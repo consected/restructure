@@ -16,6 +16,7 @@ class ActivityLog < ActiveRecord::Base
   default_scope -> { order 'disabled asc nulls last'}
 
   after_save :force_option_config_parse
+  after_save :handle_placeholder_fields
 
   def implementation_model_name
     item_type_name
@@ -79,7 +80,7 @@ class ActivityLog < ActiveRecord::Base
       end
       res += elts.map(&:resource_name)
     end
-    
+
     return res
   end
 
@@ -100,7 +101,7 @@ class ActivityLog < ActiveRecord::Base
   end
 
   def force_option_config_parse
-    extra_log_type_configs force:true
+    extra_log_type_configs force: true
   end
 
   # return the activity log implementation class that corresponds to
@@ -142,7 +143,7 @@ class ActivityLog < ActiveRecord::Base
       fc = ::ActivityLog.const_get(fc_model_name.to_s.camelize)
       implementation_class = fc
     rescue => e
-      logger.warn "Failed to get constant #{al_cn} => \n#{e.backtrace[0..10].join("\n")}"
+      logger.warn "Failed to get constant #{al_cn} / #{fc_model_name} => \n#{e.backtrace[0..10].join("\n")}"
     end
     raise "Failed to get #{al_cn} " unless implementation_class
     return implementation_class
@@ -423,51 +424,29 @@ class ActivityLog < ActiveRecord::Base
   def generate_model
 
     logger.info "---------------------------------------------------------------------------
-    ************** GENERATING ActivityLog MODEL #{self.name} ****************
-    ---------------------------------------------------------------------------"
+************** GENERATING ActivityLog MODEL #{self.name} ****************
+---------------------------------------------------------------------------"
 
+    klass = ::ActivityLog
     failed = false
+    @regenerate = nil
 
 
     if enabled? && !failed
       begin
 
-        parent_type = (self.item_type).to_sym
-        parent_rec_type = (self.rec_type).to_sym
-        action_when_attribute = (self.action_when_attribute).to_sym
-        activity_log_name = self.name
         definition = self
+
+        if prevent_regenerate_model
+          logger.info "Already defined class #{model_class_name}."
+          # Refresh the definition in the implementation class
+          implementation_class.definition = definition
+          return
+        end
+
 
         # Main implementation class
         a_new_class = Class.new(ActivityLogBase) do
-
-          def self.parent_type= parent_type
-            @parent_type = parent_type
-          end
-          def self.parent_type
-            @parent_type
-          end
-
-          def self.parent_rec_type= parent_rec_type
-            @parent_rec_type = parent_rec_type
-          end
-          def self.parent_rec_type
-            @parent_rec_type
-          end
-
-          def self.action_when_attribute= action_when_attribute
-            @action_when_attribute = action_when_attribute
-          end
-          def self.action_when_attribute
-            @action_when_attribute
-          end
-
-          def self.activity_log_name= activity_log_name
-            @activity_log_name = activity_log_name
-          end
-          def self.activity_log_name
-            @activity_log_name
-          end
 
           def self.definition= d
             @definition = d
@@ -477,60 +456,24 @@ class ActivityLog < ActiveRecord::Base
             @definition
           end
 
-          def self.permitted_params
-            fts = self.fields_to_sync.map(&:to_sym)
-            self.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, "#{parent_type}_id".to_sym, parent_type, :tracker_id] + [:item_id] - fts
-          end
-
-          def model_data_type
-            :activity_log
-          end
-
           self.definition = definition
-          self.parent_type = parent_type
-          self.parent_rec_type = parent_rec_type
-          self.action_when_attribute = action_when_attribute
-          self.activity_log_name = activity_log_name
+
         end
 
         a_new_controller = Class.new(ActivityLog::ActivityLogsController) do
 
-          # Annoyingly this needs to be forced, since const_set below does not
-          # appear to set the parent class correctly, unlike for models
-          # Possibly this is a Rails specific override, but the parent is set correctly
-          # when a controller is created as a file in a namespaced folder, so rather
-          # than fighting it, just force the known parent here.
-          def self.parent
-            ::ActivityLog
+          def self.definition= d
+            @definition = d
           end
 
-          def self.item_controller
-            @parent_type
-          end
-          def item_controller
-            self.class.item_controller
-          end
-          def self.item_controller= parent_type
-            @parent_type = parent_type
+          def self.definition
+            @definition
           end
 
-          def self.item_rec_type
-            @parent_rec_type
-          end
-          def item_rec_type
-            self.class.item_rec_type
-          end
-          def self.item_rec_type= parent_rec_type
-            @parent_rec_type = parent_rec_type
-          end
-          self.item_controller = parent_type.to_s.pluralize
-          self.item_rec_type = parent_rec_type.to_s
+          self.definition = definition
 
         end
 
-        m_name = model_class_name
-
-        klass = ::ActivityLog
 
         begin
           # This may fail if an underlying dependent class (parent class) has been redefined by
@@ -550,13 +493,6 @@ class ActivityLog < ActiveRecord::Base
         ESignature::ESignatureManager.enable_e_signature_for res
 
 
-        # Allow placeholder fields to pretend to be form fields
-        placeholder_fields = all_implementation_fields.select {|f| f.start_with? 'placeholder_'}.map(&:to_sym)
-        res.send :attr_accessor, *placeholder_fields
-
-        embedded_report_fields = all_implementation_fields.select {|f| f.start_with? 'embedded_report_'}.map(&:to_sym)
-        res.send :attr_accessor, *embedded_report_fields
-
         c_name = full_implementation_controller_name
 
         begin
@@ -570,8 +506,9 @@ class ActivityLog < ActiveRecord::Base
         end
 
         res2 = klass.const_set(c_name, a_new_controller)
+        res2.include ActivityLogControllerHandler
 
-        logger.debug "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
+        logger.debug "Model Name: #{model_class_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
 
         add_model_to_list res
       rescue=>e
@@ -580,14 +517,14 @@ class ActivityLog < ActiveRecord::Base
         logger.info "*************************************************************************************"
         logger.info "Failure creating activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
         logger.info "*************************************************************************************"
-
       end
     end
+
     if failed || !enabled?
       remove_model_from_list
     end
 
-    res
+    @regenerate = res
   end
 
   def generator_script
@@ -626,7 +563,17 @@ class ActivityLog < ActiveRecord::Base
     end
   end
 
+  def handle_placeholder_fields
+    # Allow placeholder fields to pretend to be form fields
+    placeholder_fields = all_implementation_fields.select {|f| f.start_with? 'placeholder_'}.map(&:to_sym)
+    implementation_class.send :attr_accessor, *placeholder_fields
+
+    embedded_report_fields = all_implementation_fields.select {|f| f.start_with? 'embedded_report_'}.map(&:to_sym)
+    implementation_class.send :attr_accessor, *embedded_report_fields
+  end
+
 end
+
 
 # Force the initialization. Do this here, rather than an initializer, since forces a reload if rails reloads classes in development mode.
 # ::ActivityLog.define_models

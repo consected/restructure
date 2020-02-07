@@ -16,6 +16,7 @@ module Seeds
             )
       res.update(current_admin: auto_admin) unless res.admin
 
+      res
     end
 
 
@@ -67,16 +68,19 @@ module Seeds
 
       if Rails.env.test? || Classification::GeneralSelection.where(item_type: "activity_log__player_contact_phone_select_call_direction").length == 0
         create_phone_log_general_selections
+        als = ActivityLog.where(name: 'Phone Log')
+        als.update_all(disabled: true) if als.length > 1
       end
 
-      unless res = ActivityLog.active.where(name: 'Phone Log').first
-        create_phone_log_admin_activity_log
+      res = ActivityLog.active.where(name: 'Phone Log').first
+
+      unless res
+        res = create_phone_log_admin_activity_log
       end
 
       if Rails.env.test?
-        res = ActivityLog.where(name: 'Phone Log').first
 
-        res.update!(current_admin: auto_admin, disabled: false) if res&.disabled?
+        res.update(current_admin: auto_admin, disabled: false)
 
         app_type = Admin::AppType.where(name: :zeus).first
         uac = Admin::UserAccessControl.where(user: nil,  app_type: app_type, resource_type: 'table', resource_name: 'activity_log__player_contact_phones').first

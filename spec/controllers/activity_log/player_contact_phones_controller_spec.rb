@@ -50,6 +50,11 @@ RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
 
     @master.current_user = @user
 
+    als = ActivityLog.where(name: 'Phone Log')
+    if als.active.count < 1
+      als.first.update!(disabled: false, current_admin: @admin)
+    end
+
     setup_access :player_contacts
     setup_access :activity_log__player_contact_phones
     setup_access :activity_log__player_contact_phones_primary, resource_type: :activity_log_type

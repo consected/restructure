@@ -128,8 +128,33 @@ module ActivityLogHandler
     def human_name_for extra_log_type
       extra_log_type.to_s.humanize
     end
+
+    def parent_type
+      @parent_type = (definition.item_type).to_sym
+    end
+
+    def parent_rec_type
+      @parent_rec_type = (definition.rec_type).to_sym
+    end
+
+    def action_when_attribute
+      @action_when_attribute = (definition.action_when_attribute).to_sym
+    end
+
+    def activity_log_name
+      @activity_log_name = definition.name
+    end
+
+    def permitted_params
+      fts = self.fields_to_sync.map(&:to_sym)
+      self.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, "#{parent_type}_id".to_sym, parent_type, :tracker_id] + [:item_id] - fts
+    end
+
   end
 
+  def model_data_type
+    :activity_log
+  end
 
   def human_name
     return extra_log_type_config.label if extra_log_type_config.label.present?

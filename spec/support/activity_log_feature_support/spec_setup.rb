@@ -5,16 +5,14 @@ module SpecSetup
     puts 'setup database'
 
     # Clean up old activity log definitions
-    a = ActivityLog.active
-    i = 1
-
     create_admin unless @admin
 
-    a.each do |a1|
-      # break if i == a.length
-      a1.update!(current_admin: @admin, disabled: true)
-      i += 1
-    end
+    als = ActivityLog.where(name: 'Phone Log')
+    als.update_all(disabled: true) if als.length > 1
+    first_al = als.first
+    first_al.update!(current_admin: auto_admin, disabled: false)
+
+    expect(ActivityLog.model_names).to include :player_contact_phone
 
 
     Seeds::ActivityLogPlayerContactPhone.setup
@@ -51,7 +49,7 @@ module SpecSetup
 
     # Ensure the steps can be accessed
     [:primary, :blank_log].each do |s|
-      rn = (ActivityLog.enabled.first.extra_log_type_configs.select{|a| a.name == s}.first).resource_name
+      rn = (first_al.extra_log_type_configs.select{|a| a.name == s}.first).resource_name
       uacs = Admin::UserAccessControl.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: rn
       uac = uacs.first
       if uac

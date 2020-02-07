@@ -12,7 +12,7 @@ class Admin::ConfigLibrary < Admin::AdminBase
   validates :format, inclusion: { in: valid_formats }
   validate :unique_library
 
-  after_commit :restart_server
+  after_commit :refresh_dependencies
 
   def self.content_named category, name, format: nil
     l = where(name: name, category: category, format: format).first
@@ -80,8 +80,25 @@ class Admin::ConfigLibrary < Admin::AdminBase
 
     end
 
-    def restart_server
-      AppControl.restart_server if self.format.to_s == 'yaml'
+    def refresh_dependencies
+      return unless self.format.to_s == 'yaml'
+
+      ms = []
+
+      ActivityLog.active.each do |a|
+        cl = ExtraLogType.config_libraries a
+        ms << a if cl.include? self
+      end
+
+      DynamicModel.active.each do |a|
+        cl = ExtraOptions.config_libraries a
+        ms << a if cl.include? self
+      end
+
+      ms.each do |e|
+        e.force_option_config_parse
+      end
+
     end
 
 

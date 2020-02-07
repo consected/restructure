@@ -6,7 +6,7 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
 
   before(:all) do
 
-
+    Settings::TwoFactorAuthDisabled = false
 
 
     #create a user, then disable it

@@ -116,6 +116,11 @@ class User < ActiveRecord::Base
     Admin::AppType.all_available_to(self)
   end
 
+  # The full list of active role names for the current app_type
+  def role_names
+    user_roles.active.pluck(:role_name)
+  end
+
   protected
 
     # Override included functionality that ensures an administrator has been set

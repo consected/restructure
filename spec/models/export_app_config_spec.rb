@@ -7,12 +7,14 @@ RSpec.describe "Export an app configuration", type: :model do
 
   before :all do
 
-    ActivityLog.active.update_all(disabled: true)
+    create_admin
+    ActivityLog.active.each do |a|
+      a.update!(disabled: true, current_admin: @admin)
+    end
 
     seed_database
     Seeds::ActivityLogPlayerContactPhone.setup
     ::ActivityLog.define_models
-    create_admin
     create_user
 
     apps = Admin::AppType.active.where("name = 'test1' or label = 'Test App 12' or name = 'new_name'")

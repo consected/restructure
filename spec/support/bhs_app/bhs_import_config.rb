@@ -40,6 +40,11 @@ module BhsImportConfig
     create_admin
     create_user
 
+    eis = ExternalIdentifier.where(name: 'bhs_assignments')
+    if eis.length > 0 && eis.active.length == 0
+      eis.order(id: :desc).first.update current_admin: @admin, disabled: false
+    end
+
     Admin::AppType.import_config File.read(Rails.root.join('db', 'app_configs', 'bhs_config.json')), @admin
 
     # Make sure the activity log configuration is available

@@ -24,9 +24,102 @@ module DynamicModelHandler
         end
       end
 
+
+
+      def is_dynamic_model
+        true
+      end
+
+      def assoc_inverse
+        @assoc_inverse = definition.model_association_name
+      end
+
+      def foreign_key_name
+        @foreign_key_name = definition.foreign_key_name.blank? ? nil : definition.foreign_key_name.to_sym
+      end
+
+      def primary_key_name
+        @primary_key_name = (definition.primary_key_name).to_sym
+      end
+
+      def result_order
+        @result_order = definition.result_order
+
+        unless @result_order.blank?
+          default_scope -> {order ro}
+        end
+
+        @result_order
+      end
+
+      def no_master_association
+        !foreign_key_name
+      end
+
+      def default_options
+        @default_options = definition.default_options
+      end
+
+      def human_name
+        @human_name = definition.name
+      end
+
+
+      def find id
+        find_by(primary_key => id)
+      end
+
+      def permitted_params
+
+        field_list = definition.field_list
+        if field_list.blank?
+          field_list = self.attribute_names.map(&:to_sym) - [:disabled, :user_id, :created_at, :updated_at, :tracker_id] + [:item_id]
+        else
+          field_list = self.definition.field_list_array.map(&:to_sym)
+        end
+
+        field_list
+      end
+
     end
 
 
+  def model_data_type
+    :dynamic_model
+  end
+
+  def option_type
+    'default'
+  end
+
+  def option_type_config
+    self.class.default_options
+  end
+
+  def master_id
+    return nil if self.class.no_master_association
+    master&.id
+  end
+
+  def current_user
+    if self.class.no_master_association
+      @current_user
+    else
+      master.current_user
+    end
+  end
+
+  def current_user= cu
+    if self.class.no_master_association
+      @current_user = cu
+    else
+      master.current_user = cu
+    end
+  end
+
+  def id
+    self.attributes[self.class.primary_key.to_s]
+  end
 
 
 

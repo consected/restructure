@@ -80,7 +80,9 @@ class DynamicModel < ActiveRecord::Base
     # Now forcibly set the Master association if there is a foreign_key_name set
     # If there is no foreign_key_name set, then this is not attached to a master record
     if foreign_key_name.present?
+
       man = self.model_association_name
+
       Master.has_many man, inverse_of: :master , class_name: "DynamicModel::#{self.model_class_name}", foreign_key: self.foreign_key_name, primary_key: self.primary_key_name
 
       # Add a filtered scope method, which allows master associations to remove non-accessible items automatically
@@ -122,7 +124,7 @@ class DynamicModel < ActiveRecord::Base
   end
 
   def force_option_config_parse
-    option_configs force:true
+    option_configs force: true
   end
 
   def update_tracker_events
@@ -140,62 +142,42 @@ class DynamicModel < ActiveRecord::Base
 ************** GENERATING DynamicModel MODEL #{self.name} ****************
 ---------------------------------------------------------------------------"
 
-    obj = self
+    klass = ::DynamicModel
     failed = false
-    mcn = model_class_name
+    @regenerate = nil
 
 
     if enabled? && !failed
       begin
 
-        pkn = (self.primary_key_name).to_sym
-        fkn = self.foreign_key_name.blank? ? nil: self.foreign_key_name.to_sym
-        tkn = self.table_key_name.blank? ? 'id' : self.table_key_name.to_sym
-        man = self.model_association_name
-        ro = self.result_order
-        default_options = self.default_options
-        n = self.name
         definition = self
 
+        if prevent_regenerate_model
+          logger.info "Already defined class #{model_class_name}."
+          # Refresh the definition in the implementation class
+          implementation_class.definition = definition
+          return
+        end
+
+
+        # Main implementation class
         a_new_class = Class.new(DynamicModelBase) do
-          def self.is_dynamic_model
-            true
-          end
-          self.table_name = obj.table_name
-          def self.assoc_inverse= man
-            @assoc_inverse = man
-          end
-          def self.assoc_inverse
-            @assoc_inverse
-          end
-          def self.foreign_key_name= fkn
-            @foreign_key_name = fkn
-          end
-          def self.foreign_key_name
-            @foreign_key_name
+
+          def self.definition= d
+            @definition = d
+            # Force the table_name, since it doesn't include dynamic_model_ as a prefix, which is the Rails convention for namespaced models
+            self.table_name = d.table_name
           end
 
-          def self.primary_key_name= pkn
-            @primary_key_name = pkn
-          end
-          def self.primary_key_name
-            @primary_key_name
-          end
-          def self.result_order= ro
-            @result_order = ro
-
-            unless ro.blank?
-              default_scope -> {order ro}
-            end
-
-          end
-          def self.result_order
-            @result_order
+          def self.definition
+            @definition
           end
 
-          def self.no_master_association
-            !@foreign_key_name
-          end
+          self.definition = definition
+
+        end
+
+        a_new_controller = Class.new(DynamicModel::DynamicModelsController) do
 
           def self.definition= d
             @definition = d
@@ -205,124 +187,19 @@ class DynamicModel < ActiveRecord::Base
             @definition
           end
 
-          def self.default_options= default_options
-            @default_options = default_options
-          end
-
-          def self.default_options
-            @default_options
-          end
-
-          def self.human_name= n
-            @human_name = n
-          end
-
-          def self.human_name
-            @human_name
-          end
-
-          def model_data_type
-            :dynamic_model
-          end
-
-
           self.definition = definition
-          self.primary_key = tkn
-          self.foreign_key_name = fkn
-          self.primary_key_name = pkn
-          self.assoc_inverse = man
-          self.result_order = ro
-          self.default_options = default_options
-          self.human_name = n
-
-          def master_id
-            return nil if self.class.no_master_association
-            master&.id
-          end
-
-          def current_user
-            if self.class.no_master_association
-              @current_user
-            else
-              master.current_user
-            end
-          end
-
-          def current_user= cu
-            if self.class.no_master_association
-              @current_user = cu
-            else
-              master.current_user = cu
-            end
-          end
-
-          def self.find id
-            find_by(primary_key => id)
-          end
-
-          def id
-            self.attributes[self.class.primary_key.to_s]
-          end
-
-          def self.permitted_params
-
-            field_list = definition.field_list
-            if field_list.blank?
-              field_list = self.attribute_names.map(&:to_sym) - [:disabled, :user_id, :created_at, :updated_at, :tracker_id] + [:item_id]
-            else
-              field_list = self.definition.field_list_array.map(&:to_sym)
-            end
-
-            field_list
-          end
-
-          def option_type
-            'default'
-          end
-
-          def option_type_config
-            self.class.default_options
-          end
 
         end
 
-        a_new_controller = Class.new(DynamicModel::DynamicModelsController) do
 
-          def self.model_class_name= m
-            @model_class_name = m
-          end
-          def self.model_class_name
-            @model_class_name
-          end
-          self.model_class_name = mcn
-
-          # Annoyingly this needs to be forced, since const_set below does not
-          # appear to set the parent class correctly, unlike for models
-          # Possibly this is a Rails specific override, but the parent is set correctly
-          # when a controller is created as a file in a namespaced folder, so rather
-          # than fighting it, just force the known parent here.
-          def self.parent
-            ::DynamicModel
-          end
-
-          def edit_form
-            'common_templates/edit_form'
-          end
-
-          def implementation_class
-            cn = self.class.model_class_name
-            cnf = "DynamicModel::#{cn}"
-            cnf.constantize
-          end
-        end
-
-        m_name = model_class_name
-
-        klass = ::DynamicModel
         begin
+          # This may fail if an underlying dependent class (parent class) has been redefined by
+          # another dynamic implementation, such as external identifier
           klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass, fail_without_exception: true, fail_without_exception_newable_result: true)
         rescue => e
+          logger.info "*************************************************************************************"
           logger.info "Failed to remove the old definition of #{model_class_name}. #{e.inspect}"
+          logger.info "*************************************************************************************"
         end
 
         res = klass.const_set(model_class_name, a_new_class)
@@ -330,8 +207,8 @@ class DynamicModel < ActiveRecord::Base
         res.include UserHandler
         res.include DynamicModelHandler
 
+        # Handle extensions with an appropriate name
         ext = Rails.root.join('app', 'models', 'dynamic_model_extension', "#{model_class_name.underscore}.rb")
-
         if File.exist? ext
           require_dependency ext
           res.include "DynamicModelExtension::#{model_class_name}".constantize
@@ -339,37 +216,47 @@ class DynamicModel < ActiveRecord::Base
         end
 
         # Create an alias in the main namespace to make dynamic model easier to refer to
-
         begin
-          Object.send(:remove_const, model_class_name) if implementation_class_defined?(Object, fail_without_exception: true, fail_without_exception_newable_result: true)
+          Object.send(:remove_const, model_class_name) if implementation_class_defined?(Object, fail_without_exception: true, fail_without_exception_newable_result: true, class_name: model_class_name)
         rescue => e
-          logger.info "Failed to remove the old alias of Object::#{model_class_name}. #{e.inspect}"
+          logger.info "*************************************************************************************"
+          logger.info "Failed to remove the old definition of Object::#{model_class_name}. #{e.inspect}"
+          logger.info "*************************************************************************************"
         end
 
         Object.const_set(model_class_name, res)
 
-        c_name = "#{table_name.pluralize.camelcase}Controller"
+        # Setup the controller
+        c_name = full_implementation_controller_name
         begin
           klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
         rescue => e
+          logger.info "*************************************************************************************"
           logger.info "Failed to remove the old definition of #{c_name}. #{e.inspect}"
+          logger.info "*************************************************************************************"
         end
 
         res2 = klass.const_set(c_name, a_new_controller)
+        res2.include DynamicModelControllerHandler
 
-        logger.info "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
+        logger.debug "Model Name: #{model_class_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
 
         add_model_to_list res
       rescue=>e
         failed = true
-        logger.info "Failure creating a dynamic model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        puts "Failure creating dynamic model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        logger.info "*************************************************************************************"
+        logger.info "Failure creating dynamic log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        logger.info "*************************************************************************************"
+
       end
     end
+
     if failed || !enabled?
       remove_model_from_list
     end
 
-    res
+    @regenerate = res
   end
 
   def self.routes_load

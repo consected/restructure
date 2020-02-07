@@ -16,6 +16,10 @@ class ExternalIdentifier < ActiveRecord::Base
   after_validation :implementation_table_tests
   after_save :generate_usage_reports
 
+  def self.implementation_prefix
+    ""
+  end
+
 
 
   def self.class_for field_name
@@ -143,80 +147,49 @@ class ExternalIdentifier < ActiveRecord::Base
 
   def generate_model
 
-    failed = false
+    logger.info "---------------------------------------------------------------------------
+************** GENERATING ExternalIdentifier MODEL #{self.name} ****************
+---------------------------------------------------------------------------"
 
-    logger.info "Generating ExternalIdentifier model #{name}"
-    external_id_attribute = self.external_id_attribute
-    external_id_edit_pattern = self.external_id_edit_pattern
-    external_id_view_formatter = self.external_id_view_formatter
-    external_id_range = self.external_id_range
-    allow_to_generate_ids = self.pregenerate_ids
-    prevent_edit = self.prevent_edit
-    extra_fields = self.extra_fields
-    alphanumeric = self.alphanumeric
-    label = self.label
-    name = self.name
-    model_class_name = self.model_class_name
-    definition = self
+    klass = Object
+    failed = false
+    @regenerate = nil
+
 
     if enabled? && !failed
-
       begin
 
+        definition = self
+
+        if prevent_regenerate_model
+          logger.info "Already defined class #{model_class_name}."
+          # Refresh the definition in the implementation class
+          implementation_class.definition = definition
+          return
+        end
 
         # Main implementation class
         a_new_class = Class.new(UserBase) do
 
-          self.table_name = name
+          def self.definition= d
+            @definition = d
+            # Force the table_name, since it doesn't include external_identifer_ as a prefix, which is the Rails convention for namespaced models
+            self.table_name = d.name
+          end
+
+          def self.definition
+            @definition
+          end
+
+          self.definition = definition
 
           # allow views to be used, where a primary key index is not defined, but the
           # integer id field is guaranteed to be unique in the source table.
           self.primary_key = :id
 
-          def self.is_external_identifier?
-            true
-          end
+        end
 
-
-          def self.external_id_attribute=v
-            @external_id_attribute = v
-          end
-
-          def self.external_id_edit_pattern= v
-            @external_id_edit_pattern = v
-          end
-
-          def self.external_id_range= v
-            @external_id_range = v
-          end
-
-          def self.allow_to_generate_ids= v
-            @allow_to_generate_ids = v
-          end
-
-          def self.prevent_edit= v
-            @prevent_edit = v
-          end
-
-          def self.extra_fields
-            @extra_fields
-          end
-
-          def self.extra_fields= v
-            @extra_fields = v
-          end
-
-          def self.external_id_view_formatter= v
-            @external_id_view_formatter = v
-          end
-
-          def self.label= v
-            @label = v
-          end
-
-          def self.alphanumeric= v
-            @alphanumeric = v
-          end
+        a_new_controller = Class.new(ExternalIdentifier::ExternalIdentifierController) do
 
           def self.definition= d
             @definition = d
@@ -226,71 +199,39 @@ class ExternalIdentifier < ActiveRecord::Base
             @definition
           end
 
-          def model_data_type
-            :external_identifier
-          end
-
-
           self.definition = definition
-          self.external_id_attribute = external_id_attribute
-          self.external_id_edit_pattern = external_id_edit_pattern
-          self.external_id_range = external_id_range
-          self.allow_to_generate_ids = allow_to_generate_ids
-          self.prevent_edit = prevent_edit
-          self.extra_fields = extra_fields
-          self.external_id_view_formatter = external_id_view_formatter
-          self.label = label
-          self.alphanumeric = alphanumeric
 
         end
 
-        a_new_controller = Class.new(ExternalIdentifier::ExternalIdentifierController) do
-
-            private
-
-              def self.external_id_attribute
-                @external_id_attribute
-              end
-              def self.name
-                @name
-              end
-
-              def self.external_id_attribute=v
-                @external_id_attribute = v
-              end
-              def self.name=v
-                @name = v
-              end
-
-              def self.allow_to_generate_ids= v
-                @allow_to_generate_ids = v
-              end
-              def self.allow_to_generate_ids
-                @allow_to_generate_ids
-              end
-
-              def implementation_class
-                cnf = controller_name.singularize.classify
-                @implementation_class = cnf.constantize
-              end
-
-              self.allow_to_generate_ids = allow_to_generate_ids
-              self.external_id_attribute = external_id_attribute
-              self.name = name
+        begin
+          # This may fail if an underlying dependent class (parent class) has been redefined by
+          # another dynamic implementation, such as external identifier
+          klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass, fail_without_exception: true, fail_without_exception_newable_result: true)
+        rescue => e
+          logger.info "*************************************************************************************"
+          logger.info "Failed to remove the old definition of #{model_class_name}. #{e.inspect}"
+          logger.info "*************************************************************************************"
         end
 
-        klass = Object
-        klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass)
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
         res.include ExternalIdHandler
         res.include LimitedAccessControl
 
+
+        # Setup the controller
         c_name = full_implementation_controller_name
-        klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
+        begin
+          klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
+        rescue => e
+          logger.info "*************************************************************************************"
+          logger.info "Failed to remove the old definition of #{c_name}. #{e.inspect}"
+          logger.info "*************************************************************************************"
+        end
+
         res2 = klass.const_set(c_name, a_new_controller)
-        # res2.include MasterHandler
+        res2.include ExternalIdControllerHandler
 
         add_model_to_list res
       rescue=>e
@@ -303,9 +244,9 @@ class ExternalIdentifier < ActiveRecord::Base
       remove_model_from_list
     end
 
-    Master.reset_external_id_matching_fields!
+    reset_master_fields if res
 
-    res
+    @regenerate = res
   end
 
   def update_tracker_events
@@ -314,6 +255,10 @@ class ExternalIdentifier < ActiveRecord::Base
     Tracker.add_record_update_entries self.name.singularize, current_admin, 'record'
     # flag items are added when item flag names are added to the list
     #Tracker.add_record_update_entries self.name.singularize, current_admin, 'flag'
+  end
+
+  def reset_master_fields
+    Master.reset_external_id_matching_fields!
   end
 
 

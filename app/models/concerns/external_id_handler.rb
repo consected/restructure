@@ -21,10 +21,6 @@ module ExternalIdHandler
     #default_scope -> {order id: :desc}
     default_scope -> {order updated_at: :desc, id: :desc}
 
-    # @prevent_create = nil
-    # @prevent_edit = nil
-    # @id_formatter = nil
-    # @label = nil
 
     validates self.external_id_attribute, presence: true,
                                           numericality: {
@@ -38,6 +34,18 @@ module ExternalIdHandler
   end
 
   class_methods do
+
+    def is_external_identifier?
+      true
+    end
+
+    def external_id_edit_pattern
+      @external_id_edit_pattern = definition.external_id_edit_pattern
+    end
+
+    def extra_fields
+      @extra_fields = definition.extra_fields
+    end
 
     def find_by_external_id value
       self.where(external_id_attribute => value).first
@@ -59,75 +67,42 @@ module ExternalIdHandler
     end
 
     def allow_to_generate_ids?
-      @allow_to_generate_ids
+      @allow_to_generate_ids = definition.pregenerate_ids
     end
 
-    def prevent_edit= val
-      @prevent_edit = val
-    end
-
-    def prevent_create= val
-      @prevent_create = val
-    end
-
-    def external_id_attribute= val
-      @external_id_attribute = val
-    end
-
-    def external_id_view_formatter= val
-      @id_formatter = val
-    end
-
-    def external_id_range= val
-      @external_id_range = val
-    end
-
-    def external_id_edit_pattern= val
-      @external_edit_id_pattern = val
-    end
-
-    def label= val
-      unless defined? @label
-        @label = nil
-      end
-      @label
-    end
 
     def human_name
       self.label
     end
 
     def prevent_edit?
+      @prevent_edit = definition.prevent_edit
       return @prevent_edit unless @prevent_edit.nil?
       false
     end
 
     def prevent_create?
-      return @prevent_create unless @prevent_create.nil?
-      false
+      nil
     end
 
     def alphanumeric
-      @alphanumeric
+      @alphanumeric = definition.alphanumeric
     end
 
     def external_id_attribute
-      @external_id_attribute
+      @external_id_attribute = definition.external_id_attribute
     end
 
     def external_id_view_formatter
-      @external_id_view_formatter
+      @external_id_view_formatter = definition.external_id_view_formatter
     end
 
     def external_id_range
-      unless defined? @external_id_range
-        @external_id_range = nil
-      end
-      @external_id_range || ExternalIdentifier::DefaultRange
+      @external_id_range ||= definition.external_id_range || ExternalIdentifier::DefaultRange
     end
 
     def external_id_edit_pattern
-      @external_id_edit_pattern# || '\\d{0,10}'
+      @external_id_edit_pattern = definition.external_id_edit_pattern
     end
 
     def plural_name
@@ -137,8 +112,9 @@ module ExternalIdHandler
     def hyphenated_plural_name
       name.underscore.pluralize.hyphenate
     end
+
     def label
-      @label || self.name.underscore.humanize.titleize
+      @label ||= definition.label || self.name.underscore.humanize.titleize
     end
 
     # For external ID models that require an auto-generated or auto-assigned (from an existing list) ID,
@@ -268,6 +244,10 @@ module ExternalIdHandler
     end
 
 
+  end
+
+  def model_data_type
+    :external_identifier
   end
 
   def current_user

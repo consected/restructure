@@ -7,10 +7,10 @@ module DynamicModelDefHandler
     after_save :check_implementation_class
     # Reload the routes based on specific controller actions, to allow app type uploads to work faster
     # after_save :reload_routes
-    after_save :add_master_association
-    after_save :add_user_access_controls
-    after_commit :update_tracker_events
-    after_commit :restart_server
+    after_save :add_master_association, if: -> { @regenerate }
+    after_save :add_user_access_controls, if: -> { @regenerate }
+    after_commit :update_tracker_events, if: -> { @regenerate }
+    after_commit :restart_server, if: -> { @regenerate }
   end
 
   class_methods do
@@ -75,12 +75,12 @@ module DynamicModelDefHandler
         logger.info "Generating models #{self.name} #{self.active.length}"
 
         dma.each do |dm|
-          dm.generate_model
+          res = dm.generate_model
           # Force the admin for cases that this is run outside of the admin console
           # It is expected that this is mostly when originally seeding the database
           dm.current_admin ||= dm.admin
 
-          dm.update_tracker_events
+          dm.update_tracker_events if res
         end
       rescue Exception => e
         Rails.logger.warn "Failed to generate models. Hopefully this is only during a migration. #{e.inspect}"
@@ -90,6 +90,7 @@ module DynamicModelDefHandler
     end
 
     def routes_reload
+      return unless @regenerate
       Rails.application.reload_routes!
       Rails.application.routes_reloader.reload!
     end
@@ -127,9 +128,10 @@ module DynamicModelDefHandler
   end
 
   def implementation_class_defined? parent_class=Module, opt={}
-      return false unless full_implementation_class_name
+      icn = opt[:class_name] || full_implementation_class_name
+      return false unless icn
       # Check that the class is defined
-      klass = parent_class.const_get(full_implementation_class_name)
+      klass = parent_class.const_get(icn)
       res = klass.is_a?(Class)
 
       return false unless res
@@ -139,7 +141,7 @@ module DynamicModelDefHandler
         # since this is seriously unexpected
         klass.new
       rescue Exception => e
-        err  = "Failed to instantiate the class #{full_implementation_class_name} in parent #{parent_class}: #{e}"
+        err  = "Failed to instantiate the class #{icn} in parent #{parent_class}: #{e}"
         if opt[:fail_without_exception]
           # By default, return false if an error occurred attempting the initialization.
           # In certain cases (for example, checking if a class exists so it can be removed), returning true if the
@@ -154,6 +156,15 @@ module DynamicModelDefHandler
       return false
   end
 
+  def prevent_regenerate_model
+
+    got_class = full_implementation_class_name.constantize rescue nil
+    if got_class && got_class.to_s.start_with?(self.class.implementation_prefix)
+      got_class
+    else
+      nil
+    end
+  end
 
   def ready?
     begin
@@ -194,7 +205,7 @@ module DynamicModelDefHandler
   # If there is no prefix then this matches the simple model name
   def full_item_type_name
     prefix = ""
-    if self.class.implementation_prefix
+    if self.class.implementation_prefix.present?
       prefix = "#{self.class.implementation_prefix.ns_underscore}__"
     end
 
@@ -228,7 +239,6 @@ module DynamicModelDefHandler
     tn = model_def_name
     self.class.models[tn] = m
     logger.info "Added new model #{tn}"
-
     unless self.class.model_names.include? tn
       self.class.model_names << tn
     end
