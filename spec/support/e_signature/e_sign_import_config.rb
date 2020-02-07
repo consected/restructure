@@ -32,9 +32,21 @@ module ESignImportConfig
     create_admin
     create_user
 
-    al = ActivityLog.active.where(name: 'Test E Signature').first
-    if al&.disabled?
-      al.update! current_admin: @admin, disabled: false
+    apps = Admin::AppType.where(name: 'test esign')
+    if apps.active.count != 1
+      als = ActivityLog.where( table_name: 'activity_log_player_info_e_signs')
+      als.each do |al|
+        al.updated!  current_admin: @admin, disabled: true
+      end
+
+      apps.each do |a|
+        a.update! current_admin: @admin, disabled: true
+      end
+
+      new_app_type = apps.first
+      new_app_type.update!(disabled: false, current_admin: @admin) if new_app_type
+
+
     end
 
     Admin::AppType.import_config File.read(Rails.root.join('db', 'app_configs', 'test esign_config.json')), @admin
@@ -42,14 +54,18 @@ module ESignImportConfig
     # Make sure the activity log configuration is available
 
     # Admin::UserAccessControl.active.update_all(disabled: true)
+    #
+    # apps = Admin::AppType.where(name: 'test esign')
+    # if apps.active.count != 1
+    #
+    #   apps.each do |a|
+    #     a.update! current_admin: @admin, disabled: true
+    #   end
+    #
+    #   new_app_type = apps.first
+    #   new_app_type.update!(disabled: false, current_admin: @admin) if new_app_type
+    # end
 
-    new_app_type = Admin::AppType.where(name: 'test esign').first
-    new_app_type.update!(disabled: false, current_admin: @admin)
-
-    al = ActivityLog.active.where(name: 'Test E Signature').first
-    if al&.disabled?
-      al.update! current_admin: @admin, disabled: false
-    end
 
     expect(defined? ActivityLog::PlayerInfoESign).to be_truthy
 
