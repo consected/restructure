@@ -558,6 +558,55 @@ _fpa.form_utils = {
                 var alt_nst = sel.attr('data-nothing-selected-text');
                 if(alt_nst) no_sel_text = alt_nst;
                 sel.chosen({width: '100%', placeholder_text_multiple: no_sel_text, hide_results_on_select: false}).addClass('attached-chosen');
+
+                sel.on('chosen:showing_dropdown', function (evt, params) {
+
+                  // Access the element
+                  var $el = params.chosen.container;
+                  var el = $el[0];
+                  var style = el.style;
+                  var bc = el.getBoundingClientRect();
+
+                  // Save the original position and sizes
+                  $el.orig_sizes = {
+                    width: $el.width(),
+                    height: $el.height(),
+                    position: style.position,
+                    top: style.top,
+                    left: style.left,
+                    zIndex: style.zIndex
+                  };
+
+                  // Set where we want to position the element
+                  var new_sizes = $.extend({}, $el.orig_sizes);
+                  new_sizes.position = 'absolute';
+                  new_sizes.top = bc.top + window.pageYOffset;
+                  new_sizes.left = bc.left + window.pageXOffset;
+                  new_sizes.zIndex = 999999;
+
+
+                  // Placeholder to the original position, plus it keeps the correct size for the form
+                  var $elclone = $el.elclone = $el.clone();
+                  $elclone.find('.chosen-drop').remove();
+                  $el.before($elclone);
+
+                  // Set the new position and move the chosen box into the body
+                  $el.css(new_sizes);
+                  $('body').append($el);
+
+                });
+
+                sel.on('chosen:hiding_dropdown', function (evt, params) {
+
+                  // Move the chosen box back into its form, and remove the placeholder
+                  var $el = params.chosen.container;
+                  $el.css($el.orig_sizes);
+                  $el.elclone.before($el);
+                  $el.elclone.remove();
+
+
+                });
+
             }, 1);
         });
     },
