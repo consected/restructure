@@ -2,7 +2,7 @@ module SecureView
   class Previewer
 
     DefaultResolution = 150
-    DocumentExtensions = %w(doc docx odt html)
+    DocumentExtensions = %w(doc docx odt html rtf)
     SpreadsheetExtensions = %w(xls xlsx ods csv)
     PresentationExtensions = %w(ppt pptx odp odg)
     OfficeDocTypesTo = %w(html pdf)
