@@ -3,6 +3,12 @@ Dir[Rails.root.join('db/seeds/*.rb')].each { |f| Rails.logger.info "requiring: #
 module Seeds
 
   def self.setup
+
+    if $already_seeeded
+      Rails.logger.info "============ Seed startup already done (#{DateTime.now}) ==============="
+      return
+    end
+
     Rails.logger.info "============ Starting seed setup (#{DateTime.now}) ==============="
 
     do_last = []
@@ -33,6 +39,9 @@ module Seeds
       s.setup
     end
     Rails.logger.info "============ Completed seed setup (#{DateTime.now}) ==============="
+
+    $already_seeeded = true
+
   end
 
 end
@@ -48,7 +57,7 @@ def auto_admin
 end
 
 def log txt
-  puts txt
+  # puts txt
   Rails.logger.info txt
 end
 
