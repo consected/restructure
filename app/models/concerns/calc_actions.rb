@@ -7,7 +7,8 @@ module CalcActions
 
   included do
     # We won't use a query join when referring to tables based on these keys
-    NonJoinTableNames = [:this, :referring_record, :this_references, :parent_references, :validate].freeze
+    NonJoinTableNames = [:this, :parent, :referring_record, :this_references, :parent_references, :user, :master, :condition, :value, :hide_error].freeze
+    NonQueryTableNames = [:this, :referring_record, :this_references, :parent_references, :validate].freeze
 
     SelectionTypes = :all, :any, :not_all, :not_any
 
@@ -40,6 +41,13 @@ module CalcActions
     # @return [True | False]
     def non_join_table_name? key
        (key.in?(NonJoinTableNames) || is_selection_type(key))
+    end
+
+    # Check if this is a key that represents part of a non query condition, or if it is a selection type (such as and:, :not_all...)
+    # @param key [Symbol]
+    # @return [True | False]
+    def non_query_table_name? key
+       (key.in?(NonQueryTableNames) || is_selection_type(key))
     end
 
     # Check if the supplied key is a selection type, starting :all, :not_all, :any, :not_any
@@ -525,6 +533,281 @@ EOF
 
     end
 
+
+    # Generate the query conditions to allow
+    # values to be matched from another referenced record (or this)
+    # Each type of reference is related to the current instance and pulls
+    # one or more results to be used directly in a query condition
+    #
+    # These are defined something like:
+    #   activity_log__player_contact_phone:
+    #     extra_log_type: 'do_something'
+    #     field_to_compare:
+    #       <type_of_reference>: attribute or hash
+
+    # @param val [Hash] the definition of the matching requirements
+    # @param non_query_condition [True | False] the initial non_query_condition flag, which we may update and return
+    # @param ref_table_name [String | Symbol] the table name to reference in this_references / parent_references conditions
+    # @return [String | Number | Array, True | False] return array of new values for [val, non_query_condition]
+    def generate_match_query_condition val, non_query_condition, ref_table_name
+
+      val_item_key = val.first.first
+      val_item_value = val.first.last
+
+      # If a specific table was not set (we have a select type such as all, any)
+      # then we can assume that we are referring to 'this' current record
+      if is_selection_type(val_item_key)
+        val_item_key = :this
+        val = {this: val}
+      end
+
+
+      if val_item_key == :this && !val_item_value.is_a?(Hash)
+        # Get a literal value from 'this' to be compared
+        val = @current_instance.attributes[val_item_value]
+
+      elsif val_item_key == :parent && !val_item_value.is_a?(Hash)
+        # Get a literal value from the current instance's parent to be compared
+        # Note: parent_item is only available on NfsStore::Container
+        from_instance = @current_instance.parent_item
+        raise FphsException.new "No parent record found for condition" unless from_instance
+        val = from_instance.attributes[val_item_value]
+
+      elsif val_item_key == :referring_record && !val_item_value.is_a?(Hash)
+        # Get a literal value from the current instance's referring_record.
+        # This is a record referring to the current instance.
+        # A referring record is either based on the context of the current request (from a controller)
+        # or if there is only a single model reference referring to the current instance,
+        # that is used instead
+        # This is often an activity_log record referring to the current activity_log
+        # If no referring record exists, the result is nil
+        from_instance = @current_instance.referring_record
+        val = from_instance&.attributes[val_item_value]
+
+      elsif val_item_key == :this_references || val_item_key == :parent_references
+        # Get possible values from records referenced by this instance, or this instance's referring record (parent)
+
+        if val_item_key == :this_references
+          # Identify all records this instance references
+          from_instance = @current_instance
+        elsif val_item_key == :parent_references
+          # Identify all records this instance's referrring record (parent) references
+          from_instance = @current_instance.referring_record
+        end
+
+        if val_item_value.is_a?(Hash)
+          # If the expected value is a hash, this indicates that a specific type of referenced record is required,
+          # and a field is to be returned from any matching records of this type
+          # For example, the following definition will match addresses where
+          # city and zip match
+          # and the current instance (an activity log) references a activity_log__player_contact_phone record where the
+          # set_related_player_contact_rank field of the referenced record equals the rank of the address
+          #
+          #  addresses:
+          #    city: 'portland'
+          #    zip: '12345'
+          #    rank:
+          #      this_references:
+          #        activity_log__player_contact_phone: set_related_player_contact_rank
+
+          att = val_item_value.first.last
+          to_table_name = val_item_value.first.first
+
+        else
+          # If the expected value is not a hash, we are probably performing a simple match to find a
+          # record of a specific type referenced by the instance, rather than any record of that type
+          # that is associated with the master.
+          # For example, to just find addresses referenced by an activity log (rather than all of them the master has),
+          # the definition looks like:
+          #  addresses:
+          #    city: 'portland'
+          #    zip: '12345'
+          #    id:
+          #      this_references: id
+          #
+          # In this case we will be matching addresses where
+          # city and zip match
+          # and the instance (an activity log) references an address record where the
+          # the address id is one of those referenced.
+          # In other words, it will only pick an address that is referenced by this activity_log,
+          # not other addresses that belong to this master.
+
+          att = val_item_value
+          # We will filter on the main table name if it is actually a table, not something like 'parent_references'
+          to_table_name = nil if non_join_table_name?(ref_table_name)
+
+        end
+
+        raise FphsException.new "No referring record specified when using #{val_item_key}" unless from_instance
+
+        # Now go ahead and get the possible values to use in the condition
+        val = []
+        # Ensure we only get results from an active (not disabled) model reference, and
+        model_refs = from_instance.model_references(active_only: true)
+        # filter it to return only those matching the required to_record_type (if necessary)
+        if to_table_name
+          model_refs = model_refs.select {|r| r.to_record_type == to_table_name.to_s.singularize.ns_camelize}
+        end
+
+        # Get the specified attribute's value from each of the model references
+        # Generate an array, allowing the conditions to be IN any of these
+        model_refs.each do |mr|
+          val << mr.to_record.attributes[att]
+        end
+
+      elsif val_item_key == :user
+        # Get an attribute or role names for the current user (as set on the current instance master)
+        #
+        # In the simplest form, we can match the current instance user_id (creator or latest updater)
+        # against the current user, using a definition like this:
+        #   all_creator:
+        #     this:
+        #       user_id:
+        #         user: id
+        #
+        # Also, consider checking if an instance has an attribute that matches one of the current
+        # user's roles:
+        #       all:
+        #         this:
+        #           select_who:
+        #             user: role_name
+
+
+        att = val_item_value
+        user = @current_instance.master.current_user
+        raise FphsException.new "No user found for condition" unless user
+
+        if att == 'role_name'
+          # The value to match against is an array of the user's role names
+          val = user.user_roles.active.pluck(:role_name)
+        else
+          # The value to match against is the value of the specified attribute
+          val = user.attributes[att]
+        end
+
+      else
+        # No special reference type was specified.
+        # Decide instead if the expected value represents a non query condition,
+        # or simply a table name to be used as a join in the base query
+
+        if non_query_table_name?(val_item_key)
+          non_query_condition = true
+        else
+          @join_tables << val_item_key
+        end
+
+      end
+
+      return val, non_query_condition
+
+    end
+
+
+    # Based on match query conditions being generated, now setup the value comparisons.
+    # This may produce extra conditions to be pushed into the query at runtime, or
+    # basic joined conditions.
+    def generate_query_condition_values val, table_name, field_name, join_table_name
+
+      if val.is_a?(Hash)
+
+        condition_type = val[:condition]
+
+        # If we have a non-equals condition specified, generate the extra conditions
+        if condition_type.in?(ValidExtraConditions)
+          # A simple unary or binary condition
+
+          # Setup the query conditions array ["sql", cond1, cond2, ...]
+          if @extra_conditions[0].blank?
+            @extra_conditions[0] = ""
+          else
+            @extra_conditions[0] += " #{BoolTypeString} "
+          end
+
+          if condition_type.in? UnaryConditions
+            # It is a unary condition, extend the SQL
+            @extra_conditions[0] += "#{table_name}.#{field_name} #{condition_type}"
+          else
+            # It is a binary condition, extend the SQL and conditions
+            vc = ValidExtraConditions.find {|c| c == condition_type}
+            vv = dynamic_value(val[:value])
+            @extra_conditions[0] += "#{table_name}.#{field_name} #{vc} (?)"
+            @extra_conditions << vv
+          end
+
+
+        elsif condition_type.in?(ValidExtraConditionsArrays)
+          # It is an array condition
+
+          veca_extra_args = ''
+
+          # Setup the query conditions array ["sql", cond1, cond2, ...]
+          if @extra_conditions[0].blank?
+            @extra_conditions[0] = ""
+          else
+            @extra_conditions[0] += " #{BoolTypeString} "
+          end
+
+          # Extend the SQL and conditions
+          vc = ValidExtraConditionsArrays.find {|c| c == condition_type}
+          vv = dynamic_value(val[:value])
+
+          negate = (val[:not] ? 'NOT' : '')
+
+          leftop = '?'
+          if vc == '&&'
+            leftop = "ARRAY[?]"
+            if vv.first.is_a? String
+              leftop += "::varchar[]"
+            end
+          end
+
+          veca_extra_args = ', 1' if vc.include?('ARRAY_LENGTH')
+
+          @extra_conditions[0] += "#{negate} (#{leftop} #{vc} (#{table_name}.#{field_name}#{veca_extra_args}))"
+          @extra_conditions << vv
+        end
+
+      end
+
+      unless condition_type
+        # We did not have a non-equals condition type specified.
+        # Just add a condition value for the query, except if the expected value is requesting a return, with "return_*"
+        # (not return_* in an array though, since this is part of an IN statement)
+        unless val.in?(ReturnTypes)
+          @condition_values[table_name] ||= {}
+          @condition_values[table_name][field_name] = dynamic_value(val)
+        end
+
+      end
+
+    end
+
+    def generate_returns val, join_table_name, field_name
+
+      # Check if the definition expects a return value, list or result
+      mode = nil
+      if expected_value_requests_return? :value, val
+        mode = 'return_value'
+      elsif expected_value_requests_return? :result, val
+        mode = 'return_result'
+      elsif expected_value_requests_return? :value_list, val
+        mode = 'return_value_list'
+      end
+
+      # If a return mode was specified, set this up to be used in the query
+      if mode
+        @this_val_where = {
+          assoc: join_table_name,
+          field_name: field_name,
+          table_name: ModelReference.record_type_to_ns_table_name(join_table_name).to_sym,
+          mode: mode
+        }
+      end
+
+
+    end
+
+
     # Generate query conditions and a list of join tables based on a conditional configuration,
     # such as
     # creatable_if:
@@ -534,7 +817,7 @@ EOF
     def calc_base_query condition_type
 
       # join_tables = @condition_config.keys.map(&:to_sym) - SelectionTypes
-      join_tables = []
+      @join_tables = []
       @condition_values = {}
       @extra_conditions = []
       @non_query_conditions = {}
@@ -554,199 +837,31 @@ EOF
 
             # non query conditions are those aren't formulated with a series of
             # inner joins on the master. They are handled as individual queries.
-
             non_query_condition = table_name.in?([:this, :user, :parent, :referring_record])
+
             if field_name == :return_constant
               # Allow us to return a set value, typically if no other conditions are met
               # This is a non query condition
               non_query_condition = true
 
             elsif val.is_a? Hash
-              # If the conditional value is actually a hash, then we need to
-              # get the value to be matched from another record
-
-              val_item_key = val.first.first
-
-              # If a specific table was not set (we have a select type such as all, any)
-              # then we can assume that we are referring to 'this' current record
-              if is_selection_type(val_item_key)
-                val_item_key = :this
-                val = {this: val}
-              end
-
-
-              if val_item_key == :this && !val.first.last.is_a?(Hash)
-                # Get a literal value from 'this' to be compared
-                val = @current_instance.attributes[val.first.last]
-              elsif val_item_key == :parent && !val.first.last.is_a?(Hash)
-                # Get a literal value from the current instance's parent to be compared
-                val = @current_instance.parent_item.attributes[val.first.last]
-              elsif val_item_key == :referring_record && !val.first.last.is_a?(Hash)
-                # Get a literal value from the current instance's referring_record.
-                # This is a record referring to the current instance.
-                # A referring record is either based on the context of the current request (from a controller)
-                # or if there is only a single model reference referring to the current instance,
-                # that is used instead
-                val = @current_instance.referring_record && @current_instance.referring_record.attributes[val.first.last]
-              elsif val_item_key == :this_references
-                if val.first.last.is_a?(Hash)
-                  att = val.first.last.first.last
-                  to_table_name = val.first.last.first.first
-                  val = []
-                  model_refs = @current_instance.model_references(active_only: true)
-                  model_refs = model_refs.select {|r| r.to_record_type == to_table_name.to_s.singularize.ns_camelize}
-
-                  model_refs.each do |mr|
-                    val << mr.to_record.attributes[att]
-                  end
-
-                else
-                  att = val.first.last
-                  # non_query_condition = true
-                  val = []
-
-                  mrs = @current_instance.model_references(active_only: true)
-
-                  unless non_join_table_name?(join_table_name)
-                    mrs = mrs.select {|r| r.to_record_type == join_table_name.to_s.singularize.ns_camelize}
-                  end
-
-                  # Get the specified attribute's value from each of the model references
-                  # Generate an array, allowing the conditions to be IN any of these
-                  mrs.each do |mr|
-                    val << mr.to_record.attributes[att]
-                  end
-                end
-              elsif val_item_key == :parent_references
-                if val.first.last.is_a?(Hash)
-                  att = val.first.last.first.last
-                  to_table_name = val.first.last.first.first
-                  val = []
-                  raise FphsException.new "No referring record specified when using parent_references" unless @current_instance.referring_record
-                  parent_model_refs = @current_instance.referring_record.model_references(active_only: true)
-                  parent_model_refs = parent_model_refs.select {|r| r.to_record_type == to_table_name.to_s.singularize.ns_camelize}
-
-                  parent_model_refs.each do |mr|
-                    val << mr.to_record.attributes[att]
-                  end
-
-                else
-                  att = val.first.last
-                  # non_query_condition = true
-                  val = []
-
-                  # Get the specified attribute's value from each of the parent model references
-                  # Generate an array, allowing the conditions to be IN any of these
-                  # parent_model = ModelReference.find_where_referenced_from(@current_instance).order(id: :desc).first
-                  parent_model_refs = @current_instance.referring_record.model_references(active_only: true)
-
-                  unless non_join_table_name?(join_table_name)
-                    parent_model_refs = parent_model_refs.select {|r| r.to_record_type == join_table_name.to_s.singularize.ns_camelize}
-                  end
-
-                  parent_model_refs.each do |mr|
-                    val << mr.to_record.attributes[att]
-                  end
-                end
-              elsif val_item_key == :user
-                att = val.first.last
-                user = @current_instance.master.current_user
-                if att.is_a?(Hash)
-                  if att == :role_name
-                    role_names = user.user_roles.active.pluck(:role_name)
-                    val = role_names
-                  else
-                  end
-                else
-                  val = user.attributes[att]
-                end
-
-              else
-                val.keys.each do |val_key|
-                  if non_join_table_name?(val_key)
-                    non_query_condition = true
-                  else
-                    join_tables << val_key unless join_tables.include? val_key
-                  end
-                end
-              end
+              # The conditional value is actually a hash, so we need to
+              # get the value to be matched from another referenced record (or this)
+              # Generate the query condition to do this
+              val, non_query_condition = generate_match_query_condition(val, non_query_condition, join_table_name)
             end
+
             unless non_query_condition
-              if val.is_a?(Hash) && val[:condition].in?(ValidExtraConditions)
-                if @extra_conditions[0].blank?
-                  @extra_conditions[0] = ""
-                else
-                  @extra_conditions[0] += " #{BoolTypeString} "
-                end
-
-                if val[:condition].in? UnaryConditions
-                  @extra_conditions[0] += "#{table_name}.#{field_name} #{val[:condition]}"
-                else
-
-                  vc = ValidExtraConditions.find {|c| c == val[:condition]}
-                  vv = dynamic_value(val[:value])
-
-                  @extra_conditions[0] += "#{table_name}.#{field_name} #{vc} (?)"
-                  @extra_conditions << vv
-                end
-              elsif val.is_a?(Hash) && val[:condition].in?(ValidExtraConditionsArrays)
-                  veca_extra_args = ''
-                  if @extra_conditions[0].blank?
-                    @extra_conditions[0] = ""
-                  else
-                    @extra_conditions[0] += " #{BoolTypeString} "
-                  end
-
-                  vc = ValidExtraConditionsArrays.find {|c| c == val[:condition]}
-                  vv = dynamic_value(val[:value])
-
-                  negate = (val[:not] ? 'NOT' : '')
-
-                  leftop = '?'
-                  if vc == '&&'
-                    leftop = "ARRAY[?]"
-                    if vv.first.is_a? String
-                      leftop += "::varchar[]"
-                    end
-                  end
+              # We have finally decided that this is a regular query condition
+              # Handle setting up the condition values
+              generate_query_condition_values(val, table_name, field_name, join_table_name)
 
 
+              generate_returns(val, join_table_name, field_name)
 
-                  veca_extra_args = ', 1' if vc.include?('ARRAY_LENGTH')
 
-                  @extra_conditions[0] += "#{negate} (#{leftop} #{vc} (#{table_name}.#{field_name}#{veca_extra_args}))"
-                  @extra_conditions << vv
-              else
+              @join_tables << join_table_name
 
-                # Check if the definition expects a return value, list or result
-                mode = nil
-                if expected_value_requests_return? :value, val
-                  mode = 'return_value'
-                elsif expected_value_requests_return? :result, val
-                  mode = 'return_result'
-                elsif expected_value_requests_return? :value_list, val
-                  mode = 'return_value_list'
-                end
-
-                # If a return mode was specified, set this up to be used in the query
-                if mode
-                  @this_val_where = {
-                    assoc: c_table.to_sym,
-                    field_name: field_name,
-                    table_name: ModelReference.record_type_to_ns_table_name(c_table).to_sym,
-                    mode: mode
-                  }
-                end
-
-                # Add a condition value for the query, except if the expected value is requesting a return, with "return_*"
-                # (not return_* in an array though, since this is part of an IN statement)
-                unless val.in?(ReturnTypes)
-                  @condition_values[table_name] ||= {}
-                  @condition_values[table_name][field_name] = dynamic_value(val)
-                end
-
-              end
-              join_tables << join_table_name unless join_tables.include? table_name
             else
               @non_query_conditions[table_name] ||= {}
               @non_query_conditions[table_name][field_name] = val
@@ -754,12 +869,12 @@ EOF
           end
         end
       end
-      @join_tables = join_tables = (join_tables - [:this, :parent, :referring_record, :this_references, :parent_references, :user, :master, :condition, :value, :hide_error]).uniq
+      @join_tables = (@join_tables - NonJoinTableNames).uniq
 
       if [:all, :not_all].include? condition_type
-        @base_query = @current_scope.joins(join_tables)
+        @base_query = @current_scope.joins(@join_tables)
       else
-        @base_query = @current_scope.includes(join_tables)
+        @base_query = @current_scope.includes(@join_tables)
       end
     end
 

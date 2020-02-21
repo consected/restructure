@@ -33,12 +33,15 @@ module ActivityLogSupport
       {
         player_contact_id: @player_contact.id,
         select_call_direction: 'to staff',
-        select_who: 'user'
+        select_who: 'user',
+        extra_log_type: 'primary'
+
       },
       {
         player_contact_id: @player_contact.id,
         select_call_direction: 'to player',
-        select_who: 'user'
+        select_who: 'user',
+        extra_log_type: 'primary'        
       }
     ]
 

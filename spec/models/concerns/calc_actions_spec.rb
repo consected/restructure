@@ -846,6 +846,32 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
 
+    # Check that calc_query_conditions handles nested any conditions OK
+    conf = {
+
+
+        any_pcs: {
+
+          player_contacts: {
+            id: -1,
+            data: 'bad pc.data'
+          },
+
+          any: {
+            # A player contact record exists in the master
+            player_contacts: {
+                id: 0
+            }
+
+          }
+
+        }
+
+
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
 
     # Check that calc_query_conditions handles nested any conditions OK
     conf = {
@@ -966,7 +992,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
       }
     }
     res = ConditionalActions.new conf, @al
-    
     expect(res.calc_action_if).to be true
 
 
@@ -987,7 +1012,9 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
   end
 
-  it "checks if a certain the current user has a specific role" do
+  it "checks if the current user has a specific role" do
+
+    al = create_item
 
     conf = {
       all: {
@@ -997,7 +1024,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
       }
     }
 
-    res = ConditionalActions.new conf, @al
+    res = ConditionalActions.new conf, al
 
     expect(res.calc_action_if).to be false
 
@@ -1011,7 +1038,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
       }
     }
 
-    res = ConditionalActions.new conf, @al
+    res = ConditionalActions.new conf, al
     expect(res.calc_action_if).to be true
 
 
@@ -1023,7 +1050,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
       }
     }
 
-    res = ConditionalActions.new conf, @al
+    res = ConditionalActions.new conf, al
     expect(res.calc_action_if).to be true
 
     conf = {
@@ -1034,8 +1061,30 @@ RSpec.describe "Calculate conditional actions", type: :model do
       }
     }
 
-    res = ConditionalActions.new conf, @al
+    res = ConditionalActions.new conf, al
     expect(res.calc_action_if).to be false
+
+    # Check the user has a role matching the current instance attribute value
+
+    expect(@user.role_names.first).not_to be nil
+    conf = {
+      all: {
+        this: {
+          select_who: {
+            user: 'role_name'
+          }
+        }
+      }
+    }
+
+    al.select_who = 'bad role'
+
+    res = ConditionalActions.new conf, al
+    expect(res.calc_action_if).to be false
+
+    al.select_who = @user.role_names.first
+    res = ConditionalActions.new conf, al
+    expect(res.calc_action_if).to be true
 
   end
 
@@ -1096,8 +1145,62 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
 
+    # Does a referenced item specifying a record type work correctly?
+
+    confy= "
+    all:
+      addresses:
+        city: 'portland'
+        zip: '#{a1.zip}'
+        id:
+          this_references:
+            player_contact: id
+    "
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
 
 
+    confy= "
+    all:
+      addresses:
+        city: 'portland'
+        zip: '#{a1.zip}'
+        id:
+          this_references:
+            address: id
+    "
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    confy= "
+    all:
+      addresses:
+        city: 'portland'
+        zip: '#{a1.zip}'
+        rank:
+          this_references:
+            # This activity log references a address record with 'rank'
+            # that matches an address with equal rank
+            address: rank
+    "
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    address_rank = @al.master.addresses.first.rank
+
+    expect(@al.master.player_contacts.pluck(:rank)).to include address_rank
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+
+    # More complex references
     confy = "
         all:
           activity_log__player_contact_phones:
@@ -1335,12 +1438,38 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
 
 
-    # Expect this one to fail, as the references do not exist when using @alnor as the object in ConditionalActions
+    # Check whether references work correctly
     @alnor = create_item
+
 
     @alnor.master_id = @al.master_id
     @alnor.force_save!
     @alnor.save!
+
+    @alnor.extra_log_type_config.references = {
+      address: {
+        address: {
+          from: 'master',
+          add: 'one_to_master'
+        }
+      },
+      player_contact: {
+        player_contact: {
+          from: 'master',
+          add: 'many'
+        }
+      },
+      activity_log__player_contact_phone: {
+        activity_log__player_contact_phone: {
+          from: 'this',
+          add: 'many'
+        }
+      }
+    }
+
+
+    # Create a reference to @al
+    ModelReference.create_with @alnor, @al
 
     confy = "
         all:
@@ -1373,20 +1502,62 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = YAML.load(confy)
     conf = conf.deep_symbolize_keys
 
-    # expect(@alnor.model_references.count).to eq 2 # two dynamic models only
+    # We have two references
+    expect(@alnor.model_references.count).to eq 3 # two addresses and one activity log
 
+    # Since neither match extra_log_type xxx, not_all results in true
     res = ConditionalActions.new conf, @alnor
     expect(res.calc_action_if).to be true
+
+
+    # Check it also finds a matching item with 'primary', causing the result to fail
+    confy = "
+        all:
+          activity_log__player_contact_phones:
+            id: #{@alnor.id}
+
+
+          any:
+            all:
+              addresses:
+                city: 'portland'
+                zip: x
+                id:
+                  this_references: id
+
+
+            all2:
+              addresses:
+                city: 'portland'
+                zip: #{a2.zip}
+                id:
+                  this_references: id
+
+        not_all:
+          activity_log__player_contact_phones:
+            extra_log_type: #{@al.extra_log_type}
+            id:
+              this_references: id
+"
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    # Since one of the references matches extra_log_type primary, not_all results in false
+    res = ConditionalActions.new conf, @alnor
+    expect(res.calc_action_if).to be false
+
+
 
     # Set the references to be disabled
     # This only affects the conditions handled by this_reference: id
     # since the initial condition is handled directly by an INNER JOIN query
     # not through the model references
     @alnor.extra_log_type_config.editable_if = {always: true}
-    @alnor.model_references.each do |r|
-      r.update!(disabled: true, current_user: @user) unless r.disabled?
-    end
+    r = @alnor.model_references.last
+    r.update!(disabled: true, current_user: @user) unless r.disabled?
 
+
+    res = ConditionalActions.new conf, @alnor
     res_if = res.calc_action_if
 
     expect(res_if).to be true
@@ -1972,6 +2143,440 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
     res = ca.get_this_val
     expect(res).to eq @al
+
+  end
+
+  it "finds parent_references" do
+
+    new_al0 = create_item
+    new_al0.extra_log_type = 'blank'
+    new_al0.force_save!
+    new_al0.save!
+
+    new_al = create_item
+    new_al.master_id = new_al0.master_id
+    new_al.extra_log_type = 'primary'
+    new_al.force_save!
+    new_al.save!
+
+    new_al2 = create_item
+    new_al2.master_id = new_al0.master_id
+    new_al2.extra_log_type = 'secondary'
+    new_al2.force_save!
+    new_al2.save!
+
+    new_al0.extra_log_type_config.references = {
+      references: {
+        activity_log__player_contact_phone: {
+          from: 'this',
+          add: 'many'
+        }
+      }
+    }
+    # new_al.extra_log_type_config.references = new_al0.extra_log_type_config.references
+    # new_al2.extra_log_type_config.references = new_al0.extra_log_type_config.references
+
+    m = new_al0.master
+    m.current_user = @user
+    data = "(516)123-7612-#{DateTime.now.to_f}"
+    pc = m.player_contacts.first
+    pc.update! data: data, rec_type: 'phone', rank: 10, source: 'nflpa'
+
+    expect(new_al.extra_log_type).not_to be nil
+    expect(m.activity_log__player_contact_phones.where(extra_log_type: 'primary').count).to be > 0
+
+    # Make al refer to al0 (al is the parent of al0)
+    ModelReference.create_with new_al, new_al0, force_create: true
+    expect(new_al0.referring_record).to eq new_al
+    expect(new_al0.extra_log_type).to eq :blank
+    ModelReference.create_with new_al, new_al2, force_create: true
+    expect(new_al2.referring_record).to eq new_al
+    expect(new_al2.extra_log_type).to eq :secondary
+
+    expect(new_al.model_references.length).to eq 2
+
+    confy = <<EOF_YAML
+      all:
+        activity_log__player_contact_phones:
+          extra_log_type: secondary
+          id:
+            parent_references: id
+
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+    confy = <<EOF_YAML
+      all:
+
+        activity_log__player_contact_phones:
+          extra_log_type: primary
+          id:
+            parent_references: id
+
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+
+    confy = <<EOF_YAML
+      all:
+
+        activity_log__player_contact_phones:
+          extra_log_type: blank
+          id:
+            parent_references: id
+
+
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+    # Can we check for a record with a specific type
+
+    confy = <<EOF_YAML
+      all:
+
+        activity_log__player_contact_phones:
+          extra_log_type: blank
+          id:
+            parent_references:
+              activity_log__player_contact_phones: id
+
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+    confy = <<EOF_YAML
+      all:
+
+        activity_log__player_contact_phones:
+          extra_log_type: primary
+          id:
+            parent_references:
+              activity_log__player_contact_phones: id
+
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+
+confy = <<EOF_YAML
+  all:
+
+    activity_log__player_contact_phones:
+      extra_log_type: primary
+      id:
+        parent_references:
+          player_contact: id
+
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+
+  end
+
+  it "handles special cases" do
+
+    new_al0 = create_item
+
+    new_al = create_item
+
+    new_al.master_id = new_al0.master_id
+    new_al.extra_log_type = 'primary'
+    new_al.force_save!
+    new_al.save!
+
+    m = new_al0.master
+    m.current_user = @user
+    data = "(516)123-7612-#{DateTime.now.to_f}"
+    pc = m.player_contacts.first
+    pc.update! data: data, rec_type: 'phone', rank: 10, source: 'nflpa'
+
+    expect(new_al.extra_log_type).not_to be nil
+    expect(m.activity_log__player_contact_phones.where(extra_log_type: 'primary').count).to be > 0
+
+    # Script ineligibility test
+    confy = <<EOF_YAML
+      all:
+        not_any:
+          activity_log__player_contact_phones:
+            extra_log_type: ineligible
+        any_ineligible:
+          all_basic_questions:
+            activity_log__player_contact_phones:
+              extra_log_type: #{new_al.extra_log_type}
+            not_all:
+              all_phq8_eligible:
+                player_contacts:
+                  rank:
+                    condition: '<'
+                    value: 10
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    pc.update! rank: 10
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+    pc.update! rank: 5
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+
+    # Script ineligibility test - alternative nesting
+    confy = <<EOF_YAML
+      all:
+        not_any:
+          activity_log__player_contact_phones:
+            extra_log_type: ineligible
+        any_ineligible:
+          all_basic_questions:
+            all:
+              activity_log__player_contact_phones:
+                extra_log_type: #{new_al.extra_log_type}
+            not_all:
+              all_phq8_eligible:
+                player_contacts:
+                  rank:
+                    condition: '<'
+                    value: 10
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    pc.update! rank: 10
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+    pc.update! rank: 5
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+
+
+    # Script eligibility test
+    confy = <<EOF_YAML
+      all:
+        not_any:
+          activity_log__player_contact_phones:
+            extra_log_type: eligible
+        all_done:
+          activity_log__player_contact_phones:
+            extra_log_type: #{new_al.extra_log_type}
+        all_phq8_eligible:
+          player_contacts:
+            rank:
+              condition: '<'
+              value: 10
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    pc.update! rank: 10
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+    pc.update! rank: 5
+
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+
+
+    # Check "any" also works
+    confy = <<EOF_YAML
+      all:
+        not_any:
+          activity_log__player_contact_phones:
+            extra_log_type: ineligible
+        any_ineligible:
+          any_basic_questions:
+            activity_log__player_contact_phones:
+              # the first on should not match, but the id should
+              extra_log_type: will not match
+              id: #{new_al.id}
+            not_all:
+              all_phq8_eligible:
+                player_contacts:
+                  rank:
+                    condition: '<'
+                    value: 10
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    pc.update! rank: 10
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+    pc.update! rank: 5
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+
+
+    confy = <<EOF_YAML
+      all:
+        not_any:
+          activity_log__player_contact_phones:
+            # This will not match, meaning not_any will pass
+            extra_log_type: ineligible
+        any_ineligible:
+          any_basic_questions:
+            activity_log__player_contact_phones:
+              # neither should match
+              extra_log_type: will not match
+              id: -1
+            not_all:
+              all_phq8_eligible:
+                player_contacts:
+                  rank:
+                    condition: '<'
+                    value: 10
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    pc.update! rank: 10
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+    pc.update! rank: 5
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+
+#
+
+    # Check "not_all" also works
+    confy = <<EOF_YAML
+      all:
+        not_any:
+          activity_log__player_contact_phones:
+            extra_log_type: ineligible
+        any_ineligible:
+          not_all_basic_questions:
+            activity_log__player_contact_phones:
+              # the first on should not match, but the id should
+              extra_log_type: will not match
+              id: #{new_al.id}
+            not_all:
+              all_phq8_eligible:
+                player_contacts:
+                  rank:
+                    condition: '<'
+                    value: 10
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    pc.update! rank: 10
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+    pc.update! rank: 5
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+
+
+    confy = <<EOF_YAML
+      all:
+        not_any:
+          activity_log__player_contact_phones:
+            # This will not match, meaning not_any will pass
+            extra_log_type: ineligible
+        any_ineligible:
+          not_all_basic_questions:
+            activity_log__player_contact_phones:
+              # both should match
+              extra_log_type: primary
+              id: #{new_al.id}
+            not_all:
+              all_phq8_eligible:
+                player_contacts:
+                  rank:
+                    condition: '<'
+                    value: 10
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    pc.update! rank: 10
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+    pc.update! rank: 5
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+
+# Combined not_all
+
+    confy = <<EOF_YAML
+      all:
+        not_any:
+          activity_log__player_contact_phones:
+            # This will not match, meaning not_any will pass
+            extra_log_type: ineligible
+        any_ineligible:
+          not_all_basic_questions:
+            activity_log__player_contact_phones:
+              # both should match
+              extra_log_type: primary
+              id: #{new_al.id}
+            player_contacts:
+              rank:
+                condition: '>='
+                value: 10
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    pc.update! rank: 10
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+    pc.update! rank: 5
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+
 
   end
 
