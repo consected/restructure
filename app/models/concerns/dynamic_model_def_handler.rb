@@ -106,7 +106,7 @@ module DynamicModelDefHandler
           else
             klass = dm.class.name.constantize
           end
-          dm.add_master_association if dm.ready? && dm.implementation_class_defined?(klass, fail_without_exception: true)
+          dm.add_master_association if !dm.disabled && dm.ready? && dm.implementation_class_defined?(klass, fail_without_exception: true)
         end
       else
         puts "Table doesn't exist yet: #{self.table_name}"
@@ -168,7 +168,7 @@ module DynamicModelDefHandler
 
   def ready?
     begin
-      return !self.disabled && ActiveRecord::Base.connection.table_exists?(self.table_name)
+      return ActiveRecord::Base.connection.table_exists?(self.table_name)
     rescue => e
       puts e
       return false
@@ -286,7 +286,7 @@ module DynamicModelDefHandler
   def check_implementation_class
     if !disabled && errors.empty?
 
-      unless ready?
+      unless !disabled? && ready?
         err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:
 
           #{generator_script} > db/app_specific/create_#{table_name}.sql

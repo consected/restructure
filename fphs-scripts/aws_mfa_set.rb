@@ -16,7 +16,7 @@ aws_acct = '756598248234'
 
 res = `aws sts get-caller-identity | grep "#{aws_acct}"`
 while res == ''
-  puts "AWS MFA is needed. Enter the one time code and hit enter"
+  puts "# AWS MFA is needed. Enter the one time code and hit enter"
   aws_mfa = gets.chomp
 
   res = `aws-mfa-login --profile #{aws_profile} --token #{aws_mfa}`

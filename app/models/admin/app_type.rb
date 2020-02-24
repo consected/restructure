@@ -10,7 +10,7 @@ class Admin::AppType < Admin::AdminBase
   has_many :user_roles, -> { order id: :asc }, autosave: true, class_name: "Admin::UserRole"
   has_many :nfs_store_filters, -> { order id: :asc }, autosave: true, class_name: "NfsStore::Filter::Filter"
 
-  validates :name, presence: true
+  validates :name, presence: true, uniqueness: true
   validates :label, presence: true
   after_save :set_access_levels
 

@@ -61,7 +61,7 @@
       CREATE TABLE ipa_appointments (
           id integer NOT NULL,
           master_id integer,
-          visit_start_date date unique,
+          visit_start_date date,
           visit_end_date date,
           select_status varchar,
           select_status varchar,

@@ -32,42 +32,31 @@ module ESignImportConfig
     create_admin
     create_user
 
-    apps = Admin::AppType.where(name: 'test esign')
-    if apps.active.count != 1
-      als = ActivityLog.where( table_name: 'activity_log_player_info_e_signs')
-      als.each do |al|
-        al.updated!  current_admin: @admin, disabled: true
-      end
-
-      apps.each do |a|
-        a.update! current_admin: @admin, disabled: true
-      end
-
-      new_app_type = apps.first
-      new_app_type.update!(disabled: false, current_admin: @admin) if new_app_type
-
-
-    end
-
-    Admin::AppType.import_config File.read(Rails.root.join('db', 'app_configs', 'test esign_config.json')), @admin
-
-    # Make sure the activity log configuration is available
-
-    # Admin::UserAccessControl.active.update_all(disabled: true)
-    #
-    # apps = Admin::AppType.where(name: 'test esign')
-    # if apps.active.count != 1
-    #
-    #   apps.each do |a|
-    #     a.update! current_admin: @admin, disabled: true
+    # apps = Admin::AppType.active.where(name: 'test esign')
+    # if apps.active.count == 1
+    #   als = ActivityLog.active.where(table_name: 'activity_log_player_info_e_signs')
+    #   als.first.implementation_class_defined?(::ActivityLog)
+    # else
+    #   als = ActivityLog.active.where( table_name: 'activity_log_player_info_e_signs')
+    #   als.each do |al|
+    #     al.update  current_admin: @admin, disabled: true
     #   end
     #
-    #   new_app_type = apps.first
-    #   new_app_type.update!(disabled: false, current_admin: @admin) if new_app_type
+    #   apps.each do |a|
+    #     a.update current_admin: @admin, disabled: true
+    #   end
+    #
     # end
 
 
+    Admin::AppType.import_config File.read(Rails.root.join('db', 'app_configs', 'test esign_config.json')), @admin
+
+    als = ActivityLog.active.where(table_name: 'activity_log_player_info_e_signs')
+    als.active.first.implementation_class_defined?(::ActivityLog)
     expect(defined? ActivityLog::PlayerInfoESign).to be_truthy
+
+    new_app_type = Admin::AppType.where(name: 'test esign').first
+    new_app_type.update! disabled: false, current_admin: @admin if new_app_type.disabled?
 
     cdir = File.join(NfsStore::Manage::Filesystem.nfs_store_directory, 'gid600', "app-type-#{new_app_type.id}", "containers")
     FileUtils.rm_rf cdir

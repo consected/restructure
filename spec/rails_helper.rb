@@ -33,6 +33,24 @@ require 'devise'
 require 'browser_helper'
 include BrowserHelper
 
+bbrc = Rails.root.join('.byebugrc')
+init_bb = false
+if File.exist?(bbrc)
+   fbb = File.read(bbrc)
+   init_bb = !!fbb.index(/^b /)
+end
+
+
+if ENV['BYEBUG'] == 'true'
+  puts "Running Remote Byebug server.\nTo connect, run:\n   byebug -R localhost:8099"
+  require "byebug/core"
+  Byebug.wait_connection = true
+  Byebug.start_server("localhost", 8099)
+end
+if init_bb
+  byebug
+end
+
 Capybara.server = :webrick
 setup_browser
 

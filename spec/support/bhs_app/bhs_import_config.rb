@@ -62,7 +62,7 @@ module BhsImportConfig
     # Admin::UserAccessControl.active.update_all(disabled: true)
 
     new_app_type = Admin::AppType.where(name: 'bhs').first
-    new_app_type.update!(disabled: false, current_admin: @admin)
+    new_app_type.update!(disabled: false, current_admin: @admin) if new_app_type.disabled?
     new_app_type
   end
 

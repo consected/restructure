@@ -522,6 +522,14 @@ class ActivityLog < ActiveRecord::Base
 
     if failed || !enabled?
       remove_model_from_list
+    else
+      # Check that the implementation has been successful
+      unless implementation_class_defined?(klass)
+        puts "Failure checking activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        logger.info "*************************************************************************************"
+        logger.info "Failure checking activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        logger.info "*************************************************************************************"
+      end
     end
 
     @regenerate = res
