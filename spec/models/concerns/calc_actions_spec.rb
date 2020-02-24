@@ -2578,6 +2578,73 @@ EOF_YAML
 
 
 
+
+    # Check "not_any" also works
+    confy = <<EOF_YAML
+      all:
+        not_any:
+          activity_log__player_contact_phones:
+            extra_log_type: ineligible
+        any_ineligible:
+          not_any_basic_questions:
+            activity_log__player_contact_phones:
+              # the first on should not match, but the id should
+              extra_log_type: will not match
+              id: #{new_al.id}
+            not_all:
+              all_phq8_eligible:
+                player_contacts:
+                  rank:
+                    condition: '<'
+                    value: 10
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    pc.update! rank: 10
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+    pc.update! rank: 5
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+
+
+    confy = <<EOF_YAML
+      all:
+        not_any:
+          activity_log__player_contact_phones:
+            # This will not match, meaning not_any will pass
+            extra_log_type: ineligible
+        any_ineligible:
+          not_any_basic_questions:
+            activity_log__player_contact_phones:
+              # neither should match
+              extra_log_type: will not match
+              id: -1
+            not_all:
+              all_phq8_eligible:
+                player_contacts:
+                  rank:
+                    condition: '<'
+                    value: 10
+EOF_YAML
+
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    pc.update! rank: 10
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+    pc.update! rank: 5
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+
+
   end
 
 end

@@ -1,3 +1,25 @@
+# Handle the evaluation of general calc_action_if methods for:
+#   conditions (such as creatable_if)
+#   validations (to ensure data is valid)
+#   return of values, lists and instances matching the conditions
+#
+# Conditions may be deeply nested to handle the equivalent of OR(AND, NOT(OR),...)
+# Each level is calculated through two distinct mechanisms: query conditions and non-query conditions
+#
+# Query conditions are directly fulfilled by generating a query scope. For conditions where all should match
+# then a single query result provides the result. For conditions where any should match, the basic scope is used
+# to run each condition in turn.
+#
+# Non-query conditions are those that reference the current instance or user in some way and are therefore
+# not a table that can be joined in a query. They are evaluated through specific logic, and this can be extended to
+# provide new forms of evaluation.
+#
+# Nested conditions may occur within either form of condition, and are handled by just recursively instantiating
+# the outer class, ConditionalActions.
+#
+# In addition to the evaluation of basic conditions against plain values, comparison values may be pulled from
+# referencing other tables and non-query conditions.
+
 module CalcActions
 
   extend ActiveSupport::Concern
@@ -8,9 +30,10 @@ module CalcActions
   included do
     # We won't use a query join when referring to tables based on these keys
     NonJoinTableNames = [:this, :parent, :referring_record, :this_references, :parent_references, :user, :master, :condition, :value, :hide_error].freeze
-    NonQueryTableNames = [:this, :referring_record, :this_references, :parent_references, :validate].freeze
+    NonQueryTableNames = [:this, :user, :parent, :referring_record].freeze
+    NonQueryNestedKeyNames = [:this, :referring_record, :this_references, :parent_references, :validate].freeze
 
-    SelectionTypes = :all, :any, :not_all, :not_any
+    SelectionTypes = [:all, :any, :not_all, :not_any].freeze
 
     BoolTypeString = '__!BOOL__'.freeze
 
@@ -35,32 +58,6 @@ module CalcActions
   end
 
   private
-
-    # Check if this is a key we won't join on, or if it is a selection type (such as and:, :not_all...)
-    # @param key [Symbol]
-    # @return [True | False]
-    def non_join_table_name? key
-       (key.in?(NonJoinTableNames) || is_selection_type(key))
-    end
-
-    # Check if this is a key that represents part of a non query condition, or if it is a selection type (such as and:, :not_all...)
-    # @param key [Symbol]
-    # @return [True | False]
-    def non_query_table_name? key
-       (key.in?(NonQueryTableNames) || is_selection_type(key))
-    end
-
-    # Check if the supplied key is a selection type, starting :all, :not_all, :any, :not_any
-    # Allow the same selection type to be used multiple times, such as:
-    # not_any:
-    # not_any_2:
-    # not_any_3:
-    # @param key [Symbol]
-    # @return [True | False]
-    def is_selection_type key
-      return key if key.in?(SelectionTypes)
-      SelectionTypes.select {|st| key.to_s.start_with? st.to_s}.first
-    end
 
     # Primary method to calculate conditions
     def do_calc_action_if
@@ -141,8 +138,9 @@ module CalcActions
             # These conditions are easy to handle as a standard query
             # @this_val_where check allows a return_value definition to be used alone without other conditions
             unless @condition_values.empty? && @extra_conditions.empty? && !@this_val_where
-              gen_condition_scope_and_return_value @condition_values, @extra_conditions
-              res_q = calc_query_conditions
+              gen_condition_scope @condition_values, @extra_conditions
+              calc_return_types
+              res_q = calc_nested_query_conditions
               merge_failures({condition_type => @condition_config}) if !res_q
             end
 
@@ -162,8 +160,9 @@ module CalcActions
             res_q = true
             # equivalent of NOT(cond1 AND cond2 AND cond3 ...)
             unless @condition_values.empty? && @extra_conditions.empty?
-              gen_condition_scope_and_return_value @condition_values, @extra_conditions
-              res_q = calc_query_conditions
+              gen_condition_scope @condition_values, @extra_conditions
+              calc_return_types
+              res_q = calc_nested_query_conditions
             end
 
             @non_query_conditions.each do |table, fields|
@@ -197,7 +196,8 @@ module CalcActions
 
               @condition_values.each do |table, fields|
                 fields.each do |field_name, expected_val|
-                  gen_condition_scope_and_return_value({table => {field_name => expected_val}}, @extra_conditions, 'OR')
+                  gen_condition_scope({table => {field_name => expected_val}}, @extra_conditions, 'OR')
+                  calc_return_types
                   res_q = (@condition_scope.length > 0)
 
                   break if res_q
@@ -208,10 +208,10 @@ module CalcActions
               reset_scope = @base_query.order(id: :desc).limit(1)
             end
 
-            # Reset the condition scope, since gen_condition_scope_and_return_value will have messed with it
+            # Reset the condition scope, since gen_condition_scope will have messed with it
             @condition_scope = reset_scope
             unless res_q || @condition_scope.nil?
-              res_q ||= calc_query_conditions return_first_false: false
+              res_q ||= calc_nested_query_conditions return_first_false: false
             end
 
             # If no matches - return all possible items that failed
@@ -243,12 +243,14 @@ module CalcActions
             if @condition_values.empty?
               # Reset the previous condition_scope, since it could be carrying unwanted joins from an all, not_any condition
               @condition_scope = nil
+              reset_scope = nil
             else
 
               @condition_values.each do |table, fields|
                 fields.each do |field_name, expected_val|
-                  gen_condition_scope_and_return_value({table => {field_name => expected_val}}, @extra_conditions, 'OR')
-                  res_q = calc_query_conditions
+                  gen_condition_scope({table => {field_name => expected_val}}, @extra_conditions, 'OR')
+                  calc_return_types
+                  res_q = (@condition_scope.length > 0)
                   merge_failures({condition_type => {table => {field_name => expected_val}}}) if res_q
                   cond_res &&= !res_q
                   break unless cond_res && !return_failures
@@ -256,6 +258,14 @@ module CalcActions
                 break unless cond_res && !return_failures
               end
 
+              reset_scope = @base_query.order(id: :desc).limit(1)
+            end
+
+            # Reset the condition scope, since gen_condition_scope will have messed with it
+            @condition_scope = reset_scope
+            if cond_res && !@condition_scope.nil?
+              res_q = calc_nested_query_conditions return_first_false: false
+              cond_res &&= !res_q
             end
 
             @non_query_conditions.each do |table, fields|
@@ -311,11 +321,11 @@ module CalcActions
     # Generate the query for the @condition_scope.
     # This basically generates the query that will be used to handle queries against tables, and
     # acts as the scope around individual non query conditions
-    # As a side-effect, also get the return_value, return_value_list or return_result in @this_val
     # @param conditions [Hash] conditions as a standard ActiveQuery hash {table: {field: value}, ...}
     # @param extra_conditions [Array]
+    # @param bool [String] value 'AND' or 'OR' used to replace the BoolTypeString placeholder
     # @return [ActiveQuery::Relation] the final @condition_scope
-    def gen_condition_scope_and_return_value conditions, extra_conditions = [], bool = 'AND'
+    def gen_condition_scope conditions, extra_conditions = [], bool = 'AND'
 
       unless conditions.first && conditions.first.last&.length == 0
         # Conditions are available - apply them as a where clause on top of the base query
@@ -335,6 +345,19 @@ module CalcActions
         @condition_scope = @condition_scope.where(extra_conditions)
       end
 
+      unless @this_val_where
+        @condition_scope = @condition_scope.order(id: :desc).limit(1)
+      end
+
+      # Return the usable @condition_scope
+      @condition_scope
+    end
+
+    # Get any requested return_value, return_value_list or return_result
+    # The results are set in the instance attribute #this_val
+    # The instance variable @this_val_where defines the return requirements, or may be
+    # nil if there is no requirement to return anything
+    def calc_return_types
       # Handle the return of requested values, lists or results (instances) if the definition
       # requested this
       if @this_val_where
@@ -387,12 +410,7 @@ module CalcActions
             end
           end
         end
-      else
-        @condition_scope = @condition_scope.order(id: :desc).limit(1)
       end
-
-      # Return the usable @condition_scope
-      @condition_scope
 
     end
 
@@ -509,7 +527,8 @@ EOF
           end
 
 
-        #### If we have a user or role_name as the table key
+        #### If we have a user as the table key and we are requesting the role_name
+        # to match the expected value
         elsif table == :user && field_name == :role_name
           user = @current_instance.master.current_user
           expected_val = [expected_val] unless expected_val.is_a? Array
@@ -546,10 +565,9 @@ EOF
     #       <type_of_reference>: attribute or hash
 
     # @param val [Hash] the definition of the matching requirements
-    # @param non_query_condition [True | False] the initial non_query_condition flag, which we may update and return
     # @param ref_table_name [String | Symbol] the table name to reference in this_references / parent_references conditions
-    # @return [String | Number | Array, True | False] return array of new values for [val, non_query_condition]
-    def generate_match_query_condition val, non_query_condition, ref_table_name
+    # @return [String | Number | Array] return val to be matched
+    def generate_match_query_condition val, ref_table_name
 
       val_item_key = val.first.first
       val_item_value = val.first.last
@@ -686,19 +704,10 @@ EOF
         end
 
       else
-        # No special reference type was specified.
-        # Decide instead if the expected value represents a non query condition,
-        # or simply a table name to be used as a join in the base query
-
-        if non_query_table_name?(val_item_key)
-          non_query_condition = true
-        else
-          @join_tables << val_item_key
-        end
-
+        # No previous special reference type was specified
       end
 
-      return val, non_query_condition
+      return val
 
     end
 
@@ -782,7 +791,10 @@ EOF
 
     end
 
-    def generate_returns val, join_table_name, field_name
+    # If we are expecting values or results to be returned, handle the setup for this here
+    # @param val [String | Array] a string or array that may contain a required return definition
+    # @return [nil | Hash] defining the return definition
+    def generate_returns_config val, join_table_name, field_name
 
       # Check if the definition expects a return value, list or result
       mode = nil
@@ -808,15 +820,15 @@ EOF
     end
 
 
-    # Generate query conditions and a list of join tables based on a conditional configuration,
-    # such as
-    # creatable_if:
-    #  all:
-    #    <creatable conditions>
-    #
+    # Generate query conditions to support the conditional configuration.
+    # Each condition definition decides if it is a query or non-query condition and
+    # sets up conditions to support this.
+    # Query conditions may incorporate joined tables (inner and left joins) into the query
+    # as well as formulating the ActiveRecord queries to support this.
+    # Non-query conditions build on the base query when evaluated, and this method just
+    # sets up some structures to support this.
     def calc_base_query condition_type
 
-      # join_tables = @condition_config.keys.map(&:to_sym) - SelectionTypes
       @join_tables = []
       @condition_values = {}
       @extra_conditions = []
@@ -837,18 +849,13 @@ EOF
 
             # non query conditions are those aren't formulated with a series of
             # inner joins on the master. They are handled as individual queries.
-            non_query_condition = table_name.in?([:this, :user, :parent, :referring_record])
+            non_query_condition = is_non_query_condition table_name, field_name, val
 
-            if field_name == :return_constant
-              # Allow us to return a set value, typically if no other conditions are met
-              # This is a non query condition
-              non_query_condition = true
-
-            elsif val.is_a? Hash
-              # The conditional value is actually a hash, so we need to
+            if val.is_a? Hash
+              # Since the conditional value is actually a hash, we need to
               # get the value to be matched from another referenced record (or this)
               # Generate the query condition to do this
-              val, non_query_condition = generate_match_query_condition(val, non_query_condition, join_table_name)
+              val = generate_match_query_condition(val, join_table_name)
             end
 
             unless non_query_condition
@@ -856,24 +863,30 @@ EOF
               # Handle setting up the condition values
               generate_query_condition_values(val, table_name, field_name, join_table_name)
 
+              # And handle any returns value / results config
+              generate_returns_config(val, join_table_name, field_name)
 
-              generate_returns(val, join_table_name, field_name)
-
-
+              # We can add this table to the joins
               @join_tables << join_table_name
 
             else
+              # We have decided this is a non query condition, and will not be joined on the master
+              # Set this so they can be evaluated at runtime.
               @non_query_conditions[table_name] ||= {}
               @non_query_conditions[table_name][field_name] = val
             end
           end
         end
       end
+
+      # Make the list of tables to be joined valid (in case anything slipped through) and unique
       @join_tables = (@join_tables - NonJoinTableNames).uniq
 
       if [:all, :not_all].include? condition_type
+        # Inner join, since our conditions require the existence of records in the joined tables
         @base_query = @current_scope.joins(@join_tables)
       else
+        # Left join, since our conditions do not absolutely require the existence of records in the joined tables
         @base_query = @current_scope.includes(@join_tables)
       end
     end
@@ -884,16 +897,17 @@ EOF
     end
 
     # Calculate the sub conditions for this level if it contains any of the selection types
-    def calc_query_conditions return_first_false: true
-
+    # @param return_first_false [true | false] return immediately on the first condition that fails
+    #   to match. This also controls whether results are combined through AND or OR
+    # @return [true | false] return the result of the evaluated conditions
+    def calc_nested_query_conditions return_first_false: true
       res = return_first_false
 
       # The query didn't return a result - therefore the condition evaluates to false
       return false if @condition_scope.length == 0
 
-
-
       # Combine sub condition results if they are specified
+      # This sends the current @condition_scope as the basis for evaluation.
       @condition_config.each do |c_type, t_conds|
         # If this is a sub condition (the key is one of :all, :any, :not_any, :not_all)
         # go ahead and calculate the sub conditions results by instantiating a ConditionalActions class
@@ -919,6 +933,59 @@ EOF
 
 
 
+    # Check if this is a key we won't join on, or if it is a selection type (such as and:, :not_all...)
+    # @param key [Symbol]
+    # @return [True | False]
+    def non_join_table_name? key
+       (key.in?(NonJoinTableNames) || is_selection_type(key))
+    end
+
+    # Check if this is a key that represents part of a non query condition, or if it is a selection type (such as and:, :not_all...)
+    # @param key [Symbol]
+    # @return [True | False]
+    def non_query_nested_key_name? key
+       (key.in?(NonQueryNestedKeyNames) || is_selection_type(key))
+    end
+
+    # Check if the supplied key is a selection type, starting :all, :not_all, :any, :not_any
+    # Allow the same selection type to be used multiple times, such as:
+    # not_any:
+    # not_any_2:
+    # not_any_3:
+    # @param key [Symbol]
+    # @return [True | False]
+    def is_selection_type key
+      return key if key.in?(SelectionTypes)
+      SelectionTypes.select {|st| key.to_s.start_with? st.to_s}.first
+    end
+
+
+    # Evaluate if this definition represents a non query condition, to be evaluated without
+    # directly joining on the master table
+    # @param table_name [Symbol] table key from definition
+    # @param field_name [Symbol] field name key from definition
+    # @param val [Hash | Object] the condition definition
+    def is_non_query_condition table_name, field_name, val
+
+      # Simple table keys handled by non query conditions
+      non_query_condition = table_name.in?(NonQueryTableNames) || is_selection_type(table_name)
+
+      # Requesting a return constant in any circumstance requires a non query condition
+      non_query_condition = true if field_name == :return_constant
+
+      # If there is a nested condition, the key may represent a non query table name
+      val_item_key = val.is_a?(Hash) && val.first.is_a?(Hash) && val.first.first
+      non_query_condition ||= non_query_nested_key_name?(val_item_key) if val_item_key
+
+      non_query_condition
+    end
+
+
+
+    # Calculate a validation based on a :validate key
+    # @param condition [Hash] defined validation condition
+    # @param value [Object] actual value of the expected result
+    # @return [Type] description_of_returned_object
     def calc_complex_validation condition, value
       res = true
       condition.each do |k, opts|
