@@ -131,8 +131,8 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     sleep 2
     v = find("#search_count").text
     unless v && v.match(/[0-9]+/)
-      puts "About to fail"
-      puts @full_player_info.inspect
+      #puts "About to fail"
+      #puts @full_player_info.inspect
       sleep 10
     end
     expect(page).to have_css "#search_count", text: /[0-9]+/
@@ -287,9 +287,9 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
 
     ### Occasionally we fail here, perhaps due to bad test data?????
     if items.length == 0
-      puts "About to fail with a bad result"
-      puts @full_player_info.inspect
-      puts protocol.name, sp.id, pe.id
+      #puts "About to fail with a bad result"
+      #puts @full_player_info.inspect
+      #puts protocol.name, sp.id, pe.id
       sleep 10
     end
     expect(items.length).to be > 0

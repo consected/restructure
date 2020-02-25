@@ -50,6 +50,8 @@ module Seeds
           s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
         end
 
+        Master.reset_external_id_matching_fields!
+
         Admin::AppType.active.each do |app_type|
           Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'scantrons', access: :create, current_admin: auto_admin)
           Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'sage_assignments', access: :create, current_admin: auto_admin)

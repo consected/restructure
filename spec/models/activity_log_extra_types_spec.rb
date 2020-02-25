@@ -16,8 +16,11 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
     setup_access :player_contacts
     setup_access :activity_log__player_contact_phones
     create_item(data: rand(10000000000000000), rank: 10)
+  end
 
-    @activity_log = al = ActivityLog.enabled.first
+  before :each do
+
+    @activity_log = al = ActivityLog.active.where(name: 'Phone Log').first
 
     al.extra_log_types =<<EOF
     step_1:

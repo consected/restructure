@@ -4,10 +4,6 @@ module Seeds
 
   def self.setup
 
-    if $already_seeeded
-      Rails.logger.info "============ Seed startup already done (#{DateTime.now}) ==============="
-      return
-    end
 
     Rails.logger.info "============ Starting seed setup (#{DateTime.now}) ==============="
 
@@ -39,8 +35,6 @@ module Seeds
       s.setup
     end
     Rails.logger.info "============ Completed seed setup (#{DateTime.now}) ==============="
-
-    $already_seeeded = true
 
   end
 

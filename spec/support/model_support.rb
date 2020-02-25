@@ -147,6 +147,7 @@ module ModelSupport
     ExternalIdentifier.where(name: 'bhs_assignments').update_all(disabled: true)
     i = ExternalIdentifier.where(name: 'bhs_assignments').order(id: :desc).first
     i.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin if i
+    Master.reset_external_id_matching_fields!
 
     ActivityLog.where(name: 'BHS Tracker').update_all(disabled: true)
     i = ActivityLog.where(name: 'BHS Tracker').order(id: :desc).first

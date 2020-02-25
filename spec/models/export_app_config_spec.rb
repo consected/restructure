@@ -24,7 +24,8 @@ RSpec.describe "Export an app configuration", type: :model do
       a.save!
     end
 
-    @app_type = Admin::AppType.create!(name: 'test1', label: 'Test App 12', current_admin: @admin)
+    @app_type = Admin::AppType.active.where(name: 'test1').first
+    @app_type ||= Admin::AppType.create!(name: 'test1', label: 'Test App 12', current_admin: @admin)
 
     # Allow all users access to the app
     Admin::UserAccessControl.create! app_type: @app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: @admin
@@ -133,6 +134,7 @@ RSpec.describe "Export an app configuration", type: :model do
 
     config = @app_type.export_config
 
+    @activity_log = ActivityLog.active.first
 
     al_orig_name = @activity_log.name
     @activity_log.name = "Changed #{rand}!"

@@ -100,7 +100,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
     mn_id = Messaging::MessageNotification.last.id if Messaging::MessageNotification.last
 
-    testcnx = ActiveRecord::Base.establish_connection(:test).connection
+    testcnx = ActiveRecord::Base.connection
 testcnx.transaction do
   @activity_log = @player_contact.activity_log__player_contact_phones.build(select_call_direction: 'from player', select_who: 'user', master: @player_contact.master)
   @activity_log.save!
