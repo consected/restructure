@@ -104,4 +104,10 @@ module AdminHandler
   end
 
 
+  # Check if a specific attribute value has already been used in an active definition
+  # @return [true | false] 
+  def already_taken attr
+    !!self.class.active.where(attr => self[attr.to_s]).where("id <> ?", self.id).first
+  end
+
 end

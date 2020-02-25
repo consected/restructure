@@ -10,11 +10,17 @@ class Admin::AppType < Admin::AdminBase
   has_many :user_roles, -> { order id: :asc }, autosave: true, class_name: "Admin::UserRole"
   has_many :nfs_store_filters, -> { order id: :asc }, autosave: true, class_name: "NfsStore::Filter::Filter"
 
-  validates :name, presence: true, uniqueness: true
+  validates :name, presence: true
+  validate :name_not_already_taken
   validates :label, presence: true
   after_save :set_access_levels
 
   attr_accessor :import_results
+
+  def name_not_already_taken
+    return true if self.disabled
+    !already_taken(:name)
+  end
 
   def to_s
     name

@@ -75,7 +75,7 @@ module Messaging
       data = self.data
       if data.blank?
         raise FphsException.new "Data is blank and item_type / item_id does not return an item" unless item
-        puts "Notification item: #{item}"
+
         data = Admin::MessageTemplate.setup_data item, for_item
         data[:_subject] = self.subject
         data[:extra_substitutions] = self.extra_substitutions_data
