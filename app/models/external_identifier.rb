@@ -242,6 +242,7 @@ class ExternalIdentifier < ActiveRecord::Base
     end
     if failed || !enabled?
       remove_model_from_list
+      reset_master_fields
     end
 
     reset_master_fields if res
