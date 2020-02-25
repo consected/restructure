@@ -1,5 +1,6 @@
 /nbproject/private/
 
+.byebugrc
 .python-version
 *.rbc
 capybara-*.html
