@@ -17,15 +17,19 @@ module BhsImportConfig
     # Setup the triggers, functions, etc
     files = %w(DROP-bhs_tables.sql 1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 3-add_notification_triggers.sql 4-add_testmybrain_trigger.sql 5-create_sync_subject_data_aws_db.sql 6-grant_roles_access_to_ml_app.sql)
 
-    ExternalIdentifier.where(name: 'bhs_assignments').update_all(disabled: true)
+    eis = ExternalIdentifier.active.where(name: 'bhs_assignments').order(id: :desc)
+    if eis.count != 1
+      eis.where("id <> ?", eis.first&.id).update_all(disabled: true)
+    end
+
+    i = ExternalIdentifier.active.where(name: 'bhs_assignments').order(id: :desc).first
+    i.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin if i
     Master.reset_external_id_matching_fields!
 
-    i = ExternalIdentifier.where(name: 'bhs_assignments').order(id: :desc).first
-    i.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin if i
-
-    ActivityLog.where(table_name: 'activity_log_bhs_assignments').update_all(disabled: true)
-    i = ActivityLog.where(table_name: 'activity_log_bhs_assignments').order(id: :desc).first
-    i.update! disabled: false, current_admin: @admin if i
+    als = ActivityLog.active.where(name: 'BHS Tracker')
+    if als.count != 1
+      als.where("id <> ?", als.first&.id).update_all(disabled: true)
+    end
 
     files.each do |fn|
 
@@ -42,30 +46,13 @@ module BhsImportConfig
     create_admin
     create_user
 
-    eis = ExternalIdentifier.where(name: 'bhs_assignments')
-    if eis.length > 0 && eis.active.length == 0
-      eis.order(id: :desc).first.update current_admin: @admin, disabled: false
-    end
-
     Admin::AppType.import_config File.read(Rails.root.join('db', 'app_configs', 'bhs_config.json')), @admin
 
-    # Make sure the activity log configuration is available
 
-    ExternalIdentifier.where(name: 'bhs_assignments').update_all(disabled: true)
-    Master.reset_external_id_matching_fields!
-    i = ExternalIdentifier.where(name: 'bhs_assignments').order(id: :desc).first
-    i.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin if i
+    new_app_type = Admin::AppType.where(name: 'bhs').active.first
+    Admin::UserAccessControl.active.where(app_type_id: new_app_type.id, resource_type: [:external_id_assignments, :limited_access]).update_all(disabled: true)
 
-    ActivityLog.where(table_name: 'activity_log_bhs_assignments').update_all(disabled: true)
-    i = ActivityLog.where(table_name: 'activity_log_bhs_assignments').order(id: :desc).first
-    i.update! disabled: false, current_admin: @admin if i
-    ::ActivityLog.define_models
-    ::ExternalIdentifier.define_models
-
-    # Admin::UserAccessControl.active.update_all(disabled: true)
-
-    new_app_type = Admin::AppType.where(name: 'bhs').first
-    new_app_type.update!(disabled: false, current_admin: @admin) if new_app_type.disabled?
+    # new_app_type.update!(disabled: false, current_admin: @admin) if new_app_type.disabled?
     new_app_type
   end
 
@@ -99,7 +86,7 @@ module BhsImportConfig
     if role == :pi
       add_user_to_role :pi
       add_user_config :hide_player_tabs, 'true'
-
+      setup_access :activity_log__bhs_assignments, resource_type: :table, access: :create, user: @user
       setup_access :activity_log__bhs_assignment__blank_log, resource_type: :activity_log_type, access: :create, user: @user
       setup_access :activity_log__bhs_assignment__contact_initiator, resource_type: :activity_log_type, access: :create, user: @user
     elsif role == :ra
@@ -107,6 +94,8 @@ module BhsImportConfig
       add_user_config :hide_player_tabs, 'false'
       setup_access :player_contacts
       setup_access :create_master, resource_type: :general, access: :read, user: @user
+      setup_access :bhs_assignments, resource_type: :table, access: :create, user: @user
+      setup_access :activity_log__bhs_assignments, resource_type: :table, access: :create, user: @user
       setup_access 'BHS Subjects Pending Sync', resource_type: :report, access: :read, user: @user
       setup_access 'Contact from PI', resource_type: :report, access: :read, user: @user
       setup_access :activity_log__bhs_assignment__respond_to_pi, resource_type: :activity_log_type, access: :create, user: @user

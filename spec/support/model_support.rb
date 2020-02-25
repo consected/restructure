@@ -144,18 +144,22 @@ module ModelSupport
     # Setup the triggers, functions, etc
     files = %w(1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 6-grant_roles_access_to_ml_app.sql create_adders_table.sql)
 
-    ExternalIdentifier.where(name: 'bhs_assignments').update_all(disabled: true)
-    i = ExternalIdentifier.where(name: 'bhs_assignments').order(id: :desc).first
+    eis = ExternalIdentifier.active.where(name: 'bhs_assignments').order(id: :desc)
+    if eis.count != 1
+      eis.where("id <> ?", eis.first&.id).update_all(disabled: true)
+    end
+
+    i = ExternalIdentifier.active.where(name: 'bhs_assignments').order(id: :desc).first
     i.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin if i
     Master.reset_external_id_matching_fields!
 
-    ActivityLog.where(name: 'BHS Tracker').update_all(disabled: true)
-    i = ActivityLog.where(name: 'BHS Tracker').order(id: :desc).first
-    i.update! disabled: false, current_admin: @admin if i
+    als = ActivityLog.active.where(name: 'BHS Tracker')
+    if als.count != 1
+      als.where("id <> ?", als.first&.id).update_all(disabled: true)
+    end
 
 
     files.each do |fn|
-
       begin
         sqlfn = Rails.root.join('docs', 'config_tests', fn)
         puts "Running psql: #{sqlfn}"
@@ -167,11 +171,10 @@ module ModelSupport
 
     config = File.read Rails.root.join('docs/config_tests/bhs_app_type_test_config.json')
 
-    if ActivityLog.where(name: 'BHS Tracker').all.first && !ActivityLog.where(name: 'BHS Tracker').active.first
-      ActivityLog.where(name: 'BHS Tracker').all.first.update!(disabled: false, current_admin: @admin)
-    end
-
     Admin::AppType.import_config(config, @admin)
+    new_app_type = Admin::AppType.where(name: 'bhs').active.first
+    Admin::UserAccessControl.active.where(app_type_id: new_app_type.id, resource_type: [:external_id_assignments, :limited_access]).update_all(disabled: true)
+    new_app_type
   end
 
 end

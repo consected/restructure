@@ -20,7 +20,9 @@ describe "Create a BHS subject and activity", driver: :app_firefox_driver do
     setup_access_as :pi
     @pi = {user: @user, email: @good_email, pw: @good_password}
 
-    m = Master.create(current_user: @ra[:user])
+    expect(@user.can?(:bhs_assignments, :table) ).to be_truthy
+
+    m = Master.create!(current_user: @ra[:user])
     b = m.bhs_assignments.build(bhs_id:'252356501')
     b.save!
   end
