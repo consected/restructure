@@ -38,7 +38,6 @@ class Master < ActiveRecord::Base
   before_validation :set_user
   before_validation :prevent_user_updates,  on: :update
   validates :user, presence: true
-  before_create :assign_msid
 
   # The main set of has_many associations that represents the primary data objects that can belong to a master record
   PrimaryAssociations = reflect_on_all_associations(:has_many).map{|a| a.name.to_s}
@@ -406,12 +405,6 @@ class Master < ActiveRecord::Base
       instance_var_init :current_user
     end
 
-    def assign_msid
-
-      max_msid = Master.maximum(:msid) || 0
-      self.msid = max_msid + 1
-
-    end
 
     def prevent_user_updates
       errors.add :pro_id, "can not be updated by users" if pro_id_changed?

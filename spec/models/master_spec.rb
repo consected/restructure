@@ -34,9 +34,37 @@ RSpec.describe Master, type: :model do
   it "should see results of database triggers ok" do
     pi1 = @full_master_record.player_infos.first
     pro1 = @full_master_record.pro_infos.first
-    expect(@full_master_record.msid).not_to be nil
     expect(@full_master_record.pro_id).to eq pro1.pro_id
     expect(@full_master_record.rank).to eq pi1.rank
+
+  end
+
+  it "adds an MSID value within a DB trigger" do
+
+    new_master = Master.new
+    new_master.current_user = @user
+    new_master.save!
+
+
+    expect([11, 12]).not_to include new_master.rank
+    expect(new_master.msid).to be nil
+    new_master.rank = 11
+    new_master.save!
+    expect(new_master.msid).not_to be nil
+
+
+    new_master = Master.new
+    new_master.current_user = @user
+    new_master.rank = 12
+    new_master.save!
+
+    msid = new_master.msid
+
+    # Check the MSID did not change
+    new_master.rank = 11
+    new_master.save!
+    expect(new_master.msid).to eq new_master.msid
+
 
   end
 
