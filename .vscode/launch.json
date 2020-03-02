@@ -1,0 +1,62 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Server",
+            "type": "Ruby",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "useBundler": true,
+            "pathToBundler": "/home/phil/.rbenv/shims/bundler",
+            "pathToRDebugIDE": "/home/phil/.rbenv/shims",
+            "debuggerPort": "1235",
+            "program": "bin/rails",
+            "args": [
+                "server",
+                "--port",
+                "3001"
+            ],
+            "env": {
+                "RAILS_ENV": "ipa_test",
+                "FPHS_2FA_AUTH_DISABLED": "true"
+            }
+        },
+        {
+            "name": "RSpec - active file",
+            "type": "Ruby",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "useBundler": true,
+            "pathToBundler": "/home/phil/.rbenv/shims/bundler",
+            "pathToRDebugIDE": "/home/phil/.rbenv/shims",
+            "debuggerPort": "1235",
+            "program": "bin/rspec",
+            "args": [
+                "${file}"
+            ],
+            "env": {
+                "NOT_HEADLESS": "true"
+            }
+        },
+        {
+            "name": "RSpec - active line",
+            "type": "Ruby",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "useBundler": true,
+            "pathToBundler": "/home/phil/.rbenv/shims/bundler",
+            "pathToRDebugIDE": "/home/phil/.rbenv/shims",
+            "debuggerPort": "1235",
+            "program": "bin/rspec",
+            "args": [
+                "${file}:${lineNumber}"
+            ],
+            "env": {
+                "NOT_HEADLESS": "true"
+            }
+        }
+    ]
+}
