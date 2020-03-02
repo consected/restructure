@@ -1,19 +1,21 @@
+# frozen_string_literal: true
+
 # Test the underlying SMS sending capability
 # Actual notify functionality for any method of delivery is tested by SaveTriggers::NotifySpec
 require 'rails_helper'
 
-RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
+BulkMsgSupport.import_bulk_msg_app
 
+RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
   include MasterSupport
   include ModelSupport
   include PlayerContactSupport
   include BulkMsgSupport
 
-
   before :all do
     create_admin
     create_user
-    import_bulk_msg_app
+    
 
     @bulk_master = Master.find(-1)
     @bulk_master.current_user = @user
@@ -25,11 +27,9 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
     let_user_create :dynamic_model__zeus_bulk_messages
 
     @bulk_master.dynamic_model__zeus_bulk_message_recipients.update_all(response: nil)
-
   end
 
-  it "associates with the recipient list" do
-
+  it 'associates with the recipient list' do
     pcs = []
     max_num = 3
 
@@ -42,7 +42,7 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
       sleep 1.2 if n == max_num - 1 || n == max_num
       pcs << m.player_contacts.create(data: "(123)123-123#{n}", rank: 10, rec_type: :phone)
       pc = pcs[n]
-      restext = "[{\"aws_sns_sms_message_id\":\"#{rand(199999999999)}\"}]"
+      restext = "[{\"aws_sns_sms_message_id\":\"#{rand(199_999_999_999)}\"}]"
 
       recips << @bulk_master.dynamic_model__zeus_bulk_message_recipients.create!(record_id: pc.id, data: pc.data, rank: pc.rank, response: restext, zeus_bulk_message_id: zbmsg.id)
     end
@@ -50,10 +50,10 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
     num = 0
     statuses = []
 
-    #Ensure status dates are later than recipient dates
+    # Ensure status dates are later than recipient dates
     sleep 2
-    #Skip the first one
-    pcs.each do |pc|
+    # Skip the first one
+    pcs.each do |_pc|
       num += 1
       statuses << @bulk_master.dynamic_model__zeus_bulk_message_statuses.create!(status: 'success', zeus_bulk_message_recipient_id: recips[num].id)
       break if num == max_num
@@ -69,8 +69,6 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
 
     not_done = DynamicModel::ZeusBulkMessageStatus.earliest_incomplete_timestamp
     not_done_id = DynamicModel::ZeusBulkMessageStatus.incomplete_recipients.first.id
-
-
 
     # No results will return if there is no associated zeus_bulk_message record, or its status isn't sent
     # We shouldn't be checking for results from items that haven't been sent or are only scheduled, since that is a waste
@@ -95,11 +93,8 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
     end
     expect(DynamicModel::ZeusBulkMessageStatus.earliest_incomplete_timestamp).not_to be nil
 
-
-
-
     # Ensure the date comes from the database, not the Rails time
-    r0 = recips[num+1].reload
+    r0 = recips[num + 1].reload
     expect(r0.id).to eq not_done_id
     expect(r0.created_at).to eq not_done
 
@@ -112,23 +107,19 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
     not_done = DynamicModel::ZeusBulkMessageStatus.earliest_incomplete_timestamp
 
     expect(not_done).to be nil
-
   end
 
-  it "can access log groups" do
-
+  it 'can access log groups' do
     lg = @bms.aws_log_groups
     expect(lg.length).to be > 0
 
     expect(lg[:failure]).not_to be nil
     expect(lg[:success]).not_to be nil
 
-    puts lg
-
+    # puts lg
   end
 
-  it "can pull logs" do
-
+  it 'can pull logs' do
     # Limit 1 to test paging
     res = @bms.delivery_responses :success, limit: 10
     expect(res[:raw_events].length).to be == 10
@@ -142,7 +133,7 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
 
     e1 = res[:events].first
     expect(e1[:status]).to eq :success
-    mids = res[:events].map {|r| r[:message_id]}
+    mids = res[:events].map { |r| r[:message_id] }
 
     # Pull a second page
     res = @bms.delivery_responses :success, limit: 10
@@ -154,7 +145,7 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
       expect(res[:more_results]).to be true
     end
 
-    new_mids = res[:events].map {|r| r[:message_id]}
+    new_mids = res[:events].map { |r| r[:message_id] }
     expect(mids).not_to eq new_mids
 
     ev = res[:events].first
@@ -169,14 +160,12 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
     # Erroneously attempt to pull another next page
     res = @bms.delivery_responses :success, limit: 10
     expect(res).to be nil
-
   end
 
-  it "matches a delivery log to a recipient message id" do
-
+  it 'matches a delivery log to a recipient message id' do
     res = @bms.delivery_responses :success, limit: 9, next_page: false
 
-    mids = res[:events].map {|r| r[:message_id]}
+    mids = res[:events].map { |r| r[:message_id] }
     zbmsg = @bulk_master.dynamic_model__zeus_bulk_messages.create!(status: 'sent', name: 'test', channel: 'sms', message: 'message', send_date: DateTime.now, send_time: Time.now - 10.minutes)
 
     pcs = []
@@ -197,17 +186,16 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
     res[:events].each do |ev|
       r = DynamicModel::ZeusBulkMessageStatus.find_matching_recipient_by_message_id(ev[:message_id])
       expect(r.id).to eq recips[n].id
-      n+=1
+      n += 1
     end
   end
 
-  it "add status records from logged delivery events" do
-
+  it 'add status records from logged delivery events' do
     res = @bms.delivery_responses :success, limit: 9, next_page: false
-    mids = res[:events].map {|r| r[:message_id]}
+    mids = res[:events].map { |r| r[:message_id] }
 
     res = @bms.delivery_responses :failure, limit: 9, next_page: false
-    mids += res[:events].map {|r| r[:message_id]}
+    mids += res[:events].map { |r| r[:message_id] }
 
     pcs = []
     recips = []
@@ -228,8 +216,5 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
     res = DynamicModel::ZeusBulkMessageStatus.add_status_from_log limit: 9
 
     expect(res.length).to be > 0
-
-
   end
-
 end

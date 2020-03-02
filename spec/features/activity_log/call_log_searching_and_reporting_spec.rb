@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Feature: Report logged call details
 #   As a user
 #   I want to be able to report on logged call details, linking them with tracker and player information
@@ -12,17 +14,14 @@
 #   I want to be able to search calls made, received based on their status and other key information
 #   In order that I can rapidly follow up on required call backs, bad phone numbers, etc
 
-
 require 'rails_helper'
+SetupHelper.feature_setup
 
-describe "Call log searching and reporting", driver: :app_firefox_driver do
-
+describe 'Call log searching and reporting', driver: :app_firefox_driver do
   include ActivityLogMain
 
   before :all do
     setup_database
     user_logs_in
   end
-
-
 end

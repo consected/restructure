@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 require './db/table_generators/external_identifiers_table.rb'
 
@@ -6,7 +8,6 @@ RSpec.describe ExternalIdentifier, type: :model do
   include ExternalIdentifierSupport
 
   def allow_ext_id_create
-
     unless @user.has_access_to? :create, :table, @implementation_table_name
       uac = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :table, resource_name: @implementation_table_name.pluralize).first
       uac ||= Admin::UserAccessControl.create app_type: @user.app_type, resource_type: :table, resource_name: @implementation_table_name.pluralize
@@ -17,6 +18,8 @@ RSpec.describe ExternalIdentifier, type: :model do
   end
 
   before :all do
+    Seeds.setup
+
     create_admin
     create_user
     r = 'test7'
@@ -25,10 +28,9 @@ RSpec.describe ExternalIdentifier, type: :model do
     unless ActiveRecord::Base.connection.table_exists? @implementation_table_name
       TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
     end
-
   end
 
-  it "validates new configurations" do
+  it 'validates new configurations' do
     # Check if a configured item does actually exist as a usable model
     vals = list_valid_attribs.first
 
@@ -42,9 +44,9 @@ RSpec.describe ExternalIdentifier, type: :model do
     new_vals[:name] = vals[:name]
     new_vals[:disabled] = false
 
-    expect {
+    expect do
       create_item new_vals, nil, true
-    }.to raise_error(ActiveRecord::RecordInvalid)
+    end.to raise_error(ActiveRecord::RecordInvalid)
 
     # No duplicate external_id_attribute
     new_vals = list_valid_attribs.last.dup
@@ -54,13 +56,12 @@ RSpec.describe ExternalIdentifier, type: :model do
     end
     new_vals[:external_id_attribute] = vals[:external_id_attribute]
     new_vals[:disabled] = false
-    expect {
+    expect do
       create_item new_vals, nil, true
-    }.to raise_error(ActiveRecord::RecordInvalid)
-
+    end.to raise_error(ActiveRecord::RecordInvalid)
   end
 
-  it "has an implementation class for a created external model" do
+  it 'has an implementation class for a created external model' do
     ExternalIdentifier.active.each do |e|
       e.disabled = true
       e.current_admin = @admin
@@ -86,9 +87,9 @@ RSpec.describe ExternalIdentifier, type: :model do
 
     expect(@user.app_type_id).not_to be nil
     allow_ext_id_create
-    expect(@user.has_access_to? :create, :table, @implementation_table_name).to be_truthy
+    expect(@user.has_access_to?(:create, :table, @implementation_table_name)).to be_truthy
 
-    eid = rand(9999999)
+    eid = rand(9_999_999)
     m.current_user = @user
     res = c.new(c.external_id_attribute => eid, master: m)
 
@@ -101,10 +102,9 @@ RSpec.describe ExternalIdentifier, type: :model do
     res = c.new(c.external_id_attribute => -1, master: m)
 
     expect(res.save).to be false
-
   end
 
-  it "allows player records to referenced using the external ID" do
+  it 'allows player records to referenced using the external ID' do
     ExternalIdentifier.active.each do |e|
       e.disabled = true
       e.current_admin = @admin
@@ -122,7 +122,7 @@ RSpec.describe ExternalIdentifier, type: :model do
     # Create an external identifier ID record
     allow_ext_id_create
     c = e.implementation_class
-    eid = rand(9999999)
+    eid = rand(9_999_999)
     m.current_user = @user
     res = c.new(c.external_id_attribute => eid, master: m)
     res.save
@@ -131,22 +131,16 @@ RSpec.describe ExternalIdentifier, type: :model do
     # Attempt to find the master
     found = Master.find_with_alternative_id(vals[:external_id_attribute], eid)
     expect(found).to eq m
-
-
-
   end
 
-  it "creates an external ID automatically" do
+  it 'creates an external ID automatically' do
     create_master
 
     expect(SageAssignment.definition.pregenerate_ids).to be true
 
     SageAssignment.generate_ids(@admin, 100)
 
-
     res = @master.sage_assignments.create!
     expect(res.sage_id).not_to be blank?
-
   end
-
 end

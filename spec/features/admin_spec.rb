@@ -1,13 +1,16 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-describe "admin sign in process", driver: :app_firefox_driver do
+SetupHelper.feature_setup
 
+describe 'admin sign in process', driver: :app_firefox_driver do
   include ModelSupport
 
   def make_an_admin
-    ENV['FPHS_ADMIN_SETUP']='yes'
+    ENV['FPHS_ADMIN_SETUP'] = 'yes'
 
-    @good_email = "testuser#{rand(1000000000)}admin@testing.com"
+    @good_email = "testuser#{rand(1_000_000_000)}admin@testing.com"
     @admin = Admin.create! email: @good_email
     # Save a new password, as required to handle temp passwords
     @admin = Admin.find(@admin.id)
@@ -18,18 +21,15 @@ describe "admin sign in process", driver: :app_firefox_driver do
     @admin.new_two_factor_auth_code = false
     @admin.save!
 
-
     @good_password
   end
 
   before(:all) do
-    ENV['FPHS_ADMIN_SETUP']='yes'
+    ENV['FPHS_ADMIN_SETUP'] = 'yes'
 
     Admin.transaction do
-
-      #create an admin that has been disabled
-      @d_email = "testuserdis#{rand(1000000000)}admin@testing.com"
-
+      # create an admin that has been disabled
+      @d_email = "testuserdis#{rand(1_000_000_000)}admin@testing.com"
 
       @d_admin = Admin.create email: @d_email
 
@@ -51,10 +51,8 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
       make_an_admin
 
-
-      @final_good_email = "test-final#{rand(1000000000)}admin@testing.com"
+      @final_good_email = "test-final#{rand(1_000_000_000)}admin@testing.com"
       @final_admin = Admin.create! email: @final_good_email
-
 
       @final_admin = Admin.find(@final_admin.id)
       @final_good_password = @final_admin.generate_password
@@ -63,27 +61,22 @@ describe "admin sign in process", driver: :app_firefox_driver do
       @final_admin.new_two_factor_auth_code = false
       @final_admin.save!
       @final_admin = Admin.find(@final_admin.id)
-
     end
-
   end
 
-
   it "won't show the admin page unless using a secure URL param" do
-    visit "/admins/sign_in"
+    visit '/admins/sign_in'
     expect(current_path).to eq '/users/sign_in'
   end
 
-
-  it "should sign in" do
-
+  it 'should sign in' do
     admin = Admin.where(email: @good_email).first
     expect(admin).to be_a Admin
     expect(admin.id).to equal @admin.id
 
     url = "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     visit url
-    expect(current_path).to eq "/admins/sign_in"
+    expect(current_path).to eq '/admins/sign_in'
 
     within '#new_admin' do
       expect(@admin.email).to eq @good_email
@@ -91,61 +84,56 @@ describe "admin sign in process", driver: :app_firefox_driver do
       # Do not validate, since this consumes the one time code and prevents it from being used (causes a long delay in the process)
       # expect(@admin.validate_one_time_code(@admin.current_otp)).to be true
 
-      fill_in "Email", with: @good_email
-      fill_in "Password", with: @good_password
-      fill_in "Two-Factor Authentication Code", with: @admin.current_otp
+      fill_in 'Email', with: @good_email
+      fill_in 'Password', with: @good_password
+      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
 
-      click_button "Log in"
+      click_button 'Log in'
     end
-    expect(page).to have_css( ".flash .alert", text: "× Signed in successfully")
-
+    expect(page).to have_css('.flash .alert', text: '× Signed in successfully')
   end
 
-  it "should prevent invalid sign in" do
-
+  it 'should prevent invalid sign in' do
     admin = Admin.where(email: @good_email).first
     expect(admin).to be_a Admin
     expect(admin.id).to equal @admin.id
 
-    #login_as @user, scope: :user
+    # login_as @user, scope: :user
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
-      fill_in "Email", with: @good_email
-      fill_in "Password", with: ""
-      fill_in "Two-Factor Authentication Code", with: @admin.current_otp
-      click_button "Log in"
+      fill_in 'Email', with: @good_email
+      fill_in 'Password', with: ''
+      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
+      click_button 'Log in'
     end
 
-    expect(page).to have_css "input:invalid"
+    expect(page).to have_css 'input:invalid'
 
     # make a new admin to avoid lockout
     # make_an_admin
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
-      fill_in "Email", with: @good_email
-      fill_in "Password", with: @good_password + ' '
-      fill_in "Two-Factor Authentication Code", with: @admin.current_otp
-      click_button "Log in"
+      fill_in 'Email', with: @good_email
+      fill_in 'Password', with: @good_password + ' '
+      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
+      click_button 'Log in'
     end
 
-    fail_message = "× Invalid email, password or two-factor authentication code."
+    fail_message = '× Invalid email, password or two-factor authentication code.'
 
-    expect(page).to have_css ".flash .alert", text: fail_message
-
-
-
+    expect(page).to have_css '.flash .alert', text: fail_message
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
-      fill_in "Email", with: @final_good_email
-      fill_in "Password", with: ' ' + @final_good_password
-      fill_in "Two-Factor Authentication Code", with: @final_admin.current_otp
-      click_button "Log in"
+      fill_in 'Email', with: @final_good_email
+      fill_in 'Password', with: ' ' + @final_good_password
+      fill_in 'Two-Factor Authentication Code', with: @final_admin.current_otp
+      click_button 'Log in'
     end
 
-    expect(page).to have_css ".flash .alert", text: fail_message
+    expect(page).to have_css '.flash .alert', text: fail_message
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
 
@@ -155,41 +143,35 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
     # visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
-      fill_in "Email", with: @final_good_email
-      fill_in "Password", with: @final_good_password
-      fill_in "Two-Factor Authentication Code", with: @final_admin.current_otp
-      click_button "Log in"
+      fill_in 'Email', with: @final_good_email
+      fill_in 'Password', with: @final_good_password
+      fill_in 'Two-Factor Authentication Code', with: @final_admin.current_otp
+      click_button 'Log in'
     end
-    have_css ".flash .alert"
+    have_css '.flash .alert'
 
-    fa = all(".flash .alert")[0]
+    fa = all('.flash .alert')[0]
     if fa
-      just_signed_in = (fa.text == "× Signed in successfully.")
+      just_signed_in = (fa.text == '× Signed in successfully.')
       puts fa.text unless just_signed_in
     end
 
     expect(just_signed_in).to be true
-
   end
 
-  it "should prevent sign in if admin disabled" do
-
-
-
+  it 'should prevent sign in if admin disabled' do
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
-      fill_in "Email", with: @d_email
-      fill_in "Password", with: @d_pw
-      fill_in "Two-Factor Authentication Code", with: @d_admin.current_otp
-      click_button "Log in"
+      fill_in 'Email', with: @d_email
+      fill_in 'Password', with: @d_pw
+      fill_in 'Two-Factor Authentication Code', with: @d_admin.current_otp
+      click_button 'Log in'
     end
 
-    expect(page).to have_css ".flash .alert"
-
+    expect(page).to have_css '.flash .alert'
   end
 
-
   after(:all) do
-    #@admin.destroy!
+    # @admin.destroy!
   end
 end

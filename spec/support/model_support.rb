@@ -1,34 +1,37 @@
+# frozen_string_literal: true
+
 require "#{::Rails.root}/spec/support/seed_support"
+require "#{::Rails.root}/spec/support/user_support"
+
 module ModelSupport
+  include ::UserSupport
 
   UserPrefix = 'g-ttuser-'
   UserDomain = 'testing.com'
 
   def seed_database
-    Rails.logger.info "NOT Starting seed setup"
-    # SeedSupport.setup
+    Rails.logger.info 'NOT Starting seed setup'
+    SeedSupport.setup
   end
 
-  def gen_username r
+  def db_name
+    "fpa_test#{ENV['TEST_ENV_NUMBER']}"
+  end
 
+  def gen_username(r)
     "#{UserPrefix}#{r}@#{UserDomain}"
   end
 
-  def pick_one_from objs
+  def pick_one_from(objs)
     objs[rand objs.length]
   end
 
-  def create_user r=nil, extra='', opt={}
-
-    unless r
-      r = Time.new.to_f.to_s
-    end
+  def create_user(r = nil, extra = '', opt = {})
+    r ||= Time.new.to_f.to_s
     good_email = gen_username("#{r}-#{extra}-")
 
-
-    admin, _ = create_admin
+    admin, = create_admin
     user = User.create! email: good_email, current_admin: admin, first_name: "fn#{r}", last_name: "ln#{r}"
-
 
     # Save a new password, as required to handle temp passwords
     user = User.find(user.id)
@@ -42,7 +45,8 @@ module ModelSupport
     user = User.find(user.id)
 
     app_type = Admin::AppType.active.first
-    raise "No active app type!" unless app_type
+    raise 'No active app type!' unless app_type
+
     unless opt[:no_app_type_setup]
       Admin::UserAccessControl.create! user: user, app_type: app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: admin
     end
@@ -50,7 +54,6 @@ module ModelSupport
     # Set a default app_type to use to allow non-interactive tests to continue
     user.app_type = app_type
     user.save!
-
 
     if opt[:create_master]
       Admin::UserAccessControl.create! app_type_id: app_type.id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: user
@@ -61,8 +64,7 @@ module ModelSupport
     [user, good_password]
   end
 
-  def create_admin  r=nil
-
+  def self.create_admin(r = nil)
     a = Admin.order(id: :desc).first
     unless r
       r = 1
@@ -82,49 +84,52 @@ module ModelSupport
 
     # # Can't reload, as that doesn't clear non-db attributes
     admin = Admin.find(admin.id)
+    [admin, good_admin_password]
+  end
 
+  def create_admin(r = nil)
+    admin, good_admin_password = ModelSupport.create_admin(r)
     @admin = admin
     [admin, good_admin_password]
   end
 
-  def create_user_role role_name, user: nil, app_type: nil
+  def create_user_role(role_name, user: nil, app_type: nil)
     user ||= @user
     app_type ||= user.app_type
     Admin::UserRole.create! current_admin: @admin, app_type: app_type, role_name: role_name, user: user
   end
 
-  def create_app_type name: nil, label: nil
+  def create_app_type(name: nil, label: nil)
     Admin::AppType.create! current_admin: @admin, name: name, label: label
   end
 
-  def let_user_create_player_infos in_app_type: nil
+  def let_user_create_player_infos(in_app_type: nil)
     let_user_create :player_infos, in_app_type: in_app_type
   end
 
-  def let_user_create_player_contacts in_app_type: nil
+  def let_user_create_player_contacts(in_app_type: nil)
     let_user_create :player_contacts, in_app_type: in_app_type
   end
 
-  def let_user_create resource_name, in_app_type: nil
+  def let_user_create(resource_name, in_app_type: nil)
     res = @user.has_access_to? :access, :table, resource_name
     if res && res.user_id == @user.id
       res.disabled = true
       res.current_admin = @admin
       res.save!
-    # else
+      # else
     end
 
     in_app_type ||= @user.app_type
     if in_app_type
       Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: @user, access: :create, resource_type: :table, resource_name: resource_name
     end
-
   end
 
-  def add_app_config app_type, name, value, user: nil, role_name: nil
+  def add_app_config(app_type, name, value, user: nil, role_name: nil)
     @admin ||= create_admin
 
-    cond = {name: name}
+    cond = { name: name }
     cond[:role_name] = role_name if role_name
     cond[:user] = user if user
 
@@ -136,45 +141,8 @@ module ModelSupport
       cond = cond.merge(current_admin: @admin, app_type: app_type, value: value)
       Admin::AppConfiguration.create! cond
     end
-
   end
 
-  def import_test_app
-    @admin, _ = create_admin unless @admin
-    # Setup the triggers, functions, etc
-    files = %w(1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 6-grant_roles_access_to_ml_app.sql create_adders_table.sql)
-
-    eis = ExternalIdentifier.active.where(name: 'bhs_assignments').order(id: :desc)
-    if eis.count != 1
-      eis.where("id <> ?", eis.first&.id).update_all(disabled: true)
-    end
-
-    i = ExternalIdentifier.active.where(name: 'bhs_assignments').order(id: :desc).first
-    i.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin if i
-    Master.reset_external_id_matching_fields!
-
-    als = ActivityLog.active.where(name: 'BHS Tracker')
-    if als.count != 1
-      als.where("id <> ?", als.first&.id).update_all(disabled: true)
-    end
-
-
-    files.each do |fn|
-      begin
-        sqlfn = Rails.root.join('docs', 'config_tests', fn)
-        puts "Running psql: #{sqlfn}"
-        `PGOPTIONS=--search_path=ml_app psql -d fpa_test < #{sqlfn}  2>&1`
-      rescue ActiveRecord::StatementInvalid => e
-        puts "Exception due to PG error?... #{e}"
-      end
-    end
-
-    config = File.read Rails.root.join('docs/config_tests/bhs_app_type_test_config.json')
-
-    Admin::AppType.import_config(config, @admin)
-    new_app_type = Admin::AppType.where(name: 'bhs').active.first
-    Admin::UserAccessControl.active.where(app_type_id: new_app_type.id, resource_type: [:external_id_assignments, :limited_access]).update_all(disabled: true)
-    new_app_type
-  end
-
+  # Force a database seed at config time, to avoid issues later
+  SeedSupport.setup
 end

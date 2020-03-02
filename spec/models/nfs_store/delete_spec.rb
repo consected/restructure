@@ -13,6 +13,8 @@ RSpec.describe "Delete stored files", type: :model do
 
   before :all do
     setup_nfs_store
+
+    @activity_log = @container.parent_item
   end
 
   it "delete a stored file from a container" do
@@ -78,6 +80,12 @@ RSpec.describe "Delete stored files", type: :model do
 
       }
     }
+
+    al = @activity_log
+    expect(al).to be_a ActivityLog::PlayerContactPhone
+    expect(al.model_references.length).to eq 1
+
+    setup_access al.resource_name, resource_type: :activity_log_type, user: @user
 
     f = create_filter('.*', resource_name: 'nfs_store__manage__containers', role_name: nil)
     create_filter('.*', resource_name: 'activity_log__player_contact_phones', role_name: nil)

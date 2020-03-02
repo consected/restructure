@@ -28,6 +28,9 @@ class ExternalIdentifier < ActiveRecord::Base
     return e.implementation_class
   end
 
+  def resource_name
+    name
+  end
 
   def table_name
     name

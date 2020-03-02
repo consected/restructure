@@ -28,6 +28,10 @@ RSpec.describe 'Alternative ID implementation', type: :model do
 
   it "creates an item based on an alternative ID, linking it to the master automatically" do
 
+    expect(defined?(ExternalIdentifier::Scantron)).to be_truthy
+    expect(Master.alternative_id_fields).to include :scantron_id
+    expect(PlayerContact.new).to respond_to 'scantron_id='
+
     att = valid_attribs.dup
 
     att[:scantron_id] = @sid

@@ -87,7 +87,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
   def self.resource_names_for resource_type
     if resource_type == :table
-      return (Master.get_all_associations + ['item_flags'] + ActivityLog.active.map(&:full_item_types_name) + DynamicModel.active.map(&:full_item_types_name) + ExternalIdentifier.active.map(&:name)).uniq
+      return (Master.get_all_associations + ['item_flags'] + ActivityLog.active.map(&:resource_name) + DynamicModel.active.map(&:resource_name) + ExternalIdentifier.active.map(&:resource_name)).uniq
     elsif resource_type == :general
       return [
         'app_type', 'create_master',
@@ -97,7 +97,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
         'view_dashboards'
       ]
     elsif resource_type == :external_id_assignments || resource_type == :limited_access
-      return ExternalIdentifier.active.map(&:name) + DynamicModel.active.map(&:full_item_types_name)
+      return ExternalIdentifier.active.map(&:resource_name) + DynamicModel.active.map(&:resource_name)
     elsif resource_type == :report
       return Report.active.map(&:alt_resource_name) + Report.active.map(&:name) + ['_all_reports_']
     elsif resource_type == :activity_log_type

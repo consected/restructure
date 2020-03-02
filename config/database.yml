@@ -21,7 +21,7 @@ development:
 # Do not set this db to the same as development or production.
 test: &test
   <<: *default
-  database: fpa_test
+  database: fpa_test<%= ENV['TEST_ENV_NUMBER'] %>
   schema_search_path: 'ml_app,ipa_ops,testmybrain,persnet,bulk_msg'
 
 production:
@@ -29,3 +29,9 @@ production:
 
 cucumber:
   <<: *test
+
+ipa_test:
+  <<: *default
+  username: fphs
+  database: fpa_ipa_test
+  schema_search_path: 'ml_app,ipa_ops'

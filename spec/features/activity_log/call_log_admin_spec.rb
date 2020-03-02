@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Feature: Set up activity logs for record types
 # As an administrator
 # I want to set up a new activity log for a record type belonging to a master record
@@ -20,17 +22,14 @@
 #
 #
 
-
 require 'rails_helper'
+SetupHelper.feature_setup
 
-describe "Call log admin", driver: :app_firefox_driver do
-
+describe 'Call log admin', driver: :app_firefox_driver do
   include ActivityLogMain
 
   before :all do
     setup_database
     user_logs_in
   end
-
-
 end

@@ -1,25 +1,24 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-RSpec.describe NfsStore::Filter::Filter, type: :model do
+SetupHelper.setup_test_app
 
+RSpec.describe NfsStore::Filter::Filter, type: :model do
   include PlayerContactSupport
   include ModelSupport
   include NfsStoreSupport
 
   before :all do
-    import_test_app
     setup_nfs_store
 
     res = defined? BhsAssignment
     expect(res).to be_truthy
 
-
+    @activity_log = @container.parent_item
   end
 
-
-
-  it "creates filters for a user and role" do
-
+  it 'creates filters for a user and role' do
     f = create_filter('^contabc', resource_name: 'nfs_store__manage__containers')
     expect(f).to be_a NfsStore::Filter::Filter
 
@@ -27,7 +26,6 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     expect(f).to be_a NfsStore::Filter::Filter
 
     f = create_filter('^contdef', role_name: 'non user role', resource_name: 'nfs_store__manage__containers')
-
 
     fs = NfsStore::Filter::Filter.filters_for @container
 
@@ -38,13 +36,9 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     fs = NfsStore::Filter::Filter.filters_for @container
 
     expect(fs.length).to eq 3
-
-
-
   end
 
-  it "creates filters for a user and role in activity log" do
-
+  it 'creates filters for a user and role in activity log' do
     f = create_filter('^abc')
     expect(f).to be_a NfsStore::Filter::Filter
 
@@ -52,7 +46,6 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     expect(f).to be_a NfsStore::Filter::Filter
 
     f = create_filter('^def', role_name: 'non user role')
-
 
     fs = NfsStore::Filter::Filter.filters_for @activity_log
 
@@ -63,13 +56,9 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     fs = NfsStore::Filter::Filter.filters_for @activity_log
 
     expect(fs.length).to eq 3
-
-
-
   end
 
-  it "applies filters for the current user to container" do
-
+  it 'applies filters for the current user to container' do
     create_stored_file '.', 'not_abc_ is a test'
     create_stored_file '.', 'abc_ is a test'
 
@@ -87,7 +76,6 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     f = create_filter('^/ghi')
     f = create_filter('^/id\/{{id}} - id file')
 
-
     res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
     expect(res.length).to eq 1
     expect(res.first.file_name).to eq 'abc_ is a test'
@@ -103,16 +91,13 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     expect(res.last.file_name).to eq 'abc_ is a test2'
 
     create_stored_file 'id', "#{@activity_log.id} - id file"
-    create_stored_file 'id', "000100 - id file"
+    create_stored_file 'id', '000100 - id file'
     res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
     expect(res.length).to eq 3
     expect(res.first.file_name).to eq "#{@activity_log.id} - id file"
-
-
   end
 
-  it "generates SQL to filter reports" do
-
+  it 'generates SQL to filter reports' do
     f = create_filter('^/fabc')
     f = create_filter('^fdir\/')
     f = create_filter('^/fghi')
@@ -123,7 +108,5 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
 
     expect(fs.length).to be > 10
     expect(fs).to include 'fid\/.+ - id file'
-
   end
-
 end

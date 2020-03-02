@@ -18,6 +18,8 @@ RSpec.describe PlayerContact, type: :model do
       seed_database
       create_user
       create_master
+
+      Seeds::GeneralSelections.create_player_contacts_source
     end
 
     it "requires data to be entered" do
@@ -127,7 +129,7 @@ RSpec.describe PlayerContact, type: :model do
 
     it "validates correct source" do
 
-      gs = Classification::GeneralSelection.where(item_type: 'player_contacts_source').where('disabled is null OR disabled = true')
+      gs = Classification::GeneralSelection.active.where(item_type: 'player_contacts_source')
 
       expect(gs.length).to be > 0
       expect(gs.first.value).to_not be_nil

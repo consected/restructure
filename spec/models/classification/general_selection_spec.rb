@@ -1,4 +1,8 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
+
+SetupHelper.setup_test_app
 
 RSpec.describe Classification::GeneralSelection, type: :model do
   include ModelSupport
@@ -6,15 +10,14 @@ RSpec.describe Classification::GeneralSelection, type: :model do
 
   before :each do
     seed_database
-    import_test_app
-    create_user
     create_admin
+    create_user
+    
     create_master
     create_items :list_valid_attribs
   end
 
-  it "gets active general selection configurations" do
-
+  it 'gets active general selection configurations' do
     expect(@list.length).to eq 10
 
     l = Classification::GeneralSelection.active.length
@@ -22,17 +25,15 @@ RSpec.describe Classification::GeneralSelection, type: :model do
 
     res = Classification::GeneralSelection.selector_with_config_overrides
     expect(res.length).to be >= l
-
   end
 
-  it "overrides general selection configurations with dynamic model alt_options" do
-
+  it 'overrides general selection configurations with dynamic model alt_options' do
     config0 = Classification::GeneralSelection.selector_with_config_overrides
 
     ::ActivityLog.define_models
     @activity_log = al = ActivityLog.enabled.first
 
-    al.extra_log_types =<<EOF
+    al.extra_log_types = <<EOF
     step_1:
       label: Step 1
       fields:
@@ -64,10 +65,18 @@ EOF
 
     config2 = Classification::GeneralSelection.selector_with_config_overrides extra_log_type: 'step_1', item_type: al.item_type
     expect(config2.length).not_to eq config1.length
-
-
   end
 
+  it 'prevents duplicate entries with the same value in an item type' do
+    g = Classification::GeneralSelection.new item_type: 'player_contacts_type', name: 'Not Email', value: 'not email', current_admin: @admin
+    expect(g.already_taken(:item_type, :value)).to be false
 
+    expect(g.save).to be true
 
+    g = Classification::GeneralSelection.new item_type: 'player_contacts_type', name: 'Email', value: 'email', current_admin: @admin
+    expect(g.already_taken(:item_type, :value)).to be true
+
+    expect(g.save).to be false
+    expect(g.errors.keys).to include :duplicated
+  end
 end

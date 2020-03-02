@@ -1,5 +1,7 @@
 require 'rails_helper'
 
+SetupHelper.setup_al_player_contact_phones
+
 RSpec.describe SaveTriggers::Notify, type: :model do
 
   include ModelSupport
@@ -14,6 +16,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     let_user_create :player_contacts
     create_master
     @al = create_item
+    setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
 
     # @activity_log = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player', select_who: 'user', master: @player_contact.master)
 
@@ -109,8 +112,16 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     @al.extra_log_type_config.clean_references_def
     @al.extra_log_type_config.editable_if = {always: true}
 
-    ModelReference.create_with @al, @al1
-    ModelReference.create_with @al, @al2
+    setup_access @al.resource_name, resource_type: :table, access: :create, user: @user
+    setup_access @al.extra_log_type_config.resource_name, resource_type: :activity_log_type, access: :create, user: @user
+
+    begin
+      ModelReference.create_with @al, @al1
+      ModelReference.create_with @al, @al2
+    rescue ActiveRecord::RecordInvalid => e
+      puts e
+      byebug
+    end
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}} in id {{id}}. This is a name: {{select_who}}.</p><p>{{extra_substitutions.extra_text}}</p>'
     @content_extra = Admin::MessageTemplate.create! name: 'test email content extra', message_type: :email, template_type: :content, template: t, current_admin: @admin

@@ -156,6 +156,11 @@ module ActivityLogHandler
     :activity_log
   end
 
+  # resource_name used by user access controls
+  def resource_name
+    self.class.definition.resource_name
+  end
+
   def human_name
     return extra_log_type_config.label if extra_log_type_config.label.present?
     return extra_log_type.to_s.humanize

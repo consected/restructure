@@ -1,5 +1,6 @@
-module DynamicModelDefHandler
+# frozen_string_literal: true
 
+module DynamicModelDefHandler
   extend ActiveSupport::Concern
 
   included do
@@ -11,10 +12,10 @@ module DynamicModelDefHandler
     after_save :add_user_access_controls, if: -> { @regenerate }
     after_commit :update_tracker_events, if: -> { @regenerate }
     after_commit :restart_server, if: -> { @regenerate }
+    after_commit :other_regenerate_actions
   end
 
   class_methods do
-
     def implementation_prefix
       nil
     end
@@ -24,12 +25,12 @@ module DynamicModelDefHandler
       @model_names ||= []
     end
 
-    def model_names= m
+    def model_names=(m)
       @model_names = m
     end
 
     def model_name_strings
-      model_names.map {|m| m.to_s}
+      model_names.map(&:to_s)
     end
 
     def models
@@ -41,38 +42,36 @@ module DynamicModelDefHandler
     end
 
     def active_model_configurations
-
       olat = Admin::AppType.active_app_types
 
-      if olat && olat.length > 0
+      if olat && !olat.empty?
         dma = []
         qs = []
         olat.each do |app_type|
           # Compare against string class names, to avoid autoload errors
-          if self.name == 'ActivityLog'
+          if name == 'ActivityLog'
             qs << app_type.associated_activity_logs.reorder('').to_sql
-          elsif self.name == 'DynamicModel'
+          elsif name == 'DynamicModel'
             qs << app_type.associated_dynamic_models(valid_resources_only: false).reorder('').to_sql
-          elsif self.name == 'ExternalIdentifier'
+          elsif name == 'ExternalIdentifier'
             qs << app_type.associated_external_identifiers.reorder('').to_sql
           end
         end
         unions = qs.join("\nUNION\n")
-        dma = from("(#{unions}) AS #{self.table_name}")
+        dma = from("(#{unions}) AS #{table_name}")
       else
-        dma = self.active
+        dma = active
       end
       dma
     end
 
     def define_models
-      self.preload
+      preload
 
       begin
-
         dma = active_model_configurations
 
-        logger.info "Generating models #{self.name} #{self.active.length}"
+        logger.info "Generating models #{name} #{active.length}"
 
         dma.each do |dm|
           res = dm.generate_model
@@ -80,99 +79,103 @@ module DynamicModelDefHandler
           # It is expected that this is mostly when originally seeding the database
           dm.current_admin ||= dm.admin
 
-          dm.update_tracker_events if res
+          dm.update_tracker_events
         end
       rescue Exception => e
         Rails.logger.warn "Failed to generate models. Hopefully this is only during a migration. #{e.inspect}"
         puts "Failed to generate models. Hopefully this is only during a migration. #{e.inspect}"
       end
-
     end
 
     def routes_reload
       return unless @regenerate
+
       Rails.application.reload_routes!
       Rails.application.routes_reloader.reload!
     end
 
-
     def enable_active_configurations
       # to ensure that the db migrations can run, check for the existence of the admin table
       # before attempting to use it. Otherwise Rake tasks fail.
-      if ActiveRecord::Base.connection.table_exists? self.table_name
+      if ActiveRecord::Base.connection.table_exists? table_name
         active_model_configurations.each do |dm|
-          if dm.is_a? ExternalIdentifier
-            klass = Object
+          klass = if dm.is_a? ExternalIdentifier
+                    Object
+                  else
+                    dm.class.name.constantize
+                  end
+
+          if !dm.disabled && dm.ready? && dm.implementation_class_defined?(klass, fail_without_exception: true)
+            dm.add_master_association
           else
-            klass = dm.class.name.constantize
+            puts "Failed to enable #{dm}"
+            Rails.logger.warn "Failed to enable #{dm}"
           end
-          dm.add_master_association if !dm.disabled && dm.ready? && dm.implementation_class_defined?(klass, fail_without_exception: true)
         end
       else
-        puts "Table doesn't exist yet: #{self.table_name}"
+        puts "Table doesn't exist yet: #{table_name}"
       end
     end
-
   end
 
+  def is_active_model_configuration?
+    self.class.active_model_configurations.include? self
+  end
 
-  def implementation_controller_defined? parent_class=Module
+  def implementation_controller_defined?(parent_class = Module)
     return false unless full_implementation_controller_name
 
     # Check that the class is defined
     klass = parent_class.const_get(full_implementation_controller_name)
     res = klass.is_a?(Class)
-    return res
+    res
   rescue NameError
-    return false
+    false
   end
 
-  def implementation_class_defined? parent_class=Module, opt={}
-      icn = opt[:class_name] || full_implementation_class_name
-      return false unless icn
-      # Check that the class is defined
-      klass = parent_class.const_get(icn)
-      res = klass.is_a?(Class)
+  def implementation_class_defined?(parent_class = Module, opt = {})
+    icn = opt[:class_name] || full_implementation_class_name
+    return false unless icn
 
-      return false unless res
+    # Check that the class is defined
+    klass = parent_class.const_get(icn)
+    res = klass.is_a?(Class)
 
-      begin
-        # Check if it can be instantiated correctly - if it can't, allow it to raise an exception
-        # since this is seriously unexpected
-        klass.new
-      rescue Exception => e
-        err  = "Failed to instantiate the class #{icn} in parent #{parent_class}: #{e}"
-        if opt[:fail_without_exception]
-          # By default, return false if an error occurred attempting the initialization.
-          # In certain cases (for example, checking if a class exists so it can be removed), returning true if the
-          # class is defined regardless of whether it can be initialized makes most sense. Provide an option to support this.
-          return opt[:fail_without_exception_newable_result]
-        else
-          raise FphsException.new err
-        end
+    return false unless res
+
+    begin
+      # Check if it can be instantiated correctly - if it can't, allow it to raise an exception
+      # since this is seriously unexpected
+      klass.new
+    rescue Exception => e
+      err = "Failed to instantiate the class #{icn} in parent #{parent_class}: #{e}"
+      if opt[:fail_without_exception]
+        # By default, return false if an error occurred attempting the initialization.
+        # In certain cases (for example, checking if a class exists so it can be removed), returning true if the
+        # class is defined regardless of whether it can be initialized makes most sense. Provide an option to support this.
+        return opt[:fail_without_exception_newable_result]
+      else
+        raise FphsException, err
       end
-
-    rescue NameError
-      return false
+    end
+  rescue NameError
+    false
   end
 
   def prevent_regenerate_model
-
-    got_class = full_implementation_class_name.constantize rescue nil
-    if got_class && got_class.to_s.start_with?(self.class.implementation_prefix)
-      got_class
-    else
-      nil
-    end
+    got_class = begin
+                  full_implementation_class_name.constantize
+                rescue StandardError
+                  nil
+                end
+    got_class if got_class&.to_s&.start_with?(self.class.implementation_prefix)
   end
 
   def ready?
-    begin
-      return ActiveRecord::Base.connection.table_exists?(self.table_name)
-    rescue => e
-      puts e
-      return false
-    end
+    ActiveRecord::Base.connection.table_exists?(table_name)
+  rescue StandardError => e
+    puts e
+    false
   end
 
   # This needs to be overridden in each provider to allow consistency of calculating model names for implementations
@@ -192,7 +195,6 @@ module DynamicModelDefHandler
     self.class.models[model_def_name]
   end
 
-
   def model_data_template_name
     model_association_name.to_s.hyphenate
   end
@@ -204,7 +206,7 @@ module DynamicModelDefHandler
   # Full namespaced item type name, underscored with double underscores
   # If there is no prefix then this matches the simple model name
   def full_item_type_name
-    prefix = ""
+    prefix = ''
     if self.class.implementation_prefix.present?
       prefix = "#{self.class.implementation_prefix.ns_underscore}__"
     end
@@ -217,7 +219,6 @@ module DynamicModelDefHandler
     full_item_type_name.pluralize
   end
 
-
   def full_implementation_class_name
     full_item_type_name.ns_camelize
   end
@@ -226,22 +227,21 @@ module DynamicModelDefHandler
     "#{model_class_name.pluralize}Controller"
   end
 
-
   def implementation_class
     full_implementation_class_name.ns_constantize
   end
 
   def update_tracker_events
-    raise "DynamicModel configuration implementation must define update_tracker_events"
+    raise 'DynamicModel configuration implementation must define update_tracker_events'
   end
 
-  def add_model_to_list m
+  def other_regenerate_actions; end
+
+  def add_model_to_list(m)
     tn = model_def_name
     self.class.models[tn] = m
     logger.info "Added new model #{tn}"
-    unless self.class.model_names.include? tn
-      self.class.model_names << tn
-    end
+    self.class.model_names << tn unless self.class.model_names.include? tn
   end
 
   def remove_model_from_list
@@ -251,36 +251,34 @@ module DynamicModelDefHandler
     self.class.model_names -= [tn]
   end
 
-  def remove_assoc_class in_class_name
+  def remove_assoc_class(in_class_name)
     # Dump the old association
-    begin
-      assoc_ext_name = "#{in_class_name}#{model_class_name.pluralize}AssociationExtension"
-      Object.send(:remove_const, assoc_ext_name) if implementation_class_defined?(Object)
-    rescue => e
-      logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
-      # puts "Failed to remove #{assoc_ext_name} : #{e}"
+
+    assoc_ext_name = "#{in_class_name}#{model_class_name.pluralize}AssociationExtension"
+    if implementation_class_defined?(Object)
+      Object.send(:remove_const, assoc_ext_name)
     end
+  rescue StandardError => e
+    logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
+    # puts "Failed to remove #{assoc_ext_name} : #{e}"
   end
 
-
   def reload_routes
-
     self.class.routes_reload
   end
 
-  def add_user_access_controls
-
-    if !persisted? || disabled_changed?
+  def add_user_access_controls(force: false, app_type: nil)
+    if !persisted? || disabled_changed? || force
       begin
-        if ready? || disabled?
+        if ready? || disabled? || force
+          app_type ||= admin.matching_user_app_type
           # Admin::UserAccessControl.create_control_for_all_apps admin, :table, model_association_name, disabled: disabled
-          Admin::UserAccessControl.create_template_control admin, admin.matching_user_app_type, :table, model_association_name, disabled: disabled
+          Admin::UserAccessControl.create_template_control admin, app_type, :table, model_association_name, disabled: disabled
         end
-      rescue => e
-        raise FphsException.new "A failure occurred creating user access control for all apps with: #{model_association_name}.\n#{e}"
+      rescue StandardError => e
+        raise FphsException, "A failure occurred creating user access control for all apps with: #{model_association_name}.\n#{e}"
       end
     end
-
   end
 
   def check_implementation_class
@@ -296,24 +294,24 @@ module DynamicModelDefHandler
         "
         # errors.add :name, err
         # Force exit of callbacks
-        raise  FphsException.new err
+        raise FphsException, err
       end
 
       begin
-        res =  implementation_class_defined?
+        res = implementation_class_defined?
       rescue Exception => e
         err = "Failed to instantiate the class #{full_implementation_class_name}: #{e}"
         logger.warn err
         errors.add :name, err
         # Force exit of callbacks
-        raise FphsException.new err
+        raise FphsException, err
       end
       unless res
         err = "The implementation of #{model_class_name} was not completed although the DB table #{table_name} has been created."
         logger.warn err
         errors.add :name, err
         # Force exit of callbacks
-        raise FphsException.new err
+        raise FphsException, err
       end
     end
   end
@@ -321,5 +319,4 @@ module DynamicModelDefHandler
   def restart_server
     AppControl.restart_server
   end
-
 end

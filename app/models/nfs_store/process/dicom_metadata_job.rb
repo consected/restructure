@@ -24,7 +24,7 @@ module NfsStore
       def perform(container_file)
 
 
-        puts "Extracting DICOM metadata for #{container_file}"
+        log "Extracting DICOM metadata for #{container_file}"
 
         if container_file.is_archive?
           container_file.current_user = container_file.user

@@ -105,9 +105,19 @@ module AdminHandler
 
 
   # Check if a specific attribute value has already been used in an active definition
-  # @return [true | false] 
-  def already_taken attr
-    !!self.class.active.where(attr => self[attr.to_s]).where("id <> ?", self.id).first
+  # @param *attrs any number of attributes to compare against
+  # @return [true | false]
+  def already_taken *attrs
+
+    comp = {}
+    attrs.each do |a|
+      comp[a] = self[a.to_s]
+    end
+
+    res = self.class.active.where(comp)
+    res = res.where("id <> ?", self.id) if id
+
+    !!res.first
   end
 
 end

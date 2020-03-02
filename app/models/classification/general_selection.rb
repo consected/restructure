@@ -12,6 +12,7 @@ class Classification::GeneralSelection < ActiveRecord::Base
   before_validation :prevent_value_change,  on: :update
   validates :name, presence: true
   validates :value, presence: true
+  validate :not_duplicated
 
 
   def self.item_types
@@ -184,6 +185,18 @@ class Classification::GeneralSelection < ActiveRecord::Base
       if item_type_changed? && self.persisted?
         errors.add(:item_type, "change not allowed!")
       end
+    end
+
+  private
+
+    def not_duplicated
+      return true if disabled?
+
+      if already_taken(:item_type, :value)
+        errors.add :duplicated, "existing general selection with item type #{self.item_type} and value #{self.value}"
+      end
+
+      true
     end
 
 end

@@ -1,30 +1,35 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
+SetupHelper.feature_setup
 
-describe "external id (bhs_assignments)", js: true, driver: :app_firefox_driver do
-
+describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver do
   include ModelSupport
   include MasterDataSupport
   include FeatureSupport
+  include BhsImportConfig # automatically imports the BHS app
+
+  BhsImportConfig.import_config
 
   before(:all) do
-    @admin, _ = create_admin
+    create_admin
 
-    seed_database
+    create_data_set_outside_tx
+
     gs = Classification::GeneralSelection.all
-    gs.each {|g| g.current_admin = @admin; g.create_with = true; g.edit_always = true; g.save!}
+    gs.each { |g| g.current_admin = @admin; g.create_with = true; g.edit_always = true; g.save! }
 
-    create_data_set
+    @user, @good_password = create_user
+    @good_email = @user.email
+    resource_name = :bhs_assignments
+    # Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :create, resource_type: :table, resource_name: , current_admin: @admin, user: @user
+    setup_access resource_name, resource_type: :table, access: :create, user: @user
 
-    @user, @good_password  = create_user
-    @good_email  = @user.email
-    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :create, resource_type: :table, resource_name: :bhs_assignments, current_admin: @admin, user: @user
-
-    bhs = ExternalIdentifier.where(name: 'bhs_assignments').first
+    bhs = ExternalIdentifier.where(name: resource_name).first
     bhs.update! external_id_edit_pattern: '\\d{3} \\d{3} \\d{3}', current_admin: @admin
 
     @master.current_user = @user
-    @master.bhs_assignments.create! bhs_id: rand(100000000..999999999)
-
+    @master.bhs_assignments.create! bhs_id: rand(100_000_000..999_999_999)
   end
 
   before :each do
@@ -33,16 +38,12 @@ describe "external id (bhs_assignments)", js: true, driver: :app_firefox_driver 
     expect(user).to be_a User
     expect(user.id).to equal @user.id
 
-    #login_as @user, scope: :user
+    # login_as @user, scope: :user
 
     login
-
   end
 
-
-
-  it "creates external IDs" do
-
+  it 'creates external IDs' do
     visit "/masters/search?utf8=%E2%9C%93&nav_q_id=#{@master.id}"
 
     expect(page).to have_css("#master-#{@master.id}")
@@ -63,9 +64,9 @@ describe "external id (bhs_assignments)", js: true, driver: :app_firefox_driver 
 
     b.click
 
-    expect(page).to have_css("form.new_bhs_assignment")
-    new_num = rand(100000000..999999999)
-    within("form.new_bhs_assignment") do
+    expect(page).to have_css('form.new_bhs_assignment')
+    new_num = rand(100_000_000..999_999_999)
+    within('form.new_bhs_assignment') do
       fill_in 'Bhs', with: new_num
       sleep 0.5
       click_on 'Save'
@@ -76,11 +77,8 @@ describe "external id (bhs_assignments)", js: true, driver: :app_firefox_driver 
     h = all('h4.external-id-heading').first
     new_num = new_num.to_s
     expect(h.text).to eq "BHS ID #{new_num[0..2]} #{new_num[3..5]} #{new_num[6..8]}"
-
-
   end
 
   after(:all) do
-
   end
 end

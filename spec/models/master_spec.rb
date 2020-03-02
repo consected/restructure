@@ -41,30 +41,38 @@ RSpec.describe Master, type: :model do
 
   it "adds an MSID value within a DB trigger" do
 
+    # Create a master record without an MSID
     new_master = Master.new
     new_master.current_user = @user
     new_master.save!
 
-
+    # Check it was setup correctly
     expect([11, 12]).not_to include new_master.rank
     expect(new_master.msid).to be nil
+
+    # Now set a low rank, and expect the MSID NOT to be set
+    new_master.rank = 0
+    new_master.save!
+    expect(new_master.msid).to be nil
+
+    # Now set a rank, and expect the MSID to be set
     new_master.rank = 11
     new_master.save!
     expect(new_master.msid).not_to be nil
 
-
+    # Create a new master with a rank that creates an MSID
     new_master = Master.new
     new_master.current_user = @user
     new_master.rank = 12
     new_master.save!
 
     msid = new_master.msid
+    expect(msid).not_to be nil
 
-    # Check the MSID did not change
+    # Check the MSID did not change once an MSID has been assigned
     new_master.rank = 11
     new_master.save!
     expect(new_master.msid).to eq new_master.msid
-
 
   end
 

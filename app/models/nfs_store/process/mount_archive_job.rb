@@ -22,7 +22,7 @@ module NfsStore
       end
 
       def perform(container_file)
-        puts "Mounting archive file #{container_file}"
+        log "Mounting archive file #{container_file}"
         container_file.current_user = container_file.user
         NfsStore::Archive::Mounter.mount container_file
       end

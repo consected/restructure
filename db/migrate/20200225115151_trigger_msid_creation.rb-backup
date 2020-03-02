@@ -1,0 +1,59 @@
+class TriggerMsidCreation < ActiveRecord::Migration
+
+  reversible do |dir|
+    dir.up do
+execute <<EOF
+
+
+-- FUNCTION: ml_app.update_master_msid()
+
+CREATE FUNCTION ml_app.update_master_msid()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+      BEGIN
+          UPDATE ml_app.masters
+              set msid = (
+              case when NEW.msid is null and rank in (11,12)
+				  then (select max(msid) from ml_app.masters)+1
+                   else new.msid
+              end
+              )
+
+          WHERE masters.id = NEW.id;
+
+          RETURN NEW;
+      END;
+      $BODY$;
+
+ALTER FUNCTION ml_app.update_master_msid()
+    OWNER TO fphs;
+
+
+
+-- Trigger: update_master_msid_trigger
+
+CREATE TRIGGER update_master_msid_trigger
+    AFTER INSERT
+    ON ml_app.masters
+    FOR EACH ROW
+    EXECUTE PROCEDURE ml_app.update_master_msid();
+
+
+EOF
+    end
+
+    dir.down do
+execute <<EOF
+
+DROP TRIGGER update_master_msid_trigger ON ml_app.masters;
+DROP FUNCTION ml_app.update_master_msid();
+
+EOF
+    end
+
+  end
+
+end

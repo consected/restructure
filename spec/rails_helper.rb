@@ -20,9 +20,6 @@ if res == ''
 end
 
 
-require 'simplecov'
-SimpleCov.start 'rails'
-
 require 'spec_helper'
 require File.expand_path('../../config/environment', __FILE__)
 require 'rspec/rails'
@@ -31,27 +28,12 @@ require 'capybara/rspec'
 require 'devise'
 
 require 'browser_helper'
+require 'setup_helper'
 include BrowserHelper
 
-bbrc = Rails.root.join('.byebugrc')
-init_bb = false
-if File.exist?(bbrc)
-   fbb = File.read(bbrc)
-   init_bb = !!fbb.index(/^b /)
-end
+SetupHelper.setup_byebug
+SetupHelper.validate_db_setup
 
-
-if ENV['BYEBUG'] == 'true'
-  puts "Running Remote Byebug server.\nTo connect, run:\n   byebug -R localhost:8099"
-  require "byebug/core"
-  Byebug.wait_connection = true
-  Byebug.start_server("localhost", 8099)
-end
-if init_bb
-  byebug
-end
-
-Capybara.server = :webrick
 setup_browser
 
 include Warden::Test::Helpers
@@ -100,6 +82,13 @@ RSpec.configure do |config|
 
     # Seeds.setup
     Seeds::ActivityLogPlayerContactPhone.setup
+
+    als = ActivityLog.active.where(item_type: 'zeus_bulk_message')
+    als.each do |a|
+      a.update! current_admin: a.admin, disabled: true if a.enabled?
+    end
+
+
     Rails.application.load_tasks
     Rake::Task["assets:precompile"].invoke
   end

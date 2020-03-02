@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
+SetupHelper.feature_setup
 
-describe "Create a BHS subject and activity", driver: :app_firefox_driver do
-
+describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
+  include MasterDataSupport
   include FeatureSupport
   include BhsActivityLogSetup
   include BhsImportConfig
@@ -9,28 +12,49 @@ describe "Create a BHS subject and activity", driver: :app_firefox_driver do
   include BhsExpectations
   include BhsActions
 
+  BhsImportConfig.import_config
+
   before :all do
-    create_bhs_config
+    seed_database
+    create_data_set_outside_tx
+
+    create_admin
+    @app_type = Admin::AppType.where(name: BhsImportConfig.bhs_app_name).active.first
+
+    # By default the app limits access to only those masters that have a BHS assignment
+    # already made in another app.
+    # To avoid this, just disable this restriction for now.
+    Admin::UserAccessControl.active.where(app_type_id: @app_type.id, resource_type: %i[external_id_assignments limited_access]).update_all(disabled: true)
+
+    # Can't seem to avoid an error without this
+    BhsAssignment.definition.update_tracker_events
+
+    create_user_for_login
 
     create_user_for_login
     setup_access_as :ra
-    @ra = {user: @user, email: @good_email, pw: @good_password}
+    @ra = { user: @user, email: @good_email, pw: @good_password }
 
     create_user_for_login
     setup_access_as :pi
-    @pi = {user: @user, email: @good_email, pw: @good_password}
+    @pi = { user: @user, email: @good_email, pw: @good_password }
 
-    expect(@user.can?(:bhs_assignments, :table) ).to be_truthy
+    m = Master.last
+    m.current_user = @ra[:user]
+    setup_access :bhs_assignments, access: :create, user: @ra[:user]
+    expect(@ra[:user].has_access_to?(:create, :table, :bhs_assignments)).to be_truthy
 
-    m = Master.create!(current_user: @ra[:user])
-    b = m.bhs_assignments.build(bhs_id:'252356501')
+    bmaxobj = BhsAssignment.order(bhs_id: :desc).first
+    bmax = bmaxobj&.bhs_id || 200_197_832
+                              
+    b = m.bhs_assignments.build(bhs_id: bmax + 1)
     b.save!
   end
 
   before :each do
   end
 
-  def as_user role
+  def as_user(role)
     @user = role[:user]
     @good_email = role[:email]
     @good_password = role[:pw]
@@ -44,19 +68,18 @@ describe "Create a BHS subject and activity", driver: :app_firefox_driver do
     expect(@user.app_type_id).to eq @app_type.id
     a = Admin::UserAccessControl.active.where(user: @user, app_type: @app_type, resource_type: :general, resource_name: 'create_master').first.access
     expect(a).to eq 'read'
-    expect(@user.can? :create_master).to be_truthy
+    expect(@user.can?(:create_master)).to be_truthy
     create_bhs_master
     # click_button BhsUi::SearchButton
   end
 
   def login_to_app
-
     if user_logged_in?
       logged_in_user = find('a[data-do-action="show-user-options"]')[:title]
       if logged_in_user == @good_email
-        visit "/"
+        visit '/'
       else
-        puts "Logout user #{logged_in_user} and login as #{@good_email}"
+        # puts "Logout user #{logged_in_user} and login as #{@good_email}"
         user_logout
       end
     end
@@ -65,38 +88,33 @@ describe "Create a BHS subject and activity", driver: :app_firefox_driver do
     select_app BhsUi::AppName
   end
 
-  it "allows a user to create a subject record" do
+  it 'allows a user to create a subject record' do
     as_user @ra
 
     create_bhs_master
     expect_master_record
   end
 
-  it "finds a subject as PI" do
-
+  it 'finds a subject as PI' do
     create_master_as_ra
     as_user @pi
 
-    search_player ""
+    search_player ''
 
     expand_master 0
     expect_master_record
     expect_bhs_tabs :pi
-
   end
 
-  it "finds a subject as RA" do
+  it 'finds a subject as RA' do
     create_master_as_ra
     as_user @ra
 
-    search_player ""
+    search_player ''
 
     expand_master 0
     expect_master_record
     expect_bhs_tabs :ra
     expand_master_record_tab 'external ids'
-
   end
-
-
 end

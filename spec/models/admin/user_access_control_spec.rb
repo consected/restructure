@@ -208,7 +208,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     @master.current_user = @user
     jres = @master.to_json
     res = JSON.parse jres
-    puts jres
+
     expect(res['latest_tracker_history']).not_to be nil
 
     res = @user.has_access_to? :access, :table, :tracker_histories
@@ -371,7 +371,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     # Check they both have the same result
     [:limited_access, :external_id_assignments].each do |rt|
 
-      puts "Trying resource_type: #{rt}"
+      #puts "Trying resource_type: #{rt}"
 
       # Check that users can access these records
       jres = Master.where(id: ids).limited_access_scope(@user).to_json(current_user: @user)

@@ -1,12 +1,13 @@
 require 'rails_helper'
 
+SetupHelper.setup_al_player_contact_phones
+
 RSpec.describe "Calculate conditional actions", type: :model do
 
   include ModelSupport
   include ActivityLogSupport
 
   before :all do
-
     u1, _ = create_user
     @u1 = u1
     create_user
@@ -14,6 +15,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
     let_user_create_player_contacts
 
     setup_access :activity_log__player_contact_phones
+    setup_access :addresses
     setup_access :activity_log__player_contact_phone__primary
     setup_access :activity_log__player_contact_phone__blank
 
@@ -384,7 +386,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
     m.current_user = @user
 
     a1 = m.addresses.create! city: "Portland",
-      state: "OR",
+      state: "OR",\
       zip: "#{rand(99999).to_s.rjust(5, "0")}",
       rank: 0,
       rec_type: 'home',

@@ -18,6 +18,10 @@ class ActivityLog < ActiveRecord::Base
   after_save :force_option_config_parse
   after_save :handle_placeholder_fields
 
+  def resource_name
+    full_item_types_name
+  end
+
   def implementation_model_name
     item_type_name
   end
@@ -62,6 +66,10 @@ class ActivityLog < ActiveRecord::Base
     self.enabled.where(item_type: item_type).all.map {|i| i.rec_type }
   end
 
+  def self.reset_extra_log_type_resource_names!
+    @extra_log_type_resource_names = nil
+  end
+
   # Get all the resource names for extra log types in all active activity log definitions
   # Used by user access control definitions and filestore filters
   # @param [Proc] an optional block may be passed to allow filtering based on values in the extra log type config for each entry
@@ -101,6 +109,7 @@ class ActivityLog < ActiveRecord::Base
   end
 
   def force_option_config_parse
+    return if disabled?
     extra_log_type_configs force: true
   end
 
@@ -190,6 +199,16 @@ class ActivityLog < ActiveRecord::Base
     self.item_type.singularize.classify.constantize
   end
 
+  # Generate an item_type_name from its component parts
+  def self.item_type_name item_type, process_name, rec_type
+    tn = []
+    tn << item_type
+    tn << process_name unless process_name.blank?
+    tn << rec_type unless rec_type.blank?
+    tn.join('_').singularize
+  end
+
+
   def item_type_name
     return @item_type_name if @item_type_name
     tn = []
@@ -256,7 +275,7 @@ class ActivityLog < ActiveRecord::Base
     al_class = activity_log_class_from_type activity_log_type
     activity_log = al_class.find(id)
     activity_log.current_user = current_user
-    raise FsException::NoAccess.new "User does not have access to this activity log" unless activity_log.allows_current_user_access_to? :access
+    raise FsException::NoAccess.new "User does not have access to this activity log (#{activity_log.extra_log_type}) | (#{activity_log.resource_name})" unless activity_log.allows_current_user_access_to? :access
     activity_log
   end
 
@@ -571,7 +590,21 @@ class ActivityLog < ActiveRecord::Base
     end
   end
 
+  # Callback method specific to regenerating models
+  def other_regenerate_actions
+    if @regenerate
+      # Specific to regeneration of the class
+    end
+
+    # Always performed
+    self.class.reset_extra_log_type_resource_names!
+
+    true
+  end
+
+
   def handle_placeholder_fields
+    return if disabled?
     # Allow placeholder fields to pretend to be form fields
     placeholder_fields = all_implementation_fields.select {|f| f.start_with? 'placeholder_'}.map(&:to_sym)
     implementation_class.send :attr_accessor, *placeholder_fields

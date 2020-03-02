@@ -37,7 +37,7 @@ module PhoneLogActions
     if !top_ranked
       res = all(player_contact_phone_block_css)
       m = res.map {|a| a['data-item-rank'] }.join(', ')
-      puts "Exiting top_ranked_phone without finding a phone record. Tried ranks #{phone_ranks.join(', ')}. But #{res.length} phone type blocks were found with ranks #{m}"
+      #puts "Exiting top_ranked_phone without finding a phone record. Tried ranks #{phone_ranks.join(', ')}. But #{res.length} phone type blocks were found with ranks #{m}"
     end
 
     top_ranked

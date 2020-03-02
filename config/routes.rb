@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
 
   # Provide Javascript testing in the browser, only in the development / test environment
-  mount JasmineRails::Engine => '/specs' if defined?(JasmineRails)
+  mount JasmineRails::Engine => '/specs' if defined?(JasmineRails) && Rails.env.development?
   
   resources :page_layouts, only: [:show, :index]
 

@@ -1,88 +1,85 @@
-module DynamicModelHandler
+# frozen_string_literal: true
 
+module DynamicModelHandler
   extend ActiveSupport::Concern
 
+  class_methods do
+    # Scope method to filter results based on whether they can be viewed according to user access controls
+    # and default option config showable_if rules
+    # @return [ActiveRecord::Relation] scope to provide rules filtered according to the calculated rules
+    def filter_results
+      sall = all
+      return unless sall
 
-    class_methods do
-
-      # Scope method to filter results based on whether they can be viewed according to user access controls
-      # and default option config showable_if rules
-      # @return [ActiveRecord::Relation] scope to provide rules filtered according to the calculated rules
-      def filter_results
-
-        sall = all
-        return unless sall
-        ex_ids = []
-        sall.each do |r|
-          ex_ids << r.id unless r.can_access?
-        end
-
-        if ex_ids.length == 0
-          sall
-        else
-          where("#{self.table_name}.id not in (?)", ex_ids)
-        end
+      ex_ids = []
+      sall.each do |r|
+        ex_ids << r.id unless r.can_access?
       end
 
-
-
-      def is_dynamic_model
-        true
+      if ex_ids.empty?
+        sall
+      else
+        where("#{table_name}.id not in (?)", ex_ids)
       end
-
-      def assoc_inverse
-        @assoc_inverse = definition.model_association_name
-      end
-
-      def foreign_key_name
-        @foreign_key_name = definition.foreign_key_name.blank? ? nil : definition.foreign_key_name.to_sym
-      end
-
-      def primary_key_name
-        @primary_key_name = (definition.primary_key_name).to_sym
-      end
-
-      def result_order
-        @result_order = definition.result_order
-
-        unless @result_order.blank?
-          default_scope -> {order ro}
-        end
-
-        @result_order
-      end
-
-      def no_master_association
-        !foreign_key_name
-      end
-
-      def default_options
-        @default_options = definition.default_options
-      end
-
-      def human_name
-        @human_name = definition.name
-      end
-
-
-      def find id
-        find_by(primary_key => id)
-      end
-
-      def permitted_params
-
-        field_list = definition.field_list
-        if field_list.blank?
-          field_list = self.attribute_names.map(&:to_sym) - [:disabled, :user_id, :created_at, :updated_at, :tracker_id] + [:item_id]
-        else
-          field_list = self.definition.field_list_array.map(&:to_sym)
-        end
-
-        field_list
-      end
-
     end
 
+    def is_dynamic_model
+      true
+    end
+
+    def assoc_inverse
+      @assoc_inverse = definition.model_association_name
+    end
+
+    def foreign_key_name
+      @foreign_key_name = definition.foreign_key_name.blank? ? nil : definition.foreign_key_name.to_sym
+    end
+
+    def primary_key_name
+      @primary_key_name = definition.primary_key_name.to_sym
+    end
+
+    # Override the primary_key definition for a model, to ensure
+    # views and tables without primary keys can load
+    def primary_key
+      primary_key_name&.to_s
+    end
+
+    def result_order
+      @result_order = definition.result_order
+
+      default_scope -> { order ro } unless @result_order.blank?
+
+      @result_order
+    end
+
+    def no_master_association
+      !foreign_key_name
+    end
+
+    def default_options
+      @default_options = definition.default_options
+    end
+
+    def human_name
+      @human_name = definition.name
+    end
+
+    def find(id)
+      find_by(primary_key => id)
+    end
+
+    def permitted_params
+      field_list = definition.field_list
+      if field_list.blank?
+        field_list = attribute_names.map(&:to_sym) - %i[disabled user_id created_at updated_at tracker_id] + [:item_id]
+      else
+        field_list = definition.field_list_array.map(&:to_sym)
+      end
+
+      field_list
+    end
+  end
 
   def model_data_type
     :dynamic_model
@@ -92,12 +89,18 @@ module DynamicModelHandler
     'default'
   end
 
+  # resource_name used by user access controls
+  def resource_name
+    self.class.definition.resource_name
+  end
+
   def option_type_config
     self.class.default_options
   end
 
   def master_id
     return nil if self.class.no_master_association
+
     master&.id
   end
 
@@ -109,7 +112,7 @@ module DynamicModelHandler
     end
   end
 
-  def current_user= cu
+  def current_user=(cu)
     if self.class.no_master_association
       @current_user = cu
     else
@@ -118,26 +121,21 @@ module DynamicModelHandler
   end
 
   def id
-    self.attributes[self.class.primary_key.to_s]
+    attributes[self.class.primary_key.to_s]
   end
 
-
-
   def can_edit?
-
     # This returns nil if there was no rule, true or false otherwise.
     # Therefore, for no rule (nil) return true
     res = calc_can :edit
     return true if res.nil?
-    return if !res
+    return unless res
 
     # Finally continue with the standard checks if none of the previous have failed
     super()
   end
 
-
   def can_access?
-
     # This returns nil if there was no rule, true or false otherwise.
     # Therefore, for no rule (nil) return true
     res = calc_can :access
@@ -150,7 +148,7 @@ module DynamicModelHandler
 
   # Calculate the can rules for the required type, based on user access controls and showable_if rules
   # @param type [Symbol] either :access or :edit for showable_if or editable_if
-  def calc_can type
+  def calc_can(type)
     # either use the editable_if configuration if there is one
     dopt = definition_default_options
 
@@ -160,19 +158,16 @@ module DynamicModelHandler
       doptif = dopt.showable_if
     end
 
-
     if doptif.is_a?(Hash) && doptif.first
       # Generate an old version of the object prior to changes
-      old_obj = self.dup
-      self.changes.each do |k,v|
-        if k.to_s != 'user_id'
-          old_obj.send("#{k}=", v.first)
-        end
+      old_obj = dup
+      changes.each do |k, v|
+        old_obj.send("#{k}=", v.first) if k.to_s != 'user_id'
       end
 
       # Ensure the duplicate old_obj references the real master, ensuring current user can
       # be referenced correctly in conditional calculations
-      old_obj.master = self.master
+      old_obj.master = master
 
       if type == :edit
         res = !!dopt.calc_editable_if(old_obj)
@@ -182,7 +177,6 @@ module DynamicModelHandler
     end
 
     res
-
   end
 
   # Force the ability to add references even if can_edit? for the parent record returns false
@@ -193,5 +187,4 @@ module DynamicModelHandler
       return !!res
     end
   end
-
 end

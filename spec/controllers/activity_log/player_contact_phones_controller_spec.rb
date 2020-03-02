@@ -1,9 +1,6 @@
 require 'rails_helper'
 
-# Ensure that we seed the database, otherwise the PlayerContactPhonesController class does not exist
-RSpec.configure {|c| c.before {
-  SeedSupport.setup
-  }}
+SetupHelper.setup_al_player_contact_phones
 
 RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
 
@@ -40,20 +37,6 @@ RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
     create_admin
     create_user
     create_master @user
-
-
-    if ActivityLog.connection.table_exists? "activity_log_player_contact_phones"
-      sql = TableGenerators.activity_logs_table('activity_log_player_contact_phones', 'player_contacts', :drop_do)
-    end
-
-    TableGenerators.activity_logs_table('activity_log_player_contact_phones', 'player_contacts', true, 'select_result', 'select_next_step', 'follow_up_when', 'protocol_id', 'select_call_direction', 'select_who', 'called_when', 'notes', 'data', 'set_related_player_contact_rank')
-
-    @master.current_user = @user
-
-    als = ActivityLog.where(name: 'Phone Log')
-    if als.active.count < 1
-      als.first.update!(disabled: false, current_admin: @admin)
-    end
 
     setup_access :player_contacts
     setup_access :activity_log__player_contact_phones

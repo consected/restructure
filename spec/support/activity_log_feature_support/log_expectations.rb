@@ -17,9 +17,9 @@ module LogExpectations
     all(LoggedPhoneCallCss).each do |e|
       scroll_to(LoggedPhoneCallCss)
       p = e.find(PhoneNumberInItemCss).text
-      puts "Got phone number from block: #{p}"
+      #puts "Got phone number from block: #{p}"
       selected = e['class'].include?('selected-item')
-      puts "Block selected? #{selected} with '#{e['class']}' in #{LoggedPhoneCallCss} with #{e['data-item-id']}"
+      #puts "Block selected? #{selected} with '#{e['class']}' in #{LoggedPhoneCallCss} with #{e['data-item-id']}"
       if p == phone
         expect(selected).to be true
       else

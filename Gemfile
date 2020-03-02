@@ -1,5 +1,6 @@
-source 'https://rubygems.org'
+# frozen_string_literal: true
 
+source 'https://rubygems.org'
 
 gem 'rails', '~> 4.2.10'
 gem 'pg', '~> 0.15'
@@ -23,7 +24,6 @@ gem 'syslog-logger'
 # end
 
 gem 'dicom'
-
 
 gem 'delayed_job'
 gem 'delayed_job_active_record'
@@ -49,13 +49,10 @@ gem 'crass', '~> 1.0.4'
 gem 'kramdown'
 
 group :development do
-
   gem 'web-console', '~> 2.0'
-
-
 end
 
-group :development, :test do
+group :development, :test, :ipa_test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
 
@@ -63,21 +60,23 @@ group :development, :test do
 
   gem 'webrick'
 
-  gem "brakeman", :require => false
-  gem "bundler-audit"
+  gem 'brakeman', require: false
+  gem 'bundler-audit'
 
   gem 'jasmine-rails'
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-
+  gem 'parallel_tests'
+  gem 'spring-commands-parallel-tests'
+  gem 'ruby-debug-ide'
+  gem 'debase'
 end
 
 group :test do
   gem 'capybara', '~> 2.18'
   gem 'selenium-webdriver', '3.4.4'
   gem 'database_cleaner'
-  gem 'simplecov', :require => false
   gem 'test_after_commit'
 end
 

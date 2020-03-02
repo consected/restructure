@@ -68,7 +68,7 @@ module PhoneListActions
     di = sel_phone.find('[data-rec-type="phone"]')
     phone = di['data-item-data']
     diid = sel_phone['data-sub-id']
-    puts "Selected phone number in list: #{phone} (#{diid})"
+    #puts "Selected phone number in list: #{phone} (#{diid})"
 
     phone
   end

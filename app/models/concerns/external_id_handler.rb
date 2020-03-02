@@ -246,6 +246,11 @@ module ExternalIdHandler
 
   end
 
+  # resource_name used by user access controls
+  def resource_name
+    self.class.definition.resource_name
+  end
+
   def model_data_type
     :external_identifier
   end

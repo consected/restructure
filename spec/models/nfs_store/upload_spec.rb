@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 require 'securerandom'
 
 RSpec.describe NfsStore::Upload, type: :model do
-
   include PlayerContactSupport
   include ModelSupport
   include NfsStoreSupport
@@ -18,10 +19,10 @@ RSpec.describe NfsStore::Upload, type: :model do
     @other_users << create_user.first
 
     setup_nfs_store
+    @activity_log = @container.parent_item
   end
 
-  it "uploads in chunks" do
-
+  it 'uploads in chunks' do
     c = @container
 
     u = NfsStore::Upload.new container: c, user: @container.master.current_user, file_name: 'test-name.txt'
@@ -55,14 +56,11 @@ RSpec.describe NfsStore::Upload, type: :model do
     totstring = s1 + s2
     expect(final_file).to eq(totstring)
 
-
     md5tot = Digest::MD5.hexdigest(totstring)
     expect(u.hash_for_file).to eq md5tot
-
-
   end
 
-  it "uploads a single large chunk efficiently" do
+  it 'uploads a single large chunk efficiently' do
     c = @container
 
     u = NfsStore::Upload.new container: c, user: @container.master.current_user, file_name: 'test-name.txt'
@@ -86,22 +84,19 @@ RSpec.describe NfsStore::Upload, type: :model do
     totstring = s1
     expect(final_file).to eq(totstring)
 
-
     md5tot = Digest::MD5.hexdigest(totstring)
     expect(u.hash_for_file).to eq md5tot
-
   end
 
-  it "filters notifications" do
-
+  it 'filters notifications' do
     if @container.respond_to? :filter_notifications
 
       role_name = 'upload test notify'
 
       files = []
-      files << create_stored_file( '.', 'not_abc_ is a test')
-      files << create_stored_file( '.', 'abc_ is a test')
-      files << create_stored_file( '.', 'abc_2 is a test')
+      files << create_stored_file('.', 'not_abc_ is a test')
+      files << create_stored_file('.', 'abc_ is a test')
+      files << create_stored_file('.', 'abc_2 is a test')
 
       f0 = create_filter('^/abc_')
       f = create_filter('^/fabc')

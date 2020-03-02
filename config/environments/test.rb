@@ -53,4 +53,16 @@ Rails.application.configure do
 
   config.active_job.queue_adapter = :delayed_job
 
+
+  # Support parallel tests
+  assets_cache_path = Rails.root.join("tmp/cache/assets/paralleltests#{ENV['TEST_ENV_NUMBER']}")
+  config.assets.configure do |env|
+    FileUtils.mkdir_p assets_cache_path
+    env.cache = Sprockets::Cache::FileStore.new(assets_cache_path)
+  end
+
+  fs_cache_path = Rails.root.join("tmp", "cache", "cache-fs", "paralleltests#{ENV['TEST_ENV_NUMBER']}")
+  FileUtils.mkdir_p fs_cache_path
+  config.cache_store = :file_store, fs_cache_path
+
 end

@@ -22,7 +22,7 @@ module NfsStore
       end
 
       def perform(container_file)
-        puts "Indexing files #{container_file}"
+        log "Indexing files #{container_file}"
         container_file.current_user = container_file.user
         NfsStore::Archive::Mounter.index container_file
       end

@@ -1,21 +1,20 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-RSpec.describe "Export an app configuration", type: :model do
+SetupHelper.setup_al_player_contact_phones
 
+RSpec.describe 'Export an app configuration', type: :model do
   include MasterSupport
   include ModelSupport
 
   before :all do
-
     create_admin
-    ActivityLog.active.each do |a|
-      a.update!(disabled: true, current_admin: @admin)
-    end
-
-    seed_database
-    Seeds::ActivityLogPlayerContactPhone.setup
-    ::ActivityLog.define_models
     create_user
+
+    # seed_database
+    # Seeds::ActivityLogPlayerContactPhone.setup
+    # ::ActivityLog.define_models
 
     apps = Admin::AppType.active.where("name = 'test1' or label = 'Test App 12' or name = 'new_name'")
     apps.each do |a|
@@ -34,12 +33,11 @@ RSpec.describe "Export an app configuration", type: :model do
     @user.app_type = @app_type
     @user.save!
 
-
     uac = nil
     # Make some items creatable
-    [:player_infos, :player_contacts, :scantrons].each do |rn|
+    %i[player_infos player_contacts scantrons].each do |rn|
       uac = Admin::UserAccessControl.active.where(app_type: @app_type, resource_type: :table, resource_name: rn).first
-      uac = Admin::UserAccessControl.new(app_type: @app_type, resource_type: :table, resource_name: rn) unless uac
+      uac ||= Admin::UserAccessControl.new(app_type: @app_type, resource_type: :table, resource_name: rn)
       uac.access = :create
       uac.current_admin = @admin
       uac.save!
@@ -47,12 +45,11 @@ RSpec.describe "Export an app configuration", type: :model do
 
     # Set a user specific control on sage_assignments
     uac = Admin::UserAccessControl.active.where(app_type: @app_type, resource_type: :table, resource_name: :sage_assignments).first
-    uac = Admin::UserAccessControl.new(app_type: @app_type, resource_type: :table, resource_name: :sage_assignments) unless uac
+    uac ||= Admin::UserAccessControl.new(app_type: @app_type, resource_type: :table, resource_name: :sage_assignments)
     uac.access = :read
     uac.user = @user
     uac.current_admin = @admin
     uac.save!
-
 
     # Set some app configurations
     add_app_config @app_type, 'create master with', 'player_info'
@@ -70,17 +67,43 @@ RSpec.describe "Export an app configuration", type: :model do
       Admin::UserAccessControl.create! app_type: @app_type, access: :create, resource_type: :table, resource_name: @activity_log.full_item_type_name.pluralize, current_admin: @admin
     end
 
-
-
-
     @app_type.user_access_controls.reload
     @app_type.app_configurations.reload
-
-
   end
 
-  it "exports a set of JSON" do
+  def import_test_app
+    @app_name = app_name = "bhs_model_#{rand(100_000_000)}"
 
+    @admin, = create_admin unless @admin
+    # Setup the triggers, functions, etc
+
+    eis = ExternalIdentifier.active.where(name: 'bhs_assignments').order(id: :desc)
+    if eis.count != 1
+      eis.where('id <> ?', eis.first&.id).update_all(disabled: true)
+    end
+
+    i = ExternalIdentifier.active.where(name: 'bhs_assignments').order(id: :desc).first
+    i&.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin
+    Master.reset_external_id_matching_fields!
+
+    als = ActivityLog.active.where(name: 'BHS Tracker')
+    if als.count != 1
+      als.where('id <> ?', als.first&.id).update_all(disabled: true)
+    end
+
+    sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 6-grant_roles_access_to_ml_app.sql create_adders_table.sql]
+    sql_source_dir = Rails.root.join('docs', 'config_tests')
+    config_dir = Rails.root.join('docs', 'config_tests')
+    config_fn = 'bhs_app_type_test_config.json'
+    SetupHelper.setup_app_from_import app_name, sql_source_dir, sql_files, config_dir, config_fn
+
+    new_app_type = Admin::AppType.where(name: app_name).active.first
+    Admin::UserAccessControl.active.where(app_type_id: new_app_type.id, resource_type: %i[external_id_assignments limited_access]).update_all(disabled: true)
+
+    new_app_type
+  end
+
+  it 'exports a set of JSON' do
     res = @app_type.export_config
 
     expect(res).to be_a String
@@ -95,43 +118,39 @@ RSpec.describe "Export an app configuration", type: :model do
 
     acs = app['app_configurations']
     expect(acs).to be_a Array
-    config = acs.select {|a| a['name'] == 'hide pro info'}.first
+    config = acs.select { |a| a['name'] == 'hide pro info' }.first
     expect(config['user_email']).to eq @user.email
     expect(config['value']).to eq 'true'
 
     uac = app['valid_user_access_controls']
     expect(uac).to be_a Array
-    config = uac.select {|a| a['resource_name'] == 'player_infos'}.first
+    config = uac.select { |a| a['resource_name'] == 'player_infos' }.first
     expect(config['resource_type']).to eq 'table'
     expect(config['access']).to eq 'create'
     expect(config['user_email']).to be_nil
 
-    config = uac.select {|a| a['resource_name'] == 'sage_assignments'}.first
+    config = uac.select { |a| a['resource_name'] == 'sage_assignments' }.first
     expect(config['access']).to eq 'read'
     expect(config['user_email']).to eq @user.email
 
     uac = app['valid_associated_activity_logs']
     expect(uac).to be_a Array
-    config = uac.select {|a| a['name'] == @activity_log.name}.first
+    config = uac.select { |a| a['name'] == @activity_log.name }.first
     expect(config['item_type']).to eq @activity_log.item_type
 
     uac = app['associated_external_identifiers']
     expect(uac).to be_a Array
-    config = uac.select {|a| a['name'] == 'scantrons'}.first
+    config = uac.select { |a| a['name'] == 'scantrons' }.first
     expect(config['external_id_attribute']).to eq 'scantron_id'
 
     uac = app['associated_general_selections']
     expect(uac).to be_a Array
-    config = uac.select {|a| a['item_type'] == 'player_infos_source'}
+    config = uac.select { |a| a['item_type'] == 'player_infos_source' }
     expect(config).to be_a Array
-    expect(config.map {|a| a['value']}).to include 'nflpa'
-
-
-
+    expect(config.map { |a| a['value'] }).to include 'nflpa'
   end
 
-  it "imports a JSON configuration" do
-
+  it 'imports a JSON configuration' do
     config = @app_type.export_config
 
     @activity_log = ActivityLog.active.first
@@ -166,24 +185,22 @@ RSpec.describe "Export an app configuration", type: :model do
     expect(ac.user).to be nil
     expect(ac.role_name).to eq 'role 1'
 
-    expect(@user.has_access_to? :create, :table, :player_infos).to be_truthy
+    expect(@user.has_access_to?(:create, :table, :player_infos)).to be_truthy
 
-    expect(@user.has_access_to? :read, :table, :sage_assignments).to be_truthy
+    expect(@user.has_access_to?(:read, :table, :sage_assignments)).to be_truthy
 
     @activity_log.reload
     expect(@activity_log.name).to eq al_orig_name
-
-
-
   end
 
-  it "imports a test JSON config file" do
+  it 'imports a test JSON config file' do
+    Seeds.setup
 
-    res, _ = import_test_app
+    res = import_test_app
 
     expect(res).to be_a Admin::AppType
 
-    expect(res.name).to eq 'bhs'
+    expect(res.name).to eq @app_name
     expect(res.label).to eq 'Brain Health Study'
 
     enable_user_app_access res.name, @user
@@ -193,7 +210,7 @@ RSpec.describe "Export an app configuration", type: :model do
     @user.save!
     app_type = res
 
-    expect(@user.has_access_to? :create, :table, :player_infos).to be_truthy
+    expect(@user.has_access_to?(:create, :table, :player_infos)).to be_truthy
 
     expect(ExternalIdentifier.where(name: 'bhs_assignments').first).to be_a ExternalIdentifier
     a = Admin::UserAccessControl.where app_type: app_type, resource_type: :table, resource_name: :bhs_assignments
@@ -210,8 +227,5 @@ RSpec.describe "Export an app configuration", type: :model do
 
     # expect(@user.has_access_to? :create, :table, :activity_log__bhs_assignments).to be_truthy
     # expect(@user.has_access_to? :create, :table, :bhs_assignments).to be_truthy
-
-
   end
-
 end

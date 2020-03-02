@@ -1,9 +1,16 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
+AlNameGenTest = 'Gen Test ELT'
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
+SetupHelper.setup_al_gen_tests AlNameGenTest, 'elt', 'player_contact'
 
 RSpec.describe 'Activity Log extra types implementation', type: :model do
+  def al_name
+    AlNameGenTest
+  end
 
   include ModelSupport
   include PlayerContactSupport
@@ -11,18 +18,22 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
   before :all do
     seed_database
     ::ActivityLog.define_models
+    Seeds::ActivityLogPlayerContactPhone.setup
     create_admin
     create_user
     setup_access :player_contacts
     setup_access :activity_log__player_contact_phones
-    create_item(data: rand(10000000000000000), rank: 10)
+    create_item(data: rand(10_000_000_000_000_000), rank: 10)
   end
 
   before :each do
+    @activity_log = al = ActivityLog.active.where(name: al_name).first
 
-    @activity_log = al = ActivityLog.active.where(name: 'Phone Log').first
+    if al.nil?
+      raise "Activity Log #{al_name} not set up"
+    end
 
-    al.extra_log_types =<<EOF
+    al.extra_log_types = <<EOF
     step_1:
       label: Step 1
       fields:
@@ -40,34 +51,30 @@ EOF
     al.current_admin = @admin
 
     al.save!
-
   end
 
-  it "saves data into an activity log record" do
-
+  it 'saves data into an activity log record' do
     al = @activity_log
 
     c1 = al.extra_log_type_configs.first
     expect(c1.label).to eq 'Step 1'
-    expect(c1.fields).to eq ['select_call_direction', 'select_who']
+    expect(c1.fields).to eq %w[select_call_direction select_who]
 
     c2 = al.extra_log_type_configs[1]
     expect(c2.label).to eq 'Step 2'
-    expect(c2.fields).to eq ['select_call_direction', 'extra_text']
-
+    expect(c2.fields).to eq %w[select_call_direction extra_text]
 
     # Additional field for extra_log_type is expected to be added to the configuration by default
-    expect(ExtraLogType.fields_for_all_in al).to eq ['select_call_direction', 'select_who', 'extra_text']
-
+    expect(ExtraLogType.fields_for_all_in(al)).to eq %w[select_call_direction select_who extra_text]
   end
 
-  it "prevents user from accessing specific activity log extra log types" do
+  it 'prevents user from accessing specific activity log extra log types' do
     al = @activity_log
 
     resource_name = al.extra_log_type_configs.first.resource_name
 
     res = Admin::UserAccessControl.active.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: resource_name
-    res.first.update!(current_admin: @admin, disabled: true) if res.first
+    res.first&.update!(current_admin: @admin, disabled: true)
 
     res = @user.has_access_to? :access, :activity_log_type, resource_name
     expect(res).to be_falsey
@@ -75,27 +82,14 @@ EOF
 
     res = @user.has_access_to? :access, :activity_log_type, resource_name
     expect(res).to be_truthy
-
-
   end
 
-  it "allows a user only to see the presence of an iten, not its content" do
-
+  it 'allows a user only to see the presence of an iten, not its content' do
     al = @activity_log
 
     resource_name = ActivityLog::PlayerContactPhone.extra_log_type_config_for(:primary).resource_name
 
-
-    uac = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :activity_log_type, resource_name: resource_name).first
-    unless uac
-      uac = Admin::UserAccessControl.new(app_type: @user.app_type, resource_type: :activity_log_type, resource_name: resource_name)
-    end
-
-    # First, allow an activity log record to be created
-    uac.access = :create
-    uac.current_admin = @admin
-    uac.save!
-
+    setup_access resource_name, resource_type: :activity_log_type, access: :create, user: @user
 
     @player_contact.master.current_user = @user
     al = @player_contact.activity_log__player_contact_phones.build(select_call_direction: 'from player', select_who: 'user')
@@ -115,9 +109,7 @@ EOF
     expect(data['select_who']).to eq 'user'
 
     # Now restrict access to only see its presence
-    uac.access = :see_presence
-    uac.current_admin = @admin
-    uac.save!
+    setup_access resource_name, resource_type: :activity_log_type, access: :see_presence, user: @user
 
     res = @user.has_access_to? :access, :activity_log_type, alpcps.first.extra_log_type_config.resource_name
     expect(res).to be_falsey
@@ -125,10 +117,8 @@ EOF
     res = @user.has_access_to? :see_presence, :activity_log_type, alpcps.first.extra_log_type_config.resource_name
     expect(res).to be_truthy
 
-
     res = @user.has_access_to? :see_presence_or_access, :activity_log_type, alpcps.first.extra_log_type_config.resource_name
     expect(res).to be_truthy
-
 
     alpcps.each do |a|
       a.master.current_user = @user
@@ -139,8 +129,5 @@ EOF
     expect(data['id']).to eq alid
 
     expect(data['select_who']).to be_nil
-
   end
-
-
 end
