@@ -1,38 +1,41 @@
-class ExtraOptions
+# frozen_string_literal: true
 
+class ExtraOptions
   # include CalcActions
 
   def self.base_key_attributes
-    [
-      :name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options,
-      :field_options, :dialog_before, :creatable_if, :editable_if, :showable_if, :add_reference_if, :valid_if,
-      :filestore, :labels, :fields, :button_label
+    %i[
+      name config_obj caption_before show_if resource_name save_action view_options
+      field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
+      filestore labels fields button_label
     ]
   end
+
   def self.add_key_attributes
     []
   end
+
   def self.key_attributes
-    self.base_key_attributes + self.add_key_attributes
+    base_key_attributes + add_key_attributes
   end
+
   def self.editable_attributes
-    self.key_attributes - [:name, :config_obj, :resource_name] + [:label]
+    key_attributes - %i[name config_obj resource_name] + [:label]
   end
 
-  attr_accessor(*self.key_attributes)
-
+  attr_accessor(*key_attributes)
 
   def self.attr_defs
-    attr_for_conditions_marker = "ref: ** conditions reference **"
+    attr_for_conditions_marker = 'ref: ** conditions reference **'
     {
-      fields: [
-        'field_name_1', 'field_name_2'
+      fields: %w[
+        field_name_1 field_name_2
       ],
 
       caption_before: {
-        field_name: "string caption to appear before field",
-        all_fields: "caption to appear before all fields",
-        submit: "caption to appear before submit button",
+        field_name: 'string caption to appear before field',
+        all_fields: 'caption to appear before all fields',
+        submit: 'caption to appear before submit button',
         field_to_retain_label: {
           keep_label: true,
           caption: 'caption to appear before label'
@@ -80,7 +83,12 @@ class ExtraOptions
           hide_panel: {
             value: 'panel / category name',
             if: attr_for_conditions_marker
+          },
+          refresh_panel: {
+            value: 'panel / category name',
+            if: attr_for_conditions_marker
           }
+
         },
         on_create: {},
         on_save: {
@@ -90,8 +98,8 @@ class ExtraOptions
       field_options: {
         field_name: {
           include_blank: 'true or false to force a drop down field to include a selectable blank',
-          pattern: "provide a mask for a text field",
-          value: "default value | now() | today()",
+          pattern: 'provide a mask for a text field',
+          value: 'default value | now() | today()',
           edit_as: {
             field_type: 'alternative field name to use for selection of edit field',
             alt_options: 'optional specification of options for a select_ type field to use instead of general selection specified list'
@@ -102,16 +110,16 @@ class ExtraOptions
         }
       },
       dialog_before: {
-        field_name: {name: "message template name", label: "show dialog button label" },
-        all_fields: {name: "message template name", label: "show dialog button label" },
-        submit: {name: "message template name", label: "show dialog button label" }
+        field_name: { name: 'message template name', label: 'show dialog button label' },
+        all_fields: { name: 'message template name', label: 'show dialog button label' },
+        submit: { name: 'message template name', label: 'show dialog button label' }
       },
       creatable_if: attr_for_conditions_marker,
       editable_if: attr_for_conditions_marker,
       showable_if: attr_for_conditions_marker,
       add_reference_if: attr_for_conditions_marker,
       valid_if: {
-        on_save:  attr_for_validations,
+        on_save: attr_for_validations,
         on_create: {
           hide_error: 'true|false (default false) to hide an error associated with this validation'
         },
@@ -131,9 +139,9 @@ class ExtraOptions
           field_name_2: 'literal value | null',
           field_name_3: { this: 'attribute in this record' },
           field_name_4: { this_references: 'attribute in any referenced record' },
-          return_constant: "value to return if previous condition matches",
-          field_to_return: "return_value",
-          field_to_return_if_also_a_condition: ['match1', 'match2', 'return_value'],
+          return_constant: 'value to return if previous condition matches',
+          field_to_return: 'return_value',
+          field_to_return_if_also_a_condition: %w[match1 match2 return_value],
           list_field_to_return: 'return_value_list',
           return: 'return_result (return the actual matched instance)'
         }
@@ -143,8 +151,8 @@ class ExtraOptions
           field_name: 'any conditional value must be true',
           field_name_2: {
             condition: " one of #{(ConditionalActions::ValidExtraConditions + ConditionalActions::ValidExtraConditionsArrays).join(', ')}",
-            not: "true|false (optional, default false) negate the result",
-            value: "any value, with defaults or substitutions, or a hash reference to another table field"
+            not: 'true|false (optional, default false) negate the result',
+            value: 'any value, with defaults or substitutions, or a hash reference to another table field'
           }
         },
         'all|any|not_all|not_any': {
@@ -171,40 +179,36 @@ class ExtraOptions
         }
       ]
 
-
-
     }
   end
 
   def self.attr_for_validations
     {
-      "ref: conditions": "** ref: conditions",
+      "ref: conditions": '** ref: conditions',
       all: {
         "model_table_name | this": {
-          validation_field_name_5: { validation_type: 'validation options'}
+          validation_field_name_5: { validation_type: 'validation options' }
         }
       }
     }
   end
 
-
-  def initialize name, config, config_obj
+  def initialize(name, config, config_obj)
     @name = name
 
     @config_obj = config_obj
     config.each do |k, v|
       begin
-        self.send("#{k}=", v)
+        send("#{k}=", v)
       rescue NoMethodError
-        raise FphsException.new "Prevented a bad configuration of #{self.class.name} in #{config_obj.class.name} (#{config_obj.respond_to?(:human_name) ? config_obj.human_name : config_obj.id}). #{k} is not recognized as a valid attribute."
+        raise FphsException, "Prevented a bad configuration of #{self.class.name} in #{config_obj.class.name} (#{config_obj.respond_to?(:human_name) ? config_obj.human_name : config_obj.id}). #{k} is not recognized as a valid attribute."
       end
     end
     self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
     self.caption_before ||= {}
     self.caption_before = self.caption_before.symbolize_keys
 
-    self.caption_before = self.caption_before.each do |k,v|
-
+    self.caption_before = self.caption_before.each do |k, v|
       if v.is_a? String
 
         v = Admin::MessageTemplate.text_to_html(v)
@@ -219,7 +223,6 @@ class ExtraOptions
           v[mode] = Admin::MessageTemplate.text_to_html(modeval)
         end
       end
-
     end
 
     self.dialog_before ||= {}
@@ -277,15 +280,14 @@ class ExtraOptions
     self
   end
 
-  def self.parse_config config_obj
-
+  def self.parse_config(config_obj)
     config_text = options_text(config_obj)
 
     configs = []
     begin
       if config_text.present?
         config_text = include_libraries(config_text)
-        res = YAML.load(config_text)
+        res = YAML.safe_load(config_text)
       else
         res = {}
       end
@@ -293,10 +295,9 @@ class ExtraOptions
 
       set_defaults config_obj, res
 
-
       opt_default = res.delete(:_default)
 
-      res.delete_if {|k,v| k.to_s.start_with? '_definitions'}
+      res.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
 
       res.each do |name, value|
         # If defined, use the optional _default entry as the basis for all individual options,
@@ -304,64 +305,69 @@ class ExtraOptions
 
         value = opt_default.merge(value) if opt_default
 
-        i = self.new name, value, config_obj
+        i = new name, value, config_obj
         configs << i
       end
-
     end
 
-    return configs
+    configs
   end
 
-  def calc_creatable_if obj
+  def calc_creatable_if(obj)
     Rails.logger.debug "Checking calc_creatable_if on #{obj} with #{self.creatable_if}"
     ca = ConditionalActions.new self.creatable_if, obj
     ca.calc_action_if
   end
 
-  def calc_reference_creatable_if ref_config, obj
+  def calc_reference_creatable_if(ref_config, obj)
     ci = ref_config[:creatable_if]
     return true unless ci
+
     Rails.logger.debug "Checking calc_reference_creatable_if on #{obj} with #{ci}"
     ca = ConditionalActions.new ci, obj
     ca.calc_action_if
   end
 
-  def calc_reference_prevent_disable_if ref_config, obj
+  def calc_reference_prevent_disable_if(ref_config, obj)
     ci = ref_config[:prevent_disable]
     return false unless ci
+
     Rails.logger.debug "Checking calc_reference_prevent_disable_if on #{obj} with #{ci}"
     ca = ConditionalActions.new ci, obj
     ca.calc_action_if
   end
 
-  def calc_reference_allow_disable_if_not_editable_if ref_config, obj
+  def calc_reference_allow_disable_if_not_editable_if(ref_config, obj)
     ci = ref_config[:allow_disable_if_not_editable]
     return false unless ci
+
     Rails.logger.debug "Checking calc_reference_allow_disable_if_not_editable_if on #{obj} with #{ci}"
     ca = ConditionalActions.new ci, obj
     ca.calc_action_if
   end
 
-  def calc_editable_if obj
+  def calc_editable_if(obj)
     Rails.logger.debug "Checking calc_editable_if on #{obj} with #{self.editable_if}"
     ca = ConditionalActions.new self.editable_if, obj
     ca.calc_action_if
   end
 
-  def calc_add_reference_if obj
-    Rails.logger.debug "Checking calc_add_reference_if on #{obj} with #{self.add_reference_if}"
-    ca = ConditionalActions.new self.add_reference_if, obj
+  def calc_add_reference_if(obj)
+    Rails.logger.debug "Checking calc_add_reference_if on #{obj} with #{add_reference_if}"
+    ca = ConditionalActions.new add_reference_if, obj
     ca.calc_action_if
   end
 
-  def calc_showable_if obj
+  def calc_showable_if(obj)
     ca = ConditionalActions.new self.showable_if, obj
     ca.calc_action_if
   end
 
-  def calc_valid_if action_type, obj, return_failures: nil
-    raise FphsException.new "incorrect action type requested in calc_valid_if #{action_type}" unless action_type.to_s.in?(%w(create update save))
+  def calc_valid_if(action_type, obj, return_failures: nil)
+    unless action_type.to_s.in?(%w[create update save])
+      raise FphsException, "incorrect action type requested in calc_valid_if #{action_type}"
+    end
+
     ci = self.valid_if["on_#{action_type}".to_sym]
     Rails.logger.debug "Checking calc_valid_if on #{obj} with #{ci}"
     ca = ConditionalActions.new ci, obj, return_failures: return_failures
@@ -369,47 +375,42 @@ class ExtraOptions
   end
 
   # Get an array of ConfigLibrary objects from the options text
-  def self.config_libraries config_obj
+  def self.config_libraries(config_obj)
     c = options_text(config_obj).dup
     return [] unless c.present?
 
     format = config_obj.is_a?(Report) ? :sql : :yaml
 
     Admin::ConfigLibrary.make_substitutions! c, format
-
   end
 
   protected
 
-    def self.options_text config_obj
-      if config_obj.is_a?(Report)
-        config_obj.sql.dup
-      else
-        config_obj.options.dup
-      end
+  def self.options_text(config_obj)
+    if config_obj.is_a?(Report)
+      config_obj.sql.dup
+    else
+      config_obj.options.dup
     end
+  end
 
-    def self.set_defaults config_obj, all_options={}
+  def self.set_defaults(config_obj, all_options = {}); end
 
-    end
+  def self.include_libraries(content_to_update)
+    content_to_update = content_to_update.dup
+    reg = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
+    res = content_to_update.match reg
 
-    def self.include_libraries content_to_update
-
-      content_to_update = content_to_update.dup
-      reg = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
+    while res
+      category = res[1].strip
+      name = res[2].strip
+      lib = Admin::ConfigLibrary.content_named category, name, format: :yaml
+      lib = lib.dup
+      lib.gsub!(/^_definitions:.*/, "_definitions__#{category}_#{name}:")
+      content_to_update.gsub!(res[0], lib)
       res = content_to_update.match reg
-
-      while res
-        category = res[1].strip
-        name = res[2].strip
-        lib = Admin::ConfigLibrary.content_named category, name, format: :yaml
-        lib = lib.dup
-        lib.gsub!(/^_definitions:.*/, "_definitions__#{category}_#{name}:")
-        content_to_update.gsub!(res[0], lib)
-        res = content_to_update.match reg
-      end
-
-      content_to_update
     end
 
+    content_to_update
+  end
 end

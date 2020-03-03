@@ -179,6 +179,23 @@ _fpa.activity_logs = {
             $(tab2.attr('data-target')).collapse('hide');
           }, 500);
         }
+        if (save_action.refresh_panel) {
+          var tab3 = $('.master-panel[data-master-id="' + obj_data.master_id + '"] a[data-panel-tab="' + save_action.refresh_panel + '"]');
+          var exp = tab3.attr('aria-expanded') == 'true';
+          tab3.click();
+
+          if (exp) {
+            window.setTimeout(function () {
+              $(tab3.attr('data-target')).collapse('show');
+            }, 500);
+          }
+          else {
+            window.setTimeout(function () {
+              $(tab3.attr('data-target')).collapse('hide');
+            }, 500);
+          }
+
+        }
       }
     }
   }
