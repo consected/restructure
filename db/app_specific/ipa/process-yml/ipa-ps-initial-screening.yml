@@ -1,0 +1,76 @@
+default:
+  dialog_before:
+    select_is_good_time_to_speak: 
+      name: ipa ps intro
+
+    any_questions_blank_yes_no: 
+      name: ipa ps intro overview
+      label: show script
+    select_still_interested: 
+      name: ipa ps intro details
+      label: show script
+#    select_still_interested: 
+#      name: ipa ps intro time to continue
+#      label: show script
+    placeholder_complete_intro: 
+      name: ipa ps intro complete intro
+      label: show script
+
+  show_if:
+  
+  
+    looked_at_website_yes_no:  
+      select_is_good_time_to_speak: "yes"
+    any_questions_blank_yes_no:
+      looked_at_website_yes_no: 
+        - "yes"
+        - "no"
+      
+    select_still_interested:
+      any_questions_blank_yes_no: 
+        - "yes"
+        - "no"        
+
+    placeholder_complete_intro:
+      any:
+        select_still_interested:
+          - "yes"
+
+    follow_up_date:
+      any:
+        select_is_good_time_to_speak: 
+          - not appropriate time
+          - left voicemail
+        select_still_interested: yes - call back
+
+    follow_up_time:
+      any:
+        select_is_good_time_to_speak:
+          - not appropriate time
+          - left voicemail        
+        select_still_interested: yes - call back
+        
+    placeholder_not_interested:
+      any:
+        select_is_good_time_to_speak: not interested
+        select_still_interested: no
+        
+      
+
+  caption_before:
+    select_is_good_time_to_speak: Is this a good time to speak?
+    looked_at_website_yes_no: |
+        Okay great, thank you for expressing interest in our study.  Did you have a chance to look at the website that had more details about the In-Person Assessments?
+        <i>(yes)</i> Great, do you have any specific questions about it before I briefly go over the study?
+        <i>(no)</i> That is alright, I can tell you more about the study right now.
+#    select_may_i_begin: May I begin?
+#    any_questions_blank_yes_no: I am going to go over the study in some more detail. Do you have any questions so far?
+#    select_still_interested: Are you still interested in hearing more about the study or do you have any additional questions? (offer to mail materials and call them back if they want to review materials; offer to send them a link to the IPA webpage)
+
+    follow_up_date: Enter a follow up date and time if the subject wishes for a call back before continuing with the screening, or you left a voicemail. 
+    follow_up_time: Follow up time
+    placeholder_not_interested: Thank and end call
+    notes: Notes, questions or other information for follow up
+    
+
+#    contact_details_notes: Contact details notes for gift card. After completing the call, ensure contact details recorded here are transferred to the subject's address record.
