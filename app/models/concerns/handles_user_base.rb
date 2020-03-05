@@ -1,5 +1,6 @@
-module HandlesUserBase
+# frozen_string_literal: true
 
+module HandlesUserBase
   extend ActiveSupport::Concern
 
   included do
@@ -13,7 +14,8 @@ module HandlesUserBase
 
     before_validation :downcase_attributes
 
-    before_save :check_can_save, unless: -> {self.force_save?}
+    before_create :write_created_by_user
+    before_save :check_can_save, unless: -> { force_save? }
 
     # This validation ensures that the user ID has been set in the master object
     # It implicitly reinforces security, in that the user must be authenticated for
@@ -26,26 +28,24 @@ module HandlesUserBase
     after_save :handle_disabled, if: -> { respond_to?(:disabled?) && disabled? }
 
     attr_accessor :ignore_configurable_valid_if
-
   end
 
   class_methods do
-
     def all_subclasses
       # Subsclasses may be subclassed further - go to the next level if needed.
-      UserBase.subclasses.map {|s| s.subclasses ? s.subclasses : s }.flatten
+      UserBase.subclasses.map { |s| s.subclasses || s }.flatten
     end
 
-    def class_from_name class_name
-      all_subclasses.select {|s| s.name == class_name}.first
+    def class_from_name(class_name)
+      all_subclasses.select { |s| s.name == class_name }.first
     end
 
-    def class_from_table_name table_name
-      UserBase.descendants.reject(&:abstract_class).select {|c| c.table_name == table_name.to_s}.first
+    def class_from_table_name(table_name)
+      UserBase.descendants.reject(&:abstract_class).select { |c| c.table_name == table_name.to_s }.first
     end
 
     # Ensure that a provided table_name is clean and can be used safely without SQL injection warnings
-    def clean_table_name table_name
+    def clean_table_name(table_name)
       class_from_table_name(table_name)&.table_name
     end
 
@@ -58,27 +58,27 @@ module HandlesUserBase
     end
 
     def human_name
-      cn = self.name
+      cn = name
 
-      if self.respond_to?(:is_dynamic_model) && self.is_dynamic_model || self.respond_to?(:is_activity_log) && self.is_activity_log
+      if respond_to?(:is_dynamic_model) && is_dynamic_model || respond_to?(:is_activity_log) && is_activity_log
         cn = cn.split('::').last
       end
 
       cn.underscore.humanize.titleize
     end
 
-    def allows_user_access_to? user, perform, with_options=nil
-      raise FphsException.new "no user in allows_user_access_to?" unless user
+    def allows_user_access_to?(user, perform, with_options = nil)
+      raise FphsException, 'no user in allows_user_access_to?' unless user
 
       # Check at a table level that the user can access the resource
-      named = self.name.ns_underscore.pluralize
+      named = name.ns_underscore.pluralize
       !!user.has_access_to?(perform, :table, named, with_options)
     end
 
-    def refine_permitted_params param_list
+    def refine_permitted_params(param_list)
       res = param_list.dup
 
-      ms_keys = res.select {|a| columns_hash[a.to_s]&.array }
+      ms_keys = res.select { |a| columns_hash[a.to_s]&.array }
       ms_keys.each do |k|
         res.delete(k)
         res << { k => [] }
@@ -88,29 +88,23 @@ module HandlesUserBase
     end
 
     def permitted_params
-      res = self.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, :tracker_id, :admin_id]
+      res = attribute_names.map(&:to_sym) - %i[disabled user_id created_at updated_at tracker_id admin_id]
       refine_permitted_params res
     end
 
-    def default_options
-
-    end
-
+    def default_options; end
   end
-
 
   def allows_nil_master?
     false
   end
 
-
   def creatable_without_user
     false
   end
 
-
   def can_edit?
-    self.allows_current_user_access_to? :edit
+    allows_current_user_access_to? :edit
   end
 
   def prevent_edit
@@ -129,11 +123,11 @@ module HandlesUserBase
   end
 
   def can_create?
-    self.allows_current_user_access_to? :create
+    allows_current_user_access_to? :create
   end
 
   def can_access?
-    self.allows_current_user_access_to? :access
+    allows_current_user_access_to? :access
   end
 
   # Simple wrapper around #valid? that ensures certain validation methods avoid running and breaking outside of
@@ -142,9 +136,9 @@ module HandlesUserBase
     self.validating = true
 
     begin
-      res = !marked_invalid? && self.valid?
-    rescue => e
-      self.errors.add "unexpected error", e.message
+      res = !marked_invalid? && valid?
+    rescue StandardError => e
+      errors.add 'unexpected error', e.message
       res = false
     end
     self.validating = false
@@ -155,7 +149,7 @@ module HandlesUserBase
     @marked_invalid
   end
 
-  def mark_invalid= val
+  def mark_invalid=(val)
     @marked_invalid = val
   end
 
@@ -163,7 +157,7 @@ module HandlesUserBase
     @validating
   end
 
-  def validating= v
+  def validating=(v)
     @validating = v
   end
 
@@ -173,28 +167,24 @@ module HandlesUserBase
 
   # Provide a modified human name for an instance
   def human_name
-
-    if respond_to?(:rec_type) && self.rec_type
+    if respond_to?(:rec_type) && rec_type
       rec_type.underscore.humanize.titleize
     else
       self.class.human_name
     end
   end
 
-  def option_type
-  end
+  def option_type; end
 
-  def option_type_config
-  end
+  def option_type_config; end
 
-  def creatables
-  end
+  def creatables; end
 
-  def save_action
-  end
+  def save_action; end
 
   def master_user
     return current_user if self.class.no_master_association
+
     if respond_to?(:master) && master
       current_user = master.current_user
       current_user
@@ -202,7 +192,10 @@ module HandlesUserBase
       current_user = item.master.current_user
       current_user
     else
-      raise "master is nil and can't be used to get the current user" unless validating?
+      unless validating?
+        raise "master is nil and can't be used to get the current user"
+      end
+
       nil
     end
   end
@@ -221,26 +214,34 @@ module HandlesUserBase
   end
 
   def item_type_us
-    self.item_type.ns_underscore
+    item_type.ns_underscore
   end
 
-  def record_item no_exception: false
-    raise FphsException.new("Does not have a record_type or record_id attribute") unless respond_to?(:record_type) && respond_to?(:record_id)
-    rc = ModelReference.to_record_class_for_type self.record_type
-    r = rc.find(self.record_id)
-    raise FphsException.new "User does not have access to record of type #{self.record_type}" unless no_exception || r.can_access?
+  def record_item(no_exception: false)
+    unless respond_to?(:record_type) && respond_to?(:record_id)
+      raise FphsException, 'Does not have a record_type or record_id attribute'
+    end
+
+    rc = ModelReference.to_record_class_for_type record_type
+    r = rc.find(record_id)
+    unless no_exception || r.can_access?
+      raise FphsException, "User does not have access to record of type #{record_type}"
+    end
+
     r
   end
 
-  def allows_current_user_access_to? perform, with_options=nil
-    if self.class.no_master_association
-      curr_user = self.current_user
-    else
-      curr_user = master_user
+  def allows_current_user_access_to?(perform, _with_options = nil)
+    curr_user = if self.class.no_master_association
+                  current_user
+                else
+                  master_user
+                end
+    unless curr_user
+      raise FphsException, 'no master_user in allows_current_user_access_to?'
     end
-    raise FphsException.new "no master_user in allows_current_user_access_to?" unless curr_user
 
-    res = self.class.allows_user_access_to? curr_user, perform, with_options=nil
+    res = self.class.allows_user_access_to? curr_user, perform, with_options = nil
     return false unless res
 
     if self.class.no_master_association
@@ -253,13 +254,11 @@ module HandlesUserBase
     end
 
     !!m.allows_user_access
-
   end
 
   def referenced_from
     ModelReference.find_where_referenced_from self
   end
-
 
   def model_reference_disable
     if respond_to? :disabled
@@ -270,23 +269,22 @@ module HandlesUserBase
     end
   end
 
-
   def embedded_item
     @embedded_item
   end
 
-  def embedded_item= o
+  def embedded_item=(o)
     if o.is_a? UserBase
       @embedded_item = o
     elsif o.is_a?(Hash) && @embedded_item
-      @embedded_item.master.current_user ||= self.master_user
+      @embedded_item.master.current_user ||= master_user
       @embedded_item.update o
       self.updated_at = @embedded_item.updated_at
     end
   end
 
   # Used as an indicator in certain models to show that this is part of a master record creation
-  def creating_master=cm
+  def creating_master=(cm)
     @creating_master = cm
   end
 
@@ -297,33 +295,30 @@ module HandlesUserBase
   if Master.respond_to? :alternative_id_fields
     # add the alternative_id_fields from the master as attributes, so we can use them for matching
     Master.alternative_id_fields.each do |f|
-
       define_method :"#{f}=" do |value|
-        if self.attribute_names.include? f.to_s
+        if attribute_names.include? f.to_s
           write_attribute(f, value)
         else
           instance_variable_set("@#{f}", value)
-          if self.master
-            return self.master
-          end
+          return master if master
+
           self.master = Master.find_with_alternative_id(f, value)
         end
       end
 
       define_method :"#{f}" do
-        if self.attribute_names.include? f.to_s
+        if attribute_names.include? f.to_s
           read_attribute(f)
         else
           instance_variable_get("@#{f}")
         end
       end
-
     end
   else
-    puts "Master does not respond to alternative_id_fields. Hopefully this is just during seeding"
+    puts 'Master does not respond to alternative_id_fields. Hopefully this is just during seeding'
   end
 
-  def set_referring_record ref_record_type, ref_record_id, current_user
+  def set_referring_record(ref_record_type, ref_record_id, current_user)
     @ref_record_type = ref_record_type
     @ref_record_id = ref_record_id
     @referring_record = find_referring_record
@@ -340,21 +335,18 @@ module HandlesUserBase
       ic = UserBase.class_from_name ref_item_class_name
 
       # look up the item using the item_id parameter.
-      @referring_record  = ic.find(@ref_record_id.to_i)
+      @referring_record = ic.find(@ref_record_id.to_i)
       @referring_record.current_user = current_user
       @referring_record
     end
   end
 
-
   def create_referring_record
     if @ref_record_type
 
-      @referring_record  = find_referring_record
+      @referring_record = find_referring_record
 
-      if @referring_record
-        ModelReference.create_with @referring_record, self
-      end
+      ModelReference.create_with @referring_record, self if @referring_record
     end
   end
 
@@ -363,10 +355,10 @@ module HandlesUserBase
     if respond_to?(:background_job_ref) && background_job_ref.present?
       ref_parts = background_job_ref.split('%')
       valid_ref_cns = ['delayed__backend__active_record__job'].freeze
-      valid_ref_cn = valid_ref_cns.select {|s| s == ref_parts.first}.first
+      valid_ref_cn = valid_ref_cns.select { |s| s == ref_parts.first }.first
       if valid_ref_cn
         job = valid_ref_cn.ns_camelize.constantize.find(ref_parts.last.to_i)
-        job.delete if job
+        job&.delete
       end
     end
   end
@@ -379,157 +371,177 @@ module HandlesUserBase
     @force_save
   end
 
-  def disable! current_user: nil, force_save: false
+  def disable!(current_user: nil, force_save: false)
     force_save! if force_save
     self.current_user ||= current_user
-    self.update! disabled: true
+    update! disabled: true
   end
-
 
   protected
 
-    def check_master
+  def check_master
+    return if self.class.no_master_association
 
-      return if self.class.no_master_association
+    msid = nil if msid.blank? && !msid.nil?
+    if msid && !master_id
+      m = Master.where(msid: msid).first
+      raise 'MSID set, but it does not match a master record' unless m
 
-      msid = nil if msid.blank? && !msid.nil?
-      if msid && !master_id
-        m = Master.where(msid: msid).first
-        raise "MSID set, but it does not match a master record" unless m
-        self.master_id = m.id
-      elsif msid && master_id
-        raise "MSID and master_id set, but they do not correspond to the same record" unless self.master.msid == msid
-      end
-
-      raise FphsException.new "master not set in #{self} #{self.id}" if self.respond_to?(:master) && !(self.master_id && self.master) && !validating?
-    end
-
-    def no_user_validation
-      (creatable_without_user && !persisted?) || validating? || self.class.no_master_association
-    end
-
-
-    def force_write_user
-      return true if no_user_validation
-      logger.debug "Forcing save of user in #{self}"
-      return unless self.master if self.respond_to? :master
-      mu = master_user
-      raise "bad user (for master #{master}) being pulled from master_user (#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '': ' not persisted'})" unless mu.is_a?(User) && mu.persisted?
-
-      write_attribute :user_id, mu.id
-    end
-
-    def user_set
-      return true if no_user_validation
-
-      unless self.user
-        errors.add :user, "must be authenticated and set"
-        logger.warn "User is not set. Failed user_set validation for #{self.inspect}"
-      end
-      self.user
-    end
-
-    # Downcase attributes prior to validation only if
-    # the name does not match a predefined 'ignore' regex
-    # and it is one of the permitted params
-    # NOTE: previously there was a bug that downcased params that were not in the
-    # permitted params list, and this could unexpectedly change attributes that were
-    # not submitted by a user. Although this could be considered reasonable, with the
-    # introduction of filepaths with Filestore, the result was damaging.
-    # To allow specific models to specify additional attributes not to downcase
-    # define a class method no_downcase_attributes returning an array of attribute names
-    def downcase_attributes
-
-      ea = ""
-      if self.class.respond_to? :no_downcase_attributes
-        self.class.no_downcase_attributes.each do |e|
-          ea += "(#{e})?"
+      self.master_id = m.id
+    elsif msid && master_id
+      unless master.msid == msid
+        raise 'MSID and master_id set, but they do not correspond to the same record'
         end
-      end
-
-      ignore = /(item_type)?(notes)?(description)?(message)?(.+_notes)?(.+_description)?(.+_details)?(e_signed_document)?#{ea}/
-
-      self.attributes.select {|k,v| k.to_sym.in? self.class.permitted_params }.reject {|k,v| k && k.match(ignore)[0].present?}.each do |k, v|
-
-        logger.info "Downcasing attribute (#{k})"
-        self.send("#{k}=".to_sym, v.downcase) if self.attributes[k].is_a? String
-      end
-      true
     end
 
-    def check_can_save
+    if respond_to?(:master) && !(master_id && master) && !validating?
+      raise FphsException, "master not set in #{self} #{id}"
+      end
+  end
 
-      raise FphsException.new "This item is not editable (#{self.respond_to?(:human_name) ? self.human_name : self.class.name}) #{self.id}" if persisted? && !can_edit?
-      raise FphsException.new "This item can not be created (#{self.respond_to?(:human_name) ? self.human_name : self.class.name})" if !persisted? && !can_create?
-      true
+  def no_user_validation
+    (creatable_without_user && !persisted?) || validating? || self.class.no_master_association
+  end
 
+  def force_write_user
+    return true if no_user_validation
+
+    logger.debug "Forcing save of user in #{self}"
+    return if respond_to?(:master) && !master
+
+    mu = master_user
+    unless mu.is_a?(User) && mu.persisted?
+      raise "bad user (for master #{master}) being pulled from master_user (#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '' : ' not persisted'})"
     end
 
-    def configurable_valid_if
+    write_attribute :user_id, mu.id
+  end
 
-      return true if @ignore_configurable_valid_if || !option_type_config.respond_to?(:valid_if)
+  # When creating, set the created_by_user_id attribute if it exists
+  def write_created_by_user
+    return true unless attribute_names.include? 'created_by_user_id'
 
-      vi = option_type_config.valid_if
-      return true if vi.empty?
+    return if respond_to?(:master) && !master
 
-      action_name = persisted? ? :update : :create
-      return_failures = {}
-      res = option_type_config.calc_valid_if action_name, self, return_failures: return_failures
+    mu = master_user
+    unless mu.is_a?(User) && mu.persisted?
+      raise "bad user (for master #{master}) being pulled from master_user when creating record (#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '' : ' not persisted'})"
+    end
 
-      unless res
-        if return_failures.empty?
-          errors.add :field_validation, "failed. Check your entries and try again"
-        else
-          return_failures.each do |c_var, c_vals|
+    # Failsafe, in case this is already set
+    return true if attributes['created_by_user_id']
 
-            c_vals.each do |table, cond|
-              cond.each do |k, v|
-                v = v.present? ? v : '(blank)'
-                if v.is_a? Hash
-                  if v[:hide_error]
-                    next
-                  elsif v[:condition]
-                    v = "#{v[:condition]} #{v[:value].present? ? v[:value] : '(blank)' }"
-                  else
-                    v = "#{v.first.first.to_s.humanize.downcase}: #{v.first.last.present? ? v.first.last : '(blank)' }"
-                  end
+    write_attribute :created_by_user_id, mu.id
+  end
+
+  def user_set
+    return true if no_user_validation
+
+    unless user
+      errors.add :user, 'must be authenticated and set'
+      logger.warn "User is not set. Failed user_set validation for #{inspect}"
+    end
+    user
+  end
+
+  # Downcase attributes prior to validation only if
+  # the name does not match a predefined 'ignore' regex
+  # and it is one of the permitted params
+  # NOTE: previously there was a bug that downcased params that were not in the
+  # permitted params list, and this could unexpectedly change attributes that were
+  # not submitted by a user. Although this could be considered reasonable, with the
+  # introduction of filepaths with Filestore, the result was damaging.
+  # To allow specific models to specify additional attributes not to downcase
+  # define a class method no_downcase_attributes returning an array of attribute names
+  def downcase_attributes
+    ea = ''
+    if self.class.respond_to? :no_downcase_attributes
+      self.class.no_downcase_attributes.each do |e|
+        ea += "(#{e})?"
+      end
+    end
+
+    ignore = /(item_type)?(notes)?(description)?(message)?(.+_notes)?(.+_description)?(.+_details)?(e_signed_document)?#{ea}/
+
+    attributes.select { |k, _v| k.to_sym.in? self.class.permitted_params }.reject { |k, _v| k && k.match(ignore)[0].present? }.each do |k, v|
+      logger.info "Downcasing attribute (#{k})"
+      send("#{k}=".to_sym, v.downcase) if attributes[k].is_a? String
+    end
+    true
+  end
+
+  def check_can_save
+    if persisted? && !can_edit?
+      raise FphsException, "This item is not editable (#{respond_to?(:human_name) ? human_name : self.class.name}) #{id}"
+      end
+    if !persisted? && !can_create?
+      raise FphsException, "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name})"
+      end
+
+    true
+  end
+
+  def configurable_valid_if
+    if @ignore_configurable_valid_if || !option_type_config.respond_to?(:valid_if)
+      return true
+      end
+
+    vi = option_type_config.valid_if
+    return true if vi.empty?
+
+    action_name = persisted? ? :update : :create
+    return_failures = {}
+    res = option_type_config.calc_valid_if action_name, self, return_failures: return_failures
+
+    if res
+      true
+    else
+      if return_failures.empty?
+        errors.add :field_validation, 'failed. Check your entries and try again'
+      else
+        return_failures.each do |c_var, c_vals|
+          c_vals.each do |table, cond|
+            cond.each do |k, v|
+              v = v.present? ? v : '(blank)'
+              if v.is_a? Hash
+                if v[:hide_error]
+                  next
+                elsif v[:condition]
+                  v = "#{v[:condition]} #{v[:value].present? ? v[:value] : '(blank)'}"
                 else
-                  v = ": #{v}"
+                  v = "#{v.first.first.to_s.humanize.downcase}: #{v.first.last.present? ? v.first.last : '(blank)'}"
                 end
-                k = table == :this ? k : "#{table}.#{k}"
-                if c_var == :all
-                  errors.add k.to_sym, "is invalid. Expected value to be #{v}"
-                elsif c_var == :any
-                  errors.add k.to_sym, "is one of several possible fields that is invalid - one must match. Expected value #{v}"
-                elsif c_var == :not_any
-                  errors.add k.to_sym, "is invalid. Expected value not to be #{v}"
-                elsif c_var == :not_all
-                  errors.add k.to_sym, "is one of several possible fields that is invalid - none must match. Expected value not #{v}"
-                end
+              else
+                v = ": #{v}"
+              end
+              k = table == :this ? k : "#{table}.#{k}"
+              if c_var == :all
+                errors.add k.to_sym, "is invalid. Expected value to be #{v}"
+              elsif c_var == :any
+                errors.add k.to_sym, "is one of several possible fields that is invalid - one must match. Expected value #{v}"
+              elsif c_var == :not_any
+                errors.add k.to_sym, "is invalid. Expected value not to be #{v}"
+              elsif c_var == :not_all
+                errors.add k.to_sym, "is one of several possible fields that is invalid - none must match. Expected value not #{v}"
               end
             end
           end
         end
-        return
-      else
-        true
       end
-
+      return
     end
+  end
 
-    def valid_embedded_item
-
-      if embedded_item && !embedded_item.errors.empty?
-        embedded_item.errors.each do |k, v|
-          errors.add k, v
-        end
+  def valid_embedded_item
+    if embedded_item && !embedded_item.errors.empty?
+      embedded_item.errors.each do |k, v|
+        errors.add k, v
       end
     end
+  end
 
-    def handle_disabled
-      @was_disabled = true
-      cancel_associated_job!
-    end
-
-
+  def handle_disabled
+    @was_disabled = true
+    cancel_associated_job!
+  end
 end

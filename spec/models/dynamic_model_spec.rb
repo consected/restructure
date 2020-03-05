@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require './db/table_generators/dynamic_models_table.rb'
 
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
@@ -14,6 +15,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
   before :all do
     Seeds.setup
 
+    @user0, = create_user
     create_admin
     create_user
     import_bulk_msg_app
@@ -55,5 +57,39 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
 
       recips << @bulk_master.dynamic_model__zeus_bulk_message_recipients.create!(record_id: pc.id, data: pc.data, rank: pc.rank, response: restext, zeus_bulk_message_id: zbmsg.id)
     end
+  end
+
+  it "saves the current user's user_id if the created_by_user_id field is present" do
+    unless ActivityLog.connection.table_exists? 'test_created_by_recs'
+      sql = TableGenerators.dynamic_models_table('test_created_by_recs', :create_do, 'test1', 'test2', 'created_by_user_id')
+    end
+
+    setup_access :masters, user: @user
+    master = Master.create! current_user: @user
+    master.current_user = @user
+
+    dm = DynamicModel.create! current_admin: @admin, name: 'test created by', table_name: 'test_created_by_recs', primary_key_name: :id, foreign_key_name: :master_id, category: :test
+
+    expect(dm).to be_a ::DynamicModel
+
+    setup_access :dynamic_model__test_created_by_recs, user: @user
+    setup_access :dynamic_model__test_created_by_recs, user: @user0
+
+    rec = master.dynamic_model__test_created_by_recs.create! test1: 'abc'
+
+    expect(rec).to be_a DynamicModel::TestCreatedByRec
+
+    rec = DynamicModel::TestCreatedByRec.find rec.id
+    expect(rec).to be_persisted
+    expect(rec.user_id).to eq @user.id
+    # Expect the created_by_user_id field value to match the current user
+    expect(rec.created_by_user_id).to eq @user.id
+
+    rec.update!(current_user: @user0, test2: 'def')
+    rec = DynamicModel::TestCreatedByRec.find rec.id
+
+    expect(rec.user_id).to eq @user0.id
+    # Expect the created_by_user_id field value to be unchanged
+    expect(rec.created_by_user_id).to eq @user.id
   end
 end
