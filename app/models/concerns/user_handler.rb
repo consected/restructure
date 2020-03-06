@@ -1,21 +1,22 @@
-module UserHandler
+# frozen_string_literal: true
 
+module UserHandler
   extend ActiveSupport::Concern
   include GeneralDataConcerns
 
   included do
     attr_accessor :no_track
 
-    scope :active, -> {
+    scope :active, lambda {
       if attribute_names.include?('disabled')
-        where "disabled is null or disabled = false"
+        where 'disabled is null or disabled = false'
       else
         self
       end
     }
-    scope :disabled, -> {
+    scope :disabled, lambda {
       if attribute_names.include?('disabled')
-        where "disabled = true"
+        where 'disabled = true'
       else
         self
       end
@@ -24,18 +25,21 @@ module UserHandler
     after_initialize :init_vars_user_handler
 
     # Ensure dynamic models without master as the foreign key and filestore files don't break associations
-    unless defined?(self.no_master_association) && self.no_master_association
+    unless defined?(no_master_association) && no_master_association
       # Standard associations
       Rails.logger.debug "Associating master as inverse of #{assoc_inverse}"
       belongs_to :master, assoc_rules
     end
 
-    has_many :item_flags,  -> { preload(:item_flag_name) }, as: :item, inverse_of: :item
+    if attribute_names.include? 'created_by_user_id'
+      belongs_to :created_by_user, class_name: 'User'
+    end
 
+    has_many :item_flags, -> { preload(:item_flag_name) }, as: :item, inverse_of: :item
 
-
-    has_many :trackers, as: :item, inverse_of: :item if self != Tracker && self != TrackerHistory
-
+    if self != Tracker && self != TrackerHistory
+      has_many :trackers, as: :item, inverse_of: :item
+    end
 
     validate :source_correct
     validate :rank_correct
@@ -45,9 +49,8 @@ module UserHandler
   end
 
   class_methods do
-
-    def uses_item_flags? user
-      Classification::ItemFlagName.enabled_for? self.name.ns_underscore, user
+    def uses_item_flags?(user)
+      Classification::ItemFlagName.enabled_for? name.ns_underscore, user
     end
 
     def foreign_key_name
@@ -59,35 +62,38 @@ module UserHandler
     end
 
     def assoc_rules
-      r = {inverse_of: assoc_inverse}
-      r[:foreign_key] = self.foreign_key_name if self.foreign_key_name && self.foreign_key_name != :master_id
-      r[:primary_key] = self.primary_key_name if self.primary_key_name && self.primary_key_name != :id
+      r = { inverse_of: assoc_inverse }
+      if foreign_key_name && foreign_key_name != :master_id
+        r[:foreign_key] = foreign_key_name
+      end
+      if primary_key_name && primary_key_name != :id
+        r[:primary_key] = primary_key_name
+      end
       r
-
     end
 
     def assoc_inverse
       # The plural model name
-      self.to_s.ns_underscore.pluralize.to_sym
+      to_s.ns_underscore.pluralize.to_sym
     end
 
     def ns_table_name
       assoc_inverse.to_s.singularize.to_sym
     end
 
-    def get_rank_name value
+    def get_rank_name(value)
       Classification::GeneralSelection.name_for self, value, :rank
     end
-    def get_source_name value
+
+    def get_source_name(value)
       Classification::GeneralSelection.name_for self, value, :source
     end
 
-
     def valid_rec_types
-      return nil unless self.attribute_names.include?('rec_type')
-      Classification::GeneralSelection.selector_attributes([:value], item_type: "#{self.assoc_inverse}_type").map(&:first)
-    end
+      return nil unless attribute_names.include?('rec_type')
 
+      Classification::GeneralSelection.selector_attributes([:value], item_type: "#{assoc_inverse}_type").map(&:first)
+    end
 
     # A secondary key is a field that can be used to uniquely identify a record. It is not a formal key,
     # and can not be guaranteed to provide uniqueness, but for certain data situations (such as imports)
@@ -104,111 +110,113 @@ module UserHandler
     # if the value does not already exist in the table
     # By returning nil, rather than false for non-existent values, the caller can evaluate the result
     # appropriately.
-    def secondary_key_unique? value, options={}
-      raise "No secondary_key field defined" unless secondary_key
-      l = self.where(secondary_key => value).length
+    def secondary_key_unique?(value, options = {})
+      raise 'No secondary_key field defined' unless secondary_key
+
+      l = where(secondary_key => value).length
       return false if l > 1
       return true if l == 1
+
       # the length is 0
       # handle the result based on the option
-      return (options[:fail_if_non_existent] ? nil : true)
+      (options[:fail_if_non_existent] ? nil : true)
     end
 
     def secondary_key_dups
       # protect against SQL injection
-      raise "Bad secondary_key #{secondary_key}" unless attribute_names.include? secondary_key.to_s
+      unless attribute_names.include? secondary_key.to_s
+        raise "Bad secondary_key #{secondary_key}"
+      end
+
       sk = secondary_key.to_s
-      self.select("count(id), #{sk}").group(sk).having("count(id) > 1")
+      self.select("count(id), #{sk}").group(sk).having('count(id) > 1')
     end
 
     # Find the item by the secondary key value, checking that the secondary key field is set,
     # and that the result does not return multiple values.
     # It is valid that no matches are made, in which case we return nil
-    def find_by_secondary_key value
-      raise "No secondary_key field defined" unless secondary_key
-      res = self.where(secondary_key => value)
-      raise "Secondary key field '#{secondary_key}' returns multiple values for '#{value}'" if res.length > 1
+    def find_by_secondary_key(value)
+      raise 'No secondary_key field defined' unless secondary_key
+
+      res = where(secondary_key => value)
+      if res.length > 1
+        raise "Secondary key field '#{secondary_key}' returns multiple values for '#{value}'"
+      end
+
       res.first
     end
-
   end
-
 
   public
 
-    def current_user
-      master.current_user
-    end
+  def current_user
+    master.current_user
+  end
 
-    def current_user= cu
-      master.current_user = cu
-    end
+  def current_user=(cu)
+    master.current_user = cu
+  end
 
-    def belongs_directly_to
-      master unless self.class.no_master_association
-    end
+  def belongs_directly_to
+    master unless self.class.no_master_association
+  end
 
-    def is_admin?
-      if respond_to?(:master) && master
-        master.is_admin?
-      else
-        nil
-      end
-    end
+  def is_admin?
+    master.is_admin? if respond_to?(:master) && master
+  end
 
-    # A fallback data attribute to act as the human identifier for an item
-    # for quick review.
-    # Most items will override this definition.
-    # Even if they don't directly, but have an attribute, we'll catch it
-    def data
-      if defined? super
-        return super()
-      end
-      a_list = %w(id master_id user_id admin_id rank source rec_type notes)
-      (self.attributes[(self.attribute_names - a_list).first] || "").to_s
-    end
+  # A fallback data attribute to act as the human identifier for an item
+  # for quick review.
+  # Most items will override this definition.
+  # Even if they don't directly, but have an attribute, we'll catch it
+  def data
+    return super() if defined? super
+
+    a_list = %w[id master_id user_id admin_id rank source rec_type notes]
+    (attributes[(attribute_names - a_list).first] || '').to_s
+  end
 
   protected
 
-    def init_vars_user_handler
-      instance_var_init :was_created
-      instance_var_init :updated_with
-      instance_var_init :was_updated
-      instance_var_init :update_action
-      instance_var_init :multiple_results
-    end
+  def init_vars_user_handler
+    instance_var_init :was_created
+    instance_var_init :updated_with
+    instance_var_init :was_updated
+    instance_var_init :update_action
+    instance_var_init :multiple_results
+  end
 
-
-
-    def track_record_update
-      # Don't do this if we have the configuration set to avoid tracking, or
-      # if the record was not created or updated
-      return if no_track || !(@was_updated || @was_created) || self.class.no_master_association
-      @update_action = true
-      Tracker.track_record_update self
-    end
-
-    def source_correct
-      if respond_to?(:source) && self.source
-        unless source_name
-          logger.info "Requested source of #{self.source}. This is not a valid value."
-          errors.add :source, "(#{self.source}) not a valid value"
-          logger.warn "Source is not a valid value in #{self.inspect}"
-          return false
-        end
+  def track_record_update
+    # Don't do this if we have the configuration set to avoid tracking, or
+    # if the record was not created or updated
+    if no_track || !(@was_updated || @was_created) || self.class.no_master_association
+      return
       end
-      true
-    end
 
+    @update_action = true
+    Tracker.track_record_update self
+  end
 
-    def rank_correct
-      if respond_to?(:rank) && self.rank
-        unless rank_name
-          errors.add :rank, "(#{self.rank}) not a valid value"
-          logger.warn "Rank is not a valid value in #{self.inspect}"
-        end
+  def source_correct
+    if respond_to?(:source) && source
+      unless source_name
+        logger.info "Requested source of #{source}. This is not a valid value."
+        errors.add :source, "(#{source}) not a valid value"
+        logger.warn "Source is not a valid value in #{inspect}"
         return false
       end
-      true
     end
+    true
+  end
+
+  def rank_correct
+    if respond_to?(:rank) && rank
+      unless rank_name
+        errors.add :rank, "(#{rank}) not a valid value"
+        logger.warn "Rank is not a valid value in #{inspect}"
+      end
+      return false
+    end
+    true
+  end
 end

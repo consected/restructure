@@ -91,5 +91,8 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
     expect(rec.user_id).to eq @user0.id
     # Expect the created_by_user_id field value to be unchanged
     expect(rec.created_by_user_id).to eq @user.id
+
+    expect(rec).to respond_to :created_by_user_name
+    expect(rec.created_by_user_name).to eq @user.email
   end
 end
