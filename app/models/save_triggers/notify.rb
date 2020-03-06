@@ -167,7 +167,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       end
 
       if @subject
-        Admin::MessageTemplate.substitute(@subject, data: @item, tag_subs: nil, ignore_missing: true)
+        @subject = Admin::MessageTemplate.substitute(@subject, data: @item, tag_subs: nil, ignore_missing: true)
       end
 
       if @extra_substitutions
