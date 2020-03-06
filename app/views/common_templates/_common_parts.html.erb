@@ -45,7 +45,7 @@
 <script id="search_results_notes_block" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <li class="list-group-item result-notes-container {{full_name_hyphenated}}-{{key}} notes-block {{#unless value}}notes-empty{{/unless}}">
     {{#if label}}
-    <small class="notes-block-label">{{label}}</small>
+    <small class="notes-block-label">{{> field_label labels=(concat 'labels_' (underscore name)) }}</small>
     {{/if}}
     {{#is (get template_config 'field_options' key 'format') 'markdown'}}
     <div class="custom-editor-viewer">

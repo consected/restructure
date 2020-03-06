@@ -425,6 +425,12 @@ div.popover {
     min-width:90%;
 }
 
+.modal-body {
+  max-height: 80vh;
+  overflow: auto;
+  height: auto;
+}
+
 .form-inline textarea.form-control {
   width: 97.5%;
   height: 40px;

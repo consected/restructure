@@ -8,8 +8,12 @@
       edid = "custom-editor-#{form_object_instance.class.name.ns_hyphenate}-#{field_name_sym}-#{form_object_instance.id}"
     end
   end
+
+  lf = label_for(field_name_sym, labels)
 %>
-<%= form.label field_name_sym, label_for(field_name_sym, labels) %>
+<% if lf.present? %>
+<%= form.label field_name_sym, lf %>
+<% end %>
 <% if editor_format == 'markdown'
 # editor_id = "custom-editor-#{form_object_instance.model_name}-#{form_object_instance.id}-#{field_name_sym}"
 %>

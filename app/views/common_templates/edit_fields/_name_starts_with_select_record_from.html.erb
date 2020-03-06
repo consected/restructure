@@ -6,45 +6,9 @@ options = field_options_for(form_object_instance, field_name_sym)
 curr_field_name = options[:edit_as] && options[:edit_as][:field_type] || field_name
 options[:include_blank] = true unless options.has_key?(:include_blank)
 
-rlit = curr_field_name.sub('select_record_from_', '').singularize
+assoc_or_class_name = curr_field_name.sub('select_record_from_', '').singularize
 
-# Lookup all the possible classes an activity log be used with (really these are master associations)
-if ActivityLog.use_with_class_names.include?(rlit)
-  reslist = form_object_instance.master.send(rlit.pluralize)
-  cl = reslist.first.class
-  if cl
-    if cl.attribute_names.include?('rank')
-      reslist = reslist.order(rank: :desc)
-      reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
-    else
-      reslist = reslist.order(data: :asc)
-      reslist = reslist.all.map{|i| [i.data, i.data]}
-    end
-  end
-elsif (ActivityLog.all_valid_item_and_rec_types - ActivityLog.use_with_class_names).include? rlit
-  ActivityLog.use_with_class_names.each do |ucn|
-    if rlit.start_with?(ucn)
-      reslist = form_object_instance.master.send(rlit.pluralize).where(rec_type: rlit.sub(/^#{ucn}_/, ''))
-      cl = reslist.first.class
-      if cl
-        if cl.attribute_names.include?('rank')
-          reslist = reslist.order(rank: :desc)
-          reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
-        else
-          reslist = reslist.order(data: :asc)
-          reslist = reslist.all.map{|i| [i.data, i.data]}
-        end
-      end
-    end
-  end
-end
-
-if cl
-  human_name = cl.human_name
-else
-  logger.warn "Failed to find valid class name for #{field_name_sym}"
-end
-
+human_name, reslist = list_record_data_for_select(form_object_instance, assoc_or_class_name)
 
 %>
 <%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: human_name) %>

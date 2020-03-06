@@ -133,6 +133,23 @@ li.list-group-item label {
 
 // .showed-caption-before label {display: none !important;}
 
+.caption-before, .dialog-before {
+  h1 {
+    font-size: 28px;
+  }
+
+  h2 {
+    font-size: 22px;
+  }
+  h3 {
+    font-size: 18px;
+  }
+  h4 {
+    font-size: 16px;
+  }
+
+}
+
 .form-inline .row > div {
     text-align: right;
     div.form-group {
