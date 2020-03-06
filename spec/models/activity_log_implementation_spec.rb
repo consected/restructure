@@ -29,6 +29,7 @@ RSpec.describe 'Activity Log implementation', type: :model do
     al = @player_contact.activity_log__player_contact_phones.build(select_call_direction: 'from player', select_who: 'user')
     expect(al.master_user).to eq user
     expect(master.activity_log__player_contact_phones).not_to be nil
+    expect(al.class.definition).not_to be nil
 
     expect(al.player_contact).to eq @player_contact
     resource_name = al.extra_log_type_config.resource_name
