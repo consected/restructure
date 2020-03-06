@@ -287,7 +287,7 @@ class ExtraOptions
     begin
       if config_text.present?
         config_text = include_libraries(config_text)
-        res = YAML.safe_load(config_text)
+        res = YAML.safe_load(config_text, [], [], true)
       else
         res = {}
       end
