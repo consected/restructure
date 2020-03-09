@@ -477,13 +477,9 @@ class Report < ActiveRecord::Base
     end
   end
 
-  # Validate short_name to prevent multiple double underscores in resource_name
+  # Validate short_name is downcased
   def valid_short_name?
-    parts = short_name.id_underscore.split('__')
-    if parts.length > 1
-      errors.add short_name, "must not use multiple space or punctuation characters between letters: '#{short_name}' becomes #{short_name.id_underscore}"
-      return
-    end
+    short_name.id_underscore.downcase == short_name
   end
 
   # Validate the generated resource_name is not a duplicate
@@ -501,6 +497,7 @@ class Report < ActiveRecord::Base
   # Validate the item_type to prevent multiple double underscores in resource_name
   def valid_item_type?
     return unless item_type
+
     parts = item_type.id_underscore.split('__')
     if parts.length > 1
       errors.add :item_type, "must not use multiple space or punctuation characters between letters: '#{item_type}' becomes #{item_type.id_underscore}"
