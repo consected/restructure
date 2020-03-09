@@ -1,6 +1,26 @@
 {
   "ignored_warnings": [
     {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "4e620104bf32818bad9633273c4b28a3a002de5e735fc35ec1116cb1cf08c2bb",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/concerns/calc_actions.rb",
+      "line": 395,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "@condition_scope.order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "CalcActions",
+        "method": "calc_return_types"
+      },
+      "user_input": "UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
       "fingerprint": "54e62a96700972c7fc9874fbba9da1e8d6a79791d1028f575f3c47e1d9d91ed2",
@@ -32,26 +52,6 @@
       "note": ""
     },
     {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "7085fa9bbe2091b698ee4ef62479cf458ae0862c3a2c7d8b56ed974d380b9373",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/concerns/calc_actions.rb",
-      "line": 269,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "CalcActions",
-        "method": "calc_query"
-      },
-      "user_input": "UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))",
-      "confidence": "Medium",
-      "note": ""
-    },
-    {
       "warning_type": "Command Injection",
       "warning_code": 14,
       "fingerprint": "735d9b84f6fdd9c36661cd08ce04e8139f00da74b428c97a0c08a0ce012898ff",
@@ -69,26 +69,6 @@
       },
       "user_input": "full_file_path",
       "confidence": "Medium",
-      "note": ""
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "9d7823c2d839cc45b01876f5748165dc61b964dd6894c57b48b2e53d7ede732b",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/concerns/calc_actions.rb",
-      "line": 276,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "((@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).reorder(\"#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.id desc\") or (@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")).select(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.*\").pluck(\"#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first}\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "CalcActions",
-        "method": "calc_query"
-      },
-      "user_input": "(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first",
-      "confidence": "Weak",
       "note": ""
     },
     {
@@ -153,6 +133,26 @@
       "note": ""
     },
     {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "ddede0603c1b3226772cfe2a99d55c7903d1e8539f6bbdf8bd5b267c4ac7b04a",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/concerns/calc_actions.rb",
+      "line": 407,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "(@condition_scope.order(:id => :desc).limit(1).reorder(\"#{@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.id desc\") or @condition_scope.order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")).select(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.*\").pluck(\"#{@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.#{@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first}\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "CalcActions",
+        "method": "calc_return_types"
+      },
+      "user_input": "@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first",
+      "confidence": "Weak",
+      "note": ""
+    },
+    {
       "warning_type": "Command Injection",
       "warning_code": 14,
       "fingerprint": "edac64dedbf192ca033ca46a9c90399f18e187becdaebbc8db59a4de3843b437",
@@ -173,6 +173,6 @@
       "note": ""
     }
   ],
-  "updated": "2019-10-18 18:06:41 +0100",
-  "brakeman_version": "4.6.1"
+  "updated": "2020-03-09 14:20:26 +0000",
+  "brakeman_version": "4.7.2"
 }
