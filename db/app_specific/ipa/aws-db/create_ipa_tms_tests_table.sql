@@ -1,9 +1,6 @@
 
       BEGIN;
 
--- Command line:
--- table_generators/generate.sh create dynamic_models_table ipa_ps_tms_tests false convulsion_or_seizue_blank_yes_no_dont_know epilepsy_blank_yes_no_dont_know fainting_blank_yes_no_dont_know concussion_blank_yes_no_dont_know hearing_problems_blank_yes_no_dont_know cochlear_implants_blank_yes_no_dont_know metal_blank_yes_no_dont_know metal_details neurostimulator_blank_yes_no_dont_know neurostimulator_details pacemaker_blank_yes_no_dont_know med_infusion_device_blank_yes_no_dont_know past_tms_blank_yes_no_dont_know past_tms_details past_mri_blank_yes_no_dont_know past_mri_details current_meds_blank_yes_no_dont_know current_meds_details neuro_history_details other_chronic_problems_blank_yes_no_dont_know other_chronic_problems_details hospital_visits_blank_yes_no_dont_know hospital_visits_details dietary_restrictions_blank_yes_no_dont_know dietary_restrictions_details anything_else_blank_yes_no anything_else_details
-
 
 -- Field order:
 -- past_tms_blank_yes_no_dont_know, past_tms_details, convulsion_or_seizue_blank_yes_no_dont_know, epilepsy_blank_yes_no_dont_know, fainting_blank_yes_no_dont_know, concussion_blank_yes_no_dont_know,
@@ -21,6 +18,7 @@
                   INSERT INTO ipa_ps_tms_test_history
                   (
                       master_id,
+                      form_version,
                       convulsion_or_seizure_blank_yes_no_dont_know,
                       convulsion_or_seizure_details,
                       epilepsy_blank_yes_no_dont_know,
@@ -49,6 +47,10 @@
                       hospital_visits_details,
                       dietary_restrictions_blank_yes_no_dont_know,
                       dietary_restrictions_details,
+                      tobacco_smoker_blank_yes_no, 
+                      tobacco_smoker_details, 
+                      healthcare_anxiety_blank_yes_no, 
+                      healthcare_anxiety_details,
                       anything_else_blank_yes_no,
                       anything_else_details,
                       user_id,
@@ -58,6 +60,7 @@
                       )
                   SELECT
                       NEW.master_id,
+                      NEW.form_version,
                       NEW.convulsion_or_seizure_blank_yes_no_dont_know,
                       NEW.convulsion_or_seizure_details,
                       NEW.epilepsy_blank_yes_no_dont_know,
@@ -86,6 +89,10 @@
                       NEW.hospital_visits_details,
                       NEW.dietary_restrictions_blank_yes_no_dont_know,
                       NEW.dietary_restrictions_details,
+                      NEW.tobacco_smoker_blank_yes_no, 
+                      NEW.tobacco_smoker_details, 
+                      NEW.healthcare_anxiety_blank_yes_no, 
+                      NEW.healthcare_anxiety_details,                      
                       NEW.anything_else_blank_yes_no,
                       NEW.anything_else_details,
                       NEW.user_id,
@@ -100,6 +107,7 @@
       CREATE TABLE ipa_ps_tms_test_history (
           id integer NOT NULL,
           master_id integer,
+          form_version varchar,
           convulsion_or_seizure_blank_yes_no_dont_know varchar,
           convulsion_or_seizure_details varchar,
           epilepsy_blank_yes_no_dont_know varchar,
@@ -132,6 +140,10 @@
           hospital_visits_details varchar,
           dietary_restrictions_blank_yes_no_dont_know varchar,
           dietary_restrictions_details varchar,
+          tobacco_smoker_blank_yes_no varchar,
+          tobacco_smoker_details varchar,
+          healthcare_anxiety_blank_yes_no varchar, 
+          healthcare_anxiety_details varchar,
           anything_else_blank_yes_no varchar,
           anything_else_details varchar,
           user_id integer,
@@ -152,6 +164,7 @@
       CREATE TABLE ipa_ps_tms_tests (
           id integer NOT NULL,
           master_id integer,
+          form_version varchar,
           convulsion_or_seizure_blank_yes_no_dont_know varchar,
           convulsion_or_seizure_details varchar,
           epilepsy_blank_yes_no_dont_know varchar,
@@ -184,6 +197,10 @@
           hospital_visits_details varchar,
           dietary_restrictions_blank_yes_no_dont_know varchar,
           dietary_restrictions_details varchar,
+          tobacco_smoker_blank_yes_no varchar,
+          tobacco_smoker_details varchar,
+          healthcare_anxiety_blank_yes_no varchar, 
+          healthcare_anxiety_details varchar,
           anything_else_blank_yes_no varchar,
           anything_else_details varchar,
           user_id integer,

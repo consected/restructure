@@ -1,3 +1,14 @@
+# Fields:
+
+# form_version,select_schedule
+# placeholder_ps_intro_v1,placeholder_ps_intro_v2,select_is_good_time_to_speak,
+# looked_at_website_yes_no,
+# placeholder_ps_overview_v1,placeholder_ps_overview_v2,any_questions_blank_yes_no,
+# placeholder_ps_details_v1,placeholder_ps_details_v2,same_hotel_yes_no,
+# placeholder_ps_details_sched_a_v2,placeholder_ps_details_sched_b_v2,select_still_interested,
+# placeholder_complete_intro,follow_up_date,follow_up_time,placeholder_not_interested,notes
+
+
 default:
   dialog_before:
     select_is_good_time_to_speak: 

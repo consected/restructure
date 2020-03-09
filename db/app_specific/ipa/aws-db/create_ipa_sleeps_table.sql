@@ -1,15 +1,6 @@
 
       BEGIN;
 
-      DROP TABLE if exists ipa_ps_sleep_history CASCADE;
-      DROP TABLE if exists ipa_ps_sleeps CASCADE;
-      DROP FUNCTION if exists log_ipa_ps_sleep_update();
-
-
-      COMMIT;
-
-      BEGIN;
-
 -- Command line:
 -- table_generators/generate.sh create dynamic_models_table ipa_ps_sleeps false sleep_disorder_blank_yes_no_dont_know sleep_disorder_details sleep_apnea_device_no_yes sleep_apnea_device_details bed_and_wake_time_details
 
@@ -25,6 +16,10 @@
                       sleep_apnea_device_no_yes,
                       sleep_apnea_device_details,
                       bed_and_wake_time_details,
+                      form_version,
+                      number_of_nights_sleep_apnea_device,
+                      sleep_apnea_travel_with_device_yes_no,
+                      sleep_apnea_bring_device_yes_no,
                       user_id,
                       created_at,
                       updated_at,
@@ -37,6 +32,10 @@
                       NEW.sleep_apnea_device_no_yes,
                       NEW.sleep_apnea_device_details,
                       NEW.bed_and_wake_time_details,
+                      NEW.form_version,
+                      NEW.number_of_nights_sleep_apnea_device,
+                      NEW.sleep_apnea_travel_with_device_yes_no,
+                      NEW.sleep_apnea_bring_device_yes_no,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -54,6 +53,10 @@
           sleep_apnea_device_no_yes varchar,
           sleep_apnea_device_details varchar,
           bed_and_wake_time_details varchar,
+          form_version varchar,
+          number_of_nights_sleep_apnea_device integer,
+          sleep_apnea_travel_with_device_yes_no varchar,
+          sleep_apnea_bring_device_yes_no varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -77,6 +80,10 @@
           sleep_apnea_device_no_yes varchar,
           sleep_apnea_device_details varchar,
           bed_and_wake_time_details varchar,
+          form_version varchar,
+          number_of_nights_sleep_apnea_device integer,
+          sleep_apnea_travel_with_device_yes_no varchar,
+          sleep_apnea_bring_device_yes_no varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

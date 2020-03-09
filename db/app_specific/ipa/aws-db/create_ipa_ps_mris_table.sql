@@ -4,13 +4,14 @@
 -- Command line:
 -- table_generators/generate.sh create dynamic_models_table ipa_ps_mris false electrical_implants_blank_yes_no_dont_know electrical_implants_details metal_implants_blank_yes_no_dont_know metal_implants_details metal_jewelry_blank_yes_no hearing_aid_blank_yes_no
 
-      CREATE FUNCTION log_ipa_ps_mri_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_ipa_ps_mri_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
                   INSERT INTO ipa_ps_mri_history
                   (
                       master_id,
+                      form_version,
                       past_mri_yes_no_dont_know,
                       past_mri_details,
                       electrical_implants_blank_yes_no_dont_know,
@@ -21,6 +22,7 @@
                       hearing_aid_blank_yes_no,
                       radiation_blank_yes_no,
                       radiation_details,
+                      select_radiation_type,
                       user_id,
                       created_at,
                       updated_at,
@@ -28,6 +30,7 @@
                       )
                   SELECT
                       NEW.master_id,
+                      NEW.form_version,
                       NEW.past_mri_yes_no_dont_know,
                       NEW.past_mri_details,
                       NEW.electrical_implants_blank_yes_no_dont_know,
@@ -38,6 +41,7 @@
                       NEW.hearing_aid_blank_yes_no,
                       NEW.radiation_blank_yes_no,
                       NEW.radiation_details,
+                      NEW.select_radiation_type,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -50,6 +54,7 @@
       CREATE TABLE ipa_ps_mri_history (
           id integer NOT NULL,
           master_id integer,
+          form_version varchar,
           past_mri_yes_no_dont_know varchar,
           past_mri_details varchar,
           electrical_implants_blank_yes_no_dont_know varchar,
@@ -60,6 +65,7 @@
           hearing_aid_blank_yes_no varchar,
           radiation_blank_yes_no varchar,
           radiation_details varchar,
+          select_radiation_type varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -78,6 +84,7 @@
       CREATE TABLE ipa_ps_mris (
           id integer NOT NULL,
           master_id integer,
+          form_version varchar,
           past_mri_yes_no_dont_know varchar,
           past_mri_details varchar,
           electrical_implants_blank_yes_no_dont_know varchar,
@@ -88,6 +95,7 @@
           hearing_aid_blank_yes_no varchar,
           radiation_blank_yes_no varchar,
           radiation_details varchar,          
+          select_radiation_type varchar,          
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

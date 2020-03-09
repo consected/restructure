@@ -14,6 +14,7 @@ set search_path=ipa_ops, ml_app;
           prev_activity_type varchar,
           extra_log_type varchar,
           user_id integer,
+          created_by_user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
           activity_log_ipa_assignment_discussion_id integer
@@ -27,6 +28,7 @@ set search_path=ipa_ops, ml_app;
           prev_activity_type varchar,
           extra_log_type varchar,
           user_id integer,
+          created_by_user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
       );
@@ -44,6 +46,7 @@ set search_path=ipa_ops, ml_app;
                       prev_activity_type,
                       extra_log_type,
                       user_id,
+                      created_by_user_id,
                       created_at,
                       updated_at,
                       activity_log_ipa_assignment_discussion_id
@@ -56,6 +59,7 @@ set search_path=ipa_ops, ml_app;
                       NEW.prev_activity_type,
                       NEW.extra_log_type,
                       NEW.user_id,
+                      NEW.created_by_user_id,
                       NEW.created_at,
                       NEW.updated_at,
                       NEW.id
