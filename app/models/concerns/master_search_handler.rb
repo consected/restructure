@@ -23,23 +23,29 @@ module MasterSearchHandler
     SimplePlayerJoin = 'LEFT JOIN player_infos on masters.id = player_infos.master_id LEFT JOIN pro_infos as pro_infos on masters.id = pro_infos.master_id'
     NotTrackerJoin = :no_join # 'INNER JOIN trackers "not_trackers" on masters.id = not_trackers.master_id'
     NotTrackerHistoryJoin = :no_join # 'INNER JOIN tracker_history "not_tracker_histories" on masters.id = not_tracker_histories.master_id'
+
+    #
     # AltConditions allows certain search fields to be handled differently from a plain equality match
     # Simply define a hash for the table containing the symbolized field names to be handled
+    #
     # Use a hash with :value to define a predefined matching clause:
     # :starts_with is the equivalent of "?%"
     # :contains is the equivalent of "%?%"
     # :is  and :is_not are the equivalent of "?"
     # :do_nothing forces this attribute to be skipped
+    #
     # Subsequent symbols in the array can be used to modify the string
     # :strip_spaces removes all spaces from the string
     # :upcase makes the whole string uppercase
-    # The :conditioncan be specified to state the actual query condition
+    #
+    # The :condition can be specified to state the actual query condition
     # :starts with and :contains both default to "field_name LIKE ?"
     # :is_not default to "field_name <> ?"
+    #
     # note that ? characters will be replaced by the field search value
+    #
     # Optionally add a value (symbol or array of symbols or string specifying full join clause) for :joins
     # to specify specific tables to add to the inner join list
-
     AltConditions = {
       player_infos: {
         first_name: { value: :starts_with },
