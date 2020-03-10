@@ -94,8 +94,9 @@ class Report < ActiveRecord::Base
     user.has_access_to?(:read, :report, :_all_reports_)
   end
 
+  # Generate a list of categories, which are the unique item_type values for active records
   def self.categories
-    Report.select('distinct item_type').where('item_type is not null').all.map(&:item_type)
+    Report.active.select('distinct item_type').where('item_type is not null').all.map(&:item_type)
   end
 
   def self.item_types

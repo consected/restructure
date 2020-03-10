@@ -8,6 +8,7 @@ describe 'reports', js: true, driver: :app_firefox_driver do
   include MasterDataSupport
   include ItemFlagSupport
   include FeatureSupport
+  include ReportSupport
 
   before(:all) do
     @admin, = create_admin
@@ -32,7 +33,7 @@ describe 'reports', js: true, driver: :app_firefox_driver do
     if rl.count > 0
       r = rl.first
     else
-      r = Report.create(current_admin: @admin, name: 'Item Flags types', description: '', sql: sql, search_attrs: '', disabled: false, report_type: 'regular_report', auto: false, searchable: false, position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
+      r = create_item_flags_report
       r.save!
       expect(r.can_access?(@user)).to be_truthy
     end
