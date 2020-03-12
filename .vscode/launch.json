@@ -20,7 +20,7 @@
                 "3001"
             ],
             "env": {
-                // "RAILS_ENV": "ipa_test",
+                "RAILS_ENV": "ipa_test",
                 "FPHS_2FA_AUTH_DISABLED": "true"
             }
         },
