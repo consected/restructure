@@ -6,7 +6,7 @@ $color2: rgb(0, 97, 140);
   margin: 0 0.5rem;
   background-color: transparent;
   border-radius: 50px;
-  line-height:14px;
+  line-height: 14px;
   padding: 8px 12px 4px 8px;
   color: white;
   font-weight: bold;
@@ -14,7 +14,6 @@ $color2: rgb(0, 97, 140);
     position: absolute;
     opacity: 0;
     + label {
-
       margin-bottom: 0;
       font-size: 13px;
       font-weight: normal;
@@ -27,24 +26,29 @@ $color2: rgb(0, 97, 140);
       }
 
       &:before {
-        content: '\2714';
+        content: "\e013";
+
+        font-family: "Glyphicons Halflings";
+        font-size: 9px;
+        line-height: 14px;
+        height: 18px;
+        width: 18px;
+
         font-weight: normal;
         background: $color1;
         border-radius: 100%;
         border: 1px solid darken($color1, 25%);
         display: inline-block;
-        width: 1.4em;
-        height: 1.3em;
+
         position: relative;
         top: -0.2em;
-        margin-right: 0.3em;
+        margin-right: 0.5em;
         vertical-align: top;
         cursor: pointer;
         text-align: center;
         transition: all 250ms ease;
-        padding-top:0.05em;
+        padding-top: 0.05em;
         color: white;
-
       }
     }
     &:checked {
@@ -69,7 +73,7 @@ $color2: rgb(0, 97, 140);
           box-shadow: inset 0 0 0 2px $color1;
           border-color: darken($color1, 25%);
           background: darken($color1, 25%);
-          content: '-';
+          content: "-";
         }
       }
     }
