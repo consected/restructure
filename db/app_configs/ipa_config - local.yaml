@@ -4214,7 +4214,7 @@ app_type:
     admin_id: 3
     disabled: false
     created_at: '2020-03-02T10:56:10.918Z'
-    updated_at: '2020-03-02T10:56:10.918Z'
+    updated_at: '2020-03-11T17:53:10.172Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -4237,10 +4237,11 @@ app_type:
       pi_review\r\n            id:\r\n              this_references: id\r\n\r\n  save_trigger:\r\n
       \   on_create:\r\n      <<: *create_filestore_container\r\n\r\n      notify:\r\n
       \     - type: email\r\n        role: email - protocol deviation review\r\n        layout_template:
-      ipa notification layout\r\n        content_template: ipa protocol deviation
-      message\r\n        subject: \"IPA App: Protocol Deviation needs initial review\"\r\n
-      \     - type: sms\r\n        role: sms - protocol deviation review\r\n        layout_template:
-      standard sms layout\r\n        content_template: ipa sms notification\r\n        subject:
+      ipa notification layout\r\n        content_template: ipa notification message\r\n
+      \       subject: \"IPA App: Protocol Deviation needs initial review - {{id}}\"\r\n
+      \       extra_substitutions:\r\n        \r\n        \r\n      - type: sms\r\n
+      \       role: sms - protocol deviation review\r\n        layout_template: standard
+      sms layout\r\n        content_template: ipa sms notification\r\n        subject:
       Protocol Deviation\r\n\r\n  references:\r\n\r\n  # Always show the record that
       contains event details\r\n  - dynamic_model__ipa_protocol_deviation:\r\n      from:
       this\r\n      add: one_to_this\r\n\r\n  # The initial review can be performed
@@ -4284,13 +4285,20 @@ app_type:
       \ showable_if:\r\n    never: true\r\n  creatable_if:\r\n    never: true\r\n
       \ save_trigger:\r\n    on_create:\r\n      notify:\r\n      - type: email\r\n
       \       role: email - protocol deviation pi\r\n        layout_template: ipa
-      notification layout\r\n        content_template: ipa protocol deviation message\r\n
-      \       subject: \"IPA App: Protocol Deviation needs review\"\r\n        if:
-      &notify_conditions_pi\r\n          all:\r\n            dynamic_model__ipa_protocol_deviations:\r\n
-      \             select_severity: major\r\n              id:\r\n                parent_references:
-      id\r\n\r\n      - type: sms\r\n        role: sms - protocol deviation pi\r\n
-      \       layout_template: standard sms layout\r\n        content_template: ipa
-      sms notification\r\n        subject: Protocol Deviation\r\n        if: *notify_conditions_pi\r\n\r\npi_review:\r\n
+      notification layout\r\n        content_template: ipa notification message\r\n
+      \       subject: \"IPA App: Protocol Deviation needs initial review - {{id}}\"\r\n
+      \       extra_substitutions:\r\n          reason: 'Protocol Deviation needs
+      initial review'\r\n          extra_text: |\r\n            A **protocol deviation**
+      record has been created. Based on the \r\n            details entered, a review
+      is required.\r\n            \r\n            Please login to the Athena app using
+      the link below to review\r\n            the protocol deviation and record any
+      additional details related to it.\r\n\r\n          panel_tab: activity-log--ipa-assignment-protocol-deviations\r\n
+      \         item_id: \"{{id}}\"\r\n\r\n        if: &notify_conditions_pi\r\n          all:\r\n
+      \           dynamic_model__ipa_protocol_deviations:\r\n              select_severity:
+      major\r\n              id:\r\n                parent_references: id\r\n\r\n
+      \     - type: sms\r\n        role: sms - protocol deviation pi\r\n        layout_template:
+      standard sms layout\r\n        content_template: ipa sms notification\r\n        subject:
+      Protocol Deviation\r\n        if: *notify_conditions_pi\r\n\r\npi_review:\r\n
       \ label: Complete PI Review\r\n  fields:\r\n    - select_who\r\n    - done_when\r\n
       \   - notes\r\n\r\n  caption_before:\r\n    all_fields: <b>Review the protocol
       deviation and update the details and severity if necessary before continuing.</b>\r\n
@@ -4302,8 +4310,15 @@ app_type:
       \   never: true\r\n  creatable_if:\r\n    never: true\r\n\r\n  save_trigger:\r\n
       \   on_create:\r\n      notify:\r\n      - type: email\r\n        role: email
       - protocol deviation irb report\r\n        layout_template: ipa notification
-      layout\r\n        content_template: ipa protocol deviation message\r\n        subject:
-      \"IPA App: Protocol Deviation needs IRB report\"\r\n        if: &notify_conditions_irb_report\r\n
+      layout\r\n        content_template: ipa notification message\r\n        subject:
+      \"IPA App: Protocol Deviation needs IRB report - {{id}}\"\r\n        extra_substitutions:\r\n
+      \         reason: 'Protocol Deviation needs IRB report'\r\n          extra_text:
+      |\r\n            A **protocol deviation** record has been updated. Based on
+      the \r\n            details entered, an IRB report is required.\r\n            \r\n
+      \           Please login to the Athena app using the link below to review\r\n
+      \           the protocol deviation and record any additional details related
+      to it.\r\n\r\n          panel_tab: activity-log--ipa-assignment-protocol-deviations\r\n
+      \         item_id: \"{{id}}\"\r\n        \r\n        if: &notify_conditions_irb_report\r\n
       \         all:\r\n            dynamic_model__ipa_protocol_deviations:\r\n              select_severity:
       major\r\n              id:\r\n                parent_references: id\r\n\r\n
       \     - type: sms\r\n        role: sms - protocol deviation irb report\r\n        layout_template:
@@ -4328,7 +4343,7 @@ app_type:
     admin_id: 3
     disabled: false
     created_at: '2020-03-02T10:56:10.992Z'
-    updated_at: '2020-03-04T14:43:19.330Z'
+    updated_at: '2020-03-11T13:50:23.048Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -4342,20 +4357,24 @@ app_type:
       for notifying roles\r\n  # Override the subject: and if: structures to refine
       operation\r\n  ####\r\n\r\n  # Default email - just add roles or users\r\n  notify_email_default:
       &notify_email_default\r\n    type: email\r\n    layout_template: ipa notification
-      layout\r\n    content_template: ipa inex message\r\n    subject: \"IPA App:
-      Phone Screen Complete\"\r\n\r\n\r\n  # Default SMS - just add roles or users\r\n
-      \ notify_sms_default: &notify_sms_default\r\n    type: sms\r\n    layout_template:
-      standard sms layout\r\n    content_template: ipa sms notification\r\n    subject:
-      \"IPA Phone Screen Complete\"\r\n\r\n\r\n\r\n  # MedNav reviewer\r\n  notify_reviewer:
-      &notify_reviewer\r\n    <<: *notify_email_default\r\n    role: email - inex
-      reviewer\r\n\r\n  # MedNav reviewer SMS\r\n  notify_reviewer_sms: &notify_reviewer_sms\r\n
-      \   <<: *notify_sms_default\r\n    role: sms - inex reviewer\r\n\r\n  # PI\r\n
-      \ notify_pi: &notify_pi\r\n    <<: *notify_email_default\r\n    role: email
-      - inex pi\r\n\r\n\r\n  # PI SMS\r\n  notify_pi_sms: &notify_pi_sms\r\n    <<:
-      *notify_sms_default\r\n    role: sms - inex pi\r\n\r\n\r\n_default:\r\n  showable_if:
-      *enabled_if\r\n  creatable_if: *enabled_if\r\n  editable_if: *not_finalized\r\n
-      \ save_action:\r\n    on_create:\r\n      create_next_creatable:\r\n        if:\r\n
-      \         not_any:\r\n            activity_log__ipa_assignment_phone_screens:\r\n
+      layout\r\n    content_template: ipa notification message\r\n    subject: \"IPA:
+      Phone Screen Complete - {{id}}\"\r\n    extra_substitutions:\r\n      reason:
+      'Phone Screen Complete'\r\n      extra_text: |        \r\n        The **phone
+      screen** for this participant has been completed.\r\n        \r\n        *Participant
+      Summary* and the *Inclusion / Exclusion Checklist* have been prepared\r\n        for
+      completion and review.\r\n        \r\n        If you have questions about this
+      screening, contact the original \r\n        phone screening interviewer from
+      the **Discussions** panel in the participant's \r\n        record, selecting
+      the role: *Phone Screen Interviewer*.\r\n        \r\n      panel_tab: activity-log--ipa-assignment-summaries\r\n\r\n\r\n
+      \ # Default SMS - just add roles or users\r\n  notify_sms_default: &notify_sms_default\r\n
+      \   type: sms\r\n    layout_template: standard sms layout\r\n    content_template:
+      ipa sms notification\r\n    subject: \"IPA Phone Screen Complete\"\r\n\r\n\r\n\r\n
+      \ # MedNav reviewer\r\n  notify_reviewer: &notify_reviewer\r\n    <<: *notify_email_default\r\n
+      \   role: email - inex reviewer\r\n\r\n  # MedNav reviewer SMS\r\n  notify_reviewer_sms:
+      &notify_reviewer_sms\r\n    <<: *notify_sms_default\r\n    role: sms - inex
+      reviewer\r\n\r\n\r\n_default:\r\n  showable_if: *enabled_if\r\n  creatable_if:
+      *enabled_if\r\n  editable_if: *not_finalized\r\n  save_action:\r\n    on_create:\r\n
+      \     create_next_creatable:\r\n        if:\r\n          not_any:\r\n            activity_log__ipa_assignment_phone_screens:\r\n
       \             extra_log_type: rescreen\r\n\r\n################################\r\nstart_phone_screen:\r\n
       \ label: Start Phone Screening\r\n  fields:\r\n\r\n  references:\r\n    dynamic_model__ipa_ps_initial_screening:\r\n
       \     from: this\r\n      add: one_to_this\r\n\r\n  caption_before:\r\n\r\n
@@ -4698,15 +4717,14 @@ app_type:
       \             birth_date:\r\n                dynamic_model__ipa_ps_sizes:\r\n
       \                 birth_date: return_value\r\n\r\n\r\n\r\n\r\n  # Notify the
       reviewers that the phone screen has been completed\r\n      notify:\r\n        -
-      *notify_reviewer\r\n        - *notify_reviewer_sms\r\n#        - *notify_pi\r\n#
-      \       - *notify_pi_sms\r\n\r\nrescreen:\r\n\r\n  label: Rescreen\r\n\r\n  view_options:\r\n
-      \   hide_unless_creatable: true\r\n\r\n  caption_before:\r\n    all_fields:
-      |\r\n      Enable rescreening of the participant\r\n    submit: |\r\n      Save
-      this entry to unlock the phone screen forms so that individual rescreen\r\n
-      \     responses can be recorded.\r\n\r\n      After saving this entry, select
-      the each form to rescreen from the header above.\r\n      Save each form then
-      select the next one to rescreen, or *Finalize* when complete.\r\n\r\n\r\n  creatable_if:\r\n
-      \   <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
+      *notify_reviewer\r\n        - *notify_reviewer_sms\r\n\r\nrescreen:\r\n\r\n
+      \ label: Rescreen\r\n\r\n  view_options:\r\n    hide_unless_creatable: true\r\n\r\n
+      \ caption_before:\r\n    all_fields: |\r\n      Enable rescreening of the participant\r\n
+      \   submit: |\r\n      Save this entry to unlock the phone screen forms so that
+      individual rescreen\r\n      responses can be recorded.\r\n\r\n      After saving
+      this entry, select the each form to rescreen from the header above.\r\n      Save
+      each form then select the next one to rescreen, or *Finalize* when complete.\r\n\r\n\r\n
+      \ creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
       \       extra_log_type:\r\n          - finalize\r\n\r\n    not_any_inex_finalized:\r\n
       \     activity_log__ipa_assignment_inex_checklists:\r\n        extra_log_type:
       finalize_phone_screen_checklist\r\n\r\n  # Override the default that hides activities
@@ -4725,7 +4743,7 @@ app_type:
     admin_id: 3
     disabled: false
     created_at: '2020-03-02T10:56:11.063Z'
-    updated_at: '2020-03-02T10:56:11.063Z'
+    updated_at: '2020-03-11T17:52:13.654Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -4734,24 +4752,26 @@ app_type:
       \ # Boilerplace for notifying roles\r\n  # Override the subject: and if: structures
       to refine operation\r\n  ####\r\n\r\n  # Default email - just add roles or users\r\n
       \ notify_email_default: &notify_email_default\r\n    type: email\r\n    layout_template:
-      ipa notification layout\r\n    content_template: ipa inex message\r\n    subject:
-      \"IPA App: Inclusion / Exclusion checklist message\"\r\n\r\n  # Default SMS
-      - just add roles or users\r\n  notify_sms_default: &notify_sms_default\r\n    type:
-      sms\r\n    layout_template: standard sms layout\r\n    content_template: ipa
-      sms notification\r\n    subject: \"Inclusion / Exclusion\"\r\n\r\n\r\n  # staff
-      member that initiated the phone screen checklist\r\n  notify_ps_checklist_initiator:
-      &notify_ps_checklist_initiator\r\n    <<: *notify_email_default\r\n    users:\r\n
-      \     activity_log__ipa_assignment_inex_checklists:\r\n        extra_log_type:
-      phone_screen_review\r\n        user_id: return_value\r\n\r\n  # staff member
-      that initiated the phone screen checklist SMS\r\n  notify_ps_checklist_initiator_sms:
-      &notify_ps_checklist_initiator_sms\r\n    <<: *notify_sms_default\r\n    users:\r\n
-      \     activity_log__ipa_assignment_inex_checklists:\r\n        extra_log_type:
-      phone_screen_review\r\n        user_id: return_value\r\n\r\n\r\n  # staff member
-      that initiated the baseline checklist\r\n  notify_baseline_checklist_initiator:
-      &notify_baseline_checklist_initiator\r\n    <<: *notify_email_default\r\n    users:\r\n
-      \     activity_log__ipa_assignment_inex_checklists:\r\n        extra_log_type:
-      baseline_review\r\n        user_id: return_value\r\n\r\n\r\n  # staff member
-      that initiated the phone screen checklist SMS\r\n  notify_baseline_checklist_initiator_sms:
+      ipa notification layout\r\n    content_template: ipa notification message\r\n
+      \   subject: \"IPA: Inclusion / Exclusion Checklist update - {{id}}\"\r\n    extra_substitutions:\r\n
+      \     reason: 'Status update for Inclusion / Exclusion checklist'\r\n      extra_text:
+      |\r\n        An *inclusion / exclusion checklist* record has been updated.\r\n
+      \       \r\n        Please review the record using the Athena link below.\r\n
+      \       \r\n      panel_tab: activity-log--ipa-assignment-inex-checklists\r\n
+      \     item_id: \"{{id}}\"\r\n\r\n\r\n\r\n  # Default SMS - just add roles or
+      users\r\n  notify_sms_default: &notify_sms_default\r\n    type: sms\r\n    layout_template:
+      standard sms layout\r\n    content_template: ipa sms notification\r\n    subject:
+      \"Inclusion / Exclusion\"\r\n\r\n\r\n  # staff member that initiated the phone
+      screen checklist\r\n  notify_ps_checklist_initiator: &notify_ps_checklist_initiator\r\n
+      \   <<: *notify_email_default\r\n    users: &ps_checklist_initiator\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
+      \       extra_log_type: phone_screen_review\r\n        user_id: return_value\r\n\r\n
+      \ # staff member that initiated the phone screen checklist SMS\r\n  notify_ps_checklist_initiator_sms:
+      &notify_ps_checklist_initiator_sms\r\n    <<: *notify_sms_default\r\n    users:
+      *ps_checklist_initiator\r\n\r\n  # staff member that initiated the baseline
+      checklist\r\n  notify_baseline_checklist_initiator: &notify_baseline_checklist_initiator\r\n
+      \   <<: *notify_email_default\r\n    users:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
+      \       extra_log_type: baseline_review\r\n        user_id: return_value\r\n\r\n\r\n
+      \ # staff member that initiated the phone screen checklist SMS\r\n  notify_baseline_checklist_initiator_sms:
       &notify_baseline_checklist_initiator_sms\r\n    <<: *notify_sms_default\r\n
       \   users:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n        extra_log_type:
       baseline_review\r\n        user_id: return_value\r\n\r\n\r\n  # MedNav reviewer\r\n
@@ -4956,12 +4976,23 @@ app_type:
       study partner\r\n    not_any:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
       \       extra_log_type: finalize_phone_screen_checklist\r\n\r\n  editable_if:\r\n
       \   never: true\r\n\r\n\r\n\r\n  # Notify the reviewers that the checklist is
-      ready for signature\r\n  save_trigger:\r\n    on_save:\r\n      notify:\r\n
-      \       - *notify_ps_checklist_initiator\r\n        - *notify_ps_checklist_initiator_sms\r\n
-      \       - *notify_reviewer\r\n        - *notify_reviewer_sms\r\n        - *notify_pi\r\n
-      \       - *notify_pi_sms\r\n        - *notify_tms\r\n        - *notify_tms_sms\r\n\r\n
-      \ # save_action:\r\n  #   on_create: create_next_creatable\r\n\r\n####\r\n#
-      Staff Member Signs Phone Screen checklist\r\n####\r\nsign_phone_screen_staff:\r\n
+      ready for signature\r\n  save_trigger:\r\n    on_save:\r\n\r\n      notify:\r\n
+      \       - type: email\r\n          layout_template: ipa notification layout\r\n
+      \         content_template: ipa notification message\r\n          subject: \"IPA:
+      Inclusion / Exclusion Checklist finalized - {{id}}\"\r\n          extra_substitutions:\r\n
+      \           reason: 'Inclusion / Exclusion Checklist Finalized'\r\n            extra_text:
+      |\r\n              An *inclusion / exclusion checklist* record has been **finalized**.\r\n\r\n
+      \             This indicates that the inclusion / exclusion checklist form has
+      \r\n              been completed and locked to prevent additional changes. It
+      \r\n              is now ready for your final review and electronic signature.\r\n\r\n
+      \           panel_tab: activity-log--ipa-assignment-inex-checklists\r\n            item_id:
+      \"{{id}}\"\r\n            \r\n          users: *ps_checklist_initiator\r\n          role:
+      \r\n            - \"email - inex reviewer\"\r\n            - \"email - inex
+      pi\"\r\n\r\n        - type: sms\r\n          layout_template: standard sms layout\r\n
+      \         content_template: ipa sms notification\r\n          subject: \"Inclusion
+      / Exclusion checklist finalized\"\r\n          users: *ps_checklist_initiator\r\n
+      \         role: \r\n            - \"sms - inex reviewer\"\r\n            - \"sms
+      - inex pi\"\r\n\r\n####\r\n# Staff Member Signs Phone Screen checklist\r\n####\r\nsign_phone_screen_staff:\r\n
       \ <<: *e_signature_ps_checklist\r\n  label: Sign Phone Screen Review (Staff)\r\n
       \ creatable_if:\r\n    <<: *enabled_if\r\n    not_all:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
       \       extra_log_type: sign_phone_screen_staff\r\n    all:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
@@ -4980,17 +5011,30 @@ app_type:
       \       extra_log_type: finalize_phone_screen_checklist\r\n\r\n  # Notify initiator,
       clinical research coordinator and mednav that PI has signed\r\n  save_trigger:\r\n
       \   on_create: *on_create_e_sign\r\n\r\n    on_save:\r\n      notify:\r\n        -
-      *notify_ps_checklist_initiator\r\n        - *notify_ps_checklist_initiator_sms\r\n
-      \       - *notify_reviewer\r\n        - *notify_reviewer_sms\r\n        - *notify_crc\r\n
-      \       - *notify_crc_sms\r\n\r\n\r\n####\r\n# TMS Review\r\n####\r\ntms_responses:\r\n
-      \ label: TMS Responses\r\n  references:\r\n    dynamic_model__ipa_tms_review:\r\n
-      \     from: any\r\n      view_as:\r\n        new: readonly\r\n        edit:
-      readonly\r\n  caption_before:\r\n    all_fields: TMS responses from the participant's
-      Phone Screener\r\n\r\n  # We expect the TMS Responses activity to be created
-      automatically during\r\n  # creation of the phone screen checklist.\r\n  # For
-      now, keep this as a placeholder to ensure the user is prompted if\r\n  # the
-      appropriate trigger has not been updated\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
-      \   all:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n        extra_log_type:
+      type: email\r\n          layout_template: ipa notification layout\r\n          content_template:
+      ipa notification message\r\n          subject: \"IPA: Inclusion / Exclusion
+      Checklist Signed by PI - {{id}}\"\r\n          extra_substitutions:\r\n            reason:
+      'Inclusion / Exclusion Checklist Signed by PI'\r\n            extra_text: |\r\n
+      \             An *inclusion / exclusion checklist* record has been **signed
+      by the PI**.\r\n\r\n              This indicates that a review of the eligibility
+      of the \r\n              participant is complete. Full information can be reviewed
+      in the Athena app\r\n              through the link below.\r\n\r\n            panel_tab:
+      activity-log--ipa-assignment-inex-checklists\r\n            item_id: \"{{id}}\"\r\n
+      \           \r\n          users: *ps_checklist_initiator\r\n          role:
+      \r\n            - \"email - inex reviewer\"\r\n            - \"email - inex
+      crc\"\r\n\r\n        - type: sms\r\n          layout_template: standard sms
+      layout\r\n          content_template: ipa sms notification\r\n          subject:
+      \"Inclusion / Exclusion checklist signed by PI\"\r\n          users: *ps_checklist_initiator\r\n
+      \         role: \r\n            - \"sms - inex reviewer\"\r\n            - \"sms
+      - inex crc\"\r\n\r\n\r\n####\r\n# TMS Review\r\n####\r\ntms_responses:\r\n  label:
+      TMS Responses\r\n  references:\r\n    dynamic_model__ipa_tms_review:\r\n      from:
+      any\r\n      view_as:\r\n        new: readonly\r\n        edit: readonly\r\n
+      \ caption_before:\r\n    all_fields: TMS responses from the participant's Phone
+      Screener\r\n\r\n  # We expect the TMS Responses activity to be created automatically
+      during\r\n  # creation of the phone screen checklist.\r\n  # For now, keep this
+      as a placeholder to ensure the user is prompted if\r\n  # the appropriate trigger
+      has not been updated\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n
+      \     activity_log__ipa_assignment_inex_checklists:\r\n        extra_log_type:
       phone_screen_review\r\n    not_any:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
       \       extra_log_type: tms_responses\r\n  editable_if:\r\n    never: true\r\n\r\n\r\n\r\n####\r\n#
       TMS Signs TMS eligibility\r\n####\r\nsign_tms_eligibility:\r\n  label: Submit
@@ -5007,13 +5051,25 @@ app_type:
       \       extra_log_type: sign_tms_eligibility\r\n        signed_no_yes: \"yes\"\r\n\r\n
       \ valid_if:\r\n    on_save:\r\n      all:\r\n        this:\r\n          signed_no_yes:
       'yes'\r\n\r\n  # Notify the Reviewer that the TMS decision has been signed\r\n
-      \ save_trigger:\r\n    on_save:\r\n      notify:\r\n        <<: *notify_reviewer\r\n
-      \       subject: \"IPA App: TMS eligibility review completed\"\r\n        if:\r\n
-      \         all:\r\n            this:\r\n              signed_no_yes: 'yes'\r\n\r\n\r\n\r\n\r\n####\r\n#
-      Baseline review - checklist\r\n# Navigator fills out the baseline review\r\n#
-      Remains editable until PI has signed it\r\n####\r\nbaseline_review:\r\n  label:
-      Fill Baseline Review\r\n\r\n  references:\r\n    ipa_inex_checklist:\r\n      from:
-      this\r\n      add: one_to_this\r\n      filter_by:\r\n        fixed_checklist_type:
+      \ save_trigger:\r\n    on_save:\r\n\r\n      notify:\r\n        - type: email\r\n
+      \         layout_template: ipa notification layout\r\n          content_template:
+      ipa notification message\r\n          subject: \"IPA: TMS eligibility review
+      completed - {{id}}\"\r\n          extra_substitutions:\r\n            reason:
+      'TMS eligibility review completed'\r\n            extra_text: |\r\n              A
+      **TMS eligibility review** has been completed and is \r\n              available
+      for review in the *inclusion / exclusion checklist* panel.\r\n\r\n            panel_tab:
+      activity-log--ipa-assignment-inex-checklists\r\n            item_id: \"{{id}}\"\r\n
+      \           \r\n          role: \r\n            - \"email - inex reviewer\"\r\n\r\n
+      \         if:\r\n            all:\r\n              this:\r\n                signed_no_yes:
+      'yes'\r\n\r\n\r\n        - type: sms\r\n          layout_template: standard
+      sms layout\r\n          content_template: ipa sms notification\r\n          subject:
+      \"TMS eligibility review completed\"\r\n          role: \r\n            - \"sms
+      - inex reviewer\"\r\n          if:\r\n            all:\r\n              this:\r\n
+      \               signed_no_yes: 'yes'\r\n\r\n\r\n####\r\n# Baseline review -
+      checklist\r\n# Navigator fills out the baseline review\r\n# Remains editable
+      until PI has signed it\r\n####\r\nbaseline_review:\r\n  label: Fill Baseline
+      Review\r\n\r\n  references:\r\n    ipa_inex_checklist:\r\n      from: this\r\n
+      \     add: one_to_this\r\n      filter_by:\r\n        fixed_checklist_type:
       baseline review\r\n  caption_before:\r\n    all_fields: Fill out the checklist.\r\n\r\n
       \ creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
       \       extra_log_type: sign_phone_screen\r\n    not_any:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
@@ -5055,24 +5111,25 @@ app_type:
       \ caption_before:\r\n    all_fields: |\r\n      Use this activity to contact
       the selected role about the phone screen checklist.\r\n      Note: messages
       are visible to all phone screen checklist users.\r\n    submit: After clicking
-      <i>Send</i> the selected role will be notified.\r\n\r\n  creatable_if:\r\n    <<:
-      *enabled_if\r\n    not_all:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
-      \       extra_log_type: baseline_review\r\n\r\n####\r\n# Baseline checklist
+      <i>Send</i> the selected role will be notified.\r\n\r\n  creatable_if:\r\n    never:
+      true\r\n    #<<: *enabled_if\r\n    #not_all:\r\n    #  activity_log__ipa_assignment_inex_checklists:\r\n
+      \   #    extra_log_type: baseline_review\r\n\r\n####\r\n# Baseline checklist
       review -\r\n# contact all baseline checklist users\r\n####\r\ncontact_baseline_users:\r\n
       \ label: Create Baseline Discussion\r\n\r\n  <<: *contact_defaults_baseline\r\n\r\n
       \ view_options:\r\n    hide_unless_creatable: yes\r\n\r\n  caption_before:\r\n
       \   notes: |\r\n      Use this activity to contact the selected role about the
       baseline checklist.\r\n      Note: messages are visible to all baseline checklist
       users.\r\n    submit: After clicking <i>Send</i> the selected role will be notified.\r\n\r\n\r\n
-      \ creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
-      \       extra_log_type: baseline_review\r\n\r\n\r\n\r\n####\r\n# TMS review
-      process -\r\n# contact all TMS review users\r\n####\r\ncontact_tms_users:\r\n
-      \ label: Create TMS Review Discussion\r\n\r\n  <<: *contact_defaults_tms\r\n\r\n\r\n
-      \ caption_before:\r\n    notes: |\r\n      Use this activity to contact the
-      selected role about the TMS eligibility review.\r\n      Note: messages are
-      visible to all TMS eligibility review users.\r\n    submit: After clicking <i>Send</i>
-      the selected role will be notified.\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
-      \   not_all:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n        extra_log_type:
+      \ creatable_if:\r\n    never: true\r\n    #<<: *enabled_if\r\n    #all:\r\n
+      \   #  activity_log__ipa_assignment_inex_checklists:\r\n    #    extra_log_type:
+      baseline_review\r\n\r\n\r\n\r\n####\r\n# TMS review process -\r\n# contact all
+      TMS review users\r\n####\r\ncontact_tms_users:\r\n  label: Create TMS Review
+      Discussion\r\n\r\n  <<: *contact_defaults_tms\r\n\r\n\r\n  caption_before:\r\n
+      \   notes: |\r\n      Use this activity to contact the selected role about the
+      TMS eligibility review.\r\n      Note: messages are visible to all TMS eligibility
+      review users.\r\n    submit: After clicking <i>Send</i> the selected role will
+      be notified.\r\n\r\n  creatable_if:\r\n    never: true\r\n#    <<: *enabled_if\r\n#
+      \   not_all:\r\n#      activity_log__ipa_assignment_inex_checklists:\r\n#        extra_log_type:
       baseline_review\r\n\r\n\r\n\r\n##########################\r\nsupporting_files:\r\n
       \ label: Supporting Files\r\n\r\n  fields:\r\n    - notes\r\n\r\n  caption_before:\r\n
       \   notes: Describe the files in this container. Individual files can also be
@@ -5100,7 +5157,7 @@ app_type:
     admin_id: 3
     disabled: false
     created_at: '2020-03-02T10:56:11.138Z'
-    updated_at: '2020-03-02T10:56:11.138Z'
+    updated_at: '2020-03-11T17:53:43.954Z'
     action_when_attribute: activity_date
     field_list: ''
     blank_log_field_list: ''
@@ -5173,28 +5230,38 @@ app_type:
       'yes'\r\n    not_any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
       appointment\r\n\r\n  save_trigger:\r\n    on_create:\r\n      notify:\r\n      -
       type: email\r\n        role: email - ipa tracker new participant\r\n        layout_template:
-      ipa notification layout\r\n        content_template: ipa message content\r\n
-      \       subject: Notification of New IPA Participant Appointment\r\n      -
-      type: sms\r\n        role: sms - ipa tracker new participant\r\n        layout_template:
-      standard sms layout\r\n        content_template: ipa sms notification\r\n        subject:
-      New IPA Participant\r\n\r\n\r\ncontact_info:\r\n  label: Emergency Contacts\r\n
-      \ fields:\r\n\r\n  caption_before:\r\n    all_fields: One or more emergency
-      contacts should be added.\r\n    submit: When multiple have been added do not
-      edit the block directly.\r\n    metadata: Expand items in the list above to
-      view and allow editing. To remove an item, edit it and select rank '0 - Not
-      Used'.\r\n  references:\r\n\r\n    dynamic_model__emergency_contact:\r\n      from:
-      master\r\n      add: many\r\n      prevent_disable: true\r\n\r\n  creatable_if:\r\n
-      \   <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
+      ipa notification layout\r\n        content_template: ipa notification message\r\n
+      \       subject: \"Notification of New IPA Participant Appointment Date - {{id}}\"\r\n
+      \       extra_substitutions:\r\n          reason: 'New IPA Participant Appointment
+      Date'\r\n          extra_text: |\r\n            An new **appointment date**
+      has been set for an IPA participant.\r\n            \r\n            Details
+      of the appointment may be viewed in Athena, following the link below.\r\n\r\n
+      \         panel_tab: activity-log--ipa-assignments\r\n          item_id: \"{{id}}\"\r\n
+      \         \r\n        \r\n      - type: sms\r\n        role: sms - ipa tracker
+      new participant\r\n        layout_template: standard sms layout\r\n        content_template:
+      ipa sms notification\r\n        subject: New IPA Participant\r\n\r\n\r\ncontact_info:\r\n
+      \ label: Emergency Contacts\r\n  fields:\r\n\r\n  caption_before:\r\n    all_fields:
+      One or more emergency contacts should be added.\r\n    submit: When multiple
+      have been added do not edit the block directly.\r\n    metadata: Expand items
+      in the list above to view and allow editing. To remove an item, edit it and
+      select rank '0 - Not Used'.\r\n  references:\r\n\r\n    dynamic_model__emergency_contact:\r\n
+      \     from: master\r\n      add: many\r\n      prevent_disable: true\r\n\r\n
+      \ creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
       \       extra_log_type: appointment\r\n\r\n\r\nmrn:\r\n  label: MRN\r\n  fields:\r\n\r\n
       \ references:\r\n    mrn_number:\r\n      from: master\r\n      add: many\r\n
       \     prevent_disable: true\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
       \   all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
       appointment\r\n\r\n  save_trigger:\r\n    on_create:\r\n      notify:\r\n        type:
       email\r\n        role: clinical research coordinator\r\n        layout_template:
-      ipa notification layout\r\n        content_template: ipa message content\r\n
-      \       subject: \"IPA App: Subject MRN assigned\"\r\n\r\n\r\ntransportation_and_housing:\r\n
-      \ label: Transportation and Housing\r\n  fields:\r\n  references:\r\n    ipa_transportation:\r\n
-      \     from: master\r\n      add: many\r\n      view_as:\r\n        new: not_embedded\r\n
+      ipa notification layout\r\n        content_template: ipa notification message\r\n
+      \       subject: \"IPA: Participant MRN assigned - {{id}}\"\r\n        extra_substitutions:\r\n
+      \         reason: 'Participant MRN assigned'\r\n          extra_text: |\r\n
+      \           A **medical record number** has been assigned to an IPA participant.\r\n
+      \           \r\n            Details may be viewed in Athena, following the link
+      below.\r\n\r\n          panel_tab: activity-log--ipa-assignments\r\n          item_id:
+      \"{{id}}\"\r\n\r\n\r\ntransportation_and_housing:\r\n  label: Transportation
+      and Housing\r\n  fields:\r\n  references:\r\n    ipa_transportation:\r\n      from:
+      master\r\n      add: many\r\n      view_as:\r\n        new: not_embedded\r\n
       \       edit: not_embedded\r\n    ipa_hotel:\r\n      from: master\r\n      add:
       one_to_master\r\n      view_as:\r\n        new: not_embedded\r\n        edit:
       not_embedded\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
@@ -5392,7 +5459,7 @@ app_type:
     admin_id: 3
     disabled: false
     created_at: '2020-03-02T10:56:11.284Z'
-    updated_at: '2020-03-02T10:56:11.284Z'
+    updated_at: '2020-03-11T17:54:23.154Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -5412,18 +5479,18 @@ app_type:
       pi_review\r\n            id:\r\n              this_references: id\r\n\r\n  save_trigger:\r\n
       \   on_create:\r\n      <<: *create_filestore_container\r\n\r\n      notify:\r\n
       \     - type: email\r\n        role: email - adverse event review\r\n        layout_template:
-      ipa notification layout\r\n        content_template: ipa adverse event message\r\n
-      \       subject: \"IPA App: Adverse Event needs initial review\"\r\n      -
-      type: sms\r\n        role: sms - adverse event review\r\n        layout_template:
-      standard sms layout\r\n        content_template: ipa sms notification\r\n        subject:
-      Adverse Event\r\n\r\n  references:\r\n\r\n  # Always show the record that contains
-      event details\r\n  - dynamic_model__ipa_adverse_event:\r\n      from: this\r\n
-      \     add: one_to_this\r\n\r\n  # The initial review can be performed at any
-      time until the PI review has been completed\r\n  # It does not block PI review\r\n
-      \ - activity_log__ipa_assignment_adverse_event:\r\n      label: Initial Review\r\n
-      \     from: this\r\n      add: one_to_this\r\n      add_with:\r\n        extra_log_type:
-      initial_review\r\n      filter_by:\r\n        extra_log_type: initial_review\r\n\r\n
-      \     creatable_if:\r\n        all:\r\n          activity_log__ipa_assignment_adverse_events:\r\n
+      ipa notification layout\r\n        content_template: ipa notification message\r\n
+      \       subject: \"IPA App: Adverse Event needs initial review\"\r\n        extra_substitutions:\r\n
+      \       \r\n      - type: sms\r\n        role: sms - adverse event review\r\n
+      \       layout_template: standard sms layout\r\n        content_template: ipa
+      sms notification\r\n        subject: Adverse Event\r\n\r\n  references:\r\n\r\n
+      \ # Always show the record that contains event details\r\n  - dynamic_model__ipa_adverse_event:\r\n
+      \     from: this\r\n      add: one_to_this\r\n\r\n  # The initial review can
+      be performed at any time until the PI review has been completed\r\n  # It does
+      not block PI review\r\n  - activity_log__ipa_assignment_adverse_event:\r\n      label:
+      Initial Review\r\n      from: this\r\n      add: one_to_this\r\n      add_with:\r\n
+      \       extra_log_type: initial_review\r\n      filter_by:\r\n        extra_log_type:
+      initial_review\r\n\r\n      creatable_if:\r\n        all:\r\n          activity_log__ipa_assignment_adverse_events:\r\n
       \           extra_log_type: adverse_event_record\r\n            id:\r\n              this:
       id\r\n\r\n        not_all:\r\n          activity_log__ipa_assignment_adverse_events:\r\n
       \           extra_log_type: pi_review\r\n            id:\r\n              this_references:
@@ -5471,12 +5538,19 @@ app_type:
       \   never: true\r\n  creatable_if:\r\n    never: true\r\n  save_trigger:\r\n
       \   on_create:\r\n      notify:\r\n      - type: email\r\n        role: email
       - adverse event pi\r\n        layout_template: ipa notification layout\r\n        content_template:
-      ipa adverse event message\r\n        subject: \"IPA App: Adverse Event needs
-      review\"\r\n        if: &notify_conditions_pi\r\n          any:\r\n            all:\r\n
-      \             dynamic_model__ipa_adverse_events:\r\n                select_location:
-      internal\r\n                select_expectedness: unexpected\r\n                select_relatedness:\r\n
-      \               - related\r\n                - possibly related\r\n                id:\r\n
-      \                 parent_references: id\r\n\r\n\r\n            all2:\r\n              dynamic_model__ipa_adverse_events:\r\n
+      ipa notification message\r\n        subject: \"IPA App: Adverse Event needs
+      review - {{id}}\"\r\n        extra_substitutions:\r\n          reason: 'Adverse
+      Event needs initial review'\r\n          extra_text: |\r\n            An **adverse
+      event** record has been created. Based on the \r\n            details entered,
+      a review is required.\r\n            \r\n            Please login to the Athena
+      app using the link below to review\r\n            the adverse event and record
+      any additional details related to it.\r\n\r\n          panel_tab: activity-log--ipa-assignment-adverse-events\r\n
+      \         item_id: \"{{id}}\"\r\n        \r\n        if: &notify_conditions_pi\r\n
+      \         any:\r\n            all:\r\n              dynamic_model__ipa_adverse_events:\r\n
+      \               select_location: internal\r\n                select_expectedness:
+      unexpected\r\n                select_relatedness:\r\n                - related\r\n
+      \               - possibly related\r\n                id:\r\n                  parent_references:
+      id\r\n\r\n\r\n            all2:\r\n              dynamic_model__ipa_adverse_events:\r\n
       \               select_severity: serious\r\n                select_expectedness:
       unexpected\r\n                select_relatedness:\r\n                - related\r\n
       \               - possibly related\r\n                id:\r\n                  parent_references:
@@ -5497,12 +5571,19 @@ app_type:
       \ creatable_if:\r\n    never: true\r\n\r\n  save_trigger:\r\n    on_create:\r\n
       \     notify:\r\n      - type: email\r\n        role: email - adverse event
       irb report\r\n        layout_template: ipa notification layout\r\n        content_template:
-      ipa adverse event message\r\n        subject: \"IPA App: Adverse Event needs
-      IRB report\"\r\n        if: &notify_conditions_irb_report\r\n          any:\r\n
-      \           all:\r\n              dynamic_model__ipa_adverse_events:\r\n                select_location:
-      internal\r\n                select_expectedness: unexpected\r\n                select_relatedness:\r\n
-      \               - related\r\n                - possibly related\r\n                id:\r\n
-      \                 parent_references: id\r\n\r\n\r\n            all2:\r\n              dynamic_model__ipa_adverse_events:\r\n
+      ipa notification message\r\n        subject: \"IPA App: Adverse Event needs
+      IRB report - {{id}}\"\r\n        extra_substitutions:\r\n          reason: 'Adverse
+      Event needs IRB report'\r\n          extra_text: |\r\n            An **adverse
+      event** record has been updated. Based on the \r\n            details entered,
+      an IRB report is required.\r\n            \r\n            Please login to the
+      Athena app using the link below to review\r\n            the adverse event and
+      record any additional details related to it.\r\n\r\n          panel_tab: activity-log--ipa-assignment-adverse-events\r\n
+      \         item_id: \"{{id}}\"\r\n        \r\n        if: &notify_conditions_irb_report\r\n
+      \         any:\r\n            all:\r\n              dynamic_model__ipa_adverse_events:\r\n
+      \               select_location: internal\r\n                select_expectedness:
+      unexpected\r\n                select_relatedness:\r\n                - related\r\n
+      \               - possibly related\r\n                id:\r\n                  parent_references:
+      id\r\n\r\n\r\n            all2:\r\n              dynamic_model__ipa_adverse_events:\r\n
       \               select_severity: serious\r\n                select_expectedness:
       unexpected\r\n                select_relatedness:\r\n                - related\r\n
       \               - possibly related\r\n                id:\r\n                  parent_references:
@@ -5770,7 +5851,7 @@ app_type:
     admin_id: 3
     disabled: false
     created_at: '2020-03-02T10:56:11.467Z'
-    updated_at: '2020-03-05T15:17:46.081Z'
+    updated_at: '2020-03-11T19:01:26.254Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -5787,9 +5868,11 @@ app_type:
       ipa notification message\r\n    subject: \"IPA App: Discussion Message - {{referring_record.id}}\"\r\n
       \   extra_substitutions:\r\n      reason: 'New Discussion Message'\r\n      extra_text:
       |\r\n        To Role: *{{referring_record.tag_select_contact_role::join_with_semicolon}}*\r\n
-      \       \r\n        Discussion Subject: *{{referring_record.notes}}*\r\n        \r\n
-      \     panel_tab: activity-log--ipa-assignment-discussions\r\n\r\n\r\n\r\n  #
-      Default SMS - just add roles or users\r\n  notify_sms_default: &notify_sms_default\r\n
+      \       \r\n        Discussion Subject: **{{referring_record.notes}}**\r\n        \r\n
+      \       A new message has been sent from this discussion. Click the link below\r\n
+      \       to access the full message in Athena.\r\n        \r\n      panel_tab:
+      activity-log--ipa-assignment-discussions\r\n      item_id: \"{{referring_record.id}}\"\r\n\r\n\r\n\r\n
+      \ # Default SMS - just add roles or users\r\n  notify_sms_default: &notify_sms_default\r\n
       \   type: sms\r\n    layout_template: standard sms layout\r\n    content_template:
       ipa sms notification\r\n    subject: \"IPA Discussion\"\r\n\r\n\r\n###############################################\r\n#
       Now load discussion specific libraries\r\n###############################################\r\n#
@@ -15365,6 +15448,69 @@ app_type:
     created_at: '2020-03-05T14:44:54.669Z'
     updated_at: '2020-03-05T14:44:54.669Z'
     user_email: template@template
+  - id: 93
+    app_type_id: 3
+    role_name: email - inex reviewer
+    user_id: 9
+    admin_id: 3
+    disabled: false
+    created_at: '2020-03-11T16:06:38.533Z'
+    updated_at: '2020-03-11T16:06:38.533Z'
+    user_email: phil@test
+  - id: 94
+    app_type_id: 3
+    role_name: email - inex reviewer
+    user_id: 1
+    admin_id: 3
+    disabled: false
+    created_at: '2020-03-11T16:06:38.544Z'
+    updated_at: '2020-03-11T16:06:38.544Z'
+    user_email: template@template
+  - id: 95
+    app_type_id: 3
+    role_name: email - inex reviewer
+    user_id: 8
+    admin_id: 3
+    disabled: false
+    created_at: '2020-03-11T16:06:44.624Z'
+    updated_at: '2020-03-11T16:06:44.624Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 96
+    app_type_id: 3
+    role_name: email - ipa tracker new participant
+    user_id: 8
+    admin_id: 3
+    disabled: false
+    created_at: '2020-03-11T16:08:56.624Z'
+    updated_at: '2020-03-11T16:08:56.624Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 97
+    app_type_id: 3
+    role_name: email - ipa tracker new participant
+    user_id: 1
+    admin_id: 3
+    disabled: false
+    created_at: '2020-03-11T16:08:56.631Z'
+    updated_at: '2020-03-11T16:08:56.631Z'
+    user_email: template@template
+  - id: 98
+    app_type_id: 3
+    role_name: clinical research coordinator
+    user_id: 8
+    admin_id: 3
+    disabled: false
+    created_at: '2020-03-11T16:09:18.051Z'
+    updated_at: '2020-03-11T16:09:18.051Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 99
+    app_type_id: 3
+    role_name: clinical research coordinator
+    user_id: 1
+    admin_id: 3
+    disabled: false
+    created_at: '2020-03-11T16:09:18.059Z'
+    updated_at: '2020-03-11T16:09:18.059Z'
+    user_email: template@template
   associated_message_templates:
   - id: 3
     name: ipa ps intro
@@ -15412,8 +15558,8 @@ app_type:
     admin_id: 3
     disabled: false
     created_at: '2020-03-02T10:56:17.746Z'
-    updated_at: '2020-03-02T10:56:17.746Z'
-    category: 
+    updated_at: '2020-03-10T08:56:55.362Z'
+    category: ipa
     user_email: 
   - id: 5
     name: ipa ps intro details
@@ -15538,22 +15684,8 @@ app_type:
     admin_id: 3
     disabled: false
     created_at: '2020-03-02T10:56:17.751Z'
-    updated_at: '2020-03-02T10:56:17.751Z'
-    category: 
-    user_email: 
-  - id: 7
-    name: ipa message content
-    message_type: email
-    template_type: content
-    template: "<p>A new message has been sent from the IPA Tracker App.</p>\r\n<p>Participant
-      IPA ID: <b>{{ids.ipa_id}}</b></p>\r\n<p>Please login to Athena to view the request.
-      Click the following link to access the subject record directly:</p>\r\n<p><a
-      href=\"{{base_url}}/masters/{{master_id}}\">{{base_url}}/masters/{{master_id}}</a></p>"
-    admin_id: 3
-    disabled: false
-    created_at: '2020-03-02T10:56:17.755Z'
-    updated_at: '2020-03-02T10:56:17.755Z'
-    category: 
+    updated_at: '2020-03-10T08:56:29.992Z'
+    category: ipa
     user_email: 
   - id: 8
     name: ipa eligibility call eligible 1
@@ -15700,48 +15832,6 @@ app_type:
     updated_at: '2020-03-06T10:01:51.201Z'
     category: ipa
     user_email: 
-  - id: 14
-    name: ipa inex message
-    message_type: email
-    template_type: content
-    template: "<p>A new message has been sent from the IPA Tracker App.</p>\r\n<p>Participant
-      IPA ID: <b>{{ids.ipa_id}}</b></p>\r\n<p>Please login to Athena to view the request.
-      Click the following link to access the subject record directly:</p>\r\n<p><a
-      href=\"{{base_url}}/masters/{{master_id}}#activity-log--ipa-assignment-inex-checklists-{{master_id}}\">{{base_url}}/masters/{{master_id}}</a></p>"
-    admin_id: 3
-    disabled: false
-    created_at: '2020-03-02T10:56:17.774Z'
-    updated_at: '2020-03-02T10:56:17.774Z'
-    category: 
-    user_email: 
-  - id: 15
-    name: ipa protocol deviation message
-    message_type: email
-    template_type: content
-    template: "<p>A new message has been sent from the IPA Tracker App.</p>\r\n<p>Participant
-      IPA ID: <b>{{ids.ipa_id}}</b></p>\r\n<p>Please login to Athena to view the request.
-      Click the following link to access the subject record directly:</p>\r\n<p><a
-      href=\"{{base_url}}/masters/{{master_id}}#activity-log--ipa-assignment-protocol-deviations-{{master_id}}\">{{base_url}}/masters/{{master_id}}</a></p>"
-    admin_id: 3
-    disabled: false
-    created_at: '2020-03-02T10:56:17.776Z'
-    updated_at: '2020-03-02T10:56:17.776Z'
-    category: 
-    user_email: 
-  - id: 16
-    name: ipa adverse event message
-    message_type: email
-    template_type: content
-    template: "<p>A new message has been sent from the IPA Tracker App.</p>\r\n<p>Participant
-      IPA ID: <b>{{ids.ipa_id}}</b></p>\r\n<p>Please login to Athena to view the request.
-      Click the following link to access the subject record directly:</p>\r\n<p><a
-      href=\"{{base_url}}/masters/{{master_id}}#activity-log--ipa-assignment-adverse-events-{{master_id}}\">{{base_url}}/masters/{{master_id}}</a></p>"
-    admin_id: 3
-    disabled: false
-    created_at: '2020-03-02T10:56:17.777Z'
-    updated_at: '2020-03-02T10:56:17.777Z'
-    category: 
-    user_email: 
   - id: 17
     name: standard sms layout
     message_type: sms
@@ -15761,22 +15851,21 @@ app_type:
     admin_id: 3
     disabled: false
     created_at: '2020-03-02T10:56:17.781Z'
-    updated_at: '2020-03-02T10:56:17.781Z'
-    category: 
+    updated_at: '2020-03-10T08:57:02.040Z'
+    category: ipa
     user_email: 
   - id: 19
     name: ipa notification message
     message_type: email
     template_type: content
-    template: "<h2>{{_subject}}</h2>\r\n<h3>{{extra_substitutions.reason}}</h3>\r\n<p>A
-      new message has been sent from the FPHS IPA App.</p>\r\n<p>Participant IPA ID:
-      <b>{{ids.ipa_id}}</b></p>\r\n<div>{{extra_substitutions.extra_text::markup}}<div>\r\n<hr/>\r\n<p>Please
+    template: "<h3>{{extra_substitutions.reason}}</h3>\r\n<p>Participant IPA ID: <b>{{ids.ipa_id}}</b></p>\r\n<hr/>\r\n<div>{{extra_substitutions.extra_text::markup}}<div>\r\n<hr/>\r\n<p>Please
       login to Athena to view the request. Click the following link to access the
-      subject record directly:</p>\r\n<p><a href=\"{{base_url}}/masters/{{master_id}}#{{extra_substitutions.panel_tab::hyphenate}}-{{master_id}}\">{{base_url}}/masters/{{master_id}}</a></p>\r\n<hr/>"
+      subject record directly:</p>\r\n<p><a href=\"{{base_url}}/masters/{{master_id}}#{{extra_substitutions.panel_tab::hyphenate}}-{{master_id}}:#{{extra_substitutions.panel_tab::hyphenate}}-{{master_id}}
+      [data-sub-id='{{extra_substitutions.item_id::ignore_missing}}']\">{{base_url}}/masters/{{master_id}}</a></p>\r\n<hr/>"
     admin_id: 3
     disabled: false
     created_at: '2020-03-02T10:56:17.783Z'
-    updated_at: '2020-03-02T10:56:17.783Z'
+    updated_at: '2020-03-11T18:58:07.480Z'
     category: ipa
     user_email: 
   - id: 20
@@ -16230,36 +16319,46 @@ app_type:
       sending new messages.\r\n\r\n      notes:\r\n        edit_caption: |\r\n          Enter
       subject of the discussion\r\n\r\n          *Do not enter any PII or PHI in this
       field,\r\n          since it will be included in notification emails*\r\n        show_caption:
-      Subject\r\n      tag_select_contact_role: Roles to be included\r\n\r\n\r\n    references:\r\n
-      \     - activity_log__ipa_assignment_ipa_discussion:\r\n          label: New
-      Message\r\n          from: this\r\n          add: many\r\n          prevent_disable:
-      true\r\n          add_with:\r\n            extra_log_type:\r\n              this:\r\n
-      \               prev_activity_type: return_value\r\n            prev_activity_type:\r\n
-      \             this:\r\n                extra_log_type: return_value\r\n          filter_by:\r\n
-      \           extra_log_type:\r\n              this:\r\n                prev_activity_type:
-      return_value\r\n\r\n    editable_if:\r\n      <<: *enabled_if\r\n\r\n    creatable_if:\r\n
-      \     <<: *enabled_if\r\n\r\n\r\n  ####\r\n  # Contact defaults for all generic
-      contact forms\r\n  ####\r\n  discussion_message_defaults: &discussion_message_defaults\r\n
-      \   fields:\r\n      - notes\r\n      - prev_activity_type\r\n\r\n    field_options:\r\n
-      \     prev_activity_type:\r\n        edit_as:\r\n          field_type: fixed_type\r\n\r\n
-      \   caption_before: &contact_caption_before\r\n      submit: After clicking
-      <i>Send</i> a notification message will be sent to the roles\r\n        selected
-      in the discussion setup.\r\n\r\n      notes: |\r\n        **Message:** The message
-      text is not sent by email, so can include PHI.\r\n\r\n    show_if:\r\n      prev_activity_type:\r\n
-      \       never: true\r\n\r\n    view_options:\r\n      data_attribute:\r\n        -
-      notes\r\n      hide_unless_creatable: true\r\n\r\n    showable_if:\r\n      <<:
-      *enabled_if\r\n      all:\r\n        this:\r\n          prev_activity_type:
-      ''\r\n\r\n\r\n    editable_if:\r\n      never: true\r\n\r\n    creatable_if:\r\n
-      \     never: true\r\n\r\n\r\n    save_action:\r\n      label: Send\r\n\r\n    save_trigger:\r\n
-      \     on_create:\r\n        notify: *notify_options\r\n        update_reference:\r\n
-      \         ref:\r\n\r\n            first:\r\n              all:\r\n                referring_record:\r\n
-      \                 update: return_result\r\n\r\n            with:\r\n              updated_at:
-      now()"
+      Subject\r\n      tag_select_contact_role: |\r\n        <div data-add-icon=\"info-sign\"
+      title=\"Discussion Roles\" data-show-modal=\"#ipa-discussion-roles\">Roles to
+      be included</div>\r\n        <div id=\"ipa-discussion-roles\" class=\"hidden\">\r\n
+      \       <p class=\"strong\">Roles will enable access and notify specific users</p>\r\n
+      \       <ul>\r\n        <li><b>Phone Screen Interviewer:</b> the staff member
+      that started phone screen interview</li>\r\n        <li><b>All Phone Screeners:</b>
+      all staff members that may perform phone screen interviews</li>\r\n        <li><b>Clinical
+      Research Coordinator:</b> the Clinical Research Coordinator for the project</li>\r\n
+      \       <li><b>Navigator:</b> all staff members with the role of Navigator</li>\r\n
+      \       <li><b>Med Nav:</b> the Medical Navigator for the project</li>\r\n        <li><b>TMS:</b>
+      all users in the TMS group</li>\r\n        <li><b>PI:</b> the Principal Investigator</li>\r\n
+      \       </ul>\r\n        </div>\r\n\r\n\r\n    references:\r\n      - activity_log__ipa_assignment_ipa_discussion:\r\n
+      \         label: New Message\r\n          from: this\r\n          add: many\r\n
+      \         prevent_disable: true\r\n          add_with:\r\n            extra_log_type:\r\n
+      \             this:\r\n                prev_activity_type: return_value\r\n
+      \           prev_activity_type:\r\n              this:\r\n                extra_log_type:
+      return_value\r\n          filter_by:\r\n            extra_log_type:\r\n              this:\r\n
+      \               prev_activity_type: return_value\r\n\r\n    editable_if:\r\n
+      \     <<: *enabled_if\r\n\r\n    creatable_if:\r\n      <<: *enabled_if\r\n\r\n\r\n
+      \ ####\r\n  # Contact defaults for all generic contact forms\r\n  ####\r\n  discussion_message_defaults:
+      &discussion_message_defaults\r\n    fields:\r\n      - notes\r\n      - prev_activity_type\r\n\r\n
+      \   field_options:\r\n      prev_activity_type:\r\n        edit_as:\r\n          field_type:
+      fixed_type\r\n\r\n    caption_before: &contact_caption_before\r\n      submit:
+      After clicking <i>Send</i> a notification message will be sent to the roles\r\n
+      \       selected in the discussion setup.\r\n\r\n      notes: |\r\n        **Message:**
+      The message text is not sent by email, so can include PHI.\r\n\r\n    show_if:\r\n
+      \     prev_activity_type:\r\n        never: true\r\n\r\n    view_options:\r\n
+      \     data_attribute:\r\n        - notes\r\n      hide_unless_creatable: true\r\n\r\n
+      \   showable_if:\r\n      <<: *enabled_if\r\n      all:\r\n        this:\r\n
+      \         prev_activity_type: ''\r\n\r\n\r\n    editable_if:\r\n      never:
+      true\r\n\r\n    creatable_if:\r\n      never: true\r\n\r\n\r\n    save_action:\r\n
+      \     label: Send\r\n\r\n    save_trigger:\r\n      on_create:\r\n        notify:
+      *notify_options\r\n        update_reference:\r\n          ref:\r\n\r\n            first:\r\n
+      \             all:\r\n                referring_record:\r\n                  update:
+      return_result\r\n\r\n            with:\r\n              updated_at: now()"
     format: yaml
     disabled: false
     admin_id: 3
     created_at: '2020-03-02T10:56:08.874Z'
-    updated_at: '2020-03-06T10:03:40.395Z'
+    updated_at: '2020-03-10T10:18:38.873Z'
     user_email: 
   - id: 19
     category: ipa
