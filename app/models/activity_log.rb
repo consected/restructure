@@ -267,7 +267,7 @@ class ActivityLog < ActiveRecord::Base
     activity_log = al_class.find(id)
     activity_log.current_user = current_user
     unless activity_log.allows_current_user_access_to? :access
-      raise FsException::NoAccess, "User does not have access to this activity log (#{activity_log.extra_log_type}) | (#{activity_log.resource_name})"
+      raise FsException::NoAccess, "User (#{current_user.id}) does not have access to this activity log (#{activity_log.extra_log_type}) in (#{activity_log.class.resource_name})"
     end
 
     activity_log

@@ -93,6 +93,13 @@ module ActivityLogHandler
       res.map(&:to_sym)
     end
 
+    # resource_name used by user access controls
+    # This is the resource name for the total process
+    # The method #resource_name represents the resource_name for the extra_log_type
+    def resource_name
+      definition.resource_name
+    end
+
     # The user relevant data attributes in the parent class
     def parent_data_names
       parent_class.attribute_names - %w[id master_id disabled user_id admin_id created_at updated_at rank rec_type]
@@ -153,8 +160,10 @@ module ActivityLogHandler
   end
 
   # resource_name used by user access controls
+  # This method represents the resource_name for the extra_log_type
+  # The resource name for the total process is the class method {resource_name}
   def resource_name
-    self.class.definition.resource_name
+    extra_log_type_config.resource_name
   end
 
   def human_name
