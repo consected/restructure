@@ -1,14 +1,14 @@
+# frozen_string_literal: true
+
 class PagesController < ApplicationController
   before_action :authenticate_user_or_admin!
   def index
-    if current_user && ! current_admin
-      redirect_to :masters
-    end
+    redirect_to :masters if current_user && !current_admin
   end
 
   # Simple action to refresh the session timeout
   def show
-    render json: {version: Application.version}
+    render json: { version: Application.version }
   end
 
   # template
@@ -16,9 +16,9 @@ class PagesController < ApplicationController
     return not_authorized unless current_user || current_admin
 
     if current_user
-      response.headers["Cache-Control"] = "max-age=604800"
-      response.headers["Pragma"] = ""
-      response.headers["Expires"] = "Fri, 01 Jan 2090 00:00:00 GMT"
+      response.headers['Cache-Control'] = 'max-age=604800'
+      response.headers['Pragma'] = ''
+      response.headers['Expires'] = 'Fri, 01 Jan 2090 00:00:00 GMT'
       render partial: 'masters/cache_search_results_template'
     else
       render text: ''
@@ -27,11 +27,11 @@ class PagesController < ApplicationController
 
   private
 
-    def no_action_log
-      true
-    end
+  def no_action_log
+    true
+  end
 
-    def ignore_temp_password_for
-      ['show', 'template']
-    end
+  def ignore_temp_password_for
+    %w[show template]
+  end
 end
