@@ -73,6 +73,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # @param tag_subs [String] for example 'span class="someclass"'
   # @return [String] resulting text after substitution
   def self.substitute(all_content, data: {}, tag_subs:, ignore_missing: false)
+    return unless all_content
+
     all_content = all_content.dup
     tags = all_content.scan(/{{[0-9a-zA-Z_\.\:]+}}/)
 
@@ -97,7 +99,10 @@ class Admin::MessageTemplate < ActiveRecord::Base
       end
 
       # Handle formatting directives, following the ::
-      tag_name = tag.split('::').first
+      tag_split = tag.split('::')
+      tag_name = tag_split.first
+      first_format_directive = tag_split[1]
+      ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
 
       unless d&.is_a?(Hash) && (d&.key?(tag_name) || d&.key?(tag_name.to_sym))
         if ignore_missing
@@ -228,7 +233,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
     res = formatter_do(res.class, res, current_user: data[:current_user_instance])
 
-    return if res.nil?
+    return if res.nil? && tagp[1] != 'ignore_missing'
 
     # Automatically titleize names
     if tagp.length == 1 && (tag == 'name' || tag.end_with?('_name'))
@@ -259,6 +264,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
         res = res.join("\n\n") if res.is_a? Array
       elsif op == 'markup'
         res = Kramdown::Document.new(res).to_html.html_safe
+      elsif op == 'ignore_missing'
+        res ||= ''
       elsif op.to_i != 0
         res = res[0..op.to_i]
       end
@@ -403,14 +410,13 @@ class Admin::MessageTemplate < ActiveRecord::Base
         raise "Association first item does not respond to attributes: #{an}"
       end
 
-      
       # Set the attributes
       if item.respond_to?(:attributes)
         data[an.to_sym] ||= item.attributes
       else
         return nil
       end
-      
+
       ditem = data[an.to_sym]
       if ditem
 
@@ -423,7 +429,6 @@ class Admin::MessageTemplate < ActiveRecord::Base
         ditem[:current_user_instance] ||= data[:current_user_instance]
 
       end
-
     rescue StandardError => e
       Rails.logger.info "Get associations for #{an} failed: #{e}"
     end
