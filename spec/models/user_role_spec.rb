@@ -1,30 +1,32 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Admin::UserRole, type: :model do
-
   include ModelSupport
   include PlayerInfoSupport
 
-  TestRoleName = 'test_role_1'
-  TestRoleName2 = 'test_role_2'
-  App2TestRoleName2 = 'app2_test_role_2'
+  TestRoleName = "test_role_1_#{rand 10_000_000}"
+  TestRoleName2 = "test_role_2_#{rand 10_000_000}"
+  App2TestRoleName2 = "app2_test_role_2_#{rand 10_000_000}"
 
-  it "prevents others from querying UserRole.where directly" do
+  it 'prevents others from querying UserRole.where directly' do
     create_admin
     create_user
 
-    expect {
+    expect do
       Admin::UserRole.where role_name: TestRoleName
-    }.to raise_error FphsException
+    end.to raise_error FphsException
 
     res = Admin::UserRole.where role_name: TestRoleName, app_type: @user.app_type
     expect(res).to be_a ActiveRecord::Relation
   end
 
-  it "always ensures an app type is applied to the user roles selection" do
+  it 'always ensures an app type is applied to the user roles selection' do
     create_admin
+    app_type_1 = @user&.app_type || Admin::AppType.active.first
     app_type_2 = create_app_type name: 'apptype2', label: 'apptype2'
-    user0, _ = create_user
+    user0, = create_user
 
     # Validates that a named user in a user access control works
     let_user_create_player_infos
@@ -33,8 +35,11 @@ RSpec.describe Admin::UserRole, type: :model do
     user0.app_type = app_type_2
     create_item
 
-    user1, _ = create_user
-    user2, _ = create_user
+    @user.app_type = app_type_1
+    user1, = create_user
+    user2, = create_user
+
+    expect(app_type_2.id).not_to eq user1.app_type.id
 
     r1 = create_user_role TestRoleName, user: user1
     r2 = create_user_role TestRoleName, user: user2, app_type: app_type_2
@@ -44,12 +49,11 @@ RSpec.describe Admin::UserRole, type: :model do
     res = user2.has_access_to? :read, :table, :player_infos
     expect(res).to be_falsey # since the user does not have a useful role
 
-
-    uac_test_role = Admin::UserAccessControl.create! app_type: user1.app_type, access: :read, resource_type: :table, resource_name: :player_infos, current_admin: @admin,
-                      role_name: TestRoleName
+    uac_test_role = Admin::UserAccessControl.create! app_type: app_type_1, access: :read, resource_type: :table, resource_name: :player_infos, current_admin: @admin,
+                                                     role_name: TestRoleName
 
     uac_test_role2 = Admin::UserAccessControl.create! app_type: app_type_2, access: :read, resource_type: :table, resource_name: :player_infos, current_admin: @admin,
-                      role_name: TestRoleName
+                                                      role_name: TestRoleName
 
     res = user1.has_access_to? :read, :table, :player_infos
     expect(res).to be_truthy # since the user's current app type has the role
@@ -71,28 +75,27 @@ RSpec.describe Admin::UserRole, type: :model do
 
     res = user2.has_access_to? :read, :table, :player_infos
     expect(res).to be_truthy # since the user's current app type has the role
-
-
   end
 
-  it "gets the right role names for the current app type" do
+  it 'gets the right role names for the current app type' do
     create_admin
     app_type_2 = create_app_type name: 'apptype2', label: 'apptype2'
-    user0, _ = create_user
-    user1, _ = create_user
-    user2, _ = create_user
+    user0, = create_user
+    user1, = create_user
+    user2, = create_user
 
     app_type_1 = user1.app_type
+
+    expect(app_type_2.id).not_to eq user1.app_type.id
 
     r1 = create_user_role TestRoleName, user: user1
     r2 = create_user_role TestRoleName, user: user2, app_type: app_type_2
 
     uac_test_role = Admin::UserAccessControl.create! app_type: app_type_1, access: :read, resource_type: :table, resource_name: :player_infos, current_admin: @admin,
-                      role_name: TestRoleName
+                                                     role_name: TestRoleName
 
     uac_test_role2 = Admin::UserAccessControl.create! app_type: app_type_2, access: :read, resource_type: :table, resource_name: :player_infos, current_admin: @admin,
-                      role_name: TestRoleName
-
+                                                      role_name: TestRoleName
 
     expect(user1.user_roles.role_names).to eq [TestRoleName]
     expect(user2.user_roles.role_names).to eq []
@@ -136,13 +139,12 @@ RSpec.describe Admin::UserRole, type: :model do
     user1.reload
 
     expect(user1.user_roles.role_names).to eq [TestRoleName]
-
   end
 
-  it "duplicates all the roles from one user to another" do
+  it 'duplicates all the roles from one user to another' do
     create_admin
     app_type_2 = create_app_type name: 'apptype2', label: 'apptype2'
-    user0, _ = create_user
+    user0, = create_user
     app_type_0 = user0.app_type
 
     # Validates that a named user in a user access control works
@@ -155,7 +157,7 @@ RSpec.describe Admin::UserRole, type: :model do
 
     expect(user0.user_roles.length).to eq 0
 
-    user1, _ = create_user
+    user1, = create_user
 
     r1 = create_user_role TestRoleName, user: user0, app_type: app_type_2
     r2 = create_user_role TestRoleName2, user: user0, app_type: app_type_2
@@ -176,11 +178,8 @@ RSpec.describe Admin::UserRole, type: :model do
     expect(Admin::UserRole.where(app_type: app_type_0, user: user1).role_names).to eq [App2TestRoleName2]
 
     # Can't copy roles if the target user has roles in the specified app
-    expect {
+    expect do
       Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin
-    }.to raise_error FphsException
-
-
+    end.to raise_error FphsException
   end
-
 end

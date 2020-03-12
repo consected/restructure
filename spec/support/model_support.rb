@@ -44,7 +44,7 @@ module ModelSupport
     # # Can't reload, as that doesn't clear non-db attributes
     user = User.find(user.id)
 
-    app_type = Admin::AppType.active.first
+    app_type = @user&.app_type || Admin::AppType.active.first
     raise 'No active app type!' unless app_type
 
     unless opt[:no_app_type_setup]
@@ -56,7 +56,7 @@ module ModelSupport
     user.save!
 
     if opt[:create_master]
-      Admin::UserAccessControl.create! app_type_id: app_type.id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: user
+      Admin::UserAccessControl.create! app_type: app_type, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: user
     end
     @user = user
     let_user_create :player_contacts

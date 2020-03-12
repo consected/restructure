@@ -33,7 +33,7 @@ describe 'reports', js: true, driver: :app_firefox_driver do
     if rl.count > 0
       r = rl.first
     else
-      r = create_item_flags_report
+      r = Report.create(current_admin: @admin, name: 'Item Flags types', description: '', sql: sql, search_attrs: '', disabled: false, report_type: 'regular_report', auto: false, searchable: false, position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
       r.save!
       expect(r.can_access?(@user)).to be_truthy
     end
@@ -55,6 +55,7 @@ describe 'reports', js: true, driver: :app_firefox_driver do
   end
 
   def get_list
+    expect(@user.can?(:view_reports)).to be_truthy
     expect(page).to have_css("a[href='/reports']")
     click_link 'Reports'
     expect(page).to have_css('.data-results table.tablesorter tr[data-report-id]')

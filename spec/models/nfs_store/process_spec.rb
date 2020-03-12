@@ -24,10 +24,16 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
     @activity_log = @container.parent_item
   end
 
-  it 'can access the underlying activity log to get the pipeline definition' do
+  before :each do
+    @activity_log = @container.parent_item
+    @activity_log.extra_log_type = :step_1
+    @activity_log.save!
+  end
 
+  it 'can access the underlying activity log to get the pipeline definition' do
     al = @container.parent_item
     expect(al).to be_a ActivityLog::PlayerContactPhone
+    expect(al.resource_name).to eq 'activity_log__player_contact_phone__step_1'
     expect(al.extra_log_type_config.nfs_store).to be_a Hash
 
     pl = al.extra_log_type_config.nfs_store[:pipeline]

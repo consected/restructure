@@ -1,36 +1,31 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-
 RSpec.describe Admin::ActivityLogsController, type: :controller do
-
   include AdminActivityLogSupport
 
   def object_class
     ActivityLog
   end
+
   def item
     @activity_log
   end
 
   before(:all) do
-    @path_prefix = "/admin"
+    @path_prefix = '/admin'
     seed_database
 
-    ActivityLog.connection.execute "
-      delete from activity_log_history;
-      delete from activity_logs;
-    "
-
-    if ActivityLog.connection.table_exists? "activity_log_player_contact_emails"
-      sql = TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', :drop_do)
+    unless ActivityLog.connection.table_exists? 'activity_log_player_contact_emails'
+      TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true, 'emailed_when')
     end
-
-    TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true, 'emailed_when')
-
 
     Rails.cache.clear
 
-    raise "Bad Seed! #{PlayerContact.valid_rec_types}" unless PlayerContact.valid_rec_types.length > 0
+    if PlayerContact.valid_rec_types.empty?
+      raise "Bad Seed! #{PlayerContact.valid_rec_types}"
+    end
   end
 
   before :each do
@@ -38,5 +33,4 @@ RSpec.describe Admin::ActivityLogsController, type: :controller do
   end
 
   it_behaves_like 'a standard admin controller'
-
 end

@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 require 'securerandom'
 
-RSpec.describe "Delete stored files", type: :model do
-
+RSpec.describe 'Delete stored files', type: :model do
   include PlayerContactSupport
   include ModelSupport
   include NfsStoreSupport
@@ -15,9 +16,16 @@ RSpec.describe "Delete stored files", type: :model do
     setup_nfs_store
 
     @activity_log = @container.parent_item
+    @activity_log.extra_log_type = :step_1
+    @activity_log.save!
   end
 
-  it "delete a stored file from a container" do
+  before :each do
+    @activity_log = @container.parent_item
+    @activity_log.extra_log_type = :step_1
+  end
+
+  it 'delete a stored file from a container' do
     upload_file 'test-name.txt'
     u = upload_file 'test-name-2.txt'
     upload_file 'test-name-3.txt'
@@ -38,12 +46,10 @@ RSpec.describe "Delete stored files", type: :model do
 
     sf.current_user_role_names.each do |role_name|
       curr_path = NfsStore::Manage::Filesystem.nfs_store_path role_name, sf.container, sf.path, sf.file_name
-      if File.exist?(curr_path)
-        break
-      end
+      break if File.exist?(curr_path)
     end
 
-    expect(curr_path).to end_with("#{trashdir}/#{delfn}--#{dt}") || end_with("#{trashdir}/#{delfn}--#{dt-1}")
+    expect(curr_path).to end_with("#{trashdir}/#{delfn}--#{dt}") || end_with("#{trashdir}/#{delfn}--#{dt - 1}")
 
     expect(NfsStore::Upload.hash_for_file(curr_path)).to eq u.file_hash
 
@@ -53,12 +59,9 @@ RSpec.describe "Delete stored files", type: :model do
 
     fs = @container.list_fs_files
     expect(fs.length).to eq 2
-
-
   end
 
-  it "delete a stored zip file but retain its exploded archive files" do
-
+  it 'delete a stored zip file but retain its exploded archive files' do
     create_filter('.*', role_name: nil)
 
     orig_count = @container.list_fs_files.length
@@ -67,11 +70,11 @@ RSpec.describe "Delete stored files", type: :model do
     upload_file 'test-name-5.txt'
     upload_file 'test-name-6.txt'
 
-
     # Generate a zip file from the uploaded files
     all_sf = @container.stored_files.order(id: :desc).limit(3)
 
-    all_sf_dl = all_sf.map {|sf| {
+    all_sf_dl = all_sf.map do |sf|
+      {
         id: sf.id,
         container_id: @container.id,
         retrieval_type: :stored_file,
@@ -79,10 +82,12 @@ RSpec.describe "Delete stored files", type: :model do
         activity_log_id: @activity_log.id
 
       }
-    }
+    end
 
     al = @activity_log
     expect(al).to be_a ActivityLog::PlayerContactPhone
+    expect(@container.parent_item).to eq al
+    expect(al.resource_name).to eq 'activity_log__player_contact_phone__step_1'
     expect(al.model_references.length).to eq 1
 
     setup_access al.resource_name, resource_type: :activity_log_type, user: @user
@@ -97,7 +102,6 @@ RSpec.describe "Delete stored files", type: :model do
 
     # Upload the generated zip
     u = upload_file 'test-name.zip', File.read(download.zip_file_path)
-
 
     delfn = 'test-name.zip'
     trashdir = '.trash'
@@ -116,12 +120,10 @@ RSpec.describe "Delete stored files", type: :model do
 
     sf.current_user_role_names.each do |role_name|
       curr_path = NfsStore::Manage::Filesystem.nfs_store_path role_name, sf.container, sf.path, sf.file_name
-      if File.exist?(curr_path)
-        break
-      end
+      break if File.exist?(curr_path)
     end
 
-    expect(curr_path).to end_with("#{trashdir}/#{delfn}--#{dt}") || end_with("#{trashdir}/#{delfn}--#{dt-1}")
+    expect(curr_path).to end_with("#{trashdir}/#{delfn}--#{dt}") || end_with("#{trashdir}/#{delfn}--#{dt - 1}")
 
     expect(NfsStore::Upload.hash_for_file(curr_path)).to eq u.file_hash
 
@@ -140,11 +142,9 @@ RSpec.describe "Delete stored files", type: :model do
 
     non_trash_af = @container.archived_files
     expect(non_trash_af.count).to eq (count_afs - 1)
-
   end
 
-
-  it "delete a stored file from a container and allows new upload" do
+  it 'delete a stored file from a container and allows new upload' do
     u = upload_file 'test-name-7.txt'
     upload_file 'test-name-8.txt'
     upload_file 'test-name-9.txt'
@@ -159,9 +159,9 @@ RSpec.describe "Delete stored files", type: :model do
     non_trash_sf = @container.stored_files
     expect(non_trash_sf.count).to eq 3
 
-    expect {
+    expect do
       NfsStore::Upload.find_upload @container, sf.file_hash, delfn, @user, path: sf.path
-    }.to raise_error(FsException::Action, "A matching stored file already exists")
+    end.to raise_error(FsException::Action, 'A matching stored file already exists')
 
     sf.move_to_trash!
 
@@ -171,16 +171,14 @@ RSpec.describe "Delete stored files", type: :model do
     again = NfsStore::Upload.find_upload @container, sf.file_hash, delfn, @user, path: sf.path
     expect(again).to be nil
 
-
     upload_file delfn
     sf = @container.stored_files.where(file_name: delfn).first
 
-    expect {
+    expect do
       NfsStore::Upload.find_upload @container, sf.file_hash, delfn, @user, path: sf.path
-    }.to raise_error(FsException::Action, "A matching stored file already exists")
+    end.to raise_error(FsException::Action, 'A matching stored file already exists')
 
     sleep 2 # to ensure the move to trash timestamp is ok
     sf.move_to_trash!
-
   end
 end

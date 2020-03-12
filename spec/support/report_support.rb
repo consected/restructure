@@ -14,7 +14,4 @@ module ReportSupport
     Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :report, resource_name: @report3.name, current_admin: @admin
   end
 
-  def create_item_flags_report
-    @item_flags_report = Report.create(current_admin: @admin, name: 'Item Flags types', description: '', sql: sql, search_attrs: '', disabled: false, report_type: 'regular_report', auto: false, searchable: false, position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
-  end
 end

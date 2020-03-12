@@ -15,7 +15,9 @@ RSpec.describe 'DynamicModel::PlayerContactPhoneInfo', type: :model do
     create_user
     import_bulk_msg_app
 
-    include DynamicModel::PlayerContactPhoneInfo
+    # DynamicModel::PlayerContactPhoneInfo
+
+    DynamicModel::PlayerContactPhoneInfo.definition.update_tracker_events
 
     @bulk_master = Master.find(-1)
     @bulk_master.current_user = @user

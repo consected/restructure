@@ -13,9 +13,9 @@ RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
   include BulkMsgSupport
 
   before :all do
+    seed_database
     create_admin
     create_user
-    
 
     @bulk_master = Master.find(-1)
     @bulk_master.current_user = @user
@@ -25,6 +25,9 @@ RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
     let_user_create :dynamic_model__zeus_bulk_message_recipients
     let_user_create :dynamic_model__zeus_bulk_message_statuses
     let_user_create :dynamic_model__zeus_bulk_messages
+
+    has_ranks = Classification::GeneralSelection.active.pluck(:item_type).select { |a| a == 'dynamic_model__zeus_bulk_message_recipients_rank' }
+    expect(has_ranks.length).to be > 0
 
     @bulk_master.dynamic_model__zeus_bulk_message_recipients.update_all(response: nil)
   end

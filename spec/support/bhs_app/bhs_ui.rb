@@ -8,6 +8,6 @@ module BhsUi
   NewSubjectCreateButton = 'Create'
   SearchPlayer = 'Search BHS Player'
   SearchButton = 'search'
-  TabNames = ['details', 'external ids', 'bhs tracker'].freeze
-  DefaultTabs = ['details', 'bhs tracker'].freeze
+  TabNames = ['details', 'external ids', 'records', 'bhs tracker'].freeze
+  DefaultTabs = ['details', 'records', 'bhs tracker'].freeze
 end

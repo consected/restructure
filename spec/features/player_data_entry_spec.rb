@@ -388,9 +388,11 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
 
     find('a.add-flags').click
 
+    sleep 1
     # Trigger the chosen drop down
     i = 'ul.chosen-choices .search-field input.default'
     expect(page).to have_css(i)
+    sleep 1
     f = find(i)
     f.click
 

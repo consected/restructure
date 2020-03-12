@@ -19,8 +19,8 @@ describe 'Register an incoming call', driver: :app_firefox_driver do
   include ActivityLogMain
 
   before :all do
-    setup_database
     seed_database
+    setup_database
     ::ActivityLog.define_models
     expect(ActivityLog.model_names).to include :player_contact_phone
 

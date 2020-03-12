@@ -154,16 +154,19 @@ EOF
     al = ActivityLog::PlayerContactPhone.new(select_call_direction: 'from player', select_who: 'user', extra_log_type: :step_1, player_contact: @player_contact, master: @player_contact.master)
     al.save!
     expect(al).to be_a ActivityLog::PlayerContactPhone
-
+    expect(al.extra_log_type).to eq :step_1
     expect(al.model_references.length).to eq 1
     @activity_log = al
     @container = NfsStore::Manage::Container.last
-    @container.parent_item = @activity_log
-
+    
     expect(@container).not_to be nil
-
+    
     @container.master.current_user ||= @user
     @container.save!
+
+    @container.parent_item = @activity_log
+    expect(@container.parent_item.resource_name).to eq 'activity_log__player_contact_phone__step_1'
+    @container
   end
 
   def upload_file(filename = 'test-name.txt', content = nil)

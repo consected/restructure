@@ -14,7 +14,7 @@ module BhsImportConfig
   end
 
   def self.import_config
-    sql_files = %w[DROP-bhs_tables.sql 1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 3-add_notification_triggers.sql 4-add_testmybrain_trigger.sql 5-create_sync_subject_data_aws_db.sql 6-grant_roles_access_to_ml_app.sql]
+    sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 3-add_notification_triggers.sql 4-add_testmybrain_trigger.sql 5-create_sync_subject_data_aws_db.sql 6-grant_roles_access_to_ml_app.sql]
     sql_source_dir = Rails.root.join('db', 'app_specific', 'bhs', 'aws-db')
     config_dir = Rails.root.join('db', 'app_configs')
     config_fn = 'bhs_config.json'

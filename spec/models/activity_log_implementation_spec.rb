@@ -32,7 +32,7 @@ RSpec.describe 'Activity Log implementation', type: :model do
     expect(al.class.definition).not_to be nil
 
     expect(al.player_contact).to eq @player_contact
-    resource_name = al.extra_log_type_config.resource_name
+    resource_name = al.resource_name
 
     setup_access resource_name, resource_type: :activity_log_type, access: nil, user: @user
 

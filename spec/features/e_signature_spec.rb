@@ -7,8 +7,8 @@ describe 'Electronically sign a record', driver: :app_firefox_driver do
   include ActivityLogMain
 
   before :all do
-    setup_database
     seed_database
+    setup_database
     ::ActivityLog.define_models
 
     user_logs_in

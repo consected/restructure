@@ -77,6 +77,8 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
       all('input[type="submit"]').first.click
     end
 
+    expand_tracker_panel
+
     has_css? '.tracker-tree-results'
 
     sleep 0.5
@@ -277,10 +279,11 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
 
     ### Occasionally we fail here, perhaps due to bad test data?????
     if items.empty?
-      # puts "About to fail with a bad result"
+      # puts 'About to fail with a bad result'
       # puts @full_player_info.inspect
       # puts protocol.name, sp.id, pe.id
       sleep 10
+      items = page.all(:css, '.master-expander')
     end
     expect(items.length).to be > 0
 
@@ -326,6 +329,14 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     have_css('.master-expander')
     # The results should show at least this one player
     items = page.all(:css, '.master-expander')
+    if items.empty?
+      # puts 'About to fail with a bad result'
+      # puts @full_player_info.inspect
+      # puts protocol.name, sp.id, pe.id
+      sleep 10
+      items = page.all(:css, '.master-expander')
+    end
+
     expect(items.length).to be > 0
 
     h = open_player_element items.first, items

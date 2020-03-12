@@ -19,6 +19,11 @@ RSpec.describe 'Move and rename stored files', type: :model do
     setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
   end
 
+  before :each do
+    @activity_log = @container.parent_item
+    @activity_log.extra_log_type = :step_1
+  end
+
   it 'rename a stored file in a container' do
     upload_file 'test-name.txt'
     u = upload_file 'test-name-2.txt'
@@ -56,6 +61,8 @@ RSpec.describe 'Move and rename stored files', type: :model do
   end
 
   it 'rename an archive file' do
+    expect(@app_type).to eq @user&.app_type
+
     create_filter('.*', role_name: nil)
 
     orig_count = @container.list_fs_files.length
@@ -85,9 +92,14 @@ RSpec.describe 'Move and rename stored files', type: :model do
     setup_access :activity_log__player_contact_phones, resource_type: :table, user: @user
     setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
 
+    expect(@activity_log.class.resource_name).to eq 'activity_log__player_contact_phones'
     expect(@activity_log).to eq @container.parent_item
-    expect(@activity_log.extra_log_type_config&.resource_name).not_to be_blank
-    expect(@user.has_access_to?(:access, :activity_log_type, @activity_log.extra_log_type_config.resource_name))
+    expect(@activity_log.extra_log_type).to eq :step_1
+    expect(@activity_log.resource_name).to eq @activity_log.extra_log_type_config.resource_name
+    expect(@user.has_access_to?(:access, :activity_log_type, @activity_log.resource_name))
+    expect(@container.parent_item).to eq @activity_log
+    expect(@activity_log.current_user).to eq @user
+    expect(@container.current_user).to eq @user
 
     download.retrieve_files_from all_sf_dl
 

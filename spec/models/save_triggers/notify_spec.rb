@@ -2,7 +2,10 @@
 
 require 'rails_helper'
 
+AlNameGenTest2 = 'Gen Test ELT 2'
+
 SetupHelper.setup_al_player_contact_phones
+SetupHelper.setup_al_gen_tests AlNameGenTest2, 'elt2_test', 'player_contact'
 
 RSpec.describe SaveTriggers::Notify, type: :model do
   include ModelSupport
@@ -16,6 +19,9 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     create_user
     let_user_create :player_contacts
     create_master
+    ActivityLog::PlayerContactPhone.definition.update_tracker_events
+    ActivityLog::PlayerContactElt2Test.definition.update_tracker_events
+
     @al = create_item
     setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
 
@@ -35,6 +41,8 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     Admin::UserRole.create! app_type: u1.app_type, user: u1, role_name: 'test', current_admin: @admin
     Admin::UserRole.create! app_type: u1.app_type, user: @user, role_name: 'test', current_admin: @admin
     Admin::UserRole.create! app_type: u1.app_type, user: ud, role_name: 'test', current_admin: @admin
+
+    Admin::UserRole.create! app_type: u1.app_type, user: @user, role_name: 'test_2', current_admin: @admin
 
     at2 = Admin::AppType.create! name: 'new-notify', label: 'Test Notify App', current_admin: @admin
     Admin::UserRole.create! app_type: at2, user: u0, role_name: 'test', current_admin: @admin
@@ -106,8 +114,8 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     @al.extra_log_type_config.clean_references_def
     @al.extra_log_type_config.editable_if = { always: true }
 
-    setup_access @al.resource_name, resource_type: :table, access: :create, user: @user
-    setup_access @al.extra_log_type_config.resource_name, resource_type: :activity_log_type, access: :create, user: @user
+    setup_access @al.class.resource_name, resource_type: :table, access: :create, user: @user
+    setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
 
     begin
       ModelReference.create_with @al, @al1
@@ -371,5 +379,71 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
     expect(@trigger.receiving_user_ids.first).to eq @al.user_id
     expect(@trigger.subject).to eq 'subject text 2'
+  end
+
+  it 'sends notifications on a save_trigger in an activity log' do
+    # Setup a new activity log with multiple notifications on create
+
+    t = '<p>This is some content in a template testing save_trigger notifications.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
+
+    @activity_log = al = ActivityLog.active.where(name: AlNameGenTest2).first
+
+    raise "Activity Log #{AlNameGenTest2} not set up" if al.nil?
+
+    al.extra_log_types = <<~EOF
+      step_1:
+        label: Step 1
+        fields:
+          - select_call_direction
+          - select_who
+        save_trigger:
+          on_create:
+            notify:
+              - type: email
+                role: test
+                layout_template: #{@layout.name}
+                content_template_text: |
+                  #{t}
+                subject: subject text
+              - type: email
+                role: test_2
+                layout_template: #{@layout.name}
+                content_template_text: |
+                  #{t}
+                subject: subject text
+
+      step_2:
+        label: Step 2
+        fields:
+          - select_call_direction
+          - extra_text
+
+    EOF
+
+    al.current_admin = @admin
+    al.save!
+
+    user = @user
+    @player_contact.current_user = user
+
+    setup_access al.resource_name, resource_type: :table, access: :create, user: user
+
+    alstep1 = @player_contact.activity_log__player_contact_elt2_tests.build(select_call_direction: 'from player', select_who: 'user', extra_log_type: 'step_1')
+
+    setup_access alstep1.resource_name, resource_type: :activity_log_type, access: :create, user: user
+
+    alstep1.save!
+    expect(alstep1).to be_persisted
+
+    alstep2 = @player_contact.activity_log__player_contact_elt2_tests.build(select_call_direction: 'from staff', select_who: 'user', extra_log_type: 'step_1')
+    alstep2.save!
+
+    lastid = Messaging::MessageNotification.last.id
+    mns = Messaging::MessageNotification.where(id: [lastid, lastid - 1]).order(id: :desc)
+    expect(mns.first.item_type).to eq al.implementation_class.name
+    expect(mns.first.item_id).to eq alstep2.id
+
+    expect(mns.last.item_type).to eq al.implementation_class.name
+    expect(mns.last.item_id - 1).to eq alstep1.id
   end
 end

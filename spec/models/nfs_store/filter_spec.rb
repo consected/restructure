@@ -18,6 +18,11 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     @activity_log = @container.parent_item
   end
 
+  before :each do
+    @activity_log = @container.parent_item
+    @activity_log.extra_log_type = :step_1
+  end
+
   it 'creates filters for a user and role' do
     f = create_filter('^contabc', resource_name: 'nfs_store__manage__containers')
     expect(f).to be_a NfsStore::Filter::Filter
@@ -39,6 +44,9 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
   end
 
   it 'creates filters for a user and role in activity log' do
+    expect(@container.parent_item).to eq @activity_log
+    @resource_name = @activity_log.resource_name
+
     f = create_filter('^abc')
     expect(f).to be_a NfsStore::Filter::Filter
 
@@ -59,6 +67,8 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
   end
 
   it 'applies filters for the current user to container' do
+    @resource_name = @activity_log.resource_name
+
     create_stored_file '.', 'not_abc_ is a test'
     create_stored_file '.', 'abc_ is a test'
 
@@ -98,6 +108,8 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
   end
 
   it 'generates SQL to filter reports' do
+    @resource_name = @activity_log.resource_name
+
     f = create_filter('^/fabc')
     f = create_filter('^fdir\/')
     f = create_filter('^/fghi')
