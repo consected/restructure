@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 module NfsStore
   class MultiActions < NfsStoreUserBase
-
     # Support multiple actions to be performed against files, such as downloads and sending to trash
 
     self.abstract_class = true
@@ -8,9 +9,9 @@ module NfsStore
     include HasCurrentUser
 
     belongs_to :user
-    belongs_to :container, class_name: "NfsStore::Manage::Container", foreign_key: 'nfs_store_container_id'
+    belongs_to :container, class_name: 'NfsStore::Manage::Container', foreign_key: 'nfs_store_container_id'
 
-    ValidRetrievalTypes = %i(stored_file archived_file)
+    ValidRetrievalTypes = %i[stored_file archived_file].freeze
 
     before_validation :store_action_items
 
@@ -21,7 +22,7 @@ module NfsStore
     # Check if requested retrieval type is one of a valid set
     # @param retrieval_type [Symbol] retrieval type requested
     # @return [True, False]
-    def self.valid_retrieval_type? retrieval_type
+    def self.valid_retrieval_type?(retrieval_type)
       retrieval_type.in? ValidRetrievalTypes
     end
 
@@ -31,16 +32,16 @@ module NfsStore
     #     during initialization or immediately after
     #   multiple_items (optional) specifies if this is a download of one or more files in a zip
     #   user is no longer specified, since this is set from the container during retrieval
-    def initialize options={}
+    def initialize(options = {})
       super
     end
 
     # Override the standard current_user setting to allow multiple containers / masters to be handled
-    def current_user=user
+    def current_user=(user)
       if container_ids
         @current_user = user
       else
-        master ||= self.container.master
+        master ||= container.master
         master.current_user = user
       end
     end
@@ -49,7 +50,7 @@ module NfsStore
       if container_ids
         @current_user
       else
-        master ||= self.container.master
+        master ||= container.master
         master.current_user
       end
     end
@@ -57,7 +58,7 @@ module NfsStore
     # Memoize filtered container files, returning a hash for stored and archived files
     # @param item_for_filter [NfsStore::Manage::Container | ActivityLog]
     # @return [Hash {stored_files: ActiveRecord::Relation, archived_files: ActiveRecord::Relation}]
-    def filtered_files_as_scopes item_for_filter
+    def filtered_files_as_scopes(item_for_filter)
       rnid = "#{item_for_filter.class.to_s.ns_underscore}--#{item_for_filter.id}"
       @filtered_files_as_scopes ||= {}
       @filtered_files_as_scopes[rnid] ||= NfsStore::Filter::Filter.evaluate_container_files_as_scopes item_for_filter
@@ -68,37 +69,48 @@ module NfsStore
     # @param retrieval_type [Symbol] the type of object referencing the file
     # @param container [NfsStore::Manage::Container | nil] optionally provide a container to support multi container downloads
     # @return [String] filesystem path to the file to be retrieved
-    def retrieve_file_from id, retrieval_type, container: nil, activity_log: nil, for_action:
-
+    def retrieve_file_from(id, retrieval_type, container: nil, activity_log: nil, for_action:)
       container ||= self.container
       activity_log ||= self.activity_log
 
-      raise FsException::NoAccess.new "user does not have access to this container" unless container.allows_current_user_access_to? :access
-      raise FsException::NoAccess.new "user is not authorized to #{for_action.to_s.humanize}" unless container.send("can_#{for_action}?")
+      unless container.allows_current_user_access_to? :access
+        raise FsException::NoAccess, 'user does not have access to this container'
+      end
+      unless container.send("can_#{for_action}?")
+        raise FsException::NoAccess, "user is not authorized to #{for_action.to_s.humanize}"
+      end
 
       unless activity_log
         res = ModelReference.find_where_referenced_from(container).first
-        raise FsException::NoAccess.new "Attempting to browse a container that is referenced by activity logs, without specifying which one" if res
+        if res
+          raise FsException::NoAccess, 'Attempting to browse a container that is referenced by activity logs, without specifying which one'
+        end
       end
 
       item_for_filter = activity_log || container
 
       filtered_files = filtered_files_as_scopes item_for_filter
 
-      if retrieval_type == :stored_file
-        retrieved_file = filtered_files[:stored_files].select {|f| f.id == id }.first
-      elsif retrieval_type == :archived_file
-        retrieved_file = filtered_files[:archived_files].select {|f| f.id == id }.first
-      else
-        raise FsException::Download.new "Invalid retrieval type requested for download: #{retrieval_type}"
+      unless filtered_files
+        raise FsException::Download, 'No file filters are configured.'
       end
 
-      raise FsException::Download.new "The requested file either does not exist or you do not have access to it" unless retrieved_file
+      if retrieval_type == :stored_file
+        retrieved_file = filtered_files[:stored_files].select { |f| f.id == id }.first
+      elsif retrieval_type == :archived_file
+        retrieved_file = filtered_files[:archived_files].select { |f| f.id == id }.first
+      else
+        raise FsException::Download, "Invalid retrieval type requested for download: #{retrieval_type}"
+      end
+
+      unless retrieved_file
+        raise FsException::Download, 'The requested file either does not exist or you do not have access to it'
+      end
 
       # Save the list of gids this user has
       self.user_groups = retrieved_file.current_user_group_ids
       self.container = retrieved_file.container
-      self.user = self.current_user
+      self.user = current_user
 
       # The details we save is dependent on whether we are downloading a single file, or a set of multiple items
       if multiple_items
@@ -123,28 +135,27 @@ module NfsStore
         self.file_metadata = retrieved_file.file_metadata
       end
 
-      FsException::NotFound.new "file not found with available group access" unless self.retrieval_path
+      unless retrieval_path
+        FsException::NotFound.new 'file not found with available group access'
+      end
 
-      self.retrieval_path
+      retrieval_path
     end
-
 
     private
 
-      # During save of the download record, copy all_action_items to the actual retrieved_items attribute
-      # We do this to handle the difference between JSON in Postgres and SQLite
-      def store_action_items
+    # During save of the download record, copy all_action_items to the actual retrieved_items attribute
+    # We do this to handle the difference between JSON in Postgres and SQLite
+    def store_action_items
+      return unless self.all_action_items
 
-        return unless self.all_action_items
-        self.all_action_items.delete :retrieved_file
+      self.all_action_items.delete :retrieved_file
 
-        if self.class.columns_hash[self.item_actions_field].type == :string
-          send "#{self.item_actions_field}=", self.all_action_items.to_json
-        else
-          send "#{self.item_actions_field}=", self.all_action_items
-        end
+      if self.class.columns_hash[item_actions_field].type == :string
+        send "#{item_actions_field}=", self.all_action_items.to_json
+      else
+        send "#{item_actions_field}=", self.all_action_items
       end
-
-
+    end
   end
 end
