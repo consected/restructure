@@ -89,6 +89,36 @@ module NfsStore
       all_action_items
     end
 
+    #
+    # Replace the current file content with a new file. The actual file content is replaced
+    # so we generate a new digest, file size, etc
+    #
+    # @param [Tempfile] tmp_file the temporary file, which will be removed after it replaces the original
+    # @return [Boolean] success
+    #
+    def replace_file!(tmp_file)
+      # Retain the current file name and path
+      orig_path = path
+      orig_file_name = file_name
+
+      # Move the current file to trash
+      move_to_trash!
+      # Move the temporary file to the original location
+      move_from tmp_file.path
+      # Remove the trash file
+      Filesystem.remove_trash_file
+
+      # Resetting file name and path
+      self.path = orig_path
+      self.file_name = orig_file_name
+      self.valid_path_change = true
+      save!
+
+      # All done. Unlink the temporary file
+      tmp_file.unlink
+      true
+    end
+
     protected
 
     def filters_allow_rename?(archive_file, path, new_name)
