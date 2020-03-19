@@ -32,6 +32,7 @@ then
   echo '4 (fphs-crm-dev01)'
   echo '5 (fphs-crm-dev02)'
   echo '6 (fphs-crm-prod01)'
+  echo '7 (app-internal.zeus.fphs.link)'
 
   read OPT
 
@@ -63,13 +64,16 @@ fi
 
 
 
-if [[ $OPT != '1' && $OPT != '2' && $OPT != '3' && $OPT != '4' && $OPT != '5' && $OPT != '6' ]]
+if [[ $OPT != '1' && $OPT != '2' && $OPT != '3' && $OPT != '4' && $OPT != '5' && $OPT != '6' && $OPT != '7' ]]
 then
-    echo Only 1, 2, 3, 4, 5 or 6 are valid
+    echo Only 1, 2, 3, 4, 5, 6, 7 are valid
     exit
 fi
 
 export BECOME_USER=''
+export EXTDBCONN=''
+export PREFIX_CMDS=''
+export POSTFIX_CMDS=''
 
 if [ -z "$SEND_TO_DB" ]
 then
@@ -189,6 +193,28 @@ export EXTRAPGDUMPARGS='-T ml_app.masters_backup_20190703 -T ml_app.addresses_ba
 ###############################
 fi
 
+if [ $OPT == '7' ]
+then
+#### if AWS Zeus production #####
+export EXTNAME=app-internal.zeus.fphs.link
+export EXTUSER=$ext_user
+export SCHEMA=ml_app
+export EXTDB=fphs
+export EXTDBHOST=fphs-zeus-db-prod01.repo
+export EXTDBUSER=fphs
+export EXPORTSVR=app-internal.zeus.fphs.link
+export EXPORTLOC=/home/$ext_user/db_migrations
+export EXTROLE=FPHSUSR
+export EXTADMROLE=FPHSADM
+export PREFIX_CMDS='yum install -y docker && service docker start && docker pull postgres:11-alpine'
+export POSTFIX_CMDS='service docker stop'
+export EXTRAPGDUMPARGS='-T ml_app.masters_backup_20190703 -T ml_app.addresses_backup_20190709 -T ml_app.player_contacts_20190808 -T ml_app.player_contacts_prenflpa6_20190920'
+export PG_DUMP_PREFIX="docker run -t --rm  -e PGPASSWORD=\${FPHS_POSTGRESQL_PASSWORD} postgres:11-alpine "
+export BECOME_USER=root
+export EXTDBCONN="-h $EXTDBHOST -U $EXTDBUSER"
+###############################
+fi
+
 export DEVDIR="$(dirname $DIR)"
 export DBHOST=localhost
 export DBUSER=fphs
@@ -202,7 +228,6 @@ then
   echo "NOTE: your ecommons user on the remote server requires a .pgpass entry for $EXTDBHOST:5432:$EXTDB:$EXTDBUSER:<password>"
 else
   export BECOME_USER_CMD="sudo -u $BECOME_USER -i"
-  export EXTDBCONN=''
 fi
 
 if [ -z "$NOSSH" ]
@@ -240,20 +265,27 @@ fi
 
 echo Prepare dump of current schema from the server $EXTNAME
 $RUNSCRIPT <<EOF
+echo become user? $BECOME_USER_CMD
+$BECOME_USER_CMD
+$PREFIX_CMDS
 cd /tmp
 mv migrate-$EXTNAME migrate-$EXTNAME.old.`date --iso-8601=seconds`
 cd -
-echo become user? $BECOME_USER_CMD
-$BECOME_USER_CMD
 cd /tmp
 mkdir -p migrate-$EXTNAME
 mkdir -p $EXPORTLOC/migrate-$EXTNAME
 cd migrate-$EXTNAME
 echo -d $EXTDB $EXTDBCONN
-pg_dump -O -d $EXTDB $EXTDBCONN --clean --create --schema-only --schema=${SCHEMA} -T $SCHEMA.{jd_tmp} $EXTRAPGDUMPARGS -x > "db-schema.sql"
-pg_dump -O -d $EXTDB $EXTDBCONN --data-only --schema=${SCHEMA} --table=${SCHEMA}.schema_migrations $EXTRAPGDUMPARGS -x > "db-schema-migrations.sql"
-chmod 777 .
-chmod 755 *
+$PG_DUMP_PREFIX pg_dump -O $EXTDBCONN --schema-only --schema=${SCHEMA} -T ${SCHEMA}.jd_tmp $EXTRAPGDUMPARGS -x -d $EXTDB > "db-schema.sql"
+$PG_DUMP_PREFIX pg_dump -O $EXTDBCONN --data-only --schema=${SCHEMA} --table=${SCHEMA}.schema_migrations $EXTRAPGDUMPARGS -x -d $EXTDB > "db-schema-migrations.sql"
+chmod 0777 .
+chmod 0755 *
+if [ ! -z "$BECOME_USER" ]
+then
+  chown $EXTUSER .
+  chown $EXTUSER *
+fi
+$POSTFIX_CMDS
 echo Done dumping files
 exit
 EOF
@@ -278,6 +310,14 @@ then
 else
   echo Pull the db-schema files back locally using rsync
   rsync $EXTUSER@$EXTNAME:/tmp/migrate-$EXTNAME/db-schema* .
+fi
+
+if [ ! -f db-schema.sql ] || [ ! -f db-schema-migrations.sql ] || [ "$(wc -l db-schema.sql)" == "0 db-schema.sql" ] || [ "$(wc -l db-schema-migrations.sql)" == "0 db-schema-migrations.sql" ]
+then
+  echo "**************************************************************************"
+  echo "Failed to get db schema or migrations"
+  echo "**************************************************************************"
+  exit
 fi
 
 echo Create the local database
