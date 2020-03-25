@@ -39,26 +39,24 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
     pl = al.extra_log_type_config.nfs_store[:pipeline]
     expect(pl).to be_a Array
 
-    expect(pl.last.first.first).to eq :dicom_deidentify
-    pli = pl.last.first.last
+    expect(pl[-2].first.first).to eq :dicom_deidentify
+    pli = pl[-2].first.last
 
     expect(pli[0]).to be_a Hash
-    expect(pli[0].first.first).to eq :"modify-all"
-    expect(pli[0].first.last).to be_a Hash
-
-    expect(pli[1]).to be_a Hash
-    expect(pli[1].first.first).to eq :"modify-all"
+    expect(pli[0].first.first).to eq :file_filters
+    expect(pli[0].first.last).to be_a String
+    expect(pli[0][:set_tags]).to be_a Hash
   end
 
-  it 'runs a custom process when a file is uploaded' do
+  it 'defines a custom pipeline' do
     dicom_content = File.read Rails.root.join('docs', 'dicom1.dcm')
     ul = upload_file 'dicom1.dcm', dicom_content
     sf = ul.stored_file
 
+    expect(sf.container.parent_item).to be_a ActivityLog::PlayerContactPhone
+
     ph = NfsStore::Process::ProcessHandler.new sf
 
-    expect(ph.job_list).to eq %i[mount_archive index_files dicom_metadata dicom_deidentify]
-
-    raise 'Work out how to get the background job to run'
+    expect(ph.job_list).to eq %i[mount_archive index_files dicom_deidentify dicom_metadata]
   end
 end

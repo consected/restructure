@@ -86,12 +86,18 @@ module NfsStoreSupport
         pipeline:
           - mount_archive:
           - index_files:
-          - dicom_metadata:
+
           - dicom_deidentify:
-              - modify-all:
-                  (0010,0010): new value
-              - modify-all:
-                  (0010,0020): another tagval
+              - file_filters: .*
+                recursive: true
+                set_tags:
+                  0010,0010: new value
+                  0010,0020: another tagval
+                delete_tags:
+                  - 0008,0020
+
+
+          - dicom_metadata:
 
     step_2:
       label: Step 2
@@ -158,9 +164,9 @@ EOF
     expect(al.model_references.length).to eq 1
     @activity_log = al
     @container = NfsStore::Manage::Container.last
-    
+
     expect(@container).not_to be nil
-    
+
     @container.master.current_user ||= @user
     @container.save!
 

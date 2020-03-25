@@ -82,6 +82,32 @@ module NfsStore
 
         job_list[i + 1]
       end
+
+      #
+      # Get the configuration for the named pipeline job
+      # @param [NfsStore::Manage::ArchivedFile|NfsStore::Manage::StoredFile|NfsStore::Manage::Container|ActivityLog] container_file
+      #   Any one of these items allowing us to identify the activity log instance
+      # @param [String | Symbol] name representing the job config to retrieve
+      # @return [Hash] configuration
+      def self.pipeline_job_config(item, name)
+        if item.respond_to? :container
+          container = item.container
+        elsif item.is_a? NfsStore::Manage::Container
+          container = item
+        end
+
+        if container
+          activity_log = container.parent_item
+        elsif item.is_a? ActivityLog
+          activity_log = item
+        else
+          raise FsException::Action, "pipeline_job_config was provided an item that could not be used to resolve an activity log: #{item}"
+        end
+
+        pipeline = activity_log.extra_log_type_config.nfs_store[:pipeline]
+
+        NfsStore::Config::ExtraOptions.pipeline_item_config(pipeline, name)
+      end
     end
   end
 end

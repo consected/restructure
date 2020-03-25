@@ -65,6 +65,16 @@ module NfsStore
         !!path.split('/').select { |p| p == TrashPath }.first
       end
 
+      #
+      # Calculate the new path for a file moved to trash
+      #
+      # @return [<Type>] <description>
+      #
+      def trash_path
+        f_path = container_path(no_filename: true)
+        f_path.blank? ? TrashPath : File.join(TrashPath, f_path)
+      end
+
       def as_json(extras = {})
         extras[:methods] ||= []
         extras[:methods] << :master_id
@@ -87,8 +97,8 @@ module NfsStore
       end
 
       # Move the file to a new path, and/or rename, changing the path and file_name stored in the record to match
-      # @param new_path [String] the new container relative path to move the file to, or if null leave it at the current path (rename only)
-      # @param new_file_name [String] the new file name, or leave it the same if nil (move, don't rename the actual file)
+      # @param [String] new_path the new container relative path to move the file to, or if null leave it at the current path (rename only)
+      # @param [String] new_file_name the new file name, or leave it the same if nil (move, don't rename the actual file)
       # @return [true|false] successful rename / move
       def move_to(new_path, new_file_name = nil)
         res = false
@@ -109,9 +119,7 @@ module NfsStore
           break
         end
 
-        unless res
-          raise FsException::Action, "Failed to move file to #{new_path}/#{new_file_name}"
-        end
+        raise FsException::Action, "Failed to move file to #{new_path}/#{new_file_name}" unless res
 
         res
       end
@@ -145,22 +153,19 @@ module NfsStore
       # Create a .trash/stored_file_name directory
       # Then move the file appended with the current timestamp
       # If the file is an archive, remove any directories that are empty
-      def move_to_trash!
-        curr_path = nil
-        current_user_role_names.each do |role_name|
-          curr_path = file_path_for role_name: role_name
-          break if File.exist?(curr_path)
+      def move_to_trash!(remove_empty_dir: true)
+        curr_path, = file_path_and_role_name
+        unless curr_path
+          raise FsException::Action, "Move to trash not allowed. File not accessible with current roles: #{curr_path}"
         end
 
-        f_path = container_path(no_filename: true)
-        new_path = f_path.blank? ? TrashPath : File.join(TrashPath, f_path)
         dt = DateTime.now.to_i
         new_file_name = "#{file_name}--#{dt}"
-        move_to new_path, new_file_name
+        move_to trash_path, new_file_name
 
-        if curr_path && is_a?(ArchivedFile)
-          NfsStore::Archive::Mounter.remove_empty_archive_dir(curr_path)
-        end
+        return unless curr_path && is_a?(ArchivedFile) && remove_empty_dir
+
+        NfsStore::Archive::Mounter.remove_empty_archive_dir(curr_path)
       end
 
       # Move the file to its final location
@@ -169,10 +174,11 @@ module NfsStore
       def move_from(from_path)
         res = false
         current_user_role_names.each do |role_name|
+          # Cycle until we find a role that makes this directory writeable
           next unless Filesystem.test_dir role_name, container, :write
 
           # If a path is set, ensure we can make a directory for it if one doesn't exist
-          unless !path.present? || Filesystem.test_dir(role_name, container, :mkdir, extra_path: container_path(no_filename: true), ok_if_exists: true)
+          unless path.blank? || Filesystem.test_dir(role_name, container, :mkdir, extra_path: container_path(no_filename: true), ok_if_exists: true)
             next
           end
 
@@ -202,6 +208,102 @@ module NfsStore
         true
       end
 
+      #
+      # Replace the current file content with a new file. The actual file content is replaced
+      # so we generate a new digest, file size, etc
+      #
+      # @param [Tempfile] tmp_file the temporary file, which will be removed after it replaces the original
+      # @return [Boolean] success
+      #
+      def replace_file!(tmp_file)
+        # Retain the current file name and path
+        orig_path = path
+        orig_file_name = file_name
+
+        blanked_path = path || ''
+        if respond_to? :archive_file
+          orig_archive_file = archive_file
+          orig_file_path = File.join(blanked_path, orig_archive_file, orig_file_name)
+        else
+          orig_file_path = File.join(blanked_path, orig_file_name)
+        end
+        file_path, role_name = file_path_and_role_name
+        new_trash_path = trash_path
+
+        unless file_path
+          raise FsException::Action, "Replacing file not allowed. File not accessible with current roles: #{file_path}"
+        end
+
+        orig_fs_path = Filesystem.nfs_store_path(role_name, container, path, file_name, archive_file: orig_archive_file)
+        self.current_role_name = role_name
+
+        transaction do
+          # Move the current file to trash. Prevent removal of an empty directory
+          # since the replacement will go back into it
+          move_to_trash! remove_empty_dir: false
+
+          unless self.class.trash_path?(path)
+            raise FsException::Action, "Replacing file did not move original to trash: #{orig_file_path}"
+          end
+
+          trash_file_path = Filesystem.nfs_store_path(role_name, container, new_trash_path, file_name)
+          unless File.exist?(trash_file_path)
+            raise FsException::Action, "Replacing file did not move the actual file to the trash filesystem location: #{trash_file_path}"
+          end
+
+          # Resetting file name and generating new hash, mime type, etc
+          self.path = orig_path
+          self.file_name = orig_file_name
+          self.archive_file = orig_archive_file if respond_to? :archive_file
+          self.valid_path_change = true
+
+          rep_fs_path = Filesystem.nfs_store_path(role_name, container, path, file_name, archive_file: orig_archive_file)
+          unless rep_fs_path == orig_fs_path
+            raise FsException::Action, "Replacement file targeting wrong location: #{rep_fs_path}"
+          end
+
+          # Move the temporary file to the original location
+          move_from tmp_file.path
+
+          self.file_hash = nil
+          analyze_file!
+          self.file_hash ||= ContainerFile.hash_for_file(rep_fs_path)
+
+          # Remove the trash file
+          Filesystem.remove_trash_file trash_file_path
+
+          save!
+        end
+
+        # All done. Unlink the temporary file
+        tmp_file.unlink
+        true
+      end
+
+      #
+      # Get the filesystem path and role name for the first role that allows
+      # the container file to be accessed
+      # @return [Array(String, String) | nil] returns an array [filesystem_path, role_name]
+      def file_path_and_role_name
+        current_user_role_names.each do |role_name|
+          fs_path = file_path_for role_name: role_name
+          return [fs_path, role_name] if File.exist?(fs_path)
+        end
+        nil
+      end
+
+      # Calculate a the MD5 hash for a file focusing on memory efficiency for large files by handling as chunks
+      # NOTE: this should not be used directly against mounted archive files that are larger than one chunk,
+      # since the overhead of continuous unzipping slows things enormously.
+      # @param file_path [String] full path to the file
+      # @return [String] MD5 hash
+      def self.hash_for_file(file_path)
+        md5_digest = Digest::MD5.new
+        md5_digest.file(file_path)
+
+        md5_digest.hexdigest
+      end
+
       private
 
       def reset_flags
@@ -209,11 +311,9 @@ module NfsStore
       end
 
       def prevent_path_change
-        if persisted?
-          if !valid_path_change && path_changed?
-            errors.add :path, 'must not be changed'
-            end
-        end
+        return unless persisted? && !valid_path_change && path_changed?
+
+        errors.add :path, 'must not be changed'
       end
     end
   end

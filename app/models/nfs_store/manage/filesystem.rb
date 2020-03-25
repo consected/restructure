@@ -83,6 +83,9 @@ module NfsStore
       # @param container [NfsStore::Manage::Container] the container, which will also set the app type if it is not set explicitly
       # @param path [String] path relative to the container for a directory
       # @param file_name [String] specific file name to use
+      # @param archive_file [String] specify an archive file this is extracted from
+      # @param app_type_id [Admin::AppType] specify an app type to override the current user's current app type
+      # @param strip_final_slash [Boolean] force a clean path without a final slash
       # @return [String] path string
       def self.nfs_store_path(role_name, container = nil, path = nil, file_name = nil, archive_file: nil, app_type_id: nil, strip_final_slash: nil)
         fs_dir = nfs_store_directory
@@ -104,9 +107,7 @@ module NfsStore
         end
 
         parts << container&.directory_name if container&.directory_name
-        unless archive_file.blank?
-          parts << Archive::Mounter.archive_mount_name(archive_file)
-        end
+        parts << Archive::Mounter.archive_mount_name(archive_file) unless archive_file.blank?
         parts << path unless path.blank?
         parts << file_name if file_name
 
@@ -247,6 +248,12 @@ module NfsStore
 
         Kernel.system 'mv', from_path, fs_path
 
+        unless File.exist?(fs_path)
+          raise FsException::Action, "Move file to final location did not move the file: #{fs_path}"
+        end
+
+        puts "Moved file to final location: #{fs_path}"
+
         FileUtils.chmod FinalFilePerms, fs_path if FinalFilePerms
         true
       end
@@ -268,6 +275,23 @@ module NfsStore
         !!File.exist?(fs_dir)
       end
 
+      #
+      # Remove a file that is in a .trash directory from the filesystem
+      #
+      # @param [String] full_path is the full file system path to the file
+      def self.remove_trash_file(full_path)
+        unless ContainerFile.trash_path?(full_path)
+          raise FsException::Action, "File to remove is not in trash: #{full_path}"
+        end
+        unless File.exist?(full_path)
+          raise FsException::Action, "File to remove from trash is not present: #{full_path}"
+        end
+
+        FileUtils.rm full_path
+      end
+
+      #
+      #
       # Ensure that the configurations are loaded from initializers
       ActiveSupport.run_load_hooks(:nfs_store_config, self)
     end

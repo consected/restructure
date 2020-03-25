@@ -37,11 +37,10 @@ module NfsStore
           mounter.stored_file = sf
           # How old is the file?
           td = begin
-                 Time.now - File.ctime(sf.retrieval_path)
+                   Time.now - File.ctime(sf.retrieval_path)
                rescue StandardError
                  nil
-               end
-
+                 end
           if (td && td < ProcessingRetryTime) || mounter.archive_extracted? || sf.last_process_name_run == '_all_done_'
             next
           end
@@ -257,7 +256,7 @@ module NfsStore
 
           glob_path = "#{@mounted_path}/**/*"
           %w([ ] { } ?).each do |c|
-            glob_path = glob_path.gsub(c, "\\#{c}")
+            glob_path.gsub!(c, "\\#{c}")
           end
 
           files = Dir.glob(glob_path)

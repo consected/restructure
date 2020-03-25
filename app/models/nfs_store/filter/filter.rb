@@ -61,7 +61,7 @@ module NfsStore
         user ||= item.current_user
         fs = filters_for item, user: user
         fs.each do |f|
-          return true if evaluate_with f, text, item
+          return true if evaluate_with f, text
         end
 
         false
@@ -96,12 +96,14 @@ module NfsStore
 
       # Evaluate a query directly in the database to produce a filtered set of records
       # Returns two scopes as a hash {stored_files: ActiveRecord::Relation, archived_files: ActiveRecord::Relation}
-      # @param item [ActivityLog|NfsStore::ManageContainer] container or activity log referencing the container
-      # @param user [User|nil]
+      # @param [ActivityLog|NfsStore::ManageContainer] item is a container or activity log referencing the container
+      # @param [User|nil] user
+      # @param [Array] filters optionally allows a list of filter strings to be supplied rather
+      #   than getting them from the stored definition
       # @return [Hash{ActiveRecord::Relation}] resultset of all matched records
-      def self.evaluate_container_files_as_scopes(item, user: nil, alt_role: nil)
+      def self.evaluate_container_files_as_scopes(item, user: nil, alt_role: nil, filters: nil)
         user ||= item.current_user
-        filters = filters_for(item, user: user, alt_role: alt_role)
+        filters ||= filters_for(item, user: user, alt_role: alt_role)
 
         # If no filters are defined, exit. At least one is required to return a sensible result.
         return if filters.empty?
@@ -162,10 +164,10 @@ module NfsStore
       # Evaluate the text against the current filter
       # @return [nil, MatchData] if the match is made, a MatchData object is returned, otherwise nil
       def evaluate(text, item)
-        self.class.evaluate_with filter_for(item), text, item
+        self.class.evaluate_with filter_for(item), text
       end
 
-      def self.evaluate_with(filter, text, _item)
+      def self.evaluate_with(filter, text)
         re = Regexp.new filter
         re.match(text)
       end
