@@ -21,7 +21,8 @@
             ],
             "env": {
                 "RAILS_ENV": "ipa_test",
-                "FPHS_2FA_AUTH_DISABLED": "true"
+                "FPHS_2FA_AUTH_DISABLED": "true",
+                "DISABLE_SPRING": "true"
             }
         },
         {
@@ -38,7 +39,8 @@
                 "${file}"
             ],
             "env": {
-                "NOT_HEADLESS": "true"
+                "NOT_HEADLESS": "true",
+                "DISABLE_SPRING": "true"
             }
         },
         {
@@ -55,7 +57,8 @@
                 "${file}:${lineNumber}"
             ],
             "env": {
-                "NOT_HEADLESS": "true"
+                "NOT_HEADLESS": "true",
+                "DISABLE_SPRING": "true"
             }
         }
     ]

@@ -1,0 +1,33 @@
+Metrics/LineLength:
+  Enabled: true
+  Max: 120
+  Include:
+    - 'app/**/*'
+    - 'spec/**/*'
+
+Metrics/BlockLength:
+  Enabled: true
+  Max: 50
+  Include:
+    - 'app/**/*'
+    - 'spec/**/*'
+
+Metrics/MethodLength:
+  Enabled: true
+  Max: 50
+  Include:
+    - 'app/**/*'
+    - 'spec/**/*'
+
+
+Naming/ConstantName:
+  Enabled: false
+
+Style/DoubleNegation:
+  Enabled: false
+
+Style/WordArray:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
