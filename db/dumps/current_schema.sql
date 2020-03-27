@@ -3936,7 +3936,8 @@ CREATE TABLE ml_app.message_notifications (
     role_name character varying,
     content_template_text character varying,
     importance character varying,
-    extra_substitutions character varying
+    extra_substitutions character varying,
+    content_hash character varying
 );
 
 
