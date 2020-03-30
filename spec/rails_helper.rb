@@ -31,8 +31,6 @@ require 'browser_helper'
 require 'setup_helper'
 include BrowserHelper
 
-SetupHelper.setup_byebug
-SetupHelper.validate_db_setup
 
 setup_browser
 
@@ -65,13 +63,18 @@ end
 # require only the support files necessary.
 #
 require "#{::Rails.root}/spec/support/master_support.rb"
+require "#{::Rails.root}/spec/support/model_support.rb"
 
 Dir[Rails.root.join('spec/support/*.rb')].each { |f| require f }
 Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 
+SetupHelper.setup_byebug
+SetupHelper.validate_db_setup
+
 # Checks for pending migrations before tests are run.
 # If you are not using ActiveRecord, you can remove this line.
 ActiveRecord::Migration.maintain_test_schema!
+
 
 
 

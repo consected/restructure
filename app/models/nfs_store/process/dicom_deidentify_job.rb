@@ -80,6 +80,10 @@ module NfsStore
 
           container_file.replace_file! new_tmp_image
         end
+
+        dmj = NfsStore::Process::DicomMetadataJob.new
+        dmj.extract_metadata(container_file)
+
       end
     end
   end

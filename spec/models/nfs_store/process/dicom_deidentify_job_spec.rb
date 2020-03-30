@@ -37,6 +37,9 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     ul = @uploaded_files.first
     sf = ul.stored_file
 
+    dmj = NfsStore::Process::DicomMetadataJob.new
+    dmj.extract_metadata sf
+
     orig_file_name = sf.file_name
     orig_path = sf.path
     orig_file_hash = sf.file_hash
@@ -52,6 +55,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
 
     # Brute force reload the file
     sf = sf.class.find(sf.id)
+    sf.current_user = @user
     fs_path, = sf.file_path_and_role_name
 
     dcm = DICOM::DObject.read(fs_path)
