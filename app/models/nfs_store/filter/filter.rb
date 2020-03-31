@@ -108,7 +108,9 @@ module NfsStore
         # If no filters are defined, exit. At least one is required to return a sensible result.
         return if filters.empty?
 
-        if item.model_data_type == :activity_log
+        if item.is_a? NfsStore::Manage::Container
+          container = item
+        elsif item.model_data_type == :activity_log
           container = ModelReference.find_referenced_items(item, record_type: 'NfsStore::Manage::Container').first
         end
 
