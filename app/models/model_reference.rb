@@ -114,7 +114,9 @@ class ModelReference < ActiveRecord::Base
     end
 
     if without_reference
-      recs = to_record_type_class.where(master: from_item_or_master).order(ref_order)
+      cond = { master: from_item_or_master }
+      cond.merge!(filter_by) if filter_by
+      recs = to_record_type_class.where(cond).order(ref_order)
       res = []
       recs.each do |r|
         res << ModelReference.new(from_record_type: nil, from_record_id: nil, from_record_master_id: from_item_or_master.id,
@@ -129,9 +131,7 @@ class ModelReference < ActiveRecord::Base
         cond[:to_record_type] = to_record_type if to_record_type
         res = ModelReference.where(cond).order(ref_order)
         # Handle the filter_by clause
-        if filter_by
-          res = res.select { |mr| filter_by.all? { |k, v| mr.to_record.attributes[k.to_s] == v } }
-        end
+        res = res.select { |mr| filter_by.all? { |k, v| mr.to_record.attributes[k.to_s] == v } } if filter_by
       end
     end
 
@@ -291,17 +291,13 @@ class ModelReference < ActiveRecord::Base
   end
 
   def to_record_result_key
-    if to_record.respond_to? :extra_log_type
-      return "#{to_record_type_us}_#{to_record.extra_log_type}"
-    end
+    return "#{to_record_type_us}_#{to_record.extra_log_type}" if to_record.respond_to? :extra_log_type
 
     to_record_type_us
   end
 
   def to_record_template
-    if to_record.respond_to? :extra_log_type
-      return "#{to_record_type_us}_#{to_record.extra_log_type}"
-    end
+    return "#{to_record_type_us}_#{to_record.extra_log_type}" if to_record.respond_to? :extra_log_type
 
     to_record_short_type_us
   end
@@ -387,9 +383,7 @@ class ModelReference < ActiveRecord::Base
 
     extras[:methods] << :to_record_data
 
-    if from_record.respond_to? :option_type_config
-      extras[:methods] << :to_record_options_config
-    end
+    extras[:methods] << :to_record_options_config if from_record.respond_to? :option_type_config
     extras[:methods] << :from_record_type_us
     extras[:methods] << :from_record_short_type_us
     extras[:methods] << :from_record_viewable

@@ -85,11 +85,11 @@ module ActivityLogHandler
     # Otherwise use the view_attribute_list
     def view_blank_log_attribute_list
       al = definition
-      if al.blank_log_field_list.blank?
-        res = view_attribute_list.clone
-      else
-        res = definition.view_blank_log_attribute_list.map(&:to_s) + ['tracker_history_id']
-      end
+      res = if al.blank_log_field_list.blank?
+              view_attribute_list.clone
+            else
+              definition.view_blank_log_attribute_list.map(&:to_s) + ['tracker_history_id']
+            end
       res.map(&:to_sym)
     end
 
@@ -239,9 +239,7 @@ module ActivityLogHandler
   # - otherwise the extra_log_type value is humanized and used
   #
   def data
-    if extra_log_type_config&.view_options
-      da = extra_log_type_config.view_options[:data_attribute]
-    end
+    da = extra_log_type_config.view_options[:data_attribute] if extra_log_type_config&.view_options
 
     if da
       return self.class.format_data_attribute da, self
@@ -280,9 +278,7 @@ module ActivityLogHandler
     elt = extra_log_type
 
     res = self.class.extra_log_type_config_for elt
-    unless res
-      logger.warn "No extra log type configuration exists for #{elt} in #{self.class.name}"
-    end
+    logger.warn "No extra log type configuration exists for #{elt} in #{self.class.name}" unless res
     res
   end
 
@@ -363,12 +359,22 @@ module ActivityLogHandler
     refs.each do |_ref_key, refitem|
       refitem.each do |ref_type, ref_config|
         f = ref_config[:from]
+        without_reference = (ref_config[:without_reference] == true)
         if f == 'this'
-          got = ModelReference.find_references self, to_record_type: ref_type, filter_by: ref_config[:filter_by]
+          got = ModelReference.find_references self,
+                                               to_record_type: ref_type,
+                                               filter_by: ref_config[:filter_by],
+                                               without_reference: without_reference
         elsif f == 'master'
-          got = ModelReference.find_references master, to_record_type: ref_type, filter_by: ref_config[:filter_by]
+          got = ModelReference.find_references master,
+                                               to_record_type: ref_type, 
+                                               filter_by: ref_config[:filter_by], 
+                                               without_reference: without_reference
         elsif f == 'any'
-          got = ModelReference.find_references master, to_record_type: ref_type, filter_by: ref_config[:filter_by], without_reference: true
+          got = ModelReference.find_references master,
+                                               to_record_type: ref_type, 
+                                               filter_by: ref_config[:filter_by], 
+                                               without_reference: true
         else
           got = nil
         end
@@ -399,21 +405,34 @@ module ActivityLogHandler
 
         if ci_res
           a = ref_config[:add]
+          without_reference = (ref_config[:without_reference] == true)
           if a == 'many'
             l = ref_config[:limit]
             under_limit = true
 
             if l&.is_a?(Integer)
-              under_limit = (ModelReference.find_references(master, to_record_type: ref_type, filter_by: fb, active: true).length < l)
+              under_limit = (ModelReference.find_references(master,
+                                                            to_record_type: ref_type,
+                                                            filter_by: fb,
+                                                            active: true,
+                                                            without_reference: without_reference).length < l)
             end
 
             ires = a if under_limit
           elsif a == 'one_to_master'
-            if ModelReference.find_references(master, to_record_type: ref_type, filter_by: fb, active: true).empty?
+            if ModelReference.find_references(master,
+                                              to_record_type: ref_type,
+                                              filter_by: fb,
+                                              active: true,
+                                              without_reference: without_reference).empty?
               ires = a
             end
           elsif a == 'one_to_this'
-            if ModelReference.find_references(self, to_record_type: ref_type, filter_by: fb, active: true).empty?
+            if ModelReference.find_references(self,
+                                              to_record_type: ref_type,
+                                              filter_by: fb,
+                                              active: true,
+                                              without_reference: without_reference).empty?
               ires = a
             end
           elsif a.present?
@@ -424,9 +443,7 @@ module ActivityLogHandler
             # Check if the user has access to create the item
 
             mrc = ModelReference.to_record_class_for_type(ref_type)
-            if mrc.nil?
-              raise FphsException, "Reference type is invalid: #{ref_type}"
-            end
+            raise FphsException, "Reference type is invalid: #{ref_type}" if mrc.nil?
 
             if mrc.parent == ActivityLog
               elt = ref_config[:add_with] && ref_config[:add_with][:extra_log_type]
@@ -443,17 +460,13 @@ module ActivityLogHandler
             end
 
             i = o.allows_current_user_access_to? :create
-            if ires && i
-              res = { ref_type: ref_type, many: ires, ref_config: ref_config }
-            end
+            res = { ref_type: ref_type, many: ires, ref_config: ref_config } if ires && i
 
           end
 
         end
 
-        if res[:ref_type] || !only_creatables
-          cre_res[ref_key] = { ref_type => res }
-        end
+        cre_res[ref_key] = { ref_type => res } if res[:ref_type] || !only_creatables
       end
     end
     cre_res
@@ -525,9 +538,7 @@ module ActivityLogHandler
                                item_id: id, item_type: self.class.name, event_date: action_when)
 
     # check and raise error that is usable by a user if there was a problem (for example, a required field not set)
-    unless t&.valid?
-      raise FphsException, "could not create tracker record: #{t.errors.full_messages.join('; ')}"
-    end
+    raise FphsException, "could not create tracker record: #{t.errors.full_messages.join('; ')}" unless t&.valid?
 
     t
   end
@@ -645,13 +656,9 @@ module ActivityLogHandler
       # Do not set master - this should already be set, and setting it again breaks
       # secondary_key matched saves
       s[:item].master = master unless s[:item].master
-      unless s[:item].master_user
-        s[:item].master.current_user = master_user || user
-        end
+      s[:item].master.current_user = master_user || user unless s[:item].master_user
       res = s[:item].save
-      unless res
-        raise "Failed to save related item. #{s[:item].errors.full_messages.join('; ')}"
-        end
+      raise "Failed to save related item. #{s[:item].errors.full_messages.join('; ')}" unless res
     end
     true
   end
@@ -659,9 +666,7 @@ module ActivityLogHandler
   # Store the result of allowing a tracker sync to happen before save, when we
   # would lose access to the required change information.
   def set_allow_tracker_sync
-    if !persisted? || (respond_to?(:protocol_id) && protocol_id_changed?)
-      @allow_tracker_sync = true
-    end
+    @allow_tracker_sync = true if !persisted? || (respond_to?(:protocol_id) && protocol_id_changed?)
   end
 
   def track_record_update
@@ -865,9 +870,7 @@ module ActivityLogHandler
                    rescue StandardError
                      nil
                    end
-      if mr_view_as && mr_view_as[:edit].in?(not_embedded_options)
-        @embedded_item = nil
-      end
+      @embedded_item = nil if mr_view_as && mr_view_as[:edit].in?(not_embedded_options)
 
     elsif action_name.in?(%w[show index]) && mrs.length == 1 && cmrs.empty?
       # A referenced record exists and no more are creatable

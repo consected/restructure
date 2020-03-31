@@ -19,7 +19,8 @@ class ExtraLogType < ExtraOptions
       references: {
         model_name: {
           label: 'button label',
-          from: 'this | master',
+          from: 'this | master | any',
+          without_reference: true,
           add: 'many | one_to_master | one_to_this',
           add_with: {
             extra_log_type: 'type name',
