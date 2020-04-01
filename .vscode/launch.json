@@ -22,7 +22,8 @@
             "env": {
                 "RAILS_ENV": "development",
                 "FPHS_2FA_AUTH_DISABLED": "true",
-                "DISABLE_SPRING": "true"
+                "DISABLE_SPRING": "true",
+                "FPHS_LOAD_APP_TYPES": "4"
             }
         },
         {

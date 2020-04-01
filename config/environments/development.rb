@@ -1,9 +1,9 @@
-require File.expand_path('../../../lib/logger/do_nothing_logger.rb', __FILE__)
+# frozen_string_literal: true
+
+require File.expand_path('../../lib/logger/do_nothing_logger.rb', __dir__)
 Rails.application.configure do
-
-
-# initialadmin@hms.harvard.edu-not
-# Admin user password: NsePVLdQQq_E
+  # initialadmin@hms.harvard.edu-not
+  # Admin user password: NsePVLdQQq_E
 
   config.log_level = :info
   # Settings specified here will take precedence over those in config/application.rb.
@@ -47,7 +47,6 @@ Rails.application.configure do
   # number of complex assets.
   config.assets.debug = true
 
-
   config.cache_store = :mem_cache_store
 
   # Asset digests allow you to set far-future HTTP expiration dates on all assets,
@@ -58,7 +57,6 @@ Rails.application.configure do
   # Checks for improperly declared sprockets dependencies.
   # Raises helpful error messages.
   config.assets.raise_runtime_errors = true
-
 
   # config.active_job.queue_adapter = :inline
   config.active_job.queue_adapter = :delayed_job

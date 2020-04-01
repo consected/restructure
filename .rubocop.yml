@@ -19,6 +19,11 @@ Metrics/MethodLength:
     - 'app/**/*'
     - 'spec/**/*'
 
+Metrics/ClassLength:
+  Enabled: true
+  Max: 400
+  Include:
+    - 'app/**/*'
 
 Naming/ConstantName:
   Enabled: false
