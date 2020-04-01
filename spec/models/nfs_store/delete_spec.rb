@@ -18,11 +18,14 @@ RSpec.describe 'Delete stored files', type: :model do
     @activity_log = @container.parent_item
     @activity_log.extra_log_type = :step_1
     @activity_log.save!
+
+    expect(@container.parent_item.resource_name).to eq 'activity_log__player_contact_phone__step_1'
   end
 
   before :each do
     @activity_log = @container.parent_item
     @activity_log.extra_log_type = :step_1
+    expect(@container.parent_item.resource_name).to eq 'activity_log__player_contact_phone__step_1'
   end
 
   it 'delete a stored file from a container' do

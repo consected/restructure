@@ -174,7 +174,7 @@ RSpec.describe Admin::UserRole, type: :model do
     res = Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin
     expect(res.length).to eq 1
 
-    expect(Admin::UserRole.where(app_type: app_type_2, user: user1).role_names).to eq [TestRoleName, TestRoleName2]
+    expect(Admin::UserRole.where(app_type: app_type_2, user: user1).role_names.sort).to eq [TestRoleName, TestRoleName2].sort
     expect(Admin::UserRole.where(app_type: app_type_0, user: user1).role_names).to eq [App2TestRoleName2]
 
     # Can't copy roles if the target user has roles in the specified app

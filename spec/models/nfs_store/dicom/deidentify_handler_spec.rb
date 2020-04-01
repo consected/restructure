@@ -22,10 +22,10 @@ RSpec.describe NfsStore::Dicom::MetadataHandler, type: :model do
 
     # Setup and run the anonymization handler
     dh = NfsStore::Dicom::DeidentifyHandler.new file_path: test_file
-    tmpfile = dh.anonymize
+    tmpfile = dh.send :anonymize
 
-    expect(tmpfile).to be_a Tempfile
-    dcm = DICOM::DObject.read(tmpfile.path)
+    expect(tmpfile).to be_a String
+    dcm = DICOM::DObject.read(tmpfile)
     dcm = dcm.to_hash
 
     expect(dcm["Patient's Name"]).to eq 'Patient'
@@ -47,8 +47,8 @@ RSpec.describe NfsStore::Dicom::MetadataHandler, type: :model do
     dh = NfsStore::Dicom::DeidentifyHandler.new file_path: test_file
     tmpfile = dh.anonymize_with(set_tags: set_tags, delete_tags: delete_tags)
 
-    expect(tmpfile).to be_a Tempfile
-    dcm = DICOM::DObject.read(tmpfile.path)
+    expect(tmpfile).to be_a String
+    dcm = DICOM::DObject.read(tmpfile)
     dcm = dcm.to_hash
 
     expect(dcm["Patient's Name"]).to eq 'Anon'

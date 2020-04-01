@@ -86,17 +86,6 @@ module NfsStoreSupport
         pipeline:
           - mount_archive:
           - index_files:
-
-          - dicom_deidentify:
-              - file_filters: .*
-                recursive: true
-                set_tags:
-                  0010,0010: new value
-                  0010,0020: another tagval
-                delete_tags:
-                  - 0008,0020
-
-
           - dicom_metadata:
 
     step_2:

@@ -122,7 +122,6 @@ RSpec.describe SaveTriggers::Notify, type: :model do
       ModelReference.create_with @al, @al2
     rescue ActiveRecord::RecordInvalid => e
       puts e
-      byebug
     end
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}} in id {{id}}. This is a name: {{select_who}}.</p><p>{{extra_substitutions.extra_text}}</p>'

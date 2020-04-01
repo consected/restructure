@@ -44,7 +44,7 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
 
     expect(pli[0]).to be_a Hash
     expect(pli[0].first.first).to eq :file_filters
-    expect(pli[0].first.last).to be_a String
+    expect(pli[0].first.last).to be_a Array
     expect(pli[0][:set_tags]).to be_a Hash
   end
 
@@ -57,6 +57,6 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
 
     ph = NfsStore::Process::ProcessHandler.new sf
 
-    expect(ph.job_list).to eq %i[mount_archive index_files dicom_deidentify dicom_metadata]
+    expect(ph.job_list).to eq %i[mount_archive index_files dicom_metadata]
   end
 end
