@@ -691,7 +691,7 @@
         "id": 72,
         "user_id": null,
         "resource_type": "report",
-        "resource_name": "IPA ID Search",
+        "resource_name": "ipa_files_id_search",
         "options": "",
         "access": "read",
         "disabled": false,
@@ -1686,7 +1686,7 @@
     "associated_reports": [
       {
         "id": 7,
-        "name": "IPA ID Search",
+        "name": "IPA Files ID Search",
         "description": "Search for IPA subject by IPA ID.",
         "sql": "select * from ipa_assignments where ipa_id = :ipa_id",
         "search_attrs": "\r\nipa_id:\r\n  number:\r\n    all: true\r\n    multiple: single\r\n",
@@ -1706,7 +1706,7 @@
       },
       {
         "id": 8,
-        "name": "Search IPA Subject",
+        "name": "Search IPA Files Subject",
         "description": "Search subjects by name, phone, email or ID.\r\nLeave the search field empty to see all subjects.",
         "sql": "select distinct m.id master_id, \r\npi.first_name, pi.middle_name, pi.last_name, pi.nick_name,\r\na.street, a.street2, a.city, a.state, a.zip, \r\npc.data, pc.rec_type\r\nfrom masters m\r\ninner join player_infos pi\r\non pi.master_id = m.id \r\ninner join ipa_assignments b\r\non m.id = b.master_id\r\nleft join addresses a\r\non m.id = a.master_id\r\nleft join player_contacts pc\r\non pc.master_id = m.id\r\nwhere \r\n(:name is null \r\nor pi.first_name ~* :name\r\nor pi.last_name ~* :name\r\nor pi.middle_name ~* :name\r\nor pi.nick_name ~* :name\r\nor( \r\n    pi.first_name ~* coalesce(split_part(:name, ' ', 1),'none')\r\n    AND pi.last_name ~* coalesce(split_part(:name, ' ', 2),'none')\r\n  )\r\n) OR\r\n(\r\nlength(:name) > 5 AND\r\nregexp_replace(pc.data, '\\W+', '', 'g') ~* regexp_replace(:name, '\\W+', '', 'g')\r\n) OR\r\n(\r\nb.ipa_id::varchar = :name\r\n)\r\n",
         "search_attrs": "name: \r\n  text: \r\n    all: true\r\n    multiple: single\r\n",
@@ -3979,18 +3979,10 @@
         "user_email": "phil_ayres@hms.harvard.edu"
       }
     ],
-    "associated_message_templates": [
-
-    ],
-    "associated_protocols": [
-
-    ],
-    "associated_sub_processes": [
-
-    ],
-    "associated_protocol_events": [
-
-    ],
+    "associated_message_templates": [],
+    "associated_protocols": [],
+    "associated_sub_processes": [],
+    "associated_protocol_events": [],
     "nfs_store_filters": [
       {
         "id": 1,

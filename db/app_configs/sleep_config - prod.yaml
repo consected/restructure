@@ -3891,6 +3891,32 @@ app_type:
     created_at: '2019-11-25T16:54:15.451Z'
     updated_at: '2019-11-25T16:54:15.451Z'
     user_email: 
+  - id: 1164
+    user_id: 
+    resource_type: report
+    resource_name: sleep__chart___participant_status
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 11
+    role_name: tracker
+    created_at: '2020-02-19T10:27:51.873Z'
+    updated_at: '2020-02-19T10:27:51.873Z'
+    user_email: 
+  - id: 1166
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__sleep_assignment__completed_intervention
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 11
+    role_name: admin - bwh
+    created_at: '2020-03-13T08:54:11.708Z'
+    updated_at: '2020-03-13T08:54:11.708Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 12
     name: Protocol Deviations & Exceptions
@@ -4672,7 +4698,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-11-21T11:00:53.909Z'
-    updated_at: '2020-02-03T17:44:47.148Z'
+    updated_at: '2020-03-31T09:08:09.636Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -4794,11 +4820,11 @@ app_type:
       \     from: master\r\n      add: one_to_master\r\n      \r\n    activity_log__sleep_assignment:\r\n
       \     from: master\r\n      add: one_to_master\r\n      add_with: \r\n        extra_log_type:
       assign_id\r\n      filter_by: \r\n        extra_log_type: assign_id\r\n      view_as:\r\n
-      \       eidt: hide\r\n        show: hide\r\n  \r\n  view_options:\r\n    always_embed_reference:
-      dynamic_model__sleep_appointment\r\n    hide_unless_creatable: true\r\n\r\n
-      \ caption_before:\r\n    reference_activity_log__sleep_assignment: |\r\n      Click
-      **+ Assign ID** to record the BWH Study ID for this participant\r\n\r\n  creatable_if:\r\n
-      \   <<: *enabled_if\r\n    all:\r\n      activity_log__sleep_assignment_phone_screen2s:\r\n
+      \       edit: not_embedded\r\n        show: readonly\r\n        new: not_embedded\r\n
+      \       \r\n  view_options:\r\n    always_embed_reference: dynamic_model__sleep_appointment\r\n
+      \   hide_unless_creatable: true\r\n\r\n  caption_before:\r\n    reference_activity_log__sleep_assignment:
+      |\r\n      Click **+ Assign ID** to record the BWH Study ID for this participant\r\n\r\n
+      \ creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__sleep_assignment_phone_screen2s:\r\n
       \       extra_log_type: eligible\r\n            \r\n    not_any_exit: *any_exit_or_complete\r\n
       \   not_any:\r\n      activity_log__sleep_assignments:\r\n        extra_log_type:
       appointment\r\n\r\n  save_trigger:\r\n    on_save:\r\n      create_reference:
@@ -4842,7 +4868,8 @@ app_type:
       \       subject: New SLEEP Enrollment\r\n\r\n\r\n\r\n\r\n###################################\r\nassign_id:\r\n
       \ label: Assign ID\r\n###################################\r\n  \r\n  fields:\r\n\r\n
       \ references:\r\n    bwh_sleep_id_number:\r\n      from: master\r\n      add:
-      one_to_master\r\n      prevent_disable: true\r\n      \r\n  creatable_if:\r\n
+      one_to_master\r\n      prevent_disable: true\r\n      creatable_if:\r\n        any:\r\n
+      \         bwh_sleep_id_numbers:\r\n            id: null\r\n      \r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    all:\r\n      activity_log__sleep_assignments:\r\n
       \       extra_log_type: appointment\r\n            \r\n    not_any_exit: *any_exit_or_complete\r\n
       \   not_any:\r\n      activity_log__sleep_assignments:\r\n        extra_log_type:
@@ -5366,7 +5393,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-11-21T11:00:54.227Z'
-    updated_at: '2019-11-25T14:35:40.510Z'
+    updated_at: '2020-02-18T19:07:00.411Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -5449,24 +5476,24 @@ app_type:
       \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    all:\r\n
       \     <<: *enabled_if\r\n      not_any:\r\n        activity_log__sleep_assignment_phone_screen2s:\r\n
       \         extra_log_type: ineligible\r\n      any_ineligible:\r\n        all_basic_questions:\r\n
-      \         activity_log__sleep_assignment_phone_screen2s:\r\n            extra_log_type:
-      phq8\r\n          not_all:\r\n            <<: *eligible_phq8_questions\r\n\r\n
-      \ save_action:\r\n    on_save:\r\n      show_panel:\r\n        value: activity_log__sleep_assignments\r\n\r\n\r\n
-      \ save_trigger:\r\n    on_create:\r\n\r\n      create_reference:\r\n        -
-      activity_log__sleep_assignment_med_nav:\r\n            in: this\r\n            add:
-      many\r\n            if:\r\n              any:\r\n                dynamic_model__sleep_ps2_non_eligibles:\r\n
-      \                 questions_for_pi_yes_no: 'yes'\r\n\r\n            with:\r\n
-      \             extra_log_type: request_pi_follow_up\r\n              notes: |\r\n
-      \               BWH Phone Screen found this subject to be ineligible.\r\n                The
-      subject requested a PI follow up.\r\n\r\n                Please review the BWH
-      Phone Screen tab for complete information.\r\n\r\n        - activity_log__sleep_assignment_phone_screen2:\r\n
-      \           in: master\r\n            with:\r\n              extra_log_type:
-      finalize\r\n\r\n\r\n      # Notify the PI that the subject has questions\r\n
-      \     notify:\r\n        - <<: *notify_pi\r\n          if:\r\n            any:\r\n
-      \             dynamic_model__sleep_ps2_non_eligibles:\r\n                questions_for_pi_yes_no:
-      'yes'\r\n\r\n        - <<: *notify_pi_sms\r\n          if:\r\n            any:\r\n
-      \             dynamic_model__sleep_ps2_non_eligibles:\r\n                questions_for_pi_yes_no:
-      'yes'\r\n\r\n\r\n################################################\r\neligible:\r\n
+      \         all_done:\r\n            activity_log__sleep_assignment_phone_screen2s:\r\n
+      \             extra_log_type: phq8\r\n          not_all:\r\n            <<:
+      *eligible_phq8_questions\r\n\r\n  save_action:\r\n    on_save:\r\n      show_panel:\r\n
+      \       value: activity_log__sleep_assignments\r\n\r\n\r\n  save_trigger:\r\n
+      \   on_create:\r\n\r\n      create_reference:\r\n        - activity_log__sleep_assignment_med_nav:\r\n
+      \           in: this\r\n            add: many\r\n            if:\r\n              any:\r\n
+      \               dynamic_model__sleep_ps2_non_eligibles:\r\n                  questions_for_pi_yes_no:
+      'yes'\r\n\r\n            with:\r\n              extra_log_type: request_pi_follow_up\r\n
+      \             notes: |\r\n                BWH Phone Screen found this subject
+      to be ineligible.\r\n                The subject requested a PI follow up.\r\n\r\n
+      \               Please review the BWH Phone Screen tab for complete information.\r\n\r\n
+      \       - activity_log__sleep_assignment_phone_screen2:\r\n            in: master\r\n
+      \           with:\r\n              extra_log_type: finalize\r\n\r\n\r\n      #
+      Notify the PI that the subject has questions\r\n      notify:\r\n        - <<:
+      *notify_pi\r\n          if:\r\n            any:\r\n              dynamic_model__sleep_ps2_non_eligibles:\r\n
+      \               questions_for_pi_yes_no: 'yes'\r\n\r\n        - <<: *notify_pi_sms\r\n
+      \         if:\r\n            any:\r\n              dynamic_model__sleep_ps2_non_eligibles:\r\n
+      \               questions_for_pi_yes_no: 'yes'\r\n\r\n\r\n################################################\r\neligible:\r\n
       \ label: Eligible\r\n\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n  references:\r\n
       \   dynamic_model__sleep_ps2_eligible:\r\n      from: this\r\n      add: one_to_this\r\n\r\n
       \   activity_log__sleep_assignment:\r\n      label: Perform Informed Consent
@@ -5482,7 +5509,7 @@ app_type:
       \         extra_log_type: eligible\r\n\r\n  view_options:\r\n    hide_unless_creatable:
       true\r\n    always_embed_reference: dynamic_model__sleep_ps2_eligible\r\n    always_embed_creatable_reference:
       dynamic_model__sleep_ps2_eligible\r\n\r\n\r\n\r\n  save_action:\r\n\r\n\r\n
-      \ save_trigger:\r\n    on_create:\r\n\r\n      create_reference:\r\n        -
+      \ save_trigger:\r\n    on_save:\r\n\r\n      create_reference:\r\n        -
       activity_log__sleep_assignment_phone_screen2:\r\n            in: master\r\n
       \           with:\r\n              extra_log_type: finalize\r\n            if:\r\n
       \             not_any:\r\n                dynamic_model__sleep_ps2_eligibles:\r\n
@@ -5496,7 +5523,7 @@ app_type:
       record will be generated.\r\n\r\n      Click the cancel button instead if review
       or revision of the phone screen forms is still required.\r\n\r\n\r\n\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    all:\r\n      activity_log__sleep_assignment_phone_screen2s:\r\n
-      \       extra_log_type:\r\n#         - eligible\r\n         - ineligible\r\n\r\n
+      \       extra_log_type:\r\n         - eligible\r\n         - ineligible\r\n\r\n
       \   not_any:\r\n      activity_log__sleep_assignment_phone_screen2s:\r\n        extra_log_type:
       finalize\r\n\r\n\r\n  # Override the default that hides activities after a certain
       stage,\r\n  # so that any user can see that the phone screen process has been
@@ -5578,7 +5605,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-11-21T11:00:54.288Z'
-    updated_at: '2019-11-21T11:00:54.288Z'
+    updated_at: '2020-02-06T10:44:07.531Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -5602,8 +5629,8 @@ app_type:
       \         HMS Phone Screen Interviewers: hms phone screener\r\n          BWH
       Phone Screen Interviewers: bwh phone screener          \r\n          All Interventionists:
       all interventionists\r\n          Assigned Interventionist: assigned interventionist\r\n
-      \         PI: pi\r\n          \r\n\r\n\r\n  showable_if:\r\n    any:\r\n      all_creator:\r\n
-      \       this:\r\n          user_id:\r\n            user: id\r\n          \r\n
+      \         PI: pi\r\n          \r\n\r\n\r\n  showable_if:\r\n    any:\r\n#      all_creator:\r\n#
+      \       this:\r\n#          user_id:\r\n#            user: id\r\n          \r\n
       \     all:\r\n        activity_log__sleep_assignment_discussions:\r\n          id:\r\n
       \           this: id\r\n          tag_select_contact_role:\r\n            condition:
       '&&'\r\n            value: current_user_role_names\r\n          \r\n    \r\n
@@ -6828,6 +6855,52 @@ app_type:
       'yes'\r\n        \r\n#    follow_up_date: *consent_given\r\n#    follow_up_time:
       *consent_given\r\n\r\n    placeholder_end_call: *consent_given\r\n"
     user_email: 
+  - id: 66
+    name: Sleep Phone Screen Part 2 Eligible
+    table_name: sleep_ps2_eligibles
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:53.158Z'
+    updated_at: '2020-02-18T17:58:01.187Z'
+    position: 
+    category: sleep-phone-screen-2
+    table_key_name: ''
+    field_list: notes interested_yes_no not_interested_notes review_consent_now_yes_no
+      placeholder_review_now follow_up_date,follow_up_time
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before:\r\n    \r\n    notes: |\r\n      Thank
+      you for answering our remaining questions. \r\n      You are eligible to participate
+      in this study! Do you have any questions? \r\n      \r\n      *Do not enter
+      personal health information here*\r\n\r\n\r\n    interested_yes_no: |\r\n      Are
+      you interested in participating?\r\n    \r\n    not_interested_notes: |\r\n
+      \     May I ask you why you are not interested? \r\n      \r\n      Thank you
+      for your time. \r\n      \r\n      *Record reason, for example, too busy*\r\n
+      \     \r\n      *Do not enter personal health information here*\r\n    \r\n
+      \   review_consent_now_yes_no: |\r\n      Wonderful. The next step to enrolling
+      in the study is to complete \r\n      the informed consent.\r\n      \r\n      We
+      can go through this now together if you have a few more \r\n      minutes and
+      access to your email account now. \r\n      \r\n      Shall we go through the
+      informed consent together?\r\n      \r\n      \r\n    placeholder_review_now:
+      |\r\n      *Email consent document to conduct consent and enrollment protocol.*\r\n\r\n
+      \     Save this form, then click the **+ Perform Informed Consent Review** button
+      to record\r\n      the informed consent.\r\n\r\n    \r\n    follow_up_date:\r\n
+      \     keep_label: true\r\n      caption: |\r\n        I will email you the consent
+      document for you to review.\r\n        \r\n        Is there a more convenient
+      time to go through this together and \r\n        complete your enrollment?\r\n\r\n
+      \   #notes: Notes\r\n    \r\n    \r\n  show_if:\r\n    \r\n    not_interested_notes:\r\n
+      \     interested_yes_no: 'no'\r\n      \r\n    review_consent_now_yes_no: \r\n
+      \     interested_yes_no: 'yes'\r\n\r\n    placeholder_review_now:\r\n      interested_yes_no:
+      'yes'\r\n      review_consent_now_yes_no: 'yes'\r\n\r\n    follow_up_date:\r\n
+      \     interested_yes_no: 'yes'\r\n      review_consent_now_yes_no: 'no'\r\n
+      \     \r\n    follow_up_time:\r\n      interested_yes_no: 'yes'\r\n      review_consent_now_yes_no:
+      'no'\r\n      \r\n  valid_if:\r\n    on_save:\r\n      all:\r\n        this:\r\n
+      \         review_consent_now_yes_no:\r\n            - 'no'\r\n            -
+      'yes'\r\n          \r\n    \r\n    "
+    user_email: 
   - id: 67
     name: PHQ-8 Questions
     table_name: sleep_ps2_phq8_questions
@@ -6921,50 +6994,6 @@ app_type:
       \     not_any: *not_any_blanks\r\n        \r\n    placeholder_ineligible:\r\n
       \     all:\r\n        total_score:\r\n          - '20'\r\n          - '21'\r\n
       \         - '22'\r\n          - '23'\r\n          - '24'\r\n      not_any: *not_any_blanks\r\n\r\n"
-    user_email: 
-  - id: 66
-    name: Sleep Phone Screen Part 2 Eligible
-    table_name: sleep_ps2_eligibles
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-11-21T11:00:53.158Z'
-    updated_at: '2019-11-21T11:00:53.158Z'
-    position: 
-    category: sleep-phone-screen-2
-    table_key_name: ''
-    field_list: notes interested_yes_no not_interested_notes review_consent_now_yes_no
-      placeholder_review_now follow_up_date,follow_up_time
-    result_order: ''
-    options: "default:\r\n\r\n  caption_before:\r\n    \r\n    notes: |\r\n      Thank
-      you for answering our remaining questions. \r\n      You are eligible to participate
-      in this study! Do you have any questions? \r\n      \r\n      *Do not enter
-      personal health information here*\r\n\r\n\r\n    interested_yes_no: |\r\n      Are
-      you interested in participating?\r\n    \r\n    not_interested_notes: |\r\n
-      \     May I ask you why you are not interested? \r\n      \r\n      Thank you
-      for your time. \r\n      \r\n      *Record reason, for example, too busy*\r\n
-      \     \r\n      *Do not enter personal health information here*\r\n    \r\n
-      \   review_consent_now_yes_no: |\r\n      Wonderful. The next step to enrolling
-      in the study is to complete \r\n      the informed consent.\r\n      \r\n      We
-      can go through this now together if you have a few more \r\n      minutes and
-      access to your email account now. \r\n      \r\n      Shall we go through the
-      informed consent together?\r\n      \r\n      \r\n    placeholder_review_now:
-      |\r\n      *Email consent document to conduct consent and enrollment protocol.*\r\n\r\n
-      \     Save this form, then click the **+ Perform Informed Consent Review** button
-      to record\r\n      the informed consent.\r\n\r\n    \r\n    follow_up_date:\r\n
-      \     keep_label: true\r\n      caption: |\r\n        I will email you the consent
-      document for you to review.\r\n        \r\n        Is there a more convenient
-      time to go through this together and \r\n        complete your enrollment?\r\n\r\n
-      \   #notes: Notes\r\n    \r\n    \r\n  show_if:\r\n    \r\n    not_interested_notes:\r\n
-      \     interested_yes_no: 'no'\r\n      \r\n    review_consent_now_yes_no: \r\n
-      \     interested_yes_no: 'yes'\r\n\r\n    placeholder_review_now:\r\n      interested_yes_no:
-      'yes'\r\n      review_consent_now_yes_no: 'yes'\r\n\r\n    follow_up_date:\r\n
-      \     interested_yes_no: 'yes'\r\n      review_consent_now_yes_no: 'no'\r\n
-      \     \r\n    follow_up_time:\r\n      interested_yes_no: 'yes'\r\n      review_consent_now_yes_no:
-      'no'\r\n      \r\n    \r\n    "
     user_email: 
   - id: 65
     name: Sleep Phone Screen Part 2 Ineligible
@@ -8192,6 +8221,61 @@ app_type:
     item_type: sleep
     short_name: sleep_interventionist_assignments_report
     options: ''
+    user_email: 
+  - id: 97
+    name: Chart - Participant Status
+    description: Number of participants as they progress through the process
+    sql: "CREATE temp table temp_status AS \r\nSELECT * from (\r\n  SELECT distinct
+      dt.master_id, sleep.sleep_id, bwh_sleep.bwh_sleep_id,\r\n  CASE \r\n  WHEN extra_log_type
+      = 'completed' THEN 'completed study'\r\n  WHEN extra_log_type = 'completed_intervention'
+      THEN 'completed bbti'\r\n  WHEN extra_log_type = 'withdraw' THEN 'withdrawn'\r\n
+      \ WHEN extra_log_type IN ('exit_not_consented', 'exit_ps', 'exit_ps_bwh', 'exit_opt_out')
+      THEN 'exited'\r\n  WHEN extra_log_type = 'exit_l2fu' THEN 'lost to follow up'\r\n
+      \ WHEN extra_log_type = 'ineligible' THEN 'ineligible'\r\n  WHEN extra_log_type
+      = 'hms_ps_eligible' THEN 'ready for BWH screening'\r\n  WHEN extra_log_type
+      = 'bwh_ps_eligible' THEN 'ready for informed consent'\r\n  WHEN extra_log_type
+      = 'schedule_screening' THEN 'HMS scheduled screening'\r\n  WHEN extra_log_type
+      = 'appointment' THEN 'enrolled'\r\n  ELSE extra_log_type\r\n  END \"status\",
+      \r\n  dt.created_at \r\n  FROM \r\n  (\r\n    SELECT\r\n    al.master_id, al.created_at,
+      al.extra_log_type,    \r\n    rank()\r\n     OVER (\r\n      PARTITION BY al.master_id
+      \r\n      ORDER BY al.created_at DESC\r\n     ) AS r\r\n\r\n    FROM activity_log_sleep_assignments
+      al\r\n    WHERE   \r\n    extra_log_type IN (\r\n      'schedule_screening',
+      \r\n      'hms_ps_eligible',\r\n      'bwh_ps_eligible', \r\n      'ineligible',
+      \r\n      'exit_not_consented', \r\n      'exit_ps', \r\n      'exit_ps_bwh',\r\n
+      \     'exit_opt_out',\r\n      'exit_l2fu',\r\n      'appointment',\r\n      'completed',\r\n
+      \     'completed_intervention',\r\n      'withdraw'\r\n    )\r\n  ) dt\r\n  INNER
+      JOIN sleep_assignments sleep ON dt.master_id = sleep.master_id\r\n  LEFT OUTER
+      JOIN bwh_sleep_id_numbers bwh_sleep ON dt.master_id = bwh_sleep.master_id\r\n
+      \ WHERE r = 1 \r\n) dt2\r\n--ORDER BY status, created_at desc\r\n;\r\n\r\nSELECT
+      count(*), status \r\nfrom temp_status \r\ngroup by status\r\norder by \r\nCASE
+      status\r\n      WHEN 'HMS scheduled screening' THEN 1 \r\n      WHEN 'ready
+      for BWH screening' THEN 8\r\n      WHEN 'ready for informed consent' THEN 9\r\n
+      \     WHEN 'enrolled' THEN 10\r\n      WHEN 'withdrawn' THEN 11\r\n      WHEN
+      'completed bbti' THEN 15\r\n      WHEN 'completed study' THEN 16\r\n      WHEN
+      'exited' THEN 92\r\n      WHEN 'lost to follow up' THEN 95\r\n      WHEN 'ineligible'
+      THEN 97\r\n      ELSE 100\r\n      \r\n   END\r\n;\r\n"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2020-02-19T09:53:44.091Z'
+    updated_at: '2020-02-19T10:33:09.524Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: chart___participant_status
+    options: "view_options:\r\n  view_as: chart\r\n  \r\ncomponent:\r\n  options:\r\n
+      \   type: bar\r\n    height: 600\r\n    width: 600\r\n    label_with_column:
+      status\r\n    dataset_options:\r\n\r\n      - backgroundColor: \r\n        -
+      rgba(204,0,0,0.4)\r\n        - rgba(0,204,0,0.4)\r\n        - rgba(0,0,204,0.4)\r\n
+      \       - rgba(102,102,0,0.4)\r\n        - rgba(0,102,102,0.4)\r\n        -
+      rgba(20,70,112,0.4)\r\n        - rgba(20,112,70,0.4)\r\n        - rgba(70,20,112,0.4)
+      \   \r\n        \r\n    options:\r\n      legend:\r\n        display: false\r\n
+      \     title:\r\n        display: true\r\n        text: Participant Status\r\n"
     user_email: 
   associated_general_selections:
   - id: 12
@@ -10920,12 +11004,12 @@ app_type:
     panel_label: Navigation
     panel_position: 1
     options: "nav:\r\n  links:\r\n    - label: Calendar\r\n      resource_type: report\r\n
-      \     resource_name: Sleep Calendar\r\n      url: /reports/sleep__sleep_calendar\r\n
+      \     resource_name: sleep__sleep_calendar\r\n      url: /reports/sleep__sleep_calendar\r\n
       \   "
     disabled: false
     admin_id: 4
     created_at: '2019-11-21T11:00:55.458Z'
-    updated_at: '2019-11-21T11:00:55.458Z'
+    updated_at: '2020-02-07T08:57:32.883Z'
     description: ''
     user_email: 
   - id: 27
@@ -14052,6 +14136,195 @@ app_type:
     created_at: '2020-01-29T09:23:14.563Z'
     updated_at: '2020-01-29T09:23:14.563Z'
     user_email: test@test
+  - id: 1343
+    app_type_id: 11
+    role_name: email - hms phone screener
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-05T14:35:55.764Z'
+    updated_at: '2020-02-05T14:35:55.764Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1344
+    app_type_id: 11
+    role_name: phone screener
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-05T14:35:55.776Z'
+    updated_at: '2020-02-05T14:35:55.776Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1345
+    app_type_id: 11
+    role_name: sms - hms phone screener
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-05T14:35:55.786Z'
+    updated_at: '2020-02-05T14:35:55.786Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1346
+    app_type_id: 11
+    role_name: tracker
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-05T14:35:55.795Z'
+    updated_at: '2020-02-05T14:35:55.795Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1347
+    app_type_id: 11
+    role_name: user - discussions
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-05T14:35:55.805Z'
+    updated_at: '2020-02-05T14:35:55.805Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1348
+    app_type_id: 11
+    role_name: user - participant details
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-05T14:35:55.814Z'
+    updated_at: '2020-02-05T14:35:55.814Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1349
+    app_type_id: 11
+    role_name: user - phone screen
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-05T14:35:55.822Z'
+    updated_at: '2020-02-05T14:35:55.822Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1350
+    app_type_id: 11
+    role_name: user - mednav
+    user_id: 92
+    admin_id: 5
+    disabled: true
+    created_at: '2020-02-05T14:35:55.831Z'
+    updated_at: '2020-02-05T14:36:44.540Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1351
+    app_type_id: 11
+    role_name: user - protocol exception
+    user_id: 92
+    admin_id: 5
+    disabled: true
+    created_at: '2020-02-05T14:35:55.839Z'
+    updated_at: '2020-02-05T14:37:05.050Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1352
+    app_type_id: 11
+    role_name: user - protocol deviation
+    user_id: 92
+    admin_id: 5
+    disabled: true
+    created_at: '2020-02-05T14:35:55.848Z'
+    updated_at: '2020-02-05T14:37:01.339Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1353
+    app_type_id: 11
+    role_name: nfs_store group 600
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-05T14:35:55.857Z'
+    updated_at: '2020-02-05T14:35:55.857Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1409
+    app_type_id: 11
+    role_name: interventionist
+    user_id: 94
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-21T13:14:21.973Z'
+    updated_at: '2020-02-21T13:14:21.973Z'
+    user_email: cspadola1@gmail.com
+  - id: 1410
+    app_type_id: 11
+    role_name: sms - interventionist
+    user_id: 94
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-21T13:14:21.990Z'
+    updated_at: '2020-02-21T13:14:21.990Z'
+    user_email: cspadola1@gmail.com
+  - id: 1411
+    app_type_id: 11
+    role_name: user - discussions
+    user_id: 94
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-21T13:14:22.003Z'
+    updated_at: '2020-02-21T13:14:22.003Z'
+    user_email: cspadola1@gmail.com
+  - id: 1412
+    app_type_id: 11
+    role_name: user - participant details
+    user_id: 94
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-21T13:14:22.012Z'
+    updated_at: '2020-02-21T13:14:22.012Z'
+    user_email: cspadola1@gmail.com
+  - id: 1413
+    app_type_id: 11
+    role_name: nfs_store group 600
+    user_id: 94
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-21T13:14:22.022Z'
+    updated_at: '2020-02-21T13:14:22.022Z'
+    user_email: cspadola1@gmail.com
+  - id: 1414
+    app_type_id: 11
+    role_name: email - interventionist
+    user_id: 94
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-21T13:14:22.031Z'
+    updated_at: '2020-02-21T13:14:22.031Z'
+    user_email: cspadola1@gmail.com
+  - id: 1415
+    app_type_id: 11
+    role_name: user - phone screen
+    user_id: 94
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-21T13:14:22.040Z'
+    updated_at: '2020-02-21T13:14:22.040Z'
+    user_email: cspadola1@gmail.com
+  - id: 1416
+    app_type_id: 11
+    role_name: user - phone screen 2
+    user_id: 94
+    admin_id: 5
+    disabled: false
+    created_at: '2020-02-21T13:14:22.049Z'
+    updated_at: '2020-02-21T13:14:22.049Z'
+    user_email: cspadola1@gmail.com
+  - id: 1457
+    app_type_id: 11
+    role_name: admin - bwh
+    user_id: 81
+    admin_id: 4
+    disabled: false
+    created_at: '2020-03-13T08:53:53.654Z'
+    updated_at: '2020-03-13T08:53:53.654Z'
+    user_email: rrottapel@bwh.harvard.edu
+  - id: 1458
+    app_type_id: 11
+    role_name: admin - bwh
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-03-13T08:53:53.677Z'
+    updated_at: '2020-03-13T08:53:53.677Z'
+    user_email: template@template
   associated_message_templates:
   - id: 21
     name: standard sms layout
