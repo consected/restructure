@@ -181,16 +181,12 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # @return [String] resulting text
   #
   def generate(content_template_name: nil, content_template_text: nil, data: {}, ignore_missing: false)
-    unless layout_template?
-      raise FphsException, 'Must use a layout template to generate from'
-    end
+    raise FphsException, 'Must use a layout template to generate from' unless layout_template?
 
     if content_template_name
       # Lookup the template based on its name
       content_template = Admin::MessageTemplate.active.content_templates.where(name: content_template_name).first
-      unless content_template
-        raise FphsException, "No content template found with name: #{content_template_name}"
-      end
+      raise FphsException, "No content template found with name: #{content_template_name}" unless content_template
 
       # The raw text is the #template definition
       content_template_text = content_template.template
@@ -236,9 +232,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
     return if res.nil? && tagp[1] != 'ignore_missing'
 
     # Automatically titleize names
-    if tagp.length == 1 && (tag == 'name' || tag.end_with?('_name'))
-      tagp << 'titleize'
-    end
+    tagp << 'titleize' if tagp.length == 1 && (tag == 'name' || tag.end_with?('_name'))
     tagp[1..-1].each do |op|
       if op == 'capitalize'
         res = res.capitalize
@@ -286,12 +280,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
     if item.is_a? Hash
       item = item.dup
       item.symbolize_keys!
-      if item[:master_id] && !item[:master]
-        item[:master] = Master.find(item[:master_id])
-        end
-      if item[:master] && !item[:master_id]
-        item[:master_id] ||= item[:master].id
-        end
+      item[:master] = Master.find(item[:master_id]) if item[:master_id] && !item[:master]
+      item[:master_id] ||= item[:master].id if item[:master] && !item[:master_id]
       return item
     end
 
@@ -306,9 +296,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
     data[:password_reminder_days] = Settings::PasswordReminderDays
 
     # if the referenced item has its own referenced item (much like an activity log might), then get it
-    if item.respond_to?(:item) && item.item.respond_to?(:attributes)
-      data[:item] = item.item.attributes
-    end
+    data[:item] = item.item.attributes if item.respond_to?(:item) && item.item.respond_to?(:attributes)
 
     if item.respond_to?(:user) && item.user
       cu = item.user
@@ -347,6 +335,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
       master = item
     end
 
+    data[:parent_item] = item.container&.parent_item&.attributes if item.respond_to?(:container)
+
     if master
 
       data[:master] = master
@@ -359,11 +349,11 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
     end
 
-    if cu&.respond_to?(:contact_info) && cu&.contact_info
-      data[:current_user_contact_info] = cu.contact_info.attributes
-    else
-      data[:current_user_contact_info] = Users::ContactInfo.new.attributes
-    end
+    data[:current_user_contact_info] = if cu&.respond_to?(:contact_info) && cu&.contact_info
+                                         cu.contact_info.attributes
+                                       else
+                                         Users::ContactInfo.new.attributes
+                                       end
 
     data
   end
@@ -393,6 +383,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
     if an == 'ids'
       return data[:ids] = master.alternative_ids
+    elsif an == 'parent_item'
+      return data[:parent_item]
     elsif an == 'referring_record'
       return data[:referring_record] = data[:original_item].respond_to?(:referring_record) && data[:original_item].referring_record&.attributes
     end
@@ -446,9 +438,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
   def self.handle_shortlink(sub_data, tag_args)
     sl = DynamicModel::ZeusShortLink.new
 
-    unless sub_data[:master]
-      raise FphsException, "No master set for create_link: #{sub_data}"
-    end
+    raise FphsException, "No master set for create_link: #{sub_data}" unless sub_data[:master]
 
     res = sl.create_link(tag_args, master: sub_data[:master], batch_user: true, for_item: sub_data[:alt_item] || sub_data[:original_item])
     res[:short_link_instance]&.short_url
