@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 module NfsStore
   module Manage
     class Container < UserBase
-
       self.table_name = 'nfs_store_containers'
 
       # include HandlesUserBase
@@ -15,9 +16,8 @@ module NfsStore
 
       after_create :create_in_nfs_store
 
-      attr_accessor :current_user, :create_with_role, :parent_item, :previous_uploads, :previous_upload_stored_file_ids
+      attr_accessor :create_with_role, :parent_item, :previous_uploads, :previous_upload_stored_file_ids
       alias_attribute :container_id, :nfs_store_container_id
-
 
       def self.resource_name
         'nfs_store__manage__containers'
@@ -39,17 +39,16 @@ module NfsStore
         self.class.resource_name
       end
 
-
       # Container-specific sub directory to place container directory into
       # @return [nil | String] set to a sub path string such as 'holder123' or 'parentdir/holder123'
       def parent_sub_dir
         upsd = Filesystem.use_parent_sub_dir
         if upsd
-          setting = Admin::AppConfiguration.find_default_app_config(self.app_type_id, 'filestore directory id')
+          setting = Admin::AppConfiguration.find_default_app_config(app_type_id, 'filestore directory id')
           if setting
-            return "#{setting.value.hyphenate}-#{self.master.send(setting.value)}"
+            return "#{setting.value.hyphenate}-#{master.send(setting.value)}"
           else
-            return "master-#{self.master_id}"
+            return "master-#{master_id}"
           end
         end
       end
@@ -63,11 +62,11 @@ module NfsStore
       # All containers for the user's current app type. Returns an ActiveRecord::Relation that can be refined
       # @param user [User] the current user
       # @return [ActiveRecord::Relation] result set of all matching containers in this app type
-      def self.for_current_app_type user
+      def self.for_current_app_type(user)
         app_type = user.app_type
-        raise FsException::NoAccess.new "User has no access to this container's app-type" unless user.app_type_valid?
+        raise FsException::NoAccess, "User has no access to this container's app-type" unless user.app_type_valid?
 
-        self.where app_type: app_type
+        where app_type: app_type
       end
 
       # Create a container record in the current app. After creation, #create_in_nfs_store is called by a callback
@@ -76,16 +75,18 @@ module NfsStore
       # @param name [String] the human readable name for the container
       # @param extra_params [Hash] additional parameters used to create the record
       # @return [NfsStore::Manage::Container] the instantiated container
-      def self.create_in_current_app user: nil, name: nil, extra_params: {}
+      def self.create_in_current_app(user: nil, name: nil, extra_params: {})
         app_type_id = user&.app_type_id
-        FsException::Action.new "Cannot create a container with app_type: #{app_type_id}, user: #{user&.id}, name: #{name}" unless app_type_id && user && name.present?
+        unless app_type_id && user && name.present?
+          FsException::Action.new "Cannot create a container with app_type: #{app_type_id}, user: #{user&.id}, name: #{name}"
+        end
 
-        self.create! extra_params.merge(app_type_id: app_type_id, name: name, current_user: user)
+        create! extra_params.merge(app_type_id: app_type_id, name: name, current_user: user)
       end
 
       # Set current user used when creating new containers
       # @param user [User] current user
-      def current_user=user
+      def current_user=(user)
         master.current_user = user
       end
 
@@ -95,22 +96,28 @@ module NfsStore
         master.current_user
       end
 
+      # Find the parent item (activity log) that created the container
+      # by looking for the first model reference
+      # @return [ActivityLog]
+      #
+      def find_creator_parent_item
+        ModelReference.find_where_referenced_from(self).first&.from_record
+      end
+
       # Inform the container that a set of uploads have completed
       # This may cause notifications or other events to fire
       # @param ids [Array] integer IDs for the Upload records
-      def upload_done ids
+      def upload_done(ids)
         # Forces a check that the supplied info is correct
-        self.previous_uploads = ids.map {|id| NfsStore::Upload.find(id) }
-        self.previous_upload_stored_file_ids = self.previous_uploads.map(&:nfs_store_stored_file_id)
+        self.previous_uploads = ids.map { |id| NfsStore::Upload.find(id) }
+        self.previous_upload_stored_file_ids = previous_uploads.map(&:nfs_store_stored_file_id)
 
         # Get any uploads that already have an upload_set, since it is invalid to reset it
-        if self.previous_uploads.map(&:upload_set).uniq.length != 1
-          raise FsException::Action.new "Upload set files don't match"
-        end
+        raise FsException::Action, "Upload set files don't match" if previous_uploads.map(&:upload_set).uniq.length != 1
 
-        if self.parent_item.can_edit? && self.parent_item
-          self.parent_item.extra_log_type_config.calc_save_trigger_if self, alt_on: :upload
-        end
+        return unless parent_item&.can_edit?
+
+        parent_item.extra_log_type_config.calc_save_trigger_if self, alt_on: :upload
       end
 
       # # Filter upload notification users based on file filters
@@ -138,7 +145,7 @@ module NfsStore
       # after containers are created, since they will not be found
       # @return [String]
       def directory_name
-        "#{self.id} -- #{self.name}"
+        "#{id} -- #{name}"
       end
 
       # Get the first filsystem group gid that allows reading of the container directory,
@@ -148,7 +155,7 @@ module NfsStore
         res = nil
         Group.role_names_for(user).each do |role_name|
           if Filesystem.test_dir role_name, self, :read
-            res = File.stat(path_for role_name: role_name).gid
+            res = File.stat(path_for(role_name: role_name)).gid
             break if res
           end
         end
@@ -158,8 +165,9 @@ module NfsStore
       # Full filesystem path to the container directory for the current role
       # @param role_name [String] role name for the path
       # @return [String] full path to the container directory
-      def path_for role_name: nil
-        raise FsException::Action.new 'role_name must be specified' unless role_name
+      def path_for(role_name: nil)
+        raise FsException::Action, 'role_name must be specified' unless role_name
+
         Filesystem.nfs_store_path(role_name, self)
       end
 
@@ -167,26 +175,23 @@ module NfsStore
       # which may match the standard 'containers' directory if
       # parent_sub_dir has not been overridden
       # @return [String]
-      def path_to_parent_dir_for role_name: nil
+      def path_to_parent_dir_for(role_name: nil)
         parts = path_for(role_name: role_name).split('/')
-        if parent_sub_dir.present?
-          parts.pop
-        end
+        parts.pop if parent_sub_dir.present?
         File.join parts
       end
 
       # All role names that the current user has assigned
       # @return [Array(String)] list of role names
       def current_user_role_names
-        @current_user_role_names ||= Manage::Group.role_names_for self.current_user
+        @current_user_role_names ||= Manage::Group.role_names_for current_user
       end
 
       # All group ID gids that the current user has assigned
       # @return [Array(Integer)] list of gids
       def current_user_group_ids
-        @current_user_group_ids ||= Manage::Group.group_ids_for self.current_user
+        @current_user_group_ids ||= Manage::Group.group_ids_for current_user
       end
-
 
       # Can files be read from the container directory?
       # @return [Boolean] true if readable, false if not
@@ -215,30 +220,31 @@ module NfsStore
         false
       end
 
-
       def can_edit?
-        res = self.allows_current_user_access_to? :edit
+        res = allows_current_user_access_to? :edit
         return unless res
-        if self.parent_item
-          res = self.parent_item.can_edit?
-        end
+
+        res = parent_item.can_edit? if parent_item
         !!res
       end
 
       def can_download?
         return @can_download unless @can_download.nil?
+
         cu = current_user
         @can_download = !!(!!(cu.can?(:download_files) || cu.can?(:view_files_as_html) || cu.can?(:view_files_as_image)))
       end
 
       def can_send_to_trash?
         return @can_send_to_trash unless @can_send_to_trash.nil?
+
         cu = current_user
         @can_send_to_trash = !!(can_edit? && cu.can?(:send_files_to_trash))
       end
 
       def can_move_files?
         return @can_move_files unless @can_move_files.nil?
+
         cu = current_user
         @can_move_files = !!(can_edit? && cu.can?(:move_files))
       end
@@ -246,7 +252,7 @@ module NfsStore
       # Method to provide checking of access controls. Can the user access the container
       # in a specific way. Easily overridden in applications to provide app specific functionality
       # @param perform [Symbol(:list_files, :create_files)]
-      def allows_current_user_access_to? perform, with_options=nil
+      def allows_current_user_access_to?(perform, with_options = nil)
         super
       end
 
@@ -258,11 +264,11 @@ module NfsStore
       def list_fs_files
         all_files = []
         current_user_role_names.each do |role_name|
-          if Filesystem.test_dir role_name, self, :read
-            p = path_for role_name: role_name
-            # Don't use Regex - it breaks if there are special characters
-            all_files += Dir.glob("#{p}/**/*").reject {|f| Pathname.new(f).directory?}.map {|f| f.sub("#{p}/", '').sub(p, '')}
-          end
+          next unless Filesystem.test_dir role_name, self, :read
+
+          p = path_for role_name: role_name
+          # Don't use Regex - it breaks if there are special characters
+          all_files += Dir.glob("#{p}/**/*").reject { |f| Pathname.new(f).directory? }.map { |f| f.sub("#{p}/", '').sub(p, '') }
         end
 
         all_files.uniq
@@ -270,33 +276,38 @@ module NfsStore
 
       private
 
-        # Create the container directory on the filesystem, using the first available role that provides this access if
-        # a specific role is not specified
-        # @param using_role [String] optional role to use for creation, otherwise use the first available role that works
-        # @return [Boolean] success
-        def create_in_nfs_store using_role: nil
-          res = nil
-          using_role ||= self.create_with_role
+      # Create the container directory on the filesystem, using the first available role that provides this access if
+      # a specific role is not specified
+      # @param using_role [String] optional role to use for creation, otherwise use the first available role that works
+      # @return [Boolean] success
+      def create_in_nfs_store(using_role: nil)
+        res = nil
+        using_role ||= create_with_role
 
-          if using_role
-            roles = [using_role]
-          else
-            roles = current_user_role_names
-          end
-          roles.each do |role_name|
-            if Filesystem.test_dir role_name, self, :mkdir
-              res = Filesystem.create_container self, role_name
-              break if res
-            end
-          end
-          raise FsException::Action.new "Could not create a container. Maybe you don't have permission to store here. App type: #{user.app_type.name}. Name: #{self.name}. Roles: #{roles.join(", ")} " unless res
-          true
+        roles = if using_role
+                  [using_role]
+                else
+                  current_user_role_names
+                end
+        roles.each do |role_name|
+          next unless Filesystem.test_dir role_name, self, :mkdir
+
+          res = Filesystem.create_container self, role_name
+          break if res
         end
 
+        unless res
+          raise FsException::Action, "Could not create a container. Maybe you don't have permission to store here. "\
+                                          "App type: #{user.app_type.name} (#{user.app_type.id}). "\
+                                          "Name: #{name}. "\
+                                          "Roles: #{roles.join(', ')}"
+        end
 
-        # Hook allowing the class to be reopened safely in the initializers
-        ActiveSupport.run_load_hooks(:nfs_store_container, self)
+        true
+      end
+
+      # Hook allowing the class to be reopened safely in the initializers
+      ActiveSupport.run_load_hooks(:nfs_store_container, self)
     end
-
   end
 end

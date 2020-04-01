@@ -4,13 +4,14 @@
 module NfsStore
   module Process
     class ProcessHandler
-      DefaultJobList = %w[mount_archive index_files dicom_metadata].freeze
-      attr_accessor :container_file, :parent_item
+      DefaultJobList = %i[mount_archive index_files dicom_metadata].freeze
+      attr_accessor :container_file, :parent_item, :container
 
       def initialize(container_file)
         self.container_file = container_file
+        self.container = container_file.container
         # Save the parent_item activity log so we can use it to pick up additional configurations
-        self.parent_item = container_file.container&.parent_item
+        self.parent_item = container&.find_creator_parent_item
       end
 
       def pipeline_config
@@ -18,7 +19,7 @@ module NfsStore
       end
 
       def pipeline_job_list
-        pipeline_config.map { |p| p.first.first }
+        pipeline_config.map { |p| p.first.first.to_sym }
       end
 
       # List of valid processing jobs.
@@ -48,9 +49,13 @@ module NfsStore
       def run(name)
         return unless name
 
+        puts "Job Running: (#{name}) of (#{job_list})"
+        Rails.logger.info "Job Running: (#{name}) of (#{job_list})"
+
         classname = "#{name}_job".camelize
         c = self.class.parents.first.const_get classname
-        c.perform_later container_file
+
+        c.perform_later container_file, parent_item
 
         container_file.current_user = container_file.user
         container_file.last_process_name_run = name

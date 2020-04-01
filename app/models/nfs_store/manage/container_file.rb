@@ -8,10 +8,10 @@ module NfsStore
 
       default_scope -> { where "path IS NULL OR path NOT LIKE '#{TrashPath}%' " }
 
-      after_create :process_new_file
+      after_create :process_new_file, unless: -> { do_not_postprocess }
       after_save :reset_flags
 
-      attr_accessor :prevent_processing, :valid_path_change
+      attr_accessor :prevent_processing, :valid_path_change, :do_not_postprocess
 
       self.abstract_class = true
       def self.no_master_association
@@ -79,6 +79,33 @@ module NfsStore
         extras[:methods] ||= []
         extras[:methods] << :master_id
         super
+      end
+
+      # Store a new file from a temp file, into a container, with a full set of attributes
+      # The attributes can come from a copy of an existing container_file, with container_file.attributes
+      #
+      # @param [String] new_tmp_image_path is the path to the file to move to the final storage
+      # @param [Container] container
+      # @param [Hash] attrs full set of attributes. Unnecessary items will be overwritten.
+      # @options attrs [String] path
+      # @options attrs [String] file_name
+      # @options attrs [String] content_type
+      # @options attrs [String] archived_file_path (optional) for archived files
+      # @options attrs [Boolean] do_not_postprocess (optional) true to prevent background processing pipeline from running
+      # @return [ContainerFile] new container_file
+      #
+      def self.store_new_file(new_tmp_image_path, container, attrs)
+        container_file = new(attrs)
+        container_file.id = nil
+        container_file.container = container
+        container_file.current_user = container.current_user
+        container_file.file_hash = container_file.class.hash_for_file(new_tmp_image_path)
+
+        container_file.move_from new_tmp_image_path
+        container_file.analyze_file!
+        container_file.valid_path_change = true
+        container_file.save!
+        container_file
       end
 
       # After creating a new container_file record we should process it.
@@ -212,10 +239,10 @@ module NfsStore
       # Replace the current file content with a new file. The actual file content is replaced
       # so we generate a new digest, file size, etc
       #
-      # @param [Tempfile] tmp_file the temporary file, which will be removed after it replaces the original
+      # @param [String] tmp_file_path the path to the temporary file
       # @return [Boolean] success
       #
-      def replace_file!(tmp_file)
+      def replace_file!(tmp_file_path)
         # Retain the current file name and path
         orig_path = path
         orig_file_name = file_name
@@ -263,7 +290,7 @@ module NfsStore
           end
 
           # Move the temporary file to the original location
-          move_from tmp_file.path
+          move_from tmp_file_path
 
           self.file_hash = nil
           analyze_file!
@@ -275,8 +302,6 @@ module NfsStore
           save!
         end
 
-        # All done. Unlink the temporary file
-        tmp_file.unlink
         true
       end
 

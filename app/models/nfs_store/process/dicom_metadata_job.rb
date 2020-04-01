@@ -1,30 +1,16 @@
+# frozen_string_literal: true
+
 module NfsStore
   module Process
-    class DicomMetadataJob < ApplicationJob
-
+    class DicomMetadataJob < NfsStoreJob
       # retry_on FphsException
       queue_as :nfs_store_process
 
-      # Check whether the job should be enqueued or just skipped
-      around_enqueue do |job, block|
-        container_file = job.arguments.first
-        if container_file.content_type == 'application/dicom' || container_file.is_archive?
-          block.call
-        else
-          container_file = job.arguments.first
-          ProcessHandler.new(container_file).run_next_job_after 'dicom_metadata'
-        end
-      end
+      flow_control :dicom_metadata, skip_if: ->(container_file) { container_file.content_type == 'application/dicom' || container_file.is_archive? }
 
-      after_perform do |job|
-        container_file = job.arguments.first
-        ProcessHandler.new(container_file).run_next_job_after 'dicom_metadata'
-      end
-
-      def perform(container_file)
-
-
+      def perform(container_file, activity_log = nil)
         log "Extracting DICOM metadata for #{container_file}"
+        container_file.container.parent_item ||= activity_log
 
         if container_file.is_archive?
           container_file.current_user = container_file.user
@@ -35,12 +21,9 @@ module NfsStore
         else
           extract_metadata container_file unless container_file.content_type.blank?
         end
-
-
       end
 
-      def extract_metadata container_file
-
+      def extract_metadata(container_file)
         container_file.current_user = container_file.user
         full_path = container_file.retrieval_path
         return if container_file.content_type.blank?
@@ -51,12 +34,11 @@ module NfsStore
           # used offline to recover is desired
           mh = NfsStore::Dicom::MetadataHandler.new(file_path: full_path)
           metadata = mh.extract_metadata
-        rescue => e
-          metadata = {fphs_exception: {status: 'failed', info: 'failed to extract DICOM metadata.', exception: e.to_s } }
+        rescue StandardError => e
+          metadata = { fphs_exception: { status: 'failed', info: 'failed to extract DICOM metadata.', exception: e.to_s } }
         end
         container_file.file_metadata = metadata
         container_file.save!
-
       end
     end
   end

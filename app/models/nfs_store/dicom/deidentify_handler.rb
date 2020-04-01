@@ -9,8 +9,47 @@ module NfsStore
       DicomTempFilePrefix = 'nfs-dicom-file'
       attr_accessor :file_path, :dicom_object, :tempfile
 
-      def initialize(file_path: nil)
-        self.file_path = file_path
+      # Use the pipeline configuration to deidentify metadata in a Dicom file, relying
+      # on the extra log type configuration
+      # @param [NfsStore::Manage::ContainerFile] container_file represents a stored or archived file
+      # @param [Hash] config containing :set_tags and :delete_tags
+      #    {
+      #      set_tags: { "0010,0010" => "some value", "0010,0020" => "another value" },
+      #      delete_tags: ["0020,0080"]
+      #    }
+      def self.deidentify_file(container_file, config)
+        container_file.current_user = container_file.user
+        return if container_file.content_type.blank?
+
+        full_path = container_file.retrieval_path
+
+        set_tags = config[:set_tags]
+        # Handle substitutions of new values
+        set_tags.each_key do |k|
+          v = Admin::MessageTemplate.substitute(set_tags[k], data: container_file, tag_subs: nil)
+          set_tags[k] = v
+        end
+        delete_tags = config[:delete_tags]
+
+        # Overwrite the metadata
+        dh = DeidentifyHandler.new(file_path: full_path)
+        new_tmp_image_path = dh.anonymize_with(set_tags: set_tags, delete_tags: delete_tags)
+
+        new_path = config[:new_path]
+        if new_path
+          attrs = container_file.attributes
+          attrs['path'] = new_path
+          attrs['do_not_postprocess'] = true
+          container_file = container_file.class.store_new_file(new_tmp_image_path, container_file.container, attrs)
+        else
+          container_file.replace_file! new_tmp_image_path
+        end
+
+        if container_file.file_metadata.present?
+          # There is existing metadata stored. Bring it up to date based on the updated file
+          dmj = NfsStore::Process::DicomMetadataJob.new
+          dmj.extract_metadata(container_file)
+        end
       end
 
       #
@@ -19,7 +58,7 @@ module NfsStore
       #    Represented by the form
       #    { tagname: { value: '', enum: true}, 'odd/tagname2': { value: 'some value' }  }
       # @param [Array] delete_tags is the list of tags to delete
-      # @return [Tempfile] updated Dicom file stored in a temporary file
+      # @return [String] updated Dicom file path
       def anonymize_with(set_tags: {}, delete_tags: [], recursive: true)
         anonymizer = DICOM::Anonymizer.new(recursive: recursive)
         anonymizer.reset_defaults(set_tags, delete_tags)
@@ -27,28 +66,35 @@ module NfsStore
         anonymize(anonymizer)
       end
 
+      protected
+
+      def initialize(file_path: nil)
+        self.file_path = file_path
+      end
+
       #
       # Anonymize file metadata with defaults
       # Setup of anonymizers is explained in http://dicom.github.io/ruby-dicom/tutorial2.html
       # @param [DICOM::Anonymizer | nil] anonymizer is an anonymizer instance, or if nil sets up a default
       # @param [Boolean] recursive indicates if tags should be matched recursively
-      # @return [Tempfile] updated Dicom file stored in a temporary file
+      # @return [String] updated Dicom file path
       def anonymize(anonymizer = nil, recursive: true)
         setup_file
         anonymizer ||= DICOM::Anonymizer.new(recursive: recursive)
 
         dicom_object.anonymize(anonymizer)
 
-        dicom_object.write(create_tempfile.path)
-        tempfile
+        dicom_object.write(output_path)
+        output_path
       end
 
       private
 
-      # Create a tempfile for output of updated DICOM. Set it in the attribute :tempfile
-      # @return [Tempfile]
-      def create_tempfile
-        self.tempfile = Tempfile.new(DicomTempFilePrefix)
+      def output_path
+        return tempfile if tempfile
+
+        tmpdir = Manage::Filesystem.temp_directory
+        self.tempfile = File.join(tmpdir, "#{DicomTempFilePrefix}-#{rand(10)}.dcm")
       end
 
       #

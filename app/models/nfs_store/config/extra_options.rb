@@ -35,7 +35,8 @@ module NfsStore
 
       # Clean the configuration definition and give it a consistent structure
       def self.clean_def(config)
-        DicomDeidentifyExtraOptions.clean_def(pipeline_item_config(config, :dicom_deidentify))
+        pic = pipeline_item_config(config, :dicom_deidentify)
+        DicomDeidentifyExtraOptions.clean_def(pic)
       end
     end
   end

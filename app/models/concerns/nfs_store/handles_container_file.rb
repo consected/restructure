@@ -122,9 +122,7 @@ module NfsStore
       raise FsException::Action, 'role_name must be specified' unless role_name
 
       ext_path = []
-      if respond_to?(:archive_mount_name) && archive_mount_name
-        ext_path << archive_mount_name
-        end
+      ext_path << archive_mount_name if respond_to?(:archive_mount_name) && archive_mount_name
       ext_path << path if path
 
       ext_path_str = nil
@@ -136,9 +134,7 @@ module NfsStore
       end
       parts = []
       parts << container.path_for(role_name: role_name)
-      if respond_to?(:archive_mount_name) && archive_mount_name
-        parts << archive_mount_name
-        end
+      parts << archive_mount_name if respond_to?(:archive_mount_name) && archive_mount_name
       parts << path if path.present?
       parts << file_name
 

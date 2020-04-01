@@ -1,28 +1,16 @@
+# frozen_string_literal: true
+
 module NfsStore
   module Process
-    class IndexFilesJob < ApplicationJob
-
+    class IndexFilesJob < NfsStoreJob
       # retry_on FphsException
       queue_as :nfs_store_process
 
-      # Check whether the job should be enqueued or just skipped
-      around_enqueue do |job, block|
-        container_file = job.arguments.first
-        if container_file.is_archive?
-          block.call
-        else
-          container_file = job.arguments.first
-          ProcessHandler.new(container_file).run_next_job_after 'index_files'
-        end
-      end
+      flow_control :index_files, skip_if: ->(container_file) { container_file.is_archive? }
 
-      after_perform do |job|
-        container_file = job.arguments.first
-        ProcessHandler.new(container_file).run_next_job_after 'index_files'
-      end
-
-      def perform(container_file)
+      def perform(container_file, activity_log = nil)
         log "Indexing files #{container_file}"
+        container_file.container.parent_item ||= activity_log
         container_file.current_user = container_file.user
         NfsStore::Archive::Mounter.index container_file
       end
