@@ -5,15 +5,17 @@
 {{/with}}
 </script>
 
-<script id="activity_log_<%=name%>_references"  type="text/x-handlebars-template" class="hidden handlebars-partial">
-<% if references && references.first&.last&.first&.last %>
+<script id="activity_log_<%=name%>_references"  type="text/x-handlebars-template" class="hidden handlebars-partial references_def_block">
+<%
+  first_ref_def = references&.first&.last&.first&.last
+  if first_ref_def %>
   {{#each model_references}}
     {{#is ../embedded_item.id '===' to_record_id}}
-      {{#is ../embedded_item.item_type '===' '<%= references.first.last.first.last[:to_model_name_us] %>'}}
+      {{#is ../embedded_item.item_type '===' '<%= first_ref_def[:to_model_name_us] %>'}}
         {{#is to_record_options_config.view_as.show '!==' 'hide'}}
           {{#is to_record_options_config.view_as.show '!==' 'not_embedded'}}
             {{#with ../embedded_item}}
-              <% mr_name = ModelReference.record_type_to_ns_table_name references.first.first %>
+              <% mr_name = ModelReference.record_type_to_ns_table_name references&.first&.first %>
               {{> common_template_result_fields result_data=this name='<%=mr_name%>' template_config=(fpa_state_item 'template_config' '<%=mr_name.underscore%>')}}
             {{/with}}
           {{/is}}
@@ -37,9 +39,14 @@
       {{/is}}
     {{/each}}
   {{/if}}
+  <% end %>
 
-  <% references.each do |ref_key, refitem|
-      refitem.each do |ref_type, ref_config| %>
+  <% references&.each do |ref_key, refitem|
+      next unless ref_key && refitem
+      
+      refitem.each do |ref_type, ref_config| 
+        next unless ref_type && ref_config
+      %>
       {{#if creatable_model_references.<%= ref_key %> }}
 
         {{#if creatable_model_references.<%= ref_key %>.<%= ref_type %> }}
@@ -64,7 +71,5 @@
       {{/is}}
     {{/each}}
   {{/if}}
-
-<% end %>
 
 </script>
