@@ -360,24 +360,22 @@ module ActivityLogHandler
       refitem.each do |ref_type, ref_config|
         f = ref_config[:from]
         without_reference = (ref_config[:without_reference] == true)
-        if f == 'this'
-          got = ModelReference.find_references self,
+        got = if f == 'this'
+                ModelReference.find_references self,
                                                to_record_type: ref_type,
                                                filter_by: ref_config[:filter_by],
                                                without_reference: without_reference
-        elsif f == 'master'
-          got = ModelReference.find_references master,
-                                               to_record_type: ref_type, 
-                                               filter_by: ref_config[:filter_by], 
+              elsif f == 'master'
+                ModelReference.find_references master,
+                                               to_record_type: ref_type,
+                                               filter_by: ref_config[:filter_by],
                                                without_reference: without_reference
-        elsif f == 'any'
-          got = ModelReference.find_references master,
-                                               to_record_type: ref_type, 
-                                               filter_by: ref_config[:filter_by], 
+              elsif f == 'any'
+                ModelReference.find_references master,
+                                               to_record_type: ref_type,
+                                               filter_by: ref_config[:filter_by],
                                                without_reference: true
-        else
-          got = nil
-        end
+              end
 
         if got
           got = got.reject(&:disabled) if active_only
@@ -396,7 +394,7 @@ module ActivityLogHandler
       refitem.each do |ref_type, ref_config|
         res = {}
         ires = nil
-        ci_res = true
+
         # Check if creatable_if has been defined on the reference configuration
         # and if it evaluates to true
 
