@@ -67,6 +67,29 @@ module DicomSupport
             new: not_embedded
 
       nfs_store:
+
+        user_file_actions:
+          - name: Re-Identify
+            pipeline:
+              - dicom_deidentify:
+                  - file_filters: .*
+                    recursive: true
+                    set_tags:
+                      '0010,0010': '{{master_id}}'
+                      '0010,0020': '{{player_contacts.data}}'
+              - dicom_metadata:
+          - name: Re-Identify and Copy
+            id: reidentify_copy
+            pipeline:
+              - dicom_deidentify:
+                  - file_filters: .*
+                    recursive: true
+                    new_path: copy-location
+                    set_tags:
+                      '0010,0010': '{{master_id}}'
+                      '0010,0020': '{{player_contacts.data}}'
+              - dicom_metadata:
+
         pipeline:
           - mount_archive:
           - index_files:

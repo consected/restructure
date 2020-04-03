@@ -5,17 +5,49 @@ module NfsStore
   module Process
     class ProcessHandler
       DefaultJobList = %i[mount_archive index_files dicom_metadata].freeze
-      attr_accessor :container_file, :parent_item, :container
+      LastProcessAllDone = '_all_done_'
+      attr_accessor :container_files, :parent_item, :container, :call_options, :use_pipeline_config
 
-      def initialize(container_file)
-        self.container_file = container_file
+      #
+      # Initialize the process handler
+      # @param [NfsStore::Manage::ContainerFile] container_file
+      # @param [Hash] call_options
+      # @option call_options [Hash] :use_pipeline definition of pipeline to use,
+      #    for example: { user_file_actions: action_id }
+      # @option call_options [Array] :use_pipeline_config is the definition of a pipeline to use
+      # @option call_options [Boolean] :do_not_run_job_after prevent the next job from running on 'skip' or completion
+      def initialize(container_files, call_options = {})
+        if container_files.is_a? Array
+          container_file = container_files.first
+          self.container_files = container_files
+        else
+          container_file = container_files
+          self.container_files = [container_files]
+        end
+
         self.container = container_file.container
         # Save the parent_item activity log so we can use it to pick up additional configurations
         self.parent_item = container&.find_creator_parent_item
+        self.call_options = call_options
+
+        use_pipeline = call_options[:use_pipeline]
+        if use_pipeline.is_a? Hash
+          action_id = use_pipeline[:user_file_actions]
+          self.use_pipeline_config = self.class.user_file_action_pipeline(container_file, action_id)
+          unless use_pipeline_config
+            raise FphsException, "Specified user file action #{action_id} did not find a definition"
+          end
+        else
+          self.use_pipeline_config = call_options[:use_pipeline_config]
+        end
+      end
+
+      def nfs_store_config
+        parent_item&.extra_log_type_config&.nfs_store || {}
       end
 
       def pipeline_config
-        parent_item&.extra_log_type_config&.nfs_store && parent_item.extra_log_type_config.nfs_store[:pipeline]
+        use_pipeline_config || nfs_store_config[:pipeline]
       end
 
       def pipeline_job_list
@@ -32,15 +64,27 @@ module NfsStore
 
       # File path for flag to indicate file is being processed
       # @return [String] file path
-      def processing_flag_file_path
+      def processing_flag_file_path(container_file)
         "#{container_file.retrieval_path}.__processing__"
+      end
+
+      def set_processing_flags
+        container_files.each do |container_file|
+          FileUtils.touch processing_flag_file_path(container_file)
+        end
+      end
+
+      def clear_processing_flags
+        container_files.each do |container_file|
+          FileUtils.rm_f processing_flag_file_path(container_file)
+        end
       end
 
       # Start running the processors by starting with the first
       # @todo extend to allow configuration of what runs, based on the container configuration
       # @return
       def run_all
-        FileUtils.touch processing_flag_file_path
+        set_processing_flags
         run job_list.first
       end
 
@@ -52,14 +96,13 @@ module NfsStore
         puts "Job Running: (#{name}) of (#{job_list})"
         Rails.logger.info "Job Running: (#{name}) of (#{job_list})"
 
-        classname = "#{name}_job".camelize
-        c = self.class.parents.first.const_get classname
+        self.class.job_class(name).perform_later container_files, parent_item, call_options
 
-        c.perform_later container_file, parent_item
-
-        container_file.current_user = container_file.user
-        container_file.last_process_name_run = name
-        container_file.save!
+        container_files.each do |container_file|
+          container_file.current_user = container_file.user
+          container_file.last_process_name_run = name
+          container_file.save!
+        end
       end
 
       # Run the next job in the job_list
@@ -68,10 +111,13 @@ module NfsStore
         next_name = next_job_after current_name
 
         unless next_name
-          container_file.current_user = container_file.user
-          container_file.last_process_name_run = '_all_done_'
-          container_file.save!
-          FileUtils.rm_f processing_flag_file_path
+          container_files.each do |container_file|
+            container_file.current_user = container_file.user
+            container_file.last_process_name_run = LastProcessAllDone
+            container_file.save!
+          end
+
+          clear_processing_flags
           return
         end
 
@@ -88,13 +134,17 @@ module NfsStore
         job_list[i + 1]
       end
 
+      def self.job_class(name)
+        classname = "#{name}_job".camelize
+
+        parents.first.const_get classname
+      end
+
       #
-      # Get the configuration for the named pipeline job
-      # @param [NfsStore::Manage::ArchivedFile|NfsStore::Manage::StoredFile|NfsStore::Manage::Container|ActivityLog] container_file
-      #   Any one of these items allowing us to identify the activity log instance
-      # @param [String | Symbol] name representing the job config to retrieve
-      # @return [Hash] configuration
-      def self.pipeline_job_config(item, name)
+      # Get the activity log for a container or container_file
+      # @param [NfsStore::Manage::Container | NfsStore::Manage::ContainerFile | ActivityLog] item <description>
+      # @return [ActivityLog] activity log from a matched container parent item
+      def self.activity_log_for(item)
         if item.respond_to? :container
           container = item.container
         elsif item.is_a? NfsStore::Manage::Container
@@ -106,12 +156,34 @@ module NfsStore
         elsif item.is_a? ActivityLog
           activity_log = item
         else
-          raise FsException::Action, "pipeline_job_config was provided an item that could not be used to resolve an activity log: #{item}"
+          raise FsException::Action, "item could not be used to resolve an activity log: #{item}"
         end
 
-        pipeline = activity_log.extra_log_type_config.nfs_store[:pipeline]
+        activity_log
+      end
 
-        NfsStore::Config::ExtraOptions.pipeline_item_config(pipeline, name)
+      #
+      # Get the configuration for the named pipeline job
+      # @todo handle when there is more than one named job in a pipeline (such as dicom_deidentify)
+      # @param [String | Symbol] name representing the job config to retrieve
+      # @return [Hash] configuration
+      def pipeline_job_config(name)
+        NfsStore::Config::ExtraOptions.pipeline_item_configs(pipeline_config, name).first&.first&.last
+      end
+
+      #
+      # Get the configuration for the user file action pipeline job
+      # @param [NfsStore::Manage::ArchivedFile|NfsStore::Manage::StoredFile|NfsStore::Manage::Container|ActivityLog] container_file
+      #   Any one of these items allowing us to identify the activity log instance
+      # @param [String | Symbol] name representing the job config to retrieve
+      # @return [Hash] configuration
+      def self.user_file_action_pipeline(item, action_name)
+        activity_log = activity_log_for item
+
+        user_file_actions = activity_log.extra_log_type_config.nfs_store[:user_file_actions]
+
+        ufa = NfsStore::Config::UserFileActionsExtraOptions.user_file_action_item(user_file_actions, action_name)
+        ufa[:pipeline] if ufa
       end
     end
   end

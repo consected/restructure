@@ -151,10 +151,11 @@
     extra_options_config = nil
   end
 
+  field_options = extra_options_config&.field_options || {}
+  user_file_actions = extra_options_config&.nfs_store[:user_file_actions] if extra_options_config&.nfs_store
+  user_file_actions ||= []
   item_list = [] if only_see_presence
-
   al_full_name = "activity_log__#{full_name.underscore}"
-
   show_item_type_flags = Classification::ItemFlagName.enabled_for?(item_class_name, current_user)
 
   if category
@@ -253,7 +254,8 @@
     add_item_label: '<%=add_item_label%>',
     supports_activity_log: <%=!!supports_activity_log%>,
     extra_data_attribs: <%= extra_data_attribs.to_json.html_safe %>,
-    field_options: <%= (extra_options_config&.field_options || {}).to_json&.html_safe %>
+    field_options: <%= field_options.to_json&.html_safe %>,
+    user_file_actions: <%= user_file_actions.to_json&.html_safe %>
   }
 
   <% if full_name.to_s.end_with?('_primary') %>_fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = <% end %>
@@ -262,7 +264,23 @@
 </script>
 
 
-<%= render partial: 'common_templates/references_results', locals: { name: name.underscore, full_name: full_name, references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before, external_id_attr: external_id_attr, caption_before_keys_without_keep_label: caption_before_keys_without_keep_label, caption_before_keys: caption_before_keys, item_flags_readonly: item_flags_readonly, hide_tracker_panel: hide_tracker_panel, hide_rank_badge: hide_rank_badge, edit_button_href: edit_button_href, show_item_type_flags_after: show_item_type_flags_after, item_flags_after: item_flags_after } %>
+<%= render partial: 'common_templates/references_results', locals: { 
+      name: name.underscore, 
+      full_name: full_name, 
+      references: references, 
+      item_list: item_list, 
+      implementation_class_name: implementation_class_name, 
+      caption_before: caption_before, 
+      external_id_attr: external_id_attr, 
+      caption_before_keys_without_keep_label: caption_before_keys_without_keep_label, 
+      caption_before_keys: caption_before_keys, 
+      item_flags_readonly: item_flags_readonly, 
+      hide_tracker_panel: hide_tracker_panel, 
+      hide_rank_badge: hide_rank_badge, 
+      edit_button_href: edit_button_href, 
+      show_item_type_flags_after: show_item_type_flags_after, 
+      item_flags_after: item_flags_after 
+    } %>
 
 <script id="<%=name.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with <%=with_data || full_name%>}}

@@ -47,8 +47,7 @@ module NfsStore
 
         if container_file.file_metadata.present?
           # There is existing metadata stored. Bring it up to date based on the updated file
-          dmj = NfsStore::Process::DicomMetadataJob.new
-          dmj.extract_metadata(container_file)
+          NfsStore::Dicom::MetadataHandler.extract_metadata_from(container_file)
         end
       end
 
@@ -94,7 +93,7 @@ module NfsStore
         return tempfile if tempfile
 
         tmpdir = Manage::Filesystem.temp_directory
-        self.tempfile = File.join(tmpdir, "#{DicomTempFilePrefix}-#{rand(10)}.dcm")
+        self.tempfile = File.join(tmpdir, "#{DicomTempFilePrefix}-#{DateTime.now.to_i}-#{SecureRandom.hex(10)}.dcm")
       end
 
       #

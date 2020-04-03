@@ -11,7 +11,7 @@ module NfsStore
     private
 
     def find_container
-      if action_name.in? ['create', 'update']
+      if request.post? || request.patch? || request.put?
         alid = secure_params[:activity_log_id]
         altype = secure_params[:activity_log_type]
         cid = secure_params[:container_id]

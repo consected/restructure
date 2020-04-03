@@ -124,7 +124,7 @@ RSpec.describe 'Trash archive files', type: :model do
     hash_for_file = Digest::MD5.hexdigest(txt)
     size_for_file = tmp_file.size
     orig_path = af.path.dup
-    af.replace_file!(tmp_file)
+    af.replace_file!(tmp_file.path)
 
     # Reload the archive file record to ensure the changes have been persisted
     af = NfsStore::Manage::ArchivedFile.find(af.id)

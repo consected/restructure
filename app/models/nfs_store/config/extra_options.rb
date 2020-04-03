@@ -4,15 +4,18 @@ module NfsStore
   module Config
     # Options specific to the nfs_store entry in an extra log type config
     class ExtraOptions
-      def self.config_def(if_extras: {})
-        pipeline = []
-        pipeline << { mount_archive: {} }
-        pipeline << { index_files: {} }
-        pipeline << DicomDeidentifyExtraOptions.config_def
-        pipeline << { dicom_metadata: {} }
+      def self.pipeline_config
+        pipeline_config = []
+        pipeline_config << { mount_archive: {} }
+        pipeline_config << { index_files: {} }
+        pipeline_config << DicomDeidentifyExtraOptions.config_def
+        pipeline_config << { dicom_metadata: {} }
+      end
 
+      def self.config_def(if_extras: {})
         {
-          pipeline: pipeline
+          pipeline: pipeline_config,
+          user_file_actions: UserFileActionsExtraOptions.config_def
         }
       end
 
@@ -21,22 +24,24 @@ module NfsStore
         @model_defs = config
       end
 
-      # Get the configuration for a specific pipeline item
+
+      # Get the configurations matching an named pipeline item
       # @param [Hash] config is the configuration from { nfs_store: { pipeline: config } }
       # @param [String | Symbol] item_name the key from the pipeline config identifying the config
-      # @return [Hash] configuration result
-      def self.pipeline_item_config(config, item_name)
+      # @return [Array(Hash)] configuration results as an array of hashes
+      def self.pipeline_item_configs(config, item_name)
         config = config[:pipeline] if config.is_a?(Hash) && config[:pipeline]
-        matches = config.select { |k| k.first.first == item_name.to_sym }.first
-
-        # Return the value from the contained Hash
-        matches&.first&.last
+        config.select { |k| k.first.first == item_name.to_sym }
       end
 
       # Clean the configuration definition and give it a consistent structure
       def self.clean_def(config)
-        pic = pipeline_item_config(config, :dicom_deidentify)
-        DicomDeidentifyExtraOptions.clean_def(pic)
+        pics = pipeline_item_configs(config, :dicom_deidentify)
+        pics&.each do |pic|
+          pic = pic.first&.last
+          DicomDeidentifyExtraOptions.clean_def(pic)
+        end
+        UserFileActionsExtraOptions.clean_def(config[:user_file_actions])
       end
     end
   end

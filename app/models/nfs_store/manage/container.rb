@@ -96,6 +96,10 @@ module NfsStore
         master.current_user
       end
 
+      def extra_options_config
+        parent_item&.extra_log_type_config
+      end
+
       # Find the parent item (activity log) that created the container
       # by looking for the first model reference
       # @return [ActivityLog]
@@ -117,7 +121,7 @@ module NfsStore
 
         return unless parent_item&.can_edit?
 
-        parent_item.extra_log_type_config.calc_save_trigger_if self, alt_on: :upload
+        extra_options_config.calc_save_trigger_if self, alt_on: :upload
       end
 
       # # Filter upload notification users based on file filters
@@ -249,6 +253,13 @@ module NfsStore
         @can_move_files = !!(can_edit? && cu.can?(:move_files))
       end
 
+      def can_user_file_actions?
+        return @can_user_file_actions unless @can_user_file_actions.nil?
+
+        cu = current_user
+        @can_user_file_actions = !!(can_edit? && cu.can?(:user_file_actions))
+      end
+
       # Method to provide checking of access controls. Can the user access the container
       # in a specific way. Easily overridden in applications to provide app specific functionality
       # @param perform [Symbol(:list_files, :create_files)]
@@ -272,6 +283,10 @@ module NfsStore
         end
 
         all_files.uniq
+      end
+
+      def user_file_actions_config
+        extra_options_config.nfs_store[:user_file_actions] if extra_options_config.nfs_store
       end
 
       private
