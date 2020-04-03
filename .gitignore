@@ -61,3 +61,4 @@ db/dumps/aws-elaine-dev.sql
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+vendor/cache
