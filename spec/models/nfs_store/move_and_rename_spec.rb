@@ -83,7 +83,7 @@ RSpec.describe 'Move and rename stored files', type: :model do
       }
     end
 
-    f = create_filter('.*', resource_name: 'nfs_store__manage__containers', role_name: nil)
+    create_filter('.*', resource_name: 'nfs_store__manage__containers', role_name: nil)
     create_filter('.*', resource_name: 'activity_log__player_contact_phones', role_name: nil)
 
     download = NfsStore::Download.new multiple_items: true, container_ids: [@container.id]
@@ -92,6 +92,7 @@ RSpec.describe 'Move and rename stored files', type: :model do
     setup_access :activity_log__player_contact_phones, resource_type: :table, user: @user
     setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
 
+    expect(@user.app_type).to eq @app_type
     expect(@activity_log.class.resource_name).to eq 'activity_log__player_contact_phones'
     expect(@activity_log).to eq @container.parent_item
     expect(@activity_log.extra_log_type).to eq :step_1
