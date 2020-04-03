@@ -20,7 +20,7 @@ module NfsStore
     def move_files(selected_items, new_path)
       new_path = Manage::Filesystem.clean_path new_path
 
-      setup_items selected_items
+      setup_items selected_items, :move_files
 
       if new_path && (new_path.start_with?('.') || new_path.start_with?('/'))
         raise FsException::Action, "Path to move to can not start with / or .: #{new_path}"
@@ -72,7 +72,7 @@ module NfsStore
     def rename_file(selected_items, new_name)
       raise FsException::Action, 'New name is not specified' if new_name.blank?
 
-      setup_items selected_items
+      setup_items selected_items, :move_files
 
       all_action_items.each do |item|
         f = item[:retrieved_file]
@@ -95,16 +95,6 @@ module NfsStore
       f = [archive_file, path, new_name].join('/').gsub(%r{//+}, '/')
       f = "/#{f}" unless f.start_with? '/'
       NfsStore::Filter::Filter.evaluate f, activity_log
-    end
-
-    def setup_items(selected_items)
-      # Retrieve each file's details. The container_id will be passed if this is a
-      # multi container download, otherwise it will be ignored
-      selected_items.each do |s|
-        container = self.container || Browse.open_container(id: s[:container_id], user: current_user)
-        activity_log = self.activity_log || ActivityLog.open_activity_log(s[:activity_log_type], s[:activity_log_id], current_user)
-        retrieve_file_from(s[:id], s[:retrieval_type], container: container, activity_log: activity_log, for_action: :move_files)
-      end
     end
   end
 end

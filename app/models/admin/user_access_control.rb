@@ -39,7 +39,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
       app_type create_master
       export_csv export_json view_reports view_external_links edit_report_data create_report_data import_csv
       print
-      download_files view_files_as_image view_files_as_html send_files_to_trash move_files trigger_file_actions
+      download_files view_files_as_image view_files_as_html send_files_to_trash move_files user_file_actions
       view_dashboards
     ]
   end

@@ -8,7 +8,13 @@ module NfsStore
       # retry_on FphsException
       queue_as :nfs_store_process
 
-      flow_control :dicom_deidentify, skip_if: ->(container_file) { container_file.content_type == 'application/dicom' || container_file.is_archive? }
+      flow_control :dicom_deidentify,
+                   skip_if: lambda { |container_file|
+                              container_file.is_a?(NfsStore::Manage::ContainerFile) && !(
+                                container_file.content_type == 'application/dicom' ||
+                                container_file.is_archive?
+                              )
+                            }
 
       # Perform the job (called in the background from ActiveJob).
       # The job gets the pipeline configuration from the extra log type for
@@ -17,40 +23,44 @@ module NfsStore
       # rules to the file, replacing it in the underlying storage and updating the
       # appropriate record attributes.
       # @param [NfsStore::Manage::ArchivedFile | NfsStore::Manage::StoredFile] container_file
-      def perform(container_file, activity_log = nil)
-        log "Overwriting DICOM metadata for #{container_file}"
+      def perform(container_files, activity_log = nil, call_options = {})
+        log 'Deidentifying DICOM metadata'
 
-        container = container_file.container
-        container.parent_item ||= activity_log
+        container_files = [container_files] if container_files.is_a? NfsStore::Manage::ContainerFile
 
-        configs = NfsStore::Process::ProcessHandler.pipeline_job_config(container_file, :dicom_deidentify)
+        container_files.each do |container_file|
+          container = container_file.container
+          container.parent_item ||= activity_log
 
-        # Run through each config
-        configs.each do |config|
-          # Get scopes that can filter files to be deidentified
-          filters = config[:file_filters]
-          filtered_files = NfsStore::Filter::Filter.evaluate_container_files_as_scopes container, filters: filters
+          configs = NfsStore::Process::ProcessHandler.new(container_file, call_options).pipeline_job_config(:dicom_deidentify)
 
-          if container_file.is_archive?
-            # For an archive, get the list of files based on the archived files filter
-            container_file.current_user = container_file.user
-            archived_files = filtered_files[:archived_files].where(nfs_store_stored_file_id: container_file)
+          # Run through each config
+          configs.each do |config|
+            # Get scopes that can filter files to be deidentified
+            filters = config[:file_filters]
+            filtered_files = NfsStore::Filter::Filter.evaluate_container_files_as_scopes container, filters: filters
 
-            # Each file is deidentified in turn
-            archived_files.each do |archived_file|
-              next if af.content_type.blank?
+            if container_file.is_archive?
+              # For an archive, get the list of files based on the archived files filter
+              container_file.current_user = container_file.user
+              archived_files = filtered_files[:archived_files].where(nfs_store_stored_file_id: container_file)
 
-              deidentify_file archived_file, config
+              # Each file is deidentified in turn
+              archived_files.each do |archived_file|
+                next if af.content_type.blank?
+
+                deidentify_file archived_file, config
+              end
+
+            else
+              # For a single stored file, filter appropriately
+              next if container_file.content_type.blank?
+
+              in_filter = filtered_files[:stored_files].where(id: container_file.id).first
+              next unless in_filter
+
+              NfsStore::Dicom::DeidentifyHandler.deidentify_file container_file, config
             end
-
-          else
-            # For a single stored file, filter appropriately
-            next if container_file.content_type.blank?
-
-            in_filter = filtered_files[:stored_files].where(id: container_file.id).first
-            next unless in_filter
-
-            NfsStore::Dicom::DeidentifyHandler.deidentify_file container_file, config
           end
         end
       end

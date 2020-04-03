@@ -252,8 +252,6 @@ module NfsStore
           raise FsException::Action, "Move file to final location did not move the file: #{fs_path}"
         end
 
-        puts "Moved file to final location: #{fs_path}"
-
         FileUtils.chmod FinalFilePerms, fs_path if FinalFilePerms
         true
       end

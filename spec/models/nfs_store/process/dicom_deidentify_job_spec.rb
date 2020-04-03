@@ -62,8 +62,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     ul = @uploaded_files.first
     sf = ul.stored_file
 
-    dmj = NfsStore::Process::DicomMetadataJob.new
-    dmj.extract_metadata sf
+    NfsStore::Dicom::MetadataHandler.extract_metadata_from sf
 
     orig_file_name = sf.file_name
     orig_path = sf.path
@@ -76,7 +75,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     orig_file_metadata = dcm.to_hash
 
     # Get the deidentify config from the activity log
-    configs = NfsStore::Process::ProcessHandler.pipeline_job_config(sf, :dicom_deidentify)
+    configs = NfsStore::Process::ProcessHandler.new(sf).pipeline_job_config(:dicom_deidentify)
 
     config = configs.first
     NfsStore::Dicom::DeidentifyHandler.deidentify_file sf, config
@@ -97,30 +96,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     expect(sf.file_metadata).not_to eq orig_metadata
   end
 
-  # The configuration for the pipeline is set in NfsStoreSupport::setup_nfs_store as:
-  #
-  # nfs_store:
-  #   pipeline:
-  #     - mount_archive:
-  #     - index_files:
-
-  #     - dicom_deidentify:
-  #       - file_filters: .*
-  #         recursive: true
-  #         set_tags:
-  #           '0010,0010': new value
-  #           '0010,0020': another tagval
-  #         delete_tags:
-  #           - '0010,1010'
-  #      - file_filters: substitute.dcm
-  #        recursive: true
-  #        set_tags:
-  #          '0010,0010': do nothing - {{master_id}}
-  #          '0010,0020': do nothing tagval - {{player_contacts.data}}
-  #          '0008,103E': got the activity - {{parent_item.data}}
-  #     - dicom_metadata:
-  #
-  #
+  # The configuration for the pipeline is set in NfsStoreSupport::setup_nfs_store
   it 'runs a dicom_deidentify job on a single stored file' do
     # Make sure we are working with a new file
     @uploaded_files.shift
@@ -136,8 +112,6 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     dcm = DICOM::DObject.read(fs_path)
     file_metadata = dcm.to_hash
 
-    puts file_metadata
-
     expect(file_metadata["Patient's Name"]).not_to be_blank
     expect(file_metadata['Patient ID']).not_to be_blank
     expect(file_metadata.keys).to include "Patient's Age"
@@ -152,7 +126,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     fs_path, = sf.file_path_and_role_name
     dcm = DICOM::DObject.read(fs_path)
     file_metadata = dcm.to_hash
-    puts file_metadata
+
     expect(file_metadata["Patient's Name"]).to eq 'new value'
     expect(file_metadata['Patient ID']).to eq 'another tagval'
     expect(file_metadata.keys).not_to include "Patient's Age"
@@ -168,8 +142,6 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     fs_path, = sf.file_path_and_role_name
     dcm = DICOM::DObject.read(fs_path)
     file_metadata = dcm.to_hash
-
-    puts file_metadata
 
     expect(file_metadata["Patient's Name"]).not_to be_blank
     expect(file_metadata['Patient ID']).not_to be_blank
@@ -204,8 +176,6 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     fs_path, = sf.file_path_and_role_name
     dcm = DICOM::DObject.read(fs_path)
     file_metadata = dcm.to_hash
-
-    puts file_metadata
 
     expect(file_metadata["Patient's Name"]).not_to be_blank
     expect(file_metadata['Patient ID']).not_to be_blank

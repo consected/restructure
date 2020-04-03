@@ -1,5 +1,16 @@
 <div>
-  <div data-result="nfs-store-container-list-items-<%=@container.id%>" class="container-browser browser-hide-meta browser-hide-classifications" id="container-browser-<%=@container.id%>"  data-container-writable="<%= @container.writable? %>" data-container-readable="<%= @container.readable? %>" data-can-submit-download="<%= @container.can_download? %>" data-can-submit-trash="<%= @container.can_send_to_trash? %>" data-can-submit-move-files="<%= @container.can_move_files? %>" data-can-submit-rename-file="<%= @container.can_move_files? %>" data-can-submit-rename-folder="<%= @container.can_move_files? %>">
+  <div data-result="nfs-store-container-list-items-<%=@container.id%>" 
+       class="container-browser browser-hide-meta browser-hide-classifications" 
+       id="container-browser-<%=@container.id%>"  
+       data-container-writable="<%= @container.writable? %>" 
+       data-container-readable="<%= @container.readable? %>" 
+       data-can-submit-download="<%= @container.can_download? %>" 
+       data-can-submit-trash="<%= @container.can_send_to_trash? %>" 
+       data-can-submit-move-files="<%= @container.can_move_files? %>" 
+       data-can-submit-rename-file="<%= @container.can_move_files? %>" 
+       data-can-submit-rename-folder="<%= @container.can_move_files? %>" 
+       data-can-trigger-file-actions="<%= @container.can_user_file_actions? %>"
+  >
     <% if @directory_not_found %>
     <p>Storage has not been initialized. This container is not usable.</p>
     <% elsif !@container.readable? %>
@@ -30,12 +41,19 @@
           <%= form.submit value: 'Move Files', id: "container-browse-move-files-in-form-#{@container.id}", class: 'hidden', data: {disable_with: 'select files to move'} %>
           <%= form.submit value: 'Rename File', id: "container-browse-rename-file-in-form-#{@container.id}", class: 'hidden', data: {disable_with: 'select file to rename'} %>
           <%= form.submit value: 'Rename Folder', id: "container-browse-rename-folder-in-form-#{@container.id}", class: 'hidden', data: {disable_with: 'select folder to rename'} %>
+          <% @container.user_file_actions_config&.each do |tfa_config| %>
+            <%= form.submit value: "Trigger File Action: #{tfa_config[:id]}", 
+                            id: "container-browse-trigger-file-action-#{tfa_config[:id]}-in-form-#{@container.id}", 
+                            class: 'hidden container-browse-trigger-file-action-in-form', 
+                            data: { disable_with: 'select files', trigger_file_action: tfa_config[:id] } %>
+          <% end %>
         <% end %>
       <% end %>
       <% if @container.can_edit? %>
       <div class="nfs-store-valid-files panel">
         <div class="panel-header">
-          <a data-toggle-caret="true" data-toggle="collapse" class="glyphicon glyphicon-triangle-bottom" href="#valid-files-list-<%=@container.id%>" aria-expanded="false" aria-controls="valid-files-list-<%=@container.id%>" role="button"></a> valid upload files
+          <a data-toggle-caret="true" data-toggle="collapse" class="glyphicon glyphicon-triangle-bottom" href="#valid-files-list-<%=@container.id%>" aria-expanded="false" aria-controls="valid-files-list-<%=@container.id%>" role="button"></a> 
+          valid upload files
         </div>
         <div id="valid-files-list-<%=@container.id%>" class="collapse">
           <ul>

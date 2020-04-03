@@ -55,6 +55,17 @@ module NfsStore
       end
     end
 
+    # Setup the the items for a multiple action
+    def setup_items(selected_items, for_action)
+      # Retrieve each file's details. The container_id will be passed if this is a
+      # multi container download, otherwise it will be ignored
+      selected_items.each do |s|
+        container = self.container || Browse.open_container(id: s[:container_id], user: current_user)
+        activity_log = self.activity_log || ActivityLog.open_activity_log(s[:activity_log_type], s[:activity_log_id], current_user)
+        retrieve_file_from(s[:id], s[:retrieval_type], container: container, activity_log: activity_log, for_action: for_action)
+      end
+    end
+
     # Memoize filtered container files, returning a hash for stored and archived files
     # @param item_for_filter [NfsStore::Manage::Container | ActivityLog]
     # @return [Hash {stored_files: ActiveRecord::Relation, archived_files: ActiveRecord::Relation}]
@@ -91,9 +102,7 @@ module NfsStore
 
       filtered_files = filtered_files_as_scopes item_for_filter
 
-      unless filtered_files
-        raise FsException::Download, 'No file filters are configured.'
-      end
+      raise FsException::Download, 'No file filters are configured.' unless filtered_files
 
       if retrieval_type == :stored_file
         retrieved_file = filtered_files[:stored_files].select { |f| f.id == id }.first
@@ -135,16 +144,14 @@ module NfsStore
         self.file_metadata = retrieved_file.file_metadata
       end
 
-      unless retrieval_path
-        FsException::NotFound.new 'file not found with available group access'
-      end
+      FsException::NotFound.new 'file not found with available group access' unless retrieval_path
 
       retrieval_path
     end
 
     private
 
-    # During save of the download record, copy all_action_items to the actual retrieved_items attribute
+    # During save of the multi action record, copy all_action_items to the actual retrieved_items attribute
     # We do this to handle the difference between JSON in Postgres and SQLite
     def store_action_items
       return unless self.all_action_items
