@@ -4547,6 +4547,45 @@ ALTER SEQUENCE ml_app.nfs_store_uploads_id_seq OWNED BY ml_app.nfs_store_uploads
 
 
 --
+-- Name: nfs_store_user_file_actions; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_user_file_actions (
+    id integer NOT NULL,
+    user_groups integer[],
+    path character varying,
+    new_path character varying,
+    action character varying,
+    retrieval_path character varying,
+    action_items character varying,
+    nfs_store_container_ids integer[],
+    user_id integer NOT NULL,
+    nfs_store_container_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: nfs_store_user_file_actions_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.nfs_store_user_file_actions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: nfs_store_user_file_actions_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.nfs_store_user_file_actions_id_seq OWNED BY ml_app.nfs_store_user_file_actions.id;
+
+
+--
 -- Name: page_layout_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -6222,6 +6261,13 @@ ALTER TABLE ONLY ml_app.nfs_store_uploads ALTER COLUMN id SET DEFAULT nextval('m
 
 
 --
+-- Name: nfs_store_user_file_actions id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_user_file_actions ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_user_file_actions_id_seq'::regclass);
+
+
+--
 -- Name: page_layout_history id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
@@ -6867,6 +6913,14 @@ ALTER TABLE ONLY ml_app.nfs_store_trash_actions
 
 ALTER TABLE ONLY ml_app.nfs_store_uploads
     ADD CONSTRAINT nfs_store_uploads_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: nfs_store_user_file_actions nfs_store_user_file_actions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_user_file_actions
+    ADD CONSTRAINT nfs_store_user_file_actions_pkey PRIMARY KEY (id);
 
 
 --
@@ -9500,6 +9554,14 @@ ALTER TABLE ONLY ml_app.trackers
 
 
 --
+-- Name: nfs_store_user_file_actions fk_rails_639da31037; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_user_file_actions
+    ADD CONSTRAINT fk_rails_639da31037 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: app_configurations fk_rails_647c63b069; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -9769,6 +9831,14 @@ ALTER TABLE ONLY ml_app.nfs_store_move_actions
 
 ALTER TABLE ONLY ml_app.item_flags
     ADD CONSTRAINT fk_rails_c2d5bb8930 FOREIGN KEY (item_flag_name_id) REFERENCES ml_app.item_flag_names(id);
+
+
+--
+-- Name: nfs_store_user_file_actions fk_rails_c423dc1802; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_user_file_actions
+    ADD CONSTRAINT fk_rails_c423dc1802 FOREIGN KEY (nfs_store_container_id) REFERENCES ml_app.nfs_store_containers(id);
 
 
 --
