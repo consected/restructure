@@ -24,13 +24,18 @@ module NfsStore
         @model_defs = config
       end
 
-
       # Get the configurations matching an named pipeline item
       # @param [Hash] config is the configuration from { nfs_store: { pipeline: config } }
       # @param [String | Symbol] item_name the key from the pipeline config identifying the config
       # @return [Array(Hash)] configuration results as an array of hashes
       def self.pipeline_item_configs(config, item_name)
-        config = config[:pipeline] if config.is_a?(Hash) && config[:pipeline]
+        if config.is_a?(Hash) && config[:pipeline]
+          config = config[:pipeline]
+        elsif config.is_a? Array
+          # OK
+        else
+          return
+        end
         config.select { |k| k.first.first == item_name.to_sym }
       end
 

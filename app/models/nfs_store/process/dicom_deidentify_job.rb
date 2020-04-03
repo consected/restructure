@@ -40,16 +40,17 @@ module NfsStore
             filters = config[:file_filters]
             filtered_files = NfsStore::Filter::Filter.evaluate_container_files_as_scopes container, filters: filters
 
-            if container_file.is_archive?
+            if container_file.is_a? NfsStore::Manage::ArchivedFile
               # For an archive, get the list of files based on the archived files filter
-              container_file.current_user = container_file.user
-              archived_files = filtered_files[:archived_files].where(nfs_store_stored_file_id: container_file)
+              c_user = container_file.current_user = container_file.user
+              archived_files = filtered_files[:archived_files].where(id: container_file.id)
 
               # Each file is deidentified in turn
               archived_files.each do |archived_file|
-                next if af.content_type.blank?
+                next if archived_file.content_type.blank?
 
-                deidentify_file archived_file, config
+                archived_file.current_user = c_user
+                NfsStore::Dicom::DeidentifyHandler.deidentify_file archived_file, config
               end
 
             else

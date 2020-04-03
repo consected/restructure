@@ -40,7 +40,12 @@ module NfsStore
           attrs = container_file.attributes
           attrs['path'] = new_path
           attrs['do_not_postprocess'] = true
-          container_file = container_file.class.store_new_file(new_tmp_image_path, container_file.container, attrs)
+          attrs.delete('archive_file') if attrs.keys.include? 'archive_file'
+          attrs.delete('nfs_store_stored_file_id') if attrs.keys.include? 'nfs_store_stored_file_id'
+
+          # Specifically create a stored file, even if the original was an archived file
+          # since we want it to be stored independently of the original archive
+          container_file = NfsStore::Manage::StoredFile.store_new_file(new_tmp_image_path, container_file.container, attrs)
         else
           container_file.replace_file! new_tmp_image_path
         end

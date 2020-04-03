@@ -87,34 +87,37 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     f = create_filter('^/id\/{{id}} - id file')
 
     res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
+    res = res.sort { |f, g| f.created_at <=> g.created_at }
     expect(res.length).to eq 1
     expect(res.first.file_name).to eq 'abc_ is a test'
 
     create_stored_file 'dir1', 'abc_ is a test3'
     res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
+    res = res.sort { |f, g| f.created_at <=> g.created_at }
     expect(res.length).to eq 1
 
     create_stored_file 'dir', 'abc_ is a test2'
     res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
+    res = res.sort { |f, g| f.created_at <=> g.created_at }
     expect(res.length).to eq 2
     expect(res.first.file_name).to eq 'abc_ is a test'
     expect(res.last.file_name).to eq 'abc_ is a test2'
 
-    create_stored_file 'id', "#{@activity_log.id} - id file"
     create_stored_file 'id', '000100 - id file'
+    create_stored_file 'id', "#{@activity_log.id} - id file"
     res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
+    res = res.sort { |f, g| f.created_at <=> g.created_at }
     expect(res.length).to eq 3
-    expect(res.first.file_name).to eq "#{@activity_log.id} - id file"
+    expect(res.last.file_name).to eq "#{@activity_log.id} - id file"
   end
 
   it 'generates SQL to filter reports' do
     @resource_name = @activity_log.resource_name
 
-    f = create_filter('^/fabc')
-    f = create_filter('^fdir\/')
-    f = create_filter('^/fghi')
-
-    f = create_filter('^fid\/{{id}} - id file')
+    create_filter('^/fabc')
+    create_filter('^fdir\/')
+    create_filter('^/fghi')
+    create_filter('^fid\/{{id}} - id file')
 
     fs = NfsStore::Filter::Filter.generate_filters_for 'activity_log__player_contact_phone', user: @user
 
