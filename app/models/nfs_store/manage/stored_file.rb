@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 module NfsStore
   module Manage
     class StoredFile < ContainerFile
-
       self.table_name = 'nfs_store_stored_files'
 
       include HandlesContainerFile
@@ -15,8 +16,8 @@ module NfsStore
       # @param orig_file_obj [NfsStore::Upload] the original upload instance with file information
       # @param [String] the temporary file path to be moved from
       # @return [NfsStore::Manage::StoredFile] the generated stored file object
-      def self.finalize_upload orig_file_obj, from_path
-        attrs = orig_file_obj.attributes.slice(*(self.attribute_names - ['nfs_store_container_id', 'id', 'user_id']))
+      def self.finalize_upload(orig_file_obj, from_path)
+        attrs = orig_file_obj.attributes.slice(*(attribute_names - ['nfs_store_container_id', 'id', 'user_id']))
         stored_file = orig_file_obj.container.stored_files.build attrs
         stored_file.container.current_user = orig_file_obj.container.current_user
 
@@ -31,10 +32,12 @@ module NfsStore
       # Analyze the file to complete its StoredFile attributes
       def analyze_file!
         rp = retrieval_path
-        raise FsException::Action.new "Retrieval path is not set when analyzing file '#{path}' '#{file_name}'. Does gid #{self.current_gid} have permissions for this app / container?" unless rp
+        unless rp
+          raise FsException::Action, "Retrieval path is not set when analyzing file '#{path}' '#{file_name}'. Does gid #{current_gid} have permissions for this app / container?"
+        end
+
         super(rp)
       end
-
 
       # Mount an archive file, if necessary (idempotent)
       def mount_archive
@@ -46,30 +49,23 @@ module NfsStore
       # @param final_slash [Boolean] default (falsey) the final slash is not included on a directory path, otherwise (true) the final slash is included
       # @param use_archive_file_name [Boolean] unused in this implementation
       # @param leading_dot [Boolean] default (falsey) do not include a leading dot, otherwise (true) the leading dot is included in the path
-      def container_path no_filename: nil, final_slash: nil, use_archive_file_name: nil, leading_dot: nil
+      def container_path(no_filename: nil, final_slash: nil, use_archive_file_name: nil, leading_dot: nil)
         parts = []
         parts << '.' if leading_dot
         parts << path unless path.blank?
         parts << file_name unless no_filename
         res = File.join parts
-        res = res + '/' if final_slash && res.length > 0
+        res += '/' if final_slash && !res.empty?
         res
       end
 
-      # Shortcut way to check if a stored file is a compressed archive
-      # @return [Boolean] true if the file is an archive
-      def is_archive?
-        NfsStore::Archive::Mounter.has_archive_extension? self
-      end
-
       def not_named_like_archive
-        if NfsStore::Archive::Mounter.path_is_archive?(self.file_name) || NfsStore::Archive::Mounter.path_is_archive?(self.path)
+        if NfsStore::Archive::Mounter.path_is_archive?(file_name) || NfsStore::Archive::Mounter.path_is_archive?(path)
           errors.add :file_name, 'has an invalid name. Rename before attempting to upload.'
           return false
         end
         true
       end
-
     end
   end
 end

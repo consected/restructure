@@ -65,6 +65,12 @@ module NfsStore
         !!path.split('/').select { |p| p == TrashPath }.first
       end
 
+      # Shortcut way to check if a file is a compressed archive
+      # @return [Boolean] true if the file is an archive
+      def is_archive?
+        NfsStore::Archive::Mounter.has_archive_extension? self
+      end
+
       #
       # Calculate the new path for a file moved to trash
       #

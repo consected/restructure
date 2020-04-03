@@ -99,6 +99,8 @@ module NfsStore
         self.class.job_class(name).perform_later container_files, parent_item, call_options
 
         container_files.each do |container_file|
+          next unless container_file.respond_to? :last_process_name_run=
+
           container_file.current_user = container_file.user
           container_file.last_process_name_run = name
           container_file.save!
@@ -112,6 +114,8 @@ module NfsStore
 
         unless next_name
           container_files.each do |container_file|
+            next unless container_file.respond_to? :last_process_name_run=
+
             container_file.current_user = container_file.user
             container_file.last_process_name_run = LastProcessAllDone
             container_file.save!
