@@ -2,6 +2,10 @@
 
 module NfsStore
   class DownloadsController < FsBaseController
+    #
+    # Actions that are valid to be called from a post (create) action
+    ValidActions = %i[trash download move_files rename_file trigger_file_action].freeze
+
     include InNfsStoreContainer
     include SecureView::Previewing
 
@@ -36,6 +40,7 @@ module NfsStore
 
     def create
       do_action = @commit.split(':').first&.id_underscore
+      do_action = ValidActions.select { |va| va == do_action&.to_sym }.first
       if do_action
         send do_action
       else
