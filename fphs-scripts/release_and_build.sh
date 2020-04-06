@@ -16,6 +16,7 @@ if [ ! -z "${GITSTATUS}" ]; then
 fi
 
 ALLTAGS="$(git tag --sort=-taggerdate)"
+CURRVER=$(cat ../install-playbook/ansible/build_version.txt)
 NEWVER="$(VERSION_FILE=../install-playbook/ansible/build_version.txt fphs-scripts/upversion.rb -p)"
 RELEASESTARTED="$(echo ${ALLTAGS} | grep ${NEWVER})"
 
@@ -31,6 +32,13 @@ fi
 
 cd ../install-playbook/ansible
 build_box=true vagrant up --provision
+TESTVER=$(cat ../install-playbook/ansible/build_version.txt)
+
+if [ "${TESTVER}" != "${NEWVER}" ]; then
+  echo "Build failed"
+  exit 1
+fi
+
 sed -i -E "s/git_version: .+/git_version: ${NEWVER}/g" package_vars.yml
 setup_assets=true vagrant up --provision
 
