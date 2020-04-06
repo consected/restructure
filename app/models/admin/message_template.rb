@@ -246,6 +246,10 @@ class Admin::MessageTemplate < ActiveRecord::Base
         res = res.underscore
       elsif op == 'hyphenate'
         res = res.hyphenate
+      elsif op == 'initial'
+        res = res.first.upcase
+      elsif op == 'first'
+        res = res.first
       elsif op == 'join_with_space'
         res = res.join(' ') if res.is_a? Array
       elsif op == 'join_with_comma'
