@@ -7,6 +7,9 @@ if [ -z "${ONDEVELOP}" ]; then
   exit 1
 fi
 
+bundle exec rake assets:clobber
+git commit public/assets -m "Cleanup"
+
 GITSTATUS="$(git status --porcelain=1)"
 
 if [ ! -z "${GITSTATUS}" ]; then
@@ -14,9 +17,6 @@ if [ ! -z "${GITSTATUS}" ]; then
   git status
   exit 1
 fi
-
-bundle exec rake assets:clobber
-git commit -a -m "Cleanup"
 
 ALLTAGS="$(git tag --sort=-taggerdate)"
 CURRVER=$(cat ../install-playbook/ansible/build_version.txt)
