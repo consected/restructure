@@ -24,7 +24,7 @@ if [ -z "${RELEASESTARTED}" ]; then
   git push
   git push --tags
 else
-  git checkout new-master && git pull && git merge develop || echo "Failed!" && exit
+  git checkout new-master && git pull && git merge develop
   git push
   git push --tags
 fi
