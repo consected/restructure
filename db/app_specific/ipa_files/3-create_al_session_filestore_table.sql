@@ -1,147 +1,211 @@
-set search_path=filestore, filestore_admin, ml_app;
-      BEGIN;
+set
+    search_path = filestore,
+    filestore_admin,
+    ml_app;
+
+BEGIN
+;
 
 -- Command line:
 -- table_generators/generate.sh activity_logs_table create activity_log_ipa_assignment_session_filestores ipa_assignment select_type operator notes session_date session_time
+CREATE TABLE activity_log_ipa_assignment_session_filestore_history (
+    id integer NOT NULL,
+    master_id integer,
+    ipa_assignment_id integer,
+    select_type varchar,
+    operator varchar,
+    session_date date,
+    session_time time,
+    notes varchar,
+    select_status varchar,
+    select_confirm_status varchar,
+    select_notify_role_name varchar,
+    extra_log_type varchar,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_ipa_assignment_session_filestore_id integer
+);
 
-      CREATE TABLE activity_log_ipa_assignment_session_filestore_history (
-          id integer NOT NULL,
-          master_id integer,
-          ipa_assignment_id integer,
-          select_type varchar,
-          operator varchar,
-          session_date date,
-          session_time time,
-          notes varchar,
-          select_status varchar,
-          select_confirm_status varchar,
-          extra_log_type varchar,
-          user_id integer,
-          created_at timestamp without time zone NOT NULL,
-          updated_at timestamp without time zone NOT NULL,
-          activity_log_ipa_assignment_session_filestore_id integer
-      );
-      CREATE TABLE activity_log_ipa_assignment_session_filestores (
-          id integer NOT NULL,
-          master_id integer,
-          ipa_assignment_id integer,
-          select_type varchar,
-          operator varchar,
-          session_date date,
-          session_time time,
-          notes varchar,
-          select_status varchar,
-          select_confirm_status varchar,
-          extra_log_type varchar,
-          user_id integer,
-          created_at timestamp without time zone NOT NULL,
-          updated_at timestamp without time zone NOT NULL
-      );
+CREATE TABLE activity_log_ipa_assignment_session_filestores (
+    id integer NOT NULL,
+    master_id integer,
+    ipa_assignment_id integer,
+    select_type varchar,
+    operator varchar,
+    session_date date,
+    session_time time,
+    notes varchar,
+    select_status varchar,
+    select_confirm_status varchar,
+    select_notify_role_name varchar,
+    extra_log_type varchar,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
 
-      CREATE or REPLACE FUNCTION log_activity_log_ipa_assignment_session_filestore_update() RETURNS trigger
-          LANGUAGE plpgsql
-          AS $$
-              BEGIN
-                  INSERT INTO activity_log_ipa_assignment_session_filestore_history
-                  (
-                      master_id,
-                      ipa_assignment_id,
-                      select_type,
-                      operator,
-                      notes,
-                      session_date,
-                      session_time,
-                      select_status,
-                      select_confirm_status,
-                      extra_log_type,
-                      user_id,
-                      created_at,
-                      updated_at,
-                      activity_log_ipa_assignment_session_filestore_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.ipa_assignment_id,
-                      NEW.select_type,
-                      NEW.operator,
-                      NEW.notes,
-                      NEW.session_date,
-                      NEW.session_time,
-                      NEW.select_status, 
-                      NEW.select_confirm_status,
-                      NEW.extra_log_type,
-                      NEW.user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
+CREATE
+or REPLACE FUNCTION log_activity_log_ipa_assignment_session_filestore_update() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN
+    INSERT INTO
+        activity_log_ipa_assignment_session_filestore_history (
+            master_id,
+            ipa_assignment_id,
+            select_type,
+            operator,
+            notes,
+            session_date,
+            session_time,
+            select_status,
+            select_confirm_status,
+            select_notify_role_name,
+            extra_log_type,
+            user_id,
+            created_at,
+            updated_at,
+            activity_log_ipa_assignment_session_filestore_id
+        )
+    SELECT
+        NEW .master_id,
+        NEW .ipa_assignment_id,
+        NEW .select_type,
+        NEW .operator,
+        NEW .notes,
+        NEW .session_date,
+        NEW .session_time,
+        NEW .select_status,
+        NEW .select_confirm_status,
+        NEW .select_notify_role_name,
+        NEW .extra_log_type,
+        NEW .user_id,
+        NEW .created_at,
+        NEW .updated_at,
+        NEW .id;
 
-      CREATE SEQUENCE activity_log_ipa_assignment_session_filestore_history_id_seq
-          START WITH 1
-          INCREMENT BY 1
-          NO MINVALUE
-          NO MAXVALUE
-          CACHE 1;
+RETURN NEW;
 
-      ALTER SEQUENCE activity_log_ipa_assignment_session_filestore_history_id_seq OWNED BY activity_log_ipa_assignment_session_filestore_history.id;
+END;
 
+$$;
 
-      CREATE SEQUENCE activity_log_ipa_assignment_session_filestores_id_seq
-          START WITH 1
-          INCREMENT BY 1
-          NO MINVALUE
-          NO MAXVALUE
-          CACHE 1;
+CREATE SEQUENCE activity_log_ipa_assignment_session_filestore_history_id_seq
+START WITH
+    1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 
-      ALTER SEQUENCE activity_log_ipa_assignment_session_filestores_id_seq OWNED BY activity_log_ipa_assignment_session_filestores.id;
+ALTER SEQUENCE activity_log_ipa_assignment_session_filestore_history_id_seq OWNED BY activity_log_ipa_assignment_session_filestore_history.id;
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_session_filestores ALTER COLUMN id SET DEFAULT nextval('activity_log_ipa_assignment_session_filestores_id_seq'::regclass);
-      ALTER TABLE ONLY activity_log_ipa_assignment_session_filestore_history ALTER COLUMN id SET DEFAULT nextval('activity_log_ipa_assignment_session_filestore_history_id_seq'::regclass);
+CREATE SEQUENCE activity_log_ipa_assignment_session_filestores_id_seq
+START WITH
+    1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_session_filestore_history
-          ADD CONSTRAINT activity_log_ipa_assignment_session_filestore_history_pkey PRIMARY KEY (id);
+ALTER SEQUENCE activity_log_ipa_assignment_session_filestores_id_seq OWNED BY activity_log_ipa_assignment_session_filestores.id;
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_session_filestores
-          ADD CONSTRAINT activity_log_ipa_assignment_session_filestores_pkey PRIMARY KEY (id);
+ALTER TABLE
+    ONLY activity_log_ipa_assignment_session_filestores
+ALTER COLUMN
+    id
+SET
+    DEFAULT nextval(
+        'activity_log_ipa_assignment_session_filestores_id_seq' :: regclass
+    );
 
-      CREATE INDEX index_al_ipa_assignment_session_filestore_history_on_master_id ON activity_log_ipa_assignment_session_filestore_history USING btree (master_id);
-      CREATE INDEX index_al_ipa_assignment_session_filestore_history_on_ipa_assignment_session_filestore_id ON activity_log_ipa_assignment_session_filestore_history USING btree (ipa_assignment_id);
+ALTER TABLE
+    ONLY activity_log_ipa_assignment_session_filestore_history
+ALTER COLUMN
+    id
+SET
+    DEFAULT nextval(
+        'activity_log_ipa_assignment_session_filestore_history_id_seq' :: regclass
+    );
 
-      CREATE INDEX index_al_ipa_assignment_session_filestore_history_on_activity_log_ipa_assignment_session_filestore_id ON activity_log_ipa_assignment_session_filestore_history USING btree (activity_log_ipa_assignment_session_filestore_id);
-      CREATE INDEX index_al_ipa_assignment_session_filestore_history_on_user_id ON activity_log_ipa_assignment_session_filestore_history USING btree (user_id);
+ALTER TABLE
+    ONLY activity_log_ipa_assignment_session_filestore_history
+ADD
+    CONSTRAINT activity_log_ipa_assignment_session_filestore_history_pkey PRIMARY KEY (id);
 
-      CREATE INDEX index_activity_log_ipa_assignment_session_filestores_on_master_id ON activity_log_ipa_assignment_session_filestores USING btree (master_id);
-      CREATE INDEX index_activity_log_ipa_assignment_session_filestores_on_ipa_assignment_session_filestore_id ON activity_log_ipa_assignment_session_filestores USING btree (ipa_assignment_id);
-      CREATE INDEX index_activity_log_ipa_assignment_session_filestores_on_user_id ON activity_log_ipa_assignment_session_filestores USING btree (user_id);
+ALTER TABLE
+    ONLY activity_log_ipa_assignment_session_filestores
+ADD
+    CONSTRAINT activity_log_ipa_assignment_session_filestores_pkey PRIMARY KEY (id);
 
-      CREATE TRIGGER activity_log_ipa_assignment_session_filestore_history_insert AFTER INSERT ON activity_log_ipa_assignment_session_filestores FOR EACH ROW EXECUTE PROCEDURE log_activity_log_ipa_assignment_session_filestore_update();
-      CREATE TRIGGER activity_log_ipa_assignment_session_filestore_history_update AFTER UPDATE ON activity_log_ipa_assignment_session_filestores FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_activity_log_ipa_assignment_session_filestore_update();
+CREATE INDEX index_al_ipa_assignment_session_filestore_history_on_master_id ON activity_log_ipa_assignment_session_filestore_history USING btree (master_id);
 
+CREATE INDEX index_al_ipa_assignment_session_filestore_history_on_ipa_assignment_session_filestore_id ON activity_log_ipa_assignment_session_filestore_history USING btree (ipa_assignment_id);
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_session_filestores
-          ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
-      ALTER TABLE ONLY activity_log_ipa_assignment_session_filestores
-          ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
-      ALTER TABLE ONLY activity_log_ipa_assignment_session_filestores
-          ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_ops.ipa_assignments(id);
+CREATE INDEX index_al_ipa_assignment_session_filestore_history_on_activity_log_ipa_assignment_session_filestore_id ON activity_log_ipa_assignment_session_filestore_history USING btree (activity_log_ipa_assignment_session_filestore_id);
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_session_filestore_history
-          ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+CREATE INDEX index_al_ipa_assignment_session_filestore_history_on_user_id ON activity_log_ipa_assignment_session_filestore_history USING btree (user_id);
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_session_filestore_history
-          ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+CREATE INDEX index_activity_log_ipa_assignment_session_filestores_on_master_id ON activity_log_ipa_assignment_session_filestores USING btree (master_id);
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_session_filestore_history
-          ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_ipa_assignment_session_filestore_id FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_ops.ipa_assignments(id);
+CREATE INDEX index_activity_log_ipa_assignment_session_filestores_on_ipa_assignment_session_filestore_id ON activity_log_ipa_assignment_session_filestores USING btree (ipa_assignment_id);
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_session_filestore_history
-          ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_activity_log_ipa_assignment_session_filestores FOREIGN KEY (activity_log_ipa_assignment_session_filestore_id) REFERENCES activity_log_ipa_assignment_session_filestores(id);
+CREATE INDEX index_activity_log_ipa_assignment_session_filestores_on_user_id ON activity_log_ipa_assignment_session_filestores USING btree (user_id);
 
-      GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ipa_ops TO fphs;
-      GRANT USAGE ON ALL SEQUENCES IN SCHEMA ipa_ops TO fphs;
-      GRANT SELECT ON ALL SEQUENCES IN SCHEMA ipa_ops TO fphs;
+CREATE TRIGGER activity_log_ipa_assignment_session_filestore_history_insert AFTER
+INSERT
+    ON activity_log_ipa_assignment_session_filestores FOR EACH ROW EXECUTE PROCEDURE log_activity_log_ipa_assignment_session_filestore_update();
 
-      COMMIT;
+CREATE TRIGGER activity_log_ipa_assignment_session_filestore_history_update AFTER
+UPDATE
+    ON activity_log_ipa_assignment_session_filestores FOR EACH ROW
+    WHEN (
+        (
+            old.* IS DISTINCT
+            FROM
+                new.*
+        )
+    ) EXECUTE PROCEDURE log_activity_log_ipa_assignment_session_filestore_update();
+
+ALTER TABLE
+    ONLY activity_log_ipa_assignment_session_filestores
+ADD
+    CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
+
+ALTER TABLE
+    ONLY activity_log_ipa_assignment_session_filestores
+ADD
+    CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+ALTER TABLE
+    ONLY activity_log_ipa_assignment_session_filestores
+ADD
+    CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_ops.ipa_assignments(id);
+
+ALTER TABLE
+    ONLY activity_log_ipa_assignment_session_filestore_history
+ADD
+    CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+
+ALTER TABLE
+    ONLY activity_log_ipa_assignment_session_filestore_history
+ADD
+    CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+ALTER TABLE
+    ONLY activity_log_ipa_assignment_session_filestore_history
+ADD
+    CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_ipa_assignment_session_filestore_id FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_ops.ipa_assignments(id);
+
+ALTER TABLE
+    ONLY activity_log_ipa_assignment_session_filestore_history
+ADD
+    CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_activity_log_ipa_assignment_session_filestores FOREIGN KEY (activity_log_ipa_assignment_session_filestore_id) REFERENCES activity_log_ipa_assignment_session_filestores(id);
+
+GRANT
+SELECT
+,
+INSERT
+,
+UPDATE
+,
+DELETE
+    ON ALL TABLES IN SCHEMA ipa_ops TO fphs;
+
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA ipa_ops TO fphs;
+
+GRANT
+SELECT
+    ON ALL SEQUENCES IN SCHEMA ipa_ops TO fphs;
+
+COMMIT;
