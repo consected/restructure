@@ -7,6 +7,9 @@ if [ -z "${ONDEVELOP}" ]; then
   exit 1
 fi
 
+bundle exec rake assets:clobber
+git commit public/assets -m "Cleanup"
+
 GITSTATUS="$(git status --porcelain=1)"
 
 if [ ! -z "${GITSTATUS}" ]; then
