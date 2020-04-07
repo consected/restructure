@@ -414,6 +414,82 @@ _fpa.form_utils = {
     });
   },
 
+  // Format a substitution string like {{player_infos.first_name::ignore_if_missing::capitalize}}
+  format_substitution: function (text, ops, tag_name) {
+
+    var res = text;
+
+    if (res == null && ops[0] != 'ignore_missing') {
+      return;
+    }
+
+    // Automatically titleize names
+    if (ops.length == 0 && (tag_name == 'name' || tag_name.split('_name').length == 1)) {
+      ops = ['titleize']
+    }
+
+    for (var i = 0; i < ops.length; i++) {
+      var op = ops[i];
+
+      if (op == 'capitalize')
+        res = res.capitalize()
+      else if (op == 'titleize')
+        res = res.titleize()
+      else if (op == 'uppercase')
+        res = res.toUpperCase()
+      else if (op == 'lowercase')
+        res = res.toLowerCase()
+      else if (op == 'underscore')
+        res = res.underscore()
+      else if (op == 'hyphenate')
+        res = res.hyphenate()
+      else if (op == 'initial')
+        res = (res[0] || '').toUpperCase();
+      else if (op == 'first')
+        res = res[0]
+      else if (op == 'dicom_datetime') {
+        if (typeof res == 'date') {
+          res = res.toISOString();
+        }
+        res = res.split('.')[0].replace(/[\:\-T]/g, '');
+      }
+      else if (op == 'dicom_date') {
+        if (typeof res == 'date') {
+          res = res.toISOString();
+        }
+        res = res.split('T')[0].replace(/[\:\-T]/g, '')
+      }
+      else if (op == 'join_with_space') {
+        if (Array.isArray(res))
+          res = res.join(' ')
+      }
+      else if (op == 'join_with_comma') {
+        if (Array.isArray(res))
+          res = res.join(', ')
+      }
+      else if (op == 'join_with_semicolon') {
+        if (Array.isArray(res))
+          res = res.join('; ')
+      }
+      else if (op == 'join_with_newline') {
+        if (Array.isArray(res))
+          res = res.join("\n")
+      }
+      else if (op == 'join_with_2newlines') {
+        if (Array.isArray(res))
+          res = res.join("\n\n")
+      }
+      else if (op == 'markup')
+        res = megamark(res)
+      else if (op == 'ignore_missing')
+        res = res || ''
+      else if (Int(op) != 0)
+        res = res[0..op.to_i]
+    }
+
+    return res;
+  },
+
   // Make subtitutions in moustaches, when in view mode.
   // This function is called by a handlebars helper rather than in the postprocessor loop
   caption_before_substitutions: function (block, data) {
@@ -421,7 +497,7 @@ _fpa.form_utils = {
     block.find('.caption-before').not('.cb_subs_done').each(function () {
       var text = $(this).html();
       if (!text || text.length < 1) return;
-      var res = text.match(/{{[0-9a-zA-z_\.]+}}/g);
+      var res = text.match(/{{[0-9a-zA-z_\.:]+}}/g);
       if (!res || res.length < 1) return;
 
       var new_data = {};
@@ -440,17 +516,52 @@ _fpa.form_utils = {
       }
 
       res.forEach(function (el) {
-        var elsplit = el.replace('{{', '').replace('}}', '').split('.');
-        var got = null;
-        if (elsplit[0])
-          got = new_data[elsplit[0]];
 
-        if (got && elsplit[1])
-          got = got[elsplit[1]];
+        var formatters = el.replace('{{', '').replace('}}', '').split('::');
+        var els = formatters.shift();
+        var elsplit = els.split('.');
 
-        if (got == null) got = '(?)';
+        if (formatters[0] == 'ignore_missing') {
+          var ignore_missing = 'show_blank'
+        }
+
+
+        if (elsplit.length > 0) {
+
+          var got = null;
+          var el0 = elsplit[0];
+          var el1 = elsplit[1];
+          var tag_name = el1 || el0;
+
+          if (el0) {
+            got = new_data[el0];
+          }
+
+          if (got && el1) {
+            // If this is an array of results, get the first item for use
+            if (Array.isArray(got)) {
+              got = got[0];
+            }
+            got = got[el1];
+          }
+
+        }
+
+        if (got == null) {
+          if (ignore_missing == 'show_blank') {
+            got = '';
+          }
+          else {
+            got = '(?)';
+          }
+        }
+        else if (formatters) {
+          got = _fpa.form_utils.format_substitution(got, formatters, tag_name);
+        }
         got = '<em class="all_caps">' + got + '</em>';
+
         text = text.replace(el, got);
+
       });
 
       $(this).html(text);

@@ -23,16 +23,16 @@ module DicomSupport
   def setup_deidentifier
     @al_name = AlFilterTestName
 
-    aldef = ActivityLog.active.where(name: @al_name).first
-    unless aldef
-      aldef = ActivityLog.where(name: @al_name).first
-      aldef.update(disabled: false, current_admin: @admin)
-      aldef = ActivityLog.active.where(name: @al_name).first
-      puts 'About to fail' unless aldef
+    @aldef = ActivityLog.active.where(name: @al_name).first
+    unless @aldef
+      @aldef = ActivityLog.where(name: @al_name).first
+      @aldef.update(disabled: false, current_admin: @admin)
+      @aldef = ActivityLog.active.where(name: @al_name).first
+      puts 'About to fail' unless @aldef
     end
-    expect(aldef).not_to be nil
+    expect(@aldef).not_to be nil
 
-    aldef.extra_log_types = <<EOF
+    @aldef.extra_log_types = <<EOF
     step_1:
       label: Step 1
       fields:
@@ -152,7 +152,9 @@ module DicomSupport
 
 EOF
 
-    aldef.current_admin = @admin
-    aldef.save!
+    @aldef.current_admin = @admin
+    @aldef.save!
+
+    finalize_al_setup
   end
 end

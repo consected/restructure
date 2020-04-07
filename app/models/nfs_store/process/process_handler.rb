@@ -27,7 +27,7 @@ module NfsStore
 
         self.container = container_file.container
         # Save the parent_item activity log so we can use it to pick up additional configurations
-        self.parent_item = container&.find_creator_parent_item
+        self.parent_item = container&.parent_item || container&.find_creator_parent_item
         self.call_options = call_options
 
         use_pipeline = call_options[:use_pipeline]
@@ -172,7 +172,7 @@ module NfsStore
       # @param [String | Symbol] name representing the job config to retrieve
       # @return [Hash] configuration
       def pipeline_job_config(name)
-        NfsStore::Config::ExtraOptions.pipeline_item_configs(pipeline_config, name).first&.first&.last
+        NfsStore::Config::ExtraOptions.pipeline_item_configs(pipeline_config, name)&.first&.first&.last
       end
 
       #

@@ -34,6 +34,11 @@ module NfsStore
 
           configs = NfsStore::Process::ProcessHandler.new(container_file, call_options).pipeline_job_config(:dicom_deidentify)
 
+          unless configs
+            log 'Pipeline job config for dicom_deidentify is nil. Trying next'
+            next
+          end
+
           # Run through each config
           configs.each do |config|
             # Get scopes that can filter files to be deidentified

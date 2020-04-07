@@ -35,7 +35,7 @@ fi
 
 cd ../install-playbook/ansible
 build_box=true vagrant up --provision
-TESTVER=$(cat ../install-playbook/ansible/build_version.txt)
+TESTVER=$(cat build_version.txt)
 
 if [ "${TESTVER}" != "${NEWVER}" ]; then
   echo "Build failed"

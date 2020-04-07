@@ -15,8 +15,8 @@ module NfsStoreSupport
     create_admin
     create_user
 
-    trash_master = create_master
-    trash_pc = create_item(data: rand(10_000_000_000_000_000), rank: 0)
+    @trash_master = create_master
+    @trash_pc = create_item(data: rand(10_000_000_000_000_000), rank: 0)
 
     @app_type = @user.app_type
     create_user_role default_role, user: @user, app_type: @app_type
@@ -33,14 +33,14 @@ module NfsStoreSupport
     @al_name = AlFilterTestName
     @al_item_type = 'player_contact'
 
-    aldef = ActivityLog.active.where(name: @al_name).first
-    unless aldef
-      aldef = ActivityLog.where(name: @al_name).first
-      aldef.update(disabled: false, current_admin: @admin)
-      aldef = ActivityLog.active.where(name: @al_name).first
-      puts 'About to fail' unless aldef
+    @aldef = ActivityLog.active.where(name: @al_name).first
+    unless @aldef
+      @aldef = ActivityLog.where(name: @al_name).first
+      @aldef.update(disabled: false, current_admin: @admin)
+      @aldef = ActivityLog.active.where(name: @al_name).first
+      puts 'About to fail' unless @aldef
     end
-    expect(aldef).not_to be nil
+    expect(@aldef).not_to be nil
 
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
     @layout = Admin::MessageTemplate.create! name: 'test email layout upload', message_type: :email, template_type: :layout, template: t, current_admin: @admin
@@ -48,7 +48,7 @@ module NfsStoreSupport
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
     @content = Admin::MessageTemplate.create! name: 'test email content upload', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
-    aldef.extra_log_types = <<EOF
+    @aldef.extra_log_types = <<EOF
     step_1:
       label: Step 1
       fields:
@@ -123,9 +123,13 @@ module NfsStoreSupport
 
 EOF
 
-    aldef.current_admin = @admin
-    aldef.save!
+    @aldef.current_admin = @admin
+    @aldef.save!
 
+    finalize_al_setup
+  end
+
+  def finalize_al_setup
     @resource_name = ActivityLog::PlayerContactPhone.extra_log_type_config_for(:step_1).resource_name
 
     setup_access 'activity_log__player_contact_phones', user: @user
@@ -144,7 +148,7 @@ EOF
 
     # Make sure the tests will run cleanly
     mrs = ModelReference.all
-    mrs.update_all from_record_master_id: trash_master.id, from_record_id: nil
+    mrs.update_all from_record_master_id: @trash_master.id, from_record_id: nil
 
     al = ActivityLog::PlayerContactPhone.new(select_call_direction: 'from player', select_who: 'user', extra_log_type: :step_1, player_contact: @player_contact, master: @player_contact.master)
     al.save!
