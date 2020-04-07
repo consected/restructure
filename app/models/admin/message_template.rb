@@ -225,7 +225,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
   def self.get_tag_value(data, tag_and_operator)
     tagp = tag_and_operator.split('::')
     tag = tagp.first
-    res = data[tag] || data[tag.to_sym] || ''
+    orig_val = data[tag] || data[tag.to_sym]
+    res = orig_val || ''
 
     res = formatter_do(res.class, res, current_user: data[:current_user_instance])
 
@@ -234,6 +235,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
     # Automatically titleize names
     tagp << 'titleize' if tagp.length == 1 && (tag == 'name' || tag.end_with?('_name'))
     tagp[1..-1].each do |op|
+      # NOTE: if additional formatters are added here, they also need matching javascript
+      # in _fpa_form_utils.format_subtitution
       if op == 'capitalize'
         res = res.capitalize
       elsif op == 'titleize'
@@ -247,9 +250,13 @@ class Admin::MessageTemplate < ActiveRecord::Base
       elsif op == 'hyphenate'
         res = res.hyphenate
       elsif op == 'initial'
-        res = res.first.upcase
+        res = res.first&.upcase
       elsif op == 'first'
         res = res.first
+      elsif op == 'dicom_datetime'
+        res = orig_val.strftime('%Y%m%d%H%M%S+0000')
+      elsif op == 'dicom_date'
+        res = orig_val.strftime('%Y%m%d')
       elsif op == 'join_with_space'
         res = res.join(' ') if res.is_a? Array
       elsif op == 'join_with_comma'

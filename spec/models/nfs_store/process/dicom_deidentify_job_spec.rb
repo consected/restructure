@@ -54,8 +54,13 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
 
   before :each do
     @activity_log = @container.parent_item
-    @activity_log.extra_log_type = :step_1
-    @activity_log.save!
+    unless @activity_log.extra_log_type == :step_1
+      @activity_log = ActivityLog::PlayerContactPhone.new(select_call_direction: 'from player', select_who: 'user', extra_log_type: :step_1, player_contact: @player_contact, master: @player_contact.master)
+
+      @activity_log.extra_log_type = :step_1
+      @activity_log.save!
+      @container.parent_item = @activity_log
+    end
   end
 
   it '#overwrite_metadata' do
