@@ -25,13 +25,12 @@ RELEASESTARTED="$(echo ${ALLTAGS} | grep ${NEWVER})"
 
 if [ -z "${RELEASESTARTED}" ]; then
   git flow release start ${NEWVER}
-  git push
-  git push --tags
+  git flow release finish ${NEWVER}
 else
   git checkout new-master && git pull && git merge develop
-  git push
-  git push --tags
 fi
+git push --set-upstream origin release/${NEWVER}
+git push --tags
 
 cd ../install-playbook/ansible
 build_box=true vagrant up --provision
