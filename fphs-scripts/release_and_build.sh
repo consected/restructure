@@ -18,6 +18,8 @@ if [ ! -z "${GITSTATUS}" ]; then
   exit 1
 fi
 
+git push
+
 ALLTAGS="$(git tag --sort=-taggerdate)"
 CURRVER=$(cat ../install-playbook/ansible/build_version.txt)
 NEWVER="$(VERSION_FILE=../install-playbook/ansible/build_version.txt fphs-scripts/upversion.rb -p)"
@@ -26,11 +28,12 @@ RELEASESTARTED="$(echo ${ALLTAGS} | grep ${NEWVER})"
 if [ -z "${RELEASESTARTED}" ]; then
   git flow release start ${NEWVER}
   git flow release finish ${NEWVER}
+  git push --set-upstream origin release/${NEWVER}
 else
   git checkout new-master && git pull && git merge develop
 fi
-git push --set-upstream origin release/${NEWVER}
-git push --tags
+git push origin --tags
+git push origin --all
 
 cd ../install-playbook/ansible
 build_box=true vagrant up --provision
