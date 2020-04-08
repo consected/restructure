@@ -1,6 +1,6 @@
 //= require app/_fpa_show_if.js
-describe('show_if', function() {
-  it("tests that all specified fields have a value", function() {
+describe('show_if', function () {
+  it("tests that all specified fields have a value", function () {
 
     var res
 
@@ -57,7 +57,7 @@ describe('show_if', function() {
 
   });
 
-  it("tests that any specified fields have a value", function() {
+  it("tests that any specified fields have a value", function () {
 
     var res
 
@@ -90,7 +90,7 @@ describe('show_if', function() {
   });
 
 
-  it("tests that not any of the specified fields have a value", function() {
+  it("tests that not any of the specified fields have a value", function () {
 
     var res
 
@@ -123,7 +123,7 @@ describe('show_if', function() {
   });
 
 
-  it("tests that not all of the specified fields match", function() {
+  it("tests that not all of the specified fields match", function () {
 
     var res
 
@@ -156,7 +156,7 @@ describe('show_if', function() {
   });
 
 
-  it("allows for nested conditions", function() {
+  it("allows for nested conditions", function () {
 
     var res
 
@@ -256,8 +256,8 @@ describe('show_if', function() {
       any: {
         all: {
           six_or_more_frequency: null,
-          total_score: [0,1,2,3,4,5],
-          alcohol_frequency: [2,3,4]
+          total_score: [0, 1, 2, 3, 4, 5],
+          alcohol_frequency: [2, 3, 4]
         },
         not_any: {
           six_or_more_frequency: ''
@@ -280,6 +280,42 @@ describe('show_if', function() {
       alcohol_frequency: 0,
       total_score: 0,
       six_or_more_frequency: ''
+    }
+
+    res = _fpa.show_if.methods.calc_conditions(field_def_init, data)
+    expect(res).toBe(false)
+
+  });
+
+
+  it("tests that any array of values, like current_user_roles can be used for comparison", function () {
+
+    var res
+
+    var field_def_init = {
+      not_all: {
+        field_a: 2,
+        field_b: ['some', 'value'],
+        field_c: 'something',
+        current_user_roles: 'role4'
+      }
+    }
+
+    var data = {
+      field_a: 2,
+      field_b: 'value',
+      field_c: 'something',
+      current_user_roles: ['role1', 'role2', 'role3']
+    }
+
+    res = _fpa.show_if.methods.calc_conditions(field_def_init, data)
+    expect(res).toBe(true)
+
+    var data = {
+      field_a: 2,
+      field_b: 'value',
+      field_c: 'something',
+      current_user_roles: ['role1', 'role4', 'role3']
     }
 
     res = _fpa.show_if.methods.calc_conditions(field_def_init, data)

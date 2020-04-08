@@ -21,7 +21,6 @@ RSpec.describe 'Replace stored files', type: :model do
   end
 
   before :each do
-    @activity_log = @container.parent_item
-    @activity_log.extra_log_type = :step_1
+    setup_container_and_al
   end
 end

@@ -31,18 +31,18 @@ RSpec.describe 'Trash archive files', type: :model do
   end
 
   before :each do
-    @activity_log = @container.parent_item
-    @activity_log.extra_log_type = :step_1
+    setup_container_and_al
+
     expect(@app_type).to eq @user&.app_type
-    create_filter('.*', role_name: nil)
-    create_filter('.*', resource_name: 'nfs_store__manage__containers', role_name: nil)
-    create_filter('.*', resource_name: 'activity_log__player_contact_phones', role_name: nil)
+
+    setup_default_filters
     setup_access :activity_log__player_contact_phones, resource_type: :table, user: @user
     setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
   end
 
   it 'sends an archive file to trash' do
     @container.list_fs_files.length
+    setup_default_filters
 
     upload_file 'test-name-5.txt'
 

@@ -27,8 +27,8 @@ RELEASESTARTED="$(echo ${ALLTAGS} | grep ${NEWVER})"
 
 if [ -z "${RELEASESTARTED}" ]; then
   git flow release start ${NEWVER}
-  git flow release finish ${NEWVER}
   git push --set-upstream origin release/${NEWVER}
+  git flow release finish ${NEWVER}
 else
   git checkout new-master && git pull && git merge develop
 fi

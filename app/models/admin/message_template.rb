@@ -254,9 +254,9 @@ class Admin::MessageTemplate < ActiveRecord::Base
       elsif op == 'first'
         res = res.first
       elsif op == 'dicom_datetime'
-        res = orig_val.strftime('%Y%m%d%H%M%S+0000')
+        res = orig_val.strftime('%Y%m%d%H%M%S+0000') if orig_val.respond_to? :strftime
       elsif op == 'dicom_date'
-        res = orig_val.strftime('%Y%m%d')
+        res = orig_val.strftime('%Y%m%d') if orig_val.respond_to? :strftime
       elsif op == 'join_with_space'
         res = res.join(' ') if res.is_a? Array
       elsif op == 'join_with_comma'

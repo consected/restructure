@@ -23,9 +23,7 @@ RSpec.describe 'Delete stored files', type: :model do
   end
 
   before :each do
-    @activity_log = @container.parent_item
-    @activity_log.extra_log_type = :step_1
-    expect(@container.parent_item.resource_name).to eq 'activity_log__player_contact_phone__step_1'
+    setup_container_and_al
   end
 
   it 'delete a stored file from a container' do
@@ -65,7 +63,6 @@ RSpec.describe 'Delete stored files', type: :model do
   end
 
   it 'delete a stored zip file but retain its exploded archive files' do
-    create_filter('.*', role_name: nil)
 
     orig_count = @container.list_fs_files.length
 
@@ -95,8 +92,7 @@ RSpec.describe 'Delete stored files', type: :model do
 
     setup_access al.resource_name, resource_type: :activity_log_type, user: @user
 
-    f = create_filter('.*', resource_name: 'nfs_store__manage__containers', role_name: nil)
-    create_filter('.*', resource_name: 'activity_log__player_contact_phones', role_name: nil)
+    setup_default_filters
 
     download = NfsStore::Download.new multiple_items: true, container_ids: [@container.id]
     download.current_user = @user
