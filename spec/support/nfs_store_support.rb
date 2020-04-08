@@ -168,6 +168,30 @@ EOF
     @container
   end
 
+  def setup_container_and_al
+    # @activity_log = @container.parent_item
+    unless @activity_log&.extra_log_type == :step_1
+      @activity_log = ActivityLog::PlayerContactPhone.new(select_call_direction: 'from player', select_who: 'user', extra_log_type: :step_1, player_contact: @player_contact, master: @player_contact.master)
+
+      @activity_log.extra_log_type = :step_1
+      @activity_log.save!
+      # @container.parent_item = @activity_log
+      @container = ModelReference.find_references(@activity_log).first
+
+    end
+    @container.parent_item = @activity_log
+
+    @activity_log.current_user = @user
+    @container.current_user = @user
+  end
+
+  def setup_default_filters
+    create_filter('.*', role_name: nil)
+    create_filter('.*', resource_name: 'nfs_store__manage__containers', role_name: nil)
+    create_filter('.*', resource_name: 'activity_log__player_contact_phones', role_name: nil)
+    create_filter('.*', resource_name: 'activity_log__player_contact_phone_step_1', role_name: nil)
+  end
+
   def upload_file(filename = 'test-name.txt', content = nil)
     content ||= SecureRandom.hex
     upload_set = SecureRandom.hex

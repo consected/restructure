@@ -13,6 +13,8 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     'file1'
   end
 
+  def do_dicom_test_uploads; end
+
   before :all do
     ::ActivityLog.define_models
 
@@ -50,17 +52,14 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
 
     # Now we have uploaded successfully, setup the deidentifier
     setup_deidentifier
+    setup_container_and_al
+    setup_default_filters
   end
 
   before :each do
-    @activity_log = @container.parent_item
-    unless @activity_log.extra_log_type == :step_1
-      @activity_log = ActivityLog::PlayerContactPhone.new(select_call_direction: 'from player', select_who: 'user', extra_log_type: :step_1, player_contact: @player_contact, master: @player_contact.master)
-
-      @activity_log.extra_log_type = :step_1
-      @activity_log.save!
-      @container.parent_item = @activity_log
-    end
+    setup_deidentifier
+    setup_container_and_al
+    setup_default_filters
   end
 
   it '#overwrite_metadata' do

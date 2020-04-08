@@ -20,8 +20,7 @@ RSpec.describe 'Move and rename stored files', type: :model do
   end
 
   before :each do
-    @activity_log = @container.parent_item
-    @activity_log.extra_log_type = :step_1
+    setup_container_and_al
   end
 
   it 'rename a stored file in a container' do
@@ -63,7 +62,6 @@ RSpec.describe 'Move and rename stored files', type: :model do
   it 'rename an archive file' do
     expect(@app_type).to eq @user&.app_type
 
-    create_filter('.*', role_name: nil)
 
     orig_count = @container.list_fs_files.length
 
@@ -83,8 +81,7 @@ RSpec.describe 'Move and rename stored files', type: :model do
       }
     end
 
-    create_filter('.*', resource_name: 'nfs_store__manage__containers', role_name: nil)
-    create_filter('.*', resource_name: 'activity_log__player_contact_phones', role_name: nil)
+    setup_default_filters
 
     download = NfsStore::Download.new multiple_items: true, container_ids: [@container.id]
     download.current_user = @user
@@ -137,7 +134,6 @@ RSpec.describe 'Move and rename stored files', type: :model do
   end
 
   it 'rename a folder of archive files' do
-    create_filter('.*', role_name: nil)
 
     orig_count = @container.list_fs_files.length
 
@@ -158,8 +154,7 @@ RSpec.describe 'Move and rename stored files', type: :model do
       }
     end
 
-    f = create_filter('.*', resource_name: 'nfs_store__manage__containers', role_name: nil)
-    create_filter('.*', resource_name: 'activity_log__player_contact_phones', role_name: nil)
+    setup_default_filters
 
     download = NfsStore::Download.new multiple_items: true, container_ids: [@container.id]
     download.current_user = @user
