@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-SetupHelper.feature_setup
 
 describe 'user sign in process', js: true, driver: :app_firefox_driver do
   include ModelSupport
 
   before(:all) do
+    SetupHelper.feature_setup
+
     Settings::TwoFactorAuthDisabled = false
 
     # create a user, then disable it

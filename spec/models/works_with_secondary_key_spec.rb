@@ -5,13 +5,12 @@ require 'rails_helper'
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
 
-SetupHelper.setup_al_player_contact_phones
-
 RSpec.describe 'Works With handler', type: :model do
   include ModelSupport
   include PlayerContactSupport
 
   before :all do
+    SetupHelper.setup_al_player_contact_phones
     Seeds.setup
 
     create_user

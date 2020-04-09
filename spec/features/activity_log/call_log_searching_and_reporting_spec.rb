@@ -15,12 +15,12 @@
 #   In order that I can rapidly follow up on required call backs, bad phone numbers, etc
 
 require 'rails_helper'
-SetupHelper.feature_setup
 
 describe 'Call log searching and reporting', driver: :app_firefox_driver do
   include ActivityLogMain
 
   before :all do
+    SetupHelper.feature_setup
     setup_database
     user_logs_in
   end

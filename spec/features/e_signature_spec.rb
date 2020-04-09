@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-SetupHelper.feature_setup
 
 describe 'Electronically sign a record', driver: :app_firefox_driver do
   include ActivityLogMain
 
   before :all do
+    SetupHelper.feature_setup
+
     seed_database
     setup_database
     ::ActivityLog.define_models

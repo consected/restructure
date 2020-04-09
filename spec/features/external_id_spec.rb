@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-SetupHelper.feature_setup
 
 describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver do
   include ModelSupport
@@ -9,9 +8,11 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
   include FeatureSupport
   include BhsImportConfig # automatically imports the BHS app
 
-  BhsImportConfig.import_config
-
+  
   before(:all) do
+    BhsImportConfig.import_config
+    SetupHelper.feature_setup
+
     create_admin
 
     create_data_set_outside_tx

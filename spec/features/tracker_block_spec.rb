@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-SetupHelper.feature_setup
 
 describe 'tracker block', js: true, driver: :app_firefox_driver do
   include ModelSupport
@@ -9,6 +8,8 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
   include FeatureSupport
 
   before(:all) do
+    SetupHelper.feature_setup
+
     create_admin
 
     Classification::ProtocolEvent.enabled.each do |d|

@@ -13,14 +13,13 @@ RSpec.describe 'Replace stored files', type: :model do
   end
 
   before :all do
-    setup_nfs_store
-
-    @activity_log = @container.parent_item
-    @activity_log.extra_log_type = :step_1
-    @activity_log.save!
+    seed_database && ::ActivityLog.define_models
+    # setup_nfs_store
   end
 
   before :each do
+    setup_nfs_store
     setup_container_and_al
+    setup_default_filters
   end
 end

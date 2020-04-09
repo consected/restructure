@@ -9,11 +9,9 @@ module ESignImportConfig
 
   def self.import_config
     # Setup the triggers, functions, etc
-    sql_files = %w[create_al_table.sql create_ipa_inex_checklist_table.sql]
-    sql_source_dir = Rails.root.join('db', 'app_specific', 'test_esign')
     config_dir = Rails.root.join('db', 'app_configs')
     config_fn = 'test esign_config.json'
-    SetupHelper.setup_app_from_import 'test esign', sql_source_dir, sql_files, config_dir, config_fn
+    SetupHelper.setup_app_from_import 'test esign', config_dir, config_fn
   end
 
   def setup_config
@@ -27,9 +25,7 @@ module ESignImportConfig
     expect(defined? ActivityLog::PlayerInfoESign).to be_truthy
 
     new_app_type = Admin::AppType.where(name: 'test esign').first
-    if new_app_type.disabled?
-      new_app_type.update! disabled: false, current_admin: @admin
-    end
+    new_app_type.update! disabled: false, current_admin: @admin if new_app_type.disabled?
 
     cdir = File.join(NfsStore::Manage::Filesystem.nfs_store_directory, 'gid600', "app-type-#{new_app_type.id}", 'containers')
     FileUtils.rm_rf cdir

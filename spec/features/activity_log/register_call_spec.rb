@@ -14,11 +14,11 @@
 
 require 'rails_helper'
 
-SetupHelper.feature_setup
 describe 'Register an incoming call', driver: :app_firefox_driver do
   include ActivityLogMain
 
   before :all do
+    SetupHelper.feature_setup
     seed_database
     setup_database
     ::ActivityLog.define_models

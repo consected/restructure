@@ -14,30 +14,24 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
   end
 
   before :all do
-    ::ActivityLog.define_models
-
     @other_users = []
     @other_users << create_user.first
     @other_users << create_user.first
     @other_users << create_user.first
 
-    setup_nfs_store
-    setup_deidentifier
-
-    setup_container_and_al
-    setup_default_filters
+    seed_database && ::ActivityLog.define_models
+    # setup_nfs_store
+    # setup_deidentifier
   end
 
   before :each do
+    setup_nfs_store
     setup_deidentifier
     setup_container_and_al
     setup_default_filters
   end
 
   it 'can access the underlying activity log to get the pipeline definition' do
-    setup_container_and_al
-    setup_default_filters
-
     al = @activity_log
     expect(al).to be_a ActivityLog::PlayerContactPhone
     expect(al.resource_name).to eq 'activity_log__player_contact_phone__step_1'

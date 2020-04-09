@@ -2,17 +2,19 @@
 
 require 'rails_helper'
 
-SetupHelper.setup_test_app
-
 RSpec.describe Classification::GeneralSelection, type: :model do
   include ModelSupport
   include GeneralSelectionSupport
+
+  before :all do
+    SetupHelper.setup_test_app
+  end
 
   before :each do
     seed_database
     create_admin
     create_user
-    
+
     create_master
     create_items :list_valid_attribs
   end

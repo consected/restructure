@@ -4,15 +4,15 @@
 # Actual notify functionality for any method of delivery is tested by SaveTriggers::NotifySpec
 require 'rails_helper'
 
-BulkMsgSupport.import_bulk_msg_app
-
 RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
   include MasterSupport
   include ModelSupport
   include PlayerContactSupport
   include BulkMsgSupport
 
+  
   before :all do
+    BulkMsgSupport.import_bulk_msg_app
     seed_database
     create_admin
     create_user

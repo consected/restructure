@@ -1,13 +1,13 @@
 require 'rails_helper'
 
-SetupHelper.setup_al_player_contact_phones
 
 RSpec.describe "Calculate conditional actions", type: :model do
-
+  
   include ModelSupport
   include ActivityLogSupport
-
+  
   before :all do
+    SetupHelper.setup_al_player_contact_phones
     u1, _ = create_user
     @u1 = u1
     create_user

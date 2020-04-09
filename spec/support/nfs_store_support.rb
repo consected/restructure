@@ -8,10 +8,7 @@ module NfsStoreSupport
     'file1'
   end
 
-  def setup_nfs_store
-    seed_database
-    ::ActivityLog.define_models
-
+  def setup_nfs_store(clean_files: true)
     create_admin
     create_user
 
@@ -22,9 +19,16 @@ module NfsStoreSupport
     create_user_role default_role, user: @user, app_type: @app_type
     create_user_role 'nfs_store group 600', user: @user, app_type: @app_type
 
-    test_dir = File.join(NfsStore::Manage::Filesystem.nfs_store_directory, "#{NfsStore::Manage::Group::NfsMountNamePrefix}600", "app-type-#{@app_type.id}", 'containers')
-    FileUtils.rm_rf test_dir
-    FileUtils.mkdir_p test_dir
+    if clean_files
+      test_dir = File.join(
+        NfsStore::Manage::Filesystem.nfs_store_directory,
+        "#{NfsStore::Manage::Group::NfsMountNamePrefix}600",
+        "app-type-#{@app_type.id}",
+        'containers'
+      )
+      FileUtils.rm_rf test_dir
+      FileUtils.mkdir_p test_dir
+    end
 
     setup_access :player_contacts
     setup_access :activity_log__player_contact_phones
@@ -33,7 +37,17 @@ module NfsStoreSupport
     @al_name = AlFilterTestName
     @al_item_type = 'player_contact'
 
-    @aldef = ActivityLog.active.where(name: @al_name).first
+    aldefs = ActivityLog.active.where(name: @al_name)
+    @aldef = aldefs.first
+
+    if aldefs.count >= 1
+      # Cleanup duplicate defs
+
+      aldefs.each do |a|
+        a.disable!(@admin) unless a.id == @aldef.id
+      end
+    end
+
     unless @aldef
       @aldef = ActivityLog.where(name: @al_name).first
       @aldef.update(disabled: false, current_admin: @admin)
@@ -125,6 +139,8 @@ EOF
 
     @aldef.current_admin = @admin
     @aldef.save!
+    @aldef.extra_log_type_configs(force: true)
+    ActivityLog::PlayerContactPhone.definition.extra_log_type_configs(force: true)
 
     finalize_al_setup
   end
@@ -141,7 +157,7 @@ EOF
     setup_access 'nfs_store__manage__archived_files', user: @user
     setup_access :download_files, resource_type: :general, access: :read, user: @user
 
-    basedir = '/var/tmp/nfs_store_tmp'
+    basedir = NfsStore::Manage::Filesystem.temp_directory
     FileUtils.mkdir_p File.join(basedir, 'gid600', "app-type-#{@app_type.id}", 'containers')
 
     @player_contact.master.current_user = @user
@@ -150,46 +166,74 @@ EOF
     mrs = ModelReference.all
     mrs.update_all from_record_master_id: @trash_master.id, from_record_id: nil
 
-    al = ActivityLog::PlayerContactPhone.new(select_call_direction: 'from player', select_who: 'user', extra_log_type: :step_1, player_contact: @player_contact, master: @player_contact.master)
-    al.save!
-    expect(al).to be_a ActivityLog::PlayerContactPhone
-    expect(al.extra_log_type).to eq :step_1
-    expect(al.model_references.length).to eq 1
-    @activity_log = al
-    @container = NfsStore::Manage::Container.last
+    setup_container_and_al
+    # names = ActivityLog::PlayerContactPhone.definition.extra_log_type_configs.map(&:name)
+    # expect(names).to include :step_1
 
-    expect(@container).not_to be nil
+    # al = ActivityLog::PlayerContactPhone.new(
+    #   select_call_direction: 'from player',
+    #   select_who: 'user',
+    #   extra_log_type: :step_1,
+    #   player_contact: @player_contact,
+    #   master: @player_contact.master
+    # )
 
-    @container.master.current_user ||= @user
-    @container.save!
+    # al.save!
+    # expect(al).to be_a ActivityLog::PlayerContactPhone
+    # expect(al.extra_log_type).to eq :step_1
+    # expect(al.model_references.length).to eq 1
+    # @activity_log = al
+    # @container = @activity_log.model_references.first.to_record
 
-    @container.parent_item = @activity_log
-    expect(@container.parent_item.resource_name).to eq 'activity_log__player_contact_phone__step_1'
-    @container
+    # expect(@container).not_to be nil
+
+    # @container.master.current_user ||= @user
+    # @container.save!
+
+    # @container.parent_item = @activity_log
+    # expect(@container.parent_item.resource_name).to eq 'activity_log__player_contact_phone__step_1'
+    # @container
   end
 
   def setup_container_and_al
-    # @activity_log = @container.parent_item
-    unless @activity_log&.extra_log_type == :step_1
-      @activity_log = ActivityLog::PlayerContactPhone.new(select_call_direction: 'from player', select_who: 'user', extra_log_type: :step_1, player_contact: @player_contact, master: @player_contact.master)
+    names = ActivityLog::PlayerContactPhone.definition.extra_log_type_configs.map(&:name)
+    expect(names).to include :step_1
 
-      @activity_log.extra_log_type = :step_1
-      @activity_log.save!
-      # @container.parent_item = @activity_log
-      @container = ModelReference.find_references(@activity_log).first
+    # unless @activity_log&.extra_log_type == :step_1 &&
+    #        @activity_log&.resource_name == 'activity_log__player_contact_phone__step_1' &&
+    #        @container.parent_item == @activity_log
 
-    end
+    @activity_log = ActivityLog::PlayerContactPhone.new(
+      select_call_direction: 'from player',
+      select_who: 'user',
+      extra_log_type: :step_1,
+      player_contact: @player_contact,
+      master: @player_contact.master
+    )
+
+    @activity_log.save!
+    expect(@activity_log.resource_name).to eq 'activity_log__player_contact_phone__step_1'
+
+    @container = @activity_log.model_references.first.to_record
+    expect(@container).not_to be nil
+    # end
+
     @container.parent_item = @activity_log
-
     @activity_log.current_user = @user
     @container.current_user = @user
+
+    expect(@activity_log).to be_a ActivityLog::PlayerContactPhone
+    expect(@activity_log.resource_name).to eq 'activity_log__player_contact_phone__step_1'
+    expect(@activity_log.extra_log_type_config.nfs_store).to be_a Hash
+
+    @container
   end
 
   def setup_default_filters
     create_filter('.*', role_name: nil)
     create_filter('.*', resource_name: 'nfs_store__manage__containers', role_name: nil)
     create_filter('.*', resource_name: 'activity_log__player_contact_phones', role_name: nil)
-    create_filter('.*', resource_name: 'activity_log__player_contact_phone_step_1', role_name: nil)
+    create_filter('.*', resource_name: 'activity_log__player_contact_phone__step_1', role_name: nil)
   end
 
   def upload_file(filename = 'test-name.txt', content = nil)
@@ -210,7 +254,7 @@ EOF
     resource_name ||= @resource_name
     role_name = nil if user
 
-    f = NfsStore::Filter::Filter.create!(
+    NfsStore::Filter::Filter.create!(
       current_admin: @admin,
       app_type: @app_type,
       role_name: role_name,
@@ -218,6 +262,10 @@ EOF
       resource_name: resource_name,
       filter: filter
     )
+  end
+
+  def clear_filters
+    NfsStore::Filter::Filter.active.where(app_type: @app_type).update_all(disabled: true)
   end
 
   def create_stored_file(file_path, file_name, container: nil, activity_log: nil)

@@ -5,7 +5,6 @@ require 'rails_helper'
 AlNameGenTest = 'Gen Test ELT'
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
-SetupHelper.setup_al_gen_tests AlNameGenTest, 'elt', 'player_contact'
 
 RSpec.describe 'Activity Log extra types implementation', type: :model do
   def al_name
@@ -16,6 +15,7 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
   include PlayerContactSupport
 
   before :all do
+    SetupHelper.setup_al_gen_tests AlNameGenTest, 'elt', 'player_contact'
     seed_database
     ::ActivityLog.define_models
     Seeds::ActivityLogPlayerContactPhone.setup
@@ -29,9 +29,7 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
   before :each do
     @activity_log = al = ActivityLog.active.where(name: al_name).first
 
-    if al.nil?
-      raise "Activity Log #{al_name} not set up"
-    end
+    raise "Activity Log #{al_name} not set up" if al.nil?
 
     al.extra_log_types = <<EOF
     step_1:

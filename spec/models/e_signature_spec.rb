@@ -7,9 +7,9 @@ RSpec.describe 'electronic signature of records', type: 'model' do
   include ESignatureSupport
   include ESignImportConfig
 
-  ESignImportConfig.import_config
-
+  
   before :all do
+    ESignImportConfig.import_config
     setup_config
 
     @user_0, @good_password_0 = create_user

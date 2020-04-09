@@ -116,7 +116,7 @@ module NfsStore
         if strip_final_slash
           clean_path p
         else
-          p
+          p&.to_s
         end
       end
 

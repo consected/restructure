@@ -10,12 +10,12 @@
 #   In order that I can rapidly enter the call details for the rep, meeting all the activity tracking requirements
 
 require 'rails_helper'
-SetupHelper.feature_setup
 
 describe 'Import list of calls to log', driver: :app_firefox_driver do
   include ActivityLogMain
 
   before :all do
+    SetupHelper.feature_setup
     setup_database
     user_logs_in
   end

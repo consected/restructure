@@ -13,17 +13,14 @@ RSpec.describe 'Delete stored files', type: :model do
   end
 
   before :all do
-    setup_nfs_store
-
-    @activity_log = @container.parent_item
-    @activity_log.extra_log_type = :step_1
-    @activity_log.save!
-
-    expect(@container.parent_item.resource_name).to eq 'activity_log__player_contact_phone__step_1'
+    seed_database && ::ActivityLog.define_models
+    # setup_nfs_store
   end
 
   before :each do
+    setup_nfs_store
     setup_container_and_al
+    setup_default_filters
   end
 
   it 'delete a stored file from a container' do
@@ -63,6 +60,13 @@ RSpec.describe 'Delete stored files', type: :model do
   end
 
   it 'delete a stored zip file but retain its exploded archive files' do
+    setup_nfs_store
+    setup_container_and_al
+    al = @activity_log
+    expect(al).to be_a ActivityLog::PlayerContactPhone
+    expect(@container.parent_item).to eq al
+    expect(al.resource_name).to eq 'activity_log__player_contact_phone__step_1'
+    expect(al.model_references.length).to eq 1
 
     orig_count = @container.list_fs_files.length
 
@@ -83,14 +87,6 @@ RSpec.describe 'Delete stored files', type: :model do
 
       }
     end
-
-    al = @activity_log
-    expect(al).to be_a ActivityLog::PlayerContactPhone
-    expect(@container.parent_item).to eq al
-    expect(al.resource_name).to eq 'activity_log__player_contact_phone__step_1'
-    expect(al.model_references.length).to eq 1
-
-    setup_access al.resource_name, resource_type: :activity_log_type, user: @user
 
     setup_default_filters
 

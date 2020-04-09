@@ -1,12 +1,12 @@
 require 'rails_helper'
 
-SetupHelper.setup_al_player_contact_phones
 
 RSpec.describe AdminHandler, type: :model do
-
+  
   include ModelSupport
-
+  
   before :all do
+    SetupHelper.setup_al_player_contact_phones
     create_admin
   end
 

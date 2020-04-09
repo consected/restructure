@@ -2,6 +2,8 @@
 
 require "#{::Rails.root}/spec/support/seeds"
 
+$STARTED_AT = DateTime.now.to_i
+
 module SetupHelper
   def self.auto_admin
     admin, = ModelSupport.create_admin
@@ -12,6 +14,30 @@ module SetupHelper
     "fpa_test#{ENV['TEST_ENV_NUMBER']}"
   end
 
+  def self.setup_app_dbs
+    # ESign setup
+    # Setup the triggers, functions, etc
+    sql_files = %w[create_al_table.sql create_ipa_inex_checklist_table.sql]
+    sql_source_dir = Rails.root.join('db', 'app_specific', 'test_esign')
+    SetupHelper.setup_app_db sql_source_dir, sql_files
+
+    # ExportApp
+    sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 3-add_notification_triggers.sql 4-add_testmybrain_trigger.sql 5-create_sync_subject_data_aws_db.sql 6-grant_roles_access_to_ml_app.sql]
+    sql_source_dir = Rails.root.join('db', 'app_specific', 'bhs', 'aws-db')
+    SetupHelper.setup_app_db sql_source_dir, sql_files
+
+    # Export App
+    sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 6-grant_roles_access_to_ml_app.sql create_adders_table.sql]
+    sql_source_dir = Rails.root.join('docs', 'config_tests')
+    SetupHelper.setup_app_db sql_source_dir, sql_files
+
+    # Bulk
+    # Setup the triggers, functions, etc
+    sql_files = %w[bulk/create_zeus_bulk_messages_table.sql bulk/dup_check_recipients.sql bulk/create_zeus_bulk_message_recipients_table.sql bulk/create_al_bulk_messages.sql bulk/create_zeus_bulk_message_statuses.sql bulk/setup_master.sql bulk/create_zeus_short_links.sql bulk/create_player_contact_phone_infos.sql bulk/create_zeus_short_link_clicks.sql 0-scripts/z_grant_roles.sql]
+    sql_source_dir = Rails.root.join('db', 'app_specific', 'bulk-msg', 'aws-db')
+    SetupHelper.setup_app_db sql_source_dir, sql_files
+  end
+
   def self.validate_db_setup
     # Ensure we are set up for this test
     res = File.read("#{ENV['HOME']}/.pgpass").include? db_name
@@ -19,9 +45,7 @@ module SetupHelper
 
     q = ActiveRecord::Base.connection.execute "select * from pg_catalog.pg_roles where rolname='fphsetl'"
     res = q.ntuples
-    unless res == 1
-      raise "Database #{db_name} does not have role fphsetl set up"
-    end
+    raise "Database #{db_name} does not have role fphsetl set up" unless res == 1
   end
 
   # Setup the byebug service if breakpoints are set in the .byebugrc file
@@ -119,11 +143,9 @@ module SetupHelper
   def self.setup_test_app
     app_name = "bhs_model_#{rand(100_000_000)}"
 
-    sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 6-grant_roles_access_to_ml_app.sql create_adders_table.sql]
-    sql_source_dir = Rails.root.join('docs', 'config_tests')
     config_dir = Rails.root.join('docs', 'config_tests')
     config_fn = 'bhs_app_type_test_config.json'
-    SetupHelper.setup_app_from_import app_name, sql_source_dir, sql_files, config_dir, config_fn
+    SetupHelper.setup_app_from_import app_name, config_dir, config_fn
 
     new_app_type = Admin::AppType.where(name: app_name).active.first
     Admin::UserAccessControl.active.where(app_type_id: new_app_type.id, resource_type: %i[external_id_assignments limited_access]).update_all(disabled: true)
@@ -140,14 +162,7 @@ module SetupHelper
   # @param [String] config_fn filename of the configuration file (must have file extension .json or .yaml)
   # @return [Array(Admin::AppType, Hash)] returns the results from Admin::AppType.import_config
   #
-  def self.setup_app_from_import(name, sql_source_dir, sql_files, config_dir, config_fn)
-    admin = auto_admin
-
-    als = ActivityLog.active.where(name: name)
-    if als.count != 1
-      als.where('id <> ?', als.first&.id).update_all(disabled: true)
-    end
-
+  def self.setup_app_db(sql_source_dir, sql_files)
     sql_files.each do |fn|
       begin
         sqlfn = Rails.root.join(sql_source_dir, fn)
@@ -157,6 +172,13 @@ module SetupHelper
         puts "Exception due to PG error?... #{e}"
       end
     end
+  end
+
+  def self.setup_app_from_import(name, config_dir, config_fn)
+    admin = auto_admin
+
+    als = ActivityLog.active.where(name: name)
+    als.where('id <> ?', als.first&.id).update_all(disabled: true) if als.count != 1
 
     format = config_fn.split('.').last.to_sym
 
