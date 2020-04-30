@@ -1,41 +1,38 @@
-class MastersController < UserBaseController
+# frozen_string_literal: true
 
+class MastersController < UserBaseController
   before_action :init_vars
 
-  before_action :authorized?, only: [:new, :create]
+  before_action :authorized?, only: %i[new create]
 
   include MasterSearch
-
 
   ResultsLimit = Master.results_limit
 
   def index
-
-    #search_params
-    if search_params.nil? || search_params.length == 0
+    # search_params
+    if search_params.nil? || search_params.empty?
       @no_masters = true
       redirect_to '/masters/search/'
       return
     end
 
-    search_type = params[:mode]
-    search_type = 'ADVANCED' if search_type.blank?
+    @search_type = params[:mode]
+    @search_type = 'ADVANCED' if @search_type.blank?
 
-    @search_type = search_type
-
-    run search_type
-
-
+    run @search_type
   end
 
   def show
     if params[:type] == 'msid' && params[:id]
       @master = Master.find_by_msid(params[:id])
       return not_found unless @master
+
       @msid = @master.msid
     elsif params[:id]
       @master = Master.find(params[:id])
       return not_found unless @master
+
       @master_id = @master.id
       @master.current_user = current_user
     end
@@ -43,7 +40,7 @@ class MastersController < UserBaseController
     # Allow return of a simple JSON master
     respond_to do |format|
       format.html { search }
-      format.json { render json: {master: @master}  }
+      format.json { render json: { master: @master } }
     end
   end
 
@@ -56,7 +53,7 @@ class MastersController < UserBaseController
 
     @master_req_format = params[:req_format] || 'reg'
 
-    @master =  Master.new
+    @master = Master.new
 
     # Advanced search fields
     @master.pro_infos.build
@@ -65,10 +62,8 @@ class MastersController < UserBaseController
     @master.player_contacts.build
     @master.trackers.build
     @master.tracker_histories.build
-    if defined? Scantron
-      @master.scantrons.build
-    end
-    #@master.sage_assignments.build
+    @master.scantrons.build if defined? Scantron
+    # @master.sage_assignments.build
 
     # NOT conditions
     @master.not_trackers.build
@@ -76,7 +71,6 @@ class MastersController < UserBaseController
 
     # Simple search fields
     @master.general_infos.build
-
 
     render :search
   end
@@ -87,7 +81,6 @@ class MastersController < UserBaseController
   end
 
   def create
-
     if Rails.env.test? && params[:commit] == 'Create Empty Master'
       # Test an edge case that requires a completely empty master record to be created, without Player Info
       @master = Master.create_master_record current_user, empty: true
@@ -101,8 +94,8 @@ class MastersController < UserBaseController
       end
     end
 
-    if @master && @master.id
-      redirect_to master_path(@master.id), notice:  "Created Master Record with MSID #{@master.id}"
+    if @master&.id
+      redirect_to master_path(@master.id), notice: "Created Master Record with MSID #{@master.id}"
     else
       redirect_to new_master_url, notice: "Error creating Master Record: #{Application.record_error_message @master}"
     end
@@ -110,24 +103,23 @@ class MastersController < UserBaseController
 
   private
 
-    def init_vars
-      instance_var_init :master
-      instance_var_init :id
-    end
+  def init_vars
+    instance_var_init :master
+    instance_var_init :id
+  end
 
-    def search_params
+  def search_params
+    p = params_nil_if_blank params
+    p = params_downcase p
+    # p = p.permit(:master_id, player_info_attributes: [:first_name, :middle_name, :last_name, :nick_name, :birth_date, :death_date, :start_year], player_contacts_attributes: [], pro_info_attributes: [], address_attributes: [], manual_investigation_attributes: [])
+    p = p.except(:utf8, :controller, :action).permit!
+    logger.debug "Screened params: #{p.inspect}"
+    p
+  end
 
-      p = params_nil_if_blank params
-      p = params_downcase p
-      #p = p.permit(:master_id, player_info_attributes: [:first_name, :middle_name, :last_name, :nick_name, :birth_date, :death_date, :start_year], player_contacts_attributes: [], pro_info_attributes: [], address_attributes: [], manual_investigation_attributes: [])
-      p = p.except(:utf8, :controller, :action).permit!
-      logger.debug "Screened params: #{p.inspect}"
-      p
-    end
+  def authorized?
+    return true if current_user.can? :create_master
 
-    def authorized?
-      return true if current_user.can? :create_master
-      return not_authorized
-    end
-
+    not_authorized
+  end
 end

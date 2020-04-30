@@ -66,7 +66,7 @@ class Admin < ActiveRecord::Base
   protected
 
     def unlock_account
-      if self.access_locked? && self.encrypted_password_changed?
+      if self.access_locked? && self.saved_change_to_encrypted_password?
         self.locked_at = nil
         self.failed_attempts = nil
       end
@@ -75,18 +75,23 @@ class Admin < ActiveRecord::Base
     def prevent_email_change
       if email_changed? && self.persisted?
         errors.add(:email, "change not allowed!")
+        # throw(:abort)
       end
     end
 
     def prevent_reenabling_admin
       if disabled_changed? && self.persisted? && self.disabled != true && !in_setup_script
         errors.add(:disabled, "change not allowed!")
+        # throw(:abort)
       end
 
     end
 
     def prevent_not_in_setup_script
-      errors.add(:admin, "can only create admins in console") unless in_setup_script
+      unless in_setup_script
+        errors.add(:admin, "can only create admins in console") 
+        # throw(:abort)
+      end
     end
 
 end

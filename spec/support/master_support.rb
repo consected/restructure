@@ -1,23 +1,24 @@
+# frozen_string_literal: true
+
 require "#{::Rails.root}/spec/support/seeds"
 require "#{::Rails.root}/spec/support/user_support"
 
 module MasterSupport
-
   include ::UserSupport
 
   def seed_database
-    Rails.logger.info "Starting seed setup"
+    Rails.logger.info 'Starting seed setup'
     SeedSupport.setup
   end
 
-
-  def add_default_app_config app_type, config_name, config_value
+  def add_default_app_config(app_type, config_name, config_value)
     Admin::AppConfiguration.add_default_config app_type, config_name, config_value, @admin
   end
 
   def edit_form_prefix
     @edit_form_prefix = nil
   end
+
   def edit_form_name
     @edit_form_name = nil
   end
@@ -47,9 +48,7 @@ module MasterSupport
   end
 
   def edit_form_admin
-    unless defined? @edit_form_admin
-      @edit_form_admin = nil
-    end
+    @edit_form_admin = nil unless defined? @edit_form_admin
     @edit_form_admin || "#{edit_form_prefix || custom_edit_form_prefix}/_form"
   end
 
@@ -57,10 +56,10 @@ module MasterSupport
     "#{edit_form_prefix || objects_symbol}/#{edit_form_name || '_edit_form'}"
   end
 
-  def create_sources name
+  def create_sources(name)
     i = "#{name}_source"
     gs = Classification::GeneralSelection.active.where(item_type: i, value: ['nfl', 'nflpa'])
-    if (gs.length) == 0
+    if gs.empty?
       Classification::GeneralSelection.create item_type: i, name: 'NFL', value: 'nfl', current_admin: auto_admin, create_with: true
       Classification::GeneralSelection.create item_type: i, name: 'NFLPA', value: 'nflpa', current_admin: auto_admin, create_with: true
     else
@@ -73,13 +72,12 @@ module MasterSupport
     valid_attribs
   end
 
-
-  def create_master user=nil, att=nil
+  def create_master(user = nil, att = nil)
     user ||= @user || create_user
 
     user.app_type ||= Admin::AppType.active.first
 
-    att ||= { msid: rand(10000000), pro_id: rand(1000000) }
+    att ||= { msid: rand(10_000_000), pro_id: rand(1_000_000) }
 
     master = Master.new att
     master.current_user = user
@@ -88,32 +86,27 @@ module MasterSupport
     setup_access
     setup_access :trackers
 
-
-
     @master_id = master.id
     @master = master
   end
 
-  def create_items from_list=:list_valid_attribs, master_or_admin=nil, expect_failures=false
-
+  def create_items(from_list = :list_valid_attribs, master_or_admin = nil, expect_failures = false)
     @created_count = 0
     @exceptions = []
     @list = send(from_list)
     @created_items = []
 
     @list.each do |l|
-      begin
-        res = create_item l, master_or_admin
-        if res
-          @created_count+=1
-          @created_items << res
-        end
-      rescue => e
-        @exceptions << e
-        unless expect_failures
-          puts "Exceptions in create_items for #{l.inspect}: #{e.inspect} #{e.backtrace.join("\n")}"
-          raise e
-        end
+      res = create_item l, master_or_admin
+      if res
+        @created_count += 1
+        @created_items << res
+      end
+    rescue StandardError => e
+      @exceptions << e
+      unless expect_failures
+        puts "Exceptions in create_items for #{l.inspect}: #{e.inspect} #{e.backtrace.join("\n")}"
+        raise e
       end
     end
 
@@ -121,22 +114,18 @@ module MasterSupport
   end
 
   def check_all_records_failed
-
-    expect(@exceptions.length).to eq(@list.length), "Not every test caused the record creation to fail"
+    expect(@exceptions.length).to eq(@list.length), 'Not every test caused the record creation to fail'
 
     @exceptions.each do |e|
-
       expect(e).to be_a(ActiveRecord::StatementInvalid) | be_a(ActiveRecord::RecordInvalid)
     end
 
     expect(@created_count).to eq 0
-
   end
 
   def opt(bd)
     (rand(1000) > 500 ? bd : nil)
   end
-
 
   def invalid_attribs
     pick_from list_invalid_attribs
@@ -146,47 +135,42 @@ module MasterSupport
     pick_from list_invalid_update_attribs
   end
 
-
   def valid_attribs
     pick_from list_valid_attribs
   end
 
-
   def new_attribs_downcase
-
-    @new_attribs.each {|k,att| @new_attribs[k] = (att.is_a?(String) ? att.downcase : att) }
+    @new_attribs.each { |k, att| @new_attribs[k] = (att.is_a?(String) ? att.downcase : att) }
   end
 
-   def resp
-     JSON.parse(response.body)
-   end
+  def resp
+    JSON.parse(response.body)
+  end
 
-   def pick_one
-     res = (rand(1000) > 500)
-     Rails.logger.info "Pick one returned #{res}"
-     return res
-   end
+  def pick_one
+    res = (rand(1000) > 500)
+    Rails.logger.info "Pick one returned #{res}"
+    res
+  end
 
-   def pick_from list
-     r = rand(list.length)
-     list[r]
-   end
+  def pick_from(list)
+    r = rand(list.length)
+    list[r]
+  end
 
+  def first_names
+    ['Glenn', 'Mose', 'Leandro', 'Damien', 'Claude', 'Kelvin', 'Rudolf', 'Shad', 'Wm', 'Nathanial', 'Dominick', 'Carlton', 'Arthur', 'Jame', 'Doug', 'Tod', 'Nickolas', 'Israel', 'Domingo', 'Donovan', 'Scott', 'Carol', 'Cesar', 'Ismael', 'Michael', 'Reyes', 'Blake', 'Odis', 'Brant', 'Luther', 'Mauricio', 'Olin', 'Victor', 'Milford', 'Tony', 'Aubrey', 'Dana', 'Berry', 'Salvador', 'Parker', 'Marcelo', 'Ray', 'Gerard', 'Miguel', 'Cornelius', 'Coleman', 'Dwayne', 'Wilbert', 'Leonardo', 'Bud']
+  end
 
-   def first_names
-     ['Glenn', 'Mose', 'Leandro', 'Damien', 'Claude', 'Kelvin', 'Rudolf', 'Shad', 'Wm', 'Nathanial', 'Dominick', 'Carlton', 'Arthur', 'Jame', 'Doug', 'Tod', 'Nickolas', 'Israel', 'Domingo', 'Donovan', 'Scott', 'Carol', 'Cesar', 'Ismael', 'Michael', 'Reyes', 'Blake', 'Odis', 'Brant', 'Luther', 'Mauricio', 'Olin', 'Victor', 'Milford', 'Tony', 'Aubrey', 'Dana', 'Berry', 'Salvador', 'Parker', 'Marcelo', 'Ray', 'Gerard', 'Miguel', 'Cornelius', 'Coleman', 'Dwayne', 'Wilbert', 'Leonardo', 'Bud']
-   end
+  def last_names
+    ['Basilio', 'Portillo', 'Just', 'Northup', 'Ankrom', 'Seto', 'Dominick', 'Dehn', 'Ramirez', 'Polley', 'Detwiler', 'Mahone', 'Mchenry', 'Fink', 'Keesling', 'Shaikh', 'Mazurek', 'Brashears', 'Arel', 'Perrella', 'Ver', 'Fitzgibbon', 'Tefft', 'Burruel', 'Boulter', 'Klatt', 'Linger', 'Kyser', 'Silversmith', 'Tregre', 'Millett', 'Welk', 'Down', 'Bate', 'Mchaney', 'Pope', 'Wagoner', 'Mcdougal', 'Nolan', 'Melendez', 'Imler', 'Way', 'Crimmins', 'Korando', 'Cohen', 'Keisler', 'Hardman', 'Sallis', 'Pinder', 'Acey']
+  end
 
-   def last_names
-     ['Basilio', 'Portillo', 'Just', 'Northup', 'Ankrom', 'Seto', 'Dominick', 'Dehn', 'Ramirez', 'Polley', 'Detwiler', 'Mahone', 'Mchenry', 'Fink', 'Keesling', 'Shaikh', 'Mazurek', 'Brashears', 'Arel', 'Perrella', 'Ver', 'Fitzgibbon', 'Tefft', 'Burruel', 'Boulter', 'Klatt', 'Linger', 'Kyser', 'Silversmith', 'Tregre', 'Millett', 'Welk', 'Down', 'Bate', 'Mchaney', 'Pope', 'Wagoner', 'Mcdougal', 'Nolan', 'Melendez', 'Imler', 'Way', 'Crimmins', 'Korando', 'Cohen', 'Keisler', 'Hardman', 'Sallis', 'Pinder', 'Acey']
-   end
+  def other_names
+    ['Dingus', 'Vella', 'Bowland', 'Sackett', 'Arias', 'Pannell', 'Swinehart', 'Bezio', 'Goble', 'Greenley', 'Sides', 'Utz', 'Andres', 'Witt', 'Mraz', 'Cheever', 'Muma', 'Diana', 'Weston', 'Lennox', 'Carasco', 'Stavros', 'Platts', 'Bunyard', 'Bahena', 'Marciano', 'Normandeau', 'Small', 'Sellars', 'Bahr', 'Yard', 'Hankerson', 'Abram', 'Bouffard', 'Arruda', 'Faulkenberry', 'Sirmans', 'Mabon', 'Chavarin', 'Uphoff', 'Billingslea', 'Montandon', 'Neilson', 'Repka', 'Delucia', 'Juarbe', 'Govan', 'Mattern', 'Bendel', 'Flatley']
+  end
 
-   def other_names
-     ['Dingus', 'Vella', 'Bowland', 'Sackett', 'Arias', 'Pannell', 'Swinehart', 'Bezio', 'Goble', 'Greenley', 'Sides', 'Utz', 'Andres', 'Witt', 'Mraz', 'Cheever', 'Muma', 'Diana', 'Weston', 'Lennox', 'Carasco', 'Stavros', 'Platts', 'Bunyard', 'Bahena', 'Marciano', 'Normandeau', 'Small', 'Sellars', 'Bahr', 'Yard', 'Hankerson', 'Abram', 'Bouffard', 'Arruda', 'Faulkenberry', 'Sirmans', 'Mabon', 'Chavarin', 'Uphoff', 'Billingslea', 'Montandon', 'Neilson', 'Repka', 'Delucia', 'Juarbe', 'Govan', 'Mattern', 'Bendel', 'Flatley']
-   end
-
-   def colleges
-     ["harvard", "dartmouth", "yale", "ucla", "boston college", "boston university", "northeastern", "mit"]
-   end
-
+  def colleges
+    ['harvard', 'dartmouth', 'yale', 'ucla', 'boston college', 'boston university', 'northeastern', 'mit']
+  end
 end

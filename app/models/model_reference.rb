@@ -420,7 +420,7 @@ class ModelReference < ActiveRecord::Base
 
   def handle_disabled
     @was_updated = 'updated'
-    return true unless disabled_changed?
+    return true unless saved_change_to_disabled?
 
     troc = to_record_options_config
     to_record.model_reference_disable if troc && troc[:also_disable_record]

@@ -64,23 +64,23 @@ module ReportsHelper
     if type_val['multiple'] == 'multiple' || type_val['multiple'] == 'multiple-regex'
       if use_dropdown
         options.merge!(multiple: true)
-        main_field << select_tag("search_attrs[#{name}]", use_dropdown, options)
+        main_field += select_tag("search_attrs[#{name}]", use_dropdown, options)
       else
         options.merge!(type: type_string, class: 'form-control no-auto-submit', data: { attribute: name })
-        main_field << text_field_tag("multiple_attrs[#{name}]", '', options)
-        main_field << link_to('+', "add_multiple_attrs[#{name}]", data: { attribute: name }, class: 'btn btn-default add-btn multivalue-field-add', title: 'add to search')
+        main_field += text_field_tag("multiple_attrs[#{name}]", '', options)
+        main_field += link_to('+', "add_multiple_attrs[#{name}]", data: { attribute: name }, class: 'btn btn-default add-btn multivalue-field-add', title: 'add to search')
         v = value
         v = value.join("\n") if value.is_a? Array
-        main_field << text_area_tag("search_attrs[#{name}]", v, class: 'auto-grow')
+        main_field += text_area_tag("search_attrs[#{name}]", v, class: 'auto-grow')
 
       end
     else
       if use_dropdown
         options.merge!(include_blank: 'select')
-        main_field << select_tag("search_attrs[#{name}]", use_dropdown, options)
+        main_field += select_tag("search_attrs[#{name}]", use_dropdown, options)
       else
         options.merge!(type: type_string, class: 'form-control')
-        main_field << text_field_tag("search_attrs[#{name}]", value, options)
+        main_field += text_field_tag("search_attrs[#{name}]", value, options)
       end
     end
   end

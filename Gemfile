@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-gem 'rails', '~> 4.2.10'
+gem 'rails', '~> 5.0'
 gem 'pg', '~> 0.15'
 gem 'jquery-rails'
 gem 'devise', '>= 4.6.1'
@@ -31,12 +31,13 @@ gem 'kramdown'
 
 group :development do
   gem 'web-console', '~> 2.0'
+  gem 'listen'
 end
 
 group :development, :test, :ipa_test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
-  gem 'rspec-rails', '~> 3.0'
+  gem 'rspec-rails'
   gem 'webrick'
   gem 'brakeman', require: false
   gem 'bundler-audit'
@@ -51,10 +52,10 @@ end
 group :test do
   gem 'capybara', '~> 2.18'
   gem 'database_cleaner'
+  gem 'rails-controller-testing'
   gem 'selenium-webdriver', '3.4.4'
   gem 'simplecov'
   gem 'simplecov-console'
-  gem 'test_after_commit'
 end
 
 group :assets do

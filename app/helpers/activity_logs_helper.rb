@@ -1,7 +1,7 @@
+# frozen_string_literal: true
+
 module ActivityLogsHelper
-
   def activity_log_edit_form_id
-
     if @extra_log_type_name
       # The extra log type was passed as a param for a new item
       extra_type = "-#{@extra_log_type_name.hyphenate}"
@@ -13,10 +13,9 @@ module ActivityLogsHelper
     end
 
     "#{@implementation_class.name.ns_hyphenate}#{extra_type}-edit-form-#{@master_id}-#{@id}"
-
   end
 
-  def activity_log_edit_form_hash extras={}
+  def activity_log_edit_form_hash(extras = {})
     res = extras.dup
 
     res[:remote] = true
@@ -28,23 +27,22 @@ module ActivityLogsHelper
     end
 
     if @item
-      res.merge!({url: "/masters/#{@master_id}/#{@item.item_type_path.pluralize}/#{@item_id}/#{object_instance.item_type_path}/#{object_instance.id}#{extra_type_param}", action: :post, remote: true, html: {"data-result-target" => "##{@implementation_class.name.ns_hyphenate}#{extra_type}-#{@master_id}-#{@id}", "data-template" => "#{@implementation_class.name.ns_hyphenate}#{extra_type}-result-template", "data-use-alt-result-key" => "#{@implementation_class.name.ns_underscore}_primary" }})
+      res.merge!(url: "/masters/#{@master_id}/#{@item.item_type_path.pluralize}/#{@item_id}/#{object_instance.item_type_path}/#{object_instance.id}#{extra_type_param}", action: :post, remote: true, html: { 'data-result-target' => "##{@implementation_class.name.ns_hyphenate}#{extra_type}-#{@master_id}-#{@id}", 'data-template' => "#{@implementation_class.name.ns_hyphenate}#{extra_type}-result-template", 'data-use-alt-result-key' => "#{@implementation_class.name.ns_underscore}_primary" })
     else
       extra_type ||= '-blank-log'
-      res.merge!({url: "/masters/#{@master_id}/#{object_instance.item_type_path}/#{object_instance.id}#{extra_type_param}", action: :post, remote: true, html: {"data-result-target" => "##{@implementation_class.name.ns_hyphenate}#{extra_type}-#{@master_id}-#{@id}", "data-template" => "#{@implementation_class.name.ns_hyphenate}#{extra_type}-result-template", "data-use-alt-result-key" => "#{@implementation_class.name.ns_underscore}#{extra_type.underscore}" }})
+      res.merge!(url: "/masters/#{@master_id}/#{object_instance.item_type_path}/#{object_instance.id}#{extra_type_param}", action: :post, remote: true, html: { 'data-result-target' => "##{@implementation_class.name.ns_hyphenate}#{extra_type}-#{@master_id}-#{@id}", 'data-template' => "#{@implementation_class.name.ns_hyphenate}#{extra_type}-result-template", 'data-use-alt-result-key' => "#{@implementation_class.name.ns_underscore}#{extra_type.underscore}" })
     end
     res
   end
 
-  def activity_log_inline_cancel_button class_extras=nil, link_text=nil
-
+  def activity_log_inline_cancel_button(class_extras = nil, link_text = nil)
     if @extra_log_type_name
       extra_type_param = "?extra_type=#{@extra_log_type_name.hyphenate}"
       extra_type = "-#{@extra_log_type_name.hyphenate}"
     end
 
-    button_class = "glyphicon glyphicon-remove-sign"
-    class_extras ||= "pull-right" unless link_text
+    button_class = 'glyphicon glyphicon-remove-sign'
+    class_extras ||= 'pull-right' unless link_text
 
     if @id
       if @item
@@ -72,16 +70,16 @@ module ActivityLogsHelper
     params[:references] && params[:references][:allow_select] == 'true'
   end
 
-  def model_reference_fields f
-    res = ""
+  def model_reference_fields(f)
+    res = ''
     ref_params = params[:references]
     if ref_params.present?
       ref_record_type = ref_params[:record_type]
       ref_record_id = ref_params[:record_id]
     end
     if ref_record_id && ref_record_type
-      res << f.hidden_field( :ref_record_type, value: ref_record_type)
-      res << f.hidden_field( :ref_record_id, value: ref_record_id)
+      res += f.hidden_field(:ref_record_type, value: ref_record_type)
+      res += f.hidden_field(:ref_record_id, value: ref_record_id)
     end
 
     res.html_safe

@@ -7,7 +7,7 @@ class Admin::AppConfiguration < Admin::AdminBase
   include AppTyped
   include UserAndRoles
 
-  belongs_to :user
+  belongs_to :user, optional: true
   before_validation :humanize_name
   validates :name, presence: true
   validate :valid_entry

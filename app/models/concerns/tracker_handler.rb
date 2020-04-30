@@ -1,33 +1,36 @@
-module TrackerHandler
+# frozen_string_literal: true
 
+module TrackerHandler
   extend ActiveSupport::Concern
 
   included do
-    belongs_to :protocol, class_name: 'Classification::Protocol'
-    belongs_to :sub_process, class_name: 'Classification::SubProcess'
-    belongs_to :protocol_event, class_name: 'Classification::ProtocolEvent'
-
+    belongs_to :protocol, class_name: 'Classification::Protocol', optional: true
+    belongs_to :sub_process, class_name: 'Classification::SubProcess', optional: true
+    belongs_to :protocol_event, class_name: 'Classification::ProtocolEvent', optional: true
   end
 
-
   def protocol_name
-    return nil unless self.protocol
-    self.protocol.name
+    return nil unless protocol
+
+    protocol.name
   end
 
   def protocol_position
-    return nil unless self.protocol
-    self.protocol.position
+    return nil unless protocol
+
+    protocol.position
   end
 
   def sub_process_name
-    return nil unless self.sub_process
-    self.sub_process.name
+    return nil unless sub_process
+
+    sub_process.name
   end
 
   def event_name
-    return nil unless self.protocol_event
-    self.protocol_event.name
+    return nil unless protocol_event
+
+    protocol_event.name
   end
 
   def protocol_event_name
@@ -35,34 +38,36 @@ module TrackerHandler
   end
 
   def event_milestone
-    return nil unless self.protocol_event
-    self.protocol_event.milestone
+    return nil unless protocol_event
+
+    protocol_event.milestone
   end
 
   def event_description
-    return nil unless self.protocol_event
-    self.protocol_event.description
+    return nil unless protocol_event
+
+    protocol_event.description
   end
 
   # get the underlying item_type related to the polymorphic association
   # this accessor was overridden elsewhere
   def record_type
-    self.attributes['item_type']
+    attributes['item_type']
   end
 
   # get the underlying item_id related to the polymorphic association
   # this accessor was overridden elsewhere
   def record_id
-    self.attributes['item_id']
+    attributes['item_id']
   end
 
   def record_type_us
-    return unless self.record_type
-    self.record_type.ns_underscore
+    return unless record_type
+
+    record_type.ns_underscore
   end
 
   def no_master_association
     false
   end
-
 end

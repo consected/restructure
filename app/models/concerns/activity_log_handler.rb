@@ -570,7 +570,6 @@ module ActivityLogHandler
     fields_to_sync.each do |f|
       send("#{f}=", item.send(f))
     end
-    true
   end
 
   def update_action

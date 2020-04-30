@@ -1,4 +1,7 @@
-require File.expand_path('../../../lib/logger/do_nothing_logger.rb', __FILE__)
+# frozen_string_literal: true
+
+require File.expand_path('../../lib/logger/do_nothing_logger.rb', __dir__)
+
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -13,10 +16,14 @@ Rails.application.configure do
   # preloads Rails for running tests, you may have to set it to true.
   config.eager_load = false
 
-  # Configure static file server for tests with Cache-Control for performance.
-  config.serve_static_files   = true
-  config.static_cache_control = 'public, max-age=3600'
+  # Configure public file server for tests with Cache-Control for performance.
+  config.public_file_server.enabled = true
+  config.public_file_server.headers = {
+    'Cache-Control' => "public, max-age=#{1.hour.to_i}"
+  }
 
+  config.i18n.fallbacks = [I18n.default_locale]
+  
   # Show full error reports and disable caching.
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = false
@@ -26,6 +33,11 @@ Rails.application.configure do
 
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
+
+  # Store uploaded files on the local file system in a temporary directory
+  config.active_storage.service = :test
+
+  config.action_mailer.perform_caching = false
 
   # Tell Action Mailer not to deliver emails to the real world.
   # The :test delivery method accumulates sent emails in the
@@ -37,22 +49,19 @@ Rails.application.configure do
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
-  # simplify review of the logs by keeping them local in the test environment
-  # config.logger = Logger::Syslog.new('fphs_rails')
+
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
-
-  if ENV['FPHS_USE_LOGGER']=='TRUE'
-    puts "!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger disabled !!!!!!!!!!!!!!!!!!!!!!"
+  if ENV['FPHS_USE_LOGGER'] == 'TRUE'
+    puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger disabled !!!!!!!!!!!!!!!!!!!!!!'
     config.log_level = :info
   else
-    puts "!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!"
+    puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!'
     config.logger = DoNothingLogger.new
   end
 
   config.active_job.queue_adapter = :delayed_job
-
 
   # Support parallel tests
   assets_cache_path = Rails.root.join("tmp/cache/assets/paralleltests#{ENV['TEST_ENV_NUMBER']}")
@@ -61,8 +70,7 @@ Rails.application.configure do
     env.cache = Sprockets::Cache::FileStore.new(assets_cache_path)
   end
 
-  fs_cache_path = Rails.root.join("tmp", "cache", "cache-fs", "paralleltests#{ENV['TEST_ENV_NUMBER']}")
+  fs_cache_path = Rails.root.join('tmp', 'cache', 'cache-fs', "paralleltests#{ENV['TEST_ENV_NUMBER']}")
   FileUtils.mkdir_p fs_cache_path
   config.cache_store = :file_store, fs_cache_path
-
 end

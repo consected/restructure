@@ -9,14 +9,14 @@ module UserHandler
 
     scope :active, lambda {
       if attribute_names.include?('disabled')
-        where 'disabled is null or disabled = false'
+        where Arel.sql('disabled is null or disabled = false')
       else
         self
       end
     }
     scope :disabled, lambda {
       if attribute_names.include?('disabled')
-        where 'disabled = true'
+        where disabled: true
       else
         self
       end
@@ -31,15 +31,11 @@ module UserHandler
       belongs_to :master, assoc_rules
     end
 
-    if attribute_names.include? 'created_by_user_id'
-      belongs_to :created_by_user, class_name: 'User'
-    end
+    belongs_to :created_by_user, class_name: 'User', optional: true if attribute_names.include? 'created_by_user_id'
 
     has_many :item_flags, -> { preload(:item_flag_name) }, as: :item, inverse_of: :item
 
-    if self != Tracker && self != TrackerHistory
-      has_many :trackers, as: :item, inverse_of: :item
-    end
+    has_many :trackers, as: :item, inverse_of: :item if self != Tracker && self != TrackerHistory
 
     validate :source_correct
     validate :rank_correct
@@ -63,12 +59,10 @@ module UserHandler
 
     def assoc_rules
       r = { inverse_of: assoc_inverse }
-      if foreign_key_name && foreign_key_name != :master_id
-        r[:foreign_key] = foreign_key_name
-      end
-      if primary_key_name && primary_key_name != :id
-        r[:primary_key] = primary_key_name
-      end
+      r[:foreign_key] = foreign_key_name if foreign_key_name && foreign_key_name != :master_id
+      r[:primary_key] = primary_key_name if primary_key_name && primary_key_name != :id
+      r[:optional] = true if defined?(no_master_association) && no_master_association
+
       r
     end
 
@@ -99,18 +93,20 @@ module UserHandler
     # and can not be guaranteed to provide uniqueness, but for certain data situations (such as imports)
     # it may be considered to be sufficient.
     # To facilitate matching code, the method secondary_key_unique? checks this fact.
-    # Returns a symbol representing the field name
+    # Overriding methods will return a symbol representing the field name
+    # @return [Symbol | nil]
     def secondary_key
       nil
     end
 
     # Check if a value is unique for the defined secondary_key field
     # Returns true if exactly one item is found, false if more than one item is found.
-    # The option fail_if_non_existent: true (default is nil) indicates that nil should be returned
-    # if the value does not already exist in the table
     # By returning nil, rather than false for non-existent values, the caller can evaluate the result
     # appropriately.
-    def secondary_key_unique?(value, options = {})
+    # @param [Object] value represents the secondary_key value to check
+    # @param [Boolean | nil] fail_if_not_existent (default is nil) if true, indicates that nil should be returned
+    #   if the value does not already exist in the table
+    def secondary_key_unique?(value, fail_if_non_existent: nil)
       raise 'No secondary_key field defined' unless secondary_key
 
       l = where(secondary_key => value).length
@@ -119,14 +115,12 @@ module UserHandler
 
       # the length is 0
       # handle the result based on the option
-      (options[:fail_if_non_existent] ? nil : true)
+      (fail_if_non_existent ? nil : true)
     end
 
     def secondary_key_dups
       # protect against SQL injection
-      unless attribute_names.include? secondary_key.to_s
-        raise "Bad secondary_key #{secondary_key}"
-      end
+      raise "Bad secondary_key #{secondary_key}" unless attribute_names.include? secondary_key.to_s
 
       sk = secondary_key.to_s
       self.select("count(id), #{sk}").group(sk).having('count(id) > 1')
@@ -139,15 +133,11 @@ module UserHandler
       raise 'No secondary_key field defined' unless secondary_key
 
       res = where(secondary_key => value)
-      if res.length > 1
-        raise "Secondary key field '#{secondary_key}' returns multiple values for '#{value}'"
-      end
+      raise "Secondary key field '#{secondary_key}' returns multiple values for '#{value}'" if res.length > 1
 
       res.first
     end
   end
-
-  public
 
   def current_user
     master.current_user
@@ -169,6 +159,7 @@ module UserHandler
   # for quick review.
   # Most items will override this definition.
   # Even if they don't directly, but have an attribute, we'll catch it
+  # @return [String]
   def data
     return super() if defined? super
 
@@ -186,12 +177,15 @@ module UserHandler
     instance_var_init :multiple_results
   end
 
+  #
+  # After a record has been saved, make a tracker entry for it
+  # This only happens if the record was created or updated,
+  # is not marked `no_track` and it has a master association.
+  # @return [Boolean | nil] representing success or failure
   def track_record_update
     # Don't do this if we have the configuration set to avoid tracking, or
     # if the record was not created or updated
-    if no_track || !(@was_updated || @was_created) || self.class.no_master_association
-      return
-      end
+    return if no_track || !(@was_updated || @was_created) || self.class.no_master_association
 
     @update_action = true
     Tracker.track_record_update self

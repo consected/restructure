@@ -72,6 +72,26 @@
       "note": ""
     },
     {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "9d5662e84cd23c0222b9362de21842797c5c441c70bd829b4e180350b3ba6e47",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/concerns/external_id_handler.rb",
+      "line": 226,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "connection.execute((\"INSERT into #{table_name} (#{external_id_attribute}, admin_id, master_id, created_at, updated_at) VALUES \" + [\"('#{generate_random_id}', #{admin.id}, NULL, '#{DateTime.now.iso8601}', '#{DateTime.now.iso8601}')\"].join(\",\")))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ExternalIdHandler",
+        "method": "generate_ids"
+      },
+      "user_input": "[\"('#{generate_random_id}', #{admin.id}, NULL, '#{DateTime.now.iso8601}', '#{DateTime.now.iso8601}')\"].join(\",\")",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
       "fingerprint": "a3f91e1d51c1425b602f37aea71321024015c12969389e863a464e55156b1413",
@@ -86,7 +106,7 @@
           "type": "controller",
           "class": "ReportsController",
           "method": "show",
-          "line": 110,
+          "line": 108,
           "file": "app/controllers/reports_controller.rb",
           "rendered": {
             "name": "reports/_results",
@@ -119,7 +139,7 @@
       "check_name": "SendFile",
       "message": "Parameter value used in file name",
       "file": "app/controllers/nfs_store/downloads_controller.rb",
-      "line": 27,
+      "line": 34,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
       "code": "send_file(Download.new(:container => (@container), :activity_log => (@activity_log)).retrieve_file_from(params[:download_id].to_i, [:stored_file, :archived_file].select do\n (r == params[:retrieval_type].to_sym)\n end.first, :for_action => :download))",
       "render_path": null,
@@ -130,6 +150,66 @@
       },
       "user_input": "params[:download_id]",
       "confidence": "Weak",
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "b1e62cc85c7eba4c9f39f2f82936341481bc4da5ada4a7d0df55ace601f34a06",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/controllers/admin/nfs_store/filter/filters_controller.rb",
+      "line": 24,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "Arel.sql(\"app_type_id asc, translate(resource_name, '__', 'ZZZZ') asc, #{Admin::UserAccessControl.priority_order}\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::NfsStore::Filter::FiltersController",
+        "method": "default_index_order"
+      },
+      "user_input": "Admin::UserAccessControl.priority_order",
+      "confidence": "High",
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "b87f89a667bbb536e8122300d90e1d6ca3e3263113b64bfc09b98147f1e5fab7",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/concerns/external_id_handler.rb",
+      "line": 199,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "connection.execute((\"INSERT into #{table_name} (#{external_id_attribute}, admin_id, master_id, created_at, updated_at) VALUES \" + [\"('#{generate_random_id}', #{admin.id}, #{m}, '#{DateTime.now.iso8601}', '#{DateTime.now.iso8601}')\"].join(\",\")))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ExternalIdHandler",
+        "method": "generate_ids_for_all_masters"
+      },
+      "user_input": "[\"('#{generate_random_id}', #{admin.id}, #{m}, '#{DateTime.now.iso8601}', '#{DateTime.now.iso8601}')\"].join(\",\")",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "c4849bbd5ad704cab1a06825b331b0bb903881abf1a54590aab0ed6af1d03276",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/controllers/admin/user_access_controls_controller.rb",
+      "line": 11,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "Arel.sql(\"app_type_id asc, resource_type asc, translate(resource_name, '__', 'ZZZZ') asc, #{Admin::UserAccessControl.priority_order}\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::UserAccessControlsController",
+        "method": "default_index_order"
+      },
+      "user_input": "Admin::UserAccessControl.priority_order",
+      "confidence": "High",
       "note": ""
     },
     {
@@ -159,7 +239,7 @@
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/models/nfs_store/archive/mounter.rb",
-      "line": 171,
+      "line": 177,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
       "code": "Kernel.system(*[\"unzip\", stored_file.retrieval_path, \"-d\", \"#{File.join(Manage::Filesystem.temp_directory, \"__filestore__#{SecureRandom.hex}\")}/zip\"])",
       "render_path": null,
@@ -173,6 +253,6 @@
       "note": ""
     }
   ],
-  "updated": "2020-03-09 14:20:26 +0000",
-  "brakeman_version": "4.7.2"
+  "updated": "2020-04-14 16:59:15 +0100",
+  "brakeman_version": "4.8.1"
 }

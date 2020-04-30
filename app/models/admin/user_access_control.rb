@@ -7,7 +7,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
   include AppTyped
   include UserAndRoles
 
-  belongs_to :user
+  belongs_to :user, optional: true
 
   validate :correct_access
 

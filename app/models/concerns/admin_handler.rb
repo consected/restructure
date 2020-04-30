@@ -5,14 +5,18 @@ module AdminHandler
 
   included do
     after_initialize :init_vars_admin_handler
-    belongs_to :admin
+
+    # If the class including this concern has already set the class variable
+    # `@admin_optional = true`, use it to change the optional requirement on the
+    # admin association
+    belongs_to :admin, optional: @admin_optional
     scope :active, -> { where 'disabled is null or disabled = false' }
     scope :disabled, -> { where 'disabled = true' }
 
     before_validation :ensure_admin_set
     before_create :setup_values
 
-    scope :index, -> {}
+    scope :limited_index, -> {}
   end
 
   def init_vars_admin_handler
@@ -21,8 +25,7 @@ module AdminHandler
   end
 
   def setup_values
-    disabled = false if disabled.nil?
-    true
+    self.disabled = false if disabled.nil?
   end
 
   def enabled?
@@ -95,11 +98,17 @@ module AdminHandler
   end
 
   def ensure_admin_set
-    errors.add(:admin, 'has not been set') unless admin_set?
+    return if admin_set?
+
+    errors.add(:admin, 'has not been set')
+    # throw(:abort)
   end
 
   def prevent_item_type_change
-    errors.add(:item_type, 'change not allowed!') if item_type_changed? && persisted?
+    if item_type_changed? && persisted?
+      errors.add(:item_type, 'change not allowed!')
+      # throw(:abort)
+    end
   end
 
   # Check if a specific attribute value has already been used in an active definition

@@ -9,7 +9,13 @@ module NfsStore
 
     FinalFilenameSuffix = 'final'
 
-    belongs_to :stored_file, class_name: 'NfsStore::Manage::StoredFile', foreign_key: 'nfs_store_stored_file_id'
+    # An optional association with stored_file.
+    # It must be optional, since we can't set the stored_file
+    # until after the upload has completed.
+    belongs_to :stored_file,
+               class_name: 'NfsStore::Manage::StoredFile',
+               foreign_key: 'nfs_store_stored_file_id',
+               optional: true
 
     scope :completed, -> { where completed: true }
 

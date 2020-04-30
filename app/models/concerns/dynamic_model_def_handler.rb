@@ -108,8 +108,8 @@ module DynamicModelDefHandler
           if !dm.disabled && dm.ready? && dm.implementation_class_defined?(klass, fail_without_exception: true)
             dm.add_master_association
           else
-            puts "Failed to enable #{dm}"
-            Rails.logger.warn "Failed to enable #{dm}"
+            puts "Failed to enable #{dm} #{dm.id}"
+            Rails.logger.warn "Failed to enable #{dm} #{dm.id}"
           end
         end
       else
@@ -207,9 +207,7 @@ module DynamicModelDefHandler
   # If there is no prefix then this matches the simple model name
   def full_item_type_name
     prefix = ''
-    if self.class.implementation_prefix.present?
-      prefix = "#{self.class.implementation_prefix.ns_underscore}__"
-    end
+    prefix = "#{self.class.implementation_prefix.ns_underscore}__" if self.class.implementation_prefix.present?
 
     "#{prefix}#{implementation_model_name}"
   end
@@ -255,9 +253,7 @@ module DynamicModelDefHandler
     # Dump the old association
 
     assoc_ext_name = "#{in_class_name}#{model_class_name.pluralize}AssociationExtension"
-    if implementation_class_defined?(Object)
-      Object.send(:remove_const, assoc_ext_name)
-    end
+    Object.send(:remove_const, assoc_ext_name) if implementation_class_defined?(Object)
   rescue StandardError => e
     logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
     # puts "Failed to remove #{assoc_ext_name} : #{e}"
@@ -268,7 +264,7 @@ module DynamicModelDefHandler
   end
 
   def add_user_access_controls(force: false, app_type: nil)
-    if !persisted? || disabled_changed? || force
+    if !persisted? || saved_change_to_disabled? || force
       begin
         if ready? || disabled? || force
           app_type ||= admin.matching_user_app_type

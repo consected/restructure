@@ -8,7 +8,7 @@ module NfsStore
       include AppTyped
       include UserAndRoles
 
-      belongs_to :user
+      belongs_to :user, optional: true
 
       validate :filter_is_valid
 

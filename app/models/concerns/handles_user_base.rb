@@ -192,9 +192,7 @@ module HandlesUserBase
       current_user = item.master.current_user
       current_user
     else
-      unless validating?
-        raise "master is nil and can't be used to get the current user"
-      end
+      raise "master is nil and can't be used to get the current user" unless validating?
 
       nil
     end
@@ -237,9 +235,7 @@ module HandlesUserBase
                 else
                   master_user
                 end
-    unless curr_user
-      raise FphsException, 'no master_user in allows_current_user_access_to?'
-    end
+    raise FphsException, 'no master_user in allows_current_user_access_to?' unless curr_user
 
     res = self.class.allows_user_access_to? curr_user, perform, with_options = nil
     return false unless res
@@ -388,15 +384,13 @@ module HandlesUserBase
       raise 'MSID set, but it does not match a master record' unless m
 
       self.master_id = m.id
-    elsif msid && master_id
-      unless master.msid == msid
-        raise 'MSID and master_id set, but they do not correspond to the same record'
-        end
+    elsif msid && master_id && master.msid != msid
+      raise 'MSID and master_id set, but they do not correspond to the same record'
     end
 
-    if respond_to?(:master) && !(master_id && master) && !validating?
-      raise FphsException, "master not set in #{self} #{id}"
-      end
+    return unless respond_to?(:master) && !(master_id && master) && !validating?
+
+    raise FphsException, "master not set in #{self} #{id}"
   end
 
   def no_user_validation
@@ -464,7 +458,6 @@ module HandlesUserBase
     ignore = /(item_type)?(notes)?(description)?(message)?(.+_notes)?(.+_description)?(.+_details)?(e_signed_document)?#{ea}/
 
     attributes.select { |k, _v| k.to_sym.in? self.class.permitted_params }.reject { |k, _v| k && k.match(ignore)[0].present? }.each do |k, v|
-      logger.info "Downcasing attribute (#{k})"
       send("#{k}=".to_sym, v.downcase) if attributes[k].is_a? String
     end
     true
@@ -473,18 +466,15 @@ module HandlesUserBase
   def check_can_save
     if persisted? && !can_edit?
       raise FphsException, "This item is not editable (#{respond_to?(:human_name) ? human_name : self.class.name}) #{id}"
-      end
+    end
+
     if !persisted? && !can_create?
       raise FphsException, "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name})"
-      end
-
-    true
+    end
   end
 
   def configurable_valid_if
-    if @ignore_configurable_valid_if || !option_type_config.respond_to?(:valid_if)
-      return true
-      end
+    return true if @ignore_configurable_valid_if || !option_type_config.respond_to?(:valid_if)
 
     vi = option_type_config.valid_if
     return true if vi.empty?
