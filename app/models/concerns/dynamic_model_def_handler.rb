@@ -207,9 +207,7 @@ module DynamicModelDefHandler
   # If there is no prefix then this matches the simple model name
   def full_item_type_name
     prefix = ''
-    if self.class.implementation_prefix.present?
-      prefix = "#{self.class.implementation_prefix.ns_underscore}__"
-    end
+    prefix = "#{self.class.implementation_prefix.ns_underscore}__" if self.class.implementation_prefix.present?
 
     "#{prefix}#{implementation_model_name}"
   end
@@ -255,9 +253,7 @@ module DynamicModelDefHandler
     # Dump the old association
 
     assoc_ext_name = "#{in_class_name}#{model_class_name.pluralize}AssociationExtension"
-    if implementation_class_defined?(Object)
-      Object.send(:remove_const, assoc_ext_name)
-    end
+    Object.send(:remove_const, assoc_ext_name) if implementation_class_defined?(Object)
   rescue StandardError => e
     logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
     # puts "Failed to remove #{assoc_ext_name} : #{e}"

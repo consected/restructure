@@ -1,0 +1,50 @@
+<%
+# Allow a 'data' selection to be made from a dynamic model table that is not tied to this master
+# A special data formatting allows grouping:
+# group 1 | something to say
+# group 1 | something else
+# group 2 | does good
+
+rlit = field_name.sub('pick_multiple_records_from_table_', '').singularize
+cn = rl = rlit
+
+cl = cn.camelize.constantize
+reslist = cl.all.order('ctid asc')
+
+grouped = {}
+
+
+reslist.each do |rec|
+  r = rec.data
+  val = rec.table_key || rec.id
+  
+  rs = r.split('|', 2)
+
+  if rs.length == 2
+    group = rs.first.strip
+    new_r = [rs.last.strip, val]
+  else
+    group = ''
+    new_r = [r, val]
+  end
+
+  grouped[group] ||= []
+  grouped[group] << new_r
+end
+reslist = grouped.each {|k,v| [k, v]}
+
+unless rl
+  logger.warn "Failed to find valid class name for #{field_name_sym}"
+end
+options = field_options_for(form_object_instance, field_name_sym)
+options[:include_blank] = true unless options.has_key?(:include_blank)
+
+html_options = {
+  data: {attr_name: field_name_sym, object_name: form_object_item_type_us},
+  multiple: 'multiple',
+  include_group_label_in_selected: 'true'
+}
+
+%>
+<%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: rl) %>
+<%= form.select field_name_sym, reslist, options, html_options%>
