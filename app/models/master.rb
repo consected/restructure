@@ -326,7 +326,12 @@ class Master < ActiveRecord::Base
     extras[:methods] << :header_prefix
     extras[:methods] << :trackers_length
 
-    res = Admin::AppConfiguration.values_for(:show_ids_in_master_result, current_user) - self.class.crosswalk_attrs
+    res = Admin::AppConfiguration.values_for(:show_ids_in_master_result, current_user)
+    res = if res.include? :none
+            []
+          else
+            res - self.class.crosswalk_attrs
+          end
 
     res.each do |id_attr|
       extras[:methods] << id_attr
