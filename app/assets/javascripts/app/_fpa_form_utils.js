@@ -681,7 +681,7 @@ _fpa.form_utils = {
           // Save the original position and sizes
           $el.orig_sizes = {
             width: $el.width(),
-            height: $el.height(),
+            minHeight: $el.height(),
             position: style.position,
             top: style.top,
             left: style.left,

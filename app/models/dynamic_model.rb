@@ -71,9 +71,7 @@ class DynamicModel < ActiveRecord::Base
   end
 
   def self.orientation(category)
-    if category.to_s.include?('history') || category.to_s.include?('-records')
-      return :horizontal
-    end
+    return :horizontal if category.to_s.include?('history') || category.to_s.include?('-records')
 
     :vertical
   end
@@ -225,9 +223,7 @@ class DynamicModel < ActiveRecord::Base
         # Setup the controller
         c_name = full_implementation_controller_name
         begin
-          if implementation_controller_defined?(klass)
-            klass.send(:remove_const, c_name)
-          end
+          klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
         rescue StandardError => e
           logger.info '*************************************************************************************'
           logger.info "Failed to remove the old definition of #{c_name}. #{e.inspect}"

@@ -175,9 +175,7 @@ class ActivityLog < ActiveRecord::Base
   # The attribute list defined in the admin record. If blank, the implementation_class
   # equivalent of this method returns a set of fields based on the actual implementation table
   def view_blank_log_attribute_list
-    unless blank_log_field_list.blank?
-      blank_log_field_list.split(',').map(&:strip).compact
-    end
+    blank_log_field_list.split(',').map(&:strip).compact unless blank_log_field_list.blank?
   end
 
   # Get a complete list of all fields required to generate a table.
@@ -279,9 +277,7 @@ class ActivityLog < ActiveRecord::Base
   def self.activity_log_class_from_type(activity_log_type)
     al_type = activity_log_type.ns_camelize
     al_class = ActivityLog.implementation_classes.select { |a| a.to_s == al_type }.first
-    unless al_class
-      raise FsException::List, 'activity log type specified is invalid'
-    end
+    raise FsException::List, 'activity log type specified is invalid' unless al_class
 
     al_class
   end
@@ -311,9 +307,7 @@ class ActivityLog < ActiveRecord::Base
     # build method being called
     # puts "Adding implementation class association: #{implementation_class.parent_class}.has_many #{self.model_association_name.to_sym} #{self.full_implementation_class_name}"
 
-    if item_type_exists
-      remove_assoc_class "#{implementation_class.parent_class}ActivityLog"
-    end
+    remove_assoc_class "#{implementation_class.parent_class}ActivityLog" if item_type_exists
     #    has_many :activity_logs, as: :item, inverse_of: :item ????
     implementation_class.parent_class.has_many model_association_name.to_sym, class_name: full_implementation_class_name do
       def build(att = nil)
@@ -491,9 +485,7 @@ class ActivityLog < ActiveRecord::Base
         begin
           # This may fail if an underlying dependent class (parent class) has been redefined by
           # another dynamic implementation, such as external identifier
-          if implementation_controller_defined?(klass)
-            klass.send(:remove_const, c_name)
-          end
+          klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
         rescue StandardError => e
           logger.info '*************************************************************************************'
           logger.info "Failed to remove the old definition of #{c_name}. #{e.inspect}"
