@@ -48,7 +48,7 @@ module FilterUtils
   def filter_defaults
     app_type_id = current_user&.app_type_id
     if app_type_id && primary_model_uses_app_type?
-      f = params[:filter] && params[:filter][:app_type_id]
+      f = filter_params_permitted && filter_params_permitted[:app_type_id]
       if f.present?
         { app_type_id: f }
       else
@@ -72,16 +72,16 @@ module FilterUtils
 
     has_disabled_field = primary_model.attribute_names.include?('disabled') && current_admin
 
-    if params[:filter].blank? || (params[:filter].is_a?(Array) && params[:filter][0].blank?)
-      params[:filter] = { disabled: 'enabled' } if has_disabled_field
+    if filter_params_permitted.blank? || (filter_params_permitted.is_a?(Array) && filter_params_permitted[0].blank?)
+      filter_params_permitted = { disabled: 'enabled' } if has_disabled_field
     end
 
     fo = filters_on
     fo << :disabled if has_disabled_field
 
-    return {} unless params[:filter]
+    return {} unless filter_params_permitted
 
-    res = params.require(:filter).permit(fo)
+    res = filter_params_permitted || {}
     res = filter_defaults.merge(res)
 
     res.reject! { |_k, v| v.blank? }

@@ -40,7 +40,7 @@ class ReportsController < UserBaseController
     @embedded_report = (params[:embed] == 'true')
 
     options = {}
-    search_attrs = params[:search_attrs]
+    search_attrs = search_attrs_params_permitted
     @search_attrs = search_attrs
 
     @view_context = params[:view_context]
@@ -353,6 +353,10 @@ class ReportsController < UserBaseController
 
   def report_params_holder
     report_model.to_s.ns_underscore.gsub('__', '_')
+  end
+
+  def search_attrs_params_permitted
+    params.require(:search_attrs).permit! if params[:search_attrs]
   end
 
   def init_vars
