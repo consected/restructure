@@ -126,7 +126,7 @@ _fpa.postprocessors_reports = {
       }
       else {
         _fpa.reports.report_position_buttons('go-to-form');
-        return;
+        if (!by_auto_search) return;
       }
 
       $('td a.edit-entity').click(function () {
