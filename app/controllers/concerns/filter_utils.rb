@@ -35,6 +35,10 @@ module FilterUtils
     pm
   end
 
+  def primary_model_uses_app_type?
+    primary_model.attribute_names.include?('app_type_id')
+  end
+
   #
   # Set defaults for filters, to be used by filtered pages when
   # no `filter[]` URL parameters are set
@@ -43,7 +47,7 @@ module FilterUtils
   # @return [Hash]
   def filter_defaults
     app_type_id = current_user&.app_type_id
-    if app_type_id
+    if app_type_id && primary_model_uses_app_type?
       f = params[:filter] && params[:filter][:app_type_id]
       if f.present?
         { app_type_id: f }
@@ -53,6 +57,10 @@ module FilterUtils
     else
       {}
     end
+  end
+
+  def filter_params_permitted
+    params.require(:filter).permit(filters_on) if params[:filter]
   end
 
   #

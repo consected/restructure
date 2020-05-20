@@ -26,7 +26,7 @@ module AdminHelper
       path = new_path(copy_with_id: options[:copy]&.id)
       link_to '', path, remote: true, class: 'edit-entity glyphicon glyphicon-copy copy-icon'
     else
-      path = edit_path(id, filter: params[:filter])
+      path = edit_path(id, filter: filter_params_permitted)
       link_to '', path, remote: true, class: 'edit-entity glyphicon glyphicon-pencil'
     end
   end
@@ -38,8 +38,8 @@ module AdminHelper
 
   def filter_btn(title, filter_on, val)
     res = ''
-    filter = (params[:filter] || {}).dup
 
+    filter = (filter_params_permitted || {}).dup
     prev_val = filter[filter_on].to_s
     filter[filter_on] = val.to_s
 
@@ -95,7 +95,7 @@ module AdminHelper
 
   def hidden_filter_fields
     res = ''
-    params[:filter]&.each do |filter|
+    filter_params_permitted&.each do |filter|
       res += hidden_field_tag "filter[#{filter.first}]", filter.last
     end
     res.html_safe

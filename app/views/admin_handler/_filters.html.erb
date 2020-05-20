@@ -66,7 +66,7 @@ end
   <div class="panel-body pull-right">
     <button class="btn btn-sm expand-all-expandables">expand all</button>
     <button class="btn btn-sm shrink-all-expandables">shrink all</button>
-    <%= link_to "export csv", {filter: params[:filter], format: 'csv'}, class: "btn btn-sm export-csv" %>
+    <%= link_to "export csv", {filter: filter_params_permitted, format: 'csv'}, class: "btn btn-sm export-csv" %>
   </div>
 </div>
 <% end %>
