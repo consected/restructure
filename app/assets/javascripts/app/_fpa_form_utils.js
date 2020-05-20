@@ -668,7 +668,7 @@ _fpa.form_utils = {
         var no_sel_text = 'no tags selected';
         var alt_nst = sel.attr('data-nothing-selected-text');
         if (alt_nst) no_sel_text = alt_nst;
-        sel.chosen({ width: '100%', placeholder_text_multiple: no_sel_text, hide_results_on_select: false }).addClass('attached-chosen');
+        sel.chosen({ width: '100%', placeholder_text_multiple: no_sel_text, hide_results_on_select: false })
 
         sel.on('chosen:showing_dropdown', function (evt, params) {
 
@@ -719,7 +719,7 @@ _fpa.form_utils = {
         });
 
       }, 1);
-    });
+    }).addClass('attached-chosen');;
   },
 
   organize_common_templates: function (block) {
