@@ -122,6 +122,20 @@
         {{>iterateMultiSelect field_key=key multi_vals=this_value result_data=result_data}}
       </strong>
   </li>
+  {{else is key 'includes' '_attribs$' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_attribs$' }}
+      {{#* inline "iterateMultiSelect"}}
+        {{#each multi_vals}}
+          {{#is this '!in' "0,false,no" }}
+          <span data-field-array-el-val="{{this}}">{{#if (get ../result_data._general_selections ../field_key @index 'name')}}{{get ../result_data._general_selections ../field_key @index 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</span>
+          <br/>
+          {{/is}}
+        {{/each}}
+      {{/inline}}
+      <strong>
+        {{>iterateMultiSelect field_key=key multi_vals=this_value result_data=result_data}}
+      </strong>
+  </li>
   {{else is key 'includes' '_blank_yes_no_dont_know' }}
     <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_blank_yes_no_dont_know$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'includes' '_yes_no_dont_know' }}
