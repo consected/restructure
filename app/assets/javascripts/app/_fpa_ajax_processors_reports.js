@@ -43,6 +43,10 @@ _fpa.postprocessors_reports = {
 
     _fpa.masters.handle_search_form(block.find('form'));
 
+    var by_auto_search_btn = $('#report-form-auto-submitter-btn');
+    by_auto_search_btn.not('.asclick-attached').on('click', function () {
+      by_auto_search_btn.attr('data-submitted', 'true');
+    }).addClass('asclick-attached');
 
     block.find('a.btn[data-attribute]').click(function (ev) {
       ev.preventDefault();
@@ -110,8 +114,13 @@ _fpa.postprocessors_reports = {
 
 
     window.setTimeout(function () {
+
+      var by_auto_search_btn = $('#report-form-auto-submitter-btn');
+      var by_auto_search = (by_auto_search_btn.attr('data-submitted') == 'true');
+      by_auto_search_btn.attr('data-submitted', null);
+
       var table_cell_types = _fpa.postprocessors_reports.table_cell_types;
-      if (data.count && data.count.count != 0) {
+      if (data.count && data.count.count != 0 && !by_auto_search) {
         $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
         _fpa.reports.report_position_buttons('go-to-results');
       }
