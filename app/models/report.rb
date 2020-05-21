@@ -65,7 +65,11 @@ class Report < ActiveRecord::Base
     parts = csn.split('__')
     raise FphsException, 'Bad item_type__short_name identifier' unless parts.length == 2
 
-    res = where(item_type: parts.first, short_name: parts.last).first
+    i = parts.first
+    # Allow hyphenated categories to be matched with underscores
+    its = [i, i.gsub('_', '-')].uniq
+
+    res = where(item_type: its, short_name: parts.last).first
     raise ActiveRecord::RecordNotFound unless res
 
     res
