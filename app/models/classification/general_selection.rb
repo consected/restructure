@@ -156,7 +156,7 @@ class Classification::GeneralSelection < ActiveRecord::Base
   end
 
   # Cached version of the general selections and config overrides (alt_options)
-  # for use in various places around the code
+  # as a hash of arrays
   def self.field_selections
     Rails.cache.fetch('field_selections_hash') do
       res = {}
@@ -164,6 +164,20 @@ class Classification::GeneralSelection < ActiveRecord::Base
         item_type = s[:item_type].to_sym
         res[item_type] ||= []
         res[item_type] << s
+      end
+      res
+    end
+  end
+
+  # Cached version of the general selections and config overrides (alt_options)
+  # as a hash of hashes
+  def self.field_selections_hashes
+    Rails.cache.fetch('field_selections_hash_of_hashes') do
+      res = {}
+      selector_with_config_overrides.each do |s|
+        item_type = s[:item_type].to_sym
+        res[item_type] ||= {}
+        res[item_type][s[:value]] = s
       end
       res
     end

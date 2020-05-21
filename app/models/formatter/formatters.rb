@@ -32,7 +32,22 @@ module Formatter
 
       def format_data_attribute(attr_conf, obj)
         attr_conf = [attr_conf] if attr_conf.is_a? String
-        res = attr_conf.map { |i| a = obj.attributes[i]; obj.attribute_names.include?(i) ? formatter_do(a.class, a, current_user: obj.current_user) : i }
+
+        res = attr_conf.map do |i|
+          res = if obj.attribute_names.include?(i)
+                  val = obj.attributes[i]
+
+                  fs = Classification::GeneralSelection.field_selections_hashes
+                  rn = "#{obj.resource_name}_#{i}".to_sym
+                  item = fs[rn] && fs[rn][val] && fs[rn][val][:name]
+                  item || formatter_do(val.class, val, current_user: obj.current_user)
+                else
+                  i
+                end
+
+          res
+        end
+
         res.join(' ')
       end
     end
