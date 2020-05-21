@@ -155,6 +155,20 @@ class Classification::GeneralSelection < ActiveRecord::Base
     res
   end
 
+  # Cached version of the general selections and config overrides (alt_options)
+  # for use in various places around the code
+  def self.field_selections
+    Rails.cache.fetch('field_selections_hash') do
+      res = {}
+      selector_with_config_overrides.each do |s|
+        item_type = s[:item_type].to_sym
+        res[item_type] ||= []
+        res[item_type] << s
+      end
+      res
+    end
+  end
+
   # Get the form_options.edit_as.alt_options configurations for a specific item type object
   # which can be a simple new and uninitialized dynamic model or activity log.
   # For activity logs, generally the extra_log_type attribute is set, allowing the appropriate
