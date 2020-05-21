@@ -59,8 +59,21 @@ module FilterUtils
     end
   end
 
+  def has_disabled_field
+    primary_model.attribute_names.include?('disabled') && current_admin
+  end
+
   def filter_params_permitted
-    params.require(:filter).permit(filters_on) if params[:filter]
+    return @filter_params_permitted if @filter_params_permitted
+
+    fo = filters_on
+    fo << :disabled if has_disabled_field
+
+    @filter_params_permitted = params.require(:filter).permit(fo) if params[:filter]
+  end
+
+  def filter_params_hash
+    @filter_params_hash ||= filter_params_permitted&.to_h
   end
 
   #
@@ -70,18 +83,16 @@ module FilterUtils
   def filter_params
     return @filter_params if @filter_params
 
-    has_disabled_field = primary_model.attribute_names.include?('disabled') && current_admin
-
     if filter_params_permitted.blank? || (filter_params_permitted.is_a?(Array) && filter_params_permitted[0].blank?)
-      filter_params_permitted = { disabled: 'enabled' } if has_disabled_field
+      @filter_params_permitted = { disabled: 'enabled' } if has_disabled_field
     end
 
-    fo = filters_on
-    fo << :disabled if has_disabled_field
+    unless @filter_params_permitted
+      @filter_params = {}
+      return @filter_params
+    end
 
-    return {} unless filter_params_permitted
-
-    res = filter_params_permitted || {}
+    res = @filter_params_permitted || {}
     res = filter_defaults.merge(res)
 
     res.reject! { |_k, v| v.blank? }
@@ -89,6 +100,8 @@ module FilterUtils
     res.each do |k, v|
       res[k] = nil if v == 'IS NULL'
     end
+
+    res.symbolize_keys!
 
     @filter_params = res
   end

@@ -14,7 +14,7 @@
     <%= f.label 'role name override' %>
     <%
       select_item_type = {}
-      select_item_type[:selected] = filter_params_permitted.first.last if filter_params_permitted && filter_params_permitted.first.first.to_s == 'role_name' && object_instance.role_name.blank?
+      select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first.first.to_s == 'role_name' && object_instance.role_name.blank?
       select_item_type[:include_blank] = true
 
       options = role_name_options
@@ -29,7 +29,7 @@
     <%= f.label :resource_name %>
     <%
       select_item_type = {}
-      select_item_type[:selected] = filter_params_permitted.first.last if filter_params_permitted && filter_params_permitted.first.first == 'resource_name'  && object_instance.resource_name.blank?
+      select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first.first == 'resource_name'  && object_instance.resource_name.blank?
     %>
     <%= f.select :resource_name, Admin::UserAccessControl.resource_names_by_type, select_item_type %>
   </div>

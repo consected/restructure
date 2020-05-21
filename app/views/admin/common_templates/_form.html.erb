@@ -31,7 +31,7 @@
         <%= f.label p %>
         <%
           select_item_type = {}
-          select_item_type[:selected] = filter_params_permitted.first.last if filter_params_permitted && filter_params_permitted.first.first.to_s == p.to_s
+          select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first.first.to_s == p.to_s
           select_item_type[:include_blank] = true
 
           options = send("#{p}_options")

@@ -6,7 +6,7 @@ class AdminController < ApplicationController
   include AdminActionLogging
 
   layout 'admin_application'
-  helper_method :object_has_admin_parent?, :object_name, :editor_code_type, :filter_params_permitted
+  helper_method :object_has_admin_parent?, :object_name, :editor_code_type, :filter_params_permitted, :filter_params_hash
 
   protected
 
