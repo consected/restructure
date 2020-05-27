@@ -1,14 +1,14 @@
+# frozen_string_literal: true
+
 class Admin < ActiveRecord::Base
-
-
   include StandardAuthentication
 
   # A configuration allows two factor authentication to be disabled for the app server
-  if self.two_factor_auth_disabled
+  if two_factor_auth_disabled
     devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
   else
     devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable,
-           :otp_secret_encryption_key => otp_enc_key
+           otp_secret_encryption_key: otp_enc_key
   end
 
   before_validation :prevent_email_change, on: :update
@@ -16,30 +16,30 @@ class Admin < ActiveRecord::Base
   before_validation :prevent_not_in_setup_script, on: :create
   after_save :unlock_account, on: :update
 
-  scope :active, -> { where "disabled is null or disabled = false" }
+  scope :active, -> { where 'disabled is null or disabled = false' }
 
   def enabled?
-    !self.disabled
+    !disabled
   end
 
   def timeout_in
-    return Settings::AdminTimeout
+    Settings::AdminTimeout
   end
 
   # Standard Devise callback to allow accounts to be disabled
   def active_for_authentication?
-    super && !self.disabled
+    super && !disabled
   end
 
   # Standard Devise callback to tell user that an account has been disabled
   def inactive_message
-    !self.disabled  ? super : :account_has_been_disabled
+    !disabled ? super : :account_has_been_disabled
   end
 
   # Get the user that corresponds to this admin
   # @return [User | nil]
   def matching_user
-    User.active.where(email: self.email).first
+    User.active.where(email: email).first
   end
 
   # Get the current app type for the user that corresponds to this admin
@@ -50,48 +50,44 @@ class Admin < ActiveRecord::Base
 
   # Simple way to ensure that this is not being run from inside Passenger
   def in_setup_script
-    ENV['FPHS_ADMIN_SETUP']=='yes'
+    ENV['FPHS_ADMIN_SETUP'] == 'yes'
   end
 
   def to_s
     email
   end
 
-  def authentication_token=_
-  end
+  def authentication_token=(_); end
 
-  def authentication_token
-  end
+  def authentication_token; end
 
   protected
 
-    def unlock_account
-      if self.access_locked? && self.saved_change_to_encrypted_password?
-        self.locked_at = nil
-        self.failed_attempts = nil
-      end
+  def unlock_account
+    if access_locked? && saved_change_to_encrypted_password?
+      self.locked_at = nil
+      self.failed_attempts = nil
     end
+  end
 
-    def prevent_email_change
-      if email_changed? && self.persisted?
-        errors.add(:email, "change not allowed!")
-        # throw(:abort)
-      end
+  def prevent_email_change
+    if email_changed? && persisted?
+      errors.add(:email, 'change not allowed!')
+      # throw(:abort)
     end
+  end
 
-    def prevent_reenabling_admin
-      if disabled_changed? && self.persisted? && self.disabled != true && !in_setup_script
-        errors.add(:disabled, "change not allowed!")
-        # throw(:abort)
-      end
-
+  def prevent_reenabling_admin
+    if disabled_changed? && persisted? && disabled != true && !in_setup_script
+      errors.add(:disabled, 'change not allowed!')
+      # throw(:abort)
     end
+  end
 
-    def prevent_not_in_setup_script
-      unless in_setup_script
-        errors.add(:admin, "can only create admins in console") 
-        # throw(:abort)
-      end
+  def prevent_not_in_setup_script
+    unless in_setup_script
+      errors.add(:admin, 'can only create admins in console')
+      # throw(:abort)
     end
-
+  end
 end
