@@ -269,6 +269,10 @@ class ExternalIdentifier < ActiveRecord::Base
     end
   end
 
+  def field_list
+    "#{external_id_attribute.to_sym} #{extra_fields}"
+  end
+
   def id_range_correct
     return if max_id.nil? || min_id.nil?
 

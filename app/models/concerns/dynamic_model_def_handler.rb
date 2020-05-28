@@ -153,7 +153,7 @@ module DynamicModelDefHandler
         # By default, return false if an error occurred attempting the initialization.
         # In certain cases (for example, checking if a class exists so it can be removed), returning true if the
         # class is defined regardless of whether it can be initialized makes most sense. Provide an option to support this.
-        return opt[:fail_without_exception_newable_result]
+        opt[:fail_without_exception_newable_result]
       else
         raise FphsException, err
       end
@@ -275,6 +275,11 @@ module DynamicModelDefHandler
         raise FphsException, "A failure occurred creating user access control for all apps with: #{model_association_name}.\n#{e}"
       end
     end
+  end
+
+  def field_list_array(for_attrib: nil)
+    for_attrib ||= field_list
+    for_attrib.split(/[,\s]+/).map(&:strip).compact if for_attrib
   end
 
   def check_implementation_class
