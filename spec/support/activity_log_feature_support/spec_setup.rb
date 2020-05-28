@@ -14,9 +14,7 @@ module SpecSetup
     end
 
     als = ActivityLog.active.where(name: 'Phone Log')
-    if als.count != 1
-      als.where('id <> ?', als.first&.id).update_all(disabled: true)
-    end
+    als.where('id <> ?', als.first&.id).update_all(disabled: true) if als.count != 1
 
     first_al = als.first
     first_al.update!(current_admin: auto_admin, disabled: false)
@@ -24,7 +22,7 @@ module SpecSetup
     expect(ActivityLog.model_names).to include :player_contact_phone
 
     Seeds::ActivityLogPlayerContactPhone.setup
-    Seeds::TrackerUpdatesProtocol.setup
+    Seeds::ATrackerUpdatesProtocol.setup
 
     seed_database
 
@@ -95,12 +93,8 @@ module SpecSetup
         create_phone_logs c, 2 unless al.length > 1
       end
 
-      if p.master.player_contacts.length < 2
-        raise 'Failed to create player contacts correctly'
-      end
-      if p.master.activity_log__player_contact_phones.length < 2
-        raise 'Failed to create activity logs correctly'
-      end
+      raise 'Failed to create player contacts correctly' if p.master.player_contacts.length < 2
+      raise 'Failed to create activity logs correctly' if p.master.activity_log__player_contact_phones.length < 2
     end
   end
 end

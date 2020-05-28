@@ -40,7 +40,7 @@ class ReportsController < UserBaseController
     @embedded_report = (params[:embed] == 'true')
 
     options = {}
-    search_attrs = search_attrs_params_permitted
+    search_attrs = search_attrs_params_hash
     @search_attrs = search_attrs
 
     @view_context = params[:view_context]
@@ -202,6 +202,16 @@ class ReportsController < UserBaseController
     render json: res
   end
 
+  def update_list
+    atl_params = params[:update_list]
+    list = Reports::ReportList.setup atl_params, current_user, current_admin
+
+    n = list.update_items_in_list
+
+    res = { flash_message_only: "Updated #{n} #{'item'.pluralize(n)} in the list" }
+    render json: res
+  end
+
   def remove_from_list
     atl_params = params[:remove_from_list]
     list = Reports::ReportList.setup atl_params, current_user, current_admin
@@ -355,8 +365,9 @@ class ReportsController < UserBaseController
     report_model.to_s.ns_underscore.gsub('__', '_')
   end
 
-  def search_attrs_params_permitted
-    params.require(:search_attrs).permit! if params[:search_attrs]
+  def search_attrs_params_hash
+    # Permit everything, since this is not used for assignment.
+    params.require(:search_attrs).permit!.to_h if params[:search_attrs]
   end
 
   def init_vars
