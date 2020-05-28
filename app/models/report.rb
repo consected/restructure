@@ -23,11 +23,14 @@ class Report < ActiveRecord::Base
   ReportTypes = %i[count regular_report search].freeze
   ReportIdAttribName = '_report_id_'
 
-  configure :view_options, with: %i[hide_table_names humanize_column_names hide_result_count hide_export_buttons hide_criteria_panel prevent_collapse_for_list
+  configure :view_options, with: %i[hide_table_names humanize_column_names
+                                    hide_result_count hide_export_buttons
+                                    hide_criteria_panel prevent_collapse_for_list
                                     view_as search_button_label]
   configure :list_options, with: [:hide_in_list]
   configure :view_css, with: %i[classes selectors]
   configure :component, with: [:options]
+  configure :column_options, with: %i[tags classes hide]
 
   attr_reader :clean_sql
   attr_reader :filtering_on
@@ -269,7 +272,9 @@ class Report < ActiveRecord::Base
     # on DDL to the Rails user is expected.
     self.class.connection.transaction do
       begin
-        @search_attr_values = @search_attr_values.to_unsafe_h.symbolize_keys
+        if @search_attr_values.respond_to? :to_unsafe_h
+          @search_attr_values = @search_attr_values.to_unsafe_h.symbolize_keys
+        end
         clean_sql = ActiveRecord::Base.send(:sanitize_sql_for_conditions, [sql, @search_attr_values])
       rescue StandardError => e
         logger.info "Unabled to sanitize sql: #{e.inspect}.\n#{e.backtrace.join("\n")}"
@@ -296,11 +301,7 @@ class Report < ActiveRecord::Base
       begin
         m_field = field_index('master_id')
         ids = nil
-        if m_field
-          ids = []
-          res.each_row { |r| ids << r[m_field] }
-        end
-        ids.uniq!
+        ids = res.map { |r| r[m_field] }.uniq! if m_field
         write_filtering_ids ids
 
         list = if filtering_previous
@@ -397,7 +398,7 @@ class Report < ActiveRecord::Base
 
     search_attr_values.slice!(*ks)
 
-    search_attr_values.symbolize_keys! unless search_attr_values.is_a?(ActionController::Parameters)
+    search_attr_values.symbolize_keys! if search_attr_values.respond_to? :symbolize_keys!
 
     search_attr_values.each do |k, v|
       all_blank &&= (k.to_s != ReportIdAttribName && (search_attributes[k.to_s].nil? || v.blank?))
@@ -442,7 +443,7 @@ class Report < ActiveRecord::Base
   end
 
   def alt_resource_name
-    "#{item_type || '_default'}__#{short_name}".downcase.id_underscore
+    "#{item_type&.id_underscore || '_default'}__#{short_name}".downcase.id_underscore
   end
 
   private
