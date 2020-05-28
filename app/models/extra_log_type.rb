@@ -120,12 +120,16 @@ class ExtraLogType < ExtraOptions
       if references.is_a? Array
         references.each do |refitem|
           # Make all keys singular, to simplify configurations
+          add_refitem = {}
           refitem.each do |k, _v|
             if k.to_s != k.to_s.singularize
               new_k = k.to_s.singularize.to_sym
-              refitem[new_k] = refitem.delete(k)
+              add_refitem[new_k] = refitem.delete(k)
             end
           end
+
+          refitem.merge! add_refitem
+
           refitem.each do |k, v|
             vi = v[:add_with] && v[:add_with][:extra_log_type]
             ckey = k.to_s
