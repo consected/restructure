@@ -9,7 +9,7 @@ module ActivityLogHandler
     # It is necessary to force the class name of the parent, since
     # the association will attempt to use the class within the ActivityLog module otherwise
     # which effectively refers the implementation back to itself
-    belongs_to parent_type, class_name: "::#{parent_class.name}"
+    belongs_to parent_type, class_name: "::#{parent_class.name}", optional: true
     has_many :item_flags, as: :item, inverse_of: :item
 
     after_initialize :set_action_when
@@ -242,14 +242,14 @@ module ActivityLogHandler
     da = extra_log_type_config.view_options[:data_attribute] if extra_log_type_config&.view_options
 
     if da
-      return self.class.format_data_attribute da, self
+      self.class.format_data_attribute da, self
     else
       n = if attribute_names.include? 'data'
             attributes['data']
           else
             extra_log_type_config.label || extra_log_type.to_s.humanize
           end
-      return n.to_s
+      n.to_s
     end
   end
 
@@ -723,7 +723,7 @@ module ActivityLogHandler
     eltc = extra_log_type_config
     if eltc.add_reference_if.is_a?(Hash) && eltc.add_reference_if.first
       res = eltc.calc_add_reference_if(self)
-      return !!res
+      !!res
     end
   end
 
