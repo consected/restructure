@@ -143,18 +143,16 @@ module ExternalIdHandler
     # SageAssignments for example expand on the master_build_with_random_id method
     # in order to pluck the next available pre-generated ID from a list.
     def master_build_with_next_id(owner, att = nil)
-      if att
-        # If attributes are provided, ensure they don't attempt to do anything bad
-        att = att.symbolize_keys
-        if att[external_id_attribute.to_sym].present?
-          # Fail if there is an attempt to set the value manually
-          obj = new master: owner
-          obj.errors.add external_id_attribute, 'is assigned automatically and can not be assigned manually'
-          return obj
-        end
-      else
-        # For the case when we are building one for edit form, no attributes are provided
-        return new master: owner
+      # For the case when we are building one for edit form, no attributes are provided
+      return new master: owner unless att
+
+      # If attributes are provided, ensure they don't attempt to do anything bad
+      att = att.to_h.symbolize_keys
+      if att[external_id_attribute.to_sym].present?
+        # Fail if there is an attempt to set the value manually
+        obj = new master: owner
+        obj.errors.add external_id_attribute, 'is assigned automatically and can not be assigned manually'
+        return obj
       end
 
       assign_next_available_id owner
