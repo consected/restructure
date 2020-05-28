@@ -156,9 +156,9 @@ RSpec.describe TrackersController, type: :controller do
         new_item = Tracker.find_by_master_id_and_protocol_id item.master_id, item.protocol_id
 
         new_attribs_downcase.each do |k, att|
-          val = item.send(k) || ''
+          val = new_item.send(k) || ''
           att ||= ''
-          expect(val).to eq(att), "Expected #{new_item.attributes.inspect} to equal #{new_attribs_downcase} "
+          expect(val).to eq(att), "Expected #{val} to equal #{att} for #{k} "
         end
       end
 
