@@ -99,6 +99,16 @@
     display: none !important;
   }
 
+  .report-results-block .report-results-inner {
+    overflow-y: hidden;
+    overflow-x: hidden;
+    height: auto;
+  }
+
+  .report-results-block .back-to-search-form {
+    display: none;
+  }
+
   /* No report buttons */
 
   body.reports .form-actions,
