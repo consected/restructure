@@ -80,10 +80,7 @@
         formatter = 'pattern_mask "' + pattern.gsub('\\', '\\\\') + '"';
       end
 
-      field_list = [e.external_id_attribute.to_s]
-      if e.extra_fields.present?
-        field_list += e.extra_fields.split(',').map(&:strip)
-      end
+      field_list = e.definition.field_list_array
 
 %>
 <%= render partial: 'common_templates/search_results_template', locals: {
