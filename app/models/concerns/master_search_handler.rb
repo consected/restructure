@@ -313,9 +313,9 @@ module MasterSearchHandler
     # @return [ActiveRecord::Relation] <description>
     def default_sort
       if results_limit
-        res.order(MasterRank).limit(results_limit)
+        order(MasterRank).limit(results_limit)
       else
-        res.order(MasterRank).all
+        order(MasterRank).all
       end
     end
   end
