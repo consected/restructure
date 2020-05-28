@@ -104,7 +104,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
       first_format_directive = tag_split[1]
       ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
 
-      unless d&.is_a?(Hash) && (d&.key?(tag_name) || d&.key?(tag_name.to_sym))
+      unless d&.is_a?(Hash) && (d&.key?(tag_name) || d&.key?(tag_name.to_sym)) || tag.start_with?('embedded_report_')
         if ignore_missing
           d = {}
           missing = true
@@ -212,7 +212,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
     text
   end
 
-  private
+  ##### The following methods are not intended for use outside this class ######
 
   #
   # Get the current tag value from the data, and format it
@@ -225,6 +225,14 @@ class Admin::MessageTemplate < ActiveRecord::Base
   def self.get_tag_value(data, tag_and_operator)
     tagp = tag_and_operator.split('::')
     tag = tagp.first
+
+    if tag.start_with? 'embedded_report_'
+      report_name = tag.sub('embedded_report_', '')
+      list_id = data[:original_item].respond_to?(:referring_record) && data[:original_item].referring_record&.id
+      list_id ||= data[:original_item][:id]
+      return Reports::Template.embedded_report report_name, list_id
+    end
+
     orig_val = data[tag] || data[tag.to_sym]
     res = orig_val || ''
 

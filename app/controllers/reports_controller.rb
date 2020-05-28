@@ -11,7 +11,7 @@ class ReportsController < UserBaseController
   before_action :set_master_and_user, only: %i[create update]
   after_action :clear_results, only: %i[show run]
 
-  helper_method :filters, :filters_on, :index_path, :permitted_params, :editable?, :creatable?
+  helper_method :filters, :filters_on, :index_path, :permitted_params, :filter_params_permitted
   ResultsLimit = Master.results_limit
 
   # List of available reports
@@ -223,14 +223,6 @@ class ReportsController < UserBaseController
   end
 
   protected
-
-  def editable?
-    @editable = @report.editable_data? && (current_admin || current_user&.can?(:edit_report_data))
-  end
-
-  def creatable?
-    @creatable = @report.editable_data? && (current_admin || current_user&.can?(:create_report_data))
-  end
 
   def set_master_and_user
     return unless @report_item

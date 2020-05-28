@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 module ReportsHelper
+  def editable?
+    @editable = @report.editable_data? && (current_admin || current_user&.can?(:edit_report_data))
+  end
+
+  def creatable?
+    @creatable = @report.editable_data? && (current_admin || current_user&.can?(:create_report_data))
+  end
+
   def report_edit_btn(id)
     link_to '', edit_report_path(id, report_id: @report.id, filter: filter_params_permitted), remote: true, class: 'edit-entity glyphicon glyphicon-pencil'
   end

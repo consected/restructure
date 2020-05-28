@@ -16,6 +16,7 @@
 
   <tbody>
     <% objects_instance.each do |list_item| %>
+     <% list_item.item&.current_user ||= current_user  if list_item.item&.respond_to? :current_user %>
       <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
         <td>
           <table>

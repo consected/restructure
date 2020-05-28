@@ -1,4 +1,8 @@
 <%
+  @report = report if local_assigns[:report]
+  @results = results if local_assigns[:results]
+  @outer_block_id = outer_block_id if local_assigns[:outer_block_id]
+
   col_classes = {}
   col_tags = {}
   col_hide = {}
