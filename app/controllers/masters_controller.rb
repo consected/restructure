@@ -109,10 +109,10 @@ class MastersController < UserBaseController
   end
 
   def search_params
-    p = params_nil_if_blank params
+    # Permit everything, since this is not used for assignment.
+    p = params.except(:utf8, :controller, :action).permit!.to_h
+    p = params_nil_if_blank p
     p = params_downcase p
-    # p = p.permit(:master_id, player_info_attributes: [:first_name, :middle_name, :last_name, :nick_name, :birth_date, :death_date, :start_year], player_contacts_attributes: [], pro_info_attributes: [], address_attributes: [], manual_investigation_attributes: [])
-    p = p.except(:utf8, :controller, :action).permit!
     logger.debug "Screened params: #{p.inspect}"
     p
   end

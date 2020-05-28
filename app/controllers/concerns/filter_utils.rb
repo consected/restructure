@@ -73,7 +73,7 @@ module FilterUtils
   end
 
   def filter_params_hash
-    @filter_params_hash ||= filter_params_permitted&.to_h
+    @filter_params_hash ||= filter_params_permitted&.to_h || {}
   end
 
   #

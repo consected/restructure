@@ -16,8 +16,8 @@ module OptionListHelper
       { selected: current_user&.app_type_id }
     elsif object_instance&.app_type_id.present?
       { selected: object_instance&.app_type_id }
-    elsif filter_params_hash&.first.first == 'app_type_id' && object_instance&.app_type_id.blank?
-      { selected: filter_params_hash.first.last }
+    elsif filter_params_hash&.first&.first == 'app_type_id' && object_instance&.app_type_id.blank?
+      { selected: filter_params_hash&.first&.last }
     else
       {}
     end

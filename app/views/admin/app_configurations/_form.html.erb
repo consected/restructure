@@ -9,7 +9,7 @@
   <div class="form-group">
     <%= f.label :name %>
     <% select_item_type = {}
-       select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first.first == 'name'    %>
+       select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == 'name'    %>
 
     <%= f.select :name, app_configuration_options, select_item_type %>
   </div>
@@ -21,7 +21,7 @@
     <%= f.label 'role name override' %>
     <%
       select_item_type = {}
-      select_item_type[:selected] = filter_params_hash.first.last if filter_params_permitted && filter_params_hash&.first.first.to_s == 'role_name'
+      select_item_type[:selected] = filter_params_hash.first.last if filter_params_permitted && filter_params_hash&.first&.first == 'role_name'
       select_item_type[:include_blank] = true
 
       options = role_name_options
