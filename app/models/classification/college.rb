@@ -18,13 +18,6 @@ class Classification::College < ActiveRecord::Base
   before_validation :either_admin_or_user, on: :create
   validates :name, presence: true, uniqueness: true
 
-  # Override standard #all method to pull from cache if available
-  def self.all
-    Rails.cache.fetch gen_cache_key do
-      super
-    end
-  end
-
   # Check if the college with 'name' exists. If so, return truthy value
   def self.exists?(name)
     res = all.exists? name: name.downcase
