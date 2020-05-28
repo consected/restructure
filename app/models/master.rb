@@ -330,7 +330,7 @@ class Master < ActiveRecord::Base
     res = if res.include? :none
             []
           else
-            res - self.class.crosswalk_attrs
+            res - self.class.crosswalk_attrs - [:master_id]
           end
 
     res.each do |id_attr|
