@@ -14,6 +14,7 @@ SET search_path = data_requests, ml_app;
           notes varchar,
           extra_log_type varchar,
           user_id integer,
+          created_by_user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
           activity_log_data_request_assignment_id integer
@@ -27,11 +28,12 @@ SET search_path = data_requests, ml_app;
           notes varchar,
           extra_log_type varchar,
           user_id integer,
+          created_by_user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
       );
 
-      CREATE FUNCTION log_activity_log_data_request_assignment_update() RETURNS trigger
+      CREATE OR REPLACE FUNCTION log_activity_log_data_request_assignment_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -44,6 +46,7 @@ SET search_path = data_requests, ml_app;
                       notes,
                       extra_log_type,
                       user_id,
+                      created_by_user_id,
                       created_at,
                       updated_at,
                       activity_log_data_request_assignment_id
@@ -56,6 +59,7 @@ SET search_path = data_requests, ml_app;
                       NEW.notes,
                       NEW.extra_log_type,
                       NEW.user_id,
+                      NEW.created_by_user_id,
                       NEW.created_at,
                       NEW.updated_at,
                       NEW.id
@@ -112,8 +116,8 @@ SET search_path = data_requests, ml_app;
           ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
       ALTER TABLE ONLY activity_log_data_request_assignments
           ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (data_request_assignment_id) REFERENCES data_request_assignments(id);
-      -- ALTER TABLE ONLY activity_log_data_request_assignments
-      --     ADD CONSTRAINT fk_rails_982635401e0 FOREIGN KEY (created_by_user_id) REFERENCES users(id);
+      ALTER TABLE ONLY activity_log_data_request_assignments
+          ADD CONSTRAINT fk_rails_982635401e0 FOREIGN KEY (created_by_user_id) REFERENCES users(id);
 
       ALTER TABLE ONLY activity_log_data_request_assignment_history
           ADD CONSTRAINT fk_activity_log_data_request_assignment_history_users FOREIGN KEY (user_id) REFERENCES users(id);
@@ -127,8 +131,8 @@ SET search_path = data_requests, ml_app;
       ALTER TABLE ONLY activity_log_data_request_assignment_history
           ADD CONSTRAINT fk_activity_log_data_request_assignment_history_activity_log_data_request_assignments FOREIGN KEY (activity_log_data_request_assignment_id) REFERENCES activity_log_data_request_assignments(id);
       
-      -- ALTER TABLE ONLY activity_log_data_request_assignment_history
-      --     ADD CONSTRAINT fk_activity_log_data_request_assignment_history_cb_users FOREIGN KEY (created_by_user_id) REFERENCES users(id);
+      ALTER TABLE ONLY activity_log_data_request_assignment_history
+          ADD CONSTRAINT fk_activity_log_data_request_assignment_history_cb_users FOREIGN KEY (created_by_user_id) REFERENCES users(id);
 
 
       GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA data_requests TO fphs;

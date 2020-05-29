@@ -21,12 +21,23 @@ div#master-search-accordion {
   box-shadow: none;
 }
 
-.activity-logs-header .action-buttons {
-  text-align: left;
+.activity-logs-header .action-buttons a {
+  font-size: 20px;
 }
 
 .sublist-controls .sublist-layout-selectors {
   display: none !important;
+}
+
+.common-template-item .list-group,
+.new-block .list-group {
+  background-color: white;
+}
+
+.list-group-item.edit-field-container input,
+#master_results_block form .list-group-item.edit-field-container select,
+.list-group-item.edit-field-container textarea {
+  background-color: rgb(248, 248, 248);
 }
 
 .panel.panel-default.activity-logs-item-block {
@@ -192,7 +203,8 @@ table.table.report-table td {
   font-size: 15px;
 }
 
-.edit-field-container .input-sm[data-attr-name="project_title"] {
+.edit-field-container .input-sm[data-attr-name="project_title"],
+li.dynamic-model--data-request-project_title.result-field-container strong {
   font-size: 23px;
   font-weight: bold;
   min-height: 38px;
@@ -200,4 +212,40 @@ table.table.report-table td {
 
 hr {
   border-top: 3px solid rgb(228, 228, 228);
+}
+
+td.report-el {
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+}
+
+td.report-el.datadict-field-label {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 13px !important;
+}
+
+td.report-el.datadict-field-label pre,
+td.report-el.datadict-field-attributes pre {
+  white-space: pre-wrap;
+  word-break: keep-all;
+  min-width: 25vw;
+  max-width: 25vw;
+  width: 25vw;
+}
+
+td.report-el pre {
+  padding: 0;
+}
+
+#modal_results_block .report-results-inner {
+  overflow-y: hidden;
+}
+
+.model-reference-disabled {
+  display: none;
+}
+
+ul.list-group > div.model-reference-result.is-in-show-viewable {
+  border-left: 3px solid rgb(192, 192, 192);
+  margin-left: 21px;
 }
