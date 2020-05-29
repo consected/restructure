@@ -29,7 +29,9 @@
   <tbody>
     <% @reports.each do |list_item| %>
       <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
-        <td><%= admin_edit_btn list_item.id%> </td>
+        <td class="edit-btn-cell"><%= admin_edit_btn list_item.id %>
+        &nbsp;
+        <%= admin_edit_btn list_item.id, copy: list_item %> </td>
 
         <td><%= link_to  list_item.name, report_path(list_item.id), target: 'report', title: 'opens in a new window' %></td>
         <td><%= list_item.item_type %></td>
