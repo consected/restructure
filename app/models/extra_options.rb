@@ -102,7 +102,7 @@ class ExtraOptions
           value: 'default value | now() | today()',
           edit_as: {
             field_type: 'alternative field name to use for selection of edit field',
-            alt_options: 'optional specification of options for a select_ type field to use instead of general selection specified list'
+            alt_options: 'optional specification of options for a select_ type field to use instead of general selection specified list. {Label: value, ...} or [Label,...]. For the latter the Label is downcased automatically to generate the value'
           },
           calculate_with: {
             sum: []
@@ -198,11 +198,9 @@ class ExtraOptions
 
     @config_obj = config_obj
     config.each do |k, v|
-      begin
-        send("#{k}=", v)
-      rescue NoMethodError
-        raise FphsException, "Prevented a bad configuration of #{self.class.name} in #{config_obj.class.name} (#{config_obj.respond_to?(:human_name) ? config_obj.human_name : config_obj.id}). #{k} is not recognized as a valid attribute."
-      end
+      send("#{k}=", v)
+    rescue NoMethodError
+      raise FphsException, "Prevented a bad configuration of #{self.class.name} in #{config_obj.class.name} (#{config_obj.respond_to?(:human_name) ? config_obj.human_name : config_obj.id}). #{k} is not recognized as a valid attribute."
     end
     self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
     self.caption_before ||= {}
@@ -251,6 +249,19 @@ class ExtraOptions
 
     self.field_options ||= {}
     self.field_options = self.field_options.symbolize_keys
+
+    # Allow field_options.edit_as.alt_options to be an array
+    self.field_options.each do |k, v|
+      ao = nil
+      ao = v[:edit_as][:alt_options] if v && v[:edit_as]
+      next unless ao.is_a? Array
+
+      new_ao = {}
+      ao.each do |aov|
+        new_ao[aov.to_sym] = aov.downcase
+      end
+      self.field_options[k][:edit_as][:alt_options] = new_ao
+    end
 
     self.creatable_if ||= {}
     self.creatable_if = self.creatable_if.symbolize_keys
