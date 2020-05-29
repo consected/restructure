@@ -187,7 +187,7 @@ module ActivityLogHandler
         v = attributes[n]
         if v.is_a? Date
           # Set the date portion of the date / time pair, but don't store it yet
-          dtp = DateTime.new(v.year, v.month, v.day, 0, 0, 0, v.send(:zone))
+          dtp = DateTime.new(v.year, v.month, v.day, 0, 0, 0, Time.current.send(:zone))
         elsif v.is_a? Time
           if dtp
             # A date portion of a date / time pair is present, so add the time and store to the result
