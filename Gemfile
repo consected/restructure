@@ -30,23 +30,23 @@ gem 'crass', '~> 1.0.4'
 gem 'kramdown'
 
 group :development do
-  gem 'web-console', '~> 2.0'
   gem 'listen'
+  gem 'web-console'
 end
 
 group :development, :test, :ipa_test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  gem 'byebug'
-  gem 'rspec-rails'
-  gem 'webrick'
   gem 'brakeman', require: false
   gem 'bundler-audit'
+  gem 'byebug'
+  # gem 'debase'
   gem 'jasmine-rails'
-  gem 'spring'
   gem 'parallel_tests'
+  gem 'puma'
+  gem 'rspec-rails'
+  # gem 'ruby-debug-ide'
+  gem 'spring'
   gem 'spring-commands-parallel-tests'
-  gem 'ruby-debug-ide'
-  gem 'debase'
 end
 
 group :test do
