@@ -17,13 +17,13 @@ Rails.application.configure do
   config.eager_load = false
 
   # Configure public file server for tests with Cache-Control for performance.
-  config.public_file_server.enabled = true
-  config.public_file_server.headers = {
-    'Cache-Control' => "public, max-age=#{1.hour.to_i}"
-  }
+  # config.public_file_server.enabled = true
+  # config.public_file_server.headers = {
+  #   'Cache-Control' => "public, max-age=#{1.hour.to_i}"
+  # }
 
   config.i18n.fallbacks = [I18n.default_locale]
-  
+
   # Show full error reports and disable caching.
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = false
@@ -34,8 +34,8 @@ Rails.application.configure do
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
 
-  # Store uploaded files on the local file system in a temporary directory
-  config.active_storage.service = :test
+  # # Store uploaded files on the local file system in a temporary directory
+  # config.active_storage.service = :test
 
   config.action_mailer.perform_caching = false
 
