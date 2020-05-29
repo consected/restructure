@@ -15,5 +15,9 @@
 }
 
 .edit_admin_page_layout .form-group[data-out-attr-name="description"] {
-    display: block;
+  display: block;
+}
+
+td.edit-btn-cell {
+  min-width: 80px;
 }

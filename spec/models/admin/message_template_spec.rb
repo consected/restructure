@@ -1,11 +1,12 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Admin::MessageTemplate, type: :model do
-
   include MasterSupport
   include ModelSupport
   include PlayerInfoSupport
-
+  include ReportSupport
 
   before :all do
     create_admin
@@ -17,22 +18,20 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     Admin::MessageTemplate.where(name: 'test email content').update_all(name: "test old content #{l}")
   end
 
-  it "generates a message" do
-
+  it 'generates a message' do
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
     layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name}}.</p>'
     Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
-    res = layout.generate content_template_name: 'test email content', data: {master_id: @master.id, 'name' => 'test name'}
+    res = layout.generate content_template_name: 'test email content', data: { master_id: @master.id, 'name' => 'test name' }
     expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{@master.id}. This is a name: Test Name.</p></div></body></html>"
 
     expect(res).to eq expected_text
   end
 
-  it "generates a message with master and associations data" do
-
+  it 'generates a message with master and associations data' do
     create_item
     let_user_create :player_contacts
     master = @player_info.master
@@ -65,46 +64,56 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     expect(res).to eq expected_text
   end
 
-  it "generates a message with a text template" do
-
+  it 'generates a message with a text template' do
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
     layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name}}.</p>'
     # Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
-    expect {
-      layout.generate data: {master_id: @master.id, 'name' => 'test name'}
-    }.to raise_error FphsException
+    expect do
+      layout.generate data: { master_id: @master.id, 'name' => 'test name' }
+    end.to raise_error FphsException
 
-    res = layout.generate content_template_text: t, data: {master: @master, 'name' => 'test name bob'}
+    res = layout.generate content_template_text: t, data: { master: @master, 'name' => 'test name bob' }
     expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{@master.id}. This is a name: Test Name Bob.</p></div></body></html>"
 
     expect(res).to eq expected_text
   end
 
-  it "provides formatting options for substituted fields" do
-
+  it 'provides formatting options for substituted fields' do
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
     layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase}}.</p>'
 
-    res = layout.generate content_template_text: t, data: {master_id: @master.id, 'name' => 'test name bob'}
+    res = layout.generate content_template_text: t, data: { master_id: @master.id, 'name' => 'test name bob' }
     expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{@master.id}. This is a name: TEST NAME BOB.</p></div></body></html>"
 
     expect(res).to eq expected_text
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase::3}}.</p>'
 
-    res = layout.generate content_template_text: t, data: {master_id: @master.id, 'name' => 'test name bob'}
+    res = layout.generate content_template_text: t, data: { master_id: @master.id, 'name' => 'test name bob' }
     expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{@master.id}. This is a name: TEST.</p></div></body></html>"
 
     expect(res).to eq expected_text
-
   end
 
-  it "stress tests creating many" do
+  it 'embeds reports' do
+    create_reports
+    rn = @report1.alt_resource_name
 
+    t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
+    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
+
+    t = "<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase}}.</p>{{embedded_report_#{rn}}}<br/>"
+
+    res = layout.generate content_template_text: t, data: { master_id: @master.id, 'name' => 'test name bob', id: -1, original_item: { id: -1 } }
+
+    expect(res).to include '<table '
+  end
+
+  it 'stress tests creating many' do
     test_times = 10
 
     txt = "A short message with a generated URL https://footballplayershealth.harvard.edu/join-us/?test_id={{ids.msid}}\nThanks!"
@@ -132,9 +141,5 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     puts "It took #{t} seconds to create #{test_times} templates"
 
     expect(t).to be < 2
-
-
   end
-
-
 end

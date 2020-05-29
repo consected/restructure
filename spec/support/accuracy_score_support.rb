@@ -5,17 +5,17 @@ module AccuracyScoreSupport
   def list_valid_attribs
     res = []
 
-    (1..5).each do |l|
+    (1001..1005).each do |l|
       res << {
         name: "Score #{l}",
-        value: "val#{l}",
+        value: l.to_s,
         disabled: false
       }
     end
-    (1..5).each do |l|
+    (1006..1010).each do |l|
       res << {
         name: "DisScore #{l}",
-        value: "disval#{l}",
+        value: l.to_s,
         disabled: true
       }
     end
@@ -36,7 +36,7 @@ module AccuracyScoreSupport
   def list_invalid_update_attribs
     [
       {
-        value: 'anynewvalue'
+        value: 1001
       },
       {
         value: nil
