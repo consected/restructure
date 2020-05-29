@@ -431,10 +431,15 @@ _fpa.form_utils = {
     for (var i = 0; i < ops.length; i++) {
       var op = ops[i];
 
-      if (op == 'capitalize')
+      if (op == 'titleize') {
+        if (typeof res == 'string') {
+          res = res.titleize()
+        }
+      }
+      else if (op == 'no_html_tag')
+        res
+      else if (op == 'capitalize')
         res = res.capitalize()
-      else if (op == 'titleize')
-        res = res.titleize()
       else if (op == 'uppercase')
         res = res.toUpperCase()
       else if (op == 'lowercase')
@@ -483,8 +488,8 @@ _fpa.form_utils = {
         res = megamark(res)
       else if (op == 'ignore_missing')
         res = res || ''
-      else if (Int(op) != 0)
-        res = res[0..op.to_i]
+      else if (Number(op) != 0)
+        res = res.slice(0, Number(op))
     }
 
     return res;
@@ -525,6 +530,10 @@ _fpa.form_utils = {
           var ignore_missing = 'show_blank'
         }
 
+        if (formatters.indexOf('no_html_tag') >= 0) {
+          var no_html_tag = true;
+        }
+
 
         if (elsplit.length > 0) {
 
@@ -535,6 +544,13 @@ _fpa.form_utils = {
 
           if (el0) {
             got = new_data[el0];
+          }
+
+          // The value was not found since the new_data doesn't have the el0 key
+          // and this is not a referenced request like el0.el1
+          // and there is an embedded_item, so check to see if we should be returning that instead
+          if (!got && !el1 && !new_data.hasOwnProperty(el0) && new_data.embedded_item) {
+            got = new_data.embedded_item[el0];
           }
 
           if (got && el1) {
@@ -558,7 +574,10 @@ _fpa.form_utils = {
         else if (formatters) {
           got = _fpa.form_utils.format_substitution(got, formatters, tag_name);
         }
-        got = '<em class="all_caps">' + got + '</em>';
+
+        if (!no_html_tag) {
+          got = '<em class="all_caps">' + got + '</em>';
+        }
 
         text = text.replace(el, got);
 
