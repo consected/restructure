@@ -31,12 +31,23 @@ module Formatter
       end
 
       def format_data_attribute(attr_conf, obj)
-        attr_conf = [attr_conf] if attr_conf.is_a? String
+        if attr_conf.is_a? String
+          return Admin::MessageTemplate.substitute attr_conf, obj, tag_subs: nil if attr_conf.include?('{{')
+
+          attr_conf = [attr_conf]
+        end
 
         res = attr_conf.map do |i|
-          res = if obj.attribute_names.include?(i)
-                  val = obj.attributes[i]
+          got = false
+          if obj.attributes.keys.include? i
+            val = obj.attributes[i]
+            got = true
+          elsif obj.respond_to? i
+            val = obj.send(i)
+            got = true
+          end
 
+          res = if got
                   fs = Classification::GeneralSelection.field_selections_hashes
                   rn = "#{obj.resource_name}_#{i}".to_sym
                   item = fs[rn] && fs[rn][val] && fs[rn][val][:name]
