@@ -228,9 +228,18 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
     if tag.start_with? 'embedded_report_'
       report_name = tag.sub('embedded_report_', '')
-      list_id = data[:original_item].respond_to?(:referring_record) && data[:original_item].referring_record&.id
-      list_id ||= data[:original_item][:id]
-      return Reports::Template.embedded_report report_name, list_id
+      # Find the source item to call the report with
+      if data[:original_item].respond_to?(:referring_record) && data[:original_item].referring_record
+        list_item = data[:original_item].referring_record
+        list_id = list_item.id
+      else
+        list_item = data[:original_item]
+        list_id = list_item[:id]
+      end
+
+      list_type = list_item.class.name
+
+      return Reports::Template.embedded_report report_name, list_id, list_type
     end
 
     orig_val = data[tag] || data[tag.to_sym]
@@ -275,6 +284,9 @@ class Admin::MessageTemplate < ActiveRecord::Base
         res = res.join("\n") if res.is_a? Array
       elsif op == 'join_with_2newlines'
         res = res.join("\n\n") if res.is_a? Array
+      elsif op == 'plaintext'
+        res = ActionController::Base.helpers.sanitize(res)
+        res = res.gsub("\n", '<br>').html_safe
       elsif op == 'markup'
         res = Kramdown::Document.new(res).to_html.html_safe
       elsif op == 'ignore_missing'

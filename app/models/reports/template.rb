@@ -3,13 +3,13 @@
 module Reports
   class Template
     # Embed a report
-    def self.embedded_report(report_name, list_id)
+    def self.embedded_report(report_name, list_id, list_type)
       t = Reports::Template.new
-      t.embedded_report report_name, list_id
+      t.embedded_report report_name, list_id, list_type
     end
 
-    def embedded_report(report_name, list_id)
-      search_attrs = { list_id: list_id }
+    def embedded_report(report_name, list_id, list_type)
+      search_attrs = { list_id: list_id, list_type: list_type }
       report = Report.active.find_category_short_name report_name
       results = report.run search_attrs
       result_tables = report.result_tables_by_index || []
