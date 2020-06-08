@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "#{::Rails.root}/spec/support/seeds"
+require './db/table_generators/external_identifiers_table.rb'
+
 
 $STARTED_AT = DateTime.now.to_i
 
@@ -12,6 +14,10 @@ module SetupHelper
 
   def self.db_name
     "fpa_test#{ENV['TEST_ENV_NUMBER']}"
+  end
+
+  def self.clear_delayed_job
+    Delayed::Job.delete_all
   end
 
   def self.setup_app_dbs
@@ -75,6 +81,7 @@ module SetupHelper
   end
 
   def self.reload_configs
+    Rails.logger.info 'Reload configs'
     AppControl.define_models
     DynamicModel.enable_active_configurations
     ItemFlag.enable_active_configurations
@@ -84,19 +91,26 @@ module SetupHelper
   end
 
   def self.feature_setup(_options = {})
+    Rails.logger.info 'Feature setup'
     Seeds.setup
     # MasterDataSupport.create_data_set_outside_tx options
   end
 
+  def self.setup_al_player_contact_emails
+    Rails.logger.info 'Setting up al player contact emails'
+    return if ActivityLog.connection.table_exists? 'activity_log_player_contact_emails'
+
+    TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true, 'emailed_when')
+    Rails.cache.clear
+  end
+
   # Setup Activity Log Player Contact Phones
   def self.setup_al_player_contact_phones
+    Rails.logger.info 'Setting up al player contact phones'
     # Ensure that we seed the database, otherwise the PlayerContactPhonesController class does not exist
-    RSpec.configure do |c|
-      c.before do
-        Seeds::GeneralSelections.setup
-        Seeds::ActivityLogPlayerContactPhone.setup
-      end
-    end
+
+    Seeds::GeneralSelections.setup
+    Seeds::ActivityLogPlayerContactPhone.setup
 
     reload_configs
 
@@ -165,6 +179,15 @@ module SetupHelper
     cname.constantize
 
     res
+  end
+
+  def self.setup_ext_identifier(r = 'test7', implementation_table_name: nil, implementation_attr_name: nil)
+    Rails.logger.info "Setting up external identifier #{r}"
+    @implementation_table_name = implementation_table_name || "test_external_#{r}_identifiers"
+    @implementation_attr_name = implementation_attr_name || "test_#{r}_id"
+    unless ActiveRecord::Base.connection.table_exists? @implementation_table_name
+      TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
+    end
   end
 
   def self.setup_test_app

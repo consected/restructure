@@ -13,18 +13,12 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
     'file1'
   end
 
-  before :all do
+  before :example do
     @other_users = []
     @other_users << create_user.first
     @other_users << create_user.first
     @other_users << create_user.first
 
-    seed_database && ::ActivityLog.define_models
-    # setup_nfs_store
-    # setup_deidentifier
-  end
-
-  before :each do
     setup_nfs_store
     setup_deidentifier
     setup_container_and_al

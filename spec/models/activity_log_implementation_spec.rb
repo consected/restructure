@@ -9,8 +9,8 @@ RSpec.describe 'Activity Log implementation', type: :model do
   include ModelSupport
   include PlayerContactSupport
 
-  before :all do
-    SetupHelper.setup_al_player_contact_phones
+  before :example do
+    # SetupHelper.setup_al_player_contact_phones
     # ::ActivityLog.define_models
     create_user
     setup_access :player_contacts

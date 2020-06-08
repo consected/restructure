@@ -8,8 +8,8 @@ RSpec.describe Master, type: :model do
   include ModelSupport
   include MasterDataSupport
 
-  before(:all) do
-    seed_database
+  before(:example) do
+    # seed_database
 
     create_data_set
 
@@ -234,11 +234,8 @@ RSpec.describe Master, type: :model do
   end
 
   describe 'contact search' do
-    before(:all) do
+    before(:example) do
       create_data_set
-    end
-
-    before(:each) do
       @contact_1 = @full_master_record.player_contacts.create!(data: '(617)794-1213', rec_type: 'phone', rank: 10)
       @contact_2 = @full_master_record.player_contacts.create!(data: '(617)223-1213 ext 1621', rec_type: 'phone', rank: 5)
       @contact_3 = @full_master_record.player_contacts.create!(data: 'some.email@testdomain.com', rec_type: 'email', rank: 10)

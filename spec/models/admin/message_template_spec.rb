@@ -8,10 +8,9 @@ RSpec.describe Admin::MessageTemplate, type: :model do
   include PlayerInfoSupport
   include ReportSupport
 
-  before :all do
+  before :example do
     create_admin
     create_user
-    seed_database
     create_master
     l = Admin::MessageTemplate.last.id
     Admin::MessageTemplate.where(name: 'test email layout').update_all(name: "test old layout #{l}")

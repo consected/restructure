@@ -14,19 +14,20 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
   include ModelSupport
   include PlayerContactSupport
 
-  before :all do
+  before :context do
     SetupHelper.setup_al_gen_tests AlNameGenTest, 'elt', 'player_contact'
-    seed_database
-    ::ActivityLog.define_models
-    Seeds::ActivityLogPlayerContactPhone.setup
+    # seed_database
+    # ::ActivityLog.define_models
+    # Seeds::ActivityLogPlayerContactPhone.setup
+  end
+
+  before :each do
     create_admin
     create_user
     setup_access :player_contacts
     setup_access :activity_log__player_contact_phones
     create_item(data: rand(10_000_000_000_000_000), rank: 10)
-  end
 
-  before :each do
     @activity_log = al = ActivityLog.active.where(name: al_name).first
 
     raise "Activity Log #{al_name} not set up" if al.nil?

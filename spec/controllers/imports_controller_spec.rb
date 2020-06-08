@@ -38,8 +38,8 @@ RSpec.describe ImportsController, type: :controller do
   let(:invalid_attributes) do
   end
 
-  before :all do
-    seed_database
+  before :example do
+    # seed_database
     @admin, = create_admin
     @user, = create_user
   end

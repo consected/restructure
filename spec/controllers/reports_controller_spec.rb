@@ -8,7 +8,7 @@ RSpec.describe ReportsController, type: :controller do
   include MasterSupport
   include ReportSupport
 
-  before :all do
+  before :example do
     create_admin
     create_user
     create_reports

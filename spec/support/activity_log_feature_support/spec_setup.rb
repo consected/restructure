@@ -4,6 +4,7 @@ require "#{::Rails.root}/spec/support/activity_log_feature_support/activity_log_
 module SpecSetup
   def setup_database
     # puts 'setup database'
+    Rails.logger.info 'Setting up database in SpecSetup'
 
     # Clean up old activity log definitions
     create_admin unless @admin

@@ -9,7 +9,7 @@ RSpec.describe 'DynamicModel::ZeusShortLink', type: :model do
   include PlayerContactSupport
   include BulkMsgSupport
 
-  before :all do
+  before :example do
     create_admin
     create_user
     import_bulk_msg_app

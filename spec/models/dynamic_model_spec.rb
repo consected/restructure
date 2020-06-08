@@ -12,8 +12,8 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
   include PlayerContactSupport
   include BulkMsgSupport
 
-  before :all do
-    Seeds.setup
+  before :example do
+    # Seeds.setup
 
     @user0, = create_user
     create_admin

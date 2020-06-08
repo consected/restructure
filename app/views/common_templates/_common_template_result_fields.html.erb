@@ -6,11 +6,11 @@
   {{#if (fpa_state_item 'dialog_before' (underscore name) key)}}
     {{{fpa_state_item 'dialog_before' (underscore name) key}}}
   {{else if (fpa_state_item 'caption_before' (underscore name) key 'show_caption')}}
-  <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}}">
+  <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}">
     {{{fpa_state_item 'caption_before' (underscore name) key 'show_caption'}}}
   </li>
   {{else if (fpa_state_item 'caption_before' (underscore name) key 'caption')}}
-  <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}}">
+  <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}">
     {{{fpa_state_item 'caption_before' (underscore name) key 'caption'}}}
   </li>
   {{/if}}

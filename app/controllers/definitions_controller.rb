@@ -20,7 +20,7 @@ class DefinitionsController < ApplicationController
     def_type = params[:id]
     j = get_def def_type
 
-    render json: j
+    render json: j unless performed?
   end
 
   def create
@@ -30,7 +30,7 @@ class DefinitionsController < ApplicationController
       j[dt] = get_def(dt)
     end
 
-    render json: j
+    render json: j unless performed?
   end
 
   private

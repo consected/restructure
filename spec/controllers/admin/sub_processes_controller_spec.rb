@@ -37,7 +37,7 @@ RSpec.describe Admin::SubProcessesController, type: :controller do
     :classification_sub_process
   end
 
-  before(:all) do
+  before(:example) do
     TrackerHistory.destroy_all
     Tracker.destroy_all
     Classification::Protocol.connection.execute "

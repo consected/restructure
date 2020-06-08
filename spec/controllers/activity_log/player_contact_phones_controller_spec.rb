@@ -28,10 +28,10 @@ RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
     invalid_attribs
   end
 
-  before(:all) do
-    SetupHelper.setup_al_player_contact_phones
+  before(:example) do
+    # SetupHelper.setup_al_player_contact_phones
 
-    seed_database
+    # seed_database
 
     create_admin
     create_user

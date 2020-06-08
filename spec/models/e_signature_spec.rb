@@ -8,7 +8,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
   include ESignImportConfig
 
   
-  before :all do
+  before :example do
     ESignImportConfig.import_config
     setup_config
 
@@ -49,7 +49,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
   end
 
   describe 'validations performed to check integrity of the document and signer' do
-    before :all do
+    before :example do
       if @good_password.blank?
         raise 'Password can not be blank for successful tests'
       end

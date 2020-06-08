@@ -64,7 +64,7 @@ end
 require "#{::Rails.root}/spec/support/master_support.rb"
 require "#{::Rails.root}/spec/support/model_support.rb"
 
-Dir[Rails.root.join('spec/support/*.rb')].each { |f| require f }
+Dir[Rails.root.join('spec/support/*.rb')].sort.each { |f| require f }
 Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 
 SetupHelper.setup_byebug
@@ -80,8 +80,13 @@ RSpec.configure do |config|
   config.before(:suite) do
     # Do some setup that could impact all tests through the availability of master associations
 
+    SetupHelper.clear_delayed_job
+
     # Seeds.setup
     Seeds::ActivityLogPlayerContactPhone.setup
+    SetupHelper.setup_al_player_contact_emails
+    SetupHelper.setup_ext_identifier
+    SetupHelper.setup_test_app
 
     als = ActivityLog.active.where(item_type: 'zeus_bulk_message')
     als.each do |a|

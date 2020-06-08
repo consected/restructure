@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require './db/table_generators/external_identifiers_table.rb'
 
 RSpec.describe Admin::ExternalIdentifiersController, type: :controller do
   include MasterSupport
@@ -23,22 +22,17 @@ RSpec.describe Admin::ExternalIdentifiersController, type: :controller do
     'admin/common_templates/_item'
   end
 
-  before(:all) do
-    seed_database
+  before(:context) do
     @path_prefix = '/admin'
-
-    r = 'test7'
-    @implementation_table_name = "test_external_#{r}_identifiers"
-    @implementation_attr_name = "test_#{r}_id"
-    unless ActiveRecord::Base.connection.table_exists? @implementation_table_name
-      TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
-    end
   end
 
   before_each_login_admin
 
   before :each do
     disable_existing_records :all, current_admin: @admin
+    r = 'test7'
+    @implementation_table_name = "test_external_#{r}_identifiers"
+    @implementation_attr_name = "test_#{r}_id"
   end
 
   it_behaves_like 'a standard admin controller'

@@ -37,7 +37,7 @@ RSpec.describe Admin::ProtocolEventsController, type: :controller do
     :classification_protocol_event
   end
 
-  before(:all) do
+  before(:example) do
     TrackerHistory.destroy_all
     Tracker.destroy_all
     Classification::Protocol.connection.execute "
@@ -70,7 +70,7 @@ RSpec.describe Admin::ProtocolEventsController, type: :controller do
   describe 'Ensure authentication' do
     before_each_login_admin
     it 'returns a result' do
-      get :index, params: {protocol_id: @protocol_id, sub_process_id: @sub_process_id}
+      get :index, params: { protocol_id: @protocol_id, sub_process_id: @sub_process_id }
       expect(response).to have_http_status(200), "Attempting #{@admin}"
     end
   end
@@ -81,7 +81,7 @@ RSpec.describe Admin::ProtocolEventsController, type: :controller do
     it 'assigns all items as @vars' do
       create_items
 
-      get :index, params: {protocol_id: @protocol_id, sub_process_id: @sub_process_id}
+      get :index, params: { protocol_id: @protocol_id, sub_process_id: @sub_process_id }
 
       # Do this, since we can't guarantee the order of any particular controller response
       @created_items.each do |ci|
@@ -105,7 +105,7 @@ RSpec.describe Admin::ProtocolEventsController, type: :controller do
     before_each_login_admin
 
     it 'assigns a new item as @var' do
-      get :new, params: {protocol_id: @protocol_id, sub_process_id: @sub_process_id}
+      get :new, params: { protocol_id: @protocol_id, sub_process_id: @sub_process_id }
       expect(assigns(object_symbol)).to be_a_new(object_class)
     end
   end

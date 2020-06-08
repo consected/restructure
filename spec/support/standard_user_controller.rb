@@ -16,8 +16,8 @@ shared_examples 'a standard user controller' do
     invalid_attribs
   end
 
-  before :all do
-    seed_database
+  before :example do
+    # seed_database
     create_admin
     create_user
     setup_access :addresses

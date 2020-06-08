@@ -7,7 +7,7 @@ module ModelSupport
   include ::UserSupport
 
   def seed_database
-    Rails.logger.info 'NOT Starting seed setup'
+    Rails.logger.info 'Starting seed setup in Model Support'
     SeedSupport.setup
   end
 
@@ -41,5 +41,6 @@ module ModelSupport
   end
 
   # Force a database seed at config time, to avoid issues later
+  Rails.logger.info 'Starting seed setup in setup of Master Support'
   SeedSupport.setup
 end

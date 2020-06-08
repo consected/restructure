@@ -7,7 +7,7 @@ module MasterSupport
   include ::UserSupport
 
   def seed_database
-    Rails.logger.info 'Starting seed setup'
+    Rails.logger.info 'Starting seed setup in Master Support'
     SeedSupport.setup
   end
 
