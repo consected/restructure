@@ -213,7 +213,8 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
     # The embedded_item params are only used in an update. Create actions are handled separately
     if @embedded_item
-      res << { embedded_item: @implementation_class.refine_permitted_params(@embedded_item.class.permitted_params) }
+      epp = @embedded_item.class.permitted_params
+      res << { embedded_item: @embedded_item.class.refine_permitted_params(epp) }
     end
 
     res
@@ -255,7 +256,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
     handle_extra_log_type if action_name == 'edit'
     unless object_instance.allows_current_user_access_to? :edit
       not_editable
-      return
+      nil
     end
   end
 
@@ -263,7 +264,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
     handle_extra_log_type if action_name == 'new'
     unless object_instance.allows_current_user_access_to? :create
       not_creatable
-      return
+      nil
     end
   end
 
