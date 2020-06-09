@@ -4,6 +4,13 @@ module DynamicModelHandler
   extend ActiveSupport::Concern
 
   class_methods do
+    def final_setup
+      Rails.logger.debug "Running final setup for #{name}"
+      ro = result_order
+      ro = { id: :desc } if result_order.blank?
+      default_scope -> { order ro }
+    end
+
     # Scope method to filter results based on whether they can be viewed according to user access controls
     # and default option config showable_if rules
     # @return [ActiveRecord::Relation] scope to provide rules filtered according to the calculated rules
@@ -46,11 +53,9 @@ module DynamicModelHandler
     end
 
     def result_order
-      @result_order = definition.result_order
+      return @result_order if @result_order
 
-      default_scope -> { order ro } unless @result_order.blank?
-
-      @result_order
+      @result_order = definition.result_order || ''
     end
 
     def no_master_association
@@ -189,7 +194,7 @@ module DynamicModelHandler
     dopt = definition_default_options
     if dopt.add_reference_if.is_a?(Hash) && dopt.add_reference_if.first
       res = dopt.calc_add_reference_if(self)
-      return !!res
+      !!res
     end
   end
 end

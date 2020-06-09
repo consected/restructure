@@ -584,7 +584,7 @@ module CalcActions
       # This is often an activity_log record referring to the current activity_log
       # If no referring record exists, the result is nil
       from_instance = @current_instance.referring_record
-      val = from_instance&.attributes[val_item_value]
+      val = from_instance && from_instance.attributes[val_item_value]
 
     elsif val_item_key == :this_references || val_item_key == :parent_references
       # Get possible values from records referenced by this instance, or this instance's referring record (parent)

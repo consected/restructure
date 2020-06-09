@@ -40,6 +40,11 @@ module ActivityLogHandler
   end
 
   class_methods do
+    def final_setup
+      Rails.logger.debug "Running final setup for #{name}"
+      default_scope -> { order id: :desc }
+    end
+
     def is_activity_log
       true
     end
@@ -346,7 +351,7 @@ module ActivityLogHandler
     res
   end
 
-  def model_references(reference_type: :references, active_only: false)
+  def model_references(reference_type: :references, active_only: false, ref_order: nil)
     res = []
     if reference_type == :references
       refs = extra_log_type_config.references
@@ -364,17 +369,20 @@ module ActivityLogHandler
                 ModelReference.find_references self,
                                                to_record_type: ref_type,
                                                filter_by: ref_config[:filter_by],
-                                               without_reference: without_reference
+                                               without_reference: without_reference,
+                                               ref_order: ref_order
               elsif f == 'master'
                 ModelReference.find_references master,
                                                to_record_type: ref_type,
                                                filter_by: ref_config[:filter_by],
-                                               without_reference: without_reference
+                                               without_reference: without_reference,
+                                               ref_order: ref_order
               elsif f == 'any'
                 ModelReference.find_references master,
                                                to_record_type: ref_type,
                                                filter_by: ref_config[:filter_by],
-                                               without_reference: true
+                                               without_reference: true,
+                                               ref_order: ref_order
               end
 
         if got
@@ -690,7 +698,7 @@ module ActivityLogHandler
     if eltc.editable_if.is_a?(Hash) && eltc.editable_if.first
 
       # Generate an old version of the object prior to changes
-      old_obj = dup
+      old_obj = clone
       changes.each do |k, v|
         old_obj.send("#{k}=", v.first) if k.to_s != 'user_id'
       end

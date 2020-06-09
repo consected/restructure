@@ -417,7 +417,13 @@ class Admin::MessageTemplate < ActiveRecord::Base
     elsif an == 'parent_item'
       return data[:parent_item]
     elsif an == 'referring_record'
-      return data[:referring_record] = data[:original_item].respond_to?(:referring_record) && data[:original_item].referring_record&.attributes
+      return data[:referring_record] = data[:original_item].respond_to?(:referring_record) &&
+                                       data[:original_item].referring_record&.attributes
+    elsif an == 'latest_reference'
+      return data[:latest_reference] = data[:original_item].respond_to?(:model_references) &&
+                                       data[:original_item].model_references(ref_order: { id: :desc })
+                                                           .first
+                                                           &.to_record&.attributes
     end
 
     return nil unless an.in? allowable_associations

@@ -479,6 +479,7 @@ class ActivityLog < ActiveRecord::Base
         res.include UserHandler
         res.include ActivityLogHandler
         ESignature::ESignatureManager.enable_e_signature_for res
+        res.final_setup
 
         c_name = full_implementation_controller_name
 

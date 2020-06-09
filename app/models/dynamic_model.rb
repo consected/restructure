@@ -197,6 +197,8 @@ class DynamicModel < ActiveRecord::Base
         res.include UserHandler
         res.include DynamicModelHandler
 
+        res.final_setup
+
         # Handle extensions with an appropriate name
         ext = Rails.root.join('app', 'models', 'dynamic_model_extension', "#{model_class_name.underscore}.rb")
         if File.exist? ext

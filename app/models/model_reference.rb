@@ -107,7 +107,9 @@ class ModelReference < ActiveRecord::Base
   # These can be further limited by a filter_by condition on the to_record,
   # allowing for specific records to be selected from the master (such as a specific 'type' of referenced record)
   # The param active == true returns only results that are not disabled
-  def self.find_references(from_item_or_master, to_record_type: nil, filter_by: nil, without_reference: false, ref_order: default_ref_order, active: nil)
+  def self.find_references(from_item_or_master, to_record_type: nil, filter_by: nil, without_reference: false, ref_order: nil, active: nil)
+    ref_order ||= default_ref_order
+
     if to_record_type
       to_record_type_class = to_record_class_for_type(to_record_type)
       to_record_type = to_record_type_class.name if to_record_type_class
