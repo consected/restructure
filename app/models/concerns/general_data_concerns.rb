@@ -18,7 +18,16 @@ module GeneralDataConcerns
 
   def check_status
     @was_created = respond_to?(:id) && saved_change_to_id? ? 'created' : false
-    @was_updated = respond_to?(:updated_at) && saved_change_to_updated_at? ? 'updated' : false
+
+    # If an embedded_item is present and it was updated, allow that to set @was_updated.
+    # Just changing the updated_at attribute on self (with #touch) is not registered as a change.
+    @was_updated = if respond_to?(:updated_at) &&
+                      (saved_change_to_updated_at? || embedded_item&.saved_change_to_updated_at?)
+                     'updated'
+                   else
+                     false
+                   end
+
     @was_disabled = respond_to?(:disabled) && saved_change_to_disabled? && disabled ? 'disabled' : false
   end
 

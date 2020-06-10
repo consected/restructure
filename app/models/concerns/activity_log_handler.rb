@@ -395,6 +395,15 @@ module ActivityLogHandler
   end
 
   def creatable_model_references(only_creatables: false)
+    # Check for a memoized result
+    memokey = "only_creatables_#{only_creatables}"
+    if @creatable_model_references
+      memores = @creatable_model_references[memokey]
+      return memores if memores
+    else
+      @creatable_model_references = {}
+    end
+
     cre_res = {}
     return cre_res unless extra_log_type_config&.references
 
@@ -475,7 +484,7 @@ module ActivityLogHandler
         cre_res[ref_key] = { ref_type => res } if res[:ref_type] || !only_creatables
       end
     end
-    cre_res
+    @creatable_model_references[memokey] = cre_res
   end
 
   # Use a provided creatable model reference to make a new item

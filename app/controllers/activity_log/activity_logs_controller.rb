@@ -24,11 +24,11 @@ class ActivityLog::ActivityLogsController < UserBaseController
     return unless @embedded_item
 
     # Allow passing of params to embedded item to initialize the new form
-    if params[al_type.singularize.to_sym] && params[al_type.singularize.to_sym][:embedded_item]
-      ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(@embedded_item.class.permitted_params)
-      ei_secure_params.each do |p, v|
-        @embedded_item.send("#{p}=", v)
-      end
+    return unless params[al_type.singularize.to_sym] && params[al_type.singularize.to_sym][:embedded_item]
+
+    ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(embedded_item_permitted_params)
+    ei_secure_params.each do |p, v|
+      @embedded_item.send("#{p}=", v)
     end
   end
 
@@ -42,18 +42,17 @@ class ActivityLog::ActivityLogsController < UserBaseController
     oi.action_name = action_name
     @embedded_item = oi.embedded_item
 
-    if @embedded_item
+    return unless @embedded_item
 
-      set_embedded_item_optional_params if action_name == 'new'
-
-      if action_name == 'create'
-        begin
-          ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(@embedded_item.class.permitted_params)
-          @embedded_item.update ei_secure_params
-          oi.updated_at = @embedded_item.updated_at
-        rescue ActionController::ParameterMissing
-          raise FphsException, 'Could not save the item, since you do not have access to any of the data it references.'
-        end
+    if action_name == 'new'
+      set_embedded_item_optional_params
+    elsif action_name == 'create'
+      begin
+        ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(embedded_item_permitted_params)
+        @embedded_item.update ei_secure_params
+        oi.updated_at = @embedded_item.updated_at
+      rescue ActionController::ParameterMissing
+        raise FphsException, 'Could not save the item, since you do not have access to any of the data it references.'
       end
     end
   end
@@ -212,12 +211,14 @@ class ActivityLog::ActivityLogsController < UserBaseController
     res = @implementation_class.refine_permitted_params res
 
     # The embedded_item params are only used in an update. Create actions are handled separately
-    if @embedded_item
-      epp = @embedded_item.class.permitted_params
-      res << { embedded_item: @embedded_item.class.refine_permitted_params(epp) }
-    end
+    res << { embedded_item: embedded_item_permitted_params } if @embedded_item
 
     res
+  end
+
+  def embedded_item_permitted_params
+    epp = @embedded_item.class.permitted_params
+    @embedded_item.class.refine_permitted_params(epp)
   end
 
   def secure_params

@@ -275,7 +275,7 @@ module HandlesUserBase
     elsif o.is_a?(Hash) && @embedded_item
       @embedded_item.master.current_user ||= master_user
       @embedded_item.update o
-      self.updated_at = @embedded_item.updated_at
+      touch(time: @embedded_item.updated_at) if @embedded_item.updated_at_previously_changed?
     end
   end
 
@@ -518,7 +518,7 @@ module HandlesUserBase
           end
         end
       end
-      return
+      nil
     end
   end
 

@@ -284,6 +284,16 @@ class Admin::MessageTemplate < ActiveRecord::Base
         res = res.join("\n") if res.is_a? Array
       elsif op == 'join_with_2newlines'
         res = res.join("\n\n") if res.is_a? Array
+      elsif op == 'compact'
+        res = res.reject(&:blank?) if res.is_a? Array
+      elsif op == 'sort'
+        res = res.sort if res.is_a? Array
+      elsif op == 'uniq'
+        res = res.uniq if res.is_a? Array
+      elsif op == 'markdown_list'
+        res = '  - ' + res.join("\n  - ") if res.is_a? Array
+      elsif op == 'html_list'
+        res = '<ul><li>' + res.join("</li>\n  <li>") + '</li></ul>' if res.is_a? Array
       elsif op == 'plaintext'
         res = ActionController::Base.helpers.sanitize(res)
         res = res.gsub("\n", '<br>').html_safe
