@@ -39,12 +39,12 @@ group :development, :test, :ipa_test do
   gem 'brakeman', require: false
   gem 'bundler-audit'
   gem 'byebug'
-  # gem 'debase'
+  gem 'debase'
   gem 'jasmine-rails'
   gem 'parallel_tests'
   gem 'puma'
   gem 'rspec-rails'
-  # gem 'ruby-debug-ide'
+  gem 'ruby-debug-ide'
   gem 'spring'
   gem 'spring-commands-parallel-tests'
 end
