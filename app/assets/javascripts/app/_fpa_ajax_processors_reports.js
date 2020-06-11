@@ -56,11 +56,15 @@ _fpa.postprocessors_reports = {
       var newval = v.val();
       if (newval.length > 0) newval += "\n";
       var from_f = $('#multiple_attrs_' + da);
-      newval += from_f.val();
-      v.val(newval);
-      from_f.val('');
-      v.change();
-      from_f.change();
+      var boxval = from_f.val();
+      // Prevent empty values being put into the list
+      if (boxval) {
+        newval += boxval;
+        v.val(newval);
+        from_f.val('');
+        v.change();
+        from_f.change();
+      }
     });
 
     block.find('form').not('.attached-complete-listener').on('submit', function () {
