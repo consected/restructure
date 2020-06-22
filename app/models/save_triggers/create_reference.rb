@@ -7,6 +7,7 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
         model_name: {
           if: if_extras,
           in: 'this | referring_record | master (creates no reference, just uses master_id) | master_with_reference (creates a reference to the master, not the item)',
+          force_create: 'true to force the creation of a reference and referenced object, independent of user access controls',
           with: {
             field_name: 'now()',
             field_name_2: 'literal value',
@@ -54,16 +55,19 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
         end
 
         @item.transaction do
-          new_item = @master.assoc_named(model_name.to_s.pluralize).create! vals
+          force_create = config[:force_create]
+          new_item = @master.assoc_named(model_name.to_s.pluralize).new vals
+          new_item.force_save! if force_create
+          new_item.save!
 
           if config[:in] == 'this'
-            ModelReference.create_with @item, new_item
+            ModelReference.create_with @item, new_item, force_create: force_create
           elsif config[:in] == 'referring_record'
-            ModelReference.create_with @item.referring_record, new_item
+            ModelReference.create_with @item.referring_record, new_item, force_create: force_create
           elsif config[:in] == 'master'
             # ModelReference.create_from_master_with @master, new_item
           elsif config[:in] == 'master_with_reference'
-            ModelReference.create_from_master_with @master, new_item
+            ModelReference.create_from_master_with @master, new_item, force_create: force_create
           else
             raise FphsException, "Unknown 'in' value in create_reference"
           end
