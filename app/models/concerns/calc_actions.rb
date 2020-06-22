@@ -759,6 +759,7 @@ module CalcActions
       # (not return_* in an array though, since this is part of an IN statement)
       unless val.in?(ReturnTypes)
         @condition_values[table_name] ||= {}
+        val = val.reject { |r| r.in?(ReturnTypes) } if val.is_a?(Array)
         @condition_values[table_name][field_name] = dynamic_value(val)
       end
 
