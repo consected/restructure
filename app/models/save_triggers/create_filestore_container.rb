@@ -31,6 +31,6 @@ class SaveTriggers::CreateFilestoreContainer < SaveTriggers::SaveTriggersBase
 
   def perform
     container = NfsStore::Manage::Container.create_in_current_app user: item.master_user, name: @name, extra_params: { master: item.master, create_with_role: @create_with_role }
-    ModelReference.create_with item, container
+    ModelReference.create_with item, container, force_create: true
   end
 end
