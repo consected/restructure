@@ -79,6 +79,22 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     expect(res).to eq expected_text
   end
 
+  it 'substitutes user fields' do
+    t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
+    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
+
+    t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name}}. Done by current user: {{current_user.first_name}}.</p>'
+    # Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
+    expect do
+      layout.generate data: { master_id: @master.id, 'name' => 'test name' }
+    end.to raise_error FphsException
+
+    res = layout.generate content_template_text: t, data: { master: @master, 'name' => 'test name bob' }
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{@master.id}. This is a name: Test Name Bob. Done by current user: #{@master.current_user.first_name.capitalize}.</p></div></body></html>"
+
+    expect(res).to eq expected_text
+  end
+
   it 'provides formatting options for substituted fields' do
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
     layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
@@ -133,13 +149,23 @@ RSpec.describe Admin::MessageTemplate, type: :model do
           from: 'this',
           add: 'many'
         }
+      },
+      activity_log__player_contact_phone: {
+        activity_log__player_contact_phone: {
+          from: 'this',
+          add: 'one_to_this'
+        }
       }
     }
 
+    @activity_log2 = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player', select_who: 'user', master: @player_contact.master)
+    ModelReference.create_with(@activity_log2, pc3, force_create: true)
+    ModelReference.create_with(@activity_log, @activity_log2, force_create: true)
+
     expect(pc1.data).to eq pn
 
-    ModelReference.create_with(@activity_log, pc1)
-    ModelReference.create_with(@activity_log, pc2)
+    ModelReference.create_with(@activity_log, pc1, force_create: true)
+    ModelReference.create_with(@activity_log, pc2, force_create: true)
     pn_ref1 = pc2.data
     expect(@activity_log.model_references(ref_order: { id: :desc }).first.to_record.data).to eq pn_ref1
 
@@ -151,11 +177,11 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
     layout = Admin::MessageTemplate.create! name: 'test email layout 2', message_type: :email, template_type: :layout, template: t, current_admin: @admin
 
-    t = '<p>This is some content.</p><p>Related to master_id {{master_id}} for {{player_info.created_at}} by {{player_info.user_email}}. This is a name: {{player_info.first_name}} and {{player_contact_phones.data}} and {{latest_reference.data}}.</p>'
+    t = '<p>This is some content.</p><p>Related to master_id {{master_id}} for {{player_info.created_at}} by {{player_info.user_email}}. This is a name: {{player_info.first_name}} and {{player_contact_phones.data}} and {{latest_reference.data}} and {{activity_log__player_contact_phones.player_contact.data}}.</p>'
     Admin::MessageTemplate.create! name: 'test email content 2', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
     res = layout.generate content_template_name: 'test email content 2', data: @activity_log
-    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id} for #{dateformatted} by #{@player_info.user_email}. This is a name: #{@player_info.first_name.titleize} and #{pn} and #{pn_ref1}.</p></div></body></html>"
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id} for #{dateformatted} by #{@player_info.user_email}. This is a name: #{@player_info.first_name.titleize} and #{pn} and #{pn_ref1} and #{pc3.data}.</p></div></body></html>"
 
     expect(res).to eq expected_text
   end

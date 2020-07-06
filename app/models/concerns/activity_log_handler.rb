@@ -864,6 +864,17 @@ module ActivityLogHandler
     nil
   end
 
+  def latest_reference
+    return @latest_reference == :nil ? nil : @latest_reference unless @latest_reference.nil?
+
+    @latest_reference = model_references(ref_order: { id: :desc }).first&.to_record
+
+    return @latest_reference if @latest_reference
+
+    @latest_reference = :nil
+    nil
+  end
+
   def embedded_item
     return @embedded_item == :nil ? nil : @embedded_item unless @embedded_item.nil?
 
