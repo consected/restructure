@@ -324,3 +324,33 @@ div.chosen-container.chosen-disabled li.search-choice {
   box-shadow: none;
   border: 1px solid rgb(97, 97, 97);
 }
+
+.model-reference-result .object-results-header.header-for-gen-model {
+  display: block;
+}
+
+/* CLeanup the NFS container */
+li.list-group-item.result-field-container.nfs-store--manage--container-data {
+  display: none;
+}
+
+h4.container-name {
+  display: none;
+}
+
+.container-heading-block a.refresh-container-list {
+  margin-top: 6px;
+}
+
+.nfs-store-valid-files.panel {
+  display: none;
+}
+
+.file-block.well {
+  margin: 8px 16px;
+  padding: 4px 16px;
+}
+
+.button-radio.classifications {
+  display: none;
+}
