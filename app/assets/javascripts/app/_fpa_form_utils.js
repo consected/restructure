@@ -1494,8 +1494,8 @@ _fpa.form_utils = {
 
         $edtools.hide();
         $eddiv.on('focus', function () {
-          $('.custom-editor-container .btn-toolbar').hide();
-          $edtools.show();
+          $('.custom-editor-container .btn-toolbar').not("[data-target='" + $edtools.attr('data-target') + "']").hide();
+          $edtools.slideDown();
         }).on('change', function () {
           $eddiv.data('editor-changed', true);
         });
