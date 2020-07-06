@@ -7,7 +7,7 @@
       "check_name": "MassAssignment",
       "message": "Parameters should be whitelisted for mass assignment",
       "file": "app/controllers/reports_controller.rb",
-      "line": 369,
+      "line": 362,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.require(:search_attrs).permit!",
       "render_path": null,
@@ -195,6 +195,26 @@
     {
       "warning_type": "SQL Injection",
       "warning_code": 0,
+      "fingerprint": "ad0cdcb9b169f2245a85a2d64bec0940fd13304c7b80e5aa950ccbd620b85b27",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/model_reference.rb",
+      "line": 144,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "ModelReference.joins(\"INNER JOIN #{ModelReference.record_type_to_table_name(to_record_class_for_type(to_record_type).name.ns_underscore.pluralize)} ON model_references.to_record_id = #{ModelReference.record_type_to_table_name(to_record_class_for_type(to_record_type).name.ns_underscore.pluralize)}.id\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ModelReference",
+        "method": "ModelReference.find_references"
+      },
+      "user_input": "ModelReference.record_type_to_table_name(to_record_class_for_type(to_record_type).name.ns_underscore.pluralize)",
+      "confidence": "High",
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
       "fingerprint": "b1e62cc85c7eba4c9f39f2f82936341481bc4da5ada4a7d0df55ace601f34a06",
       "check_name": "SQL",
       "message": "Possible SQL injection",
@@ -293,6 +313,6 @@
       "note": ""
     }
   ],
-  "updated": "2020-05-27 13:24:42 +0100",
+  "updated": "2020-06-15 17:03:56 +0100",
   "brakeman_version": "4.8.1"
 }

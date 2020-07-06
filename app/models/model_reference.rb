@@ -3,6 +3,8 @@
 class ModelReference < ActiveRecord::Base
   belongs_to :user
 
+  scope :active, -> { where 'disabled is null or disabled = false' }
+
   validates :from_record_master_id, presence: true
   # Validations on from_record can not be enforced, since we want to allow reference from master only
   # validates :from_record_id, presence: true
@@ -29,11 +31,12 @@ class ModelReference < ActiveRecord::Base
     m = ModelReference.where from_record_type: from_item.class.name, from_record_id: from_item.id, from_record_master_id: from_item.master_id,
                              to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id
 
-    if m.limit(1).empty?
-      ModelReference.create! from_record_type: from_item.class.name, from_record_id: from_item.id, from_record_master_id: from_item.master_id,
-                             to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id,
-                             user: to_item.master_user, current_user: to_item.master_user, force_create: force_create
-    end
+    return unless m.limit(1).empty?
+
+    from_item.reset_model_references if from_item.respond_to? :model_references
+    ModelReference.create! from_record_type: from_item.class.name, from_record_id: from_item.id, from_record_master_id: from_item.master_id,
+                           to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id,
+                           user: to_item.master_user, current_user: to_item.master_user, force_create: force_create
   end
 
   # Create a reference from a master only, not an individual item.
@@ -119,6 +122,7 @@ class ModelReference < ActiveRecord::Base
       cond = { master: from_item_or_master }
       cond.merge!(filter_by) if filter_by
       recs = to_record_type_class.where(cond).order(ref_order)
+      recs = recs.active if active
       res = []
       recs.each do |r|
         res << ModelReference.new(from_record_type: nil, from_record_id: nil, from_record_master_id: from_item_or_master.id,
@@ -127,29 +131,36 @@ class ModelReference < ActiveRecord::Base
       end
     else
       if from_item_or_master.is_a? Master
-        res = ModelReference.find_records_in_master to_record_type: to_record_type, master: from_item_or_master, filter_by: filter_by
+        res = ModelReference.find_records_in_master to_record_type: to_record_type,
+                                                    master: from_item_or_master,
+                                                    filter_by: filter_by,
+                                                    active: active
       else
         cond = { from_record_type: from_item_or_master.class.name, from_record_id: from_item_or_master.id }
         cond[:to_record_type] = to_record_type if to_record_type
-        res = ModelReference.where(cond).order(ref_order)
-        # Handle the filter_by clause
-        res = res.select { |mr| filter_by.all? { |k, v| mr.to_record.attributes[k.to_s] == v } } if filter_by
+
+        mr = ModelReference
+        if filter_by
+          item_name = to_record_type.ns_underscore
+          tn = ModelReference.record_type_to_table_name(item_name.pluralize)
+          ij = "INNER JOIN #{tn} ON model_references.to_record_id = #{tn}.id"
+          cond.merge! tn => filter_by
+          mr = mr.joins(ij)
+        end
+        res = mr.where(cond).order(ref_order)
+        res = res.active if active
       end
     end
 
-    res = res.reject(&:disabled) if active
-
     # Set the current user, so that access controls can be correctly applied
-    res.each do |r|
-      mu = if from_item_or_master.respond_to? :master_user
-             from_item_or_master.master_user
-           else
-             from_item_or_master.current_user
-           end
-      r.current_user = mu
+    mu = if from_item_or_master.respond_to? :master_user
+           from_item_or_master.master_user
+         else
+           from_item_or_master.current_user
+         end
 
-      r.to_record.current_user = mu
-      r.from_record.current_user = mu if r.from_record
+    res.each do |r|
+      r.current_user ||= mu
     end
     res
   end
@@ -159,13 +170,13 @@ class ModelReference < ActiveRecord::Base
     cond = { to_record_type: to_item.class.name, to_record_id: to_item.id }
     res = ModelReference.where cond
     # Set the current user, so that access controls can be correctly applied
+    mu = if to_item.respond_to? :master_user
+           to_item.master_user
+         else
+           to_item.current_user
+         end
     res.each do |r|
-      mu = if to_item.respond_to? :master_user
-             to_item.master_user
-           else
-             to_item.current_user
-           end
-      r.current_user = mu
+      r.current_user ||= mu
     end
     res
   end
@@ -234,17 +245,21 @@ class ModelReference < ActiveRecord::Base
   end
 
   def to_record_viewable
-    !!current_user.has_access_to?(:access, :table, to_record_type_us.pluralize)
+    return @to_record_viewable unless @to_record_viewable.nil?
+
+    @to_record_viewable = !!current_user.has_access_to?(:access, :table, to_record_type_us.pluralize)
   end
 
   def to_record_editable
-    res = !!current_user.has_access_to?(:edit, :table, to_record_type_us.pluralize)
-    return unless res
+    return @to_record_editable unless @to_record_editable.nil?
+
+    @to_record_editable = !!current_user.has_access_to?(:edit, :table, to_record_type_us.pluralize)
+    return unless @to_record_editable
 
     if to_record.respond_to?(:can_edit?)
-      !!to_record.can_edit?
+      @to_record_editable = !!to_record.can_edit?
     else
-      res
+      @to_record_editable
     end
   end
 
@@ -305,7 +320,7 @@ class ModelReference < ActiveRecord::Base
   end
 
   def to_record_assoc
-    to_record_class.assoc_inverse
+    @to_record_assoc ||= to_record_class.assoc_inverse
   end
 
   attr_writer :to_record
@@ -319,13 +334,18 @@ class ModelReference < ActiveRecord::Base
     end
   end
 
-  def self.find_records_in_master(master: nil, to_record_type: nil, filter_by: nil, ref_order: default_ref_order)
+  def self.find_records_in_master(master: nil, to_record_type: nil, filter_by: nil, ref_order: default_ref_order, active: nil)
     res = []
     cond = { master: master }
     cond.merge! filter_by if filter_by
 
     to_record_class_for_type(to_record_type).where(cond).order(ref_order).each do |i|
-      rec = ModelReference.where(from_record_master_id: master.id, to_record_type: to_record_type, to_record_id: i.id, to_record_master_id: i.master_id).first
+      recs = ModelReference.where from_record_master_id: master.id,
+                                  to_record_type: to_record_type,
+                                  to_record_id: i.id,
+                                  to_record_master_id: i.master_id
+      recs = recs.active if active
+      rec = recs.first
       if rec
         rec.to_record = i
         res << rec
@@ -342,6 +362,8 @@ class ModelReference < ActiveRecord::Base
   #   OR
   #   the prevent_disable options is a Hash and the calculated if resolves to false
   def can_disable
+    return @can_disable unless @can_disable.nil?
+
     c = find_config || {}
     if from_record && c.is_a?(Hash)
       pd = from_record.extra_log_type_config.calc_reference_prevent_disable_if c, to_record
@@ -351,7 +373,7 @@ class ModelReference < ActiveRecord::Base
       ane = false
     end
 
-    (!pd && (!from_record || ane || from_record.can_edit?))
+    @can_disable = (!pd && (!from_record || ane || from_record.can_edit?))
   end
 
   # Ensures that parent records are updated in the UI if a change has been made to the reference, such as disabling it

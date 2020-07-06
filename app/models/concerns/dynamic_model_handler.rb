@@ -135,25 +135,33 @@ module DynamicModelHandler
   end
 
   def can_edit?
+    return @can_edit unless @can_edit.nil?
+
+    @can_edit = false
+
     # This returns nil if there was no rule, true or false otherwise.
     # Therefore, for no rule (nil) return true
     res = calc_can :edit
-    return true if res.nil?
+    return @can_edit = true if res.nil?
     return unless res
 
     # Finally continue with the standard checks if none of the previous have failed
-    super()
+    @can_edit = !!super()
   end
 
   def can_access?
+    return @can_access unless @can_access.nil?
+
+    @can_access = false
+
     # This returns nil if there was no rule, true or false otherwise.
     # Therefore, for no rule (nil) return true
     res = calc_can :access
-    return true if res.nil?
+    return @can_access = true if res.nil?
     return unless res
 
     # Finally continue with the standard checks if none of the previous have failed
-    super()
+    @can_access = !!super()
   end
 
   # Calculate the can rules for the required type, based on user access controls and showable_if rules
@@ -191,10 +199,13 @@ module DynamicModelHandler
 
   # Force the ability to add references even if can_edit? for the parent record returns false
   def can_add_reference?
+    return @can_add_reference unless @can_add_reference.nil?
+
+    @can_add_reference = false
     dopt = definition_default_options
-    if dopt.add_reference_if.is_a?(Hash) && dopt.add_reference_if.first
-      res = dopt.calc_add_reference_if(self)
-      !!res
-    end
+    return unless dopt.add_reference_if.is_a?(Hash) && dopt.add_reference_if.first
+
+    res = dopt.calc_add_reference_if(self)
+    @can_add_reference = !!res
   end
 end

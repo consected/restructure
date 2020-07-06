@@ -1219,7 +1219,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 "
     conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
-
+    @al.reset_model_references
     res = ConditionalActions.new conf, @al
 
     expect(res.calc_action_if).to be true
@@ -1256,6 +1256,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 "
     conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
@@ -1283,6 +1284,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 "
     conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
@@ -1301,6 +1303,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 "
     conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
@@ -1319,6 +1322,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 "
     conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
@@ -1337,6 +1341,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 "
     conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
@@ -1355,6 +1360,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 "
     conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
@@ -1373,6 +1379,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 "
     conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
@@ -1479,6 +1486,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 "
     conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @alnor.reset_model_references
 
     # Since one of the references matches extra_log_type primary, not_all results in false
     res = ConditionalActions.new conf, @alnor
@@ -1491,6 +1499,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     @alnor.extra_log_type_config.editable_if = { always: true }
     r = @alnor.model_references.last
     r.update!(disabled: true, current_user: @user) unless r.disabled?
+    @alnor.reset_model_references
 
     res = ConditionalActions.new conf, @alnor
     res_if = res.calc_action_if
@@ -2047,6 +2056,19 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
     res = ca.get_this_val
     expect(res).to eq @al
+
+    # Top referring record
+
+    conf = {
+      top_referring_record: {
+        update: 'return_result'
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al2
+
+    res = ca.get_this_val
+    expect(res).to eq @al
   end
 
   it 'finds parent_references' do
@@ -2197,6 +2219,78 @@ EOF_YAML
 
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be false
+
+    # Can we use parent_or_this_references to make
+    # reusable references
+
+    confy = <<EOF_YAML
+      all:
+
+        activity_log__player_contact_phones:
+          extra_log_type: blank
+          id:
+            parent_or_this_references:
+              activity_log__player_contact_phones: id
+
+EOF_YAML
+
+    conf = YAML.safe_load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+    confy = <<EOF_YAML
+      all:
+
+        activity_log__player_contact_phones:
+          extra_log_type: primary
+          id:
+            parent_or_this_references:
+              activity_log__player_contact_phones: id
+
+EOF_YAML
+
+    conf = YAML.safe_load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+    # Try where parent_or_this falls back to the current instance
+    confy = <<EOF_YAML
+      all:
+
+        activity_log__player_contact_phones:
+          extra_log_type: blank
+          id:
+            parent_or_this_references:
+              activity_log__player_contact_phones: id
+
+EOF_YAML
+
+    conf = YAML.safe_load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al
+    expect(res.calc_action_if).to be true
+
+    confy = <<EOF_YAML
+      all:
+
+        activity_log__player_contact_phones:
+          extra_log_type: primary
+          id:
+            parent_or_this_references:
+              activity_log__player_contact_phones: id
+
+EOF_YAML
+
+    conf = YAML.safe_load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al
+    expect(res.calc_action_if).to be false
   end
 
   it 'handles special cases' do
@@ -2240,6 +2334,10 @@ EOF_YAML
     conf = conf.deep_symbolize_keys
 
     pc.update! rank: 10
+
+    pc = new_al0.master.player_contacts.where(rank: 10).first
+    expect(pc).not_to be nil
+
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be true
 

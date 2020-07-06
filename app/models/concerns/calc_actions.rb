@@ -29,9 +29,11 @@ module CalcActions
 
   included do
     # We won't use a query join when referring to tables based on these keys
-    NonJoinTableNames = %i[this parent referring_record this_references parent_references user master condition value hide_error].freeze
-    NonQueryTableNames = %i[this user parent referring_record].freeze
-    NonQueryNestedKeyNames = %i[this referring_record this_references parent_references validate].freeze
+    NonJoinTableNames = %i[this parent referring_record top_referring_record this_references parent_references
+                           parent_or_this_references user master condition value hide_error].freeze
+    NonQueryTableNames = %i[this user parent referring_record top_referring_record].freeze
+    NonQueryNestedKeyNames = %i[this referring_record top_referring_record this_references parent_references
+                                parent_or_this_references validate].freeze
 
     SelectionTypes = %i[all any not_all not_any].freeze
 
@@ -47,7 +49,7 @@ module CalcActions
       '<> ARRAY_LENGTH', # The value of this field (must be integer) must not equal the length of the retrieved array field
       '= LENGTH', # The value of this field (must be integer) equals the length of the string (varchar or text) field
       '<> LENGTH', # The value of this field (must be integer) must not equal the length of the string (varchar or text) field
-      '&&', # Any value of this field (an array) must be in the retrieved array field
+      '&&', # There is an overlap, so any value of this field (an array) must be in the retrieved array field
       '@>', # This array field contains all of the elements of the retrieved array field
       '<@' # This array field's elements are all found in the retrieved array field
     ].freeze
@@ -427,7 +429,7 @@ module CalcActions
       end
 
       #### If we have a non-query table specified
-      if table == :this || table == :parent || table == :referring_record || (table == :user && field_name != :role_name)
+      if table == :this || table == :parent || table == :referring_record || table == :top_referring_record || (table == :user && field_name != :role_name)
 
         # Pick the instance we are referring to
         if table == :this
@@ -438,6 +440,8 @@ module CalcActions
           in_instance = current_instance.parent_item
         elsif table == :referring_record
           in_instance = current_instance.referring_record
+        elsif table == :top_referring_record
+          in_instance = current_instance.top_referring_record
         end
 
         if field_name == :exists
@@ -586,7 +590,18 @@ module CalcActions
       from_instance = @current_instance.referring_record
       val = from_instance && from_instance.attributes[val_item_value]
 
-    elsif val_item_key == :this_references || val_item_key == :parent_references
+    elsif val_item_key == :top_referring_record && !val_item_value.is_a?(Hash)
+      # Get a literal value from the current instance's top_referring_record.
+      # This is the top record in the hierarchy referring to the current instance.
+      # A referring record is either based on the context of the current request (from a controller)
+      # or if there is only a single model reference referring to the current instance,
+      # that is used instead
+      # This is often an activity_log record referring to the current activity_log
+      # If no referring record exists, the result is nil
+      from_instance = @current_instance.top_referring_record
+      val = from_instance && from_instance.attributes[val_item_value]
+
+    elsif val_item_key.in? %i[this_references parent_references parent_or_this_references]
       # Get possible values from records referenced by this instance, or this instance's referring record (parent)
 
       if val_item_key == :this_references
@@ -595,6 +610,9 @@ module CalcActions
       elsif val_item_key == :parent_references
         # Identify all records this instance's referrring record (parent) references
         from_instance = @current_instance.referring_record
+      elsif val_item_key == :parent_or_this_references
+        # Identify all records this instance's referrring record (parent) references, or if there is no parent, this record references
+        from_instance = @current_instance.referring_record || @current_instance
       end
 
       if val_item_value.is_a?(Hash)
@@ -640,7 +658,10 @@ module CalcActions
 
       end
 
-      raise FphsException, "No referring record specified when using #{val_item_key}" unless from_instance
+      unless from_instance
+        raise FphsException, "No referring record specified when using #{val_item_key} in " \
+                             "#{@current_instance.class.name} #{@current_instance.id}"
+      end
 
       # Now go ahead and get the possible values to use in the condition
       val = []
@@ -999,6 +1020,7 @@ module CalcActions
     unless Rails.env.production?
       begin
         Rails.logger.debug "**#{orig_cond_type}*******************************************************************************************************"
+        Rails.logger.debug "this instance: #{@current_instance.id}"
         Rails.logger.debug "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
         Rails.logger.debug @condition_config
         Rails.logger.debug @non_query_conditions

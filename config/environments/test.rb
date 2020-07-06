@@ -61,7 +61,7 @@ Rails.application.configure do
     config.logger = DoNothingLogger.new
   end
 
-  config.active_job.queue_adapter = :test # :delayed_job
+  config.active_job.queue_adapter = :delayed_job
 
   # Support parallel tests
   assets_cache_path = Rails.root.join("tmp/cache/assets/paralleltests#{ENV['TEST_ENV_NUMBER']}")

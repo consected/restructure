@@ -253,7 +253,9 @@ module HandlesUserBase
   end
 
   def referenced_from
-    ModelReference.find_where_referenced_from self
+    return @referenced_from unless @referenced_from.nil?
+
+    @referenced_from = ModelReference.find_where_referenced_from self
   end
 
   def model_reference_disable

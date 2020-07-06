@@ -351,13 +351,22 @@ module ActivityLogHandler
     res
   end
 
+  def reset_model_references
+    @model_references = {}
+  end
+
   def model_references(reference_type: :references, active_only: false, ref_order: nil)
+    mr_key = { reference_type: reference_type, active_only: active_only, ref_order: ref_order }
+    @model_references ||= {}
+    return @model_references[mr_key] unless @model_references[mr_key].nil?
+
     res = []
     if reference_type == :references
       refs = extra_log_type_config.references
     elsif reference_type == :e_sign
       refs = extra_log_type_config.e_sign && extra_log_type_config.e_sign[:document_reference]
     end
+    @model_references[mr_key] = res
 
     return res unless extra_log_type_config && refs
 
@@ -370,28 +379,31 @@ module ActivityLogHandler
                                                to_record_type: ref_type,
                                                filter_by: ref_config[:filter_by],
                                                without_reference: without_reference,
-                                               ref_order: ref_order
+                                               ref_order: ref_order,
+                                               active: active_only
               elsif f == 'master'
                 ModelReference.find_references master,
                                                to_record_type: ref_type,
                                                filter_by: ref_config[:filter_by],
                                                without_reference: without_reference,
-                                               ref_order: ref_order
+                                               ref_order: ref_order,
+                                               active: active_only
               elsif f == 'any'
                 ModelReference.find_references master,
                                                to_record_type: ref_type,
                                                filter_by: ref_config[:filter_by],
                                                without_reference: true,
-                                               ref_order: ref_order
+                                               ref_order: ref_order,
+                                               active: active_only
               end
 
         if got
-          got = got.reject(&:disabled) if active_only
+          # got = got.reject(&:disabled) if active_only
           res += got
         end
       end
     end
-    res
+    @model_references[mr_key] = res
   end
 
   def creatable_model_references(only_creatables: false)
@@ -693,6 +705,10 @@ module ActivityLogHandler
   end
 
   def can_edit?
+    return @can_edit unless @can_edit.nil?
+
+    @can_edit = false
+
     # First, check if the user can actually access this type of activity log to edit it
     res = master.current_user.has_access_to? :edit, :activity_log_type, extra_log_type_config.resource_name
     unless res
@@ -707,10 +723,15 @@ module ActivityLogHandler
     if eltc.editable_if.is_a?(Hash) && eltc.editable_if.first
 
       # Generate an old version of the object prior to changes
-      old_obj = clone
+      # We use dup rather than clone to ensure that updates made to the attributes do not
+      # overwrite the current instance
+      old_obj = dup
       changes.each do |k, v|
         old_obj.send("#{k}=", v.first) if k.to_s != 'user_id'
       end
+
+      # Set the id, since dup doesn't do this and we may need it
+      old_obj.id = id
 
       # Ensure the duplicate old_obj references the real master, ensuring current user can
       # be referenced correctly in conditional calculations
@@ -731,37 +752,46 @@ module ActivityLogHandler
     end
 
     # Finally continue with the standard checks if none of the previous have failed
-    super()
+    @can_edit = super()
   end
 
   # @return [Boolean | nil] returns true or false based on the result of a conditional calculation,
   #    or nil if there is no `add_reference_if` configuration
   def can_add_reference?
+    return @can_add_reference unless @can_add_reference.nil?
+
+    @can_add_reference = false
     eltc = extra_log_type_config
     if eltc.add_reference_if.is_a?(Hash) && eltc.add_reference_if.first
       res = eltc.calc_add_reference_if(self)
-      !!res
+      @can_add_reference = !!res
     end
   end
 
   def can_create?
+    return @can_create unless @can_create.nil?
+
+    @can_create = false
     res = master.current_user.has_access_to? :create, :activity_log_type, extra_log_type_config.resource_name
 
     unless res
       Rails.logger.info "Can not create activity_log_type #{extra_log_type_config.resource_name} due to lack of access"
     end
 
-    res && super()
+    @can_create = !!(res && super())
   end
 
   def can_access?
+    return @can_access unless @can_access.nil?
+
+    @can_access = false
     res = master.current_user.has_access_to? :access, :activity_log_type, extra_log_type_config.resource_name
 
     unless res
       Rails.logger.info "Can not access activity_log_type #{extra_log_type_config.resource_name} due to lack of access"
     end
 
-    res && super()
+    @can_access = !!(res && super())
   end
 
   # Extend the standard access check with a check on the extra_log_type resource
@@ -808,17 +838,34 @@ module ActivityLogHandler
   # when an action is performed, or
   # if there is only one model reference we use that instead.
   def referring_record
-    return @referring_record if @referring_record
+    return @referring_record == :nil ? nil : @referring_record unless @referring_record.nil?
 
     res = referenced_from
     @referring_record = res.first&.from_record
     return @referring_record if @referring_record && res.length == 1
 
+    @referring_record = :nil
+    nil
+  end
+
+  # Top referring record is the top record in the reference hierarchy
+  def top_referring_record
+    return @top_referring_record == :nil ? nil : @top_referring_record unless @top_referring_record.nil?
+
+    @top_referring_record = next_up = referring_record
+    while next_up
+      next_up = next_up.referring_record
+      @top_referring_record = next_up if next_up
+    end
+
+    return @top_referring_record if @top_referring_record
+
+    @top_referring_record = :nil
     nil
   end
 
   def embedded_item
-    return @embedded_item if @embedded_item
+    return @embedded_item == :nil ? nil : @embedded_item unless @embedded_item.nil?
 
     action_name = self.action_name || 'index'
 
@@ -902,6 +949,8 @@ module ActivityLogHandler
       end
     end
 
-    @embedded_item
+    res = @embedded_item
+    @embedded_item ||= :nil
+    res
   end
 end

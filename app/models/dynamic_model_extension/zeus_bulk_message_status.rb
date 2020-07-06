@@ -35,6 +35,7 @@ module DynamicModelExtension
       # @return [ActiveRecord::Relation] matching zeus_bulk_message_recipients ordered by created_at time
       def incomplete_recipients
         DynamicModel::ZeusBulkMessageRecipient
+          .unscoped
           .select('zeus_bulk_message_recipients.*')
           .joins("INNER JOIN zeus_bulk_messages ON zeus_bulk_message_recipients.zeus_bulk_message_id = zeus_bulk_messages.id
                     AND zeus_bulk_messages.channel = 'sms'

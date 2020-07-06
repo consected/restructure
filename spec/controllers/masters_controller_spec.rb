@@ -31,10 +31,13 @@ RSpec.describe MastersController, type: :controller do
         Admin::AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info', current_admin: @admin
       end
 
+      prev_master = Master.last
+
       setup_access :player_infos
 
       post :create
       @master = Master.last
+      expect(@master).not_to eq prev_master
       mid = @master.id
       raise 'No master ID?' unless mid
 
