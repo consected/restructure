@@ -2,6 +2,7 @@
   external_id_types = ExternalIdentifier.active_model_configurations.map(&:implementation_class)
   subject_data_type = app_config_text(:header_subject_data_type, 'player_infos')
   no_subject_details_label = app_config_text(:header_no_subject_details_label, '(no subject details)')
+  no_subject_details_label = '' if no_subject_details_label == 'none'
 %>
 
 <script id="modal-pi-search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">
@@ -9,7 +10,7 @@
   <div class="panel-group" id="results-accordion modal-pi-search-results" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default results-panel">
     {{#each masters}}
-      <div class="panel-heading master-result" role="tab" id="master-{{id}}">
+      <div class="panel-heading master-result num-masters-{{num_masters}}" role="tab" id="master-{{id}}">
         <h3 class="panel-title">
           <a class="glyphicon glyphicon-link pull-right" href="/masters/{{id}}" title="open in new tab" target="openmaster"> </a>
           <div class="row">

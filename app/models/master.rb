@@ -159,10 +159,12 @@ class Master < ActiveRecord::Base
     end
   end
 
-  def self.create_master_record(user, empty: nil, with_embedded_params: nil)
+  def self.create_master_record(user, empty: nil, with_embedded_params: nil, extra_ids: nil)
     raise 'no user specified' unless user
 
-    m = Master.create!(current_user: user, creating_master: true)
+    vals = { current_user: user, creating_master: true }
+    vals = vals.merge(extra_ids) if extra_ids
+    m = Master.create!(vals)
 
     unless empty
       i = 0

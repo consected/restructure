@@ -1,6 +1,7 @@
 <%
   subject_data_type = app_config_text(:header_subject_data_type, 'player_infos')
   no_subject_details_label = app_config_text(:header_no_subject_details_label, '(no subject details)')
+  no_subject_details_label = '' if no_subject_details_label == 'none'
 %>
 <script id="search-count-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   <span>
@@ -48,7 +49,7 @@
 </script>
 
 <script id="master_panel_heading" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <div class="panel-heading master-result {{#is num_masters '===' 1}}selected-result{{/is}}" role="tab" id="master-{{id}}">
+  <div class="panel-heading master-result num-masters-{{num_masters}} {{#is num_masters '===' 1}}selected-result{{/is}}" role="tab" id="master-{{id}}">
     <h3 class="panel-title">
       <a class="glyphicon glyphicon-link pull-right" href="/masters/{{id}}" title="link to this record"> </a>
       <div class="row">

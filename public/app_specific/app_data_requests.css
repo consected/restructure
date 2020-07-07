@@ -2,9 +2,9 @@ body {
   font-size: 16px;
 }
 
-#master--1.panel-heading {
+/* .master-result.panel-heading {
   display: none;
-}
+} */
 
 .panel-body.master-main-panel {
   padding-top: 0;
@@ -119,9 +119,9 @@ select.form-control.has-value {
   color: rgb(84, 84, 84);
 }
 
-.advanced-form-selections {
+/* .advanced-form-selections {
   display: none;
-}
+} */
 
 li.list-group-item em.all_caps {
   text-transform: none;
@@ -352,5 +352,29 @@ h4.container-name {
 }
 
 .button-radio.classifications {
+  display: none;
+}
+
+.action-buttons .add-item-button {
+  display: none;
+}
+.action-buttons .add-item-button[data-target="#activity-log--data-request-assignment-request--1-"] {
+  display: inline;
+}
+
+span.master-header-prefix {
+  color: rgb(100, 100, 100);
+  font-size: 19px;
+  width: 500px;
+  display: block;
+  text-transform: capitalize;
+}
+
+.master-result.num-masters-1,
+.master-result.selected-result#master--1 {
+  display: none;
+}
+
+.sublist-controls {
   display: none;
 }

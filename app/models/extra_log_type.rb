@@ -5,7 +5,7 @@
 # driving workflows.
 
 class ExtraLogType < ExtraOptions
-  ValidSaveTriggers = %i[notify create_reference update_reference create_filestore_container].freeze
+  ValidSaveTriggers = %i[notify create_reference create_master update_reference create_filestore_container].freeze
 
   def self.add_key_attributes
     %i[references label save_trigger e_sign nfs_store]
@@ -49,6 +49,7 @@ class ExtraLogType < ExtraOptions
           notify: SaveTriggers::Notify.config_def(if_extras: 'ref: ** conditions reference **'),
           create_reference: SaveTriggers::CreateReference.config_def(if_extras: 'ref: ** conditions reference **'),
           update_reference: SaveTriggers::UpdateReference.config_def(if_extras: 'ref: ** conditions reference **'),
+          create_master: SaveTriggers::CreateMaster.config_def(if_extras: 'ref: ** conditions reference **'),
           create_filestore_container: SaveTriggers::CreateFilestoreContainer.config_def(if_extras: 'ref: ** conditions reference **')
         },
         on_update: {

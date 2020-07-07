@@ -355,6 +355,11 @@ module ActivityLogHandler
     @model_references = {}
   end
 
+  # Get model references of the current instance
+  # NOTE: only model references specified in the references configuration will be returned,
+  # independent of the entries in the model_references table. If you do not get back the results
+  # you expect, check the references definition to ensure it includes the appropriate
+  # add_with and filter_by entries.
   def model_references(reference_type: :references, active_only: false, ref_order: nil)
     mr_key = { reference_type: reference_type, active_only: active_only, ref_order: ref_order }
     @model_references ||= {}
@@ -395,6 +400,8 @@ module ActivityLogHandler
                                                without_reference: true,
                                                ref_order: ref_order,
                                                active: active_only
+              else
+                Rails.logger.warn "Find references attempted without known :from key: #{f}"
               end
 
         if got

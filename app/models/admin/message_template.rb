@@ -362,7 +362,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
       # Associations are evaluated as needed in the data substitution, to avoid slowing everything down
     end
 
-    iu = item.user if item.respond_to?(:user)
+    iu = item.user if item.respond_to?(:user) && item.respond_to?(:user_id)
     if iu
       data[:item_user] = iu.attributes
       data[:user_email] = iu.email

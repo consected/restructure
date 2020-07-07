@@ -249,6 +249,10 @@ class Report < ActiveRecord::Base
 
     sql.gsub!(':filter_previous', '') if sql.include?(':filter_previous')
 
+    sql.scan(/:current_user/) do |cu|
+      sql = sql.sub(cu, current_user&.id.to_s || 'NULL')
+    end
+
     sql.scan(/:file_filtering_conditions_for_[a-z_]+/) do |file_filter|
       if file_filter.present?
         resource_name = file_filter.sub(':file_filtering_conditions_for_', '')
@@ -317,6 +321,7 @@ class Report < ActiveRecord::Base
           l.delete(:_report_id_)
           l.delete(:_filter_previous_)
           l.delete(:no_run)
+          l.delete(:current_user)
         end
         list << { name: name, id: id, search_params: l, results_length: @results.count }
 
