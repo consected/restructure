@@ -9,10 +9,7 @@ RSpec.describe 'Works With handler', type: :model do
   include ModelSupport
   include PlayerContactSupport
 
-  before :all do
-    SetupHelper.setup_al_player_contact_phones
-    Seeds.setup
-
+  before :example do
     create_user
     # Create a random player contact item
     create_item(data: rand(10_000_000_000_000_000), rank: 10, rec_type: 'phone')

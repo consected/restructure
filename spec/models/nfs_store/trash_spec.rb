@@ -23,17 +23,11 @@ RSpec.describe 'Trash archive files', type: :model do
     expect(@container.current_user).to eq @user
   end
 
-  before :all do
-    seed_database && ::ActivityLog.define_models
-    # setup_nfs_store
-  end
-
   before :each do
     setup_nfs_store
     setup_container_and_al
     setup_default_filters
   end
-
 
   it 'sends an archive file to trash' do
     @container.list_fs_files.length

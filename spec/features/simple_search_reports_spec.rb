@@ -14,7 +14,7 @@ describe 'simple search reports', js: true, driver: :app_firefox_driver do
 
     seed_database
     create_data_set_outside_tx
-
+    create_data_set
     gs = Classification::GeneralSelection.all
     gs.each { |g| g.current_admin = @admin; g.create_with = true; g.edit_always = true; g.save! }
 
@@ -41,6 +41,8 @@ describe 'simple search reports', js: true, driver: :app_firefox_driver do
 
   it 'should export CSV for a simple search' do
     visit '/masters/search'
+    user = User.where(email: @good_email).first
+    expect(user.can?(:export_csv)).to be_truthy
 
     pl = player_list.first
 

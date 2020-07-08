@@ -1,14 +1,13 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-
-RSpec.describe "Calculate conditional actions", type: :model do
-  
+RSpec.describe 'Calculate conditional actions', type: :model do
   include ModelSupport
   include ActivityLogSupport
-  
-  before :all do
-    SetupHelper.setup_al_player_contact_phones
-    u1, _ = create_user
+
+  before :example do
+    u1, = create_user
     @u1 = u1
     create_user
     create_master
@@ -22,7 +21,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
     setup_access :activity_log__player_contact_phones, user: @user
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
     setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: @user
-
 
     @al2 = create_item
     @al0 = create_item
@@ -46,29 +44,24 @@ RSpec.describe "Calculate conditional actions", type: :model do
     expect(Admin::UserRole.where(role_name: 'test', app_type: u1.app_type).count).to eq 3
 
     @role_user_ids = [u1.id, @user.id]
-
   end
 
-
-  it "always returns false for never and true for always" do
-
-    conf = {never: true}
+  it 'always returns false for never and true for always' do
+    conf = { never: true }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
 
-    conf = {always: true}
+    conf = { always: true }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
-
   end
 
-  it "checks if all attributes have a certain value" do
-
+  it 'checks if all attributes have a certain value' do
     conf = {
       all: {
         this: {
-            select_who: @al.select_who,
-            user_id: @al.user_id
+          select_who: @al.select_who,
+          user_id: @al.user_id
         }
       }
     }
@@ -78,8 +71,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       all: {
         this: {
-            select_who: 'will not work',
-            user_id: @al.user_id
+          select_who: 'will not work',
+          user_id: @al.user_id
         }
       }
     }
@@ -89,8 +82,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       all: {
         this: {
-            select_who: @al.select_who,
-            user_id: -1
+          select_who: @al.select_who,
+          user_id: -1
         }
       }
     }
@@ -100,8 +93,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       all: {
         this: {
-            select_who: 'will not work',
-            user_id: -1
+          select_who: 'will not work',
+          user_id: -1
         }
       }
     }
@@ -111,8 +104,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       all: {
         this: {
-            select_who: @al.select_who,
-            user_id: @al.user_id
+          select_who: @al.select_who,
+          user_id: @al.user_id
         }
       }
     }
@@ -124,24 +117,21 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       all: {
         this: {
-            select_who: ["doesn't match", @al.select_who],
-            user_id: [@al.user_id, "doesn't match"]
+          select_who: ["doesn't match", @al.select_who],
+          user_id: [@al.user_id, "doesn't match"]
         }
       }
     }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
-
-
   end
 
-  it "checks if any attributes have a certain value" do
-
+  it 'checks if any attributes have a certain value' do
     conf = {
       any: {
         this: {
-            select_who: @al.select_who,
-            user_id: @al.user_id
+          select_who: @al.select_who,
+          user_id: @al.user_id
         }
       }
     }
@@ -151,8 +141,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       any: {
         this: {
-            select_who: 'will not work',
-            user_id: @al.user_id
+          select_who: 'will not work',
+          user_id: @al.user_id
         }
       }
     }
@@ -162,8 +152,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       any: {
         this: {
-            select_who: @al.select_who,
-            user_id: -1
+          select_who: @al.select_who,
+          user_id: -1
         }
       }
     }
@@ -173,25 +163,22 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       any: {
         this: {
-            select_who: 'will not work',
-            user_id: -1
+          select_who: 'will not work',
+          user_id: -1
         }
       }
     }
 
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
-
   end
 
-
-  it "checks if none of the attributes have a certain value" do
-
+  it 'checks if none of the attributes have a certain value' do
     conf = {
       not_any: {
         this: {
-            select_who: @al.select_who,
-            user_id: @al.user_id
+          select_who: @al.select_who,
+          user_id: @al.user_id
         }
       }
     }
@@ -201,8 +188,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       not_any: {
         this: {
-            select_who: 'will not work',
-            user_id: @al.user_id
+          select_who: 'will not work',
+          user_id: @al.user_id
         }
       }
     }
@@ -212,8 +199,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       not_any: {
         this: {
-            select_who: @al.select_who,
-            user_id: -1
+          select_who: @al.select_who,
+          user_id: -1
         }
       }
     }
@@ -223,25 +210,21 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       not_any: {
         this: {
-            select_who: 'will not work',
-            user_id: -1
+          select_who: 'will not work',
+          user_id: -1
         }
       }
     }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
-
-
   end
 
-
-  it "checks if not all the attributes have a certain value" do
-
+  it 'checks if not all the attributes have a certain value' do
     conf = {
       not_all: {
         this: {
-            select_who: @al.select_who,
-            user_id: @al.user_id
+          select_who: @al.select_who,
+          user_id: @al.user_id
         }
       }
     }
@@ -251,8 +234,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       not_all: {
         this: {
-            select_who: 'will not work',
-            user_id: @al.user_id
+          select_who: 'will not work',
+          user_id: @al.user_id
         }
       }
     }
@@ -262,8 +245,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       not_all: {
         this: {
-            select_who: @al.select_who,
-            user_id: -1
+          select_who: @al.select_who,
+          user_id: -1
         }
       }
     }
@@ -273,19 +256,16 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       not_all: {
         this: {
-            select_who: 'will not work',
-            user_id: -1
+          select_who: 'will not work',
+          user_id: -1
         }
       }
     }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
-
   end
 
-
-  it "checks if all attributes in this and another table in the master have a certain value" do
-
+  it 'checks if all attributes in this and another table in the master have a certain value' do
     m = @al.master
     m.current_user = @user
     pc = m.player_contacts.create! data: '(516)123-7612', rec_type: 'phone', rank: 10, source: 'nflpa'
@@ -293,8 +273,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       all: {
         this: {
-            select_who: @al.select_who,
-            user_id: @al.user_id
+          select_who: @al.select_who,
+          user_id: @al.user_id
         },
         player_contacts: {
           data: pc.data
@@ -307,8 +287,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       all: {
         this: {
-            select_who: 'should fail',
-            user_id: @al.user_id
+          select_who: 'should fail',
+          user_id: @al.user_id
         },
         player_contacts: {
           data: pc.data
@@ -321,8 +301,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       all: {
         this: {
-            select_who: @al.select_who,
-            user_id: @al.user_id
+          select_who: @al.select_who,
+          user_id: @al.user_id
         },
         player_contacts: {
           data: '0001112223'
@@ -331,11 +311,9 @@ RSpec.describe "Calculate conditional actions", type: :model do
     }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
-
   end
 
-  it "checks if all attributes match multiple condition types" do
-
+  it 'checks if all attributes match multiple condition types' do
     m = @al.master
     m.current_user = @user
     pc = m.player_contacts.create! data: '(516)123-7612', rec_type: 'phone', rank: 10, source: 'nflpa'
@@ -343,8 +321,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       all: {
         this: {
-            select_who: @al.select_who,
-            user_id: @al.user_id
+          select_who: @al.select_who,
+          user_id: @al.user_id
         },
         player_contacts: {
           data: pc.data
@@ -362,8 +340,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = {
       all: {
         this: {
-            select_who: @al.select_who,
-            user_id: @al.user_id
+          select_who: @al.select_who,
+          user_id: @al.user_id
         },
         player_contacts: {
           data: pc.data
@@ -377,27 +355,25 @@ RSpec.describe "Calculate conditional actions", type: :model do
     }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
-
   end
 
-  it "checks for lists of possible items in the the same table with different sets of attributes" do
-
+  it 'checks for lists of possible items in the the same table with different sets of attributes' do
     m = @al.master
     m.current_user = @user
 
-    a1 = m.addresses.create! city: "Portland",
-      state: "OR",\
-      zip: "#{rand(99999).to_s.rjust(5, "0")}",
-      rank: 0,
-      rec_type: 'home',
-      source: 'nflpa'
+    a1 = m.addresses.create! city: 'Portland',
+                             state: 'OR',\
+                             zip: rand(99_999).to_s.rjust(5, '0').to_s,
+                             rank: 0,
+                             rec_type: 'home',
+                             source: 'nflpa'
 
-    m.addresses.create! city: "Portland",
-      state: "OR",
-      zip: "#{rand(99999).to_s.rjust(5, "0")}",
-      rank: 10,
-      rec_type: 'home',
-      source: 'nflpa'
+    m.addresses.create! city: 'Portland',
+                        state: 'OR',
+                        zip: rand(99_999).to_s.rjust(5, '0').to_s,
+                        rank: 10,
+                        rec_type: 'home',
+                        source: 'nflpa'
 
     conf = {
       any: [
@@ -435,50 +411,48 @@ RSpec.describe "Calculate conditional actions", type: :model do
     expect(res.calc_action_if).to be false
   end
 
-  it "checks if nested conditions work" do
-
+  it 'checks if nested conditions work' do
     m = @al.master
     m.current_user = @user
 
-    a1 = m.addresses.create! city: "Portland",
-      state: "OR",
-      zip: "#{rand(99999).to_s.rjust(5, "0")}",
-      rank: 0,
-      rec_type: 'home',
-      source: 'nflpa'
+    a1 = m.addresses.create! city: 'Portland',
+                             state: 'OR',
+                             zip: rand(99_999).to_s.rjust(5, '0').to_s,
+                             rank: 0,
+                             rec_type: 'home',
+                             source: 'nflpa'
 
-    a2 = m.addresses.create! city: "Portland",
-      state: "OR",
-      zip: "#{rand(99999).to_s.rjust(5, "0")}",
-      rank: 10,
-      rec_type: 'home',
-      source: 'nflpa'
+    a2 = m.addresses.create! city: 'Portland',
+                             state: 'OR',
+                             zip: rand(99_999).to_s.rjust(5, '0').to_s,
+                             rank: 10,
+                             rec_type: 'home',
+                             source: 'nflpa'
 
     pc = m.player_contacts.create! data: '(516)123-7612', rec_type: 'phone', rank: 10, source: 'nflpa'
 
-      conf = {
+    conf = {
+      all: {
         all: {
-          all: {
-            this: {
-              select_who: @al.select_who,
-              user_id: @al.user_id
-            },
-            addresses: {
-              id: a2.id,
-              zip: [a1.zip, a2.zip]
-            }
+          this: {
+            select_who: @al.select_who,
+            user_id: @al.user_id
           },
-          not_all: {
-            addresses: {
-              id: a1.id,
-              zip: 'x'
-            }
+          addresses: {
+            id: a2.id,
+            zip: [a1.zip, a2.zip]
+          }
+        },
+        not_all: {
+          addresses: {
+            id: a1.id,
+            zip: 'x'
           }
         }
       }
-      res = ConditionalActions.new conf, @al
-      expect(res.calc_action_if).to be true
-
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
 
     conf = {
       all: {
@@ -566,7 +540,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
 
-
     conf = {
       not_all: {
         all: {
@@ -648,7 +621,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
 
-
     # Check that nested conditions work across various tables
 
     conf = {
@@ -695,7 +667,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
 
-
     conf = {
 
       all: {
@@ -729,7 +700,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
 
-
     # Deep nesting
     conf = {
       # Negate the nested result
@@ -739,7 +709,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
           any: {
             # A player contact record exists in the master
             player_contacts: {
-                id: pc.id
+              id: pc.id
             }
 
           },
@@ -768,27 +738,27 @@ RSpec.describe "Calculate conditional actions", type: :model do
           any: {
             # A player contact record exists in the master
             player_contacts: {
-                id: pc.id
+              id: pc.id
             }
 
           },
 
           # A player contact record exists in the master
-#          all_pcs_with_data: {
-            player_contacts: {
-              id: pc.id,
-              data: pc.data
-            }
-#          }
+          #          all_pcs_with_data: {
+          player_contacts: {
+            id: pc.id,
+            data: pc.data
+          }
+          #          }
         }
       }
 
     }
 
     res = ConditionalActions.new conf, @al
-    expect{
+    expect do
       res.calc_action_if
-    }.to raise_error FphsException
+    end.to raise_error FphsException
 
     # Need all: before named table
     conf = {
@@ -799,49 +769,47 @@ RSpec.describe "Calculate conditional actions", type: :model do
           any: {
             # A player contact record exists in the master
             player_contacts: {
-                id: 0
+              id: 0
             }
 
           },
 
           # A player contact record exists in the master
-#          all_pcs_with_data: {
-            player_contacts: {
-              id: pc.id,
-              data: pc.data
-            }
-#          }
+          #          all_pcs_with_data: {
+          player_contacts: {
+            id: pc.id,
+            data: pc.data
+          }
+          #          }
         }
       }
 
     }
 
     res = ConditionalActions.new conf, @al
-    expect{
+    expect do
       res.calc_action_if
-    }.to raise_error FphsException
+    end.to raise_error FphsException
 
     # Check that calc_query_conditions handles nested any conditions OK
     conf = {
 
+      any_pcs: {
 
-        any_pcs: {
+        player_contacts: {
+          id: pc.id,
+          data: pc.data
+        },
 
+        any: {
+          # A player contact record exists in the master
           player_contacts: {
-            id: pc.id,
-            data: pc.data
-          },
-
-          any: {
-            # A player contact record exists in the master
-            player_contacts: {
-                id: 0
-            }
-
+            id: 0
           }
 
         }
 
+      }
 
     }
 
@@ -851,24 +819,22 @@ RSpec.describe "Calculate conditional actions", type: :model do
     # Check that calc_query_conditions handles nested any conditions OK
     conf = {
 
+      any_pcs: {
 
-        any_pcs: {
+        player_contacts: {
+          id: -1,
+          data: 'bad pc.data'
+        },
 
+        any: {
+          # A player contact record exists in the master
           player_contacts: {
-            id: -1,
-            data: 'bad pc.data'
-          },
-
-          any: {
-            # A player contact record exists in the master
-            player_contacts: {
-                id: 0
-            }
-
+            id: 0
           }
 
         }
 
+      }
 
     }
 
@@ -878,47 +844,46 @@ RSpec.describe "Calculate conditional actions", type: :model do
     # Check that calc_query_conditions handles nested any conditions OK
     conf = {
 
+      all: {
+        activity_log__player_contact_phones: {
+          select_who: @al.select_who
+        }
+      },
+
+      any_pcs: {
         all: {
-          activity_log__player_contact_phones: {
-            select_who: @al.select_who
+          player_contacts: {
+            data: 'not good'
           }
         },
 
-        any_pcs: {
-          all: {
-            player_contacts: {
-              data: 'not good'
-            }
-          },
-
-          not_any: {
-            # A player contact record exists in the master
-            player_contacts: {
-                id: pc.id
-            }
-
+        not_any: {
+          # A player contact record exists in the master
+          player_contacts: {
+            id: pc.id
           }
 
         }
+
+      }
     }
 
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
-
 
     # Check that calc_query_conditions handles nested any conditions OK
 
     # Validate the first chunk
     conf = {
 
-        all: {
-          activity_log__player_contact_phones: {
-            select_who: @al2.select_who
-          },
-          player_contacts: {
-            data: pc.data
-          }
+      all: {
+        activity_log__player_contact_phones: {
+          select_who: @al2.select_who
+        },
+        player_contacts: {
+          data: pc.data
         }
+      }
     }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
@@ -926,21 +891,21 @@ RSpec.describe "Calculate conditional actions", type: :model do
     # Validate the second chunk
     conf = {
 
-        any_done: {
-          all: {
-            activity_log__player_contact_phones: {
-              select_who: 'not good'
-            }
-          },
+      any_done: {
+        all: {
+          activity_log__player_contact_phones: {
+            select_who: 'not good'
+          }
+        },
 
-          not_any: {
-            activity_log__player_contact_phones: {
-              select_who: @al.select_who
-            }
-
+        not_any: {
+          activity_log__player_contact_phones: {
+            select_who: @al.select_who
           }
 
         }
+
+      }
     }
 
     res = ConditionalActions.new conf, @al
@@ -949,40 +914,38 @@ RSpec.describe "Calculate conditional actions", type: :model do
     # Both chunks together
     conf = {
 
+      all: {
+        activity_log__player_contact_phones: {
+          select_who: @al2.select_who
+        },
+        player_contacts: {
+          data: pc.data
+        }
+      },
+
+      any_done: {
         all: {
           activity_log__player_contact_phones: {
-            select_who: @al2.select_who
-          },
-          player_contacts: {
-            data: pc.data
+            select_who: 'not good'
           }
         },
 
-        any_done: {
-          all: {
-            activity_log__player_contact_phones: {
-              select_who: 'not good'
-            }
-          },
-
-          not_any: {
-            activity_log__player_contact_phones: {
-              select_who: @al.select_who
-            }
-
+        not_any: {
+          activity_log__player_contact_phones: {
+            select_who: @al.select_who
           }
 
         }
+
+      }
     }
 
     res = ConditionalActions.new conf, @al
     r = res.calc_action_if
     expect(r).to be false
-
   end
 
-  it "checks if a certain the current user has a specific id" do
-
+  it 'checks if a certain the current user has a specific id' do
     # user_id for the activity log matches the current user's id
     conf = {
       all_creator: {
@@ -995,7 +958,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
     }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
-
 
     conf = {
       all: {
@@ -1010,12 +972,9 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
 
     expect(res.calc_action_if).to eq true
-
-
   end
 
-  it "checks if the current user has a specific role" do
-
+  it 'checks if the current user has a specific role' do
     al = create_item
 
     conf = {
@@ -1042,7 +1001,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
     res = ConditionalActions.new conf, al
     expect(res.calc_action_if).to be true
-
 
     conf = {
       all: {
@@ -1087,29 +1045,25 @@ RSpec.describe "Calculate conditional actions", type: :model do
     al.select_who = @user.role_names.first
     res = ConditionalActions.new conf, al
     expect(res.calc_action_if).to be true
-
   end
 
-  it "handles repeated, nested items" do
-
-
+  it 'handles repeated, nested items' do
     m = @al.master
     m.current_user = @user
 
-    a1 = m.addresses.create! city: "Portland",
-      state: "OR",
-      zip: "#{rand(99999).to_s.rjust(5, "0")}",
-      rank: 0,
-      rec_type: 'home',
-      source: 'nflpa'
+    a1 = m.addresses.create! city: 'Portland',
+                             state: 'OR',
+                             zip: rand(99_999).to_s.rjust(5, '0').to_s,
+                             rank: 0,
+                             rec_type: 'home',
+                             source: 'nflpa'
 
-    a2 = m.addresses.create! city: "Portland",
-      state: "OR",
-      zip: "#{rand(99999).to_s.rjust(5, "0")}",
-      rank: 10,
-      rec_type: 'home',
-      source: 'nflpa'
-
+    a2 = m.addresses.create! city: 'Portland',
+                             state: 'OR',
+                             zip: rand(99_999).to_s.rjust(5, '0').to_s,
+                             rank: 10,
+                             rec_type: 'home',
+                             source: 'nflpa'
 
     @al.extra_log_type_config.references = {
       address: {
@@ -1133,7 +1087,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
     # Does the referenced item work correctly?
 
-    confy= "
+    confy = "
     all:
       addresses:
         city: 'portland'
@@ -1141,7 +1095,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
         id:
           this_references: id
     "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     res = ConditionalActions.new conf, @al
@@ -1149,7 +1103,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
     # Does a referenced item specifying a record type work correctly?
 
-    confy= "
+    confy = "
     all:
       addresses:
         city: 'portland'
@@ -1158,14 +1112,13 @@ RSpec.describe "Calculate conditional actions", type: :model do
           this_references:
             player_contact: id
     "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
 
-
-    confy= "
+    confy = "
     all:
       addresses:
         city: 'portland'
@@ -1174,13 +1127,13 @@ RSpec.describe "Calculate conditional actions", type: :model do
           this_references:
             address: id
     "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
 
-    confy= "
+    confy = "
     all:
       addresses:
         city: 'portland'
@@ -1191,7 +1144,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
             # that matches an address with equal rank
             address: rank
     "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     address_rank = @al.master.addresses.first.rank
@@ -1200,7 +1153,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
-
 
     # More complex references
     confy = "
@@ -1231,14 +1183,11 @@ RSpec.describe "Calculate conditional actions", type: :model do
             id:
               this_references: id
 "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
-
-
-
 
     confy = "
         all:
@@ -1268,13 +1217,12 @@ RSpec.describe "Calculate conditional actions", type: :model do
             id:
               this_references: id
 "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
-
+    @al.reset_model_references
     res = ConditionalActions.new conf, @al
 
     expect(res.calc_action_if).to be true
-
 
     # Check nested alls work as expected
     confy = "
@@ -1306,14 +1254,13 @@ RSpec.describe "Calculate conditional actions", type: :model do
             id:
               this_references: id
 "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
     expect(res.calc_action_if).to be true
-
-
 
     # # Try matching any across multiple relations
     m.player_contacts.create! rec_type: :phone, data: '(123)456-7891', rank: 5
@@ -1335,14 +1282,14 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
 
 "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
     a = res.calc_action_if
     expect(a).to be true
-
 
     confy = "
         not_any:
@@ -1354,14 +1301,14 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
 
 "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
     a = res.calc_action_if
     expect(a).to be false
-
 
     confy = "
         all:
@@ -1373,14 +1320,14 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
 
 "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
     a = res.calc_action_if
     expect(a).to be false
-
 
     confy = "
         all:
@@ -1392,14 +1339,14 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
 
 "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
     a = res.calc_action_if
     expect(a).to be true
-
 
     confy = "
         not_all:
@@ -1411,14 +1358,14 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
 
 "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
     a = res.calc_action_if
     expect(a).to be true
-
 
     confy = "
         not_all:
@@ -1430,19 +1377,17 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
 
 "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @al.reset_model_references
 
     res = ConditionalActions.new conf, @al
 
     a = res.calc_action_if
     expect(a).to be false
-
-
 
     # Check whether references work correctly
     @alnor = create_item
-
 
     @alnor.master_id = @al.master_id
     @alnor.force_save!
@@ -1468,7 +1413,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
         }
       }
     }
-
 
     # Create a reference to @al
     ModelReference.create_with @alnor, @al
@@ -1501,7 +1445,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
             id:
               this_references: id
 "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     # We have two references
@@ -1510,7 +1454,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
     # Since neither match extra_log_type xxx, not_all results in true
     res = ConditionalActions.new conf, @alnor
     expect(res.calc_action_if).to be true
-
 
     # Check it also finds a matching item with 'primary', causing the result to fail
     confy = "
@@ -1541,40 +1484,37 @@ RSpec.describe "Calculate conditional actions", type: :model do
             id:
               this_references: id
 "
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
+    @alnor.reset_model_references
 
     # Since one of the references matches extra_log_type primary, not_all results in false
     res = ConditionalActions.new conf, @alnor
     expect(res.calc_action_if).to be false
 
-
-
     # Set the references to be disabled
     # This only affects the conditions handled by this_reference: id
     # since the initial condition is handled directly by an INNER JOIN query
     # not through the model references
-    @alnor.extra_log_type_config.editable_if = {always: true}
+    @alnor.extra_log_type_config.editable_if = { always: true }
     r = @alnor.model_references.last
     r.update!(disabled: true, current_user: @user) unless r.disabled?
-
+    @alnor.reset_model_references
 
     res = ConditionalActions.new conf, @alnor
     res_if = res.calc_action_if
 
     expect(res_if).to be true
-
   end
 
-  it "checks non-equality conditions" do
-
+  it 'checks non-equality conditions' do
     conf = {
       all: {
         activity_log__player_contact_phones: {
           id: @al.id,
           created_at: {
-            condition: "<",
-            value: "#{@al.created_at + 1.second}"
+            condition: '<',
+            value: (@al.created_at + 1.second).to_s
           }
         }
       }
@@ -1589,8 +1529,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
           id: @al.id,
 
           created_at: {
-            condition: ">",
-            value: "#{@al.created_at + 1.second}"
+            condition: '>',
+            value: (@al.created_at + 1.second).to_s
           }
         }
       }
@@ -1656,7 +1596,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
         activity_log__player_contact_phones: {
           id: @al.id,
           select_who: {
-            condition: "<>",
+            condition: '<>',
             value: @al.select_who
           }
         }
@@ -1671,7 +1611,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
         activity_log__player_contact_phones: {
           id: @al.id,
           select_who: {
-            condition: "<",
+            condition: '<',
             value: "a-#{@al.select_who}"
           }
         }
@@ -1692,8 +1632,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
       all: {
         activity_log__player_contact_phones: {
           created_at: {
-            condition: "<",
-            value: "#{@al.created_at + 1.second}"
+            condition: '<',
+            value: (@al.created_at + 1.second).to_s
           }
         }
       }
@@ -1711,8 +1651,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
       all: {
         activity_log__player_contact_phones: {
           created_at: {
-            condition: ">",
-            value: "#{@al.created_at + 1.second}"
+            condition: '>',
+            value: (@al.created_at + 1.second).to_s
           }
         }
       }
@@ -1720,7 +1660,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
-
 
     # Special conditions are not supported on any or not_any
     # Ensure we get an obvious exception
@@ -1733,18 +1672,17 @@ RSpec.describe "Calculate conditional actions", type: :model do
       any: {
         activity_log__player_contact_phones: {
           created_at: {
-            condition: "<",
-            value: "#{@al.created_at + 1.second}"
+            condition: '<',
+            value: (@al.created_at + 1.second).to_s
           }
         }
       }
     }
 
     res = ConditionalActions.new conf, @al
-    expect {
-     res.calc_action_if
-    }.to raise_error(FphsException)
-
+    expect do
+      res.calc_action_if
+    end.to raise_error(FphsException)
 
     # Right to Left conditions
     expect(@al.select_who.length).to be > 0
@@ -1754,8 +1692,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
         activity_log__player_contact_phones: {
           id: @al.id,
           select_who: {
-            condition: "= LENGTH",
-            value: "#{@al.select_who.length}"
+            condition: '= LENGTH',
+            value: @al.select_who.length.to_s
           }
         }
       }
@@ -1770,8 +1708,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
         activity_log__player_contact_phones: {
           id: @al.id,
           select_who: {
-            condition: "= LENGTH",
-            value: "#{@al.select_who.length + 1}"
+            condition: '= LENGTH',
+            value: (@al.select_who.length + 1).to_s
           }
         }
       }
@@ -1780,15 +1718,13 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
 
-
-
     # Right to Left conditions in "this" - a special case that requires extra calculation
     conf = {
       all: {
         this: {
           select_who: {
-            condition: "= LENGTH",
-            value: "#{@al.select_who.length + 1}"
+            condition: '= LENGTH',
+            value: (@al.select_who.length + 1).to_s
           }
         }
       }
@@ -1797,14 +1733,13 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
 
-
     # Right to Left conditions in "this" - a special case that requires extra calculation
     conf = {
       all: {
         this: {
           select_who: {
-            condition: "= LENGTH",
-            value: "#{@al.select_who.length}"
+            condition: '= LENGTH',
+            value: @al.select_who.length.to_s
           }
         }
       }
@@ -1812,10 +1747,9 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
-
   end
 
-  it "returns the last value from a condition as this_val attribute" do
+  it 'returns the last value from a condition as this_val attribute' do
     conf = {
       activity_log__player_contact_phones: {
         id: @al.id,
@@ -1829,7 +1763,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
     conf = {
       activity_log__player_contact_phones: {
-        id: @al.id+100,
+        id: @al.id + 100,
         select_who: 'return_value'
       }
     }
@@ -1847,7 +1781,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
     ca = ConditionalActions.new conf, @al
     res = ca.get_this_val
     expect(res).to eq @al.select_who
-
 
     # Alternatively return one value or another
     conf = {
@@ -1872,7 +1805,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ca.get_this_val
     expect(res).to eq @al.select_who
 
-
     conf = {
       any: {
         any_1: {
@@ -1894,20 +1826,18 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ca.get_this_val
     expect(res).to eq @al2.select_who
 
-
-
     conf = {
       any: {
         all_1: {
           activity_log__player_contact_phones: {
             id: [@al2.id,
-            'return_value']
+                 'return_value']
           }
         },
         all_2: {
           activity_log__player_contact_phones: {
             id: [@al.id + 100,
-            'return_value']
+                 'return_value']
 
           }
         }
@@ -1917,12 +1847,9 @@ RSpec.describe "Calculate conditional actions", type: :model do
     ca = ConditionalActions.new conf, @al
     res = ca.get_this_val
     expect(res).to eq @al2.id
-
-
   end
 
-  it "returns the all values as a list from a condition as this_val attribute" do
-
+  it 'returns the all values as a list from a condition as this_val attribute' do
     @al1 = create_item
     @al1.update! select_who: 'someone new', current_user: @user, master_id: @al.master_id
 
@@ -1940,13 +1867,9 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
     res = ca.get_this_val
     expect(res).to eq [@al1.select_who, @al.select_who, @al0.select_who]
-
-
   end
 
-
-  it "returns a record using return_result" do
-
+  it 'returns a record using return_result' do
     @al1 = create_item
     @al1.update! select_who: 'someone new', current_user: @user, master_id: @al.master_id
 
@@ -1965,11 +1888,9 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
     res = ca.get_this_val
     expect(res).to eq @al0
-
-
   end
 
-  it "returns a constant value if the condition is matched" do
+  it 'returns a constant value if the condition is matched' do
     conf = {
       activity_log__player_contact_phones: {
         id: @al.id,
@@ -1992,13 +1913,12 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ca.get_this_val
     expect(res).to be nil
 
-
     conf = {
       all: {
         this: {
-            select_who: @al.select_who,
-            user_id: @al.user_id,
-            return_constant: 'random constant'
+          select_who: @al.select_who,
+          user_id: @al.user_id,
+          return_constant: 'random constant'
         }
       }
     }
@@ -2026,7 +1946,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ca.get_this_val
     expect(res).to eq 'random constant2'
 
-
     conf = {
       all: {
         all_2: {
@@ -2046,22 +1965,18 @@ RSpec.describe "Calculate conditional actions", type: :model do
     ca = ConditionalActions.new conf, @al
     res = ca.get_this_val
     expect(res).to eq nil
-
   end
 
-  it "returns a referring record attribute" do
-
+  it 'returns a referring record attribute' do
     create_user
     setup_access :activity_log__player_contact_phones
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type
     setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type
 
-
     # create_master
 
     @al = create_item
     @al.current_user = @user
-
 
     @al1 = create_item
     @al1.update! select_who: 'someone new', current_user: @user, master_id: @al.master_id
@@ -2085,7 +2000,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
     }
 
     @al.extra_log_type_config.clean_references_def
-    @al.extra_log_type_config.editable_if = {always: true}
+    @al.extra_log_type_config.editable_if = { always: true }
 
     ModelReference.create_with @al, @al1, force_create: true
     ModelReference.create_with @al, @al2, force_create: true
@@ -2117,8 +2032,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
 
-
-
     conf = {
       activity_log__player_contact_phones: {
         id: {
@@ -2133,8 +2046,6 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ca.get_this_val
     expect(res).to eq @al
 
-
-
     conf = {
       referring_record: {
         update: 'return_result'
@@ -2146,10 +2057,21 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ca.get_this_val
     expect(res).to eq @al
 
+    # Top referring record
+
+    conf = {
+      top_referring_record: {
+        update: 'return_result'
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al2
+
+    res = ca.get_this_val
+    expect(res).to eq @al
   end
 
-  it "finds parent_references" do
-
+  it 'finds parent_references' do
     new_al0 = create_item
     new_al0.extra_log_type = 'blank'
     new_al0.force_save!
@@ -2206,7 +2128,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     res = ConditionalActions.new conf, new_al0
@@ -2222,12 +2144,11 @@ EOF_YAML
 
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be false
-
 
     confy = <<EOF_YAML
       all:
@@ -2240,7 +2161,7 @@ EOF_YAML
 
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     res = ConditionalActions.new conf, new_al0
@@ -2259,7 +2180,7 @@ EOF_YAML
 
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     res = ConditionalActions.new conf, new_al0
@@ -2276,14 +2197,13 @@ EOF_YAML
 
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be false
 
-
-confy = <<EOF_YAML
+    confy = <<EOF_YAML
   all:
 
     activity_log__player_contact_phones:
@@ -2294,17 +2214,86 @@ confy = <<EOF_YAML
 
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be false
 
+    # Can we use parent_or_this_references to make
+    # reusable references
 
+    confy = <<EOF_YAML
+      all:
+
+        activity_log__player_contact_phones:
+          extra_log_type: blank
+          id:
+            parent_or_this_references:
+              activity_log__player_contact_phones: id
+
+EOF_YAML
+
+    conf = YAML.safe_load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be true
+
+    confy = <<EOF_YAML
+      all:
+
+        activity_log__player_contact_phones:
+          extra_log_type: primary
+          id:
+            parent_or_this_references:
+              activity_log__player_contact_phones: id
+
+EOF_YAML
+
+    conf = YAML.safe_load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al0
+    expect(res.calc_action_if).to be false
+
+    # Try where parent_or_this falls back to the current instance
+    confy = <<EOF_YAML
+      all:
+
+        activity_log__player_contact_phones:
+          extra_log_type: blank
+          id:
+            parent_or_this_references:
+              activity_log__player_contact_phones: id
+
+EOF_YAML
+
+    conf = YAML.safe_load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al
+    expect(res.calc_action_if).to be true
+
+    confy = <<EOF_YAML
+      all:
+
+        activity_log__player_contact_phones:
+          extra_log_type: primary
+          id:
+            parent_or_this_references:
+              activity_log__player_contact_phones: id
+
+EOF_YAML
+
+    conf = YAML.safe_load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, new_al
+    expect(res.calc_action_if).to be false
   end
 
-  it "handles special cases" do
-
+  it 'handles special cases' do
     new_al0 = create_item
 
     new_al = create_item
@@ -2341,17 +2330,20 @@ EOF_YAML
                     value: 10
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     pc.update! rank: 10
+
+    pc = new_al0.master.player_contacts.where(rank: 10).first
+    expect(pc).not_to be nil
+
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be true
 
     pc.update! rank: 5
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be false
-
 
     # Script ineligibility test - alternative nesting
     confy = <<EOF_YAML
@@ -2372,7 +2364,7 @@ EOF_YAML
                     value: 10
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     pc.update! rank: 10
@@ -2382,8 +2374,6 @@ EOF_YAML
     pc.update! rank: 5
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be false
-
-
 
     # Script eligibility test
     confy = <<EOF_YAML
@@ -2401,7 +2391,7 @@ EOF_YAML
               value: 10
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     pc.update! rank: 10
@@ -2412,8 +2402,6 @@ EOF_YAML
 
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be true
-
-
 
     # Check "any" also works
     confy = <<EOF_YAML
@@ -2435,7 +2423,7 @@ EOF_YAML
                     value: 10
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     pc.update! rank: 10
@@ -2445,8 +2433,6 @@ EOF_YAML
     pc.update! rank: 5
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be true
-
-
 
     confy = <<EOF_YAML
       all:
@@ -2468,7 +2454,7 @@ EOF_YAML
                     value: 10
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     pc.update! rank: 10
@@ -2478,9 +2464,6 @@ EOF_YAML
     pc.update! rank: 5
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be false
-
-
-#
 
     # Check "not_all" also works
     confy = <<EOF_YAML
@@ -2502,7 +2485,7 @@ EOF_YAML
                     value: 10
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     pc.update! rank: 10
@@ -2512,8 +2495,6 @@ EOF_YAML
     pc.update! rank: 5
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be true
-
-
 
     confy = <<EOF_YAML
       all:
@@ -2535,7 +2516,7 @@ EOF_YAML
                     value: 10
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     pc.update! rank: 10
@@ -2546,8 +2527,7 @@ EOF_YAML
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be true
 
-
-# Combined not_all
+    # Combined not_all
 
     confy = <<EOF_YAML
       all:
@@ -2567,7 +2547,7 @@ EOF_YAML
                 value: 10
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     pc.update! rank: 10
@@ -2577,9 +2557,6 @@ EOF_YAML
     pc.update! rank: 5
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be true
-
-
-
 
     # Check "not_any" also works
     confy = <<EOF_YAML
@@ -2601,7 +2578,7 @@ EOF_YAML
                     value: 10
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     pc.update! rank: 10
@@ -2611,8 +2588,6 @@ EOF_YAML
     pc.update! rank: 5
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be false
-
-
 
     confy = <<EOF_YAML
       all:
@@ -2634,7 +2609,7 @@ EOF_YAML
                     value: 10
 EOF_YAML
 
-    conf = YAML.load(confy)
+    conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
     pc.update! rank: 10
@@ -2644,9 +2619,5 @@ EOF_YAML
     pc.update! rank: 5
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be true
-
-
-
   end
-
 end

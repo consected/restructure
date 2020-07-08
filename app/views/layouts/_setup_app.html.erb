@@ -7,7 +7,7 @@
   _fpa.layout = {item_blocks: <%= layout_item_block_sizes.to_json.html_safe %> };
   <% if current_user %>
   _fpa.state.app_configs = <%= Admin::AppConfiguration.all_for(current_user).to_json.html_safe %>;
-  _fpa.state.current_user_roles = <%= current_user.role_names.to_json.html_safe %>;
+  _fpa.state.current_user_roles = <%= current_user.app_type ? current_user.role_names.to_json.html_safe : [] %>;
   <% end %>
   _fpa.loaded.preload();
 

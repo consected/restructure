@@ -13,15 +13,5 @@ RSpec.describe Admin::CollegesController, type: :controller do
     @college
   end
 
-  before(:all) do
-    # @path_prefix = "/admin"
-    # Classification::College.connection.execute "
-    #   delete from college_history;
-    #   delete from colleges;
-    # "
-
-    # Rails.cache.clear
-  end
-
   it_behaves_like 'a standard admin controller'
 end

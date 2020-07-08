@@ -2,25 +2,17 @@
 
 require 'rails_helper'
 
-
 RSpec.describe NfsStore::Filter::Filter, type: :model do
   include PlayerContactSupport
   include ModelSupport
   include NfsStoreSupport
-  
-  before :all do
-    SetupHelper.setup_test_app
-    seed_database && ::ActivityLog.define_models
+
+  before :example do
     setup_nfs_store
 
     res = defined? BhsAssignment
     expect(res).to be_truthy
 
-    @activity_log = @container.parent_item
-  end
-
-  before :each do
-    setup_nfs_store
     setup_container_and_al
     clear_filters
   end

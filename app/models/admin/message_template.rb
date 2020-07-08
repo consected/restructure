@@ -80,22 +80,23 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
     # Only setup data if there are tags
     sub_data = setup_data(data) unless tags.empty?
-
     # Replace each tag {{tag}}
     tags.each do |tag_container|
       tag = tag_container[2..-3]
       missing = false
 
-      tagpair = tag.split('.', 2)
+      tagpair = tag.split('.')
 
-      d = sub_data
-      if tagpair.length == 2
-        # For {{tag.attr}} items, get the association (if needed), then
+      if tagpair.length >= 2
+        # For {{tag.attr}} or {{tag.sub.attr}} items, get the association (if needed), then
         # get the actual attribute value
-        get_assoc(sub_data[:master], tagpair.first, sub_data)
-        d = get_tag_value sub_data, tagpair.first
+
+        ref_parts = tagpair[0..-2]
         # Make the current tag just the attribute name, since it may include {{attr::formatting}} to be processed
         tag = tagpair.last
+        d = get_assoc(sub_data[:master], ref_parts, sub_data)
+      else
+        d = sub_data
       end
 
       # Handle formatting directives, following the ::
@@ -104,7 +105,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
       first_format_directive = tag_split[1]
       ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
 
-      unless d&.is_a?(Hash) && (d&.key?(tag_name) || d&.key?(tag_name.to_sym))
+      unless d&.is_a?(Hash) && (d&.key?(tag_name) || d&.key?(tag_name.to_sym)) || tag.start_with?('embedded_report_')
         if ignore_missing
           d = {}
           missing = true
@@ -212,7 +213,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
     text
   end
 
-  private
+  ##### The following methods are not intended for use outside this class ######
 
   #
   # Get the current tag value from the data, and format it
@@ -225,6 +226,23 @@ class Admin::MessageTemplate < ActiveRecord::Base
   def self.get_tag_value(data, tag_and_operator)
     tagp = tag_and_operator.split('::')
     tag = tagp.first
+
+    if tag.start_with? 'embedded_report_'
+      report_name = tag.sub('embedded_report_', '')
+      # Find the source item to call the report with
+      if data[:original_item].respond_to?(:referring_record) && data[:original_item].referring_record
+        list_item = data[:original_item].referring_record
+        list_id = list_item.id
+      else
+        list_item = data[:original_item]
+        list_id = list_item[:id]
+      end
+
+      list_type = list_item.class.name
+
+      return Reports::Template.embedded_report report_name, list_id, list_type
+    end
+
     orig_val = data[tag] || data[tag.to_sym]
     res = orig_val || ''
 
@@ -267,6 +285,19 @@ class Admin::MessageTemplate < ActiveRecord::Base
         res = res.join("\n") if res.is_a? Array
       elsif op == 'join_with_2newlines'
         res = res.join("\n\n") if res.is_a? Array
+      elsif op == 'compact'
+        res = res.reject(&:blank?) if res.is_a? Array
+      elsif op == 'sort'
+        res = res.sort if res.is_a? Array
+      elsif op == 'uniq'
+        res = res.uniq if res.is_a? Array
+      elsif op == 'markdown_list'
+        res = '  - ' + res.join("\n  - ") if res.is_a? Array
+      elsif op == 'html_list'
+        res = '<ul><li>' + res.join("</li>\n  <li>") + '</li></ul>' if res.is_a? Array
+      elsif op == 'plaintext'
+        res = ActionController::Base.helpers.sanitize(res)
+        res = res.gsub("\n", '<br>').html_safe
       elsif op == 'markup'
         res = Kramdown::Document.new(res).to_html.html_safe
       elsif op == 'ignore_missing'
@@ -289,17 +320,24 @@ class Admin::MessageTemplate < ActiveRecord::Base
   #
   def self.setup_data(item, alt_item = nil)
     if item.is_a? Hash
-      item = item.dup
-      item.symbolize_keys!
-      item[:master] = Master.find(item[:master_id]) if item[:master_id] && !item[:master]
-      item[:master_id] ||= item[:master].id if item[:master] && !item[:master_id]
-      return item
+      data = item.dup
+      data.symbolize_keys!
+      master = item[:master]
+      master = Master.find(item[:master_id]) if item[:master_id] && !master
+    else
+      data = item.attributes.dup
+      data[:original_item] = item
+      data[:alt_item] = alt_item
+
+      if item.respond_to?(:master)
+        master = item.master
+      elsif item.is_a? Master
+        master = item
+      end
+
     end
 
-    data = item.attributes.dup
-
-    data[:original_item] = item
-    data[:alt_item] = alt_item
+    # Common constants tags
     data[:base_url] = Settings::BaseUrl
     data[:admin_email] = Settings::AdminEmail
     data[:environment_name] = Settings::EnvironmentName
@@ -309,19 +347,6 @@ class Admin::MessageTemplate < ActiveRecord::Base
     # if the referenced item has its own referenced item (much like an activity log might), then get it
     data[:item] = item.item.attributes if item.respond_to?(:item) && item.item.respond_to?(:attributes)
 
-    if item.respond_to?(:user) && item.user
-      cu = item.user
-      data[:item_user] = item.user.attributes
-      data[:current_user] = item.user.attributes
-      data[:user_email] = item.user.email
-      data[:user_preference] = item.user.user_preference.attributes
-      data[:user_contact_info] = if item.user.contact_info
-                                   item.user.contact_info.attributes
-                                 else
-                                   Users::ContactInfo.new.attributes
-      end
-    end
-
     data[:created_by_user] = nil
     data[:created_by_user_email] = nil
 
@@ -330,48 +355,40 @@ class Admin::MessageTemplate < ActiveRecord::Base
       data[:created_by_user_email] = item.created_by_user_email
     end
 
-    if item.respond_to?(:current_user) && item.current_user
-      cu = item.current_user
-      data[:current_user] = item.current_user.attributes
-      data[:user_email] ||= item.current_user.email
-      data[:user_preference] ||= item.current_user.user_preference.attributes
-      data[:current_user_email] ||= item.current_user.email
-      data[:current_user_preference] ||= item.current_user.user_preference.attributes
-
-    end
-
-    if item.respond_to?(:master)
-      master = item.master
-    elsif item.is_a? Master
-      master = item
-    end
-
-    data[:parent_item] = item.container&.parent_item&.attributes if item.respond_to?(:container)
-
     if master
-
       data[:master] = master
-      data[:master_id] = master.id
-      cu = master.current_user
-      data[:current_user] = cu.attributes if cu
-      data[:current_user_instance] = cu
+      data[:master_id] ||= master.id
       # Alternative ids are evaluated as needed
       # Associations are evaluated as needed in the data substitution, to avoid slowing everything down
+    end
+
+    iu = item.user if item.respond_to?(:user) && item.respond_to?(:user_id)
+    if iu
+      data[:item_user] = iu.attributes
+      data[:user_email] = iu.email
+      data[:user_preference] = iu.user_preference.attributes
+      data[:user_contact_info] = iu.contact_info&.attributes || Users::ContactInfo.new.attributes
 
     end
 
-    data[:current_user_contact_info] = if cu&.respond_to?(:contact_info) && cu&.contact_info
-                                         cu.contact_info.attributes
-                                       else
-                                         Users::ContactInfo.new.attributes
-                                       end
+    cu = item.current_user if item.respond_to?(:current_user)
+    cu ||= master.current_user if master
+    if cu
+      data[:current_user_instance] ||= cu
+      data[:current_user] ||= cu.attributes
+      data[:current_user_email] ||= cu.email
+      data[:current_user_preference] ||= cu.user_preference.attributes
+      data[:current_user_contact_info] = cu.contact_info&.attributes || Users::ContactInfo.new.attributes
+    end
 
     data
   end
 
   # Associations that are allowable when getting model associations to resolve tags
   def self.allowable_associations
-    Master.get_all_associations + Master.get_all_associations(:has_one) - %w[not_trackers not_tracker_histories trackers_item_flags]
+    (Master.get_all_associations +
+      Master.get_all_associations(:has_one) -
+      %w[not_trackers not_tracker_histories trackers_item_flags]).uniq
   end
 
   #
@@ -379,64 +396,95 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # such as data[:ipa_appointments]. The attributes of the first record from the
   # association are added to this entry, and returned.
   #
-  # Special names, which are not actual associations but work like them are:
-  # - ids: alternative id / value pairs
-  # - referring_record: the record referring to this item (such as an activity log referring to a dynamic model)
+  # Allow data item to retrieve data from based on a chain of one or more associations / references
+  # Associations / references are chained with dots. Only the final item's attributes are returned
+  #
   #
   # @param [Master] master the current master instance
   # @param [String|Symbol] name the association to get
   # @param [Hash] data passed from {substitute}, which will gain an entry [:<name>]
   # @return [Hash] just this particular association result (the first records attributes)
-  #
-  def self.get_assoc(master, name, data)
-    an = name.to_s
+  def self.get_assoc(master, ref_parts, data)
     return nil unless master
 
-    if an == 'ids'
-      return data[:ids] = master.alternative_ids
-    elsif an == 'parent_item'
-      return data[:parent_item]
-    elsif an == 'referring_record'
-      return data[:referring_record] = data[:original_item].respond_to?(:referring_record) && data[:original_item].referring_record&.attributes
-    end
-
-    return nil unless an.in? allowable_associations
+    an = ref_parts.join('.').to_sym
 
     begin
-      # Get the association and find the first result
-      assoc = master.send(an)
-      if assoc.respond_to? :attributes
-        item = assoc
-      elsif assoc.respond_to?(:first)
-        item = assoc.first
-      else
-        raise "Association first item does not respond to attributes: #{an}"
+      res_data = data
+      item_reference = false
+      ref_parts.each do |name|
+        # Get the associated item, based on the current part of the substitution name
+        res_item = get_associated_item(master, name, res_data, item_reference: item_reference)
+        res_data = nil
+        break unless res_item
+
+        res_data = setup_data res_item
+        item_reference = true
       end
 
-      # Set the attributes
-      if item.respond_to?(:attributes)
-        data[an.to_sym] ||= item.attributes
-      else
-        return nil
-      end
-
-      ditem = data[an.to_sym]
-      if ditem
-
-        # If we got a result, update it with additional information
-        add_data = setup_data item
-        ditem.merge!(add_data)
-
-        # Force the current user information to match the supplied data if it hasn't been set
-        ditem[:current_user] ||= data[:current_user]
-        ditem[:current_user_instance] ||= data[:current_user_instance]
-
-      end
+      return unless res_data
     rescue StandardError => e
       Rails.logger.info "Get associations for #{an} failed: #{e}"
     end
 
-    ditem
+    res_data
+  end
+
+  #
+  # Get requested master association into its own data item
+  # such as data[:ipa_appointments].
+  #
+  # Special names, which are not actual associations but work like them are:
+  # - ids: alternative id / value pairs
+  # - parent_item:
+  # - referring_record: the record referring to this item (such as an activity log referring to a dynamic model)
+  # - latest_reference: the most recent reference from the record
+  #
+  # @param [Master] master the current master instance
+  # @param [String|Symbol] name the association to get
+  # @param [Hash | ActiveRecord::Model] data: object or data passed
+  #    from {substitute}, from which the association or reference should be found
+  # @param [Boolean] item_reference True if getting association / reference from an item rather than the master
+  # @return [ActiveRecord::Model] the first item from an association or reference
+  #
+  def self.get_associated_item(master, name, data, item_reference: false)
+    name = name.to_sym
+    an = name.to_s
+
+    return nil unless master
+
+    item = data[:original_item] || data
+
+    if an == 'ids'
+      master.alternative_ids
+    elsif data.is_a?(Hash) && data.keys.include?(name)
+      data[name]
+    elsif an == 'parent_item' && item.respond_to?(:container)
+      item.container&.parent_item
+    elsif an == 'current_user' && item.respond_to?(:current_user)
+      item.current_user
+    elsif an == 'referring_record' && item.respond_to?(:referring_record)
+      item.referring_record
+    elsif an == 'top_referring_record' && item.respond_to?(:top_referring_record)
+      item.top_referring_record
+    elsif an == 'latest_reference' && item.respond_to?(:latest_reference)
+      item.latest_reference
+    elsif item_reference
+      # Match model reference by underscored to record type, or if not matched by the resource name
+      # The latter allows activity logs to be matched on their extra log type too.
+      # Note - beware to ensure the activity log type is singular before the extra log type
+      #   activity_log__player_contact__step_1 NOT activity_log__player_contact**s**__step_1
+      imr = item.model_references
+      imr.select { |mr| mr.to_record_type_us == an.singularize }.first&.to_record ||
+        imr.select { |mr| mr.to_record.resource_name.to_s == an }.first&.to_record
+    elsif an.in? allowable_associations
+      objs = master.send(an)
+      if objs.respond_to? :first
+        objs.first
+      else
+        objs
+      end
+    end
   end
 
   #

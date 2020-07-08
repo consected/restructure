@@ -6,12 +6,8 @@ RSpec.describe Classification::GeneralSelection, type: :model do
   include ModelSupport
   include GeneralSelectionSupport
 
-  before :all do
-    SetupHelper.setup_test_app
-  end
 
-  before :each do
-    seed_database
+  before :example do
     create_admin
     create_user
 
@@ -27,6 +23,19 @@ RSpec.describe Classification::GeneralSelection, type: :model do
 
     res = Classification::GeneralSelection.selector_with_config_overrides
     expect(res.length).to be >= l
+  end
+
+  it 'gets active general selection configurations as a cached hash' do
+    expect(@list.length).to eq 10
+
+    l = Classification::GeneralSelection.active.length
+    expect(l).to be > 10
+
+    res = Classification::GeneralSelection.field_selections
+
+    expect(res).to be_a Hash
+    item_type = Classification::GeneralSelection.active.first.item_type
+    expect(res[item_type.to_sym].length).to be_present
   end
 
   it 'overrides general selection configurations with dynamic model alt_options' do

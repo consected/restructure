@@ -138,6 +138,8 @@ _nfs_store.fs_browser = function ($outer) {
       $b.removeClass('browser-hide-' + val);
     }
 
+    var $els = $outer.parents('.multi-model-reference-result .is-activity-log');
+    if ($els.length > 0) return;
     var $el = $outer.parents('.common-template-item.is-activity-log').first();
     var wasSmall = $el.hasClass('col-md-8');
     var nowSmall = false;

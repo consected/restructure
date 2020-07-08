@@ -63,9 +63,7 @@
         <h4 class="list-group-item-heading">{{>show_result_caption result_data=result_data}}</h4>
       </li>
       {{#with (fpa_state_item 'caption_before' (underscore name) 'all_fields')}}
-        <li class="list-group-item caption-before results-caption-before {{ hyphenate full_name }}-all_fields all-fields-caption">
-          {{{this.show_caption}}}
-        </li>
+        <li class="list-group-item caption-before results-caption-before {{ hyphenate full_name }}-all_fields all-fields-caption">{{{this.show_caption}}}</li>
       {{/with}}
 
     {{else}}

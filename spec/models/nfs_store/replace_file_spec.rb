@@ -12,11 +12,6 @@ RSpec.describe 'Replace stored files', type: :model do
     'file1'
   end
 
-  before :all do
-    seed_database && ::ActivityLog.define_models
-    # setup_nfs_store
-  end
-
   before :each do
     setup_nfs_store
     setup_container_and_al

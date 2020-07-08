@@ -15,8 +15,10 @@ class DynamicModel < ActiveRecord::Base
     'DynamicModel'
   end
 
+  # Dynamic Models may have singular or plural table names, so we must use
+  # this definition rather than the general resource name method
   def resource_name
-    full_item_types_name
+    "dynamic_model__#{table_name}"
   end
 
   # List of item types that can be used to define Classification::GeneralSelection drop downs
@@ -41,10 +43,6 @@ class DynamicModel < ActiveRecord::Base
 
   def implementation_model_name
     table_name.singularize
-  end
-
-  def field_list_array
-    field_list.split(/[,\s]+/).map(&:strip).compact if field_list
   end
 
   def all_implementation_fields(ignore_errors: true)
@@ -198,6 +196,8 @@ class DynamicModel < ActiveRecord::Base
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
         res.include DynamicModelHandler
+
+        res.final_setup
 
         # Handle extensions with an appropriate name
         ext = Rails.root.join('app', 'models', 'dynamic_model_extension', "#{model_class_name.underscore}.rb")

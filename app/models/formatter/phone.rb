@@ -25,20 +25,20 @@ module Formatter
 
             if num == 10
               # we already have 10 digits, the remaining amount is plain text. Separate it with a space
-              res << ' '
-              res << s unless s.blank?
+              res += ' '
+              res += s unless s.blank?
               num += 1
             elsif num > 10
               # handle the plain text
-              res << s
+              res += s
               num += 1
             elsif s.to_i.to_s == s
               # the character is a digit
-              res << s
+              res += s
               num += 1
 
-              res << ')' if num == 3
-              res << '-' if num == 6
+              res += ')' if num == 3
+              res += '-' if num == 6
             elsif !s.index(/[[[:punct:]]\s]/)
               # it wasn't whitespace or punctuation
               return nil

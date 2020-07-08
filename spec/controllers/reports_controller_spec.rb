@@ -8,7 +8,7 @@ RSpec.describe ReportsController, type: :controller do
   include MasterSupport
   include ReportSupport
 
-  before :all do
+  before :example do
     create_admin
     create_user
     create_reports
@@ -38,18 +38,18 @@ RSpec.describe ReportsController, type: :controller do
     @test_report = @report1
     setup_report_access
 
-    get :show, id: @test_report.id
+    get :show, params:  { id: @test_report.id }
     expect(response).to have_http_status 200
     expect(assigns(:report)).to eq(@test_report)
 
-    get :show, id: "#{@test_report.item_type}__#{@test_report.short_name}"
+    get :show, params:  { id: "#{@test_report.item_type}__#{@test_report.short_name}" }
     expect(response).to have_http_status 200
     expect(assigns(:report)).to eq(@test_report)
 
-    get :show, id: "#{@test_report.item_type}__#{@test_report.short_name}1"
+    get :show, params:  { id: "#{@test_report.item_type}__#{@test_report.short_name}1" }
     expect(response).to have_http_status 404
 
-    get :show, id: @test_report.item_type.to_s
+    get :show, params:  { id: @test_report.item_type.to_s }
     expect(response).to have_http_status 400
   end
 end

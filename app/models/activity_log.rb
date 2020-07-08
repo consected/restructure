@@ -169,13 +169,13 @@ class ActivityLog < ActiveRecord::Base
   # The attribute list defined in the admin record. If blank, the implementation_class
   # equivalent of this method returns a set of fields based on the actual implementation table
   def view_attribute_list
-    field_list.split(',').map(&:strip).compact unless field_list.blank?
+    field_list_array
   end
 
   # The attribute list defined in the admin record. If blank, the implementation_class
   # equivalent of this method returns a set of fields based on the actual implementation table
   def view_blank_log_attribute_list
-    blank_log_field_list.split(',').map(&:strip).compact unless blank_log_field_list.blank?
+    field_list_array for_attrib: blank_log_field_list
   end
 
   # Get a complete list of all fields required to generate a table.
@@ -410,7 +410,7 @@ class ActivityLog < ActiveRecord::Base
       end
       unless rec_type_valid?
         errors.add(:rec_type, "(#{rec_type}) invalid for the selected item type #{item_type}.")
-        return
+        nil
       end
     end
   end
@@ -479,6 +479,7 @@ class ActivityLog < ActiveRecord::Base
         res.include UserHandler
         res.include ActivityLogHandler
         ESignature::ESignatureManager.enable_e_signature_for res
+        res.final_setup
 
         c_name = full_implementation_controller_name
 
@@ -537,7 +538,7 @@ class ActivityLog < ActiveRecord::Base
     end
 
     begin
-      return implementation_class.parent_class
+      implementation_class.parent_class
     rescue StandardError => e
       logger.debug e
       errors.add :item_type, "It seems that the model that this activity log definition is associated with does not exist. Check that the #{item_type.pluralize} table exists, and if this is a dynamic model or external ID, check it is enabled"

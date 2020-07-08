@@ -77,6 +77,52 @@ FROM (
 
     UNION
     --
+    -- IPA Tracker process for follow up surveys sent
+    --
+    SELECT
+      al.master_id,
+      'tracker' "source",
+      'follow up survey sent',
+      NULL "communication_result",
+      NULL "checklist_signed",
+      s.created_at
+
+    FROM activity_log_ipa_assignments al
+
+    INNER JOIN ipa_surveys s
+      ON al.master_id = s.master_id
+      AND s.sent_date IS NOT NULL
+
+    WHERE
+      :activity_performed = 'survey-sent' AND al.extra_log_type='follow_up_surveys'
+      OR :activity_outstanding is not null AND :activity_outstanding = 'survey-sent' AND al.extra_log_type='follow_up_surveys'
+
+    UNION   
+
+    --
+    -- IPA Tracker process for follow up surveys completed
+    --
+    SELECT
+      al.master_id,
+      'tracker' "source",
+      'follow up survey completed',
+      NULL "communication_result",
+      NULL "checklist_signed",
+      s.updated_at
+
+    FROM activity_log_ipa_assignments al
+
+    INNER JOIN ipa_surveys s
+      ON al.master_id = s.master_id
+      AND s.completed_date IS NOT NULL
+
+    WHERE
+      :activity_performed = 'survey-completed' AND al.extra_log_type='follow_up_surveys'
+      OR :activity_outstanding is not null AND :activity_outstanding = 'survey-completed' AND al.extra_log_type='follow_up_surveys'
+
+    UNION  
+
+    --
     -- Inclusion / Exclusion process
     --
     SELECT
@@ -267,6 +313,8 @@ AND
   OR :activity_performed = 'has-planned-event' AND extra_log_type = 'planned_event'
   OR :activity_performed = 'has-event-feedback' AND extra_log_type = 'station_event'
   OR :activity_performed = 'appointment-set' AND extra_log_type='appointment'
+  OR :activity_performed = 'survey-sent' AND extra_log_type='follow up survey sent'
+  OR :activity_performed = 'survey-completed' AND extra_log_type='follow up survey completed'
 
   OR (
     :activity_performed = 'inex-baseline-complete'
@@ -300,6 +348,8 @@ AND (
       OR :activity_outstanding = 'has-planned-event' AND extra_log_type = 'planned_event'
       OR :activity_outstanding = 'has-event-feedback' AND extra_log_type = 'station_event'
       OR :activity_outstanding = 'appointment-set' AND extra_log_type='appointment'
+      OR :activity_outstanding = 'survey-sent' AND extra_log_type='follow up survey sent'
+      OR :activity_outstanding = 'survey-completed' AND extra_log_type='follow up survey completed'
 
       OR (
           :activity_outstanding = 'inex-baseline-complete'

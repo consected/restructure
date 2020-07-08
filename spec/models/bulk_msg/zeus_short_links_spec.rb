@@ -9,9 +9,12 @@ RSpec.describe 'DynamicModel::ZeusShortLink', type: :model do
   include PlayerContactSupport
   include BulkMsgSupport
 
-  before :all do
+  before :example do
     create_admin
     create_user
+    setup_access :trackers
+    setup_access :tracker_history
+
     import_bulk_msg_app
 
     @bulk_master = Master.find(-1)
@@ -101,7 +104,7 @@ RSpec.describe 'DynamicModel::ZeusShortLink', type: :model do
         data = Admin::MessageTemplate.setup_data(master.player_contacts[0], master.player_contacts[1])
         res = Admin::MessageTemplate.substitute txt.dup, data: data, tag_subs: nil
 
-        sl = DynamicModel::ZeusShortLink.last
+        sl = DynamicModel::ZeusShortLink.first
         expect(sl).to be_a DynamicModel::ZeusShortLink
         expect(sl.url).to eq "https://footballplayershealth.harvard.edu/join-us/?test_id=#{master.msid}"
       end

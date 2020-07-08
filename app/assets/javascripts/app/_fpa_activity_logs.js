@@ -163,6 +163,10 @@ _fpa.activity_logs = {
 
 
       if (typeof save_action == 'object') {
+        if (save_action.go_to_master) {
+          _fpa.send_ajax_request("/masters.json?master[id]=" + obj_data.master_id + "&commit=search");
+        }
+
         if (save_action.create_next_creatable) {
           var sel = '.activity-logs-generic-block[data-sub-id="' + obj_data.master_id + '"][data-sub-item="' + obj_data.item_types + '"] a.add-item-button[data-extra-log-type]';
           var res = $(sel).not('[disabled]').first().click();

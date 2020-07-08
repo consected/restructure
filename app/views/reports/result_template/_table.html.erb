@@ -1,3 +1,27 @@
+<%
+  @report = report if local_assigns[:report]
+  @results = results if local_assigns[:results]
+  @outer_block_id = outer_block_id if local_assigns[:outer_block_id]
+
+  col_classes = {}
+  col_tags = {}
+  col_hide = {}
+
+  if @report.column_options
+    @report.column_options.classes&.each do |k,v|
+      col_classes[k] = v.is_a?(Array) ? v.join(' ') : v
+    end
+
+    @report.column_options.tags&.each do |k,v|
+      col_tags[k] = v
+    end
+
+    @report.column_options.hide&.each do |k,v|
+      col_hide[k] = v
+    end
+  end
+
+%>
 <div class="report-results-table-block" id="<%=@outer_block_id%>-table-block">
 
   <table class="report-table table tablesorter">
@@ -10,10 +34,11 @@
           table_names = result_tables.uniq
           num_tables = table_names.length
         %>
-        <% @results.fields.each do |col|
-
+        <% 
+          @results.fields.each do |col|
+            unless col_hide[col]
         %>
-          <th title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="<%=col%>">
+          <th title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="<%=col%>" class="table-header <%= col_classes[@results.fields[i]] %>">
             <p class="table-header-col-type"><%=@report.view_options.humanize_column_names ? col.humanize : col%></p>
             <% unless num_tables == 1 %>
             <% unless @report.view_options.hide_table_names %>
@@ -21,8 +46,11 @@
             <% end %>
             <% end %>
           </th>
-        <%  i += 1%>
-        <% end %>
+        <%  
+            end
+            i += 1
+         end 
+        %>
       </tr>
     </thead>
     <tbody>
@@ -36,19 +64,25 @@
          <% end %>
           <% i = 0 %>
 
-          <% list_item.each do |col| %>
-          <td data-col-type="<%=@results.fields[i] %>" data-col-table="<%=result_tables[i] %>" class="report-el <%= @results.fields[i] == 'id' ? 'report-el-object-id' : '' %>"><%
+          <% 
+            list_item.each do |col| 
+              col_name = @results.fields[i]
+              unless col_hide[col_name]
+          %>
+          <td data-col-type="<%=@results.fields[i] %>" data-col-table="<%=result_tables[i] %>" class="report-el <%= @results.fields[i] == 'id' ? 'report-el-object-id' : '' %> <%= col_classes[@results.fields[i]] %>"><%
+                col_tag = col_tags[col_name] 
                 l = col&.scan("\n")&.length if col.is_a?(String)
                 l ||= 0
-                got_nl = (l > 2)
-
-                if col.is_a?(Hash)
-                  col = col.to_json
-                end
-            %><% if got_nl%><pre class="expandable"><% end %><%= col %><% if got_nl%></pre><% end %></td>
-          <%  i += 1 %>
-          <% end %>
-
+                got_nl = (l >= 1)
+                col = col.to_json if col.is_a?(Hash)
+                col_tag ||= 'pre' if got_nl
+                
+            %><% if got_nl || col_tag%><<%=col_tag%> class="<% if l > 4%>expandable<% end %>"><% end %><%= col %><% if got_nl%></<%=col_tag%>><% end %></td>
+          <%  
+              end
+              i += 1
+            end 
+          %>
         </tr>
       <% end %>
       <tr class="<%= editable? ? '' : 'hidden' %>" id="report-item-new">

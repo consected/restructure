@@ -4,7 +4,6 @@
   padding: 10px 30px;
   border-radius: 4px;
   box-shadow: 0 3px 4px 1px #e9e9e9;
-
 }
 
 .report-results-outer .report-results-block {
@@ -12,37 +11,40 @@
   // border: 1px solid rgb(219, 219, 219);
 }
 
-.back-to-search-form-btn, .show-results-btn {
-    border-radius: 5px 5px 0 0;
-    border-bottom: 0;
+.back-to-search-form-btn,
+.show-results-btn {
+  border-radius: 5px 5px 0 0;
+  border-bottom: 0;
 }
 
 tr.report-auto {
-  background-color: #FFFADF;
+  background-color: #fffadf;
 }
 
 .report-search-attr {
-    .attr-label {
-        color: gray;
-        padding-right: 10px;
-    }
-    .attr-val {
-        color: black;
-    }
+  .attr-label {
+    color: gray;
+    padding-right: 10px;
+  }
+  .attr-val {
+    color: black;
+  }
 }
 
 .hover-link {
-    color: #0063a6 ;
-    &:hover {cursor: pointer; color: #09c; }
-    &:hover:after {
-    content: '\e066';
+  color: #0063a6;
+  &:hover {
+    cursor: pointer;
+    color: #09c;
+  }
+  &:hover:after {
+    content: "\e066";
     display: inline-block;
-    font-family: 'Glyphicons Halflings';
+    font-family: "Glyphicons Halflings";
     font-size: 80%;
-    padding-left:0.4em;
+    padding-left: 0.4em;
     margin-right: -1.6em;
-    }
-
+  }
 }
 
 body.reports.table-results {
@@ -54,19 +56,20 @@ body.reports.table-results {
 }
 
 .item-selected {
-    background-color: #FFFADF;
+  background-color: #fffadf;
 }
 
 .btn.add-btn {
-    position: absolute;
-    top: 1.8em;
-    right: 0.48em;
+  position: absolute;
+  top: 1.8em;
+  right: 0.48em;
 }
 
-.report-edit-submit, .report-edit-cancel {
-    font-size: 10px;
-    padding: 2px 4px;
-    margin: 0 2px;
+.report-edit-submit,
+.report-edit-cancel {
+  font-size: 10px;
+  padding: 2px 4px;
+  margin: 0 2px;
 }
 
 .report-edit-form {
@@ -78,36 +81,35 @@ table.table.report-table .report-el.report-el-object-id {
   background-color: #eee;
 }
 
-#report-item-new a.edit-entity {display: none;}
+#report-item-new a.edit-entity {
+  display: none;
+}
 
 .report-new-item-btn {
   font-size: 10px;
   margin: 0;
   padding: 2px 3px;
-
 }
 
 p.small.report-table-name {
-    max-width: 70px;
-    overflow: hidden;
-    font-weight: normal;
-    text-overflow: ellipsis;
-
+  max-width: 70px;
+  overflow: hidden;
+  font-weight: normal;
+  text-overflow: ellipsis;
 }
 
 .report-measure {
   font-weight: bold;
 }
 
-
 .report-files-actions {
-
   margin-bottom: 4px;
   display: block;
+  min-width: 100px;
+  text-align: left;
 
   input[type="submit"] {
-    float:right;
-    margin-bottom:4px;
+    margin-bottom: 4px;
   }
 
   #report-select-all-files {
@@ -116,18 +118,23 @@ p.small.report-table-name {
 
   label {
     padding-left: 6px;
+    vertical-align: bottom;
   }
+}
 
-
+.report-files-actions-btn {
+  margin-bottom: 4px;
+  display: block;
 }
 
 .report-criteria-block {
   background: rgb(255, 255, 255);
   box-shadow: 0 5px 4px 2px #e4e4e4;
-
 }
 
-td[data-col-type^="perform action:"], td[data-col-type^="select items:"], td[data-col-type^="search_reports_"] {
+td[data-col-type^="perform action:"],
+td[data-col-type^="select items:"],
+td[data-col-type^="search_reports_"] {
   color: rgba(255, 255, 255, 0);
   -webkit-animation: working 1s ease-in-out infinite;
   -moz-animation: working 1s ease-in-out infinite;
@@ -135,22 +142,27 @@ td[data-col-type^="perform action:"], td[data-col-type^="select items:"], td[dat
 
   &:before {
     color: silver;
-    content: 'loading...';
+    content: "loading...";
   }
 
-  &.attached_report_search, &.attached_report_perform_action, &.attached_report_select_items {
+  &.attached_report_search,
+  &.attached_report_perform_action,
+  &.attached_report_select_items {
     -webkit-animation: none;
     -moz-animation: none;
     animation: none;
     color: inherit;
     &:before {
-      content: '';
+      content: "";
     }
-
   }
 }
 
 textarea.admin-clean-sql {
   width: 100%;
   height: 20vh;
+}
+
+.rep-sel-action-update-list {
+  display: none;
 }

@@ -11,30 +11,33 @@ echo ""
 echo "========================================="
 echo "Enter app environment: athena-stage, athena-production, filestore-production"
 
-
 read TEMP_ENV
 
-if [ "$TEMP_ENV" == 'athena-production' ]
-then
+if [ "$TEMP_ENV" == 'athena-production' ]; then
   TEMP_DBNAME=fphs
   DB_SEARCH_PATH='ml_app'
+  TEMP_HOSTNAME='fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
-if [ "$TEMP_ENV" == 'filestore-production' ]
-then
+if [ "$TEMP_ENV" == 'filestore-production' ]; then
   TEMP_DBNAME=fphs
   DB_SEARCH_PATH='filestore,filestore_admin,ipa_ops,ml_app'
+  TEMP_HOSTNAME='fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
+if [ "$TEMP_ENV" == 'zeus-production' ]; then
+  TEMP_DBNAME=fphs
+  DB_SEARCH_PATH='ml_app'
+  TEMP_HOSTNAME='fphs-zeus-db-prod01.cqtftnqosfiy.us-east-1.rds.amazonaws.com'
+fi
 
-if [ "$TEMP_ENV" == 'athena-stage' ]
-then
+if [ "$TEMP_ENV" == 'athena-stage' ]; then
   TEMP_DBNAME=fphs_sleep_test
   DB_SEARCH_PATH='filestore,filestore_admin,ml_app'
+  TEMP_HOSTNAME='fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
-if [ -z "$TEMP_DBNAME" ]
-then
+if [ -z "$TEMP_DBNAME" ]; then
   echo "Incorrect environment name: $TEMP_ENV"
   exit
 fi
@@ -43,24 +46,27 @@ echo "Enter password for the $TEMP_ENV AWS database user FPHS:"
 read -s -p "FPHS user password: " TEMP_DB_PW
 
 echo
-FPHS_POSTGRESQL_HOSTNAME=fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com \
-FPHS_POSTGRESQL_DATABASE=$TEMP_DBNAME \
-RAILS_ENV=production \
-FPHS_POSTGRESQL_SCHEMA="$DB_SEARCH_PATH" \
-FPHS_POSTGRESQL_USERNAME=fphs \
-FPHS_POSTGRESQL_PORT=5432 \
-FPHS_RAILS_SECRET_KEY_BASE=temp \
-FPHS_RAILS_DEVISE_SECRET_KEY=temp \
-FPHS_POSTGRESQL_PASSWORD="$TEMP_DB_PW" \
-bundle exec rake db:migrate
+FPHS_POSTGRESQL_HOSTNAME=$TEMP_HOSTNAME \
+  FPHS_POSTGRESQL_DATABASE=$TEMP_DBNAME \
+  RAILS_ENV=production \
+  FPHS_POSTGRESQL_SCHEMA="$DB_SEARCH_PATH" \
+  FPHS_POSTGRESQL_USERNAME=fphs \
+  FPHS_POSTGRESQL_PORT=5432 \
+  FPHS_RAILS_SECRET_KEY_BASE=temp \
+  FPHS_RAILS_DEVISE_SECRET_KEY=temp \
+  FPHS_POSTGRESQL_PASSWORD="$TEMP_DB_PW" \
+  bundle exec rake db:migrate
 
 export PGPASSWORD="$TEMP_DB_PW"
 
-psql -d $TEMP_DBNAME -h fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com -U fphs < fphs-sql/grant_roles_access_to_ml_app.sql
+psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < fphs-sql/grant_roles_access_to_ml_app.sql
 
-if [ "$TEMP_ENV" == 'filestore-production' ]
-then
-  psql -d $TEMP_DBNAME -h fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com -U fphs < fphs-sql/grant_roles_access_to_filestore.sql
+if [ "$TEMP_ENV" == 'filestore-production' ]; then
+  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < fphs-sql/grant_roles_access_to_filestore.sql
+fi
+
+if [ "$TEMP_ENV" == 'zeus-production' ]; then
+  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < fphs-sql/grant_roles_access_to_zeus.sql
 fi
 
 echo "Note:"

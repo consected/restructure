@@ -7,6 +7,8 @@ RSpec.describe 'Export an app configuration', type: :model do
   include ModelSupport
 
   before :each do
+    Seeds.setup
+
     create_admin
     create_user
     SetupHelper.setup_al_player_contact_phones

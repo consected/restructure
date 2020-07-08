@@ -1,6 +1,7 @@
-module FieldDefaults
+# frozen_string_literal: true
 
-  def self.calculate_default obj, default, type=nil, from_when: nil
+module FieldDefaults
+  def self.calculate_default(obj, default, type = nil, from_when: nil)
     default = '' if default.nil?
 
     res = default
@@ -28,6 +29,8 @@ module FieldDefaults
         res = obj.current_user.user_roles.active.pluck(:id)
       elsif default == 'current_user_role_names'
         res = obj.current_user.user_roles.active.pluck(:role_name)
+      elsif default.include? '{{'
+        res = Admin::MessageTemplate.substitute(default, data: obj, tag_subs: nil)
       end
     elsif default.is_a? Hash
       ca = ConditionalActions.new default, obj
@@ -35,13 +38,15 @@ module FieldDefaults
     end
 
     if type&.to_sym == :date
-      res = res.strftime('%Y-%m-%d') rescue nil
+      res = begin
+              res.strftime('%Y-%m-%d')
+            rescue StandardError
+              nil
+            end
     elsif type&.to_sym == :datetime_type && res.is_a?(String)
       res = DateTime.parse(res)
     end
 
     res
   end
-
-
 end

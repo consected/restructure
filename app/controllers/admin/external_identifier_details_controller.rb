@@ -1,10 +1,9 @@
-class Admin::ExternalIdentifierDetailsController < AdminController
+# frozen_string_literal: true
 
+class Admin::ExternalIdentifierDetailsController < AdminController
   before_action :set_type
 
-
   def show
-
     unless params[:do] == 'report'
       ic = @external_identifier.implementation_class
 
@@ -19,14 +18,14 @@ class Admin::ExternalIdentifierDetailsController < AdminController
 
       r = @external_identifier.usage_report(rep_type)
 
-      unless r && r.id
+      unless r&.id
         flash[:alert] = "No report named '#{@external_identifier.usage_report_name(rep_type)}' is available"
         redirect_to admin_external_identifier_detail_path(@external_identifier.id)
         return
       end
 
       redirect_to report_path(r)
-      return
+      nil
     end
   end
 
@@ -48,40 +47,38 @@ class Admin::ExternalIdentifierDetailsController < AdminController
         @external_identifier_implementation_class = @external_identifier.implementation_class.new
         @master_count = @external_identifier.implementation_class.masters_without_assignment.count
         @external_identifier_implementation_class.assign_all_request = true
-        flash.now[:alert] = "Check the box to confirm before submitting, or go back"
+        flash.now[:alert] = 'Check the box to confirm before submitting, or go back'
         @external_identifier_implementation_class.errors.add :assign_all, 'must be checked to submit the request'
         render 'new'
-        return
+        nil
       end
     else
 
       if cc.blank? || cc.to_i < 1
         @external_identifier_implementation_class = @external_identifier.implementation_class.new
-        flash.now[:alert] = "Number of IDs to create must be at least 1"
-        @external_identifier_implementation_class.errors.add :create_count, "must be at least 1"
+        flash.now[:alert] = 'Number of IDs to create must be at least 1'
+        @external_identifier_implementation_class.errors.add :create_count, 'must be at least 1'
         render 'new'
-        return
+        nil
       else
         @external_identifier_items = @external_identifier.implementation_class.generate_ids(current_admin, cc.to_i)
       end
     end
-
-
   end
 
   protected
 
-    def set_type
-      @external_identifier = ExternalIdentifier.active.find(params[:id])
-    end
+  def set_type
+    @external_identifier = ExternalIdentifier.active.find(params[:id])
+  end
 
-    def primary_model
-      Admin::ExternalIdentifier
-    end
+  def primary_model
+    ::ExternalIdentifier
+  end
 
-    def secure_params
-      # SageAssignment.new.admin_id = 1
-      p = @external_identifier.name.singularize.to_sym
-      params.require(p).permit(:create_count, :assign_all, :assign_all_request)
-    end
+  def secure_params
+    # SageAssignment.new.admin_id = 1
+    p = @external_identifier.name.singularize.to_sym
+    params.require(p).permit(:create_count, :assign_all, :assign_all_request)
+  end
 end

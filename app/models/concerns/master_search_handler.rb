@@ -6,11 +6,11 @@ module MasterSearchHandler
   extend ActiveSupport::Concern
 
   included do
-    MasterRank = 'master_rank desc nulls last, masters.id desc nulls last'
-    PlayerInfoRankOrderClause = "case when rank is null then -1000 when rank > #{PlayerInfo::BestAccuracyScore} then rank * -1 else rank end desc nulls last"
-    RankNotNullClause = ' case rank when null then -1 else rank * -1 end'
-    TrackerEventOrderClause = 'protocols.position asc, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
-    TrackerHistoryEventOrderClause = 'event_date DESC NULLS last, tracker_history.updated_at DESC NULLS last '
+    MasterRank = Arel.sql 'master_rank desc nulls last, masters.id desc nulls last'
+    PlayerInfoRankOrderClause = Arel.sql "case when rank is null then -1000 when rank > #{PlayerInfo::BestAccuracyScore} then rank * -1 else rank end desc nulls last"
+    RankNotNullClause = Arel.sql ' case rank when null then -1 else rank * -1 end'
+    TrackerEventOrderClause = Arel.sql 'protocols.position asc, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
+    TrackerHistoryEventOrderClause = Arel.sql 'event_date DESC NULLS last, tracker_history.updated_at DESC NULLS last '
 
     # TODO
     # This association is provided to allow 'simple' search on names in player_infos OR pro_infos
@@ -20,7 +20,7 @@ module MasterSearchHandler
     has_many :not_tracker_histories, -> { order(TrackerHistoryEventOrderClause) }, class_name: 'TrackerHistory'
     has_many :not_trackers, -> { order(TrackerEventOrderClause) }, class_name: 'Tracker'
 
-    SimplePlayerJoin = 'LEFT JOIN player_infos on masters.id = player_infos.master_id LEFT JOIN pro_infos as pro_infos on masters.id = pro_infos.master_id'
+    SimplePlayerJoin = Arel.sql 'LEFT JOIN player_infos on masters.id = player_infos.master_id LEFT JOIN pro_infos as pro_infos on masters.id = pro_infos.master_id'
     NotTrackerJoin = :no_join # 'INNER JOIN trackers "not_trackers" on masters.id = not_trackers.master_id'
     NotTrackerHistoryJoin = :no_join # 'INNER JOIN tracker_history "not_tracker_histories" on masters.id = not_tracker_histories.master_id'
 
@@ -190,9 +190,7 @@ module MasterSearchHandler
               # For each alternative condition attribute, check if it has a defined condition, then
               # generate alternative where clauses
               alt_condition_attribs.each do |alt_condition_attrib|
-                unless alt_condition_attrib && alt_condition_attrib[:condition]
-                  next
-                end
+                next unless alt_condition_attrib && alt_condition_attrib[:condition]
 
                 logger.info "Alt Condition: #{alt_condition_attrib[:condition]}"
                 wheresalt[0] = "#{wheresalt[0]}#{wheresalt[0] ? ' AND ' : ''}#{alt_condition_attrib[:condition]}"
@@ -213,9 +211,7 @@ module MasterSearchHandler
             end
 
             logger.debug "Adding condition_key to joins: #{condition_key}"
-            unless NoDefaultJoinFor.include?(condition_key)
-              joins << condition_key
-            end
+            joins << condition_key unless NoDefaultJoinFor.include?(condition_key)
             logger.info "adding standard join params_val=#{condition_table.to_sym} when basic_condition_attribs = #{basic_condition_attribs}"
             conditions[condition_key] = basic_condition_attribs
           end
@@ -233,10 +229,10 @@ module MasterSearchHandler
       logger.debug "joins: #{joins}"
       logger.debug "Standard wheres: #{wheres}"
       logger.debug "Alt wheres: #{wheresalt}"
-      res = Master.select(selects).joins(joins).uniq.where(wheres)
+      res = Master.select(selects).joins(joins).where(wheres).distinct
       res = res.where(wheresalt.first, wheresalt.last) if wheresalt.first
 
-      default_sort res
+      res.default_sort
     end
 
     def alt_condition(table_name, condition)
@@ -258,9 +254,7 @@ module MasterSearchHandler
 
       cond_op = altdef[:value]
 
-      if cond_op == :do_nothing || cond_op == :is_not_null && (cval.blank? || cval == '(null)')
-        return {}
-      end
+      return {} if cond_op == :do_nothing || cond_op == :is_not_null && (cval.blank? || cval == '(null)')
 
       cond_op = [cond_op] unless cond_op.is_a? Array
 
@@ -312,15 +306,17 @@ module MasterSearchHandler
       res
     end
 
-    def default_sort(res)
-      # Note that this sorts first, based on the Master rank, which is calculated through a trigger from player info accuracy
-      res = if results_limit
-              res.order(MasterRank).take(results_limit)
-            else
-              res.order(MasterRank).all
-            end
-      logger.info "sorted to #{res.map { |a| [a.id, a.master_rank] }} "
-      res
+    #
+    # Provide a default ordered scope, potentially limited by the results_limit attribute
+    # Note that this sorts first, based on the Master rank, which is calculated through a trigger from player info accuracy
+    # @param [ActiveRecord::Model || ActiveRecord::Relation] res previous set of results to build on, or a base class
+    # @return [ActiveRecord::Relation] <description>
+    def default_sort
+      if results_limit
+        order(MasterRank).limit(results_limit)
+      else
+        order(MasterRank).all
+      end
     end
   end
 end

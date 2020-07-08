@@ -25,6 +25,18 @@ Metrics/ClassLength:
   Include:
     - 'app/**/*'
 
+Metrics/CyclomaticComplexity:
+  Enabled: true
+  Max: 20
+  Include:
+    - 'app/**/*'
+
+Metrics/PerceivedComplexity:
+  Enabled: true
+  Max: 20
+  Include:
+    - 'app/**/*'
+
 Naming/ConstantName:
   Enabled: false
 

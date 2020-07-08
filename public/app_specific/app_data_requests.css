@@ -2,9 +2,9 @@ body {
   font-size: 16px;
 }
 
-#master--1.panel-heading {
+/* .master-result.panel-heading {
   display: none;
-}
+} */
 
 .panel-body.master-main-panel {
   padding-top: 0;
@@ -21,12 +21,23 @@ div#master-search-accordion {
   box-shadow: none;
 }
 
-.activity-logs-header .action-buttons {
-  text-align: left;
+.activity-logs-header .action-buttons a {
+  font-size: 20px;
 }
 
 .sublist-controls .sublist-layout-selectors {
   display: none !important;
+}
+
+.common-template-item .list-group,
+.new-block .list-group {
+  background-color: white;
+}
+
+.list-group-item.edit-field-container input,
+#master_results_block form .list-group-item.edit-field-container select,
+.list-group-item.edit-field-container textarea {
+  background-color: rgb(248, 248, 248);
 }
 
 .panel.panel-default.activity-logs-item-block {
@@ -60,11 +71,18 @@ li.edit-form-header h4.list-group-item-heading {
   padding: 15px 0;
   font-size: 32px;
   font-family: serif;
-  border-bottom: 3px solid rgb(228, 228, 228);
+  /* border-bottom: 3px solid rgb(228, 228, 228); */
 }
 
-li.list-group-item.caption-before {
+ul.list-group.is-activity-log > li.list-group-item.caption-before,
+ul.list-group > li.list-group-item.caption-before {
   padding: 10px 15px 0 15px;
+  border-top: 1px solid rgb(228, 228, 228);
+}
+
+ul.list-group.is-activity-log > li.list-group-item.caption-before.placeholder-caption-before,
+ul.list-group > li.list-group-item.caption-before.placeholder-caption-before {
+  padding-bottom: 10px;
 }
 
 .new-block.new-after-parent.alr-new-block {
@@ -101,9 +119,9 @@ select.form-control.has-value {
   color: rgb(84, 84, 84);
 }
 
-.advanced-form-selections {
+/* .advanced-form-selections {
   display: none;
-}
+} */
 
 li.list-group-item em.all_caps {
   text-transform: none;
@@ -192,7 +210,8 @@ table.table.report-table td {
   font-size: 15px;
 }
 
-.edit-field-container .input-sm[data-attr-name="project_title"] {
+.edit-field-container .input-sm[data-attr-name="project_title"],
+li.dynamic-model--data-request-project_title.result-field-container strong {
   font-size: 23px;
   font-weight: bold;
   min-height: 38px;
@@ -200,4 +219,168 @@ table.table.report-table td {
 
 hr {
   border-top: 3px solid rgb(228, 228, 228);
+}
+
+td.report-el {
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+}
+
+td.report-el.datadict-field-label {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 13px !important;
+}
+
+td.report-el.datadict-field-label pre,
+td.report-el.datadict-field-attributes pre {
+  white-space: pre-wrap;
+  word-break: keep-all;
+  min-width: 25vw;
+  max-width: 25vw;
+  width: 25vw;
+}
+
+td.report-el pre {
+  padding: 0;
+}
+
+#modal_results_block .report-results-inner {
+  overflow-y: hidden;
+}
+
+.model-reference-disabled {
+  display: none;
+}
+
+ul.list-group > div.model-reference-result.is-in-show-viewable {
+  border-left: 3px solid rgb(192, 192, 192);
+  margin-left: 21px;
+  border-bottom: 1px solid rgb(228, 228, 228);
+}
+
+li.in-item-model-references.rr-mr span {
+  font-size: 16px;
+  font-style: italic;
+  color: rgb(110, 110, 110);
+}
+
+li.in-item-model-references.rr-mr span i {
+  font-style: normal;
+  color: rgb(88, 88, 88);
+  font-size: 28px;
+  font-family: serif;
+}
+
+.model-reference-result .list-group-item.is-heading,
+.model-reference-result .list-group-item.edit-form-header {
+  height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: visible;
+  min-height: 0;
+}
+
+.model-reference-result .list-group-item.is-heading a.edit-entity,
+.model-reference-result .list-group-item.edit-form-header a.show-entity {
+  margin-top: -26px;
+}
+
+.model-reference-result .list-group-item.is-heading h4 {
+  display: none;
+}
+
+li.list-group-item.in-item-model-references.rr-mr {
+  margin-top: 15px;
+}
+
+a.btn.embedded-add-item-button {
+  font-size: 16px;
+}
+
+/* .model-reference-list > .model-reference-new-block {
+  border-left: 3px solid rgb(192, 192, 192);
+  margin-left: 21px;
+} */
+
+.chosen-container-multi .chosen-choices {
+  border: 1px solid rgb(204, 204, 204);
+  background-color: rgb(248, 248, 248);
+  background-image: none;
+  border-radius: 4px;
+  padding: 4px 4px;
+}
+
+.chosen-container-multi.chosen-disabled .chosen-choices {
+  border: 0;
+  background-image: none;
+  background: rgba(0, 0, 0, 0);
+}
+
+.chosen-container-multi .chosen-choices li.search-choice,
+div.chosen-container.chosen-disabled li.search-choice {
+  background-color: rgb(97, 97, 97);
+  color: rgb(255, 255, 255);
+  background-image: none;
+  box-shadow: none;
+  border: 1px solid rgb(97, 97, 97);
+}
+
+.model-reference-result .object-results-header.header-for-gen-model {
+  display: block;
+}
+
+/* CLeanup the NFS container */
+li.list-group-item.result-field-container.nfs-store--manage--container-data {
+  display: none;
+}
+
+h4.container-name {
+  display: none;
+}
+
+.container-heading-block a.refresh-container-list {
+  margin-top: 6px;
+}
+
+.nfs-store-valid-files.panel {
+  display: none;
+}
+
+.file-block.well {
+  margin: 8px 16px;
+  padding: 4px 16px;
+}
+
+.button-radio.classifications {
+  display: none;
+}
+
+.action-buttons .add-item-button {
+  display: none;
+}
+.action-buttons .add-item-button[data-target="#activity-log--data-request-assignment-request--1-"] {
+  display: inline;
+}
+
+span.master-header-prefix {
+  color: rgb(100, 100, 100);
+  font-size: 19px;
+  width: 500px;
+  display: block;
+  /* text-transform: capitalize; */
+}
+
+.master-result.num-masters-1,
+.master-result.selected-result#master--1 {
+  display: none;
+}
+
+.sublist-controls {
+  display: none;
+}
+
+#master-report-data_requests__data_requests img[alt="Data Requests Process"] {
+  width: 800px;
+  margin: 0 auto;
+  display: block;
 }

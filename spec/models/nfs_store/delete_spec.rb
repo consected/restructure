@@ -12,8 +12,7 @@ RSpec.describe 'Delete stored files', type: :model do
     'file1'
   end
 
-  before :all do
-    seed_database && ::ActivityLog.define_models
+  before :example do
     # setup_nfs_store
   end
 

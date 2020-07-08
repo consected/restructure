@@ -10,12 +10,13 @@ RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
   include PlayerContactSupport
   include BulkMsgSupport
 
-  
-  before :all do
+  before :example do
     BulkMsgSupport.import_bulk_msg_app
     seed_database
     create_admin
     create_user
+    setup_access :trackers
+    setup_access :tracker_history
 
     @bulk_master = Master.find(-1)
     @bulk_master.current_user = @user

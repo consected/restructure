@@ -1,17 +1,23 @@
 # frozen_string_literal: true
 
 require "#{::Rails.root}/spec/support/seeds"
+require './db/table_generators/external_identifiers_table.rb'
+
 
 $STARTED_AT = DateTime.now.to_i
 
 module SetupHelper
   def self.auto_admin
-    admin, = ModelSupport.create_admin
+    admin, = ::UserSupport.create_admin
     admin
   end
 
   def self.db_name
     "fpa_test#{ENV['TEST_ENV_NUMBER']}"
+  end
+
+  def self.clear_delayed_job
+    Delayed::Job.delete_all
   end
 
   def self.setup_app_dbs
@@ -22,18 +28,25 @@ module SetupHelper
     SetupHelper.setup_app_db sql_source_dir, sql_files
 
     # ExportApp
-    sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 3-add_notification_triggers.sql 4-add_testmybrain_trigger.sql 5-create_sync_subject_data_aws_db.sql 6-grant_roles_access_to_ml_app.sql]
+    sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql
+                   3-add_notification_triggers.sql 4-add_testmybrain_trigger.sql 5-create_sync_subject_data_aws_db.sql
+                   6-grant_roles_access_to_ml_app.sql]
     sql_source_dir = Rails.root.join('db', 'app_specific', 'bhs', 'aws-db')
     SetupHelper.setup_app_db sql_source_dir, sql_files
 
     # Export App
-    sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 6-grant_roles_access_to_ml_app.sql create_adders_table.sql]
+    sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql
+                   6-grant_roles_access_to_ml_app.sql create_adders_table.sql]
     sql_source_dir = Rails.root.join('docs', 'config_tests')
     SetupHelper.setup_app_db sql_source_dir, sql_files
 
     # Bulk
     # Setup the triggers, functions, etc
-    sql_files = %w[bulk/create_zeus_bulk_messages_table.sql bulk/dup_check_recipients.sql bulk/create_zeus_bulk_message_recipients_table.sql bulk/create_al_bulk_messages.sql bulk/create_zeus_bulk_message_statuses.sql bulk/setup_master.sql bulk/create_zeus_short_links.sql bulk/create_player_contact_phone_infos.sql bulk/create_zeus_short_link_clicks.sql 0-scripts/z_grant_roles.sql]
+    sql_files = %w[bulk/create_zeus_bulk_messages_table.sql bulk/dup_check_recipients.sql
+                   bulk/create_zeus_bulk_message_recipients_table.sql bulk/create_al_bulk_messages.sql
+                   bulk/create_zeus_bulk_message_statuses.sql bulk/setup_master.sql bulk/create_zeus_short_links.sql
+                   bulk/create_player_contact_phone_infos.sql
+                   bulk/create_zeus_short_link_clicks.sql 0-scripts/z_grant_roles.sql]
     sql_source_dir = Rails.root.join('db', 'app_specific', 'bulk-msg', 'aws-db')
     SetupHelper.setup_app_db sql_source_dir, sql_files
   end
@@ -68,6 +81,7 @@ module SetupHelper
   end
 
   def self.reload_configs
+    Rails.logger.info 'Reload configs'
     AppControl.define_models
     DynamicModel.enable_active_configurations
     ItemFlag.enable_active_configurations
@@ -77,19 +91,26 @@ module SetupHelper
   end
 
   def self.feature_setup(_options = {})
+    Rails.logger.info 'Feature setup'
     Seeds.setup
     # MasterDataSupport.create_data_set_outside_tx options
   end
 
+  def self.setup_al_player_contact_emails
+    Rails.logger.info 'Setting up al player contact emails'
+    return if ActivityLog.connection.table_exists? 'activity_log_player_contact_emails'
+
+    TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true, 'emailed_when')
+    Rails.cache.clear
+  end
+
   # Setup Activity Log Player Contact Phones
   def self.setup_al_player_contact_phones
+    Rails.logger.info 'Setting up al player contact phones'
     # Ensure that we seed the database, otherwise the PlayerContactPhonesController class does not exist
-    RSpec.configure do |c|
-      c.before do
-        Seeds::GeneralSelections.setup
-        Seeds::ActivityLogPlayerContactPhone.setup
-      end
-    end
+
+    Seeds::GeneralSelections.setup
+    Seeds::ActivityLogPlayerContactPhone.setup
 
     reload_configs
 
@@ -110,17 +131,37 @@ module SetupHelper
     cname = 'ActivityLog::' + itn.ns_camelize
 
     unless ActivityLog.connection.table_exists? tname
-      TableGenerators.activity_logs_table(tname, item_type.to_s.pluralize, true,
-                                          'data', 'select_call_direction', 'select_who', 'called_when', 'select_result', 'select_next_step', 'follow_up_when', 'notes', 'protocol_id', 'set_related_player_contact_rank')
+      TableGenerators.activity_logs_table(
+        tname,
+        item_type.to_s.pluralize,
+        true,
+        'data',
+        'select_call_direction',
+        'select_who',
+        'called_when',
+        'select_result',
+        'select_next_step',
+        'follow_up_when',
+        'notes',
+        'protocol_id',
+        'set_related_player_contact_rank'
+      )
     end
 
-    res = ActivityLog.find_or_initialize_by(name: name, item_type: item_type, rec_type: rec_type, process_name: process_name, disabled: false, action_when_attribute: 'called_when',
-                                            field_list: 'data, select_call_direction, select_who, called_when, select_result, select_next_step, follow_up_when, notes, protocol_id, set_related_player_contact_rank',
-                                            blank_log_field_list: 'select_who, called_when, select_next_step, follow_up_when, notes, protocol_id')
+    res = ActivityLog.find_or_initialize_by(
+      name: name, item_type: item_type,
+      rec_type: rec_type,
+      process_name: process_name,
+      disabled: false,
+      action_when_attribute: 'called_when',
+      field_list: 'data, select_call_direction, select_who, called_when, select_result, select_next_step,'\
+                  'follow_up_when, notes, protocol_id, set_related_player_contact_rank',
+      blank_log_field_list: 'select_who, called_when, select_next_step, follow_up_when, notes, protocol_id'
+    )
     unless res.is_active_model_configuration?
       # If this was a new item, set an admin. Also set disabled nil, since this forces regeneration of the model
       res.update!(current_admin: auto_admin) unless res.admin
-      tu = User.template_user
+
       app_type = Admin::AppType.active.first
       # Ensure there is at least one user access control, otherwise we won't re-enable the process on future loads
       res.other_regenerate_actions
@@ -140,6 +181,15 @@ module SetupHelper
     res
   end
 
+  def self.setup_ext_identifier(r = 'test7', implementation_table_name: nil, implementation_attr_name: nil)
+    Rails.logger.info "Setting up external identifier #{r}"
+    @implementation_table_name = implementation_table_name || "test_external_#{r}_identifiers"
+    @implementation_attr_name = implementation_attr_name || "test_#{r}_id"
+    unless ActiveRecord::Base.connection.table_exists? @implementation_table_name
+      TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
+    end
+  end
+
   def self.setup_test_app
     app_name = "bhs_model_#{rand(100_000_000)}"
 
@@ -148,7 +198,10 @@ module SetupHelper
     SetupHelper.setup_app_from_import app_name, config_dir, config_fn
 
     new_app_type = Admin::AppType.where(name: app_name).active.first
-    Admin::UserAccessControl.active.where(app_type_id: new_app_type.id, resource_type: %i[external_id_assignments limited_access]).update_all(disabled: true)
+    Admin::UserAccessControl.active.where(
+      app_type_id: new_app_type.id,
+      resource_type: %i[external_id_assignments limited_access]
+    ).update_all(disabled: true)
 
     new_app_type
   end
@@ -164,13 +217,11 @@ module SetupHelper
   #
   def self.setup_app_db(sql_source_dir, sql_files)
     sql_files.each do |fn|
-      begin
-        sqlfn = Rails.root.join(sql_source_dir, fn)
-        puts "Running psql: #{sqlfn}"
-        `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} < #{sqlfn}`
-      rescue ActiveRecord::StatementInvalid => e
-        puts "Exception due to PG error?... #{e}"
-      end
+      sqlfn = Rails.root.join(sql_source_dir, fn)
+      puts "Running psql: #{sqlfn}"
+      `PGOPTIONS=--search_path=ml_app psql -v ON_ERROR_STOP=ON -d #{db_name} < #{sqlfn}`
+    rescue ActiveRecord::StatementInvalid => e
+      puts "Exception due to PG error?... #{e}"
     end
   end
 

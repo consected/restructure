@@ -15,7 +15,7 @@
     <% end %>
     <% Report.active.searchable.for_user(current_user).each do |r|%>
       <%  # Hide the searchable reports, except for if one of those reports is the default.
-        is_default = default_search_form == r.name.downcase
+        is_default = default_search_form == r.name.downcase || default_search_form == r.alt_resource_name
         if !app_config_set(:hide_search_form_searchable_reports) || is_default
           add_class = (is_default ? 'is_default_report' : 'collapsed')
           add_class += ' prevent-list-collapse' if r.view_options.prevent_collapse_for_list
@@ -44,7 +44,7 @@
   </div>
 
   <% Report.active.searchable.for_user(current_user).each do |r|
-      if default_search_form == r.name.downcase
+      if default_search_form == r.name.downcase || default_search_form == r.alt_resource_name
         @view_context = :search
         @report = r
       else

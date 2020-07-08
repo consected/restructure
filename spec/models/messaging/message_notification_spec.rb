@@ -6,7 +6,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
   include ModelSupport
   include PlayerContactSupport
 
-  before :all do
+  before :example do
     create_admin
     @rec_user, = create_user
     create_user
@@ -95,9 +95,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
     # expect(Delayed::Job.count).to eq 0
 
-    if Messaging::MessageNotification.last
-      mn_id = Messaging::MessageNotification.last.id
-    end
+    mn_id = Messaging::MessageNotification.last.id if Messaging::MessageNotification.last
 
     testcnx = ActiveRecord::Base.connection
     testcnx.transaction do

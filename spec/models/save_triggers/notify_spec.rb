@@ -4,12 +4,11 @@ require 'rails_helper'
 
 AlNameGenTest2 = 'Gen Test ELT 2'
 
-
 RSpec.describe SaveTriggers::Notify, type: :model do
   include ModelSupport
   include ActivityLogSupport
-  
-  before :all do
+
+  before :example do
     SetupHelper.setup_al_player_contact_phones
     SetupHelper.setup_al_gen_tests AlNameGenTest2, 'elt2_test', 'player_contact'
     ud, = create_user

@@ -1,6 +1,9 @@
+<%
+    url = url_for([:admin, object_instance])
+%>
 <div class="data-results">
   <div data-result="admin-edit-form-"  class="admin-edit-form admin-report">
-<%= form_for(@report, url: (@report.id ? admin_report_path(@report) : admin_reports_path ), class: "inline-form", remote: true) do |f| %>
+<%= form_for(@report, url: url, class: "inline-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="row">
     <div class="col-sm-12" style="text-align: left">

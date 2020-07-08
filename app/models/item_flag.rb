@@ -1,12 +1,13 @@
-class ItemFlag < UserBase
+# frozen_string_literal: true
 
+class ItemFlag < UserBase
   include WorksWithItem
 
   belongs_to :item, polymorphic: true, inverse_of: :item_flags
   belongs_to :item_flag_name, class_name: 'Classification::ItemFlagName'
   belongs_to :user
 
-  before_validation :prevent_item_change,  on: :update
+  before_validation :prevent_item_change, on: :update
 
   # We must have a user set to save a record
   # Since we don't include the UserHandler module, it is necessary for users of this class
@@ -21,17 +22,17 @@ class ItemFlag < UserBase
   validates :item_flag_name_id, presence: true
   validates :item_flag_name, presence: true
 
-  default_scope -> {where "disabled is null or disabled = false"}
+  default_scope -> { where 'disabled is null or disabled = false' }
 
   def user_name
-    return nil unless self.user
-    self.user.email
-  end
+    return nil unless user
 
+    user.email
+  end
 
   # Is this class_name one of the possible classes ItemFlag can work with, independent of whether
   # the admin configuration is actually created or enabled for it
-  def self.works_with class_name
+  def self.works_with(class_name)
     # Get the value from the array and return it, so we can return a value that is not the original passed in (failing Brakeman test otherwise)
     pos = use_with_class_names.index(class_name.ns_underscore)
     if pos
@@ -42,76 +43,75 @@ class ItemFlag < UserBase
     end
   end
 
-
   # The full list of model names that ItemFlag can work with.
   # The result is simply downcased for simple models and fully module/class qualified
   # for namespaced models (such as ActivityLog::PlayerContactPhone)
   def self.use_with_class_names
     all_assocs = Master.reflect_on_all_associations(:has_many)
     # Be sure to reject the association on item_flag, since it can't flag itself
-    filtered_assocs = all_assocs.select {|v| v.options[:source] != :item_flags}
+    filtered_assocs = all_assocs.reject { |v| v.options[:source] == :item_flags }
     # Return a sorted list
-    filtered_assocs.collect {|v| v.class_name.ns_underscore}.sort
+    filtered_assocs.collect { |v| v.class_name.ns_underscore }.sort
   end
 
   # Get only the list of active class names (based on admin item flag name configurations) that
   # are also genuine class names that ItemFlag reports as working with
   def self.active_class_names
-    Classification::ItemFlagName.active.map(&:item_type).uniq & self.use_with_class_names
+    Classification::ItemFlagName.active.map(&:item_type).uniq & use_with_class_names
   end
 
-  def self.is_active_for? class_or_class_name
+  def self.is_active_for?(class_or_class_name)
     return unless class_or_class_name
-    if class_or_class_name.is_a? Class
-      class_name = class_or_class_name.name.ns_underscore
-    else
-      class_name = class_or_class_name
-    end
-    self.active_class_names.include? class_name.ns_underscore
+
+    class_name = if class_or_class_name.is_a? Class
+                   class_or_class_name.name.ns_underscore
+                 else
+                   class_or_class_name
+                 end
+    active_class_names.include? class_name.ns_underscore
   end
 
   # Create and remove flags for the underlying item.
   # Returns true if flags were added or removed
-  def self.set_flags flag_list, item, current_user
-
-    current_flags = item.item_flags.map {|f| f.item_flag_name_id}.uniq
+  def self.set_flags(flag_list, item, current_user)
+    current_flags = item.item_flags.map(&:item_flag_name_id).uniq
     added_flags = flag_list - current_flags
-    removed_flags =  current_flags - flag_list
+    removed_flags = current_flags - flag_list
 
     logger.info "Current flags #{current_flags} in #{item}"
     logger.info "Removing flags #{removed_flags} from #{item}"
     logger.info "Adding flags #{added_flags} to #{item}"
 
     item.item_flags.where(item_flag_name_id: removed_flags).each do |i|
-        i.disabled = true
-        i.save!
+      i.disabled = true
+      i.save!
     end
 
     added_flags.each do |f|
-      unless f.blank?
-        i = item.item_flags.build item_flag_name_id: f, user: current_user
-        logger.info "Added flag #{f} to #{item}"
-        i.save!
-      end
+      next if f.blank?
+
+      i = item.item_flags.build item_flag_name_id: f, user: current_user
+      logger.info "Added flag #{f} to #{item}"
+      i.save!
     end
 
     # Reload the association to have it register the changes
     item.item_flags.reload
     item.master.current_user = current_user
 
-    logger.info "Remaining flags in #{item} for #{item.master_user}: #{item.item_flags.map {|f| f.id}}"
-    if added_flags.length > 0 || removed_flags.length > 0
+    logger.info "Remaining flags in #{item} for #{item.master_user}: #{item.item_flags.map(&:id)}"
+    if !added_flags.empty? || !removed_flags.empty?
       ItemFlag.track_flag_updates item, added_flags, removed_flags
       update_action = true
     end
 
-    return update_action
+    update_action
   end
 
-  def as_json options={}
+  def as_json(options = {})
     options[:methods] ||= []
-    options[:methods] += [:method_id, :item_type_us]
-    options[:include] ||=[]
+    options[:methods] += %i[method_id item_type_us]
+    options[:include] ||= []
     options[:include] << :item_flag_name
     options[:done] = true
     super(options)
@@ -123,8 +123,9 @@ class ItemFlag < UserBase
     end
   end
 
-  def self.add_master_association ifc
-    raise "Invalid item flag type. No class exists for #{ifc}" unless self.active_class_names.include? ifc
+  def self.add_master_association(ifc)
+    raise "Invalid item flag type. No class exists for #{ifc}" unless active_class_names.include? ifc
+
     ifcs = ifc.pluralize
     # This association is provided to allow generic search on flagged associated object
     Master.has_many "#{ifcs}_item_flags".to_sym, through: ifcs, source: :item_flags
@@ -133,14 +134,12 @@ class ItemFlag < UserBase
 
   protected
 
+  def self.track_flag_updates(item, added_flags, removed_flags)
+    logger.info "Track record update for added item_flags #{added_flags} and removed #{removed_flags}"
+    Tracker.track_flag_update item, added_flags, removed_flags
+  end
 
-    def self.track_flag_updates item, added_flags, removed_flags
-      logger.info "Track record update for added item_flags #{added_flags} and removed #{removed_flags}"
-      Tracker.track_flag_update item, added_flags, removed_flags
-    end
-
-    def prevent_item_change
-      errors.add :item_flag_name_id, "can not be changed" if item_flag_name_id_changed?
-    end
-
+  def prevent_item_change
+    errors.add :item_flag_name_id, 'can not be changed' if item_flag_name_id_changed?
+  end
 end

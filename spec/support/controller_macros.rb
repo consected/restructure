@@ -1,14 +1,15 @@
+# frozen_string_literal: true
+
 require "#{::Rails.root}/spec/support/seed_support"
 
 module ControllerMacros
-
-  def self.create_user opt={}
+  def self.create_user(opt = {})
     a = User.all.unscope(:where, :order).order(id: :desc).first
     r = 1
     r = a.id + 1 if a
     good_email = "ctestuser-tester-#{r}@testing.com"
 
-    admin, _ = create_admin
+    admin, = create_admin
 
     user = User.create! email: good_email, current_admin: admin, first_name: "fn#{r}", last_name: "ln#{r}"
 
@@ -34,7 +35,6 @@ module ControllerMacros
     user = User.find(user.id)
 
     [user, good_password]
-
   end
 
   def self.create_admin
@@ -61,14 +61,15 @@ module ControllerMacros
 
   def before_each_login_user
     before(:each) do
-      SeedSupport.setup
+      # SeedSupport.setup
 
       user, pw = ControllerMacros.create_user
-      @request.env["devise.mapping"] = Devise.mappings[:user]
+      @request.env['devise.mapping'] = Devise.mappings[:user]
 
       Rails.logger.info "Attempting to sign in new user with email #{user.email} and password #{pw}"
       res = sign_in user
-      raise "User not logged in" unless subject.current_user
+      raise 'User not logged in' unless subject.current_user
+
       user.app_type = Admin::AppType.all_available_to(user).first
       user.save!
       @user = user
@@ -79,12 +80,13 @@ module ControllerMacros
 
   def before_each_login_admin
     before(:each) do
-      admin, _ = ControllerMacros.create_admin
+      admin, = ControllerMacros.create_admin
 
-      @request.env["devise.mapping"] = Devise.mappings[:admin]
+      @request.env['devise.mapping'] = Devise.mappings[:admin]
 
       sign_in admin
-      raise "Admin not logged in" unless subject.current_admin
+      raise 'Admin not logged in' unless subject.current_admin
+
       @admin = admin
     end
   end
@@ -92,5 +94,4 @@ module ControllerMacros
   def before_each_create_address
     @address = ControllerMacros.create_address @user
   end
-
 end

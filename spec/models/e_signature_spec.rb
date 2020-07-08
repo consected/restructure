@@ -7,17 +7,14 @@ RSpec.describe 'electronic signature of records', type: 'model' do
   include ESignatureSupport
   include ESignImportConfig
 
-  
-  before :all do
+  before :example do
     ESignImportConfig.import_config
     setup_config
 
     @user_0, @good_password_0 = create_user
     @user, @good_password = create_user
 
-    if @good_password.blank?
-      raise 'Password can not be blank for successful tests'
-    end
+    raise 'Password can not be blank for successful tests' if @good_password.blank?
     raise 'Password must be valid' unless @user.valid_password?(@good_password)
 
     create_master
@@ -35,6 +32,8 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       @al = create_item
       @al.prepare_activity_for_signature
       @al.save!
+      expect(@al.class.column_names).to include 'e_signed_document'
+      expect(@al.e_signed_document).not_to be nil
     end
 
     it 'generates a reference document for signature' do
@@ -49,13 +48,9 @@ RSpec.describe 'electronic signature of records', type: 'model' do
   end
 
   describe 'validations performed to check integrity of the document and signer' do
-    before :all do
-      if @good_password.blank?
-        raise 'Password can not be blank for successful tests'
-      end
-      unless @user.valid_password?(@good_password)
-        raise 'Password must be valid'
-      end
+    before :example do
+      raise 'Password can not be blank for successful tests' if @good_password.blank?
+      raise 'Password must be valid' unless @user.valid_password?(@good_password)
     end
 
     before :each do
@@ -125,13 +120,13 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       add_user_to_role 'nfs_store group 600'
       @master.current_user = @user
 
-      if @good_password.blank?
-        raise 'Password can not be blank for successful tests'
-      end
+      raise 'Password can not be blank for successful tests' if @good_password.blank?
 
       @al = create_item
       @signed_document = @al.prepare_activity_for_signature
       @al.save!
+
+      expect(@signed_document).not_to be nil
     end
 
     it 'raises an error if the prepared document has changed' do

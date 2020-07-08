@@ -1,9 +1,10 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 # Test the user action log functionality by exercising the AddressesController
 
 RSpec.describe AddressesController, type: :controller do
-
   include AddressSupport
 
   def item
@@ -15,22 +16,19 @@ RSpec.describe AddressesController, type: :controller do
   end
 
   def edit_form_prefix
-    @edit_form_prefix = "common_templates"
+    @edit_form_prefix = 'common_templates'
   end
-
 
   before_each_login_user
 
-  it "records an action for a controller" do
-
+  it 'records an action for a controller' do
     setup_access :addresses
     setup_access :trackers
-
 
     create_items
 
     t0 = DateTime.now
-    get :show, id: @address.id, master_id: @master.id
+    get :show, params: { id: @address.id, master_id: @master.id }
 
     res = Admin::UserActionLog.order(id: :desc).limit(1).first
     expect(res).to be_a Admin::UserActionLog
@@ -41,13 +39,5 @@ RSpec.describe AddressesController, type: :controller do
     expect(res.app_type_id).to eq @user.app_type_id
     expect(res.created_at).to be_between(t0, DateTime.now)
     expect(res.action).to eq 'show'
-
-
-
-
-
-
-
   end
-
 end

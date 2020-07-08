@@ -7,9 +7,10 @@ class Admin::UserAccessControl < ActiveRecord::Base
   include AppTyped
   include UserAndRoles
 
-  belongs_to :user
+  belongs_to :user, optional: true
 
   validate :correct_access
+  after_save :invalidate_cache
 
   attr_accessor :allow_bad_resource_name
 
@@ -302,5 +303,11 @@ class Admin::UserAccessControl < ActiveRecord::Base
         end
       end
     end
+  end
+
+  def invalidate_cache
+    logger.info "User Role added or updated (#{self.class.name}). Invalidating cache."
+    # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
+    Rails.cache.clear
   end
 end

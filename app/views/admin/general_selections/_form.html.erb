@@ -14,7 +14,7 @@
   <div class="form-group">
     <%= f.label :item_type %>
     <% select_item_type = {}
-       select_item_type[:selected] = params[:filter][:item_type] unless object_instance.id || !params[:filter] %>
+       select_item_type[:selected] = filter_params_permitted[:item_type] unless object_instance.id || !filter_params_permitted %>
     <%= f.select :item_type, Classification::GeneralSelection.item_types, select_item_type, disabled: !!object_instance.id  %>
   </div>
   <div class="form-group">
