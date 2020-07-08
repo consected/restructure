@@ -4,6 +4,13 @@ module DynamicModelHandler
   extend ActiveSupport::Concern
 
   class_methods do
+    def final_setup
+      Rails.logger.debug "Running final setup for #{name}"
+      ro = result_order
+      ro = { id: :desc } if result_order.blank?
+      default_scope -> { order ro }
+    end
+
     # Scope method to filter results based on whether they can be viewed according to user access controls
     # and default option config showable_if rules
     # @return [ActiveRecord::Relation] scope to provide rules filtered according to the calculated rules
@@ -46,11 +53,9 @@ module DynamicModelHandler
     end
 
     def result_order
-      @result_order = definition.result_order
+      return @result_order if @result_order
 
-      default_scope -> { order ro } unless @result_order.blank?
-
-      @result_order
+      @result_order = definition.result_order || ''
     end
 
     def no_master_association
@@ -71,11 +76,11 @@ module DynamicModelHandler
 
     def permitted_params
       field_list = definition.field_list
-      if field_list.blank?
-        field_list = attribute_names.map(&:to_sym) - %i[disabled user_id created_at updated_at tracker_id] + [:item_id]
-      else
-        field_list = definition.field_list_array.map(&:to_sym)
-      end
+      field_list = if field_list.blank?
+                     attribute_names.map(&:to_sym) - %i[disabled user_id created_at updated_at tracker_id] + [:item_id]
+                   else
+                     definition.field_list_array.map(&:to_sym)
+                   end
 
       field_list
     end
@@ -96,6 +101,11 @@ module DynamicModelHandler
 
   def option_type_config
     self.class.default_options
+  end
+
+  def no_downcase_attributes
+    fo = option_type_config.field_options
+    fo&.filter { |_k, v| v[:no_downcase] }&.keys
   end
 
   def master_id
@@ -124,26 +134,39 @@ module DynamicModelHandler
     attributes[self.class.primary_key.to_s]
   end
 
+  def table_key
+    table_key_name = self.class.definition.table_key_name
+    attributes[table_key_name] if table_key_name.present?
+  end
+
   def can_edit?
+    return @can_edit unless @can_edit.nil?
+
+    @can_edit = false
+
     # This returns nil if there was no rule, true or false otherwise.
     # Therefore, for no rule (nil) return true
     res = calc_can :edit
-    return true if res.nil?
+    return @can_edit = true if res.nil?
     return unless res
 
     # Finally continue with the standard checks if none of the previous have failed
-    super()
+    @can_edit = !!super()
   end
 
   def can_access?
+    return @can_access unless @can_access.nil?
+
+    @can_access = false
+
     # This returns nil if there was no rule, true or false otherwise.
     # Therefore, for no rule (nil) return true
     res = calc_can :access
-    return true if res.nil?
+    return @can_access = true if res.nil?
     return unless res
 
     # Finally continue with the standard checks if none of the previous have failed
-    super()
+    @can_access = !!super()
   end
 
   # Calculate the can rules for the required type, based on user access controls and showable_if rules
@@ -181,10 +204,13 @@ module DynamicModelHandler
 
   # Force the ability to add references even if can_edit? for the parent record returns false
   def can_add_reference?
+    return @can_add_reference unless @can_add_reference.nil?
+
+    @can_add_reference = false
     dopt = definition_default_options
-    if dopt.add_reference_if.is_a?(Hash) && dopt.add_reference_if.first
-      res = dopt.calc_add_reference_if(self)
-      return !!res
-    end
+    return unless dopt.add_reference_if.is_a?(Hash) && dopt.add_reference_if.first
+
+    res = dopt.calc_add_reference_if(self)
+    @can_add_reference = !!res
   end
 end

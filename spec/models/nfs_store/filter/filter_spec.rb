@@ -2,25 +2,19 @@
 
 require 'rails_helper'
 
-SetupHelper.setup_test_app
-
 RSpec.describe NfsStore::Filter::Filter, type: :model do
   include PlayerContactSupport
   include ModelSupport
   include NfsStoreSupport
 
-  before :all do
+  before :example do
     setup_nfs_store
 
     res = defined? BhsAssignment
     expect(res).to be_truthy
 
-    @activity_log = @container.parent_item
-  end
-
-  before :each do
-    @activity_log = @container.parent_item
-    @activity_log.extra_log_type = :step_1
+    setup_container_and_al
+    clear_filters
   end
 
   it 'creates filters for a user and role' do

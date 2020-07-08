@@ -96,6 +96,8 @@ module MasterDataSupport
 
   # Force a new connection (with a thread) to create the data set
   def create_data_set_outside_tx(options = {})
+    Rails.logger.info "** Creating data set outside transaction **"
+    puts "** Creating data set outside transaction **"
     Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do
         SeedSupport.setup

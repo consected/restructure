@@ -67,7 +67,7 @@ Rails.application.config.to_prepare do
     redirect_to '/'
   end
 
-  Devise::SessionsController.send(:after_filter) do
+  Devise::SessionsController.send(:after_action) do
     record = resource
 
     if record&.id && record&.password_expiring_soon?

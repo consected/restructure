@@ -9,7 +9,7 @@
 }
 
 .browse-container {
-    border: 1px solid rgb(221, 221, 221);
+  border: 1px solid rgb(221, 221, 221);
 }
 
 .common-template-item .browse-container {
@@ -50,16 +50,20 @@
   }
 }
 
-
 .file-block.well {
   margin: 8px 16px;
 
-  .progress, .file-name {
+  .progress,
+  .file-name {
     float: none;
     width: auto;
   }
   .progress {
     margin-top: 6px;
+  }
+
+  .close:hover {
+    cursor: pointer;
   }
 }
 
@@ -68,7 +72,6 @@ li.list-group-item.filestore-classification-stored-file-full-title strong {
 }
 
 .container-entry .browse-entry-classifications {
-
   span {
     margin-left: 0em;
   }
@@ -83,7 +86,7 @@ li.list-group-item.filestore-classification-stored-file-full-title strong {
   }
 
   .item-flags-block {
-    margin-top:0px;
+    margin-top: 0px;
     display: inline-block;
 
     .chosen-container-multi .chosen-choices {
@@ -107,14 +110,13 @@ li.list-group-item.filestore-classification-stored-file-full-title strong {
   }
 }
 
-#nfs_store_manage_stored_file_title, #nfs_store_manage_archived_file_title {
+#nfs_store_manage_stored_file_title,
+#nfs_store_manage_archived_file_title {
   width: 98.7%;
 }
 
 .download-actions .dropdown-menu {
-
   a[disabled] {
     color: gray;
   }
-
 }

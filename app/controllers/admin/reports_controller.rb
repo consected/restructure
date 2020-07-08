@@ -3,7 +3,7 @@ class Admin::ReportsController < AdminController
 
   protected
     def default_index_order
-      "disabled asc nulls first, updated_at desc"
+      Arel.sql "disabled asc nulls first, updated_at desc"
     end
 
     def filters_on

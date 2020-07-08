@@ -8,7 +8,7 @@ module NfsStore
       # include HandlesUserBase
       include UserHandler
 
-      belongs_to :app_type
+      belongs_to :app_type, class_name: 'Admin::AppType'
       has_many :stored_files, foreign_key: 'nfs_store_container_id', inverse_of: :container
       has_many :archived_files, foreign_key: 'nfs_store_container_id', inverse_of: :container
 

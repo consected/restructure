@@ -1,16 +1,12 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-RSpec.configure {|c| c.before {
-  SeedSupport.setup
-  }}
-
 RSpec.describe 'SageAssignment', type: :model do
-
   include ModelSupport
   include SageAssignmentSupport
 
-  describe "SageAssignment" do
-
+  describe 'SageAssignment' do
     before :each do
       seed_database
       create_user
@@ -20,23 +16,21 @@ RSpec.describe 'SageAssignment', type: :model do
       create_master
     end
 
-    it "allows multiple SageAssignment records to be created, then to be assigned" do
-      #create_items :list_valid_attribs, @master
+    it 'allows multiple SageAssignment records to be created, then to be assigned' do
+      # create_items :list_valid_attribs, @master
 
       res = SageAssignment.generate_ids(@admin, 100)
 
       @created_count = res.length
 
-      expect(@created_count).to be  > 90 #allow for a few to drop out due to existing in the db already
+      expect(@created_count).to be > 90 # allow for a few to drop out due to existing in the db already
 
       list = []
-      (0..9).each do
+      10.times do
         s = @master.sage_assignments.build sage_id: ''
         s.save!
         list << s
       end
-
-
 
       num = 0
       # Step through the full set of sage assignments and compare it to those assigned to this master
@@ -45,17 +39,16 @@ RSpec.describe 'SageAssignment', type: :model do
         num += 1
         break if num > list.length
       end
-
     end
 
-    it "only allows sage_assignment IDs that have been pregenerated" do
+    it 'only allows sage_assignment IDs that have been pregenerated' do
       res = SageAssignment.generate_ids(@admin, 100)
 
       create_items :list_invalid_attribs, @master, true
       check_all_records_failed
     end
 
-    it "prevents assignments from being edited" do
+    it 'prevents assignments from being edited' do
       @master.sage_assignments.unscope(:order).order(:id).each do |s|
         s.sage_id = SageAssignment.generate_random_id.to_s
         res = s.save
@@ -69,27 +62,19 @@ RSpec.describe 'SageAssignment', type: :model do
         expect(res.errors).to have_key(:sage_id)
         expect(res.errors[:master]).to eq 'record this sage ID is associated with can not be changed'
       end
-
     end
 
-    it "provides error when no unassigned IDs remain" do
-
-
+    it 'provides error when no unassigned IDs remain' do
       SageAssignment.unassigned.each do
         s = @master.sage_assignments.build sage_id: ''
         s.save!
       end
 
-
-      expect{
+      expect do
         @master.sage_assignments.build sage_id: ''
-      }.to raise_error(::ExternalIdHandler::NoUnassignedAvailable, 'No available IDs for assignment')
-
-
+      end.to raise_error(::ExternalIdHandler::NoUnassignedAvailable, 'No available IDs for assignment')
     end
-
-
   end
 
-  #it_behaves_like 'a standard user model'
+  # it_behaves_like 'a standard user model'
 end

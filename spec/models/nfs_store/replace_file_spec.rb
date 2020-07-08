@@ -12,15 +12,9 @@ RSpec.describe 'Replace stored files', type: :model do
     'file1'
   end
 
-  before :all do
-    setup_nfs_store
-
-    @activity_log = @container.parent_item
-    @activity_log.extra_log_type = :step_1
-    @activity_log.save!
-  end
-
   before :each do
+    setup_nfs_store
     setup_container_and_al
+    setup_default_filters
   end
 end

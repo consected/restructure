@@ -7,7 +7,7 @@ RSpec.describe Messaging::NotificationSms, type: :model do
   include ModelSupport
   include ActivityLogSupport
 
-  before :all do
+  before :example do
     create_admin
   end
 

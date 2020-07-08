@@ -23,21 +23,10 @@ RSpec.describe 'Trash archive files', type: :model do
     expect(@container.current_user).to eq @user
   end
 
-  before :all do
-    setup_nfs_store
-    @activity_log = @container.parent_item
-    setup_access :activity_log__player_contact_phones, resource_type: :table, user: @user
-    setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
-  end
-
   before :each do
+    setup_nfs_store
     setup_container_and_al
-
-    expect(@app_type).to eq @user&.app_type
-
     setup_default_filters
-    setup_access :activity_log__player_contact_phones, resource_type: :table, user: @user
-    setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
   end
 
   it 'sends an archive file to trash' do

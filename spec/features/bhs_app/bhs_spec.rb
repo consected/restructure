@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-SetupHelper.feature_setup
 
 describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
   include MasterDataSupport
@@ -12,9 +11,10 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
   include BhsExpectations
   include BhsActions
 
-  BhsImportConfig.import_config
-
+  
   before :all do
+    BhsImportConfig.import_config
+    SetupHelper.feature_setup
     seed_database
     create_data_set_outside_tx
 
@@ -46,7 +46,7 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
 
     bmaxobj = BhsAssignment.order(bhs_id: :desc).first
     bmax = bmaxobj&.bhs_id || 200_197_832
-                              
+
     b = m.bhs_assignments.build(bhs_id: bmax + 1)
     b.save!
   end

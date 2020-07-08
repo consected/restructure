@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-SetupHelper.feature_setup
 
 describe 'reports', js: true, driver: :app_firefox_driver do
   include ModelSupport
@@ -11,6 +10,8 @@ describe 'reports', js: true, driver: :app_firefox_driver do
   include ReportSupport
 
   before(:all) do
+    SetupHelper.feature_setup
+
     @admin, = create_admin
 
     seed_database

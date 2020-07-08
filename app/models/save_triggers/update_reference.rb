@@ -1,15 +1,16 @@
-class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
+# frozen_string_literal: true
 
-  def self.config_def if_extras: {}
+class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
+  def self.config_def(if_extras: {})
     [
       {
         model_name: {
           if: if_extras,
-          first: "update the first matching reference with this configuration, specifying {update: return_result}",
+          first: 'update the first matching reference with this configuration, specifying {update: return_result}',
           force_not_editable_save: 'true allows the update to succeed even if the referenced item is set as not_editable',
           with: {
-            field_name: "now()",
-            field_name_2: "literal value",
+            field_name: 'now()',
+            field_name_2: 'literal value',
             field_name_3: {
               this: 'field_name'
             },
@@ -22,21 +23,17 @@ class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
     ]
   end
 
-  def initialize config, item
+  def initialize(config, item)
     super
 
     @model_defs = config
-
   end
 
   def perform
-
-
     @model_defs = [@model_defs] unless @model_defs.is_a? Array
 
     @model_defs.each do |model_def|
-      model_def.each do |model_name, config|
-
+      model_def.each do |_model_name, config|
         vals = {}
 
         # We calculate the conditional if inside each item, rather than relying
@@ -47,7 +44,6 @@ class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
         end
 
         config[:with].each do |fn, def_val|
-
           if def_val.is_a? Hash
             ca = ConditionalActions.new def_val, @item
             res = ca.get_this_val
@@ -64,11 +60,7 @@ class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
           res.force_save! if config[:force_not_editable_save]
           res.update! vals.merge(current_user: @item.user)
         end
-
       end
-
     end
-
   end
-
 end

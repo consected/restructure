@@ -1,10 +1,10 @@
-module ActivityLogControllerHandler
+# frozen_string_literal: true
 
+module ActivityLogControllerHandler
   extend ActiveSupport::Concern
   include GeneralDataConcerns
 
   class_methods do
-
     # Annoyingly this needs to be forced, since const_set during controller generation does not
     # appear to set the parent class correctly, unlike for models
     # Possibly this is a Rails specific override, but the parent is set correctly
@@ -23,13 +23,12 @@ module ActivityLogControllerHandler
     end
 
     def parent_type
-      @parent_type = (definition.item_type).to_sym
+      @parent_type = definition.item_type.to_sym
     end
 
     def parent_rec_type
-      @parent_rec_type = (definition.rec_type).to_sym
+      @parent_rec_type = definition.rec_type.to_sym
     end
-
   end
 
   def item_controller
@@ -39,6 +38,4 @@ module ActivityLogControllerHandler
   def item_rec_type
     self.class.item_rec_type
   end
-
-
 end

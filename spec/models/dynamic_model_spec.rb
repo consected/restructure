@@ -12,12 +12,15 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
   include PlayerContactSupport
   include BulkMsgSupport
 
-  before :all do
-    Seeds.setup
+  before :example do
+    # Seeds.setup
 
     @user0, = create_user
     create_admin
     create_user
+    setup_access :trackers
+    setup_access :tracker_history
+
     import_bulk_msg_app
     dm = DynamicModel::ZeusBulkMessage.definition
     dm.current_admin = @admin

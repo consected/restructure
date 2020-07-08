@@ -1,0 +1,1094 @@
+_default:
+################# Default configurations ###################
+
+  fields:
+#    - follow_up_date
+#    - follow_up_time
+#    - notes
+
+  creatable_if: 
+    never: true
+  showable_if:
+    never: true
+  editable_if: 
+    never: true
+
+
+  view_options:
+    hide_unless_creatable: true
+    show_cancel: true
+    only_create_as_reference: true
+    data_attribute: 
+      - by
+      - created_by_user_email
+      - at
+      - created_at
+
+
+# Data Classifications
+  #- ipa data covered under requestors agreement
+  #- ipa data covered another investigators agreement
+  #- non-ipa data used by ipa team for recruitment
+  #- non-ipa data not used for ipa recruitment
+  #- restricted access data 
+
+
+
+################# Reusable definitions ###################
+_definitions:
+  fs_enabled_if: &enabled_if
+    always: true
+
+# @library common filestore_container
+
+
+_definitions:
+
+  email_notification: &email_notification
+    type: email
+    layout_template: data request notification layout
+    content_template: data request message content
+
+  initial_review_approved_email_notification: &initial_review_approved_email_notification
+    <<: *email_notification
+    subject: "FPHS Data Request: Initial Review Approved - {{referring_record.id}}"
+    extra_substitutions: &initial_review_approved_extra_substitutions
+      reason: 'Data Request Initial Review Approved"'
+      extra_text: ''
+      extra_html: |
+        <p>A data request for FPHS has passed initial review. The request is for:</p>
+
+        <ul>
+        <li>Analysis to be performed within the secure FPHS environment: {{latest_reference.fphs_server_yes_no}}</li>
+        <li>Requester is an FPHS analyst: {{latest_reference.fphs_analyst_yes_no}}</li>
+        <li>Data classifications: 
+        {{latest_reference.tag_select_data_classifications::compact::html_list}}
+        </li>
+        </ul>
+
+        <h3>Requested Attributes</h3>
+        {{embedded_report_data_requests__selected_data_attributes_all}}
+  
+
+
+  general_message: &general_message
+    <<: *email_notification
+    role:
+    users:
+      referring_record: 
+        created_by_user_id: return_value
+
+    subject: "FPHS Data Request: Message - {{referring_record.id}}"
+    extra_substitutions:
+      reason: 'Data Request Message'
+      extra_html: ''
+      extra_text: |
+        A message has been received regarding a data request.
+        Please login to reply to the message.
+
+        **Message**
+
+        ---
+
+        {{latest_reference.message_notes::plaintext}}
+
+
+  dynamic_model__data_request_initial_reviews: &initial_review
+    id:
+      parent_or_this_references: 
+        dynamic_model__data_request_initial_reviews: id
+
+
+
+
+  ###### Notify PI reviews template #########
+  do_pi_review: &do_pi_review
+    fields:
+      - placeholder_intro
+      - notes
+      - next_step
+
+    field_options:
+      next_step:
+        edit_as:
+          field_type: select_next_step
+          alt_options:
+            - complete
+            - rejected
+
+    editable_if:
+      # always: true
+      all:
+        this:
+          next_step:
+            - ''
+            - null
+
+    caption_before: &do_pi_review_caption_before
+    
+      placeholder_intro:
+        show_caption: |
+          Click the edit button to enter notes and record your decision
+    
+      notes: 
+        show_caption: Review notes
+        edit_caption: |
+          Enter any notes to support your initial review
+
+          *These notes will be visible to all users involved in 
+          the review of this data request*
+
+      next_step: 
+        show_caption: Decision
+        edit_caption: |
+          If you have no concerns regarding this data request, select **complete**.
+          The request will be sent for additional investigator reviews if the
+          data classifications requested require them, or will be approved.
+
+          If you are not able to approve this data request, select **reject**. The
+          request will be rejected and will be closed.
+
+          If you need to save notes, or contact the requester or FPHS Data Manager,
+          just leave this option blank, then click *Save*. The request will not
+          progress until you return here and select your decision.
+
+
+    show_if:
+      placeholder_intro:
+        next_step:
+          - ''
+          - null
+
+    save_trigger: &do_pi_review_save_trigger
+
+      on_update:      
+        create_reference:
+          - activity_log__data_request_assignment:
+              in: referring_record
+              with:
+                extra_log_type: request_approved
+              force_create: true
+              if:
+                # All of the previously created "notify" activities
+                # have been marked as complete
+                # This is tested by checking that a record returns where
+                # the extra log type matches and none are blank or rejected                
+                not_all_notifies_not_complete:
+                  activity_log__data_request_assignments:
+                    id:
+                      parent_references: 
+                        activity_log__data_request_assignments: id
+                    extra_log_type:
+                      - do_review_ipa_pi
+                      - do_review_data_repo_pi
+                    next_step:
+                      - null
+                      - ''
+                      - rejected                    
+
+          - activity_log__data_request_assignment:
+              in: referring_record
+              with:
+                extra_log_type: request_rejected
+              force_create: true
+              if:
+                # All of the previously created "notify" activities
+                # have been marked as complete
+                # This is tested by checking that a record returns where
+                # the extra log type matches and none are blank or rejected                
+                all_notifies_not_complete:
+                  activity_log__data_request_assignments:
+                    id:
+                      parent_references: 
+                        activity_log__data_request_assignments: id
+                    extra_log_type:
+                      - do_review_ipa_pi
+                      - do_review_data_repo_pi
+                    next_step: rejected                    
+
+
+  ###### Contact reviews template #########
+  # contact_review: &contact_review
+
+  #   fields:
+  #     - placeholder_intro
+  #     - notes
+  #     - next_step
+
+  #   field_options:
+  #     next_step:
+  #       edit_as: 
+  #         field_type: select_next_step
+  #         alt_options:
+  #           - request approved
+  #           - request rejected
+
+  #   caption_before:
+  #     placeholder_intro:
+  #       show_caption: |
+  #         Click the edit button to enter notes and record your decision
+    
+  #     notes:
+  #       show_caption: Review notes
+  #       edit_caption: |      
+  #         Enter any notes to support your review
+
+  #         *These notes will be visible to all users involved in 
+  #         the review of this data request*
+        
+  #     next_step:
+  #       show_caption: Decision
+  #       edit_caption: |      
+  #         If you are ready to approve or reject this data request, select
+  #         your decision. If you need to save notes, or contact the requester or FPHS Data Manager,
+  #         just leave this option blank, then click *Save*. The request will not
+  #         progress until you return here and select your decision.
+
+
+  #   show_if:
+  #     placeholder_intro:
+  #       next_step:
+  #         - ''
+  #         - null
+
+
+  #   editable_if:
+  #     all:
+  #       this:
+  #         next_step:
+  #           - ''
+  #           - null
+  
+  #   save_trigger: &contact_review_save_trigger      
+  #     on_save:
+  #       create_reference:
+  #         - activity_log__data_request_assignment: &create_reference_request_approved
+  #             in: referring_record
+  #             with:
+  #               extra_log_type: request_approved
+  #             force_create: true
+  #             if:
+  #               # All of the previously created "contact review" activities
+  #               # have been marked as approved
+  #               # This is tested by checking that a record returns where
+  #               # the extra log type matches and none are blank or rejected
+  #               not_all_reviews_not_approved:
+  #                 activity_log__data_request_assignments:
+  #                   id:
+  #                     parent_references: 
+  #                       activity_log__data_request_assignments: id                  
+                  
+  #                   extra_log_type:
+  #                     - review_by_ipa_inv
+  #                     - review_by_fphs_pi
+  #                     - review_by_data_repo_pi
+  #                     - full_review_by_data_repo_pi                    
+  #                   next_step: 
+  #                     - null
+  #                     - ''
+  #                     - request rejected
+
+  #         - activity_log__data_request_assignment: &create_reference_request_rejected
+  #             in: referring_record
+  #             with:
+  #               extra_log_type: request_rejected
+  #             force_create: true
+  #             if:
+  #               # Any of the previously created "contact review" activities
+  #               # have been marked as rejected
+  #               # This is tested by checking that a record returns where
+  #               # the extra log type matches and next step is rejected
+  #               all_reviews_approved:
+  #                 activity_log__data_request_assignments:
+  #                   id:
+  #                     parent_references: 
+  #                       activity_log__data_request_assignments: id                  
+                  
+  #                   extra_log_type:
+  #                     - review_by_ipa_inv
+  #                     - review_by_fphs_pi
+  #                     - review_by_data_repo_pi
+  #                     - full_review_by_data_repo_pi                    
+  #                   next_step: request rejected
+
+
+
+################################################  
+#                 Activities                   #  
+################################################  
+  
+########################################
+# Make Data Request
+########################################
+request:
+  label: Data Request
+
+  fields: 
+    - status
+    
+  caption_before: 
+    show_caption:
+      status: Request Status
+
+  show_if:
+    status:
+      not_any:
+        status:
+          - null
+          - ''
+
+
+  creatable_if: 
+    always: true
+  showable_if:
+    any:
+      this:
+        role_name:
+          - reviewer - fphs pi
+          - reviewer - ipa pi
+          - reviewer - ipa investigator
+          - reviewer - initial review
+          - reviewer - faculty
+          - reviewer - data repo pi
+        created_by_user_id: 
+          user: id
+      
+
+  editable_if: 
+    not_all:
+      activity_log__data_request_assignments:
+        id:
+          this_references:
+            activity_log__data_request_assignments: id
+          
+        extra_log_type: submit_request
+
+  add_reference_if: 
+    always: true
+
+  view_options:
+    only_create_as_reference: false
+    always_embed_reference: dynamic_model__data_request
+    always_embed_creatable_reference: dynamic_model__data_request
+    alt_width_classes: resized-width col-md-18 col-lg-18 col-md-offset-3 al-shrinkable prevent_nfs_resize
+  
+
+
+  references:
+    # Primary request details
+    - dynamic_model__data_requests:
+        from: this
+        add: one_to_this
+        prevent_disable: true
+
+
+    # Submit the request
+    - activity_log__data_request_assignments:
+        label: Submit Request
+        from: this
+        add: one_to_this
+        add_with:
+          extra_log_type: submit_request
+        filter_by:
+          extra_log_type: submit_request  
+        prevent_disable: true
+
+
+    # Allow an initial review if the request has been submitted
+    # with a submit_request activity
+    - activity_log__data_request_assignments:
+        label: Initial Review
+        prevent_disable: true
+        from: this
+        add: one_to_this
+        add_with:
+          extra_log_type: initial_review
+        filter_by:
+          extra_log_type: initial_review
+        creatable_if: &all_submitted
+          all:
+            activity_log__data_request_assignments:
+              extra_log_type: submit_request
+              id:
+                this_references:
+                  activity_log__data_request_assignments: id
+
+
+    # Allow users to send a message
+    - activity_log__data_request_assignments:
+        label: Send Message
+        prevent_disable: true
+        from: this
+        add: many
+        add_with:
+          extra_log_type: send_message
+        filter_by:
+          extra_log_type: send_message
+        creatable_if: 
+          all:
+            <<: *all_submitted            
+
+    - activity_log__data_request_assignments:
+        label: IPA PI Initial Review
+        prevent_disable: true
+        from: this
+        add: one_to_this
+        add_with:
+          extra_log_type: do_review_ipa_pi
+        filter_by:
+          extra_log_type: do_review_ipa_pi
+        creatable_if: 
+          never: true
+
+    - activity_log__data_request_assignments:
+        label: Data Repository PI Initial Review
+        prevent_disable: true
+        from: this
+        add: one_to_this
+        add_with:
+          extra_log_type: do_review_data_repo_pi
+        filter_by:
+          extra_log_type: do_review_data_repo_pi
+        creatable_if: 
+          never: true
+
+
+    # - activity_log__data_request_assignments:
+    #     label: Review by Data Repository PI
+    #     prevent_disable: true
+    #     from: this
+    #     add: one_to_this
+    #     add_with:
+    #       extra_log_type: review_by_data_repo_pi
+    #     filter_by:
+    #       extra_log_type: review_by_data_repo_pi
+    #     creatable_if: 
+    #       never: true
+
+    # - activity_log__data_request_assignments:
+    #     label: Detailed Review by Data Repository PI
+    #     prevent_disable: true
+    #     from: this
+    #     add: one_to_this
+    #     add_with:
+    #       extra_log_type: full_review_by_data_repo_pi
+    #     filter_by:
+    #       extra_log_type: full_review_by_data_repo_pi
+    #     creatable_if: 
+    #       never: true
+
+    # - activity_log__data_request_assignments:
+    #     label: Review by FPHS PI
+    #     prevent_disable: true
+    #     from: this
+    #     add: one_to_this
+    #     add_with:
+    #       extra_log_type: review_by_fphs_pi
+    #     filter_by:
+    #       extra_log_type: review_by_fphs_pi
+    #     creatable_if: 
+    #       never: true
+
+    # - activity_log__data_request_assignments:
+    #     label: Review by IPA Investigator
+    #     prevent_disable: true
+    #     from: this
+    #     add: one_to_this
+    #     add_with:
+    #       extra_log_type: review_by_ipa_inv
+    #     filter_by:
+    #       extra_log_type: review_by_ipa_inv
+    #     creatable_if: 
+    #       never: true
+
+    - activity_log__data_request_assignments:
+        label: Supporting Files
+        prevent_disable: true
+        from: this
+        add: one_to_this
+        filter_by:
+          extra_log_type: supporting_files
+        add_with:
+          extra_log_type: supporting_files
+        creatable_if: 
+          never: true
+
+    - activity_log__data_request_assignments:
+        label: Request Approved
+        prevent_disable: true
+        from: this
+        add: one_to_this
+        add_with:
+          extra_log_type: request_approved
+        filter_by:
+          extra_log_type: request_approved
+        creatable_if: 
+          never: true
+
+    - activity_log__data_request_assignments:
+        label: Request Rejected
+        prevent_disable: true
+        from: this
+        add: one_to_this
+        add_with:
+          extra_log_type: request_rejected
+        filter_by:
+          extra_log_type: request_rejected
+        creatable_if: 
+          never: true
+
+
+  save_trigger:
+    on_create:
+      create_reference:
+        - activity_log__data_request_assignments:
+            in: this
+            with:
+              extra_log_type: supporting_files
+
+
+
+########################################
+# Submit Request
+########################################
+submit_request:
+  label: Submit Request
+
+  editable_if: 
+    never: true
+
+  caption_before:
+    submit: To confirm submission of this data request, click **Submit Now**
+    all_fields:
+      show_caption: This data request has been submitted.
+
+  save_action:
+    label: Submit Now
+
+  save_trigger:
+  
+    on_create:
+
+      update_reference:
+        ref_data_requests_form: 
+          force_not_editable_save: true        
+          first:
+            dynamic_model__data_requests:
+              id:
+                parent_references:
+                  dynamic_model__data_requests: id
+              update: return_result
+          with:
+            status: submitted        
+
+        ref_top_level: &update_reference_ref_status
+          force_not_editable_save: true        
+          first:
+            referring_record:                  
+              update: return_result
+          with:
+            status: submitted        
+
+      notify:
+      
+      - <<: *email_notification
+        role: reviewer - initial review
+        subject: "FPHS Data Request: Initial Review Required - {{referring_record.id}}"
+        extra_substitutions:
+          reason: 'New Data Request Received'
+          extra_text: ''
+          extra_html: |
+            <h3>Requested Attributes</h3>
+            {{embedded_report_data_requests__selected_data_attributes_all}}
+
+
+
+########################################
+# Initial Review
+########################################
+initial_review:
+  label: Initial Review
+
+
+  references:
+    # Initial review details
+   - dynamic_model__data_request_initial_reviews:
+        from: this
+        add: one_to_this
+        prevent_disable: true
+
+  editable_if: 
+#    any:
+#      referring_record: 
+#        exists: true
+    not_all:
+      activity_log__data_request_assignments:
+        id:
+          parent_references:
+            activity_log__data_request_assignments: id          
+        extra_log_type: 
+          - initial_review_approved
+          - initial_review_not_approved
+
+
+  save_trigger:
+  
+    on_save:
+
+      create_reference:
+      
+        ####### Add an initial review approved marker
+        - activity_log__data_request_assignment:
+            in: referring_record
+            with:
+              extra_log_type: initial_review_approved
+            force_create: true
+            if: &all_initial_review_approved
+              all_initial_review_approved:
+                dynamic_model__data_request_initial_reviews:
+                  id:
+                    this_references: 
+                      dynamic_model__data_request_initial_reviews: id
+                  next_step: 'yes'
+                  review_approved_yes_no: 'yes'
+
+        ####### Initial review NOT approved. 
+        - activity_log__data_request_assignment:
+            in: referring_record
+            with:
+              extra_log_type: initial_review_not_approved
+            force_create: true
+            if: &all_initial_review_not_approved
+              all_initial_review_not_approved:
+                dynamic_model__data_request_initial_reviews:
+                  id:
+                    this_references: 
+                      dynamic_model__data_request_initial_reviews: id
+                  next_step: 'yes'
+                  review_approved_yes_no: 'no'
+    
+            
+
+
+
+########################################
+# Send Message
+########################################
+send_message:
+  label: Message
+  
+  editable_if:
+    any:
+      this:
+        id: null
+  
+  add_reference_if:
+    always: true
+    
+  references:
+    # Message to requester or reviewers
+   - dynamic_model__data_request_messages:
+        from: this
+        add: one_to_this
+        prevent_disable: true
+
+  save_trigger:
+    on_create:
+      notify:
+        # Initial Review
+        - <<: *general_message
+          role:
+            - reviewer - initial review
+
+
+########################################
+# Initial Review Approved
+########################################
+initial_review_approved:
+  label: Initial Review Approved
+  
+  editable_if:
+    never: true
+
+  save_trigger:
+    on_create:
+      create_reference:
+      
+        ####### Notify initial review complete
+        
+        # Notify IPA PI
+        # On or Off FPHS server
+        - activity_log__data_request_assignment:
+            in: referring_record
+            with:
+              extra_log_type: do_review_ipa_pi
+            force_create: true
+                                    
+
+        ####### Notify Data Repository PI
+        # On or Off FPHS server
+        - activity_log__data_request_assignment:
+            in: referring_record
+            with:
+              extra_log_type: do_review_data_repo_pi
+            force_create: true
+            
+            if:
+              any:
+                # On FPHS Server and not an FPHS analyst
+                all_on_fphs_server_and_fphs_analyst_no:
+                  dynamic_model__data_request_initial_reviews:
+                    <<: *initial_review
+                    fphs_server_yes_no: 'yes'
+                    fphs_analyst_yes_no: 'no'
+                # Off FPHS Server, always
+                all_off_fphs_server:
+                  dynamic_model__data_request_initial_reviews:
+                    <<: *initial_review
+                    fphs_server_yes_no: 'no'
+      
+    
+      update_reference:
+        ref: 
+            <<: *update_reference_ref_status
+            with:
+              status: initial review approved
+
+########################################
+# Initial Review Not Approved
+########################################
+initial_review_not_approved:
+  label: Initial Review Not Approved
+
+  editable_if:
+    never: true
+
+  save_trigger:
+    on_create:
+      update_reference:
+        ref: 
+            <<: *update_reference_ref_status
+            with:
+              status: initial review not approved
+
+
+##################### NOTIFY PIs #######################
+
+
+########################################
+# Review by IPA PI
+########################################
+do_review_ipa_pi:
+  label: Review by IPA PI
+  
+  <<: *do_pi_review
+  
+
+  save_trigger:
+    <<: *do_pi_review_save_trigger
+    on_create:
+      notify:
+        - <<: *initial_review_approved_email_notification
+          role: reviewer - ipa pi
+          extra_substitutions: 
+            <<: *initial_review_approved_extra_substitutions
+            reason: 'Review by IPA PI required'
+                               
+        
+
+########################################
+# Review by Data Repo PI
+########################################
+do_review_data_repo_pi:
+  label: Review by Data Repository PI
+  
+  <<: *do_pi_review
+
+  save_trigger:
+    <<: *do_pi_review_save_trigger
+    on_create:
+      notify:
+        - <<: *initial_review_approved_email_notification
+          role: reviewer - data repo pi
+          extra_substitutions: 
+            <<: *initial_review_approved_extra_substitutions
+            reason: 'Review by Data Repository PI required'
+
+
+
+  
+########################################
+# Request Approved 
+########################################
+request_approved:
+  label: Request Approved
+
+  save_trigger:
+    on_create:
+    
+      update_reference:
+        ref: 
+          <<: *update_reference_ref_status
+          with:
+            status: approved        
+              
+      notify:
+        #### 
+        # Notify Approval!
+        - <<: *initial_review_approved_email_notification
+          role: reviewer - initial review
+          users: 
+            referring_record:
+              created_by_user_id: return_value
+          
+          subject: Data Request Approved
+          extra_substitutions: 
+            <<: *initial_review_approved_extra_substitutions
+            reason: Reviews completed
+
+
+########################################
+# Request Rejected 
+########################################
+request_rejected:
+  label: Request Rejected
+
+  save_trigger:
+    on_create:
+    
+      update_reference:
+        ref: 
+          <<: *update_reference_ref_status
+          with:
+            status: rejected        
+              
+      notify:
+        #### 
+        # Notify Rejected!
+        - <<: *initial_review_approved_email_notification
+          role: reviewer - initial review
+          users: 
+            referring_record:
+              created_by_user_id: return_value
+          
+          extra_substitutions: 
+            <<: *initial_review_approved_extra_substitutions
+            reason: 'Data Request Rejected'                      
+
+
+
+
+########################################
+# Supporting Files 
+########################################
+supporting_files: 
+  <<: *files_activity
+  creatable_if: 
+    never: true
+    
+    
+
+
+################################################################################
+# Backups for future reference
+################################################################################
+
+
+# ########################################
+# # INITIAL NOTIFICATIONS COMPLETE
+# ########################################
+# initial_notifications_complete:
+#   label: Initial Notifications Complete
+  
+#   editable_if:
+#     never: true
+
+#   save_trigger:
+#     on_create:
+#       create_reference:
+
+
+#         ####### Reviews by contacts
+#         # On or Off Server
+
+#         ####### 2: IPA Investigator - FPHS Server YES or NO - regular review
+#         - activity_log__data_request_assignment:
+#             in: referring_record
+#             with:
+#               extra_log_type: review_by_ipa_inv
+#             force_create: true
+            
+#             if:
+#               <<: *all_initial_review_approved
+#               all_specific_data_categories:
+#                 dynamic_model__data_request_initial_reviews:
+#                   <<: *initial_review
+#                   tag_select_data_classifications:
+#                     condition: '&&'
+#                     value: 
+#                       - ipa data covered another investigators agreement
+
+
+#         ####### 4: FPHS PI - FPHS Server YES or NO - regular review
+#         - activity_log__data_request_assignment:
+#             in: referring_record
+#             with:
+#               extra_log_type: review_by_fphs_pi
+#             force_create: true
+            
+#             if:
+#               <<: *all_initial_review_approved    
+#               all_specific_data_categories: 
+#                 dynamic_model__data_request_initial_reviews:
+#                   <<: *initial_review
+#                   tag_select_data_classifications:
+#                     condition: '&&'
+#                     value: 
+#                       - non-ipa data not used for ipa recruitment
+
+
+#         ####### Reviews by Data Repo PI
+#         # On Server  
+        
+#         ####### 5: Data Repo PI - FPHS Server YES - regular review
+#         - activity_log__data_request_assignment:
+#             in: referring_record
+#             with:
+#               extra_log_type: review_by_data_repo_pi
+#             force_create: true
+            
+#             if:
+#               all_specific_data_categories:
+#                 dynamic_model__data_request_initial_reviews:
+#                   <<: *initial_review
+#                   fphs_server_yes_no: 'yes'
+#                   tag_select_data_classifications:
+#                     condition: '&&'
+#                     value: 
+#                       - restricted access data
+
+
+#         ####### Reviews by Data Repo PI
+#         # Off Server  
+
+#         ####### 5: Data Repo PI - FPHS Server NO - detailed review
+#         - activity_log__data_request_assignment:
+#             in: referring_record
+#             with:
+#               extra_log_type: full_review_by_data_repo_pi
+#             force_create: true
+            
+#             if:
+#               <<: *all_initial_review_approved
+#               all_specific_data_categories:
+#                 dynamic_model__data_request_initial_reviews:
+#                   <<: *initial_review
+#                   fphs_server_yes_no: 'no'
+#                   tag_select_data_classifications:
+#                     condition: '&&'
+#                     value: 
+#                       - restricted access data
+
+
+#         # If nothing was created, jump straight to approved!
+#         - activity_log__data_request_assignment: *create_reference_request_approved
+
+
+
+
+
+# ##################### CONTACT REVIEWS #######################
+
+
+# ########################################
+# # 2: Review by IPA Inv.
+# ########################################
+# review_by_ipa_inv:
+#   label: Review by IPA Investigator
+
+#   <<: *contact_review
+
+#   save_trigger:
+#     <<: *contact_review_save_trigger
+#     on_create:
+#       notify:
+#         - <<: *initial_review_approved_email_notification
+#           role: reviewer - ipa investigator
+#           extra_substitutions: 
+#             <<: *initial_review_approved_extra_substitutions
+#             reason: 'Notify IPA Investigator'          
+
+
+# ########################################
+# # 4: Review by FPHS PI
+# ########################################
+# review_by_fphs_pi:
+#   label: Review by FPHS PI
+
+#   <<: *contact_review
+
+#   save_trigger:
+#     <<: *contact_review_save_trigger
+#     on_create:
+#       notify:
+#         - <<: *initial_review_approved_email_notification
+#           role: reviewer - fphs pi
+#           extra_substitutions: 
+#             <<: *initial_review_approved_extra_substitutions
+#             reason: 'Notify FPHS PI'    
+
+# ########################################
+# # 5: Regular Review by data repo pi
+# # on server restricted access data
+# ########################################
+# review_by_data_repo_pi:
+#   label: Review by Data Repository PI
+
+#   <<: *contact_review
+
+#   save_trigger:
+#     <<: *contact_review_save_trigger
+#     on_create:
+#       notify:
+#         - <<: *initial_review_approved_email_notification
+#           role: reviewer - data repo pi
+#           extra_substitutions: 
+#             <<: *initial_review_approved_extra_substitutions
+#             reason: 'Notify Data Repository PI'    
+
+ 
+
+# ########################################
+# # 5: Full review by data repo pi for 
+# # off server restricted access data
+# ########################################
+# full_review_by_data_repo_pi:
+#   label: Detailed Review by Data Repository PI
+
+#   <<: *contact_review
+  
+#   caption_before:
+#     <<: *do_pi_review_caption_before
+#     all_fields: |
+#       **A detailed review is required*
+      
+#       This data request includes *restricted access data* for analysis outside of the
+#       *FPHS secure environment*.
+      
+#       If necessary, seek input from Faculty before making a 
+#       decision to approve or reject the request.
+
+#   save_trigger:
+#     <<: *contact_review_save_trigger
+#     on_create:
+#       notify:
+#         - <<: *initial_review_approved_email_notification
+#           role: reviewer - data repo pi
+#           extra_substitutions: 
+#             <<: *initial_review_approved_extra_substitutions
+#             reason: 'Detailed review required by Data Repository PI'    
+
+ 
+
+# ####################################################
+

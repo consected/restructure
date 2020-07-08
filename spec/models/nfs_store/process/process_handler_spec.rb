@@ -13,9 +13,7 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
     'file1'
   end
 
-  before :all do
-    ::ActivityLog.define_models
-
+  before :example do
     @other_users = []
     @other_users << create_user.first
     @other_users << create_user.first
@@ -23,21 +21,11 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
 
     setup_nfs_store
     setup_deidentifier
-
-    setup_container_and_al
-    setup_default_filters
-  end
-
-  before :each do
-    setup_deidentifier
     setup_container_and_al
     setup_default_filters
   end
 
   it 'can access the underlying activity log to get the pipeline definition' do
-    setup_container_and_al
-    setup_default_filters
-
     al = @activity_log
     expect(al).to be_a ActivityLog::PlayerContactPhone
     expect(al.resource_name).to eq 'activity_log__player_contact_phone__step_1'
@@ -88,6 +76,9 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
     ul = upload_file(f, dicom_content)
     sf = ul.stored_file
     sf.current_user = @user
+    al = sf.container.parent_item
+    expect(al).to be_a ActivityLog::PlayerContactPhone
+    expect(al.extra_log_type_config.nfs_store).to be_a Hash
 
     ph = NfsStore::Process::ProcessHandler.new(sf, use_pipeline: { user_file_actions: 're_identify' })
     expect(ph.job_list).to eq %i[dicom_deidentify dicom_metadata]

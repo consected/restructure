@@ -15,8 +15,10 @@ class DynamicModel < ActiveRecord::Base
     'DynamicModel'
   end
 
+  # Dynamic Models may have singular or plural table names, so we must use
+  # this definition rather than the general resource name method
   def resource_name
-    full_item_types_name
+    "dynamic_model__#{table_name}"
   end
 
   # List of item types that can be used to define Classification::GeneralSelection drop downs
@@ -43,10 +45,6 @@ class DynamicModel < ActiveRecord::Base
     table_name.singularize
   end
 
-  def field_list_array
-    field_list.split(/[,\s]+/).map(&:strip).compact if field_list
-  end
-
   def all_implementation_fields(ignore_errors: true)
     fl = field_list_array
 
@@ -71,9 +69,7 @@ class DynamicModel < ActiveRecord::Base
   end
 
   def self.orientation(category)
-    if category.to_s.include?('history') || category.to_s.include?('-records')
-      return :horizontal
-    end
+    return :horizontal if category.to_s.include?('history') || category.to_s.include?('-records')
 
     :vertical
   end
@@ -201,6 +197,8 @@ class DynamicModel < ActiveRecord::Base
         res.include UserHandler
         res.include DynamicModelHandler
 
+        res.final_setup
+
         # Handle extensions with an appropriate name
         ext = Rails.root.join('app', 'models', 'dynamic_model_extension', "#{model_class_name.underscore}.rb")
         if File.exist? ext
@@ -225,9 +223,7 @@ class DynamicModel < ActiveRecord::Base
         # Setup the controller
         c_name = full_implementation_controller_name
         begin
-          if implementation_controller_defined?(klass)
-            klass.send(:remove_const, c_name)
-          end
+          klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
         rescue StandardError => e
           logger.info '*************************************************************************************'
           logger.info "Failed to remove the old definition of #{c_name}. #{e.inspect}"

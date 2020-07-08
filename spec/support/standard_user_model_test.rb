@@ -3,8 +3,8 @@ shared_examples 'a standard user model' do
 
   describe "sends updates to tracker" do
 
-    before :all do
-      seed_database
+    before :example do
+      # seed_database
       create_admin
       create_user
       setup_access :addresses

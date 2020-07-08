@@ -15,8 +15,8 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
 
   def do_dicom_test_uploads; end
 
-  before :all do
-    ::ActivityLog.define_models
+  before :each do
+    seed_database && ::ActivityLog.define_models
 
     @other_users = []
     @other_users << create_user.first
@@ -54,12 +54,11 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     setup_deidentifier
     setup_container_and_al
     setup_default_filters
-  end
 
-  before :each do
-    setup_deidentifier
-    setup_container_and_al
-    setup_default_filters
+    # setup_nfs_store clean_files: false
+    # setup_deidentifier
+    # setup_container_and_al
+    # setup_default_filters
   end
 
   it '#overwrite_metadata' do

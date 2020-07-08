@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-bhs_app_name = "bhs_#{rand(100_000_000)}"
+bhs_app_name = "bhs_#{$STARTED_AT}"
 
 module BhsImportConfig
   include MasterSupport
@@ -14,11 +14,9 @@ module BhsImportConfig
   end
 
   def self.import_config
-    sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 3-add_notification_triggers.sql 4-add_testmybrain_trigger.sql 5-create_sync_subject_data_aws_db.sql 6-grant_roles_access_to_ml_app.sql]
-    sql_source_dir = Rails.root.join('db', 'app_specific', 'bhs', 'aws-db')
     config_dir = Rails.root.join('db', 'app_configs')
     config_fn = 'bhs_config.json'
-    app, = SetupHelper.setup_app_from_import bhs_app_name, sql_source_dir, sql_files, config_dir, config_fn
+    app, = SetupHelper.setup_app_from_import bhs_app_name, config_dir, config_fn
     # app = SetupHelper.setup_test_app
     @bhs_app_name = app.name
     app

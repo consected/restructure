@@ -2,82 +2,60 @@
 
 source 'https://rubygems.org'
 
-gem 'rails', '~> 4.2.10'
+gem 'rails', '~> 5.0'
 gem 'pg', '~> 0.15'
-
 gem 'jquery-rails'
-
 gem 'devise', '>= 4.6.1'
 gem 'strong_password', '~> 0.0.5'
-
 gem 'simple_token_authentication', '~> 1.0', git: 'https://github.com/philayres/simple_token_authentication.git'
-
 gem 'dalli'
-
 gem 'country_select'
-
 gem 'syslog-logger'
-
-#  explicitly remove sdoc since it is holding back JSON, which needs to be upgraded due to a CVE
-# group :doc do
-#   gem 'sdoc', '~> 0.4.0', group: :doc
-# end
-
 gem 'dicom'
-
 gem 'delayed_job'
 gem 'delayed_job_active_record'
 gem 'delayed_job_recurring'
 gem 'daemons'
-
 gem 'jquery-fileupload-rails', '0.4.7'
 gem 'rubyzip'
-
 gem 'devise-two-factor'
 gem 'rqrcode'
-
 gem 'activerecord-import'
 gem 'mime-types'
-
 gem 'aws-sdk-sns', '~> 1'
 gem 'aws-sdk-cloudwatchlogs', '~> 1'
 gem 'aws-sdk-pinpoint', '~> 1'
 gem 'aws-sdk-s3', '~> 1'
-
 gem 'crass', '~> 1.0.4'
-
 gem 'kramdown'
 
 group :development do
-  gem 'web-console', '~> 2.0'
+  gem 'listen'
+  gem 'web-console'
 end
 
 group :development, :test, :ipa_test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  gem 'byebug'
-
-  gem 'rspec-rails', '~> 3.0'
-
-  gem 'webrick'
-
   gem 'brakeman', require: false
   gem 'bundler-audit'
-
-  gem 'jasmine-rails'
-
-  # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
-  gem 'spring'
-  gem 'parallel_tests'
-  gem 'spring-commands-parallel-tests'
-  gem 'ruby-debug-ide'
+  gem 'byebug'
   gem 'debase'
+  gem 'jasmine-rails'
+  gem 'parallel_tests'
+  gem 'puma'
+  gem 'rspec-rails'
+  gem 'ruby-debug-ide'
+  gem 'spring'
+  gem 'spring-commands-parallel-tests'
 end
 
 group :test do
   gem 'capybara', '~> 2.18'
-  gem 'selenium-webdriver', '3.4.4'
   gem 'database_cleaner'
-  gem 'test_after_commit'
+  gem 'rails-controller-testing'
+  gem 'selenium-webdriver', '3.4.4'
+  gem 'simplecov'
+  gem 'simplecov-console'
 end
 
 group :assets do

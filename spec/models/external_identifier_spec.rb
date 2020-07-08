@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require './db/table_generators/external_identifiers_table.rb'
 
 RSpec.describe ExternalIdentifier, type: :model do
   include ModelSupport
@@ -17,17 +16,14 @@ RSpec.describe ExternalIdentifier, type: :model do
     end
   end
 
-  before :all do
-    Seeds.setup
-
-    create_admin
-    create_user
+  before :example do
+    # Seeds.setup
     r = 'test7'
     @implementation_table_name = "test_external_#{r}_identifiers"
     @implementation_attr_name = "test_#{r}_id"
-    unless ActiveRecord::Base.connection.table_exists? @implementation_table_name
-      TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
-    end
+
+    create_admin
+    create_user
   end
 
   it 'validates new configurations' do

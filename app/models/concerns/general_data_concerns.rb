@@ -17,9 +17,18 @@ module GeneralDataConcerns
   end
 
   def check_status
-    @was_created = respond_to?(:id) && id_changed? ? 'created' : false
-    @was_updated = respond_to?(:updated_at) && updated_at_changed? ? 'updated' : false
-    @was_disabled = respond_to?(:disabled) && disabled_changed? && disabled ? 'disabled' : false
+    @was_created = respond_to?(:id) && saved_change_to_id? ? 'created' : false
+
+    # If an embedded_item is present and it was updated, allow that to set @was_updated.
+    # Just changing the updated_at attribute on self (with #touch) is not registered as a change.
+    @was_updated = if respond_to?(:updated_at) &&
+                      (saved_change_to_updated_at? || embedded_item&.saved_change_to_updated_at?)
+                     'updated'
+                   else
+                     false
+                   end
+
+    @was_disabled = respond_to?(:disabled) && saved_change_to_disabled? && disabled ? 'disabled' : false
   end
 
   def _created
@@ -121,9 +130,7 @@ module GeneralDataConcerns
   end
 
   def as_json(extras = {})
-    if self.class.no_master_association
-      self.current_user ||= extras[:current_user]
-    end
+    self.current_user ||= extras[:current_user] if self.class.no_master_association
     if allows_current_user_access_to?(:access)
 
       extras[:include] ||= {}
@@ -148,12 +155,8 @@ module GeneralDataConcerns
       extras[:methods] << :accuracy_score_name if respond_to? :accuracy_score
       extras[:methods] << :user_name if respond_to? :user_name
       extras[:methods] << :user_email if respond_to? :user_email
-      if respond_to? :created_by_user_name
-        extras[:methods] << :created_by_user_name
-      end
-      if respond_to? :created_by_user_email
-        extras[:methods] << :created_by_user_email
-      end
+      extras[:methods] << :created_by_user_name if respond_to? :created_by_user_name
+      extras[:methods] << :created_by_user_email if respond_to? :created_by_user_email
 
       # update_action can be used by requestor to identify whether the record was just updated (saved) or not
       extras[:methods] << :update_action if respond_to? :update_action
@@ -164,24 +167,18 @@ module GeneralDataConcerns
       extras[:methods] << :model_data_type if respond_to? :model_data_type
 
       extras[:methods] << :model_references if respond_to? :model_references
-      if respond_to? :creatable_model_references
-        extras[:methods] << :creatable_model_references
-      end
+      extras[:methods] << :creatable_model_references if respond_to? :creatable_model_references
       extras[:methods] << :referenced_from if respond_to? :referenced_from
       extras[:methods] << :embedded_item if respond_to? :embedded_item
 
       # extras[:methods] << :creatables if respond_to? :creatables
       extras[:methods] << :prevent_edit if respond_to? :prevent_edit
-      if respond_to? :prevent_add_reference
-        extras[:methods] << :prevent_add_reference
-      end
+      extras[:methods] << :prevent_add_reference if respond_to? :prevent_add_reference
       extras[:methods] << :option_type if respond_to? :option_type
       extras[:methods] << :alt_order if respond_to? :alt_order
       extras[:methods] << :user_preference if respond_to? :user_preference
 
-      if self.class.respond_to? :parent_type
-        extras[:include][self.class.parent_type] = { methods: %i[rank_name data] }
-      end
+      extras[:include][self.class.parent_type] = { methods: %i[rank_name data] } if self.class.respond_to? :parent_type
       if self.class.respond_to?(:uses_item_flags?) && self.class.uses_item_flags?(master_user)
         extras[:include][:item_flags] = { include: [:item_flag_name], methods: %i[method_id item_type_us] }
       end
@@ -199,12 +196,8 @@ module GeneralDataConcerns
       extras[:methods] << :created_at_ts if respond_to? :created_at
       extras[:methods] << :user_name if respond_to? :user_name
       extras[:methods] << :user_email if respond_to? :user_email
-      if respond_to? :created_by_user_name
-        extras[:methods] << :created_by_user_name
-      end
-      if respond_to? :created_by_user_email
-        extras[:methods] << :created_by_user_email
-      end
+      extras[:methods] << :created_by_user_name if respond_to? :created_by_user_name
+      extras[:methods] << :created_by_user_email if respond_to? :created_by_user_email
 
       # update_action can be used by requestor to identify whether the record was just updated (saved) or not
       extras[:methods] << :update_action if respond_to? :update_action

@@ -1,14 +1,15 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-SetupHelper.feature_setup
 
 describe 'tracker block', js: true, driver: :app_firefox_driver do
   include ModelSupport
   include MasterDataSupport
   include FeatureSupport
 
-  before(:all) do
+  before(:each) do
+    SetupHelper.feature_setup
+
     create_admin
 
     Classification::ProtocolEvent.enabled.each do |d|
@@ -29,9 +30,9 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     setup_access :player_infos
     setup_access :trackers
     setup_access :tracker_histories
-  end
+    # end
 
-  before :each do
+    # before :each do
     user = User.where(email: @good_email).first
     expect(user).to be_a User
     expect(user.id).to equal @user.id
@@ -81,14 +82,14 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
 
     has_css? '.tracker-tree-results'
 
-    sleep 0.5
+    sleep 2.5
 
     within '.tracker-tree-results' do
       find('a.add-tracker-record').click
     end
 
     # Wait for the new tracker form to show
-    expect(page).to have_css('#new_tracker')
+    expect(page).to have_css('#new_tracker'), wait: 10
   end
 
   it 'should create a new tracker item' do
@@ -173,13 +174,14 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     expect(page).not_to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: protocol.name
     expect(page).not_to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: sp.name.titleize
 
+    sleep 2.5
     # Now add a new tracker item
     within '.tracker-tree-results' do
       click_link 'add tracker record'
     end
 
     # Wait for the new tracker form to show
-    find '.tracker-tree-results #new_tracker', wait: 5
+    find '.tracker-tree-results #new_tracker', wait: 10
 
     # Enter new tracker details
     within '.tracker-tree-results #new_tracker' do
@@ -363,9 +365,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
       find("#tracker_protocol_event_id[data-parent-filter-id='#{sp_new.id}'] option[value='#{pe_new.id}']").select_option
 
       # Avoid a failure when we don't need to
-      unless tracker_field_event_date(Date.parse('2030-02-02'))
-        expect_tracker_date_to_be_today
-      end
+      expect_tracker_date_to_be_today unless tracker_field_event_date(Date.parse('2030-02-02'))
 
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
       dd = find('.tracker-event_date input')

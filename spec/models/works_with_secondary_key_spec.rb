@@ -5,15 +5,11 @@ require 'rails_helper'
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
 
-SetupHelper.setup_al_player_contact_phones
-
 RSpec.describe 'Works With handler', type: :model do
   include ModelSupport
   include PlayerContactSupport
 
-  before :all do
-    Seeds.setup
-
+  before :example do
     create_user
     # Create a random player contact item
     create_item(data: rand(10_000_000_000_000_000), rank: 10, rec_type: 'phone')

@@ -24,9 +24,15 @@ module NfsStore
           # used offline to recover is desired
           mh = new(file_path: full_path)
           metadata = mh.extract_metadata
+          unless metadata.nil? || metadata.is_a?(Hash)
+            raise NfsStore::FsExceptionHandler::FsException, "metadata #{metadata.class} is an invalid type after extraction"
+          end
         rescue StandardError => e
-          metadata = { fphs_exception: { status: 'failed', info: 'failed to extract DICOM metadata.', exception: e.to_s } }
+          metadata = {
+            fphs_exception: { status: 'failed', info: 'failed to extract DICOM metadata.', exception: e.to_s }
+          }
         end
+
         container_file.file_metadata = metadata
         container_file.save!
       end
@@ -38,7 +44,7 @@ module NfsStore
         Rails.logger.info "Retrieving file for DICOM metadata processing: #{file_path}"
 
         dcm = DICOM::DObject.read(file_path)
-        dcm.to_hash.to_json
+        dcm.to_hash
       end
     end
   end

@@ -6,7 +6,7 @@ RSpec.describe Report, type: :model do
   include ModelSupport
   include ReportSupport
 
-  before :all do
+  before :example do
     create_admin
     create_user
     create_reports

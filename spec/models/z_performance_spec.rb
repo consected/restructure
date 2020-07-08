@@ -1,7 +1,9 @@
-require "rails_helper"
-require "benchmark"
+# frozen_string_literal: true
 
-RSpec.describe "Performance", type: :model do
+require 'rails_helper'
+require 'benchmark'
+
+RSpec.describe 'Performance', type: :model do
   include MasterSupport
   include ModelSupport
 
@@ -9,8 +11,7 @@ RSpec.describe "Performance", type: :model do
   NumMasters = 100
   NumTrackerItems = 100
 
-
-  def create_trackers_for master, num=NumTrackerItems
+  def create_trackers_for(master, num = NumTrackerItems)
     @trackers = []
     (1..NumProtocols).each do |i|
       p1 = Classification::Protocol.active.where(name: "PerfP1 #{i}").first
@@ -22,25 +23,26 @@ RSpec.describe "Performance", type: :model do
     end
   end
 
-  def create_trackers_for_all_types_for master
-     Classification::Protocol.active.each do |p|
-       p.sub_processes.active.each do |sp|
-         active_sp = sp.protocol_events.active
-         if active_sp.length > 0
-           active_sp.each do |pe|
-             master.trackers.create(protocol_id: p.id, sub_process_id: sp.id, protocol_event_id: pe.id, event_date: DateTime.now)
-           end
-         else
-           master.trackers.create(protocol_id: p.id, sub_process_id: sp.id, event_date: DateTime.now)
-         end
-       end
+  def create_trackers_for_all_types_for(master)
+    Classification::Protocol.active.each do |p|
+      p.sub_processes.active.each do |sp|
+        active_sp = sp.protocol_events.active
+        if !active_sp.empty?
+          active_sp.each do |pe|
+            master.trackers.create(protocol_id: p.id, sub_process_id: sp.id, protocol_event_id: pe.id, event_date: DateTime.now)
+          end
+        else
+          master.trackers.create(protocol_id: p.id, sub_process_id: sp.id, event_date: DateTime.now)
+        end
+      end
     end
   end
 
   before(:each) do
-
     create_user
     create_admin
+    setup_access :trackers
+    setup_access :tracker_history
 
     @masters = []
 
@@ -61,11 +63,9 @@ RSpec.describe "Performance", type: :model do
     end
 
     setup_access :tracker_histories
-
   end
 
   it "Creates #{NumTrackerItems} tracker items for a master and checks the performance to retrieve them" do
-
     create_trackers_for @master
 
     # Load all items individually
@@ -76,7 +76,7 @@ RSpec.describe "Performance", type: :model do
     th_length = 0
 
     # First, do this the brute force way
-    Rails.logger.debug "****************** Loading tracker  without preload optimizations *********************"
+    Rails.logger.debug '****************** Loading tracker  without preload optimizations *********************'
     t = Benchmark.realtime do
       th = Tracker.where(master_id: master.id).all
       th_length = th.length
@@ -87,9 +87,8 @@ RSpec.describe "Performance", type: :model do
     expect(th_length).to be <= NumProtocols
     expect(t).to be < 0.5
 
-
     # Now repeat with the same approach as used in a controller
-    Rails.logger.debug "********************* Loading trackers  with preload optimizations *********************"
+    Rails.logger.debug '********************* Loading trackers  with preload optimizations *********************'
     t = Benchmark.realtime do
       th = master.trackers.all
       th_length = th.length
@@ -101,23 +100,19 @@ RSpec.describe "Performance", type: :model do
     expect(t).to be < 0.5
 
     # Now convert to JSON
-    Rails.logger.debug "********************* Converting tracker  to JSON with preload optimizations *********************"
+    Rails.logger.debug '********************* Converting tracker  to JSON with preload optimizations *********************'
     jt = nil
     t = Benchmark.realtime do
-      jt = {trackers: th.as_json(current_user: @user), multiple_results: 'trackers'}.to_json(current_user: @user)
+      jt = { trackers: th.as_json(current_user: @user), multiple_results: 'trackers' }.to_json(current_user: @user)
     end
 
     puts "Trackers JSON time: #{t}"
     expect(t).to be < 2.0
 
-    expect(JSON.parse(jt)["trackers"].length).to be <= NumProtocols
-
+    expect(JSON.parse(jt)['trackers'].length).to be <= NumProtocols
   end
 
-
-
   it "Creates #{NumTrackerItems} tracker history items for a master and checks the performance to retrieve them" do
-
     create_trackers_for @master
 
     # Load all items individually
@@ -129,7 +124,7 @@ RSpec.describe "Performance", type: :model do
     th_length = 0
 
     # First, do this the brute force way
-    Rails.logger.debug "****************** Loading tracker histories without preload optimizations *********************"
+    Rails.logger.debug '****************** Loading tracker histories without preload optimizations *********************'
     t = Benchmark.realtime do
       th = TrackerHistory.where(master_id: master.id).order(Master::TrackerHistoryEventOrderClause).all
       th_length = th.length
@@ -140,9 +135,8 @@ RSpec.describe "Performance", type: :model do
     expect(th_length).to be >= NumTrackerItems
     expect(t).to be < 0.5
 
-
     # Now repeat with the same approach as used in a controller
-    Rails.logger.debug "********************* Loading trackers histories with preload optimizations *********************"
+    Rails.logger.debug '********************* Loading trackers histories with preload optimizations *********************'
     t = Benchmark.realtime do
       th = master.tracker_histories.all
       th_length = th.length
@@ -154,30 +148,25 @@ RSpec.describe "Performance", type: :model do
     expect(t).to be < 0.5
 
     # Now convert to JSON
-    Rails.logger.debug "********************* Converting tracker histories to JSON with preload optimizations *********************"
+    Rails.logger.debug '********************* Converting tracker histories to JSON with preload optimizations *********************'
     jt = nil
     t = Benchmark.realtime do
-      jt = {tracker_histories: th, master_id: master.id}.to_json(current_user: @user)
+      jt = { tracker_histories: th, master_id: master.id }.to_json(current_user: @user)
     end
 
     puts "TrackerHistory JSON time: #{t}"
     expect(t).to be < 3.0
 
-    expect(JSON.parse(jt)["tracker_histories"].length).to be >= NumTrackerItems
-
+    expect(JSON.parse(jt)['tracker_histories'].length).to be >= NumTrackerItems
   end
 
-
-
-
   it "Creates tracker history items for each master and checks the performance encode the #{NumMasters} masters" do
-
-    puts "Creating tracker items for Masters"
+    puts 'Creating tracker items for Masters'
     @masters.each do |master|
       create_trackers_for_all_types_for master
     end
 
-    puts "Benchmarking tracker items for Masters"
+    puts 'Benchmarking tracker items for Masters'
     user = User.find(@user.id)
     master = Master.find(@master.id)
     master.current_user = @masters.first.user
@@ -185,31 +174,29 @@ RSpec.describe "Performance", type: :model do
     jt = nil
     t = Benchmark.realtime do
       jt = {
-          masters: @masters.as_json(current_user: @user, filtered_search_results: true, style: :index),
-          count: {
-            count: 0,
-            show_count: @masters.length
-          },
-          search_action: 'Test',
-          message: 'OK'
-        }.to_json
+        masters: @masters.as_json(current_user: @user, filtered_search_results: true, style: :index),
+        count: {
+          count: 0,
+          show_count: @masters.length
+        },
+        search_action: 'Test',
+        message: 'OK'
+      }.to_json
     end
 
     puts "Masters JSON time: #{t}"
     expect(t).to be < 3.0
 
-    expect(JSON.parse(jt)["masters"].length).to be >= NumMasters
+    expect(JSON.parse(jt)['masters'].length).to be >= NumMasters
 
     # The index style of as_json removes most of the junk from the result. latest_tracker_history is only
     # returned when we get a non-index / full as_json
-    expect(JSON.parse(jt)["masters"][(NumMasters/2).to_i]["latest_tracker_history"]).to be nil
-
+    expect(JSON.parse(jt)['masters'][(NumMasters / 2).to_i]['latest_tracker_history']).to be nil
   end
 
-  it "ensures that tracker history results are correct after applying more performant processing" do
-
+  it 'ensures that tracker history results are correct after applying more performant processing' do
     # Pick a player contact
-    m = @masters[NumMasters/2]
+    m = @masters[NumMasters / 2]
     pc = m.player_contacts.create!(rec_type: 'phone', data: '(617)123-1234', rank: 0)
 
     # update it a few times to ensure there are tracker histories associated with it
@@ -231,7 +218,5 @@ RSpec.describe "Performance", type: :model do
 
     expect(th_expected.pluck(:id).sort).to eq pc.tracker_histories.pluck(:id).sort
     expect(th_latest_expected.id).to eq pc.tracker_history.id
-
   end
-
 end

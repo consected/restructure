@@ -1,7 +1,10 @@
-.import-edit-container, .import-table-container, .report-results-block {
+.import-edit-container,
+.import-table-container,
+.report-results-block {
   margin: 30px 30px 0 30px;
 }
-.import-edit-form, .report-results-inner {
+.import-edit-form,
+.report-results-inner {
   width: auto;
   background-color: white;
 
@@ -11,14 +14,14 @@
 }
 
 #embed_results_block {
-  .import-edit-form, .report-results-inner {
+  .import-edit-form,
+  .report-results-inner {
     height: auto;
   }
 }
 
-
-
-#import-container.hide-blank-rows, .report-container.hide-blank-rows {
+#import-container.hide-blank-rows,
+.report-container.hide-blank-rows {
   tr.blank-row {
     display: none;
   }
@@ -26,7 +29,6 @@
   tr.next-blank-row {
     display: table-row;
   }
-
 
   tr.final-blank-row {
     display: none;
@@ -45,8 +47,8 @@ table.table.report-table {
   margin: 0;
 }
 
-table.import-grid, table.table.report-table {
-
+table.import-grid,
+table.table.report-table {
   tr.report-item-edit td {
     background-color: rgb(255, 255, 200);
   }
@@ -56,20 +58,19 @@ table.import-grid, table.table.report-table {
   }
 }
 
-
-
-table.import-grid, table.table.report-table {
-
-  th, thead th.tablesorter-header {
+table.import-grid,
+table.table.report-table {
+  th,
+  thead th.tablesorter-header {
     padding: 6px 8px 0 8px;
     border: 1px solid silver;
     background-color: #eee;
     vertical-align: top;
-    &[aria-sort="descending"], &[aria-sort="ascending"] {
+    &[aria-sort="descending"],
+    &[aria-sort="ascending"] {
       background-color: #ffb;
     }
   }
-
 
   td {
     padding: 0 0 0 4px;
@@ -78,8 +79,8 @@ table.import-grid, table.table.report-table {
     line-height: normal;
     font-size: 12px;
 
-    input.form-control, select.form-control {
-
+    input.form-control,
+    select.form-control {
       border: 0;
       border-radius: 0;
       box-shadow: none;
@@ -107,7 +108,7 @@ table.import-grid, table.table.report-table {
         height: auto !important;
       }
     }
-    input[type='checkbox'] {
+    input[type="checkbox"] {
       border: 1px solid silver;
       -moz-appearance: checkbox;
       -webkit-appearance: checkbox;
@@ -123,14 +124,14 @@ table.import-grid, table.table.report-table {
       vertical-align: middle;
       color: #444;
     }
-
   }
 
   .edit-entity {
     margin: 0;
   }
 
-  select, input {
+  select,
+  input {
     &.form-control.has-value {
       background-color: white !important;
       background-image: none;
@@ -158,8 +159,9 @@ table.import-grid, table.table.report-table {
   }
 
   tr.item-invalid {
-    .form-control { color: red !important;}
-
+    .form-control {
+      color: red !important;
+    }
   }
 
   td.row-num {
@@ -177,27 +179,24 @@ table.import-grid, table.table.report-table {
     .report-el {
       padding: 0px 4px;
     }
-
   }
 
   .report-el.report-el-object-id {
     padding: 8px 8px;
   }
 
+  .report-edit-btn-cell {
+    padding: 4px 6px;
+    min-width: 60px;
+  }
 
- .report-edit-btn-cell {
-   padding: 4px 6px;
-   min-width: 60px;
- }
+  .report-edit-btn-cell.report-edit-btn-cell-editing {
+    padding: 4px 4px;
 
- .report-edit-btn-cell.report-edit-btn-cell-editing {
-   padding: 4px 4px;
-
-   a.btn {
-     top: 0;
-   }
- }
-
+    a.btn {
+      top: 0;
+    }
+  }
 }
 
 fieldset[disabled] {
@@ -205,7 +204,10 @@ fieldset[disabled] {
     background-color: inherit;
     cursor: default;
   }
-  h3, h4 { color: gray; }
+  h3,
+  h4 {
+    color: gray;
+  }
 }
 
 p.field-names {
@@ -222,22 +224,35 @@ table th.edit-button-column {
   width: 80px;
 }
 
-table.table.report-table  {
+table.table.report-table {
+  pre {
+    position: relative;
+    background-color: transparent;
+    border: 0;
+
+    &.expandable {
+      border-bottom: 2px dotted gray;
+    }
+
+    &.expanded {
+      border-bottom: 0;
+    }
+  }
+
   .expandable {
     max-height: 100px;
     padding-bottom: 20px;
-    margin-bottom:26px;
-    border-bottom: 2px dotted gray;
+    margin-bottom: 26px;
     display: block;
     overflow: hidden;
-
+    border-bottom: 2px dotted gray;
 
     &:hover {
       cursor: s-resize;
     }
 
     &:after {
-      content: '(click to expand)';
+      content: "(click to expand)";
       font-size: 90%;
       font-weight: normal;
       font-style: italic;
@@ -245,27 +260,32 @@ table.table.report-table  {
       padding-top: 0;
       color: rgb(128, 128, 128);
       position: absolute;
-      top: 104px;
+      top: 76px;
+      right: 0;
+      background: rgb(245, 245, 245);
+      margin-bottom: -20px;
     }
   }
   .expanded {
-      max-height: none;
-      border-bottom: 0;
+    max-height: none;
+    border-bottom: 0;
 
-      &:hover {
-          cursor: n-resize;
-      }
-      &:after {
-        content: '(click to shrink)';
-        font-size: 90%;
-        font-weight: normal;
-        font-style: italic;
-        position: relative;
-        top: 4px;
-      }
+    &:hover {
+      cursor: n-resize;
+    }
+    &:after {
+      display: none;
+      //   content: "(click to shrink)";
+      //   font-size: 90%;
+      //   font-weight: normal;
+      //   font-style: italic;
+      //   position: absolute;
+      //   top: 0px;
+      //   right: 0;
+    }
   }
 
   pre.shrinkable-block.expandable {
-      max-width: 1300px;
+    max-width: 1300px;
   }
 }

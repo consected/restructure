@@ -3,7 +3,7 @@ default: &default
   encoding: unicode
   # For details on connection pooling, see rails configuration guide
   # http://guides.rubyonrails.org/configuring.html#database-pooling
-  pool: 5
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 8 } %>
   database: <%= ENV['FPHS_POSTGRESQL_DATABASE'] %>
   username: <%= ENV['FPHS_POSTGRESQL_USERNAME'] %>
   password: <%= ENV['FPHS_POSTGRESQL_PASSWORD'] %>
@@ -14,7 +14,7 @@ default: &default
 development:
   <<: *default
   database: <%= ENV['FPHS_POSTGRESQL_DATABASE'].present? ? ENV['FPHS_POSTGRESQL_DATABASE'] : 'fpa_development' %>
-  schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA'].present? ? ENV['FPHS_POSTGRESQL_SCHEMA'] : 'ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit' %>
+  schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA'].present? ? ENV['FPHS_POSTGRESQL_SCHEMA'] : 'ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests' %>
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -26,9 +26,6 @@ test: &test
 
 production:
   <<: *default
-
-cucumber:
-  <<: *test
 
 ipa_test:
   <<: *default

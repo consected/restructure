@@ -1,24 +1,25 @@
-class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
+# frozen_string_literal: true
 
+class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   attr_accessor :model_defs, :role, :users, :layout_template, :content_template, :content_template_text, :message_type, :subject,
                 :receiving_user_ids, :phones, :emails, :default_country_code, :when, :importance, :extra_substitutions
 
-  def self.config_def if_extras: {}
+  def self.config_def(if_extras: {})
     [
       {
-        type: "email|sms",
-        role: "(optional) role name(s) to notify - or reference like {this: {user_id: return_value} }",
-        users: "(optional) list of users to notify - or reference like {this: {phone_numbers: return_value} }",
-        phones: "(optional) list of phone numbers to notify - or reference like {this: {role_names: return_value} }",
-        default_country_code: "(optional) country code for SMS numbers, if they are not otherwise specified",
-        layout_template: "name of layout template",
-        content_template: "name of content template",
-        content_template_text: "alternative content template text",
-        subject: "subject text",
+        type: 'email|sms',
+        role: '(optional) role name(s) to notify - or reference like {this: {user_id: return_value} }',
+        users: '(optional) list of users to notify - or reference like {this: {phone_numbers: return_value} }',
+        phones: '(optional) list of phone numbers to notify - or reference like {this: {role_names: return_value} }',
+        default_country_code: '(optional) country code for SMS numbers, if they are not otherwise specified',
+        layout_template: 'name of layout template',
+        content_template: 'name of content template',
+        content_template_text: 'alternative content template text',
+        subject: 'subject text',
         extra_substitutions: {
           data1: 'fixed data item to be substituted into the message in {{extra_substitutions.data1}}'
         },
-        importance: "transactional (default) | promotional",
+        importance: 'transactional (default) | promotional',
         when: {
           wait_until: '(optional) ISO date or {date:..., time..., zone:... } where zone is one specified in MAPPINGS @ https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html',
           wait: 'n seconds|minutes|hours|days|weeks|months|years'
@@ -35,25 +36,21 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     Rails.configuration.active_job.queue_adapter != :inline
   end
 
-  def initialize config, item
+  def initialize(config, item)
     super
 
     @model_defs = config.deep_dup
     @model_defs = [@model_defs] unless @model_defs.is_a? Array
-
   end
 
   def perform
-
     @model_defs.each do |config|
-
       # We calculate the conditional if inside each item, rather than relying
       # on the outer processing in ExtraLogType#calc_save_trigger_if
       if config[:if]
         ca = ConditionalActions.new config[:if], @item
         next unless ca.calc_action_if
       end
-
 
       @role = config[:role]
       @users = config[:users]
@@ -87,9 +84,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         end
 
         if @users
-          if @users.is_a? Array
-            @users = @users.reject(&:blank?)
-          end
+          @users = @users.reject(&:blank?) if @users.is_a? Array
           user_ids = calc_field_or_return(@users)
           @receiving_user_ids += User.where(id: user_ids).active.pluck(:id)
         end
@@ -99,37 +94,35 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       elsif @phones
         force_phones = calc_field_or_return(@phones)
 
-        @phones = force_phones = force_phones.map {|p|
+        @phones = force_phones = force_phones.map do |p|
           Formatter::Phone.format p, format: :unformatted, default_country_code: @default_country_code, current_user: @item.user
-        }
+        end
       elsif @phone_records
 
         ids = calc_field_or_return(@phone_records)
-        raise FphsException.new "no recipients were found in the list" if ids.nil? || ids.length == 0
+        raise FphsException, 'no recipients were found in the list' if ids.nil? || ids.empty?
 
         list_type_class = ModelReference.to_record_class_for_type @list_type.singularize
         recs = list_type_class.where id: ids
 
-        force_recip_recs = recs.map{|rec| {list_type: @list_type, id: rec.id, default_country_code: @default_country_code}.to_json }
+        force_recip_recs = recs.map { |rec| { list_type: @list_type, id: rec.id, default_country_code: @default_country_code }.to_json }
       elsif @emails
         force_emails = calc_field_or_return(@emails)
       else
-        raise FphsException.new "role, users or phones must be specified in save_trigger: notify: role: ..."
+        raise FphsException, 'role, users or phones must be specified in save_trigger: notify: role: ...'
       end
 
-      if @importance
-        force_importance = calc_field_or_return(@importance)
-      end
+      force_importance = calc_field_or_return(@importance) if @importance
 
-      if (!@receiving_user_ids || @receiving_user_ids.length == 0) && !force_phones && !force_emails && !force_recip_recs
+      if (!@receiving_user_ids || @receiving_user_ids.empty?) && !force_phones && !force_emails && !force_recip_recs
         Rails.logger.warn "No recipients based on role: #{@role}, users or specified phones/emails in #{self.class.name}"
         return
       end
 
       if @item.respond_to?(:filter_notifications)
         @receiving_user_ids = @item.filter_notifications @receiving_user_ids
-        if @receiving_user_ids.length == 0
-          Rails.logger.info "No recipients after filtering"
+        if @receiving_user_ids.empty?
+          Rails.logger.info 'No recipients after filtering'
           return
         end
       end
@@ -162,18 +155,14 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         @when = set_when
       end
 
-      if @content_template_text.is_a? Hash
-        @content_template_text = calc_field_or_return(@content_template_text)
-      end
+      @content_template_text = calc_field_or_return(@content_template_text) if @content_template_text.is_a? Hash
 
       if @subject
         @subject = Admin::MessageTemplate.substitute(@subject, data: @item, tag_subs: nil, ignore_missing: true)
       end
 
-      if @extra_substitutions
-        @extra_substitutions.each do |k,v|
-          @extra_substitutions[k] = Admin::MessageTemplate.substitute(v, data: @item, tag_subs: nil, ignore_missing: true)
-        end
+      @extra_substitutions&.each do |k, v|
+        @extra_substitutions[k] = Admin::MessageTemplate.substitute(v, data: @item, tag_subs: nil, ignore_missing: true)
       end
 
       setup_data = {
@@ -205,15 +194,10 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         @item.background_job_ref = "#{res.provider_job.class.name.ns_underscore}%#{res.provider_job.id}"
         @item.save
       end
-
     end
-
   end
 
-  def calc_field_or_return cond
+  def calc_field_or_return(cond)
     ConditionalActions.calc_field_or_return cond, item
   end
-
-
-
 end

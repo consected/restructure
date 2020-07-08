@@ -2,7 +2,6 @@
 
 require 'rails_helper'
 
-SetupHelper.feature_setup
 
 describe 'admin sign in process', driver: :app_firefox_driver do
   include ModelSupport
@@ -25,6 +24,8 @@ describe 'admin sign in process', driver: :app_firefox_driver do
   end
 
   before(:all) do
+    SetupHelper.feature_setup
+
     ENV['FPHS_ADMIN_SETUP'] = 'yes'
 
     Admin.transaction do

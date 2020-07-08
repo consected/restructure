@@ -2,19 +2,16 @@
 
 require 'rails_helper'
 
-SetupHelper.setup_al_player_contact_phones
-
 RSpec.describe 'Export an app configuration', type: :model do
   include MasterSupport
   include ModelSupport
 
-  before :all do
+  before :each do
+    Seeds.setup
+
     create_admin
     create_user
-
-    # seed_database
-    # Seeds::ActivityLogPlayerContactPhone.setup
-    # ::ActivityLog.define_models
+    SetupHelper.setup_al_player_contact_phones
 
     apps = Admin::AppType.active.where("name = 'test1' or label = 'Test App 12' or name = 'new_name'")
     apps.each do |a|
@@ -72,7 +69,7 @@ RSpec.describe 'Export an app configuration', type: :model do
   end
 
   def import_test_app
-    @app_name = app_name = "bhs_model_#{rand(100_000_000)}"
+    @app_name = app_name = "bhs_model_#{$STARTED_AT}"
 
     @admin, = create_admin unless @admin
     # Setup the triggers, functions, etc
@@ -87,11 +84,9 @@ RSpec.describe 'Export an app configuration', type: :model do
     als = ActivityLog.active.where(name: 'BHS Tracker')
     als.where('id <> ?', als.first&.id).update_all(disabled: true) if als.count != 1
 
-    sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 6-grant_roles_access_to_ml_app.sql create_adders_table.sql]
-    sql_source_dir = Rails.root.join('docs', 'config_tests')
     config_dir = Rails.root.join('docs', 'config_tests')
     config_fn = 'bhs_app_type_test_config.json'
-    SetupHelper.setup_app_from_import app_name, sql_source_dir, sql_files, config_dir, config_fn
+    SetupHelper.setup_app_from_import app_name, config_dir, config_fn
 
     new_app_type = Admin::AppType.where(name: app_name).active.first
     Admin::UserAccessControl.active.where(app_type_id: new_app_type.id, resource_type: %i[external_id_assignments limited_access]).update_all(disabled: true)

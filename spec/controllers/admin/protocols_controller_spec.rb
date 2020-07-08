@@ -1,21 +1,22 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-
 RSpec.describe Admin::ProtocolsController, type: :controller do
-
   include ProtocolSupport
 
-  let(:object_param_symbol) {
+  let(:object_param_symbol) do
     :classification_protocol
-  }
+  end
 
   def object_class
     Classification::Protocol
   end
+
   def item
     @protocol
   end
-  before(:all){
+  before(:example) do
     TrackerHistory.destroy_all
     Tracker.destroy_all
     Classification::Protocol.connection.execute "
@@ -26,7 +27,6 @@ RSpec.describe Admin::ProtocolsController, type: :controller do
       delete from protocol_history;
       delete from protocols;
     "
-  }
+  end
   it_behaves_like 'a standard admin controller'
-
 end

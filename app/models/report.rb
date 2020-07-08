@@ -23,11 +23,14 @@ class Report < ActiveRecord::Base
   ReportTypes = %i[count regular_report search].freeze
   ReportIdAttribName = '_report_id_'
 
-  configure :view_options, with: %i[hide_table_names humanize_column_names hide_result_count hide_export_buttons hide_criteria_panel prevent_collapse_for_list
+  configure :view_options, with: %i[hide_table_names humanize_column_names
+                                    hide_result_count hide_export_buttons
+                                    hide_criteria_panel prevent_collapse_for_list
                                     view_as search_button_label]
   configure :list_options, with: [:hide_in_list]
   configure :view_css, with: %i[classes selectors]
   configure :component, with: [:options]
+  configure :column_options, with: %i[tags classes hide]
 
   attr_reader :clean_sql
   attr_reader :filtering_on
@@ -43,7 +46,7 @@ class Report < ActiveRecord::Base
 
   # Get reports that the user has access to in its current app
   # @param [User] user
-  # @return [ActiveRecord::ResultSet] reports
+  # @return [ActiveRecord::Relation] reports
   def self.for_user(user)
     if user.has_access_to?(:read, :report, :_all_reports_)
       all
@@ -63,11 +66,13 @@ class Report < ActiveRecord::Base
   # @return [Report] or raises an exception if not found
   def self.find_category_short_name(csn)
     parts = csn.split('__')
-    unless parts.length == 2
-      raise FphsException, 'Bad item_type__short_name identifier'
-    end
+    raise FphsException, 'Bad item_type__short_name identifier' unless parts.length == 2
 
-    res = where(item_type: parts.first, short_name: parts.last).first
+    i = parts.first
+    # Allow hyphenated categories to be matched with underscores
+    its = [i, i.gsub('_', '-')].uniq
+
+    res = where(item_type: its, short_name: parts.last).first
     raise ActiveRecord::RecordNotFound unless res
 
     res
@@ -219,6 +224,7 @@ class Report < ActiveRecord::Base
     primary_table = 'masters'
     sql.strip!
     sql = sql[0..-2] if sql.last == ';'
+    sql = sql.dup
 
     ids = filtering_ids
     @search_attr_values[:ids_filter_previous] = nil
@@ -227,7 +233,7 @@ class Report < ActiveRecord::Base
       logger.info "Trying to get data from cache (#{current_user.id} :#{ids}"
       if ids && sql.include?(':filter_previous')
         inner_sql = ' inner join (select id master_id from masters where id in (:filter_previous_ids)) filter_previous_alias using(master_id) '
-        clean_inner_sql = ActiveRecord::Base.send(:sanitize_sql, [inner_sql, { filter_previous_ids: ids }], primary_table)
+        clean_inner_sql = ActiveRecord::Base.send(:sanitize_sql_for_conditions, [inner_sql, { filter_previous_ids: ids }])
         sql.gsub!(':filter_previous', clean_inner_sql) if clean_inner_sql
 
         filtering_previous = true
@@ -243,6 +249,10 @@ class Report < ActiveRecord::Base
 
     sql.gsub!(':filter_previous', '') if sql.include?(':filter_previous')
 
+    sql.scan(/:current_user/) do |cu|
+      sql = sql.sub(cu, current_user&.id.to_s || 'NULL')
+    end
+
     sql.scan(/:file_filtering_conditions_for_[a-z_]+/) do |file_filter|
       if file_filter.present?
         resource_name = file_filter.sub(':file_filtering_conditions_for_', '')
@@ -254,9 +264,7 @@ class Report < ActiveRecord::Base
     # Import config libraries
     Admin::ConfigLibrary.make_substitutions! sql, :sql
 
-    if options[:count_only]
-      sql = "select count(*) \"result_count\" from (#{sql}) t"
-    end
+    sql = "select count(*) \"result_count\" from (#{sql}) t".dup if options[:count_only]
 
     res = []
 
@@ -268,7 +276,10 @@ class Report < ActiveRecord::Base
     # on DDL to the Rails user is expected.
     self.class.connection.transaction do
       begin
-        clean_sql = ActiveRecord::Base.send(:sanitize_sql, [sql, @search_attr_values], primary_table)
+        if @search_attr_values.respond_to? :to_unsafe_h
+          @search_attr_values = @search_attr_values.to_unsafe_h.symbolize_keys
+        end
+        clean_sql = ActiveRecord::Base.send(:sanitize_sql_for_conditions, [sql, @search_attr_values])
       rescue StandardError => e
         logger.info "Unabled to sanitize sql: #{e.inspect}.\n#{e.backtrace.join("\n")}"
         raise Report::BadSearchCriteria
@@ -294,11 +305,7 @@ class Report < ActiveRecord::Base
       begin
         m_field = field_index('master_id')
         ids = nil
-        if m_field
-          ids = []
-          res.each_row { |r| ids << r[m_field] }
-        end
-        ids.uniq!
+        ids = res.map { |r| r[m_field] }.uniq! if m_field
         write_filtering_ids ids
 
         list = if filtering_previous
@@ -314,6 +321,7 @@ class Report < ActiveRecord::Base
           l.delete(:_report_id_)
           l.delete(:_filter_previous_)
           l.delete(:no_run)
+          l.delete(:current_user)
         end
         list << { name: name, id: id, search_params: l, results_length: @results.count }
 
@@ -383,9 +391,7 @@ class Report < ActiveRecord::Base
   end
 
   def search_attrs_prep
-    if @search_attr_values == '_use_defaults_'
-      @search_attr_values = use_defaults
-    end
+    @search_attr_values = use_defaults if @search_attr_values == '_use_defaults_'
 
     all_blank = true
 
@@ -397,9 +403,7 @@ class Report < ActiveRecord::Base
 
     search_attr_values.slice!(*ks)
 
-    unless search_attr_values.is_a?(ActionController::Parameters)
-      search_attr_values.symbolize_keys!
-    end
+    search_attr_values.symbolize_keys! if search_attr_values.respond_to? :symbolize_keys!
 
     search_attr_values.each do |k, v|
       all_blank &&= (k.to_s != ReportIdAttribName && (search_attributes[k.to_s].nil? || v.blank?))
@@ -409,11 +413,11 @@ class Report < ActiveRecord::Base
       elsif v.is_a? Hash
         search_attr_values[k] = v.collect { |_, v1| v1 }
       elsif v.is_a?(String) && v.include?("\n")
-        if search_attributes[k.to_s].first.last['multiple'] == 'multiple-regex'
-          search_attr_values[k] = "(#{v.split("\n").map(&:squish).join('|')})"
-        else
-          search_attr_values[k] = v.split("\n").map(&:squish)
-        end
+        search_attr_values[k] = if search_attributes[k.to_s].first.last['multiple'] == 'multiple-regex'
+                                  "(#{v.split("\n").map(&:squish).join('|')})"
+                                else
+                                  v.split("\n").map(&:squish)
+                                end
       end
     end
 
@@ -444,7 +448,7 @@ class Report < ActiveRecord::Base
   end
 
   def alt_resource_name
-    "#{item_type || '_default'}__#{short_name}".downcase.id_underscore
+    "#{item_type&.id_underscore || '_default'}__#{short_name}".downcase.id_underscore
   end
 
   private
@@ -456,8 +460,10 @@ class Report < ActiveRecord::Base
     rescue StandardError => e
       errmsg = e
     end
+
     unless s
       errors.add :search_attributes, "definition can not be parsed. Check the YAML or JSON is valid. #{errmsg.message}"
+      # throw(:abort)
     end
   end
 
@@ -473,9 +479,7 @@ class Report < ActiveRecord::Base
   end
 
   def gen_short_name
-    if short_name.blank?
-      self.short_name = name.downcase.id_underscore.gsub(/__+/, '_')
-    end
+    self.short_name = name.downcase.id_underscore.gsub(/__+/, '_') if short_name.blank?
   end
 
   # Validate short_name is downcased

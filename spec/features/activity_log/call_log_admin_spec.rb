@@ -23,12 +23,12 @@
 #
 
 require 'rails_helper'
-SetupHelper.feature_setup
 
 describe 'Call log admin', driver: :app_firefox_driver do
   include ActivityLogMain
-
+  
   before :all do
+    SetupHelper.feature_setup
     setup_database
     user_logs_in
   end

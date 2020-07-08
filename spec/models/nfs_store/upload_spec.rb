@@ -12,14 +12,15 @@ RSpec.describe NfsStore::Upload, type: :model do
     'file1'
   end
 
-  before :all do
+  before :example do
     @other_users = []
     @other_users << create_user.first
     @other_users << create_user.first
     @other_users << create_user.first
 
     setup_nfs_store
-    @activity_log = @container.parent_item
+    setup_container_and_al
+    setup_default_filters
   end
 
   it 'uploads in chunks' do

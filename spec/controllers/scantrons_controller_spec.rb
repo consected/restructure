@@ -1,12 +1,8 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-RSpec.configure {|c| c.before {
-  SeedSupport.setup
-}}
-
-
 RSpec.describe ScantronsController, type: :controller do
-
   include ScantronSupport
 
   def object_class
@@ -18,15 +14,15 @@ RSpec.describe ScantronsController, type: :controller do
   end
 
   def edit_form_name
-    @edit_form_name = "_edit_form"
+    @edit_form_name = '_edit_form'
   end
 
   def edit_form_prefix
-    @edit_form_prefix = "common_templates"
+    @edit_form_prefix = 'common_templates'
   end
 
-  before(:all) do
-    seed_database
+  before(:context) do
+    # seed_database
     # Handle a strange issue during full test runs
     ExternalIdentifier.routes_reload
 
@@ -34,9 +30,8 @@ RSpec.describe ScantronsController, type: :controller do
   end
 
   before :each do
-    seed_database
+    # seed_database
   end
 
   it_behaves_like 'a standard user controller'
-
 end

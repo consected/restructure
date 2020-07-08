@@ -62,5 +62,7 @@ module BrowserHelper
 
     cb.current_driver = :app_firefox_driver
     cb.default_max_wait_time = 25
+
+    puts '--> Done setup browser'
   end
 end
