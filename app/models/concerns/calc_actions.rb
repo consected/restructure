@@ -667,9 +667,11 @@ module CalcActions
       val = []
       # Ensure we only get results from an active (not disabled) model reference, and
       model_refs = from_instance.model_references(active_only: true)
+      Rails.logger.info '*** No model_refs found' if model_refs.empty?
       # filter it to return only those matching the required to_record_type (if necessary)
       if to_table_name
         model_refs = model_refs.select { |r| r.to_record_type == to_table_name.to_s.singularize.ns_camelize }
+        Rails.logger.info "*** No model_refs found for table name: #{to_table_name}" if model_refs.empty?
       end
 
       # Get the specified attribute's value from each of the model references
