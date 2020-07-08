@@ -354,9 +354,18 @@ class Master < ActiveRecord::Base
 
   def header_prefix
     prefix = Admin::AppConfiguration.value_for(:master_header_prefix, current_user)
+    html = false
     return unless prefix.present?
 
-    Admin::MessageTemplate.substitute prefix, data: self, tag_subs: nil, ignore_missing: true
+    prefix = Admin::MessageTemplate.substitute prefix, data: self, tag_subs: nil, ignore_missing: true
+    prefix = CGI.escapeHTML prefix
+    while prefix.include? '**'
+      prefix = prefix.sub('**', '<b>')
+      prefix = prefix.sub('**', '</b>')
+      html = true
+    end
+    prefix.html_safe if html
+    prefix
   end
 
   # Validate that the external identifier restrictions do not prevent access to this item
