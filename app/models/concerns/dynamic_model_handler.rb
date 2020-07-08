@@ -103,6 +103,11 @@ module DynamicModelHandler
     self.class.default_options
   end
 
+  def no_downcase_attributes
+    fo = option_type_config.field_options
+    fo&.filter { |_k, v| v[:no_downcase] }&.keys
+  end
+
   def master_id
     return nil if self.class.no_master_association
 

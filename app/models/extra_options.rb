@@ -100,6 +100,7 @@ class ExtraOptions
           include_blank: 'true or false to force a drop down field to include a selectable blank',
           pattern: 'provide a mask for a text field',
           value: 'default value | now() | today()',
+          no_downcase: 'true to prevent downcasing of the attribute when stored to the database',
           edit_as: {
             field_type: 'alternative field name to use for selection of edit field',
             alt_options: 'optional specification of options for a select_ type field to use instead of general selection specified list. {Label: value, ...} or [Label,...]. For the latter the Label is downcased automatically to generate the value'

@@ -287,6 +287,11 @@ module ActivityLogHandler
     res
   end
 
+  def no_downcase_attributes
+    fo = extra_log_type_config.field_options
+    fo&.filter { |_k, v| v[:no_downcase] }&.keys
+  end
+
   # default record updates tracking is not performed, since we sync tracker separately
   def no_track
     false

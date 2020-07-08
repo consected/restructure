@@ -457,6 +457,12 @@ module HandlesUserBase
       end
     end
 
+    if respond_to? :no_downcase_attributes
+      no_downcase_attributes.each do |e|
+        ea += "(#{e})?"
+      end
+    end
+
     ignore = /(item_type)?(notes)?(description)?(message)?(.+_notes)?(.+_description)?(.+_details)?(e_signed_document)?#{ea}/
 
     attributes.select { |k, _v| k.to_sym.in? self.class.permitted_params }.reject { |k, _v| k && k.match(ignore)[0].present? }.each do |k, v|
