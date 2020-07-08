@@ -54,10 +54,19 @@ class SaveTriggers::CreateMaster < SaveTriggers::SaveTriggersBase
       @new_master = Master.create_master_record @item.current_user, empty: true, extra_ids: vals
 
       if move_this
-        @item.force_save!
-        @item.update!(master: @new_master)
+        new_master_id = @new_master.id
 
-        @item.embedded_item&.update!(master: @new_master)
+        @item.master = @new_master
+        @item.update_columns(master_id: new_master_id)
+
+        ei = @item.embedded_item
+        if ei
+          ei.master = @new_master
+          ei.update_columns(master_id: new_master_id)
+          mr = @item.model_references.select { |mra| mra.to_record_type == ei.class.name && mra.to_record_id == ei.id }.first
+          mr.update_columns(from_record_master_id: new_master_id, to_record_master_id: new_master_id)
+        end
+
       end
     end
   end
