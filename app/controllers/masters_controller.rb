@@ -47,7 +47,7 @@ class MastersController < UserBaseController
   def search
     @msid ||= params[:nav_q]
     @master_pro_id ||= params[:nav_q_pro_id]
-    @master_id ||= params[:nav_q_id]
+    @master_id ||= params[:nav_q_id] unless app_config_text(:prevent_reload_master_list, nil)
 
     @requested_master = @master_id || @master_pro_id || @msid
 
