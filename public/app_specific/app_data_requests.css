@@ -367,7 +367,7 @@ span.master-header-prefix {
   font-size: 19px;
   width: 500px;
   display: block;
-  text-transform: capitalize;
+  /* text-transform: capitalize; */
 }
 
 .master-result.num-masters-1,
@@ -377,4 +377,10 @@ span.master-header-prefix {
 
 .sublist-controls {
   display: none;
+}
+
+#master-report-data_requests__data_requests img[alt="Data Requests Process"] {
+  width: 800px;
+  margin: 0 auto;
+  display: block;
 }
