@@ -3,6 +3,7 @@
   full_name = "dynamic_model__#{m.model_def_name.to_s}"
   field_list = m.field_list
   if field_list.blank?
+    raise FphsException, "No model definition for #{full_name}" unless m.model_def
     field_list = m.model_def.attribute_names - ['id', 'created_at', 'updated_at', 'contactid', 'user_id', 'master_id']
     field_list  << 'tracker_history_id' if current_user.has_access_to? :edit, :table, full_name.pluralize
   else
