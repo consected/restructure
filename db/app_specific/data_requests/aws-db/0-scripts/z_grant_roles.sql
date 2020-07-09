@@ -30,6 +30,16 @@ IF EXISTS (
    GRANT SELECT,USAGE ON ALL SEQUENCES IN SCHEMA data_requests TO fphsrailsapp;
 END IF;
 
+IF EXISTS (
+   SELECT *
+   FROM   pg_catalog.pg_roles
+   WHERE  rolname = 'fphsrailsapp1') THEN
+
+   GRANT USAGE ON SCHEMA data_requests TO fphsrailsapp;
+   GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA data_requests TO fphsrailsapp;
+   GRANT SELECT,USAGE ON ALL SEQUENCES IN SCHEMA data_requests TO fphsrailsapp;
+END IF;
+
 
 END
 $body$;

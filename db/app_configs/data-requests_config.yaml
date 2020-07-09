@@ -21,14 +21,14 @@ app_type:
     user_email: 
   - id: 533
     name: master header prefix
-    value: 'Data Request: {{dynamic_model__data_requests.project_title}}'
+    value: "{{dynamic_model__data_requests.status::titleize}} Data Request: **{{dynamic_model__data_requests.project_title}}**"
     disabled: false
     admin_id: 21
     user_id: 
     app_type_id: 42
     role_name: ''
     created_at: '2020-05-19T11:18:52.902Z'
-    updated_at: '2020-07-07T15:34:36.425Z'
+    updated_at: '2020-07-08T16:04:27.078Z'
     user_email: 
   - id: 534
     name: hide navbar search
@@ -98,14 +98,14 @@ app_type:
     user_email: 
   - id: 540
     name: default search form
-    value: data requests
+    value: data_requests__data_requests
     disabled: false
     admin_id: 21
     user_id: 
     app_type_id: 42
     role_name: ''
     created_at: '2020-05-19T11:29:03.837Z'
-    updated_at: '2020-05-19T11:38:01.889Z'
+    updated_at: '2020-07-08T09:49:55.573Z'
     user_email: 
   - id: 541
     name: hide pro info
@@ -172,6 +172,39 @@ app_type:
     role_name: ''
     created_at: '2020-07-07T15:35:17.162Z'
     updated_at: '2020-07-07T15:40:34.983Z'
+    user_email: 
+  - id: 547
+    name: default report tab
+    value: data_requests__data_requests
+    disabled: true
+    admin_id: 21
+    user_id: 
+    app_type_id: 42
+    role_name: ''
+    created_at: '2020-07-08T09:07:13.846Z'
+    updated_at: '2020-07-08T09:12:15.043Z'
+    user_email: 
+  - id: 548
+    name: show search form on single result
+    value: 'true'
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 42
+    role_name: ''
+    created_at: '2020-07-08T09:34:45.969Z'
+    updated_at: '2020-07-08T09:34:45.969Z'
+    user_email: 
+  - id: 549
+    name: prevent reload master list
+    value: 'true'
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 42
+    role_name: ''
+    created_at: '2020-07-08T13:30:22.096Z'
+    updated_at: '2020-07-08T13:30:22.096Z'
     user_email: 
   valid_user_access_controls:
   - id: 2322
@@ -303,19 +336,6 @@ app_type:
     role_name: user
     created_at: '2020-05-19T14:49:32.130Z'
     updated_at: '2020-05-19T14:49:32.130Z'
-    user_email: 
-  - id: 2335
-    user_id: 
-    resource_type: table
-    resource_name: dynamic_model__q2_rc_codebook
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 42
-    role_name: user
-    created_at: '2020-05-19T16:27:30.377Z'
-    updated_at: '2020-05-22T17:14:11.524Z'
     user_email: 
   - id: 2336
     user_id: 
@@ -459,6 +479,19 @@ app_type:
     role_name: user
     created_at: '2020-06-08T14:56:16.375Z'
     updated_at: '2020-06-09T09:10:30.830Z'
+    user_email: 
+  - id: 2352
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__q2_rc_codebook
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 42
+    role_name: user
+    created_at: '2020-06-08T15:00:07.593Z'
+    updated_at: '2020-07-09T09:12:20.754Z'
     user_email: 
   - id: 2353
     user_id: 
@@ -837,6 +870,97 @@ app_type:
     created_at: '2020-07-07T17:51:59.549Z'
     updated_at: '2020-07-07T17:52:08.053Z'
     user_email: 
+  - id: 2395
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__data_request_assignment__do_review_ipa_pi
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 42
+    role_name: user
+    created_at: '2020-07-09T08:35:47.119Z'
+    updated_at: '2020-07-09T08:36:44.605Z'
+    user_email: 
+  - id: 2396
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__data_request_assignment__do_review_data_repo_pi
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 42
+    role_name: user
+    created_at: '2020-07-09T08:35:57.327Z'
+    updated_at: '2020-07-09T08:36:25.942Z'
+    user_email: 
+  - id: 2397
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__data_request_assignment__initial_review_not_approved
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 42
+    role_name: admin
+    created_at: '2020-07-09T08:37:12.544Z'
+    updated_at: '2020-07-09T08:37:12.544Z'
+    user_email: 
+  - id: 2398
+    user_id: 
+    resource_type: report
+    resource_name: data_requests__select_data_attributes_q1
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 42
+    role_name: user
+    created_at: '2020-07-09T08:42:45.683Z'
+    updated_at: '2020-07-09T08:42:45.683Z'
+    user_email: 
+  - id: 2399
+    user_id: 
+    resource_type: report
+    resource_name: data_requests__select_data_attributes_persnet
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 42
+    role_name: user
+    created_at: '2020-07-09T08:42:54.356Z'
+    updated_at: '2020-07-09T08:42:54.356Z'
+    user_email: 
+  - id: 2400
+    user_id: 
+    resource_type: report
+    resource_name: data_requests__select_data_attributes_ipa
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 42
+    role_name: user
+    created_at: '2020-07-09T08:43:02.028Z'
+    updated_at: '2020-07-09T08:43:02.028Z'
+    user_email: 
+  - id: 2401
+    user_id: 
+    resource_type: report
+    resource_name: data_requests__select_data_attributes_bhs
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 42
+    role_name: user
+    created_at: '2020-07-09T08:43:10.597Z'
+    updated_at: '2020-07-09T08:43:10.597Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 104
     name: FPHS Data Request Form
@@ -845,7 +969,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-05-19T10:28:43.095Z'
-    updated_at: '2020-07-07T18:22:58.662Z'
+    updated_at: '2020-07-09T10:32:41.519Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: placeholder_intro
@@ -893,16 +1017,16 @@ app_type:
       \   extra_substitutions:\r\n      reason: 'Data Request Message'\r\n      extra_html:
       ''\r\n      extra_text: |\r\n        A message has been received regarding a
       data request.\r\n        Please login to reply to the message.\r\n\r\n        **Message**\r\n\r\n
-      \       ---\r\n\r\n        {{latest_reference.message_notes::plaintext}}\r\n\r\n\r\n
-      \ dynamic_model__data_request_initial_reviews: &initial_review\r\n    id:\r\n
-      \     parent_or_this_references: \r\n        dynamic_model__data_request_initial_reviews:
+      \       ---\r\n\r\n        {{latest_reference.message_notes::plaintext}}\r\n\r\n\r\n#
+      \ dynamic_model__data_request_initial_reviews: &initial_review\r\n#    id:\r\n#
+      \     parent_or_this_references: \r\n#        dynamic_model__data_request_initial_reviews:
       id\r\n\r\n\r\n\r\n\r\n  ###### Notify PI reviews template #########\r\n  do_pi_review:
       &do_pi_review\r\n    fields:\r\n      - placeholder_intro\r\n      - notes\r\n
-      \     - next_step\r\n\r\n    field_options:\r\n      next_step:\r\n        edit_as:\r\n
-      \         field_type: select_next_step\r\n          alt_options:\r\n            -
-      approve\r\n            - rejected\r\n\r\n    editable_if:\r\n      # always:
-      true\r\n      all:\r\n        this:\r\n          next_step:\r\n            -
-      ''\r\n            - null\r\n\r\n    caption_before: &do_pi_review_caption_before\r\n
+      \     - next_step\r\n      - follow_up_date\r\n\r\n    field_options:    \r\n
+      \     next_step:\r\n        edit_as:\r\n          field_type: select_next_step\r\n
+      \         alt_options:\r\n            - approve\r\n            - rejected\r\n\r\n
+      \   editable_if:\r\n      all:\r\n        this:\r\n          next_step:\r\n
+      \           - ''\r\n            - null\r\n\r\n    caption_before: &do_pi_review_caption_before\r\n
       \   \r\n      placeholder_intro:\r\n        show_caption: |\r\n          Click
       the edit button to enter notes and record your decision\r\n    \r\n      notes:
       \r\n        show_caption: Review notes\r\n        edit_caption: |\r\n          Enter
@@ -914,9 +1038,11 @@ app_type:
       **reject**. The\r\n          request will be rejected and will be closed.\r\n\r\n
       \         If you need to save notes, or contact the requester or FPHS Data Manager,\r\n
       \         just leave this option blank, then click *Save*. The request will
-      not\r\n          progress until you return here and select your decision.\r\n\r\n\r\n
-      \   show_if:\r\n      placeholder_intro:\r\n        next_step:\r\n          -
-      ''\r\n          - null\r\n\r\n    save_trigger: &do_pi_review_save_trigger\r\n\r\n
+      not\r\n          progress until you return here and select your decision.\r\n\r\n
+      \     follow_up_date: Date of decision\r\n\r\n    show_if:\r\n      placeholder_intro:\r\n
+      \       next_step:\r\n          - ''\r\n          - null\r\n\r\n      follow_up_date:\r\n
+      \       not_any:\r\n          next_step:\r\n            - ''\r\n            -
+      null\r\n        \r\n\r\n    save_trigger: &do_pi_review_save_trigger\r\n\r\n
       \     on_update:      \r\n        create_reference:\r\n          - activity_log__data_request_assignment:\r\n
       \             in: referring_record\r\n              with:\r\n                extra_log_type:
       request_approved\r\n              force_create: true\r\n              if:\r\n
@@ -996,11 +1122,11 @@ app_type:
       \r\n    show_caption:\r\n      status: Request Status\r\n\r\n  show_if:\r\n
       \   status:\r\n      not_any:\r\n        status:\r\n          - null\r\n          -
       ''\r\n\r\n\r\n  creatable_if: \r\n    always: true\r\n    \r\n  showable_if:\r\n
-      \   any:\r\n      this:\r\n        role_name:\r\n          - reviewer - fphs
-      pi\r\n          - reviewer - ipa pi\r\n          - reviewer - ipa investigator\r\n
-      \         - reviewer - initial review\r\n          - reviewer - faculty\r\n
-      \         - reviewer - data repo pi\r\n        created_by_user_id: \r\n          user:
-      id\r\n      \r\n\r\n  editable_if: \r\n    not_all:\r\n      activity_log__data_request_assignments:\r\n
+      \   any_role_or_this_user_showable:\r\n      role_name:\r\n        - admin\r\n
+      \       - reviewer - fphs pi\r\n        - reviewer - ipa pi\r\n        - reviewer
+      - ipa investigator\r\n        - reviewer - initial review\r\n        - reviewer
+      - faculty\r\n        - reviewer - data repo pi\r\n      this:\r\n        created_by_user_id:
+      \r\n          user: id\r\n\r\n\r\n  editable_if: \r\n    not_all:\r\n      activity_log__data_request_assignments:\r\n
       \       id:\r\n          this_references:\r\n            activity_log__data_request_assignments:
       id\r\n          \r\n        extra_log_type: submit_request\r\n\r\n  add_reference_if:
       \r\n    always: true\r\n\r\n  view_options:\r\n    only_create_as_reference:
@@ -1083,7 +1209,7 @@ app_type:
       \   on_create:\r\n      create_master:\r\n        if:\r\n          always: true\r\n
       \       move_this: true\r\n    \r\n      create_reference:\r\n        - activity_log__data_request_assignments:\r\n
       \           in: this\r\n            with:\r\n              extra_log_type: supporting_files\r\n\r\n\r\n
-      \ save_action:\r\n    on_update:\r\n      go_to_master: true\r\n\r\n\r\n########################################\r\n#
+      \ save_action:\r\n    on_create:\r\n      go_to_master: true\r\n\r\n\r\n########################################\r\n#
       Submit Request\r\n########################################\r\nsubmit_request:\r\n
       \ label: Submit Request\r\n\r\n  editable_if: \r\n    never: true\r\n\r\n  caption_before:\r\n
       \   submit: To confirm submission of this data request, click **Submit Now**\r\n
@@ -1146,17 +1272,16 @@ app_type:
       \       ####### Notify Data Repository PI\r\n        # On or Off FPHS server\r\n
       \       - activity_log__data_request_assignment:\r\n            in: referring_record\r\n
       \           with:\r\n              extra_log_type: do_review_data_repo_pi\r\n
-      \           force_create: true\r\n            \r\n#            if:\r\n#              any:\r\n#
-      \               # On FPHS Server and not an FPHS analyst\r\n#                all_on_fphs_server_and_fphs_analyst_no:\r\n#
-      \                 dynamic_model__data_request_initial_reviews:\r\n#                    <<:
-      *initial_review\r\n#                    fphs_server_yes_no: 'yes'\r\n#                    fphs_analyst_yes_no:
-      'no'\r\n##                # On FPHS Server and restricted access data\r\n#                all_on_fphs_server_and_restricted_access_data:\r\n#
-      \                 dynamic_model__data_request_initial_reviews:\r\n#                    <<:
-      *initial_review\r\n#                    fphs_server_yes_no: 'yes'\r\n#                    tag_select_data_classifications:\r\n#
-      \                     condition: '&&'\r\n#                      value: \r\n#
-      \                       - restricted access data\r\n#                # Off FPHS
-      Server, always\r\n#                all_off_fphs_server:\r\n#                  dynamic_model__data_request_initial_reviews:\r\n#
-      \                   <<: *initial_review\r\n#                    fphs_server_yes_no:
+      \           force_create: true\r\n            \r\n            if:\r\n              any_data_repo_pi_review_required:\r\n
+      \               # On FPHS Server and not an FPHS analyst\r\n                all_on_fphs_server_and_fphs_analyst_no:\r\n
+      \                 dynamic_model__data_request_initial_reviews:\r\n                    fphs_server_yes_no:
+      'yes'\r\n                    fphs_analyst_yes_no: 'no'\r\n                #
+      On FPHS Server and restricted access data\r\n                all_on_fphs_server_and_restricted_access_data:\r\n
+      \                 dynamic_model__data_request_initial_reviews:\r\n                    fphs_server_yes_no:
+      'yes'\r\n                    tag_select_data_classifications:\r\n                      condition:
+      '&&'\r\n                      value: \r\n                        - restricted
+      access data\r\n                # Off FPHS Server, always\r\n                all_off_fphs_server:\r\n
+      \                 dynamic_model__data_request_initial_reviews:\r\n                    fphs_server_yes_no:
       'no'\r\n      \r\n    \r\n      update_reference:\r\n        ref: \r\n            <<:
       *update_reference_ref_status\r\n            with:\r\n              status: initial
       review approved\r\n\r\n########################################\r\n# Initial
@@ -1215,8 +1340,7 @@ app_type:
       \             this:\r\n                next_step: complete\r\n\r\n\r\n########################################\r\n#
       Supporting Files \r\n########################################\r\nsupporting_files:
       \r\n  <<: *files_activity\r\n  creatable_if: \r\n    never: true\r\n    \r\n
-      \   \r\n\r\nfiles_activity: \r\n  <<: *files_activity\r\n\r\n  caption_before:\r\n
-      \   notes: Notes related to uploaded files\r\n\r\n\r\n\r\n################################################################################\r\n#
+      \ caption_before:\r\n    notes: Notes related to uploaded files\r\n\r\n\r\n\r\n################################################################################\r\n#
       Backups for future reference\r\n################################################################################\r\n\r\n\r\n#
       ########################################\r\n# # INITIAL NOTIFICATIONS COMPLETE\r\n#
       ########################################\r\n# initial_notifications_complete:\r\n#
@@ -1311,22 +1435,23 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-05-19T10:44:04.604Z'
-    updated_at: '2020-06-30T17:48:37.745Z'
+    updated_at: '2020-07-09T09:37:57.802Z'
     position: 
     category: data-requests
     table_key_name: ''
-    field_list: status, placeholder_start, project_title, fphs_analyst_yes_no, full_name,  title,
-      institution, other_institution, others_handling_data, pm_contact, other_pm_contact,data_start_date,
-      data_end_date, fphs_server_yes_no, fphs_server_tools_notes, off_fphs_server_reason_notes,
-      data_use_agreement_status, data_use_agreement_notes, terms_of_use_yes_no, placeholder_terms_no,
-      placeholder_attrib_requests, embedded_report_data_requests__select_data_attributes_q1
+    field_list: status, placeholder_banner, placeholder_start, project_title, fphs_analyst_yes_no,
+      full_name,  title, institution, other_institution, others_handling_data, pm_contact,
+      other_pm_contact,data_start_date, data_end_date, fphs_server_yes_no, fphs_server_tools_notes,
+      off_fphs_server_reason_notes, data_use_agreement_status, data_use_agreement_notes,
+      terms_of_use_yes_no, placeholder_terms_no, placeholder_attrib_requests, embedded_report_data_requests__select_data_attributes_q1
       embedded_report_data_requests__select_data_attributes_q2, embedded_report_data_requests__select_data_attributes_bhs,
       embedded_report_data_requests__select_data_attributes_persnet,embedded_report_data_requests__select_data_attributes_ipa,
       embedded_report_data_requests__selected_data_attributes_all placeholder_final_unsubmitted
       placeholder_final_submitted
     result_order: ''
-    options: "default:\r\n\r\n  field_options:\r\n    full_name:\r\n      value: \"{{current_user.first_name}}
-      {{current_user.last_name}}\"\r\n    status: \r\n      value: new\r\n    institution:\r\n
+    options: "default:\r\n\r\n  field_options:\r\n    project_title:\r\n      no_downcase:
+      true\r\n    full_name:\r\n      value: \"{{current_user.first_name}} {{current_user.last_name}}\"\r\n
+      \     no_downcase: true\r\n    status: \r\n      value: new\r\n    institution:\r\n
       \     edit_as:\r\n        field_type: select_institution\r\n        alt_options:
       \r\n          HMS: hms\r\n          BWH: bwh\r\n          other: other\r\n          \r\n
       \   others_handling_data:\r\n      edit_as:\r\n        field_type: notes\r\n
@@ -1340,7 +1465,11 @@ app_type:
       \          Dr. Lee Nadler: dr. lee nadler\r\n#           Dr. Alvaro Pascual-Leone:
       dr. alvaro pascual-leone\r\n#           Dr. Herman Taylor: dr. herman taylor\r\n#
       \          Dr. Marc Weisskopf: dr. marc weisskopf\r\n#           Dr. Ross Zafonte:
-      dr. ross zafonte\r\n           \r\n\r\n\r\n  caption_before:\r\n    placeholder_start:\r\n
+      dr. ross zafonte\r\n           \r\n\r\n\r\n  caption_before:\r\n    placeholder_banner:\r\n
+      \     show_caption: |\r\n        ## Data Request has not been submitted\r\n
+      \       \r\n        The data request will only be reviewed when the required
+      data variables\r\n        have been selected below and the data request is submitted
+      by the requester.\r\n        \r\n        \r\n        \r\n    placeholder_start:\r\n
       \     edit_caption: |\r\n        **This form must be completed to obtain faculty
       approval for use of FPHS data**\r\n\r\n        You may save this form at any
       time and return to it before submission.\r\n\r\n        Please contact the appropriate
@@ -1351,8 +1480,8 @@ app_type:
       be completed to obtain faculty approval for use of FPHS data**\r\n\r\n    project_title:
       Project title\r\n    fphs_analyst_yes_no: Are you an FPHS team analyst?\r\n\r\n
       \   full_name: Your full name\r\n    title: Your title\r\n    institution: Your
-      institution\r\n    others_handling_data: Names of others who will be handling
-      FPHS data (one per line)\r\n    pm_contact: Main Project Manager contact\r\n
+      primary affiliation\r\n    others_handling_data: Names of others who will be
+      handling FPHS data (one per line)\r\n    pm_contact: Main Project Manager contact\r\n
       \   other_pm_contact: Project Manager name\r\n    fphs_server_yes_no:\r\n      show_caption:
       |\r\n        Will analysis be performed within the *FPHS secure environment*?\r\n
       \       \r\n      edit_caption: |\r\n        The *FPHS secure environment* provides
@@ -1384,8 +1513,8 @@ app_type:
       agreement, or other form of contractual agreement, with the Football Players
       Health Study at Harvard University.\r\n    \r\n    placeholder_terms_no: |\r\n
       \     The terms of use must be accepted before continuing.\r\n    \r\n    placeholder_attrib_requests:\r\n
-      \     show_caption: |\r\n        Select the required data attributes from each
-      of the sections below.\r\n\r\n    embedded_report_data_requests__select_data_attributes_q1:\r\n
+      \     show_caption: |\r\n        ## Select the **required data variables** from
+      each of the sections below.\r\n\r\n    embedded_report_data_requests__select_data_attributes_q1:\r\n
       \     keep_label: true\r\n      caption: |\r\n        **First Health and Wellness
       Questionnaire (Q1)**\r\n\r\n    embedded_report_data_requests__select_data_attributes_q2:\r\n
       \     keep_label: true\r\n      caption: |\r\n        **Second Health and Wellness
@@ -1396,20 +1525,21 @@ app_type:
       (PersNet)**\r\n        \r\n    embedded_report_data_requests__select_data_attributes_ipa:\r\n
       \     keep_label: true\r\n      caption: |\r\n        **In-Person Assessments
       (IPA)**\r\n\r\n    embedded_report_data_requests__selected_data_attributes_all:\r\n
-      \     keep_label: true\r\n      caption: |\r\n        **All Selected Attributes**\r\n\r\n\r\n
+      \     keep_label: true\r\n      caption: |\r\n        **All Selected Variables**\r\n\r\n\r\n
       \   placeholder_final_unsubmitted:\r\n      edit_caption: |\r\n        **Save**
-      your changes to update the data attributes you require or submit your request
-      for review.\r\n      show_caption: |\r\n        After selecting the data attributes
+      your changes to update the data variables you require or submit your request
+      for review.\r\n      show_caption: |\r\n        After selecting the data variables
       for your request click **+Submit Request** to \r\n        send your request
       for review.\r\n      \r\n\r\n\r\n  labels:\r\n    embedded_report_data_requests__select_data_attributes_q1:
-      edit Q1 attribute request\r\n    embedded_report_data_requests__select_data_attributes_q2:
-      edit Q2 attribute request\r\n    embedded_report_data_requests__select_data_attributes_bhs:
-      edit BHS attribute request\r\n    embedded_report_data_requests__select_data_attributes_persnet:
-      edit PersNet attribute request\r\n    embedded_report_data_requests__select_data_attributes_ipa:
-      edit IPA attribute request\r\n\r\n    embedded_report_data_requests__selected_data_attributes_all:
-      view attributes\r\n    \r\n\r\n    \r\n  show_if:\r\n    status: \r\n      never:
-      true\r\n\r\n    \r\n    full_name:\r\n      fphs_analyst_yes_no: \r\n        -
-      'no'\r\n        - 'yes'\r\n          \r\n    title: \r\n      fphs_analyst_yes_no:
+      edit Q1 variable request\r\n    embedded_report_data_requests__select_data_attributes_q2:
+      edit Q2 variable request\r\n    embedded_report_data_requests__select_data_attributes_bhs:
+      edit BHS variable request\r\n    embedded_report_data_requests__select_data_attributes_persnet:
+      edit PersNet variable request\r\n    embedded_report_data_requests__select_data_attributes_ipa:
+      edit IPA variable request\r\n\r\n    embedded_report_data_requests__selected_data_attributes_all:
+      view all selected variables\r\n    \r\n\r\n    \r\n  show_if:\r\n    status:
+      \r\n      never: true\r\n\r\n    placeholder_banner:\r\n      status:\r\n        -
+      ''\r\n        - null\r\n        - 'new'\r\n    \r\n    full_name:\r\n      fphs_analyst_yes_no:
+      \r\n        - 'no'\r\n        - 'yes'\r\n          \r\n    title: \r\n      fphs_analyst_yes_no:
       'no'\r\n\r\n    institution: \r\n      fphs_analyst_yes_no: 'no'\r\n\r\n    other_institution:\r\n
       \     fphs_analyst_yes_no: 'no'\r\n      institution: other\r\n\r\n    others_handling_data:\r\n
       \     fphs_analyst_yes_no: 'no'\r\n\r\n    pm_contact:\r\n      fphs_analyst_yes_no:
@@ -1445,6 +1575,25 @@ app_type:
       \           - new\r\n            - ''\r\n            - NULL\r\n    \r\n    \r\n
       \ valid_if:\r\n    on_save:\r\n      all:\r\n        this:\r\n          terms_of_use_yes_no:
       'yes'\r\n          "
+    user_email: 
+  - id: 599
+    name: Q2 REDCap dictionary
+    table_name: q2_rc_codebook
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: ''
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-19T15:31:46.550Z'
+    updated_at: '2020-07-09T09:11:38.438Z'
+    position: 
+    category: data-requests
+    table_key_name: ''
+    field_list: ''
+    result_order: ''
+    options: "default:\r\n\r\n  view_options:\r\n    data_attribute: \r\n      - q2_domain\r\n
+      \     - '|'\r\n      - variable_name\r\n      - ':'\r\n      - field_label"
     user_email: 
   - id: 603
     name: Initial Review
@@ -1507,25 +1656,6 @@ app_type:
       \"Message to requester\"\r\n      edit_caption: |\r\n        Enter your message
       to the requester. \r\n\r\n        *These notes will be visible by the requester
       and other reviewers.*\r\n\r\n"
-    user_email: 
-  - id: 599
-    name: Q2 REDCap dictionary
-    table_name: q2_rc_codebook
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: ''
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2020-05-19T15:31:46.550Z'
-    updated_at: '2020-05-26T13:56:11.692Z'
-    position: 
-    category: data-requests
-    table_key_name: ''
-    field_list: ''
-    result_order: ''
-    options: "default:\r\n\r\n  view_options:\r\n    data_attribute: \r\n      - q2_domain\r\n
-      \     - '|'\r\n      - variable_name\r\n      - ':'\r\n      - field_label"
     user_email: 
   - id: 601
     name: Selected Data Attributes
@@ -1617,9 +1747,9 @@ app_type:
     role_name: requester
     user_id: 1
     admin_id: 21
-    disabled: false
+    disabled: true
     created_at: '2020-05-19T09:01:10.894Z'
-    updated_at: '2020-05-19T11:31:14.370Z'
+    updated_at: '2020-07-09T08:59:49.892Z'
     user_email: phil_ayres@test.com
   - id: 928
     app_type_id: 42
@@ -1900,6 +2030,141 @@ app_type:
     created_at: '2020-06-22T14:40:25.919Z'
     updated_at: '2020-06-22T14:40:25.919Z'
     user_email: template@template
+  - id: 960
+    app_type_id: 42
+    role_name: admin
+    user_id: 105
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T08:58:07.123Z'
+    updated_at: '2020-07-09T08:58:07.123Z'
+    user_email: datareqadmin@template
+  - id: 961
+    app_type_id: 42
+    role_name: user
+    user_id: 105
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T08:58:15.313Z'
+    updated_at: '2020-07-09T08:58:15.313Z'
+    user_email: datareqadmin@template
+  - id: 962
+    app_type_id: 42
+    role_name: nfs_store group 600
+    user_id: 105
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T08:58:51.992Z'
+    updated_at: '2020-07-09T08:58:51.992Z'
+    user_email: datareqadmin@template
+  - id: 963
+    app_type_id: 42
+    role_name: reviewer - data repo pi
+    user_id: 106
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T09:00:05.263Z'
+    updated_at: '2020-07-09T09:00:05.263Z'
+    user_email: datareqdrpi@template
+  - id: 964
+    app_type_id: 42
+    role_name: user
+    user_id: 106
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T09:00:21.445Z'
+    updated_at: '2020-07-09T09:00:21.445Z'
+    user_email: datareqdrpi@template
+  - id: 965
+    app_type_id: 42
+    role_name: nfs_store group 600
+    user_id: 106
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T09:00:32.716Z'
+    updated_at: '2020-07-09T09:00:32.716Z'
+    user_email: datareqdrpi@template
+  - id: 966
+    app_type_id: 42
+    role_name: reviewer - ipa pi
+    user_id: 107
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T09:01:07.760Z'
+    updated_at: '2020-07-09T09:01:07.760Z'
+    user_email: datareqipapi@template
+  - id: 967
+    app_type_id: 42
+    role_name: user
+    user_id: 107
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T09:01:16.605Z'
+    updated_at: '2020-07-09T09:01:16.605Z'
+    user_email: datareqipapi@template
+  - id: 968
+    app_type_id: 42
+    role_name: nfs_store group 600
+    user_id: 107
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T09:01:26.217Z'
+    updated_at: '2020-07-09T09:01:26.217Z'
+    user_email: datareqipapi@template
+  - id: 969
+    app_type_id: 42
+    role_name: data prep
+    user_id: 104
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T09:02:03.230Z'
+    updated_at: '2020-07-09T09:02:03.230Z'
+    user_email: datareqdm@template
+  - id: 970
+    app_type_id: 42
+    role_name: user
+    user_id: 104
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T09:02:17.534Z'
+    updated_at: '2020-07-09T09:02:17.534Z'
+    user_email: datareqdm@template
+  - id: 971
+    app_type_id: 42
+    role_name: nfs_store group 600
+    user_id: 104
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T09:02:25.652Z'
+    updated_at: '2020-07-09T09:02:25.652Z'
+    user_email: datareqdm@template
+  - id: 972
+    app_type_id: 42
+    role_name: reviewer - initial review
+    user_id: 104
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T09:02:34.379Z'
+    updated_at: '2020-07-09T09:02:34.379Z'
+    user_email: datareqdm@template
+  - id: 973
+    app_type_id: 42
+    role_name: user
+    user_id: 103
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T09:02:56.213Z'
+    updated_at: '2020-07-09T09:02:56.213Z'
+    user_email: datarequser@template
+  - id: 974
+    app_type_id: 42
+    role_name: nfs_store group 600
+    user_id: 103
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T09:03:08.065Z'
+    updated_at: '2020-07-09T09:03:08.065Z'
+    user_email: datarequser@template
   associated_message_templates:
   - id: 71
     name: data request message content
