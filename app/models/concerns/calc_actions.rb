@@ -30,8 +30,8 @@ module CalcActions
   included do
     # We won't use a query join when referring to tables based on these keys
     NonJoinTableNames = %i[this parent referring_record top_referring_record this_references parent_references
-                           parent_or_this_references user master condition value hide_error].freeze
-    NonQueryTableNames = %i[this user parent referring_record top_referring_record].freeze
+                           parent_or_this_references user master condition value hide_error role_name].freeze
+    NonQueryTableNames = %i[this user parent referring_record top_referring_record role_name].freeze
     NonQueryNestedKeyNames = %i[this referring_record top_referring_record this_references parent_references
                                 parent_or_this_references validate].freeze
 

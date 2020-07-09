@@ -384,3 +384,13 @@ span.master-header-prefix {
   margin: 0 auto;
   display: block;
 }
+
+li.list-group-item.caption-before.results-caption-before.dynamic-model--data-request-placeholder_banner,
+li.list-group-item.caption-before.results-caption-before.dynamic-model--data-request-placeholder_attrib_requests {
+  background: rgb(234, 234, 234);
+}
+
+li.list-group-item.caption-before.results-caption-before.dynamic-model--data-request-placeholder_banner h2,
+li.list-group-item.caption-before.results-caption-before.dynamic-model--data-request-placeholder_attrib_requests h2 {
+  margin-top: 10px;
+}
