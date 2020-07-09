@@ -1,6 +1,8 @@
 --
 -- PostgreSQL database dump
 --
+set search_path=q2,data_requests,ml_app;
+
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
