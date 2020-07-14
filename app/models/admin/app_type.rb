@@ -310,10 +310,11 @@ class Admin::AppType < Admin::AdminBase
   end
 
   def associated_reports
-    names = user_access_controls.valid_resources.where(resource_type: :report).where("access IS NOT NULL and access <> ''").pluck(:resource_name).uniq
+    byebug
+    names = user_access_controls.valid_resources.where(resource_type: :report).where("access IS NOT NULL and access <> ''").map(&:resource_name).uniq
     names = Report.active.map(&:alt_resource_name).uniq if names.include? '_all_reports_'
 
-    Report.active.where("(item_type || '__' || short_name) in (?)", names).order(id: :asc)
+    Report.active.where("(REGEXP_REPLACE(item_type, '( |-)', '_') || '__' || short_name) in (?)", names).order(id: :asc)
   end
 
   def associated_general_selections
