@@ -235,9 +235,7 @@ td.report-el.datadict-field-label pre,
 td.report-el.datadict-field-attributes pre {
   white-space: pre-wrap;
   word-break: keep-all;
-  min-width: 25vw;
   max-width: 25vw;
-  width: 25vw;
 }
 
 td.report-el pre {
