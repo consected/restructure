@@ -35,6 +35,9 @@ fi
 git push origin --tags
 git push origin --all
 
+git checkout develop
+
+
 cd ../install-playbook/ansible
 build_box=true vagrant up --provision
 TESTVER=$(cat build_version.txt)

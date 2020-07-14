@@ -172,7 +172,8 @@ module DynamicModelDefHandler
   end
 
   def ready?
-    ActiveRecord::Base.connection.table_exists?(table_name)
+    cn = ActiveRecord::Base.connection
+    cn.table_exists?(table_name) || cn.view_exists?(table_name)
   rescue StandardError => e
     puts e
     false

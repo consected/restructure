@@ -1724,7 +1724,472 @@ app_type:
     alphanumeric: false
     extra_fields: ''
     user_email: 
-  associated_reports: []
+  associated_reports:
+  - id: 284
+    name: New Data Request
+    description: "# FPHS Data Requests\r\n\r\nThe data requests process follows a
+      series of activities. More complex requests, and those requiring analysis outside
+      of the **FPHS Secure Environment** may take longer to review if they require
+      specific stakeholder / faculty discussions.\r\n\r\n![Data Requests Process](/app_specific/data_requests/data-requests-process.svg)\r\n\r\nClick
+      the **+ Data Request** button to start a new Data Request\r\n\r\n"
+    sql: "select id master_id from masters where id = -1 limit 1;\r\n"
+    search_attrs: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-19T11:28:00.910Z'
+    updated_at: '2020-07-08T09:27:21.468Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 0
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: data_requests
+    options: "view_options:\r\n  hide_result_count: true\r\n  hide_export_buttons:
+      true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
+      \ \r\nlist_options:\r\n  hide_in_list: true"
+    user_email: 
+  - id: 286
+    name: Select Data Attributes Q2
+    description: "###Select the attributes required for analysis\r\n\r\nCheck each
+      item required. You can continue to add and remove attributes as many times as
+      you need to, up until the data request form is submitted for review.\r\n\r\nThe
+      checkbox selections are immediately saved when you click them. If you refresh
+      the search criteria or return to this form in the future, the items you have
+      selected will appear at the top of the list.\r\n\r\n**Note**: requesting attributes
+      from the **restricted** set will lead to a more in-depth review process, and
+      therefore will take more time. Requesting multiple attributes from the **partially
+      restricted** set may require more in-depth review, dependent on the combination.\r\n"
+    sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  '{\"field_name\": \"update_list[items][]\",\"value\":
+      {\"list_id\": \"' || :list_id || \r\n  '\",\"type\":\"q2_rc_codebook\", \"id\":
+      ' || cb.id || \r\n  ', \"from_master_id\":-1, \"init_value\": ' || \r\n  case
+      when coalesce(sel.id, 0) = 0 then 'false' else 'true' end\r\n  || '}}' \r\n
+      \   \"select items: update list: data_requests_selected_attribs\", \r\n  cb.variable_name,\r\n
+      \ cb.q2_domain,\r\n  cb.field_label,\r\n  cb.field_attributes,\r\n  cb.notes,
+      \r\n  case when coalesce(sel.id, 0) = 0 then 'false' else 'true' end \"selected\"\r\nfrom
+      q2_rc_codebook cb\r\nleft join data_requests_selected_attribs sel\r\non sel.record_id
+      = cb.id \r\n  and not coalesce(sel.disabled, false) \r\n  and :list_id = data_request_id\r\nwhere\r\n
+      \ (\r\n    (\r\n      (:domain) is NULL OR cb.q2_domain IN (:domain)\r\n    )\r\n
+      \   AND (\r\n      :variable_name is NULL OR cb.variable_name ~* :variable_name\r\n
+      \   )\r\n    AND (\r\n      :field_label is NULL OR cb.field_label ~* :field_label\r\n
+      \   )\r\n    OR sel.id IS NOT NULL\r\n  )\r\norder by \r\nselected desc\r\n,
+      cb.id;\r\n"
+    search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
+      multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
+      \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
+      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nvariable_name:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
+      \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-21T13:10:43.213Z'
+    updated_at: '2020-07-07T15:08:27.316Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: select_data_attributes_q2
+    options: "view_options:\r\n  hide_table_names: true\r\n  #humanize_column_names:
+      true\r\n\r\nlist_options:\r\n  hide_in_list: true\r\n  \r\ncolumn_options:\r\n
+      \ classes:\r\n    field_label: datadict-field-label\r\n    field_attributes:
+      datadict-field-attributes\r\n    'select items: update list: data_requests_selected_attribs':
+      select-items\r\n  tags:\r\n    field_label: pre\r\n    field_attributes: pre\r\n
+      \ hide:\r\n    id: true\r\n    selected: true\r\n  \r\nview_css:\r\n  classes:\r\n
+      \   table-header.select-items .table-header-col-type: \r\n      display: 'none'"
+    user_email: 
+  - id: 287
+    name: Selected Data Attributes All
+    description: ''
+    sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  'Q2' \"study\",\r\n  cb.variable_name,\r\n
+      \ cb.q2_domain,\r\n  cb.field_label,\r\n  cb.field_attributes,\r\n  cb.notes\r\nfrom
+      q2_rc_codebook cb\r\n\r\ninner join data_requests_selected_attribs sel\r\non
+      \r\n  sel.record_id = cb.id \r\n  and not coalesce(sel.disabled, false) \r\n\r\ninner
+      join model_references  mr\r\non \r\n  (:list_type IS NULL OR :list_type = 'DynamicModel::DataRequest')\r\n
+      \ and sel.data_request_id = :list_id \r\n\r\n   OR\r\n   \r\n  :list_type =
+      'ActivityLog::DataRequestAssignment'\r\n  and from_record_id = :list_id \r\n
+      \ and from_record_type = 'ActivityLog::DataRequestAssignment' \r\n  and to_record_type
+      = 'DynamicModel::DataRequest'\r\n  and sel.data_request_id = mr.to_record_id\r\n
+      \ \r\nwhere\r\n  sel.id IS NOT NULL\r\norder by \r\n  cb.id;\r\n"
+    search_attrs: "\r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n
+      \   \r\n    \r\nlist_type:\r\n  text:\r\n    label: Type\r\n    hidden: true\r\n"
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-28T16:08:10.384Z'
+    updated_at: '2020-06-08T12:57:41.617Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: selected_data_attributes_all
+    options: "view_options:\r\n  hide_table_names: true\r\n\r\nlist_options:\r\n  hide_in_list:
+      true\r\n  \r\ncolumn_options:\r\n  classes:\r\n    field_label: datadict-field-label\r\n
+      \   field_attributes: datadict-field-attributes\r\n  tags:\r\n    field_label:
+      pre\r\n    field_attributes: pre\r\n  hide:\r\n    id: true\r\n    selected:
+      true\r\n  \r\nview_css:\r\n  classes:\r\n    table-header.select-items .table-header-col-type:
+      \r\n      display: 'none'"
+    user_email: 
+  - id: 288
+    name: Awaiting Initial Review
+    description: "# FPHS Data Requests awaiting initial review\r\n\r\nThe Data Manager
+      is responsible for initial review of new data requests. This is a list of items
+      awaiting initial review.\r\n"
+    sql: "\r\nselect master_id from (\r\n  select \r\n   id, master_id, extra_log_type
+      from activity_log_data_request_assignments \r\n  where \r\n    extra_log_type
+      in ('submit_request', 'initial_review', 'initial_review_approved', 'initial_review_not_approved')\r\n
+      \   and master_id > 0\r\n  order by id desc\r\n  limit 1\r\n) t\r\nwhere \r\nextra_log_type
+      IN ('submit_request', 'initial_review')\r\nand master_id > 0\r\n;"
+    search_attrs: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-07T14:53:11.236Z'
+    updated_at: '2020-07-07T17:30:32.506Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 20
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: awaiting_initial_review
+    options: "view_options:\r\n  hide_result_count: true\r\n  hide_export_buttons:
+      true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
+      \ \r\nlist_options:\r\n  hide_in_list: true"
+    user_email: 
+  - id: 289
+    name: My Requests
+    description: "# FPHS Data Requests\r\n\r\nYou can view your existing data requests
+      below, or submit a new Data Request\r\n\r\n"
+    sql: "select master_id\r\n\r\nfrom activity_log_data_request_assignments \r\nwhere
+      created_by_user_id = :current_user\r\norder by updated_at desc\r\n;"
+    search_attrs: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-07T15:46:32.009Z'
+    updated_at: '2020-07-07T17:30:45.199Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 10
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: my_requests
+    options: "view_options:\r\n  hide_result_count: true\r\n  hide_export_buttons:
+      true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
+      \ \r\nlist_options:\r\n  hide_in_list: true"
+    user_email: 
+  - id: 290
+    name: Awaiting Data Repo PI Review
+    description: "# FPHS Data Requests review by the Data Repository PI\r\n\r\nThe
+      Data Repository PI or an administrator can enter the results of the review in
+      the section **Review by Data Repository PI**\r\n\r\nIf discussions with others,
+      such as the faculty members are required, these can be completed offline before
+      submitting this review. If it is necessary to communicate with the Data Manager
+      or the original requester, the **Send Message** button will allow this communication.\r\n\r\nTo
+      save any supporting documents or emails (in PDF format) to back up a decision,
+      upload them in **Supporting Files**\r\n"
+    sql: "  select \r\n   id, master_id, extra_log_type from activity_log_data_request_assignments
+      \r\n  where \r\n    extra_log_type in ('do_review_data_repo_pi')\r\n    and
+      (next_step is NULL OR next_step = '')\r\n    and master_id > 0\r\n  order by
+      id desc\r\n"
+    search_attrs: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-07T17:29:17.730Z'
+    updated_at: '2020-07-07T17:30:11.427Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 50
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: awaiting_data_repo_pi_review
+    options: "view_options:\r\n  hide_result_count: true\r\n  hide_export_buttons:
+      true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
+      \ \r\nlist_options:\r\n  hide_in_list: true"
+    user_email: 
+  - id: 291
+    name: Awaiting IPA PI Review
+    description: "# FPHS Data Requests review by the IPA PI\r\n\r\nThe In-Person Assessments
+      PI or an administrator can enter the results of the review in the section **Review
+      by IPA PI**\r\n\r\nIf discussions with others, such as the faculty members are
+      required, these can be completed offline before submitting this review. If it
+      is necessary to communicate with the Data Manager or the original requester,
+      the **Send Message** button will allow this communication.\r\n\r\nTo save any
+      supporting documents or emails (in PDF format) to back up a decision, upload
+      them in **Supporting Files**\r\n"
+    sql: "  select \r\n   id, master_id, extra_log_type from activity_log_data_request_assignments
+      \r\n  where \r\n    extra_log_type in ('do_review_ipa_pi')\r\n    and (next_step
+      is NULL OR next_step = '')\r\n    and master_id > 0\r\n  order by id desc\r\n"
+    search_attrs: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-07T17:32:25.626Z'
+    updated_at: '2020-07-07T17:34:35.315Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 60
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: awaiting_ipa_pi_review
+    options: "view_options:\r\n  hide_result_count: true\r\n  hide_export_buttons:
+      true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
+      \ \r\nlist_options:\r\n  hide_in_list: true"
+    user_email: 
+  - id: 292
+    name: Awaiting Data Prep
+    description: "# FPHS Data Requests approved and awaiting Data Prep"
+    sql: "  select \r\n   id, master_id, extra_log_type from activity_log_data_request_assignments
+      \r\n  where \r\n    extra_log_type in ('data_prep')\r\n    and (next_step is
+      NULL OR next_step = '')\r\n    and master_id > 0\r\n  order by id desc\r\n"
+    search_attrs: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-07T17:51:37.734Z'
+    updated_at: '2020-07-07T17:52:12.995Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 70
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: awaiting_data_prep
+    options: "view_options:\r\n  hide_result_count: true\r\n  hide_export_buttons:
+      true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
+      \ \r\nlist_options:\r\n  hide_in_list: true"
+    user_email: 
+  - id: 293
+    name: Select Data Attributes Q1
+    description: "###Select the attributes required for analysis\r\n\r\nCheck each
+      item required. You can continue to add and remove attributes as many times as
+      you need to, up until the data request form is submitted for review.\r\n\r\nThe
+      checkbox selections are immediately saved when you click them. If you refresh
+      the search criteria or return to this form in the future, the items you have
+      selected will appear at the top of the list.\r\n\r\n**Note**: requesting attributes
+      from the **restricted** set will lead to a more in-depth review process, and
+      therefore will take more time. Requesting multiple attributes from the **partially
+      restricted** set may require more in-depth review, dependent on the combination.\r\n"
+    sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  '{\"field_name\": \"update_list[items][]\",\"value\":
+      {\"list_id\": \"' || :list_id || \r\n  '\",\"type\":\"q2_rc_codebook\", \"id\":
+      ' || cb.id || \r\n  ', \"from_master_id\":-1, \"init_value\": ' || \r\n  case
+      when coalesce(sel.id, 0) = 0 then 'false' else 'true' end\r\n  || '}}' \r\n
+      \   \"select items: update list: data_requests_selected_attribs\", \r\n  cb.variable_name,\r\n
+      \ cb.q2_domain,\r\n  cb.field_label,\r\n  cb.field_attributes,\r\n  cb.notes,
+      \r\n  case when coalesce(sel.id, 0) = 0 then 'false' else 'true' end \"selected\"\r\nfrom
+      q2_rc_codebook cb\r\nleft join data_requests_selected_attribs sel\r\non sel.record_id
+      = cb.id \r\n  and not coalesce(sel.disabled, false) \r\n  and :list_id = data_request_id\r\nwhere\r\n
+      \ (\r\n    (\r\n      (:domain) is NULL OR cb.q2_domain IN (:domain)\r\n    )\r\n
+      \   AND (\r\n      :variable_name is NULL OR cb.variable_name ~* :variable_name\r\n
+      \   )\r\n    AND (\r\n      :field_label is NULL OR cb.field_label ~* :field_label\r\n
+      \   )\r\n    OR sel.id IS NOT NULL\r\n  )\r\norder by \r\nselected desc\r\n,
+      cb.id;\r\n"
+    search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
+      multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
+      \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
+      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nvariable_name:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
+      \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T08:40:04.493Z'
+    updated_at: '2020-07-09T08:40:04.493Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: select_data_attributes_q1
+    options: "view_options:\r\n  hide_table_names: true\r\n  #humanize_column_names:
+      true\r\n\r\nlist_options:\r\n  hide_in_list: true\r\n  \r\ncolumn_options:\r\n
+      \ classes:\r\n    field_label: datadict-field-label\r\n    field_attributes:
+      datadict-field-attributes\r\n    'select items: update list: data_requests_selected_attribs':
+      select-items\r\n  tags:\r\n    field_label: pre\r\n    field_attributes: pre\r\n
+      \ hide:\r\n    id: true\r\n    selected: true\r\n  \r\nview_css:\r\n  classes:\r\n
+      \   table-header.select-items .table-header-col-type: \r\n      display: 'none'"
+    user_email: 
+  - id: 294
+    name: Select Data Attributes IPA
+    description: "###Select the attributes required for analysis\r\n\r\nCheck each
+      item required. You can continue to add and remove attributes as many times as
+      you need to, up until the data request form is submitted for review.\r\n\r\nThe
+      checkbox selections are immediately saved when you click them. If you refresh
+      the search criteria or return to this form in the future, the items you have
+      selected will appear at the top of the list.\r\n\r\n**Note**: requesting attributes
+      from the **restricted** set will lead to a more in-depth review process, and
+      therefore will take more time. Requesting multiple attributes from the **partially
+      restricted** set may require more in-depth review, dependent on the combination.\r\n"
+    sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  '{\"field_name\": \"update_list[items][]\",\"value\":
+      {\"list_id\": \"' || :list_id || \r\n  '\",\"type\":\"q2_rc_codebook\", \"id\":
+      ' || cb.id || \r\n  ', \"from_master_id\":-1, \"init_value\": ' || \r\n  case
+      when coalesce(sel.id, 0) = 0 then 'false' else 'true' end\r\n  || '}}' \r\n
+      \   \"select items: update list: data_requests_selected_attribs\", \r\n  cb.variable_name,\r\n
+      \ cb.q2_domain,\r\n  cb.field_label,\r\n  cb.field_attributes,\r\n  cb.notes,
+      \r\n  case when coalesce(sel.id, 0) = 0 then 'false' else 'true' end \"selected\"\r\nfrom
+      q2_rc_codebook cb\r\nleft join data_requests_selected_attribs sel\r\non sel.record_id
+      = cb.id \r\n  and not coalesce(sel.disabled, false) \r\n  and :list_id = data_request_id\r\nwhere\r\n
+      \ (\r\n    (\r\n      (:domain) is NULL OR cb.q2_domain IN (:domain)\r\n    )\r\n
+      \   AND (\r\n      :variable_name is NULL OR cb.variable_name ~* :variable_name\r\n
+      \   )\r\n    AND (\r\n      :field_label is NULL OR cb.field_label ~* :field_label\r\n
+      \   )\r\n    OR sel.id IS NOT NULL\r\n  )\r\norder by \r\nselected desc\r\n,
+      cb.id;\r\n"
+    search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
+      multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
+      \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
+      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nvariable_name:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
+      \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T08:40:44.123Z'
+    updated_at: '2020-07-09T08:40:44.123Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: select_data_attributes_ipa
+    options: "view_options:\r\n  hide_table_names: true\r\n  #humanize_column_names:
+      true\r\n\r\nlist_options:\r\n  hide_in_list: true\r\n  \r\ncolumn_options:\r\n
+      \ classes:\r\n    field_label: datadict-field-label\r\n    field_attributes:
+      datadict-field-attributes\r\n    'select items: update list: data_requests_selected_attribs':
+      select-items\r\n  tags:\r\n    field_label: pre\r\n    field_attributes: pre\r\n
+      \ hide:\r\n    id: true\r\n    selected: true\r\n  \r\nview_css:\r\n  classes:\r\n
+      \   table-header.select-items .table-header-col-type: \r\n      display: 'none'"
+    user_email: 
+  - id: 295
+    name: Select Data Attributes Personal Networks
+    description: "###Select the attributes required for analysis\r\n\r\nCheck each
+      item required. You can continue to add and remove attributes as many times as
+      you need to, up until the data request form is submitted for review.\r\n\r\nThe
+      checkbox selections are immediately saved when you click them. If you refresh
+      the search criteria or return to this form in the future, the items you have
+      selected will appear at the top of the list.\r\n\r\n**Note**: requesting attributes
+      from the **restricted** set will lead to a more in-depth review process, and
+      therefore will take more time. Requesting multiple attributes from the **partially
+      restricted** set may require more in-depth review, dependent on the combination.\r\n"
+    sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  '{\"field_name\": \"update_list[items][]\",\"value\":
+      {\"list_id\": \"' || :list_id || \r\n  '\",\"type\":\"q2_rc_codebook\", \"id\":
+      ' || cb.id || \r\n  ', \"from_master_id\":-1, \"init_value\": ' || \r\n  case
+      when coalesce(sel.id, 0) = 0 then 'false' else 'true' end\r\n  || '}}' \r\n
+      \   \"select items: update list: data_requests_selected_attribs\", \r\n  cb.variable_name,\r\n
+      \ cb.q2_domain,\r\n  cb.field_label,\r\n  cb.field_attributes,\r\n  cb.notes,
+      \r\n  case when coalesce(sel.id, 0) = 0 then 'false' else 'true' end \"selected\"\r\nfrom
+      q2_rc_codebook cb\r\nleft join data_requests_selected_attribs sel\r\non sel.record_id
+      = cb.id \r\n  and not coalesce(sel.disabled, false) \r\n  and :list_id = data_request_id\r\nwhere\r\n
+      \ (\r\n    (\r\n      (:domain) is NULL OR cb.q2_domain IN (:domain)\r\n    )\r\n
+      \   AND (\r\n      :variable_name is NULL OR cb.variable_name ~* :variable_name\r\n
+      \   )\r\n    AND (\r\n      :field_label is NULL OR cb.field_label ~* :field_label\r\n
+      \   )\r\n    OR sel.id IS NOT NULL\r\n  )\r\norder by \r\nselected desc\r\n,
+      cb.id;\r\n"
+    search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
+      multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
+      \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
+      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nvariable_name:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
+      \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T08:41:11.370Z'
+    updated_at: '2020-07-09T08:41:11.370Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: select_data_attributes_persnet
+    options: "view_options:\r\n  hide_table_names: true\r\n  #humanize_column_names:
+      true\r\n\r\nlist_options:\r\n  hide_in_list: true\r\n  \r\ncolumn_options:\r\n
+      \ classes:\r\n    field_label: datadict-field-label\r\n    field_attributes:
+      datadict-field-attributes\r\n    'select items: update list: data_requests_selected_attribs':
+      select-items\r\n  tags:\r\n    field_label: pre\r\n    field_attributes: pre\r\n
+      \ hide:\r\n    id: true\r\n    selected: true\r\n  \r\nview_css:\r\n  classes:\r\n
+      \   table-header.select-items .table-header-col-type: \r\n      display: 'none'"
+    user_email: 
+  - id: 296
+    name: Select Data Attributes Brain Health Study
+    description: "###Select the attributes required for analysis\r\n\r\nCheck each
+      item required. You can continue to add and remove attributes as many times as
+      you need to, up until the data request form is submitted for review.\r\n\r\nThe
+      checkbox selections are immediately saved when you click them. If you refresh
+      the search criteria or return to this form in the future, the items you have
+      selected will appear at the top of the list.\r\n\r\n**Note**: requesting attributes
+      from the **restricted** set will lead to a more in-depth review process, and
+      therefore will take more time. Requesting multiple attributes from the **partially
+      restricted** set may require more in-depth review, dependent on the combination.\r\n"
+    sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  '{\"field_name\": \"update_list[items][]\",\"value\":
+      {\"list_id\": \"' || :list_id || \r\n  '\",\"type\":\"q2_rc_codebook\", \"id\":
+      ' || cb.id || \r\n  ', \"from_master_id\":-1, \"init_value\": ' || \r\n  case
+      when coalesce(sel.id, 0) = 0 then 'false' else 'true' end\r\n  || '}}' \r\n
+      \   \"select items: update list: data_requests_selected_attribs\", \r\n  cb.variable_name,\r\n
+      \ cb.q2_domain,\r\n  cb.field_label,\r\n  cb.field_attributes,\r\n  cb.notes,
+      \r\n  case when coalesce(sel.id, 0) = 0 then 'false' else 'true' end \"selected\"\r\nfrom
+      q2_rc_codebook cb\r\nleft join data_requests_selected_attribs sel\r\non sel.record_id
+      = cb.id \r\n  and not coalesce(sel.disabled, false) \r\n  and :list_id = data_request_id\r\nwhere\r\n
+      \ (\r\n    (\r\n      (:domain) is NULL OR cb.q2_domain IN (:domain)\r\n    )\r\n
+      \   AND (\r\n      :variable_name is NULL OR cb.variable_name ~* :variable_name\r\n
+      \   )\r\n    AND (\r\n      :field_label is NULL OR cb.field_label ~* :field_label\r\n
+      \   )\r\n    OR sel.id IS NOT NULL\r\n  )\r\norder by \r\nselected desc\r\n,
+      cb.id;\r\n"
+    search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
+      multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
+      \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
+      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nvariable_name:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
+      \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-09T08:41:36.211Z'
+    updated_at: '2020-07-09T08:41:36.211Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: select_data_attributes_bhs
+    options: "view_options:\r\n  hide_table_names: true\r\n  #humanize_column_names:
+      true\r\n\r\nlist_options:\r\n  hide_in_list: true\r\n  \r\ncolumn_options:\r\n
+      \ classes:\r\n    field_label: datadict-field-label\r\n    field_attributes:
+      datadict-field-attributes\r\n    'select items: update list: data_requests_selected_attribs':
+      select-items\r\n  tags:\r\n    field_label: pre\r\n    field_attributes: pre\r\n
+      \ hide:\r\n    id: true\r\n    selected: true\r\n  \r\nview_css:\r\n  classes:\r\n
+      \   table-header.select-items .table-header-col-type: \r\n      display: 'none'"
+    user_email: 
   associated_general_selections: []
   page_layouts:
   - id: 76

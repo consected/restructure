@@ -120,8 +120,9 @@
 <div class="col-sm-5" style="text-align: left">
   <%= f.label 'Primary Tables'%> 
   <ul id="as-list" style="max-height: 800px; overflow: auto; background-color: white;">
-    <%  tables = ActiveRecord::Base.connection.tables
-      #tables +=  DynamicModel.active.unscope(:order).distinct.select {|t| t.table_name}.map {|t| t.table_name}
+    <%  
+      cn = ActiveRecord::Base.connection
+      tables = cn.tables + cn.views
     
       tables.sort.each do |table_name| %>
       
@@ -129,7 +130,7 @@
           <a href="#tblock-<%=table_name%>" data-toggle="collapse"  class="collapsed" "><%= table_name  %></a>
       </li>      
       <ul id="tblock-<%=table_name%>" class="collapse">
-        <% ActiveRecord::Base.connection.columns(table_name).each  do |c| %>
+        <% cn.columns(table_name).each  do |c| %>
           <li id="table-<%=c.name%>"><%=c.name%> <small style="color: gray"><%=c.type.to_s%></small></li>
         <% end %>
       </ul>
