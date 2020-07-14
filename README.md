@@ -84,6 +84,7 @@ The NfsStore expects a specific structure for new App Types.
     cd $FS_ROOT/$FS_DIR
     mkdir -p $APPTYPE_DIR/containers    
     chmod 770 $APPTYPE_DIR
+    chmod 770 $APPTYPE_DIR/containers
     chown nfsuser:nfs_store_all_access $APPTYPE_DIR
     chown nfsuser:nfs_store_group_0 $APPTYPE_DIR/containers
 
