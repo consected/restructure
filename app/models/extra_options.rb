@@ -259,7 +259,7 @@ class ExtraOptions
 
       new_ao = {}
       ao.each do |aov|
-        new_ao[aov.to_sym] = aov.downcase
+        new_ao[aov.to_s.to_sym] = aov.to_s.downcase
       end
       self.field_options[k][:edit_as][:alt_options] = new_ao
     end
