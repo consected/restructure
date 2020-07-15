@@ -7,7 +7,7 @@ if [ -z "${ONDEVELOP}" ]; then
   exit 1
 fi
 
-bundle exec rake assets:clobber
+FPHS_LOAD_APP_TYPES=1 bundle exec rake assets:clobber
 git commit public/assets -m "Cleanup"
 
 GITSTATUS="$(git status --porcelain=1)"
@@ -37,17 +37,19 @@ git push origin --all
 
 git checkout develop
 
-
 cd ../install-playbook/ansible
 build_box=true vagrant up --provision
 TESTVER=$(cat build_version.txt)
 
-if [ "${TESTVER}" != "${NEWVER}" ]; then
+if [ "${TESTVER}" == "${CURRVER}" ]; then
   echo "Build failed"
+  echo "${TESTVER} == ${CURRVER}"
   exit 1
 fi
 
-sed -i -E "s/git_version: .+/git_version: ${NEWVER}/g" package_vars.yml
+sed -i -E "s/git_version: .+/git_version: ${TESTVER}/g" package_vars.yml
 setup_assets=true vagrant up --provision
 
 cd ${CURRDIR}
+echo ${TESTVER} > version.txt
+echo "Built and setup assets: ${TESTVER}"
