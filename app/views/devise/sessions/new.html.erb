@@ -3,6 +3,8 @@
     Log in <% if resource_name == :admin %><b>as Administrator</b><% elsif params[:redirect_from_secure] == 'true' && resource_name == :user %><b>as User</b><% end %>
   </h2>
 
+  <% if Settings::LoginMessage %><div class="well login-message"><%= Settings::LoginMessage%></div><% end %>
+
   <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
     <div class="form-group-non">
       <%= f.label :email %><br />
@@ -28,7 +30,7 @@
     </div>
 
   <% end %>
-
+  <p class="forgot-password"><%=link_to "Forgotten password or trouble logging in?", Settings::LoginIssuesUrl, target: "_blank" %></p>
   <p><br/></p>
   <p class="version-info">FPHS database app. Version <%=Application.version%></p>
 
