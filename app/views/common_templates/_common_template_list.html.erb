@@ -45,6 +45,28 @@
       {{/unless}}
     {{/is}}
     {{#is name '!==' full_name }}</div> {{/is}}
+    {{#is orientation '===' 'columns' }}
+
+      <div class="new-block{{#is name '!==' full_name }} new-block new-after{{/is}} hidden-if-empty" 
+           id="{{hyphenate name}}-{{../master_id}}-" 
+           data-subscription="{{hyphenate name}}-edit-form-{{../master_id}}-">{{#unless (pluralize full_name)}}
+        <ul class="list-group">
+          <li class="list-group-item is-heading">
+            <h4>No {{run_template caption}} records</h4>
+          </li>
+        </ul>
+      {{/unless}}</div>
+      
+      {{#unless prevent_create}}
+        {{#unless view_options.only_create_as_reference}}
+        <div class="new-button-container">
+          <div class="text-center"><a href="/masters/{{../master_id}}/{{pluralize name}}/new" data-toggle="scrollto-result" data-target="#{{hyphenate name}}-{{../master_id}}-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> {{add_item_label}}</a> </div>
+        </div>
+        {{/unless}}
+      {{/unless}}
+
+    {{/is}}
+
   {{else}}
   <p>
     Template Config not available for {{name}}
