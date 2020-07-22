@@ -38,6 +38,12 @@ class Settings
   PasswordReminderDays = (ENV['FPHS_PASSWORD_REMINDER_DAYS'] || 5).to_i
   PasswordMaxAttempts = (ENV['FPHS_PASSWORD_MAX_ATTEMPTS'] || 3).to_i
 
+  # email = Sends an unlock link to the user email
+  # time  = Re-enables login after a certain amount of time (see :unlock_in below)
+  # both  = Enables both strategies
+  # none  = No unlock strategy. You should handle unlocking by yourself.
+  PasswordUnlockStrategy = (ENV['FPHS_PASSWORD_UNLOCK_STRATEGY'] || 'time').to_sym
+
   EnvironmentName = ENV['FPHS_ENV_NAME'] || 'unknown'
   BaseUrl = ENV['BASE_URL']
 
