@@ -88,7 +88,7 @@ module HandlesUserBase
     end
 
     def permitted_params
-      res = attribute_names.map(&:to_sym) - %i[disabled user_id created_at updated_at tracker_id admin_id]
+      res = attribute_names.map(&:to_sym) - %i[disabled user_id created_at updated_at tracker_id tracker_history_id admin_id]
       refine_permitted_params res
     end
 
