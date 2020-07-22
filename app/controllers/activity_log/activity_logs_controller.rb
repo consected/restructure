@@ -141,7 +141,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
     # For example, in a phone log, the log records belong to player contacts, and these are retrieved
     # through the activity log controller
     @filtered_ids = @master_objects.select { |i| i.extra_log_type_config&.calc_showable_if(i) }.map(&:id)
-    @master_objects = primary_model.where(id: @filtered_ids)
+    @master_objects = @master_objects.where(id: @filtered_ids)
     limit_results
   end
 
