@@ -162,7 +162,7 @@
 
   if category
     res = page_layout_panel(category: category)
-    add_item_label = caption.singularize
+    add_item_label = button_label || caption.singularize
     if res
       orientation = res.view_options&.orientation || 'vertical'
       add_item_label =  res.view_options&.add_item_label || add_item_label
