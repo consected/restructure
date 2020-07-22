@@ -10,17 +10,17 @@ module ViewHandlers
     end
 
     class_methods do
+      # Add additional includes after this handler has been included
+      def handle_include_extras
+        include RankHandler
+        include Formatter::Formatters
+        include RecTypeHandler
+      end
+
       # an informal key onto the table is the :data field
       def secondary_key
         :data
       end
-    end
-
-    # Add additional includes after this handler has been included
-    def handle_include_extras
-      include RankHandler
-      include Formatter::Formatters
-      include RecTypeHandler
     end
   end
 end
