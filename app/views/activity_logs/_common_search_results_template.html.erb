@@ -89,21 +89,26 @@
 
 <% extra_log_type_configs.each do |c|
 
+    view_options = c.view_options
     cwc = col_width_classes
     cwc = 'e-sign-doc col-md-24 col-lg-12' if c.e_sign
-    cwc = c.view_options[:alt_width_classes] if c.view_options && c.view_options[:alt_width_classes]
+    cwc = view_options[:alt_width_classes] if view_options && view_options[:alt_width_classes]
+
+    header_caption = view_options[:header_caption] || c.label
+    extra_class = view_options[:extra_class]
+
 %>
 
   <%= render partial: 'common_templates/search_results_template', locals: {
+      caption: header_caption,
       name: "#{full_name}_#{c.name}",
       model_data_type: :activity_log,
       item_class_name: full_name,
-      caption: c.label,
       button_label: c.button_label,
       prevent_edit: prevent_edit,
       prevent_create: prevent_create,
       only_see_presence: current_user.has_access_to?(:see_presence, :activity_log_type, c.resource_name),
-      extra_class: "alt-width #{cwc}",
+      extra_class: "alt-width #{cwc} #{extra_class}",
       item_list: c.fields,
       data_sort: [:desc, data_action_when],
       subsort_id: true,

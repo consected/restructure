@@ -197,6 +197,7 @@
   });
 
   Handlebars.registerHelper('join', function (list, with_str, context) {
+    if (!list) return list;
     if (!list.join) return list;
     return list.join(with_str);
   });

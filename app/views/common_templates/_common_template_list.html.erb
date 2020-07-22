@@ -1,12 +1,25 @@
+<script id="common_template_list_new_button_container"  type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <div class="new-button-container">
+    <div class="text-center">
+      <a href="/masters/{{master_id}}/{{pluralize name}}/new"
+          data-toggle="scrollto-result"
+          data-target="#{{hyphenate name}}-{{../master_id}}-" 
+          data-remote="true"
+          class="btn btn-sm btn-primary add-item-button"
+      >
+        <span class="glyphicon glyphicon-plus"></span> {{add_item_label}}
+      </a>
+    </div>
+  </div>
+</script>
+
 <script id="common_template_list-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#with template_config}}
     {{#is orientation '===' 'horizontal' }}
 
       {{#unless prevent_create}}
         {{#unless view_options.only_create_as_reference}}
-        <div class="new-button-container">
-          <p class="text-center"><a href="/masters/{{../master_id}}/{{pluralize name}}/new" data-toggle="scrollto-result" data-target="#{{hyphenate name}}-{{../master_id}}-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> {{add_item_label}}</a> </p>
-        </div>
+          {{>common_template_list_new_button_container master_id=../master_id}}
         {{/unless}}
       {{/unless}}
 
@@ -38,9 +51,7 @@
       </div>
       {{#unless prevent_create}}
         {{#unless view_options.only_create_as_reference}}
-        <div class="new-button-container">
-          <p class="text-center"><a href="/masters/{{../master_id}}/{{pluralize name}}/new" data-toggle="scrollto-result" data-target="#{{hyphenate name}}-{{../master_id}}-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> {{add_item_label}} </a> </p>
-        </div>
+          {{>common_template_list_new_button_container master_id=../master_id}}
         {{/unless}}
       {{/unless}}
     {{/is}}
@@ -59,9 +70,7 @@
       
       {{#unless prevent_create}}
         {{#unless view_options.only_create_as_reference}}
-        <div class="new-button-container">
-          <div class="text-center"><a href="/masters/{{../master_id}}/{{pluralize name}}/new" data-toggle="scrollto-result" data-target="#{{hyphenate name}}-{{../master_id}}-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> {{add_item_label}}</a> </div>
-        </div>
+          {{>common_template_list_new_button_container master_id=../master_id}}
         {{/unless}}
       {{/unless}}
 
