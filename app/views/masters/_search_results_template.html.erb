@@ -53,7 +53,8 @@
     item_list: %w(source tracker_history_id),
     data_sort: [:desc, "data-rank"],
     extra_class: '{{rec_type}}-type',
-    extra_data_attribs: [:rec_type]
+    extra_data_attribs: [:rec_type],
+    view_options: { view_handlers: ['contact'] }
   } if current_user.has_access_to?(:access, :table, :player_contacts) %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
@@ -64,7 +65,8 @@
     item_list: %w(country_name,street,street2,street3,city,state_name,zip,region,postal_code,source_name,rec_type tracker_history_id),
     data_sort: [:desc, "data-rank"],
     # add custom markup data attribute to allow country to be processed in Javascript formatting
-    custom_block_attrs: {data_address_is_us: "{{#is country 'us'}}true{{else is country ''}}true{{else is country null}}true{{else}}false{{/is}}"}
+    custom_block_attrs: {data_address_is_us: "{{#is country 'us'}}true{{else is country ''}}true{{else is country null}}true{{else}}false{{/is}}"},
+    view_options: { view_handlers: ['address'] }
   } if current_user.has_access_to?(:access, :table, :addresses) %>
 
 

@@ -24,12 +24,27 @@
   end
   @form_object_instance = form_object_instance
 
+  unless defined? view_options
+    d = form_object_instance.class.default_options
+    view_options = d.view_options if d
+    # view_options = {}
+  end
+  view_options ||= {}
+  view_handlers = (view_options[:view_handlers] || [])
+  view_handlers = view_handlers.map{|v| "#{v}_edit"}.join(" ")
+
+
   # If this object form is embedded in an outer form (an activity log), then use fields_for rather than form_for
+
   if embedded
-    form_block = [:fields_for, :embedded_item, form_object_instance]
+    form_block = [:fields_for, :embedded_item, form_object_instance, {data: { view_handlers: view_handlers }}]
     form_block_object = form_embed
   else
-    form_block = [:form_for, [form_object_instance.belongs_directly_to, form_object_instance], edit_form_hash]
+    edit_form_hash_val = edit_form_hash.dup || {}
+    edit_form_hash_val[:html] ||= {}
+    edit_form_hash_val[:html]["data-view-handlers"] = view_handlers if view_handlers.present?
+    
+    form_block = [:form_for, [form_object_instance.belongs_directly_to, form_object_instance], edit_form_hash_val]
     form_block_object = self
   end
 
@@ -74,10 +89,6 @@
   end
   labels ||= {}
 
-  unless defined? view_options
-    view_options = {}
-  end
-
   if caption.blank?
     # if object_instance.respond_to?(:human_name) && object_instance.human_name.present?
       caption = object_instance.human_name
@@ -94,11 +105,6 @@
   end
 
   save_label = save_action[:label] || 'Save'
-
-  unless defined? view_options
-    d = form_object_instance.class.default_options
-    view_options = d.view_options if d
-  end
 
   show_cancel = view_options[:show_cancel] if view_options
 

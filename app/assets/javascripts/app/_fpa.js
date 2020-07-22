@@ -4,6 +4,7 @@ _fpa = {
   partials: {},
   app: {},
   state: {},
+  view_handlers: {},
   version: '0',
   remote_request: null,
   remote_request_block: null,

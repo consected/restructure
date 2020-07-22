@@ -750,6 +750,27 @@ _fpa.form_utils = {
     });
   },
 
+  // Call specific view handlers from view_options.view_handlers, which are placed 
+  // into data-view-handlers markup
+  apply_view_handlers: function (block) {
+
+    var bvh = block.find('[data-view-handlers]');
+    bvh.each(function () {
+      var vh = $(this).attr('data-view-handlers');
+      if (vh && _fpa.view_handlers[vh]) _fpa.view_handlers[vh]($(this));
+    });
+
+    if (bvh.length == 0) {
+      var vh = block.attr('data-view-handlers');
+      if (vh && _fpa.view_handlers[vh]) {
+        _fpa.view_handlers[vh](block);
+      }
+    }
+
+
+
+  },
+
   // Provide a filtered set of options in a select field, based on the selection of
   // another field. Used exclusively for protocol / sub-process / protocol-event forms at the moment
   // This handle both the initial setup and handling changes made to parent and dependent
@@ -1769,6 +1790,8 @@ _fpa.form_utils = {
     _fpa.form_utils.setup_error_clear(block);
     _fpa.form_utils.resize_children(block);
     _fpa.form_utils.setup_sub_lists(block);
+    _fpa.form_utils.apply_view_handlers(block);
+
     block.removeClass('formatting-block');
   }
 };
