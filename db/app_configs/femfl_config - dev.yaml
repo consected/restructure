@@ -1,0 +1,482 @@
+---
+app_type:
+  id: 43
+  name: femfl
+  label: FEMFL
+  disabled: false
+  admin_id: 21
+  created_at: '2020-07-16T16:09:06.233Z'
+  updated_at: '2020-07-20T14:53:42.968Z'
+  app_configurations:
+  - id: 550
+    name: hide pro info
+    value: 'true'
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 43
+    role_name: ''
+    created_at: '2020-07-16T16:12:19.111Z'
+    updated_at: '2020-07-16T16:12:19.111Z'
+    user_email: 
+  - id: 551
+    name: menu research label
+    value: FEMFL
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 43
+    role_name: ''
+    created_at: '2020-07-16T16:12:57.726Z'
+    updated_at: '2020-07-20T14:54:12.104Z'
+    user_email: 
+  - id: 552
+    name: hide navbar search
+    value: 'true'
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 43
+    role_name: ''
+    created_at: '2020-07-16T16:14:01.557Z'
+    updated_at: '2020-07-16T16:14:01.557Z'
+    user_email: 
+  - id: 553
+    name: hide search form advanced
+    value: 'true'
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 43
+    role_name: ''
+    created_at: '2020-07-16T16:14:24.767Z'
+    updated_at: '2020-07-16T16:14:24.767Z'
+    user_email: 
+  - id: 554
+    name: hide search form simple
+    value: 'true'
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 43
+    role_name: ''
+    created_at: '2020-07-16T16:14:36.927Z'
+    updated_at: '2020-07-16T16:14:36.927Z'
+    user_email: 
+  - id: 555
+    name: default search form
+    value: femfl__search_femfl_study_subject
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 43
+    role_name: ''
+    created_at: '2020-07-20T14:53:27.268Z'
+    updated_at: '2020-07-20T14:53:27.268Z'
+    user_email: 
+  - id: 556
+    name: create master with
+    value: dynamic_model__femfl_subject
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 43
+    role_name: ''
+    created_at: '2020-07-20T15:18:14.264Z'
+    updated_at: '2020-07-20T15:18:14.264Z'
+    user_email: 
+  - id: 557
+    name: menu create master record label
+    value: Create Subject
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 43
+    role_name: ''
+    created_at: '2020-07-20T15:18:54.406Z'
+    updated_at: '2020-07-20T15:18:54.406Z'
+    user_email: 
+  - id: 558
+    name: header subject data type
+    value: dynamic_model__femfl_subjects
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 43
+    role_name: ''
+    created_at: '2020-07-21T13:47:27.717Z'
+    updated_at: '2020-07-21T13:48:26.863Z'
+    user_email: 
+  valid_user_access_controls:
+  - id: 2402
+    user_id: 
+    resource_type: general
+    resource_name: app_type
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-16T16:10:04.109Z'
+    updated_at: '2020-07-16T16:10:04.109Z'
+    user_email: 
+  - id: 2403
+    user_id: 
+    resource_type: table
+    resource_name: femfl_assignments
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-16T16:40:00.564Z'
+    updated_at: '2020-07-20T16:08:43.474Z'
+    user_email: 
+  - id: 2404
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__femfl_addresses
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-20T14:22:00.015Z'
+    updated_at: '2020-07-20T15:20:13.848Z'
+    user_email: 
+  - id: 2405
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__femfl_subjects
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-20T14:56:03.888Z'
+    updated_at: '2020-07-20T15:20:06.363Z'
+    user_email: 
+  - id: 2406
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__femfl_contacts
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-20T14:56:16.368Z'
+    updated_at: '2020-07-20T15:19:36.015Z'
+    user_email: 
+  - id: 2407
+    user_id: 
+    resource_type: report
+    resource_name: Search FEMFL Study Subject
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-20T14:56:45.070Z'
+    updated_at: '2020-07-20T14:56:45.070Z'
+    user_email: 
+  - id: 2408
+    user_id: 
+    resource_type: general
+    resource_name: create_master
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-20T15:17:20.681Z'
+    updated_at: '2020-07-20T15:17:20.681Z'
+    user_email: 
+  - id: 2409
+    user_id: 
+    resource_type: table
+    resource_name: trackers
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-20T16:07:53.740Z'
+    updated_at: '2020-07-20T16:08:37.510Z'
+    user_email: 
+  - id: 2410
+    user_id: 
+    resource_type: table
+    resource_name: tracker_histories
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-20T16:08:21.953Z'
+    updated_at: '2020-07-20T16:08:21.953Z'
+    user_email: 
+  valid_associated_activity_logs: []
+  associated_dynamic_models:
+  - id: 609
+    name: Subject
+    table_name: femfl_subjects
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-16T16:55:44.009Z'
+    updated_at: '2020-07-22T10:32:20.015Z'
+    position: 0
+    category: femfl
+    table_key_name: ''
+    field_list: first_name last_name middle_name nick_name birth_date rank source
+      tracker_history_id
+    result_order: ''
+    options: "default:\r\n\r\n  view_options:\r\n    view_handlers: \r\n      - subject\r\n
+      \     "
+    user_email: 
+  - id: 613
+    name: Address
+    table_name: femfl_addresses
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-20T14:21:59.900Z'
+    updated_at: '2020-07-22T10:32:14.257Z'
+    position: 10
+    category: femfl
+    table_key_name: ''
+    field_list: street street2 street3 city state zip country source rank rec_type
+      postal_code region tracker_history_id
+    result_order: ''
+    options: "default:\r\n\r\n  view_options:\r\n    view_handlers: \r\n      - address\r\n
+      \     \r\n      "
+    user_email: 
+  - id: 611
+    name: Contact
+    table_name: femfl_contacts
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-16T16:58:45.518Z'
+    updated_at: '2020-07-22T10:31:38.984Z'
+    position: 20
+    category: femfl
+    table_key_name: ''
+    field_list: rec_type data rank source tracker_history_id
+    result_order: ''
+    options: "default:\r\n  button_label: Phone / Email\r\n  view_options:\r\n    header_caption:
+      \"{{data}}\"\r\n    extra_class: \"{{rec_type}}-type\"\r\n    view_handlers:
+      \r\n      - contact\r\n  \r\n  show_if:\r\n    rec_type:\r\n      current_mode:
+      edit\r\n    data: \r\n      current_mode: edit    \r\n    rank:\r\n      current_mode:
+      edit    "
+    user_email: 
+  associated_external_identifiers:
+  - id: 43
+    name: femfl_assignments
+    label: FEMFL ID
+    external_id_attribute: femfl_id
+    external_id_view_formatter: ''
+    external_id_edit_pattern: ''
+    prevent_edit: true
+    pregenerate_ids: true
+    min_id: 100000
+    max_id: 999999
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-16T16:40:00.450Z'
+    updated_at: '2020-07-20T15:05:48.758Z'
+    alphanumeric: false
+    extra_fields: ''
+    user_email: 
+  associated_reports: []
+  associated_general_selections:
+  - id: 830
+    name: CIF
+    value: cif
+    item_type: dynamic_model__femfl_contacts_source
+    created_at: '2020-07-21T14:36:40.891Z'
+    updated_at: '2020-07-21T14:36:40.891Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 831
+    name: Phone
+    value: phone
+    item_type: dynamic_model__femfl_contacts_rec_type
+    created_at: '2020-07-21T14:37:22.557Z'
+    updated_at: '2020-07-21T14:37:22.557Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: false
+    position: 1
+    description: ''
+    lock: true
+    user_email: 
+  - id: 832
+    name: Email
+    value: email
+    item_type: dynamic_model__femfl_contacts_rec_type
+    created_at: '2020-07-21T14:37:49.427Z'
+    updated_at: '2020-07-21T14:37:49.427Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: false
+    position: 1
+    description: ''
+    lock: true
+    user_email: 
+  - id: 833
+    name: primary
+    value: '10'
+    item_type: dynamic_model__femfl_contacts_rank
+    created_at: '2020-07-21T14:38:49.129Z'
+    updated_at: '2020-07-21T14:39:55.279Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 0
+    description: ''
+    lock: false
+    user_email: 
+  - id: 834
+    name: secondary
+    value: '5'
+    item_type: dynamic_model__femfl_contacts_rank
+    created_at: '2020-07-21T14:38:57.399Z'
+    updated_at: '2020-07-21T14:38:57.399Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 1
+    description: ''
+    lock: false
+    user_email: 
+  - id: 835
+    name: do not use
+    value: '0'
+    item_type: dynamic_model__femfl_contacts_rank
+    created_at: '2020-07-21T14:39:38.588Z'
+    updated_at: '2020-07-21T14:39:38.588Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 3
+    description: ''
+    lock: false
+    user_email: 
+  - id: 836
+    name: bad contact
+    value: "-1"
+    item_type: dynamic_model__femfl_contacts_rank
+    created_at: '2020-07-21T14:40:10.993Z'
+    updated_at: '2020-07-21T14:40:10.993Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 5
+    description: ''
+    lock: false
+    user_email: 
+  page_layouts:
+  - id: 77
+    app_type_id: 43
+    layout_name: master
+    panel_name: subject_details
+    panel_label: Subject Details
+    panel_position: 1
+    options: "contains:\r\n#  resources:\r\n#    - dynamic_model__femfl_subjects\r\n
+      \ categories: \r\n    - femfl\r\n\r\nview_options:\r\n  initial_show: true\r\n
+      \ orientation: columns"
+    disabled: false
+    admin_id: 21
+    created_at: '2020-07-20T16:11:13.321Z'
+    updated_at: '2020-07-20T17:38:58.713Z'
+    description: ''
+    user_email: 
+  - id: 78
+    app_type_id: 43
+    layout_name: master
+    panel_name: trackers
+    panel_label: Tracker
+    panel_position: 0
+    options: "contains:\r\n#  resources:\r\n#    - dynamic_model__femfl_subjects\r\n
+      \ categories: \r\n    - trackers\r\n\r\nview_options:\r\n  initial_show: true\r\n
+      \ orientation: columns"
+    disabled: false
+    admin_id: 21
+    created_at: '2020-07-21T10:47:43.518Z'
+    updated_at: '2020-07-21T10:47:43.518Z'
+    description: ''
+    user_email: 
+  user_roles:
+  - id: 975
+    app_type_id: 43
+    role_name: user
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-16T16:09:41.052Z'
+    updated_at: '2020-07-16T16:09:41.052Z'
+    user_email: phil_ayres@test.com
+  - id: 976
+    app_type_id: 43
+    role_name: user
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-16T16:09:41.072Z'
+    updated_at: '2020-07-16T16:09:41.072Z'
+    user_email: template@template
+  - id: 977
+    app_type_id: 43
+    role_name: _app_
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-16T16:40:00.528Z'
+    updated_at: '2020-07-16T16:40:00.528Z'
+    user_email: template@template
+  associated_message_templates: []
+  associated_config_libraries: []
+  associated_protocols: []
+  associated_sub_processes: []
+  associated_protocol_events: []
+  nfs_store_filters: []
+  user_email: 
