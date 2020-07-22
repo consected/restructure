@@ -4,10 +4,13 @@ class DynamicModel < ActiveRecord::Base
   include DynamicModelDefHandler
   include AdminHandler
 
+  StandardFields = %w[id created_at updated_at contactid user_id master_id].freeze
+
   default_scope -> { order disabled: :asc, category: :asc, position: :asc, updated_at: :desc }
 
   validate :table_name_ok
   after_save :force_option_config_parse
+  after_save :set_empty_field_list
 
   attr_accessor :editable
 
@@ -53,7 +56,7 @@ class DynamicModel < ActiveRecord::Base
 
     if res.empty? && model_def
       begin
-        res = model_def.attribute_names - %w[id created_at updated_at contactid user_id master_id]
+        res = model_def.attribute_names - StandardFields
       rescue StandardError => e
         puts "Failed to get all_implementation_fields for reason: #{e.inspect} \n#{e.backtrace.join("\n")}"
         raise e unless ignore_errors
@@ -196,6 +199,7 @@ class DynamicModel < ActiveRecord::Base
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
         res.include DynamicModelHandler
+        add_handlers(res)
 
         res.final_setup
 
@@ -245,11 +249,23 @@ class DynamicModel < ActiveRecord::Base
 
     if failed || !enabled?
       remove_model_from_list
-    else
-      add_model_to_list res if res
+    elsif res
+      add_model_to_list res
     end
 
     @regenerate = res
+  end
+
+  def add_handlers(res)
+    vh = default_options.view_options[:view_handlers]
+    return unless vh.present?
+
+    vh.each do |v|
+      h = "ViewHandlers::#{v.camelize}".constantize
+      res.include h
+
+      handle_include_extras if res.respond_to? :handle_include_extras
+    end
   end
 
   def self.routes_load
@@ -287,6 +303,11 @@ class DynamicModel < ActiveRecord::Base
     else
       true
     end
+  end
+
+  def set_empty_field_list
+    fl = implementation_class.attribute_names - StandardFields
+    self.field_list = fl.join(' ') if field_list.blank?
   end
 end
 
