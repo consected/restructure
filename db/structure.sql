@@ -23,6 +23,13 @@ CREATE SCHEMA data_requests;
 
 
 --
+-- Name: femfl; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA femfl;
+
+
+--
 -- Name: grit; Type: SCHEMA; Schema: -; Owner: -
 --
 
@@ -350,38 +357,43 @@ CREATE FUNCTION bulk_msg.log_zeus_short_link_update() RETURNS trigger
 
 CREATE FUNCTION data_requests.log_activity_log_data_request_assignment_update() RETURNS trigger
     LANGUAGE plpgsql
-    AS $$
-              BEGIN
-                  INSERT INTO activity_log_data_request_assignment_history
-                  (
-                      master_id,
-                      data_request_assignment_id,
-                      follow_up_date,
-                      follow_up_time,
-                      notes,
-                      extra_log_type,
-                      user_id,
-                      created_by_user_id,
-                      created_at,
-                      updated_at,
-                      activity_log_data_request_assignment_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.data_request_assignment_id,
-                      NEW.follow_up_date,
-                      NEW.follow_up_time,
-                      NEW.notes,
-                      NEW.extra_log_type,
-                      NEW.user_id,
-                      NEW.created_by_user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
+    AS $$ BEGIN
+    INSERT INTO
+        activity_log_data_request_assignment_history (
+            master_id,
+            data_request_assignment_id,
+            follow_up_date,
+            follow_up_time,
+            next_step,
+            status,
+            notes,
+            extra_log_type,
+            user_id,
+            created_by_user_id,
+            created_at,
+            updated_at,
+            activity_log_data_request_assignment_id
+        )
+    SELECT
+        NEW.master_id,
+        NEW.data_request_assignment_id,
+        NEW.follow_up_date,
+        NEW.follow_up_time,
+        NEW.next_step,
+        NEW.status,
+        NEW .notes,
+        NEW.extra_log_type,
+        NEW.user_id,
+        NEW.created_by_user_id,
+        NEW.created_at,
+        NEW.updated_at,
+        NEW.id;
+
+RETURN NEW;
+
+END;
+
+$$;
 
 
 --
@@ -616,6 +628,7 @@ CREATE FUNCTION data_requests.log_data_request_update() RETURNS trigger
                       fphs_analyst_yes_no,
                       fphs_server_yes_no,
                       fphs_server_tools_notes,
+                      off_fphs_server_reason_notes,
                       status,
                       user_id,
                       created_by_user_id,
@@ -643,6 +656,7 @@ CREATE FUNCTION data_requests.log_data_request_update() RETURNS trigger
                       NEW.fphs_analyst_yes_no,
                       NEW.fphs_server_yes_no,
                       NEW.fphs_server_tools_notes,
+                      NEW.off_fphs_server_reason_notes,
                       NEW.status,
                       NEW.user_id,
                       NEW.created_by_user_id,
@@ -693,6 +707,116 @@ CREATE FUNCTION data_requests.log_data_requests_selected_attrib_update() RETURNS
                   RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_femfl_addresses_update(); Type: FUNCTION; Schema: femfl; Owner: -
+--
+
+CREATE FUNCTION femfl.log_femfl_addresses_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO femfl_address_history (
+    master_id,
+    street, street2, street3, city, state, zip, source, rank, rec_type, country, postal_code, region,
+    user_id,
+    created_at,
+    updated_at,
+    femfl_address_id)
+  SELECT
+    NEW.master_id,
+    NEW.street, NEW.street2, NEW.street3, NEW.city, NEW.state, NEW.zip, NEW.source, NEW.rank, NEW.rec_type, NEW.country, NEW.postal_code, NEW.region,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_femfl_assignments_update(); Type: FUNCTION; Schema: femfl; Owner: -
+--
+
+CREATE FUNCTION femfl.log_femfl_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO femfl_assignment_history (
+    master_id,
+    femfl_id, femfl_id,
+    user_id,
+    admin_id,
+    created_at,
+    updated_at,
+    femfl_assignment_table_id)
+  SELECT
+    NEW.master_id,
+    NEW.femfl_id,
+    NEW.user_id,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_femfl_contacts_update(); Type: FUNCTION; Schema: femfl; Owner: -
+--
+
+CREATE FUNCTION femfl.log_femfl_contacts_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO femfl_contact_history (
+    master_id,
+    rec_type, data, rank, source,
+    user_id,
+    created_at,
+    updated_at,
+    femfl_contact_id)
+  SELECT
+    NEW.master_id,
+    NEW.rec_type, NEW.data, NEW.rank, NEW.source,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_femfl_subjects_update(); Type: FUNCTION; Schema: femfl; Owner: -
+--
+
+CREATE FUNCTION femfl.log_femfl_subjects_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO femfl_subject_history (
+    master_id,
+    first_name, last_name, middle_name, nick_name, birth_date, rank, source,
+    user_id,
+    created_at,
+    updated_at,
+    femfl_subject_id)
+  SELECT
+    NEW.master_id,
+    NEW.first_name, NEW.last_name, NEW.middle_name, NEW.nick_name, NEW.birth_date, NEW.rank, NEW.source,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -7206,15 +7330,15 @@ $$;
 CREATE FUNCTION ml_app.filestore_report_full_file_path(sf ml_app.nfs_store_stored_files, af ml_app.nfs_store_archived_files) RETURNS character varying
     LANGUAGE plpgsql
     AS $$
-    BEGIN
+          BEGIN
 
-      return CASE WHEN af.id IS NOT NULL THEN
-        coalesce(sf.path, '') || '/' || sf.file_name || '/' || af.path '/' || af.file_name
-        ELSE sf.path
-      END;
+            return CASE WHEN af.id IS NOT NULL THEN
+              coalesce(sf.path, '') || '/' || sf.file_name || '/' || af.path || '/' || af.file_name
+              ELSE coalesce(sf.path, '') || '/' || sf.file_name
+            END;
 
-	END;
-$$;
+       END;
+      $$;
 
 
 --
@@ -19071,7 +19195,9 @@ CREATE TABLE data_requests.activity_log_data_request_assignment_history (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     activity_log_data_request_assignment_id integer,
-    created_by_user_id integer
+    created_by_user_id integer,
+    next_step character varying,
+    status character varying
 );
 
 
@@ -19109,7 +19235,9 @@ CREATE TABLE data_requests.activity_log_data_request_assignments (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    created_by_user_id integer
+    created_by_user_id integer,
+    next_step character varying,
+    status character varying
 );
 
 
@@ -19300,7 +19428,8 @@ CREATE TABLE data_requests.data_request_history (
     fphs_analyst_yes_no character varying,
     fphs_server_yes_no character varying,
     fphs_server_tools_notes character varying,
-    status character varying
+    status character varying,
+    off_fphs_server_reason_notes character varying
 );
 
 
@@ -19638,7 +19767,8 @@ CREATE TABLE data_requests.data_requests (
     fphs_analyst_yes_no character varying,
     fphs_server_yes_no character varying,
     fphs_server_tools_notes character varying,
-    status character varying
+    status character varying,
+    off_fphs_server_reason_notes character varying
 );
 
 
@@ -19770,6 +19900,316 @@ CREATE SEQUENCE data_requests.q2_rc_codebook_id_seq
 --
 
 ALTER SEQUENCE data_requests.q2_rc_codebook_id_seq OWNED BY data_requests.q2_rc_codebook.id;
+
+
+--
+-- Name: femfl_address_history; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_address_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    street character varying,
+    street2 character varying,
+    street3 character varying,
+    city character varying,
+    state character varying,
+    zip character varying,
+    source character varying,
+    rank character varying,
+    rec_type character varying,
+    country character varying,
+    postal_code character varying,
+    region character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    femfl_address_id bigint
+);
+
+
+--
+-- Name: femfl_address_history_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_address_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_address_history_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_address_history_id_seq OWNED BY femfl.femfl_address_history.id;
+
+
+--
+-- Name: femfl_addresses; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_addresses (
+    id bigint NOT NULL,
+    master_id bigint,
+    street character varying,
+    street2 character varying,
+    street3 character varying,
+    city character varying,
+    state character varying,
+    zip character varying,
+    source character varying,
+    rank character varying,
+    rec_type character varying,
+    country character varying,
+    postal_code character varying,
+    region character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: femfl_addresses_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_addresses_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_addresses_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_addresses_id_seq OWNED BY femfl.femfl_addresses.id;
+
+
+--
+-- Name: femfl_assignment_history; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_assignment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    femfl_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    femfl_assignment_table_id_id bigint
+);
+
+
+--
+-- Name: femfl_assignment_history_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_assignment_history_id_seq OWNED BY femfl.femfl_assignment_history.id;
+
+
+--
+-- Name: femfl_assignments; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_assignments (
+    id bigint NOT NULL,
+    master_id bigint,
+    femfl_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: femfl_assignments_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_assignments_id_seq OWNED BY femfl.femfl_assignments.id;
+
+
+--
+-- Name: femfl_contact_history; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_contact_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    rec_type character varying,
+    data character varying,
+    rank character varying,
+    source character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    femfl_contact_id bigint
+);
+
+
+--
+-- Name: femfl_contact_history_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_contact_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_contact_history_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_contact_history_id_seq OWNED BY femfl.femfl_contact_history.id;
+
+
+--
+-- Name: femfl_contacts; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_contacts (
+    id bigint NOT NULL,
+    master_id bigint,
+    rec_type character varying,
+    data character varying,
+    rank character varying,
+    source character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: femfl_contacts_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_contacts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_contacts_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_contacts_id_seq OWNED BY femfl.femfl_contacts.id;
+
+
+--
+-- Name: femfl_subject_history; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_subject_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    first_name character varying,
+    last_name character varying,
+    middle_name character varying,
+    nick_name character varying,
+    birth_date date,
+    rank character varying,
+    source character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    femfl_subject_id bigint
+);
+
+
+--
+-- Name: femfl_subject_history_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_subject_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_subject_history_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_subject_history_id_seq OWNED BY femfl.femfl_subject_history.id;
+
+
+--
+-- Name: femfl_subjects; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_subjects (
+    id bigint NOT NULL,
+    master_id bigint,
+    first_name character varying,
+    last_name character varying,
+    middle_name character varying,
+    nick_name character varying,
+    birth_date date,
+    rank character varying,
+    source character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: femfl_subjects_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_subjects_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_subjects_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_subjects_id_seq OWNED BY femfl.femfl_subjects.id;
 
 
 --
@@ -39687,6 +40127,62 @@ ALTER TABLE ONLY data_requests.q2_rc_codebook ALTER COLUMN id SET DEFAULT nextva
 
 
 --
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_address_history ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_address_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_addresses ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_addresses_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignment_history ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignments ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contact_history ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_contact_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contacts ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_contacts_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subject_history ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_subject_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subjects ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_subjects_id_seq'::regclass);
+
+
+--
 -- Name: id; Type: DEFAULT; Schema: grit; Owner: -
 --
 
@@ -43181,6 +43677,70 @@ ALTER TABLE ONLY data_requests.data_requests_selected_attribs
 
 ALTER TABLE ONLY data_requests.q2_rc_codebook
     ADD CONSTRAINT q2_rc_codebook_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_address_history_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_address_history
+    ADD CONSTRAINT femfl_address_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_addresses_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_addresses
+    ADD CONSTRAINT femfl_addresses_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_assignment_history_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignment_history
+    ADD CONSTRAINT femfl_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_assignments_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignments
+    ADD CONSTRAINT femfl_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_contact_history_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contact_history
+    ADD CONSTRAINT femfl_contact_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_contacts_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contacts
+    ADD CONSTRAINT femfl_contacts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_subject_history_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subject_history
+    ADD CONSTRAINT femfl_subject_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_subjects_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subjects
+    ADD CONSTRAINT femfl_subjects_pkey PRIMARY KEY (id);
 
 
 --
@@ -47480,6 +48040,160 @@ CREATE INDEX index_data_requests_selected_attribs_on_master_id ON data_requests.
 --
 
 CREATE INDEX index_data_requests_selected_attribs_on_user_id ON data_requests.data_requests_selected_attribs USING btree (user_id);
+
+
+--
+-- Name: femfl_address_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX femfl_address_id_idx ON femfl.femfl_address_history USING btree (femfl_address_id);
+
+
+--
+-- Name: femfl_assignment_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX femfl_assignment_id_idx ON femfl.femfl_assignment_history USING btree (femfl_assignment_table_id_id);
+
+
+--
+-- Name: femfl_contact_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX femfl_contact_id_idx ON femfl.femfl_contact_history USING btree (femfl_contact_id);
+
+
+--
+-- Name: femfl_subject_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX femfl_subject_id_idx ON femfl.femfl_subject_history USING btree (femfl_subject_id);
+
+
+--
+-- Name: index_femfl.femfl_address_history_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_address_history_on_master_id" ON femfl.femfl_address_history USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_address_history_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_address_history_on_user_id" ON femfl.femfl_address_history USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_addresses_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_addresses_on_master_id" ON femfl.femfl_addresses USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_addresses_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_addresses_on_user_id" ON femfl.femfl_addresses USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_assignment_history_on_admin_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_assignment_history_on_admin_id" ON femfl.femfl_assignment_history USING btree (admin_id);
+
+
+--
+-- Name: index_femfl.femfl_assignment_history_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_assignment_history_on_master_id" ON femfl.femfl_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_assignment_history_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_assignment_history_on_user_id" ON femfl.femfl_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_assignments_on_admin_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_assignments_on_admin_id" ON femfl.femfl_assignments USING btree (admin_id);
+
+
+--
+-- Name: index_femfl.femfl_assignments_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_assignments_on_master_id" ON femfl.femfl_assignments USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_assignments_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_assignments_on_user_id" ON femfl.femfl_assignments USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_contact_history_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_contact_history_on_master_id" ON femfl.femfl_contact_history USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_contact_history_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_contact_history_on_user_id" ON femfl.femfl_contact_history USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_contacts_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_contacts_on_master_id" ON femfl.femfl_contacts USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_contacts_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_contacts_on_user_id" ON femfl.femfl_contacts USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_subject_history_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_subject_history_on_master_id" ON femfl.femfl_subject_history USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_subject_history_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_subject_history_on_user_id" ON femfl.femfl_subject_history USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_subjects_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_subjects_on_master_id" ON femfl.femfl_subjects USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_subjects_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_subjects_on_user_id" ON femfl.femfl_subjects USING btree (user_id);
 
 
 --
@@ -56086,6 +56800,62 @@ CREATE TRIGGER data_requests_selected_attrib_history_update AFTER UPDATE ON data
 
 
 --
+-- Name: log_femfl_address_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_address_history_insert AFTER INSERT ON femfl.femfl_addresses FOR EACH ROW EXECUTE PROCEDURE femfl.log_femfl_addresses_update();
+
+
+--
+-- Name: log_femfl_address_history_update; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_address_history_update AFTER UPDATE ON femfl.femfl_addresses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE femfl.log_femfl_addresses_update();
+
+
+--
+-- Name: log_femfl_assignment_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_assignment_history_insert AFTER INSERT ON femfl.femfl_assignments FOR EACH ROW EXECUTE PROCEDURE femfl.log_femfl_assignments_update();
+
+
+--
+-- Name: log_femfl_assignment_history_update; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_assignment_history_update AFTER UPDATE ON femfl.femfl_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE femfl.log_femfl_assignments_update();
+
+
+--
+-- Name: log_femfl_contact_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_contact_history_insert AFTER INSERT ON femfl.femfl_contacts FOR EACH ROW EXECUTE PROCEDURE femfl.log_femfl_contacts_update();
+
+
+--
+-- Name: log_femfl_contact_history_update; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_contact_history_update AFTER UPDATE ON femfl.femfl_contacts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE femfl.log_femfl_contacts_update();
+
+
+--
+-- Name: log_femfl_subject_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_subject_history_insert AFTER INSERT ON femfl.femfl_subjects FOR EACH ROW EXECUTE PROCEDURE femfl.log_femfl_subjects_update();
+
+
+--
+-- Name: log_femfl_subject_history_update; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_subject_history_update AFTER UPDATE ON femfl.femfl_subjects FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE femfl.log_femfl_subjects_update();
+
+
+--
 -- Name: activity_log_grit_assignment_adverse_event_history_insert; Type: TRIGGER; Schema: grit; Owner: -
 --
 
@@ -60022,6 +60792,182 @@ ALTER TABLE ONLY data_requests.data_request_message_to_reviewers
 
 ALTER TABLE ONLY data_requests.data_request_messages
     ADD CONSTRAINT fk_rails_982635401e0 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a3285fe5b; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contact_history
+    ADD CONSTRAINT fk_rails_1a3285fe5b FOREIGN KEY (femfl_contact_id) REFERENCES femfl.femfl_contacts(id);
+
+
+--
+-- Name: fk_rails_2166f7237d; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contacts
+    ADD CONSTRAINT fk_rails_2166f7237d FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_21f20021cd; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_address_history
+    ADD CONSTRAINT fk_rails_21f20021cd FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_4120d4ab90; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignment_history
+    ADD CONSTRAINT fk_rails_4120d4ab90 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_4e70686814; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contact_history
+    ADD CONSTRAINT fk_rails_4e70686814 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_56c0e165b2; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignment_history
+    ADD CONSTRAINT fk_rails_56c0e165b2 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_5e27ae2ba2; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignments
+    ADD CONSTRAINT fk_rails_5e27ae2ba2 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_6609a61f67; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_address_history
+    ADD CONSTRAINT fk_rails_6609a61f67 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_72809ba128; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignment_history
+    ADD CONSTRAINT fk_rails_72809ba128 FOREIGN KEY (femfl_assignment_table_id_id) REFERENCES femfl.femfl_assignments(id);
+
+
+--
+-- Name: fk_rails_7a745b7b8c; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subject_history
+    ADD CONSTRAINT fk_rails_7a745b7b8c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_8f6160c35f; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignments
+    ADD CONSTRAINT fk_rails_8f6160c35f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_90f4e08ddd; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_address_history
+    ADD CONSTRAINT fk_rails_90f4e08ddd FOREIGN KEY (femfl_address_id) REFERENCES femfl.femfl_addresses(id);
+
+
+--
+-- Name: fk_rails_93e4bf606f; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subjects
+    ADD CONSTRAINT fk_rails_93e4bf606f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_aee3b901b1; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_addresses
+    ADD CONSTRAINT fk_rails_aee3b901b1 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_bd9caca30a; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subjects
+    ADD CONSTRAINT fk_rails_bd9caca30a FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_c0d50fccd9; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_addresses
+    ADD CONSTRAINT fk_rails_c0d50fccd9 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_e7bc04e4c0; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subject_history
+    ADD CONSTRAINT fk_rails_e7bc04e4c0 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_ee53b66c4d; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subject_history
+    ADD CONSTRAINT fk_rails_ee53b66c4d FOREIGN KEY (femfl_subject_id) REFERENCES femfl.femfl_subjects(id);
+
+
+--
+-- Name: fk_rails_ef0ac20f2e; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contact_history
+    ADD CONSTRAINT fk_rails_ef0ac20f2e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_ef5b678a2c; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignments
+    ADD CONSTRAINT fk_rails_ef5b678a2c FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_efeeb3018f; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignment_history
+    ADD CONSTRAINT fk_rails_efeeb3018f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_f5506ad91c; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contacts
+    ADD CONSTRAINT fk_rails_f5506ad91c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -69452,7 +70398,7 @@ ALTER TABLE ONLY tbs.tbs_withdrawal_history
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests;
+SET search_path TO ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests,femfl;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20150602181200'),
@@ -69715,6 +70661,11 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200225115151'),
 ('20200313160640'),
 ('20200403172361'),
-('20200611123849');
+('20200611123849'),
+('20200720100000'),
+('20200720110000'),
+('20200720121356'),
+('20200720161000'),
+('20200720161100');
 
 
