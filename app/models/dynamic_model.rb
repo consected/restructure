@@ -264,7 +264,7 @@ class DynamicModel < ActiveRecord::Base
       h = "ViewHandlers::#{v.camelize}".constantize
       res.include h
 
-      handle_include_extras if res.respond_to? :handle_include_extras
+      res.handle_include_extras if res.respond_to? :handle_include_extras
     end
   end
 
