@@ -720,7 +720,7 @@ BEGIN
   INSERT INTO activity_log_femfl_assignment_femfl_comm_history (
     master_id,
     femfl_assignment_id,
-    select_activity, activity_date, select_record_from_dynamic_model__femfl_contacts, select_record_from_dynamic_model__femfl_addresses, select_direction, select_who, select_result, select_next_step, follow_up_when, follow_up_time, notes,
+    select_activity, activity_date, select_record_from_dynamic_model__femfl_contacts, select_record_from_dynamic_model__femfl_addresses, select_direction, select_who, select_result, select_next_step, follow_up_when, follow_up_time, notes, protocol_id,
     extra_log_type,
     user_id,
     created_at,
@@ -729,7 +729,7 @@ BEGIN
   SELECT
     NEW.master_id,
     NEW.femfl_assignment_id,
-    NEW.select_activity, NEW.activity_date, NEW.select_record_from_dynamic_model__femfl_contacts, NEW.select_record_from_dynamic_model__femfl_addresses, NEW.select_direction, NEW.select_who, NEW.select_result, NEW.select_next_step, NEW.follow_up_when, NEW.follow_up_time, NEW.notes,
+    NEW.select_activity, NEW.activity_date, NEW.select_record_from_dynamic_model__femfl_contacts, NEW.select_record_from_dynamic_model__femfl_addresses, NEW.select_direction, NEW.select_who, NEW.select_result, NEW.select_next_step, NEW.follow_up_when, NEW.follow_up_time, NEW.notes, NEW.protocol_id,
     NEW.extra_log_type,
     NEW.user_id,
     NEW.created_at,
@@ -19952,6 +19952,7 @@ CREATE TABLE femfl.activity_log_femfl_assignment_femfl_comm_history (
     follow_up_when date,
     follow_up_time time without time zone,
     notes character varying,
+    protocol_id bigint,
     extra_log_type character varying,
     user_id bigint,
     created_at timestamp without time zone NOT NULL,
@@ -19998,6 +19999,7 @@ CREATE TABLE femfl.activity_log_femfl_assignment_femfl_comms (
     follow_up_when date,
     follow_up_time time without time zone,
     notes character varying,
+    protocol_id bigint,
     extra_log_type character varying,
     user_id bigint,
     created_at timestamp without time zone NOT NULL,
@@ -31540,7 +31542,8 @@ CREATE TABLE ml_app.protocols (
     updated_at timestamp without time zone NOT NULL,
     disabled boolean,
     admin_id integer,
-    "position" integer
+    "position" integer,
+    app_type_id bigint
 );
 
 
@@ -52990,6 +52993,13 @@ CREATE INDEX index_protocols_on_admin_id ON ml_app.protocols USING btree (admin_
 
 
 --
+-- Name: index_protocols_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_protocols_on_app_type_id ON ml_app.protocols USING btree (app_type_id);
+
+
+--
 -- Name: index_report_history_on_report_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -66578,6 +66588,14 @@ ALTER TABLE ONLY ml_app.sage_assignments
 
 
 --
+-- Name: fk_rails_990daa5f76; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.protocols
+    ADD CONSTRAINT fk_rails_990daa5f76 FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
+
+
+--
 -- Name: fk_rails_9e92bdfe65; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -70938,6 +70956,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200720121356'),
 ('20200720161000'),
 ('20200720161100'),
-('20200723104100');
+('20200723104100'),
+('20200723153130');
 
 

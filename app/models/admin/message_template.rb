@@ -469,6 +469,12 @@ class Admin::MessageTemplate < ActiveRecord::Base
       item.top_referring_record
     elsif an == 'latest_reference' && item.respond_to?(:latest_reference)
       item.latest_reference
+    elsif an == 'first' && item.respond_to?(:first)
+      item.first
+    elsif an == 'app_protocols' && master.current_user
+      Classification::Protocol.enabled.where(
+        app_type_id: [master.current_user.app_type_id, nil]
+      ).order(position: :asc).first
     elsif item_reference
       # Match model reference by underscored to record type, or if not matched by the resource name
       # The latter allows activity logs to be matched on their extra log type too.
