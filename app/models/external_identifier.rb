@@ -260,13 +260,44 @@ class ExternalIdentifier < ActiveRecord::Base
     else
       # Can't enable the configuration until the table exists
       unless disabled || !errors.empty?
-        raise FphsException, "name: #{name} does not exist as a table in the database. Ensure the DB table #{name} has been created. Run:
-        \`db/table_generators/generate.sh external_identifiers_table create #{name} #{external_id_attribute}\`
-        to generate the SQL for this table.
+        raise FphsException, "name: #{name} does not exist as a table in the database. Ensure the DB table #{name} has been created.
+
+        #{generator_script}
+
         IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
          "
       end
     end
+  end
+
+  def category
+    name.split('_').first
+  end
+
+  def generator_script
+    fn = "db/app_migrations/#{category}/#{Time.new.to_s(:number)}_create_#{table_name}.rb"
+    res = <<~CONTENT
+      require 'active_record/migration/app_generator'
+      class Create#{table_name.camelize} < ActiveRecord::Migration[5.2]
+        include ActiveRecord::Migration::AppGenerator
+
+        def change
+          self.schema = '#{category}'
+          self.table_name = '#{table_name}'
+          self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
+
+          create_external_identifier_tables
+          create_external_identifier_trigger
+        end
+      end
+    CONTENT
+
+    File.write(fn, res)
+
+    "Wrote migration to: #{fn}
+    Review it, then run migration with:
+
+    MIG_PATH=femfl FPHS_LOAD_APP_TYPES= bundle exec rails db:migrate"
   end
 
   def field_list

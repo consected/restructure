@@ -176,6 +176,7 @@ module DynamicModelDefHandler
     cn.table_exists?(table_name) || cn.view_exists?(table_name)
   rescue StandardError => e
     puts e
+    @extra_error = e
     false
   end
 
@@ -287,13 +288,14 @@ module DynamicModelDefHandler
     if !disabled && errors.empty?
 
       unless !disabled? && ready?
-        err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:
+        err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created.
 
-          #{generator_script} > db/app_specific/create_#{table_name}.sql
+        #{generator_script}
 
-        Then edit the result to change the field-type for the two CREATE TABLE statements at the top of the results.
         IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
         "
+
+        err += "(extra error info: #{@extra_error})" if @extra_error
         # errors.add :name, err
         # Force exit of callbacks
         raise FphsException, err
