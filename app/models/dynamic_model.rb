@@ -294,7 +294,31 @@ class DynamicModel < ActiveRecord::Base
   end
 
   def generator_script
-    "db/table_generators/generate.sh dynamic_models_table create  #{table_name} #{all_implementation_fields(ignore_errors: true).join(' ')}"
+    db_category = category.split('-').first
+
+    fn = "db/app_migrations/#{db_category}/#{Time.new.to_s(:number)}_create_#{table_name}.rb"
+    res = <<~CONTENT
+      require 'active_record/migration/app_generator'
+      class Create#{table_name.camelize} < ActiveRecord::Migration[5.2]
+        include ActiveRecord::Migration::AppGenerator
+
+        def change
+          self.schema = '#{db_category}'
+          self.table_name = '#{table_name}'
+          self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
+
+          create_dynamic_model_tables
+          create_dynamic_model_trigger
+        end
+      end
+    CONTENT
+
+    File.write(fn, res)
+
+    "Wrote migration to: #{fn}
+    Review it, then run migration with:
+
+    MIG_PATH=femfl FPHS_LOAD_APP_TYPES= bundle exec rails db:migrate"
   end
 
   def table_name_ok
