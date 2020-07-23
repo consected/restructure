@@ -71,7 +71,8 @@ updating the app search path.
 Adding App Types to Filestore
 ---
 
-A script is provided in the **scripts** repo under **app_scripts/filestore**
+A script is provided in the **scripts** repo under **app_scripts/filestore** (for production)
+and **fphs_scripts/setup_filestore_app.sh** (for dev)
 
 The NfsStore expects a specific structure for new App Types.
 
