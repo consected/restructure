@@ -142,13 +142,13 @@ module ActiveRecord
       def setup_fields
         return if field_opts
 
+        fields.reject! { |a| a.to_s.index(/^placeholder_|^tracker_history_id$/) }
+
         self.history_table_name = "#{table_name.singularize}_history"
         self.trigger_fn_name = "#{schema}.log_#{table_name}_update"
         self.new_fields = fields.map { |f| "NEW.#{f}" }
         self.field_defs = {}
         self.field_opts = {}
-
-        fields.reject! { |a| a.to_s.index /^placeholder_|^tracker_history_id^/ }
 
         fields.each do |attr_name|
           a = attr_name.to_s
@@ -169,7 +169,7 @@ module ActiveRecord
             f = :boolean
           elsif a.index(/(?:_id)$/)
             f = :bigint
-          elsif a.index(/^(?:number)|&(?:age)$|(?:_number|_timestamp)$/)
+          elsif a.index(/^(?:number)|^(?:age|rank)$|(?:_number|_timestamp|score)$/)
             f = :integer
           end
           field_defs[attr_name] = f
