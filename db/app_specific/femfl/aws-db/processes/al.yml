@@ -1,0 +1,160 @@
+_definitions:
+  enabled_if: &enabled_if
+    always: true
+
+# @library common filestore_container
+
+
+_default:
+
+  view_options:
+    hide_unless_creatable: true
+
+###################################
+general:
+  label: General Communications
+###################################
+  
+  fields:
+    - select_activity
+    - activity_date
+    - placeholder_communication
+    - placeholder_followup
+    - select_record_from_player_contacts
+    - select_record_from_addresses
+    - select_direction
+    - select_who
+    - select_result
+    - select_next_step
+    - follow_up_when
+    - follow_up_time
+    - notes
+
+  view_options:
+    data_attribute: 
+      - activity_date
+      - select_activity
+      - select_direction
+      - "status:"
+      - select_result
+    hide_unless_creatable: true  
+
+  field_options:
+    select_who:
+      edit_as:
+        field_type: select_user_with_role_phone_screener
+    activity_date:
+      value: today()
+
+
+  caption_before:
+    select_activity: Select an action:<ul><li>make a record of an incoming or outgoing communication</li><li>schedule a follow up</li><li>mark all previous follow-ups completed</li></ul>
+    select_who: If not you, who performed the activity?
+    activity_date: When was the communication sent or received?
+
+    placeholder_communication: |
+        Was this communication sent by email, phone or regular mail:
+
+    placeholder_followup: |
+        Is this communication to be sent by email, phone or regular mail:
+
+    select_record_from_player_contacts: |
+      *Email or Phone*
+    select_record_from_addresses: |
+      *Mail Address*
+    
+    select_result: Is a follow up required, or is this communication complete?
+    select_direction: Was the communication received from the subject or sent to the subject?
+    notes: Notes regarding a communication or to assist with a follow up
+
+  references:
+    activity_log__feml_assignment_femfl_comms:
+      label: follow up
+      from: this
+      add: many
+      add_with:
+        extra_log_type: general
+        select_activity: general communications
+        select_direction: to subject
+        select_result: completed
+  
+  # Only show this if it is not embedded
+  showable_if:
+    not_all:
+      referring_record:
+        exists: true
+
+  show_if:
+    select_result:
+      select_activity: general communications
+    
+    select_next_step:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+    follow_up_when:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+    follow_up_time:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+
+    select_direction:
+      select_activity: general communications
+    activity_date:
+      select_activity: general communications
+    select_who:
+      never: true
+      #select_activity: general communications
+    
+    placeholder_followup:
+      select_activity: 
+        - schedule follow up
+
+    placeholder_communication:
+      select_activity: 
+        - general communications
+    
+    select_record_from_player_contacts:
+      select_activity: 
+        - general communications
+        - schedule follow up
+    select_record_from_addresses:
+      select_activity: 
+        - general communications
+        - schedule follow up
+
+
+  save_trigger:
+    on_save:                
+      update_reference:
+        ref:
+          if:
+            any:
+              referring_record:
+                exists: true
+
+          first:
+            all:
+              referring_record:
+                update: return_result
+
+          with:
+            updated_at: now()
+              
+
+###################################
+files:
+  label: Files
+###################################
+
+  <<: *files_activity  
+  save_trigger:
+    on_create:
+      <<: *create_filestore_container 
+  references:
+    <<: *ref_filestore_container
+
+
