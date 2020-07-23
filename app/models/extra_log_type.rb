@@ -221,7 +221,9 @@ class ExtraLogType < ExtraOptions
   def self.fields_for_all_in(activity_log)
     activity_log.extra_log_type_configs.reject { |e| e.name.in?(%i[primary blank_log]) }.map(&:fields).reduce([], &:+).uniq
   rescue StandardError => e
-    raise FphsException, "Failed to use the extra log options. It is likely that the 'fields:' attribute of one of the extra entries (not primary or blank) is missing or not formatted as expected. #{e}"
+    raise FphsException,
+          "\nFailed to use the extra log options. It is likely that the 'fields:' attribute of one of the extra entries "\
+          "(not primary or blank) is missing or not formatted as expected, or an @library inclusion has an error. #{e}"
   end
 
   def calc_save_action_if(obj)

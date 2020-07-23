@@ -186,6 +186,7 @@ class ActivityLog < ActiveRecord::Base
   rescue FphsException => e
     raise e unless ignore_errors
 
+    @extra_error = e
     []
   end
 
@@ -524,7 +525,32 @@ class ActivityLog < ActiveRecord::Base
   end
 
   def generator_script
-    "db/table_generators/generate.sh activity_logs_table create #{table_name} #{item_type.pluralize} #{all_implementation_fields(ignore_errors: true).join(' ')}"
+    db_category = category.split('-').first
+
+    fn = "db/app_migrations/#{db_category}/#{Time.new.to_s(:number)}_create_#{table_name}.rb"
+    res = <<~CONTENT
+      require 'active_record/migration/app_generator'
+      class Create#{table_name.camelize} < ActiveRecord::Migration[5.2]
+        include ActiveRecord::Migration::AppGenerator
+
+        def change
+          self.schema = '#{db_category}'
+          self.table_name = '#{table_name}'
+          self.belongs_to_model = '#{item_type}'
+          self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
+
+          create_activity_log_tables
+          create_activity_log_trigger
+        end
+      end
+    CONTENT
+
+    File.write(fn, res)
+
+    "Wrote migration to: #{fn}
+    Review it, then run migration with:
+
+    MIG_PATH=femfl FPHS_LOAD_APP_TYPES= bundle exec rails db:migrate"
   end
 
   def item_type_exists
