@@ -77,6 +77,8 @@ class ExternalIdentifier < ActiveRecord::Base
       end
     rescue ActiveRecord::StatementInvalid => e
       logger.warn "Not loading activity log routes. The table #{mn} has probably not been created yet. #{e.backtrace.join("\n")}"
+    rescue FphsException => e
+      logger.warn "Not loading activity log routes. There is possibly an error in an extra log type configuration. Table #{mn} has probably not been created yet. #{e.backtrace.join("\n")}"
     end
   end
 
@@ -274,11 +276,12 @@ class ExternalIdentifier < ActiveRecord::Base
     name.split('_').first
   end
 
-  def generator_script
-    fn = "db/app_migrations/#{category}/#{Time.new.to_s(:number)}_create_#{table_name}.rb"
+  def generator_script(mode = 'create')
+    dirname = "db/app_migrations/#{db_category}"
+    fn = "#{dirname}/#{Time.new.to_s(:number)}_#{mode}_#{table_name}.rb"
     res = <<~CONTENT
       require 'active_record/migration/app_generator'
-      class Create#{table_name.camelize} < ActiveRecord::Migration[5.2]
+      class #{mode.capitalize}#{table_name.camelize} < ActiveRecord::Migration[5.2]
         include ActiveRecord::Migration::AppGenerator
 
         def change
@@ -286,12 +289,13 @@ class ExternalIdentifier < ActiveRecord::Base
           self.table_name = '#{table_name}'
           self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
 
-          create_external_identifier_tables
+          #{mode == 'create' ? 'create_external_identifier_tables' : 'update_fields'}
           create_external_identifier_trigger
         end
       end
     CONTENT
 
+    FileUtils.mkdir_p dirname
     File.write(fn, res)
 
     "Wrote migration to: #{fn}

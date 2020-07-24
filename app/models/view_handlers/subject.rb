@@ -34,7 +34,7 @@ module ViewHandlers
     # Override the standard rank_name, to ensure correct validation, since
     # player ranks are a special case and are defined as Classification::AccuracyScore instances
     def rank_name
-      PlayerInfo.get_rank_name rank
+      self.class.get_rank_name rank if respond_to? :rank
     end
 
     def dates_sensible

@@ -112,7 +112,13 @@ class ActivityLog < ActiveRecord::Base
   def force_option_config_parse
     return if disabled?
 
-    extra_log_type_configs force: true
+    res = extra_log_type_configs force: true
+
+    # Check if any of the configs were bad
+    bad_configs = res.select { |c| c.bad_ref_items.present? }
+    raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?
+
+    res
   end
 
   # return the activity log implementation class that corresponds to
@@ -524,13 +530,14 @@ class ActivityLog < ActiveRecord::Base
     @regenerate = res
   end
 
-  def generator_script
+  def generator_script(mode = 'create')
     db_category = category.split('-').first
 
-    fn = "db/app_migrations/#{db_category}/#{Time.new.to_s(:number)}_create_#{table_name}.rb"
+    dirname = "db/app_migrations/#{db_category}"
+    fn = "#{dirname}/#{Time.new.to_s(:number)}_#{mode}_#{table_name}.rb"
     res = <<~CONTENT
       require 'active_record/migration/app_generator'
-      class Create#{table_name.camelize} < ActiveRecord::Migration[5.2]
+      class #{mode.capitalize}#{table_name.camelize} < ActiveRecord::Migration[5.2]
         include ActiveRecord::Migration::AppGenerator
 
         def change
@@ -539,12 +546,13 @@ class ActivityLog < ActiveRecord::Base
           self.belongs_to_model = '#{item_type}'
           self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
 
-          create_activity_log_tables
+          #{mode == 'create' ? 'create_activity_log_tables' : 'update_fields'}
           create_activity_log_trigger
         end
       end
     CONTENT
 
+    FileUtils.mkdir_p dirname
     File.write(fn, res)
 
     "Wrote migration to: #{fn}

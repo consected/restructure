@@ -52,11 +52,11 @@
 <script id="common_template_result_inner-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
   {{#was _created}}
-  {{#is name '!==' full_name }}<div id="{{ hyphenate full_name }}-{{result_data.master_id}}-{{result_data.id}}" {{{ data_sort_str }}}> {{/is}}
+  {{#is name '!==' full_name }}<div id="{{ hyphenate name }}-{{result_data.master_id}}-{{result_data.id}}" {{{ data_sort_str }}}> {{/is}}
 
   <div class="common-template-item index-{{_created}} {{hyphenate name}}-item {{>result_extra_class}} {{is_activity_log_class}}" 
        data-model-data-type="{{model_data_type}}" 
-       id="{{hyphenate name}}-{{result_data.master_id}}-{{result_data.id}}" 
+       id="{{hyphenate full_name}}-{{result_data.master_id}}-{{result_data.id}}" 
        data-subscription="{{hyphenate name}}-edit-form-{{result_data.master_id}}-{{result_data.id}}" 
        data-template="{{hyphenate name}}-result-template" 
        data-item-class="{{item_class_name}}" 

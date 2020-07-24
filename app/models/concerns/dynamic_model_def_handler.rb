@@ -10,6 +10,8 @@ module DynamicModelDefHandler
     # after_save :reload_routes
     after_save :add_master_association, if: -> { @regenerate }
     after_save :add_user_access_controls, if: -> { @regenerate }
+    after_save :generate_migration
+
     after_commit :update_tracker_events, if: -> { @regenerate }
     after_commit :restart_server, if: -> { @regenerate }
     after_commit :other_regenerate_actions
@@ -322,5 +324,25 @@ module DynamicModelDefHandler
 
   def restart_server
     AppControl.restart_server
+  end
+
+  def standard_columns
+    pset = %w[id created_at updated_at contactid user_id master_id
+              extra_log_type admin_id]
+    pset += ["#{table_name.singularize}_table_id", "#{table_name.singularize}_id"]
+    pset
+  end
+
+  def generate_migration
+    cols = ActiveRecord::Base.connection.columns(table_name)
+    old_colnames = cols.map(&:name) - standard_columns
+
+    fields = all_implementation_fields(ignore_errors: true)
+    new_colnames = fields.map(&:to_s) - standard_columns
+
+    added = new_colnames - old_colnames
+    removed = old_colnames - new_colnames
+
+    generator_script('update') if added.present? || removed.present?
   end
 end

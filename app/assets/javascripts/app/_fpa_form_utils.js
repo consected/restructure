@@ -797,11 +797,14 @@ _fpa.form_utils = {
       // set attribute on the children, so we can sense this has changed (useful in features specs)
       children.attr('data-parent-filter-id', v);
 
-      if (shown.length === 0)
+      if (shown.length === 0) {
+        children.addClass('no-child-items')
         children.find('option[value=""]').html('-none-');
-      else
+      }
+      else {
+        children.removeClass('no-child-items')
         children.find('option[value=""]').html('-select-');
-
+      }
       // now for each child select field reset it if the current option doesn't match
       // the new parent selection
       children.each(function () {
@@ -1372,12 +1375,12 @@ _fpa.form_utils = {
 
     }).addClass('attached-auto-grow');
 
-    block.find('input.college-input.typeahead').not('.attached-college_ta').each(function () {
+    block.find('input.college-input.typeahead').not('.attached-college_ta').addClass('attached-college_ta').each(function () {
       var el = $(this);
       _fpa.set_definition('colleges', function () {
         _fpa.form_utils.setup_typeahead(el, 'colleges', "colleges");
       });
-    }).addClass('attached-college_ta');
+    });
 
 
     block.find('[data-format-date-local="true"]').not('.formatted-date-local').each(function () {

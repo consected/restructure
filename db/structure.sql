@@ -833,14 +833,14 @@ CREATE FUNCTION femfl.log_femfl_subjects_update() RETURNS trigger
 BEGIN
   INSERT INTO femfl_subject_history (
     master_id,
-    first_name, last_name, middle_name, nick_name, birth_date, rank, source,
+    first_name, last_name, middle_name, nick_name, birth_date, source,
     user_id,
     created_at,
     updated_at,
     femfl_subject_id)
   SELECT
     NEW.master_id,
-    NEW.first_name, NEW.last_name, NEW.middle_name, NEW.nick_name, NEW.birth_date, NEW.rank, NEW.source,
+    NEW.first_name, NEW.last_name, NEW.middle_name, NEW.nick_name, NEW.birth_date, NEW.source,
     NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
@@ -4293,6 +4293,33 @@ CREATE FUNCTION ipa_ops.log_ipa_ps_informant_detail_update() RETURNS trigger
               RETURN NEW;
           END;
       $$;
+
+
+--
+-- Name: log_ipa_ps_initial_screenings_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_ps_initial_screenings_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_ps_initial_screening_history (
+    master_id,
+    form_version, select_is_good_time_to_speak, looked_at_website_yes_no, any_questions_blank_yes_no, same_hotel_yes_no, embedded_report_ipa__ipa_appointments, select_schedule, select_still_interested, follow_up_date, follow_up_time, notes,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_ps_initial_screening_id)
+  SELECT
+    NEW.master_id,
+    NEW.form_version, NEW.select_is_good_time_to_speak, NEW.looked_at_website_yes_no, NEW.any_questions_blank_yes_no, NEW.same_hotel_yes_no, NEW.embedded_report_ipa__ipa_appointments, NEW.select_schedule, NEW.select_still_interested, NEW.follow_up_date, NEW.follow_up_time, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -20309,7 +20336,6 @@ CREATE TABLE femfl.femfl_subjects (
     middle_name character varying,
     nick_name character varying,
     birth_date date,
-    rank integer,
     source character varying,
     user_id bigint,
     created_at timestamp without time zone NOT NULL,
@@ -26689,7 +26715,6 @@ CREATE TABLE ipa_ops.ipa_ps_initial_screenings (
     id integer NOT NULL,
     master_id integer,
     select_is_good_time_to_speak character varying,
-    select_may_i_begin character varying,
     any_questions_blank_yes_no character varying,
     follow_up_date date,
     follow_up_time time without time zone,
@@ -26698,7 +26723,11 @@ CREATE TABLE ipa_ops.ipa_ps_initial_screenings (
     updated_at timestamp without time zone NOT NULL,
     notes character varying,
     looked_at_website_yes_no character varying,
-    select_still_interested character varying
+    select_still_interested character varying,
+    form_version character varying,
+    same_hotel_yes_no character varying,
+    embedded_report_ipa__ipa_appointments character varying,
+    select_schedule character varying
 );
 
 
@@ -27803,51 +27832,6 @@ CREATE SEQUENCE ipa_ops.ipa_two_wk_followups_id_seq
 --
 
 ALTER SEQUENCE ipa_ops.ipa_two_wk_followups_id_seq OWNED BY ipa_ops.ipa_two_wk_followups.id;
-
-
---
--- Name: ipa_view_subject_statuses; Type: VIEW; Schema: ipa_ops; Owner: -
---
-
-CREATE VIEW ipa_ops.ipa_view_subject_statuses AS
- SELECT dt2.master_id,
-    dt2.status,
-    dt2.first_name,
-    dt2.last_name,
-    dt2."when",
-    dt2.ipa_id
-   FROM ( SELECT DISTINCT dt.master_id,
-                CASE
-                    WHEN ((dt.extra_log_type)::text = 'follow_up_surveys'::text) THEN 'completed'::character varying
-                    WHEN ((dt.extra_log_type)::text = 'withdraw'::text) THEN 'withdrawn'::character varying
-                    WHEN (((dt.ps_interested1)::text = 'not interested'::text) OR ((dt.ps_interested2)::text = 'not interested'::text) OR ((dt.ps_still_interested)::text = 'no'::text)) THEN 'not interest during phone screening'::character varying
-                    WHEN (((dt.extra_log_type)::text = 'perform_screening_follow_up'::text) AND ((dt.eligible_for_study_blank_yes_no)::text = 'no'::text)) THEN 'ineligible'::character varying
-                    WHEN (((dt.extra_log_type)::text = 'perform_screening_follow_up'::text) AND ((dt.follow_up_still_interested)::text = 'no'::text)) THEN 'not interest during screening follow-up'::character varying
-                    WHEN ((dt.extra_log_type)::text = 'schedule_screening'::text) THEN 'in process'::character varying
-                    ELSE dt.extra_log_type
-                END AS status,
-            pi.first_name,
-            pi.last_name,
-            dt.created_at AS "when",
-            ipa.ipa_id
-           FROM ((( SELECT al.master_id,
-                    al.created_at,
-                    al.extra_log_type,
-                    ipa_screenings.eligible_for_study_blank_yes_no,
-                    ipa_screenings.still_interested_blank_yes_no AS follow_up_still_interested,
-                    ipa_ps_initial_screenings.select_is_good_time_to_speak AS ps_interested1,
-                    ipa_ps_initial_screenings.select_may_i_begin AS ps_interested2,
-                    ipa_ps_initial_screenings.select_still_interested AS ps_still_interested,
-                    rank() OVER (PARTITION BY al.master_id ORDER BY al.created_at DESC) AS r
-                   FROM (((ipa_ops.activity_log_ipa_assignments al
-                     LEFT JOIN ipa_ops.ipa_screenings ON ((al.master_id = ipa_screenings.master_id)))
-                     LEFT JOIN ipa_ops.ipa_surveys ON ((al.master_id = ipa_surveys.master_id)))
-                     LEFT JOIN ipa_ops.ipa_ps_initial_screenings ON ((al.master_id = ipa_ps_initial_screenings.master_id)))
-                  WHERE (((ipa_ps_initial_screenings.select_is_good_time_to_speak)::text = 'not interested'::text) OR ((ipa_ps_initial_screenings.select_may_i_begin)::text = 'not interested'::text) OR ((ipa_ps_initial_screenings.select_still_interested)::text = 'no'::text) OR (((al.extra_log_type)::text = 'perform_screening_follow_up'::text) AND (((ipa_screenings.eligible_for_study_blank_yes_no)::text = 'no'::text) OR ((ipa_screenings.still_interested_blank_yes_no)::text = 'no'::text))) OR (((al.extra_log_type)::text = 'follow_up_surveys'::text) AND ((ipa_surveys.select_survey_type)::text = 'exit survey'::text)) OR ((al.extra_log_type)::text = 'withdraw'::text) OR ((al.extra_log_type)::text = 'schedule_screening'::text))) dt
-             JOIN ml_app.player_infos pi ON ((dt.master_id = pi.master_id)))
-             JOIN ipa_ops.ipa_assignments ipa ON ((dt.master_id = ipa.master_id)))
-          WHERE (dt.r = 1)) dt2
-  ORDER BY dt2.status, dt2."when" DESC;
 
 
 --
@@ -58278,6 +58262,20 @@ CREATE TRIGGER ipa_withdrawal_history_update AFTER UPDATE ON ipa_ops.ipa_withdra
 
 
 --
+-- Name: log_ipa_ps_initial_screening_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_initial_screening_history_insert AFTER INSERT ON ipa_ops.ipa_ps_initial_screenings FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_ps_initial_screenings_update();
+
+
+--
+-- Name: log_ipa_ps_initial_screening_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_initial_screening_history_update AFTER UPDATE ON ipa_ops.ipa_ps_initial_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_ps_initial_screenings_update();
+
+
+--
 -- Name: mrn_number_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
 --
 
@@ -70957,6 +70955,8 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200720161000'),
 ('20200720161100'),
 ('20200723104100'),
-('20200723153130');
+('20200723153130'),
+('20200724153400'),
+('20200724181747');
 
 

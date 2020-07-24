@@ -23,8 +23,9 @@ class DynamicModel::DynamicModelsController < UserBaseController
 
   # Remove items that are not showable, based on showable_if in the default options config
   def filter_records
-    @filtered_ids = @master_objects.select { |i| i.definition_default_options&.calc_showable_if(i) }.map(&:id)
-    @master_objects = @master_objects.where(id: @filtered_ids)
+    pk = @implementation_class.primary_key
+    @filtered_ids = @master_objects.select { |i| i.definition_default_options&.calc_showable_if(i) }.map { |o| o.attributes[pk] }
+    @master_objects = @master_objects.where(pk => @filtered_ids)
     limit_results
   end
 end

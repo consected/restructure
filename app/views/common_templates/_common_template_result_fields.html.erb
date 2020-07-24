@@ -78,7 +78,7 @@
     {{#each result_data.tracker_histories}}
       <li class="list-group-item {{hyphenate ../full_name}}-tracker-histories in-item-tracker-histories is-full-width">
         <span class="small">
-           <a href="/masters/{{../result_data.master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{../result_data.master_id}}" data-template="tracker-chron-result-template" data-result-callback="form_utils.highlight_tracker_history_item" data-tracker-history-item="#tracker-{{../result_data.master_id}}-{{id}}" data-toggle="scrollto-target" data-target="#trackers-{{../result_data.master_id}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a>
+           <a href="/masters/{{../result_data.master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{../result_data.master_id}}-inner" data-template="tracker-chron-result-template" data-result-callback="form_utils.highlight_tracker_history_item" data-tracker-history-item="#tracker-{{../result_data.master_id}}-{{id}}" data-toggle="scrollto-target" data-target="#trackers-{{../result_data.master_id}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a>
            {{pretty_string event_date}}
            {{protocol_name}} / {{sub_process_name}} / {{protocol_event_name}}
         </span>
@@ -87,7 +87,7 @@
     </span>
     {{#if implementation_class_name }}
     {{#unless ../prevent_edit}}
-    <div class="results-caption-before {{hyphenate full_name}}-add-linked-tracker">
+    <div class="results-caption-before {{hyphenate full_name}}-add-linked-tracker add-linked-tracker">
       <div class="panel panel-default panel-body">
         <p class="add-tracker-label">Add a specific tracker status record related to this_value item:</p>
         <p class="text-center">

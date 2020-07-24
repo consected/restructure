@@ -20,12 +20,12 @@ class UserBaseController < ApplicationController
     if all_apps.empty?
       msg = 'You have not been granted access to any application types. Contact an administrator to continue use of the application.'
     elsif !@current_user.app_type_valid?
-      current_user.app_type = all_apps.first
+      current_user.app_type_id = all_apps.first
       return current_user.save
     end
 
     if msg
-      current_user.app_type = nil
+      current_user.app_type_id = nil
 
       respond_to do |type|
         type.html do
@@ -44,7 +44,7 @@ class UserBaseController < ApplicationController
     if params[:use_app_type].present?
       a = all_apps.select { |app_id| app_id == params[:use_app_type].to_i }.first
       if a && current_user.app_type_id != a
-        current_user.app_type = a
+        current_user.app_type_id = a
         current_user.save
 
         respond_to do |type|
@@ -73,7 +73,7 @@ class UserBaseController < ApplicationController
         type.html do
           # If there is only one app type, use it
           # Otherwise, assume the first until a user selects otherwise
-          current_user.app_type = all_apps.first
+          current_user.app_type_id = all_apps.first
           current_user.save
           # Redirect, to ensure the flash and navs in the layout are updated
           redirect_to masters_search_path

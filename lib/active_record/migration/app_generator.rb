@@ -137,7 +137,32 @@ module ActiveRecord
         end
       end
 
+      def update_fields
+        setup_fields
+        cols = ActiveRecord::Base.connection.columns("#{schema}.#{table_name}")
+        old_colnames = cols.map(&:name) - standard_columns
+        new_colnames = fields.map(&:to_s) - standard_columns
+
+        added = new_colnames - old_colnames
+        removed = old_colnames - new_colnames
+
+        added.each do |c|
+          add_column "#{schema}.#{table_name}", c, field_defs[c.to_sym]
+        end
+
+        removed.each do |c|
+          remove_column "#{schema}.#{table_name}", c
+        end
+      end
+
       protected
+
+      def standard_columns
+        pset = %w[id created_at updated_at contactid user_id master_id
+                  extra_log_type admin_id]
+        pset += ["#{table_name.singularize}_table_id", "#{table_name.singularize}_id"]
+        pset
+      end
 
       def setup_fields
         return if field_opts
@@ -154,7 +179,7 @@ module ActiveRecord
           a = attr_name.to_s
           f = :string
           if a == 'created_by_user_id'
-            a = :created_by_user
+            attr_name = :created_by_user
             f = :references
             fopts = { index: true, foreign_key: { to_table: :users } }
           elsif a.index(/(?:_when|_date)$/)
@@ -230,6 +255,9 @@ module ActiveRecord
           END;
           $$;
 
+          DROP TRIGGER IF EXISTS log_#{history_table_name}_insert ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS log_#{history_table_name}_update ON #{schema}.#{table_name};
+
           CREATE TRIGGER log_#{history_table_name}_insert
             AFTER INSERT ON #{schema}.#{table_name}
             FOR EACH ROW
@@ -273,6 +301,9 @@ module ActiveRecord
             RETURN NEW;
           END;
           $$;
+
+          DROP TRIGGER IF EXISTS log_#{history_table_name}_insert ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS log_#{history_table_name}_update ON #{schema}.#{table_name};
 
           CREATE TRIGGER log_#{history_table_name}_insert
             AFTER INSERT ON #{schema}.#{table_name}
@@ -319,6 +350,9 @@ module ActiveRecord
             RETURN NEW;
           END;
           $$;
+
+          DROP TRIGGER IF EXISTS log_#{history_table_name}_insert ON #{schema}.#{table_name};
+          DROP TRIGGER IF EXISTS log_#{history_table_name}_update ON #{schema}.#{table_name};
 
           CREATE TRIGGER log_#{history_table_name}_insert
             AFTER INSERT ON #{schema}.#{table_name}

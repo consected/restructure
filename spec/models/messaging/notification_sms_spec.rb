@@ -115,14 +115,14 @@ RSpec.describe Messaging::NotificationSms, type: :model do
     sms = sms = Messaging::NotificationSms.new
 
     t = Benchmark.realtime do
-      10.times do
+      3.times do
         sms.send_now @message_notification
       end
     end
 
     puts "Done in #{t} seconds"
 
-    expect(t).to be < 10
+    expect(t).to be < 3
 
   end
 

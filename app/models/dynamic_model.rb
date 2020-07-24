@@ -293,13 +293,14 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
-  def generator_script
+  def generator_script(mode = 'create')
     db_category = category.split('-').first
 
-    fn = "db/app_migrations/#{db_category}/#{Time.new.to_s(:number)}_create_#{table_name}.rb"
+    dirname = "db/app_migrations/#{db_category}"
+    fn = "#{dirname}/#{Time.new.to_s(:number)}_#{mode}_#{table_name}.rb"
     res = <<~CONTENT
       require 'active_record/migration/app_generator'
-      class Create#{table_name.camelize} < ActiveRecord::Migration[5.2]
+      class #{mode.capitalize}#{table_name.camelize} < ActiveRecord::Migration[5.2]
         include ActiveRecord::Migration::AppGenerator
 
         def change
@@ -307,12 +308,13 @@ class DynamicModel < ActiveRecord::Base
           self.table_name = '#{table_name}'
           self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
 
-          create_dynamic_model_tables
+          #{mode == 'create' ? 'create_dynamic_model_tables' : 'update_fields'}
           create_dynamic_model_trigger
         end
       end
     CONTENT
 
+    FileUtils.mkdir_p dirname
     File.write(fn, res)
 
     "Wrote migration to: #{fn}
