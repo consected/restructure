@@ -229,6 +229,448 @@ app_type:
     updated_at: '2020-01-27T09:35:52.853Z'
     user_email: 
   valid_user_access_controls:
+  - id: 910
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_subject_addresses
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:53.033Z'
+    updated_at: '2020-01-27T09:35:53.033Z'
+    user_email: 
+  - id: 911
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_subject_contacts
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:53.107Z'
+    updated_at: '2020-01-27T09:35:53.107Z'
+    user_email: 
+  - id: 912
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_subject_infos
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:53.182Z'
+    updated_at: '2020-01-27T09:35:53.182Z'
+    user_email: 
+  - id: 913
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_access_msm_staffs
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:53.251Z'
+    updated_at: '2020-01-27T09:35:53.251Z'
+    user_email: 
+  - id: 914
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_access_pis
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:53.333Z'
+    updated_at: '2020-01-27T09:35:53.333Z'
+    user_email: 
+  - id: 915
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_pi_followups
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:53.400Z'
+    updated_at: '2020-01-27T09:35:53.400Z'
+    user_email: 
+  - id: 916
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_pain_questions
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:53.480Z'
+    updated_at: '2020-01-27T09:35:53.480Z'
+    user_email: 
+  - id: 917
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_audit_c_questions
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:53.563Z'
+    updated_at: '2020-01-27T09:35:53.563Z'
+    user_email: 
+  - id: 918
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_initial_screenings
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:53.655Z'
+    updated_at: '2020-01-27T09:35:53.655Z'
+    user_email: 
+  - id: 919
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_subject_contacts
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:53.730Z'
+    updated_at: '2020-01-27T09:35:53.730Z'
+    user_email: 
+  - id: 920
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_eligibles
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:53.837Z'
+    updated_at: '2020-01-27T09:35:53.837Z'
+    user_email: 
+  - id: 921
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_participations
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:53.948Z'
+    updated_at: '2020-01-27T09:35:53.948Z'
+    user_email: 
+  - id: 922
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_eligibility_followups
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:54.052Z'
+    updated_at: '2020-01-27T09:35:54.052Z'
+    user_email: 
+  - id: 923
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_non_eligibles
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:54.144Z'
+    updated_at: '2020-01-27T09:35:54.144Z'
+    user_email: 
+  - id: 924
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_possibly_eligibles
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:54.221Z'
+    updated_at: '2020-01-27T09:35:54.221Z'
+    user_email: 
+  - id: 925
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_screener_responses
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:54.297Z'
+    updated_at: '2020-01-27T09:35:54.297Z'
+    user_email: 
+  - id: 926
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_protocol_exceptions
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:54.393Z'
+    updated_at: '2020-01-27T09:35:54.393Z'
+    user_email: 
+  - id: 927
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_adverse_events
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:54.490Z'
+    updated_at: '2020-01-27T09:35:54.490Z'
+    user_email: 
+  - id: 928
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_protocol_deviations
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:54.585Z'
+    updated_at: '2020-01-27T09:35:54.585Z'
+    user_email: 
+  - id: 929
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_appointments
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:54.676Z'
+    updated_at: '2020-01-27T09:35:54.676Z'
+    user_email: 
+  - id: 930
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_msm_screening_details
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:54.755Z'
+    updated_at: '2020-01-27T09:35:54.755Z'
+    user_email: 
+  - id: 931
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_secure_notes
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:54.832Z'
+    updated_at: '2020-01-27T09:35:54.832Z'
+    user_email: 
+  - id: 932
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_screenings
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:54.921Z'
+    updated_at: '2020-01-27T09:35:54.921Z'
+    user_email: 
+  - id: 933
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_consent_mailings
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:55.045Z'
+    updated_at: '2020-01-27T09:35:55.045Z'
+    user_email: 
+  - id: 934
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_assign_to_groups
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:55.138Z'
+    updated_at: '2020-01-27T09:35:55.138Z'
+    user_email: 
+  - id: 935
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_withdrawals
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:55.242Z'
+    updated_at: '2020-01-27T09:35:55.242Z'
+    user_email: 
+  - id: 936
+    user_id: 
+    resource_type: table
+    resource_name: grit_assignments
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:55.357Z'
+    updated_at: '2020-01-27T09:35:55.357Z'
+    user_email: 
+  - id: 937
+    user_id: 
+    resource_type: table
+    resource_name: msm_grit_id_numbers
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:55.507Z'
+    updated_at: '2020-01-27T09:35:55.507Z'
+    user_email: 
+  - id: 938
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__grit_assignment_protocol_deviations
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:55.656Z'
+    updated_at: '2020-01-27T09:35:55.656Z'
+    user_email: 
+  - id: 939
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__grit_assignment_phone_screens
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:55.804Z'
+    updated_at: '2020-01-27T09:35:55.804Z'
+    user_email: 
+  - id: 940
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__grit_assignments
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:55.941Z'
+    updated_at: '2020-01-27T09:35:55.941Z'
+    user_email: 
+  - id: 941
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__grit_assignment_adverse_events
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:56.109Z'
+    updated_at: '2020-01-27T09:35:56.109Z'
+    user_email: 
+  - id: 942
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__grit_assignment_followups
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:56.237Z'
+    updated_at: '2020-01-27T09:35:56.237Z'
+    user_email: 
+  - id: 943
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__grit_assignment_discussions
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 12
+    role_name: _app_
+    created_at: '2020-01-27T09:35:56.362Z'
+    updated_at: '2020-01-27T09:35:56.362Z'
+    user_email: 
   - id: 944
     user_id: 
     resource_type: general
@@ -4227,6 +4669,132 @@ app_type:
     options: "default:\r\n\r\n  caption_before:\r\n    pre_call_notes: Notes in preparation
       for the follow up call \r\n    \r\n    call_notes: Notes from follow up call\r\n\r\n\r\n"
     user_email: 
+  - id: 85
+    name: GRIT Phone Screen Eligible
+    table_name: grit_ps_eligibles
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-27T09:35:53.738Z'
+    updated_at: '2020-02-18T12:04:00.239Z'
+    position: 
+    category: grit-phone-screen
+    table_key_name: ''
+    field_list: questions_yes_no notes interested_yes_no not_interested_notes consent_to_pass_info_to_msm_yes_no
+      consent_to_pass_info_to_msm_2_yes_no placeholder_consent_to_pass_info_2_no contact_info_notes
+      placeholder_continue more_questions_yes_no placeholder_more_questions_yes placeholder_more_questions_no
+      more_questions_notes select_still_interested  placeholder_select_still_interested_no
+      placeholder_select_still_interested_yes placeholder_end
+    result_order: ''
+    options: "default:\r\n\r\n  field_options:\r\n    select_still_interested:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          No Longer Interested: \"no
+      longer interested\"\r\n          Yes - Still Interested: \"yes - still interested\"\r\n\r\n
+      \ caption_before: \r\n    all_fields: |\r\n      Thank you for your time and
+      for answering our questions.  \r\n      Based on your responses so far you are
+      eligible to participate in this study. \r\n\r\n      A reminder that two final
+      screening assessments will take place \r\n      in person at Morehouse School
+      of Medicine, and it’s \r\n      possible at that time you may not be eligible
+      for the study.  \r\n      If that is the case, you will still be compensated
+      $25 for \r\n      the time you spend traveling to and participating in that
+      session.\r\n\r\n      A few other reminders - this study will take place in
+      Atlanta at\r\n      the Morehouse School of Medicine, and the purpose of this
+      study \r\n      is to test a resilience skills training developed to improve
+      those\r\n      parts of your life affected by chronic pain such as quality of\r\n
+      \     life, personal relationships, and personal growth or development. \r\n\r\n
+      \   questions_yes_no: |\r\n      Do you have any questions at this time?\r\n
+      \   \r\n    interested_yes_no: |\r\n      Are you still interested in participating?\r\n\r\n
+      \   notes: |\r\n      *Record questions*\r\n\r\n\r\n    not_interested_notes:
+      |\r\n      May I ask you why you are not interested? \r\n      *(will record
+      reason, for example, too busy)*. \r\n      \r\n      Thank you for your time.\r\n
+      \     \r\n    consent_to_pass_info_to_msm_yes_no: |\r\n      Wonderful. In order
+      for you to participate I will need to give your \r\n      contact information
+      to our collaborating researchers at Morehouse School\r\n      of Medicine, and
+      they will be conducting a two additional in-person \r\n      assessments to
+      determine your eligibility.  This means that it’s \r\n      still possible you
+      may be ineligible for the study, however based \r\n      on your responses so
+      far, you’re a great candidate.\r\n\r\n      Is it okay with you if I give them
+      your contact information?\r\n\r\n\r\n    consent_to_pass_info_to_msm_2_yes_no:
+      |\r\n      Okay - just to confirm, your information will be kept completely
+      \r\n      secure and private, in a locked environment only accessible by \r\n
+      \     approved researchers. Access to your information at Morehouse will \r\n
+      \     be removed once the study has finished.  Does that alleviate any \r\n
+      \     concerns you may have?  \r\n      \r\n      If you’d still prefer not
+      to participate I understand.\r\n\r\n    \r\n    placeholder_consent_to_pass_info_2_no:
+      |\r\n      Okay, I understand.  Well thank you so much for your time today and
+      for \r\n      your support of our research, and we will certainly be in touch
+      with \r\n      future participation opportunities.\r\n      \r\n      \r\n    contact_info_notes:
+      |\r\n      Great.  Can I please confirm the contact information I have for you?\r\n
+      \     \r\n      *Scroll to Participant Details to check and add any contact
+      information*\r\n\r\n    placeholder_continue: |    \r\n      Thank you.  We
+      will only be sharing contact information for former \r\n      players with the
+      team at Morehouse once we have 20 former players who are \r\n      eligible
+      and interested in participating, and this may take some \r\n      time as we
+      continue our recruitment efforts.  Once we reach that\r\n      goal, we will
+      send you an email stating that we have shared your \r\n      contact information
+      with them, and you will hear from them \r\n      directly shortly thereafter.
+      \ They may contact you by email, by \r\n      telephone, or both.  This may
+      take many weeks, or it may \r\n      be as soon as next week, so we appreciate
+      your patience and do keep \r\n      an eye out for the next email from us.  At
+      any time please \r\n      feel free to check in with us by phone or email, even
+      if it’s \r\n      just to check in on the status of our recruitment efforts.\r\n\r\n
+      \     If you are enrolled in the study at Morehouse, though they will be\r\n
+      \     conducting the research with you at that location, we will be kept\r\n
+      \     updated on your status in the study, and are always here to\r\n      provide
+      support and answer any questions at any time.\r\n\r\n      And if you have any
+      friends who are former players and live in the\r\n      Atlanta area, please
+      feel free to tell them about the study!\r\n      They can contact us at atlanta@footballplayershealth.harvard.edu,\r\n
+      \     or by the phone number listed on our website.    \r\n\r\n    more_questions_yes_no:
+      Do you have any questions about this?\r\n    \r\n    placeholder_more_questions_yes:
+      |    \r\n      *If Yes, about privacy:* \r\n      \r\n      Just to confirm,
+      your data and contact information lives in a highly \r\n      secure and private
+      environment, accessible only to approved researchers \r\n      on the study
+      team. The data we store is protected by a Certificate \r\n      of Confidentiality
+      issued by the National Institute of Health. \r\n      This means that your identifiable
+      information is protected from \r\n      forced disclosure (i.e. subpoenas) by
+      all possible means.\r\n      \r\n      *other question - respond and record
+      questions*\r\n      \r\n    \r\n    placeholder_more_questions_no: |\r\n      Great!
+      \ Then we will be in touch as soon as possible by email to confirm\r\n      that
+      we have provided the Morehouse researchers with your contact information.\r\n
+      \   \r\n    select_still_interested: |\r\n      Does this alleviate any concerns
+      you have? Do you have other questions? \r\n      If you would still prefer not
+      to participate I understand.\r\n\r\n    placeholder_select_still_interested_no:
+      |\r\n      Okay, I understand.  Well thank you so much for your time today and
+      for \r\n      your support of our research, and we will certainly be in touch
+      with \r\n      future participation opportunities.\r\n\r\n    placeholder_select_still_interested_yes:
+      |\r\n      Great!  Then we will be in touch as soon as possible by email to
+      \r\n      confirm that we have provided the Morehouse researchers with your
+      \r\n      contact information.\r\n    \r\n    placeholder_end: |\r\n      If
+      you have any questions or want to contact us at any time, \r\n      you can
+      reach me at 617-432-5000 or \r\n      atlanta@footballplayershealth.harvard.edu.\r\n
+      \     \r\n      **END SCREENING**\r\n      \r\n  show_if:\r\n    \r\n    notes:\r\n
+      \     questions_yes_no: 'yes'\r\n      \r\n    interested_yes_no:\r\n      questions_yes_no:
+      \r\n        - 'yes'\r\n        - 'no'\r\n          \r\n    not_interested_notes:\r\n
+      \     interested_yes_no: 'no'\r\n      \r\n    consent_to_pass_info_to_msm_yes_no:\r\n
+      \     interested_yes_no: 'yes'\r\n      \r\n    consent_to_pass_info_to_msm_2_yes_no:\r\n
+      \     consent_to_pass_info_to_msm_yes_no: 'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n
+      \     consent_to_pass_info_to_msm_2_yes_no: 'no'\r\n      \r\n    contact_info_notes:
+      &ok_to_continue\r\n      any_ok_to_continue:\r\n        consent_to_pass_info_to_msm_yes_no:
+      'yes'\r\n        consent_to_pass_info_to_msm_2_yes_no: 'yes'\r\n        \r\n
+      \   placeholder_continue:\r\n      <<: *ok_to_continue\r\n      \r\n    more_questions_yes_no:\r\n
+      \     <<: *ok_to_continue\r\n    \r\n    placeholder_more_questions_yes:\r\n
+      \     <<: *ok_to_continue\r\n      any:\r\n        more_questions_yes_no: 'yes'\r\n
+      \       \r\n    placeholder_more_questions_no:\r\n      <<: *ok_to_continue\r\n
+      \     any:\r\n        more_questions_yes_no: 'no'\r\n    \r\n    more_questions_notes:\r\n
+      \     <<: *ok_to_continue\r\n      any:\r\n        more_questions_yes_no: 'yes'\r\n
+      \   \r\n    select_still_interested:\r\n      <<: *ok_to_continue\r\n      any:\r\n
+      \       more_questions_yes_no: 'yes'\r\n    \r\n    placeholder_select_still_interested_no:\r\n
+      \     <<: *ok_to_continue\r\n      all:\r\n        more_questions_yes_no: 'yes'\r\n
+      \       select_still_interested: 'no longer interested'\r\n\r\n    placeholder_select_still_interested_yes:\r\n
+      \     <<: *ok_to_continue\r\n      all:\r\n        more_questions_yes_no: 'yes'\r\n
+      \       select_still_interested: 'yes - still interested'\r\n    \r\n\r\n  valid_if:\r\n
+      \   on_save:\r\n      any:\r\n          this:\r\n            interested_yes_no:
+      'no'\r\n            consent_to_pass_info_to_msm_2_yes_no: 'no'\r\n            more_questions_yes_no:
+      'no'\r\n            select_still_interested: \r\n              - 'yes - still
+      interested'\r\n              - 'no longer interested'\r\n\r\n    "
+    user_email: 
   - id: 90
     name: GRIT Screener Responses
     table_name: grit_ps_screener_responses
@@ -4660,128 +5228,6 @@ app_type:
       \       possibly_eligible_yes_no: 'no'\r\n      \r\n    placeholder_questions_yes:\r\n
       \     all:\r\n        possibly_eligible_yes_no: 'no'\r\n        any_questions_yes_no:
       'yes'\r\n      <<: *ineligible_rules_participation\r\n    \r\n\r\n"
-    user_email: 
-  - id: 85
-    name: GRIT Phone Screen Eligible
-    table_name: grit_ps_eligibles
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2020-01-27T09:35:53.738Z'
-    updated_at: '2020-01-27T09:35:53.738Z'
-    position: 
-    category: grit-phone-screen
-    table_key_name: ''
-    field_list: questions_yes_no notes interested_yes_no not_interested_notes consent_to_pass_info_to_msm_yes_no
-      consent_to_pass_info_to_msm_2_yes_no placeholder_consent_to_pass_info_2_no contact_info_notes
-      placeholder_continue more_questions_yes_no placeholder_more_questions_yes placeholder_more_questions_no
-      more_questions_notes select_still_interested  placeholder_select_still_interested_no
-      placeholder_select_still_interested_yes placeholder_end
-    result_order: ''
-    options: "default:\r\n\r\n  field_options:\r\n    select_still_interested:\r\n
-      \     edit_as:\r\n        alt_options:\r\n          No Longer Interested: \"no
-      longer interested\"\r\n          Yes - Still Interested: \"yes - still interested\"\r\n\r\n
-      \ caption_before: \r\n    all_fields: |\r\n      Thank you for your time and
-      for answering our questions.  \r\n      Based on your responses so far you are
-      eligible to participate in this study. \r\n\r\n      A reminder that two final
-      screening assessments will take place \r\n      in person at Morehouse School
-      of Medicine, and it’s \r\n      possible at that time you may not be eligible
-      for the study.  \r\n      If that is the case, you will still be compensated
-      $25 for \r\n      the time you spend traveling to and participating in that
-      session.\r\n\r\n      A few other reminders - this study will take place in
-      Atlanta at\r\n      the Morehouse School of Medicine, and the purpose of this
-      study \r\n      is to test a resilience skills training developed to improve
-      those\r\n      parts of your life affected by chronic pain such as quality of\r\n
-      \     life, personal relationships, and personal growth or development. \r\n\r\n
-      \   questions_yes_no: |\r\n      Do you have any questions at this time?\r\n
-      \   \r\n    interested_yes_no: |\r\n      Are you still interested in participating?\r\n\r\n
-      \   notes: |\r\n      *Record questions*\r\n\r\n\r\n    not_interested_notes:
-      |\r\n      May I ask you why you are not interested? \r\n      *(will record
-      reason, for example, too busy)*. \r\n      \r\n      Thank you for your time.\r\n
-      \     \r\n    consent_to_pass_info_to_msm_yes_no: |\r\n      Wonderful. In order
-      for you to participate I will need to give your \r\n      contact information
-      to our collaborating researchers at Morehouse School\r\n      of Medicine, and
-      they will be conducting a two additional in-person \r\n      assessments to
-      determine your eligibility.  This means that it’s \r\n      still possible you
-      may be ineligible for the study, however based \r\n      on your responses so
-      far, you’re a great candidate.\r\n\r\n      Is it okay with you if I give them
-      your contact information?\r\n\r\n\r\n    consent_to_pass_info_to_msm_2_yes_no:
-      |\r\n      Okay - just to confirm, your information will be kept completely
-      \r\n      secure and private, in a locked environment only accessible by \r\n
-      \     approved researchers. Access to your information at Morehouse will \r\n
-      \     be removed once the study has finished.  Does that alleviate any \r\n
-      \     concerns you may have?  \r\n      \r\n      If you’d still prefer not
-      to participate I understand.\r\n\r\n    \r\n    placeholder_consent_to_pass_info_2_no:
-      |\r\n      Okay, I understand.  Well thank you so much for your time today and
-      for \r\n      your support of our research, and we will certainly be in touch
-      with \r\n      future participation opportunities.\r\n      \r\n      \r\n    contact_info_notes:
-      |\r\n      Great.  Can I please confirm the contact information I have for you?\r\n
-      \     \r\n      *Scroll to Participant Details to check and add any contact
-      information*\r\n\r\n    placeholder_continue: |    \r\n      Thank you.  We
-      will only be sharing contact information for former \r\n      players with the
-      team at Morehouse once we have 20 former players who are \r\n      eligible
-      and interested in participating, and this may take some \r\n      time as we
-      continue our recruitment efforts.  Once we reach that\r\n      goal, we will
-      send you an email stating that we have shared your \r\n      contact information
-      with them, and you will hear from them \r\n      directly shortly thereafter.
-      \ They may contact you by email, by \r\n      telephone, or both.  This may
-      take many weeks, or it may \r\n      be as soon as next week, so we appreciate
-      your patience and do keep \r\n      an eye out for the next email from us.  At
-      any time please \r\n      feel free to check in with us by phone or email, even
-      if it’s \r\n      just to check in on the status of our recruitment efforts.\r\n\r\n
-      \     If you are enrolled in the study at Morehouse, though they will be\r\n
-      \     conducting the research with you at that location, we will be kept\r\n
-      \     updated on your status in the study, and are always here to\r\n      provide
-      support and answer any questions at any time.\r\n\r\n      And if you have any
-      friends who are former players and live in the\r\n      Atlanta area, please
-      feel free to tell them about the study!\r\n      They can contact us at atlanta@footballplayershealth.harvard.edu,\r\n
-      \     or by the phone number listed on our website.    \r\n\r\n    more_questions_yes_no:
-      Do you have any questions about this?\r\n    \r\n    placeholder_more_questions_yes:
-      |    \r\n      *If Yes, about privacy:* \r\n      \r\n      Just to confirm,
-      your data and contact information lives in a highly \r\n      secure and private
-      environment, accessible only to approved researchers \r\n      on the study
-      team. The data we store is protected by a Certificate \r\n      of Confidentiality
-      issued by the National Institute of Health. \r\n      This means that your identifiable
-      information is protected from \r\n      forced disclosure (i.e. subpoenas) by
-      all possible means.\r\n      \r\n      *other question - respond and record
-      questions*\r\n      \r\n    \r\n    placeholder_more_questions_no: |\r\n      Great!
-      \ Then we will be in touch as soon as possible by email to confirm\r\n      that
-      we have provided the Morehouse researchers with your contact information.\r\n
-      \   \r\n    select_still_interested: |\r\n      Does this alleviate any concerns
-      you have? Do you have other questions? \r\n      If you would still prefer not
-      to participate I understand.\r\n\r\n    placeholder_select_still_interested_no:
-      |\r\n      Okay, I understand.  Well thank you so much for your time today and
-      for \r\n      your support of our research, and we will certainly be in touch
-      with \r\n      future participation opportunities.\r\n\r\n    placeholder_select_still_interested_yes:
-      |\r\n      Great!  Then we will be in touch as soon as possible by email to
-      \r\n      confirm that we have provided the Morehouse researchers with your
-      \r\n      contact information.\r\n    \r\n    placeholder_end: |\r\n      If
-      you have any questions or want to contact us at any time, \r\n      you can
-      reach me at 617-432-5000 or \r\n      atlanta@footballplayershealth.harvard.edu.\r\n
-      \     \r\n      **END SCREENING**\r\n      \r\n  show_if:\r\n    \r\n    notes:\r\n
-      \     questions_yes_no: 'yes'\r\n      \r\n    interested_yes_no:\r\n      questions_yes_no:
-      \r\n        - 'yes'\r\n        - 'no'\r\n          \r\n    not_interested_notes:\r\n
-      \     interested_yes_no: 'no'\r\n      \r\n    consent_to_pass_info_to_msm_yes_no:\r\n
-      \     interested_yes_no: 'yes'\r\n      \r\n    consent_to_pass_info_to_msm_2_yes_no:\r\n
-      \     consent_to_pass_info_to_msm_yes_no: 'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n
-      \     consent_to_pass_info_to_msm_2_yes_no: 'no'\r\n      \r\n    contact_info_notes:
-      &ok_to_continue\r\n      any_ok_to_continue:\r\n        consent_to_pass_info_to_msm_yes_no:
-      'yes'\r\n        consent_to_pass_info_to_msm_2_yes_no: 'yes'\r\n        \r\n
-      \   placeholder_continue:\r\n      <<: *ok_to_continue\r\n      \r\n    more_questions_yes_no:\r\n
-      \     <<: *ok_to_continue\r\n    \r\n    placeholder_more_questions_yes:\r\n
-      \     <<: *ok_to_continue\r\n      any:\r\n        more_questions_yes_no: 'yes'\r\n
-      \       \r\n    placeholder_more_questions_no:\r\n      <<: *ok_to_continue\r\n
-      \     any:\r\n        more_questions_yes_no: 'no'\r\n    \r\n    more_questions_notes:\r\n
-      \     <<: *ok_to_continue\r\n      any:\r\n        more_questions_yes_no: 'yes'\r\n
-      \   \r\n    select_still_interested:\r\n      <<: *ok_to_continue\r\n      any:\r\n
-      \       more_questions_yes_no: 'yes'\r\n    \r\n    placeholder_select_still_interested_no:\r\n
-      \     <<: *ok_to_continue\r\n      all:\r\n        more_questions_yes_no: 'yes'\r\n
-      \       select_still_interested: 'no longer interested'\r\n\r\n    placeholder_select_still_interested_yes:\r\n
-      \     <<: *ok_to_continue\r\n      all:\r\n        more_questions_yes_no: 'yes'\r\n
-      \       select_still_interested: 'yes - still interested'\r\n    \r\n\r\n    "
     user_email: 
   - id: 84
     name: Subject Contact
@@ -10327,6 +10773,618 @@ app_type:
     created_at: '2020-01-29T09:22:52.218Z'
     updated_at: '2020-01-29T09:22:52.218Z'
     user_email: test@test
+  - id: 1534
+    app_type_id: 12
+    role_name: tracker
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-08T14:51:48.822Z'
+    updated_at: '2020-05-08T14:51:48.822Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1535
+    app_type_id: 12
+    role_name: user - discussions
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-08T14:51:48.931Z'
+    updated_at: '2020-05-08T14:51:48.931Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1536
+    app_type_id: 12
+    role_name: user - participant details
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-08T14:51:48.978Z'
+    updated_at: '2020-05-08T14:51:48.978Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1537
+    app_type_id: 12
+    role_name: user - phone screen
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-08T14:51:49.041Z'
+    updated_at: '2020-05-08T14:51:49.041Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1538
+    app_type_id: 12
+    role_name: user - followup
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-08T14:51:49.076Z'
+    updated_at: '2020-05-08T14:51:49.076Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1539
+    app_type_id: 12
+    role_name: user - protocol exception
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-08T14:51:49.136Z'
+    updated_at: '2020-05-08T14:51:49.136Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1540
+    app_type_id: 12
+    role_name: user - protocol deviation
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-08T14:51:49.207Z'
+    updated_at: '2020-05-08T14:51:49.207Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1541
+    app_type_id: 12
+    role_name: nfs_store group 600
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-08T14:51:49.252Z'
+    updated_at: '2020-05-08T14:51:49.252Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1542
+    app_type_id: 12
+    role_name: email - hms phone screener
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-08T14:51:49.311Z'
+    updated_at: '2020-05-08T14:51:49.311Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1543
+    app_type_id: 12
+    role_name: hms coordinator
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T16:25:52.003Z'
+    updated_at: '2020-05-19T16:25:52.003Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1544
+    app_type_id: 12
+    role_name: email - msm transfer
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T17:48:28.826Z'
+    updated_at: '2020-05-19T17:48:28.826Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1545
+    app_type_id: 12
+    role_name: msm coordinator
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T17:48:58.739Z'
+    updated_at: '2020-05-19T17:48:58.739Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1546
+    app_type_id: 12
+    role_name: phone screener
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T17:49:20.469Z'
+    updated_at: '2020-05-19T17:49:20.469Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1547
+    app_type_id: 12
+    role_name: user - adverse event
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T17:49:45.725Z'
+    updated_at: '2020-05-19T17:49:45.725Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1548
+    app_type_id: 12
+    role_name: reviewer - adverse event
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T17:51:19.914Z'
+    updated_at: '2020-05-19T17:51:19.914Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1549
+    app_type_id: 12
+    role_name: reviewer - protocol deviation
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T17:51:32.636Z'
+    updated_at: '2020-05-19T17:51:32.636Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1550
+    app_type_id: 12
+    role_name: tracker
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.539Z'
+    updated_at: '2020-05-19T19:14:49.539Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1551
+    app_type_id: 12
+    role_name: user - discussions
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.552Z'
+    updated_at: '2020-05-19T19:14:49.552Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1552
+    app_type_id: 12
+    role_name: user - participant details
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.566Z'
+    updated_at: '2020-05-19T19:14:49.566Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1553
+    app_type_id: 12
+    role_name: user - phone screen
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.575Z'
+    updated_at: '2020-05-19T19:14:49.575Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1554
+    app_type_id: 12
+    role_name: user - followup
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.584Z'
+    updated_at: '2020-05-19T19:14:49.584Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1555
+    app_type_id: 12
+    role_name: user - protocol exception
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.594Z'
+    updated_at: '2020-05-19T19:14:49.594Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1556
+    app_type_id: 12
+    role_name: user - protocol deviation
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.603Z'
+    updated_at: '2020-05-19T19:14:49.603Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1557
+    app_type_id: 12
+    role_name: nfs_store group 600
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.612Z'
+    updated_at: '2020-05-19T19:14:49.612Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1558
+    app_type_id: 12
+    role_name: email - hms phone screener
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.622Z'
+    updated_at: '2020-05-19T19:14:49.622Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1559
+    app_type_id: 12
+    role_name: hms coordinator
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.631Z'
+    updated_at: '2020-05-19T19:14:49.631Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1560
+    app_type_id: 12
+    role_name: email - msm transfer
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.650Z'
+    updated_at: '2020-05-19T19:14:49.650Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1561
+    app_type_id: 12
+    role_name: msm coordinator
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.660Z'
+    updated_at: '2020-05-19T19:14:49.660Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1562
+    app_type_id: 12
+    role_name: phone screener
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.669Z'
+    updated_at: '2020-05-19T19:14:49.669Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1563
+    app_type_id: 12
+    role_name: user - adverse event
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.677Z'
+    updated_at: '2020-05-19T19:14:49.677Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1564
+    app_type_id: 12
+    role_name: reviewer - adverse event
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.686Z'
+    updated_at: '2020-05-19T19:14:49.686Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1565
+    app_type_id: 12
+    role_name: reviewer - protocol deviation
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:14:49.695Z'
+    updated_at: '2020-05-19T19:14:49.695Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1566
+    app_type_id: 12
+    role_name: admin
+    user_id: 14
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:20:07.966Z'
+    updated_at: '2020-05-19T19:20:07.966Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1567
+    app_type_id: 12
+    role_name: admin
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:20:47.076Z'
+    updated_at: '2020-05-19T19:20:47.076Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1568
+    app_type_id: 12
+    role_name: email - hms admin
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:45:30.680Z'
+    updated_at: '2020-05-19T19:45:30.680Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1569
+    app_type_id: 12
+    role_name: email - pi
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:45:48.140Z'
+    updated_at: '2020-05-19T19:45:48.140Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1570
+    app_type_id: 12
+    role_name: email - pi follow up
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:46:08.982Z'
+    updated_at: '2020-05-19T19:46:08.982Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1571
+    app_type_id: 12
+    role_name: sms - hms admin
+    user_id: 92
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-19T19:46:37.253Z'
+    updated_at: '2020-05-19T19:46:37.253Z'
+    user_email: inana_dairi@hms.harvard.edu
+  - id: 1601
+    app_type_id: 12
+    role_name: reviewer - adverse event
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.170Z'
+    updated_at: '2020-06-08T14:08:07.170Z'
+    user_email: mharvey@msm.edu
+  - id: 1602
+    app_type_id: 12
+    role_name: reviewer - protocol deviation
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.217Z'
+    updated_at: '2020-06-08T14:08:07.217Z'
+    user_email: mharvey@msm.edu
+  - id: 1603
+    app_type_id: 12
+    role_name: sms - msm phone screener
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.226Z'
+    updated_at: '2020-06-08T14:08:07.226Z'
+    user_email: mharvey@msm.edu
+  - id: 1604
+    app_type_id: 12
+    role_name: tracker
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.236Z'
+    updated_at: '2020-06-08T14:08:07.236Z'
+    user_email: mharvey@msm.edu
+  - id: 1605
+    app_type_id: 12
+    role_name: user - adverse event
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.245Z'
+    updated_at: '2020-06-08T14:08:07.245Z'
+    user_email: mharvey@msm.edu
+  - id: 1606
+    app_type_id: 12
+    role_name: user - discussions
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.254Z'
+    updated_at: '2020-06-08T14:08:07.254Z'
+    user_email: mharvey@msm.edu
+  - id: 1607
+    app_type_id: 12
+    role_name: user - followup
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.264Z'
+    updated_at: '2020-06-08T14:08:07.264Z'
+    user_email: mharvey@msm.edu
+  - id: 1608
+    app_type_id: 12
+    role_name: user - participant details
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.275Z'
+    updated_at: '2020-06-08T14:08:07.275Z'
+    user_email: mharvey@msm.edu
+  - id: 1609
+    app_type_id: 12
+    role_name: user - phone screen
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.284Z'
+    updated_at: '2020-06-08T14:08:07.284Z'
+    user_email: mharvey@msm.edu
+  - id: 1610
+    app_type_id: 12
+    role_name: user - phone screen 2
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.293Z'
+    updated_at: '2020-06-08T14:08:07.293Z'
+    user_email: mharvey@msm.edu
+  - id: 1611
+    app_type_id: 12
+    role_name: user - protocol deviation
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.304Z'
+    updated_at: '2020-06-08T14:08:07.304Z'
+    user_email: mharvey@msm.edu
+  - id: 1612
+    app_type_id: 12
+    role_name: user - protocol exception
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.314Z'
+    updated_at: '2020-06-08T14:08:07.314Z'
+    user_email: mharvey@msm.edu
+  - id: 1613
+    app_type_id: 12
+    role_name: email - protocol deviation irb report
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.323Z'
+    updated_at: '2020-06-08T14:08:07.323Z'
+    user_email: mharvey@msm.edu
+  - id: 1614
+    app_type_id: 12
+    role_name: email - adverse event irb report
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.332Z'
+    updated_at: '2020-06-08T14:08:07.332Z'
+    user_email: mharvey@msm.edu
+  - id: 1615
+    app_type_id: 12
+    role_name: email - msm phone screener
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.346Z'
+    updated_at: '2020-06-08T14:08:07.346Z'
+    user_email: mharvey@msm.edu
+  - id: 1616
+    app_type_id: 12
+    role_name: irb reporting
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.355Z'
+    updated_at: '2020-06-08T14:08:07.355Z'
+    user_email: mharvey@msm.edu
+  - id: 1617
+    app_type_id: 12
+    role_name: email - msm transfer
+    user_id: 98
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:08:07.365Z'
+    updated_at: '2020-06-08T14:08:07.365Z'
+    user_email: mharvey@msm.edu
+  - id: 1618
+    app_type_id: 12
+    role_name: pi
+    user_id: 99
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:10:38.233Z'
+    updated_at: '2020-06-08T14:10:38.233Z'
+    user_email: lreese@msm.edu
+  - id: 1619
+    app_type_id: 12
+    role_name: sms - pi
+    user_id: 99
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:10:38.243Z'
+    updated_at: '2020-06-08T14:10:38.243Z'
+    user_email: lreese@msm.edu
+  - id: 1620
+    app_type_id: 12
+    role_name: sms - pi follow up
+    user_id: 99
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:10:38.253Z'
+    updated_at: '2020-06-08T14:10:38.253Z'
+    user_email: lreese@msm.edu
+  - id: 1621
+    app_type_id: 12
+    role_name: user - adverse event
+    user_id: 99
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:10:38.262Z'
+    updated_at: '2020-06-08T14:10:38.262Z'
+    user_email: lreese@msm.edu
+  - id: 1622
+    app_type_id: 12
+    role_name: user - discussions
+    user_id: 99
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:10:38.271Z'
+    updated_at: '2020-06-08T14:10:38.271Z'
+    user_email: lreese@msm.edu
+  - id: 1623
+    app_type_id: 12
+    role_name: user - followup
+    user_id: 99
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:10:38.279Z'
+    updated_at: '2020-06-08T14:10:38.279Z'
+    user_email: lreese@msm.edu
+  - id: 1624
+    app_type_id: 12
+    role_name: user - phone screen
+    user_id: 99
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:10:38.288Z'
+    updated_at: '2020-06-08T14:10:38.288Z'
+    user_email: lreese@msm.edu
+  - id: 1625
+    app_type_id: 12
+    role_name: user - protocol deviation
+    user_id: 99
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:10:38.297Z'
+    updated_at: '2020-06-08T14:10:38.297Z'
+    user_email: lreese@msm.edu
+  - id: 1626
+    app_type_id: 12
+    role_name: user - protocol exception
+    user_id: 99
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:10:38.305Z'
+    updated_at: '2020-06-08T14:10:38.305Z'
+    user_email: lreese@msm.edu
+  - id: 1627
+    app_type_id: 12
+    role_name: nfs_store group 600
+    user_id: 99
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:10:38.314Z'
+    updated_at: '2020-06-08T14:10:38.314Z'
+    user_email: lreese@msm.edu
+  - id: 1628
+    app_type_id: 12
+    role_name: tracker
+    user_id: 99
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:10:38.323Z'
+    updated_at: '2020-06-08T14:10:38.323Z'
+    user_email: lreese@msm.edu
+  - id: 1629
+    app_type_id: 12
+    role_name: email - pi
+    user_id: 99
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:10:38.331Z'
+    updated_at: '2020-06-08T14:10:38.331Z'
+    user_email: lreese@msm.edu
+  - id: 1630
+    app_type_id: 12
+    role_name: email - pi follow up
+    user_id: 99
+    admin_id: 8
+    disabled: false
+    created_at: '2020-06-08T14:10:38.340Z'
+    updated_at: '2020-06-08T14:10:38.340Z'
+    user_email: lreese@msm.edu
   associated_message_templates:
   - id: 21
     name: standard sms layout
