@@ -75,7 +75,7 @@ class Admin::ManageUsersController < AdminController
       a = a.to_i
       # Set the app_type_id param to nil, so the super method doesn't attempt to filter on it
       filter_params_permitted[:app_type_id] = nil
-      ids = pm.all.select { |u| a.in?(u.accessible_app_types.map(&:id)) }.map(&:id)
+      ids = pm.all.select { |u| a.in?(u.accessible_app_type_ids) }.map(&:id)
       pm = pm.where(id: ids)
     end
 
