@@ -20,8 +20,8 @@ general:
     - activity_date
     - placeholder_communication
     - placeholder_followup
-    - select_record_from_player_contacts
-    - select_record_from_addresses
+    - select_record_from_dynamic_model__femfl_contacts
+    - select_record_from_dynamic_model__femfl_addresses
     - select_direction
     - select_who
     - select_result
@@ -29,8 +29,11 @@ general:
     - follow_up_when
     - follow_up_time
     - notes
+    - protocol_id
+
 
   view_options:
+  
     data_attribute: 
       - activity_date
       - select_activity
@@ -40,9 +43,40 @@ general:
     hide_unless_creatable: true  
 
   field_options:
+    protocol_id:
+      value: '{{app_protocols.id}}'
+  
+    select_activity:
+      edit_as:
+        alt_options:
+          Record Communications: general communications
+          Mark All Previous As Completed: completed
+          Schedule Follow Up: schedule follow up
+    
+    select_result:
+      edit_as:
+        alt_options:
+          Completed: completed
+          Follow up: follow up
+  
+    select_next_step:
+      edit_as:
+        alt_options:
+          No Follow Up: no follow up
+          More Info Requested: more info requested
+          Call Back: call back
+          Email Back: email back
+  
     select_who:
       edit_as:
-        field_type: select_user_with_role_phone_screener
+        field_type: select_user_with_role_user
+        
+    select_direction:
+      edit_as:
+        alt_options:
+          Received From Subject: to staff
+          Sent / Called To Subject: to subject
+          
     activity_date:
       value: today()
 
@@ -85,6 +119,9 @@ general:
         exists: true
 
   show_if:
+    protocol_id: 
+      never: true
+  
     select_result:
       select_activity: general communications
     
