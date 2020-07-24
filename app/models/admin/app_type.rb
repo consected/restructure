@@ -37,6 +37,18 @@ class Admin::AppType < Admin::AdminBase
     end
   end
 
+  def self.all_ids_available_to(user)
+    Rails.cache.fetch("all_app_type_ids_available_to::#{user.id}") do
+      atavail = []
+
+      active.each do |a|
+        hat = user.has_access_to?(:access, :general, :app_type, alt_app_type_id: a.id)
+        atavail << hat.app_type.id if hat
+      end
+      atavail
+    end
+  end
+
   def self.all_available_to(user)
     atavail = []
 

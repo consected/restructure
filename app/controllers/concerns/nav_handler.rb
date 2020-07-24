@@ -14,7 +14,7 @@ module NavHandler
     @secondary_navs = []
     @app_type_switches = nil
 
-    @app_type_switches = Admin::AppType.all_available_to(current_user).map { |m| [m.label, m.id] } if current_user
+    @app_type_switches = current_user.accessible_app_types.map { |m| [m.label, m.id] } if current_user
     admin_sub = []
     if current_admin
 
