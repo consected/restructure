@@ -3,6 +3,8 @@
 module DynamicModelDefHandler
   extend ActiveSupport::Concern
 
+  DefaultMigrationSchema = Settings::DefaultMigrationSchema
+
   included do
     after_save :generate_model
     after_save :check_implementation_class
@@ -179,6 +181,7 @@ module DynamicModelDefHandler
   rescue StandardError => e
     puts e
     @extra_error = e
+
     false
   end
 
@@ -290,22 +293,27 @@ module DynamicModelDefHandler
     if !disabled && errors.empty?
 
       unless !disabled? && ready?
+
+        gs = generator_script
+        fn = write_db_migration gs
+
         err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created.
 
-        #{generator_script}
+        Wrote migration to: #{fn}
+        Review it, then run migration with:
+        MIG_PATH=femfl FPHS_LOAD_APP_TYPES= bundle exec rails db:migrate
 
         IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
         "
 
         err += "(extra error info: #{@extra_error})" if @extra_error
-        # errors.add :name, err
-        # Force exit of callbacks
+
         raise FphsException, err
       end
 
       begin
         res = implementation_class_defined?
-      rescue Exception => e
+      rescue StandardError => e
         err = "Failed to instantiate the class #{full_implementation_class_name}: #{e}"
         logger.warn err
         errors.add :name, err
@@ -326,6 +334,7 @@ module DynamicModelDefHandler
     AppControl.restart_server
   end
 
+  # Standard columns are used by migrations
   def standard_columns
     pset = %w[id created_at updated_at contactid user_id master_id
               extra_log_type admin_id]
@@ -334,8 +343,14 @@ module DynamicModelDefHandler
   end
 
   def generate_migration
-    cols = ActiveRecord::Base.connection.columns(table_name)
-    old_colnames = cols.map(&:name) - standard_columns
+    return unless ready?
+
+    begin
+      cols = ActiveRecord::Base.connection.columns(table_name)
+      old_colnames = cols.map(&:name) - standard_columns
+    rescue StandardError
+      return
+    end
 
     fields = all_implementation_fields(ignore_errors: true)
     new_colnames = fields.map(&:to_s) - standard_columns
@@ -343,6 +358,34 @@ module DynamicModelDefHandler
     added = new_colnames - old_colnames
     removed = old_colnames - new_colnames
 
-    generator_script('update') if added.present? || removed.present?
+    if added.present? || removed.present?
+      gs = generator_script('update', added, removed)
+      write_db_migration gs, mode: 'update'
+    end
+  end
+
+  # A DB migration schema is either the schema of the currrent app,
+  # or is based on the category of the dynamic model, activity log or external ID
+  def db_migration_schema
+    current_user_app_type = current_admin.matching_user_app_type
+    dsn = current_user_app_type&.default_schema_name
+    return dsn if dsn
+
+    res = category.split('-').first if category.present?
+    res || DefaultMigrationSchema
+  end
+
+  def db_migration_dirname
+    "db/app_migrations/#{db_migration_schema}"
+  end
+
+  def write_db_migration(mig_text, mode: 'create')
+    return if Rails.env.test?
+
+    dirname = "db/app_migrations/#{db_migration_schema}"
+    fn = "#{dirname}/#{Time.new.to_s(:number)}_#{mode}_#{table_name}.rb"
+    FileUtils.mkdir_p dirname
+    File.write(fn, mig_text)
+    fn
   end
 end

@@ -851,6 +851,35 @@ $$;
 
 
 --
+-- Name: log_test9_numbers_update(); Type: FUNCTION; Schema: femfl; Owner: -
+--
+
+CREATE FUNCTION femfl.log_test9_numbers_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO test9_number_history (
+    master_id,
+    test9_id, test9_id, test9_id,
+    user_id,
+    admin_id,
+    created_at,
+    updated_at,
+    test9_number_table_id)
+  SELECT
+    NEW.master_id,
+    NEW.test9_id, NEW.test9_id,
+    NEW.user_id,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_activity_log_grit_assignment_adverse_event_update(); Type: FUNCTION; Schema: grit; Owner: -
 --
 
@@ -8192,6 +8221,37 @@ CREATE FUNCTION ml_app.log_activity_log_bhs_assignment_update() RETURNS trigger
 
 
 --
+-- Name: log_activity_log_bhs_assignments_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_activity_log_bhs_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_bhs_assignment_history (
+    master_id,
+    bhs_assignment_id,
+    select_record_from_player_contact_phones, return_call_availability_notes, questions_from_call_notes, results_link, select_result, pi_notes_from_return_call,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_bhs_assignment_id)
+  SELECT
+    NEW.master_id,
+    NEW.bhs_assignment_id,
+    NEW.select_record_from_player_contact_phones, NEW.return_call_availability_notes, NEW.questions_from_call_notes, NEW.results_link, NEW.select_result, NEW.pi_notes_from_return_call,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_activity_log_ext_assignment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -8671,6 +8731,37 @@ CREATE FUNCTION ml_app.log_activity_log_player_contact_phone_update() RETURNS tr
                     RETURN NEW;
                 END;
             $$;
+
+
+--
+-- Name: log_activity_log_player_contact_phones_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_activity_log_player_contact_phones_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_player_contact_phone_history (
+    master_id,
+    player_contact_id,
+    data, select_call_direction, select_who, called_when, select_result, select_next_step, follow_up_when, notes, protocol_id, set_related_player_contact_rank,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_player_contact_phone_id)
+  SELECT
+    NEW.master_id,
+    NEW.player_contact_id,
+    NEW.data, NEW.select_call_direction, NEW.select_who, NEW.called_when, NEW.select_result, NEW.select_next_step, NEW.follow_up_when, NEW.notes, NEW.protocol_id, NEW.set_related_player_contact_rank,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -11042,6 +11133,35 @@ CREATE FUNCTION ml_app.log_report_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
+
+
+--
+-- Name: log_sage_assignments_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_sage_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO sage_assignment_history (
+    master_id,
+    sage_id, sage_id,
+    user_id,
+    admin_id,
+    created_at,
+    updated_at,
+    sage_assignment_table_id)
+  SELECT
+    NEW.master_id,
+    NEW.sage_id,
+    NEW.user_id,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -20363,6 +20483,75 @@ ALTER SEQUENCE femfl.femfl_subjects_id_seq OWNED BY femfl.femfl_subjects.id;
 
 
 --
+-- Name: test9_number_history; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.test9_number_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    test9_id character varying,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    test9_number_table_id_id bigint
+);
+
+
+--
+-- Name: test9_number_history_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.test9_number_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test9_number_history_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.test9_number_history_id_seq OWNED BY femfl.test9_number_history.id;
+
+
+--
+-- Name: test9_numbers; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.test9_numbers (
+    id bigint NOT NULL,
+    master_id bigint,
+    test9_id character varying,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test9_numbers_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.test9_numbers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test9_numbers_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.test9_numbers_id_seq OWNED BY femfl.test9_numbers.id;
+
+
+--
 -- Name: activity_log_grit_assignment_adverse_event_history; Type: TABLE; Schema: grit; Owner: -
 --
 
@@ -28493,22 +28682,16 @@ ALTER SEQUENCE ml_app.activity_log_bhs_assignment_history_id_seq OWNED BY ml_app
 CREATE TABLE ml_app.activity_log_bhs_assignments (
     id integer NOT NULL,
     master_id integer,
-    bhs_assignment_id integer,
     select_record_from_player_contact_phones character varying,
     return_call_availability_notes character varying,
     questions_from_call_notes character varying,
     results_link character varying,
     select_result character varying,
-    completed_q1_no_yes character varying,
-    completed_teamstudy_no_yes character varying,
-    previous_contact_with_team_no_yes character varying,
-    previous_contact_with_team_notes character varying,
     extra_log_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    notes character varying,
-    pi_return_call_notes character varying
+    pi_notes_from_return_call character varying
 );
 
 
@@ -28833,9 +29016,7 @@ CREATE TABLE ml_app.activity_log_player_contact_phones (
     protocol_id integer,
     notes character varying,
     user_id integer,
-    player_contact_id integer,
     master_id integer,
-    disabled boolean,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     set_related_player_contact_rank character varying,
@@ -29231,7 +29412,8 @@ CREATE TABLE ml_app.app_types (
     disabled boolean,
     admin_id integer,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    default_schema_name character varying
 );
 
 
@@ -29870,7 +30052,8 @@ CREATE TABLE ml_app.external_identifiers (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     alphanumeric boolean,
-    extra_fields character varying
+    extra_fields character varying,
+    category character varying
 );
 
 
@@ -31787,7 +31970,6 @@ ALTER SEQUENCE ml_app.reports_id_seq OWNED BY ml_app.reports.id;
 CREATE TABLE ml_app.sage_assignments (
     id integer NOT NULL,
     sage_id character varying(10),
-    assigned_by character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
@@ -40306,6 +40488,20 @@ ALTER TABLE ONLY femfl.femfl_subjects ALTER COLUMN id SET DEFAULT nextval('femfl
 
 
 --
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_number_history ALTER COLUMN id SET DEFAULT nextval('femfl.test9_number_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_numbers ALTER COLUMN id SET DEFAULT nextval('femfl.test9_numbers_id_seq'::regclass);
+
+
+--
 -- Name: id; Type: DEFAULT; Schema: grit; Owner: -
 --
 
@@ -43880,6 +44076,22 @@ ALTER TABLE ONLY femfl.femfl_subject_history
 
 ALTER TABLE ONLY femfl.femfl_subjects
     ADD CONSTRAINT femfl_subjects_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test9_number_history_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_number_history
+    ADD CONSTRAINT test9_number_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test9_numbers_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_numbers
+    ADD CONSTRAINT test9_numbers_pkey PRIMARY KEY (id);
 
 
 --
@@ -48385,6 +48597,55 @@ CREATE INDEX "index_femfl.femfl_subjects_on_user_id" ON femfl.femfl_subjects USI
 
 
 --
+-- Name: index_femfl.test9_number_history_on_admin_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.test9_number_history_on_admin_id" ON femfl.test9_number_history USING btree (admin_id);
+
+
+--
+-- Name: index_femfl.test9_number_history_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.test9_number_history_on_master_id" ON femfl.test9_number_history USING btree (master_id);
+
+
+--
+-- Name: index_femfl.test9_number_history_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.test9_number_history_on_user_id" ON femfl.test9_number_history USING btree (user_id);
+
+
+--
+-- Name: index_femfl.test9_numbers_on_admin_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.test9_numbers_on_admin_id" ON femfl.test9_numbers USING btree (admin_id);
+
+
+--
+-- Name: index_femfl.test9_numbers_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.test9_numbers_on_master_id" ON femfl.test9_numbers USING btree (master_id);
+
+
+--
+-- Name: index_femfl.test9_numbers_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.test9_numbers_on_user_id" ON femfl.test9_numbers USING btree (user_id);
+
+
+--
+-- Name: test9_number_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX test9_number_id_idx ON femfl.test9_number_history USING btree (test9_number_table_id_id);
+
+
+--
 -- Name: index_activity_log_grit_assignment_adverse_events_on_grit_assig; Type: INDEX; Schema: grit; Owner: -
 --
 
@@ -51850,13 +52111,6 @@ CREATE INDEX index_activity_log_bhs_assignment_history_on_user_id ON ml_app.acti
 
 
 --
--- Name: index_activity_log_bhs_assignments_on_bhs_assignment_id; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE INDEX index_activity_log_bhs_assignments_on_bhs_assignment_id ON ml_app.activity_log_bhs_assignments USING btree (bhs_assignment_id);
-
-
---
 -- Name: index_activity_log_bhs_assignments_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -52036,13 +52290,6 @@ CREATE INDEX index_activity_log_player_contact_phone_history_on_user_id ON ml_ap
 --
 
 CREATE INDEX index_activity_log_player_contact_phones_on_master_id ON ml_app.activity_log_player_contact_phones USING btree (master_id);
-
-
---
--- Name: index_activity_log_player_contact_phones_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE INDEX index_activity_log_player_contact_phones_on_player_contact_id ON ml_app.activity_log_player_contact_phones USING btree (player_contact_id);
 
 
 --
@@ -57065,6 +57312,20 @@ CREATE TRIGGER log_femfl_subject_history_update AFTER UPDATE ON femfl.femfl_subj
 
 
 --
+-- Name: log_test9_number_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_test9_number_history_insert AFTER INSERT ON femfl.test9_numbers FOR EACH ROW EXECUTE PROCEDURE femfl.log_test9_numbers_update();
+
+
+--
+-- Name: log_test9_number_history_update; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_test9_number_history_update AFTER UPDATE ON femfl.test9_numbers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE femfl.log_test9_numbers_update();
+
+
+--
 -- Name: activity_log_grit_assignment_adverse_event_history_insert; Type: TRIGGER; Schema: grit; Owner: -
 --
 
@@ -58644,6 +58905,48 @@ CREATE TRIGGER item_flag_name_history_insert AFTER INSERT ON ml_app.item_flag_na
 --
 
 CREATE TRIGGER item_flag_name_history_update AFTER UPDATE ON ml_app.item_flag_names FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_item_flag_name_update();
+
+
+--
+-- Name: log_activity_log_bhs_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_bhs_assignment_history_insert AFTER INSERT ON ml_app.activity_log_bhs_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_bhs_assignments_update();
+
+
+--
+-- Name: log_activity_log_bhs_assignment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_bhs_assignment_history_update AFTER UPDATE ON ml_app.activity_log_bhs_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_bhs_assignments_update();
+
+
+--
+-- Name: log_activity_log_player_contact_phone_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_player_contact_phone_history_insert AFTER INSERT ON ml_app.activity_log_player_contact_phones FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_player_contact_phones_update();
+
+
+--
+-- Name: log_activity_log_player_contact_phone_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_player_contact_phone_history_update AFTER UPDATE ON ml_app.activity_log_player_contact_phones FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_player_contact_phones_update();
+
+
+--
+-- Name: log_sage_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_sage_assignment_history_insert AFTER INSERT ON ml_app.sage_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_sage_assignments_update();
+
+
+--
+-- Name: log_sage_assignment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_sage_assignment_history_update AFTER UPDATE ON ml_app.sage_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_sage_assignments_update();
 
 
 --
@@ -61018,6 +61321,14 @@ ALTER TABLE ONLY data_requests.data_request_messages
 
 
 --
+-- Name: fk_rails_069dad0bca; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_number_history
+    ADD CONSTRAINT fk_rails_069dad0bca FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_085a1bd755; Type: FK CONSTRAINT; Schema: femfl; Owner: -
 --
 
@@ -61031,6 +61342,14 @@ ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comms
 
 ALTER TABLE ONLY femfl.femfl_contact_history
     ADD CONSTRAINT fk_rails_1a3285fe5b FOREIGN KEY (femfl_contact_id) REFERENCES femfl.femfl_contacts(id);
+
+
+--
+-- Name: fk_rails_1b4bda128c; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_numbers
+    ADD CONSTRAINT fk_rails_1b4bda128c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -61066,6 +61385,14 @@ ALTER TABLE ONLY femfl.femfl_contact_history
 
 
 --
+-- Name: fk_rails_4f3af366ad; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_numbers
+    ADD CONSTRAINT fk_rails_4f3af366ad FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_56c0e165b2; Type: FK CONSTRAINT; Schema: femfl; Owner: -
 --
 
@@ -61098,6 +61425,14 @@ ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comm_history
 
 
 --
+-- Name: fk_rails_698976c6e3; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_number_history
+    ADD CONSTRAINT fk_rails_698976c6e3 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
 -- Name: fk_rails_72809ba128; Type: FK CONSTRAINT; Schema: femfl; Owner: -
 --
 
@@ -61119,6 +61454,14 @@ ALTER TABLE ONLY femfl.femfl_subject_history
 
 ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comms
     ADD CONSTRAINT fk_rails_84bb0a3134 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_86f4ecdb21; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_number_history
+    ADD CONSTRAINT fk_rails_86f4ecdb21 FOREIGN KEY (test9_number_table_id_id) REFERENCES femfl.test9_numbers(id);
 
 
 --
@@ -61162,6 +61505,14 @@ ALTER TABLE ONLY femfl.femfl_addresses
 
 
 --
+-- Name: fk_rails_b2eda41b04; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_number_history
+    ADD CONSTRAINT fk_rails_b2eda41b04 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_bd9caca30a; Type: FK CONSTRAINT; Schema: femfl; Owner: -
 --
 
@@ -61183,6 +61534,14 @@ ALTER TABLE ONLY femfl.femfl_addresses
 
 ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comm_history
     ADD CONSTRAINT fk_rails_c806b34028 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_cc53b41cef; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_numbers
+    ADD CONSTRAINT fk_rails_cc53b41cef FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
@@ -66514,14 +66873,6 @@ ALTER TABLE ONLY ml_app.activity_log_new_tests
 
 
 --
--- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ml_app.activity_log_bhs_assignments
-    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (bhs_assignment_id) REFERENCES ml_app.bhs_assignments(id);
-
-
---
 -- Name: fk_rails_7c10a99849; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -70957,6 +71308,17 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200723104100'),
 ('20200723153130'),
 ('20200724153400'),
-('20200724181747');
+('20200724181747'),
+('20200727081305'),
+('20200727081306'),
+('20200727100429'),
+('20200727100431'),
+('20200727100543'),
+('20200727111056'),
+('20200727111057'),
+('20200727111100'),
+('20200727122116'),
+('20200727122117'),
+('20200727162041');
 
 

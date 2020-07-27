@@ -258,54 +258,48 @@ class ExternalIdentifier < ActiveRecord::Base
       unless ActiveRecord::Base.connection.columns(name).map(&:name).include?(external_id_attribute.to_s)
         raise FphsException, "external_id_attribute does not exist as an attribute (named #{external_id_attribute}) in the table #{name}"
       end
-
-    else
-      # Can't enable the configuration until the table exists
-      unless disabled || !errors.empty?
-        raise FphsException, "name: #{name} does not exist as a table in the database. Ensure the DB table #{name} has been created.
-
-        #{generator_script}
-
-        IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
-         "
-      end
     end
   end
 
-  def category
-    name.split('_').first
-  end
+  def generator_script(mode = 'create', added = nil, removed = nil)
+    ftype = (alphanumeric? ? 'string' : 'bigint')
+    do_create_or_update = if mode == 'create'
+                            "create_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
+                          else
+                            <<~ARCONTENT
+                              \# added: #{added}
+                                  \# removed: #{removed}
+                                  update_fields
+                            ARCONTENT
+                          end
 
-  def generator_script(mode = 'create')
-    dirname = "db/app_migrations/#{db_category}"
-    fn = "#{dirname}/#{Time.new.to_s(:number)}_#{mode}_#{table_name}.rb"
-    res = <<~CONTENT
+    <<~CONTENT
       require 'active_record/migration/app_generator'
       class #{mode.capitalize}#{table_name.camelize} < ActiveRecord::Migration[5.2]
         include ActiveRecord::Migration::AppGenerator
 
         def change
-          self.schema = '#{category}'
+          self.schema = '#{db_migration_schema}'
           self.table_name = '#{table_name}'
           self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
 
-          #{mode == 'create' ? 'create_external_identifier_tables' : 'update_fields'}
-          create_external_identifier_trigger
+          #{do_create_or_update}
+          create_external_identifier_trigger :#{external_id_attribute}
         end
       end
     CONTENT
-
-    FileUtils.mkdir_p dirname
-    File.write(fn, res)
-
-    "Wrote migration to: #{fn}
-    Review it, then run migration with:
-
-    MIG_PATH=femfl FPHS_LOAD_APP_TYPES= bundle exec rails db:migrate"
   end
 
   def field_list
     "#{external_id_attribute.to_sym} #{extra_fields}"
+  end
+
+  def all_implementation_fields(ignore_errors: true)
+    field_list.split(' ')
+  rescue StandardError => e
+    msg = "all_implementation_fields for external identifier #{id} failed. #{e}"
+    Rails.logger.warn msg
+    raise FphsException, msg unless ignore_errors
   end
 
   def id_range_correct
@@ -334,23 +328,6 @@ class ExternalIdentifier < ActiveRecord::Base
     errors.add :name, 'must be unique' if !disabled && !res.empty?
     res = self.class.active.where(external_id_attribute: external_id_attribute.downcase).where.not(id: id)
     errors.add :external_id_attribute, 'must be unique' if !disabled && !res.empty?
-  end
-
-  def check_implementation_class
-    if !disabled && errors.empty?
-      res = begin
-              implementation_class.new
-            rescue StandardError
-              nil
-            end
-      unless res
-        raise FphsException, "The implementation of #{model_class_name} was not completed. Ensure the DB table #{name} has been created. Run:
-        \`db/table_generators/generate.sh external_identifiers_table create #{name} #{external_id_attribute}\`
-        to generate the SQL for this table.
-        IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
-         "
-      end
-    end
   end
 
   def generate_usage_reports

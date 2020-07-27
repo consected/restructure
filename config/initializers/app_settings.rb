@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Settings
+  DefaultMigrationSchema = 'ml_app'
+
   StartYearRange = (1900..(Date.current.year)).freeze
   EndYearRange = (1900..(Date.current.year)).freeze
   AgeRange = (1..150).freeze

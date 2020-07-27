@@ -530,35 +530,33 @@ class ActivityLog < ActiveRecord::Base
     @regenerate = res
   end
 
-  def generator_script(mode = 'create')
-    db_category = category.split('-').first
+  def generator_script(mode = 'create', added = nil, removed = nil)
+    do_create_or_update = if mode == 'create'
+                            'create_activity_log_tables'
+                          else
+                            <<~ARCONTENT
+                              \# added: #{added}
+                                  \# removed: #{removed}
+                                  update_fields
+                            ARCONTENT
+                          end
 
-    dirname = "db/app_migrations/#{db_category}"
-    fn = "#{dirname}/#{Time.new.to_s(:number)}_#{mode}_#{table_name}.rb"
-    res = <<~CONTENT
+    <<~CONTENT
       require 'active_record/migration/app_generator'
       class #{mode.capitalize}#{table_name.camelize} < ActiveRecord::Migration[5.2]
         include ActiveRecord::Migration::AppGenerator
 
         def change
-          self.schema = '#{db_category}'
+          self.schema = '#{db_migration_schema}'
           self.table_name = '#{table_name}'
           self.belongs_to_model = '#{item_type}'
           self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
 
-          #{mode == 'create' ? 'create_activity_log_tables' : 'update_fields'}
+          #{do_create_or_update}
           create_activity_log_trigger
         end
       end
     CONTENT
-
-    FileUtils.mkdir_p dirname
-    File.write(fn, res)
-
-    "Wrote migration to: #{fn}
-    Review it, then run migration with:
-
-    MIG_PATH=femfl FPHS_LOAD_APP_TYPES= bundle exec rails db:migrate"
   end
 
   def item_type_exists
