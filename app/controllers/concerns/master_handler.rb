@@ -392,7 +392,9 @@ module MasterHandler
   end
 
   def limit_results
-    if requested_limit
+    if @master_objects.is_a? Array
+      @master_objects
+    elsif requested_limit
       @master_objects = @master_objects.limit(requested_limit)
     else
       @master_objects
