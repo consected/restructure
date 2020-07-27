@@ -8,7 +8,7 @@ module ViewHandlers
 
     included do
       validate :dates_sensible
-      validates :source, 'validates/source' => true, presence: true, if: :rank?
+      validates :source, 'validates/source' => true, presence: true, if: :uses_and_has_rank?
     end
 
     class_methods do
@@ -29,6 +29,10 @@ module ViewHandlers
 
     def accuracy_score_name
       rank_name
+    end
+
+    def uses_and_has_rank?
+      respond_to?(:rank) && rank?
     end
 
     # Override the standard rank_name, to ensure correct validation, since
