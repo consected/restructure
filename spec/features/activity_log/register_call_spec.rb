@@ -18,13 +18,25 @@ describe 'Register an incoming call', driver: :app_firefox_driver do
   include ActivityLogMain
 
   before :all do
+    User.active.where.not(email: Settings::TemplateUserEmail).where.not(id: @user&.id).update_all(disabled: true)
+
     SetupHelper.feature_setup
     seed_database
     setup_database
     ::ActivityLog.define_models
-    expect(ActivityLog.model_names).to include :player_contact_phone
 
+    ensure_user_matches_login_email
+    setup_access :player_contacts
+    setup_access :player_contacts, user: @user
+
+    expect(@user.has_access_to?(:access, :table, :player_contacts)).to be_truthy
+    expect(ActivityLog.model_names).to include :player_contact_phone
+  end
+
+  before :example do
+    ensure_user_matches_login_email
     user_logs_in
+    expect(@user.has_access_to?(:access, :table, :player_contacts)).to be_truthy
   end
 
   it 'records the details of an incoming call' do

@@ -22,6 +22,7 @@ RSpec.describe 'Activity Log implementation', type: :model do
     data = @player_contact.data
 
     # Create a second user to ensure that the user attribute is set correctly on saving
+    resource_name = :activity_log__player_contact_phone__primary
     user, = create_user
     @player_contact.master.current_user = user
     master = @player_contact.master
@@ -32,7 +33,6 @@ RSpec.describe 'Activity Log implementation', type: :model do
     expect(al.class.definition).not_to be nil
 
     expect(al.player_contact).to eq @player_contact
-    resource_name = al.resource_name
 
     setup_access resource_name, resource_type: :activity_log_type, access: nil, user: @user
 
@@ -40,8 +40,10 @@ RSpec.describe 'Activity Log implementation', type: :model do
     expect do
       al.save
     end.to raise_error FphsException
-
+    
     setup_access resource_name, resource_type: :activity_log_type, access: :create, user: @user
+    # The access has changed, reset the cached results
+    al.reset_access
 
     let_user_create_player_contacts
 

@@ -77,6 +77,9 @@ module SpecSetup
                            delete from trackers where item_type = 'ActivityLog::PlayerContactPhone';")
 
     # puts "create contacts and logs"
+    create_data_set
+    create_data_set
+    create_data_set
     @test_player_infos = PlayerInfo.all[-20..-1]
     @test_player_infos.each do |p|
       m = p.master

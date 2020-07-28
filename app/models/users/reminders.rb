@@ -6,8 +6,12 @@ module Users
       attr_accessor :password_expiration_defaults
     end
 
+    def self.prevent_send_to(user)
+      Rails.env.test? && !user.email.end_with?('-allow-test-email')
+    end
+
     def self.password_expiration(user)
-      return if Rails.env.test?
+      return if prevent_send_to(user)
 
       remind_after = password_expiration_defaults[:remind_after]
       Rails.logger.info "Setting up the password expiration reminder for #{remind_after}"

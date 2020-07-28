@@ -811,6 +811,14 @@ module ActivityLogHandler
     @can_access = !!(res && super())
   end
 
+  # If access has changed since an initial check, reset the cached results
+  def reset_access
+    @can_access = nil
+    @can_create = nil
+    @can_add_reference = nil
+    @can_edit = nil
+  end
+
   # Extend the standard access check with a check on the extra_log_type resource
   def allows_current_user_access_to?(perform, with_options = nil)
     unless master.current_user

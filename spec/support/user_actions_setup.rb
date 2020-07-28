@@ -16,6 +16,13 @@ module UserActionsSetup
     @good_email = @user.email
   end
 
+  def ensure_user_matches_login_email
+    return unless @user.email != @good_email
+
+    puts "in login @user does not match @good_email: #{@user} does not match #{@good_email}"
+    @user = User.active.where(email: @good_email).first
+  end
+
   def user_logout
     logout
   end
@@ -26,8 +33,6 @@ module UserActionsSetup
   end
 
   def select_app(app_name)
-    if has_css?('use_app_type_select')
-      select app_name, from: 'use_app_type_select'
-    end
+    select app_name, from: 'use_app_type_select' if has_css?('use_app_type_select')
   end
 end

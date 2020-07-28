@@ -125,7 +125,7 @@ describe User do
 
     create_admin
 
-    @user = User.new email: @user.email + 'dj', current_admin: @admin, first_name: 'fn', last_name: 'ln'
+    @user = User.new email: @user.email + '-allow-test-email', current_admin: @admin, first_name: 'fn', last_name: 'ln'
 
     @user.otp_required_for_login = false
 
