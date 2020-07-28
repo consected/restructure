@@ -159,7 +159,7 @@ module ActiveRecord
 
       def standard_columns
         pset = %w[id created_at updated_at contactid user_id master_id
-                  extra_log_type admin_id]
+                  extra_log_type admin_id tracker_history_id]
         pset += ["#{table_name.singularize}_table_id", "#{table_name.singularize}_id"]
         pset
       end
