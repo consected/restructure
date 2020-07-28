@@ -122,8 +122,11 @@ module ESignature
     end
 
     def prevent_change
-      if e_signed_status.in?([CancelledStatus, SignedStatus]) && !e_signed_status_changed?
-        raise ESignatureUserError, "Record has already been #{e_signed_status}"
+      if e_signed_status_was.in?([CancelledStatus, SignedStatus]) && (
+           e_signed_status_changed? || e_signed_document_changed? || e_signed_how_changed? ||
+           e_signed_at_changed? || e_signed_by_changed? || e_signed_code_changed?
+         )
+        raise ESignatureUserError, "Record has already been #{e_signed_status_was}"
       end
     end
 
