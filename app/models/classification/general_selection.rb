@@ -17,7 +17,9 @@ class Classification::GeneralSelection < ActiveRecord::Base
   validate :not_duplicated
 
   def self.item_types
-    BasicItemTypes + Report.item_types + ActivityLog.item_types + DynamicModel.item_types + ExternalIdentifier.item_types
+    Rails.cache.fetch('Classification::GeneralSelection.item_types') do
+      BasicItemTypes + Report.item_types + ActivityLog.item_types + DynamicModel.item_types + ExternalIdentifier.item_types
+    end
   end
 
   # Format the item type source string for looking up different selection types from the general_selections table

@@ -43,16 +43,18 @@ class ExternalIdentifier < ActiveRecord::Base
   # List of item types that can be used to define Classification::GeneralSelection drop downs
   # This does not represent the actual item types that are valid for selection when defining a new external identifier model record
   def self.item_types
-    list = []
+    Rails.cache.fetch('ExternalIdentifier.item_types') do
+      list = []
 
-    implementation_classes.each do |c|
-      cn = c.attribute_names.select { |a| a.start_with?('select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
-      cn.each do |a|
-        list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
+      implementation_classes.each do |c|
+        cn = c.attribute_names.select { |a| a.start_with?('select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
+        cn.each do |a|
+          list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
+        end
       end
-    end
 
-    list
+      list
+    end
   end
 
   # the list of defined activity log implementation classes

@@ -12,7 +12,6 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
   before_action :check_temp_passwords
   before_action :prevent_cache
-  before_action :setup_navs
 
   protected
 
@@ -29,6 +28,8 @@ class ApplicationController < ActionController::Base
 
   # If either user or admin has a temp password, force them to change it
   def check_temp_passwords
+    return true if request.xhr?
+
     return true if defined?(ignore_temp_password_for) && ignore_temp_password_for.include?(action_name)
 
     return true if controller_name.in?(['registrations', 'sessions'])
