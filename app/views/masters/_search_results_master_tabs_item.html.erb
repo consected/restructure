@@ -17,9 +17,8 @@
   <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
     <a href="/masters/{{id}}/trackers" data-panel-tab="trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" aria-expanded="false" class="scroll-to-expanded open-tracker collapsed">tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
   </li>
-  <% end %>
 
-  <% if categories
+  <% elsif categories
 
     if default_panels.length > 0
       initial_show = panel_name_us.to_s.in?(default_panels)
@@ -28,9 +27,8 @@
   <li role="presentation" class="category-tab <%= initial_show ? 'on-open-click' : '' %>">
     <a href="#" data-panel-tab="<%= panel_name_us %>" data-toggle="collapse" data-target="#<%= panel_name%>-{{id}}" aria-expanded="false" class="scroll-to-expanded  collapsed"><%= panel_label %></a>
   </li>
-  <% end %>
 
-  <% if resources
+  <% elsif resources
     resources.each do |resource|
       template_postfix = ''
       template_postfix = '-main-result-template' if resource.start_with?('activity_log__')

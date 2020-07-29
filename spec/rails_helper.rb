@@ -67,7 +67,7 @@ require "#{::Rails.root}/spec/support/model_support.rb"
 Dir[Rails.root.join('spec/support/*.rb')].sort.each { |f| require f }
 Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 
-SetupHelper.setup_byebug
+# SetupHelper.setup_byebug
 SetupHelper.validate_db_setup
 
 SetupHelper.setup_app_dbs

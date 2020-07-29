@@ -23,6 +23,13 @@ CREATE SCHEMA data_requests;
 
 
 --
+-- Name: femfl; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA femfl;
+
+
+--
 -- Name: grit; Type: SCHEMA; Schema: -; Owner: -
 --
 
@@ -350,38 +357,43 @@ CREATE FUNCTION bulk_msg.log_zeus_short_link_update() RETURNS trigger
 
 CREATE FUNCTION data_requests.log_activity_log_data_request_assignment_update() RETURNS trigger
     LANGUAGE plpgsql
-    AS $$
-              BEGIN
-                  INSERT INTO activity_log_data_request_assignment_history
-                  (
-                      master_id,
-                      data_request_assignment_id,
-                      follow_up_date,
-                      follow_up_time,
-                      notes,
-                      extra_log_type,
-                      user_id,
-                      created_by_user_id,
-                      created_at,
-                      updated_at,
-                      activity_log_data_request_assignment_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.data_request_assignment_id,
-                      NEW.follow_up_date,
-                      NEW.follow_up_time,
-                      NEW.notes,
-                      NEW.extra_log_type,
-                      NEW.user_id,
-                      NEW.created_by_user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
+    AS $$ BEGIN
+    INSERT INTO
+        activity_log_data_request_assignment_history (
+            master_id,
+            data_request_assignment_id,
+            follow_up_date,
+            follow_up_time,
+            next_step,
+            status,
+            notes,
+            extra_log_type,
+            user_id,
+            created_by_user_id,
+            created_at,
+            updated_at,
+            activity_log_data_request_assignment_id
+        )
+    SELECT
+        NEW.master_id,
+        NEW.data_request_assignment_id,
+        NEW.follow_up_date,
+        NEW.follow_up_time,
+        NEW.next_step,
+        NEW.status,
+        NEW .notes,
+        NEW.extra_log_type,
+        NEW.user_id,
+        NEW.created_by_user_id,
+        NEW.created_at,
+        NEW.updated_at,
+        NEW.id;
+
+RETURN NEW;
+
+END;
+
+$$;
 
 
 --
@@ -616,6 +628,7 @@ CREATE FUNCTION data_requests.log_data_request_update() RETURNS trigger
                       fphs_analyst_yes_no,
                       fphs_server_yes_no,
                       fphs_server_tools_notes,
+                      off_fphs_server_reason_notes,
                       status,
                       user_id,
                       created_by_user_id,
@@ -643,6 +656,7 @@ CREATE FUNCTION data_requests.log_data_request_update() RETURNS trigger
                       NEW.fphs_analyst_yes_no,
                       NEW.fphs_server_yes_no,
                       NEW.fphs_server_tools_notes,
+                      NEW.off_fphs_server_reason_notes,
                       NEW.status,
                       NEW.user_id,
                       NEW.created_by_user_id,
@@ -693,6 +707,176 @@ CREATE FUNCTION data_requests.log_data_requests_selected_attrib_update() RETURNS
                   RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_activity_log_femfl_assignment_femfl_comms_update(); Type: FUNCTION; Schema: femfl; Owner: -
+--
+
+CREATE FUNCTION femfl.log_activity_log_femfl_assignment_femfl_comms_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_femfl_assignment_femfl_comm_history (
+    master_id,
+    femfl_assignment_id,
+    select_activity, activity_date, select_record_from_dynamic_model__femfl_contacts, select_record_from_dynamic_model__femfl_addresses, select_direction, select_who, select_result, select_next_step, follow_up_when, follow_up_time, notes, protocol_id,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_femfl_assignment_femfl_comm_id)
+  SELECT
+    NEW.master_id,
+    NEW.femfl_assignment_id,
+    NEW.select_activity, NEW.activity_date, NEW.select_record_from_dynamic_model__femfl_contacts, NEW.select_record_from_dynamic_model__femfl_addresses, NEW.select_direction, NEW.select_who, NEW.select_result, NEW.select_next_step, NEW.follow_up_when, NEW.follow_up_time, NEW.notes, NEW.protocol_id,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_femfl_addresses_update(); Type: FUNCTION; Schema: femfl; Owner: -
+--
+
+CREATE FUNCTION femfl.log_femfl_addresses_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO femfl_address_history (
+    master_id,
+    street, street2, street3, city, state, zip, source, rank, rec_type, country, postal_code, region,
+    user_id,
+    created_at,
+    updated_at,
+    femfl_address_id)
+  SELECT
+    NEW.master_id,
+    NEW.street, NEW.street2, NEW.street3, NEW.city, NEW.state, NEW.zip, NEW.source, NEW.rank, NEW.rec_type, NEW.country, NEW.postal_code, NEW.region,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_femfl_assignments_update(); Type: FUNCTION; Schema: femfl; Owner: -
+--
+
+CREATE FUNCTION femfl.log_femfl_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO femfl_assignment_history (
+    master_id,
+    femfl_id, femfl_id,
+    user_id,
+    admin_id,
+    created_at,
+    updated_at,
+    femfl_assignment_table_id)
+  SELECT
+    NEW.master_id,
+    NEW.femfl_id,
+    NEW.user_id,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_femfl_contacts_update(); Type: FUNCTION; Schema: femfl; Owner: -
+--
+
+CREATE FUNCTION femfl.log_femfl_contacts_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO femfl_contact_history (
+    master_id,
+    rec_type, data, rank, source,
+    user_id,
+    created_at,
+    updated_at,
+    femfl_contact_id)
+  SELECT
+    NEW.master_id,
+    NEW.rec_type, NEW.data, NEW.rank, NEW.source,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_femfl_subjects_update(); Type: FUNCTION; Schema: femfl; Owner: -
+--
+
+CREATE FUNCTION femfl.log_femfl_subjects_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO femfl_subject_history (
+    master_id,
+    first_name, last_name, middle_name, nick_name, birth_date, source,
+    user_id,
+    created_at,
+    updated_at,
+    femfl_subject_id)
+  SELECT
+    NEW.master_id,
+    NEW.first_name, NEW.last_name, NEW.middle_name, NEW.nick_name, NEW.birth_date, NEW.source,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_test9_numbers_update(); Type: FUNCTION; Schema: femfl; Owner: -
+--
+
+CREATE FUNCTION femfl.log_test9_numbers_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO test9_number_history (
+    master_id,
+    test9_id, test9_id, test9_id,
+    user_id,
+    admin_id,
+    created_at,
+    updated_at,
+    test9_number_table_id)
+  SELECT
+    NEW.master_id,
+    NEW.test9_id, NEW.test9_id,
+    NEW.user_id,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -4141,6 +4325,33 @@ CREATE FUNCTION ipa_ops.log_ipa_ps_informant_detail_update() RETURNS trigger
 
 
 --
+-- Name: log_ipa_ps_initial_screenings_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_ps_initial_screenings_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_ps_initial_screening_history (
+    master_id,
+    form_version, select_is_good_time_to_speak, looked_at_website_yes_no, any_questions_blank_yes_no, same_hotel_yes_no, embedded_report_ipa__ipa_appointments, select_schedule, select_still_interested, follow_up_date, follow_up_time, notes,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_ps_initial_screening_id)
+  SELECT
+    NEW.master_id,
+    NEW.form_version, NEW.select_is_good_time_to_speak, NEW.looked_at_website_yes_no, NEW.any_questions_blank_yes_no, NEW.same_hotel_yes_no, NEW.embedded_report_ipa__ipa_appointments, NEW.select_schedule, NEW.select_still_interested, NEW.follow_up_date, NEW.follow_up_time, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_ipa_ps_mri_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
@@ -7206,15 +7417,15 @@ $$;
 CREATE FUNCTION ml_app.filestore_report_full_file_path(sf ml_app.nfs_store_stored_files, af ml_app.nfs_store_archived_files) RETURNS character varying
     LANGUAGE plpgsql
     AS $$
-    BEGIN
+          BEGIN
 
-      return CASE WHEN af.id IS NOT NULL THEN
-        coalesce(sf.path, '') || '/' || sf.file_name || '/' || af.path '/' || af.file_name
-        ELSE sf.path
-      END;
+            return CASE WHEN af.id IS NOT NULL THEN
+              coalesce(sf.path, '') || '/' || sf.file_name || '/' || af.path || '/' || af.file_name
+              ELSE coalesce(sf.path, '') || '/' || sf.file_name
+            END;
 
-	END;
-$$;
+       END;
+      $$;
 
 
 --
@@ -8007,6 +8218,37 @@ CREATE FUNCTION ml_app.log_activity_log_bhs_assignment_update() RETURNS trigger
                   RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_activity_log_bhs_assignments_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_activity_log_bhs_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_bhs_assignment_history (
+    master_id,
+    bhs_assignment_id,
+    select_record_from_player_contact_phones, return_call_availability_notes, questions_from_call_notes, results_link, select_result, pi_notes_from_return_call,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_bhs_assignment_id)
+  SELECT
+    NEW.master_id,
+    NEW.bhs_assignment_id,
+    NEW.select_record_from_player_contact_phones, NEW.return_call_availability_notes, NEW.questions_from_call_notes, NEW.results_link, NEW.select_result, NEW.pi_notes_from_return_call,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -10860,6 +11102,35 @@ CREATE FUNCTION ml_app.log_report_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
+
+
+--
+-- Name: log_sage_assignments_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_sage_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO sage_assignment_history (
+    master_id,
+    sage_id, sage_id,
+    user_id,
+    admin_id,
+    created_at,
+    updated_at,
+    sage_assignment_table_id)
+  SELECT
+    NEW.master_id,
+    NEW.sage_id,
+    NEW.user_id,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -19071,7 +19342,9 @@ CREATE TABLE data_requests.activity_log_data_request_assignment_history (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     activity_log_data_request_assignment_id integer,
-    created_by_user_id integer
+    created_by_user_id integer,
+    next_step character varying,
+    status character varying
 );
 
 
@@ -19109,7 +19382,9 @@ CREATE TABLE data_requests.activity_log_data_request_assignments (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    created_by_user_id integer
+    created_by_user_id integer,
+    next_step character varying,
+    status character varying
 );
 
 
@@ -19300,7 +19575,8 @@ CREATE TABLE data_requests.data_request_history (
     fphs_analyst_yes_no character varying,
     fphs_server_yes_no character varying,
     fphs_server_tools_notes character varying,
-    status character varying
+    status character varying,
+    off_fphs_server_reason_notes character varying
 );
 
 
@@ -19638,7 +19914,8 @@ CREATE TABLE data_requests.data_requests (
     fphs_analyst_yes_no character varying,
     fphs_server_yes_no character varying,
     fphs_server_tools_notes character varying,
-    status character varying
+    status character varying,
+    off_fphs_server_reason_notes character varying
 );
 
 
@@ -19770,6 +20047,477 @@ CREATE SEQUENCE data_requests.q2_rc_codebook_id_seq
 --
 
 ALTER SEQUENCE data_requests.q2_rc_codebook_id_seq OWNED BY data_requests.q2_rc_codebook.id;
+
+
+--
+-- Name: activity_log_femfl_assignment_femfl_comm_history; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.activity_log_femfl_assignment_femfl_comm_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    femfl_assignment_id bigint,
+    select_activity character varying,
+    activity_date date,
+    select_record_from_dynamic_model__femfl_contacts character varying,
+    select_record_from_dynamic_model__femfl_addresses character varying,
+    select_direction character varying,
+    select_who character varying,
+    select_result character varying,
+    select_next_step character varying,
+    follow_up_when date,
+    follow_up_time time without time zone,
+    notes character varying,
+    protocol_id bigint,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_femfl_assignment_femfl_comm_id bigint
+);
+
+
+--
+-- Name: activity_log_femfl_assignment_femfl_comm_history_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.activity_log_femfl_assignment_femfl_comm_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_femfl_assignment_femfl_comm_history_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.activity_log_femfl_assignment_femfl_comm_history_id_seq OWNED BY femfl.activity_log_femfl_assignment_femfl_comm_history.id;
+
+
+--
+-- Name: activity_log_femfl_assignment_femfl_comms; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.activity_log_femfl_assignment_femfl_comms (
+    id bigint NOT NULL,
+    master_id bigint,
+    femfl_assignment_id bigint,
+    select_activity character varying,
+    activity_date date,
+    select_record_from_dynamic_model__femfl_contacts character varying,
+    select_record_from_dynamic_model__femfl_addresses character varying,
+    select_direction character varying,
+    select_who character varying,
+    select_result character varying,
+    select_next_step character varying,
+    follow_up_when date,
+    follow_up_time time without time zone,
+    notes character varying,
+    protocol_id bigint,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_femfl_assignment_femfl_comms_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.activity_log_femfl_assignment_femfl_comms_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_femfl_assignment_femfl_comms_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.activity_log_femfl_assignment_femfl_comms_id_seq OWNED BY femfl.activity_log_femfl_assignment_femfl_comms.id;
+
+
+--
+-- Name: femfl_address_history; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_address_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    street character varying,
+    street2 character varying,
+    street3 character varying,
+    city character varying,
+    state character varying,
+    zip character varying,
+    source character varying,
+    rank integer,
+    rec_type character varying,
+    country character varying,
+    postal_code character varying,
+    region character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    femfl_address_id bigint
+);
+
+
+--
+-- Name: femfl_address_history_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_address_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_address_history_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_address_history_id_seq OWNED BY femfl.femfl_address_history.id;
+
+
+--
+-- Name: femfl_addresses; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_addresses (
+    id bigint NOT NULL,
+    master_id bigint,
+    street character varying,
+    street2 character varying,
+    street3 character varying,
+    city character varying,
+    state character varying,
+    zip character varying,
+    source character varying,
+    rank integer,
+    rec_type character varying,
+    country character varying,
+    postal_code character varying,
+    region character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: femfl_addresses_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_addresses_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_addresses_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_addresses_id_seq OWNED BY femfl.femfl_addresses.id;
+
+
+--
+-- Name: femfl_assignment_history; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_assignment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    femfl_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    femfl_assignment_table_id_id bigint
+);
+
+
+--
+-- Name: femfl_assignment_history_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_assignment_history_id_seq OWNED BY femfl.femfl_assignment_history.id;
+
+
+--
+-- Name: femfl_assignments; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_assignments (
+    id bigint NOT NULL,
+    master_id bigint,
+    femfl_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: femfl_assignments_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_assignments_id_seq OWNED BY femfl.femfl_assignments.id;
+
+
+--
+-- Name: femfl_contact_history; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_contact_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    rec_type character varying,
+    data character varying,
+    rank integer,
+    source character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    femfl_contact_id bigint
+);
+
+
+--
+-- Name: femfl_contact_history_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_contact_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_contact_history_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_contact_history_id_seq OWNED BY femfl.femfl_contact_history.id;
+
+
+--
+-- Name: femfl_contacts; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_contacts (
+    id bigint NOT NULL,
+    master_id bigint,
+    rec_type character varying,
+    data character varying,
+    rank integer,
+    source character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: femfl_contacts_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_contacts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_contacts_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_contacts_id_seq OWNED BY femfl.femfl_contacts.id;
+
+
+--
+-- Name: femfl_subject_history; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_subject_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    first_name character varying,
+    last_name character varying,
+    middle_name character varying,
+    nick_name character varying,
+    birth_date date,
+    rank integer,
+    source character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    femfl_subject_id bigint
+);
+
+
+--
+-- Name: femfl_subject_history_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_subject_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_subject_history_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_subject_history_id_seq OWNED BY femfl.femfl_subject_history.id;
+
+
+--
+-- Name: femfl_subjects; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.femfl_subjects (
+    id bigint NOT NULL,
+    master_id bigint,
+    first_name character varying,
+    last_name character varying,
+    middle_name character varying,
+    nick_name character varying,
+    birth_date date,
+    source character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: femfl_subjects_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.femfl_subjects_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: femfl_subjects_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.femfl_subjects_id_seq OWNED BY femfl.femfl_subjects.id;
+
+
+--
+-- Name: test9_number_history; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.test9_number_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    test9_id character varying,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    test9_number_table_id_id bigint
+);
+
+
+--
+-- Name: test9_number_history_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.test9_number_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test9_number_history_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.test9_number_history_id_seq OWNED BY femfl.test9_number_history.id;
+
+
+--
+-- Name: test9_numbers; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.test9_numbers (
+    id bigint NOT NULL,
+    master_id bigint,
+    test9_id character varying,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test9_numbers_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.test9_numbers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test9_numbers_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.test9_numbers_id_seq OWNED BY femfl.test9_numbers.id;
 
 
 --
@@ -26125,7 +26873,6 @@ CREATE TABLE ipa_ops.ipa_ps_initial_screenings (
     id integer NOT NULL,
     master_id integer,
     select_is_good_time_to_speak character varying,
-    select_may_i_begin character varying,
     any_questions_blank_yes_no character varying,
     follow_up_date date,
     follow_up_time time without time zone,
@@ -26134,7 +26881,11 @@ CREATE TABLE ipa_ops.ipa_ps_initial_screenings (
     updated_at timestamp without time zone NOT NULL,
     notes character varying,
     looked_at_website_yes_no character varying,
-    select_still_interested character varying
+    select_still_interested character varying,
+    form_version character varying,
+    same_hotel_yes_no character varying,
+    embedded_report_ipa__ipa_appointments character varying,
+    select_schedule character varying
 );
 
 
@@ -27242,51 +27993,6 @@ ALTER SEQUENCE ipa_ops.ipa_two_wk_followups_id_seq OWNED BY ipa_ops.ipa_two_wk_f
 
 
 --
--- Name: ipa_view_subject_statuses; Type: VIEW; Schema: ipa_ops; Owner: -
---
-
-CREATE VIEW ipa_ops.ipa_view_subject_statuses AS
- SELECT dt2.master_id,
-    dt2.status,
-    dt2.first_name,
-    dt2.last_name,
-    dt2."when",
-    dt2.ipa_id
-   FROM ( SELECT DISTINCT dt.master_id,
-                CASE
-                    WHEN ((dt.extra_log_type)::text = 'follow_up_surveys'::text) THEN 'completed'::character varying
-                    WHEN ((dt.extra_log_type)::text = 'withdraw'::text) THEN 'withdrawn'::character varying
-                    WHEN (((dt.ps_interested1)::text = 'not interested'::text) OR ((dt.ps_interested2)::text = 'not interested'::text) OR ((dt.ps_still_interested)::text = 'no'::text)) THEN 'not interest during phone screening'::character varying
-                    WHEN (((dt.extra_log_type)::text = 'perform_screening_follow_up'::text) AND ((dt.eligible_for_study_blank_yes_no)::text = 'no'::text)) THEN 'ineligible'::character varying
-                    WHEN (((dt.extra_log_type)::text = 'perform_screening_follow_up'::text) AND ((dt.follow_up_still_interested)::text = 'no'::text)) THEN 'not interest during screening follow-up'::character varying
-                    WHEN ((dt.extra_log_type)::text = 'schedule_screening'::text) THEN 'in process'::character varying
-                    ELSE dt.extra_log_type
-                END AS status,
-            pi.first_name,
-            pi.last_name,
-            dt.created_at AS "when",
-            ipa.ipa_id
-           FROM ((( SELECT al.master_id,
-                    al.created_at,
-                    al.extra_log_type,
-                    ipa_screenings.eligible_for_study_blank_yes_no,
-                    ipa_screenings.still_interested_blank_yes_no AS follow_up_still_interested,
-                    ipa_ps_initial_screenings.select_is_good_time_to_speak AS ps_interested1,
-                    ipa_ps_initial_screenings.select_may_i_begin AS ps_interested2,
-                    ipa_ps_initial_screenings.select_still_interested AS ps_still_interested,
-                    rank() OVER (PARTITION BY al.master_id ORDER BY al.created_at DESC) AS r
-                   FROM (((ipa_ops.activity_log_ipa_assignments al
-                     LEFT JOIN ipa_ops.ipa_screenings ON ((al.master_id = ipa_screenings.master_id)))
-                     LEFT JOIN ipa_ops.ipa_surveys ON ((al.master_id = ipa_surveys.master_id)))
-                     LEFT JOIN ipa_ops.ipa_ps_initial_screenings ON ((al.master_id = ipa_ps_initial_screenings.master_id)))
-                  WHERE (((ipa_ps_initial_screenings.select_is_good_time_to_speak)::text = 'not interested'::text) OR ((ipa_ps_initial_screenings.select_may_i_begin)::text = 'not interested'::text) OR ((ipa_ps_initial_screenings.select_still_interested)::text = 'no'::text) OR (((al.extra_log_type)::text = 'perform_screening_follow_up'::text) AND (((ipa_screenings.eligible_for_study_blank_yes_no)::text = 'no'::text) OR ((ipa_screenings.still_interested_blank_yes_no)::text = 'no'::text))) OR (((al.extra_log_type)::text = 'follow_up_surveys'::text) AND ((ipa_surveys.select_survey_type)::text = 'exit survey'::text)) OR ((al.extra_log_type)::text = 'withdraw'::text) OR ((al.extra_log_type)::text = 'schedule_screening'::text))) dt
-             JOIN ml_app.player_infos pi ON ((dt.master_id = pi.master_id)))
-             JOIN ipa_ops.ipa_assignments ipa ON ((dt.master_id = ipa.master_id)))
-          WHERE (dt.r = 1)) dt2
-  ORDER BY dt2.status, dt2."when" DESC;
-
-
---
 -- Name: ipa_withdrawal_history; Type: TABLE; Schema: ipa_ops; Owner: -
 --
 
@@ -27945,22 +28651,16 @@ ALTER SEQUENCE ml_app.activity_log_bhs_assignment_history_id_seq OWNED BY ml_app
 CREATE TABLE ml_app.activity_log_bhs_assignments (
     id integer NOT NULL,
     master_id integer,
-    bhs_assignment_id integer,
     select_record_from_player_contact_phones character varying,
     return_call_availability_notes character varying,
     questions_from_call_notes character varying,
     results_link character varying,
     select_result character varying,
-    completed_q1_no_yes character varying,
-    completed_teamstudy_no_yes character varying,
-    previous_contact_with_team_no_yes character varying,
-    previous_contact_with_team_notes character varying,
     extra_log_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    notes character varying,
-    pi_return_call_notes character varying
+    pi_notes_from_return_call character varying
 );
 
 
@@ -28285,13 +28985,12 @@ CREATE TABLE ml_app.activity_log_player_contact_phones (
     protocol_id integer,
     notes character varying,
     user_id integer,
-    player_contact_id integer,
     master_id integer,
-    disabled boolean,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     set_related_player_contact_rank character varying,
-    extra_log_type character varying
+    extra_log_type character varying,
+    player_contact_id bigint
 );
 
 
@@ -28683,7 +29382,8 @@ CREATE TABLE ml_app.app_types (
     disabled boolean,
     admin_id integer,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    default_schema_name character varying
 );
 
 
@@ -29322,7 +30022,8 @@ CREATE TABLE ml_app.external_identifiers (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     alphanumeric boolean,
-    extra_fields character varying
+    extra_fields character varying,
+    category character varying
 );
 
 
@@ -30978,7 +31679,8 @@ CREATE TABLE ml_app.protocols (
     updated_at timestamp without time zone NOT NULL,
     disabled boolean,
     admin_id integer,
-    "position" integer
+    "position" integer,
+    app_type_id bigint
 );
 
 
@@ -31238,7 +31940,6 @@ ALTER SEQUENCE ml_app.reports_id_seq OWNED BY ml_app.reports.id;
 CREATE TABLE ml_app.sage_assignments (
     id integer NOT NULL,
     sage_id character varying(10),
-    assigned_by character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
@@ -39687,6 +40388,90 @@ ALTER TABLE ONLY data_requests.q2_rc_codebook ALTER COLUMN id SET DEFAULT nextva
 
 
 --
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comm_history ALTER COLUMN id SET DEFAULT nextval('femfl.activity_log_femfl_assignment_femfl_comm_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comms ALTER COLUMN id SET DEFAULT nextval('femfl.activity_log_femfl_assignment_femfl_comms_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_address_history ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_address_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_addresses ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_addresses_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignment_history ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignments ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contact_history ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_contact_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contacts ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_contacts_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subject_history ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_subject_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subjects ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_subjects_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_number_history ALTER COLUMN id SET DEFAULT nextval('femfl.test9_number_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_numbers ALTER COLUMN id SET DEFAULT nextval('femfl.test9_numbers_id_seq'::regclass);
+
+
+--
 -- Name: id; Type: DEFAULT; Schema: grit; Owner: -
 --
 
@@ -43181,6 +43966,102 @@ ALTER TABLE ONLY data_requests.data_requests_selected_attribs
 
 ALTER TABLE ONLY data_requests.q2_rc_codebook
     ADD CONSTRAINT q2_rc_codebook_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_femfl_assignment_femfl_comm_history_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comm_history
+    ADD CONSTRAINT activity_log_femfl_assignment_femfl_comm_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_femfl_assignment_femfl_comms_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comms
+    ADD CONSTRAINT activity_log_femfl_assignment_femfl_comms_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_address_history_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_address_history
+    ADD CONSTRAINT femfl_address_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_addresses_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_addresses
+    ADD CONSTRAINT femfl_addresses_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_assignment_history_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignment_history
+    ADD CONSTRAINT femfl_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_assignments_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignments
+    ADD CONSTRAINT femfl_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_contact_history_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contact_history
+    ADD CONSTRAINT femfl_contact_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_contacts_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contacts
+    ADD CONSTRAINT femfl_contacts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_subject_history_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subject_history
+    ADD CONSTRAINT femfl_subject_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: femfl_subjects_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subjects
+    ADD CONSTRAINT femfl_subjects_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test9_number_history_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_number_history
+    ADD CONSTRAINT test9_number_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test9_numbers_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_numbers
+    ADD CONSTRAINT test9_numbers_pkey PRIMARY KEY (id);
 
 
 --
@@ -47483,6 +48364,258 @@ CREATE INDEX index_data_requests_selected_attribs_on_user_id ON data_requests.da
 
 
 --
+-- Name: activity_log_femfl_assignment_femfl_comm_id_h_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX activity_log_femfl_assignment_femfl_comm_id_h_idx ON femfl.activity_log_femfl_assignment_femfl_comm_history USING btree (activity_log_femfl_assignment_femfl_comm_id);
+
+
+--
+-- Name: al_femfl_assignment_id_h_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX al_femfl_assignment_id_h_idx ON femfl.activity_log_femfl_assignment_femfl_comm_history USING btree (femfl_assignment_id);
+
+
+--
+-- Name: al_femfl_assignment_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX al_femfl_assignment_id_idx ON femfl.activity_log_femfl_assignment_femfl_comms USING btree (femfl_assignment_id);
+
+
+--
+-- Name: al_femfl_assignment_master_id_h_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX al_femfl_assignment_master_id_h_idx ON femfl.activity_log_femfl_assignment_femfl_comm_history USING btree (master_id);
+
+
+--
+-- Name: al_femfl_assignment_master_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX al_femfl_assignment_master_id_idx ON femfl.activity_log_femfl_assignment_femfl_comms USING btree (master_id);
+
+
+--
+-- Name: al_femfl_assignment_user_id_h_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX al_femfl_assignment_user_id_h_idx ON femfl.activity_log_femfl_assignment_femfl_comm_history USING btree (user_id);
+
+
+--
+-- Name: al_femfl_assignment_user_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX al_femfl_assignment_user_id_idx ON femfl.activity_log_femfl_assignment_femfl_comms USING btree (user_id);
+
+
+--
+-- Name: femfl_address_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX femfl_address_id_idx ON femfl.femfl_address_history USING btree (femfl_address_id);
+
+
+--
+-- Name: femfl_assignment_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX femfl_assignment_id_idx ON femfl.femfl_assignment_history USING btree (femfl_assignment_table_id_id);
+
+
+--
+-- Name: femfl_contact_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX femfl_contact_id_idx ON femfl.femfl_contact_history USING btree (femfl_contact_id);
+
+
+--
+-- Name: femfl_subject_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX femfl_subject_id_idx ON femfl.femfl_subject_history USING btree (femfl_subject_id);
+
+
+--
+-- Name: index_femfl.femfl_address_history_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_address_history_on_master_id" ON femfl.femfl_address_history USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_address_history_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_address_history_on_user_id" ON femfl.femfl_address_history USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_addresses_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_addresses_on_master_id" ON femfl.femfl_addresses USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_addresses_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_addresses_on_user_id" ON femfl.femfl_addresses USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_assignment_history_on_admin_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_assignment_history_on_admin_id" ON femfl.femfl_assignment_history USING btree (admin_id);
+
+
+--
+-- Name: index_femfl.femfl_assignment_history_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_assignment_history_on_master_id" ON femfl.femfl_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_assignment_history_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_assignment_history_on_user_id" ON femfl.femfl_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_assignments_on_admin_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_assignments_on_admin_id" ON femfl.femfl_assignments USING btree (admin_id);
+
+
+--
+-- Name: index_femfl.femfl_assignments_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_assignments_on_master_id" ON femfl.femfl_assignments USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_assignments_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_assignments_on_user_id" ON femfl.femfl_assignments USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_contact_history_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_contact_history_on_master_id" ON femfl.femfl_contact_history USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_contact_history_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_contact_history_on_user_id" ON femfl.femfl_contact_history USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_contacts_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_contacts_on_master_id" ON femfl.femfl_contacts USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_contacts_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_contacts_on_user_id" ON femfl.femfl_contacts USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_subject_history_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_subject_history_on_master_id" ON femfl.femfl_subject_history USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_subject_history_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_subject_history_on_user_id" ON femfl.femfl_subject_history USING btree (user_id);
+
+
+--
+-- Name: index_femfl.femfl_subjects_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_subjects_on_master_id" ON femfl.femfl_subjects USING btree (master_id);
+
+
+--
+-- Name: index_femfl.femfl_subjects_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.femfl_subjects_on_user_id" ON femfl.femfl_subjects USING btree (user_id);
+
+
+--
+-- Name: index_femfl.test9_number_history_on_admin_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.test9_number_history_on_admin_id" ON femfl.test9_number_history USING btree (admin_id);
+
+
+--
+-- Name: index_femfl.test9_number_history_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.test9_number_history_on_master_id" ON femfl.test9_number_history USING btree (master_id);
+
+
+--
+-- Name: index_femfl.test9_number_history_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.test9_number_history_on_user_id" ON femfl.test9_number_history USING btree (user_id);
+
+
+--
+-- Name: index_femfl.test9_numbers_on_admin_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.test9_numbers_on_admin_id" ON femfl.test9_numbers USING btree (admin_id);
+
+
+--
+-- Name: index_femfl.test9_numbers_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.test9_numbers_on_master_id" ON femfl.test9_numbers USING btree (master_id);
+
+
+--
+-- Name: index_femfl.test9_numbers_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.test9_numbers_on_user_id" ON femfl.test9_numbers USING btree (user_id);
+
+
+--
+-- Name: test9_number_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX test9_number_id_idx ON femfl.test9_number_history USING btree (test9_number_table_id_id);
+
+
+--
 -- Name: index_activity_log_grit_assignment_adverse_events_on_grit_assig; Type: INDEX; Schema: grit; Owner: -
 --
 
@@ -50948,13 +52081,6 @@ CREATE INDEX index_activity_log_bhs_assignment_history_on_user_id ON ml_app.acti
 
 
 --
--- Name: index_activity_log_bhs_assignments_on_bhs_assignment_id; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE INDEX index_activity_log_bhs_assignments_on_bhs_assignment_id ON ml_app.activity_log_bhs_assignments USING btree (bhs_assignment_id);
-
-
---
 -- Name: index_activity_log_bhs_assignments_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -51134,13 +52260,6 @@ CREATE INDEX index_activity_log_player_contact_phone_history_on_user_id ON ml_ap
 --
 
 CREATE INDEX index_activity_log_player_contact_phones_on_master_id ON ml_app.activity_log_player_contact_phones USING btree (master_id);
-
-
---
--- Name: index_activity_log_player_contact_phones_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE INDEX index_activity_log_player_contact_phones_on_player_contact_id ON ml_app.activity_log_player_contact_phones USING btree (player_contact_id);
 
 
 --
@@ -52072,6 +53191,13 @@ CREATE INDEX index_protocol_history_on_protocol_id ON ml_app.protocol_history US
 --
 
 CREATE INDEX index_protocols_on_admin_id ON ml_app.protocols USING btree (admin_id);
+
+
+--
+-- Name: index_protocols_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_protocols_on_app_type_id ON ml_app.protocols USING btree (app_type_id);
 
 
 --
@@ -56086,6 +57212,90 @@ CREATE TRIGGER data_requests_selected_attrib_history_update AFTER UPDATE ON data
 
 
 --
+-- Name: log_activity_log_femfl_assignment_femfl_comm_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_femfl_assignment_femfl_comm_history_insert AFTER INSERT ON femfl.activity_log_femfl_assignment_femfl_comms FOR EACH ROW EXECUTE PROCEDURE femfl.log_activity_log_femfl_assignment_femfl_comms_update();
+
+
+--
+-- Name: log_activity_log_femfl_assignment_femfl_comm_history_update; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_femfl_assignment_femfl_comm_history_update AFTER UPDATE ON femfl.activity_log_femfl_assignment_femfl_comms FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE femfl.log_activity_log_femfl_assignment_femfl_comms_update();
+
+
+--
+-- Name: log_femfl_address_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_address_history_insert AFTER INSERT ON femfl.femfl_addresses FOR EACH ROW EXECUTE PROCEDURE femfl.log_femfl_addresses_update();
+
+
+--
+-- Name: log_femfl_address_history_update; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_address_history_update AFTER UPDATE ON femfl.femfl_addresses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE femfl.log_femfl_addresses_update();
+
+
+--
+-- Name: log_femfl_assignment_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_assignment_history_insert AFTER INSERT ON femfl.femfl_assignments FOR EACH ROW EXECUTE PROCEDURE femfl.log_femfl_assignments_update();
+
+
+--
+-- Name: log_femfl_assignment_history_update; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_assignment_history_update AFTER UPDATE ON femfl.femfl_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE femfl.log_femfl_assignments_update();
+
+
+--
+-- Name: log_femfl_contact_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_contact_history_insert AFTER INSERT ON femfl.femfl_contacts FOR EACH ROW EXECUTE PROCEDURE femfl.log_femfl_contacts_update();
+
+
+--
+-- Name: log_femfl_contact_history_update; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_contact_history_update AFTER UPDATE ON femfl.femfl_contacts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE femfl.log_femfl_contacts_update();
+
+
+--
+-- Name: log_femfl_subject_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_subject_history_insert AFTER INSERT ON femfl.femfl_subjects FOR EACH ROW EXECUTE PROCEDURE femfl.log_femfl_subjects_update();
+
+
+--
+-- Name: log_femfl_subject_history_update; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_femfl_subject_history_update AFTER UPDATE ON femfl.femfl_subjects FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE femfl.log_femfl_subjects_update();
+
+
+--
+-- Name: log_test9_number_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_test9_number_history_insert AFTER INSERT ON femfl.test9_numbers FOR EACH ROW EXECUTE PROCEDURE femfl.log_test9_numbers_update();
+
+
+--
+-- Name: log_test9_number_history_update; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_test9_number_history_update AFTER UPDATE ON femfl.test9_numbers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE femfl.log_test9_numbers_update();
+
+
+--
 -- Name: activity_log_grit_assignment_adverse_event_history_insert; Type: TRIGGER; Schema: grit; Owner: -
 --
 
@@ -57283,6 +58493,20 @@ CREATE TRIGGER ipa_withdrawal_history_update AFTER UPDATE ON ipa_ops.ipa_withdra
 
 
 --
+-- Name: log_ipa_ps_initial_screening_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_initial_screening_history_insert AFTER INSERT ON ipa_ops.ipa_ps_initial_screenings FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_ps_initial_screenings_update();
+
+
+--
+-- Name: log_ipa_ps_initial_screening_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_initial_screening_history_update AFTER UPDATE ON ipa_ops.ipa_ps_initial_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_ps_initial_screenings_update();
+
+
+--
 -- Name: mrn_number_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
 --
 
@@ -57651,6 +58875,34 @@ CREATE TRIGGER item_flag_name_history_insert AFTER INSERT ON ml_app.item_flag_na
 --
 
 CREATE TRIGGER item_flag_name_history_update AFTER UPDATE ON ml_app.item_flag_names FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_item_flag_name_update();
+
+
+--
+-- Name: log_activity_log_bhs_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_bhs_assignment_history_insert AFTER INSERT ON ml_app.activity_log_bhs_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_bhs_assignments_update();
+
+
+--
+-- Name: log_activity_log_bhs_assignment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_bhs_assignment_history_update AFTER UPDATE ON ml_app.activity_log_bhs_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_bhs_assignments_update();
+
+
+--
+-- Name: log_sage_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_sage_assignment_history_insert AFTER INSERT ON ml_app.sage_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_sage_assignments_update();
+
+
+--
+-- Name: log_sage_assignment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_sage_assignment_history_update AFTER UPDATE ON ml_app.sage_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_sage_assignments_update();
 
 
 --
@@ -60022,6 +61274,294 @@ ALTER TABLE ONLY data_requests.data_request_message_to_reviewers
 
 ALTER TABLE ONLY data_requests.data_request_messages
     ADD CONSTRAINT fk_rails_982635401e0 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_069dad0bca; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_number_history
+    ADD CONSTRAINT fk_rails_069dad0bca FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_085a1bd755; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comms
+    ADD CONSTRAINT fk_rails_085a1bd755 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a3285fe5b; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contact_history
+    ADD CONSTRAINT fk_rails_1a3285fe5b FOREIGN KEY (femfl_contact_id) REFERENCES femfl.femfl_contacts(id);
+
+
+--
+-- Name: fk_rails_1b4bda128c; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_numbers
+    ADD CONSTRAINT fk_rails_1b4bda128c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_2166f7237d; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contacts
+    ADD CONSTRAINT fk_rails_2166f7237d FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_21f20021cd; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_address_history
+    ADD CONSTRAINT fk_rails_21f20021cd FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_4120d4ab90; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignment_history
+    ADD CONSTRAINT fk_rails_4120d4ab90 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_4e70686814; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contact_history
+    ADD CONSTRAINT fk_rails_4e70686814 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_4f3af366ad; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_numbers
+    ADD CONSTRAINT fk_rails_4f3af366ad FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_56c0e165b2; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignment_history
+    ADD CONSTRAINT fk_rails_56c0e165b2 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_5e27ae2ba2; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignments
+    ADD CONSTRAINT fk_rails_5e27ae2ba2 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_6609a61f67; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_address_history
+    ADD CONSTRAINT fk_rails_6609a61f67 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_671ba35314; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comm_history
+    ADD CONSTRAINT fk_rails_671ba35314 FOREIGN KEY (femfl_assignment_id) REFERENCES femfl.femfl_assignments(id);
+
+
+--
+-- Name: fk_rails_698976c6e3; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_number_history
+    ADD CONSTRAINT fk_rails_698976c6e3 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_72809ba128; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignment_history
+    ADD CONSTRAINT fk_rails_72809ba128 FOREIGN KEY (femfl_assignment_table_id_id) REFERENCES femfl.femfl_assignments(id);
+
+
+--
+-- Name: fk_rails_7a745b7b8c; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subject_history
+    ADD CONSTRAINT fk_rails_7a745b7b8c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_84bb0a3134; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comms
+    ADD CONSTRAINT fk_rails_84bb0a3134 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_86f4ecdb21; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_number_history
+    ADD CONSTRAINT fk_rails_86f4ecdb21 FOREIGN KEY (test9_number_table_id_id) REFERENCES femfl.test9_numbers(id);
+
+
+--
+-- Name: fk_rails_88dea2b9b1; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comm_history
+    ADD CONSTRAINT fk_rails_88dea2b9b1 FOREIGN KEY (activity_log_femfl_assignment_femfl_comm_id) REFERENCES femfl.activity_log_femfl_assignment_femfl_comms(id);
+
+
+--
+-- Name: fk_rails_8f6160c35f; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignments
+    ADD CONSTRAINT fk_rails_8f6160c35f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_90f4e08ddd; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_address_history
+    ADD CONSTRAINT fk_rails_90f4e08ddd FOREIGN KEY (femfl_address_id) REFERENCES femfl.femfl_addresses(id);
+
+
+--
+-- Name: fk_rails_93e4bf606f; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subjects
+    ADD CONSTRAINT fk_rails_93e4bf606f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_aee3b901b1; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_addresses
+    ADD CONSTRAINT fk_rails_aee3b901b1 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_b2eda41b04; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_number_history
+    ADD CONSTRAINT fk_rails_b2eda41b04 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_bd9caca30a; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subjects
+    ADD CONSTRAINT fk_rails_bd9caca30a FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_c0d50fccd9; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_addresses
+    ADD CONSTRAINT fk_rails_c0d50fccd9 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_c806b34028; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comm_history
+    ADD CONSTRAINT fk_rails_c806b34028 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_cc53b41cef; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.test9_numbers
+    ADD CONSTRAINT fk_rails_cc53b41cef FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_d8245efa6f; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comms
+    ADD CONSTRAINT fk_rails_d8245efa6f FOREIGN KEY (femfl_assignment_id) REFERENCES femfl.femfl_assignments(id);
+
+
+--
+-- Name: fk_rails_e7bc04e4c0; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subject_history
+    ADD CONSTRAINT fk_rails_e7bc04e4c0 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_ee53b66c4d; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_subject_history
+    ADD CONSTRAINT fk_rails_ee53b66c4d FOREIGN KEY (femfl_subject_id) REFERENCES femfl.femfl_subjects(id);
+
+
+--
+-- Name: fk_rails_ef0ac20f2e; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contact_history
+    ADD CONSTRAINT fk_rails_ef0ac20f2e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_ef5b678a2c; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignments
+    ADD CONSTRAINT fk_rails_ef5b678a2c FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_efeeb3018f; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_assignment_history
+    ADD CONSTRAINT fk_rails_efeeb3018f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_f5506ad91c; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.femfl_contacts
+    ADD CONSTRAINT fk_rails_f5506ad91c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_fd874f4adb; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comm_history
+    ADD CONSTRAINT fk_rails_fd874f4adb FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -65289,14 +66829,6 @@ ALTER TABLE ONLY ml_app.activity_log_new_tests
 
 
 --
--- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ml_app.activity_log_bhs_assignments
-    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (bhs_assignment_id) REFERENCES ml_app.bhs_assignments(id);
-
-
---
 -- Name: fk_rails_7c10a99849; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -65358,6 +66890,14 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 ALTER TABLE ONLY ml_app.sage_assignments
     ADD CONSTRAINT fk_rails_971255ec2c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_990daa5f76; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.protocols
+    ADD CONSTRAINT fk_rails_990daa5f76 FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
 
 
 --
@@ -69452,7 +70992,7 @@ ALTER TABLE ONLY tbs.tbs_withdrawal_history
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests;
+SET search_path TO ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests,femfl;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20150602181200'),
@@ -69715,6 +71255,26 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200225115151'),
 ('20200313160640'),
 ('20200403172361'),
-('20200611123849');
+('20200611123849'),
+('20200720100000'),
+('20200720110000'),
+('20200720121356'),
+('20200720161000'),
+('20200720161100'),
+('20200723104100'),
+('20200723153130'),
+('20200724153400'),
+('20200724181747'),
+('20200727081305'),
+('20200727081306'),
+('20200727100429'),
+('20200727100431'),
+('20200727100543'),
+('20200727111056'),
+('20200727111057'),
+('20200727111100'),
+('20200727122116'),
+('20200727122117'),
+('20200727162041');
 
 

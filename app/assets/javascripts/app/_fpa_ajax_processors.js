@@ -169,6 +169,9 @@ _fpa.postprocessors = {
       });
     });
 
+
+    if (di && typeof (di) == 'object') _fpa.postprocessors.info_update_handler(block, di);
+
   },
 
   modal_pi_search_results_template: function (block, data) {
@@ -350,6 +353,8 @@ _fpa.postprocessors = {
     }
   },
 
+  // If an update has been made to a form, update the associated tracker item
+  // so that the Record Updates information reflects the new data
   info_update_handler: function (block, d, no_scroll) {
     _fpa.form_utils.format_block(block);
     if (d.update_action) {
@@ -379,61 +384,11 @@ _fpa.postprocessors = {
     _fpa.postprocessors.show_external_links(block.parents('.panel').first(), data);
   },
 
-  address_result_template: function (block, data) {
-    var d = data;
-    if (data.address) d = data.address;
-    _fpa.postprocessors.info_update_handler(block, d);
-  },
 
-  player_contact_result_template: function (block, data) {
-    var d = data;
-    if (data.player_contact) d = data.player_contact;
-    _fpa.postprocessors.info_update_handler(block, d);
-  },
+  // player_contact_edit_form: function (block, data) {
+  //   _fpa.form_utils.format_block(block);
 
-  address_edit_form: function (block, data) {
-    _fpa.form_utils.format_block(block);
-
-    var check_zip = function () {
-
-      $('#address_zip').mask("00000-9999", { 'translation': { 0: { pattern: /\d/ }, 0: { pattern: /\d/, optional: true } } });
-    };
-
-    check_zip();
-
-    var handle_country = function (val) {
-
-      if (!val || val === 'US' || val === '') {
-        block.find('.list-group-item.address-region').slideUp();
-        block.find('.list-group-item.address-postal_code').slideUp();
-        block.find('.list-group-item.address-zip').slideDown();
-        block.find('.list-group-item.address-state').slideDown();
-        block.find('#address_region').val('');
-        block.find('#address_postal_code').val('');
-      } else {
-        block.find('.list-group-item.address-region').slideDown();
-        block.find('.list-group-item.address-postal_code').slideDown();
-        block.find('.list-group-item.address-zip').slideUp();
-        block.find('.list-group-item.address-state').slideUp();
-        block.find('#address_zip').val('');
-        block.find('#address_state').val('');
-      }
-
-    };
-
-    block.find('#address_country').change(function () {
-      handle_country($(this).val());
-    });
-
-    window.setTimeout(function () {
-      handle_country($('#address_country').val());
-    }, 10);
-  },
-
-  player_contact_edit_form: function (block, data) {
-    _fpa.form_utils.format_block(block);
-
-  },
+  // },
 
 
 
@@ -463,9 +418,6 @@ _fpa.processor_handlers = {
 
   label_changes: function (block) {
 
-    block.find('.address-state_name small').each(function () { $(this).html('state'); });
-    block.find('.address-country_name small').each(function () { $(this).html('country'); });
-    block.find('.address-source_name small').each(function () { $(this).html('source'); });
     block.find('.player-info-source_name small').each(function () { $(this).html('source'); });
 
 

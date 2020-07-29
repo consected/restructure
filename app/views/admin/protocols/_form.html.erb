@@ -3,6 +3,10 @@
 <%= form_for(object_instance, url: admin_form_url, class: "inline-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
+    <%= f.label :app_type %>
+    <%= f.select :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item), {include_blank: true}, extra_field_attributes[:app_type_id]||{} %>
+  </div>
+  <div class="form-group">
     <%= f.label :name %>
     <%= f.text_field :name %>
   </div>

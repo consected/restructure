@@ -140,6 +140,8 @@ class ActivityLog::ActivityLogsController < UserBaseController
     # being retrieved to be the underlying parent items that activity log records belong to
     # For example, in a phone log, the log records belong to player contacts, and these are retrieved
     # through the activity log controller
+    return @master_objects if @master_objects.is_a? Array
+
     @filtered_ids = @master_objects.select { |i| i.extra_log_type_config&.calc_showable_if(i) }.map(&:id)
     @master_objects = @master_objects.where(id: @filtered_ids)
     limit_results

@@ -25,7 +25,13 @@ module FeatureSupport
         return if user_logged_in?
       end
       expect(page).to have_css('#new_user')
-      expect(@user.valid_password?(@good_password)).to be true
+
+      if @user.email != @good_email
+        puts "in login @user does not match @good_email: #{@user} does not match #{@good_email}"
+        @user = User.active.where(email: @good_email).first
+      end
+
+      expect(@user.valid_password?(@good_password)).to be(true), "Bad password (#{@good_password}) so can't login with email: #{@good_email}. #{@user}"
       expect(@user.email).to eq @good_email
 
       within '#new_user' do
@@ -142,9 +148,7 @@ module FeatureSupport
     finish_form_formatting
     tab_link = all("ul.details-tabs li a[data-panel-tab='#{name.id_underscore}']").first
     expect(tab_link).not_to be nil
-    if tab_link['aria-expanded'] != 'true'
-      all('ul.details-tabs').first.click_link name
-    end
+    all('ul.details-tabs').first.click_link name if tab_link['aria-expanded'] != 'true'
   end
 
   def expand_search_with_button(name)

@@ -14,7 +14,7 @@ module NavHandler
     @secondary_navs = []
     @app_type_switches = nil
 
-    @app_type_switches = Admin::AppType.all_available_to(current_user).map { |m| [m.label, m.id] } if current_user
+    @app_type_switches = current_user.accessible_app_types.map { |m| [m.label, m.id] } if current_user
     admin_sub = []
     if current_admin
 
@@ -53,19 +53,17 @@ module NavHandler
 
       if nav_conf&.nav&.links
         nav_conf.nav.links.each do |l|
-          if l.is_a? String
-            url = l
-          elsif l.is_a? Hash
-            l = l.symbolize_keys
-            if l[:resource_type]
-              rt = l[:resource_type].to_sym
-              rn = l[:resource_name]
-              next unless current_user.has_access_to? :access, rt, rn
-            end
-            url = l[:url]
-            label = l[:label]
-            @primary_navs << { label: label, url: url }
+          next unless l.is_a? Hash
+
+          l = l.symbolize_keys
+          if l[:resource_type]
+            rt = l[:resource_type].to_sym
+            rn = l[:resource_name]
+            next unless current_user.has_access_to? :access, rt, rn
           end
+          url = l[:url]
+          label = l[:label]
+          @primary_navs << { label: label, url: url }
         end
 
       end

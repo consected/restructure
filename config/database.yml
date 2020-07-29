@@ -11,10 +11,22 @@ default: &default
   host: <%= ENV['FPHS_POSTGRESQL_HOSTNAME'] %>
   schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA']%>
 
+  <% 
+  mig_path = ENV['MIG_PATH']
+  if mig_path.present?
+    mig_path = File.join("db/app_migrations", mig_path)
+  %>
+
+  migrations_paths:
+    - <%= mig_path %>
+  <% 
+  end 
+  %>
+
 development:
   <<: *default
   database: <%= ENV['FPHS_POSTGRESQL_DATABASE'].present? ? ENV['FPHS_POSTGRESQL_DATABASE'] : 'fpa_development' %>
-  schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA'].present? ? ENV['FPHS_POSTGRESQL_SCHEMA'] : 'ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests' %>
+  schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA'].present? ? ENV['FPHS_POSTGRESQL_SCHEMA'] : 'ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests,femfl' %>
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".

@@ -7,7 +7,7 @@ module DynamicModelHandler
     def final_setup
       Rails.logger.debug "Running final setup for #{name}"
       ro = result_order
-      ro = { id: :desc } if result_order.blank?
+      ro = { primary_key => :desc } if result_order.blank?
       default_scope -> { order ro }
     end
 
@@ -15,6 +15,8 @@ module DynamicModelHandler
     # and default option config showable_if rules
     # @return [ActiveRecord::Relation] scope to provide rules filtered according to the calculated rules
     def filter_results
+      return all unless primary_key == 'id'
+
       sall = all
       return unless sall
 

@@ -28,27 +28,45 @@ class ModelReference < ActiveRecord::Base
   # Create an item referenced from a specific from_item
   # TODO consider if there is a significant race condition that we should be concerned about
   def self.create_with(from_item, to_item, force_create: false)
-    m = ModelReference.where from_record_type: from_item.class.name, from_record_id: from_item.id, from_record_master_id: from_item.master_id,
-                             to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id
+    m = ModelReference.where from_record_type: from_item.class.name,
+                             from_record_id: from_item.id,
+                             from_record_master_id: from_item.master_id,
+                             to_record_type: to_item.class.name,
+                             to_record_id: to_item.id,
+                             to_record_master_id: to_item.master_id
 
     return unless m.limit(1).empty?
 
     from_item.reset_model_references if from_item.respond_to? :model_references
-    ModelReference.create! from_record_type: from_item.class.name, from_record_id: from_item.id, from_record_master_id: from_item.master_id,
-                           to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id,
-                           user: to_item.master_user, current_user: to_item.master_user, force_create: force_create
+    ModelReference.create! from_record_type: from_item.class.name,
+                           from_record_id: from_item.id,
+                           from_record_master_id: from_item.master_id,
+                           to_record_type: to_item.class.name,
+                           to_record_id: to_item.id,
+                           to_record_master_id: to_item.master_id,
+                           user: to_item.master_user,
+                           current_user: to_item.master_user,
+                           force_create: force_create
   end
 
   # Create a reference from a master only, not an individual item.
   def self.create_from_master_with(from_master, to_item, force_create: false)
-    ModelReference.create! from_record_type: nil, from_record_id: nil, from_record_master_id: from_master.id,
-                           to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id,
-                           user: to_item.master_user, current_user: to_item.master_user, force_create: force_create
+    ModelReference.create! from_record_type: nil,
+                           from_record_id: nil,
+                           from_record_master_id: from_master.id,
+                           to_record_type: to_item.class.name,
+                           to_record_id: to_item.id,
+                           to_record_master_id: to_item.master_id,
+                           user: to_item.master_user,
+                           current_user: to_item.master_user,
+                           force_create: force_create
   end
 
   # Find the configuration of the creatable reference for the pair of records representing a ModelReference
   # @return [Hash | nil] nil if there is no match or a Hash like
-  #         {:label=>"Tech Contacts", :from=>"this", :add=>"many", :view_as=>{:show=>"not_embedded", :edit=>"select_or_add", :new=>"select_or_add"}, :to_record_label=>"Tech Contacts", :no_master_association=>false}
+  #         {:label=>"Tech Contacts", :from=>"this", :add=>"many",
+  #           :view_as=>{:show=>"not_embedded", :edit=>"select_or_add", :new=>"select_or_add"},
+  #           :to_record_label=>"Tech Contacts", :no_master_association=>false}
   def self.find_creatable_config_for(from_item, to_item)
     begin
       return unless from_item
@@ -70,7 +88,9 @@ class ModelReference < ActiveRecord::Base
 
   # Find the configuration of the reference for this instance
   # @return [Hash | nil] nil if there is no match or a Hash like
-  #         {:label=>"Tech Contacts", :from=>"this", :add=>"many", :view_as=>{:show=>"not_embedded", :edit=>"select_or_add", :new=>"select_or_add"}, :to_record_label=>"Tech Contacts", :no_master_association=>false}
+  #         {:label=>"Tech Contacts", :from=>"this", :add=>"many",
+  #           :view_as=>{:show=>"not_embedded", :edit=>"select_or_add", :new=>"select_or_add"},
+  #           :to_record_label=>"Tech Contacts", :no_master_association=>false}
   def find_config
     begin
       mr = from_record&.extra_log_type_config&.references
@@ -110,7 +130,8 @@ class ModelReference < ActiveRecord::Base
   # These can be further limited by a filter_by condition on the to_record,
   # allowing for specific records to be selected from the master (such as a specific 'type' of referenced record)
   # The param active == true returns only results that are not disabled
-  def self.find_references(from_item_or_master, to_record_type: nil, filter_by: nil, without_reference: false, ref_order: nil, active: nil)
+  def self.find_references(from_item_or_master, to_record_type: nil, filter_by: nil,
+                           without_reference: false, ref_order: nil, active: nil)
     ref_order ||= default_ref_order
 
     if to_record_type
@@ -125,31 +146,34 @@ class ModelReference < ActiveRecord::Base
       recs = recs.active if active
       res = []
       recs.each do |r|
-        res << ModelReference.new(from_record_type: nil, from_record_id: nil, from_record_master_id: from_item_or_master.id,
-                                  to_record_type: r.class.name, to_record_id: r.id, to_record_master_id: r.master_id,
+        res << ModelReference.new(from_record_type: nil,
+                                  from_record_id: nil,
+                                  from_record_master_id: from_item_or_master.id,
+                                  to_record_type: r.class.name,
+                                  to_record_id: r.id,
+                                  to_record_master_id: r.master_id,
                                   current_user: from_item_or_master.current_user)
       end
+    elsif from_item_or_master.is_a? Master
+      res = ModelReference.find_records_in_master to_record_type: to_record_type,
+                                                  master: from_item_or_master,
+                                                  filter_by: filter_by,
+                                                  active: active
     else
-      if from_item_or_master.is_a? Master
-        res = ModelReference.find_records_in_master to_record_type: to_record_type,
-                                                    master: from_item_or_master,
-                                                    filter_by: filter_by,
-                                                    active: active
-      else
-        cond = { from_record_type: from_item_or_master.class.name, from_record_id: from_item_or_master.id }
-        cond[:to_record_type] = to_record_type if to_record_type
+      cond = { from_record_type: from_item_or_master.class.name, from_record_id: from_item_or_master.id }
+      cond[:to_record_type] = to_record_type if to_record_type
 
-        mr = ModelReference
-        if filter_by
-          item_name = to_record_type.ns_underscore
-          tn = ModelReference.record_type_to_table_name(item_name.pluralize)
-          ij = "INNER JOIN #{tn} ON model_references.to_record_id = #{tn}.id"
-          cond.merge! tn => filter_by
-          mr = mr.joins(ij)
-        end
-        res = mr.where(cond).order(ref_order)
-        res = res.active if active
+      mr = ModelReference
+      if filter_by
+        item_name = to_record_type.ns_underscore
+        tn = ModelReference.record_type_to_table_name(item_name.pluralize)
+        ij = "INNER JOIN #{tn} ON model_references.to_record_id = #{tn}.id"
+        cond.merge! tn => filter_by
+        mr = mr.joins(ij)
       end
+      res = mr.where(cond).order(ref_order)
+      res = res.active if active
+
     end
 
     # Set the current user, so that access controls can be correctly applied
@@ -184,21 +208,22 @@ class ModelReference < ActiveRecord::Base
   def self.to_record_class_for_type(rec_type)
     rec_type.ns_camelize.constantize
   rescue NameError => e
-    Rails.logger.error "Attempt to get to_record_class_for_type #{rec_type} failed as the type does not exist.\n#{e.backtrace[0..20].join("\n")}"
+    Rails.logger.error "Attempt to get to_record_class_for_type #{rec_type} failed as the type does not exist.\n"\
+                        "#{e.backtrace[0..20].join("\n")}"
     nil
   end
 
   # Params are provided for singularize and pluralize to highlight the fact that otherwise we rely on the data that is
   # passed in and don't enforce it one way or another.
-  # This means that if a singular rt is passed in, the result is not truly a table name, since the result will be singular
-  # unless explicitly pluralized
-  def self.record_type_to_ns_table_name(rt, pluralize: nil, singularize: nil)
-    if rt.is_a?(String) || rt.is_a?(Symbol)
-      res = rt.to_s
-    elsif rt.respond_to? :name
-      res = rt.name.ns_underscore
-    elsif rt.respond_to? :class
-      res = rt.class.name.ns_underscore
+  # This means that if a singular record_type is passed in, the result is not truly a table name, since the result
+  # will be singular unless explicitly pluralized
+  def self.record_type_to_ns_table_name(record_type, pluralize: nil, singularize: nil)
+    if record_type.is_a?(String) || record_type.is_a?(Symbol)
+      res = record_type.to_s
+    elsif record_type.respond_to? :name
+      res = record_type.name.ns_underscore
+    elsif record_type.respond_to? :class
+      res = record_type.class.name.ns_underscore
     end
 
     return unless res
@@ -220,8 +245,8 @@ class ModelReference < ActiveRecord::Base
     'model_reference'
   end
 
-  def self.record_type_to_table_name(rt)
-    record_type_to_ns_table_name(rt).gsub('__', '_')
+  def self.record_type_to_table_name(record_type)
+    record_type_to_ns_table_name(record_type).gsub('__', '_')
   end
 
   def to_record_class
@@ -326,15 +351,16 @@ class ModelReference < ActiveRecord::Base
   attr_writer :to_record
 
   def to_record_options_config
-    if from_record&.respond_to?(:option_type_config)
-      res = from_record.option_type_config.model_reference_config self
-      return unless res
+    return unless from_record&.respond_to?(:option_type_config)
 
-      res[to_record_assoc.to_s.singularize.to_sym]
-    end
+    res = from_record.option_type_config.model_reference_config self
+    return unless res
+
+    res[to_record_assoc.to_s.singularize.to_sym]
   end
 
-  def self.find_records_in_master(master: nil, to_record_type: nil, filter_by: nil, ref_order: default_ref_order, active: nil)
+  def self.find_records_in_master(master: nil, to_record_type: nil, filter_by: nil,
+                                  ref_order: default_ref_order, active: nil)
     res = []
     cond = { master: master }
     cond.merge! filter_by if filter_by
@@ -437,7 +463,14 @@ class ModelReference < ActiveRecord::Base
     return true unless from_record
 
     unless force_create? || from_record.can_edit? || from_record.can_add_reference?
-      errors.add :reference, "can not be created from a read-only parent (from: #{from_record_type} id: #{from_record_id} to: #{to_record_type}) => (force? #{!!force_create?} || edit? #{!!from_record.can_edit?} || add reference? #{!!from_record.can_add_reference?})"
+      errors.add :reference,
+                 'can not be created from a read-only parent '\
+                 "(from: #{from_record_type} "\
+                 "id: #{from_record_id} "\
+                 "to: #{to_record_type}) => ("\
+                 "force? #{!!force_create?} || "\
+                 "edit? #{!!from_record.can_edit?} || "\
+                 "add reference? #{!!from_record.can_add_reference?})"
     end
     true
   end

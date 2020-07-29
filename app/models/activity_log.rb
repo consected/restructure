@@ -112,7 +112,13 @@ class ActivityLog < ActiveRecord::Base
   def force_option_config_parse
     return if disabled?
 
-    extra_log_type_configs force: true
+    res = extra_log_type_configs force: true
+
+    # Check if any of the configs were bad
+    bad_configs = res.select { |c| c.bad_ref_items.present? }
+    raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?
+
+    res
   end
 
   # return the activity log implementation class that corresponds to
@@ -186,6 +192,7 @@ class ActivityLog < ActiveRecord::Base
   rescue FphsException => e
     raise e unless ignore_errors
 
+    @extra_error = e
     []
   end
 
@@ -243,16 +250,18 @@ class ActivityLog < ActiveRecord::Base
   # This does not represent the actual item types that are valid for selection when defining a new admin activity log record, which
   # is in fact provided by self.use_with_class_names
   def self.item_types
-    list = []
+    Rails.cache.fetch('ActivityLog.item_types') do
+      list = []
 
-    implementation_classes.each do |c|
-      cn = c.attribute_names.select { |a| a.start_with?('select_') || a.start_with?('multi_select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
-      cn.each do |a|
-        list << "#{c.model_name.to_s.ns_underscore}_#{a}".to_sym
+      implementation_classes.each do |c|
+        cn = c.attribute_names.select { |a| a.start_with?('select_') || a.start_with?('multi_select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
+        cn.each do |a|
+          list << "#{c.model_name.to_s.ns_underscore}_#{a}".to_sym
+        end
       end
-    end
 
-    list
+      list
+    end
   end
 
   # Open an activity log instance for a user, given a string activity log type and ID
@@ -523,8 +532,34 @@ class ActivityLog < ActiveRecord::Base
     @regenerate = res
   end
 
-  def generator_script
-    "db/table_generators/generate.sh activity_logs_table create #{table_name} #{item_type.pluralize} #{all_implementation_fields(ignore_errors: true).join(' ')}"
+  def generator_script(version, mode = 'create', added = nil, removed = nil)
+    cname = "#{mode}_#{table_name}_#{version}".camelize
+    do_create_or_update = if mode == 'create'
+                            'create_activity_log_tables'
+                          else
+                            <<~ARCONTENT
+                              \# added: #{added}
+                                  \# removed: #{removed}
+                                  update_fields
+                            ARCONTENT
+                          end
+
+    <<~CONTENT
+      require 'active_record/migration/app_generator'
+      class #{cname} < ActiveRecord::Migration[5.2]
+        include ActiveRecord::Migration::AppGenerator
+
+        def change
+          self.schema = '#{db_migration_schema}'
+          self.table_name = '#{table_name}'
+          self.belongs_to_model = '#{item_type}'
+          self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
+
+          #{do_create_or_update}
+          create_activity_log_trigger
+        end
+      end
+    CONTENT
   end
 
   def item_type_exists

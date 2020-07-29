@@ -14,6 +14,8 @@ RSpec.describe Master, type: :model do
     create_data_set
 
     add_app_config @user.app_type, 'create master with', 'player_info'
+    # Cleanup to get started
+    Master.reset_external_id_matching_fields!
   end
 
   it 'should create a master successfully' do

@@ -7,16 +7,16 @@ if [ -z "${ONDEVELOP}" ]; then
   exit 1
 fi
 
-FPHS_LOAD_APP_TYPES=1 bundle exec rake assets:clobber
-git commit public/assets -m "Cleanup"
-
-GITSTATUS="$(git status --porcelain=1)"
-
 if [ ! -z "${GITSTATUS}" ]; then
   echo "No files must be uncommitted"
   git status
   exit 1
 fi
+
+FPHS_LOAD_APP_TYPES=1 bundle exec rake assets:clobber
+git commit public/assets -m "Cleanup"
+
+GITSTATUS="$(git status --porcelain=1)"
 
 git push
 

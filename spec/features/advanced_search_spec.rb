@@ -30,6 +30,8 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
   it 'should test switching to advanced search and search a player' do
     visit '/masters/search'
 
+    sleep 10
+
     within '#simple_search_master' do
       fill_in 'Last name', with: 'bad1'
       click_button 'search'
@@ -52,6 +54,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     end
     # Wait for the advance form collapse animation to complete
     expect(page).to have_css '#master-search-advanced-form.in'
+    sleep 1
 
     within '#advanced_search_master' do
       click_link 'clear fields'
@@ -62,6 +65,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     # don't do 'expect' on the ajax running symbol, since it might go away too fast
     have_css '#advanced_search_master.ajax-running'
     # wait a while!
+    sleep 1
     expect(page).to have_css '#master_results_block', text: ''
     expect(page).to have_css '#search_count', text: /[0-9]+/, wait: 10
 

@@ -3,6 +3,8 @@
 module DynamicModelDefHandler
   extend ActiveSupport::Concern
 
+  DefaultMigrationSchema = Settings::DefaultMigrationSchema
+
   included do
     after_save :generate_model
     after_save :check_implementation_class
@@ -10,6 +12,8 @@ module DynamicModelDefHandler
     # after_save :reload_routes
     after_save :add_master_association, if: -> { @regenerate }
     after_save :add_user_access_controls, if: -> { @regenerate }
+    after_save :generate_migration
+
     after_commit :update_tracker_events, if: -> { @regenerate }
     after_commit :restart_server, if: -> { @regenerate }
     after_commit :other_regenerate_actions
@@ -176,6 +180,8 @@ module DynamicModelDefHandler
     cn.table_exists?(table_name) || cn.view_exists?(table_name)
   rescue StandardError => e
     puts e
+    @extra_error = e
+
     false
   end
 
@@ -287,21 +293,28 @@ module DynamicModelDefHandler
     if !disabled && errors.empty?
 
       unless !disabled? && ready?
-        err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:
 
-          #{generator_script} > db/app_specific/create_#{table_name}.sql
+        version = DateTime.now.to_i.to_s(36)
+        gs = generator_script(version)
+        fn = write_db_migration(gs, version)
 
-        Then edit the result to change the field-type for the two CREATE TABLE statements at the top of the results.
+        err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created.
+
+        Wrote migration to: #{fn}
+        Review it, then run migration with:
+        MIG_PATH=femfl FPHS_LOAD_APP_TYPES= bundle exec rails db:migrate
+
         IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
         "
-        # errors.add :name, err
-        # Force exit of callbacks
+
+        err += "(extra error info: #{@extra_error})" if @extra_error
+
         raise FphsException, err
       end
 
       begin
         res = implementation_class_defined?
-      rescue Exception => e
+      rescue StandardError => e
         err = "Failed to instantiate the class #{full_implementation_class_name}: #{e}"
         logger.warn err
         errors.add :name, err
@@ -320,5 +333,62 @@ module DynamicModelDefHandler
 
   def restart_server
     AppControl.restart_server
+  end
+
+  # Standard columns are used by migrations
+  def standard_columns
+    pset = %w[id created_at updated_at contactid user_id master_id
+              extra_log_type admin_id]
+    pset += ["#{table_name.singularize}_table_id", "#{table_name.singularize}_id"]
+    pset
+  end
+
+  def generate_migration
+    return unless ready?
+
+    begin
+      cols = ActiveRecord::Base.connection.columns(table_name)
+      old_colnames = cols.map(&:name) - standard_columns
+    rescue StandardError
+      return
+    end
+
+    fields = all_implementation_fields(ignore_errors: true)
+    new_colnames = fields.map(&:to_s) - standard_columns
+
+    added = new_colnames - old_colnames
+    removed = old_colnames - new_colnames
+
+    if added.present? || removed.present?
+      version = DateTime.now.to_i.to_s(36)
+      gs = generator_script(version, 'update', added, removed)
+      write_db_migration gs, version, mode: 'update'
+    end
+  end
+
+  # A DB migration schema is either the schema of the currrent app,
+  # or is based on the category of the dynamic model, activity log or external ID
+  def db_migration_schema
+    current_user_app_type = current_admin.matching_user_app_type
+    dsn = current_user_app_type&.default_schema_name
+    return dsn if dsn
+
+    res = category.split('-').first if category.present?
+    res || DefaultMigrationSchema
+  end
+
+  def db_migration_dirname
+    "db/app_migrations/#{db_migration_schema}"
+  end
+
+  def write_db_migration(mig_text, version, mode: 'create')
+    return if Rails.env.test?
+
+    dirname = "db/app_migrations/#{db_migration_schema}"
+    cname_us = "#{mode}_#{table_name}_#{version}"
+    fn = "#{dirname}/#{Time.new.to_s(:number)}_#{cname_us}.rb"
+    FileUtils.mkdir_p dirname
+    File.write(fn, mig_text)
+    fn
   end
 end

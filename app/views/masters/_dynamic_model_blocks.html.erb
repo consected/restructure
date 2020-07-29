@@ -13,12 +13,20 @@ end
 
 category_models.each do |m|
   if viewable  [m.model_association_name]
-    orientation ||= panel && panel.view_options&.orientation == 'horizontal' || (DynamicModel.orientation(category) == :horizontal) ? 'horizontal' : 'vertical'
-    if orientation && orientation != 'none'
+    po = panel&.view_options&.orientation
+
+    orientation ||= po == 'horizontal' || (DynamicModel.orientation(category) == :horizontal) ? 'horizontal' : po
+
+    if orientation.in?(['columns'])
+%>
+      <div class="col-md-6 common-template-list dynamic-model-list category-<%=category%> orientation-<%=orientation%> sublist-column" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+
+<%
+    elsif orientation && orientation != 'none'
 %>
       <div class="row common-template-list dynamic-model-list resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
     <% else %>
-    <div class="<%= layout_item_block_sizes[:regular] %> ">
+    <div class="<%= layout_item_block_sizes[:regular] %> orientation-<%=orientation%> sublist-column">
       {{>sublist_controls sub_list="<%=m.full_item_types_name%>" order='asc'}}
       <div class="dynamic-container do-not-resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
     </div>

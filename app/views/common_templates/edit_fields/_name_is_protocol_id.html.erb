@@ -1,2 +1,7 @@
+<% 
+  options = field_options_for(form_object_instance, field_name_sym)
+  options[:prompt] ||= "-pick one-"
+  options[:include_blank] = true unless options.has_key?(:include_blank)
+%>
 <%= form.label field_name_sym, label_for(field_name_sym, labels), 'data-add-icon' => 'info-sign', title: 'protocol this is related to' %>
-<%= form.select :protocol_id, protocol_array_without_updates, {prompt: "-pick one-"}, {"data-filters-selector" => "##{form_object_item_type_us.gsub('__',"_")}_sub_process_id", class: "form-control input-sm", data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}%>
+<%= form.select :protocol_id, protocol_array_without_updates, options, {"data-filters-selector" => "##{form_object_item_type_us.gsub('__',"_")}_sub_process_id", class: "form-control input-sm", data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}%>

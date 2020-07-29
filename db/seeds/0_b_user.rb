@@ -12,7 +12,12 @@ module Seeds
       if User.active.first
         log "Did not run #{self}.setup"
       else
-        User.create! email: 'template@template', first_name: 'template', last_name: 'template', current_admin: auto_admin
+        u = User.where(email: Settings::TemplateUserEmail).first
+        if u
+          u.update! disabled: false, current_admin: auto_admin
+        else
+          User.create! email: Settings::TemplateUserEmail, first_name: 'template', last_name: 'template', current_admin: auto_admin
+        end
         log "Ran #{self}.setup"
       end
     end

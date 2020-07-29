@@ -34,6 +34,7 @@ RSpec.describe MastersController, type: :controller do
       prev_master = Master.last
 
       setup_access :player_infos
+      setup_access :trackers
 
       post :create
       @master = Master.last

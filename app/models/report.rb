@@ -105,13 +105,15 @@ class Report < ActiveRecord::Base
   end
 
   def self.item_types
-    res = []
-    editable_data_reports.each do |r|
-      unless r.selection_fields.blank?
-        res += r.selection_fields.split(/[^a-zA-Z0-9_]/).collect { |c| "report_#{r.name.id_underscore}_#{c.downcase}".to_sym }
+    Rails.cache.fetch('Report.item_types') do
+      res = []
+      editable_data_reports.each do |r|
+        unless r.selection_fields.blank?
+          res += r.selection_fields.split(/[^a-zA-Z0-9_]/).collect { |c| "report_#{r.name.id_underscore}_#{c.downcase}".to_sym }
+        end
       end
+      res
     end
-    res
   end
 
   # Can the results be edited?

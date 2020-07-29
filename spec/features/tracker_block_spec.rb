@@ -349,7 +349,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
 
     pe_new = nil
     sp_new = nil
-    pes_new = nil
+
     while pe_new.nil? || sp_new.nil?
       sp_new = pick_one_from sps
       pes_new = sp_new.protocol_events.enabled.reload

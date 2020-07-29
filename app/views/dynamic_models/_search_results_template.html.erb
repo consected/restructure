@@ -10,37 +10,46 @@
     field_list = m.field_list_array
   end
 
-  an = field_list
-  if an.length > 1
-    l = an
-  elsif an.first&.end_with? '_id'
-    an.each do |k|
-      l << [label: k.to_s.humanize, formatter: 'format_sage_id', attribute: k.to_s]
-    end
-  else
-    l = an
+  item_list = field_list.dup
+
+  if item_list - %w(country state) != item_list
+    # Is an address model
+    item_list[item_list.index('country')] = 'country_name' if item_list.include? 'country'
+    item_list[item_list.index('state')] = 'state_name' if item_list.include? 'state'
+  end
+
+  if item_list.first&.end_with? '_id'
+    item_list = item_list.map {|k| {label: k.to_s.humanize, formatter: 'format_sage_id', attribute: k.to_s}}
   end
 
   if m.model_def.attribute_names.include? 'rank'
     data_sort = [:desc, "data-rank"]
   end
-
+  default_options = m.default_options
+  view_options = default_options.view_options
+  header_caption = view_options[:header_caption] || m.name
+  extra_class = view_options[:extra_class]
+  extra_data_attribs = [:rec_type] if field_list.include?('rec_type')
+  button_label = default_options.button_label
 %>
 <%= render partial: 'common_templates/search_results_template', locals: {
-      caption: m.name,
+      caption: header_caption,
+      button_label: button_label,
       name: m.model_def_name.to_s,
       full_name: full_name,
       model_data_type: :dynamic_model,
       prevent_edit: !(current_user.has_access_to? :edit, :table, m.full_item_type_name.pluralize),
       prevent_create: !(current_user.has_access_to? :create, :table, m.full_item_type_name.pluralize),
-      item_list: l,
-      caption_before: m.default_options.caption_before,
-      dialog_before: m.default_options.dialog_before,
-      labels: m.default_options.labels,
-      show_if: m.default_options.show_if,
+      item_list: item_list,
+      caption_before: default_options.caption_before,
+      dialog_before: default_options.dialog_before,
+      labels: default_options.labels,
+      show_if: default_options.show_if,
       data_sort: data_sort,
       category: m.category,
-      view_options: m.default_options.view_options,
-      extra_options_config: m.default_options
+      view_options: view_options,
+      extra_class: extra_class,
+      extra_data_attribs: extra_data_attribs,
+      extra_options_config: default_options
     } if current_user.has_access_to?(:access, :table, full_name.pluralize) %>
 <% end %>

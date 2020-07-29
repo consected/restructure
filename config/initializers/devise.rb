@@ -1,12 +1,14 @@
+# frozen_string_literal: true
+
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
 Devise.setup do |config|
   config.warden do |manager|
-    manager.default_strategies(:scope => :admin).unshift :two_factor_authenticatable
+    manager.default_strategies(scope: :admin).unshift :two_factor_authenticatable
   end
 
   config.warden do |manager|
-    manager.default_strategies(:scope => :user).unshift :two_factor_authenticatable
+    manager.default_strategies(scope: :user).unshift :two_factor_authenticatable
   end
 
   # The secret key used by Devise. Devise uses this key to generate
@@ -181,7 +183,7 @@ Devise.setup do |config|
   # :time  = Re-enables login after a certain amount of time (see :unlock_in below)
   # :both  = Enables both strategies
   # :none  = No unlock strategy. You should handle unlocking by yourself.
-  config.unlock_strategy = :time
+  config.unlock_strategy = Settings::PasswordUnlockStrategy
 
   # Number of authentication tries before locking an account if lock_strategy
   # is failed attempts.
@@ -232,7 +234,6 @@ Devise.setup do |config|
 
   # Set this configuration to false if you want /users/sign_out to sign out
   # only the current scope. By default, Devise signs out all scopes.
-
 
   # We use this to allow logout of admin separately from user
   config.sign_out_all_scopes = false

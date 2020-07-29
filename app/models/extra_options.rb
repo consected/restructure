@@ -28,10 +28,8 @@ class ExtraOptions
   def self.attr_defs
     attr_for_conditions_marker = 'ref: ** conditions reference **'
     {
-      fields: %w[
-        field_name_1 field_name_2
-      ],
-
+      fields: %w[field_name_1 field_name_2],
+      button_label: 'add record button label',
       caption_before: {
         field_name: 'string caption to appear before field',
         all_fields: 'caption to appear before all fields',
@@ -63,7 +61,10 @@ class ExtraOptions
         always_embed_creatable_reference: 'reference name to always show embedded during new/create',
         alt_order: 'string or list of date / time or integer fields to use for ordering',
         show_cancel: 'show cancel button alongside save button',
-        only_create_as_reference: 'prevent creation as a standalone item, only embedded / referenced within another'
+        only_create_as_reference: 'prevent creation as a standalone item, only embedded / referenced within another',
+        view_handlers: 'name of handler for UI and models (options include: address, contact, subject)',
+        header_caption: 'header caption to use - can include {{substition}}',
+        extra_class: 'html classes (space separated) to add to block'
       },
       filestore: {
         container: {

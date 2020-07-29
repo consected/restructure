@@ -264,6 +264,18 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     end
 
     it 'prevents the signed record being signed again' do
+      sleep 30 # to allow OTP to reset
+      @al = create_item
+      @al.prepare_activity_for_signature
+      @al.save!
+      @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
+      @al.e_signature_password = @good_password
+      @al.e_signature_otp_attempt = @user.current_otp
+      @al.save!
+      sleep 30 # to allow OTP to reset
+
+      @al.reload
+      @al.current_user = @user
       # check for signature digest field not null
       expect do
         @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
@@ -271,7 +283,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
         @al.e_signature_otp_attempt = @user.current_otp
 
         @al.save!
-      end.to raise_error FphsException
+      end.to raise_error ESignature::ESignatureUserError
     end
 
     it 'sends a notification of the signature to the user with a signature summary and digest'

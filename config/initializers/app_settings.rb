@@ -1,18 +1,21 @@
+# frozen_string_literal: true
+
 class Settings
-  StartYearRange = 1900..(Date.current.year)
-  EndYearRange = 1900..(Date.current.year)
-  AgeRange = 1..150
-  CareerYearsRange = 0..50
+  DefaultMigrationSchema = 'ml_app'
 
-  PositiveIntPattern = '\\d+'.freeze
-  AgePattern = '\\d{1,3}'.freeze
-  YearFieldPattern = '\\d{4,4}'.freeze
+  StartYearRange = (1900..(Date.current.year)).freeze
+  EndYearRange = (1900..(Date.current.year)).freeze
+  AgeRange = (1..150).freeze
+  CareerYearsRange = (0..50).freeze
 
+  PositiveIntPattern = '\\d+'
+  AgePattern = '\\d{1,3}'
+  YearFieldPattern = '\\d{4,4}'
 
   UserTimeout = (Rails.env.production? ? 30 : 60).minutes.freeze
   AdminTimeout = (Rails.env.production? ? 30 : 60).minutes.freeze
 
-  OsWordsFile = "/usr/share/dict/words"
+  OsWordsFile = '/usr/share/dict/words'
   PasswordEntropyConfig = {
     min_entropy: (Rails.env.test? ? 1 : 20),
     min_word_length: 4,
@@ -37,17 +40,26 @@ class Settings
   PasswordReminderDays = (ENV['FPHS_PASSWORD_REMINDER_DAYS'] || 5).to_i
   PasswordMaxAttempts = (ENV['FPHS_PASSWORD_MAX_ATTEMPTS'] || 3).to_i
 
+  # email = Sends an unlock link to the user email
+  # time  = Re-enables login after a certain amount of time (see :unlock_in below)
+  # both  = Enables both strategies
+  # none  = No unlock strategy. You should handle unlocking by yourself.
+  PasswordUnlockStrategy = (ENV['FPHS_PASSWORD_UNLOCK_STRATEGY'] || 'time').to_sym
+
   EnvironmentName = ENV['FPHS_ENV_NAME'] || 'unknown'
   BaseUrl = ENV['BASE_URL']
+
+  LoginIssuesUrl = ENV['LOGIN_ISSUES_URL'] || "mailto: #{AdminEmail}?subject=Login%20Issues"
+  LoginMessage = ENV['LOGIN_MESSAGE']
 
   SearchResultsLimit = ENV['FPHS_RESULT_LIMIT']
 
   olat = ENV['FPHS_LOAD_APP_TYPES']
-  if olat.blank?
-    olat = nil
-  else
-    olat = olat.split(',').map(&:strip).map(&:to_i)
-  end
+  olat = if olat.blank?
+           nil
+         else
+           olat.split(',').map(&:strip).map(&:to_i)
+         end
   OnlyLoadAppTypes = olat
 
   TemplateUserEmail = 'template@template'
@@ -66,5 +78,4 @@ class Settings
   DefaultShortLinkS3Bucket = ENV['FPHS_SHORTLINK_BUCKET'] || (Rails.env.production? ? 'fphs.link' : 'test-shortlink.fphs.link')
   DefaultShortLinkLogS3Bucket = ENV['FPHS_SHORTLINK_LOG_BUCKET'] || (Rails.env.production? ? 'url-shortener-logs.fphs' : 'test-fphs-url-shortener-logs')
   LogBucketPrefix = 'access/'
-
 end

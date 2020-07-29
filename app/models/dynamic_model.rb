@@ -4,10 +4,13 @@ class DynamicModel < ActiveRecord::Base
   include DynamicModelDefHandler
   include AdminHandler
 
+  StandardFields = %w[id created_at updated_at contactid user_id master_id].freeze
+
   default_scope -> { order disabled: :asc, category: :asc, position: :asc, updated_at: :desc }
 
   validate :table_name_ok
   after_save :force_option_config_parse
+  after_save :set_empty_field_list
 
   attr_accessor :editable
 
@@ -24,16 +27,18 @@ class DynamicModel < ActiveRecord::Base
   # List of item types that can be used to define Classification::GeneralSelection drop downs
   # This does not represent the actual item types that are valid for selection when defining a new dynamic model record
   def self.item_types
-    list = []
+    Rails.cache.fetch('DynamicModel.item_types') do
+      list = []
 
-    implementation_classes.each do |c|
-      cn = c.attribute_names.select { |a| a.start_with?('select_') || a.start_with?('multi_select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
-      cn.each do |a|
-        list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
+      implementation_classes.each do |c|
+        cn = c.attribute_names.select { |a| a.start_with?('select_') || a.start_with?('multi_select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
+        cn.each do |a|
+          list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
+        end
       end
-    end
 
-    list
+      list
+    end
   end
 
   # the list of defined activity log implementation classes
@@ -53,7 +58,7 @@ class DynamicModel < ActiveRecord::Base
 
     if res.empty? && model_def
       begin
-        res = model_def.attribute_names - %w[id created_at updated_at contactid user_id master_id]
+        res = model_def.attribute_names - StandardFields
       rescue StandardError => e
         puts "Failed to get all_implementation_fields for reason: #{e.inspect} \n#{e.backtrace.join("\n")}"
         raise e unless ignore_errors
@@ -196,6 +201,7 @@ class DynamicModel < ActiveRecord::Base
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
         res.include DynamicModelHandler
+        add_handlers(res)
 
         res.final_setup
 
@@ -245,11 +251,23 @@ class DynamicModel < ActiveRecord::Base
 
     if failed || !enabled?
       remove_model_from_list
-    else
-      add_model_to_list res if res
+    elsif res
+      add_model_to_list res
     end
 
     @regenerate = res
+  end
+
+  def add_handlers(res)
+    vh = default_options.view_options[:view_handlers]
+    return unless vh.present?
+
+    vh.each do |v|
+      h = "ViewHandlers::#{v.camelize}".constantize
+      res.include h
+
+      res.handle_include_extras if res.respond_to? :handle_include_extras
+    end
   end
 
   def self.routes_load
@@ -277,8 +295,33 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
-  def generator_script
-    "db/table_generators/generate.sh dynamic_models_table create  #{table_name} #{all_implementation_fields(ignore_errors: true).join(' ')}"
+  def generator_script(version, mode = 'create', added = nil, removed = nil)
+    cname = "#{mode}_#{table_name}_#{version}".camelize
+    do_create_or_update = if mode == 'create'
+                            'create_dynamic_model_tables'
+                          else
+                            <<~ARCONTENT
+                              \# added: #{added}
+                                  \# removed: #{removed}
+                                  update_fields
+                            ARCONTENT
+                          end
+
+    <<~CONTENT
+      require 'active_record/migration/app_generator'
+      class #{cname} < ActiveRecord::Migration[5.2]
+        include ActiveRecord::Migration::AppGenerator
+
+        def change
+          self.schema = '#{db_migration_schema}'
+          self.table_name = '#{table_name}'
+          self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
+
+          #{do_create_or_update}
+          create_dynamic_model_trigger
+        end
+      end
+    CONTENT
   end
 
   def table_name_ok
@@ -287,6 +330,11 @@ class DynamicModel < ActiveRecord::Base
     else
       true
     end
+  end
+
+  def set_empty_field_list
+    fl = implementation_class.attribute_names - StandardFields
+    self.field_list = fl.join(' ') if field_list.blank?
   end
 end
 

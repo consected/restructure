@@ -27,7 +27,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/concerns/calc_actions.rb",
-      "line": 388,
+      "line": 390,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "@condition_scope.order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")",
       "render_path": null,
@@ -199,7 +199,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/model_reference.rb",
-      "line": 144,
+      "line": 148,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ModelReference.joins(\"INNER JOIN #{ModelReference.record_type_to_table_name(to_record_class_for_type(to_record_type).name.ns_underscore.pluralize)} ON model_references.to_record_id = #{ModelReference.record_type_to_table_name(to_record_class_for_type(to_record_type).name.ns_underscore.pluralize)}.id\")",
       "render_path": null,
@@ -230,6 +230,26 @@
       },
       "user_input": "Admin::UserAccessControl.priority_order",
       "confidence": "High",
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "b225d0c4d79de98de44ce62d82868d021cfacd1d9a5bb34251cb389078c1bd29",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "lib/active_record/migration/app_generator.rb",
+      "line": 17,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "ActiveRecord::Base.connection.execute((\"CREATE SCHEMA IF NOT EXISTS #{schema}\" + \" AUTHORIZATION #{owner}\"))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ActiveRecord::Migration",
+        "method": "create_schema"
+      },
+      "user_input": "owner",
+      "confidence": "Medium",
       "note": ""
     },
     {
@@ -279,7 +299,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/concerns/calc_actions.rb",
-      "line": 400,
+      "line": 402,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "(@condition_scope.order(:id => :desc).limit(1).reorder(\"#{@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.id desc\") or @condition_scope.order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")).select(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.*\").pluck(\"#{@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.#{@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first}\")",
       "render_path": null,
@@ -313,6 +333,6 @@
       "note": ""
     }
   ],
-  "updated": "2020-06-15 17:03:56 +0100",
+  "updated": "2020-07-24 13:01:41 +0100",
   "brakeman_version": "4.8.1"
 }

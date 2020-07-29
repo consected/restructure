@@ -43,16 +43,18 @@ class ExternalIdentifier < ActiveRecord::Base
   # List of item types that can be used to define Classification::GeneralSelection drop downs
   # This does not represent the actual item types that are valid for selection when defining a new external identifier model record
   def self.item_types
-    list = []
+    Rails.cache.fetch('ExternalIdentifier.item_types') do
+      list = []
 
-    implementation_classes.each do |c|
-      cn = c.attribute_names.select { |a| a.start_with?('select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
-      cn.each do |a|
-        list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
+      implementation_classes.each do |c|
+        cn = c.attribute_names.select { |a| a.start_with?('select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
+        cn.each do |a|
+          list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
+        end
       end
-    end
 
-    list
+      list
+    end
   end
 
   # the list of defined activity log implementation classes
@@ -77,6 +79,8 @@ class ExternalIdentifier < ActiveRecord::Base
       end
     rescue ActiveRecord::StatementInvalid => e
       logger.warn "Not loading activity log routes. The table #{mn} has probably not been created yet. #{e.backtrace.join("\n")}"
+    rescue FphsException => e
+      logger.warn "Not loading activity log routes. There is possibly an error in an extra log type configuration. Table #{mn} has probably not been created yet. #{e.backtrace.join("\n")}"
     end
   end
 
@@ -256,21 +260,49 @@ class ExternalIdentifier < ActiveRecord::Base
       unless ActiveRecord::Base.connection.columns(name).map(&:name).include?(external_id_attribute.to_s)
         raise FphsException, "external_id_attribute does not exist as an attribute (named #{external_id_attribute}) in the table #{name}"
       end
-
-    else
-      # Can't enable the configuration until the table exists
-      unless disabled || !errors.empty?
-        raise FphsException, "name: #{name} does not exist as a table in the database. Ensure the DB table #{name} has been created. Run:
-        \`db/table_generators/generate.sh external_identifiers_table create #{name} #{external_id_attribute}\`
-        to generate the SQL for this table.
-        IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
-         "
-      end
     end
+  end
+
+  def generator_script(version, mode = 'create', added = nil, removed = nil)
+    cname = "#{mode}_#{table_name}_#{version}".camelize
+    ftype = (alphanumeric? ? 'string' : 'bigint')
+    do_create_or_update = if mode == 'create'
+                            "create_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
+                          else
+                            <<~ARCONTENT
+                              \# added: #{added}
+                                  \# removed: #{removed}
+                                  update_fields
+                            ARCONTENT
+                          end
+
+    <<~CONTENT
+      require 'active_record/migration/app_generator'
+      class #{cname} < ActiveRecord::Migration[5.2]
+        include ActiveRecord::Migration::AppGenerator
+
+        def change
+          self.schema = '#{db_migration_schema}'
+          self.table_name = '#{table_name}'
+          self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
+
+          #{do_create_or_update}
+          create_external_identifier_trigger :#{external_id_attribute}
+        end
+      end
+    CONTENT
   end
 
   def field_list
     "#{external_id_attribute.to_sym} #{extra_fields}"
+  end
+
+  def all_implementation_fields(ignore_errors: true)
+    field_list.split(' ')
+  rescue StandardError => e
+    msg = "all_implementation_fields for external identifier #{id} failed. #{e}"
+    Rails.logger.warn msg
+    raise FphsException, msg unless ignore_errors
   end
 
   def id_range_correct
@@ -299,23 +331,6 @@ class ExternalIdentifier < ActiveRecord::Base
     errors.add :name, 'must be unique' if !disabled && !res.empty?
     res = self.class.active.where(external_id_attribute: external_id_attribute.downcase).where.not(id: id)
     errors.add :external_id_attribute, 'must be unique' if !disabled && !res.empty?
-  end
-
-  def check_implementation_class
-    if !disabled && errors.empty?
-      res = begin
-              implementation_class.new
-            rescue StandardError
-              nil
-            end
-      unless res
-        raise FphsException, "The implementation of #{model_class_name} was not completed. Ensure the DB table #{name} has been created. Run:
-        \`db/table_generators/generate.sh external_identifiers_table create #{name} #{external_id_attribute}\`
-        to generate the SQL for this table.
-        IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
-         "
-      end
-    end
   end
 
   def generate_usage_reports

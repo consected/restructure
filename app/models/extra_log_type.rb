@@ -12,6 +12,7 @@ class ExtraLogType < ExtraOptions
   end
 
   attr_accessor(*key_attributes)
+  attr_accessor :bad_ref_items
 
   def self.attr_defs
     res = {
@@ -164,7 +165,7 @@ class ExtraLogType < ExtraOptions
       self.references = new_ref
 
       references.each do |_k, refitem|
-        bad_ref_items = []
+        self.bad_ref_items = []
         refitem.each do |mn, conf|
           to_class = ModelReference.to_record_class_for_type(mn)
 
@@ -179,6 +180,7 @@ class ExtraLogType < ExtraOptions
             refitem[mn][:to_model_name_us] = to_class&.to_s&.ns_underscore
           else
             bad_ref_items << mn
+            Rails.logger.warn "extra log type reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}"
             Rails.logger.info 'Will clean up reference to avoid it being used again in this session'
           end
         end
@@ -221,7 +223,9 @@ class ExtraLogType < ExtraOptions
   def self.fields_for_all_in(activity_log)
     activity_log.extra_log_type_configs.reject { |e| e.name.in?(%i[primary blank_log]) }.map(&:fields).reduce([], &:+).uniq
   rescue StandardError => e
-    raise FphsException, "Failed to use the extra log options. It is likely that the 'fields:' attribute of one of the extra entries (not primary or blank) is missing or not formatted as expected. #{e}"
+    raise FphsException,
+          "\nFailed to use the extra log options. It is likely that the 'fields:' attribute of one of the extra entries "\
+          "(not primary or blank) is missing or not formatted as expected, or an @library inclusion has an error. #{e}"
   end
 
   def calc_save_action_if(obj)

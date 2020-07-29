@@ -1,5 +1,6 @@
-class ApplicationController < ActionController::Base
+# frozen_string_literal: true
 
+class ApplicationController < ActionController::Base
   include ControllerUtils
   include AppExceptionHandler
   include AppConfigurationsHelper
@@ -15,40 +16,37 @@ class ApplicationController < ActionController::Base
 
   protected
 
+  def current_email
+    return nil unless current_user || current_admin
 
-    def current_email
-      return nil unless current_user || current_admin
-      (current_user || current_admin).email
+    (current_user || current_admin).email
+  end
+
+  def authenticate_user_or_admin!
+    redirect_to new_user_session_path if !current_user && !current_admin
+    true
+  end
+
+  # If either user or admin has a temp password, force them to change it
+  def check_temp_passwords
+    return true if request.xhr?
+
+    return true if defined?(ignore_temp_password_for) && ignore_temp_password_for.include?(action_name)
+
+    return true if controller_name.in?(['registrations', 'sessions'])
+
+    if current_user&.has_temp_password?
+      redirect_to edit_user_registration_path
+    elsif current_admin&.has_temp_password?
+      redirect_to edit_admin_registration_path
     end
 
-
-    def authenticate_user_or_admin!
-      if !current_user && !current_admin
-        redirect_to new_user_session_path
-      end
-      return true
-    end
-
-    # If either user or admin has a temp password, force them to change it
-    def check_temp_passwords
-
-      return true if defined?(ignore_temp_password_for) && ignore_temp_password_for.include?(action_name)
-
-      return true if controller_name.in?(['registrations', 'sessions'])
-
-      if current_user && current_user.has_temp_password?
-        redirect_to edit_user_registration_path
-      elsif current_admin && current_admin.has_temp_password?
-        redirect_to edit_admin_registration_path
-      end
-
-      return true
-    end
+    true
+  end
 
   private
 
-    def no_action_log
-      false
-    end
-
+  def no_action_log
+    false
+  end
 end

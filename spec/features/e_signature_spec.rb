@@ -10,7 +10,7 @@ describe 'Electronically sign a record', driver: :app_firefox_driver do
 
     seed_database
     setup_database
-    ::ActivityLog.define_models
+    # ::ActivityLog.define_models
 
     user_logs_in
   end

@@ -4,6 +4,7 @@ _fpa = {
   partials: {},
   app: {},
   state: {},
+  view_handlers: {},
   version: '0',
   remote_request: null,
   remote_request_block: null,
@@ -50,6 +51,7 @@ _fpa = {
     _fpa.state.search_running = false;
   },
   compile_templates: function () {
+    $('body').addClass('status-compiling');
     $('script.handlebars-partial').each(function () {
       var id = $(this).attr('id');
 
@@ -65,7 +67,7 @@ _fpa = {
       _fpa.templates[id] = Handlebars.compile(source);
 
     });
-
+    $('body').removeClass('status-compiling');
   },
 
   send_ajax_request: function (url, options) {
