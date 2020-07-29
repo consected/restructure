@@ -12,6 +12,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
   before_action :check_temp_passwords
   before_action :prevent_cache
+  before_action :setup_navs
 
   protected
 

@@ -5,10 +5,6 @@ module NavHandler
 
   include PageLayoutsHelper
 
-  included do
-    before_action :setup_navs
-  end
-
   def setup_navs
     return true if request.xhr?
 
