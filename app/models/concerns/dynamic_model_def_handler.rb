@@ -240,7 +240,10 @@ module DynamicModelDefHandler
     raise 'DynamicModel configuration implementation must define update_tracker_events'
   end
 
-  def other_regenerate_actions; end
+  def other_regenerate_actions
+    Rails.logger.info 'Refreshing item types'
+    Classification::GeneralSelection.item_types refresh: true
+  end
 
   def add_model_to_list(m)
     tn = model_def_name
