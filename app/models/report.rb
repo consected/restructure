@@ -104,7 +104,9 @@ class Report < ActiveRecord::Base
     Report.active.select('distinct item_type').where('item_type is not null').all.map(&:item_type)
   end
 
-  def self.item_types
+  def self.item_types(refresh: false)
+    Rails.cache.delete('Report.item_types') if refresh
+
     Rails.cache.fetch('Report.item_types') do
       res = []
       editable_data_reports.each do |r|

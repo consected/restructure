@@ -1,5 +1,6 @@
-class Admin::UserRole < ActiveRecord::Base
+# frozen_string_literal: true
 
+class Admin::UserRole < ActiveRecord::Base
   self.table_name = 'user_roles'
 
   include AdminHandler
@@ -8,7 +9,7 @@ class Admin::UserRole < ActiveRecord::Base
   belongs_to :user
 
   validates :role_name, presence: true
-  validates :user_id, uniqueness: {scope: [:app_type_id, :role_name, :disabled]}, unless: :disabled?
+  validates :user_id, uniqueness: { scope: %i[app_type_id role_name disabled] }, unless: :disabled?
 
   after_save :save_template
   after_save :invalidate_cache
@@ -17,14 +18,13 @@ class Admin::UserRole < ActiveRecord::Base
   # to the user's current app type
   scope :user_app_type, ->(user) { where user_roles: { app_type_id: user.app_type_id } }
 
-
   # Get a resultset of active roles for the user.
   # @param user [User] if the app_type attribute is set in the user, and is not set in conditions
   #                    then the user app_type will be used
   # @param conditions [Hash] if app_type or app_type_id are set then they will be used to set the app_type,
   #                          overriding the attribute set in the user
   # @return [ActiveRecord::Relation]
-  def self.active_app_roles user, conditions={}
+  def self.active_app_roles(user, conditions = {})
     app_type = conditions[:app_type] || conditions[:app_type_id] || user.app_type
     active.where user: user, app_type: app_type
   end
@@ -32,12 +32,14 @@ class Admin::UserRole < ActiveRecord::Base
   # Prevent Admin::UserRole.where from accidentally bypassing the app_type scoping.
   # @param conditions [Hash] full set of where clause conditions
   # @return [ActiveRecord::Relation]
-  def self.where conditions
-    if conditions.is_a?(Hash) && conditions.length > 0
+  def self.where(conditions)
+    if conditions.is_a?(Hash) && !conditions.empty?
       ur_cond = conditions.dup
       ur_cond = conditions[:user_roles] if conditions[:user_roles]
       ur_cond = ur_cond.symbolize_keys
-      raise FphsException.new "UserRole.where must use app_type condition" unless ur_cond[:id] || ur_cond[:app_type] || ur_cond[:app_type_id]
+      unless ur_cond[:id] || ur_cond[:app_type] || ur_cond[:app_type_id]
+        raise FphsException, 'UserRole.where must use app_type condition'
+      end
     end
     super
   end
@@ -45,10 +47,10 @@ class Admin::UserRole < ActiveRecord::Base
   # Get role names from, either unfiltered, or from a previous scope
   # @return [Array] list of string role names
   def self.role_names
-    select("role_name").distinct.pluck(:role_name)
+    select('role_name').distinct.pluck(:role_name)
   end
 
-  def self.active_role_names filter=nil
+  def self.active_role_names(filter = nil)
     q = active
     q = q.where(filter) if filter
     q.role_names
@@ -69,26 +71,27 @@ class Admin::UserRole < ActiveRecord::Base
   end
 
   def self.users
-    user_ids = select("user_id").distinct.pluck(:user_id)
+    user_ids = select('user_id').distinct.pluck(:user_id)
     User.where id: user_ids
   end
 
   # conditions must include app_type and role_name, and may include other conditions
-  def self.active_user_ids conditions=nil, app_type:, role_name:
-    res = select("user_id").joins(:user).where(
-      "(user_roles.disabled is null or user_roles.disabled = false) AND (users.disabled is null or users.disabled = false)"
-    )
+  def self.active_user_ids(conditions = nil, app_type:, role_name:)
+    condsql = '(user_roles.disabled is null or user_roles.disabled = false) AND '\
+              '(users.disabled is null or users.disabled = false)'
+    res = select('user_id').joins(:user).where(condsql)
+
     res = res.where app_type: app_type, role_name: role_name
     res = res.where conditions if conditions
 
     res.distinct.pluck(:user_id)
   end
 
-  def self.find_user_role_for_user user, app_type, role_name
+  def self.find_user_role_for_user(user, app_type, role_name)
     user.user_roles.where(app_type: app_type, role_name: role_name).first
   end
 
-  def self.add_to_role user, app_type, role_name, admin
+  def self.add_to_role(user, app_type, role_name, admin)
     res = find_user_role_for_user user, app_type, role_name
     if res
       res.with_admin(admin).enable! if res.disabled?
@@ -97,21 +100,21 @@ class Admin::UserRole < ActiveRecord::Base
     end
   end
 
-  def self.remove_from_role user, app_type, role_name, admin
+  def self.remove_from_role(user, app_type, role_name, admin)
     res = find_user_role_for_user user, app_type, role_name
-    res.with_admin(admin).disable! if res
+    res&.with_admin(admin)&.disable!
   end
-
 
   # Copy roles from one user to another. To avoid confusion, app_type must be specified
   # @param from_user [User] user to copy roles from
   # @param to_user [User] user to copy roles to
   # @param app_type [Admin::AppType] the app type the roles belong to.
   # @return [Array] array of Admin::UserRole instances created in the to_user
-  def self.copy_user_roles from_user, to_user, app_type, current_admin
-    raise FphsException.new "app_type must be specified and not nil to copy roles" unless app_type
+  def self.copy_user_roles(from_user, to_user, app_type, current_admin)
+    raise FphsException, 'app_type must be specified and not nil to copy roles' unless app_type
+
     has_roles = Admin::UserRole.active_app_roles to_user, app_type: app_type
-    raise FphsException.new "can not copy roles to a user with roles in this app #{app_type}" if has_roles.length > 0
+    raise FphsException, "can not copy roles to a user with roles in this app #{app_type}" unless has_roles.empty?
 
     from_roles = Admin::UserRole.active_app_roles from_user, app_type: app_type
 
@@ -131,17 +134,18 @@ class Admin::UserRole < ActiveRecord::Base
 
   private
 
-    # Automatically add a template@template record if needed
-    def save_template
-      return true if self.disabled?
-      tu = User.template_user
-      tu.app_type = app_type
-      self.class.add_to_role tu, self.app_type, self.role_name, self.current_admin
-    end
+  # Automatically add a template@template record if needed
+  def save_template
+    return true if disabled?
 
-    def invalidate_cache
-      logger.info "User Role added or updated (#{self.class.name}). Invalidating cache."
-      # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
-      Rails.cache.clear
-    end
+    tu = User.template_user
+    tu.app_type = app_type
+    self.class.add_to_role tu, app_type, role_name, current_admin
+  end
+
+  def invalidate_cache
+    logger.info "User Role added or updated (#{self.class.name}). Invalidating cache."
+    # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
+    Rails.cache.clear
+  end
 end

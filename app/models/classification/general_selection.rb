@@ -16,9 +16,14 @@ class Classification::GeneralSelection < ActiveRecord::Base
   validates :value, presence: true
   validate :not_duplicated
 
-  def self.item_types
+  def self.item_types(refresh: false)
+    Rails.cache.delete('Classification::GeneralSelection.item_types') if refresh
     Rails.cache.fetch('Classification::GeneralSelection.item_types') do
-      BasicItemTypes + Report.item_types + ActivityLog.item_types + DynamicModel.item_types + ExternalIdentifier.item_types
+      BasicItemTypes +
+        Report.item_types(refresh: refresh) +
+        ActivityLog.item_types(refresh: refresh) +
+        DynamicModel.item_types(refresh: refresh) +
+        ExternalIdentifier.item_types(refresh: refresh)
     end
   end
 

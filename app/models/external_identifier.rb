@@ -42,7 +42,9 @@ class ExternalIdentifier < ActiveRecord::Base
 
   # List of item types that can be used to define Classification::GeneralSelection drop downs
   # This does not represent the actual item types that are valid for selection when defining a new external identifier model record
-  def self.item_types
+  def self.item_types(refresh: false)
+    Rails.cache.delete('ExternalIdentifier.item_types') if refresh
+    
     Rails.cache.fetch('ExternalIdentifier.item_types') do
       list = []
 

@@ -249,7 +249,9 @@ class ActivityLog < ActiveRecord::Base
   # List of item types that can be used to define Classification::GeneralSelection drop downs
   # This does not represent the actual item types that are valid for selection when defining a new admin activity log record, which
   # is in fact provided by self.use_with_class_names
-  def self.item_types
+  def self.item_types(refresh: false)
+    Rails.cache.delete('ActivityLog.item_types') if refresh
+
     Rails.cache.fetch('ActivityLog.item_types') do
       list = []
 
