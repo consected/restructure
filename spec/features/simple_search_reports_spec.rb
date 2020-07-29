@@ -16,7 +16,12 @@ describe 'simple search reports', js: true, driver: :app_firefox_driver do
     create_data_set_outside_tx
     create_data_set
     gs = Classification::GeneralSelection.all
-    gs.each { |g| g.current_admin = @admin; g.create_with = true; g.edit_always = true; g.save! }
+    gs.each do |g|
+      g.current_admin = @admin
+      g.create_with = true
+      g.edit_always = true
+      g.save!
+    end
 
     @user, @good_password = create_user
     @good_email = @user.email

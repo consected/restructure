@@ -49,7 +49,7 @@ RSpec.describe ItemFlagsController, type: :controller do
       end
 
       get :index, params: { master_id: @player_info.master_id, item_controller: 'player_infos', item_id: @player_info.id }
-      expect(assigns(objects_symbol)).to eq([item])
+      expect(assigns(objects_symbol)).to include(item)
     end
   end
 

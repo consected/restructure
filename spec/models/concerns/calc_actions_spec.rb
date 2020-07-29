@@ -2294,6 +2294,7 @@ EOF_YAML
   end
 
   it 'handles special cases' do
+    junk_master = Master.create! current_user: @user
     new_al0 = create_item
 
     new_al = create_item
@@ -2321,7 +2322,7 @@ EOF_YAML
         any_ineligible:
           all_basic_questions:
             activity_log__player_contact_phones:
-              extra_log_type: #{new_al.extra_log_type}
+              extra_log_type: primary
             not_all:
               all_phq8_eligible:
                 player_contacts:
@@ -2333,14 +2334,46 @@ EOF_YAML
     conf = YAML.safe_load(confy)
     conf = conf.deep_symbolize_keys
 
-    pc.update! rank: 10
+    expect(new_al.master_id).to eq new_al0.master_id
 
-    pc = new_al0.master.player_contacts.where(rank: 10).first
-    expect(pc).not_to be nil
+    # all:
+    #   not_any:
+    #     activity_log__player_contact_phones:
+    #       extra_log_type: ineligible
+    elts = new_al0.master.activity_log__player_contact_phones.where(extra_log_type: 'ineligible')
+    expect(elts.count).to eq 0
+
+    # all:
+    #   any_ineligible:
+    #     all_basic_questions:
+    #       activity_log__player_contact_phones:
+    #         extra_log_type: primary
+    #       [...]
+    elts = new_al0.master.activity_log__player_contact_phones.where(extra_log_type: 'primary')
+    expect(elts.count).to be > 0
+
+    # all:
+    #   any_ineligible:
+    #     all_basic_questions:
+    #       [...]
+    #       not_all:
+    #         all_phq8_eligible:
+    #           player_contacts:
+    #             rank:
+    #               condition: '<'
+    #               value: 10
+
+    # Ensure there is only one player contact
+    new_al0.master.player_contacts.where.not(id: pc.id).update_all(master_id: junk_master.id)
+
+    pc.update! rank: 10
+    pcs = new_al0.master.player_contacts.where('rank < 10')
+    expect(pcs.count).to eq 0
 
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be true
 
+    ####
     pc.update! rank: 5
     res = ConditionalActions.new conf, new_al0
     expect(res.calc_action_if).to be false
