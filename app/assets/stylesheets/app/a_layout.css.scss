@@ -24,6 +24,11 @@ body {
   }
 }
 
+body.status-compiling {
+  filter: grayscale(100%);
+  opacity: 0.2;
+}
+
 body.page-loading {
   // filter: grayscale(100%);
   // opacity: 0.2;
