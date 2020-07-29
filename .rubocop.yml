@@ -3,21 +3,27 @@ Metrics/LineLength:
   Max: 120
   Include:
     - 'app/**/*'
-    - 'spec/**/*'
+    # - 'spec/**/*'
 
 Metrics/BlockLength:
   Enabled: true
   Max: 50
   Include:
     - 'app/**/*'
-    - 'spec/**/*'
+    # - 'spec/**/*'
+
+Metrics/ModuleLength:
+  Enabled: true
+  Max: 250
+  Include:
+    - 'app/**/*'
 
 Metrics/MethodLength:
   Enabled: true
   Max: 50
   Include:
     - 'app/**/*'
-    - 'spec/**/*'
+    # - 'spec/**/*'
 
 Metrics/ClassLength:
   Enabled: true
@@ -47,4 +53,12 @@ Style/WordArray:
   Enabled: false
 
 Metrics/AbcSize:
+  Enabled: false
+
+Metrics/ParameterLists:
+  Max: 5
+  CountKeywordArgs: false
+
+
+Style/Documentation:
   Enabled: false

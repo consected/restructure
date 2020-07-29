@@ -60,65 +60,69 @@ module AppExceptionHandler
     render plain: flash[level], status: 400
   end
 
-  def db_unique_violation(e)
-    msg = e.message
+  def db_unique_violation(error)
+    msg = error.message
     msg = msg.gsub('  ', ' ').split('DETAIL: Key ').last.gsub('(', ' ').gsub(')', ' ').gsub('_', ' ')
     code = 400
-    return_and_log_error e, msg, code
+    return_and_log_error error, msg, code
   end
 
-  def unhandled_exception_handler(e)
-    msg = "An unexpected error occurred. Contact the administrator if this condition persists. #{e.message}"
+  def unhandled_exception_handler(error)
+    msg = "An unexpected error occurred. Contact the administrator if this condition persists. #{error.message}"
     code = 500
-    return_and_log_error e, msg, code
+    return_and_log_error error, msg, code
   end
 
-  def fphs_app_exception_handler(e)
-    msg = e.message
+  def fphs_app_exception_handler(error)
+    msg = error.message
     code = 400
-    return_and_log_error e, msg, code
+    return_and_log_error error, msg, code
   end
 
-  def user_error_handler(e)
-    msg = e.message
+  def user_error_handler(error)
+    msg = error.message
     code = 400
-    return_and_log_error e, msg, code
+    return_and_log_error error, msg, code
   end
 
-  def runtime_error_handler(e)
-    msg = "A server error occurred. Contact the administrator if this condition persists. #{e.message}"
+  def runtime_error_handler(error)
+    msg = "A server error occurred. Contact the administrator if this condition persists. #{error.message}"
     code = 500
-    return_and_log_error e, msg, code
+    return_and_log_error error, msg, code
   end
 
-  def routing_error_handler(e)
+  def routing_error_handler(error)
     msg = 'The request URL does not exist.'
     code = 404
-    return_and_log_error e, msg, code
+    return_and_log_error error, msg, code
   end
 
-  def bad_auth_token(e)
+  def bad_auth_token(error)
     msg = 'The information could not be submitted. Try returning to the home page to refresh the session.'
     code = 422
-    return_and_log_error e, msg, code
+    return_and_log_error error, msg, code
   end
 
-  def runtime_record_not_found_handler(e)
-    msg = "A database record was not found. Contact the administrator if this condition persists. #{e.message}"
+  def runtime_record_not_found_handler(error)
+    msg = "A database record was not found. Contact the administrator if this condition persists. #{error.message}"
     code = 404
-    return_and_log_error e, msg, code
+    return_and_log_error error, msg, code
   end
 
-  def return_and_log_error(e, msg, code)
-    logger.error e.inspect
-    logger.error e.backtrace.join("\n") if e.backtrace
+  def return_and_log_error(error, msg, code)
+    logger.error error.inspect
+    logger.error error.backtrace.join("\n") if error.backtrace
 
     if code.in? [400, 500]
       user_id = current_user&.id
       admin_id = current_admin&.id
       if Rails.env.production?
-        Admin::ExceptionLog.create message: (msg || 'error'), main: e.inspect, backtrace: e.backtrace.join("\n"), user_id: user_id, admin_id: admin_id
-        end
+        Admin::ExceptionLog.create message: (msg || 'error'),
+                                   main: error.inspect,
+                                   backtrace: error.backtrace.join("\n"),
+                                   user_id: user_id,
+                                   admin_id: admin_id
+      end
     end
 
     if performed?

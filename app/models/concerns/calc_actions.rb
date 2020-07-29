@@ -46,9 +46,9 @@ module CalcActions
       '= ANY', # The value of this field (must be scalar) matches any value from the retrieved array field
       '<> ANY', # The value of this field (must be scalar) must not match any value from the retrieved array field
       '= ARRAY_LENGTH', # The value of this field (must be integer) equals the length of the retrieved array field
-      '<> ARRAY_LENGTH', # The value of this field (must be integer) must not equal the length of the retrieved array field
+      '<> ARRAY_LENGTH', # The value of this field (must be integer) must not equal length of the retrieved array field
       '= LENGTH', # The value of this field (must be integer) equals the length of the string (varchar or text) field
-      '<> LENGTH', # The value of this field (must be integer) must not equal the length of the string (varchar or text) field
+      '<> LENGTH', # The value of this field (must be integer) must not equal length of the string (varchar/text) field
       '&&', # There is an overlap, so any value of this field (an array) must be in the retrieved array field
       '@>', # This array field contains all of the elements of the retrieved array field
       '<@' # This array field's elements are all found in the retrieved array field
@@ -305,15 +305,15 @@ module CalcActions
   #     }
   #   }
   def merge_failures(results)
-    if return_failures && !@skip_merge
-      results.first.last.each do |t, res|
-        if res.is_a?(Hash) && res.first.last && res.first.last.first.first == :validate
-          field = res.first.first
-          results.first.last[t] = { field => new_validator(res.first.last[:validate].first.first, nil, options: {}).message }
-        end
+    return unless return_failures && !@skip_merge
+
+    results.first.last.each do |t, res|
+      if res.is_a?(Hash) && res.first.last && res.first.last.first.first == :validate
+        field = res.first.first
+        results.first.last[t] = { field => new_validator(res.first.last[:validate].first.first, nil, options: {}).message }
       end
-      return_failures.deep_merge!(results)
     end
+    return_failures.deep_merge!(results)
   end
 
   # Generate the query for the @condition_scope.
@@ -333,7 +333,7 @@ module CalcActions
                        else
                          # Conditions are available - apply them as a where clause on top of the base query
                          @base_query.where(conditions)
-                         end
+                       end
 
     # For extra_conditions related to non query conditions, apply them directly
     if extra_conditions.length > 1
@@ -866,7 +866,7 @@ module CalcActions
             # We can add this table to the joins
             @join_tables << join_table_name
 
-            end
+          end
         end
       end
     end
