@@ -8734,37 +8734,6 @@ CREATE FUNCTION ml_app.log_activity_log_player_contact_phone_update() RETURNS tr
 
 
 --
--- Name: log_activity_log_player_contact_phones_update(); Type: FUNCTION; Schema: ml_app; Owner: -
---
-
-CREATE FUNCTION ml_app.log_activity_log_player_contact_phones_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  INSERT INTO activity_log_player_contact_phone_history (
-    master_id,
-    player_contact_id,
-    data, select_call_direction, select_who, called_when, select_result, select_next_step, follow_up_when, notes, protocol_id, set_related_player_contact_rank,
-    extra_log_type,
-    user_id,
-    created_at,
-    updated_at,
-    activity_log_player_contact_phone_id)
-  SELECT
-    NEW.master_id,
-    NEW.player_contact_id,
-    NEW.data, NEW.select_call_direction, NEW.select_who, NEW.called_when, NEW.select_result, NEW.select_next_step, NEW.follow_up_when, NEW.notes, NEW.protocol_id, NEW.set_related_player_contact_rank,
-    NEW.extra_log_type,
-    NEW.user_id,
-    NEW.created_at,
-    NEW.updated_at,
-    NEW.id;
-  RETURN NEW;
-END;
-$$;
-
-
---
 -- Name: log_activity_log_player_info_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -29020,7 +28989,8 @@ CREATE TABLE ml_app.activity_log_player_contact_phones (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     set_related_player_contact_rank character varying,
-    extra_log_type character varying
+    extra_log_type character varying,
+    player_contact_id bigint
 );
 
 
@@ -58919,20 +58889,6 @@ CREATE TRIGGER log_activity_log_bhs_assignment_history_insert AFTER INSERT ON ml
 --
 
 CREATE TRIGGER log_activity_log_bhs_assignment_history_update AFTER UPDATE ON ml_app.activity_log_bhs_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_bhs_assignments_update();
-
-
---
--- Name: log_activity_log_player_contact_phone_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER log_activity_log_player_contact_phone_history_insert AFTER INSERT ON ml_app.activity_log_player_contact_phones FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_player_contact_phones_update();
-
-
---
--- Name: log_activity_log_player_contact_phone_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER log_activity_log_player_contact_phone_history_update AFTER UPDATE ON ml_app.activity_log_player_contact_phones FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_player_contact_phones_update();
 
 
 --

@@ -263,7 +263,8 @@ class ExternalIdentifier < ActiveRecord::Base
     end
   end
 
-  def generator_script(mode = 'create', added = nil, removed = nil)
+  def generator_script(version, mode = 'create', added = nil, removed = nil)
+    cname = "#{mode}_#{table_name}_#{version}".camelize
     ftype = (alphanumeric? ? 'string' : 'bigint')
     do_create_or_update = if mode == 'create'
                             "create_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
@@ -277,7 +278,7 @@ class ExternalIdentifier < ActiveRecord::Base
 
     <<~CONTENT
       require 'active_record/migration/app_generator'
-      class #{mode.capitalize}#{table_name.camelize} < ActiveRecord::Migration[5.2]
+      class #{cname} < ActiveRecord::Migration[5.2]
         include ActiveRecord::Migration::AppGenerator
 
         def change

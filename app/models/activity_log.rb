@@ -532,7 +532,8 @@ class ActivityLog < ActiveRecord::Base
     @regenerate = res
   end
 
-  def generator_script(mode = 'create', added = nil, removed = nil)
+  def generator_script(version, mode = 'create', added = nil, removed = nil)
+    cname = "#{mode}_#{table_name}_#{version}".camelize
     do_create_or_update = if mode == 'create'
                             'create_activity_log_tables'
                           else
@@ -545,7 +546,7 @@ class ActivityLog < ActiveRecord::Base
 
     <<~CONTENT
       require 'active_record/migration/app_generator'
-      class #{mode.capitalize}#{table_name.camelize} < ActiveRecord::Migration[5.2]
+      class #{cname} < ActiveRecord::Migration[5.2]
         include ActiveRecord::Migration::AppGenerator
 
         def change

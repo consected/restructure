@@ -294,8 +294,9 @@ module DynamicModelDefHandler
 
       unless !disabled? && ready?
 
-        gs = generator_script
-        fn = write_db_migration gs
+        version = DateTime.now.to_i.to_s(36)
+        gs = generator_script(version)
+        fn = write_db_migration(gs, version)
 
         err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created.
 
@@ -359,8 +360,9 @@ module DynamicModelDefHandler
     removed = old_colnames - new_colnames
 
     if added.present? || removed.present?
-      gs = generator_script('update', added, removed)
-      write_db_migration gs, mode: 'update'
+      version = DateTime.now.to_i.to_s(36)
+      gs = generator_script(version, 'update', added, removed)
+      write_db_migration gs, version, mode: 'update'
     end
   end
 
@@ -379,11 +381,12 @@ module DynamicModelDefHandler
     "db/app_migrations/#{db_migration_schema}"
   end
 
-  def write_db_migration(mig_text, mode: 'create')
+  def write_db_migration(mig_text, version, mode: 'create')
     return if Rails.env.test?
 
     dirname = "db/app_migrations/#{db_migration_schema}"
-    fn = "#{dirname}/#{Time.new.to_s(:number)}_#{mode}_#{table_name}.rb"
+    cname_us = "#{mode}_#{table_name}_#{version}"
+    fn = "#{dirname}/#{Time.new.to_s(:number)}_#{cname_us}.rb"
     FileUtils.mkdir_p dirname
     File.write(fn, mig_text)
     fn
