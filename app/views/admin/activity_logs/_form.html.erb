@@ -59,7 +59,10 @@
     </div>
     <div class="form-group" style="vertical-align: top">
       <label>Extra Log Options</label>
-      <% example = {'extras_log_type_name' => ExtraLogType.attr_defs.deep_stringify_keys} %>
+      <% 
+      example = ExtraOptions.top_level_defs
+      example = example.merge('extras_log_type_name' => ExtraLogType.attr_defs.deep_stringify_keys)
+      %>
       <div style="width: 800px; height: 80vh;">
         <textarea style="font-size: 12px" class="extra-help-info">
   <%= example.to_yaml %>

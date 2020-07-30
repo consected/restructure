@@ -8,7 +8,8 @@ module ActiveRecord
       included do
         attr_accessor :fields, :new_fields, :field_defs,
                       :field_opts, :schema, :owner, :table_name,
-                      :belongs_to_model, :history_table_name, :trigger_fn_name
+                      :belongs_to_model, :history_table_name, :trigger_fn_name,
+                      :table_comment, :fields_comments, :mode
       end
 
       def create_schema
@@ -29,7 +30,7 @@ module ActiveRecord
 
         self.belongs_to_model = belongs_to_model.to_s.underscore
 
-        create_table "#{schema}.#{table_name}" do |t|
+        create_table "#{schema}.#{table_name}", comment: table_comment do |t|
           t.belongs_to :master, index: { name: "al_#{belongs_to_model.singularize}_master_id_idx" }, foreign_key: true
           t.belongs_to belongs_to_model, index: { name: "al_#{belongs_to_model.singularize}_id_idx" }, foreign_key: true
           create_fields t
@@ -58,7 +59,7 @@ module ActiveRecord
             ActiveRecord::Base.connection.execute activity_log_trigger_sql
           end
           dir.down do
-            ActiveRecord::Base.connection.execute drop_activity_log_trigger_sql
+            ActiveRecord::Base.connection.execute reverse_activity_log_trigger_sql
           end
         end
       end
@@ -66,7 +67,7 @@ module ActiveRecord
       def create_dynamic_model_tables
         setup_fields
 
-        create_table "#{schema}.#{table_name}" do |t|
+        create_table "#{schema}.#{table_name}", comment: table_comment do |t|
           t.belongs_to :master, index: true, foreign_key: true
           create_fields t
           t.references :user, index: true, foreign_key: true
@@ -91,7 +92,7 @@ module ActiveRecord
             ActiveRecord::Base.connection.execute dynamic_model_trigger_sql
           end
           dir.down do
-            ActiveRecord::Base.connection.execute drop_dynamic_model_trigger_sql
+            ActiveRecord::Base.connection.execute reverse_dynamic_model_trigger_sql
           end
         end
       end
@@ -103,7 +104,7 @@ module ActiveRecord
 
         field_defs[id_field] = id_field_type
 
-        create_table "#{schema}.#{table_name}" do |t|
+        create_table "#{schema}.#{table_name}", comment: table_comment do |t|
           t.belongs_to :master, index: true, foreign_key: true
           create_fields t
           t.references :user, index: true, foreign_key: true
@@ -132,26 +133,47 @@ module ActiveRecord
             ActiveRecord::Base.connection.execute external_identifier_trigger_sql
           end
           dir.down do
-            ActiveRecord::Base.connection.execute drop_external_identifier_trigger_sql
+            ActiveRecord::Base.connection.execute reverse_external_identifier_trigger_sql
           end
         end
       end
 
       def update_fields
+        self.mode = :update
         setup_fields
         cols = ActiveRecord::Base.connection.columns("#{schema}.#{table_name}")
+        old_table_comment = ActiveRecord::Base.connection.table_comment(table_name)
+
         old_colnames = cols.map(&:name) - standard_columns
         new_colnames = fields.map(&:to_s) - standard_columns
-
         added = new_colnames - old_colnames
         removed = old_colnames - new_colnames
 
+        self.fields_comments ||= {}
+        commented_colnames = fields_comments.keys.map(&:to_s)
+        changed = commented_colnames - added - removed
+
+        change_table_comment("#{schema}.#{table_name}", table_comment) if old_table_comment != table_comment
+
         added.each do |c|
-          add_column "#{schema}.#{table_name}", c, field_defs[c.to_sym]
+          options = {}
+          comment = fields_comments[c.to_sym]
+          options[:comment] = comment if comment.present?
+          add_column "#{schema}.#{table_name}", c, field_defs[c.to_sym], options
         end
 
         removed.each do |c|
           remove_column "#{schema}.#{table_name}", c
+        end
+
+        changed.each do |c|
+          next unless fields_comments.key?(c.to_sym)
+
+          col = cols.select { |csel| csel.name == c }.first
+          new_comment = fields_comments[c.to_sym]
+          next if col.comment == new_comment
+
+          change_column_comment "#{schema}.#{table_name}", c, new_comment
         end
       end
 
@@ -165,6 +187,7 @@ module ActiveRecord
       end
 
       def setup_fields
+        self.fields_comments ||= {}
         return if field_opts
 
         fields.reject! { |a| a.to_s.index(/^placeholder_|^tracker_history_id$/) }
@@ -178,6 +201,7 @@ module ActiveRecord
         fields.each do |attr_name|
           a = attr_name.to_s
           f = :string
+          fopts = nil
           if a == 'created_by_user_id'
             attr_name = :created_by_user
             f = :references
@@ -198,6 +222,14 @@ module ActiveRecord
             f = :integer
           end
           field_defs[attr_name] = f
+
+          # Add in a field comment if one is defined
+          comment = fields_comments[attr_name.to_sym]
+          if comment
+            fopts ||= {}
+            fopts[:comment] = comment
+          end
+
           field_opts[attr_name] = fopts
         end
       end
@@ -222,6 +254,14 @@ module ActiveRecord
             add_column(tbl, attr_name, f)
           end
         end
+      end
+
+      def updating?
+        mode == :update
+      end
+
+      def creating?
+        !updating?
       end
 
       def activity_log_trigger_sql
@@ -272,8 +312,12 @@ module ActiveRecord
         EOF
       end
 
-      def drop_activity_log_trigger_sql
-        "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+      def reverse_activity_log_trigger_sql
+        if updating?
+          activity_log_trigger_sql
+        else
+          "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+        end
       end
 
       def dynamic_model_trigger_sql
@@ -319,8 +363,12 @@ module ActiveRecord
         EOF
       end
 
-      def drop_dynamic_model_trigger_sql
-        "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+      def reverse_dynamic_model_trigger_sql
+        if updating?
+          dynamic_model_trigger_sql
+        else
+          "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+        end
       end
 
       def external_identifier_trigger_sql
@@ -368,8 +416,12 @@ module ActiveRecord
         EOF
       end
 
-      def drop_external_identifier_trigger_sql
-        "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+      def reverse_external_identifier_trigger_sql
+        if updating?
+          external_identifier_trigger_sql
+        else
+          "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+        end
       end
     end
   end

@@ -25,6 +25,22 @@ class ExtraOptions
 
   attr_accessor(*key_attributes)
 
+  def self.top_level_defs
+    {
+      '_' => '#@library category name',
+      '_comments' => {
+        'table' => 'describe the table',
+        'fields' => {
+          'field1' => 'describe the field',
+          'field2' => '...'
+        }
+      },
+      '_definitions' => {
+        'reusable_key' => '&anchor resusable objects for substitution in definitions'
+      }
+    }
+  end
+
   def self.attr_defs
     attr_for_conditions_marker = 'ref: ** conditions reference **'
     {
@@ -309,6 +325,8 @@ class ExtraOptions
       set_defaults config_obj, res
 
       opt_default = res.delete(:_default)
+
+      config_obj.table_comments = res.delete(:_comments)
 
       res.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
 

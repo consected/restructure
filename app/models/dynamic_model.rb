@@ -297,16 +297,12 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
-  def generator_script(version, mode = 'create', added = nil, removed = nil)
+  def generator_script(version, mode = 'create')
     cname = "#{mode}_#{table_name}_#{version}".camelize
     do_create_or_update = if mode == 'create'
                             'create_dynamic_model_tables'
                           else
-                            <<~ARCONTENT
-                              \# added: #{added}
-                                  \# removed: #{removed}
-                                  update_fields
-                            ARCONTENT
+                            migration_update_fields
                           end
 
     <<~CONTENT
@@ -315,9 +311,7 @@ class DynamicModel < ActiveRecord::Base
         include ActiveRecord::Migration::AppGenerator
 
         def change
-          self.schema = '#{db_migration_schema}'
-          self.table_name = '#{table_name}'
-          self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
+          #{migration_set_attribs}
 
           #{do_create_or_update}
           create_dynamic_model_trigger

@@ -44,7 +44,7 @@ class ExternalIdentifier < ActiveRecord::Base
   # This does not represent the actual item types that are valid for selection when defining a new external identifier model record
   def self.item_types(refresh: false)
     Rails.cache.delete('ExternalIdentifier.item_types') if refresh
-    
+
     Rails.cache.fetch('ExternalIdentifier.item_types') do
       list = []
 
@@ -265,17 +265,13 @@ class ExternalIdentifier < ActiveRecord::Base
     end
   end
 
-  def generator_script(version, mode = 'create', added = nil, removed = nil)
+  def generator_script(version, mode = 'create')
     cname = "#{mode}_#{table_name}_#{version}".camelize
     ftype = (alphanumeric? ? 'string' : 'bigint')
     do_create_or_update = if mode == 'create'
                             "create_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
                           else
-                            <<~ARCONTENT
-                              \# added: #{added}
-                                  \# removed: #{removed}
-                                  update_fields
-                            ARCONTENT
+                            migration_update_fields
                           end
 
     <<~CONTENT
@@ -284,9 +280,7 @@ class ExternalIdentifier < ActiveRecord::Base
         include ActiveRecord::Migration::AppGenerator
 
         def change
-          self.schema = '#{db_migration_schema}'
-          self.table_name = '#{table_name}'
-          self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
+          #{migration_set_attribs}
 
           #{do_create_or_update}
           create_external_identifier_trigger :#{external_id_attribute}

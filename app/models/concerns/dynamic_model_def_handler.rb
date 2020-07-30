@@ -6,6 +6,8 @@ module DynamicModelDefHandler
   DefaultMigrationSchema = Settings::DefaultMigrationSchema
 
   included do
+    attr_accessor :table_comments
+
     after_save :generate_model
     after_save :check_implementation_class
     # Reload the routes based on specific controller actions, to allow app type uploads to work faster
@@ -346,9 +348,37 @@ module DynamicModelDefHandler
     pset
   end
 
-  def generate_migration
-    return unless ready?
+  def table_comment_changes
+    begin
+      comment = ActiveRecord::Base.connection.table_comment(table_name)
+    rescue StandardError
+      nil
+    end
+    new_comment = table_comments[:table]
+    return unless comment != new_comment
 
+    new_comment
+  end
+
+  def fields_comments_changes
+    begin
+      cols = ActiveRecord::Base.connection.columns(table_name)
+    rescue StandardError
+      return
+    end
+
+    fields_comments = table_comments[:fields] || {}
+    new_comments = {}
+
+    fields_comments.each do |k, v|
+      col = cols.select { |c| c.name == k.to_s }.first
+      new_comments[k] = v if col && col.comment != v
+    end
+
+    new_comments
+  end
+
+  def field_changes
     begin
       cols = ActiveRecord::Base.connection.columns(table_name)
       old_colnames = cols.map(&:name) - standard_columns
@@ -362,11 +392,49 @@ module DynamicModelDefHandler
     added = new_colnames - old_colnames
     removed = old_colnames - new_colnames
 
-    if added.present? || removed.present?
-      version = DateTime.now.to_i.to_s(36)
-      gs = generator_script(version, 'update', added, removed)
-      write_db_migration gs, version, mode: 'update'
+    [added, removed]
+  end
+
+  def migration_update_fields
+    added, removed = field_changes
+
+    if table_comments
+      new_table_comment = table_comment_changes
+      new_fields_comments = fields_comments_changes
     end
+
+    return unless added.present? || removed.present? || new_table_comment || new_fields_comments.present?
+
+    new_fields_comments ||= {}
+
+    <<~ARCONTENT
+      \# added: #{added}
+          \# removed: #{removed}
+          #{new_table_comment ? "\# new table comment: #{new_table_comment}" : ''}
+          #{new_fields_comments.present? ? "\# new fields comments: #{new_fields_comments}" : ''}
+          update_fields
+    ARCONTENT
+  end
+
+  def migration_set_attribs
+    table_comments = self.table_comments || {}
+    <<~SETATRRIBS
+      self.schema = '#{db_migration_schema}'
+          self.table_name = '#{table_name}'
+          self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
+          self.table_comment = '#{table_comments[:table]}'
+          self.fields_comments = #{(table_comments[:fields] || {}).to_json}
+    SETATRRIBS
+  end
+
+  def generate_migration
+    return unless ready?
+
+    return unless migration_update_fields
+
+    version = DateTime.now.to_i.to_s(36)
+    gs = generator_script(version, 'update')
+    write_db_migration gs, version, mode: 'update'
   end
 
   # A DB migration schema is either the schema of the currrent app,
@@ -384,8 +452,9 @@ module DynamicModelDefHandler
     "db/app_migrations/#{db_migration_schema}"
   end
 
+  # Write a schema-specific migration only if we are in a development mode
   def write_db_migration(mig_text, version, mode: 'create')
-    return if Rails.env.test?
+    return unless Rails.env.development?
 
     dirname = "db/app_migrations/#{db_migration_schema}"
     cname_us = "#{mode}_#{table_name}_#{version}"
