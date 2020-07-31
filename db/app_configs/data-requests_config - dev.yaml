@@ -1,969 +1,989 @@
 ---
 app_type:
-  id: 23
+  id: 42
   name: data-requests
   label: Data Requests
   disabled: false
-  admin_id: 2
-  created_at: '2020-07-14T12:54:16.459Z'
-  updated_at: '2020-07-14T12:54:16.459Z'
+  admin_id: 21
+  created_at: '2020-05-19T09:00:05.103Z'
+  updated_at: '2020-07-27T13:24:32.573Z'
   default_schema_name: data_requests
   app_configurations:
-  - id: 357
+  - id: 532
     name: hide player tabs
     value: 'true'
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.475Z'
-    updated_at: '2020-07-14T12:54:16.475Z'
+    created_at: '2020-05-19T11:17:56.345Z'
+    updated_at: '2020-05-19T11:17:56.345Z'
     user_email: 
-  - id: 358
+  - id: 533
     name: master header prefix
     value: "{{dynamic_model__data_requests.status::titleize}} Data Request: **{{dynamic_model__data_requests.project_title}}**"
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.493Z'
-    updated_at: '2020-07-14T12:54:16.493Z'
+    created_at: '2020-05-19T11:18:52.902Z'
+    updated_at: '2020-07-08T16:04:27.078Z'
     user_email: 
-  - id: 359
+  - id: 534
     name: hide navbar search
     value: 'true'
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.501Z'
-    updated_at: '2020-07-14T12:54:16.501Z'
+    created_at: '2020-05-19T11:19:05.118Z'
+    updated_at: '2020-05-19T11:19:05.118Z'
     user_email: 
-  - id: 360
+  - id: 535
     name: hide search form advanced
     value: 'true'
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.510Z'
-    updated_at: '2020-07-14T12:54:16.510Z'
+    created_at: '2020-05-19T11:19:19.739Z'
+    updated_at: '2020-05-19T11:19:19.739Z'
     user_email: 
-  - id: 361
+  - id: 536
     name: hide search form simple
     value: 'true'
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.518Z'
-    updated_at: '2020-07-14T12:54:16.518Z'
+    created_at: '2020-05-19T11:19:30.061Z'
+    updated_at: '2020-05-19T11:19:30.061Z'
     user_email: 
-  - id: 362
+  - id: 537
     name: hide tracker panel
     value: 'true'
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.527Z'
-    updated_at: '2020-07-14T12:54:16.527Z'
+    created_at: '2020-05-19T11:19:37.521Z'
+    updated_at: '2020-05-19T11:19:37.521Z'
     user_email: 
-  - id: 363
+  - id: 538
     name: menu research label
     value: Data Requests
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.535Z'
-    updated_at: '2020-07-14T12:54:16.535Z'
+    created_at: '2020-05-19T11:20:33.276Z'
+    updated_at: '2020-05-19T11:20:33.276Z'
     user_email: 
-  - id: 364
+  - id: 539
+    name: hide search form searchable reports
+    value: 'true'
+    disabled: true
+    admin_id: 21
+    user_id: 
+    app_type_id: 42
+    role_name: ''
+    created_at: '2020-05-19T11:21:52.611Z'
+    updated_at: '2020-05-19T11:35:19.600Z'
+    user_email: 
+  - id: 540
     name: default search form
     value: data_requests__data_requests
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.543Z'
-    updated_at: '2020-07-14T12:54:16.543Z'
+    created_at: '2020-05-19T11:29:03.837Z'
+    updated_at: '2020-07-08T09:49:55.573Z'
     user_email: 
-  - id: 365
+  - id: 541
     name: hide pro info
     value: 'true'
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.550Z'
-    updated_at: '2020-07-14T12:54:16.550Z'
+    created_at: '2020-05-19T11:35:01.136Z'
+    updated_at: '2020-05-19T11:35:01.136Z'
     user_email: 
-  - id: 366
+  - id: 542
     name: show ids in master result
     value: none
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.558Z'
-    updated_at: '2020-07-14T12:54:16.558Z'
+    created_at: '2020-05-19T11:36:16.069Z'
+    updated_at: '2020-07-07T15:40:01.497Z'
     user_email: 
-  - id: 367
+  - id: 543
+    name: open panels
+    value: data requests
+    disabled: true
+    admin_id: 21
+    user_id: 
+    app_type_id: 42
+    role_name: ''
+    created_at: '2020-05-19T13:23:11.393Z'
+    updated_at: '2020-05-19T13:29:24.690Z'
+    user_email: 
+  - id: 544
     name: notes field format
     value: markdown
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.566Z'
-    updated_at: '2020-07-14T12:54:16.566Z'
+    created_at: '2020-07-01T16:35:02.320Z'
+    updated_at: '2020-07-01T16:35:02.320Z'
     user_email: 
-  - id: 368
+  - id: 545
     name: create master with
     value: activity_log__data_request_assignments
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.574Z'
-    updated_at: '2020-07-14T12:54:16.574Z'
+    created_at: '2020-07-07T11:31:57.319Z'
+    updated_at: '2020-07-07T12:22:09.257Z'
     user_email: 
-  - id: 369
+  - id: 546
     name: header no subject details label
     value: none
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.582Z'
-    updated_at: '2020-07-14T12:54:16.582Z'
+    created_at: '2020-07-07T15:35:17.162Z'
+    updated_at: '2020-07-07T15:40:34.983Z'
     user_email: 
-  - id: 370
+  - id: 547
+    name: default report tab
+    value: data_requests__data_requests
+    disabled: true
+    admin_id: 21
+    user_id: 
+    app_type_id: 42
+    role_name: ''
+    created_at: '2020-07-08T09:07:13.846Z'
+    updated_at: '2020-07-08T09:12:15.043Z'
+    user_email: 
+  - id: 548
     name: show search form on single result
     value: 'true'
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.590Z'
-    updated_at: '2020-07-14T12:54:16.590Z'
+    created_at: '2020-07-08T09:34:45.969Z'
+    updated_at: '2020-07-08T09:34:45.969Z'
     user_email: 
-  - id: 371
+  - id: 549
     name: prevent reload master list
     value: 'true'
     disabled: false
-    admin_id: 2
+    admin_id: 21
     user_id: 
-    app_type_id: 23
+    app_type_id: 42
     role_name: ''
-    created_at: '2020-07-14T12:54:16.598Z'
-    updated_at: '2020-07-14T12:54:16.598Z'
+    created_at: '2020-07-08T13:30:22.096Z'
+    updated_at: '2020-07-08T13:30:22.096Z'
     user_email: 
   valid_user_access_controls:
-  - id: 1714
+  - id: 2322
     user_id: 
     resource_type: general
     resource_name: app_type
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.853Z'
-    updated_at: '2020-07-14T12:54:17.853Z'
+    created_at: '2020-05-19T09:02:08.620Z'
+    updated_at: '2020-05-19T11:32:40.319Z'
     user_email: 
-  - id: 1715
+  - id: 2326
     user_id: 
     resource_type: table
     resource_name: data_request_assignments
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.861Z'
-    updated_at: '2020-07-14T12:54:17.861Z'
+    created_at: '2020-05-19T10:07:24.581Z'
+    updated_at: '2020-05-19T11:33:11.848Z'
     user_email: 
-  - id: 1716
+  - id: 2327
     user_id: 
     resource_type: table
     resource_name: activity_log__data_request_assignments
     options: 
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: _app_
-    created_at: '2020-07-14T12:54:17.869Z'
-    updated_at: '2020-07-14T12:54:17.869Z'
+    created_at: '2020-05-19T10:28:43.203Z'
+    updated_at: '2020-05-19T10:28:43.203Z'
     user_email: 
-  - id: 1717
+  - id: 2328
     user_id: 
     resource_type: report
     resource_name: data_requests__data_requests
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.877Z'
-    updated_at: '2020-07-14T12:54:17.877Z'
+    created_at: '2020-05-19T11:29:52.078Z'
+    updated_at: '2020-05-19T11:32:47.972Z'
     user_email: 
-  - id: 1718
+  - id: 2329
     user_id: 
     resource_type: table
     resource_name: activity_log__data_request_assignments
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.884Z'
-    updated_at: '2020-07-14T12:54:17.884Z'
+    created_at: '2020-05-19T11:43:08.286Z'
+    updated_at: '2020-05-19T11:43:08.286Z'
     user_email: 
-  - id: 1719
+  - id: 2330
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__request
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.893Z'
-    updated_at: '2020-07-14T12:54:17.893Z'
+    created_at: '2020-05-19T11:43:43.251Z'
+    updated_at: '2020-05-19T11:43:43.251Z'
     user_email: 
-  - id: 1720
+  - id: 2331
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__submit_request
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.901Z'
-    updated_at: '2020-07-14T12:54:17.901Z'
+    created_at: '2020-05-19T13:15:57.900Z'
+    updated_at: '2020-05-19T13:15:57.900Z'
     user_email: 
-  - id: 1721
+  - id: 2332
     user_id: 
     resource_type: table
     resource_name: dynamic_model__data_requests
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.909Z'
-    updated_at: '2020-07-14T12:54:17.909Z'
+    created_at: '2020-05-19T13:39:28.640Z'
+    updated_at: '2020-05-19T13:39:28.640Z'
     user_email: 
-  - id: 1722
+  - id: 2333
     user_id: 
     resource_type: table
     resource_name: trackers
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.917Z'
-    updated_at: '2020-07-14T12:54:17.917Z'
+    created_at: '2020-05-19T14:23:30.636Z'
+    updated_at: '2020-05-19T14:23:30.636Z'
     user_email: 
-  - id: 1723
+  - id: 2334
     user_id: 
     resource_type: table
     resource_name: dynamic_model__data_request_attribs
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.925Z'
-    updated_at: '2020-07-14T12:54:17.925Z'
+    created_at: '2020-05-19T14:49:32.130Z'
+    updated_at: '2020-05-19T14:49:32.130Z'
     user_email: 
-  - id: 1724
+  - id: 2336
     user_id: 
     resource_type: report
     resource_name: data_requests__select_data_attributes_q2
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.934Z'
-    updated_at: '2020-07-14T12:54:17.934Z'
+    created_at: '2020-05-21T13:11:24.942Z'
+    updated_at: '2020-05-21T13:11:24.942Z'
     user_email: 
-  - id: 1725
+  - id: 2337
     user_id: 
     resource_type: general
     resource_name: view_reports
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.942Z'
-    updated_at: '2020-07-14T12:54:17.942Z'
+    created_at: '2020-05-21T18:21:16.710Z'
+    updated_at: '2020-05-21T18:21:16.710Z'
     user_email: 
-  - id: 1726
+  - id: 2338
     user_id: 
     resource_type: table
     resource_name: dynamic_model__data_requests_selected_attribs
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.950Z'
-    updated_at: '2020-07-14T12:54:17.950Z'
+    created_at: '2020-05-22T12:43:40.336Z'
+    updated_at: '2020-05-22T12:43:40.336Z'
     user_email: 
-  - id: 1727
+  - id: 2339
     user_id: 
     resource_type: general
     resource_name: print
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: admin
-    created_at: '2020-07-14T12:54:17.958Z'
-    updated_at: '2020-07-14T12:54:17.958Z'
+    created_at: '2020-05-27T15:00:26.332Z'
+    updated_at: '2020-05-27T15:00:26.332Z'
     user_email: 
-  - id: 1728
+  - id: 2340
     user_id: 
     resource_type: table
     resource_name: dynamic_model__data_request_initial_reviews
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: reviewer - initial review
-    created_at: '2020-07-14T12:54:17.969Z'
-    updated_at: '2020-07-14T12:54:17.969Z'
+    created_at: '2020-05-28T18:52:37.571Z'
+    updated_at: '2020-05-28T18:52:37.571Z'
     user_email: 
-  - id: 1729
+  - id: 2341
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__initial_review
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: reviewer - initial review
-    created_at: '2020-07-14T12:54:17.977Z'
-    updated_at: '2020-07-14T12:54:17.977Z'
+    created_at: '2020-05-28T18:53:17.088Z'
+    updated_at: '2020-05-28T18:53:17.088Z'
     user_email: 
-  - id: 1730
+  - id: 2342
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__initial_review
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.984Z'
-    updated_at: '2020-07-14T12:54:17.984Z'
+    created_at: '2020-05-28T18:53:25.025Z'
+    updated_at: '2020-05-28T18:53:25.025Z'
     user_email: 
-  - id: 1731
+  - id: 2343
     user_id: 
     resource_type: table
     resource_name: dynamic_model__data_request_initial_reviews
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:17.992Z'
-    updated_at: '2020-07-14T12:54:17.992Z'
+    created_at: '2020-05-28T18:53:53.126Z'
+    updated_at: '2020-05-28T18:53:53.126Z'
     user_email: 
-  - id: 1732
+  - id: 2344
     user_id: 
     resource_type: report
     resource_name: data_requests__selected_data_attributes_all
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.000Z'
-    updated_at: '2020-07-14T12:54:18.000Z'
+    created_at: '2020-05-29T16:24:20.375Z'
+    updated_at: '2020-06-08T12:59:26.859Z'
     user_email: 
-  - id: 1733
+  - id: 2346
     user_id: 
     resource_type: table
     resource_name: dynamic_model__data_request_messages
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.010Z'
-    updated_at: '2020-07-14T12:54:18.010Z'
+    created_at: '2020-06-08T13:59:16.841Z'
+    updated_at: '2020-06-09T09:11:03.150Z'
     user_email: 
-  - id: 1734
+  - id: 2349
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__send_message
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.018Z'
-    updated_at: '2020-07-14T12:54:18.018Z'
+    created_at: '2020-06-08T14:56:16.375Z'
+    updated_at: '2020-06-09T09:10:30.830Z'
     user_email: 
-  - id: 1735
+  - id: 2352
     user_id: 
     resource_type: table
-    resource_name: dynamic_model__q2_datadic
+    resource_name: dynamic_model__q2_rc_codebook
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.026Z'
-    updated_at: '2020-07-14T15:32:04.939Z'
+    created_at: '2020-06-08T15:00:07.593Z'
+    updated_at: '2020-07-09T09:12:20.754Z'
     user_email: 
-  - id: 1736
+  - id: 2353
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__initial_review_approved
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: reviewer - initial review
-    created_at: '2020-07-14T12:54:18.033Z'
-    updated_at: '2020-07-14T12:54:18.033Z'
+    created_at: '2020-06-09T14:21:30.414Z'
+    updated_at: '2020-06-09T14:21:30.414Z'
     user_email: 
-  - id: 1737
+  - id: 2354
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__initial_review_not_approved
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: reviewer - initial review
-    created_at: '2020-07-14T12:54:18.041Z'
-    updated_at: '2020-07-14T12:54:18.041Z'
+    created_at: '2020-06-09T14:21:36.710Z'
+    updated_at: '2020-06-09T14:21:36.710Z'
     user_email: 
-  - id: 1738
+  - id: 2355
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__initial_review_not_approved
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.051Z'
-    updated_at: '2020-07-14T12:54:18.051Z'
+    created_at: '2020-06-09T14:21:46.158Z'
+    updated_at: '2020-06-09T14:21:46.158Z'
     user_email: 
-  - id: 1739
+  - id: 2356
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__initial_review_approved
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.059Z'
-    updated_at: '2020-07-14T12:54:18.059Z'
+    created_at: '2020-06-09T14:22:00.532Z'
+    updated_at: '2020-06-09T14:22:00.532Z'
     user_email: 
-  - id: 1740
+  - id: 2360
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__supporting_files
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.067Z'
-    updated_at: '2020-07-14T12:54:18.067Z'
+    created_at: '2020-06-22T14:17:38.792Z'
+    updated_at: '2020-06-22T14:17:38.792Z'
     user_email: 
-  - id: 1741
+  - id: 2361
     user_id: 
     resource_type: general
     resource_name: view_files_as_image
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.075Z'
-    updated_at: '2020-07-14T12:54:18.075Z'
+    created_at: '2020-06-22T14:18:28.242Z'
+    updated_at: '2020-06-22T14:18:28.242Z'
     user_email: 
-  - id: 1742
+  - id: 2362
     user_id: 
     resource_type: table
     resource_name: nfs_store__manage__containers
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.082Z'
-    updated_at: '2020-07-14T12:54:18.082Z'
+    created_at: '2020-06-22T14:19:37.351Z'
+    updated_at: '2020-06-22T14:19:37.351Z'
     user_email: 
-  - id: 1743
+  - id: 2363
     user_id: 
     resource_type: table
     resource_name: nfs_store__manage__stored_files
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.090Z'
-    updated_at: '2020-07-14T12:54:18.090Z'
+    created_at: '2020-06-22T14:19:50.097Z'
+    updated_at: '2020-06-22T14:19:50.097Z'
     user_email: 
-  - id: 1744
+  - id: 2364
     user_id: 
     resource_type: table
     resource_name: nfs_store__manage__archived_files
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.097Z'
-    updated_at: '2020-07-14T12:54:18.097Z'
+    created_at: '2020-06-22T14:19:59.084Z'
+    updated_at: '2020-06-22T14:19:59.084Z'
     user_email: 
-  - id: 1745
+  - id: 2365
     user_id: 
     resource_type: general
     resource_name: download_files
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.109Z'
-    updated_at: '2020-07-14T12:54:18.109Z'
+    created_at: '2020-06-22T15:35:11.642Z'
+    updated_at: '2020-06-22T15:35:11.642Z'
     user_email: 
-  - id: 1746
+  - id: 2366
     user_id: 
     resource_type: general
     resource_name: send_files_to_trash
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: reviewer - initial review
-    created_at: '2020-07-14T12:54:18.117Z'
-    updated_at: '2020-07-14T12:54:18.117Z'
+    created_at: '2020-06-22T15:35:55.102Z'
+    updated_at: '2020-06-22T15:35:55.102Z'
     user_email: 
-  - id: 1747
+  - id: 2367
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__request_approved
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.125Z'
-    updated_at: '2020-07-14T12:54:18.125Z'
+    created_at: '2020-06-22T16:27:02.983Z'
+    updated_at: '2020-06-22T16:27:02.983Z'
     user_email: 
-  - id: 1748
+  - id: 2376
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__request_rejected
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.133Z'
-    updated_at: '2020-07-14T12:54:18.133Z'
+    created_at: '2020-06-30T17:22:20.159Z'
+    updated_at: '2020-06-30T17:22:20.159Z'
     user_email: 
-  - id: 1749
+  - id: 2377
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__initial_review
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: admin
-    created_at: '2020-07-14T12:54:18.141Z'
-    updated_at: '2020-07-14T12:54:18.141Z'
+    created_at: '2020-07-07T09:28:01.030Z'
+    updated_at: '2020-07-07T09:28:01.030Z'
     user_email: 
-  - id: 1750
+  - id: 2378
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__initial_review_approved
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: admin
-    created_at: '2020-07-14T12:54:18.149Z'
-    updated_at: '2020-07-14T12:54:18.149Z'
+    created_at: '2020-07-07T09:28:28.111Z'
+    updated_at: '2020-07-07T09:28:28.111Z'
     user_email: 
-  - id: 1751
+  - id: 2379
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__do_review_data_repo_pi
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: admin
-    created_at: '2020-07-14T12:54:18.161Z'
-    updated_at: '2020-07-14T12:54:18.161Z'
+    created_at: '2020-07-07T10:22:49.941Z'
+    updated_at: '2020-07-07T10:22:49.941Z'
     user_email: 
-  - id: 1752
+  - id: 2380
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__do_review_ipa_pi
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: admin
-    created_at: '2020-07-14T12:54:18.171Z'
-    updated_at: '2020-07-14T12:54:18.171Z'
+    created_at: '2020-07-07T10:22:58.302Z'
+    updated_at: '2020-07-07T10:22:58.302Z'
     user_email: 
-  - id: 1753
+  - id: 2381
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__data_prep
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: admin
-    created_at: '2020-07-14T12:54:18.180Z'
-    updated_at: '2020-07-14T12:54:18.180Z'
+    created_at: '2020-07-07T10:34:25.215Z'
+    updated_at: '2020-07-07T10:34:25.215Z'
     user_email: 
-  - id: 1754
+  - id: 2382
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__data_prep
     options: ''
     access: update
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: data prep
-    created_at: '2020-07-14T12:54:18.188Z'
-    updated_at: '2020-07-14T12:54:18.188Z'
+    created_at: '2020-07-07T10:34:42.179Z'
+    updated_at: '2020-07-07T10:34:42.179Z'
     user_email: 
-  - id: 1755
+  - id: 2385
     user_id: 
     resource_type: report
     resource_name: data_requests__awaiting_initial_review
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: admin
-    created_at: '2020-07-14T12:54:18.196Z'
-    updated_at: '2020-07-14T12:54:18.196Z'
+    created_at: '2020-07-07T15:05:38.523Z'
+    updated_at: '2020-07-07T15:05:38.523Z'
     user_email: 
-  - id: 1756
+  - id: 2386
     user_id: 
     resource_type: report
     resource_name: data_requests__awaiting_initial_review
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: reviewer - initial review
-    created_at: '2020-07-14T12:54:18.204Z'
-    updated_at: '2020-07-14T12:54:18.204Z'
+    created_at: '2020-07-07T15:05:49.296Z'
+    updated_at: '2020-07-07T15:05:49.296Z'
     user_email: 
-  - id: 1757
+  - id: 2387
     user_id: 
     resource_type: report
     resource_name: data_requests__my_requests
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.212Z'
-    updated_at: '2020-07-14T12:54:18.212Z'
+    created_at: '2020-07-07T15:51:17.324Z'
+    updated_at: '2020-07-07T15:51:17.324Z'
     user_email: 
-  - id: 1758
+  - id: 2388
     user_id: 
     resource_type: report
     resource_name: data_requests__awaiting_data_repo_pi_review
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: reviewer - data repo pi
-    created_at: '2020-07-14T12:54:18.220Z'
-    updated_at: '2020-07-14T12:54:18.220Z'
+    created_at: '2020-07-07T17:29:39.563Z'
+    updated_at: '2020-07-07T17:32:49.241Z'
     user_email: 
-  - id: 1759
+  - id: 2389
     user_id: 
     resource_type: report
     resource_name: data_requests__awaiting_data_repo_pi_review
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: admin
-    created_at: '2020-07-14T12:54:18.228Z'
-    updated_at: '2020-07-14T12:54:18.228Z'
+    created_at: '2020-07-07T17:32:59.622Z'
+    updated_at: '2020-07-07T17:32:59.622Z'
     user_email: 
-  - id: 1760
+  - id: 2390
     user_id: 
     resource_type: report
     resource_name: data_requests__awaiting_ipa_pi_review
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: admin
-    created_at: '2020-07-14T12:54:18.235Z'
-    updated_at: '2020-07-14T12:54:18.235Z'
+    created_at: '2020-07-07T17:33:13.841Z'
+    updated_at: '2020-07-07T17:33:13.841Z'
     user_email: 
-  - id: 1761
+  - id: 2391
     user_id: 
     resource_type: report
     resource_name: data_requests__awaiting_ipa_pi_review
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: reviewer - ipa pi
-    created_at: '2020-07-14T12:54:18.243Z'
-    updated_at: '2020-07-14T12:54:18.243Z'
+    created_at: '2020-07-07T17:33:21.472Z'
+    updated_at: '2020-07-07T17:33:21.472Z'
     user_email: 
-  - id: 1762
+  - id: 2392
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__do_review_ipa_pi
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: reviewer - ipa pi
-    created_at: '2020-07-14T12:54:18.251Z'
-    updated_at: '2020-07-14T12:54:18.251Z'
+    created_at: '2020-07-07T17:36:03.187Z'
+    updated_at: '2020-07-07T17:36:03.187Z'
     user_email: 
-  - id: 1763
+  - id: 2393
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__do_review_data_repo_pi
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: reviewer - data repo pi
-    created_at: '2020-07-14T12:54:18.258Z'
-    updated_at: '2020-07-14T12:54:18.258Z'
+    created_at: '2020-07-07T17:36:15.980Z'
+    updated_at: '2020-07-07T17:36:15.980Z'
     user_email: 
-  - id: 1764
+  - id: 2394
     user_id: 
     resource_type: report
     resource_name: data_requests__awaiting_data_prep
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: data prep
-    created_at: '2020-07-14T12:54:18.266Z'
-    updated_at: '2020-07-14T12:54:18.266Z'
+    created_at: '2020-07-07T17:51:59.549Z'
+    updated_at: '2020-07-07T17:52:08.053Z'
     user_email: 
-  - id: 1765
+  - id: 2395
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__do_review_ipa_pi
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.274Z'
-    updated_at: '2020-07-14T12:54:18.274Z'
+    created_at: '2020-07-09T08:35:47.119Z'
+    updated_at: '2020-07-09T08:36:44.605Z'
     user_email: 
-  - id: 1766
+  - id: 2396
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__do_review_data_repo_pi
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.282Z'
-    updated_at: '2020-07-14T12:54:18.282Z'
+    created_at: '2020-07-09T08:35:57.327Z'
+    updated_at: '2020-07-09T08:36:25.942Z'
     user_email: 
-  - id: 1767
+  - id: 2397
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__data_request_assignment__initial_review_not_approved
     options: ''
     access: create
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: admin
-    created_at: '2020-07-14T12:54:18.290Z'
-    updated_at: '2020-07-14T12:54:18.290Z'
+    created_at: '2020-07-09T08:37:12.544Z'
+    updated_at: '2020-07-09T08:37:12.544Z'
     user_email: 
-  - id: 1768
+  - id: 2398
     user_id: 
     resource_type: report
     resource_name: data_requests__select_data_attributes_q1
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.298Z'
-    updated_at: '2020-07-14T12:54:18.298Z'
+    created_at: '2020-07-09T08:42:45.683Z'
+    updated_at: '2020-07-09T08:42:45.683Z'
     user_email: 
-  - id: 1769
+  - id: 2399
     user_id: 
     resource_type: report
     resource_name: data_requests__select_data_attributes_persnet
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.305Z'
-    updated_at: '2020-07-14T12:54:18.305Z'
+    created_at: '2020-07-09T08:42:54.356Z'
+    updated_at: '2020-07-09T08:42:54.356Z'
     user_email: 
-  - id: 1770
+  - id: 2400
     user_id: 
     resource_type: report
     resource_name: data_requests__select_data_attributes_ipa
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.313Z'
-    updated_at: '2020-07-14T12:54:18.313Z'
+    created_at: '2020-07-09T08:43:02.028Z'
+    updated_at: '2020-07-09T08:43:02.028Z'
     user_email: 
-  - id: 1771
+  - id: 2401
     user_id: 
     resource_type: report
     resource_name: data_requests__select_data_attributes_bhs
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
+    admin_id: 21
+    app_type_id: 42
     role_name: user
-    created_at: '2020-07-14T12:54:18.322Z'
-    updated_at: '2020-07-14T12:54:18.322Z'
+    created_at: '2020-07-09T08:43:10.597Z'
+    updated_at: '2020-07-09T08:43:10.597Z'
     user_email: 
-  - id: 1773
+  - id: 2425
     user_id: 
-    resource_type: general
-    resource_name: send_files_to_trash
+    resource_type: report
+    resource_name: data_requests__q2_data_dictionary
     options: ''
     access: read
     disabled: false
-    admin_id: 2
-    app_type_id: 23
-    role_name: admin
-    created_at: '2020-07-30T15:34:55.553Z'
-    updated_at: '2020-07-30T15:34:55.553Z'
-    user_email: 
-  - id: 1774
-    user_id: 
-    resource_type: table
-    resource_name: dynamic_model__data_request_initial_reviews
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 2
-    app_type_id: 23
-    role_name: admin
-    created_at: '2020-07-30T15:35:20.082Z'
-    updated_at: '2020-07-30T15:35:20.082Z'
+    admin_id: 21
+    app_type_id: 42
+    role_name: user
+    created_at: '2020-07-31T10:17:53.041Z'
+    updated_at: '2020-07-31T10:17:53.041Z'
     user_email: 
   valid_associated_activity_logs:
-  - id: 84
+  - id: 104
     name: FPHS Data Request Form
     item_type: data_request_assignment
     rec_type: ''
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.238Z'
-    updated_at: '2020-07-14T12:54:17.238Z'
+    created_at: '2020-05-19T10:28:43.095Z'
+    updated_at: '2020-07-09T10:32:41.519Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: placeholder_intro
@@ -1419,147 +1439,17 @@ app_type:
     category: data-request
     user_email: 
   associated_dynamic_models:
-  - id: 395
-    name: Q2 dictionary
-    table_name: q2_datadic
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: ''
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T12:54:16.768Z'
-    updated_at: '2020-07-14T15:33:39.374Z'
-    position: 
-    category: data-requests
-    table_key_name: ''
-    field_list: ''
-    result_order: ''
-    options: "default:\r\n\r\n  view_options:\r\n    data_attribute: \r\n      - domain\r\n
-      \     - '|'\r\n      - variable_name\r\n      - ':'\r\n      - field_label"
-    user_email: 
-  - id: 399
-    name: Requested Data
-    table_name: data_request_attribs
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T12:54:17.050Z'
-    updated_at: '2020-07-14T12:54:17.050Z'
-    position: 
-    category: data-requests
-    table_key_name: ''
-    field_list: data_source embedded_report_data_requests__select_data_attributes_q2
-    result_order: ''
-    options: "default:\r\n\r\n  view_options:\r\n    data_attribute: \r\n      - Data
-      Attributes for\r\n      - data_source\r\n\r\n  field_options: \r\n    data_source:\r\n
-      \     edit_as:\r\n        field_type: select_data_source\r\n        alt_options:
-      \r\n          First Health and Wellness Questionnaire (Q1): q1\r\n          Second
-      Health and Wellness Questionnaire (Q2): q2\r\n          Brain Health Study:
-      bhs\r\n          Personal Network Study: persnet\r\n          In-Person Assessments:
-      ipa\r\n      \r\n#    requested_attribs:\r\n#      edit_as:\r\n#        field_type:
-      pick_multiple_records_from_table_q2_rc_codebook\r\n      \r\n\r\n\r\n  caption_before:\r\n
-      \   data_source: Which FPHS study are you requesting data from?\r\n    requested_attribs:
-      |\r\n      Select the attributes from the study being requested.\r\n      \r\n
-      \     Note: requesting attributes from the **restricted** set \r\n      will
-      lead to a more in-depth review process, and therefore will take more time.\r\n\r\n
-      \   embedded_report_data_requests__select_data_attributes_q2: Click to select
-      required data attributes\r\n    embedded_report_82: Show selected data attributes\r\n"
-    user_email: 
-  - id: 398
-    name: Selected Data Attributes
-    table_name: data_requests_selected_attribs
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T12:54:16.969Z'
-    updated_at: '2020-07-14T12:54:16.969Z'
-    position: 
-    category: data-requests
-    table_key_name: ''
-    field_list: record_id,data, data_request_id, disabled, variable_name
-    result_order: ''
-    options: ''
-    user_email: 
-  - id: 397
-    name: Message
-    table_name: data_request_messages
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T12:54:16.904Z'
-    updated_at: '2020-07-14T12:54:16.904Z'
-    position: 
-    category: data-requests
-    table_key_name: ''
-    field_list: message_notes created_by_user_id
-    result_order: ''
-    options: "default:\r\n\r\n  show_if:\r\n    created_by_user_id:\r\n      never:
-      true\r\n\r\n  caption_before:\r\n      \r\n    message_notes: \r\n      show_caption:
-      \"Message to requester\"\r\n      edit_caption: |\r\n        Enter your message
-      to the requester. \r\n\r\n        *These notes will be visible by the requester
-      and other reviewers.*\r\n\r\n"
-    user_email: 
-  - id: 396
-    name: Initial Review
-    table_name: data_request_initial_reviews
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T12:54:16.826Z'
-    updated_at: '2020-07-14T12:54:16.826Z'
-    position: 
-    category: data-requests
-    table_key_name: ''
-    field_list: fphs_analyst_yes_no fphs_server_yes_no tag_select_data_classifications
-      message_notes next_step  review_approved_yes_no created_by_user_id
-    result_order: ''
-    options: "default:\r\n\r\n  field_options:\r\n    tag_select_data_classifications:\r\n
-      \     edit_as:\r\n        alt_options:\r\n          IPA data covered under requestors
-      agreement: ipa data covered under requestors agreement\r\n          IPA data
-      covered another investigators agreement: ipa data covered another investigators
-      agreement\r\n          Non-IPA data used by IPA team for recruitment: non-ipa
-      data used by ipa team for recruitment\r\n          Non-IPA data not used for
-      IPA recruitment: non-ipa data not used for ipa recruitment\r\n          Restricted
-      access data: restricted access data \r\n    next_step:\r\n      value: 'no'\r\n
-      \     edit_as:\r\n        field_type: next_step_yes_no\r\n          \r\n\r\n
-      \ show_if:\r\n    review_approved_yes_no: \r\n      next_step: 'yes'\r\n    created_by_user_id:\r\n
-      \     never: true\r\n\r\n  caption_before:\r\n    fphs_analyst_yes_no: Is the
-      requester an FPHS analyst?\r\n    fphs_server_yes_no: Will the analysis be run
-      on the FPHS server?\r\n    tag_select_data_classifications: Which classes of
-      data have been requested?\r\n    next_step: Is the review complete?\r\n      \r\n
-      \   review_approved_yes_no: |\r\n      **Approve the request?**\r\n      \r\n
-      \     - Select **no** to reject the data request and inform the requester.\r\n
-      \     - Select **yes** if the request is *approved* and to send on for PI notifications
-      and reviews.\r\n      \r\n    message_notes: \r\n      show_caption: \"Reviewer's
-      notes\"\r\n      edit_caption: |\r\n        Enter notes regarding this review.
-      \r\n\r\n        *These notes will be visible by the requester and other reviewers,
-      and can be used to \r\n        help other reviewers understand the rationale
-      for your decisions and highlight\r\n        specific attributes requiring attention.*\r\n\r\n"
-    user_email: 
-  - id: 394
+  - id: 594
     name: Data Request
     table_name: data_requests
     schema_name: 
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:16.627Z'
-    updated_at: '2020-07-14T12:54:16.627Z'
+    created_at: '2020-05-19T10:44:04.604Z'
+    updated_at: '2020-07-09T09:37:57.802Z'
     position: 
     category: data-requests
     table_key_name: ''
@@ -1700,8 +1590,138 @@ app_type:
       \ valid_if:\r\n    on_save:\r\n      all:\r\n        this:\r\n          terms_of_use_yes_no:
       'yes'\r\n          "
     user_email: 
+  - id: 599
+    name: Q2 REDCap dictionary
+    table_name: q2_rc_codebook
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: ''
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-19T15:31:46.550Z'
+    updated_at: '2020-07-09T09:11:38.438Z'
+    position: 
+    category: data-requests
+    table_key_name: ''
+    field_list: ''
+    result_order: ''
+    options: "default:\r\n\r\n  view_options:\r\n    data_attribute: \r\n      - q2_domain\r\n
+      \     - '|'\r\n      - variable_name\r\n      - ':'\r\n      - field_label"
+    user_email: 
+  - id: 603
+    name: Initial Review
+    table_name: data_request_initial_reviews
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-28T18:51:06.326Z'
+    updated_at: '2020-06-09T13:02:14.260Z'
+    position: 
+    category: data-requests
+    table_key_name: ''
+    field_list: fphs_analyst_yes_no fphs_server_yes_no tag_select_data_classifications
+      message_notes next_step  review_approved_yes_no created_by_user_id
+    result_order: ''
+    options: "default:\r\n\r\n  field_options:\r\n    tag_select_data_classifications:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          IPA data covered under requestors
+      agreement: ipa data covered under requestors agreement\r\n          IPA data
+      covered another investigators agreement: ipa data covered another investigators
+      agreement\r\n          Non-IPA data used by IPA team for recruitment: non-ipa
+      data used by ipa team for recruitment\r\n          Non-IPA data not used for
+      IPA recruitment: non-ipa data not used for ipa recruitment\r\n          Restricted
+      access data: restricted access data \r\n    next_step:\r\n      value: 'no'\r\n
+      \     edit_as:\r\n        field_type: next_step_yes_no\r\n          \r\n\r\n
+      \ show_if:\r\n    review_approved_yes_no: \r\n      next_step: 'yes'\r\n    created_by_user_id:\r\n
+      \     never: true\r\n\r\n  caption_before:\r\n    fphs_analyst_yes_no: Is the
+      requester an FPHS analyst?\r\n    fphs_server_yes_no: Will the analysis be run
+      on the FPHS server?\r\n    tag_select_data_classifications: Which classes of
+      data have been requested?\r\n    next_step: Is the review complete?\r\n      \r\n
+      \   review_approved_yes_no: |\r\n      **Approve the request?**\r\n      \r\n
+      \     - Select **no** to reject the data request and inform the requester.\r\n
+      \     - Select **yes** if the request is *approved* and to send on for PI notifications
+      and reviews.\r\n      \r\n    message_notes: \r\n      show_caption: \"Reviewer's
+      notes\"\r\n      edit_caption: |\r\n        Enter notes regarding this review.
+      \r\n\r\n        *These notes will be visible by the requester and other reviewers,
+      and can be used to \r\n        help other reviewers understand the rationale
+      for your decisions and highlight\r\n        specific attributes requiring attention.*\r\n\r\n"
+    user_email: 
+  - id: 605
+    name: Message
+    table_name: data_request_messages
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-06-08T13:58:01.148Z'
+    updated_at: '2020-06-09T09:09:21.589Z'
+    position: 
+    category: data-requests
+    table_key_name: ''
+    field_list: message_notes created_by_user_id
+    result_order: ''
+    options: "default:\r\n\r\n  show_if:\r\n    created_by_user_id:\r\n      never:
+      true\r\n\r\n  caption_before:\r\n      \r\n    message_notes: \r\n      show_caption:
+      \"Message to requester\"\r\n      edit_caption: |\r\n        Enter your message
+      to the requester. \r\n\r\n        *These notes will be visible by the requester
+      and other reviewers.*\r\n\r\n"
+    user_email: 
+  - id: 601
+    name: Selected Data Attributes
+    table_name: data_requests_selected_attribs
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-21T13:07:03.841Z'
+    updated_at: '2020-05-26T13:30:20.440Z'
+    position: 
+    category: data-requests
+    table_key_name: ''
+    field_list: record_id,data, data_request_id, disabled, variable_name
+    result_order: ''
+    options: ''
+    user_email: 
+  - id: 597
+    name: Requested Data
+    table_name: data_request_attribs
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-19T14:46:32.863Z'
+    updated_at: '2020-05-21T15:47:01.087Z'
+    position: 
+    category: data-requests
+    table_key_name: ''
+    field_list: data_source embedded_report_data_requests__select_data_attributes_q2
+    result_order: ''
+    options: "default:\r\n\r\n  view_options:\r\n    data_attribute: \r\n      - Data
+      Attributes for\r\n      - data_source\r\n\r\n  field_options: \r\n    data_source:\r\n
+      \     edit_as:\r\n        field_type: select_data_source\r\n        alt_options:
+      \r\n          First Health and Wellness Questionnaire (Q1): q1\r\n          Second
+      Health and Wellness Questionnaire (Q2): q2\r\n          Brain Health Study:
+      bhs\r\n          Personal Network Study: persnet\r\n          In-Person Assessments:
+      ipa\r\n      \r\n#    requested_attribs:\r\n#      edit_as:\r\n#        field_type:
+      pick_multiple_records_from_table_q2_rc_codebook\r\n      \r\n\r\n\r\n  caption_before:\r\n
+      \   data_source: Which FPHS study are you requesting data from?\r\n    requested_attribs:
+      |\r\n      Select the attributes from the study being requested.\r\n      \r\n
+      \     Note: requesting attributes from the **restricted** set \r\n      will
+      lead to a more in-depth review process, and therefore will take more time.\r\n\r\n
+      \   embedded_report_data_requests__select_data_attributes_q2: Click to select
+      required data attributes\r\n    embedded_report_82: Show selected data attributes\r\n"
+    user_email: 
   associated_external_identifiers:
-  - id: 43
+  - id: 42
     name: data_request_assignments
     label: Data Request ID
     external_id_attribute: data_request_id
@@ -1711,16 +1731,16 @@ app_type:
     pregenerate_ids: true
     min_id: 1
     max_id: 1000000
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.129Z'
-    updated_at: '2020-07-14T12:54:17.129Z'
+    created_at: '2020-05-19T10:03:21.650Z'
+    updated_at: '2020-07-27T13:17:15.959Z'
     alphanumeric: false
     extra_fields: ''
     category: data
     user_email: 
   associated_reports:
-  - id: 269
+  - id: 284
     name: New Data Request
     description: "# FPHS Data Requests\r\n\r\nThe data requests process follows a
       series of activities. More complex requests, and those requiring analysis outside
@@ -1729,10 +1749,10 @@ app_type:
       the **+ Data Request** button to start a new Data Request\r\n\r\n"
     sql: "select id master_id from masters where id = -1 limit 1;\r\n"
     search_attrs: ''
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T13:18:42.152Z'
-    updated_at: '2020-07-14T13:18:42.152Z'
+    created_at: '2020-05-19T11:28:00.910Z'
+    updated_at: '2020-07-08T09:27:21.468Z'
     report_type: search
     auto: true
     searchable: true
@@ -1746,7 +1766,49 @@ app_type:
       true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
       \ \r\nlist_options:\r\n  hide_in_list: true"
     user_email: 
-  - id: 270
+  - id: 285
+    name: Q2 Data Dictionary
+    description: "Variables can be uniquely identified by the *domain* and \r\n*variable
+      name*. Note this information if you are considering making a data request, \r\nin
+      order to quickly select the variables in the request later.\r\n\r\nIf you are
+      planning on making a data request, you may find it more \r\nexpedient to fill
+      out the data request form and select the required \r\nvariables directly.\r\n\r\n"
+    sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  cb.variable_name \"variable name\",\r\n
+      \ cb.q2_domain \"domain\",\r\n  cb.field_label \"label\",\r\n  cb.field_attributes
+      \"attributes\",\r\n  cb.notes\r\nfrom q2_rc_codebook cb\r\n\r\nwhere\r\n  (\r\n
+      \   (\r\n      (:domain) is NULL OR cb.q2_domain IN (:domain)\r\n    )\r\n    AND
+      (\r\n      (\r\n        :name_or_label_contains is NULL OR cb.variable_name
+      ~* :name_or_label_contains\r\n      ) \r\n      OR (\r\n        :name_or_label_contains
+      is NULL OR cb.field_label ~* :name_or_label_contains\r\n      )\r\n    )\r\n
+      \ )\r\norder by \r\ncb.id;\r\n"
+    search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
+      multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
+      \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
+      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nname_or_label_contains:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
+      \   \r\n    "
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-20T15:14:00.059Z'
+    updated_at: '2020-07-31T11:08:34.372Z'
+    report_type: regular_report
+    auto: false
+    searchable: true
+    position: 10
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: q2_data_dictionary
+    options: "\r\nview_options:\r\n  hide_table_names: true\r\n  #humanize_column_names:
+      true\r\n\r\nlist_options:\r\n  list_description: |\r\n    View variables from
+      the **Q2 Survey**\r\n  \r\ncolumn_options:\r\n  classes:\r\n    field_label:
+      datadict-field-label\r\n    field_attributes: datadict-field-attributes\r\n
+      \ tags:\r\n    field_label: pre\r\n    field_attributes: pre\r\n  hide:\r\n
+      \   id: true\r\n    selected: true\r\n  \r\nview_css:\r\n  classes:\r\n    table-header.select-items
+      .table-header-col-type: \r\n      display: 'none'"
+    user_email: 
+  - id: 286
     name: Select Data Attributes Q2
     description: "###Select the attributes required for analysis\r\n\r\nCheck each
       item required. You can continue to add and remove attributes as many times as
@@ -1758,20 +1820,19 @@ app_type:
       therefore will take more time. Requesting multiple attributes from the **partially
       restricted** set may require more in-depth review, dependent on the combination.\r\n"
     sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  '{\"field_name\": \"update_list[items][]\",\"value\":
-      {\"list_id\": \"' || :list_id || \r\n  '\",\"type\":\"q2_datadic\", \"id\":
+      {\"list_id\": \"' || :list_id || \r\n  '\",\"type\":\"q2_rc_codebook\", \"id\":
       ' || cb.id || \r\n  ', \"from_master_id\":-1, \"init_value\": ' || \r\n  case
       when coalesce(sel.id, 0) = 0 then 'false' else 'true' end\r\n  || '}}' \r\n
       \   \"select items: update list: data_requests_selected_attribs\", \r\n  cb.variable_name,\r\n
-      \ cb.domain,\r\n  cb.field_type_sa,\r\n  cb.field_label,\r\n  replace(cb.field_attributes,
-      ' | ',\r\n'\r\n') field_attributes,\r\n  cb.field_note, \r\n  case when coalesce(sel.id,
-      0) = 0 then 'false' else 'true' end \"selected\"\r\nfrom q2_datadic cb\r\nleft
-      join data_requests_selected_attribs sel\r\non sel.record_id = cb.id \r\n  and
-      \ sel.record_type = 'q2_datadic'\r\n  and not coalesce(sel.disabled, false)
-      \r\n  and :list_id = data_request_id\r\nwhere\r\n  (\r\n    (\r\n      (:domain)
-      is NULL OR cb.domain IN (:domain)\r\n    )\r\n    AND (\r\n      :variable_name
-      is NULL OR cb.variable_name ~* :variable_name\r\n    )\r\n    AND (\r\n      :field_label
-      is NULL OR cb.field_label ~* :field_label\r\n    )\r\n    OR sel.id IS NOT NULL\r\n
-      \ )\r\norder by \r\nselected desc\r\n, cb.id;\r\n"
+      \ cb.q2_domain,\r\n  cb.field_label,\r\n  cb.field_attributes,\r\n  cb.notes,
+      \r\n  case when coalesce(sel.id, 0) = 0 then 'false' else 'true' end \"selected\"\r\nfrom
+      q2_rc_codebook cb\r\nleft join data_requests_selected_attribs sel\r\non sel.record_id
+      = cb.id \r\n  and not coalesce(sel.disabled, false) \r\n  and :list_id = data_request_id\r\nwhere\r\n
+      \ (\r\n    (\r\n      (:domain) is NULL OR cb.q2_domain IN (:domain)\r\n    )\r\n
+      \   AND (\r\n      :variable_name is NULL OR cb.variable_name ~* :variable_name\r\n
+      \   )\r\n    AND (\r\n      :field_label is NULL OR cb.field_label ~* :field_label\r\n
+      \   )\r\n    OR sel.id IS NOT NULL\r\n  )\r\norder by \r\nselected desc\r\n,
+      cb.id;\r\n"
     search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
       multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
       \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
@@ -1779,10 +1840,10 @@ app_type:
       \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
       \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
       \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T13:18:42.164Z'
-    updated_at: '2020-07-14T18:44:24.491Z'
+    created_at: '2020-05-21T13:10:43.213Z'
+    updated_at: '2020-07-07T15:08:27.316Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -1800,27 +1861,25 @@ app_type:
       \ hide:\r\n    id: true\r\n    selected: true\r\n  \r\nview_css:\r\n  classes:\r\n
       \   table-header.select-items .table-header-col-type: \r\n      display: 'none'"
     user_email: 
-  - id: 271
+  - id: 287
     name: Selected Data Attributes All
     description: ''
-    sql: "\r\n\r\nwith datadics as (\r\n  select distinct\r\n    id,\r\n    'Q2' \"study\",\r\n
-      \   variable_name,\r\n    domain,\r\n    field_label,\r\n    field_attributes,\r\n
-      \   field_note,\r\n    'q2_datadic' \"datadic\" \r\n  from q2_datadic\r\n  \r\n
-      \ union\r\n  select distinct\r\n    id,\r\n    'IPA' \"study\",\r\n    variable_name,\r\n
-      \   domain,\r\n    field_label,\r\n    field_attributes,\r\n    field_note,\r\n
-      \   'ipa_datadic' \"datadic\" \r\n  from ipa_datadic\r\n  \r\n)\r\nselect \r\n
-      \   sel.id,\r\n    cb.study,\r\n    cb.variable_name,\r\n    cb.domain,\r\n
-      \   cb.field_label,\r\n    replace(cb.field_attributes, ' | ',\r\n'\r\n') field_attributes,\r\n
-      \   cb.field_note,\r\n    cb.datadic\r\nfrom datadics cb\r\ninner join data_requests_selected_attribs
-      sel\r\non \r\n  sel.record_id = cb.id \r\n  and not coalesce(sel.disabled, false)
-      \r\n  and cb.datadic = sel.record_type\r\n  and sel.data_request_id = :list_id
-      \r\n\r\nwhere\r\n  sel.id IS NOT NULL\r\norder by \r\n  cb.study, cb.id;\r\n"
+    sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  'Q2' \"study\",\r\n  cb.variable_name,\r\n
+      \ cb.q2_domain,\r\n  cb.field_label,\r\n  cb.field_attributes,\r\n  cb.notes\r\nfrom
+      q2_rc_codebook cb\r\n\r\ninner join data_requests_selected_attribs sel\r\non
+      \r\n  sel.record_id = cb.id \r\n  and not coalesce(sel.disabled, false) \r\n\r\ninner
+      join model_references  mr\r\non \r\n  (:list_type IS NULL OR :list_type = 'DynamicModel::DataRequest')\r\n
+      \ and sel.data_request_id = :list_id \r\n\r\n   OR\r\n   \r\n  :list_type =
+      'ActivityLog::DataRequestAssignment'\r\n  and from_record_id = :list_id \r\n
+      \ and from_record_type = 'ActivityLog::DataRequestAssignment' \r\n  and to_record_type
+      = 'DynamicModel::DataRequest'\r\n  and sel.data_request_id = mr.to_record_id\r\n
+      \ \r\nwhere\r\n  sel.id IS NOT NULL\r\norder by \r\n  cb.id;\r\n"
     search_attrs: "\r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n
       \   \r\n    \r\nlist_type:\r\n  text:\r\n    label: Type\r\n    hidden: true\r\n"
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T13:18:42.180Z'
-    updated_at: '2020-07-14T18:46:41.854Z'
+    created_at: '2020-05-28T16:08:10.384Z'
+    updated_at: '2020-06-08T12:57:41.617Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -1837,7 +1896,7 @@ app_type:
       true\r\n  \r\nview_css:\r\n  classes:\r\n    table-header.select-items .table-header-col-type:
       \r\n      display: 'none'"
     user_email: 
-  - id: 272
+  - id: 288
     name: Awaiting Initial Review
     description: "# FPHS Data Requests awaiting initial review\r\n\r\nThe Data Manager
       is responsible for initial review of new data requests. This is a list of items
@@ -1848,10 +1907,10 @@ app_type:
       \   and master_id > 0\r\n  order by id desc\r\n  limit 1\r\n) t\r\nwhere \r\nextra_log_type
       IN ('submit_request', 'initial_review')\r\nand master_id > 0\r\n;"
     search_attrs: ''
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T13:18:42.186Z'
-    updated_at: '2020-07-14T13:18:42.186Z'
+    created_at: '2020-07-07T14:53:11.236Z'
+    updated_at: '2020-07-07T17:30:32.506Z'
     report_type: search
     auto: true
     searchable: true
@@ -1865,17 +1924,17 @@ app_type:
       true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
       \ \r\nlist_options:\r\n  hide_in_list: true"
     user_email: 
-  - id: 273
+  - id: 289
     name: My Requests
     description: "# FPHS Data Requests\r\n\r\nYou can view your existing data requests
       below, or submit a new Data Request\r\n\r\n"
     sql: "select master_id\r\n\r\nfrom activity_log_data_request_assignments \r\nwhere
       created_by_user_id = :current_user\r\norder by updated_at desc\r\n;"
     search_attrs: ''
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T13:18:42.192Z'
-    updated_at: '2020-07-14T13:18:42.192Z'
+    created_at: '2020-07-07T15:46:32.009Z'
+    updated_at: '2020-07-07T17:30:45.199Z'
     report_type: search
     auto: true
     searchable: true
@@ -1889,7 +1948,7 @@ app_type:
       true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
       \ \r\nlist_options:\r\n  hide_in_list: true"
     user_email: 
-  - id: 274
+  - id: 290
     name: Awaiting Data Repo PI Review
     description: "# FPHS Data Requests review by the Data Repository PI\r\n\r\nThe
       Data Repository PI or an administrator can enter the results of the review in
@@ -1904,10 +1963,10 @@ app_type:
       (next_step is NULL OR next_step = '')\r\n    and master_id > 0\r\n  order by
       id desc\r\n"
     search_attrs: ''
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T13:18:42.199Z'
-    updated_at: '2020-07-14T13:18:42.199Z'
+    created_at: '2020-07-07T17:29:17.730Z'
+    updated_at: '2020-07-07T17:30:11.427Z'
     report_type: search
     auto: true
     searchable: true
@@ -1921,7 +1980,7 @@ app_type:
       true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
       \ \r\nlist_options:\r\n  hide_in_list: true"
     user_email: 
-  - id: 275
+  - id: 291
     name: Awaiting IPA PI Review
     description: "# FPHS Data Requests review by the IPA PI\r\n\r\nThe In-Person Assessments
       PI or an administrator can enter the results of the review in the section **Review
@@ -1935,10 +1994,10 @@ app_type:
       \r\n  where \r\n    extra_log_type in ('do_review_ipa_pi')\r\n    and (next_step
       is NULL OR next_step = '')\r\n    and master_id > 0\r\n  order by id desc\r\n"
     search_attrs: ''
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T13:18:42.205Z'
-    updated_at: '2020-07-14T13:18:42.205Z'
+    created_at: '2020-07-07T17:32:25.626Z'
+    updated_at: '2020-07-07T17:34:35.315Z'
     report_type: search
     auto: true
     searchable: true
@@ -1952,17 +2011,17 @@ app_type:
       true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
       \ \r\nlist_options:\r\n  hide_in_list: true"
     user_email: 
-  - id: 276
+  - id: 292
     name: Awaiting Data Prep
     description: "# FPHS Data Requests approved and awaiting Data Prep"
     sql: "  select \r\n   id, master_id, extra_log_type from activity_log_data_request_assignments
       \r\n  where \r\n    extra_log_type in ('data_prep')\r\n    and (next_step is
       NULL OR next_step = '')\r\n    and master_id > 0\r\n  order by id desc\r\n"
     search_attrs: ''
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T13:18:42.211Z'
-    updated_at: '2020-07-14T13:18:42.211Z'
+    created_at: '2020-07-07T17:51:37.734Z'
+    updated_at: '2020-07-07T17:52:12.995Z'
     report_type: search
     auto: true
     searchable: true
@@ -1976,7 +2035,7 @@ app_type:
       true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
       \ \r\nlist_options:\r\n  hide_in_list: true"
     user_email: 
-  - id: 277
+  - id: 293
     name: Select Data Attributes Q1
     description: "###Select the attributes required for analysis\r\n\r\nCheck each
       item required. You can continue to add and remove attributes as many times as
@@ -2008,10 +2067,10 @@ app_type:
       \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
       \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
       \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T13:18:42.217Z'
-    updated_at: '2020-07-14T13:18:42.217Z'
+    created_at: '2020-07-09T08:40:04.493Z'
+    updated_at: '2020-07-09T08:40:04.493Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -2029,7 +2088,7 @@ app_type:
       \ hide:\r\n    id: true\r\n    selected: true\r\n  \r\nview_css:\r\n  classes:\r\n
       \   table-header.select-items .table-header-col-type: \r\n      display: 'none'"
     user_email: 
-  - id: 278
+  - id: 294
     name: Select Data Attributes IPA
     description: "###Select the attributes required for analysis\r\n\r\nCheck each
       item required. You can continue to add and remove attributes as many times as
@@ -2041,20 +2100,19 @@ app_type:
       therefore will take more time. Requesting multiple attributes from the **partially
       restricted** set may require more in-depth review, dependent on the combination.\r\n"
     sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  '{\"field_name\": \"update_list[items][]\",\"value\":
-      {\"list_id\": \"' || :list_id || \r\n  '\",\"type\":\"ipa_datadic\", \"id\":
+      {\"list_id\": \"' || :list_id || \r\n  '\",\"type\":\"q2_rc_codebook\", \"id\":
       ' || cb.id || \r\n  ', \"from_master_id\":-1, \"init_value\": ' || \r\n  case
       when coalesce(sel.id, 0) = 0 then 'false' else 'true' end\r\n  || '}}' \r\n
       \   \"select items: update list: data_requests_selected_attribs\", \r\n  cb.variable_name,\r\n
-      \ cb.domain,\r\n  cb.field_type_sa,\r\n  cb.field_label,\r\n  replace(cb.field_attributes,
-      ' | ',\r\n'\r\n') field_attributes,\r\n  cb.field_note, \r\n  case when coalesce(sel.id,
-      0) = 0 then 'false' else 'true' end \"selected\"\r\nfrom ipa_datadic cb\r\nleft
-      join data_requests_selected_attribs sel\r\non sel.record_id = cb.id \r\n  and
-      sel.record_type = 'ipa_datadic'\r\n  and not coalesce(sel.disabled, false) \r\n
-      \ and :list_id = data_request_id\r\nwhere\r\n  (\r\n    (\r\n      (:domain)
-      is NULL OR cb.domain IN (:domain)\r\n    )\r\n    AND (\r\n      :variable_name
-      is NULL OR cb.variable_name ~* :variable_name\r\n    )\r\n    AND (\r\n      :field_label
-      is NULL OR cb.field_label ~* :field_label\r\n    )\r\n    OR sel.id IS NOT NULL\r\n
-      \ )\r\norder by \r\nselected desc\r\n, cb.id;\r\n"
+      \ cb.q2_domain,\r\n  cb.field_label,\r\n  cb.field_attributes,\r\n  cb.notes,
+      \r\n  case when coalesce(sel.id, 0) = 0 then 'false' else 'true' end \"selected\"\r\nfrom
+      q2_rc_codebook cb\r\nleft join data_requests_selected_attribs sel\r\non sel.record_id
+      = cb.id \r\n  and not coalesce(sel.disabled, false) \r\n  and :list_id = data_request_id\r\nwhere\r\n
+      \ (\r\n    (\r\n      (:domain) is NULL OR cb.q2_domain IN (:domain)\r\n    )\r\n
+      \   AND (\r\n      :variable_name is NULL OR cb.variable_name ~* :variable_name\r\n
+      \   )\r\n    AND (\r\n      :field_label is NULL OR cb.field_label ~* :field_label\r\n
+      \   )\r\n    OR sel.id IS NOT NULL\r\n  )\r\norder by \r\nselected desc\r\n,
+      cb.id;\r\n"
     search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
       multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
       \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
@@ -2062,10 +2120,10 @@ app_type:
       \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
       \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
       \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T13:18:42.224Z'
-    updated_at: '2020-07-14T18:44:52.483Z'
+    created_at: '2020-07-09T08:40:44.123Z'
+    updated_at: '2020-07-09T08:40:44.123Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -2083,7 +2141,7 @@ app_type:
       \ hide:\r\n    id: true\r\n    selected: true\r\n  \r\nview_css:\r\n  classes:\r\n
       \   table-header.select-items .table-header-col-type: \r\n      display: 'none'"
     user_email: 
-  - id: 279
+  - id: 295
     name: Select Data Attributes Personal Networks
     description: "###Select the attributes required for analysis\r\n\r\nCheck each
       item required. You can continue to add and remove attributes as many times as
@@ -2115,10 +2173,10 @@ app_type:
       \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
       \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
       \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T13:18:42.231Z'
-    updated_at: '2020-07-14T13:18:42.231Z'
+    created_at: '2020-07-09T08:41:11.370Z'
+    updated_at: '2020-07-09T08:41:11.370Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -2136,7 +2194,7 @@ app_type:
       \ hide:\r\n    id: true\r\n    selected: true\r\n  \r\nview_css:\r\n  classes:\r\n
       \   table-header.select-items .table-header-col-type: \r\n      display: 'none'"
     user_email: 
-  - id: 280
+  - id: 296
     name: Select Data Attributes Brain Health Study
     description: "###Select the attributes required for analysis\r\n\r\nCheck each
       item required. You can continue to add and remove attributes as many times as
@@ -2168,10 +2226,10 @@ app_type:
       \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
       \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
       \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T13:18:42.237Z'
-    updated_at: '2020-07-14T13:18:42.237Z'
+    created_at: '2020-07-09T08:41:36.211Z'
+    updated_at: '2020-07-09T08:41:36.211Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -2191,8 +2249,8 @@ app_type:
     user_email: 
   associated_general_selections: []
   page_layouts:
-  - id: 54
-    app_type_id: 23
+  - id: 76
+    app_type_id: 42
     layout_name: master
     panel_name: data requests
     panel_label: Data Requests
@@ -2200,419 +2258,437 @@ app_type:
     options: "contains: \r\n  resources:\r\n    - activity_log__data_request_assignments\r\n
       \   \r\nview_options:\r\n  initial_show: true\r\n  limit: 1\r\n"
     disabled: false
-    admin_id: 2
-    created_at: '2020-07-14T12:54:17.353Z'
-    updated_at: '2020-07-14T12:54:17.353Z'
+    admin_id: 21
+    created_at: '2020-05-19T13:25:17.093Z'
+    updated_at: '2020-07-07T15:14:58.960Z'
     description: ''
     user_email: 
   user_roles:
-  - id: 1236
-    app_type_id: 23
+  - id: 927
+    app_type_id: 42
+    role_name: requester
+    user_id: 1
+    admin_id: 21
+    disabled: true
+    created_at: '2020-05-19T09:01:10.894Z'
+    updated_at: '2020-07-09T08:59:49.892Z'
+    user_email: phil_ayres@test.com
+  - id: 928
+    app_type_id: 42
+    role_name: user - requester
+    user_id: 82
+    admin_id: 21
+    disabled: true
+    created_at: '2020-05-19T09:01:10.909Z'
+    updated_at: '2020-05-19T11:31:18.934Z'
+    user_email: template@template
+  - id: 929
+    app_type_id: 42
+    role_name: admin
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-19T09:01:35.702Z'
+    updated_at: '2020-05-19T09:01:35.702Z'
+    user_email: phil_ayres@test.com
+  - id: 930
+    app_type_id: 42
     role_name: admin
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.374Z'
-    updated_at: '2020-07-14T12:54:17.374Z'
+    created_at: '2020-05-19T09:01:35.708Z'
+    updated_at: '2020-05-19T09:01:35.708Z'
     user_email: template@template
-  - id: 1237
-    app_type_id: 23
+  - id: 932
+    app_type_id: 42
     role_name: _app_
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.389Z'
-    updated_at: '2020-07-14T12:54:17.389Z'
+    created_at: '2020-05-19T10:28:43.158Z'
+    updated_at: '2020-05-19T10:28:43.158Z'
     user_email: template@template
-  - id: 1238
-    app_type_id: 23
+  - id: 933
+    app_type_id: 42
+    role_name: user
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-19T11:31:06.099Z'
+    updated_at: '2020-05-19T11:31:06.099Z'
+    user_email: phil_ayres@test.com
+  - id: 934
+    app_type_id: 42
     role_name: user
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.404Z'
-    updated_at: '2020-07-14T12:54:17.404Z'
+    created_at: '2020-05-19T11:31:06.106Z'
+    updated_at: '2020-05-19T11:31:06.106Z'
     user_email: template@template
-  - id: 1239
-    app_type_id: 23
+  - id: 935
+    app_type_id: 42
     role_name: requester
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.416Z'
-    updated_at: '2020-07-14T12:54:17.416Z'
+    created_at: '2020-05-19T11:31:14.376Z'
+    updated_at: '2020-05-19T11:31:14.376Z'
     user_email: template@template
-  - id: 1240
-    app_type_id: 23
+  - id: 936
+    app_type_id: 42
     role_name: reviewer - data repo pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.429Z'
-    updated_at: '2020-07-14T12:54:17.429Z'
+    created_at: '2020-05-19T11:31:54.127Z'
+    updated_at: '2020-05-19T11:31:54.127Z'
     user_email: template@template
-  - id: 1241
-    app_type_id: 23
+  - id: 937
+    app_type_id: 42
     role_name: reviewer - faculty
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.444Z'
-    updated_at: '2020-07-14T12:54:17.444Z'
+    created_at: '2020-05-19T11:32:04.195Z'
+    updated_at: '2020-05-19T11:32:04.195Z'
     user_email: template@template
-  - id: 1242
-    app_type_id: 23
+  - id: 938
+    app_type_id: 42
     role_name: reviewer - initial review
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.458Z'
-    updated_at: '2020-07-14T12:54:17.458Z'
+    created_at: '2020-05-19T11:32:11.877Z'
+    updated_at: '2020-05-19T11:32:11.877Z'
     user_email: template@template
-  - id: 1243
-    app_type_id: 23
+  - id: 939
+    app_type_id: 42
+    role_name: initial reviewer
+    user_id: 1
+    admin_id: 21
+    disabled: true
+    created_at: '2020-05-27T16:21:21.706Z'
+    updated_at: '2020-05-27T16:25:05.901Z'
+    user_email: phil_ayres@test.com
+  - id: 940
+    app_type_id: 42
+    role_name: initial reviewer
+    user_id: 82
+    admin_id: 21
+    disabled: true
+    created_at: '2020-05-27T16:21:21.723Z'
+    updated_at: '2020-05-27T16:22:01.690Z'
+    user_email: template@template
+  - id: 941
+    app_type_id: 42
+    role_name: initial reviewer
+    user_id: 82
+    admin_id: 21
+    disabled: true
+    created_at: '2020-05-27T16:21:40.519Z'
+    updated_at: '2020-05-27T16:25:11.125Z'
+    user_email: template@template
+  - id: 942
+    app_type_id: 42
+    role_name: pi - study
+    user_id: 1
+    admin_id: 21
+    disabled: true
+    created_at: '2020-05-27T16:22:39.828Z'
+    updated_at: '2020-05-27T16:23:50.596Z'
+    user_email: phil_ayres@test.com
+  - id: 943
+    app_type_id: 42
+    role_name: pi - study
+    user_id: 82
+    admin_id: 21
+    disabled: true
+    created_at: '2020-05-27T16:22:39.839Z'
+    updated_at: '2020-05-27T16:24:03.066Z'
+    user_email: template@template
+  - id: 944
+    app_type_id: 42
+    role_name: pi - repository
+    user_id: 1
+    admin_id: 21
+    disabled: true
+    created_at: '2020-05-27T16:22:46.319Z'
+    updated_at: '2020-05-27T16:23:47.298Z'
+    user_email: phil_ayres@test.com
+  - id: 945
+    app_type_id: 42
+    role_name: pi - repository
+    user_id: 82
+    admin_id: 21
+    disabled: true
+    created_at: '2020-05-27T16:22:46.328Z'
+    updated_at: '2020-05-27T16:23:59.469Z'
+    user_email: template@template
+  - id: 946
+    app_type_id: 42
+    role_name: reviewer - data repo pi
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-27T16:24:11.969Z'
+    updated_at: '2020-05-27T16:24:11.969Z'
+    user_email: phil_ayres@test.com
+  - id: 947
+    app_type_id: 42
+    role_name: pi - repository
+    user_id: 1
+    admin_id: 21
+    disabled: true
+    created_at: '2020-05-27T16:24:22.146Z'
+    updated_at: '2020-05-27T16:24:22.146Z'
+    user_email: phil_ayres@test.com
+  - id: 948
+    app_type_id: 42
+    role_name: reviewer - faculty
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-27T16:24:39.956Z'
+    updated_at: '2020-05-27T16:24:39.956Z'
+    user_email: phil_ayres@test.com
+  - id: 949
+    app_type_id: 42
+    role_name: reviewer - initial review
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-27T16:24:54.331Z'
+    updated_at: '2020-05-27T16:24:54.331Z'
+    user_email: phil_ayres@test.com
+  - id: 950
+    app_type_id: 42
+    role_name: reviewer - ipa investigator
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-27T16:26:23.413Z'
+    updated_at: '2020-05-27T16:26:23.413Z'
+    user_email: phil_ayres@test.com
+  - id: 951
+    app_type_id: 42
     role_name: reviewer - ipa investigator
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.474Z'
-    updated_at: '2020-07-14T12:54:17.474Z'
+    created_at: '2020-05-27T16:26:23.420Z'
+    updated_at: '2020-05-27T16:26:23.420Z'
     user_email: template@template
-  - id: 1244
-    app_type_id: 23
+  - id: 952
+    app_type_id: 42
+    role_name: data prep
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-27T16:28:13.200Z'
+    updated_at: '2020-05-27T16:28:13.200Z'
+    user_email: phil_ayres@test.com
+  - id: 953
+    app_type_id: 42
     role_name: data prep
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.488Z'
-    updated_at: '2020-07-14T12:54:17.488Z'
+    created_at: '2020-05-27T16:28:13.206Z'
+    updated_at: '2020-05-27T16:28:13.206Z'
     user_email: template@template
-  - id: 1245
-    app_type_id: 23
+  - id: 954
+    app_type_id: 42
+    role_name: reviewer - ipa pi
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-06-09T13:31:32.864Z'
+    updated_at: '2020-06-09T13:31:32.864Z'
+    user_email: phil_ayres@test.com
+  - id: 955
+    app_type_id: 42
     role_name: reviewer - ipa pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.501Z'
-    updated_at: '2020-07-14T12:54:17.501Z'
+    created_at: '2020-06-09T13:31:32.877Z'
+    updated_at: '2020-06-09T13:31:32.877Z'
     user_email: template@template
-  - id: 1246
-    app_type_id: 23
+  - id: 956
+    app_type_id: 42
+    role_name: reviewer - fphs pi
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-06-09T13:34:32.789Z'
+    updated_at: '2020-06-09T13:34:32.789Z'
+    user_email: phil_ayres@test.com
+  - id: 957
+    app_type_id: 42
     role_name: reviewer - fphs pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.520Z'
-    updated_at: '2020-07-14T12:54:17.520Z'
+    created_at: '2020-06-09T13:34:32.797Z'
+    updated_at: '2020-06-09T13:34:32.797Z'
     user_email: template@template
-  - id: 1247
-    app_type_id: 23
+  - id: 958
+    app_type_id: 42
+    role_name: nfs_store group 600
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-06-22T14:40:25.902Z'
+    updated_at: '2020-06-22T14:40:25.902Z'
+    user_email: phil_ayres@test.com
+  - id: 959
+    app_type_id: 42
     role_name: nfs_store group 600
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.535Z'
-    updated_at: '2020-07-14T12:54:17.535Z'
+    created_at: '2020-06-22T14:40:25.919Z'
+    updated_at: '2020-06-22T14:40:25.919Z'
     user_email: template@template
-  - id: 1248
-    app_type_id: 23
+  - id: 960
+    app_type_id: 42
     role_name: admin
-    user_id: 131
-    admin_id: 2
+    user_id: 105
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.548Z'
-    updated_at: '2020-07-14T12:54:17.548Z'
+    created_at: '2020-07-09T08:58:07.123Z'
+    updated_at: '2020-07-09T08:58:07.123Z'
     user_email: datareqadmin@template
-  - id: 1249
-    app_type_id: 23
+  - id: 961
+    app_type_id: 42
     role_name: user
-    user_id: 131
-    admin_id: 2
+    user_id: 105
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.561Z'
-    updated_at: '2020-07-14T12:54:17.561Z'
+    created_at: '2020-07-09T08:58:15.313Z'
+    updated_at: '2020-07-09T08:58:15.313Z'
     user_email: datareqadmin@template
-  - id: 1250
-    app_type_id: 23
+  - id: 962
+    app_type_id: 42
     role_name: nfs_store group 600
-    user_id: 131
-    admin_id: 2
+    user_id: 105
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.577Z'
-    updated_at: '2020-07-14T12:54:17.577Z'
+    created_at: '2020-07-09T08:58:51.992Z'
+    updated_at: '2020-07-09T08:58:51.992Z'
     user_email: datareqadmin@template
-  - id: 1251
-    app_type_id: 23
+  - id: 963
+    app_type_id: 42
     role_name: reviewer - data repo pi
-    user_id: 130
-    admin_id: 2
+    user_id: 106
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.590Z'
-    updated_at: '2020-07-14T12:54:17.590Z'
+    created_at: '2020-07-09T09:00:05.263Z'
+    updated_at: '2020-07-09T09:00:05.263Z'
     user_email: datareqdrpi@template
-  - id: 1252
-    app_type_id: 23
+  - id: 964
+    app_type_id: 42
     role_name: user
-    user_id: 130
-    admin_id: 2
+    user_id: 106
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.602Z'
-    updated_at: '2020-07-14T12:54:17.602Z'
+    created_at: '2020-07-09T09:00:21.445Z'
+    updated_at: '2020-07-09T09:00:21.445Z'
     user_email: datareqdrpi@template
-  - id: 1253
-    app_type_id: 23
+  - id: 965
+    app_type_id: 42
     role_name: nfs_store group 600
-    user_id: 130
-    admin_id: 2
+    user_id: 106
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.664Z'
-    updated_at: '2020-07-14T12:54:17.664Z'
+    created_at: '2020-07-09T09:00:32.716Z'
+    updated_at: '2020-07-09T09:00:32.716Z'
     user_email: datareqdrpi@template
-  - id: 1254
-    app_type_id: 23
+  - id: 966
+    app_type_id: 42
     role_name: reviewer - ipa pi
-    user_id: 132
-    admin_id: 2
+    user_id: 107
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.676Z'
-    updated_at: '2020-07-14T12:54:17.676Z'
+    created_at: '2020-07-09T09:01:07.760Z'
+    updated_at: '2020-07-09T09:01:07.760Z'
     user_email: datareqipapi@template
-  - id: 1255
-    app_type_id: 23
+  - id: 967
+    app_type_id: 42
     role_name: user
-    user_id: 132
-    admin_id: 2
+    user_id: 107
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.688Z'
-    updated_at: '2020-07-14T12:54:17.688Z'
+    created_at: '2020-07-09T09:01:16.605Z'
+    updated_at: '2020-07-09T09:01:16.605Z'
     user_email: datareqipapi@template
-  - id: 1256
-    app_type_id: 23
+  - id: 968
+    app_type_id: 42
     role_name: nfs_store group 600
-    user_id: 132
-    admin_id: 2
+    user_id: 107
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.701Z'
-    updated_at: '2020-07-14T12:54:17.701Z'
+    created_at: '2020-07-09T09:01:26.217Z'
+    updated_at: '2020-07-09T09:01:26.217Z'
     user_email: datareqipapi@template
-  - id: 1257
-    app_type_id: 23
+  - id: 969
+    app_type_id: 42
     role_name: data prep
-    user_id: 129
-    admin_id: 2
+    user_id: 104
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.714Z'
-    updated_at: '2020-07-14T12:54:17.714Z'
+    created_at: '2020-07-09T09:02:03.230Z'
+    updated_at: '2020-07-09T09:02:03.230Z'
     user_email: datareqdm@template
-  - id: 1258
-    app_type_id: 23
+  - id: 970
+    app_type_id: 42
     role_name: user
-    user_id: 129
-    admin_id: 2
+    user_id: 104
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.727Z'
-    updated_at: '2020-07-14T12:54:17.727Z'
+    created_at: '2020-07-09T09:02:17.534Z'
+    updated_at: '2020-07-09T09:02:17.534Z'
     user_email: datareqdm@template
-  - id: 1259
-    app_type_id: 23
+  - id: 971
+    app_type_id: 42
     role_name: nfs_store group 600
-    user_id: 129
-    admin_id: 2
+    user_id: 104
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.740Z'
-    updated_at: '2020-07-14T12:54:17.740Z'
+    created_at: '2020-07-09T09:02:25.652Z'
+    updated_at: '2020-07-09T09:02:25.652Z'
     user_email: datareqdm@template
-  - id: 1260
-    app_type_id: 23
+  - id: 972
+    app_type_id: 42
     role_name: reviewer - initial review
-    user_id: 129
-    admin_id: 2
+    user_id: 104
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.753Z'
-    updated_at: '2020-07-14T12:54:17.753Z'
+    created_at: '2020-07-09T09:02:34.379Z'
+    updated_at: '2020-07-09T09:02:34.379Z'
     user_email: datareqdm@template
-  - id: 1261
-    app_type_id: 23
+  - id: 973
+    app_type_id: 42
     role_name: user
-    user_id: 128
-    admin_id: 2
+    user_id: 103
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.766Z'
-    updated_at: '2020-07-14T12:54:17.766Z'
+    created_at: '2020-07-09T09:02:56.213Z'
+    updated_at: '2020-07-09T09:02:56.213Z'
     user_email: datarequser@template
-  - id: 1262
-    app_type_id: 23
+  - id: 974
+    app_type_id: 42
     role_name: nfs_store group 600
-    user_id: 128
-    admin_id: 2
+    user_id: 103
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.779Z'
-    updated_at: '2020-07-14T12:54:17.779Z'
+    created_at: '2020-07-09T09:03:08.065Z'
+    updated_at: '2020-07-09T09:03:08.065Z'
     user_email: datarequser@template
-  - id: 1263
-    app_type_id: 23
-    role_name: nfs_store group 600
-    user_id: 1
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T12:55:59.646Z'
-    updated_at: '2020-07-14T12:55:59.646Z'
-    user_email: phil_ayres@hms.harvard.edu
-  - id: 1264
-    app_type_id: 23
-    role_name: user
-    user_id: 1
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T12:55:59.660Z'
-    updated_at: '2020-07-14T12:55:59.660Z'
-    user_email: phil_ayres@hms.harvard.edu
-  - id: 1265
-    app_type_id: 23
-    role_name: admin
-    user_id: 1
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T12:55:59.671Z'
-    updated_at: '2020-07-14T12:55:59.671Z'
-    user_email: phil_ayres@hms.harvard.edu
-  - id: 1266
-    app_type_id: 23
-    role_name: nfs_store group 600
-    user_id: 133
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:47:43.518Z'
-    updated_at: '2020-07-14T17:47:43.518Z'
-    user_email: dean_marengi@hms.harvard.edu
-  - id: 1267
-    app_type_id: 23
-    role_name: user
-    user_id: 133
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:47:43.541Z'
-    updated_at: '2020-07-14T17:47:43.541Z'
-    user_email: dean_marengi@hms.harvard.edu
-  - id: 1268
-    app_type_id: 23
-    role_name: admin
-    user_id: 133
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:47:43.552Z'
-    updated_at: '2020-07-14T17:47:43.552Z'
-    user_email: dean_marengi@hms.harvard.edu
-  - id: 1269
-    app_type_id: 23
-    role_name: reviewer - initial review
-    user_id: 134
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:48:37.180Z'
-    updated_at: '2020-07-14T17:48:37.180Z'
-    user_email: bir_kafle@hms.harvard.edu
-  - id: 1270
-    app_type_id: 23
-    role_name: nfs_store group 600
-    user_id: 134
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:48:37.192Z'
-    updated_at: '2020-07-14T17:48:37.192Z'
-    user_email: bir_kafle@hms.harvard.edu
-  - id: 1271
-    app_type_id: 23
-    role_name: user
-    user_id: 134
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:48:37.285Z'
-    updated_at: '2020-07-14T17:48:37.285Z'
-    user_email: bir_kafle@hms.harvard.edu
-  - id: 1272
-    app_type_id: 23
-    role_name: data prep
-    user_id: 134
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:48:37.303Z'
-    updated_at: '2020-07-14T17:48:37.303Z'
-    user_email: bir_kafle@hms.harvard.edu
-  - id: 1273
-    app_type_id: 23
-    role_name: nfs_store group 600
-    user_id: 127
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:49:18.849Z'
-    updated_at: '2020-07-14T17:49:18.849Z'
-    user_email: heather_digregorio@hms.harvard.edu
-  - id: 1274
-    app_type_id: 23
-    role_name: user
-    user_id: 127
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:49:18.860Z'
-    updated_at: '2020-07-14T17:49:18.860Z'
-    user_email: heather_digregorio@hms.harvard.edu
-  - id: 1275
-    app_type_id: 23
-    role_name: nfs_store group 600
-    user_id: 135
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:49:34.517Z'
-    updated_at: '2020-07-14T17:49:34.517Z'
-    user_email: datarequser@test
-  - id: 1276
-    app_type_id: 23
-    role_name: user
-    user_id: 135
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:49:34.528Z'
-    updated_at: '2020-07-14T17:49:34.528Z'
-    user_email: datarequser@test
-  - id: 1277
-    app_type_id: 23
-    role_name: nfs_store group 600
-    user_id: 121
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:50:21.660Z'
-    updated_at: '2020-07-14T17:50:21.660Z'
-    user_email: sarah_kim@hms.harvard.edu
-  - id: 1278
-    app_type_id: 23
-    role_name: user
-    user_id: 121
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:50:21.672Z'
-    updated_at: '2020-07-14T17:50:21.672Z'
-    user_email: sarah_kim@hms.harvard.edu
-  - id: 1279
-    app_type_id: 23
-    role_name: reviewer - data repo pi
-    user_id: 121
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T17:50:21.682Z'
-    updated_at: '2020-07-14T17:50:21.682Z'
-    user_email: sarah_kim@hms.harvard.edu
-  - id: 1280
-    app_type_id: 23
-    role_name: reviewer - initial review
-    user_id: 1
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-30T15:33:44.895Z'
-    updated_at: '2020-07-30T15:33:44.895Z'
-    user_email: phil_ayres@hms.harvard.edu
   associated_message_templates:
-  - id: 56
+  - id: 71
     name: data request message content
     message_type: email
     template_type: content
@@ -2620,13 +2696,13 @@ app_type:
       new message has been sent from the FPHS Data Request App.</p>\r\n<div>{{extra_substitutions.extra_text::markup}}<div>\r\n<div>{{extra_substitutions.extra_html}}<div>\r\n<hr/>\r\n<p>Please
       login to Athena to view the request. Click the following link to access the
       data request record directly:</p>\r\n<p><a href=\"{{base_url}}/masters/{{master_id}}\">{{base_url}}/masters/{{master_id}}</a></p>\r\n<hr/>"
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.824Z'
-    updated_at: '2020-07-14T12:54:17.824Z'
+    created_at: '2020-05-27T16:19:37.893Z'
+    updated_at: '2020-05-28T15:45:21.643Z'
     category: data-request
     user_email: 
-  - id: 57
+  - id: 72
     name: data request notification layout
     message_type: email
     template_type: layout
@@ -2652,14 +2728,14 @@ app_type:
       \     {{main_content}}\r\n    </div>\r\n    <div>If you received this email
       in error, please contact fphsetl@hms.harvard.edu to ensure we can update our
       records appropriately.</div>\r\n  </body>\r\n<html>"
-    admin_id: 2
+    admin_id: 21
     disabled: false
-    created_at: '2020-07-14T12:54:17.836Z'
-    updated_at: '2020-07-14T12:54:17.836Z'
+    created_at: '2020-05-27T16:20:37.677Z'
+    updated_at: '2020-05-28T16:14:07.868Z'
     category: data-request
     user_email: 
   associated_config_libraries:
-  - id: 60
+  - id: 78
     category: common
     name: filestore_container
     options: "_definitions:\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n
@@ -2679,24 +2755,24 @@ app_type:
       \         <<: *ref_nfs_store__manage__container\r\n"
     format: yaml
     disabled: false
-    admin_id: 2
-    created_at: '2020-07-14T12:54:16.606Z'
-    updated_at: '2020-07-14T12:54:16.606Z'
+    admin_id: 21
+    created_at: '2020-06-22T14:02:03.937Z'
+    updated_at: '2020-07-01T15:36:25.968Z'
     user_email: 
   associated_protocols: []
   associated_sub_processes: []
   associated_protocol_events: []
   nfs_store_filters:
-  - id: 61
-    app_type_id: 23
+  - id: 85
+    app_type_id: 42
     role_name: user
     user_id: 
     resource_name: activity_log__data_request_assignment__supporting_files
     filter: ".*"
     description: ''
     disabled: false
-    admin_id: 2
-    created_at: '2020-07-14T12:54:17.811Z'
-    updated_at: '2020-07-14T12:54:17.811Z'
+    admin_id: 21
+    created_at: '2020-06-22T15:18:07.907Z'
+    updated_at: '2020-06-22T15:18:07.907Z'
     user_email: 
   user_email: 

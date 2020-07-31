@@ -72,6 +72,20 @@ CREATE SCHEMA persnet;
 
 
 --
+-- Name: q1; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA q1;
+
+
+--
+-- Name: q2; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA q2;
+
+
+--
 -- Name: sleep; Type: SCHEMA; Schema: -; Owner: -
 --
 
@@ -397,6 +411,37 @@ $$;
 
 
 --
+-- Name: log_activity_log_data_request_assignments_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_activity_log_data_request_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_data_request_assignment_history (
+    master_id,
+    data_request_assignment_id,
+    created_by_user_id, status, notes, next_step, follow_up_date,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_data_request_assignment_id)
+  SELECT
+    NEW.master_id,
+    NEW.data_request_assignment_id,
+    NEW.created_by_user_id, NEW.status, NEW.notes, NEW.next_step, NEW.follow_up_date,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_data_request_assignment_update(); Type: FUNCTION; Schema: data_requests; Owner: -
 --
 
@@ -707,6 +752,60 @@ CREATE FUNCTION data_requests.log_data_requests_selected_attrib_update() RETURNS
                   RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_data_requests_selected_attribs_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_data_requests_selected_attribs_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO data_requests_selected_attrib_history (
+    master_id,
+    record_id, data, data_request_id, disabled, variable_name, record_type,
+    user_id,
+    created_at,
+    updated_at,
+    data_requests_selected_attrib_id)
+  SELECT
+    NEW.master_id,
+    NEW.record_id, NEW.data, NEW.data_request_id, NEW.disabled, NEW.variable_name, NEW.record_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_data_requests_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_data_requests_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO data_request_history (
+    master_id,
+    status, project_title, fphs_analyst_yes_no, full_name, title, institution, other_institution, others_handling_data, pm_contact, other_pm_contact, data_start_date, data_end_date, fphs_server_yes_no, fphs_server_tools_notes, off_fphs_server_reason_notes, data_use_agreement_status, data_use_agreement_notes, terms_of_use_yes_no, created_by_user_id,
+    user_id,
+    created_at,
+    updated_at,
+    data_request_id)
+  SELECT
+    NEW.master_id,
+    NEW.status, NEW.project_title, NEW.fphs_analyst_yes_no, NEW.full_name, NEW.title, NEW.institution, NEW.other_institution, NEW.others_handling_data, NEW.pm_contact, NEW.other_pm_contact, NEW.data_start_date, NEW.data_end_date, NEW.fphs_server_yes_no, NEW.fphs_server_tools_notes, NEW.off_fphs_server_reason_notes, NEW.data_use_agreement_status, NEW.data_use_agreement_notes, NEW.terms_of_use_yes_no, NEW.created_by_user_id,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -19405,9 +19504,7 @@ ALTER SEQUENCE data_requests.activity_log_data_request_assignment_history_id_seq
 CREATE TABLE data_requests.activity_log_data_request_assignments (
     id integer NOT NULL,
     master_id integer,
-    data_request_assignment_id integer,
     follow_up_date date,
-    follow_up_time time without time zone,
     notes character varying,
     extra_log_type character varying,
     user_id integer,
@@ -19924,8 +20021,6 @@ CREATE TABLE data_requests.data_requests (
     id integer NOT NULL,
     master_id integer,
     project_title character varying,
-    concept_sheet_approved_yes_no character varying,
-    concept_sheet_approved_by character varying,
     full_name character varying,
     title character varying,
     institution character varying,
@@ -20016,14 +20111,14 @@ CREATE TABLE data_requests.data_requests_selected_attribs (
     id integer NOT NULL,
     master_id integer,
     record_id integer,
-    record_type character varying,
     data_request_id integer,
     data character varying,
     variable_name character varying,
     disabled boolean,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    record_type character varying
 );
 
 
@@ -25078,6 +25173,44 @@ ALTER SEQUENCE ipa_ops.ipa_consent_mailings_id_seq OWNED BY ipa_ops.ipa_consent_
 
 
 --
+-- Name: ipaops_datadic_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
+--
+
+CREATE SEQUENCE ipa_ops.ipaops_datadic_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_datadic; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.ipa_datadic (
+    id integer DEFAULT nextval('ipa_ops.ipaops_datadic_id_seq'::regclass) NOT NULL,
+    variable_name character varying NOT NULL,
+    domain text,
+    field_type_rc text,
+    field_type_sa text,
+    field_label text,
+    field_attributes text,
+    field_note text,
+    text_valid_type text,
+    text_valid_min text,
+    text_valid_max text,
+    required_field text,
+    field_attr_array text[],
+    source text,
+    form_name text,
+    owner text,
+    classification text,
+    display text
+);
+
+
+--
 -- Name: ipa_exit_interview_history; Type: TABLE; Schema: ipa_ops; Owner: -
 --
 
@@ -28458,6 +28591,413 @@ CREATE TABLE ml_app.masters (
 
 
 --
+-- Name: rc_stage; Type: TABLE; Schema: q1; Owner: -
+--
+
+CREATE TABLE q1.rc_stage (
+    record_id integer,
+    redcap_survey_identifier integer,
+    football_players_health_study_questionnaire_1_timestamp timestamp without time zone,
+    dob date,
+    age integer,
+    race___1 integer,
+    race___2 integer,
+    race___3 integer,
+    race___4 integer,
+    race___5 integer,
+    race___6 integer,
+    race___7 integer,
+    hispanic integer,
+    domesticstatus integer,
+    livingsituation integer,
+    height integer,
+    current_weight integer,
+    highschool_wt integer,
+    college_wt integer,
+    pro_wt integer,
+    maxretire_wt integer,
+    startplay_age integer,
+    numb_season double precision,
+    first_cal_yearplay integer,
+    last_cal_yearplay integer,
+    position___1 integer,
+    position___2 integer,
+    position___3 integer,
+    position___4 integer,
+    position___5 integer,
+    position___6 integer,
+    position___7 integer,
+    position___8 integer,
+    position___9 integer,
+    position___10 integer,
+    global1 integer,
+    global2 integer,
+    global3 integer,
+    global4 integer,
+    global5 integer,
+    global6 integer,
+    global7 integer,
+    global8 integer,
+    global10 integer,
+    phq1 integer,
+    phq2 integer,
+    gad1 integer,
+    gad_2 integer,
+    number_days_exercise integer,
+    walking integer,
+    jogging integer,
+    running integer,
+    other_aerobic integer,
+    low_intensity_exercise integer,
+    weight_training integer,
+    promis_pf6b1 integer,
+    promis_pf6b2 integer,
+    promis_pf6b3 integer,
+    promis_pf6b4 integer,
+    promis_pf6b5 integer,
+    promis_pf6b6 integer,
+    painin3 integer,
+    painin8 integer,
+    painin9 integer,
+    painin10 integer,
+    painin14 integer,
+    painin26 integer,
+    nqcog64 integer,
+    nqcog65 integer,
+    nqcog66 integer,
+    nqcog68 integer,
+    nqcog72 integer,
+    nqcog75 integer,
+    nqcog77 integer,
+    nqcog80 integer,
+    nqcog67_editted integer,
+    nqcog84 integer,
+    nqcog86 integer,
+    pcp integer,
+    other_health_professional integer,
+    supplement___1 integer,
+    supplement___2 integer,
+    supplement___3 integer,
+    supplement___4 integer,
+    medication___1 integer,
+    medication___2 integer,
+    medication___3 integer,
+    medication___4 integer,
+    pain_medications___1 integer,
+    pain_medications___2 integer,
+    pain_medications___3 integer,
+    pain_medications___4 integer,
+    dx_concussion integer,
+    numb_concussions character varying(255),
+    headaches_ht integer,
+    nausea integer,
+    dizziness integer,
+    loss_of_consciousness integer,
+    memory_problems integer,
+    disorientation integer,
+    confusion integer,
+    seizure integer,
+    visual_problems integer,
+    weakness_on_one_side_of_th integer,
+    feeling_unsteady_on_your_f integer,
+    neck_surgery integer,
+    back_surgery integer,
+    anterior_cruciate_ligament integer,
+    knee_surgery integer,
+    ankle_surgery integer,
+    shoulder_surgery integer,
+    hand_surgery integer,
+    knee_joint_replacement integer,
+    approxyrssurg_knee character varying(255),
+    hip_joint_replacemen integer,
+    approxyrssurg_hip character varying(255),
+    cardiac_surgery integer,
+    approxyrssurg_cardiac character varying(255),
+    cataract_surgery integer,
+    approxyrssurg_cataract character varying(255),
+    neck_spine_surgery integer,
+    approxyrssurg_neckspine character varying(255),
+    back_surgery1 integer,
+    approxyrssurg_back character varying(255),
+    othersurgery integer,
+    type_other_surgery character varying(255),
+    years_other_surgery character varying(255),
+    high_blood_pressure integer,
+    current_htn_med integer,
+    heart_failure integer,
+    current_heartfailure_med integer,
+    heart_rhythm integer,
+    current_heartrhythm_med integer,
+    high_cholesterol integer,
+    current_highcholesterol integer,
+    diabetes_high_blood_sugar integer,
+    current_diabetes_med integer,
+    headaches integer,
+    current_headache_med integer,
+    pain_medication integer,
+    current_medication_pain integer,
+    liver_probelm integer,
+    current_med_liver_problem integer,
+    anxiety integer,
+    current_anxiety_med integer,
+    depression integer,
+    current_depression_med integer,
+    memory_loss integer,
+    current_med_memory_loss integer,
+    add integer,
+    current_med_add integer,
+    low_testosterone integer,
+    current_lowt_med integer,
+    erectile_dys integer,
+    current_erectile_dys integer,
+    heart_attack integer,
+    yr_dx_heart_attack character varying(255),
+    stroke integer,
+    yr_dx_stroke character varying(255),
+    sleep_apnea integer,
+    yr_dx_sleepapnea character varying(255),
+    dementia integer,
+    yr_dx_dementia character varying(255),
+    cte integer,
+    yr_dx_cte character varying(255),
+    parkinsons integer,
+    yr_dx_parkinsons character varying(255),
+    arthritis integer,
+    yr_dx_arthritis character varying(255),
+    als integer,
+    yr_dx_als character varying(255),
+    renal_kidney_disease integer,
+    yr_dx_kidney_dx character varying(255),
+    cancer integer,
+    cancer_type character varying(255),
+    yr_dx_cancer character varying(255),
+    days_drink_week integer,
+    drinksday integer,
+    smoking_hx integer,
+    do_you_currently_or_have_y integer,
+    snore_loudly integer,
+    sleephrs integer,
+    health_expectation integer,
+    are_you_currently_employed integer,
+    student_looking integer,
+    job_in_football integer,
+    other_job_in_football character varying(255),
+    job_industry character varying(255),
+    job_outside_football character varying(255),
+    retired_industry character varying(255),
+    retired_job_title character varying(255),
+    questionnaire_help integer,
+    football_players_health_study_questionnaire_1_complete integer
+);
+
+
+--
+-- Name: sc_stage; Type: TABLE; Schema: q1; Owner: -
+--
+
+CREATE TABLE q1.sc_stage (
+    ncs_header character varying(100),
+    litho integer,
+    opp_date date,
+    dob date,
+    age integer,
+    race___1 integer,
+    race___2 integer,
+    race___3 integer,
+    race___4 integer,
+    race___5 integer,
+    race___6 integer,
+    hispanic integer,
+    domesticstatus integer,
+    livingsituation integer,
+    feet integer,
+    inches integer,
+    current_weight integer,
+    highschool_wt integer,
+    college_wt integer,
+    pro_wt integer,
+    maxretire_wt integer,
+    startplay_age integer,
+    numb_season double precision,
+    first_cal_yearplay integer,
+    last_cal_yearplay integer,
+    position___1 integer,
+    position___2 integer,
+    position___3 integer,
+    position___4 integer,
+    position___5 integer,
+    position___6 integer,
+    position___7 integer,
+    position___8 integer,
+    position___9 integer,
+    position___10 integer,
+    global1 integer,
+    global2 integer,
+    global3 integer,
+    global4 integer,
+    global5 integer,
+    global6 integer,
+    global7 integer,
+    global8 integer,
+    global10 integer,
+    phq1 integer,
+    phq2 integer,
+    gad1 integer,
+    gad_2 integer,
+    number_days_exercise integer,
+    walking integer,
+    jogging integer,
+    running integer,
+    other_aerobic integer,
+    low_intensity_exercise integer,
+    weight_training integer,
+    promis_pf6b1 integer,
+    promis_pf6b2 integer,
+    promis_pf6b3 integer,
+    promis_pf6b4 integer,
+    promis_pf6b5 integer,
+    promis_pf6b6 integer,
+    painin3 integer,
+    painin8 integer,
+    painin9 integer,
+    painin10 integer,
+    painin14 integer,
+    painin26 integer,
+    nqcog64 integer,
+    nqcog65 integer,
+    nqcog66 integer,
+    nqcog68 integer,
+    nqcog72 integer,
+    nqcog75 integer,
+    nqcog77 integer,
+    nqcog80 integer,
+    nqcog67_editted integer,
+    nqcog84 integer,
+    nqcog86 integer,
+    pcp integer,
+    other_health_professional integer,
+    supplement___1 integer,
+    supplement___2 integer,
+    supplement___3 integer,
+    supplement___4 integer,
+    medication___1 integer,
+    medication___2 integer,
+    medication___3 integer,
+    medication___4 integer,
+    pain_medications___1 integer,
+    pain_medications___2 integer,
+    pain_medications___3 integer,
+    pain_medications___4 integer,
+    dx_concussion integer,
+    numb_concussions character varying(255),
+    headaches_ht integer,
+    nausea integer,
+    dizziness integer,
+    loss_of_consciousness integer,
+    memory_problems integer,
+    disorientation integer,
+    confusion integer,
+    seizure integer,
+    visual_problems integer,
+    weakness_on_one_side_of_th integer,
+    feeling_unsteady_on_your_f integer,
+    neck_surgery integer,
+    back_surgery integer,
+    anterior_cruciate_ligament integer,
+    knee_surgery integer,
+    ankle_surgery integer,
+    shoulder_surgery integer,
+    hand_surgery integer,
+    knee_joint_replacement integer,
+    approxyrssurg_knee character varying(255),
+    hip_joint_replacemen integer,
+    approxyrssurg_hip character varying(255),
+    cardiac_surgery integer,
+    approxyrssurg_cardiac character varying(255),
+    cataract_surgery integer,
+    approxyrssurg_cataract character varying(255),
+    neck_spine_surgery integer,
+    approxyrssurg_neckspine character varying(255),
+    back_surgery1 integer,
+    approxyrssurg_back character varying(255),
+    othersurgery integer,
+    type_other_surgery character varying(255),
+    operator65 integer,
+    years_other_surgery character varying(255),
+    high_blood_pressure integer,
+    current_htn_med integer,
+    heart_failure integer,
+    current_heartfailure_med integer,
+    heart_rhythm integer,
+    current_heartrhythm_med integer,
+    high_cholesterol integer,
+    current_highcholesterol integer,
+    diabetes_high_blood_sugar integer,
+    current_diabetes_med integer,
+    headaches integer,
+    current_headache_med integer,
+    pain_medication integer,
+    current_medication_pain integer,
+    liver_problem integer,
+    current_med_liver_problem integer,
+    anxiety integer,
+    current_anxiety_med integer,
+    depression integer,
+    current_depression_med integer,
+    memory_loss integer,
+    current_med_memory_loss integer,
+    add integer,
+    current_med_add integer,
+    low_testosterone integer,
+    current_lowt_med integer,
+    erectile_dys integer,
+    current_erectile_dys integer,
+    heart_attack integer,
+    yr_dx_heart_attack character varying(255),
+    stroke integer,
+    yr_dx_stroke character varying(255),
+    sleep_apnea integer,
+    yr_dx_sleepapnea character varying(255),
+    dementia integer,
+    yr_dx_dementia character varying(255),
+    cte integer,
+    yr_dx_cte character varying(255),
+    parkinsons integer,
+    yr_dx_parkinsons character varying(255),
+    arthritis integer,
+    yr_dx_arthritis character varying(255),
+    als integer,
+    yr_dx_als character varying(255),
+    renal_kidney_disease integer,
+    yr_dx_kidney_dx character varying(255),
+    cancer integer,
+    cancer_type character varying(255),
+    operator67 integer,
+    yr_dx_cancer character varying(255),
+    days_drink_week integer,
+    drinksday integer,
+    smoking_hx integer,
+    do_you_currently_or_have_y integer,
+    snore_loudly integer,
+    sleephrs integer,
+    health_expectation integer,
+    are_you_currently_employed integer,
+    student_looking integer,
+    job_in_football integer,
+    other_job_in_football character varying(255),
+    job_industry character varying(255),
+    job_outside_football character varying(255),
+    job_outside_ses character varying(255),
+    retired_industry character varying(255),
+    retired_job_title character varying(255),
+    retired_ses character varying(255),
+    operator75 integer,
+    questionnaire_help integer,
+    msid integer
+);
+
+
+--
 -- Name: q1_ages; Type: VIEW; Schema: ipa_ops; Owner: -
 --
 
@@ -31755,6 +32295,17 @@ ALTER SEQUENCE ml_app.protocols_id_seq OWNED BY ml_app.protocols.id;
 
 
 --
+-- Name: rc_links; Type: TABLE; Schema: q1; Owner: -
+--
+
+CREATE TABLE q1.rc_links (
+    id integer NOT NULL,
+    master_id integer,
+    link character varying
+);
+
+
+--
 -- Name: q1_rc_links; Type: VIEW; Schema: ml_app; Owner: -
 --
 
@@ -31766,6 +32317,18 @@ CREATE VIEW ml_app.q1_rc_links AS
     NULL::timestamp without time zone AS updated_at,
     NULL::integer AS user_id
    FROM q1.rc_links;
+
+
+--
+-- Name: rc_links; Type: TABLE; Schema: q2; Owner: -
+--
+
+CREATE TABLE q2.rc_links (
+    id integer NOT NULL,
+    msid integer,
+    master_id integer,
+    link character varying
+);
 
 
 --
@@ -33436,6 +33999,88 @@ CREATE SEQUENCE persnet.persnet_assignments_id_seq
 --
 
 ALTER SEQUENCE persnet.persnet_assignments_id_seq OWNED BY persnet.persnet_assignments.id;
+
+
+--
+-- Name: rc_links_id_seq; Type: SEQUENCE; Schema: q1; Owner: -
+--
+
+CREATE SEQUENCE q1.rc_links_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: rc_links_id_seq; Type: SEQUENCE OWNED BY; Schema: q1; Owner: -
+--
+
+ALTER SEQUENCE q1.rc_links_id_seq OWNED BY q1.rc_links.id;
+
+
+--
+-- Name: q2_datadic; Type: TABLE; Schema: q2; Owner: -
+--
+
+CREATE TABLE q2.q2_datadic (
+    id integer NOT NULL,
+    variable_name character varying NOT NULL,
+    domain text,
+    field_type_rc text,
+    field_type_sa text,
+    field_label text,
+    field_attributes text,
+    field_note text,
+    text_valid_type text,
+    text_valid_min text,
+    text_valid_max text,
+    required_field text,
+    field_attr_array text[],
+    source text,
+    owner text,
+    classification text,
+    display text
+);
+
+
+--
+-- Name: datadic_id_seq; Type: SEQUENCE; Schema: q2; Owner: -
+--
+
+CREATE SEQUENCE q2.datadic_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: datadic_id_seq; Type: SEQUENCE OWNED BY; Schema: q2; Owner: -
+--
+
+ALTER SEQUENCE q2.datadic_id_seq OWNED BY q2.q2_datadic.id;
+
+
+--
+-- Name: rc_links_id_seq; Type: SEQUENCE; Schema: q2; Owner: -
+--
+
+CREATE SEQUENCE q2.rc_links_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: rc_links_id_seq; Type: SEQUENCE OWNED BY; Schema: q2; Owner: -
+--
+
+ALTER SEQUENCE q2.rc_links_id_seq OWNED BY q2.rc_links.id;
 
 
 --
@@ -42679,6 +43324,27 @@ ALTER TABLE ONLY persnet.persnet_assignments ALTER COLUMN id SET DEFAULT nextval
 
 
 --
+-- Name: id; Type: DEFAULT; Schema: q1; Owner: -
+--
+
+ALTER TABLE ONLY q1.rc_links ALTER COLUMN id SET DEFAULT nextval('q1.rc_links_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: q2; Owner: -
+--
+
+ALTER TABLE ONLY q2.q2_datadic ALTER COLUMN id SET DEFAULT nextval('q2.datadic_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: q2; Owner: -
+--
+
+ALTER TABLE ONLY q2.rc_links ALTER COLUMN id SET DEFAULT nextval('q2.rc_links_id_seq'::regclass);
+
+
+--
 -- Name: id; Type: DEFAULT; Schema: sleep; Owner: -
 --
 
@@ -45156,6 +45822,14 @@ ALTER TABLE ONLY ipa_ops.ipa_mednav_provider_reports
 
 
 --
+-- Name: ipa_ops_datadic_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_datadic
+    ADD CONSTRAINT ipa_ops_datadic_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: ipa_payment_history_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -46569,6 +47243,14 @@ ALTER TABLE ONLY persnet.persnet_assignment_history
 
 ALTER TABLE ONLY persnet.persnet_assignments
     ADD CONSTRAINT persnet_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: datadic_pkey; Type: CONSTRAINT; Schema: q2; Owner: -
+--
+
+ALTER TABLE ONLY q2.q2_datadic
+    ADD CONSTRAINT datadic_pkey PRIMARY KEY (id);
 
 
 --
@@ -48069,13 +48751,6 @@ CREATE INDEX index_zeus_short_links_on_user_id ON bulk_msg.zeus_short_links USIN
 --
 
 CREATE UNIQUE INDEX unique_recipient ON bulk_msg.zeus_bulk_message_recipients USING btree (zeus_bulk_message_id, record_id) WHERE (disabled = false);
-
-
---
--- Name: index_activity_log_data_request_assignments_on_data_request_ass; Type: INDEX; Schema: data_requests; Owner: -
---
-
-CREATE INDEX index_activity_log_data_request_assignments_on_data_request_ass ON data_requests.activity_log_data_request_assignments USING btree (data_request_assignment_id);
 
 
 --
@@ -57263,6 +57938,48 @@ CREATE TRIGGER data_requests_selected_attrib_history_update AFTER UPDATE ON data
 
 
 --
+-- Name: log_activity_log_data_request_assignment_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_data_request_assignment_history_insert AFTER INSERT ON data_requests.activity_log_data_request_assignments FOR EACH ROW EXECUTE PROCEDURE data_requests.log_activity_log_data_request_assignments_update();
+
+
+--
+-- Name: log_activity_log_data_request_assignment_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_data_request_assignment_history_update AFTER UPDATE ON data_requests.activity_log_data_request_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_activity_log_data_request_assignments_update();
+
+
+--
+-- Name: log_data_request_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_history_insert AFTER INSERT ON data_requests.data_requests FOR EACH ROW EXECUTE PROCEDURE data_requests.log_data_requests_update();
+
+
+--
+-- Name: log_data_request_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_history_update AFTER UPDATE ON data_requests.data_requests FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_data_requests_update();
+
+
+--
+-- Name: log_data_requests_selected_attrib_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_requests_selected_attrib_history_insert AFTER INSERT ON data_requests.data_requests_selected_attribs FOR EACH ROW EXECUTE PROCEDURE data_requests.log_data_requests_selected_attribs_update();
+
+
+--
+-- Name: log_data_requests_selected_attrib_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_requests_selected_attrib_history_update AFTER UPDATE ON data_requests.data_requests_selected_attribs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_data_requests_selected_attribs_update();
+
+
+--
 -- Name: log_activity_log_femfl_assignment_femfl_comm_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
 --
 
@@ -61283,14 +62000,6 @@ ALTER TABLE ONLY data_requests.data_request_message_to_reviewers
 
 ALTER TABLE ONLY data_requests.data_request_messages
     ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
-
-
---
--- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
---
-
-ALTER TABLE ONLY data_requests.activity_log_data_request_assignments
-    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (data_request_assignment_id) REFERENCES data_requests.data_request_assignments(id);
 
 
 --
@@ -71057,7 +71766,7 @@ ALTER TABLE ONLY tbs.tbs_withdrawal_history
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests,femfl;
+SET search_path TO ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests,femfl,q1,q2;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20150602181200'),
@@ -71343,6 +72052,12 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200727162041'),
 ('20200729193941'),
 ('20200730124512'),
-('20200730130051');
+('20200730130051'),
+('20200731121100'),
+('20200731121144'),
+('20200731122147'),
+('20200731124515'),
+('20200731124908'),
+('20200731130750');
 
 
