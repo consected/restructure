@@ -1,3 +1,9 @@
+-- PREP
+
+truncate q1.q1_datadic; 
+truncate q2.q2_datadic; 
+truncate ipa_ops.ipa_datadic;
+
 --
 -- PostgreSQL database dump
 --
@@ -12,7 +18,7 @@ SET client_min_messages = warning;
 SET search_path = ipa_ops, pg_catalog;
 
 --
--- Name: ipaops_datadic_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: fphs
+-- Name: ipaops_datadic_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
 --
 
 CREATE SEQUENCE ipaops_datadic_id_seq
@@ -23,14 +29,12 @@ CREATE SEQUENCE ipaops_datadic_id_seq
     CACHE 1;
 
 
-ALTER TABLE ipaops_datadic_id_seq OWNER TO fphs;
-
 SET default_tablespace = '';
 
 SET default_with_oids = false;
 
 --
--- Name: ipa_datadic; Type: TABLE; Schema: ipa_ops; Owner: fphs; Tablespace: 
+-- Name: ipa_datadic; Type: TABLE; Schema: ipa_ops; Owner: -; Tablespace: 
 --
 
 CREATE TABLE ipa_datadic (
@@ -55,12 +59,49 @@ CREATE TABLE ipa_datadic (
 );
 
 
-ALTER TABLE ipa_datadic OWNER TO fphs;
+SET search_path = q1, pg_catalog;
+
+--
+-- Name: q1datadic_id_seq; Type: SEQUENCE; Schema: q1; Owner: -
+--
+
+CREATE SEQUENCE q1datadic_id_seq
+    START WITH 411
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: q1_datadic; Type: TABLE; Schema: q1; Owner: -; Tablespace: 
+--
+
+CREATE TABLE q1_datadic (
+    id integer DEFAULT nextval('q1datadic_id_seq'::regclass) NOT NULL,
+    variable_name character varying,
+    domain text,
+    field_type_rc text,
+    field_type_sa text,
+    field_label text,
+    field_attributes text,
+    field_note text,
+    text_valid_type text,
+    text_valid_min text,
+    text_valid_max text,
+    required_field text,
+    field_attr_array text[],
+    source text,
+    owner text,
+    classification text,
+    display text
+);
+
 
 SET search_path = q2, pg_catalog;
 
 --
--- Name: q2_datadic; Type: TABLE; Schema: q2; Owner: fphs; Tablespace: 
+-- Name: q2_datadic; Type: TABLE; Schema: q2; Owner: -; Tablespace: 
 --
 
 CREATE TABLE q2_datadic (
@@ -84,10 +125,8 @@ CREATE TABLE q2_datadic (
 );
 
 
-ALTER TABLE q2_datadic OWNER TO fphs;
-
 --
--- Name: datadic_id_seq; Type: SEQUENCE; Schema: q2; Owner: fphs
+-- Name: datadic_id_seq; Type: SEQUENCE; Schema: q2; Owner: -
 --
 
 CREATE SEQUENCE datadic_id_seq
@@ -98,17 +137,15 @@ CREATE SEQUENCE datadic_id_seq
     CACHE 1;
 
 
-ALTER TABLE datadic_id_seq OWNER TO fphs;
-
 --
--- Name: datadic_id_seq; Type: SEQUENCE OWNED BY; Schema: q2; Owner: fphs
+-- Name: datadic_id_seq; Type: SEQUENCE OWNED BY; Schema: q2; Owner: -
 --
 
 ALTER SEQUENCE datadic_id_seq OWNED BY q2_datadic.id;
 
 
 --
--- Name: id; Type: DEFAULT; Schema: q2; Owner: fphs
+-- Name: id; Type: DEFAULT; Schema: q2; Owner: -
 --
 
 ALTER TABLE ONLY q2_datadic ALTER COLUMN id SET DEFAULT nextval('datadic_id_seq'::regclass);
@@ -117,7 +154,7 @@ ALTER TABLE ONLY q2_datadic ALTER COLUMN id SET DEFAULT nextval('datadic_id_seq'
 SET search_path = ipa_ops, pg_catalog;
 
 --
--- Data for Name: ipa_datadic; Type: TABLE DATA; Schema: ipa_ops; Owner: fphs
+-- Data for Name: ipa_datadic; Type: TABLE DATA; Schema: ipa_ops; Owner: -
 --
 
 COPY ipa_datadic (id, variable_name, domain, field_type_rc, field_type_sa, field_label, field_attributes, field_note, text_valid_type, text_valid_min, text_valid_max, required_field, field_attr_array, source, form_name, owner, classification, display) FROM stdin;
@@ -125,9 +162,97 @@ COPY ipa_datadic (id, variable_name, domain, field_type_rc, field_type_sa, field
 3	participant_id	\N	text	numeric	Participant ID:	\N	6-digit numeric id	number	100000	999999	y	\N	blsurveys	participant_id	\N	\N	\N
 4	visit_date	\N	text	free text	Visit date:	\N	mm-dd-yyyy	date_mdy	\N	\N	\N	\N	blsurveys	participant_id	\N	\N	\N
 5	visit_time	\N	text	free text	Visit start time:	\N	\N	time	\N	\N	\N	\N	blsurveys	participant_id	\N	\N	\N
+1315	pn_qstpreq1	pain	dropdown	categorical	1) How much pain are you experiencing right now?	0, 0 - No Pain | 1, 1 | 2, 2 | 3, 3 | 4, 4 | 5, 5 | 6, 6 | 7, 7 | 8, 8 | 9, 9 | 10, 10 - Worst Pain Imaginable	\N	\N	\N	\N	\N	\N	pain	qst_pretest	\N	\N	\N
+1316	pn_qstpreq2	pain	dropdown	categorical	2) How much pain do you expect to experience from these testing procedures?	0, 0 - No Pain | 1, 1 | 2, 2 | 3, 3 | 4, 4 | 5, 5 | 6, 6 | 7, 7 | 8, 8 | 9, 9 | 10, 10 - Worst Pain Imaginable	\N	\N	\N	\N	\N	\N	pain	qst_pretest	\N	\N	\N
+1317	pn_qstpreq3	pain	dropdown	categorical	3) How worried are you about undergoing these procedures?	0, 0 - No at All | 1, 1 | 2, 2 | 3, 3 | 4, 4 | 5, 5 | 6, 6 | 7, 7 | 8, 8 | 9, 9 | 10, 10 - Extremely Worried	\N	\N	\N	\N	\N	\N	pain	qst_pretest	\N	\N	\N
+1318	pn_qstpreq4	pain	dropdown	categorical	4) How well do you think that you'll be able to handle the pain from these procedures?	0, 0 - Not Well at All | 1, 1 | 2, 2 | 3, 3 | 4, 4 | 5, 5 | 6, 6 | 7, 7 | 8, 8 | 9, 9 | 10, 10 - Extremely well	\N	\N	\N	\N	\N	\N	pain	qst_pretest	\N	\N	\N
+1319	pn_qstpreq5	pain	dropdown	categorical	5) How much stress do you feel right now?	0, 0 - No Stress | 1, 1 | 2, 2 | 3, 3 | 4, 4 | 5, 5 | 6, 6 | 7, 7 | 8, 8 | 9, 9 | 10, 10 - Extreme Stress	\N	\N	\N	\N	\N	\N	pain	qst_pretest	\N	\N	\N
+1320	pn_qstprepr	pain	text	free text	 Clinical Pain Rating:	\N	(0-100)	number	0	100	\N	\N	pain	qst_pms	\N	\N	\N
+1321	pn_qstprear	pain	text	free text	Anxiety Rating:	\N	(0-100)	number	0	100	\N	\N	pain	qst_pms	\N	\N	\N
+1322	pn_pmsp4pr	pain	text	free text	Probe # 4 - Pain Rating Trial 1:\r\n	\N	(0-100)	number	0	100	\N	\N	pain	qst_pms	\N	\N	\N
+1323	pn_pmsp5pr	pain	text	free text	Probe # 5 - Pain Rating Trial 1:\r\n	\N	(0-100)	number	0	100	\N	\N	pain	qst_pms	\N	\N	\N
+1324	pn_pmsp6pr	pain	text	free text	Probe # 6 - Pain Rating Trial 1:\r\n	\N	(0-100)	number	0	100	\N	\N	pain	qst_pms	\N	\N	\N
+1325	pn_pmsprobe	pain	dropdown	categorical	Probe Number:	4, Probe #4 | 5, Probe #5 | 6, Probe #6	(Probe#: 4-6)	\N	\N	\N	\N	\N	pain	qst_pms	\N	\N	\N
+1326	pn_pmst1_1s	pain	text	free text	Sequence of 10 Stimuli Trial 1\n1:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_pms	\N	\N	\N
+1327	pn_pmst1_5s	pain	text	free text	Sequence of 10 Stimuli Trial 1\n5:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_pms	\N	\N	\N
+1328	pn_pmst1_10s	pain	text	free text	Sequence of 10 Stimuli Trial 1\n10:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_pms	\N	\N	\N
+1329	pn_pmst1_15s	pain	text	free text	Sequence of 10 Stimuli Trial 1\n15 sec after:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_pms	\N	\N	\N
+1330	pn_pmst2_1s	pain	text	free text	Sequence of 10 Stimuli Trial 2\n1:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_pms	\N	\N	\N
+1331	pn_pmst2_5s	pain	text	free text	Sequence of 10 Stimuli Trial 2\n5:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_pms	\N	\N	\N
+1332	pn_pmst2_10s	pain	text	free text	Sequence of 10 Stimuli Trial 2\n10:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_pms	\N	\N	\N
+1333	pn_pmst2_15s	pain	text	free text	Sequence of 10 Stimuli Trial 2\n15 sec after:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_pms	\N	\N	\N
+1334	pn_pmscom	pain	yesno	dichotomous	Would you like to add any comments?	\N	\N	\N	\N	\N	\N	\N	pain	qst_pms	\N	\N	\N
+1335	pn_pmscomexp	pain	notes	notes	Comments:	\N	\N	\N	\N	\N	\N	\N	pain	qst_pms	\N	\N	\N
+1336	pn_ppts1th	pain	text	free text	PRESSURE PAIN THRESHOLD (Maximum = 20 lbs)   Set 1 (Right Side):\nThumb:\r\n	\N	lbs	number	0	20	\N	\N	pain	qst_ppt	\N	\N	\N
 210	bb_nida_prstim	brainbehavior	text	numeric	NIDA SI Prescription Stimulants  - RS	\N	0-39	number	0	39	\N	\N	brainbehavior	nida	\N	\N	\N
+1337	pn_ppts1tr	pain	text	free text	PRESSURE PAIN THRESHOLD (Maximum = 20 lbs)   Set 1 (Right Side):\nTrapezius:\r\n	\N	lbs	number	0	20	\N	\N	pain	qst_ppt	\N	\N	\N
+1338	pn_ppts1kn	pain	text	free text	PRESSURE PAIN THRESHOLD (Maximum = 20 lbs)   Set 1 (Right Side):\nKnee:\r\n	\N	lbs	number	0	20	\N	\N	pain	qst_ppt	\N	\N	\N
+1339	pn_ppts2th	pain	text	free text	PRESSURE PAIN THRESHOLD (Maximum = 20 lbs)   Set 2 (Left Side):\nThumb:\r\n	\N	lbs	number	0	20	\N	\N	pain	qst_ppt	\N	\N	\N
+1340	pn_ppts2tr	pain	text	free text	PRESSURE PAIN THRESHOLD (Maximum = 20 lbs)   Set 2 (Left Side):\nTrapezius:\r\n	\N	lbs	number	0	20	\N	\N	pain	qst_ppt	\N	\N	\N
+1341	pn_ppts2kn	pain	text	free text	PRESSURE PAIN THRESHOLD (Maximum = 20 lbs)   Set 2 (Left Side):\nKnee:\r\n	\N	lbs	number	0	20	\N	\N	pain	qst_ppt	\N	\N	\N
+1342	pn_ppts3th	pain	text	free text	PRESSURE PAIN THRESHOLD (Maximum = 20 lbs)   Set 3 (Right Side):\nThumb:\r\n	\N	lbs	number	0	20	\N	\N	pain	qst_ppt	\N	\N	\N
+1343	pn_ppts3tr	pain	text	free text	PRESSURE PAIN THRESHOLD (Maximum = 20 lbs)   Set 3 (Right Side):\nTrapezius:\r\n	\N	lbs	number	0	20	\N	\N	pain	qst_ppt	\N	\N	\N
+1344	pn_ppts3kn	pain	text	free text	PRESSURE PAIN THRESHOLD (Maximum = 20 lbs)   Set 3 (Right Side):\nKnee:\r\n	\N	lbs	number	0	20	\N	\N	pain	qst_ppt	\N	\N	\N
+1345	pn_ppts4th	pain	text	free text	PRESSURE PAIN THRESHOLD (Maximum = 20 lbs)   Set 4 (Left Side):\nThumb:\r\n	\N	lbs	number	0	20	\N	\N	pain	qst_ppt	\N	\N	\N
+1346	pn_ppts4tr	pain	text	free text	PRESSURE PAIN THRESHOLD (Maximum = 20 lbs)   Set 4 (Left Side):\nTrapezius:\r\n	\N	lbs	number	0	20	\N	\N	pain	qst_ppt	\N	\N	\N
+1347	pn_ppts4kn	pain	text	free text	PRESSURE PAIN THRESHOLD (Maximum = 20 lbs)   Set 4 (Left Side):\nKnee:\r\n	\N	lbs	number	0	20	\N	\N	pain	qst_ppt	\N	\N	\N
+1348	pn_pptcom	pain	yesno	dichotomous	Would you like to add any comments?\r\n	\N	\N	\N	\N	\N	\N	\N	pain	qst_ppt	\N	\N	\N
+1349	pn_pptcomexp	pain	notes	notes	Comments:\r\n	\N	\N	\N	\N	\N	\N	\N	pain	qst_ppt	\N	\N	\N
+1350	pn_ccwbl1thrsh	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nTrapezius Threshold (Left Side)\n Baseline 1:	\N	(0-20 lbs)	number	0	20	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1351	pn_ccwbl2thrsh	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nTrapezius Threshold (Left Side)\nBaseline 2:	\N	(0-20 lbs)	number	0	20	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1352	pn_ccwt1cpr20	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nFIRST TRIAL\nCold Pain Rating @ 20 Sec:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1353	pn_ccwt1ppt	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nFIRST TRIAL\nPressure Pain Threshold:\r\n	\N	(0-20 lbs)	number	0	20	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1354	pn_ccwt1maxcpr	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nFIRST TRIAL\nMaximum Cold Pain Rating:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1355	pn_ccwt1withdr	pain	yesno	dichotomous	COMBINED COLD WATER AND PRESSURE TESTING\nFIRST TRIAL\nHand withdrawn prior to completing trial 1?	\N	\N	\N	\N	\N	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1356	pn_ccwt1time	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nFIRST TRIAL\nTime to  withdrawal of hand:	\N	seconds	number	0	120	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1357	pn_ccwt1pr30	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nFIRST TRIAL\nPain Rating 30 sec post:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1358	pn_ccwt1pr60	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nFIRST TRIAL\nPain Rating 1 min post:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1359	pn_ccwt1pr120	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nFIRST TRIAL\nPain Rating 2 min post:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1360	pn_ccwt2cpr20	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nSECOND TRIAL\nCold Pain Rating @ 20 Sec:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1361	pn_ccwt2ppt	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nSECOND TRIAL\nPressure Pain Threshold:\r\n	\N	(0-20 lbs)	number	0	20	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1362	pn_ccwt2maxcpr	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nSECOND TRIAL\nMaximum Cold Pain Rating:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1363	pn_ccwt2withdr	pain	yesno	dichotomous	COMBINED COLD WATER AND PRESSURE TESTING\nSECOND TRIAL\nHand withdrawn prior to completing trial 2?	\N	\N	\N	\N	\N	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1364	pn_ccwt2time	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nSECOND TRIAL\nTime to withdrawal of hand:	\N	seconds	number	0	120	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1365	pn_ccwt2pr30	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nSECOND TRIAL\nPain Rating 30 sec post:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1366	pn_ccwt2pr60	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nSECOND TRIAL\nPain Rating 1 min post:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1367	pn_ccwt2pr120	pain	text	free text	COMBINED COLD WATER AND PRESSURE TESTING\nSECOND TRIAL\nPain Rating 2 min post:\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1368	pn_ccwcom	pain	yesno	dichotomous	Would you like to add any comments?	\N	\N	\N	\N	\N	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1369	pn_ccwcomexp	pain	notes	notes	Comments:\r\n	\N	\N	\N	\N	\N	\N	\N	pain	qst_ccwpt	\N	\N	\N
+1370	pn_cptpr20	pain	text	free text	Pain Rating (20 sec):	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1371	pn_cptpr40	pain	text	free text	Pain Rating (40 sec):	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1372	pn_cptpr60	pain	text	free text	Pain Rating (1 min):	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1373	pn_cptpr80	pain	text	free text	Pain Rating (1 min 20 sec):	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1374	pn_cptpr100	pain	text	free text	Pain Rating (1 min 40 sec):	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1375	pn_cptpr120	pain	text	free text	Pain Rating (2 min):	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_finalcpt	\N	\N	\N
 47	data_verification	\N	text	free text	Data verification performed by:\r\n(If more than one staff member performed data verification, enter all names separated by semicolons)	\N	first last (e.g. jane smith; john smith; etc.)	\N	\N	\N	\N	\N	blsurveys	data_review	\N	\N	\N
 48	data_verification_date	\N	text	free text	Data verification completion date:	\N	mm-dd-yyyy	date_mdy	\N	\N	\N	\N	blsurveys	data_review	\N	\N	\N
+1376	pn_cptpr140	pain	text	free text	Pain Rating (2 min 20 sec):\r\n	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1377	pn_cptpr160	pain	text	free text	Pain Rating (2 min 40 sec):	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1378	pn_cptpr180	pain	text	free text	Pain Rating (3 min):	\N	(pain rating: 0-100)	number	0	100	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1379	pn_cpttime	pain	text	free text	Time of hand withdrawal:	\N	seconds	number	0	180	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1380	pn_qstpostar	pain	text	free text	Patient Anxiety Rating:\r\n	\N	(anxiety rating: 0-100)	number	0	100	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1381	pn_qstpostpr	pain	text	free text	Clinical Pain Rating:\r\n	\N	(0-100)	number	0	100	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1382	pn_cpt_commyn	pain	yesno	dichotomous	Would you like to add any comments?	\N	\N	\N	\N	\N	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1383	pn_qst_comm	pain	notes	notes	Comments:\r\n	\N	\N	\N	\N	\N	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1384	pn_qst_tstad	pain	text	free text	Test Administrator:	\N	First_Last	\N	\N	\N	\N	\N	pain	qst_finalcpt	\N	\N	\N
+1385	pn_qstpostq1	pain	dropdown	categorical	After Cold Water\nDirections: For the following questions, we are interested in the types of thoughts and feelings that you had while you were participating in these Cold Water pain procedures. Listed below are several statements describing different thou (...)\n1. I worried about when it would end.	0, 0 - not at all | 1, 1 - to a slight degree | 2, 2 - to a moderate degree | 3, 3 - to a great degree | 4, 4 - all the time	\N	\N	\N	\N	\N	\N	pain	qst_posttest	\N	\N	\N
+1386	pn_qstpostq2	pain	dropdown	categorical	After Cold Water\nDirections: For the following questions, we are interested in the types of thoughts and feelings that you had while you were participating in these Cold Water pain procedures. Listed below are several statements describing different thou (...)\n2. I thought that the pain might overwhelm me.	0, 0 - not at all | 1, 1 - to a slight degree | 2, 2 - to a moderate degree | 3, 3 - to a great degree | 4, 4 - all the time	\N	\N	\N	\N	\N	\N	pain	qst_posttest	\N	\N	\N
+1387	pn_qstpostq3	pain	dropdown	categorical	After Cold Water\nDirections: For the following questions, we are interested in the types of thoughts and feelings that you had while you were participating in these Cold Water pain procedures. Listed below are several statements describing different thou (...)\n3. I felt that I couldn't stand it.	0, 0 - not at all | 1, 1 - to a slight degree | 2, 2 - to a moderate degree | 3, 3 - to a great degree | 4, 4 - all the time	\N	\N	\N	\N	\N	\N	pain	qst_posttest	\N	\N	\N
+1388	pn_qstpostq4	pain	dropdown	categorical	After Cold Water\nDirections: For the following questions, we are interested in the types of thoughts and feelings that you had while you were participating in these Cold Water pain procedures. Listed below are several statements describing different thou (...)\n4. I couldn't stop thinking about how much it hurt.	0, 0 - not at all | 1, 1 - to a slight degree | 2, 2 - to a moderate degree | 3, 3 - to a great degree | 4, 4 - all the time	\N	\N	\N	\N	\N	\N	pain	qst_posttest	\N	\N	\N
+1389	pn_qstpostq5	pain	dropdown	categorical	After Cold Water\nDirections: For the following questions, we are interested in the types of thoughts and feelings that you had while you were participating in these Cold Water pain procedures. Listed below are several statements describing different thou (...)\n5. I kept wishing that it would be over.	0, 0 - not at all | 1, 1 - to a slight degree | 2, 2 - to a moderate degree | 3, 3 - to a great degree | 4, 4 - all the time	\N	\N	\N	\N	\N	\N	pain	qst_posttest	\N	\N	\N
+1410	pt_t807_admintime	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nAdministration time:	\N	HH:MM:SS	\N	\N	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1411	pt_t807_dosevolume	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nDose volume:	\N	ml	number	0	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1390	pn_qstpostq6	pain	dropdown	categorical	After Cold Water\nDirections: For the following questions, we are interested in the types of thoughts and feelings that you had while you were participating in these Cold Water pain procedures. Listed below are several statements describing different thou (...)\n6. I felt that the procedures were awful.	0, 0 - not at all | 1, 1 - to a slight degree | 2, 2 - to a moderate degree | 3, 3 - to a great degree | 4, 4 - all the time	\N	\N	\N	\N	\N	\N	pain	qst_posttest	\N	\N	\N
+1391	pn_mechpnsen	pain	calc	calc	QST Results (For Post Visit Report)\nMechanical Pain Sensitivity:\r\n[Mean of 12 Pain Pressure Threshold Values]	if([qst_ppt_complete]>0, round(mean([pn_ppts1th], [pn_ppts1tr], [pn_ppts1kn], [pn_ppts2th], [pn_ppts2tr], [pn_ppts2kn], [pn_ppts3th], [pn_ppts3tr], [pn_ppts3kn], [pn_ppts4th], [pn_ppts4tr], [pn_ppts4kn]), 2), "NaN")	\N	\N	\N	\N	\N	\N	pain	qst_scores	\N	\N	\N
+1392	pn_senspart	pain	calc	calc	QST Results (For Post Visit Report)\nMost Sensitive Body Part\r\n[Smallest mean threshold over three trials]\r\n\r\nInterpretation:\r\n1 = Thumb\r\n2 = Trapezius\r\n3 = Knee\r\n0 = all equally sensitive or maxed out on the assessment	if( (mean([pn_ppts1th], [pn_ppts2th], [pn_ppts3th], [pn_ppts4th])) < (mean([pn_ppts1tr], [pn_ppts2tr], [pn_ppts3tr], [pn_ppts4tr]))  AND mean([pn_ppts1th], [pn_ppts2th], [pn_ppts3th], [pn_ppts4th]) < (mean([pn_ppts1kn], [pn_ppts2kn], [pn_ppts3kn], [pn_ppts4kn])), 1,  if( (mean([pn_ppts1tr], [pn_ppts2tr], [pn_ppts3tr], [pn_ppts4tr])) < (mean([pn_ppts1th], [pn_ppts2th], [pn_ppts3th], [pn_ppts4th]))  AND mean([pn_ppts1tr], [pn_ppts2tr], [pn_ppts3tr], [pn_ppts4tr]) <(mean([pn_ppts1kn], [pn_ppts2kn], [pn_ppts3kn], [pn_ppts4kn])), 2, if( (mean([pn_ppts1kn], [pn_ppts2kn], [pn_ppts3kn], [pn_ppts4kn])) < (mean([pn_ppts1tr], [pn_ppts2tr], [pn_ppts3tr], [pn_ppts4tr]))  AND mean([pn_ppts1kn], [pn_ppts2kn], [pn_ppts3kn], [pn_ppts4kn]) <(mean([pn_ppts1th], [pn_ppts2th], [pn_ppts3th], [pn_ppts4th])), 3, 0)))	\N	\N	\N	\N	\N	\N	pain	qst_scores	\N	\N	\N
+1393	pn_mechpnsen_int	pain	calc	calc	QST Results (For Post Visit Report)\nMechanical Pain Sensitivity:\r\n[Interpretation]\r\n\r\n1 = Somewhat below average (<7)\r\n2 = Average (7-15)\r\n3 = Somewhat above average (>15)	if([qst_ppt_complete] > 0, sum(if([pn_mechpnsen] < 7, 1, 0), if([pn_mechpnsen] >=7 and  [pn_mechpnsen] <=15, 2, 0),  if([pn_mechpnsen] >15, 3, 0)), "NaN")	\N	\N	\N	\N	\N	\N	pain	qst_scores	\N	\N	\N
+1394	pn_pntolerance_int	pain	calc	calc	QST Results (For Post Visit Report)\nPain Tolerance:\r\n[Final CPT time of hand withdrawal]\r\n\r\nTime of withdrawel: [pn_cpttime] seconds\r\n1 = Somewhat below average (< 30)\r\n2 = Average (30-85)\r\n3 = Somewhat above average (>85)	if([qst_finalcpt_complete]>0, sum(if([pn_cpttime]< 30, 1, 0),  if([pn_cpttime]>=30 and [pn_cpttime]<=85, 2, 0), if([pn_cpttime]>85, 3, 0)), "NaN")	\N	\N	\N	\N	\N	\N	pain	qst_scores	\N	\N	\N
+1395	pn_tempsum	pain	calc	calc	QST Results (For Post Visit Report)\nTemporal Summation:\r\n[Mean pain rating at 10 stimuli (trials 1 and 2) - [Mean pain rating at 1 stimulus (trials 1 and 2)	if([qst_pms_complete]>0, round(mean([pn_pmst1_10s], [pn_pmst2_10s]) - mean([pn_pmst1_1s],[pn_pmst2_1s] ), 2), "NaN")	\N	\N	\N	\N	\N	\N	pain	qst_scores	\N	\N	\N
+1396	pn_tempsum_int	pain	calc	calc	QST Results (For Post Visit Report)\nTemporal Summation:\r\n[Interpretation]\r\n\r\n1 = Somewhat below average (<=0)\r\n2 = Average (0 to 19)\r\n3 = Somewhat above average (>=20)	if([qst_pms_complete] >0, sum(if([pn_tempsum] <=0, 1, 0), if([pn_tempsum]>0 and [pn_tempsum] < 20, 2, 0), if([pn_tempsum]>=20, 3, 0)), "NaN")	\N	\N	\N	\N	\N	\N	pain	qst_scores	\N	\N	\N
+1397	pn_paininhib	pain	calc	calc	QST Results (For Post Visit Report)\nPain Inhibition:\r\n[Mean of the 2 PPT's during water immersion divided by the mean of BL1 and BL2 PPT's]	if([qst_pms_complete] >0 and sum([pn_ccwt1ppt], [pn_ccwt2ppt], [pn_ccwbl1thrsh], [pn_ccwbl2thrsh]) = 80, 999, if([qst_pms_complete] >0, round((mean([pn_ccwt1ppt], [pn_ccwt2ppt])/mean([pn_ccwbl1thrsh], [pn_ccwbl2thrsh]))*100, 2), "NaN"))	\N	\N	\N	\N	\N	\N	pain	qst_scores	\N	\N	\N
+1412	pt_t807_injlocation	pet	dropdown	categorical	18F-T807 PET/CT SCAN DETAILS\nInjection location:	1, L antecubital | 2, R antecubital	\N	\N	\N	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1413	pt_t807_activity	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nSpecific activity (if applicable):	\N	mCi/umole	\N	\N	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1433	mr_report_date	mri	text	free text	Date of MRI interpretation:	\N	\N	date_mdy	\N	\N	\N	\N	mri	mri_report	\N	\N	\N
 72	data_entry	\N	text	free text	Data entry performed by:\r\n(If more than one staff member performed data entry, enter all names separated by semicolons)	\N	first last (e.g. jane smith; john smith; etc.)	\N	\N	\N	\N	\N	blsurveys	data_review	\N	\N	\N
 73	data_group	\N	text	free text	Group from which the data were collected:	\N	\N	\N	\N	\N	\N	\N	blsurveys	data_review	\N	\N	\N
 74	data_entry_date	\N	text	free text	Data entry completion date:	\N	mm-dd-yyyy	date_mdy	\N	\N	\N	\N	blsurveys	data_review	\N	\N	\N
@@ -341,6 +466,7 @@ COPY ipa_datadic (id, variable_name, domain, field_type_rc, field_type_sa, field
 282	bb_ace10_rs	brainbehavior	text	numeric	Adverse Childhood Experiences (ACE) - RS	\N	0-10	number	0	10	\N	\N	brainbehavior	ace10	\N	\N	\N
 283	bb_promissr1	brainbehavior	radio	categorical	1. I am satisfied with how much work I can do (include work at home)...	1, not at all | 2, a little bit | 3, somewhat | 4, quite a bit | 5, very much	\N	\N	\N	\N	\N	\N	brainbehavior	promis_sr	\N	\N	\N
 284	bb_promissr2	brainbehavior	radio	categorical	2. I am satisfied with my ability to work (include work at home)...	1, not at all | 2, a little bit | 3, somewhat | 4, quite a bit | 5, very much	\N	\N	\N	\N	\N	\N	brainbehavior	promis_sr	\N	\N	\N
+1465	tms_pi	tmseeg	text	free text	Investigator Name:	\N	\N	\N	\N	\N	\N	\N	tmseeg	pre_tms	\N	\N	\N
 285	bb_promissr3	brainbehavior	radio	categorical	3. I am satisfied with my ability to do regular personal and household responsibilities...	1, not at all | 2, a little bit | 3, somewhat | 4, quite a bit | 5, very much	\N	\N	\N	\N	\N	\N	brainbehavior	promis_sr	\N	\N	\N
 286	bb_promissr4	brainbehavior	radio	categorical	4. I am satisfied with my ability to perform my daily routines...	1, not at all | 2, a little bit | 3, somewhat | 4, quite a bit | 5, very much	\N	\N	\N	\N	\N	\N	brainbehavior	promis_sr	\N	\N	\N
 287	bb_promissr5	brainbehavior	radio	categorical	5. I am satisfied with my ability to meet the needs of those who depend on me...	1, not at all | 2, a little bit | 3, somewhat | 4, quite a bit | 5, very much	\N	\N	\N	\N	\N	\N	brainbehavior	promis_sr	\N	\N	\N
@@ -358,7 +484,6 @@ COPY ipa_datadic (id, variable_name, domain, field_type_rc, field_type_sa, field
 299	bb_nihtbmp8	brainbehavior	radio	categorical	8. I feel a sense of purpose in my life.	5, not at all | 4, a little bit | 3, somewhat | 2, quite a bit | 1, very much	\N	\N	\N	\N	\N	\N	brainbehavior	nihtbx_mp	\N	\N	\N
 300	bb_nihtbmp_rs	brainbehavior	text	numeric	NIH Toolbox Meaning and Purpose - RS	\N	8-40	number	8	40	\N	\N	brainbehavior	nihtbx_mp	\N	\N	\N
 301	bb_sds_work	brainbehavior	radio	categorical	SHEEHAN DISABILITY SCALE\nA BRIEF, PATIENT RATED, MEASURE OF DISABILITY AND IMPAIRMENT \nPlease mark ONE circle for each scale.\n\n0=Not at all | 1-3=Mildly | 4-6=Moderately | 7-9=Markedly | 10=Extremely\nIn the past week:\nThe symptoms have disrupted your work / school work:\nWORK* / SCHOOL	0, 0 | 1, 1 | 2, 2 | 3, 3 | 4, 4 | 5, 5 | 6, 6 | 7, 7 | 8, 8 | 9, 9 | 10, 10	\N	\N	\N	\N	\N	\N	brainbehavior	sds	\N	\N	\N
-302	bb_sds_nowork	brainbehavior	checkbox	dichotomous	SHEEHAN DISABILITY SCALE\nA BRIEF, PATIENT RATED, MEASURE OF DISABILITY AND IMPAIRMENT \nPlease mark ONE circle for each scale.\n\n0=Not at all | 1-3=Mildly | 4-6=Moderately | 7-9=Markedly | 10=Extremely\nIn the past week:\nThe symptoms have disrupted your work / school work:\nI have not worked /studied at all during the past week for reasons unrelated to the disorder.	bb_sds_nowork_1	\N	\N	\N	\N	\N	\N	brainbehavior	sds	\N	\N	\N
 303	bb_sds_social	brainbehavior	radio	categorical	The symptoms have disrupted your social life / leisure activities:\nSOCIAL LIFE	0, 0 | 1, 1 | 2, 2 | 3, 3 | 4, 4 | 5, 5 | 6, 6 | 7, 7 | 8, 8 | 9, 9 | 10, 10	\N	\N	\N	\N	\N	\N	brainbehavior	sds	\N	\N	\N
 304	bb_sds_family	brainbehavior	radio	categorical	The symptoms have disrupted your family life / home responsibilities:\nFAMILY LIFE / HOME RESPONSIBILITIES	0, 0 | 1, 1 | 2, 2 | 3, 3 | 4, 4 | 5, 5 | 6, 6 | 7, 7 | 8, 8 | 9, 9 | 10, 10	\N	\N	\N	\N	\N	\N	brainbehavior	sds	\N	\N	\N
 305	bb_sds_lost	brainbehavior	dropdown	categorical	DAYS LOST\nOn how many days in the last week did your  symptoms cause you to miss school or work  or leave you unable to carry out your normal  daily responsibilities?	0, 0 | 1, 1 | 2, 2 | 3, 3 | 4, 4 | 5, 5 | 6, 6 | 7, 7	days	\N	\N	\N	\N	\N	brainbehavior	sds	\N	\N	\N
@@ -409,6 +534,7 @@ COPY ipa_datadic (id, variable_name, domain, field_type_rc, field_type_sa, field
 350	bb_ristguess_ts	brainbehavior	text	numeric	RIST Guess What - TS	\N	t-score	number	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
 351	bb_nabname_rs	brainbehavior	text	numeric	NAB Naming - RS	\N	\N	number	0	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
 352	bb_nabname_ts	brainbehavior	text	numeric	NAB Naming - TS	\N	t-score	number	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+1521	tms_er_time	tmseeg	text	free text	General EEG Information\nDuration:	\N	mm:ss	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
 353	bb_nabname_pr	brainbehavior	text	numeric	NAB Naming - PR	\N	%ile	number	1	99.9	\N	\N	brainbehavior	score_sheet	\N	\N	\N
 354	bb_nablist_rs	brainbehavior	text	numeric	List Learning Trial 1 - RS	\N	\N	number	0	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
 355	bb_nablist_pr	brainbehavior	text	numeric	List Learning Trial 1 - PR	\N	%ile	number	1	99.9	\N	\N	brainbehavior	score_sheet	\N	\N	\N
@@ -496,25 +622,7 @@ COPY ipa_datadic (id, variable_name, domain, field_type_rc, field_type_sa, field
 437	bb_nihcogtot_ss	brainbehavior	text	numeric	Cognition Total Composite - Age-Corrected SS	\N	standard score (ss)	number	0	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
 438	bb_nihcogtot_ts	brainbehavior	text	numeric	Cognition Total Composite - Fully-Corrected TS	\N	t-score	number	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
 439	bb_nihcogimp	brainbehavior	radio	categorical	Cognitive Impairment Indicator	1, yes | 0, no	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-440	bb_mini_mdd	brainbehavior	checkbox	dichotomous	MINI - Major Depressive Disorder	bb_mini_mdd_never, never| bb_mini_mdd_past, past| bb_mini_mdd_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-441	bb_mini_suicide	brainbehavior	checkbox	dichotomous	MINI - Suicidality	bb_mini_suicide_never, never| bb_mini_suicide_past, past| bb_mini_suicide_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-442	bb_mini_bipolar1	brainbehavior	checkbox	dichotomous	MINI - Bipolar I Disorder	bb_mini_bipolar1_never, never| bb_mini_bipolar1_past, past| bb_mini_bipolar1_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-443	bb_mini_bipolar2	brainbehavior	checkbox	dichotomous	MINI - Bipolar II Disorder	bb_mini_bipolar2_never, never| bb_mini_bipolar2_past, past| bb_mini_bipolar2_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-444	bb_mini_panic	brainbehavior	checkbox	dichotomous	MINI - Panic Disorder	bb_mini_panic_never, never| bb_mini_panic_past, past| bb_mini_panic_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-445	bb_mini_agoraphob	brainbehavior	checkbox	dichotomous	MINI - Agoraphobia	bb_mini_agoraphob_never, never| bb_mini_agoraphob_past, past| bb_mini_agoraphob_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
 489	cv_echo_rvsystolic	cardiac	text	numeric	RV Sys Pressure:\r\n(Right ventricular systolic pressure)	\N	mmhg	number	\N	\N	\N	\N	cardiac	echo_data	\N	\N	\N
-446	bb_mini_socanxiety	brainbehavior	checkbox	dichotomous	MINI - Social Anxiety Disorder	bb_mini_socanxiety_never, never| bb_mini_socanxiety_past, past| bb_mini_socanxiety_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-447	bb_mini_ocd	brainbehavior	checkbox	dichotomous	MINI - Obsessive-Compulsive Disorder	bb_mini_ocd_never, never| bb_mini_ocd_past, past| bb_mini_ocd_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-448	bb_mini_ptsd	brainbehavior	checkbox	dichotomous	MINI - Post-Traumatic Stress Disorder	bb_mini_ptsd_never, never| bb_mini_ptsd_past, past| bb_mini_ptsd_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-449	bb_mini_alcohol	brainbehavior	checkbox	dichotomous	MINI - Alcohol Use Disorder	bb_mini_alcohol_never, never| bb_mini_alcohol_past, past| bb_mini_alcohol_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-450	bb_mini_substance	brainbehavior	checkbox	dichotomous	MINI - Substance Use Disorder	bb_mini_substance_never, never| bb_mini_substance_past, past| bb_mini_substance_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-451	bb_mini_psychotic	brainbehavior	checkbox	dichotomous	MINI - Psychotic Disorder	bb_mini_psychotic_never, never| bb_mini_psychotic_past, past| bb_mini_psychotic_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-452	bb_mini_moodpsych	brainbehavior	checkbox	dichotomous	MINI - Mood Disorder w/ Psychotic feat.	bb_mini_moodpsych_never, never| bb_mini_moodpsych_past, past| bb_mini_moodpsych_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-453	bb_mini_anorexia	brainbehavior	checkbox	dichotomous	MINI - Anorexia Nervosa	bb_mini_anorexia_never, never| bb_mini_anorexia_past, past| bb_mini_anorexia_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-454	bb_mini_bulimia	brainbehavior	checkbox	dichotomous	MINI - Bulimia Nervosa	bb_mini_bulimia_never, never| bb_mini_bulimia_past, past| bb_mini_bulimia_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-455	bb_mini_bingeeat	brainbehavior	checkbox	dichotomous	MINI - Binge Eating Disorder	bb_mini_bingeeat_never, never| bb_mini_bingeeat_past, past| bb_mini_bingeeat_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-456	bb_mini_genanxiety	brainbehavior	checkbox	dichotomous	MINI - Generalized Anxiety Disorder	bb_mini_genanxiety_never, never| bb_mini_genanxiety_past, past| bb_mini_genanxiety_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
-457	bb_mini_antisocial	brainbehavior	checkbox	dichotomous	MINI - Antisocial Personality Disorder	bb_mini_antisocial_never, never| bb_mini_antisocial_past, past| bb_mini_antisocial_curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
 458	cv_echo_imgqual	cardiac	dropdown	categorical	Image Quality:	1, 1 - excellent | 2, 2 - good | 3, 3 - fair | 4, 4 - poor	\N	\N	\N	\N	\N	\N	cardiac	echo_data	\N	\N	\N
 459	cv_echo_lvwallthick	cardiac	radio	categorical	Left ventricle wall thickness:	0, normal | 1, enlarged	\N	\N	\N	\N	\N	\N	cardiac	echo_data	\N	\N	\N
 460	cv_echo_lvcavitysize	cardiac	radio	categorical	Left ventricle cavity size:	0, normal | 1, enlarged	\N	\N	\N	\N	\N	\N	cardiac	echo_data	\N	\N	\N
@@ -811,7 +919,6 @@ COPY ipa_datadic (id, variable_name, domain, field_type_rc, field_type_sa, field
 752	pf_sfm_dpsquat	physical function	radio	categorical	Deep Squat	0, functional no pain (0)  | 1, functional pain (1)  | 2, dysfunctional pain (2)  | 3, dysfunctional no pain (3) 	\N	\N	\N	\N	\N	\N	physfunc	selective_functional_movement_assessment	\N	\N	\N
 753	pf_sfm_admin	physical function	text	free text	Test Administrator:	\N	first_last	\N	\N	\N	\N	\N	physfunc	selective_functional_movement_assessment	\N	\N	\N
 754	pf_srt_unsafe	physical function	yesno	dichotomous	Joint limitations that would make the test unsafe?	\N	\N	\N	\N	\N	\N	\N	physfunc	sitting_rising_test	\N	\N	\N
-755	pf_srt_joint	physical function	checkbox	dichotomous	Please identify the joint limitation would make the test unsafe:	pf_srt_joint_bck, back | pf_srt_joint_hip, hips | pf_srt_joint_kne, knees | pf_srt_joint_ank, ankles | pf_srt_joint_ft, feet | pf_srt_joint_oth, other	\N	\N	\N	\N	\N	\N	physfunc	sitting_rising_test	\N	\N	\N
 756	pf_srt_jointexp	physical function	text	free text	If other, please explain:	\N	\N	\N	\N	\N	\N	\N	physfunc	sitting_rising_test	\N	\N	\N
 757	pf_srt1_sithand	physical function	radio	categorical	Trial 1:\nTouches While Sitting:\nHand:	0, 0 | 1, -1 | 2, -2	\N	\N	\N	\N	\N	\N	physfunc	sitting_rising_test	\N	\N	\N
 758	pf_srt1_sitfore	physical function	radio	categorical	Trial 1:\nTouches While Sitting:\nForearm:	0, 0 | 1, -1 | 2, -2	\N	\N	\N	\N	\N	\N	physfunc	sitting_rising_test	\N	\N	\N
@@ -1414,6 +1521,7 @@ COPY ipa_datadic (id, variable_name, domain, field_type_rc, field_type_sa, field
 46	bl_ipaq27b	baseline_surveys	text	numeric	27. During the last 7 days, how much time did you usually spend sitting on a weekend\r\nday?\nminutes per day	\N	\N	number	0	960	\N	\N	baseline_surveys	ipaq	\N	\N	\N
 49	bl_pcs1	baseline_surveys	radio	categorical	1. I worry all the time about whether the pain will end.	0, not at all 0 | 1, to a slight degree 1 | 2, to a moderate degree 2 | 3, to a great degree 3 | 4, all the time 4	\N	\N	\N	\N	\N	\N	baseline_surveys	pcs	\N	\N	\N
 50	bl_pcs2	baseline_surveys	radio	categorical	2. I feel I can't go on.	0, not at all 0 | 1, to a slight degree 1 | 2, to a moderate degree 2 | 3, to a great degree 3 | 4, all the time 4	\N	\N	\N	\N	\N	\N	baseline_surveys	pcs	\N	\N	\N
+1414	pt_t807_activitytime	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nSpecific activity time:	\N	HH:MM:SS	\N	\N	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
 52	bl_pcs4	baseline_surveys	radio	categorical	4. It's awful and I feel that it overwhelms me.	0, not at all 0 | 1, to a slight degree 1 | 2, to a moderate degree 2 | 3, to a great degree 3 | 4, all the time 4	\N	\N	\N	\N	\N	\N	baseline_surveys	pcs	\N	\N	\N
 53	bl_pcs5	baseline_surveys	radio	categorical	5. I feel I can't stand it anymore.	0, not at all 0 | 1, to a slight degree 1 | 2, to a moderate degree 2 | 3, to a great degree 3 | 4, all the time 4	\N	\N	\N	\N	\N	\N	baseline_surveys	pcs	\N	\N	\N
 54	bl_pcs6	baseline_surveys	radio	categorical	6. I become afraid that the pain will get worse.	0, not at all 0 | 1, to a slight degree 1 | 2, to a moderate degree 2 | 3, to a great degree 3 | 4, all the time 4	\N	\N	\N	\N	\N	\N	baseline_surveys	pcs	\N	\N	\N
@@ -1434,27 +1542,547 @@ COPY ipa_datadic (id, variable_name, domain, field_type_rc, field_type_sa, field
 69	bl_shim4	baseline_surveys	radio	categorical	4. During sexual intercourse, how difficult was it to maintain your erection to completion of intercourse?	0, 0 did not attempt intercourse | 1, 1 extremely difficult | 2, 2 very difficult | 3, 3 difficult | 4, 4 slightly difficult | 5, 5 not difficult	\N	\N	\N	\N	\N	\N	baseline_surveys	shim	\N	\N	\N
 70	bl_shim5	baseline_surveys	radio	categorical	5. When you attempted sexual intercourse, how often was it satisfactory for you?	0, 0 did not attempt intercourse | 1, 1 almost never or never | 2, 2 a few times (much less than half the time) | 3, 3 sometimes (about half the time) | 4, 4 most times (much more than, half the time) | 5, 5 almost always or always	\N	\N	\N	\N	\N	\N	baseline_surveys	shim	\N	\N	\N
 71	bl_shimtot_sc	baseline_surveys	calc	calc	TOTAL:	sum([bl_shim1], [bl_shim2], [bl_shim3], [bl_shim4], [bl_shim5])	\N	\N	\N	\N	\N	\N	baseline_surveys	shim	\N	\N	\N
+1398	pn_paininhib_int	pain	calc	calc	QST Results (For Post Visit Report)\nPain Inhibition:\r\n[Interpretation]\r\n\r\n1 = Somewhat below average (<=105)\r\n2 = Average (>105 and < 140)\r\n3 = Somewhat above average (>=140)\r\n999 = Not scorable, but potentially  above average given the high pain thresholds	if([qst_pms_complete] >0 and sum([pn_ccwt1ppt], [pn_ccwt2ppt], [pn_ccwbl1thrsh], [pn_ccwbl2thrsh]) = 80, 999, if([qst_pms_complete] >0, sum(if([pn_paininhib] <=105, 1, 0), if([pn_paininhib]>105 and [pn_paininhib] < 140, 2, 0), if([pn_tempsum]>=140, 3, 0)), "NaN"))	\N	\N	\N	\N	\N	\N	pain	qst_scores	\N	\N	\N
+1399	pt_t807_camera	pet	text	free text	General Scan Information\nCamera used:	\N	\N	\N	\N	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1400	pt_t807_compound	pet	text	free text	General Scan Information\nStudy compound:	\N	\N	\N	\N	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1401	pt_t807_scantech	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nImaging completed by:	\N	First_Last	\N	\N	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1402	pt_t807_injtech	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nDose administered by:	\N	First_Last	\N	\N	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1403	pt_t807_dosecrtime	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nDose created at:	\N	\N	datetime_mdy	\N	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1404	pt_t807_dose	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nDose/administration:	\N	mCi	number	0	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1405	pt_t807_assaydose	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nAssay dose:	\N	mCi	number	0	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1406	pt_t807_assaytime	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nAssay time:	\N	HH:MM:SS	\N	\N	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1407	pt_t807_residdose	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nResidual dose:	\N	uCi	number	0	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1408	pt_t807_residtime	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nResidual time:	\N	HH:MM:SS	\N	\N	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1409	pt_t807_admindose	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nAdministered dose:	\N	mCi	number	0	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1415	pt_t807_scanstart	pet	text	free text	18F-T807 PET/CT SCAN DETAILS\nScan start time:	\N	HH:MM:SS	\N	\N	\N	\N	\N	pet	pet_t807_requisition	\N	\N	\N
+1416	pt_pib_camera	pet	text	free text	General Information\nCamera used:	\N	\N	\N	\N	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1417	pt_pib_compound	pet	text	free text	General Information\nStudy compound:	\N	\N	\N	\N	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1418	pt_pib_injtech	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nDose administered by:	\N	First_Last	\N	\N	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1419	pt_pib_scantech	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nImaging completed by:	\N	First_Last	\N	\N	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1420	pt_pib_dosecrtime	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nDose created at:	\N	\N	datetime_mdy	\N	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1421	pt_pib_dose	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nDose/administration:	\N	mCi	number	0	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1422	pt_pib_assaydose	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nAssay dose:	\N	mCi	number	0	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1423	pt_pib_assaytime	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nAssay time:	\N	HH:MM:SS	\N	\N	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1424	pt_pib_residdose	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nResidual dose:	\N	uCi	number	0	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1425	pt_pib_residtime	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nResidual time:	\N	HH:MM:SS	\N	\N	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1426	pt_pib_admindose	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nAdministered dose:	\N	mCi	number	0	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1427	pt_pib_admintime	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nAdministration time:	\N	HH:MM:SS	\N	\N	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1428	pt_pib_dosevolume	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nDose volume:	\N	ml	number	0	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1429	pt_pib_injlocation	pet	dropdown	categorical	11C-PIB PET/CT SCAN DETAILS:\nInjection location:	1, L antecubital | 2, R antecubital	\N	\N	\N	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1430	pt_pib_activity	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nSpecific activity (if applicable):	\N	mCi/umole	\N	\N	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1431	pt_pib_activitytime	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nSpecific activity time:	\N	HH:MM:SS	\N	\N	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1432	pt_pib_scanstart	pet	text	free text	11C-PIB PET/CT SCAN DETAILS:\nScan start time:	\N	HH:MM:SS	\N	\N	\N	\N	\N	pet	pet_pib_requisition	\N	\N	\N
+1434	mr_report_physician	mri	dropdown	categorical	Neuroradiologist name:\r\n(Interpreting physician)	1, William Copen, MD	\N	\N	\N	\N	\N	\N	mri	mri_report	\N	\N	\N
+1435	mr_report_technique	mri	dropdown	categorical	MRI Technique:	1, Noncontrast MRI examination of the brain	\N	\N	\N	\N	\N	\N	mri	mri_report	\N	\N	\N
+1436	mr_report_ventsize	mri	radio	categorical	Ventricle size:	0, Normal | 1, Enlarged | 2, Other	\N	\N	\N	\N	\N	\N	mri	mri_report	\N	\N	\N
+1437	mr_report_ventsizeoth	mri	notes	notes	If "other", please explain:	\N	\N	\N	\N	\N	\N	\N	mri	mri_report	\N	\N	\N
+1438	mr_report_whitemat	mri	radio	categorical	Non-Specific T2-Hyperintense foci in  the supratentorial white matter:	0, None | 1, Mild | 2, Moderate | 3, Severe	\N	\N	\N	\N	\N	\N	mri	mri_report	\N	\N	\N
+1439	mr_report_hemorr	mri	radio	categorical	Hemorrhage:	0, No | 1, Yes | 2, Possible	\N	\N	\N	\N	\N	\N	mri	mri_report	\N	\N	\N
+1440	mr_report_infarct	mri	radio	categorical	Acute infarction:	0, No | 1, Yes | 2, Possible	\N	\N	\N	\N	\N	\N	mri	mri_report	\N	\N	\N
+1441	mr_report_icmlesion	mri	radio	categorical	Intracranial mass lesion:	0, No | 1, Yes | 2, Possible	\N	\N	\N	\N	\N	\N	mri	mri_report	\N	\N	\N
+1442	mr_report_other	mri	radio	categorical	Other intracranial abnormality:	0, No | 1, Yes | 2, Possible	\N	\N	\N	\N	\N	\N	mri	mri_report	\N	\N	\N
+1443	mr_report_comment	mri	notes	notes	Comments:	\N	\N	\N	\N	\N	\N	\N	mri	mri_report	\N	\N	\N
+1444	mr_meal_option	mri	dropdown	categorical	Standardized meal option selected:	0, No standardized meal offered | 1, Option 1 | 2, Option 2 | 3, Option 3 | 4, Option 4	\N	\N	\N	\N	y	\N	mri	meal_results	\N	\N	\N
+1445	mr_meal_other	mri	dropdown	categorical	Select the option that best corresponds  to the meal offered/consumed:	1, Provided 500 kcal goal (BMI < 30 kg/m2) | 2, Provided 750 kcal goal (BMI >=30 kg/m2) | 3, Other	\N	\N	\N	\N	\N	\N	mri	meal_results	\N	\N	\N
+1446	mr_meal_otherexp	mri	text	free text	Please explain:	\N	\N	\N	\N	\N	\N	\N	mri	meal_results	\N	\N	\N
+1447	mr_meal_complete	mri	yesno	dichotomous	Did the participant eat the entire  [mr_meal_option] meal?	\N	\N	\N	\N	\N	y	\N	mri	meal_results	\N	\N	\N
+1448	mr_meal_kcal	mri	text	free text	Units Consumed\nKcalories: 	\N	kcal	number	0	600	\N	\N	mri	meal_results	\N	\N	\N
+1449	mr_meal_gprot	mri	text	free text	Units Consumed\nProtein:	\N	grams	number	0	30	\N	\N	mri	meal_results	\N	\N	\N
+1450	mr_meal_gfat	mri	text	free text	Units Consumed\nFat:	\N	grams	number	0	17	\N	\N	mri	meal_results	\N	\N	\N
+1451	mr_meal_gcarb	mri	text	free text	Units Consumed\nCarbohydrates:	\N	grams	number	0	100	\N	\N	mri	meal_results	\N	\N	\N
+1452	mr_meal_pkcal	mri	text	free text	Percent Consumed\nKcalories: 	\N	%	number	0	100	\N	\N	mri	meal_results	\N	\N	\N
+1453	mr_meal_pprot	mri	text	free text	Percent Consumed\nProtein: 	\N	%	number	0	100	\N	\N	mri	meal_results	\N	\N	\N
+1454	mr_meal_pfat	mri	text	free text	Percent Consumed\nFat: 	\N	%	number	0	100	\N	\N	mri	meal_results	\N	\N	\N
+1455	mr_meal_pcarb	mri	text	free text	Percent Consumed\nCarbohydrates: 	\N	%	number	0	100	\N	\N	mri	meal_results	\N	\N	\N
+1456	mr_meal_pprotdist	mri	text	free text	Macro distribution of food consumed\nProtein: 	\N	%	number	0	100	\N	\N	mri	meal_results	\N	\N	\N
+1457	mr_meal_pfatdist	mri	text	free text	Macro distribution of food consumed\nFat: 	\N	%	number	0	100	\N	\N	mri	meal_results	\N	\N	\N
+1458	mr_meal_pcarbdist	mri	text	free text	Macro distribution of food consumed\nCarbohydrates: 	\N	%	number	0	100	\N	\N	mri	meal_results	\N	\N	\N
+1459	mr_meal_note	mri	notes	notes	Notes: 	\N	\N	\N	\N	\N	\N	\N	mri	meal_results	\N	\N	\N
+1460	mr_vatliv_visceral	mri	text	free text	Visceral:	\N	cm2	number	\N	\N	\N	\N	mri	mri_liver_results	\N	\N	\N
+1461	mr_vatliv_subcu	mri	text	free text	Subcutaneous:	\N	cm2	number	\N	\N	\N	\N	mri	mri_liver_results	\N	\N	\N
+1462	mr_vatliv_tat	mri	text	free text	TAT:	\N	cm2	number	\N	\N	\N	\N	mri	mri_liver_results	\N	\N	\N
+1463	mr_dixliv_fatfrac	mri	text	free text	Fat Fraction:	\N	\N	number	\N	\N	\N	\N	mri	mri_liver_results	\N	\N	\N
+1464	mr_liv_note	mri	notes	notes	Notes:	\N	\N	\N	\N	\N	\N	\N	mri	mri_liver_results	\N	\N	\N
+1466	tms_pre1	tmseeg	yesno	dichotomous	Is anything feeling out of the ordinary? (i.e. headache, discomfort)	\N	\N	\N	\N	\N	\N	\N	tmseeg	pre_tms	\N	\N	\N
+1467	tms_pre1_com	tmseeg	notes	notes	 Comments/Description/Action:	\N	\N	\N	\N	\N	\N	\N	tmseeg	pre_tms	\N	\N	\N
+1468	tms_pre2	tmseeg	yesno	dichotomous	Any changes since your phone screening? (new med, symptom)	\N	\N	\N	\N	\N	\N	\N	tmseeg	pre_tms	\N	\N	\N
+1469	tms_pre2_notes	tmseeg	notes	notes	 Comments/Description/Action:	\N	\N	\N	\N	\N	\N	\N	tmseeg	pre_tms	\N	\N	\N
+1470	tms_pre3	tmseeg	yesno	dichotomous	Scalp Irritation (redness, burn, pain)	\N	\N	\N	\N	\N	\N	\N	tmseeg	pre_tms	\N	\N	\N
+1471	tms_pre3_notes	tmseeg	notes	notes	 Comments/Description/Action:	\N	\N	\N	\N	\N	\N	\N	tmseeg	pre_tms	\N	\N	\N
+1472	tms_safety	tmseeg	yesno	dichotomous	Confirm TMS safety/ Medical Hx changes?	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1473	tms_su_notes	tmseeg	notes	notes	Bad electrodes/Notes:	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1476	tms_ao_notes	tmseeg	notes	notes	Comments:	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1478	tms_vf_notes	tmseeg	notes	notes	Comments:	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1479	tms_setup_1	tmseeg	yesno	dichotomous	Calibrate Brainsight and headband	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1480	tms_setup_2	tmseeg	yesno	dichotomous	Digitize EEG electrodes in Brainsight for each electrode	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1481	tms_txt2	tmseeg	yesno	dichotomous	EMG:\r\n1) Prep with alcohol \r\n2) Apply EMG gel \r\n3) Attach electrode\r\nElectrodes: 1) FDI 2) APB\r\nGoal: background signal < 50 microVolts	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1487	tms_sham_time	tmseeg	text	free text	SHAM TO M1\nTime:	\N	\N	time	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1488	tms_sham_prot	tmseeg	yesno	dichotomous	SHAM TO M1\nspTMS (Protocol B (standard_bp) 120 pulses)	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1489	tms_sham_notes	tmseeg	notes	notes	SHAM TO M1\nComments:	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1490	tms_m1_time	tmseeg	text	free text	Block 1 - Left motor cortex (M1)\nTime	\N	\N	time	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1491	tms_m1_order	tmseeg	radio	categorical	Block 1 - Left motor cortex (M1)\nOrder	1, 1 | 2, 2 | 3, 3	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1492	tms_m1_prot	tmseeg	yesno	dichotomous	Block 1 - Left motor cortex (M1)\nspTMS (Protocol B (standard_bp) 120 pulses)	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1493	tms_m1_notes	tmseeg	notes	notes	Block 1 - Left motor cortex (M1)\nComments:	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1494	tms_dlpfc_time	tmseeg	text	free text	Block 1 - Left DLPFC (F-P coordinates)\nTime	\N	\N	time	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1495	tms_dlpfc_order	tmseeg	radio	categorical	Block 1 - Left DLPFC (F-P coordinates)\nOrder	1, 1 | 2, 2 | 3, 3	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1496	tms_dlpfc_prot	tmseeg	yesno	dichotomous	Block 1 - Left DLPFC (F-P coordinates)\nspTMS (Protocol Z (standard_bp) 120 pulses)	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1497	tms_dlpfc_notes	tmseeg	notes	notes	Block 1 - Left DLPFC (F-P coordinates)\nComments:	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1498	tms_ipl_time	tmseeg	text	free text	Time	\N	\N	time	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1499	tms_ipl_order	tmseeg	radio	categorical	Order	1, 1 | 2, 2 | 3, 3	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1500	tms_ipl_prot	tmseeg	yesno	dichotomous	spTMS (Protocol Z (standard_bp) 120 pulses)	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1501	tms_ipl_notes	tmseeg	notes	notes	Comments:	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1502	tms_io_time	tmseeg	text	free text	Block 2- M1 (first to skip if late)\nTime	\N	\N	time	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1503	tms_io_order	tmseeg	radio	categorical	Block 2- M1 (first to skip if late)\nOrder	1, 1 | 2, 2	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1504	tms_ipl_prot_2	tmseeg	yesno	dichotomous	Block 2- M1 (first to skip if late)\nI/O Curve (Protocol M (standard_bp) 120 pulses)	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1505	tms_io_notes	tmseeg	notes	notes	Block 2- M1 (first to skip if late)\nComments:	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1506	tms_dlpfc2_time	tmseeg	text	free text	Block 2 - Left DLPFC (F-P coordinates)\nBlock 1 - Left DLPFC (F-P coordinates)\nTime	\N	\N	time	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1507	tms_dlpfc2_order	tmseeg	radio	categorical	Block 2 - Left DLPFC (F-P coordinates)\nBlock 1 - Left DLPFC (F-P coordinates)\nOrder	1, 1 | 2, 2	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1508	tms_dlpfc2_prot	tmseeg	yesno	dichotomous	Block 2 - Left DLPFC (F-P coordinates)\nBlock 1 - Left DLPFC (F-P coordinates)\nppTMS (Protocol F)	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1509	tms_dlpfc2_notes	tmseeg	notes	notes	Block 2 - Left DLPFC (F-P coordinates)\nBlock 1 - Left DLPFC (F-P coordinates)\nComments:	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1510	tms_notes	tmseeg	notes	notes	Other notes:	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1511	tms_post1	tmseeg	yesno	dichotomous	AE Post-TMS\nPain (i.e. headache, neck pain)	\N	\N	\N	\N	\N	\N	\N	tmseeg	post_tms	\N	\N	\N
+1512	tms_post1_com	tmseeg	notes	notes	AE Post-TMS\nComments/Description/Action:	\N	\N	\N	\N	\N	\N	\N	tmseeg	post_tms	\N	\N	\N
+1513	tms_post2	tmseeg	yesno	dichotomous	AE Post-TMS\nScalp Irritation (redness, burn, pain)	\N	\N	\N	\N	\N	\N	\N	tmseeg	post_tms	\N	\N	\N
+1514	tms_post2_com	tmseeg	notes	notes	AE Post-TMS\nComments/Description/Action:	\N	\N	\N	\N	\N	\N	\N	tmseeg	post_tms	\N	\N	\N
+1515	tms_post3	tmseeg	yesno	dichotomous	AE Post-TMS\nTrouble hearing compared to when you arrived?	\N	\N	\N	\N	\N	\N	\N	tmseeg	post_tms	\N	\N	\N
+1516	tms_post3_com	tmseeg	notes	notes	AE Post-TMS\nComments/Description/Action:	\N	\N	\N	\N	\N	\N	\N	tmseeg	post_tms	\N	\N	\N
+1517	tms_post4	tmseeg	yesno	dichotomous	AE Post-TMS\nIs there anything else that you would like to tell me?	\N	\N	\N	\N	\N	\N	\N	tmseeg	post_tms	\N	\N	\N
+1518	tms_post4_com	tmseeg	notes	notes	AE Post-TMS\nComments/Description/Action:	\N	\N	\N	\N	\N	\N	\N	tmseeg	post_tms	\N	\N	\N
+1519	tms_post5	tmseeg	notes	notes	AE Post-TMS\nOther:	\N	\N	\N	\N	\N	\N	\N	tmseeg	post_tms	\N	\N	\N
+1520	tms_er_date	tmseeg	text	free text	General EEG Information\nDate of recording:	\N	\N	date_dmy	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1483	tms_mt_rmt	tmseeg	text	free text	MOTOR THRESHOLD\n(Biphasic RMT for single and paired pulse TMS)\nRMT	\N	% MSO	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1484	tms_mt_120rmt	tmseeg	text	free text	MOTOR THRESHOLD\n(Biphasic RMT for single and paired pulse TMS)\n120% RMT	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1486	tms_mt_htspot	tmseeg	text	free text	MOTOR THRESHOLD\n(Biphasic RMT for single and paired pulse TMS)\nHotspot page/sample #:	\N	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1522	tms_er_electrode_num	tmseeg	text	free text	General EEG Information\n# Electrodes: 	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1523	tms_er_electrode_place	tmseeg	text	free text	General EEG Information\nElectrode Placement	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1525	tms_er_behav_oth	tmseeg	text	free text	General EEG Information\nSpecify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1527	tms_er_pi	tmseeg	text	free text	General EEG Information\nInterpreting Physician	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1528	tms_er_pdr	tmseeg	yesno	dichotomous	Posterior dominant rhythm present?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1529	tms_er_pdr_age	tmseeg	yesno	dichotomous	Appropriate for age?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1530	tms_er_pdr_react	tmseeg	radio	categorical	Reactive?	1, Yes | 0, No | 2, Not tested	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1531	tms_er_pdr_sym	tmseeg	yesno	dichotomous	Symmetric?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1532	tms_er_pdr_sym_freq	tmseeg	text	free text	Frequency of the posterior dominant rhythm during relaxed wakefulness  (round to the closest 0.5 Hz) 	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1533	tms_er_pdr_sym_freq_asym	tmseeg	yesno	dichotomous	Frequency Asymmetry:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1534	tms_er_pdr_sym_freq_asyml	tmseeg	text	free text	Left:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1535	tms_er_pdr_sym_freq_asymr	tmseeg	text	free text	Right:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1536	tms_er_pdr_sym_amp	tmseeg	yesno	dichotomous	Amplitude asymmetry	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1537	tms_er_pdr_sym_amp_side	tmseeg	radio	categorical	Indicate side of lower voltage	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1538	tms_er_back_freq	tmseeg	radio	categorical	Predominant background frequency:	1, Alpha | 2, Beta | 3, Theta | 4, Delta	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1539	tms_er_sl	tmseeg	radio	categorical	Sleep recorded?	1, Yes | 0, No	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1540	tms_er_sl_st1	tmseeg	radio	categorical	Stage 1	1, Yes | 0, No	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1541	tms_er_sl_st1_n	tmseeg	radio	categorical	If yes, please select one:	1, Normal | 2, Abnormal	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1542	tms_er_sl_st2	tmseeg	radio	categorical	Stage 2	1, Yes | 0, No	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1543	tms_er_sl_st2_n	tmseeg	radio	categorical	If yes, please select one:	1, Normal | 2, Abnormal	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1544	tms_er_sl_st3	tmseeg	radio	categorical	Stage 3	1, Yes | 0, No	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1545	tms_er_sl_st3_n	tmseeg	radio	categorical	If yes, please select one:	1, Normal | 2, Abnormal	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1546	tms_er_sl_st4	tmseeg	radio	categorical	Stage 4	1, Yes | 0, No	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1547	tms_er_sl_st4_n	tmseeg	radio	categorical	If yes, please select one:	1, Normal | 2, Abnormal	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1548	tms_er_bvp	tmseeg	yesno	dichotomous	Are benign variant patterns present?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1550	tms_er_normal	tmseeg	yesno	dichotomous	EEG normal?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1551	tms_er_fgs	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nIs there focal or generalized slowing?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1552	tms_er_fgs_age	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nAppropriate for age?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1553	tms_er_fgs_num	tmseeg	text	free text	Focal and Generalized Slowing\nHow many types of slowing are present?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1555	tms_er_fgs1_morph	tmseeg	radio	categorical	Focal and Generalized Slowing\nMorphology:	1, Rhythmic | 2, Polymorphic	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1556	tms_er_fgs1_prev	tmseeg	radio	categorical	Focal and Generalized Slowing\nPrevalence:	1, Intermittent | 2, Continuous	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1557	tms_er_fgs1_loc_lcl	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nLocalized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1558	tms_er_fgs1_loc_lcl_f	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nFrontal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1559	tms_er_fgs1_loc_lcl_f_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1560	tms_er_fgs1_loc_lcl_p	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nParietal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1561	tms_er_fgs1_loc_lcl_p_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1562	tms_er_fgs1_loc_lcl_o	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nOccipital	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1563	tms_er_fgs1_loc_lcl_o_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1564	tms_er_fgs1_loc_lcl_t	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nTemporal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1565	tms_er_fgs1_loc_lcl_t_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1566	tms_er_fgs1_loc_lcl_h	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nHemispheric:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1567	tms_er_fgs1_loc_lcl_h_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1568	tms_er_fgs1_loc_gen	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nGeneralized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1569	tms_er_fgs1_loc_nlo	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nNo localized onset:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1570	tms_er_fgs1_loc_oth	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nOther, specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1571	tms_er_fgs1_loc_oth_spec	tmseeg	text	free text	Focal and Generalized Slowing\nPlease specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1572	tms_er_fgs2	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nSecond Focal or Generalized Slowing?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1549	tms_er_bvp_yes	tmseeg	checkbox	dichotomous	Check all that apply	tms_er_bvp_yes___1, Small sharp spikes | tms_er_bvp_yes___2, Wicket spikes | tms_er_bvp_yes___3, 14- and 6- Hz positive bursts | tms_er_bvp_yes___4, 6-Hz spike and wave | tms_er_bvp_yes___5, Rhythmic Temporal Theta Bursts of Drowsiness | tms_er_bvp_yes___6, Subclinical Rhythmic EEG Discharges in Adults | 7, Midline theta rhythem	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1554	tms_er_fgs1_freq	tmseeg	checkbox	dichotomous	Focal and Generalized Slowing\nFrequency (check all that apply)	tms_er_fgs1_freq___1, Alpha | tms_er_fgs1_freq___2, Theta | tms_er_fgs1_freq___3, Delta	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1574	tms_er_fgs2_morph	tmseeg	radio	categorical	Focal and Generalized Slowing\nMorphology:	1, Rhythmic | 2, Polymorphic	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1575	tms_er_fgs2_prev	tmseeg	radio	categorical	Focal and Generalized Slowing\nPrevalence:	1, Intermittent | 2, Continuous	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1576	tms_er_fgs2_loc_lcl	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nLocalized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1577	tms_er_fgs2_loc_lcl_f	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nFrontal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1578	tms_er_fgs2_loc_lcl_f_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1579	tms_er_fgs2_loc_lcl_p	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nParietal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1580	tms_er_fgs2_loc_lcl_p_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1581	tms_er_fgs2_loc_lcl_o	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nOccipital	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1582	tms_er_fgs2_loc_lcl_o_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1583	tms_er_fgs2_loc_lcl_t	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nTemporal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1584	tms_er_fgs2_loc_lcl_t_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1585	tms_er_fgs2_loc_lcl_h	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nHemispheric:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1586	tms_er_fgs2_loc_lcl_h_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1587	tms_er_fgs2_loc_gen	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nGeneralized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1588	tms_er_fgs2_loc_nlo	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nNo localized onset:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1589	tms_er_fgs2_loc_oth	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nOther, specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1590	tms_er_fgs2_loc_oth_spec	tmseeg	text	free text	Focal and Generalized Slowing\nPlease specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1591	tms_er_fgs3	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nThird Focal or Generalized Slowing?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1593	tms_er_fgs3_morph	tmseeg	radio	categorical	Focal and Generalized Slowing\nMorphology:	1, Rhythmic | 2, Polymorphic	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1594	tms_er_fgs3_prev	tmseeg	radio	categorical	Focal and Generalized Slowing\nPrevalence:	1, Intermittent | 2, Continuous	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1595	tms_er_fgs3_loc_lcl	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nLocalized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1596	tms_er_fgs3_loc_lcl_f	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nFrontal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1597	tms_er_fgs3_loc_lcl_f_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1598	tms_er_fgs3_loc_lcl_p	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nParietal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1599	tms_er_fgs3_loc_lcl_p_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1600	tms_er_fgs3_loc_lcl_o	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nOccipital:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1601	tms_er_fgs3_loc_lcl_o_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1602	tms_er_fgs3_loc_lcl_t	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nTemporal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1603	tms_er_fgs3_loc_lcl_t_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1604	tms_er_fgs3_loc_lcl_h	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nHemispheric:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1605	tms_er_fgs3_loc_lcl_h_side	tmseeg	radio	categorical	Focal and Generalized Slowing\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1606	tms_er_fgs3_loc_gen	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nGeneralized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1607	tms_er_fgs3_loc_nlo	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nNo localized onset:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1608	tms_er_fgs3_loc_oth	tmseeg	yesno	dichotomous	Focal and Generalized Slowing\nOther, specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1609	tms_er_fgs3_loc_oth_spec	tmseeg	text	free text	Focal and Generalized Slowing\nPlease specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1610	tms_er_ea	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nAre interictal epileptiform discharges present?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1611	tms_er_ea_num	tmseeg	text	free text	Epileptiform Abnormalities\nHow many types of epileptiform abnormalities are present?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1613	tms_er_ea1_pattern	tmseeg	radio	categorical	Epileptiform Abnormalities\nSpecial patterns:	lat, Lateralized periodic discharges | bipd, Bilateral independent periodic discharges | gen, Generalized periodic discharges	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1614	tms_er_ea1_freq	tmseeg	radio	categorical	Epileptiform Abnormalities\nIncidence	one, one | rare, Rare (<1/5 min) | occ, Occasional (1/min to 1/5 min) | freq, Frequent (1/10 sec to 1/min) | abun, Abundant (>1/10 sec)	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1615	tms_er_ea1_loc	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nLocalized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1616	tms_er_ea1_loc_lcl_f	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nFrontal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1617	tms_er_ea1_loc_lcl_f_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1618	tms_er_ea1_loc_lcl_p	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nParietal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1619	tms_er_ea3_loc_lcl_t	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nTemporal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1620	tms_er_ea1_loc_lcl_p_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1621	tms_er_ea1_loc_lcl_o	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nOccipital:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1622	tms_er_ea1_loc_lcl_o_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1623	tms_er_ea1_loc_lcl_t	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nTemporal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1624	tms_er_ea1_loc_lcl_t_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1625	tms_er_ea1_loc_lcl_h	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nHemispheric:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1626	tms_er_ea1_loc_lcl_h_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1627	tms_er_ea1_loc_gen	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nGeneralized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1628	tms_er_ea1_loc_nlo	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nNo localized onset:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1629	tms_er_ea1_loc_oth	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nOther, specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1630	tms_er_ea1_loc_oth_spec	tmseeg	text	free text	Epileptiform Abnormalities\nPlease specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1631	tms_er_ea2	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nSecond epileptiform abnormality present?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1633	tms_er_ea2_pattern	tmseeg	radio	categorical	Epileptiform Abnormalities\nPrevalence:	lat, Lateralized periodic discharges | bipd, Bilateral independent periodic discharges | gen, Generalized periodic discharges	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1634	tms_er_ea2_freq	tmseeg	radio	categorical	Epileptiform Abnormalities\nIncidence	one, one | rare, Rare (<1/5 min) | occ, Occasional (1/min to 1/5 min) | freq, Frequent (1/10 sec to 1/min) | abun, Abundant (>1/10 sec)	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1635	tms_er_ea2_loc	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nLocalized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1636	tms_er_ea2_loc_lcl_f	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nFrontal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1637	tms_er_ea2_loc_lcl_f_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1638	tms_er_ea2_loc_lcl_p	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nParietal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1639	tms_er_ea2_loc_lcl_p_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1640	tms_er_ea2_loc_lcl_o	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nOccipital:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1641	tms_er_ea2_loc_lcl_o_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1642	tms_er_ea2_loc_lcl_t	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nTemporal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1643	tms_er_ea2_loc_lcl_t_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1644	tms_er_ea2_loc_lcl_h	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nHemispheric:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1645	tms_er_ea2_loc_lcl_h_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1646	tms_er_ea2_loc_gen	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nGeneralized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1647	tms_er_ea2_loc_nlo	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nNo localized onset:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1648	tms_er_ea2_loc_oth	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nOther, specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1649	tms_er_ea2_loc_oth_spec	tmseeg	text	free text	Epileptiform Abnormalities\nPlease specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1650	tms_er_ea3	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nThird epileptiform abnormality?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1652	tms_er_ea3_pattern	tmseeg	radio	categorical	Epileptiform Abnormalities\nPrevalence:	lat, Lateralized periodic discharges | bipd, Bilateral independent periodic discharges | gen, Generalized periodic discharges	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1653	tms_er_ea3_freq	tmseeg	radio	categorical	Epileptiform Abnormalities\nIncidence	one, one | rare, Rare (<1/5 min) | occ, Occasional (1/min to 1/5 min) | freq, Frequent (1/10 sec to 1/min) | abun, Abundant (>1/10 sec)	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1654	tms_er_ea3_loc	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nLocalized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1655	tms_er_ea3_loc_lcl_f	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nFrontal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1656	tms_er_ea3_loc_lcl_f_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1657	tms_er_ea3_loc_lcl_p	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nParietal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1658	tms_er_ea3_loc_lcl_p_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1659	tms_er_ea3_loc_lcl_o	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nOccipital:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1660	tms_er_ea3_loc_lcl_o_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1661	tms_er_ea3_loc_lcl_t_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1662	tms_er_ea3_loc_lcl_h	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nHemispheric:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1663	tms_er_ea3_loc_lcl_h_side	tmseeg	radio	categorical	Epileptiform Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1664	tms_er_ea3_loc_gen	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nGeneralized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1665	tms_er_ea3_loc_nlo	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nNo localized onset:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1666	tms_er_ea3_loc_oth	tmseeg	yesno	dichotomous	Epileptiform Abnormalities\nOther, specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1667	tms_er_ea3_loc_oth_spec	tmseeg	text	free text	Epileptiform Abnormalities\nPlease specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1668	tms_er_ia	tmseeg	yesno	dichotomous	Ictal Abnormalities\nAre interictal epileptiform discharges present?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1669	tms_er_ia_num	tmseeg	text	free text	Ictal Abnormalities\nHow many types of ictal patterns are present?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1671	tms_er_ia1_rhy_freq	tmseeg	text	free text	Ictal Abnormalities\nRhythmic Activity Frequency	\N	Hz	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1672	tms_er_ia1_loc	tmseeg	yesno	dichotomous	Ictal Abnormalities\nLocalized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1673	tms_er_ia1_loc_lcl_f	tmseeg	yesno	dichotomous	Ictal Abnormalities\nFrontal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1674	tms_er_ia1_loc_lcl_f_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1675	tms_er_ia1_loc_lcl_p	tmseeg	yesno	dichotomous	Ictal Abnormalities\nParietal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1676	tms_er_ia1_loc_lcl_p_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1677	tms_er_ia1_loc_lcl_o	tmseeg	yesno	dichotomous	Ictal Abnormalities\nOccipital:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1678	tms_er_ia1_loc_lcl_o_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1679	tms_er_ia1_loc_lcl_t	tmseeg	yesno	dichotomous	Ictal Abnormalities\nTemporal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1680	tms_er_ia1_loc_lcl_t_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1681	tms_er_ia1_loc_lcl_h	tmseeg	yesno	dichotomous	Ictal Abnormalities\nHemispheric:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1682	tms_er_ia1_loc_lcl_h_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1683	tms_er_ia1_loc_gen	tmseeg	yesno	dichotomous	Ictal Abnormalities\nGeneralized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1684	tms_er_ia1_loc_nlo	tmseeg	yesno	dichotomous	Ictal Abnormalities\nNo localized onset:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1685	tms_er_ia1_loc_oth	tmseeg	yesno	dichotomous	Ictal Abnormalities\nOther, specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1686	tms_er_ia1_loc_oth_spec	tmseeg	text	free text	Ictal Abnormalities\nPlease specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1687	tms_er_ia2	tmseeg	yesno	dichotomous	Ictal Abnormalities\nSecond ictal pattern present?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1689	tms_er_ia2_rhy_freq	tmseeg	text	free text	Ictal Abnormalities\nRhythmic Activity Frequency	\N	Hz	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1690	tms_er_ia2_loc	tmseeg	yesno	dichotomous	Ictal Abnormalities\nLocalized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1691	tms_er_ia2_loc_lcl_f	tmseeg	yesno	dichotomous	Ictal Abnormalities\nFrontal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1692	tms_er_ia2_loc_lcl_f_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1693	tms_er_ia2_loc_lcl_p	tmseeg	yesno	dichotomous	Ictal Abnormalities\nParietal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1694	tms_er_ia2_loc_lcl_p_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1695	tms_er_ia2_loc_lcl_o	tmseeg	yesno	dichotomous	Ictal Abnormalities\nOccipital:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1696	tms_er_ia2_loc_lcl_o_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1697	tms_er_ia2_loc_lcl_t	tmseeg	yesno	dichotomous	Ictal Abnormalities\nTemporal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1698	tms_er_ia2_loc_lcl_t_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1699	tms_er_ia2_loc_lcl_h	tmseeg	yesno	dichotomous	Ictal Abnormalities\nHemispheric:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1700	tms_er_ia2_loc_lcl_h_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1701	tms_er_ia2_loc_gen	tmseeg	yesno	dichotomous	Ictal Abnormalities\nGeneralized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1702	tms_er_ia2_loc_nlo	tmseeg	yesno	dichotomous	Ictal Abnormalities\nNo localized onset:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1703	tms_er_ia2_loc_oth	tmseeg	yesno	dichotomous	Ictal Abnormalities\nOther, specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1704	tms_er_ia2_loc_oth_spec	tmseeg	text	free text	Ictal Abnormalities\nPlease specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1705	tms_er_ia3	tmseeg	yesno	dichotomous	Ictal Abnormalities\nThird ictal pattern present?	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1707	tms_er_ia3_rhy_freq	tmseeg	text	free text	Ictal Abnormalities\nRhythmic Activity Frequency	\N	Hz	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1708	tms_er_ia3_loc	tmseeg	yesno	dichotomous	Ictal Abnormalities\nLocalized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1709	tms_er_ia3_loc_lcl_f	tmseeg	yesno	dichotomous	Ictal Abnormalities\nFrontal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1710	tms_er_ia3_loc_lcl_f_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1711	tms_er_ia3_loc_lcl_p	tmseeg	yesno	dichotomous	Ictal Abnormalities\nParietal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1712	tms_er_ia3_loc_lcl_p_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1713	tms_er_ia3_loc_lcl_o	tmseeg	yesno	dichotomous	Ictal Abnormalities\nOccipital:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1688	tms_er_ia2_morph	tmseeg	checkbox	dichotomous	Ictal Abnormalities\nMorphology:	tms_er_ia2_morph___poly, Polyspikes | tms_er_ia2_morph___fast, Fast spike activity or repetitive spikes | tms_er_ia2_morph___low, Low voltage fast activity | tms_er_ia2_morph___polysh, Polysharp-waves |tms_er_ia2_morph___ssw, Spike-and-slow-waves | tms_er_ia2_morph___psw, Polyspike-and-slow-waves | tms_er_ia2_morph___shsw, Sharp-and-slow-waves | tms_er_ia2_morph___rhy, Rhythmic activity | tms_er_ia2_morph___amp, Slow wave o (...)	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1706	tms_er_ia3_morph	tmseeg	checkbox	dichotomous	Ictal Abnormalities\nMorphology:	tms_er_ia3_morph___poly, Polyspikes | tms_er_ia3_morph___fast, Fast spike activity or repetitive spikes | tms_er_ia3_morph___low, Low voltage fast activity | tms_er_ia3_morph___polysh, Polysharp-waves |tms_er_ia3_morph___ssw, Spike-and-slow-waves | tms_er_ia3_morph___psw, Polyspike-and-slow-waves | tms_er_ia3_morph___shsw, Sharp-and-slow-waves | tms_er_ia3_morph___rhy, Rhythmic activity | tms_er_ia3_morph___amp, Slow wave o (...)	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1714	tms_er_ia3_loc_lcl_o_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1715	tms_er_ia3_loc_lcl_t	tmseeg	yesno	dichotomous	Ictal Abnormalities\nTemporal:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1716	tms_er_ia3_loc_lcl_t_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1717	tms_er_ia3_loc_lcl_h	tmseeg	yesno	dichotomous	Ictal Abnormalities\nHemispheric:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1718	tms_er_ia3_loc_lcl_h_side	tmseeg	radio	categorical	Ictal Abnormalities\nSide:	1, Left | 2, Right	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1719	tms_er_ia3_loc_gen	tmseeg	yesno	dichotomous	Ictal Abnormalities\nGeneralized:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1720	tms_er_ia3_loc_nlo	tmseeg	yesno	dichotomous	Ictal Abnormalities\nNo localized onset:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1721	tms_er_ia3_loc_oth	tmseeg	yesno	dichotomous	Ictal Abnormalities\nOther, specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1722	tms_er_ia3_loc_oth_spec	tmseeg	text	free text	Ictal Abnormalities\nPlease specify:	\N	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1474	tms_bl	tmseeg	checkbox	dichotomous	Baseline EEG\r\n	tms_bl___eo, Eyes Open (3.5 min) | tms_bl___ec, Eyes Closed (3.5 min)	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1475	tms_ao	tmseeg	checkbox	dichotomous	Auditory Oddball Task	tms_ao___tr, Training (2 mins) | tms_ao___trq, Questions | tms_ao___te, Testing (5 mins)  | tms_ao___br, Break (1 min) | tms_ao___te2, Testing (5 mins) | tms_ao___te2q, Questions	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1477	tms_vf	tmseeg	checkbox	dichotomous	Visual Flanker Task	tms_vf___trc, Training (C) 2 mins | tms_vf___trcq, Questions | tms_vf___tec, Testing (C) 5 mins | tms_vf___tri, Training (I) 2 mins | tms_vf___tei, Testing (I) 5 mins | tms_vf___teiq, Questions	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1524	tms_er_behav	tmseeg	checkbox	dichotomous	General EEG Information\nBehavioral states recorded: \r\n(Check all that apply)	tms_er_behav___awk, Awake | tms_er_behav___slp, Asleep | tms_er_behav___drwsy, Drowsy | tms_er_behav___unrsp, Unresponsive state | tms_er_behav___ind, Indeterminate | tms_er_behav___oth, Other, specify	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1526	tms_er_tech	tmseeg	checkbox	dichotomous	General EEG Information\nTechnical quality	tms_er_tech___ade, Adequate | tms_er_tech___mld, Mild to moderate artifact | tms_er_tech___lmt, Limited (>50% of record interpretable) | tms_er_tech___inad, Inadequate (<50% of record interpretable) | tms_er_tech___no, Not interpretable	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1573	tms_er_fgs2_freq	tmseeg	checkbox	dichotomous	Focal and Generalized Slowing\nFrequency (check all that apply)	tms_er_fgs2_freq___1, Alpha | tms_er_fgs2_freq___2, Theta | tms_er_fgs2_freq___3, Delta	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1592	tms_er_fgs3_freq	tmseeg	checkbox	dichotomous	Focal and Generalized Slowing\nFrequency (check all that apply)	tms_er_fgs3_freq___1, Alpha | tms_er_fgs3_freq___2, Theta | tms_er_fgs3_freq___3, Delta	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1612	tms_er_ea1_morph	tmseeg	checkbox	dichotomous	Epileptiform Abnormalities\nMorphology:	tms_er_ea1_morph___spk, Spike | tms_er_ea1_morph___ssw, Spike-and-slow-wave | tms_er_ea1_morph___runs, Runs of rapid spikes | tms_er_ea1_morph___poly, Polyspikes | tms_er_ea1_morph___psw, Polyspike-and-slow-wave | tms_er_ea1_morph___sw, Sharp-wave | tms_er_ea1_morph___shsw, Sharp-and-slow-wave | tms_er_ea1_morph___slsw, Slow sharp-wave	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1632	tms_er_ea2_morph	tmseeg	checkbox	dichotomous	Epileptiform Abnormalities\nMorphology:	tms_er_ea2_morph___spk, Spike | tms_er_ea2_morph___ssw, Spike-and-slow-wave | tms_er_ea2_morph___runs, Runs of rapid spikes | tms_er_ea2_morph___poly, Polyspikes | tms_er_ea2_morph___psw, Polyspike-and-slow-wave | tms_er_ea2_morph___sw, Sharp-wave | tms_er_ea2_morph___shsw, Sharp-and-slow-wave | tms_er_ea2_morph___slsw, Slow sharp-wave	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1651	tms_er_ea3_morph	tmseeg	checkbox	dichotomous	Epileptiform Abnormalities\nMorphology:	tms_er_ea3_morph___spk, Spike | tms_er_ea3_morph___ssw, Spike-and-slow-wave | tms_er_ea3_morph___runs, Runs of rapid spikes | tms_er_ea3_morph___poly, Polyspikes | tms_er_ea3_morph___psw, Polyspike-and-slow-wave | tms_er_ea3_morph___sw, Sharp-wave | tms_er_ea3_morph___shsw, Sharp-and-slow-wave | tms_er_ea3_morph___slsw, Slow sharp-wave	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+1670	tms_er_ia1_morph	tmseeg	checkbox	dichotomous	Ictal Abnormalities\nMorphology:	tms_er_ia1_morph___poly, Polyspikes | tms_er_ia1_morph___fast, Fast spike activity or repetitive spikes | tms_er_ia1_morph___low, Low voltage fast activity | tms_er_ia1_morph___polysh, Polysharp-waves |tms_er_ia1_morph___ssw, Spike-and-slow-waves | tms_er_ia1_morph___psw, Polyspike-and-slow-waves | tms_er_ia1_morph___shsw, Sharp-and-slow-waves | tms_er_ia1_morph___rhy, Rhythmic activity | tms_er_ia1_morph___amp, Slow wave o (...)	\N	\N	\N	\N	\N	\N	tmseeg	eeg_report	\N	\N	\N
+302	bb_sds_nowork	brainbehavior	checkbox	dichotomous	SHEEHAN DISABILITY SCALE\nA BRIEF, PATIENT RATED, MEASURE OF DISABILITY AND IMPAIRMENT \nPlease mark ONE circle for each scale.\n\n0=Not at all | 1-3=Mildly | 4-6=Moderately | 7-9=Markedly | 10=Extremely\nIn the past week:\nThe symptoms have disrupted your work / school work:\nI have not worked /studied at all during the past week for reasons unrelated to the disorder.	bb_sds_nowork___1	\N	\N	\N	\N	\N	\N	brainbehavior	sds	\N	\N	\N
+440	bb_mini_mdd	brainbehavior	checkbox	dichotomous	MINI - Major Depressive Disorder	bb_mini_mdd___never, never| bb_mini_mdd___past, past| bb_mini_mdd___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+441	bb_mini_suicide	brainbehavior	checkbox	dichotomous	MINI - Suicidality	bb_mini_suicide___never, never| bb_mini_suicide___past, past| bb_mini_suicide___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+442	bb_mini_bipolar1	brainbehavior	checkbox	dichotomous	MINI - Bipolar I Disorder	bb_mini_bipolar1___never, never| bb_mini_bipolar1___past, past| bb_mini_bipolar1___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+443	bb_mini_bipolar2	brainbehavior	checkbox	dichotomous	MINI - Bipolar II Disorder	bb_mini_bipolar2___never, never| bb_mini_bipolar2___past, past| bb_mini_bipolar2___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+444	bb_mini_panic	brainbehavior	checkbox	dichotomous	MINI - Panic Disorder	bb_mini_panic___never, never| bb_mini_panic___past, past| bb_mini_panic___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+445	bb_mini_agoraphob	brainbehavior	checkbox	dichotomous	MINI - Agoraphobia	bb_mini_agoraphob___never, never| bb_mini_agoraphob___past, past| bb_mini_agoraphob___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+446	bb_mini_socanxiety	brainbehavior	checkbox	dichotomous	MINI - Social Anxiety Disorder	bb_mini_socanxiety___never, never| bb_mini_socanxiety___past, past| bb_mini_socanxiety___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+447	bb_mini_ocd	brainbehavior	checkbox	dichotomous	MINI - Obsessive-Compulsive Disorder	bb_mini_ocd___never, never| bb_mini_ocd___past, past| bb_mini_ocd___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+448	bb_mini_ptsd	brainbehavior	checkbox	dichotomous	MINI - Post-Traumatic Stress Disorder	bb_mini_ptsd___never, never| bb_mini_ptsd___past, past| bb_mini_ptsd___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+449	bb_mini_alcohol	brainbehavior	checkbox	dichotomous	MINI - Alcohol Use Disorder	bb_mini_alcohol___never, never| bb_mini_alcohol___past, past| bb_mini_alcohol___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+450	bb_mini_substance	brainbehavior	checkbox	dichotomous	MINI - Substance Use Disorder	bb_mini_substance___never, never| bb_mini_substance___past, past| bb_mini_substance___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+451	bb_mini_psychotic	brainbehavior	checkbox	dichotomous	MINI - Psychotic Disorder	bb_mini_psychotic___never, never| bb_mini_psychotic___past, past| bb_mini_psychotic___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+452	bb_mini_moodpsych	brainbehavior	checkbox	dichotomous	MINI - Mood Disorder w/ Psychotic feat.	bb_mini_moodpsych___never, never| bb_mini_moodpsych___past, past| bb_mini_moodpsych___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+453	bb_mini_anorexia	brainbehavior	checkbox	dichotomous	MINI - Anorexia Nervosa	bb_mini_anorexia___never, never| bb_mini_anorexia___past, past| bb_mini_anorexia___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+454	bb_mini_bulimia	brainbehavior	checkbox	dichotomous	MINI - Bulimia Nervosa	bb_mini_bulimia___never, never| bb_mini_bulimia___past, past| bb_mini_bulimia___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+455	bb_mini_bingeeat	brainbehavior	checkbox	dichotomous	MINI - Binge Eating Disorder	bb_mini_bingeeat___never, never| bb_mini_bingeeat___past, past| bb_mini_bingeeat___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+456	bb_mini_genanxiety	brainbehavior	checkbox	dichotomous	MINI - Generalized Anxiety Disorder	bb_mini_genanxiety___never, never| bb_mini_genanxiety___past, past| bb_mini_genanxiety___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+457	bb_mini_antisocial	brainbehavior	checkbox	dichotomous	MINI - Antisocial Personality Disorder	bb_mini_antisocial___never, never| bb_mini_antisocial___past, past| bb_mini_antisocial___curr, current	\N	\N	\N	\N	\N	\N	brainbehavior	score_sheet	\N	\N	\N
+755	pf_srt_joint	physical function	checkbox	dichotomous	Please identify the joint limitation would make the test unsafe:	pf_srt_joint___bck, back | pf_srt_joint___hip, hips | pf_srt_joint___kne, knees | pf_srt_joint___ank, ankles | pf_srt_joint___ft, feet | pf_srt_joint___oth, other	\N	\N	\N	\N	\N	\N	physfunc	sitting_rising_test	\N	\N	\N
+1482	tms_mt	tmseeg	checkbox	dichotomous	MOTOR THRESHOLD\n(Biphasic RMT for single and paired pulse TMS)\n	tms_mt___std, Standard | tms_mt___pwr, Power	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
+1485	tms_mt_wn	tmseeg	checkbox	dichotomous	MOTOR THRESHOLD\n(Biphasic RMT for single and paired pulse TMS)	tms_mt_wn___wn, WN	\N	\N	\N	\N	\N	\N	tmseeg	tms_eeg_flow	\N	\N	\N
 \.
 
 
 --
--- Name: ipaops_datadic_id_seq; Type: SEQUENCE SET; Schema: ipa_ops; Owner: fphs
+-- Name: ipaops_datadic_id_seq; Type: SEQUENCE SET; Schema: ipa_ops; Owner: -
 --
 
-SELECT pg_catalog.setval('ipaops_datadic_id_seq', 1314, true);
+SELECT pg_catalog.setval('ipaops_datadic_id_seq', 1722, true);
+
+
+SET search_path = q1, pg_catalog;
+
+--
+-- Data for Name: q1_datadic; Type: TABLE DATA; Schema: q1; Owner: -
+--
+
+COPY q1_datadic (id, variable_name, domain, field_type_rc, field_type_sa, field_label, field_attributes, field_note, text_valid_type, text_valid_min, text_valid_max, required_field, field_attr_array, source, owner, classification, display) FROM stdin;
+24	global5	football_players_health_study_questionnaire_1	radio	categorical	Please respond to each item by marking one response per row which best describes your current overall health:  \nIn general, how would you rate your satisfaction with your social activities and relationships?	5, Excellent | 4, Very Good | 3, Good | 2, Fair | 1, Poor	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+29	phq1	football_players_health_study_questionnaire_1	radio	categorical	Over the past two weeks, how often have you been bothered by any of the following problems? \nLittle interest or pleasure in doing things	0, Not at all | 1, Several days | 2, More than half the days | 3, Nearly every day	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+30	phq2	football_players_health_study_questionnaire_1	radio	categorical	Over the past two weeks, how often have you been bothered by any of the following problems? \nFeeling down, depressed or hopeless	0, Not at all | 1, Several days | 2, More than half the days | 3, Nearly every day	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+31	gad1	football_players_health_study_questionnaire_1	radio	categorical	Over the past two weeks, how often have you been bothered by any of the following problems? \nFeeling nervous, anxious or on edge	0, Not at all | 1, Several days | 2, More than half the days | 3, Nearly every day	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+32	gad_2	football_players_health_study_questionnaire_1	radio	categorical	Over the past two weeks, how often have you been bothered by any of the following problems? \nNot being able to stop or control worrying	0, Not at all | 1, Several days | 2, More than half the days | 3, Nearly every day	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+38	low_intensity_exercise	football_players_health_study_questionnaire_1	radio	categorical	What is the average number of hours spent each week on each activity below? Mark the response below.\nLow intensity exercise (e.g. yoga, Pilates, stretching)	1, Zero Hrs | 2, < 1 hr | 3, 1-5 hrs | 4, 6-10 hrs | 5, 10+ hrs	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+39	weight_training	football_players_health_study_questionnaire_1	radio	categorical	What is the average number of hours spent each week on each activity below? Mark the response below.\nWeight training (e.g. lifting free weights, using weight machines)	1, Zero Hrs | 2, < 1 hr | 3, 1-5 hrs | 4, 6-10 hrs | 5, 10+ hrs	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+42	promis_pf6b3	football_players_health_study_questionnaire_1	radio	categorical	Please respond to each question or statement by marking one response per row which best describes your physical function.\nAre you able to go for a walk of at least 15 minutes?	5, Without any difficulty | 4, With a little difficulty | 3, With some difficulty | 2, With much difficulty | 1, Unable to do	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+43	promis_pf6b4	football_players_health_study_questionnaire_1	radio	categorical	Please respond to each question or statement by marking one response per row which best describes your physical function.\nAre you able to run errands and shop?	5, Without any difficulty | 4, With a little difficulty | 3, With some difficulty | 2, With much difficulty | 1, Unable to do	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+44	promis_pf6b5	football_players_health_study_questionnaire_1	radio	categorical	Please respond to each question or statement by marking one response per row which best describes your physical function.\nDoes your health limit you in doing two hours of physical labor?	5, Not at all | 4, Very little | 3, Somewhat | 2, Quite a lot | 1, Cannot do	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+45	promis_pf6b6	football_players_health_study_questionnaire_1	radio	categorical	Please respond to each question or statement by marking one response per row which best describes your physical function.\nDoes your health now limit you in doing moderate work around the house like vacuuming, sweeping floors or carrying in groceries?	5, Not at all | 4, Very little | 3, Somewhat | 2, Quite a lot | 1, Cannot do	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+65	supplement	football_players_health_study_questionnaire_1	checkbox	dichotomous	During your active playing years: (Mark all that apply)\nDid you take dietary or nutritional supplements (vitamins, creatine, protein powders)?	supplement___1, To help performance | supplement___2, To prevent symptoms | supplement___3, To treat symptoms | supplement___4, No	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+66	medication	football_players_health_study_questionnaire_1	checkbox	dichotomous	During your active playing years: (Mark all that apply)\nDid you take medications or other drugs?	medication___1, To help performance | medication___2, To prevent symptoms | medication___3, To treat symptoms | medication___4, No	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+67	pain_medications	football_players_health_study_questionnaire_1	checkbox	dichotomous	During your active playing years: (Mark all that apply)\nDid you take pain control medications once a week or more (not just for an acute injury)?	pain_medications___1, Aspirin or Tylenol | pain_medications___2, Ibuprofen (Advil or Motrin) | pain_medications___3, Prescription Pain Medication | pain_medications___4, No	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+72	dizziness	football_players_health_study_questionnaire_1	radio	categorical	While playing or practicing football, did you experience a blow to the head, neck, or upper body followed by:\nDizziness	1, No | 2, Once | 3, 2-5 times | 4, 6-10 times | 5, 11 or more	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+73	loss_of_consciousness	football_players_health_study_questionnaire_1	radio	categorical	While playing or practicing football, did you experience a blow to the head, neck, or upper body followed by:\nLoss of consciousness	1, No | 2, Once | 3, 2-5 times | 4, 6-10 times | 5, 11 or more	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+74	memory_problems	football_players_health_study_questionnaire_1	radio	categorical	While playing or practicing football, did you experience a blow to the head, neck, or upper body followed by:\nMemory problems	1, No | 2, Once | 3, 2-5 times | 4, 6-10 times | 5, 11 or more	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+75	disorientation	football_players_health_study_questionnaire_1	radio	categorical	While playing or practicing football, did you experience a blow to the head, neck, or upper body followed by:\nDisorientation	1, No | 2, Once | 3, 2-5 times | 4, 6-10 times | 5, 11 or more	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+76	confusion	football_players_health_study_questionnaire_1	radio	categorical	While playing or practicing football, did you experience a blow to the head, neck, or upper body followed by:\nConfusion	1, No | 2, Once | 3, 2-5 times | 4, 6-10 times | 5, 11 or more	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+77	seizure	football_players_health_study_questionnaire_1	radio	categorical	While playing or practicing football, did you experience a blow to the head, neck, or upper body followed by:\nSeizure	1, No | 2, Once | 3, 2-5 times | 4, 6-10 times | 5, 11 or more	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+78	visual_problems	football_players_health_study_questionnaire_1	radio	categorical	While playing or practicing football, did you experience a blow to the head, neck, or upper body followed by:\nVisual problems	1, No | 2, Once | 3, 2-5 times | 4, 6-10 times | 5, 11 or more	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+79	weakness_on_one_side_of_th	football_players_health_study_questionnaire_1	radio	categorical	While playing or practicing football, did you experience a blow to the head, neck, or upper body followed by:\nWeakness on one side of the body	1, No | 2, Once | 3, 2-5 times | 4, 6-10 times | 5, 11 or more	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+80	feeling_unsteady_on_your_f	football_players_health_study_questionnaire_1	radio	categorical	While playing or practicing football, did you experience a blow to the head, neck, or upper body followed by:\nFeeling unsteady on your feet	1, No | 2, Once | 3, 2-5 times | 4, 6-10 times | 5, 11 or more	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+103	high_blood_pressure	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nHigh blood pressure	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+104	current_htn_med	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication for high blood pressure?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+106	current_heartfailure_med	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication for heart failure?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+107	heart_rhythm	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nHeart rhythm problems (atrial fibrillation, "SVT," other)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+108	current_heartrhythm_med	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication a heart rhythm problem?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+109	high_cholesterol	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nHigh cholesterol	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+110	current_highcholesterol	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication for high cholesterol?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+111	diabetes_high_blood_sugar	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nDiabetes or high blood sugar	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+112	current_diabetes_med	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication for diabetes or high blood sugar?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+113	headaches	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nHeadaches	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+114	current_headache_med	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication for headaches?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+115	pain_medication	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nPain	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+116	current_medication_pain	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication for pain?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+117	liver_probelm	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nLiver problem	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+118	current_med_liver_problem	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication for a liver problem?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+119	anxiety	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nAnxiety	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+120	current_anxiety_med	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication for anxiety?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+121	depression	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nDepression	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+122	current_depression_med	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication for depression?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+123	memory_loss	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nMemory loss	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+124	current_med_memory_loss	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication for memory loss?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+125	add	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nAttention deficit disorder (ADD, ADHD)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+126	current_med_add	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication for an attention deficit disorder?  	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+127	low_testosterone	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nLow testosterone	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+128	current_lowt_med	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication for low testosterone?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+129	erectile_dys	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nErectile dysfunction (E.D.)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+130	current_erectile_dys	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nCurrently taking medication for ED?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+148	yr_dx_kidney_dx	football_players_health_study_questionnaire_1	text	free text	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nYear Diagnosed 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+149	cancer	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nCancer 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+150	cancer_type	football_players_health_study_questionnaire_1	text	free text	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nPlease specify cancer type	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+151	yr_dx_cancer	football_players_health_study_questionnaire_1	text	free text	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nYear(s) Diagnosed 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+100	othersurgery	football_players_health_study_questionnaire_1	yesno	dichotomous	Other Surgery 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+5	race	football_players_health_study_questionnaire_1	checkbox	dichotomous	Which category best describes your race? \n(Mark all that apply)	race___1, Black/African American | race___2, White/Caucasian | race___3, American Indian / Alaskan Native | race___4, Native Hawaiian/Pacific Islander | race___5, Asian | race___6, Other | race___7, Choose not to respond	\N	\N	\N	\N	y	\N	\N	\N	\N	\N
+19	position	football_players_health_study_questionnaire_1	checkbox	dichotomous	During your professional football career what position(s) did you most often play?\n(Check all that apply) 	position___1, Offensive Line | position___2, Defensive Line | position___3, Linebacker | position___4, Defensive Back | position___5, Running Back | position___6, Wide Receiver | position___7, Tight End | position___8, Quarterback | position___9, Kicker/Punter | position___10, Special Teams	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+20	global1	football_players_health_study_questionnaire_1	radio	categorical	Please respond to each item by marking one response per row which best describes your current overall health:  \nIn general, would you say your health is:	5, Excellent | 4, Very Good | 3, Good | 2, Fair | 1, Poor	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+21	global2	football_players_health_study_questionnaire_1	radio	categorical	Please respond to each item by marking one response per row which best describes your current overall health:  \nIn general, would you say your quality of life is:	5, Excellent | 4, Very Good | 3, Good | 2, Fair | 1, Poor	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+22	global3	football_players_health_study_questionnaire_1	radio	categorical	Please respond to each item by marking one response per row which best describes your current overall health:  \nIn general, how would you rate your physical health?	5, Excellent | 4, Very Good | 3, Good | 2, Fair | 1, Poor	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+23	global4	football_players_health_study_questionnaire_1	radio	categorical	Please respond to each item by marking one response per row which best describes your current overall health:  \nIn general, how would you rate your mental health, including your mood and ability to think?	5, Excellent | 4, Very Good | 3, Good | 2, Fair | 1, Poor	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+2	record_id	football_players_health_study_questionnaire_1	text	free text	Record ID	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+3	dob	football_players_health_study_questionnaire_1	text	free text	Date of Birth 	\N	date_mdy	1/1/1910	1/1/1995	\N	y	\N	\N	\N	\N	\N
+4	age	football_players_health_study_questionnaire_1	text	free text	What is your current age?	\N	number	22	100	\N	\N	\N	\N	\N	\N	\N
+6	hispanic	football_players_health_study_questionnaire_1	radio	categorical	Are you Hispanic/Latino?	1, Yes | 2, No | 3, Choose not to respond	\N	\N	\N	\N	y	\N	\N	\N	\N	\N
+7	domesticstatus	football_players_health_study_questionnaire_1	radio	categorical	What is your current domestic status?	1, Married | 2, Living with Partner | 3, Separated/Divorced | 4, Widowed | 5, Never Married	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+8	livingsituation	football_players_health_study_questionnaire_1	radio	categorical	How would you describe your living situation?	1, Live at home | 2, Live at home with help | 3, Assisted Living Facility | 4, Other	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+9	height	football_players_health_study_questionnaire_1	dropdown	categorical	What is your height?	1, 5 ft 6 in | 2, 5 ft 7 in | 3, 5 ft 8 in | 4, 5 ft 9 in | 5, 5 ft 10 in | 6, 5 ft 11 in | 7, 6 ft 0 in | 8, 6 ft 1 in | 9, 6 ft 2 in | 10, 6 ft 3 in | 11, 6 ft 4 in | 12, 6 ft 5 in | 13, 6 ft 6 in | 14, 6 ft 7 in | 15, 6 ft 8 in | 16, 6 ft 9 in | 17, 6 ft 10 in | 18, 6 ft 11n | 19, 7 ft 0in	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+10	current_weight	football_players_health_study_questionnaire_1	text	free text	What is your current weight?	\N	number	100	500	\N	\N	\N	\N	\N	\N	\N
+11	highschool_wt	football_players_health_study_questionnaire_1	text	free text	Weight when you finished High School	\N	number	100	500	\N	\N	\N	\N	\N	\N	\N
+12	college_wt	football_players_health_study_questionnaire_1	text	free text	Weight when you played during college  	\N	number	100	500	\N	\N	\N	\N	\N	\N	\N
+13	pro_wt	football_players_health_study_questionnaire_1	text	free text	Weight when you played professionally	\N	number	100	500	\N	\N	\N	\N	\N	\N	\N
+14	maxretire_wt	football_players_health_study_questionnaire_1	text	free text	Maximum weight post NFL career	\N	number	100	500	\N	\N	\N	\N	\N	\N	\N
+15	startplay_age	football_players_health_study_questionnaire_1	text	free text	How old were you when you began to play organized football?  	\N	number	4	25	\N	\N	\N	\N	\N	\N	\N
+16	numb_season	football_players_health_study_questionnaire_1	text	free text	How many seasons did you actively practice or play professional football?  	\N	number	1	25	\N	\N	\N	\N	\N	\N	\N
+17	first_cal_yearplay	football_players_health_study_questionnaire_1	text	free text	First calendar year you played professional football	\N	number	1945	2015	\N	\N	\N	\N	\N	\N	\N
+18	last_cal_yearplay	football_players_health_study_questionnaire_1	text	free text	Last calendar year you played professional football?	\N	number	1960	2017	\N	\N	\N	\N	\N	\N	\N
+25	global6	football_players_health_study_questionnaire_1	radio	categorical	To what extent are you able to carry out everyday activities such as walking, climbing stairs, or carrying groceries?	5, Completely | 4, Mostly | 3, Moderately | 2, A little | 1, Not at all	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+26	global7	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, how would you rate your pain on average? (0=No pain, 10=Worst Imaginable pain)	0, 0 | 1, 1 | 2, 2 | 3, 3 | 4, 4 | 5, 5 | 6, 6 | 7, 7 | 8, 8 | 9, 9 | 10, 10	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+27	global8	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, how would you rate your fatigue on average?	1, None | 2, Mild | 3, Moderate | 4, Severe | 5, Very severe	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+28	global10	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, how often have you been bothered by emotional problems such as feeling anxious, depressed, or irritable?	1, Never | 2, Rarely | 3, Sometimes | 4, Often | 5, Always	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+98	back_surgery1	football_players_health_study_questionnaire_1	yesno	dichotomous	Back (Lumbar) Surgery	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+33	number_days_exercise	football_players_health_study_questionnaire_1	radio	categorical	In an average week, how many days do you exercise?	1, None | 2, 1-2 | 3, 3-4 | 4, 5-6 | 5, 7	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+34	walking	football_players_health_study_questionnaire_1	radio	categorical	Walking for exercise or walking to work	1, Zero Hrs | 2, < 1 hr | 3, 1-5 hrs | 4, 6-10 hrs | 5, 10+ hrs	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+46	painin3	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, how much did pain interfere with your enjoyment of life?	1, Not at all | 2, A little bit | 3, Somewhat | 4, Quite a bit | 5, Very much	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+47	painin8	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, how much did pain interfere with your ability to concentrate?	1, Not at all | 2, A little bit | 3, Somewhat | 4, Quite a bit | 5, Very much	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+48	painin9	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, how much did pain interfere with your day to day activities?	1, Not at all | 2, A little bit | 3, Somewhat | 4, Quite a bit | 5, Very much	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+49	painin10	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, how much did pain interfere with your enjoyment of recreational activities?	1, Not at all | 2, A little bit | 3, Somewhat | 4, Quite a bit | 5, Very much	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+50	painin14	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, how much did pain interfere with doing your tasks away from home (e.g., getting groceries, running errands)?	1, Not at all | 2, A little bit | 3, Somewhat | 4, Quite a bit | 5, Very much	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+51	painin26	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, how often did pain keep you from socializing with others?	1, Never | 2, Rarely | 3, Sometimes | 4, Often | 5, Always	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+52	nqcog64	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, I had to read something several times to understand it.	5, Never | 4, Rarely (once) | 3, Sometimes   (2-3 times) | 2, Often (once a day) | 1, Very often   (several times a day)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+53	nqcog65	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, I had trouble keeping track of what I was doing if I was interrupted.	5, Never | 4, Rarely (once) | 3, Sometimes   (2-3 times) | 2, Often (once a day) | 1, Very often   (several times a day)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+54	nqcog66	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, I had difficulty doing more than one thing at a time.	5, Never | 4, Rarely (once) | 3, Sometimes   (2-3 times) | 2, Often (once a day) | 1, Very often   (several times a day)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+55	nqcog68	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, I had trouble remembering new information, like phone numbers or simple instructions.	5, Never | 4, Rarely (once) | 3, Sometimes   (2-3 times) | 2, Often (once a day) | 1, Very often   (several times a day)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+56	nqcog72	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, I had trouble thinking clearly.	5, Never | 4, Rarely (once) | 3, Sometimes   (2-3 times) | 2, Often (once a day) | 1, Very often   (several times a day)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+57	nqcog75	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, my thinking was slow.	5, Never | 4, Rarely (once) | 3, Sometimes   (2-3 times) | 2, Often (once a day) | 1, Very often   (several times a day)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+99	approxyrssurg_back	football_players_health_study_questionnaire_1	text	free text	Approximate year(s) of surgery 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+35	jogging	football_players_health_study_questionnaire_1	radio	categorical	What is the average number of hours spent each week on each activity below? Mark the response below.\nJogging (slower than 10min/mile)	1, Zero Hrs | 2, < 1 hr | 3, 1-5 hrs | 4, 6-10 hrs | 5, 10+ hrs	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+36	running	football_players_health_study_questionnaire_1	radio	categorical	What is the average number of hours spent each week on each activity below? Mark the response below.\nRunning (10min/mile or faster)	1, Zero Hrs | 2, < 1 hr | 3, 1-5 hrs | 4, 6-10 hrs | 5, 10+ hrs	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+37	other_aerobic	football_players_health_study_questionnaire_1	radio	categorical	What is the average number of hours spent each week on each activity below? Mark the response below.\nOther aerobic (e.g. bicycling, stationary/elliptical machine/other)	1, Zero Hrs | 2, < 1 hr | 3, 1-5 hrs | 4, 6-10 hrs | 5, 10+ hrs	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+40	promis_pf6b1	football_players_health_study_questionnaire_1	radio	categorical	Please respond to each question or statement by marking one response per row which best describes your physical function.\nAre you able to do chores such as house work or yard work?	5, Without any difficulty | 4, With a little difficulty | 3, With some difficulty | 2, With much difficulty | 1, Unable to do	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+41	promis_pf6b2	football_players_health_study_questionnaire_1	radio	categorical	Please respond to each question or statement by marking one response per row which best describes your physical function.\nAre you able to go up and down stairs at a normal pace?	5, Without any difficulty | 4, With a little difficulty | 3, With some difficulty | 2, With much difficulty | 1, Unable to do	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+58	nqcog77	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, I had to work really hard to pay attention or I would make a mistake.	5, Never | 4, Rarely (once) | 3, Sometimes   (2-3 times) | 2, Often (once a day) | 1, Very often   (several times a day)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+59	nqcog80	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, I had trouble concentrating.	5, Never | 4, Rarely (once) | 3, Sometimes   (2-3 times) | 2, Often (once a day) | 1, Very often   (several times a day)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+60	nqcog67_editted	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, I had trouble remembering whether I did things I was supposed to do.	5, Never | 4, Rarely (once) | 3, Sometimes   (2-3 times) | 2, Often (once a day) | 1, Very often   (several times a day)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+61	nqcog84	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, I had trouble making decisions.	5, Never | 4, Rarely (once) | 3, Sometimes   (2-3 times) | 2, Often (once a day) | 1, Very often   (several times a day)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+62	nqcog86	football_players_health_study_questionnaire_1	radio	categorical	In the past 7 days, I had trouble planning out steps of a task.	5, Never | 4, Rarely (once) | 3, Sometimes   (2-3 times) | 2, Often (once a day) | 1, Very often   (several times a day)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+63	pcp	football_players_health_study_questionnaire_1	yesno	dichotomous	Do you have a doctor (primary care provider) that you see at least once every 3 years?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+64	other_health_professional	football_players_health_study_questionnaire_1	yesno	dichotomous	Do you have a physical therapist, chiropractor, or health professional you have seen in the past 3 years?  	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+68	dx_concussion	football_players_health_study_questionnaire_1	yesno	dichotomous	Were you ever diagnosed by a medical professional with a concussion?  \n	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+69	numb_concussions	football_players_health_study_questionnaire_1	text	free text	Please write the approximate number of diagnosed concussions you sustained.	\N	number	0	99	\N	\N	\N	\N	\N	\N	\N
+88	knee_joint_replacement	football_players_health_study_questionnaire_1	yesno	dichotomous	Knee Joint Replacement	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+89	approxyrssurg_knee	football_players_health_study_questionnaire_1	text	free text	Approximate year(s) of knee replacement surgery 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+90	hip_joint_replacemen	football_players_health_study_questionnaire_1	yesno	dichotomous	Hip Joint Replacement	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+91	approxyrssurg_hip	football_players_health_study_questionnaire_1	text	free text	Approximate year(s) of hip replacement surgery 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+92	cardiac_surgery	football_players_health_study_questionnaire_1	yesno	dichotomous	Heart Bypass, Angioplasty or Stent Placement	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+93	approxyrssurg_cardiac	football_players_health_study_questionnaire_1	text	free text	Approximate year(s) of cardiac surgery 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+94	cataract_surgery	football_players_health_study_questionnaire_1	yesno	dichotomous	Cataract Surgery	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+95	approxyrssurg_cataract	football_players_health_study_questionnaire_1	text	free text	Approximate year(s) of cataract surgery 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+96	neck_spine_surgery	football_players_health_study_questionnaire_1	yesno	dichotomous	Neck or Spine Surgery	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+97	approxyrssurg_neckspine	football_players_health_study_questionnaire_1	text	free text	Approximate year(s) of neck or spine surgery 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+70	headaches_ht	football_players_health_study_questionnaire_1	radio	categorical	While playing or practicing football, did you experience a blow to the head, neck, or upper body followed by:\nHeadaches	1, No | 2, Once | 3, 2-5 times | 4, 6-10 times | 5, 11 or more	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+84	knee_surgery	football_players_health_study_questionnaire_1	radio	categorical	Over the past two weeks, how often have you been bothered by any of the following problems? \nKnee surgery:	1, Yes | 2, No	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+71	nausea	football_players_health_study_questionnaire_1	radio	categorical	While playing or practicing football, did you experience a blow to the head, neck, or upper body followed by:\nNausea	1, No | 2, Once | 3, 2-5 times | 4, 6-10 times | 5, 11 or more	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+81	neck_surgery	football_players_health_study_questionnaire_1	radio	categorical	During your active playing years, did you have:\nNeck surgery:	1, Yes | 2, No	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+82	back_surgery	football_players_health_study_questionnaire_1	radio	categorical	During your active playing years, did you have:\nBack Surgery	1, Yes | 2, No	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+83	anterior_cruciate_ligament	football_players_health_study_questionnaire_1	radio	categorical	During your active playing years, did you have:\nAnterior cruciate ligament (ACL) reconstruction:	1, Yes | 2, No	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+85	ankle_surgery	football_players_health_study_questionnaire_1	radio	categorical	During your active playing years, did you have:\nAnkle Surgery	1, Yes | 2, No	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+86	shoulder_surgery	football_players_health_study_questionnaire_1	radio	categorical	During your active playing years, did you have:\nShoulder surgery:	1, Yes | 2, No	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+87	hand_surgery	football_players_health_study_questionnaire_1	radio	categorical	During your active playing years, did you have:\nHand surgery:	1, Yes | 2, No	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+101	type_other_surgery	football_players_health_study_questionnaire_1	text	free text	Please list other surgery:	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+102	years_other_surgery	football_players_health_study_questionnaire_1	text	free text	Please specify other surgery year(s)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+152	days_drink_week	football_players_health_study_questionnaire_1	radio	categorical	In a typical week, how many days do you drink a beverage containing alcohol?	8, None | 9, 1-2 | 10, 3-4 | 11, 5-6 | 7, 7	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+105	heart_failure	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a medical provider ever recommended or prescribed medicine for any of the following conditions? \nHeart failure	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+131	heart_attack	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nHeart Attack	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+132	yr_dx_heart_attack	football_players_health_study_questionnaire_1	text	free text	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nYear(s) Diagnosed 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+133	stroke	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nStroke	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+134	yr_dx_stroke	football_players_health_study_questionnaire_1	text	free text	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nYear(s) Diagnosed 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+135	sleep_apnea	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nSleep Apnea 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+136	yr_dx_sleepapnea	football_players_health_study_questionnaire_1	text	free text	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nYear Diagnosed 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+137	dementia	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nDementia (Alzheimer's Disease) 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+138	yr_dx_dementia	football_players_health_study_questionnaire_1	text	free text	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nYear Diagnosed 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+139	cte	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nChronic Traumatic Encephalopathy (CTE)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+140	yr_dx_cte	football_players_health_study_questionnaire_1	text	free text	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nYear Diagnosed 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+141	parkinsons	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nParkinson's Disease	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+142	yr_dx_parkinsons	football_players_health_study_questionnaire_1	text	free text	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nYear Diagnosed 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+143	arthritis	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nArthritis	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+144	yr_dx_arthritis	football_players_health_study_questionnaire_1	text	free text	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nYear(s) Diagnosed 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+145	als	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nAmyotrophic Lateral Sclerosis (ALS: Lou Gehrig's Disease)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+146	yr_dx_als	football_players_health_study_questionnaire_1	text	free text	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nYear Diagnosed 	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+147	renal_kidney_disease	football_players_health_study_questionnaire_1	yesno	dichotomous	Has a health care provider ever told you that you have had any of the following diagnoses or health outcomes? \nRenal (Kidney) Disease	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+153	drinksday	football_players_health_study_questionnaire_1	radio	categorical	On a typical day that you drink, how many beverages containing alcohol do you usually have?	1, 1 | 12, 2-3 | 13, 4-5 | 14, 6-8 | 15, 8+	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+154	smoking_hx	football_players_health_study_questionnaire_1	radio	categorical	Have you smoked 20 packs of cigarettes or more in your lifetime? 	1, No | 2, Yes I currently smoke | 3, Yes I smoked in the past	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+155	do_you_currently_or_have_y	football_players_health_study_questionnaire_1	yesno	dichotomous	Do you currently or have you ever regularly used chewing tobacco?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+156	snore_loudly	football_players_health_study_questionnaire_1	yesno	dichotomous	Have you been told you snore loudly?	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+157	sleephrs	football_players_health_study_questionnaire_1	radio	categorical	On an average weekday or working day how many hours of sleep do you get each night?	1, <5 | 2, 5 | 3, 6 | 4, 7 | 5, 8 | 6, 9 | 7, 10+	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+158	health_expectation	football_players_health_study_questionnaire_1	radio	categorical	Think about when you started to play in the NFL and how you expected your health would be at this point in your life. \n\nNow compare it to how your health actually is today. Compared to those expectations, is your health today:	1, A lot worse | 2, A little worse | 3, About the same | 4, A little better | 5, A lot better	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+159	are_you_currently_employed	football_players_health_study_questionnaire_1	radio	categorical	Are you currently employed? 	1, No | 2, Yes, I work in football (at any level) | 3, Yes, I work outside football | 4, Retired	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+160	student_looking	football_players_health_study_questionnaire_1	radio	categorical	Are you currently a student or looking for work?	1, Currently a student | 2, Currently looking for work	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+161	job_in_football	football_players_health_study_questionnaire_1	radio	categorical	If you work in football, please provide additional information	1, Coach | 2, Scout | 3, Administration | 4, Other	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+162	other_job_in_football	football_players_health_study_questionnaire_1	text	free text	Please Specify	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+163	job_industry	football_players_health_study_questionnaire_1	text	free text	Specify industry	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+164	job_outside_football	football_players_health_study_questionnaire_1	text	free text	Specify job title	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+165	retired_industry	football_players_health_study_questionnaire_1	text	free text	Specify last industry	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+166	retired_job_title	football_players_health_study_questionnaire_1	text	free text	Specify last job title	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+167	questionnaire_help	football_players_health_study_questionnaire_1	radio	categorical	Did someone help you fill out this questionnaire?	1, Spouse / Partner | 2, Other family member | 3, Other | 4, No one	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
+\.
+
+
+--
+-- Name: q1datadic_id_seq; Type: SEQUENCE SET; Schema: q1; Owner: -
+--
+
+SELECT pg_catalog.setval('q1datadic_id_seq', 167, true);
 
 
 SET search_path = q2, pg_catalog;
 
 --
--- Name: datadic_id_seq; Type: SEQUENCE SET; Schema: q2; Owner: fphs
+-- Name: datadic_id_seq; Type: SEQUENCE SET; Schema: q2; Owner: -
 --
 
 SELECT pg_catalog.setval('datadic_id_seq', 411, true);
 
 
 --
--- Data for Name: q2_datadic; Type: TABLE DATA; Schema: q2; Owner: fphs
+-- Data for Name: q2_datadic; Type: TABLE DATA; Schema: q2; Owner: -
 --
 
 COPY q2_datadic (id, variable_name, domain, field_type_rc, field_type_sa, field_label, field_attributes, field_note, text_valid_type, text_valid_min, text_valid_max, required_field, field_attr_array, source, owner, classification, display) FROM stdin;
@@ -1875,17 +2503,27 @@ COPY q2_datadic (id, variable_name, domain, field_type_rc, field_type_sa, field_
 SET search_path = ipa_ops, pg_catalog;
 
 --
--- Name: ipa_ops_datadic_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: fphs; Tablespace: 
+-- Name: ipa_ops_datadic_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY ipa_datadic
     ADD CONSTRAINT ipa_ops_datadic_pkey PRIMARY KEY (id);
 
 
+SET search_path = q1, pg_catalog;
+
+--
+-- Name: q1_datadic_pkey; Type: CONSTRAINT; Schema: q1; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY q1_datadic
+    ADD CONSTRAINT q1_datadic_pkey PRIMARY KEY (id);
+
+
 SET search_path = q2, pg_catalog;
 
 --
--- Name: datadic_pkey; Type: CONSTRAINT; Schema: q2; Owner: fphs; Tablespace: 
+-- Name: datadic_pkey; Type: CONSTRAINT; Schema: q2; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY q2_datadic
@@ -1895,48 +2533,73 @@ ALTER TABLE ONLY q2_datadic
 SET search_path = ipa_ops, pg_catalog;
 
 --
--- Name: ipaops_datadic_id_seq; Type: ACL; Schema: ipa_ops; Owner: fphs
+-- Name: ipaops_datadic_id_seq; Type: ACL; Schema: ipa_ops; Owner: -
 --
 
 REVOKE ALL ON SEQUENCE ipaops_datadic_id_seq FROM PUBLIC;
-REVOKE ALL ON SEQUENCE ipaops_datadic_id_seq FROM fphs;
-GRANT ALL ON SEQUENCE ipaops_datadic_id_seq TO fphs;
+REVOKE ALL ON SEQUENCE ipaops_datadic_id_seq FROM bk160;
+GRANT ALL ON SEQUENCE ipaops_datadic_id_seq TO bk160;
 GRANT SELECT,USAGE ON SEQUENCE ipaops_datadic_id_seq TO pa106;
 
 
 --
--- Name: ipa_datadic; Type: ACL; Schema: ipa_ops; Owner: fphs
+-- Name: ipa_datadic; Type: ACL; Schema: ipa_ops; Owner: -
 --
 
 REVOKE ALL ON TABLE ipa_datadic FROM PUBLIC;
-REVOKE ALL ON TABLE ipa_datadic FROM fphs;
-GRANT ALL ON TABLE ipa_datadic TO fphs;
+REVOKE ALL ON TABLE ipa_datadic FROM bk160;
+GRANT ALL ON TABLE ipa_datadic TO bk160;
 GRANT SELECT,INSERT,UPDATE ON TABLE ipa_datadic TO fphsadm;
 GRANT ALL ON TABLE ipa_datadic TO fphs;
 GRANT ALL ON TABLE ipa_datadic TO dam40;
 GRANT ALL ON TABLE ipa_datadic TO pa106;
+GRANT SELECT ON TABLE ipa_datadic TO fphsrailsapp;
+
+
+SET search_path = q1, pg_catalog;
+
+--
+-- Name: q1datadic_id_seq; Type: ACL; Schema: q1; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE q1datadic_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE q1datadic_id_seq FROM bk160;
+GRANT ALL ON SEQUENCE q1datadic_id_seq TO bk160;
+GRANT SELECT,USAGE ON SEQUENCE q1datadic_id_seq TO pa106;
+
+
+--
+-- Name: q1_datadic; Type: ACL; Schema: q1; Owner: -
+--
+
+REVOKE ALL ON TABLE q1_datadic FROM PUBLIC;
+REVOKE ALL ON TABLE q1_datadic FROM bk160;
+GRANT ALL ON TABLE q1_datadic TO bk160;
+GRANT SELECT ON TABLE q1_datadic TO pa106;
+GRANT SELECT ON TABLE q1_datadic TO fphsrailsapp;
 
 
 SET search_path = q2, pg_catalog;
 
 --
--- Name: q2_datadic; Type: ACL; Schema: q2; Owner: fphs
+-- Name: q2_datadic; Type: ACL; Schema: q2; Owner: -
 --
 
 REVOKE ALL ON TABLE q2_datadic FROM PUBLIC;
-REVOKE ALL ON TABLE q2_datadic FROM fphs;
-GRANT ALL ON TABLE q2_datadic TO fphs;
+REVOKE ALL ON TABLE q2_datadic FROM bk160;
+GRANT ALL ON TABLE q2_datadic TO bk160;
 GRANT ALL ON TABLE q2_datadic TO dam40;
 GRANT ALL ON TABLE q2_datadic TO pa106;
+GRANT SELECT ON TABLE q2_datadic TO fphsrailsapp;
 
 
 --
--- Name: datadic_id_seq; Type: ACL; Schema: q2; Owner: fphs
+-- Name: datadic_id_seq; Type: ACL; Schema: q2; Owner: -
 --
 
 REVOKE ALL ON SEQUENCE datadic_id_seq FROM PUBLIC;
-REVOKE ALL ON SEQUENCE datadic_id_seq FROM fphs;
-GRANT ALL ON SEQUENCE datadic_id_seq TO fphs;
+REVOKE ALL ON SEQUENCE datadic_id_seq FROM bk160;
+GRANT ALL ON SEQUENCE datadic_id_seq TO bk160;
 GRANT SELECT,USAGE ON SEQUENCE datadic_id_seq TO pa106;
 
 
