@@ -32,6 +32,7 @@ gem 'syslog-logger'
 group :development do
   gem 'listen'
   gem 'web-console'
+  gem 'solargraph'
 end
 
 group :development, :test, :ipa_test do

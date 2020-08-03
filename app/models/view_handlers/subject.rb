@@ -42,7 +42,9 @@ module ViewHandlers
     end
 
     def dates_sensible
-      errors.add('birth date', 'and death date are not sensible') if birth_date && death_date && birth_date > death_date
+      return true unless respond_to?(:birth_date)
+
+      errors.add('birth date', 'and death date are not sensible') if respond_to?(:death_date) && birth_date && death_date && birth_date > death_date
       errors.add('birth date', 'is after today') if birth_date && birth_date > DateTime.now
     end
   end

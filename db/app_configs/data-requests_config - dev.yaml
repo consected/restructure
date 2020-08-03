@@ -207,6 +207,28 @@ app_type:
     created_at: '2020-07-08T13:30:22.096Z'
     updated_at: '2020-07-08T13:30:22.096Z'
     user_email: 
+  - id: 562
+    name: reports list title
+    value: Data Dictionaries
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 42
+    role_name: ''
+    created_at: '2020-07-31T12:53:41.339Z'
+    updated_at: '2020-07-31T12:53:41.339Z'
+    user_email: 
+  - id: 563
+    name: report library button label
+    value: data dictionaries list
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 42
+    role_name: ''
+    created_at: '2020-07-31T12:54:07.823Z'
+    updated_at: '2020-07-31T12:54:19.386Z'
+    user_email: 
   valid_user_access_controls:
   - id: 2322
     user_id: 
@@ -480,19 +502,6 @@ app_type:
     role_name: user
     created_at: '2020-06-08T14:56:16.375Z'
     updated_at: '2020-06-09T09:10:30.830Z'
-    user_email: 
-  - id: 2352
-    user_id: 
-    resource_type: table
-    resource_name: dynamic_model__q2_rc_codebook
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 42
-    role_name: user
-    created_at: '2020-06-08T15:00:07.593Z'
-    updated_at: '2020-07-09T09:12:20.754Z'
     user_email: 
   - id: 2353
     user_id: 
@@ -962,7 +971,46 @@ app_type:
     created_at: '2020-07-09T08:43:10.597Z'
     updated_at: '2020-07-09T08:43:10.597Z'
     user_email: 
-  - id: 2425
+  - id: 2426
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__q2_datadic
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 42
+    role_name: user
+    created_at: '2020-07-31T11:21:48.318Z'
+    updated_at: '2020-07-31T11:21:48.318Z'
+    user_email: 
+  - id: 2427
+    user_id: 
+    resource_type: general
+    resource_name: send_files_to_trash
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 42
+    role_name: admin
+    created_at: '2020-07-31T11:21:48.511Z'
+    updated_at: '2020-07-31T11:21:48.511Z'
+    user_email: 
+  - id: 2428
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__data_request_initial_reviews
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 42
+    role_name: admin
+    created_at: '2020-07-31T11:21:48.516Z'
+    updated_at: '2020-07-31T11:21:48.516Z'
+    user_email: 
+  - id: 2429
     user_id: 
     resource_type: report
     resource_name: data_requests__q2_data_dictionary
@@ -972,8 +1020,8 @@ app_type:
     admin_id: 21
     app_type_id: 42
     role_name: user
-    created_at: '2020-07-31T10:17:53.041Z'
-    updated_at: '2020-07-31T10:17:53.041Z'
+    created_at: '2020-07-31T12:00:06.637Z'
+    updated_at: '2020-07-31T12:00:06.637Z'
     user_email: 
   valid_associated_activity_logs:
   - id: 104
@@ -983,10 +1031,10 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-05-19T10:28:43.095Z'
-    updated_at: '2020-07-09T10:32:41.519Z'
+    updated_at: '2020-07-31T11:28:58.691Z'
     action_when_attribute: created_at
     field_list: ''
-    blank_log_field_list: placeholder_intro
+    blank_log_field_list: placeholder_intro created_by_user_id
     blank_log_name: ''
     extra_log_types: "_default:\r\n################# Default configurations ###################\r\n\r\n
       \ fields:\r\n#    - follow_up_date\r\n#    - follow_up_time\r\n#    - notes\r\n\r\n
@@ -1439,6 +1487,24 @@ app_type:
     category: data-request
     user_email: 
   associated_dynamic_models:
+  - id: 601
+    name: Selected Data Attributes
+    table_name: data_requests_selected_attribs
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-05-21T13:07:03.841Z'
+    updated_at: '2020-07-31T12:07:50.845Z'
+    position: 
+    category: data-requests
+    table_key_name: ''
+    field_list: record_id,data, data_request_id, disabled, variable_name record_type
+    result_order: ''
+    options: ''
+    user_email: 
   - id: 594
     name: Data Request
     table_name: data_requests
@@ -1449,7 +1515,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-05-19T10:44:04.604Z'
-    updated_at: '2020-07-09T09:37:57.802Z'
+    updated_at: '2020-07-31T11:45:15.372Z'
     position: 
     category: data-requests
     table_key_name: ''
@@ -1461,7 +1527,7 @@ app_type:
       embedded_report_data_requests__select_data_attributes_q2, embedded_report_data_requests__select_data_attributes_bhs,
       embedded_report_data_requests__select_data_attributes_persnet,embedded_report_data_requests__select_data_attributes_ipa,
       embedded_report_data_requests__selected_data_attributes_all placeholder_final_unsubmitted
-      placeholder_final_submitted
+      placeholder_final_submitted, created_by_user_id
     result_order: ''
     options: "default:\r\n\r\n  field_options:\r\n    project_title:\r\n      no_downcase:
       true\r\n    full_name:\r\n      value: \"{{current_user.first_name}} {{current_user.last_name}}\"\r\n
@@ -1550,11 +1616,12 @@ app_type:
       edit BHS variable request\r\n    embedded_report_data_requests__select_data_attributes_persnet:
       edit PersNet variable request\r\n    embedded_report_data_requests__select_data_attributes_ipa:
       edit IPA variable request\r\n\r\n    embedded_report_data_requests__selected_data_attributes_all:
-      view all selected variables\r\n    \r\n\r\n    \r\n  show_if:\r\n    status:
-      \r\n      never: true\r\n\r\n    placeholder_banner:\r\n      status:\r\n        -
-      ''\r\n        - null\r\n        - 'new'\r\n    \r\n    full_name:\r\n      fphs_analyst_yes_no:
-      \r\n        - 'no'\r\n        - 'yes'\r\n          \r\n    title: \r\n      fphs_analyst_yes_no:
-      'no'\r\n\r\n    institution: \r\n      fphs_analyst_yes_no: 'no'\r\n\r\n    other_institution:\r\n
+      view all selected variables\r\n    \r\n\r\n    \r\n  show_if:\r\n    created_by_user_id:\r\n
+      \     never: true\r\n      \r\n    status: \r\n      never: true\r\n\r\n    placeholder_banner:\r\n
+      \     status:\r\n        - ''\r\n        - null\r\n        - 'new'\r\n    \r\n
+      \   full_name:\r\n      fphs_analyst_yes_no: \r\n        - 'no'\r\n        -
+      'yes'\r\n          \r\n    title: \r\n      fphs_analyst_yes_no: 'no'\r\n\r\n
+      \   institution: \r\n      fphs_analyst_yes_no: 'no'\r\n\r\n    other_institution:\r\n
       \     fphs_analyst_yes_no: 'no'\r\n      institution: other\r\n\r\n    others_handling_data:\r\n
       \     fphs_analyst_yes_no: 'no'\r\n\r\n    pm_contact:\r\n      fphs_analyst_yes_no:
       'no'\r\n\r\n    other_pm_contact: \r\n      fphs_analyst_yes_no: 'no'\r\n      pm_contact:
@@ -1590,23 +1657,23 @@ app_type:
       \ valid_if:\r\n    on_save:\r\n      all:\r\n        this:\r\n          terms_of_use_yes_no:
       'yes'\r\n          "
     user_email: 
-  - id: 599
-    name: Q2 REDCap dictionary
-    table_name: q2_rc_codebook
+  - id: 626
+    name: Q2 dictionary
+    table_name: q2_datadic
     schema_name: 
     primary_key_name: id
     foreign_key_name: ''
     description: ''
     admin_id: 21
     disabled: false
-    created_at: '2020-05-19T15:31:46.550Z'
-    updated_at: '2020-07-09T09:11:38.438Z'
+    created_at: '2020-07-31T11:21:47.412Z'
+    updated_at: '2020-07-31T11:21:47.412Z'
     position: 
     category: data-requests
     table_key_name: ''
     field_list: ''
     result_order: ''
-    options: "default:\r\n\r\n  view_options:\r\n    data_attribute: \r\n      - q2_domain\r\n
+    options: "default:\r\n\r\n  view_options:\r\n    data_attribute: \r\n      - domain\r\n
       \     - '|'\r\n      - variable_name\r\n      - ':'\r\n      - field_label"
     user_email: 
   - id: 603
@@ -1671,24 +1738,6 @@ app_type:
       to the requester. \r\n\r\n        *These notes will be visible by the requester
       and other reviewers.*\r\n\r\n"
     user_email: 
-  - id: 601
-    name: Selected Data Attributes
-    table_name: data_requests_selected_attribs
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2020-05-21T13:07:03.841Z'
-    updated_at: '2020-05-26T13:30:20.440Z'
-    position: 
-    category: data-requests
-    table_key_name: ''
-    field_list: record_id,data, data_request_id, disabled, variable_name
-    result_order: ''
-    options: ''
-    user_email: 
   - id: 597
     name: Requested Data
     table_name: data_request_attribs
@@ -1745,14 +1794,15 @@ app_type:
     description: "# FPHS Data Requests\r\n\r\nThe data requests process follows a
       series of activities. More complex requests, and those requiring analysis outside
       of the **FPHS Secure Environment** may take longer to review if they require
-      specific stakeholder / faculty discussions.\r\n\r\n![Data Requests Process](/app_specific/data_requests/data-requests-process.svg)\r\n\r\nClick
+      specific stakeholder / faculty discussions.\r\n\r\n![Data Requests Process](/app_specific/data_requests/data-requests-process.svg)\r\n\r\n**>**
+      View [data dictionaries](/reports) of available variables\r\n\r\n**>** Click
       the **+ Data Request** button to start a new Data Request\r\n\r\n"
     sql: "select id master_id from masters where id = -1 limit 1;\r\n"
     search_attrs: ''
     admin_id: 21
     disabled: false
     created_at: '2020-05-19T11:28:00.910Z'
-    updated_at: '2020-07-08T09:27:21.468Z'
+    updated_at: '2020-07-31T12:45:02.590Z'
     report_type: search
     auto: true
     searchable: true
@@ -1777,10 +1827,9 @@ app_type:
       \ cb.q2_domain \"domain\",\r\n  cb.field_label \"label\",\r\n  cb.field_attributes
       \"attributes\",\r\n  cb.notes\r\nfrom q2_rc_codebook cb\r\n\r\nwhere\r\n  (\r\n
       \   (\r\n      (:domain) is NULL OR cb.q2_domain IN (:domain)\r\n    )\r\n    AND
-      (\r\n      (\r\n        :name_or_label_contains is NULL OR cb.variable_name
-      ~* :name_or_label_contains\r\n      ) \r\n      OR (\r\n        :name_or_label_contains
-      is NULL OR cb.field_label ~* :name_or_label_contains\r\n      )\r\n    )\r\n
-      \ )\r\norder by \r\ncb.id;\r\n"
+      (\r\n      :name_or_label_contains is NULL \r\n      OR cb.variable_name ~*
+      :name_or_label_contains\r\n      OR cb.field_label ~* :name_or_label_contains
+      \     \r\n    )\r\n  )\r\norder by \r\ncb.id;\r\n"
     search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
       multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
       \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
@@ -1790,7 +1839,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-05-20T15:14:00.059Z'
-    updated_at: '2020-07-31T11:08:34.372Z'
+    updated_at: '2020-07-31T12:03:20.004Z'
     report_type: regular_report
     auto: false
     searchable: true
@@ -1820,30 +1869,30 @@ app_type:
       therefore will take more time. Requesting multiple attributes from the **partially
       restricted** set may require more in-depth review, dependent on the combination.\r\n"
     sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  '{\"field_name\": \"update_list[items][]\",\"value\":
-      {\"list_id\": \"' || :list_id || \r\n  '\",\"type\":\"q2_rc_codebook\", \"id\":
+      {\"list_id\": \"' || :list_id || \r\n  '\",\"type\":\"q2_datadic\", \"id\":
       ' || cb.id || \r\n  ', \"from_master_id\":-1, \"init_value\": ' || \r\n  case
       when coalesce(sel.id, 0) = 0 then 'false' else 'true' end\r\n  || '}}' \r\n
       \   \"select items: update list: data_requests_selected_attribs\", \r\n  cb.variable_name,\r\n
-      \ cb.q2_domain,\r\n  cb.field_label,\r\n  cb.field_attributes,\r\n  cb.notes,
-      \r\n  case when coalesce(sel.id, 0) = 0 then 'false' else 'true' end \"selected\"\r\nfrom
-      q2_rc_codebook cb\r\nleft join data_requests_selected_attribs sel\r\non sel.record_id
-      = cb.id \r\n  and not coalesce(sel.disabled, false) \r\n  and :list_id = data_request_id\r\nwhere\r\n
-      \ (\r\n    (\r\n      (:domain) is NULL OR cb.q2_domain IN (:domain)\r\n    )\r\n
-      \   AND (\r\n      :variable_name is NULL OR cb.variable_name ~* :variable_name\r\n
-      \   )\r\n    AND (\r\n      :field_label is NULL OR cb.field_label ~* :field_label\r\n
-      \   )\r\n    OR sel.id IS NOT NULL\r\n  )\r\norder by \r\nselected desc\r\n,
-      cb.id;\r\n"
+      \ cb.domain,\r\n  cb.field_type_sa,\r\n  cb.field_label,\r\n  replace(cb.field_attributes,
+      ' | ',\r\n'\r\n') field_attributes,\r\n  cb.field_note, \r\n  case when coalesce(sel.id,
+      0) = 0 then 'false' else 'true' end \"selected\"\r\nfrom q2_datadic cb\r\nleft
+      join data_requests_selected_attribs sel\r\non sel.record_id = cb.id \r\n  and
+      \ sel.record_type = 'q2_datadic'\r\n  and not coalesce(sel.disabled, false)
+      \r\n  and :list_id = data_request_id\r\nwhere\r\n  (\r\n    (\r\n      (:domain)
+      is NULL OR cb.domain IN (:domain)\r\n    )\r\n    AND (\r\n      :name_or_label_contains
+      is NULL \r\n      OR cb.variable_name ~* :name_or_label_contains\r\n      OR
+      cb.field_label ~* :name_or_label_contains      \r\n    )\r\n    OR sel.id IS
+      NOT NULL\r\n  )\r\norder by \r\nselected desc\r\n, cb.id;\r\n"
     search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
       multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
       \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
-      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nvariable_name:
-      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
-      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
-      \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
+      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nname_or_label_contains:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nlist_id:\r\n
+      \ number:\r\n    label: ID\r\n    hidden: true\r\n    "
     admin_id: 21
     disabled: false
     created_at: '2020-05-21T13:10:43.213Z'
-    updated_at: '2020-07-07T15:08:27.316Z'
+    updated_at: '2020-07-31T12:02:56.350Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -1864,22 +1913,24 @@ app_type:
   - id: 287
     name: Selected Data Attributes All
     description: ''
-    sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  'Q2' \"study\",\r\n  cb.variable_name,\r\n
-      \ cb.q2_domain,\r\n  cb.field_label,\r\n  cb.field_attributes,\r\n  cb.notes\r\nfrom
-      q2_rc_codebook cb\r\n\r\ninner join data_requests_selected_attribs sel\r\non
-      \r\n  sel.record_id = cb.id \r\n  and not coalesce(sel.disabled, false) \r\n\r\ninner
-      join model_references  mr\r\non \r\n  (:list_type IS NULL OR :list_type = 'DynamicModel::DataRequest')\r\n
-      \ and sel.data_request_id = :list_id \r\n\r\n   OR\r\n   \r\n  :list_type =
-      'ActivityLog::DataRequestAssignment'\r\n  and from_record_id = :list_id \r\n
-      \ and from_record_type = 'ActivityLog::DataRequestAssignment' \r\n  and to_record_type
-      = 'DynamicModel::DataRequest'\r\n  and sel.data_request_id = mr.to_record_id\r\n
-      \ \r\nwhere\r\n  sel.id IS NOT NULL\r\norder by \r\n  cb.id;\r\n"
+    sql: "\r\n\r\nwith datadics as (\r\n  select distinct\r\n    id,\r\n    'Q2' \"study\",\r\n
+      \   variable_name,\r\n    domain,\r\n    field_label,\r\n    field_attributes,\r\n
+      \   field_note,\r\n    'q2_datadic' \"datadic\" \r\n  from q2_datadic\r\n  \r\n
+      \ union\r\n  select distinct\r\n    id,\r\n    'IPA' \"study\",\r\n    variable_name,\r\n
+      \   domain,\r\n    field_label,\r\n    field_attributes,\r\n    field_note,\r\n
+      \   'ipa_datadic' \"datadic\" \r\n  from ipa_datadic\r\n  \r\n)\r\nselect \r\n
+      \   sel.id,\r\n    cb.study,\r\n    cb.variable_name,\r\n    cb.domain,\r\n
+      \   cb.field_label,\r\n    replace(cb.field_attributes, ' | ',\r\n'\r\n') field_attributes,\r\n
+      \   cb.field_note,\r\n    cb.datadic\r\nfrom datadics cb\r\ninner join data_requests_selected_attribs
+      sel\r\non \r\n  sel.record_id = cb.id \r\n  and not coalesce(sel.disabled, false)
+      \r\n  and cb.datadic = sel.record_type\r\n  and sel.data_request_id = :list_id
+      \r\n\r\nwhere\r\n  sel.id IS NOT NULL\r\norder by \r\n  cb.study, cb.id;\r\n"
     search_attrs: "\r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n
       \   \r\n    \r\nlist_type:\r\n  text:\r\n    label: Type\r\n    hidden: true\r\n"
     admin_id: 21
     disabled: false
     created_at: '2020-05-28T16:08:10.384Z'
-    updated_at: '2020-06-08T12:57:41.617Z'
+    updated_at: '2020-07-31T11:21:47.675Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -2100,30 +2151,31 @@ app_type:
       therefore will take more time. Requesting multiple attributes from the **partially
       restricted** set may require more in-depth review, dependent on the combination.\r\n"
     sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  '{\"field_name\": \"update_list[items][]\",\"value\":
-      {\"list_id\": \"' || :list_id || \r\n  '\",\"type\":\"q2_rc_codebook\", \"id\":
+      {\"list_id\": \"' || :list_id || \r\n  '\",\"type\":\"ipa_datadic\", \"id\":
       ' || cb.id || \r\n  ', \"from_master_id\":-1, \"init_value\": ' || \r\n  case
       when coalesce(sel.id, 0) = 0 then 'false' else 'true' end\r\n  || '}}' \r\n
       \   \"select items: update list: data_requests_selected_attribs\", \r\n  cb.variable_name,\r\n
-      \ cb.q2_domain,\r\n  cb.field_label,\r\n  cb.field_attributes,\r\n  cb.notes,
-      \r\n  case when coalesce(sel.id, 0) = 0 then 'false' else 'true' end \"selected\"\r\nfrom
-      q2_rc_codebook cb\r\nleft join data_requests_selected_attribs sel\r\non sel.record_id
-      = cb.id \r\n  and not coalesce(sel.disabled, false) \r\n  and :list_id = data_request_id\r\nwhere\r\n
-      \ (\r\n    (\r\n      (:domain) is NULL OR cb.q2_domain IN (:domain)\r\n    )\r\n
-      \   AND (\r\n      :variable_name is NULL OR cb.variable_name ~* :variable_name\r\n
-      \   )\r\n    AND (\r\n      :field_label is NULL OR cb.field_label ~* :field_label\r\n
-      \   )\r\n    OR sel.id IS NOT NULL\r\n  )\r\norder by \r\nselected desc\r\n,
-      cb.id;\r\n"
+      \ cb.domain,\r\n  cb.field_type_sa,\r\n  cb.field_label,\r\n  replace(cb.field_attributes,
+      ' | ',\r\n'\r\n') field_attributes,\r\n  cb.field_note, \r\n  case when coalesce(sel.id,
+      0) = 0 then 'false' else 'true' end \"selected\"\r\nfrom ipa_datadic cb\r\nleft
+      join data_requests_selected_attribs sel\r\non sel.record_id = cb.id \r\n  and
+      sel.record_type = 'ipa_datadic'\r\n  and not coalesce(sel.disabled, false) \r\n
+      \ and :list_id = data_request_id\r\nwhere\r\n  (\r\n    (\r\n      (:domain)
+      is NULL OR cb.domain IN (:domain)\r\n    )\r\n    AND (\r\n      :name_or_label_contains
+      is NULL \r\n      OR cb.variable_name ~* :name_or_label_contains\r\n      OR
+      cb.field_label ~* :name_or_label_contains      \r\n    )\r\n    OR sel.id IS
+      NOT NULL\r\n  )\r\norder by \r\nselected desc\r\n, cb.id;\r\n"
     search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
       multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
       \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
-      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nvariable_name:
-      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
+      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nname_or_label_contains:
       \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
-      \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
+      \   \r\n    \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n
+      \   "
     admin_id: 21
     disabled: false
     created_at: '2020-07-09T08:40:44.123Z'
-    updated_at: '2020-07-09T08:40:44.123Z'
+    updated_at: '2020-07-31T12:05:01.211Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -2687,6 +2739,42 @@ app_type:
     created_at: '2020-07-09T09:03:08.065Z'
     updated_at: '2020-07-09T09:03:08.065Z'
     user_email: datarequser@template
+  - id: 980
+    app_type_id: 42
+    role_name: nfs_store group 600
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-31T11:21:47.994Z'
+    updated_at: '2020-07-31T11:21:47.994Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 981
+    app_type_id: 42
+    role_name: user
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-31T11:21:48.016Z'
+    updated_at: '2020-07-31T11:21:48.016Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 982
+    app_type_id: 42
+    role_name: admin
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-31T11:21:48.032Z'
+    updated_at: '2020-07-31T11:21:48.032Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 983
+    app_type_id: 42
+    role_name: reviewer - initial review
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-31T11:21:48.065Z'
+    updated_at: '2020-07-31T11:21:48.065Z'
+    user_email: phil_ayres@hms.harvard.edu
   associated_message_templates:
   - id: 71
     name: data request message content

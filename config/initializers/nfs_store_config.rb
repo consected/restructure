@@ -3,12 +3,17 @@
 ActiveSupport.on_load(:nfs_store_config) do
   self.group_id_range = 600..601
 
-  if Rails.env.production?
+  if Rails.env.production? && !ENV['FILESTORE_CONFIG_SKIP']
     self.nfs_store_directory = ENV['FILESTORE_NFS_DIR']
     self.temp_directory = ENV['FILESTORE_TEMP_UPLOADS_DIR']
     self.containers_dirname = ENV['FILESTORE_CONTAINERS_DIRNAME']
     self.use_parent_sub_dir = (ENV['FILESTORE_USE_PARENT_SUB_DIR'] == 'TRUE')
     FileUtils.mkdir_p temp_directory
+
+    unless Rails.configuration.action_dispatch.x_sendfile_header
+      raise FsException::Config, 'action_dispatch.x_sendfile_header not set in production.rb'
+    end
+
   elsif Rails.env.test?
     self.nfs_store_directory = "/var/tmp/nfs_store_test#{ENV['TEST_ENV_NUMBER']}"
     self.temp_directory = "/var/tmp/nfs_store_tmp#{ENV['TEST_ENV_NUMBER']}"
@@ -52,8 +57,5 @@ ActiveSupport.on_load(:nfs_store_config) do
       FileUtils.mkdir_p temp_directory
     end
 
-    if Rails.env.production? && !Rails.configuration.action_dispatch.x_sendfile_header
-      raise FsException::Config, 'action_dispatch.x_sendfile_header not set in production.rb'
-    end
   end
 end

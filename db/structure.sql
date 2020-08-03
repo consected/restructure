@@ -34002,6 +34002,43 @@ ALTER SEQUENCE persnet.persnet_assignments_id_seq OWNED BY persnet.persnet_assig
 
 
 --
+-- Name: q1datadic_id_seq; Type: SEQUENCE; Schema: q1; Owner: -
+--
+
+CREATE SEQUENCE q1.q1datadic_id_seq
+    START WITH 411
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: q1_datadic; Type: TABLE; Schema: q1; Owner: -
+--
+
+CREATE TABLE q1.q1_datadic (
+    id integer DEFAULT nextval('q1.q1datadic_id_seq'::regclass) NOT NULL,
+    variable_name character varying,
+    domain text,
+    field_type_rc text,
+    field_type_sa text,
+    field_label text,
+    field_attributes text,
+    field_note text,
+    text_valid_type text,
+    text_valid_min text,
+    text_valid_max text,
+    required_field text,
+    field_attr_array text[],
+    source text,
+    owner text,
+    classification text,
+    display text
+);
+
+
+--
 -- Name: rc_links_id_seq; Type: SEQUENCE; Schema: q1; Owner: -
 --
 
@@ -47243,6 +47280,14 @@ ALTER TABLE ONLY persnet.persnet_assignment_history
 
 ALTER TABLE ONLY persnet.persnet_assignments
     ADD CONSTRAINT persnet_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: q1_datadic_pkey; Type: CONSTRAINT; Schema: q1; Owner: -
+--
+
+ALTER TABLE ONLY q1.q1_datadic
+    ADD CONSTRAINT q1_datadic_pkey PRIMARY KEY (id);
 
 
 --
@@ -72058,6 +72103,8 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200731122147'),
 ('20200731124515'),
 ('20200731124908'),
-('20200731130750');
+('20200731130750'),
+('20200803161100'),
+('20200803162444');
 
 
