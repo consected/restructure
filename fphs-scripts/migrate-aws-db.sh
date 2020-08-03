@@ -9,9 +9,12 @@ echo "==========================================================================
 
 echo ""
 echo "========================================="
-echo "Enter app environment: athena-stage, athena-production, filestore-production"
+echo "Enter app environment: athena-demo, athena-stage, athena-production, filestore-production"
 
 read TEMP_ENV
+
+DB_USERNAME=fphs
+export FILESTORE_CONFIG_SKIP=true
 
 if [ "$TEMP_ENV" == 'athena-production' ]; then
   TEMP_DBNAME=fphs
@@ -37,6 +40,12 @@ if [ "$TEMP_ENV" == 'athena-stage' ]; then
   TEMP_HOSTNAME='fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
+if [ "$TEMP_ENV" == 'athena-demo' ]; then
+  TEMP_DBNAME=ebdb
+  DB_SEARCH_PATH='ml_app,data_requests, ipa_ops,q1,q2'
+  TEMP_HOSTNAME='fphs-aws-db-dev01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
+fi
+
 if [ -z "$TEMP_DBNAME" ]; then
   echo "Incorrect environment name: $TEMP_ENV"
   exit
@@ -45,17 +54,21 @@ fi
 echo "Enter password for the $TEMP_ENV AWS database user FPHS:"
 read -s -p "FPHS user password: " TEMP_DB_PW
 
+echo "migrate or rollback?"
+read MODE
+
 echo
 FPHS_POSTGRESQL_HOSTNAME=$TEMP_HOSTNAME \
   FPHS_POSTGRESQL_DATABASE=$TEMP_DBNAME \
   RAILS_ENV=production \
   FPHS_POSTGRESQL_SCHEMA="$DB_SEARCH_PATH" \
-  FPHS_POSTGRESQL_USERNAME=fphs \
+  FPHS_POSTGRESQL_USERNAME="$DB_USERNAME" \
   FPHS_POSTGRESQL_PORT=5432 \
   FPHS_RAILS_SECRET_KEY_BASE=temp \
   FPHS_RAILS_DEVISE_SECRET_KEY=temp \
   FPHS_POSTGRESQL_PASSWORD="$TEMP_DB_PW" \
-  bundle exec rake db:migrate
+  FPHS_LOAD_APP_TYPES=1 \
+  bundle exec rake db:${MODE}
 
 export PGPASSWORD="$TEMP_DB_PW"
 
