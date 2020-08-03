@@ -307,7 +307,7 @@ module DynamicModelDefHandler
 
         Wrote migration to: #{fn}
         Review it, then run migration with:
-        MIG_PATH=femfl FPHS_LOAD_APP_TYPES= bundle exec rails db:migrate
+        MIG_PATH=#{db_migration_schema} FPHS_LOAD_APP_TYPES= bundle exec rails db:migrate
 
         IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
         "
@@ -386,11 +386,15 @@ module DynamicModelDefHandler
       return
     end
 
-    fields = all_implementation_fields(ignore_errors: true)
+    fields = migration_fields_array
     new_colnames = fields.map(&:to_s) - standard_columns
 
     added = new_colnames - old_colnames
     removed = old_colnames - new_colnames
+    if respond_to? :item_type
+      belongs_to_model_id = "#{item_type}_id"
+      removed -= [belongs_to_model_id]
+    end
 
     [added, removed]
   end
@@ -416,12 +420,17 @@ module DynamicModelDefHandler
     ARCONTENT
   end
 
+  def migration_fields_array
+    fields = all_implementation_fields(ignore_errors: true)
+    fields.reject { |f| f.index(/^embedded_report_|^placeholder_/) }
+  end
+
   def migration_set_attribs
     table_comments = self.table_comments || {}
     <<~SETATRRIBS
       self.schema = '#{db_migration_schema}'
           self.table_name = '#{table_name}'
-          self.fields = %i[#{all_implementation_fields(ignore_errors: true).join(' ')}]
+          self.fields = %i[#{migration_fields_array.join(' ')}]
           self.table_comment = '#{table_comments[:table]}'
           self.fields_comments = #{(table_comments[:fields] || {}).to_json}
     SETATRRIBS

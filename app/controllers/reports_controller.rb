@@ -139,18 +139,27 @@ class ReportsController < UserBaseController
     else
       @no_masters = true
       @report.search_attr_values = search_attrs
-      respond_to do |format|
-        format.html do
-          if params[:part] == 'form'
-            render partial: 'form'
-          else
-            return unless authorized? == true
 
-            @report_criteria = true
+      begin
+        respond_to do |format|
+          format.html do
+            if params[:part] == 'form'
+              render partial: 'form'
+            else
+              return unless authorized? == true
 
-            show_report
+              @report_criteria = true
+
+              show_report
+            end
+          end
+          format.json do
+            render json: { results: @results, search_attributes: (@report.search_attr_values || search_attrs) }
           end
         end
+      rescue StandardError => e
+        byebug
+        raise e
       end
     end
   end
@@ -359,7 +368,7 @@ class ReportsController < UserBaseController
 
   def search_attrs_params_hash
     # Permit everything, since this is not used for assignment.
-    params.require(:search_attrs).permit!.to_h if params[:search_attrs]
+    params.require(:search_attrs).permit!.to_h unless params[:search_attrs].nil? || params[:search_attrs]&.is_a?(String)
   end
 
   def init_vars

@@ -26,7 +26,7 @@ class Admin::AppConfiguration < Admin::AdminBase
       'hide search form simple', 'hide tracker panel', 'heading create master record label', 'filestore directory id',
       'master header prefix', 'menu create master record label',
       'menu research label', 'notes field caption', 'notes field format', 'open panels',
-      'prevent reload master list',
+      'prevent reload master list', 'reports list title', 'report library button label',
       'show activity log panel', 'show ids in master result',
       'show search form on single result', 'user session timeout'
     ]

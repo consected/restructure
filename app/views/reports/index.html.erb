@@ -1,9 +1,12 @@
 <div class="reports-index">
   <div class="data-results col-md-offset-1 col-md-22 col-lg-offset-2 col-lg-20" data-subscription="admin-list" >
     <div data-result="admin-list">
-  <h1>Reports</h1>
-  <% @shown_filter_break = true %>
-  <%= show_filters %>
+  <h1><%= app_config_text :reports_list_title, 'Reports' %></h1>
+  <% 
+    @shown_filter_break = true 
+    num_cats = @reports.pluck(:category).uniq.length
+  %>
+  <%= show_filters unless num_cats <= 1 %>
 
   <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
 
@@ -25,7 +28,7 @@
 
           <td style="width: 15%"><%= link_to  list_item.name, report_path(list_item.id) %></td>
 
-          <td style="width: 30%"><%= markdown_to_html list_item.description %></td>
+          <td style="width: 30%"><%= markdown_to_html list_item.list_description %></td>
           <td style="width: 25%" class="report-search-attr"></td>
           <td style="width: 25%" class="report-measure"></td>
 

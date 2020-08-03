@@ -3,7 +3,7 @@
     Log in <% if resource_name == :admin %><b>as Administrator</b><% elsif params[:redirect_from_secure] == 'true' && resource_name == :user %><b>as User</b><% end %>
   </h2>
 
-  <% if Settings::LoginMessage %><div class="well login-message"><%= Settings::LoginMessage%></div><% end %>
+  <% if Settings::LoginMessage %><div class="well login-message"><%= Settings::LoginMessage.html_safe %></div><% end %>
 
   <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
     <div class="form-group-non">

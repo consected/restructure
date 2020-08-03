@@ -52,4 +52,6 @@ setup_assets=true vagrant up --provision
 
 cd ${CURRDIR}
 echo ${TESTVER} > version.txt
+git commit version.txt -m "Bump version"
+git push
 echo "Built and setup assets: ${TESTVER}"

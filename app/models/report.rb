@@ -27,7 +27,7 @@ class Report < ActiveRecord::Base
                                     hide_result_count hide_export_buttons
                                     hide_criteria_panel prevent_collapse_for_list
                                     view_as search_button_label]
-  configure :list_options, with: [:hide_in_list]
+  configure :list_options, with: %i[hide_in_list list_description]
   configure :view_css, with: %i[classes selectors]
   configure :component, with: [:options]
   configure :column_options, with: %i[tags classes hide]
@@ -453,6 +453,11 @@ class Report < ActiveRecord::Base
 
   def alt_resource_name
     "#{item_type&.id_underscore || '_default'}__#{short_name}".downcase.id_underscore
+  end
+
+  # Optionally show a different description in the list
+  def list_description
+    list_options.list_description || description
   end
 
   private
