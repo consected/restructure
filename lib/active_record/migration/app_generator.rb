@@ -47,7 +47,7 @@ module ActiveRecord
           t.references :user, index: { name: "al_#{belongs_to_model.singularize}_user_id_h_idx" }, foreign_key: true
           t.timestamps null: false
 
-          t.belongs_to table_name.singularize, index: { name: "#{table_name.singularize}_id_h_idx" }, foreign_key: true
+          t.belongs_to table_name.singularize, index: { name: "#{table_name.singularize}_id_h_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
         end
       end
 
@@ -80,7 +80,7 @@ module ActiveRecord
           t.references :user, index: true, foreign_key: true
           t.timestamps null: false
 
-          t.belongs_to table_name.singularize, index: { name: "#{table_name.singularize}_id_idx" }, foreign_key: true
+          t.belongs_to table_name.singularize, index: { name: "#{table_name.singularize}_id_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
         end
       end
 
