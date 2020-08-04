@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Migration version added
+
 # This migration comes from nfs_store (originally 20180731141334)
 class CreateUserFileActions < ActiveRecord::Migration[4.2]
   def change

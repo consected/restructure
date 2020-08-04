@@ -1,3 +1,4 @@
+# Migration version added
 class HistoryUpdates < ActiveRecord::Migration[4.2]
   def up
     execute <<EOF

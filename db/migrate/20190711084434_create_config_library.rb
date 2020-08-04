@@ -1,3 +1,4 @@
+# Migration version added
 class CreateConfigLibrary < ActiveRecord::Migration[4.2]
   def change
     create_table :config_libraries do |t|
