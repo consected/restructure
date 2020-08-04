@@ -119,7 +119,7 @@ module ActiveRecord
           t.references :admin, index: true, foreign_key: true
           t.timestamps null: false
 
-          t.belongs_to "#{table_name.singularize}_table_id", index: { name: "#{table_name.singularize}_id_idx" }, foreign_key: { to_table: table_name }
+          t.belongs_to "#{table_name.singularize}_table_id", index: { name: "#{table_name.singularize}_id_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
         end
       end
 
