@@ -1,6 +1,5 @@
-class DowncaseReportCategories < ActiveRecord::Migration
+class DowncaseReportCategories < ActiveRecord::Migration[4.2]
   def change
-
     auto_admin = Admin.active.first
 
     Report.active.each do |r|
@@ -8,6 +7,5 @@ class DowncaseReportCategories < ActiveRecord::Migration
       r.current_admin = auto_admin
       r.save!
     end
-
   end
 end
