@@ -10,18 +10,9 @@ default: &default
   port: <%= ENV['FPHS_POSTGRESQL_PORT'] %>
   host: <%= ENV['FPHS_POSTGRESQL_HOSTNAME'] %>
   schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA']%>
-
-  <% 
-  mig_path = ENV['MIG_PATH']
-  if mig_path.present?
-    mig_path = File.join("db/app_migrations", mig_path)
-  %>
-
   migrations_paths:
-    - <%= mig_path %>
-  <% 
-  end 
-  %>
+    - <%= ENV['MIG_PATH'] ? File.join("db/app_migrations",  ENV['MIG_PATH']) : 'db/migrate' %>
+  
 
 development:
   <<: *default
