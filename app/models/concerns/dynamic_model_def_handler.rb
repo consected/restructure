@@ -421,7 +421,7 @@ module DynamicModelDefHandler
   end
 
   def migration_fields_array
-    fields = all_implementation_fields(ignore_errors: true)
+    fields = all_implementation_fields(ignore_errors: false)
     fields.reject { |f| f.index(/^embedded_report_|^placeholder_/) }
   end
 
