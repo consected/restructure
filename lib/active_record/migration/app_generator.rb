@@ -41,7 +41,9 @@ module ActiveRecord
 
         create_table "#{schema}.#{history_table_name}" do |t|
           t.belongs_to :master, index: { name: "al_#{belongs_to_model.singularize}_master_id_h_idx" }, foreign_key: true
-          t.belongs_to belongs_to_model, index: { name: "al_#{belongs_to_model.singularize}_id_h_idx" }, foreign_key: true
+          t.belongs_to belongs_to_model,
+                       index: { name: "al_#{belongs_to_model.singularize}_id_h_idx" },
+                       foreign_key: { to_table: "#{schema}.#{belongs_to_model.pluralize}" }
           create_fields t
           t.string :extra_log_type
           t.references :user, index: { name: "al_#{belongs_to_model.singularize}_user_id_h_idx" }, foreign_key: true
