@@ -1,4 +1,4 @@
-class CreateConfigLibrary < ActiveRecord::Migration
+class CreateConfigLibrary < ActiveRecord::Migration[4.2]
   def change
     create_table :config_libraries do |t|
       t.string :category
