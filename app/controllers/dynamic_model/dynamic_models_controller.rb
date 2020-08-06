@@ -23,6 +23,9 @@ class DynamicModel::DynamicModelsController < UserBaseController
 
   # Remove items that are not showable, based on showable_if in the default options config
   def filter_records
+    # If dynamic model doesn't relate to a master there will be no master objects
+    # Just return with an empty result
+    return [] unless @master_objects
     return @master_objects if @master_objects.is_a? Array
 
     pk = @implementation_class.primary_key
