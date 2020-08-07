@@ -460,6 +460,10 @@ class Report < ActiveRecord::Base
     list_options.list_description || description
   end
 
+  def gen_short_name
+    self.short_name = name.downcase.id_underscore.gsub(/__+/, '_') if short_name.blank?
+  end
+
   private
 
   def check_attr_def
@@ -485,10 +489,6 @@ class Report < ActiveRecord::Base
 
   def downcase_item_type
     self.item_type = item_type.downcase if item_type
-  end
-
-  def gen_short_name
-    self.short_name = name.downcase.id_underscore.gsub(/__+/, '_') if short_name.blank?
   end
 
   # Validate short_name is downcased
