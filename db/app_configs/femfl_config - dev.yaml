@@ -7,6 +7,7 @@ app_type:
   admin_id: 21
   created_at: '2020-07-16T16:09:06.233Z'
   updated_at: '2020-07-20T14:53:42.968Z'
+  default_schema_name: femfl
   app_configurations:
   - id: 550
     name: hide pro info
@@ -107,6 +108,28 @@ app_type:
     created_at: '2020-07-21T13:47:27.717Z'
     updated_at: '2020-07-21T13:48:26.863Z'
     user_email: 
+  - id: 559
+    name: notes field format
+    value: markdown
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 43
+    role_name: ''
+    created_at: '2020-07-23T14:43:05.229Z'
+    updated_at: '2020-07-23T14:43:05.229Z'
+    user_email: 
+  - id: 561
+    name: completion sub processes
+    value: '287'
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 43
+    role_name: ''
+    created_at: '2020-07-23T16:31:46.327Z'
+    updated_at: '2020-07-23T16:31:46.327Z'
+    user_email: 
   valid_user_access_controls:
   - id: 2402
     user_id: 
@@ -176,7 +199,7 @@ app_type:
   - id: 2407
     user_id: 
     resource_type: report
-    resource_name: Search FEMFL Study Subject
+    resource_name: femfl__search_femfl_study_subject
     options: ''
     access: read
     disabled: false
@@ -184,7 +207,7 @@ app_type:
     app_type_id: 43
     role_name: user
     created_at: '2020-07-20T14:56:45.070Z'
-    updated_at: '2020-07-20T14:56:45.070Z'
+    updated_at: '2020-07-24T09:38:11.364Z'
     user_email: 
   - id: 2408
     user_id: 
@@ -225,7 +248,247 @@ app_type:
     created_at: '2020-07-20T16:08:21.953Z'
     updated_at: '2020-07-20T16:08:21.953Z'
     user_email: 
-  valid_associated_activity_logs: []
+  - id: 2411
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__femfl_assignment_femfl_comms
+    options: 
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: _app_
+    created_at: '2020-07-23T10:27:07.810Z'
+    updated_at: '2020-07-23T10:27:07.810Z'
+    user_email: 
+  - id: 2412
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__femfl_assignment_femfl_comms
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-23T10:53:20.488Z'
+    updated_at: '2020-07-23T10:53:20.488Z'
+    user_email: 
+  - id: 2413
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__femfl_assignment_femfl_comm__files
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-23T10:53:40.001Z'
+    updated_at: '2020-07-23T10:53:40.001Z'
+    user_email: 
+  - id: 2414
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__femfl_assignment_femfl_comm__general
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-23T10:53:47.148Z'
+    updated_at: '2020-07-23T10:53:47.148Z'
+    user_email: 
+  - id: 2415
+    user_id: 
+    resource_type: general
+    resource_name: download_files
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-23T10:54:04.300Z'
+    updated_at: '2020-07-23T10:54:04.300Z'
+    user_email: 
+  - id: 2416
+    user_id: 
+    resource_type: general
+    resource_name: send_files_to_trash
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-23T10:54:16.128Z'
+    updated_at: '2020-07-23T10:54:16.128Z'
+    user_email: 
+  - id: 2417
+    user_id: 
+    resource_type: general
+    resource_name: view_files_as_image
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-23T10:54:34.184Z'
+    updated_at: '2020-07-23T10:54:34.184Z'
+    user_email: 
+  - id: 2418
+    user_id: 
+    resource_type: general
+    resource_name: view_reports
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-23T10:54:54.280Z'
+    updated_at: '2020-07-23T10:54:54.280Z'
+    user_email: 
+  - id: 2419
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__archived_files
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-23T15:00:24.161Z'
+    updated_at: '2020-07-23T15:00:24.161Z'
+    user_email: 
+  - id: 2420
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__containers
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-23T15:00:33.380Z'
+    updated_at: '2020-07-23T15:00:33.380Z'
+    user_email: 
+  - id: 2421
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__stored_files
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-23T15:00:40.557Z'
+    updated_at: '2020-07-23T15:00:40.557Z'
+    user_email: 
+  - id: 2422
+    user_id: 
+    resource_type: report
+    resource_name: femfl__follow_up_communication
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-07-24T09:37:58.022Z'
+    updated_at: '2020-07-24T09:37:58.022Z'
+    user_email: 
+  valid_associated_activity_logs:
+  - id: 124
+    name: Communications
+    item_type: femfl_assignment
+    rec_type: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-23T10:27:07.676Z'
+    updated_at: '2020-07-24T10:58:02.463Z'
+    action_when_attribute: activity_date
+    field_list: ''
+    blank_log_field_list: ''
+    blank_log_name: 
+    extra_log_types: "_definitions:\r\n  enabled_if: &enabled_if\r\n    always: true\r\n\r\n#
+      @library common filestore_container\r\n\r\n\r\n_default:\r\n\r\n  view_options:\r\n
+      \   hide_unless_creatable: true\r\n\r\n###################################\r\ngeneral:\r\n
+      \ label: General Communications\r\n###################################\r\n  \r\n
+      \ fields:\r\n    - select_activity\r\n    - activity_date\r\n    - placeholder_communication\r\n
+      \   - placeholder_followup\r\n    - select_record_from_dynamic_model__femfl_contacts\r\n
+      \   - select_record_from_dynamic_model__femfl_addresses\r\n    - select_direction\r\n
+      \   - select_who\r\n    - select_result\r\n    - select_next_step\r\n    - follow_up_when\r\n
+      \   - follow_up_time\r\n    - notes\r\n    - protocol_id\r\n\r\n\r\n  view_options:\r\n
+      \ \r\n    data_attribute: \r\n      - activity_date\r\n      - select_activity\r\n
+      \     - select_direction\r\n      - \"status:\"\r\n      - select_result\r\n
+      \   hide_unless_creatable: true  \r\n\r\n  field_options:\r\n    protocol_id:\r\n
+      \     value: '{{app_protocols.id}}'\r\n  \r\n    select_activity:\r\n      edit_as:\r\n
+      \       alt_options:\r\n          Record Communications: general communications\r\n
+      \         Mark All Previous As Completed: completed\r\n          Schedule Follow
+      Up: schedule follow up\r\n    \r\n    select_result:\r\n      edit_as:\r\n        alt_options:\r\n
+      \         Completed: completed\r\n          Follow up: follow up\r\n  \r\n    select_next_step:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          No Follow Up: no follow
+      up\r\n          More Info Requested: more info requested\r\n          Call Back:
+      call back\r\n          Email Back: email back\r\n  \r\n    select_who:\r\n      edit_as:\r\n
+      \       field_type: select_user_with_role_user\r\n        \r\n    select_direction:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          Received From Subject: to
+      staff\r\n          Sent / Called To Subject: to subject\r\n          \r\n    activity_date:\r\n
+      \     value: today()\r\n\r\n\r\n  caption_before:\r\n    select_activity: Select
+      an action:<ul><li>make a record of an incoming or outgoing communication</li><li>schedule
+      a follow up</li><li>mark all previous follow-ups completed</li></ul>\r\n    select_who:
+      If not you, who performed the activity?\r\n    activity_date: When was the communication
+      sent or received?\r\n\r\n    placeholder_communication: |\r\n        Was this
+      communication sent by email, phone or regular mail:\r\n\r\n    placeholder_followup:
+      |\r\n        Is this communication to be sent by email, phone or regular mail:\r\n\r\n
+      \   select_record_from_dynamic_model__femfl_contacts: |\r\n      *Email or Phone*\r\n
+      \   select_record_from_dynamic_model__femfl_addresses: |\r\n      *Mail Address*\r\n
+      \   \r\n    select_result: Is a follow up required, or is this communication
+      complete?\r\n    select_direction: Was the communication received from the subject
+      or sent to the subject?\r\n    notes: Notes regarding a communication or to
+      assist with a follow up\r\n\r\n  references:\r\n    activity_log__femfl_assignment_femfl_comms:\r\n
+      \     label: follow up\r\n      from: this\r\n      add: many\r\n      add_with:\r\n
+      \       extra_log_type: general\r\n        select_activity: general communications\r\n
+      \       select_direction: to subject\r\n        select_result: completed\r\n
+      \     filter_by:\r\n        extra_log_type: general\r\n        select_activity:
+      general communications\r\n        select_direction: to subject\r\n        select_result:
+      completed\r\n  \r\n  add_reference_if:\r\n    always: true\r\n  \r\n  # Only
+      show this if it is not embedded\r\n  showable_if:\r\n    not_all:\r\n      referring_record:\r\n
+      \       exists: true\r\n\r\n  editable_if:\r\n    always: true\r\n\r\n  show_if:\r\n
+      \   protocol_id: \r\n      never: true\r\n  \r\n    select_result:\r\n      select_activity:
+      general communications\r\n    \r\n    select_next_step:\r\n      any:\r\n        select_result:
+      follow up\r\n        select_activity: schedule follow up\r\n    follow_up_when:\r\n
+      \     any:\r\n        select_result: follow up\r\n        select_activity: schedule
+      follow up\r\n    follow_up_time:\r\n      any:\r\n        select_result: follow
+      up\r\n        select_activity: schedule follow up\r\n\r\n    select_direction:\r\n
+      \     select_activity: general communications\r\n    activity_date:\r\n      select_activity:
+      general communications\r\n    select_who:\r\n      never: true\r\n      #select_activity:
+      general communications\r\n    \r\n    placeholder_followup:\r\n      select_activity:
+      \r\n        - schedule follow up\r\n\r\n    placeholder_communication:\r\n      select_activity:
+      \r\n        - general communications\r\n    \r\n    select_record_from_dynamic_model__femfl_contacts:\r\n
+      \     select_activity: \r\n        - general communications\r\n        - schedule
+      follow up\r\n    select_record_from_dynamic_model__femfl_addresses:\r\n      select_activity:
+      \r\n        - general communications\r\n        - schedule follow up\r\n\r\n\r\n
+      \ save_trigger:\r\n    on_save:                \r\n      update_reference:\r\n
+      \       ref:\r\n          if:\r\n            any:\r\n              referring_record:\r\n
+      \               exists: true\r\n\r\n          first:\r\n            all:\r\n
+      \             referring_record:\r\n                update: return_result\r\n\r\n
+      \         with:\r\n            updated_at: now()\r\n              \r\n\r\n###################################\r\nfiles:\r\n
+      \ label: Files\r\n###################################\r\n\r\n  <<: *files_activity
+      \ \r\n  save_trigger:\r\n    on_create:\r\n      <<: *create_filestore_container
+      \r\n  references:\r\n    <<: *ref_filestore_container\r\n\r\n\r\n"
+    hide_item_list_panel: true
+    main_log_name: ''
+    process_name: femfl_comm
+    table_name: activity_log_femfl_assignment_femfl_comms
+    category: femfl
+    user_email: 
   associated_dynamic_models:
   - id: 609
     name: Subject
@@ -237,15 +500,15 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-07-16T16:55:44.009Z'
-    updated_at: '2020-07-22T10:32:20.015Z'
+    updated_at: '2020-07-24T15:40:33.149Z'
     position: 0
     category: femfl
     table_key_name: ''
-    field_list: first_name last_name middle_name nick_name birth_date rank source
-      tracker_history_id
+    field_list: first_name last_name middle_name nick_name birth_date source tracker_history_id
     result_order: ''
-    options: "default:\r\n\r\n  view_options:\r\n    view_handlers: \r\n      - subject\r\n
-      \     "
+    options: "default:\r\n\r\n  view_options:\r\n    view_handlers: \r\n      - subject\r\n\r\n
+      \ creatable_if:\r\n    not_any:\r\n      dynamic_model__femfl_subjects:\r\n
+      \       id:\r\n          this: id"
     user_email: 
   - id: 613
     name: Address
@@ -257,15 +520,23 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-07-20T14:21:59.900Z'
-    updated_at: '2020-07-22T10:32:14.257Z'
+    updated_at: '2020-07-28T15:32:40.217Z'
     position: 10
     category: femfl
     table_key_name: ''
-    field_list: street street2 street3 city state zip country source rank rec_type
-      postal_code region tracker_history_id
+    field_list: country street street2 street3 city state zip postal_code region source
+      rank rec_type tracker_history_id
     result_order: ''
-    options: "default:\r\n\r\n  view_options:\r\n    view_handlers: \r\n      - address\r\n
-      \     \r\n      "
+    options: "default:\r\n\r\n  field_options:\r\n    country:\r\n      value: US\r\n\r\n
+      \ view_options:\r\n    data_attribute:\r\n      - street\r\n      - street2\r\n
+      \     - city\r\n    view_handlers: \r\n      - address\r\n      \r\n  show_if:\r\n
+      \   state:\r\n      any:\r\n        country: \r\n          - us\r\n          -
+      US\r\n          - ''\r\n          - null\r\n    zip:\r\n      any:\r\n        country:
+      \r\n          - us\r\n          - US\r\n          - ''\r\n          - null\r\n
+      \   postal_code:\r\n      not_any:\r\n        country: \r\n          - us\r\n
+      \         - US\r\n          - ''\r\n          - null\r\n    region:\r\n      not_any:\r\n
+      \       country: \r\n          - us\r\n          - US\r\n          - ''\r\n
+      \         - null\r\n"
     user_email: 
   - id: 611
     name: Contact
@@ -303,11 +574,92 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-07-16T16:40:00.450Z'
-    updated_at: '2020-07-20T15:05:48.758Z'
+    updated_at: '2020-07-27T13:17:16.227Z'
     alphanumeric: false
     extra_fields: ''
+    category: femfl
     user_email: 
-  associated_reports: []
+  associated_reports:
+  - id: 300
+    name: Search FEMFL Study Subject
+    description: "Search subjects by name, phone, email, city, zip or FEMFL ID.\r\nLeave
+      the search field empty to see all subjects."
+    sql: "select distinct m.id master_id, \r\npi.first_name, pi.middle_name, pi.last_name,
+      pi.nick_name,\r\na.street, a.street2, a.city, a.state, a.zip, \r\npc.data, pc.rec_type\r\nfrom
+      masters m\r\nleft join femfl_assignments b\r\non m.id = b.master_id\r\ninner
+      join femfl_subjects pi\r\non pi.master_id = m.id \r\nleft join femfl_addresses
+      a\r\non m.id = a.master_id\r\nleft join femfl_contacts pc\r\non pc.master_id
+      = m.id\r\nwhere \r\n(:name is null \r\nor pi.first_name ~* :name\r\nor pi.last_name
+      ~* :name\r\nor pi.middle_name ~* :name\r\nor pi.nick_name ~* :name\r\nor( \r\n
+      \   pi.first_name ~* coalesce(split_part(:name, ' ', 1),'none')\r\n    AND pi.last_name
+      ~* coalesce(split_part(:name, ' ', 2),'none')\r\n  )\r\n) \r\nor regexp_replace(pc.data,
+      '\\W+', '', 'g') ~* regexp_replace(:name, '\\W+', '', 'g')\r\nor b.femfl_id::varchar
+      = :name\r\nor a.city = :name\r\nor a.zip = :name"
+    search_attrs: "name: \r\n  text: \r\n    all: true\r\n    multiple: single\r\n"
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-20T14:52:30.459Z'
+    updated_at: '2020-07-21T13:41:40.176Z'
+    report_type: search
+    auto: false
+    searchable: true
+    position: 0
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: femfl
+    short_name: search_femfl_study_subject
+    options: ''
+    user_email: 
+  - id: 304
+    name: Follow Up Communication
+    description: "List subjects that have communication activities that require \r\n**follow
+      up**, or have not yet been marked as **complete**.\r\n\r\nMark a communication
+      activity as **complete** either in the initial \r\ncommunication activity or
+      in a **follow up** by responding *Complete* to the question\r\n*Is a follow
+      up required, or is this communication complete?*"
+    sql: "select al0.master_id, max(al0.updated_at) \"updated_at\"\r\nfrom \r\n  activity_log_femfl_assignment_femfl_comms
+      al0\r\n  \r\n-- Ensure this is a record appearing at the top level, not referenced
+      from \r\n-- a top level activity\r\nleft join model_references mr1\r\n  on mr1.to_record_master_id
+      = al0.master_id\r\n  and mr1.to_record_type = 'ActivityLog::FemflAssignmentFemflComm'\r\n
+      \ and mr1.to_record_id = al0.id\r\nleft join activity_log_femfl_assignment_femfl_comms
+      al02\r\n  on mr1.from_record_master_id = al02.master_id\r\n  and mr1.from_record_type
+      = 'ActivityLog::FemflAssignmentFemflComm'\r\n  and mr1.from_record_id = al02.id\r\n
+      \ and al02.extra_log_type = 'general'  \r\n  \r\nwhere \r\n  al0.extra_log_type
+      = 'general'\r\n  and ( \r\n    al02.id is null \r\n    and\r\n    (\r\n      coalesce(al0.select_result,
+      'none') <> 'completed' \r\n      and coalesce(al0.select_activity, 'none') <>
+      'completed' \r\n    )\r\n    and\r\n      -- Check this does not have a referenced
+      record \r\n      -- marked as completed\r\n      al0.id not in \r\n      (\r\n
+      \       select al.id\r\n        from activity_log_femfl_assignment_femfl_comms
+      al\r\n        inner join model_references mr\r\n          on mr.from_record_master_id
+      = al.master_id\r\n          and mr.from_record_type = 'ActivityLog::FemflAssignmentFemflComm'\r\n
+      \         and mr.from_record_id = al.id\r\n        inner join activity_log_femfl_assignment_femfl_comms
+      al2\r\n          on mr.to_record_master_id = al2.master_id\r\n          and
+      mr.to_record_type = 'ActivityLog::FemflAssignmentFemflComm'\r\n          and
+      mr.to_record_id = al2.id\r\n          and al2.extra_log_type = 'general'\r\n
+      \       where \r\n          al.master_id = al0.master_id\r\n          and al.extra_log_type
+      = 'general'\r\n          and  (\r\n            coalesce(al.select_result, 'none')
+      = 'completed' \r\n            or coalesce(al2.select_result, 'none') = 'completed'
+      \r\n            or coalesce(al.select_activity, 'none') = 'completed' \r\n            or
+      coalesce(al2.select_activity, 'none') = 'completed' \r\n          )\r\n      )\r\n
+      \   ) \r\n    \r\n  \r\ngroup by al0.master_id\r\norder by \r\n  \"updated_at\"
+      desc;"
+    search_attrs: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-24T09:23:51.223Z'
+    updated_at: '2020-07-24T12:27:50.510Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: femfl
+    short_name: follow_up_communication
+    options: ''
+    user_email: 
   associated_general_selections:
   - id: 830
     name: CIF
@@ -414,20 +766,185 @@ app_type:
     description: ''
     lock: false
     user_email: 
+  - id: 837
+    name: User Entry
+    value: user entry
+    item_type: dynamic_model__femfl_contacts_source
+    created_at: '2020-07-24T13:58:16.752Z'
+    updated_at: '2020-07-24T13:58:16.752Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 838
+    name: CIF
+    value: cif
+    item_type: dynamic_model__femfl_addresses_source
+    created_at: '2020-07-24T14:00:18.081Z'
+    updated_at: '2020-07-24T14:00:18.081Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 839
+    name: User Entry
+    value: user entry
+    item_type: dynamic_model__femfl_addresses_source
+    created_at: '2020-07-24T14:00:39.961Z'
+    updated_at: '2020-07-24T14:00:39.961Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 840
+    name: primary
+    value: '10'
+    item_type: dynamic_model__femfl_addresses_rank
+    created_at: '2020-07-24T14:01:20.331Z'
+    updated_at: '2020-07-24T14:01:20.331Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 0
+    description: ''
+    lock: false
+    user_email: 
+  - id: 841
+    name: secondary
+    value: '5'
+    item_type: dynamic_model__femfl_addresses_rank
+    created_at: '2020-07-24T14:01:42.638Z'
+    updated_at: '2020-07-24T14:01:42.638Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 1
+    description: ''
+    lock: false
+    user_email: 
+  - id: 842
+    name: do not use
+    value: '0'
+    item_type: dynamic_model__femfl_addresses_rank
+    created_at: '2020-07-24T14:01:58.780Z'
+    updated_at: '2020-07-24T14:01:58.780Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 3
+    description: ''
+    lock: false
+    user_email: 
+  - id: 843
+    name: bad contact
+    value: "-1"
+    item_type: dynamic_model__femfl_addresses_rank
+    created_at: '2020-07-24T14:02:14.127Z'
+    updated_at: '2020-07-24T14:02:14.127Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 5
+    description: ''
+    lock: false
+    user_email: 
+  - id: 844
+    name: Home
+    value: home
+    item_type: dynamic_model__femfl_addresses_rec_type
+    created_at: '2020-07-24T14:02:47.507Z'
+    updated_at: '2020-07-24T14:02:47.507Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: false
+    position: 1
+    description: ''
+    lock: true
+    user_email: 
+  - id: 845
+    name: Business
+    value: business
+    item_type: dynamic_model__femfl_addresses_rec_type
+    created_at: '2020-07-24T14:03:07.967Z'
+    updated_at: '2020-07-24T14:03:07.967Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: false
+    position: 1
+    description: ''
+    lock: true
+    user_email: 
+  - id: 846
+    name: User Entry
+    value: user entry
+    item_type: dynamic_model__femfl_subjects_source
+    created_at: '2020-07-24T14:04:30.775Z'
+    updated_at: '2020-07-24T14:04:30.775Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 847
+    name: CIF
+    value: cif
+    item_type: dynamic_model__femfl_subjects_source
+    created_at: '2020-07-24T14:04:42.047Z'
+    updated_at: '2020-07-24T14:04:42.047Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
   page_layouts:
   - id: 77
     app_type_id: 43
     layout_name: master
     panel_name: subject_details
     panel_label: Subject Details
-    panel_position: 1
+    panel_position: 2
     options: "contains:\r\n#  resources:\r\n#    - dynamic_model__femfl_subjects\r\n
       \ categories: \r\n    - femfl\r\n\r\nview_options:\r\n  initial_show: true\r\n
       \ orientation: columns"
     disabled: false
     admin_id: 21
     created_at: '2020-07-20T16:11:13.321Z'
-    updated_at: '2020-07-20T17:38:58.713Z'
+    updated_at: '2020-07-23T11:11:46.181Z'
     description: ''
     user_email: 
   - id: 78
@@ -435,14 +952,27 @@ app_type:
     layout_name: master
     panel_name: trackers
     panel_label: Tracker
-    panel_position: 0
+    panel_position: 10
     options: "contains:\r\n#  resources:\r\n#    - dynamic_model__femfl_subjects\r\n
-      \ categories: \r\n    - trackers\r\n\r\nview_options:\r\n  initial_show: true\r\n
-      \ orientation: columns"
+      \ categories: \r\n    - trackers\r\n\r\nview_options:\r\n  initial_show: true\r\n"
     disabled: false
     admin_id: 21
     created_at: '2020-07-21T10:47:43.518Z'
-    updated_at: '2020-07-21T10:47:43.518Z'
+    updated_at: '2020-07-24T14:12:02.144Z'
+    description: ''
+    user_email: 
+  - id: 79
+    app_type_id: 43
+    layout_name: master
+    panel_name: communications
+    panel_label: Communications
+    panel_position: 0
+    options: "contains:\r\n  resources:\r\n    - activity_log__femfl_assignment_femfl_comms\r\n\r\n\r\nview_options:\r\n
+      \ initial_show: false\r\n#  orientation: columns"
+    disabled: false
+    admin_id: 21
+    created_at: '2020-07-23T10:58:39.129Z'
+    updated_at: '2020-07-24T13:43:09.293Z'
     description: ''
     user_email: 
   user_roles:
@@ -473,10 +1003,64 @@ app_type:
     created_at: '2020-07-16T16:40:00.528Z'
     updated_at: '2020-07-16T16:40:00.528Z'
     user_email: template@template
+  - id: 978
+    app_type_id: 43
+    role_name: nfs_store group 600
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-23T15:02:40.286Z'
+    updated_at: '2020-07-23T15:02:40.286Z'
+    user_email: phil_ayres@test.com
+  - id: 979
+    app_type_id: 43
+    role_name: nfs_store group 600
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-07-23T15:02:40.302Z'
+    updated_at: '2020-07-23T15:02:40.302Z'
+    user_email: template@template
   associated_message_templates: []
-  associated_config_libraries: []
+  associated_config_libraries:
+  - id: 78
+    category: common
+    name: filestore_container
+    options: "_definitions:\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n
+      \   nfs_store__manage__container: &ref_nfs_store__manage__container\r\n      from:
+      this\r\n      add: one_to_this\r\n      view_as:\r\n        edit: hide\r\n        show:
+      filestore\r\n        new: not_embedded\r\n      creatable_if:\r\n        never:
+      true\r\n        \r\n  save_trigger:\r\n    on_create_filestore_container: &create_filestore_container\r\n
+      \     create_filestore_container: \r\n        name: general files\r\n        label:
+      General Files\r\n        create_with_role: nfs_store group 600\r\n\r\n\r\n\r\n
+      \ files_activity: &files_activity\r\n    label: Supporting Files\r\n    fields:\r\n
+      \     - notes\r\n\r\n    caption_before:\r\n      notes: Describe the files
+      in this container. Individual files can also be given a title and description
+      in the file classifications.\r\n\r\n    show_if:\r\n      data: \r\n        never:
+      true\r\n\r\n    creatable_if:\r\n      <<: *enabled_if\r\n\r\n    editable_if:\r\n
+      \     <<: *enabled_if\r\n\r\n    save_trigger:\r\n      on_create:\r\n        <<:
+      *create_filestore_container\r\n\r\n\r\n    references:\r\n      - nfs_store__manage__container:\r\n
+      \         <<: *ref_nfs_store__manage__container\r\n"
+    format: yaml
+    disabled: false
+    admin_id: 21
+    created_at: '2020-06-22T14:02:03.937Z'
+    updated_at: '2020-07-01T15:36:25.968Z'
+    user_email: 
   associated_protocols: []
   associated_sub_processes: []
   associated_protocol_events: []
-  nfs_store_filters: []
+  nfs_store_filters:
+  - id: 86
+    app_type_id: 43
+    role_name: user
+    user_id: 
+    resource_name: activity_log__femfl_assignment_femfl_comm__files
+    filter: ".*"
+    description: ''
+    disabled: false
+    admin_id: 21
+    created_at: '2020-07-23T15:03:46.407Z'
+    updated_at: '2020-07-23T15:03:46.407Z'
+    user_email: 
   user_email: 
