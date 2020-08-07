@@ -16,7 +16,7 @@ class UpdateActivityLogPlayerContactPhonesQea6pf < ActiveRecord::Migration[5.2]
     # removed: []
 
     # new fields comments: {:data=>"Phone number related to this activity", :select_call_direction=>"Was this call received by staff or to subject"}
-    byebug
+
     update_fields
 
     create_activity_log_trigger

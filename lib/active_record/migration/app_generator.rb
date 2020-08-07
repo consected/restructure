@@ -104,6 +104,7 @@ module ActiveRecord
       def create_external_identifier_tables(id_field, id_field_type = :bigint)
         self.fields ||= []
         self.fields.unshift id_field
+        self.fields = fields.uniq
         setup_fields
 
         field_defs[id_field] = id_field_type
@@ -123,13 +124,14 @@ module ActiveRecord
           t.references :admin, index: true, foreign_key: true
           t.timestamps null: false
 
-          t.belongs_to "#{table_name.singularize}_table_id", index: { name: "#{table_name.singularize}_id_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
+          t.belongs_to "#{table_name.singularize}_table", index: { name: "#{table_name.singularize}_id_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
         end
       end
 
       def create_external_identifier_trigger(id_field)
         self.fields ||= []
         self.fields.unshift id_field
+        self.fields = fields.uniq
         setup_fields
 
         reversible do |dir|

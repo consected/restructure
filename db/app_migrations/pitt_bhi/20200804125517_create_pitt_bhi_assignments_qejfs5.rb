@@ -9,7 +9,6 @@ class CreatePittBhiAssignmentsQejfs5 < ActiveRecord::Migration[5.2]
     self.table_comment = ''
     self.fields_comments = {}
 
-
     create_external_identifier_tables :pitt_bhi_id, :bigint
     create_external_identifier_trigger :pitt_bhi_id
   end

@@ -15,7 +15,7 @@ class UpdateActivityLogPlayerContactPhonesQea5zc < ActiveRecord::Migration[5.2]
     # added: []
     # removed: ["player_contact_id"]
     # new table comment: Phone Log process for Zeus
-    byebug
+
     update_fields
 
     create_activity_log_trigger

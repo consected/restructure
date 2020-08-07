@@ -14854,7 +14854,7 @@ CREATE FUNCTION pitt_bhi.log_pitt_bhi_assignments_update() RETURNS trigger
 BEGIN
   INSERT INTO pitt_bhi_assignment_history (
     master_id,
-    pitt_bhi_id, pitt_bhi_id, pitt_bhi_id,
+    pitt_bhi_id,
     user_id,
     admin_id,
     created_at,
@@ -14862,7 +14862,7 @@ BEGIN
     pitt_bhi_assignment_table_id)
   SELECT
     NEW.master_id,
-    NEW.pitt_bhi_id, NEW.pitt_bhi_id,
+    NEW.pitt_bhi_id,
     NEW.user_id,
     NEW.admin_id,
     NEW.created_at,
@@ -34325,7 +34325,7 @@ CREATE TABLE pitt_bhi.pitt_bhi_assignment_history (
     admin_id bigint,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    pitt_bhi_assignment_table_id_id bigint
+    pitt_bhi_assignment_table_id bigint
 );
 
 
@@ -55670,7 +55670,7 @@ CREATE INDEX pitt_bhi_appointment_id_idx ON pitt_bhi.pitt_bhi_appointment_histor
 -- Name: pitt_bhi_assignment_id_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
 --
 
-CREATE INDEX pitt_bhi_assignment_id_idx ON pitt_bhi.pitt_bhi_assignment_history USING btree (pitt_bhi_assignment_table_id_id);
+CREATE INDEX pitt_bhi_assignment_id_idx ON pitt_bhi.pitt_bhi_assignment_history USING btree (pitt_bhi_assignment_table_id);
 
 
 --
@@ -69578,19 +69578,19 @@ ALTER TABLE ONLY pitt_bhi.pitt_bhi_secure_note_history
 
 
 --
--- Name: fk_rails_ec43822ea6; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
---
-
-ALTER TABLE ONLY pitt_bhi.pitt_bhi_assignment_history
-    ADD CONSTRAINT fk_rails_ec43822ea6 FOREIGN KEY (pitt_bhi_assignment_table_id_id) REFERENCES pitt_bhi.pitt_bhi_assignments(id);
-
-
---
 -- Name: fk_rails_ee407fe1ec; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
 --
 
 ALTER TABLE ONLY pitt_bhi.pitt_bhi_withdrawals
     ADD CONSTRAINT fk_rails_ee407fe1ec FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_f1386fec86; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_assignment_history
+    ADD CONSTRAINT fk_rails_f1386fec86 FOREIGN KEY (pitt_bhi_assignment_table_id) REFERENCES pitt_bhi.pitt_bhi_assignments(id);
 
 
 --
