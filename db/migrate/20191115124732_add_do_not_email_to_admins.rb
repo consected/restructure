@@ -1,4 +1,4 @@
-class AddDoNotEmailToAdmins < ActiveRecord::Migration[4.2]
+class AddDoNotEmailToAdmins < ActiveRecord::Migration
   def change
     add_column :admins, :do_not_email, :boolean, default: false
   end

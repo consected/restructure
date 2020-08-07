@@ -1,4 +1,4 @@
-class AddCategoryToMessageTemplates < ActiveRecord::Migration[4.2]
+class AddCategoryToMessageTemplates < ActiveRecord::Migration
   def change
     add_column :message_templates, :category, :string
   end

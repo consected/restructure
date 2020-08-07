@@ -1,4 +1,4 @@
-class ChangeRecipientDataToMessageNotifications < ActiveRecord::Migration[4.2]
+class ChangeRecipientDataToMessageNotifications < ActiveRecord::Migration
   def change
     rename_column :message_notifications, :recipient_emails, :recipient_data
   end

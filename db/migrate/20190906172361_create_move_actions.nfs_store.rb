@@ -1,8 +1,8 @@
 # This migration comes from nfs_store (originally 20180731141334)
-class CreateMoveActions < ActiveRecord::Migration[4.2]
+class CreateMoveActions < ActiveRecord::Migration
   def change
     create_table :nfs_store_move_actions do |t|
-      t.integer :user_groups, array: true # , default: []
+      t.integer :user_groups, array: true #, default: []
       t.string :path, null: true
       t.string :new_path, null: true
       t.string :retrieval_path
