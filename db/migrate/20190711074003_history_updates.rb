@@ -1,6 +1,7 @@
-class HistoryUpdates < ActiveRecord::Migration[4.2]
+class HistoryUpdates < ActiveRecord::Migration
   def up
-    execute <<EOF
+
+execute <<EOF
 
 
 
@@ -195,5 +196,6 @@ class HistoryUpdates < ActiveRecord::Migration[4.2]
 
 
 EOF
+
   end
 end

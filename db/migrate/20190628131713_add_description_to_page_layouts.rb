@@ -1,4 +1,4 @@
-class AddDescriptionToPageLayouts < ActiveRecord::Migration[4.2]
+class AddDescriptionToPageLayouts < ActiveRecord::Migration
   def change
     add_column :page_layouts, :description, :string
   end

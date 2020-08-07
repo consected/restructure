@@ -1,4 +1,4 @@
-class AddContentHashToMessageNotifications < ActiveRecord::Migration[4.2]
+class AddContentHashToMessageNotifications < ActiveRecord::Migration
   def change
     add_column :message_notifications, :content_hash, :string
   end

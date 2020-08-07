@@ -1,5 +1,5 @@
-class AddExtrasToMessageNotifications < ActiveRecord::Migration[4.2]
+class AddExtrasToMessageNotifications < ActiveRecord::Migration
   def change
-    add_column :message_notifications, :extra_substitutions, :string
+    add_column :message_notifications, :extra_substitutions, :string    
   end
 end
