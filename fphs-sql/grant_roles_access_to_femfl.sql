@@ -1,0 +1,53 @@
+REVOKE ALL ON SCHEMA femfl FROM fphs;
+
+GRANT ALL ON SCHEMA femfl TO fphs;
+
+GRANT USAGE ON SCHEMA femfl TO fphsadm;
+
+GRANT USAGE ON SCHEMA femfl TO fphsusr;
+
+GRANT USAGE ON SCHEMA femfl TO fphsetl;
+
+GRANT ALL ON ALL TABLES IN SCHEMA femfl TO fphs;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA femfl TO fphsusr;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA femfl TO fphsetl;
+
+GRANT SELECT, INSERT, DELETE, TRUNCATE, UPDATE ON ALL TABLES IN SCHEMA femfl TO fphsadm;
+
+GRANT ALL ON ALL SEQUENCES IN SCHEMA femfl TO fphs;
+
+GRANT SELECT, USAGE ON ALL SEQUENCES IN SCHEMA femfl TO fphsusr;
+
+GRANT SELECT, USAGE ON ALL SEQUENCES IN SCHEMA femfl TO fphsetl;
+
+GRANT SELECT, USAGE ON ALL SEQUENCES IN SCHEMA femfl TO fphsadm;
+
+DO $body$
+BEGIN
+  IF EXISTS (
+    SELECT
+      *
+    FROM
+      pg_catalog.pg_roles
+    WHERE
+      rolname = 'fphsrailsapp') THEN
+  GRANT USAGE ON SCHEMA femfl TO fphsrailsapp;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA femfl TO fphsrailsapp;
+  GRANT SELECT, USAGE ON ALL SEQUENCES IN SCHEMA femfl TO fphsrailsapp;
+END IF;
+  IF EXISTS (
+    SELECT
+      *
+    FROM
+      pg_catalog.pg_roles
+    WHERE
+      rolname = 'fphsrailsapp1') THEN
+  GRANT USAGE ON SCHEMA femfl TO fphsrailsapp1;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA femfl TO fphsrailsapp1;
+  GRANT SELECT, USAGE ON ALL SEQUENCES IN SCHEMA femfl TO fphsrailsapp1;
+END IF;
+END
+$body$;
+
