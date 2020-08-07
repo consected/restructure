@@ -158,7 +158,6 @@ class ReportsController < UserBaseController
           end
         end
       rescue StandardError => e
-        byebug
         raise e
       end
     end
