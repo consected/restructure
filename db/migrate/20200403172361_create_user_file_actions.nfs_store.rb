@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
+# Migration version added
+
 # This migration comes from nfs_store (originally 20180731141334)
-class CreateUserFileActions < ActiveRecord::Migration
+class CreateUserFileActions < ActiveRecord::Migration[4.2]
   def change
     create_table :nfs_store_user_file_actions do |t|
       t.integer :user_groups, array: true # , default: []
