@@ -138,21 +138,21 @@ module GeneralDataConcerns
       extras[:methods] << :item_id if respond_to? :item_id
       extras[:methods] << :item_type if respond_to? :item_type
       extras[:methods] << :full_item_type if respond_to? :full_item_type
-      extras[:methods] << :updated_at_ts if respond_to? :updated_at
-      extras[:methods] << :created_at_ts if respond_to? :created_at
+      extras[:methods] << :updated_at_ts if respond_to? :updated_at_ts
+      extras[:methods] << :created_at_ts if respond_to? :created_at_ts
       extras[:methods] << :data if respond_to? :data
-      extras[:methods] << :rank_name if respond_to? :rank
-      extras[:methods] << :state_name if respond_to? :state
-      extras[:methods] << :country_name if respond_to? :country
-      extras[:methods] << :source_name if respond_to? :source
-      extras[:methods] << :protocol_name if respond_to? :protocol
-      extras[:methods] << :sub_process_name if respond_to? :sub_process
-      extras[:methods] << :protocol_event_name if respond_to? :protocol_event
+      extras[:methods] << :rank_name if respond_to? :rank_name
+      extras[:methods] << :state_name if respond_to? :state_name
+      extras[:methods] << :country_name if respond_to? :country_name
+      extras[:methods] << :source_name if respond_to? :source_name
+      extras[:methods] << :protocol_name if respond_to? :protocol_name
+      extras[:methods] << :sub_process_name if respond_to? :sub_process_name
+      extras[:methods] << :protocol_event_name if respond_to? :protocol_event_name
       if !is_a?(Tracker) && !is_a?(TrackerHistory) && (respond_to?(:tracker_history_id) || respond_to?(:tracker_history))
         extras[:methods] << :tracker_history_id
         extras[:methods] << :tracker_histories if respond_to? :tracker_histories
       end
-      extras[:methods] << :accuracy_score_name if respond_to? :accuracy_score
+      extras[:methods] << :accuracy_score_name if respond_to? :accuracy_score_name
       extras[:methods] << :user_name if respond_to? :user_name
       extras[:methods] << :user_email if respond_to? :user_email
       extras[:methods] << :created_by_user_name if respond_to? :created_by_user_name
