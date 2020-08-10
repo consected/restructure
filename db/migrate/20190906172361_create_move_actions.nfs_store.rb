@@ -1,3 +1,4 @@
+# Migration version added
 # This migration comes from nfs_store (originally 20180731141334)
 class CreateMoveActions < ActiveRecord::Migration[4.2]
   def change
