@@ -14,7 +14,6 @@ class Admin::AppType < Admin::AdminBase
   validates :name, presence: true
   validate :name_not_already_taken
   validates :label, presence: true
-  after_save :set_access_levels
 
   attr_accessor :import_results
 
@@ -94,7 +93,7 @@ class Admin::AppType < Admin::AdminBase
     id_list = []
 
     Admin::AppType.transaction do
-      a_conf = app_type_config.slice('name', 'label')
+      a_conf = app_type_config.slice('name', 'label', 'default_schema_name')
 
       # override the name if specified
       a_conf[:current_admin] = admin
@@ -342,21 +341,16 @@ class Admin::AppType < Admin::AdminBase
   end
 
   def associated_protocols
-    return [] unless name == 'zeus'
-
-    Classification::Protocol.active.order(id: :asc)
+    t = Classification::Protocol
+    t.active.where(app_type: self).or(t.where(app_type: nil)).order(id: :asc)
   end
 
   def associated_sub_processes
-    return [] unless name == 'zeus'
-
     protocol_ids = associated_protocols.pluck(:id)
     Classification::SubProcess.active.where(protocol_id: protocol_ids).order(id: :asc)
   end
 
   def associated_protocol_events
-    return [] unless name == 'zeus'
-
     sub_processes = associated_sub_processes.pluck(:id)
     Classification::ProtocolEvent.active.where(sub_process_id: sub_processes).order(id: :asc)
   end
@@ -445,14 +439,5 @@ class Admin::AppType < Admin::AdminBase
     options[:methods] << :nfs_store_filters
 
     super(options)
-  end
-
-  private
-
-  def set_access_levels
-    # if !persisted? || self.user_access_controls.length == 0
-    #   Admin::UserAccessControl.create_all_for self, current_admin
-    #   return true
-    # end
   end
 end

@@ -1047,9 +1047,249 @@ app_type:
     created_at: '2020-06-22T14:02:03.937Z'
     updated_at: '2020-07-01T15:36:25.968Z'
     user_email: 
-  associated_protocols: []
-  associated_sub_processes: []
-  associated_protocol_events: []
+  associated_protocols:
+  - id: 108
+    name: FEMFL
+    created_at: '2020-07-23T15:52:56.901Z'
+    updated_at: '2020-07-23T16:32:47.271Z'
+    disabled: false
+    admin_id: 21
+    position: 1
+    app_type_id: 43
+    user_email: 
+  associated_sub_processes:
+  - id: 289
+    name: Ineligible
+    disabled: false
+    protocol_id: 108
+    admin_id: 21
+    created_at: '2020-07-23T16:19:39.688Z'
+    updated_at: '2020-07-23T16:19:39.688Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 288
+    name: Bounced
+    disabled: false
+    protocol_id: 108
+    admin_id: 21
+    created_at: '2020-07-23T16:19:28.739Z'
+    updated_at: '2020-07-23T16:19:28.739Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 287
+    name: Complete
+    disabled: false
+    protocol_id: 108
+    admin_id: 21
+    created_at: '2020-07-23T16:19:15.915Z'
+    updated_at: '2020-07-23T16:19:15.915Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 286
+    name: Inquiry
+    disabled: false
+    protocol_id: 108
+    admin_id: 21
+    created_at: '2020-07-23T16:19:09.909Z'
+    updated_at: '2020-07-23T16:19:09.909Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 285
+    name: Sent
+    disabled: false
+    protocol_id: 108
+    admin_id: 21
+    created_at: '2020-07-23T16:18:58.911Z'
+    updated_at: '2020-07-23T16:18:58.911Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 284
+    name: Opt In
+    disabled: false
+    protocol_id: 108
+    admin_id: 21
+    created_at: '2020-07-23T16:18:54.676Z'
+    updated_at: '2020-07-23T16:18:54.676Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 283
+    name: Opt Out
+    disabled: false
+    protocol_id: 108
+    admin_id: 21
+    created_at: '2020-07-23T16:18:29.052Z'
+    updated_at: '2020-07-23T16:18:29.052Z'
+    protocol_name: FEMFL
+    user_email: 
+  associated_protocol_events:
+  - id: 1072
+    name: Email
+    admin_id: 21
+    created_at: '2020-07-23T16:24:28.060Z'
+    updated_at: '2020-07-23T16:24:28.060Z'
+    disabled: false
+    sub_process_id: 288
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Bounced
+    user_email: 
+  - id: 1063
+    name: Email from Staff
+    admin_id: 21
+    created_at: '2020-07-23T16:21:18.802Z'
+    updated_at: '2020-07-23T16:21:18.802Z'
+    disabled: false
+    sub_process_id: 286
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1062
+    name: Email from Subject
+    admin_id: 21
+    created_at: '2020-07-23T16:21:06.477Z'
+    updated_at: '2020-07-23T16:21:06.477Z'
+    disabled: false
+    sub_process_id: 286
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1064
+    name: Inquiry Complete
+    admin_id: 21
+    created_at: '2020-07-23T16:21:30.792Z'
+    updated_at: '2020-07-23T16:21:30.792Z'
+    disabled: false
+    sub_process_id: 286
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1074
+    name: Mail
+    admin_id: 21
+    created_at: '2020-07-23T16:24:50.640Z'
+    updated_at: '2020-07-23T16:24:50.640Z'
+    disabled: false
+    sub_process_id: 288
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Bounced
+    user_email: 
+  - id: 1066
+    name: Phone from Staff
+    admin_id: 21
+    created_at: '2020-07-23T16:21:55.840Z'
+    updated_at: '2020-07-23T16:21:55.840Z'
+    disabled: false
+    sub_process_id: 286
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1065
+    name: Phone from Subject
+    admin_id: 21
+    created_at: '2020-07-23T16:21:46.992Z'
+    updated_at: '2020-07-23T16:21:46.992Z'
+    disabled: false
+    sub_process_id: 286
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1069
+    name: REDCap
+    admin_id: 21
+    created_at: '2020-07-23T16:23:13.027Z'
+    updated_at: '2020-07-23T16:23:13.027Z'
+    disabled: false
+    sub_process_id: 285
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Sent
+    user_email: 
+  - id: 1071
+    name: REDCap
+    admin_id: 21
+    created_at: '2020-07-23T16:23:45.583Z'
+    updated_at: '2020-07-23T16:23:45.583Z'
+    disabled: false
+    sub_process_id: 287
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Complete
+    user_email: 
+  - id: 1073
+    name: REDCap
+    admin_id: 21
+    created_at: '2020-07-23T16:24:33.599Z'
+    updated_at: '2020-07-23T16:24:33.599Z'
+    disabled: false
+    sub_process_id: 288
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Bounced
+    user_email: 
+  - id: 1067
+    name: Reminder - Email
+    admin_id: 21
+    created_at: '2020-07-23T16:22:54.035Z'
+    updated_at: '2020-07-23T16:22:54.035Z'
+    disabled: false
+    sub_process_id: 285
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Sent
+    user_email: 
+  - id: 1068
+    name: Reminder Mail
+    admin_id: 21
+    created_at: '2020-07-23T16:23:00.090Z'
+    updated_at: '2020-07-23T16:23:00.090Z'
+    disabled: false
+    sub_process_id: 285
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Sent
+    user_email: 
+  - id: 1070
+    name: Thank You
+    admin_id: 21
+    created_at: '2020-07-23T16:23:19.007Z'
+    updated_at: '2020-07-23T16:23:19.007Z'
+    disabled: false
+    sub_process_id: 285
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Sent
+    user_email: 
+  - id: 1075
+    name: Thank You
+    admin_id: 21
+    created_at: '2020-07-23T16:25:08.184Z'
+    updated_at: '2020-07-23T16:25:08.184Z'
+    disabled: false
+    sub_process_id: 288
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Bounced
+    user_email: 
   nfs_store_filters:
   - id: 86
     app_type_id: 43
