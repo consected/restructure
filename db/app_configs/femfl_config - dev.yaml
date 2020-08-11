@@ -1047,6 +1047,16 @@ app_type:
     created_at: '2020-06-22T14:02:03.937Z'
     updated_at: '2020-07-01T15:36:25.968Z'
     user_email: 
+  protocols:
+  - id: 108
+    name: FEMFL
+    created_at: '2020-07-23T15:52:56.901Z'
+    updated_at: '2020-07-23T16:32:47.271Z'
+    disabled: false
+    admin_id: 21
+    position: 1
+    app_type_id: 43
+    user_email: 
   associated_protocols:
   - id: 108
     name: FEMFL
@@ -1058,6 +1068,15 @@ app_type:
     app_type_id: 43
     user_email: 
   associated_sub_processes:
+  - id: 290
+    name: CIS-received
+    disabled: false
+    protocol_id: 108
+    admin_id: 21
+    created_at: '2020-08-11T09:29:27.177Z'
+    updated_at: '2020-08-11T09:29:27.177Z'
+    protocol_name: FEMFL
+    user_email: 
   - id: 289
     name: Ineligible
     disabled: false
@@ -1134,6 +1153,18 @@ app_type:
     protocol_name: FEMFL
     sub_process_name: Bounced
     user_email: 
+  - id: 1109
+    name: Email
+    admin_id: 21
+    created_at: '2020-08-11T09:29:48.047Z'
+    updated_at: '2020-08-11T09:29:48.047Z'
+    disabled: false
+    sub_process_id: 290
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: CIS-received
+    user_email: 
   - id: 1063
     name: Email from Staff
     admin_id: 21
@@ -1158,6 +1189,18 @@ app_type:
     protocol_name: FEMFL
     sub_process_name: Inquiry
     user_email: 
+  - id: 1110
+    name: Event
+    admin_id: 21
+    created_at: '2020-08-11T09:29:55.199Z'
+    updated_at: '2020-08-11T09:29:55.199Z'
+    disabled: false
+    sub_process_id: 290
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: CIS-received
+    user_email: 
   - id: 1064
     name: Inquiry Complete
     admin_id: 21
@@ -1181,6 +1224,30 @@ app_type:
     description: ''
     protocol_name: FEMFL
     sub_process_name: Bounced
+    user_email: 
+  - id: 1111
+    name: Paper
+    admin_id: 21
+    created_at: '2020-08-11T09:30:00.521Z'
+    updated_at: '2020-08-11T09:30:00.521Z'
+    disabled: false
+    sub_process_id: 290
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: CIS-received
+    user_email: 
+  - id: 1112
+    name: Phone
+    admin_id: 21
+    created_at: '2020-08-11T09:30:05.062Z'
+    updated_at: '2020-08-11T09:30:05.062Z'
+    disabled: false
+    sub_process_id: 290
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: CIS-received
     user_email: 
   - id: 1066
     name: Phone from Staff
@@ -1241,6 +1308,18 @@ app_type:
     description: ''
     protocol_name: FEMFL
     sub_process_name: Bounced
+    user_email: 
+  - id: 1113
+    name: REDCap
+    admin_id: 21
+    created_at: '2020-08-11T09:30:15.152Z'
+    updated_at: '2020-08-11T09:30:25.797Z'
+    disabled: false
+    sub_process_id: 290
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: CIS-received
     user_email: 
   - id: 1067
     name: Reminder - Email
