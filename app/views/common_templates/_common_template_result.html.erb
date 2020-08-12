@@ -117,6 +117,9 @@
         {{/if}}
       </li>
       {{#unless template_config.view_options.show_embedded_at_top}}
+      {{log name}}
+      {{log result_data}}
+      {{log (fpa_state_item 'template_config' (underscore name))}}
       {{> common_template_result_fields result_data=result_data name=name template_config=(fpa_state_item 'template_config' (underscore name))}}
       {{/unless}}
       {{#each item_blocks}}
