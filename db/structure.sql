@@ -816,6 +816,134 @@ $$;
 
 
 --
+-- Name: femfl_subjects_rc_update(); Type: FUNCTION; Schema: femfl; Owner: -
+--
+
+CREATE FUNCTION femfl.femfl_subjects_rc_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  etl_user_id integer;
+  new_master_id integer;
+BEGIN
+  SELECT
+    id
+  FROM
+    ml_app.get_etl_user () INTO etl_user_id
+LIMIT 1;
+  INSERT INTO ml_app.masters (
+    user_id,
+    created_at,
+    updated_at)
+  VALUES (
+    etl_user_id,
+    now(),
+    now())
+RETURNING
+  id INTO new_master_id;
+  INSERT INTO femfl.femfl_subjects (
+    master_id,
+    first_name,
+    last_name,
+    source,
+    user_id,
+    created_at,
+    updated_at)
+  SELECT
+    new_master_id,
+    NEW.first_name,
+    NEW.last_name,
+    'cif',
+    etl_user_id,
+    NEW.femfl_contact_info_timestamp,
+    NEW.femfl_contact_info_timestamp;
+  IF NEW.cell_number IS NOT NULL THEN
+    INSERT INTO femfl.femfl_contacts (
+      master_id,
+      data,
+      rec_type,
+      rank,
+      source,
+      user_id,
+      created_at,
+      updated_at)
+    SELECT
+      new_master_id,
+      NEW.cell_number,
+      'phone',
+      10,
+      'cif',
+      etl_user_id,
+      NEW.femfl_contact_info_timestamp,
+      NEW.femfl_contact_info_timestamp;
+  END IF;
+  IF NEW.other_phone_number IS NOT NULL THEN
+    INSERT INTO femfl.femfl_contacts (
+      master_id,
+      data,
+      rec_type,
+      rank,
+      source,
+      user_id,
+      created_at,
+      updated_at)
+    SELECT
+      new_master_id,
+      NEW.other_phone_number,
+      'phone',
+      5,
+      'cif',
+      etl_user_id,
+      NEW.femfl_contact_info_timestamp,
+      NEW.femfl_contact_info_timestamp;
+  END IF;
+  IF NEW.email IS NOT NULL THEN
+    INSERT INTO femfl.femfl_contacts (
+      master_id,
+      data,
+      rec_type,
+      rank,
+      source,
+      user_id,
+      created_at,
+      updated_at)
+    SELECT
+      new_master_id,
+      NEW.email,
+      'email',
+      10,
+      'cif',
+      etl_user_id,
+      NEW.femfl_contact_info_timestamp,
+      NEW.femfl_contact_info_timestamp;
+  END IF;
+  INSERT INTO ml_app.trackers (
+    master_id,
+    protocol_id,
+    event_date,
+    user_id,
+    notes,
+    sub_process_id,
+    protocol_event_id,
+    created_at,
+    updated_at)
+  VALUES (
+    new_master_id,
+    108,
+    now(),
+    etl_user_id,
+    'RC Auto Update femfl_cif ' || txid_current() ::varchar,
+    290,
+    1113,
+    now(),
+    now());
+  NEW.master_id := new_master_id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_activity_log_femfl_assignment_femfl_comms_update(); Type: FUNCTION; Schema: femfl; Owner: -
 --
 
@@ -8337,7 +8465,7 @@ BEGIN
   INSERT INTO activity_log_bhs_assignment_history (
     master_id,
     bhs_assignment_id,
-    select_record_from_player_contact_phones, return_call_availability_notes, questions_from_call_notes, results_link, select_result, pi_notes_from_return_call,
+    select_record_from_player_contact_phones, return_call_availability_notes, questions_from_call_notes, results_link, select_result, pi_notes_from_return_call, pi_return_call_notes,
     extra_log_type,
     user_id,
     created_at,
@@ -8346,7 +8474,7 @@ BEGIN
   SELECT
     NEW.master_id,
     NEW.bhs_assignment_id,
-    NEW.select_record_from_player_contact_phones, NEW.return_call_availability_notes, NEW.questions_from_call_notes, NEW.results_link, NEW.select_result, NEW.pi_notes_from_return_call,
+    NEW.select_record_from_player_contact_phones, NEW.return_call_availability_notes, NEW.questions_from_call_notes, NEW.results_link, NEW.select_result, NEW.pi_notes_from_return_call, NEW.pi_return_call_notes,
     NEW.extra_log_type,
     NEW.user_id,
     NEW.created_at,
@@ -11239,35 +11367,6 @@ CREATE FUNCTION ml_app.log_report_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
-
-
---
--- Name: log_sage_assignments_update(); Type: FUNCTION; Schema: ml_app; Owner: -
---
-
-CREATE FUNCTION ml_app.log_sage_assignments_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  INSERT INTO sage_assignment_history (
-    master_id,
-    sage_id, sage_id,
-    user_id,
-    admin_id,
-    created_at,
-    updated_at,
-    sage_assignment_table_id)
-  SELECT
-    NEW.master_id,
-    NEW.sage_id,
-    NEW.user_id,
-    NEW.admin_id,
-    NEW.created_at,
-    NEW.updated_at,
-    NEW.id;
-  RETURN NEW;
-END;
-$$;
 
 
 --
@@ -20726,6 +20825,72 @@ ALTER SEQUENCE femfl.femfl_subjects_id_seq OWNED BY femfl.femfl_subjects.id;
 
 
 --
+-- Name: rc_femfl_cif; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.rc_femfl_cif (
+    id integer NOT NULL,
+    master_id integer,
+    record_id numeric,
+    redcap_survey_identifier text,
+    femfl_contact_info_timestamp timestamp without time zone,
+    first_name text,
+    last_name text,
+    email text,
+    cell_number text,
+    other_phone_number text,
+    hear_about___1 numeric,
+    hear_about___10 numeric,
+    hear_about___11 numeric,
+    hear_about___12 numeric,
+    hear_about___2 numeric,
+    hear_about___3 numeric,
+    hear_about___4 numeric,
+    hear_about___5 numeric,
+    hear_about___6 numeric,
+    hear_about___7 numeric,
+    hear_about___8 numeric,
+    hear_about___9 numeric,
+    hear_about_wives_group text,
+    hear_about_event text,
+    hear_about_other text,
+    relationship_to_player___1 numeric,
+    relationship_to_player___2 numeric,
+    relationship_to_player___3 numeric,
+    relationship_to_player___4 numeric,
+    relationship_to_player___5 numeric,
+    relationship_to_player___6 numeric,
+    relationship_to_player___7 numeric,
+    relationship_to_player___8 numeric,
+    relationship_to_player___9 numeric,
+    relationship_to_player___10 numeric,
+    relationship_to_player___11 numeric,
+    relationship_other text,
+    comments text,
+    femfl_contact_info_complete numeric
+);
+
+
+--
+-- Name: rc_femfl_cif_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.rc_femfl_cif_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: rc_femfl_cif_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.rc_femfl_cif_id_seq OWNED BY femfl.rc_femfl_cif.id;
+
+
+--
 -- Name: test9_number_history; Type: TABLE; Schema: femfl; Owner: -
 --
 
@@ -29379,7 +29544,9 @@ CREATE TABLE ml_app.activity_log_bhs_assignments (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    pi_notes_from_return_call character varying
+    pi_notes_from_return_call character varying,
+    bhs_assignment_id bigint,
+    pi_return_call_notes character varying
 );
 
 
@@ -29708,7 +29875,8 @@ CREATE TABLE ml_app.activity_log_player_contact_phones (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     set_related_player_contact_rank character varying,
-    extra_log_type character varying
+    extra_log_type character varying,
+    player_contact_id integer
 );
 
 
@@ -41711,6 +41879,13 @@ ALTER TABLE ONLY femfl.femfl_subject_history ALTER COLUMN id SET DEFAULT nextval
 --
 
 ALTER TABLE ONLY femfl.femfl_subjects ALTER COLUMN id SET DEFAULT nextval('femfl.femfl_subjects_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.rc_femfl_cif ALTER COLUMN id SET DEFAULT nextval('femfl.rc_femfl_cif_id_seq'::regclass);
 
 
 --
@@ -54253,6 +54428,13 @@ CREATE INDEX index_message_templates_on_admin_id ON ml_app.message_templates USI
 
 
 --
+-- Name: index_ml_app.activity_log_bhs_assignments_on_bhs_assignment_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX "index_ml_app.activity_log_bhs_assignments_on_bhs_assignment_id" ON ml_app.activity_log_bhs_assignments USING btree (bhs_assignment_id);
+
+
+--
 -- Name: index_model_references_on_from_record_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -58901,6 +59083,13 @@ CREATE TRIGGER log_data_requests_selected_attrib_history_update AFTER UPDATE ON 
 
 
 --
+-- Name: femfl_subject_rc_insert; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER femfl_subject_rc_insert BEFORE INSERT ON femfl.rc_femfl_cif FOR EACH ROW EXECUTE PROCEDURE femfl.femfl_subjects_rc_update();
+
+
+--
 -- Name: log_activity_log_femfl_assignment_femfl_comm_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
 --
 
@@ -60592,20 +60781,6 @@ CREATE TRIGGER log_activity_log_player_contact_phone_history_insert AFTER INSERT
 --
 
 CREATE TRIGGER log_activity_log_player_contact_phone_history_update AFTER UPDATE ON ml_app.activity_log_player_contact_phones FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_player_contact_phones_update();
-
-
---
--- Name: log_sage_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER log_sage_assignment_history_insert AFTER INSERT ON ml_app.sage_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_sage_assignments_update();
-
-
---
--- Name: log_sage_assignment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER log_sage_assignment_history_update AFTER UPDATE ON ml_app.sage_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_sage_assignments_update();
 
 
 --
@@ -63055,6 +63230,14 @@ ALTER TABLE ONLY femfl.test9_number_history
 
 ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comms
     ADD CONSTRAINT fk_rails_085a1bd755 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_08e7f66647; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.rc_femfl_cif
+    ADD CONSTRAINT fk_rails_08e7f66647 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
@@ -73289,6 +73472,8 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200804144545'),
 ('20200804145635'),
 ('20200804145940'),
-('20200804150142');
+('20200804150142'),
+('20200812130051'),
+('20200814151056');
 
 

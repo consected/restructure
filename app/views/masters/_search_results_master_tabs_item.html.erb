@@ -37,9 +37,11 @@
         initial_show = resource.to_s.in?(default_panels)
       end
 
+      path = resource.gsub('__', '/').pluralize
+
   %>
   <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
-    <a id="tab-activity-log-<%= panel_name %>" href="/masters/{{id}}/<%= resource.gsub('__', '/') %>?limit=<%=limit%>"  data-panel-tab="<%=resource%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= resource.hyphenate %>-{{id}}" aria-expanded="false" class="scroll-to-expanded  collapsed"  data-result-target="#<%= resource.hyphenate %>-{{id}}" data-template="<%= resource.hyphenate %><%= template_postfix %>"><%= panel_label %></a>
+    <a id="tab-activity-log-<%= panel_name %>" href="/masters/{{id}}/<%= path %>?limit=<%=limit%>"  data-panel-tab="<%=resource%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= resource.hyphenate %>-{{id}}" aria-expanded="false" class="scroll-to-expanded  collapsed"  data-result-target="#<%= resource.hyphenate %>-{{id}}" data-template="<%= resource.hyphenate %><%= template_postfix %>"><%= panel_label %></a>
   </li>
   <%
     end

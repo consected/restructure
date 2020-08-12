@@ -150,16 +150,22 @@ module ActiveRecord
         cols = ActiveRecord::Base.connection.columns("#{schema}.#{table_name}")
         old_table_comment = ActiveRecord::Base.connection.table_comment(table_name)
 
+        belongs_to_model_field = "#{belongs_to_model}_id" if belongs_to_model
+
         old_colnames = cols.map(&:name) - standard_columns
         new_colnames = fields.map(&:to_s) - standard_columns
-        added = new_colnames - old_colnames
-        removed = old_colnames - new_colnames
+        added = new_colnames - old_colnames - [belongs_to_model_field]
+        removed = old_colnames - new_colnames - [belongs_to_model_field]
 
         self.fields_comments ||= {}
         commented_colnames = fields_comments.keys.map(&:to_s)
         changed = commented_colnames - added - removed
 
         change_table_comment("#{schema}.#{table_name}", table_comment) if old_table_comment != table_comment
+
+        if belongs_to_model && !old_colnames.include?(belongs_to_model)
+          add_reference "#{schema}.#{table_name}", belongs_to_model
+        end
 
         added.each do |c|
           options = {}

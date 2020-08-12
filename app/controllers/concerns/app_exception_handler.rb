@@ -32,7 +32,7 @@ module AppExceptionHandler
 
   def not_editable
     flash[:danger] = "This item can't be edited"
-    render plain: flash[:danger], status: :not_editable
+    render plain: flash[:danger], status: 401
   end
 
   def not_creatable

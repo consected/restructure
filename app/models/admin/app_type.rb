@@ -10,11 +10,11 @@ class Admin::AppType < Admin::AdminBase
   has_many :page_layouts, -> { order id: :asc }, autosave: true, class_name: 'Admin::PageLayout'
   has_many :user_roles, -> { order id: :asc }, autosave: true, class_name: 'Admin::UserRole'
   has_many :nfs_store_filters, -> { order id: :asc }, autosave: true, class_name: 'NfsStore::Filter::Filter'
+  has_many :protocols, -> { order id: :asc }, autosave: true, class_name: 'Classification::Protocol'
 
   validates :name, presence: true
   validate :name_not_already_taken
   validates :label, presence: true
-  after_save :set_access_levels
 
   attr_accessor :import_results
 
@@ -31,7 +31,7 @@ class Admin::AppType < Admin::AdminBase
   def self.active_app_types
     olat = Settings::OnlyLoadAppTypes
     if olat
-      app_type = Admin::AppType.find(olat)
+      Admin::AppType.find(olat)
     else
       active
     end
@@ -94,7 +94,7 @@ class Admin::AppType < Admin::AdminBase
     id_list = []
 
     Admin::AppType.transaction do
-      a_conf = app_type_config.slice('name', 'label')
+      a_conf = app_type_config.slice('name', 'label', 'default_schema_name')
 
       # override the name if specified
       a_conf[:current_admin] = admin
@@ -131,6 +131,7 @@ class Admin::AppType < Admin::AdminBase
       res['associated_message_templates'] = app_type.import_config_sub_items app_type_config, 'associated_message_templates', ['name', 'message_type', 'template_type']
 
       res['associated_protocols'] = app_type.import_config_sub_items app_type_config, 'associated_protocols', ['name']
+      res['protocols'] = app_type.import_config_sub_items app_type_config, 'protocols', ['name']
       res['associated_sub_processes'] = app_type.import_config_sub_items app_type_config, 'associated_sub_processes', ['name'], filter_on: ['protocol_name']
       res['associated_protocol_events'] = app_type.import_config_sub_items app_type_config, 'associated_protocol_events', ['name'], filter_on: ['sub_process_name', 'protocol_name']
 
@@ -342,21 +343,16 @@ class Admin::AppType < Admin::AdminBase
   end
 
   def associated_protocols
-    return [] unless name == 'zeus'
-
-    Classification::Protocol.active.order(id: :asc)
+    t = Classification::Protocol
+    t.active.where(app_type: self).or(t.where(app_type: nil)).order(id: :asc)
   end
 
   def associated_sub_processes
-    return [] unless name == 'zeus'
-
     protocol_ids = associated_protocols.pluck(:id)
     Classification::SubProcess.active.where(protocol_id: protocol_ids).order(id: :asc)
   end
 
   def associated_protocol_events
-    return [] unless name == 'zeus'
-
     sub_processes = associated_sub_processes.pluck(:id)
     Classification::ProtocolEvent.active.where(sub_process_id: sub_processes).order(id: :asc)
   end
@@ -439,20 +435,12 @@ class Admin::AppType < Admin::AdminBase
     options[:methods] << :user_roles
     options[:methods] << :associated_message_templates
     options[:methods] << :associated_config_libraries
+    options[:methods] << :protocols
     options[:methods] << :associated_protocols
     options[:methods] << :associated_sub_processes
     options[:methods] << :associated_protocol_events
     options[:methods] << :nfs_store_filters
 
     super(options)
-  end
-
-  private
-
-  def set_access_levels
-    # if !persisted? || self.user_access_controls.length == 0
-    #   Admin::UserAccessControl.create_all_for self, current_admin
-    #   return true
-    # end
   end
 end
