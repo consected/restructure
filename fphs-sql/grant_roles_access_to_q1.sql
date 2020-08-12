@@ -1,10 +1,11 @@
 -- REVOKE ALL ON SCHEMA q1 FROM fphs;
--- GRANT ALL ON SCHEMA q1 TO fphs;
+GRANT ALL ON SCHEMA q1 TO fphs;
+
+GRANT USAGE ON SCHEMA q1 TO fphsadm;
+
 -- GRANT USAGE ON SCHEMA q1 TO fphsadm;
 -- GRANT USAGE ON SCHEMA q1 TO fphsusr;
 -- GRANT USAGE ON SCHEMA q1 TO fphsetl;
-
-GRANT ALL ON q1.live_merge TO fphs;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON q1.live_merge TO fphsusr;
 
@@ -26,8 +27,10 @@ BEGIN
       pg_catalog.pg_roles
     WHERE
       rolname = 'fphsrailsapp') THEN
-  -- GRANT USAGE ON SCHEMA q1 TO fphsrailsapp;
+  GRANT USAGE ON SCHEMA q1 TO fphsrailsapp;
   GRANT SELECT, INSERT, UPDATE, DELETE ON q1.live_merge TO fphsrailsapp;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON q1.sc_stage TO fphsrailsapp;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON q1.rc_stage TO fphsrailsapp;
   -- GRANT SELECT,USAGE ON ALL SEQUENCES IN SCHEMA q1 TO fphsrailsapp;
 END IF;
 END
@@ -42,8 +45,10 @@ BEGIN
       pg_catalog.pg_roles
     WHERE
       rolname = 'fphsrailsapp1') THEN
-  -- GRANT USAGE ON SCHEMA q1 TO fphsrailsapp;
-  GRANT SELECT, INSERT, UPDATE, DELETE ON q1.live_merge TO fphsrailsapp;
+  GRANT USAGE ON SCHEMA q1 TO fphsrailsapp1;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON q1.live_merge TO fphsrailsapp1;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON q1.sc_stage TO fphsrailsapp1;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON q1.rc_stage TO fphsrailsapp1;
   -- GRANT SELECT,USAGE ON ALL SEQUENCES IN SCHEMA q1 TO fphsrailsapp;
 END IF;
 END
