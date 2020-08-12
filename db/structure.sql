@@ -8465,7 +8465,7 @@ BEGIN
   INSERT INTO activity_log_bhs_assignment_history (
     master_id,
     bhs_assignment_id,
-    select_record_from_player_contact_phones, return_call_availability_notes, questions_from_call_notes, results_link, select_result, pi_notes_from_return_call,
+    select_record_from_player_contact_phones, return_call_availability_notes, questions_from_call_notes, results_link, select_result, pi_notes_from_return_call, pi_return_call_notes,
     extra_log_type,
     user_id,
     created_at,
@@ -8474,7 +8474,7 @@ BEGIN
   SELECT
     NEW.master_id,
     NEW.bhs_assignment_id,
-    NEW.select_record_from_player_contact_phones, NEW.return_call_availability_notes, NEW.questions_from_call_notes, NEW.results_link, NEW.select_result, NEW.pi_notes_from_return_call,
+    NEW.select_record_from_player_contact_phones, NEW.return_call_availability_notes, NEW.questions_from_call_notes, NEW.results_link, NEW.select_result, NEW.pi_notes_from_return_call, NEW.pi_return_call_notes,
     NEW.extra_log_type,
     NEW.user_id,
     NEW.created_at,
@@ -11367,35 +11367,6 @@ CREATE FUNCTION ml_app.log_report_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
-
-
---
--- Name: log_sage_assignments_update(); Type: FUNCTION; Schema: ml_app; Owner: -
---
-
-CREATE FUNCTION ml_app.log_sage_assignments_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  INSERT INTO sage_assignment_history (
-    master_id,
-    sage_id, sage_id,
-    user_id,
-    admin_id,
-    created_at,
-    updated_at,
-    sage_assignment_table_id)
-  SELECT
-    NEW.master_id,
-    NEW.sage_id,
-    NEW.user_id,
-    NEW.admin_id,
-    NEW.created_at,
-    NEW.updated_at,
-    NEW.id;
-  RETURN NEW;
-END;
-$$;
 
 
 --
@@ -29573,7 +29544,9 @@ CREATE TABLE ml_app.activity_log_bhs_assignments (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    pi_notes_from_return_call character varying
+    pi_notes_from_return_call character varying,
+    bhs_assignment_id bigint,
+    pi_return_call_notes character varying
 );
 
 
@@ -54455,6 +54428,13 @@ CREATE INDEX index_message_templates_on_admin_id ON ml_app.message_templates USI
 
 
 --
+-- Name: index_ml_app.activity_log_bhs_assignments_on_bhs_assignment_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX "index_ml_app.activity_log_bhs_assignments_on_bhs_assignment_id" ON ml_app.activity_log_bhs_assignments USING btree (bhs_assignment_id);
+
+
+--
 -- Name: index_model_references_on_from_record_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -60801,20 +60781,6 @@ CREATE TRIGGER log_activity_log_player_contact_phone_history_insert AFTER INSERT
 --
 
 CREATE TRIGGER log_activity_log_player_contact_phone_history_update AFTER UPDATE ON ml_app.activity_log_player_contact_phones FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_player_contact_phones_update();
-
-
---
--- Name: log_sage_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER log_sage_assignment_history_insert AFTER INSERT ON ml_app.sage_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_sage_assignments_update();
-
-
---
--- Name: log_sage_assignment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER log_sage_assignment_history_update AFTER UPDATE ON ml_app.sage_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_sage_assignments_update();
 
 
 --
@@ -73507,6 +73473,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200804145635'),
 ('20200804145940'),
 ('20200804150142'),
-('20200812130051');
+('20200812130051'),
+('20200814151056');
 
 
