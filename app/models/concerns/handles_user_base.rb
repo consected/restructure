@@ -71,7 +71,11 @@ module HandlesUserBase
       raise FphsException, 'no user in allows_user_access_to?' unless user
 
       # Check at a table level that the user can access the resource
-      named = name.ns_underscore.pluralize
+      named = if respond_to? :definition
+                definition.resource_name
+              else
+                name.ns_underscore.pluralize
+              end
       !!user.has_access_to?(perform, :table, named, with_options)
     end
 

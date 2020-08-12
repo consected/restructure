@@ -138,8 +138,8 @@ module GeneralDataConcerns
       extras[:methods] << :item_id if respond_to? :item_id
       extras[:methods] << :item_type if respond_to? :item_type
       extras[:methods] << :full_item_type if respond_to? :full_item_type
-      extras[:methods] << :updated_at_ts if respond_to? :updated_at_ts
-      extras[:methods] << :created_at_ts if respond_to? :created_at_ts
+      extras[:methods] << :updated_at_ts if respond_to? :updated_at
+      extras[:methods] << :created_at_ts if respond_to? :created_at
       extras[:methods] << :data if respond_to? :data
       extras[:methods] << :rank_name if respond_to? :rank_name
       extras[:methods] << :state_name if respond_to? :state_name

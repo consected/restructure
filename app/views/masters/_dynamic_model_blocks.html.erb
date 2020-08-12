@@ -12,7 +12,8 @@ unless defined? orientation
 end
 
 category_models.each do |m|
-  if viewable  [m.model_association_name]
+
+  if viewable  [m.resource_name.to_sym]
     po = panel&.view_options&.orientation
 
     orientation ||= po == 'horizontal' || (DynamicModel.orientation(category) == :horizontal) ? 'horizontal' : po

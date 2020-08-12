@@ -18,9 +18,6 @@
     item_list[item_list.index('state')] = 'state_name' if item_list.include? 'state'
   end
 
-  if item_list.first&.end_with? '_id'
-    item_list = item_list.map {|k| {label: k.to_s.humanize, formatter: 'format_sage_id', attribute: k.to_s}}
-  end
 
   if m.model_def.attribute_names.include? 'rank'
     data_sort = [:desc, "data-rank"]
@@ -31,6 +28,9 @@
   extra_class = view_options[:extra_class]
   extra_data_attribs = [:rec_type] if field_list.include?('rec_type')
   button_label = default_options.button_label
+
+  res_name = m.resource_name
+  current_user_access = current_user.has_access_to?(:access, :table, res_name)
 %>
 <%= render partial: 'common_templates/search_results_template', locals: {
       caption: header_caption,
@@ -51,5 +51,5 @@
       extra_class: extra_class,
       extra_data_attribs: extra_data_attribs,
       extra_options_config: default_options
-    } if current_user.has_access_to?(:access, :table, full_name.pluralize) %>
+    } if current_user_access %>
 <% end %>
