@@ -52,10 +52,5 @@ ActiveSupport.on_load(:nfs_store_config) do
 
     raise FsException::Config, 'No App Type available' unless Admin::AppType.first
 
-    unless File.exist? temp_directory
-      Rails.logger.info 'Making the tmp upload directory'
-      FileUtils.mkdir_p temp_directory
-    end
-
   end
 end

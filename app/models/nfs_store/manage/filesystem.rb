@@ -8,43 +8,32 @@ module NfsStore
       AppDirprefix = 'app-type-'
 
       class << self
-        attr_writer :temp_directory
+        attr_accessor :nfs_store_directory,
+                      :group_id_range,
+                      :containers_dirname,
+                      :use_parent_sub_dir
       end
 
-      class << self
-        attr_reader :temp_directory
+      # Set the temp directory (and create it if necessary)
+      def self.temp_directory=(tdir)
+        @temp_directory = tdir
+        create_temp_directory
       end
 
-      class << self
-        attr_writer :nfs_store_directory
+      # Get the temp directory location
+      # Make it on demand, since it can magically
+      # disappear if the system cleans up
+      def self.temp_directory
+        create_temp_directory
+        @temp_directory
       end
 
-      class << self
-        attr_reader :nfs_store_directory
-      end
+      # Create temp directory if necessary
+      def self.create_temp_directory
+        return if File.exist? @temp_directory
 
-      class << self
-        attr_writer :group_id_range
-      end
-
-      class << self
-        attr_reader :group_id_range
-      end
-
-      class << self
-        attr_writer :containers_dirname
-      end
-
-      class << self
-        attr_reader :containers_dirname
-      end
-
-      class << self
-        attr_writer :use_parent_sub_dir
-      end
-
-      class << self
-        attr_reader :use_parent_sub_dir
+        Rails.logger.info 'Making the tmp upload directory'
+        FileUtils.mkdir_p @temp_directory
       end
 
       # Path to the 'containers' directory for the specified app type within the
@@ -80,14 +69,17 @@ module NfsStore
       # @param role_name [String]
       # @param app_type_id [Integer] (optional) app type to be used, or if nil rely on the current user's
       #   app type set in the container
-      # @param container [NfsStore::Manage::Container] the container, which will also set the app type if it is not set explicitly
+      # @param container [NfsStore::Manage::Container] the container,
+      #    which will also set the app type if it is not set explicitly
       # @param path [String] path relative to the container for a directory
       # @param file_name [String] specific file name to use
       # @param archive_file [String] specify an archive file this is extracted from
       # @param app_type_id [Admin::AppType] specify an app type to override the current user's current app type
       # @param strip_final_slash [Boolean] force a clean path without a final slash
       # @return [String] path string
-      def self.nfs_store_path(role_name, container = nil, path = nil, file_name = nil, archive_file: nil, app_type_id: nil, strip_final_slash: nil)
+      def self.nfs_store_path(role_name,
+                              container = nil, path = nil, file_name = nil,
+                              archive_file: nil, app_type_id: nil, strip_final_slash: nil)
         fs_dir = nfs_store_directory
 
         # Use the specified app type if stated explicitly, otherwise get it from the container
@@ -101,8 +93,8 @@ module NfsStore
         parts << containers_dirname unless containers_dirname.blank?
 
         # Use the parent_path if the container defines it, to place the container directory in a parent directory
-        unless container&.parent_sub_dir.blank?
-          psd_parts = container&.parent_sub_dir.split('/').reject(&:blank?)
+        if container&.parent_sub_dir&.present?
+          psd_parts = container.parent_sub_dir.split('/').reject(&:blank?)
           parts += psd_parts
         end
 
@@ -160,11 +152,9 @@ module NfsStore
         elsif action == :mkdir
           fs_test_path = nfs_store_path(role_name, container, extra_path, strip_final_slash: true)
           if File.exist?(fs_test_path)
-            if ok_if_exists
-              return true
-            else
-              raise FsException::Action, "Target to create directory already exists: #{fs_test_path}"
-            end
+            return true if ok_if_exists
+
+            raise FsException::Action, "Target to create directory already exists: #{fs_test_path}"
           end
 
           # If the directory does not already exist, we need to get to the deepest point in the path
@@ -220,7 +210,8 @@ module NfsStore
       # @param container [NfsStore::Manage::Container] container to move the file into
       # @param path [String] the path within the container to move the file to
       # @param file_name [String] the actual file name to use for the file
-      # @param archivefile [String | nil] if the file belongs to an archive, this specifies the archive file it belongs to
+      # @param archivefile [String | nil] if the file belongs to an archive,
+      #     this specifies the archive file it belongs to
       # @return [True] true represents success, exception on failure
       def self.move_file_to_final_location(role_name, from_path, container, path, file_name)
         fs_path = nfs_store_path(role_name, container, path, file_name)
