@@ -404,6 +404,71 @@ app_type:
     created_at: '2020-07-24T09:37:58.022Z'
     updated_at: '2020-07-24T09:37:58.022Z'
     user_email: 
+  - id: 2452
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__rc_femfl_cifs
+    options: 
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: _app_
+    created_at: '2020-08-12T09:34:58.534Z'
+    updated_at: '2020-08-12T09:34:58.534Z'
+    user_email: 
+  - id: 2453
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__rc_femfl_cif
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-08-12T09:37:44.172Z'
+    updated_at: '2020-08-12T09:37:44.172Z'
+    user_email: 
+  - id: 2475
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__femfl_subjects_item_flags
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-08-13T16:22:30.438Z'
+    updated_at: '2020-08-13T17:17:02.421Z'
+    user_email: 
+  - id: 2476
+    user_id: 
+    resource_type: table
+    resource_name: item_flags
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-08-13T17:17:57.713Z'
+    updated_at: '2020-08-13T17:17:57.713Z'
+    user_email: 
+  - id: 2477
+    user_id: 
+    resource_type: report
+    resource_name: femfl__list_by_type
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 43
+    role_name: user
+    created_at: '2020-08-13T18:35:47.361Z'
+    updated_at: '2020-08-13T18:35:47.361Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 124
     name: Communications
@@ -500,11 +565,12 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-07-16T16:55:44.009Z'
-    updated_at: '2020-07-24T15:40:33.149Z'
+    updated_at: '2020-08-13T15:27:28.375Z'
     position: 0
     category: femfl
     table_key_name: ''
     field_list: first_name last_name middle_name nick_name birth_date source tracker_history_id
+      rank
     result_order: ''
     options: "default:\r\n\r\n  view_options:\r\n    view_handlers: \r\n      - subject\r\n\r\n
       \ creatable_if:\r\n    not_any:\r\n      dynamic_model__femfl_subjects:\r\n
@@ -559,6 +625,32 @@ app_type:
       \r\n      - contact\r\n  \r\n  show_if:\r\n    rec_type:\r\n      current_mode:
       edit\r\n    data: \r\n      current_mode: edit    \r\n    rank:\r\n      current_mode:
       edit    "
+    user_email: 
+  - id: 635
+    name: Redcap
+    table_name: rc_femfl_cif
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-12T09:34:58.388Z'
+    updated_at: '2020-08-12T11:21:00.199Z'
+    position: 20
+    category: femflrc
+    table_key_name: ''
+    field_list: record_id redcap_survey_identifier femfl_contact_info_timestamp first_name
+      last_name email cell_number other_phone_number hear_about___1 hear_about___10
+      hear_about___11 hear_about___12 hear_about___2 hear_about___3 hear_about___4
+      hear_about___5 hear_about___6 hear_about___7 hear_about___8 hear_about___9 hear_about_wives_group
+      hear_about_event hear_about_other relationship_to_player___1 relationship_to_player___2
+      relationship_to_player___3 relationship_to_player___4 relationship_to_player___5
+      relationship_to_player___6 relationship_to_player___7 relationship_to_player___8
+      relationship_to_player___9 relationship_to_player___10 relationship_to_player___11
+      relationship_other comments femfl_contact_info_complete
+    result_order: ''
+    options: ''
     user_email: 
   associated_external_identifiers:
   - id: 43
@@ -658,6 +750,32 @@ app_type:
     selection_fields: ''
     item_type: femfl
     short_name: follow_up_communication
+    options: ''
+    user_email: 
+  - id: 310
+    name: List by Type
+    description: Search by item flags.
+    sql: "select distinct pi.* from item_flags \r\ninner join femfl_subjects pi on
+      item_id = pi.id\r\nwhere \r\nitem_flag_name_id in (:item_flag_to_search)\r\nand
+      (\r\n  rank is null and pi.rank is null\r\n  OR\r\n  pi.rank = :rank\r\n)\r\n;\r\n\r\n"
+    search_attrs: "\r\nrank: \r\n  general_selection: \r\n    label: \"Rank (leave
+      blank for 'unassigned')\"\r\n    item_type: dynamic_model__femfl_subjects_rank\r\n
+      \   multiple: single\r\n    disabled: false\r\n\r\n\r\nitem_flag_to_search:
+      \r\n  item_flag_name: \r\n    label: Subject Flags (shift+click for multiple)
+      \ \r\n    all: true\r\n    multiple: multiple\r\n    item_type: dynamic_model__femfl_subject\r\n\r\n\r\n"
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-13T17:59:17.635Z'
+    updated_at: '2020-08-14T07:58:41.056Z'
+    report_type: search
+    auto: false
+    searchable: true
+    position: 10
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: femfl
+    short_name: list_by_type
     options: ''
     user_email: 
   associated_general_selections:
@@ -931,6 +1049,36 @@ app_type:
     description: ''
     lock: false
     user_email: 
+  - id: 848
+    name: Valid
+    value: '12'
+    item_type: dynamic_model__femfl_subjects_rank
+    created_at: '2020-08-13T15:38:44.663Z'
+    updated_at: '2020-08-13T15:49:33.754Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 1
+    description: ''
+    lock: false
+    user_email: 
+  - id: 849
+    name: Invalid
+    value: "-1"
+    item_type: dynamic_model__femfl_subjects_rank
+    created_at: '2020-08-13T15:39:35.270Z'
+    updated_at: '2020-08-13T15:49:40.277Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 10
+    description: ''
+    lock: false
+    user_email: 
   page_layouts:
   - id: 77
     app_type_id: 43
@@ -952,13 +1100,13 @@ app_type:
     layout_name: master
     panel_name: trackers
     panel_label: Tracker
-    panel_position: 10
+    panel_position: 11
     options: "contains:\r\n#  resources:\r\n#    - dynamic_model__femfl_subjects\r\n
       \ categories: \r\n    - trackers\r\n\r\nview_options:\r\n  initial_show: true\r\n"
     disabled: false
     admin_id: 21
     created_at: '2020-07-21T10:47:43.518Z'
-    updated_at: '2020-07-24T14:12:02.144Z'
+    updated_at: '2020-08-12T10:15:52.550Z'
     description: ''
     user_email: 
   - id: 79
@@ -973,6 +1121,20 @@ app_type:
     admin_id: 21
     created_at: '2020-07-23T10:58:39.129Z'
     updated_at: '2020-07-24T13:43:09.293Z'
+    description: ''
+    user_email: 
+  - id: 80
+    app_type_id: 43
+    layout_name: master
+    panel_name: redcap
+    panel_label: Redcap
+    panel_position: 10
+    options: "contains:\r\n  categories: \r\n    - femflrc\r\n\r\nview_options:\r\n
+      \ initial_show: true\r\n"
+    disabled: false
+    admin_id: 21
+    created_at: '2020-08-12T09:36:02.219Z'
+    updated_at: '2020-08-12T10:41:02.855Z'
     description: ''
     user_email: 
   user_roles:
