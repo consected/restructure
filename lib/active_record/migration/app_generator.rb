@@ -55,7 +55,7 @@ module ActiveRecord
           t.references :user, index: { name: "#{rand_id}_user_id_h_idx" }, foreign_key: true
           t.timestamps null: false
 
-          t.belongs_to table_name.singularize, index: { name: "#{rand_id}_id_h_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
+          t.belongs_to table_name.singularize, index: { name: "#{rand_id}_b_id_h_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
         end
       end
 
@@ -249,6 +249,11 @@ module ActiveRecord
             fopts[:comment] = comment
           end
 
+          if a.start_with?('tag_select')
+            fopts ||= {}
+            fopts[:array] = true
+          end
+
           field_opts[attr_name] = fopts
         end
       end
@@ -349,14 +354,14 @@ module ActiveRecord
           BEGIN
             INSERT INTO #{history_table_name} (
               master_id,
-              #{fields.join(', ')},
+              #{"#{fields.join(', ')}," if fields.present?}
               user_id,
               created_at,
               updated_at,
               #{table_name.singularize}_id)
             SELECT
               NEW.master_id,
-              #{new_fields.join(', ')},
+              #{"#{new_fields.join(', ')}," if fields.present?}
               NEW.user_id,
               NEW.created_at,
               NEW.updated_at,
@@ -400,7 +405,7 @@ module ActiveRecord
           BEGIN
             INSERT INTO #{history_table_name} (
               master_id,
-              #{fields.join(', ')},
+              #{"#{fields.join(', ')}," if fields.present?}
               user_id,
               admin_id,
               created_at,
@@ -408,7 +413,7 @@ module ActiveRecord
               #{table_name.singularize}_table_id)
             SELECT
               NEW.master_id,
-              #{new_fields.join(', ')},
+              #{"#{new_fields.join(', ')}," if fields.present?}
               NEW.user_id,
               NEW.admin_id,
               NEW.created_at,

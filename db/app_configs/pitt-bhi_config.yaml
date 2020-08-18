@@ -447,19 +447,6 @@ app_type:
     created_at: '2020-08-12T16:25:00.546Z'
     updated_at: '2020-08-12T16:25:00.546Z'
     user_email: 
-  - id: 2461
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__pitt_bhi_assignment__exit_ps_msm
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 44
-    role_name: user - recruitment
-    created_at: '2020-08-12T16:25:06.426Z'
-    updated_at: '2020-08-12T16:25:06.426Z'
-    user_email: 
   - id: 2462
     user_id: 
     resource_type: activity_log_type
@@ -512,32 +499,6 @@ app_type:
     created_at: '2020-08-12T16:25:31.622Z'
     updated_at: '2020-08-12T16:25:31.622Z'
     user_email: 
-  - id: 2466
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__pitt_bhi_assignment__msm_ps_eligible
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 44
-    role_name: user - recruitment
-    created_at: '2020-08-12T16:25:38.752Z'
-    updated_at: '2020-08-12T16:25:38.752Z'
-    user_email: 
-  - id: 2467
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__pitt_bhi_assignment__post_testing_1
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 44
-    role_name: user - recruitment
-    created_at: '2020-08-12T16:25:50.497Z'
-    updated_at: '2020-08-12T16:25:50.497Z'
-    user_email: 
   - id: 2468
     user_id: 
     resource_type: activity_log_type
@@ -563,19 +524,6 @@ app_type:
     role_name: user - recruitment
     created_at: '2020-08-12T16:26:06.381Z'
     updated_at: '2020-08-12T16:26:06.381Z'
-    user_email: 
-  - id: 2470
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__pitt_bhi_assignment__transferred_to_msm
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 44
-    role_name: user - recruitment
-    created_at: '2020-08-12T16:26:13.064Z'
-    updated_at: '2020-08-12T16:26:13.064Z'
     user_email: 
   - id: 2471
     user_id: 
@@ -1123,6 +1071,383 @@ app_type:
     created_at: '2020-08-14T10:25:22.711Z'
     updated_at: '2020-08-14T10:25:22.711Z'
     user_email: 
+  - id: 2519
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment_phone_screen__suitability
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - phone screen
+    created_at: '2020-08-17T12:58:22.317Z'
+    updated_at: '2020-08-17T12:58:22.317Z'
+    user_email: 
+  - id: 2520
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment_phone_screen__suitability
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-17T12:58:32.344Z'
+    updated_at: '2020-08-17T12:58:32.344Z'
+    user_email: 
+  - id: 2521
+    user_id: 
+    resource_type: report
+    resource_name: pitt_bhi__pitt_bhi_calendar
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-18T11:04:13.086Z'
+    updated_at: '2020-08-18T11:04:13.086Z'
+    user_email: 
+  - id: 2522
+    user_id: 
+    resource_type: report
+    resource_name: pitt_bhi__pitt_bhi_calendar
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - phone screen
+    created_at: '2020-08-18T11:04:20.008Z'
+    updated_at: '2020-08-18T11:04:20.008Z'
+    user_email: 
+  - id: 2523
+    user_id: 
+    resource_type: general
+    resource_name: view_reports
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-18T11:08:40.519Z'
+    updated_at: '2020-08-18T11:15:00.929Z'
+    user_email: 
+  - id: 2524
+    user_id: 
+    resource_type: general
+    resource_name: view_reports
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - phone screen
+    created_at: '2020-08-18T11:08:47.692Z'
+    updated_at: '2020-08-18T11:15:05.598Z'
+    user_email: 
+  - id: 2525
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__pitt_bhi_access_pitt_staffs
+    options: 
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: _app_
+    created_at: '2020-08-18T11:53:55.054Z'
+    updated_at: '2020-08-18T11:53:55.054Z'
+    user_email: 
+  - id: 2526
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__pitt_bhi_access_pis
+    options: 
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: _app_
+    created_at: '2020-08-18T12:14:31.605Z'
+    updated_at: '2020-08-18T12:14:31.605Z'
+    user_email: 
+  - id: 2527
+    user_id: 
+    resource_type: limited_access
+    resource_name: dynamic_model__pitt_bhi_access_pis
+    options: ''
+    access: limited
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - pitt pi
+    created_at: '2020-08-18T12:19:07.293Z'
+    updated_at: '2020-08-18T12:19:07.293Z'
+    user_email: 
+  - id: 2528
+    user_id: 
+    resource_type: limited_access
+    resource_name: dynamic_model__pitt_bhi_access_pitt_staffs
+    options: ''
+    access: limited
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - pitt staff
+    created_at: '2020-08-18T12:19:30.767Z'
+    updated_at: '2020-08-18T12:19:30.767Z'
+    user_email: 
+  - id: 2529
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment__transferred_to_pitt
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-18T12:46:35.155Z'
+    updated_at: '2020-08-18T12:46:35.155Z'
+    user_email: 
+  - id: 2530
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__pitt_bhi_access_pis
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-18T12:50:07.517Z'
+    updated_at: '2020-08-18T12:50:07.517Z'
+    user_email: 
+  - id: 2531
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__pitt_bhi_access_pitt_staffs
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-18T12:50:23.324Z'
+    updated_at: '2020-08-18T12:50:23.324Z'
+    user_email: 
+  - id: 2532
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__pitt_bhi_assignment_discussions
+    options: 
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: _app_
+    created_at: '2020-08-18T13:39:55.279Z'
+    updated_at: '2020-08-18T13:39:55.279Z'
+    user_email: 
+  - id: 2533
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__pitt_bhi_assignment_discussions
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - phone screen
+    created_at: '2020-08-18T13:44:23.274Z'
+    updated_at: '2020-08-18T13:44:23.274Z'
+    user_email: 
+  - id: 2534
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__pitt_bhi_assignment_discussions
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-18T13:44:31.166Z'
+    updated_at: '2020-08-18T13:44:31.166Z'
+    user_email: 
+  - id: 2535
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__pitt_bhi_assignment_discussions
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - pitt staff
+    created_at: '2020-08-18T13:44:40.081Z'
+    updated_at: '2020-08-18T13:44:40.081Z'
+    user_email: 
+  - id: 2536
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__pitt_bhi_assignment_discussions
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - pitt pi
+    created_at: '2020-08-18T13:44:51.088Z'
+    updated_at: '2020-08-18T13:44:51.088Z'
+    user_email: 
+  - id: 2537
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__pitt_bhi_assignment_discussions
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: admin
+    created_at: '2020-08-18T13:45:04.282Z'
+    updated_at: '2020-08-18T13:45:04.282Z'
+    user_email: 
+  - id: 2538
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment_discussion__start_new_discussion
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - phone screen
+    created_at: '2020-08-18T13:46:20.728Z'
+    updated_at: '2020-08-18T13:46:20.728Z'
+    user_email: 
+  - id: 2539
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment_discussion__start_new_discussion
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - pitt pi
+    created_at: '2020-08-18T13:46:42.532Z'
+    updated_at: '2020-08-18T13:46:42.532Z'
+    user_email: 
+  - id: 2540
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment_discussion__start_new_discussion
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - pitt staff
+    created_at: '2020-08-18T13:46:49.083Z'
+    updated_at: '2020-08-18T13:46:49.083Z'
+    user_email: 
+  - id: 2541
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment_discussion__start_new_discussion
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-18T13:46:55.008Z'
+    updated_at: '2020-08-18T13:46:55.008Z'
+    user_email: 
+  - id: 2542
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment_discussion__start_new_discussion
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: admin
+    created_at: '2020-08-18T13:47:06.433Z'
+    updated_at: '2020-08-18T13:47:06.433Z'
+    user_email: 
+  - id: 2543
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment_discussion__general_discussion
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: admin
+    created_at: '2020-08-18T13:47:14.403Z'
+    updated_at: '2020-08-18T13:47:14.403Z'
+    user_email: 
+  - id: 2544
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment_discussion__general_discussion
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - phone screen
+    created_at: '2020-08-18T13:47:20.750Z'
+    updated_at: '2020-08-18T13:47:20.750Z'
+    user_email: 
+  - id: 2545
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment_discussion__general_discussion
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - pitt pi
+    created_at: '2020-08-18T13:47:28.570Z'
+    updated_at: '2020-08-18T13:47:28.570Z'
+    user_email: 
+  - id: 2546
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment_discussion__general_discussion
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - pitt staff
+    created_at: '2020-08-18T13:47:34.053Z'
+    updated_at: '2020-08-18T13:47:34.053Z'
+    user_email: 
+  - id: 2547
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment_discussion__general_discussion
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-18T13:47:39.704Z'
+    updated_at: '2020-08-18T13:47:39.704Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 153
     name: Recruitment & Logistics
@@ -1131,7 +1456,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-08-04T14:05:48.946Z'
-    updated_at: '2020-08-14T10:24:28.549Z'
+    updated_at: '2020-08-18T12:54:40.204Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -1146,7 +1471,7 @@ app_type:
       has completed an activity you \r\n        are to be notified about\r\n      panel_tab:
       activity-log--pitt_bhi-assignments\r\n    subject: \"PITT BHI: HMS Recruitment
       & Logistics\"\r\n\r\n\r\n  notify_transfer: &notify_transfer\r\n    <<: *notify_email_default\r\n
-      \   role: email - msm transfer\r\n    extra_substitutions:\r\n      reason:
+      \   role: email - pitt transfer\r\n    extra_substitutions:\r\n      reason:
       'PITT BHI participant transferred from HMS'\r\n      extra_text: |\r\n        A
       PITT BHI participant has been transferred from HMS after \r\n        screening.
       \r\n        \r\n        Click the link below to access the participant record.\r\n
@@ -1162,7 +1487,7 @@ app_type:
       the screener    \r\n      \r\n      *Do not enter personal health information
       here*\r\n\r\n      \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any:\r\n
       \     activity_log__pitt_bhi_assignment_phone_screens:\r\n        extra_log_type:
-      screener_responses\r\n    not_any_exit:\r\n      <<: *any_exit_or_complete      \r\n\r\n\r\n
+      finalize\r\n    not_any_exit:\r\n      <<: *any_exit_or_complete      \r\n\r\n\r\n
       \ field_options:\r\n    select_who:\r\n      edit_as:\r\n        field_type:
       select_user_with_role_user_-_phone_screen\r\n    select_record_from_player_contacts:\r\n
       \     edit_as:\r\n        field_type: select_record_from_player_contact_phone\r\n\r\n
@@ -1175,25 +1500,27 @@ app_type:
       Consent given how\r\n    select_who: Received by\r\n  \r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    all:\r\n      activity_log__pitt_bhi_assignments:\r\n
       \       extra_log_type: schedule_screening\r\n    not_any:\r\n      activity_log__pitt_bhi_assignments:\r\n
-      \       extra_log_type: consent_to_share_details\r\n    not_any_exit:\r\n      <<:
-      *any_exit_or_complete\r\n\r\n\r\n###################################\r\ntransferred_to_msm:\r\n
-      \ label: Transfer to MSM\r\n###################################\r\n  \r\n  fields:\r\n
+      \       extra_log_type: \r\n          - consent_to_share_details\r\n          -
+      transferred_to_pitt\r\n          - hms_ps_eligible\r\n    not_any_exit:\r\n
+      \     <<: *any_exit_or_complete\r\n\r\n\r\n###################################\r\ntransferred_to_pitt:\r\n
+      \ label: Transfer to PITT\r\n###################################\r\n  \r\n  fields:\r\n
       \ \r\n  caption_before:\r\n    all_fields: \r\n      edit_caption: |\r\n        On
       saving this form the eligible subject's information will be passed\r\n        to
-      MSM for screening.\r\n        \r\n        Ensure the participant is emailed\r\n
-      \       to confirm information has been sent to MSM.\r\n        \r\n      show_caption:
+      PITT for screening.\r\n        \r\n        Ensure the participant is emailed\r\n
+      \       to confirm information has been sent to PITT.\r\n        \r\n      show_caption:
       |\r\n        The subject was found to be eligible in the HMS Phone Screen and
-      has\r\n        been passed to MSM for screening.\r\n\r\n        Ensure the participant
-      has been emailed\r\n        to confirm information has been sent to MSM.\r\n
-      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__pitt_bhi_assignments:\r\n
-      \       extra_log_type: hms_ps_eligible\r\n    not_any:\r\n      activity_log__pitt_bhi_assignments:\r\n
-      \       extra_log_type: transferred_to_msm\r\n    not_any_exit:\r\n      <<:
-      *any_exit_or_complete\r\n  \r\n\r\n  # Always show, so we know why a player's
-      records may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\n  save_trigger:\r\n
-      \   on_create:\r\n      create_reference:\r\n      \r\n        ###### Grant
-      MSM Staff access to participant ######\r\n        - dynamic_model__pitt_bhi_access_msm_staffs:\r\n
+      has\r\n        been passed to PITT for screening.\r\n\r\n        Ensure the
+      participant has been emailed\r\n        to confirm information has been sent
+      to PITT.\r\n      \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n
+      \     activity_log__pitt_bhi_assignments:\r\n        extra_log_type: hms_ps_eligible\r\n
+      \   not_any:\r\n      activity_log__pitt_bhi_assignments:\r\n        extra_log_type:
+      transferred_to_pitt\r\n    not_any_exit:\r\n      <<: *any_exit_or_complete\r\n
+      \ \r\n\r\n  # Always show, so we know why a player's records may be locked down\r\n
+      \ showable_if:\r\n    always: true\r\n\r\n  save_trigger:\r\n    on_create:\r\n
+      \     create_reference:\r\n      \r\n        ###### Grant PITT Staff access
+      to participant ######\r\n        - dynamic_model__pitt_bhi_access_pitt_staffs:\r\n
       \           in: master\r\n            if:\r\n              <<: *all_eligible_and_gave_consent\r\n
-      \             not_all_access:\r\n                dynamic_model__pitt_bhi_access_msm_staffs:\r\n
+      \             not_all_access:\r\n                dynamic_model__pitt_bhi_access_pitt_staffs:\r\n
       \                 id:\r\n                    condition: IS NOT NULL\r\n\r\n
       \       ###### Grant PI access to participant ######\r\n        - dynamic_model__pitt_bhi_access_pis:\r\n
       \           in: master\r\n            if:\r\n              <<: *all_eligible_and_gave_consent\r\n
@@ -1206,31 +1533,12 @@ app_type:
       \   always_embed_reference: dynamic_model__pitt_bhi_appointment\r\n    hide_unless_creatable:
       true\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n            \r\n    not_any_exit:
       *any_exit_or_complete\r\n    <<: *not_enrolled\r\n    all_screened:\r\n      activity_log__pitt_bhi_assignments:\r\n
-      \       extra_log_type: msm_screening_appointment\r\n      \r\n\r\n\r\n\r\n\r\n###################################\r\npost_testing_1:\r\n
-      \ label: Post Testing 1\r\n###################################  \r\n  fields:
-      \r\n#    - select_who\r\n#    - select_record_from_player_contacts\r\n    -
-      follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n#
-      \   select_who: Who will perform the phone screening?\r\n#    select_record_from_player_contacts:
-      Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
-      Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes\r\n
-      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    <<: *all_enrolled\r\n
-      \   not_any_exit:          \r\n      <<: *any_exit_or_complete\r\n    not_any:\r\n
-      \     activity_log__pitt_bhi_assignments:\r\n        extra_log_type: post_testing_1\r\n
-      \       \r\n  showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\npost_testing_2:\r\n
-      \ label: Post Testing 2\r\n###################################  \r\n  fields:
-      \r\n#    - select_who\r\n#    - select_record_from_player_contacts\r\n    -
-      follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n#
-      \   select_who: Who will perform the phone screening?\r\n#    select_record_from_player_contacts:
-      Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
-      Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes\r\n
-      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    <<: *all_enrolled\r\n\r\n
-      \   not_any_exit:          \r\n      <<: *any_exit_or_complete\r\n    not_any:\r\n
-      \     activity_log__pitt_bhi_assignments:\r\n        extra_log_type: post_testing_2\r\n\r\n
-      \ showable_if:\r\n    always: true\r\n\r\n\r\n\r\n    \r\n###################################\r\ncompleted:\r\n
-      \ label: Completed Study\r\n###################################\r\n  \r\n  fields:\r\n
-      \ \r\n  caption_before:\r\n    all_fields: |\r\n      The participant completed
-      the study.\r\n  \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__pitt_bhi_assignments:\r\n
-      \       extra_log_type: post_testing_2\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
+      \       extra_log_type: transferred_to_pitt\r\n      \r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n
+      \   \r\n###################################\r\ncompleted:\r\n  label: Completed
+      Study\r\n###################################\r\n  \r\n  fields:\r\n  \r\n  caption_before:\r\n
+      \   all_fields: |\r\n      The participant completed the study.\r\n  \r\n  creatable_if:\r\n
+      \   <<: *enabled_if\r\n    all:\r\n      activity_log__pitt_bhi_assignments:\r\n
+      \       extra_log_type: appointment\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
       \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
       \   always: true\r\n\r\n\r\n###################################\r\nexit_opt_out:\r\n
       \ label: Exit (Opt-Out)\r\n###################################\r\n  \r\n  fields:\r\n
@@ -1248,9 +1556,9 @@ app_type:
       \ label: Ineligible\r\n###################################\r\n  \r\n  fields:\r\n
       \ \r\n  caption_before:\r\n    all_fields: |\r\n      The subject was found
       to be ineligible. \r\n      \r\n      All records are locked down after 14 days.\r\n
-      \ \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    any_transferred_to_msm:\r\n
+      \ \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    any_transferred_to_pitt:\r\n
       \     activity_log__pitt_bhi_assignments:\r\n        extra_log_type: \r\n          -
-      msm_screening_appointment\r\n    <<: *not_enrolled\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
+      pitt_screening_appointment\r\n    <<: *not_enrolled\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
       \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
       \   always: true\r\n\r\n\r\n\r\n###################################\r\nexit_not_consented:\r\n
       \ label: Exit During Informed Consent Review\r\n###################################\r\n
@@ -1270,25 +1578,25 @@ app_type:
       \ label: Exit During HMS Phone Screen\r\n###################################\r\n
       \ \r\n  fields:\r\n  \r\n  caption_before:\r\n    all_fields: |\r\n      The
       subject exited during HMS phone screen, due to no interest or not \r\n      giving
-      consent to pass information to MSM.\r\n      \r\n      All records are locked
+      consent to pass information to PITT.\r\n      \r\n      All records are locked
       down after 14 days.\r\n  \r\n  creatable_if:\r\n    never: true\r\n\r\n  # Always
       show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
-      \   always: true\r\n\r\n###################################\r\nexit_ps_msm:\r\n
-      \ label: Exit During MSM Phone Screen\r\n###################################\r\n
+      \   always: true\r\n\r\n###################################\r\nexit_ps_pitt:\r\n
+      \ label: Exit During PITT Phone Screen\r\n###################################\r\n
       \ \r\n  fields:\r\n  \r\n  caption_before:\r\n    all_fields: |\r\n      The
-      subject exited during MSM phone screen, due to no interest.\r\n      \r\n      All
+      subject exited during PITT phone screen, due to no interest.\r\n      \r\n      All
       records are locked down after 14 days.\r\n  \r\n  creatable_if:\r\n    never:
       true\r\n\r\n  # Always show, so we know why a player's records may be locked
       down\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\nhms_ps_eligible:\r\n
       \ label: HMS Phone Screen Eligible\r\n###################################\r\n
       \ \r\n  fields:\r\n  \r\n  caption_before:\r\n    all_fields: |\r\n      The
       subject was found to be eligible in the HMS Phone Screen and\r\n      consented
-      to pass information to MSM.\r\n      \r\n  \r\n  creatable_if:\r\n    never:
+      to pass information to PITT.\r\n      \r\n  \r\n  creatable_if:\r\n    never:
       true\r\n\r\n  # Always show, so we know why a player's records may be locked
-      down\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n\r\n\r\n###################################\r\nmsm_ps_eligible:\r\n
-      \ label: MSM Phone Screen Eligible\r\n###################################\r\n
+      down\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n\r\n\r\n###################################\r\npitt_ps_eligible:\r\n
+      \ label: PITT Phone Screen Eligible\r\n###################################\r\n
       \ \r\n  fields:\r\n  \r\n  caption_before:\r\n    all_fields: |\r\n      The
-      subject was found to be eligible in the MSM Phone Screen and\r\n      was interested
+      subject was found to be eligible in the PITT Phone Screen and\r\n      was interested
       in continuing.\r\n      \r\n  \r\n  creatable_if:\r\n    never: true\r\n\r\n
       \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
       \   always: true\r\n\r\n\r\n\r\n\r\n###################################\r\ngeneral:\r\n
@@ -1356,7 +1664,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-08-12T17:19:30.308Z'
-    updated_at: '2020-08-14T11:25:08.293Z'
+    updated_at: '2020-08-18T11:19:18.332Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -1376,10 +1684,10 @@ app_type:
       SMS - just add roles or users\r\n  notify_sms_default: &notify_sms_default\r\n
       \   type: sms\r\n    layout_template: standard sms layout\r\n    content_template:
       pitt bhi sms notification\r\n    subject: \"HMS Phone Screen Complete\"\r\n\r\n\r\n\r\n
-      \ # Notify MSM phone screener\r\n  notify_ps_complete: &notify_ps_complete\r\n
-      \   <<: *notify_email_default\r\n    role: email - msm phone screener\r\n\r\n
+      \ # Notify PITT phone screener\r\n  notify_ps_complete: &notify_ps_complete\r\n
+      \   <<: *notify_email_default\r\n    role: email - pitt phone screener\r\n\r\n
       \ # MedNav reviewer SMS\r\n  notify_ps_complete_sms: &notify_ps_complete_sms\r\n
-      \   <<: *notify_sms_default\r\n    role: sms - msm phone screener\r\n\r\n  #
+      \   <<: *notify_sms_default\r\n    role: sms - pitt phone screener\r\n\r\n  #
       PI\r\n  notify_pi: &notify_pi\r\n    <<: *notify_email_default\r\n    role:
       email - pi follow up\r\n\r\n\r\n  # PI SMS\r\n  notify_pi_sms: &notify_pi_sms\r\n
       \   <<: *notify_sms_default\r\n    role: sms - pi follow up\r\n\r\n\r\n  continue_after_suitability:
@@ -1435,7 +1743,9 @@ app_type:
       *enabled_if\r\n    all:\r\n      activity_log__pitt_bhi_assignment_phone_screens:\r\n
       \       extra_log_type: start_phone_screen\r\n      dynamic_model__pitt_bhi_ps_initial_screenings:\r\n
       \       select_still_interested: 'yes'\r\n\r\n    not_any:\r\n      activity_log__pitt_bhi_assignment_phone_screens:\r\n
-      \       extra_log_type: suitability\r\n\r\n\r\n\r\n################################################\r\nineligible:\r\n
+      \       extra_log_type: suitability\r\n\r\n\r\n  save_trigger:\r\n    before_save:\r\n
+      \     update_reference:\r\n        ref:\r\n          first:\r\n            dynamic_model__pitt_bhi_ps_suitability_questions:\r\n
+      \             update: return_result\r\n          with:\r\n            age: '{{dynamic_model__pitt_bhi_ps_suitability_questions.birth_date::age}}'\r\n\r\n\r\n\r\n################################################\r\nineligible:\r\n
       \ label: Ineligible\r\n\r\n  view_options:\r\n    hide_unless_creatable: true\r\n\r\n
       \ references:\r\n    dynamic_model__pitt_bhi_ps_non_eligible:\r\n      from:
       this\r\n      add: one_to_this\r\n\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n
@@ -1443,47 +1753,24 @@ app_type:
       \         extra_log_type: ineligible\r\n      not_all_show_eligible:\r\n        <<:
       *all_show_eligible\r\n\r\n      any_responses_ineligible: &any_responses_ineligible\r\n\r\n
       \       all_suitability:\r\n          all:\r\n            activity_log__pitt_bhi_assignment_phone_screens:\r\n
-      \             extra_log_type: suitability\r\n          not_any:\r\n            <<:
-      *eligible_suitability\r\n          not_any_2:\r\n\r\n\r\n  save_trigger:\r\n
-      \   on_create:\r\n      create_reference:\r\n\r\n        ##### Screener Responses
-      with outcome default #####\r\n        - dynamic_model__pitt_bhi_ps_screener_response:\r\n
-      \           in: master\r\n            with:\r\n              outcome: ineligible\r\n\r\n\r\n
-      \       ##### Record consent in tracker since requested follow up and gave consent
-      #####\r\n        - activity_log__pitt_bhi_assignment:\r\n            in: master\r\n
-      \           if:\r\n              any_gave_consent_to_share_ineligible:\r\n                dynamic_model__pitt_bhi_ps_non_eligibles:\r\n
-      \                 consent_to_pass_info_to_msm_yes_no: 'yes'\r\n                  consent_to_pass_info_to_msm_2_yes_no:
-      'yes'\r\n\r\n            with:\r\n              extra_log_type: consent_to_share_details\r\n
-      \             activity_date: now()\r\n              select_activity: Verbal
-      consent during HMS Phone Screen\r\n              select_who: current_user_email\r\n\r\n\r\n\r\n
-      \       ##### Ineligible - requested PI follow up ######\r\n        - activity_log__pitt_bhi_assignment_followup:
-      &create_ref_request_pi_followup\r\n            in: this\r\n            add:
-      many\r\n            if:\r\n              all:\r\n                any:\r\n                  dynamic_model__pitt_bhi_ps_non_eligibles:\r\n
-      \                   contact_pi_yes_no: 'yes'\r\n                <<: *gave_consent_to_share\r\n\r\n
-      \           with:\r\n              extra_log_type: request_pi_followup\r\n              notes:
-      |\r\n                HMS Phone Screen found this subject to be ineligible.\r\n
-      \               The subject requested a PI follow up.\r\n\r\n                Please
-      review the HMS Phone Screen tab for complete information.\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n################################################\r\neligible:\r\n
+      \             extra_log_type: suitability\r\n          \r\n            <<: *ineligible_suitability\r\n\r\n\r\n\r\n\r\n################################################\r\neligible:\r\n
       \ label: Eligible\r\n\r\n  showable_if:\r\n    always: true\r\n\r\n  references:\r\n
       \   dynamic_model__pitt_bhi_ps_eligible:\r\n      from: this\r\n      add: one_to_this\r\n\r\n
-      \ creatable_if:\r\n    all:\r\n      <<: *enabled_if\r\n      <<: *all_show_eligible\r\n\r\n
+      \ creatable_if:\r\n    all:\r\n      <<: *enabled_if\r\n      <<: *eligible_suitability\r\n\r\n
       \     not_any:\r\n        activity_log__pitt_bhi_assignment_phone_screens:\r\n
       \         extra_log_type: eligible\r\n\r\n  view_options:\r\n    hide_unless_creatable:
-      true\r\n\r\n  save_trigger:\r\n    on_create:\r\n      create_reference:\r\n\r\n
-      \       ##### Screener Responses with outcome default #####\r\n        dynamic_model__pitt_bhi_ps_screener_response:\r\n
-      \         in: master\r\n          with:\r\n            outcome: eligible\r\n\r\n\r\n\r\n\r\n\r\n################################################\r\nfinalize:\r\n
+      true\r\n\r\n\r\n\r\n\r\n################################################\r\nfinalize:\r\n
       \ label: Finalize Entries\r\n\r\n  view_options:\r\n    hide_unless_creatable:
       true\r\n    show_cancel: true\r\n\r\n  caption_before:\r\n    all_fields: |\r\n
       \     When finalized the phone screen forms are locked from editing.\r\n\r\n
       \     If the subject is eligible and has consented\r\n      to passing information
-      to MSM,\r\n      the MSM team will be notified automatically that the second
-      phone screener is\r\n      ready to be performed.\r\n\r\n      Otherwise the
-      MSM team will not be notified.\r\n\r\n\r\n    submit: |\r\n      Click the cancel
-      button instead if review or\r\n      revision of the phone screen forms is still
-      required.\r\n\r\n\r\n  creatable_if:\r\n    all:\r\n      <<: *enabled_if\r\n\r\n
-      \     any_next:\r\n        # If ineligible, or eligible and screener responses
-      completed\r\n        any_ineligible_eligible_with_screener:\r\n          dynamic_model__pitt_bhi_ps_screener_responses:\r\n
-      \           outcome:\r\n              - ineligible\r\n              - eligible\r\n\r\n
-      \         dynamic_model__pitt_bhi_ps_eligibility_followups:\r\n            outcome:\r\n
+      to PITT,\r\n      the PITT team will be notified automatically that the phone
+      screener\r\n      has been completed.\r\n\r\n      Otherwise the PITT team will
+      not be notified.\r\n\r\n\r\n    submit: |\r\n      Click the cancel button instead
+      if review or\r\n      revision of the phone screen forms is still required.\r\n\r\n\r\n
+      \ creatable_if:\r\n    all:\r\n      <<: *enabled_if\r\n\r\n      any_next:\r\n
+      \       # If ineligible or eligible\r\n        any_ineligible_eligible_with_screener:\r\n
+      \         activity_log__pitt_bhi_assignment_phone_screens:\r\n            extra_log_type:\r\n
       \             - ineligible\r\n              - eligible\r\n\r\n      not_any:\r\n
       \       activity_log__pitt_bhi_assignment_phone_screens:\r\n          extra_log_type:
       finalize\r\n\r\n\r\n  # Override the default that hides activities after a certain
@@ -1511,7 +1798,223 @@ app_type:
     table_name: activity_log_pitt_bhi_assignment_phone_screens
     category: pitt-bhi
     user_email: 
+  - id: 178
+    name: PITT BHI Discussions
+    item_type: pitt_bhi_assignment
+    rec_type: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T13:39:54.970Z'
+    updated_at: '2020-08-18T13:55:16.570Z'
+    action_when_attribute: updated_at
+    field_list: ''
+    blank_log_field_list: ''
+    blank_log_name: 
+    extra_log_types: "# @library pitt_bhi enabled_if\r\n# @library pitt_bhi filestore_container\r\n#
+      @library pitt_bhi notification_base\r\n\r\n_definitions:\r\n\r\n  ####\r\n  #
+      Boilerplace for notifying roles\r\n  # Override the subject: and if: structures
+      to refine operation\r\n  ####\r\n\r\n  # Default email - just add roles or users\r\n
+      \ notify_email_default: &notify_email_default\r\n    type: email\r\n    layout_template:
+      pitt bhi notification layout\r\n    content_template: pitt bhi notification
+      message\r\n    subject: \"GRIT Study App: Discussion Message - {{referring_record.id}}\"\r\n
+      \   extra_substitutions:\r\n      reason: 'New Discussion Message'\r\n      extra_text:
+      |\r\n        Discussion Subject: *{{referring_record.notes}}*\r\n      panel_tab:
+      activity-log--pitt-bhi-assignment-discussions\r\n      \r\n      \r\n\r\n  #
+      Default SMS - just add roles or users\r\n  notify_sms_default: &notify_sms_default\r\n
+      \   type: sms\r\n    layout_template: standard sms layout\r\n    content_template:
+      pitt bhi sms notification\r\n    subject: \"GRIT Study Discussion\"\r\n\r\n\r\n###############################################\r\n#
+      @library pitt_bhi notify_roles\r\n# @library pitt_bhi discussions\r\n###############################################\r\n\r\n\r\n\r\nstart_new_discussion:\r\n
+      \ label: '{{notes}}'\r\n  button_label: Start New Discussion\r\n  <<: *setup_discussion\r\n
+      \ \r\n  field_options: \r\n    <<: *start_discussion_field_options\r\n    tag_select_contact_role:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          HMS Admins: hms admins\r\n
+      \         HMS Phone Screen Interviewers: hms phone screener\r\n          PITT
+      staff: pitt staff          \r\n          PI: pi\r\n          \r\n\r\n\r\n  showable_if:\r\n
+      \   any:\r\n      all_creator:\r\n        this:\r\n          user_id:\r\n            user:
+      id\r\n          \r\n      all:\r\n        activity_log__pitt_bhi_assignment_discussions:\r\n
+      \         id:\r\n            this: id\r\n          tag_select_contact_role:\r\n
+      \           condition: '&&'\r\n            value: current_user_role_names\r\n
+      \         \r\n    \r\n  references:\r\n    - activity_log__pitt_bhi_assignment_discussion:\r\n
+      \       label: New Message\r\n        from: this\r\n        add: many\r\n        prevent_disable:
+      true\r\n        add_with:\r\n          extra_log_type: general_discussion\r\n
+      \         prev_activity_type: general_discussion\r\n        filter_by:\r\n          extra_log_type:
+      general_discussion\r\n\r\n\r\n\r\ngeneral_discussion:\r\n  label: Message\r\n\r\n
+      \ <<: *discussion_message_defaults\r\n\r\n\r\n\r\n"
+    hide_item_list_panel: true
+    main_log_name: ''
+    process_name: discussion
+    table_name: activity_log_pitt_bhi_assignment_discussions
+    category: pitt-bhi
+    user_email: 
   associated_dynamic_models:
+  - id: 660
+    name: PITT BHI PI Access
+    table_name: pitt_bhi_access_pis
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T12:14:31.429Z'
+    updated_at: '2020-08-18T12:14:31.429Z'
+    position: 
+    category: pitt-bhi-access
+    table_key_name: ''
+    field_list: placeholder_top
+    result_order: ''
+    options: "_comments:\r\n  table: A record referencing a master record indicates
+      PITT BHI PI has access to this participant\r\n\r\n\r\ndefault:\r\n\r\n  caption_before:\r\n
+      \   placeholder_top: Allows access to PI"
+    user_email: 
+  - id: 658
+    name: PITT BHI Staff Access
+    table_name: pitt_bhi_access_pitt_staffs
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T11:53:54.866Z'
+    updated_at: '2020-08-18T11:53:54.866Z'
+    position: 
+    category: pitt-bhi-access
+    table_key_name: ''
+    field_list: placeholder_top
+    result_order: ''
+    options: "_comments:\r\n  table: A record referencing a master record indicates
+      PITT BHI staff have access to this participant\r\n\r\ndefault:\r\n  caption_before:\r\n
+      \   placeholder_top: Allows access to PITT Staff"
+    user_email: 
+  - id: 641
+    name: BHI Phone Screen Non-Eligible
+    table_name: pitt_bhi_ps_non_eligibles
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-14T08:28:19.750Z'
+    updated_at: '2020-08-18T12:26:44.772Z'
+    position: 
+    category: pitt-bhi-phone-screen
+    table_key_name: ''
+    field_list: placeholder_initial notes
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before:\r\n  \r\n    placeholder_initial:
+      | \r\n      Thank you for answering these questions. Unfortunately, at this
+      \r\n      time you are not eligible for this particular study. We \r\n      appreciate
+      your interest and participation in our research \r\n      and your commitment
+      to support improving former player health.  \r\n      \r\n      As a reminder,
+      even though you are not eligible for this particular \r\n      study that does
+      not mean that you can’t participate in other \r\n      future Football Players
+      Health Study research studies. \r\n      Please feel free to reach out to our
+      team in the future \r\n      if you have any questions. \r\n      \r\n      \r\n
+      \   notes: Additional Notes\r\n      \r\n"
+    user_email: 
+  - id: 643
+    name: BHI Phone Screen Eligible
+    table_name: pitt_bhi_ps_eligibles
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-14T08:29:18.973Z'
+    updated_at: '2020-08-18T10:20:49.134Z'
+    position: 
+    category: pitt-bhi-phone-screen
+    table_key_name: ''
+    field_list: consent_to_pass_info_to_pitt_yes_no consent_to_pass_info_to_pitt_2_yes_no
+      placeholder_consent_to_pass_info_2_no not_interested_notes contact_info_notes
+      placeholder_continue placeholder_end
+    result_order: ''
+    options: "default:\r\n\r\n  field_options:\r\n    select_still_interested:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          No Longer Interested: \"no
+      longer interested\"\r\n          Yes - Still Interested: \"yes - still interested\"\r\n\r\n
+      \ caption_before: \r\n    all_fields: |\r\n      Thank you for taking the time
+      to answer these questions. Based on \r\n      your responses, you are preliminarily
+      \r\n      eligible to participate in the study. \r\n\r\n      The next step
+      of screening will be done by the team at \r\n      the University of Pittsburgh.
+      They will contact you \r\n      to schedule a screening phone call to further
+      determine \r\n      your eligibility and to provide a more detailed overview
+      of\r\n      the study participation. All further study participation \r\n      and
+      communications will take place with our partners at \r\n      the University
+      of Pittsburgh, although if \r\n      you have any questions or concerns you
+      can still contact us at any time. \r\n      \r\n      \r\n    interested_yes_no:
+      \r\n      \r\n\r\n    not_interested_notes: |\r\n      *record reason not interested
+      or won't consent* \r\n      \r\n    consent_to_pass_info_to_pitt_yes_no: |\r\n
+      \     As a next step, I will need your permission to share your \r\n      contact
+      information with the University of Pittsburgh team. \r\n      Your contact information
+      will still be stored only by \r\n      us in a secure environment, and we would
+      provide the \r\n      University of Pittsburgh secure access to your \r\n      contact
+      information. Providing your permission for us \r\n      to share your contact
+      information does not mean that \r\n      you are agreeing to participate in
+      the \r\n      Brain Health Initiative but rather that you are \r\n      willing
+      to talk with the University of Pittsburgh \r\n      team about the study. You
+      can decide that you do \r\n      not want to participate at any time. \r\n    \r\n
+      \     Do we have your permission to share your contact \r\n      information
+      with the University of Pittsburgh team? \r\n\r\n\r\n\r\n    consent_to_pass_info_to_pitt_2_yes_no:
+      |\r\n      Just to confirm, your data and contact information lives \r\n      in
+      a highly secure and private environment, accessible \r\n      only to approved
+      researchers on the Harvard study team. \r\n      The data we store is protected
+      by a Certificate of \r\n      Confidentiality issued by the National Institute
+      of Health. \r\n      This means that your identifiable information is \r\n      protected
+      from forced disclosure (i.e. subpoenas) by all possible means.\r\n\r\n      Does
+      this alleviate any concerns you have? Do you have other \r\n      questions?
+      If you would prefer not to participate I understand.\r\n\r\n    \r\n    placeholder_consent_to_pass_info_2_no:
+      |\r\n      Thank you so much for speaking with me today.  \r\n      \r\n      Do
+      you have any other questions I can answer \r\n      while we are on the phone
+      right now? \r\n      \r\n      \r\n    contact_info_notes: |\r\n      Great!
+      Thank you for agreeing to let us share your \r\n      information with our research
+      partners at the University of Pittsburgh.\r\n      \r\n      *Scroll to Participant
+      Details to check and add any contact information*\r\n\r\n    placeholder_continue:
+      |    \r\n      Great, then we will be in touch by email to confirm that we \r\n
+      \     have provided the researchers at the University of Pittsburgh \r\n      with
+      your contact information.\r\n \r\n        \r\n    placeholder_end: |\r\n      If
+      you have any questions or want to contact us at \r\n      any time, you can
+      reach me at 617-432-5000 or \r\n      players@footballplayershealth.harvard.edu.
+      \r\n\r\n      \r\n      **END SCREENING**\r\n      \r\n  show_if:\r\n    \r\n\r\n
+      \   consent_to_pass_info_to_pitt_2_yes_no:\r\n      consent_to_pass_info_to_pitt_yes_no:
+      'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n      consent_to_pass_info_to_pitt_2_yes_no:
+      'no'\r\n      \r\n    contact_info_notes: &ok_to_continue\r\n      any_ok_to_continue:\r\n
+      \       consent_to_pass_info_to_pitt_yes_no: 'yes'\r\n        consent_to_pass_info_to_pitt_2_yes_no:
+      'yes'\r\n\r\n\r\n    not_interested_notes:\r\n      any:\r\n        consent_to_pass_info_to_pitt_yes_no:
+      'no'\r\n        consent_to_pass_info_to_pitt_2_yes_no: 'no'\r\n      not_any:
+      *ok_to_continue\r\n      \r\n    placeholder_continue:\r\n      <<: *ok_to_continue\r\n
+      \     \r\n    \r\n\r\n "
+    user_email: 
+  - id: 645
+    name: Suitability
+    table_name: pitt_bhi_ps_suitability_questions
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-14T09:27:50.744Z'
+    updated_at: '2020-08-18T08:43:32.279Z'
+    position: 
+    category: pitt-bhi-phone-screen
+    table_key_name: ''
+    field_list: birth_date eligible_pension_yes_no age notes
+    result_order: ''
+    options: "# @library grit ps_forms_eligibility\r\n\r\n_comments:\r\n  table: |\r\n
+      \   Suitability assessment form for BHI phone screening, recording responses
+      from subject\r\n  fields:\r\n    birth_date: Date of birth\r\n    eligible_pension_yes_no:
+      |\r\n      Eligible for a pension from the NFL\r\n      (At least 3 seasons
+      with 3 games per season)\r\n    age: Calculated age at the time the response
+      was saved\r\n    notes: Question and notes recorded by interviewer\r\n\r\n\r\n\r\ndefault:\r\n\r\n
+      \ field_options:\r\n    age:\r\n      edit_as:\r\n        field_type: fixed_age\r\n\r\n\r\n
+      \ caption_before:\r\n    \r\n    birth_date: What is your date of birth?\r\n\r\n
+      \   eligible_pension_yes_no: |\r\n      Can you confirm that you are eligible
+      for a pension from the NFL? \r\n      (Must be at least 3 seasons with 3 games
+      per season)\r\n\r\n    age: Age\r\n        \r\n        \r\n    notes: Record
+      question and notes\r\n\r\n"
+    user_email: 
   - id: 637
     name: BHI Initial Screening
     table_name: pitt_bhi_ps_initial_screenings
@@ -1810,247 +2313,33 @@ app_type:
       \     \r\n    placeholder_eligible:\r\n      outcome: eligible\r\n    \r\n    placeholder_ineligible:\r\n
       \     outcome: ineligible\r\n      \r\n      "
     user_email: 
-  - id: 645
-    name: Suitability
-    table_name: pitt_bhi_ps_suitability_questions
+  - id: 628
+    name: PITT BHI Participation Details
+    table_name: pitt_bhi_appointments
     schema_name: 
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
     admin_id: 21
     disabled: false
-    created_at: '2020-08-14T09:27:50.744Z'
-    updated_at: '2020-08-14T09:35:31.363Z'
-    position: 
-    category: pitt-bhi-phone-screen
+    created_at: '2020-08-04T13:57:25.185Z'
+    updated_at: '2020-08-18T13:02:36.304Z'
+    position: 1
+    category: pitt-bhi-records
     table_key_name: ''
-    field_list: birth_date eligible_pension_yes_no placeholder_commit_to_attend_no
-      placeholder_small_group_no any_questions_yes_no notes placeholder_questions_yes
-      placeholder_questions_no
-    result_order: ''
-    options: "# @library grit ps_forms_eligibility\r\n\r\ndefault:\r\n\r\n  caption_before:\r\n
-      \ \r\n\r\n    \r\n\r\n    any_questions_yes_no: |\r\n      Do you have any questions
-      for me at this time?\r\n\r\n    \r\n    \r\n    placeholder_questions_yes: |\r\n
-      \     **Address questions and record responses**\r\n      \r\n      Thank you
-      for your interest and your time!  \r\n      \r\n      **END SCREENING.**\r\n
-      \   \r\n    placeholder_questions_no: |\r\n      Okay - thank you again for
-      your interest and your time!  \r\n      \r\n      **END SCREENING.**\r\n    \r\n
-      \   notes: Record question and notes\r\n\r\n\r\n  show_if:\r\n      \r\n    small_group_yes_no:\r\n
-      \     commit_to_attend_yes_no: 'yes'\r\n    \r\n    placeholder_questions_no:\r\n
-      \     all:\r\n        any_questions_yes_no: 'no'\r\n      <<: *ineligible_rules_participation\r\n
-      \     \r\n    possibly_eligible_yes_no: \r\n      <<: *ineligible_rules_participation\r\n\r\n
-      \   possibly_eligible_reason_notes:\r\n      all:\r\n        possibly_eligible_yes_no:
-      'yes'\r\n      <<: *ineligible_rules_participation\r\n      \r\n    placeholder_commit_to_attend_no:\r\n
-      \     commit_to_attend_yes_no: 'no'\r\n      possibly_eligible_yes_no: 'no'\r\n
-      \   \r\n    placeholder_small_group_no:\r\n      small_group_yes_no: 'no'\r\n
-      \     possibly_eligible_yes_no: 'no'\r\n\r\n    any_questions_yes_no:\r\n      <<:
-      *ineligible_rules_participation\r\n      all:\r\n        possibly_eligible_yes_no:
-      'no'\r\n      \r\n    placeholder_questions_yes:\r\n      all:\r\n        possibly_eligible_yes_no:
-      'no'\r\n        any_questions_yes_no: 'yes'\r\n      <<: *ineligible_rules_participation\r\n
-      \   \r\n\r\n"
-    user_email: 
-  - id: 643
-    name: BHI Phone Screen Eligible
-    table_name: pitt_bhi_ps_eligibles
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2020-08-14T08:29:18.973Z'
-    updated_at: '2020-08-14T08:29:18.973Z'
-    position: 
-    category: pitt-bhi-phone-screen
-    table_key_name: ''
-    field_list: interested_yes_no notes not_interested_notes consent_to_pass_info_to_msm_yes_no
-      consent_to_pass_info_to_msm_2_yes_no placeholder_consent_to_pass_info_2_no contact_info_notes
-      placeholder_continue more_questions_yes_no placeholder_more_questions_yes placeholder_more_questions_no
-      more_questions_notes select_still_interested  placeholder_select_still_interested_no
-      placeholder_select_still_interested_yes placeholder_end
-    result_order: ''
-    options: "default:\r\n\r\n  field_options:\r\n    select_still_interested:\r\n
-      \     edit_as:\r\n        alt_options:\r\n          No Longer Interested: \"no
-      longer interested\"\r\n          Yes - Still Interested: \"yes - still interested\"\r\n\r\n
-      \ caption_before: \r\n    all_fields: |\r\n      Thank you for your time and
-      for answering our questions.  \r\n      Based on your responses so far you are
-      eligible to participate in this study. \r\n\r\n      A reminder that two final
-      screening assessments will take place \r\n      in person at Morehouse School
-      of Medicine, and it’s \r\n      possible at that time you may not be eligible
-      for the study.  \r\n      If that is the case, you will still be compensated
-      $25 for \r\n      the time you spend traveling to and participating in that
-      session.\r\n\r\n      A few other reminders - this study will take place in
-      Atlanta at\r\n      the Morehouse School of Medicine, and the purpose of this
-      study \r\n      is to test a resilience skills training developed to improve
-      those\r\n      parts of your life affected by chronic pain such as quality of\r\n
-      \     life, personal relationships, and personal growth or development. \r\n\r\n
-      \   interested_yes_no: |\r\n      Do you have any questions at this time, and
-      are you still interested in participating?\r\n\r\n    notes: |\r\n      *Record
-      questions*\r\n\r\n\r\n    not_interested_notes: |\r\n      May I ask you why
-      you are not interested? \r\n      *(will record reason, for example, too busy)*.
-      \r\n      \r\n      Thank you for your time.\r\n      \r\n    consent_to_pass_info_to_msm_yes_no:
-      |\r\n      Wonderful. In order for you to participate I will need to give your
-      \r\n      contact information to our collaborating researchers at Morehouse
-      School\r\n      of Medicine, and they will be conducting a two additional in-person
-      \r\n      assessments to determine your eligibility.  This means that it’s \r\n
-      \     still possible you may be ineligible for the study, however based \r\n
-      \     on your responses so far, you’re a great candidate.\r\n\r\n      Is it
-      okay with you if I give them your contact information?\r\n\r\n\r\n    consent_to_pass_info_to_msm_2_yes_no:
-      |\r\n      Okay - just to confirm, your information will be kept completely
-      \r\n      secure and private, in a locked environment only accessible by \r\n
-      \     approved researchers. Access to your information at Morehouse will \r\n
-      \     be removed once the study has finished.  Does that alleviate any \r\n
-      \     concerns you may have?  \r\n      \r\n      If you’d still prefer not
-      to participate I understand.\r\n\r\n    \r\n    placeholder_consent_to_pass_info_2_no:
-      |\r\n      Okay, I understand.  Well thank you so much for your time today and
-      for \r\n      your support of our research, and we will certainly be in touch
-      with \r\n      future participation opportunities.\r\n      \r\n      \r\n    contact_info_notes:
-      |\r\n      Great.  Can I please confirm the contact information I have for you?\r\n
-      \     \r\n      *Scroll to Participant Details to check and add any contact
-      information*\r\n\r\n    placeholder_continue: |    \r\n      Thank you.  We
-      will only be sharing contact information for former \r\n      players with the
-      team at Morehouse once we have 20 former players who are \r\n      eligible
-      and interested in participating, and this may take some \r\n      time as we
-      continue our recruitment efforts.  Once we reach that\r\n      goal, we will
-      send you an email stating that we have shared your \r\n      contact information
-      with them, and you will hear from them \r\n      directly shortly thereafter.
-      \ They may contact you by email, by \r\n      telephone, or both.  This may
-      take many weeks, or it may \r\n      be as soon as next week, so we appreciate
-      your patience and do keep \r\n      an eye out for the next email from us.  At
-      any time please \r\n      feel free to check in with us by phone or email, even
-      if it’s \r\n      just to check in on the status of our recruitment efforts.\r\n\r\n
-      \     If you are enrolled in the study at Morehouse, though they will be\r\n
-      \     conducting the research with you at that location, we will be kept\r\n
-      \     updated on your status in the study, and are always here to\r\n      provide
-      support and answer any questions at any time.\r\n\r\n      And if you have any
-      friends who are former players and live in the\r\n      Atlanta area, please
-      feel free to tell them about the study!\r\n      They can contact us at atlanta@footballplayershealth.harvard.edu,\r\n
-      \     or by the phone number listed on our website.    \r\n\r\n    more_questions_yes_no:
-      Do you have any questions about this?\r\n    \r\n    placeholder_more_questions_yes:
-      |    \r\n      *If Yes, about privacy:* \r\n      \r\n      Just to confirm,
-      your data and contact information lives in a highly \r\n      secure and private
-      environment, accessible only to approved researchers \r\n      on the study
-      team. The data we store is protected by a Certificate \r\n      of Confidentiality
-      issued by the National Institute of Health. \r\n      This means that your identifiable
-      information is protected from \r\n      forced disclosure (i.e. subpoenas) by
-      all possible means.\r\n      \r\n      *other question - respond and record
-      questions*\r\n      \r\n    \r\n    placeholder_more_questions_no: |\r\n      Great!
-      \ Then we will be in touch as soon as possible by email to confirm\r\n      that
-      we have provided the Morehouse researchers with your contact information.\r\n
-      \   \r\n    select_still_interested: |\r\n      Does this alleviate any concerns
-      you have? Do you have other questions? \r\n      If you would still prefer not
-      to participate I understand.\r\n\r\n    placeholder_select_still_interested_no:
-      |\r\n      Okay, I understand.  Well thank you so much for your time today and
-      for \r\n      your support of our research, and we will certainly be in touch
-      with \r\n      future participation opportunities.\r\n\r\n    placeholder_select_still_interested_yes:
-      |\r\n      Great!  Then we will be in touch as soon as possible by email to
-      \r\n      confirm that we have provided the Morehouse researchers with your
-      \r\n      contact information.\r\n    \r\n    placeholder_end: |\r\n      If
-      you have any questions or want to contact us at any time, \r\n      you can
-      reach me at 617-432-5000 or \r\n      atlanta@footballplayershealth.harvard.edu.\r\n
-      \     \r\n      **END SCREENING**\r\n      \r\n  show_if:\r\n    \r\n    not_interested_notes:\r\n
-      \     interested_yes_no: 'no'\r\n      \r\n    consent_to_pass_info_to_msm_yes_no:\r\n
-      \     interested_yes_no: 'yes'\r\n      \r\n    consent_to_pass_info_to_msm_2_yes_no:\r\n
-      \     consent_to_pass_info_to_msm_yes_no: 'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n
-      \     consent_to_pass_info_to_msm_2_yes_no: 'no'\r\n      \r\n    contact_info_notes:
-      &ok_to_continue\r\n      any_ok_to_continue:\r\n        consent_to_pass_info_to_msm_yes_no:
-      'yes'\r\n        consent_to_pass_info_to_msm_2_yes_no: 'yes'\r\n        \r\n
-      \   placeholder_continue:\r\n      <<: *ok_to_continue\r\n      \r\n    more_questions_yes_no:\r\n
-      \     <<: *ok_to_continue\r\n    \r\n    placeholder_more_questions_yes:\r\n
-      \     <<: *ok_to_continue\r\n      any:\r\n        more_questions_yes_no: 'yes'\r\n
-      \       \r\n    placeholder_more_questions_no:\r\n      <<: *ok_to_continue\r\n
-      \     any:\r\n        more_questions_yes_no: 'no'\r\n    \r\n    more_questions_notes:\r\n
-      \     <<: *ok_to_continue\r\n      any:\r\n        more_questions_yes_no: 'yes'\r\n
-      \   \r\n    select_still_interested:\r\n      <<: *ok_to_continue\r\n      any:\r\n
-      \       more_questions_yes_no: 'yes'\r\n    \r\n    placeholder_select_still_interested_no:\r\n
-      \     <<: *ok_to_continue\r\n      all:\r\n        more_questions_yes_no: 'yes'\r\n
-      \       select_still_interested: 'no longer interested'\r\n\r\n    placeholder_select_still_interested_yes:\r\n
-      \     <<: *ok_to_continue\r\n      all:\r\n        more_questions_yes_no: 'yes'\r\n
-      \       select_still_interested: 'yes - still interested'\r\n    \r\n\r\n    "
-    user_email: 
-  - id: 641
-    name: BHI Phone Screen Non-Eligible
-    table_name: pitt_bhi_ps_non_eligibles
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2020-08-14T08:28:19.750Z'
-    updated_at: '2020-08-14T08:28:19.750Z'
-    position: 
-    category: pitt-bhi-phone-screen
-    table_key_name: ''
-    field_list: placeholder_initial any_questions_yes_no notes placeholder_any_questions_no
-      contact_pi_yes_no additional_questions_yes_no placeholder_additional_questions_no
-      placeholder_additional_questions_yes consent_to_pass_info_to_msm_yes_no consent_to_pass_info_to_msm_2_yes_no
-      placeholder_consent_to_pass_info_2_no contact_info_notes placeholder_finish
-    result_order: ''
-    options: "default:\r\n\r\n  caption_before:\r\n  \r\n    placeholder_initial:
-      | \r\n      Thank you for answering these questions today. Unfortunately, \r\n
-      \     at this time you do not qualify for this particular study. We \r\n      really
-      appreciate your interest in research and helping to improve \r\n      the health
-      of former players nationwide. We will be sure to contact \r\n      you about
-      future studies that you may be eligible for. \r\n      \r\n\r\n    any_questions_yes_no:
-      |\r\n      Do you have any questions for me at this time?\r\n\r\n    \r\n    placeholder_any_questions_no:
-      |\r\n      Okay - thank you again for your interest and your time! \r\n    \r\n
-      \   contact_pi_yes_no: |\r\n      *Address questions*\r\n      \r\n      *If
-      they ask why they are not eligible:* \r\n      \r\n      Actually the way that
-      our system works, \r\n      I’m not able to determine exactly which question
-      caused you to be \r\n      ineligible for the study right now, but if you have
-      concerns \r\n      or would like to discuss it further with our study PI, \r\n
-      \     I would be happy to put you in touch with him if you would like. \r\n
-      \     \r\n      Is that something you would like to do?\r\n\r\n\r\n    # Had
-      questions but no contact with PI requested\r\n    additional_questions_yes_no:
-      |\r\n      Okay, I understand.  \r\n      \r\n      Do you have any other questions
-      for me at the moment?\r\n      \r\n    placeholder_additional_questions_no:
-      |\r\n      Okay - thank you again for your interest and your time! \r\n\r\n
-      \   placeholder_additional_questions_yes: |\r\n      *Address questions*\r\n\r\n
-      \   consent_to_pass_info_to_msm_yes_no: |\r\n      Absolutely. In order for
-      him to contact you I will need to give \r\n      your contact information to
-      our collaborating researchers at \r\n      Morehouse School of Medicine.\r\n\r\n
-      \     Is that okay with you?\r\n      \r\n    consent_to_pass_info_to_msm_2_yes_no:
-      |\r\n      Okay - just to confirm, your information will be kept completely
-      \r\n      secure and private, in a locked environment only accessible by \r\n
-      \     approved researchers. Access to your information at Morehouse will \r\n
-      \     be removed once the study has finished.  Does that alleviate any \r\n
-      \     concerns you may have?  \r\n      \r\n      If you’d still prefer I not
-      provide them with your contact \r\n      information I understand.\r\n      \r\n
-      \   placeholder_consent_to_pass_info_2_no: |\r\n      Okay, I understand.  Well
-      thank you so much for your time today and for your \r\n      support of our
-      research, and we will certainly be in touch with \r\n      future participation
-      opportunities.\r\n      \r\n      \r\n      If you have any questions or want
-      to contact me at any time, you \r\n      can reach me at 617-432-5000 or players@footballplayershealth.harvard.edu.\r\n
-      \     \r\n    contact_info_notes: |\r\n      Great.  I will give your contact
-      information to the research team \r\n      at Morehouse, and one of our study
-      PIs, Dr. Leroy Reese, will reach \r\n      out to you as soon as possible.  \r\n
-      \     \r\n      Can I please confirm the contact information I have for you?\r\n
-      \     \r\n      *Scroll to Participant Details to check and add any contact
-      information*\r\n      \r\n    notes: Additional Notes\r\n      \r\n    placeholder_finish:
-      |\r\n      Thank you so much for speaking with me today. \r\n      \r\n      If
-      you have any questions or want to contact me at any time, you \r\n      can
-      reach me at 617-432-5000 or players@footballplayershealth.harvard.edu.\r\n      \r\n
-      \     **END SCREENING**\r\n      \r\n\r\n  show_if:\r\n    \r\n    placeholder_any_questions_no:\r\n
-      \     any_questions_yes_no: 'no'\r\n      \r\n    contact_pi_yes_no:\r\n      any_questions_yes_no:
-      'yes'\r\n\r\n    additional_questions_yes_no:\r\n      any_questions_yes_no:
-      'yes'\r\n      contact_pi_yes_no: 'no'\r\n      \r\n    placeholder_additional_questions_no:\r\n
-      \     any_questions_yes_no: 'yes'\r\n      contact_pi_yes_no: 'no'\r\n      additional_questions_yes_no:
-      'no'\r\n      \r\n    placeholder_additional_questions_yes:\r\n      any_questions_yes_no:
-      'yes'\r\n      contact_pi_yes_no: 'no'\r\n      additional_questions_yes_no:
-      'yes'\r\n      \r\n    consent_to_pass_info_to_msm_yes_no:\r\n      any_questions_yes_no:
-      'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      \r\n    consent_to_pass_info_to_msm_2_yes_no:\r\n
-      \     any_questions_yes_no: 'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      consent_to_pass_info_to_msm_yes_no:
-      'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n      any_questions_yes_no:
-      'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      consent_to_pass_info_to_msm_yes_no:
-      'no'\r\n      consent_to_pass_info_to_msm_2_yes_no: 'no'\r\n      \r\n    contact_info_notes:\r\n
-      \     all:\r\n        any_questions_yes_no: 'yes'\r\n        contact_pi_yes_no:
-      'yes'\r\n      any:\r\n        consent_to_pass_info_to_msm_yes_no: 'yes'\r\n
-      \       consent_to_pass_info_to_msm_2_yes_no: 'yes'\r\n        \r\n    placeholder_finish:\r\n
-      \     all:\r\n        any_questions_yes_no:\r\n          - 'yes'\r\n          -
-      'no'\r\n      not_all:\r\n        any_questions_yes_no: 'yes'\r\n        contact_pi_yes_no:
-      'yes'\r\n        consent_to_pass_info_to_msm_yes_no: 'no'\r\n        consent_to_pass_info_to_msm_2_yes_no:
-      'no'\r\n      \r\n    "
+    field_list: placeholder_set_sd,visit_start_date,visit_end_date,select_status,notes
+    result_order: updated_at desc
+    options: "_comments:\r\n  table: PITT BHI study participation dates and status\r\n\r\ndefault:\r\n\r\n
+      \ field_options:\r\n    select_status:\r\n      edit_as:\r\n        alt_options:
+      \r\n          - confirmed\r\n          - uncomfirmed\r\n    \r\n      \r\n    select_status:\r\n
+      \     edit_as:\r\n        field_type: status\r\n      value: confirmed\r\n\r\n
+      \ caption_before: \r\n    placeholder_set_sd: |\r\n      **The subject has been
+      enrolled. A training start date is required**\r\n      \r\n      Edit this form
+      to set the start date.\r\n      \r\n    visit_start_date: Participation start
+      date\r\n    visit_end_date: Expected participation end date\r\n    select_status:
+      Status\r\n    notes: Additional notes  \r\n  \r\n  \r\n  show_if:\r\n    visit_end_date:\r\n
+      \     never: true\r\n    select_status:\r\n      never: true\r\n    placeholder_set_sd:\r\n
+      \     visit_start_date: \r\n        - ''\r\n        - null"
     user_email: 
   - id: 634
     name: PITT BHI Secure Notes
@@ -2073,33 +2362,6 @@ app_type:
       \     PII and PHI may be recorded \r\n      here. All notes form part of the
       participant's study records, and are\r\n      retained and viewable according
       to the study protocol rules.\r\n    \r\n  <<: *access_defaults\r\n"
-    user_email: 
-  - id: 628
-    name: PITT BHI Assessment Details
-    table_name: pitt_bhi_appointments
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2020-08-04T13:57:25.185Z'
-    updated_at: '2020-08-04T13:57:25.185Z'
-    position: 1
-    category: pitt-bhi-records
-    table_key_name: ''
-    field_list: placeholder_set_sd,visit_start_date,visit_end_date,select_status,notes
-    result_order: updated_at desc
-    options: "default:\r\n\r\n  field_options:\r\n    select_status:\r\n      edit_as:\r\n
-      \       alt_options: \r\n          - confirmed\r\n          - uncomfirmed\r\n
-      \   \r\n      \r\n    select_status:\r\n      edit_as:\r\n        field_type:
-      status\r\n      value: confirmed\r\n\r\n  caption_before: \r\n    placeholder_set_sd:
-      |\r\n      **The subject has been enrolled. A training start date is required**\r\n
-      \     \r\n      Edit this form to set the start date.\r\n      \r\n    visit_start_date:
-      Training start date\r\n    visit_end_date: Expected training end date\r\n    select_status:
-      Status\r\n    notes: Additional notes  \r\n  \r\n  \r\n  show_if:\r\n    visit_end_date:\r\n
-      \     never: true\r\n    select_status:\r\n      never: true\r\n    placeholder_set_sd:\r\n
-      \     visit_start_date: \r\n        - ''\r\n        - null"
     user_email: 
   - id: 639
     name: BHI Informed Consent Review
@@ -2307,6 +2569,66 @@ app_type:
     item_type: pitt-bhi
     short_name: search_bhi_study_subject
     options: ''
+    user_email: 
+  - id: 313
+    name: PITT BHI Calendar
+    description: ''
+    sql: "\r\ncreate temp table appointments\r\nas select\r\nvisit_start_date,\r\nap.master_id,\r\npitt_bhi.pitt_bhi_id,\r\npi.first_name,\r\npi.last_name,\r\nmax(ap.id)
+      appointment_id\r\nfrom pitt_bhi_appointments ap\r\ninner join activity_log_pitt_bhi_assignments
+      al\r\non al.master_id = ap.master_id\r\n\r\ninner join player_infos pi\r\non
+      ap.master_id = pi.master_id\r\n\r\ninner join pitt_bhi_assignments pitt_bhi\r\non
+      pitt_bhi.master_id = al.master_id\r\n\r\n\r\nwhere\r\n  visit_start_date IS
+      NOT NULL\r\n  AND (:from_date IS NULL or visit_start_date >= :from_date)\r\n
+      \ AND (:to_date IS NULL or visit_start_date <= :to_date)\r\n  AND (:pitt_bhi_id
+      IS NULL or pitt_bhi.pitt_bhi_id = :pitt_bhi_id)\r\nGROUP BY\r\nap.master_id,
+      visit_start_date, pi.first_name, pi.last_name, pitt_bhi.pitt_bhi_id\r\n;\r\n\r\ncreate
+      temp table scheduled_calls\r\nas select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n
+      \ dt.master_id,\r\n  pitt_bhi.pitt_bhi_id,\r\n--  p.first_name,\r\n--  p.last_name,\r\n
+      \ dt.extra_log_type,\r\n  dt.select_who,\r\n  dt.select_next_step\r\nfrom\r\n
+      \ (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n      a.select_who,\r\n
+      \     a.follow_up_when,\r\n      a.follow_up_time,\r\n      a.notes,\r\n      a.select_next_step,\r\n
+      \     rank()\r\n    OVER (\r\n      PARTITION BY a.master_id, a.extra_log_type\r\n
+      \     ORDER BY a.created_at DESC\r\n    ) AS r\r\n\r\n    from activity_log_pitt_bhi_assignments
+      a\r\n    where\r\n      follow_up_when is not null\r\n      AND (:from_date
+      IS NULL OR follow_up_when >= :from_date)\r\n      AND (:to_date IS NULL OR follow_up_when
+      <= :to_date )\r\n  ) dt\r\n\r\ninner join pitt_bhi_assignments pitt_bhi\r\n
+      \ on dt.master_id = pitt_bhi.master_id\r\n\r\nWHERE r = 1\r\nAND (:pitt_bhi_id
+      IS NULL or pitt_bhi.pitt_bhi_id = :pitt_bhi_id)\r\n;\r\n\r\n\r\n\r\nSELECT\r\n
+      \ true \"allDay\",\r\n  visit_start_date::varchar || 'T' || '00:00:00' \"start\",\r\n
+      \ null \"end\",\r\n  'assessment start' \"title\",\r\n  array['report-cal-start-event']
+      \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM appointments\r\n\r\nUNION\r\nSELECT\r\n
+      \ true ,\r\n  '2019-06-20' ,\r\n  null ,\r\n  'assessment start' ,\r\n  array['report-cal-start-event']
+      \"classNames\",\r\n  null \"url\"\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n
+      \ follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n  NULL,\r\n
+      \ case when select_next_step = 'email back' then '(email)'\r\n  else '(call)'
+      end\r\n  || ' ' ||\r\n  case when extra_log_type = 'schedule_screening' then
+      'scheduled HMS screening'\r\n  else extra_log_type end\r\n  ,\r\n  array['report-cal-call-event',
+      extra_log_type] \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM
+      scheduled_calls\r\n\r\n;\r\n"
+    search_attrs: "\r\nfrom_date: \r\n  date: \r\n    all: true\r\n    multiple: single\r\n
+      \   default: -6 months\r\n\r\nto_date: \r\n  date: \r\n    all: true\r\n    multiple:
+      single\r\n    default: +12 months\r\n    \r\n\r\n\r\npitt_bhi_id: \r\n  number:
+      \r\n    label: PITT BHI ID\r\n    all: true\r\n    multiple: single\r\n\r\n\r\n"
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T11:03:19.210Z'
+    updated_at: '2020-08-18T11:03:19.210Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: pitt-bhi
+    short_name: pitt_bhi_calendar
+    options: "view_options:\r\n  view_as: calendar\r\n  search_button_label: calendar\r\n\r\ncomponent:\r\n
+      \ options:\r\n#    height: 200\r\n\r\nview_css:\r\n  classes:\r\n    report-cal-start-event:\r\n
+      \     background-color: red\r\n      border-color: red\r\n      text-align:
+      center\r\n    report-cal-call-event:\r\n      background-color: '#080'\r\n      border-color:
+      gray\r\n    report-cal-call-event.schedule_screening_2:\r\n      background-color:
+      '#155fbb'\r\n      border-color: gray\r\n    report-cal-pi-call-event:\r\n      background-color:
+      '#044'\r\n      border-color: gray\r\n"
     user_email: 
   associated_general_selections:
   - id: 14
@@ -3735,6 +4057,34 @@ app_type:
     updated_at: '2020-08-14T08:56:39.243Z'
     description: ''
     user_email: 
+  - id: 85
+    app_type_id: 44
+    layout_name: nav
+    panel_name: all
+    panel_label: Navigation
+    panel_position: 1
+    options: "nav:\r\n  links:\r\n    - label: Calendar\r\n      resource_type: report\r\n
+      \     resource_name: pitt_bhi__pitt_bhi_calendar\r\n      url: /reports/pitt_bhi__pitt_bhi_calendar\r\n
+      \     \r\n"
+    disabled: false
+    admin_id: 21
+    created_at: '2020-08-18T11:06:17.366Z'
+    updated_at: '2020-08-18T11:13:05.157Z'
+    description: ''
+    user_email: 
+  - id: 86
+    app_type_id: 44
+    layout_name: master
+    panel_name: pitt-bhi-discussions
+    panel_label: Discussions
+    panel_position: 2
+    options: "contains: \r\n  resources:\r\n  - activity_log__pitt_bhi_assignment_discussions"
+    disabled: false
+    admin_id: 21
+    created_at: '2020-08-18T13:48:33.774Z'
+    updated_at: '2020-08-18T13:48:33.774Z'
+    description: ''
+    user_email: 
   user_roles:
   - id: 984
     app_type_id: 44
@@ -3799,7 +4149,117 @@ app_type:
     created_at: '2020-08-04T14:07:12.090Z'
     updated_at: '2020-08-04T14:07:12.090Z'
     user_email: template@template
+  - id: 993
+    app_type_id: 44
+    role_name: email - pitt transfer
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T11:18:02.812Z'
+    updated_at: '2020-08-18T11:30:16.445Z'
+    user_email: phil_ayres@test.com
+  - id: 994
+    app_type_id: 44
+    role_name: email - hms phone screener
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T11:18:02.830Z'
+    updated_at: '2020-08-18T13:42:58.250Z'
+    user_email: template@template
+  - id: 995
+    app_type_id: 44
+    role_name: sms - pitt transfer
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T11:18:08.558Z'
+    updated_at: '2020-08-18T11:30:09.750Z'
+    user_email: phil_ayres@test.com
+  - id: 996
+    app_type_id: 44
+    role_name: sms - pitt phone screener
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T11:18:08.564Z'
+    updated_at: '2020-08-18T11:18:08.564Z'
+    user_email: template@template
+  - id: 997
+    app_type_id: 44
+    role_name: sms - pitt transfer
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T11:30:09.761Z'
+    updated_at: '2020-08-18T11:30:09.761Z'
+    user_email: template@template
+  - id: 998
+    app_type_id: 44
+    role_name: email - pitt transfer
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T11:30:16.455Z'
+    updated_at: '2020-08-18T11:30:16.455Z'
+    user_email: template@template
+  - id: 1003
+    app_type_id: 44
+    role_name: user - pitt pi
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T12:18:21.462Z'
+    updated_at: '2020-08-18T12:18:21.462Z'
+    user_email: template@template
+  - id: 1004
+    app_type_id: 44
+    role_name: user - pitt staff
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T12:18:32.673Z'
+    updated_at: '2020-08-18T12:18:32.673Z'
+    user_email: template@template
+  - id: 1005
+    app_type_id: 44
+    role_name: email - pitt staff
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T13:41:06.296Z'
+    updated_at: '2020-08-18T13:41:06.296Z'
+    user_email: template@template
+  - id: 1006
+    app_type_id: 44
+    role_name: email - pi
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T13:41:17.139Z'
+    updated_at: '2020-08-18T13:42:02.304Z'
+    user_email: template@template
+  - id: 1007
+    app_type_id: 44
+    role_name: email - hms admin
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-18T13:42:09.069Z'
+    updated_at: '2020-08-18T13:42:09.069Z'
+    user_email: template@template
   associated_message_templates:
+  - id: 22
+    name: standard sms layout
+    message_type: sms
+    template_type: layout
+    template: "{{main_content}}"
+    admin_id: 21
+    disabled: false
+    created_at: '2019-01-08T14:11:25.775Z'
+    updated_at: '2020-03-31T09:14:57.084Z'
+    category: 
+    user_email: 
   - id: 59
     name: grit eligibility call not eligible
     message_type: dialog
@@ -3819,6 +4279,37 @@ app_type:
     created_at: '2019-11-27T15:43:10.618Z'
     updated_at: '2019-11-27T15:43:10.618Z'
     category: 
+    user_email: 
+  - id: 73
+    name: pitt bhi notification layout
+    message_type: email
+    template_type: layout
+    template: "<html>\r\n  <head>\r\n    <title>PITT BHI App Message Notification</title>\r\n
+      \   <style>\r\n     body {font-family: sans-serif; }\r\n    </style>\r\n  </head>\r\n
+      \ <body>\r\n    <div><img src=\"data:image/png;base64,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\"
+      />\r\n    <h1>PITT BHI App Message Notification</h1>\r\n    <div>\r\n      {{main_content}}\r\n
+      \   </div>\r\n    <div>If you received this email in error, please contact fphsetl@hms.harvard.edu
+      to ensure we can update our records appropriately.</div>\r\n  </body>\r\n<html>"
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-14T09:18:14.781Z'
+    updated_at: '2020-08-14T09:18:14.781Z'
+    category: pitt-bhi
+    user_email: 
+  - id: 75
+    name: pitt bhi notification message
+    message_type: email
+    template_type: content
+    template: "<h2>{{_subject}}</h2>\r\n<h3>{{extra_substitutions.reason}}</h3>\r\n<p>A
+      new message has been sent from the FPHS PITT BHI Study App.</p>\r\n<p>Participant
+      PITT BHI Study ID: <b>{{ids.pitt_bhi_id}}</b></p>\r\n<div>{{extra_substitutions.extra_text::markup}}<div>\r\n<hr/>\r\n<p>Please
+      login to Athena to view the request. Click the following link to access the
+      subject record directly:</p>\r\n<p><a href=\"{{base_url}}/masters/{{master_id}}#{{extra_substitutions.panel_tab::hyphenate}}-{{master_id}}\">{{base_url}}/masters/{{master_id}}</a></p>\r\n<hr/>"
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-14T09:20:28.137Z'
+    updated_at: '2020-08-14T09:20:28.137Z'
+    category: pitt-bhi
     user_email: 
   - id: 76
     name: pitt bhi ps intro
@@ -3916,48 +4407,26 @@ app_type:
     name: eligibility
     options: "_definitions:\r\n\r\n  ###################################\r\n  # HMS
       Phone Screen\r\n  ###################################\r\n  \r\n  gave_consent_to_share:
-      &gave_consent_to_share\r\n    any_gave_consent:\r\n      any_gave_consent_to_share_ineligible:\r\n
-      \       dynamic_model__pitt_bhi_ps_non_eligibles:\r\n          consent_to_pass_info_to_msm_yes_no:
-      'yes'\r\n          consent_to_pass_info_to_msm_2_yes_no: 'yes'\r\n      any_gave_consent_to_share_possibly_eligible:\r\n
-      \       dynamic_model__pitt_bhi_ps_possibly_eligibles:\r\n           any_questions_yes_no:\r\n
-      \            - 'yes'\r\n             - 'no'\r\n      all_gave_consent_to_share_eligible:\r\n
-      \       dynamic_model__pitt_bhi_ps_eligibles:\r\n          interested_yes_no:
-      'yes'\r\n        any:\r\n          dynamic_model__pitt_bhi_ps_eligibles:\r\n
-      \           more_questions_yes_no: 'no'\r\n            select_still_interested:
-      \"yes - still interested\"\r\n\r\n      all_gave_consent_to_share_eligible_followup:\r\n
-      \       dynamic_model__pitt_bhi_ps_eligibility_followups:\r\n          interested_yes_no:
-      'yes'\r\n        any:\r\n          dynamic_model__pitt_bhi_ps_eligibility_followups:\r\n
-      \           more_questions_yes_no: 'no'\r\n            select_still_interested:
-      \"yes - still interested\"\r\n          \r\n\r\n  gave_and_understood_consent:
-      &gave_and_understood_consent\r\n    all_gave_and_understood_consent:\r\n      <<:
-      *gave_consent_to_share\r\n      all:\r\n        dynamic_model__pitt_bhi_ps_screener_responses:\r\n
-      \         comm_clearly_in_english_yes_no: 'yes'\r\n          give_informed_consent_yes_no_dont_know:
-      'yes'\r\n\r\n\r\n  # HMS Phone Screen - participant eligible and gave consent\r\n
-      \ all_eligible_and_gave_consent: &all_eligible_and_gave_consent\r\n    all_eligible_and_gave_consent:\r\n
-      \     <<: *gave_consent_to_share\r\n      any_eligible_outcome:\r\n        all_followup_eligible_and_interested:\r\n
-      \         dynamic_model__pitt_bhi_ps_eligibility_followups:\r\n            outcome:
-      eligible\r\n            interested_yes_no: 'yes'\r\n          any:\r\n            dynamic_model__pitt_bhi_ps_eligibility_followups:\r\n
-      \             more_questions_yes_no: 'no'\r\n              select_still_interested:
-      \"yes - still interested\"\r\n            \r\n        all_eligible_and_interested:\r\n
-      \         dynamic_model__pitt_bhi_ps_screener_responses:\r\n            outcome:
-      eligible\r\n          dynamic_model__pitt_bhi_ps_eligibles:\r\n            interested_yes_no:
-      'yes'\r\n          any:\r\n            dynamic_model__pitt_bhi_ps_eligibles:\r\n
-      \             more_questions_yes_no: 'no'\r\n              select_still_interested:
-      \"yes - still interested\"\r\n            \r\n\r\n            \r\n  all_eligible_and_gave_consent_hms_finalized:
-      &all_eligible_and_gave_consent_hms_finalized            \r\n    all_eligible_and_gave_consent_hms_finalized:\r\n
-      \     all_finalized:\r\n        activity_log__pitt_bhi_assignment_phone_screens:\r\n
-      \         extra_log_type: finalize\r\n\r\n      <<: *all_eligible_and_gave_consent\r\n\r\n\r\n\r\n
-      \ any_ineligible: &any_ineligible\r\n    any_ineligible:\r\n      dynamic_model__pitt_bhi_ps_screener_responses:\r\n
-      \       outcome: ineligible\r\n      dynamic_model__pitt_bhi_ps_eligibility_followups:\r\n
-      \       outcome: ineligible\r\n\r\n\r\n  all_enrolled: &all_enrolled\r\n    all_enrolled:\r\n
-      \     activity_log__pitt_bhi_assignments:\r\n        extra_log_type: appointment\r\n\r\n
-      \ not_enrolled: &not_enrolled\r\n    not_all_enrolled:\r\n      activity_log__pitt_bhi_assignments:\r\n
-      \       extra_log_type: appointment\r\n  \r\n  \r\n  "
+      &gave_consent_to_share\r\n    any_gave_consent_to_share_eligible:\r\n      dynamic_model__pitt_bhi_ps_eligibles:\r\n
+      \       consent_to_pass_info_to_pitt_yes_no: 'yes'\r\n        consent_to_pass_info_to_pitt_2_yes_no:
+      'yes'\r\n          \r\n\r\n\r\n  # HMS Phone Screen - participant eligible and
+      gave consent\r\n  all_eligible_and_gave_consent: &all_eligible_and_gave_consent\r\n
+      \   all_eligible_and_gave_consent:\r\n      <<: *gave_consent_to_share\r\n            \r\n\r\n
+      \           \r\n  all_eligible_and_gave_consent_hms_finalized: &all_eligible_and_gave_consent_hms_finalized
+      \           \r\n    all_eligible_and_gave_consent_hms_finalized:\r\n      all_finalized:\r\n
+      \       activity_log__pitt_bhi_assignment_phone_screens:\r\n          extra_log_type:
+      finalize\r\n\r\n      <<: *all_eligible_and_gave_consent\r\n\r\n\r\n\r\n  any_ineligible:
+      &any_ineligible\r\n    any_ineligible:\r\n      activity_log__pitt_bhi_assignment_phone_screens:\r\n
+      \       extra_log_type: ineligible\r\n\r\n  all_enrolled: &all_enrolled\r\n
+      \   all_enrolled:\r\n      activity_log__pitt_bhi_assignments:\r\n        extra_log_type:
+      appointment\r\n\r\n  not_enrolled: &not_enrolled\r\n    not_all_enrolled:\r\n
+      \     activity_log__pitt_bhi_assignments:\r\n        extra_log_type: appointment\r\n
+      \ \r\n  \r\n  "
     format: yaml
     disabled: false
     admin_id: 21
     created_at: '2020-08-04T13:43:09.332Z'
-    updated_at: '2020-08-14T09:16:51.511Z'
+    updated_at: '2020-08-18T10:39:26.075Z'
     user_email: 
   - id: 80
     category: pitt_bhi
@@ -3965,7 +4434,7 @@ app_type:
     options: "_definitions:\r\n\r\n\r\n  any_exit_or_complete: &any_exit_or_complete\r\n
       \   any_exit_or_complete:\r\n      any_exit: &any_exit\r\n        any_tracker_exits:
       &any_tracker_exit\r\n          activity_log__pitt_bhi_assignments:\r\n            extra_log_type:\r\n
-      \             - exit_ps_msm\r\n              - exit_ps\r\n              - exit_not_consented\r\n
+      \             - exit_ps_pitt\r\n              - exit_ps\r\n              - exit_not_consented\r\n
       \             - exit_opt_out\r\n              - exit_l2fu\r\n              -
       ineligible\r\n              - completed\r\n        any_withdrawal: &any_withdrawal\r\n
       \         dynamic_model__pitt_bhi_withdrawals:\r\n            no_longer_participating_no_yes:
@@ -3990,7 +4459,7 @@ app_type:
       \     dynamic_model__pitt_bhi_screenings:\r\n        still_interested_blank_yes_no:
       'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14
       days\r\n\r\n\r\n    not_all_tracker_exit: \r\n      activity_log__pitt_bhi_assignments:\r\n
-      \       extra_log_type:\r\n          - exit_ps_msm\r\n          - exit_ps\r\n
+      \       extra_log_type:\r\n          - exit_ps_pitt\r\n          - exit_ps\r\n
       \         - exit_not_consented\r\n          - exit_opt_out\r\n          - exit_l2fu\r\n
       \         - ineligible\r\n          - completed\r\n        created_at:\r\n          condition:
       <\r\n          value: -14 days\r\n      \r\n      \r\n      \r\n      \r\n  access_defaults:
@@ -4000,7 +4469,7 @@ app_type:
     disabled: false
     admin_id: 21
     created_at: '2020-08-04T13:43:40.133Z'
-    updated_at: '2020-08-14T11:24:14.990Z'
+    updated_at: '2020-08-18T11:33:55.407Z'
     user_email: 
   - id: 81
     category: pitt_bhi
@@ -4025,6 +4494,26 @@ app_type:
     created_at: '2020-08-04T13:43:52.341Z'
     updated_at: '2020-08-04T13:43:52.341Z'
     user_email: 
+  - id: 82
+    category: pitt_bhi
+    name: notification_base
+    options: "_definitions:\r\n\r\n\r\n  ####\r\n  # Boilerplace for notifying roles\r\n
+      \ # Add role or users attributes\r\n  # Override the subject: and if: structures
+      to refine operation\r\n  ####\r\n\r\n  # Default email - just add roles or users\r\n
+      \ notify_email_default: &notify_email_default\r\n    type: email\r\n    layout_template:
+      pitt bhi notification layout\r\n    content_template: pitt bhi notification
+      message\r\n    role: \r\n    subject: \"PITT BHI App: Notification message\"\r\n
+      \   extra_substitutions:\r\n      reason: ''\r\n      extra_text: ''\r\n      panel_tab:
+      none\r\n      \r\n\r\n  # Default SMS - just add roles or users\r\n  notify_sms_default:
+      &notify_sms_default\r\n    type: sms\r\n    layout_template: standard sms layout\r\n
+      \   content_template: pitt bhi sms notification\r\n    role: \r\n    subject:
+      \"PITT BHI Study Notification\"\r\n\r\n"
+    format: yaml
+    disabled: false
+    admin_id: 21
+    created_at: '2020-08-04T13:44:02.073Z'
+    updated_at: '2020-08-04T14:05:15.183Z'
+    user_email: 
   - id: 83
     category: pitt_bhi
     name: exit
@@ -4040,21 +4529,103 @@ app_type:
     name: ps_forms_eligibility
     options: "_definitions:\r\n\r\n  ###################################\r\n  # HMS
       Phone Screen\r\n  ###################################\r\n\r\n  ## Suitability
-      ##\r\n  \r\n  ineligible_fields_suitability: &ineligible_fields_suitability\r\n
-      \   total_score: \r\n      - 6\r\n      - 7\r\n      - 8\r\n      - 9\r\n      -
-      10\r\n      - 11\r\n      - 12\r\n\r\n  ineligible_rules_suitability: &ineligible_rules_suitability\r\n
-      \   any_ineligible_fields_suitability: *ineligible_fields_suitability\r\n\r\n
-      \ ineligible_suitability: &ineligible_suitability\r\n    any_ineligible_suitability:\r\n
-      \     dynamic_model__pitt_bhi_ps_suitability_questions:\r\n        <<: *ineligible_fields_suitability\r\n
-      \ \r\n  eligible_rules_suitability: &eligible_rules_suitability\r\n    not_any_ineligible_fields_suitability:
-      *ineligible_fields_suitability\r\n  \r\n  eligible_suitability: &eligible_suitability\r\n
-      \   not_any_ineligible_suitability:\r\n      dynamic_model__pitt_bhi_ps_suitability_questions:
-      \r\n        <<: *ineligible_fields_suitability\r\n        \r\n\r\n"
+      ##\r\n    \r\n  eligible_suitability: &eligible_suitability\r\n    all_eligible_suitability:\r\n
+      \     - dynamic_model__pitt_bhi_ps_suitability_questions: \r\n          eligible_pension_yes_no:
+      'yes'\r\n      - dynamic_model__pitt_bhi_ps_suitability_questions: \r\n          birth_date:\r\n
+      \           condition: '>'\r\n            value: '-60 years'\r\n      - dynamic_model__pitt_bhi_ps_suitability_questions:
+      \r\n          birth_date:\r\n            condition: '<'\r\n            value:
+      '-29 years'\r\n\r\n  ineligible_suitability: &ineligible_suitability\r\n    not_all_eligible_suitability:\r\n
+      \     <<: *eligible_suitability\r\n        \r\n\r\n"
     format: yaml
     disabled: false
     admin_id: 21
     created_at: '2020-08-04T13:44:35.847Z'
-    updated_at: '2020-08-14T09:03:04.537Z'
+    updated_at: '2020-08-18T12:35:52.355Z'
+    user_email: 
+  - id: 86
+    category: pitt_bhi
+    name: discussions
+    options: "# NOTE: \r\n# It is essential to load the following libraries before
+      this one:\r\n#\r\n#  pitt_bhi notify_roles\r\n#  pitt_bhi discussions\r\n\r\n\r\n\r\n_definitions:\r\n\r\n\r\n\r\n\r\n
+      \ ####\r\n  # Handle options for generic contact forms, allowing a\r\n  # drop-down
+      to select which role or user is notified\r\n  ####\r\n\r\n\r\n  notify_options:
+      &notify_options\r\n  \r\n    - <<: *notify_discussion_creator\r\n    - <<: *notify_discussion_creator_sms\r\n
+      \     \r\n  \r\n    #notify_hms_ps_option: &notify_hms_ps_option\r\n    - <<:
+      *notify_hms_ps\r\n      if:\r\n        all:\r\n          referring_record:\r\n
+      \           tag_select_contact_role:\r\n              value: hms phone screener\r\n
+      \             condition: '= ANY'\r\n\r\n    #notify_hms_ps_option_sms: &notify_hms_ps_option_sms\r\n
+      \   - <<: *notify_hms_ps_sms\r\n      if:\r\n        all:\r\n          referring_record:\r\n
+      \           tag_select_contact_role:\r\n              value: hms phone screener\r\n
+      \             condition: '= ANY'\r\n\r\n    #notify_pitt_staff_option: &notify_pitt_staff_option\r\n
+      \   - <<: *notify_pitt_staff\r\n      if:\r\n        all:\r\n          referring_record:\r\n
+      \           tag_select_contact_role:\r\n              value: pitt staff\r\n
+      \             condition: '= ANY'\r\n\r\n    #notify_pitt_staff_option_sms: &notify_pitt_staff_option_sms\r\n
+      \   - <<: *notify_pitt_staff_sms\r\n      if:\r\n        all:\r\n          referring_record:\r\n
+      \           tag_select_contact_role:\r\n              value: pitt staff\r\n
+      \             condition: '= ANY'\r\n\r\n\r\n\r\n\r\n    #notify_pi_option: &notify_pi_option\r\n
+      \   - <<: *notify_pi\r\n      if:\r\n        all:\r\n          referring_record:\r\n
+      \           tag_select_contact_role:\r\n              value: pi\r\n              condition:
+      '= ANY'\r\n\r\n\r\n    #notify_pi_option_sms: &notify_pi_option_sms\r\n    -
+      <<: *notify_pi_sms\r\n      if:\r\n        all:\r\n          referring_record:\r\n
+      \           tag_select_contact_role: \r\n              value: pi\r\n              condition:
+      '= ANY'\r\n\r\n    #notify_hms_admin_option: &notify_hms_admin_option\r\n    -
+      <<: *notify_hms_admin\r\n      if:\r\n        all:\r\n          referring_record:\r\n
+      \           tag_select_contact_role:\r\n              value: hms admins\r\n
+      \             condition: '= ANY'\r\n\r\n\r\n    #notify_hms_admin_option_sms:
+      &notify_hms_admin_option_sms\r\n    - <<: *notify_hms_admin_sms\r\n      if:\r\n
+      \       all:\r\n          referring_record:\r\n            tag_select_contact_role:
+      \r\n              value: hms admins\r\n              condition: '= ANY'\r\n\r\n\r\n\r\n\r\n\r\n\r\n
+      \ ####\r\n  # Defaults for the form for setting up a new discussion\r\n  ####\r\n
+      \ setup_discussion: &setup_discussion\r\n    fields:\r\n      - notes\r\n      -
+      tag_select_contact_role\r\n      - prev_activity_type\r\n\r\n    field_options:
+      &start_discussion_field_options\r\n    \r\n      notes:\r\n        edit_as:
+      \r\n          field_type: subject\r\n    \r\n      prev_activity_type:\r\n        edit_as:\r\n
+      \         field_type: fixed_type\r\n        value:\r\n          this:\r\n            extra_log_type:
+      return_value\r\n\r\n\r\n    show_if: \r\n      prev_activity_type:\r\n        never:
+      true\r\n\r\n    valid_if:\r\n      on_save:\r\n        not_any:\r\n          this:\r\n
+      \           #tag_select_contact_role:\r\n            #  value: 0\r\n            #
+      \ condition: '= ARRAY_LENGTH'\r\n            subject: ''\r\n\r\n    labels:\r\n
+      \     tag_select_contact_role: notify role\r\n\r\n    caption_before: &setup_discussion_caption_before\r\n
+      \     all_fields: |\r\n        Setup a discussion to securely contact the selected
+      roles.\r\n\r\n        Messages are visible, and notifications sent to only the
+      users with the \r\n        selected roles (and the creator of the discussion:
+      {{user_email}}). \r\n        To change this visibility, and future notifications,
+      edit this discussion before sending new messages.\r\n\r\n      notes: \r\n        edit_caption:
+      |\r\n          Enter subject of the discussion\r\n          \r\n          *Do
+      not enter any PII or PHI in this field, \r\n          since it will be included
+      in notification emails*\r\n        show_caption: Subject\r\n      tag_select_contact_role:
+      Roles to be included\r\n\r\n\r\n    references:\r\n      - activity_log__pitt_bhi_assignment_pitt_bhi_discussion:\r\n
+      \         label: New Message\r\n          from: this\r\n          add: many\r\n
+      \         prevent_disable: true\r\n          add_with:\r\n            extra_log_type:
+      \r\n              this:\r\n                prev_activity_type: return_value\r\n
+      \           prev_activity_type:\r\n              this:\r\n                extra_log_type:
+      return_value            \r\n          filter_by:\r\n            extra_log_type:\r\n
+      \             this:\r\n                prev_activity_type: return_value            \r\n\r\n
+      \   editable_if:\r\n      <<: *enabled_if\r\n\r\n    creatable_if:\r\n      <<:
+      *enabled_if\r\n\r\n\r\n  ####\r\n  # Contact defaults for all generic contact
+      forms\r\n  ####\r\n  discussion_message_defaults: &discussion_message_defaults\r\n
+      \   fields:\r\n      - notes\r\n      - prev_activity_type\r\n\r\n    field_options:\r\n
+      \     prev_activity_type:\r\n        edit_as:\r\n          field_type: fixed_type\r\n\r\n
+      \   caption_before: &contact_caption_before\r\n      submit: After clicking
+      <i>Send</i> a notification message will be sent to the roles \r\n        selected
+      in the discussion setup.\r\n        \r\n      notes: |\r\n        **Message:**
+      The message text is not sent by email, so can include PHI.\r\n\r\n    show_if:\r\n
+      \     prev_activity_type:\r\n        never: true\r\n\r\n    view_options:\r\n
+      \     data_attribute:\r\n        - notes\r\n      hide_unless_creatable: true\r\n\r\n
+      \   showable_if:\r\n      <<: *enabled_if\r\n      all:\r\n        this:\r\n
+      \         prev_activity_type: ''\r\n\r\n\r\n    editable_if:\r\n      never:
+      true\r\n      #<<: *enabled_if\r\n#      all:\r\n#        this:\r\n#          id:
+      ''\r\n\r\n    creatable_if:\r\n      never: true\r\n\r\n\r\n    save_action:\r\n
+      \     label: Send\r\n\r\n    save_trigger:\r\n      on_create:\r\n        notify:
+      *notify_options\r\n        update_reference:\r\n          ref:\r\n          \r\n
+      \           first:\r\n              all:\r\n                referring_record:\r\n
+      \                 update: return_result\r\n                \r\n            with:\r\n
+      \             updated_at: now()\r\n"
+    format: yaml
+    disabled: false
+    admin_id: 21
+    created_at: '2020-08-04T13:44:51.521Z'
+    updated_at: '2020-08-18T13:18:03.166Z'
     user_email: 
   - id: 87
     category: pitt_bhi
@@ -4071,6 +4642,35 @@ app_type:
     admin_id: 21
     created_at: '2020-08-04T13:45:42.168Z'
     updated_at: '2020-08-04T14:03:27.879Z'
+    user_email: 
+  - id: 88
+    category: pitt_bhi
+    name: notify_roles
+    options: "_definitions:\r\n\r\n\r\n  ####\r\n  # Boilerplace for notifying roles\r\n
+      \ # Directly call in a trigger like:\r\n  #\r\n  # save_trigger:\r\n  #   on_create:\r\n
+      \ #     notify: &notify_hms_ps\r\n  #\r\n  ####\r\n\r\n  # Creator\r\n  notify_discussion_creator_option:
+      &notify_discussion_creator\r\n    <<: *notify_email_default\r\n    users:\r\n
+      \     referring_record:\r\n        user_id: return_value\r\n        \r\n  #
+      Creator SMS\r\n  notify_discussion_creator_option_sms: &notify_discussion_creator_sms\r\n
+      \   <<: *notify_sms_default\r\n    users:\r\n      referring_record:\r\n        user_id:
+      return_value\r\n\r\n\r\n  # HMS Phone Screener\r\n  notify_hms_ps: &notify_hms_ps\r\n
+      \   <<: *notify_email_default\r\n    role: email - hms phone screener\r\n\r\n
+      \ # HMS Phone Screener SMS\r\n  notify_hms_ps_sms: &notify_hms_ps_sms\r\n    <<:
+      *notify_sms_default\r\n    role: sms - hms phone screener\r\n\r\n  # PITT Staff\r\n
+      \ notify_pitt_staff: &notify_pitt_staff\r\n    <<: *notify_email_default\r\n
+      \   role: email - pitt staff\r\n\r\n  # MSM Phone Screener SMS\r\n  notify_pitt_staff_sms:
+      &notify_pitt_staff_sms\r\n    <<: *notify_sms_default\r\n    role: sms - pitt
+      staff\r\n\r\n\r\n  # PI\r\n  notify_pi: &notify_pi\r\n    <<: *notify_email_default\r\n
+      \   role: email - pi\r\n\r\n  # PI SMS\r\n  notify_pi_sms: &notify_pi_sms\r\n
+      \   <<: *notify_sms_default\r\n    role: sms - pi\r\n\r\n\r\n  # HMS Admin\r\n
+      \ notify_hms_admin: &notify_hms_admin\r\n    <<: *notify_email_default\r\n    role:
+      email - hms admin\r\n\r\n  # HMS Admin SMS\r\n  notify_hms_admin_sms: &notify_hms_admin_sms\r\n
+      \   <<: *notify_sms_default\r\n    role: sms - hms admin\r\n"
+    format: yaml
+    disabled: false
+    admin_id: 21
+    created_at: '2020-08-18T13:13:51.832Z'
+    updated_at: '2020-08-18T13:16:26.472Z'
     user_email: 
   protocols: []
   associated_protocols: []
