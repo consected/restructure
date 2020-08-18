@@ -452,6 +452,20 @@ _fpa.form_utils = {
         res = (res[0] || '').toUpperCase();
       else if (op == 'first')
         res = res[0]
+      else if (op == 'age') {
+
+        res = new Date(res);
+
+        if (res.getFullYear) {
+          var today = new Date();
+          var age = today.getFullYear() - res.getFullYear();
+          var m = today.getMonth() - res.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < res.getDate())) {
+            age--;
+          }
+          res = age;
+        }
+      }
       else if (op == 'dicom_datetime') {
         if (typeof res == 'date') {
           res = res.toISOString();
