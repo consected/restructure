@@ -60,6 +60,10 @@ class ItemFlag < UserBase
     Classification::ItemFlagName.active.map(&:item_type).uniq & use_with_class_names
   end
 
+  def self.active_resource_names
+    active_class_names.map { |ifcs| "#{ifcs.pluralize}_item_flags" }
+  end
+
   def self.is_active_for?(class_or_class_name)
     return unless class_or_class_name
 
@@ -129,7 +133,6 @@ class ItemFlag < UserBase
     ifcs = ifc.pluralize
     # This association is provided to allow generic search on flagged associated object
     Master.has_many "#{ifcs}_item_flags".to_sym, through: ifcs, source: :item_flags
-    logger.debug "Associated master with #{ifcs}_item_flags through #{ifcs} with source :item_flags"
   end
 
   protected

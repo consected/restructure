@@ -7,7 +7,9 @@ class Classification::GeneralSelection < ActiveRecord::Base
 
   include AdminHandler
   include SelectorCache
-  BasicItemTypes = %i[player_infos_source player_contacts_type player_contacts_source addresses_type addresses_source addresses_rank player_contacts_rank].freeze
+  BasicItemTypes = %i[player_infos_source
+                      player_contacts_type player_contacts_source player_contacts_rank
+                      addresses_type addresses_source addresses_rank].freeze
 
   default_scope { order item_type: :asc, disabled: :asc, position: :asc }
 

@@ -100,7 +100,8 @@ class Admin::UserAccessControl < ActiveRecord::Base
         ['item_flags'] +
         ActivityLog.active.map(&:resource_name) +
         DynamicModel.active.map(&:resource_name) +
-        ExternalIdentifier.active.map(&:resource_name)
+        ExternalIdentifier.active.map(&:resource_name) +
+        ItemFlag.active_resource_names
       ).uniq
     elsif resource_type == :general
       general_resource_names
