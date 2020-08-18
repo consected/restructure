@@ -483,7 +483,6 @@ module DynamicModelDefHandler
   end
 
   def run_migration
-    byebug
     # Outside the current transaction
     Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do
