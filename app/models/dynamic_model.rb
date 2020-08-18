@@ -9,7 +9,6 @@ class DynamicModel < ActiveRecord::Base
   default_scope -> { order disabled: :asc, category: :asc, position: :asc, updated_at: :desc }
 
   validate :table_name_ok
-  after_save :force_option_config_parse
   after_save :set_empty_field_list
 
   attr_accessor :editable
@@ -177,11 +176,7 @@ class DynamicModel < ActiveRecord::Base
 
         a_new_controller = Class.new(DynamicModel::DynamicModelsController) do
           class << self
-            attr_writer :definition
-          end
-
-          class << self
-            attr_reader :definition
+            attr_accessor :definition
           end
 
           self.definition = definition

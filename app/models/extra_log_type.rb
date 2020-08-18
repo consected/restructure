@@ -51,7 +51,8 @@ class ExtraLogType < ExtraOptions
           create_reference: SaveTriggers::CreateReference.config_def(if_extras: 'ref: ** conditions reference **'),
           update_reference: SaveTriggers::UpdateReference.config_def(if_extras: 'ref: ** conditions reference **'),
           create_master: SaveTriggers::CreateMaster.config_def(if_extras: 'ref: ** conditions reference **'),
-          create_filestore_container: SaveTriggers::CreateFilestoreContainer.config_def(if_extras: 'ref: ** conditions reference **')
+          create_filestore_container: SaveTriggers::CreateFilestoreContainer.config_def(if_extras: 'ref: ** conditions reference **'),
+          update_this: SaveTriggers::UpdateThis.config_def(if_extras: 'ref: ** conditions reference **')
         },
         on_update: {
         },
@@ -63,6 +64,10 @@ class ExtraLogType < ExtraOptions
         },
         on_upload: {
 
+        },
+        before_save: {
+          _: 'Run a specified trigger before the current item has saved, allowing output to be reflected in the UI update, but before reference updates are available',
+          __: 'Typically used for update_this, although can be applied to the other triggers if necessary'
         }
 
       },
@@ -236,7 +241,9 @@ class ExtraLogType < ExtraOptions
   def calc_save_trigger_if(obj, alt_on: nil)
     ca = ConditionalActions.new self.save_trigger, obj
 
-    if alt_on == :upload
+    if alt_on == :before_save
+      action = :before_save
+    elsif alt_on == :upload
       action = :on_upload
     elsif obj._created
       action = :on_create

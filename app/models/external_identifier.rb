@@ -329,6 +329,10 @@ class ExternalIdentifier < ActiveRecord::Base
     errors.add :external_id_attribute, 'must be unique' if !disabled && !res.empty?
   end
 
+  def force_option_config_parse
+    # Does nothing, but is triggered on save
+  end
+
   def generate_usage_reports
     if !disabled && errors.empty?
       r = usage_report('Assigned')

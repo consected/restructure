@@ -16,7 +16,6 @@ class ActivityLog < ActiveRecord::Base
   validate :name_ok
   default_scope -> { order 'disabled asc nulls last' }
 
-  after_save :force_option_config_parse
   after_save :handle_placeholder_fields
 
   def resource_name

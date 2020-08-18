@@ -15,6 +15,9 @@ module ActivityLogHandler
     after_initialize :set_action_when
     after_initialize :format_sync_fields
 
+    # Ensure that referenced items have also saved
+    before_save :handle_before_save_triggers
+
     before_save :sync_item_data
     before_save :set_related_fields
     before_save :set_allow_tracker_sync
@@ -847,6 +850,11 @@ module ActivityLogHandler
 
   def handle_save_triggers
     extra_log_type_config.calc_save_trigger_if self
+    true
+  end
+
+  def handle_before_save_triggers
+    extra_log_type_config.calc_save_trigger_if self, alt_on: :before_save
     true
   end
 

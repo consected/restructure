@@ -14,9 +14,13 @@ module DynamicModelDefHandler
     # after_save :reload_routes
     after_save :add_master_association, if: -> { @regenerate }
     after_save :add_user_access_controls, if: -> { @regenerate }
-    after_save :generate_migration
+
+    after_save :force_option_config_parse
+
+    after_save :generate_migration, if: -> { !disabled }
 
     after_commit :update_tracker_events, if: -> { @regenerate }
+    after_commit :run_migration, if: -> { @do_migration }
     after_commit :restart_server, if: -> { @regenerate }
     after_commit :other_regenerate_actions
   end
@@ -396,11 +400,11 @@ module DynamicModelDefHandler
       removed -= [belongs_to_model_id]
     end
 
-    [added, removed]
+    [added, removed, old_colnames]
   end
 
   def migration_update_fields
-    added, removed = field_changes
+    added, removed, prev_fields = field_changes
 
     if table_comments
       new_table_comment = table_comment_changes
@@ -412,10 +416,11 @@ module DynamicModelDefHandler
     new_fields_comments ||= {}
 
     <<~ARCONTENT
-      \# added: #{added}
+      self.prev_fields = %i[#{prev_fields.join(' ')}]
+          \# added: #{added}
           \# removed: #{removed}
-          #{new_table_comment ? "\# new table comment: #{new_table_comment}" : ''}
-          #{new_fields_comments.present? ? "\# new fields comments: #{new_fields_comments}" : ''}
+          #{new_table_comment ? "\# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
+          #{new_fields_comments.present? ? "\# new fields comments: #{new_fields_comments.keys}" : ''}
           update_fields
     ARCONTENT
   end
@@ -465,11 +470,20 @@ module DynamicModelDefHandler
   def write_db_migration(mig_text, version, mode: 'create')
     return unless Rails.env.development?
 
-    dirname = "db/app_migrations/#{db_migration_schema}"
+    dirname = db_migration_dirname
     cname_us = "#{mode}_#{table_name}_#{version}"
     fn = "#{dirname}/#{Time.new.to_s(:number)}_#{cname_us}.rb"
     FileUtils.mkdir_p dirname
     File.write(fn, mig_text)
+
+    @do_migration = fn
     fn
+  end
+
+  def run_migration
+    ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+  rescue StandardError => e
+    FileUtils.rm @do_migration
+    raise e
   end
 end
