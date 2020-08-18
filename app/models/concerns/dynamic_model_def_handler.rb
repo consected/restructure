@@ -10,17 +10,16 @@ module DynamicModelDefHandler
 
     after_save :generate_model
     after_save :check_implementation_class
+    after_save :force_option_config_parse
+    after_save :generate_migration, if: -> { !disabled }
+    after_save :run_migration, if: -> { @do_migration }
+
     # Reload the routes based on specific controller actions, to allow app type uploads to work faster
     # after_save :reload_routes
     after_save :add_master_association, if: -> { @regenerate }
     after_save :add_user_access_controls, if: -> { @regenerate }
 
-    after_save :force_option_config_parse
-
-    after_save :generate_migration, if: -> { !disabled }
-
     after_commit :update_tracker_events, if: -> { @regenerate }
-    after_commit :run_migration, if: -> { @do_migration }
     after_commit :restart_server, if: -> { @regenerate }
     after_commit :other_regenerate_actions
   end
@@ -306,6 +305,9 @@ module DynamicModelDefHandler
         version = DateTime.now.to_i.to_s(36)
         gs = generator_script(version)
         fn = write_db_migration(gs, version)
+      end
+
+      unless !disabled? && ready?
 
         err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created.
 
@@ -481,7 +483,17 @@ module DynamicModelDefHandler
   end
 
   def run_migration
-    ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+    byebug
+    # Outside the current transaction
+    Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do
+        ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+        pid = spawn('bin/rake db:schema:dump')
+        Process.detach pid
+      end
+    end.join
+
+    true
   rescue StandardError => e
     FileUtils.rm @do_migration
     raise e

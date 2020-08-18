@@ -522,10 +522,10 @@ class ActivityLog < ActiveRecord::Base
       remove_model_from_list
     else
       # Check that the implementation has been successful
-      unless implementation_class_defined?(klass)
-        puts "Failure checking activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+      unless implementation_class_defined?(klass, fail_without_exception: true)
+        puts 'Failure checking activity log model definition.'
         logger.info '*************************************************************************************'
-        logger.info "Failure checking activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        logger.info 'Failure checking activity log model definition.'
         logger.info '*************************************************************************************'
       end
     end
