@@ -384,6 +384,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
       data[:current_user_instance] ||= cu
       data[:current_user] ||= cu.attributes
       data[:current_user_email] ||= cu.email
+      data[:user_email] ||= cu.email
       data[:current_user_preference] ||= cu.user_preference.attributes
       data[:current_user_contact_info] = cu.contact_info&.attributes || Users::ContactInfo.new.attributes
     end
