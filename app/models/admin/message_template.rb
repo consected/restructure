@@ -110,7 +110,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
           d = {}
           missing = true
         else
-          raise FphsException, "Data (#{d.class.name}) does not contain the tag #{tag_name} or :#{tag_name}\n#{d || 'data is empty'}"
+          raise FphsException,
+                "Data (#{d.class.name}) does not contain the tag #{tag_name} or :#{tag_name}\n#{d || 'data is empty'}"
         end
       end
 
@@ -271,6 +272,12 @@ class Admin::MessageTemplate < ActiveRecord::Base
         res = res.first&.upcase
       elsif op == 'first'
         res = res.first
+      elsif op == 'age'
+        if orig_val.respond_to? :year
+          age = Date.today.year - orig_val.year
+          age -= 1 if Date.today < orig_val + age.years
+          res = age
+        end
       elsif op == 'dicom_datetime'
         res = orig_val.strftime('%Y%m%d%H%M%S+0000') if orig_val.respond_to? :strftime
       elsif op == 'dicom_date'
@@ -377,6 +384,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
       data[:current_user_instance] ||= cu
       data[:current_user] ||= cu.attributes
       data[:current_user_email] ||= cu.email
+      data[:user_email] ||= cu.email
       data[:current_user_preference] ||= cu.user_preference.attributes
       data[:current_user_contact_info] = cu.contact_info&.attributes || Users::ContactInfo.new.attributes
     end

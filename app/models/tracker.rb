@@ -134,7 +134,7 @@ class Tracker < UserBase
 
     # If there were no changes, discard this item. Otherwise, save it.
     if cp.blank?
-      return nil
+      nil
     else
       t.notes = cp
       t.save
@@ -195,7 +195,8 @@ class Tracker < UserBase
 
     return if protocol_event
 
-    raise "Bad protocol_event (#{rec_type}) for tracker #{record}. If you believe it should exist, check double spacing is correct in the definition for namespaced classes."
+    raise "Bad protocol_event (#{rec_type}) for tracker #{record}. If you believe it should exist, "\
+          'check double spacing is correct in the definition for namespaced classes.'
   end
 
   def set_record_updates_sub_process(type)

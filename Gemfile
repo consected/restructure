@@ -35,7 +35,7 @@ group :development do
   gem 'solargraph'
 end
 
-group :development, :test, :ipa_test do
+group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'brakeman', require: false
   gem 'bundler-audit'

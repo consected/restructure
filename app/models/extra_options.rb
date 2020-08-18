@@ -316,7 +316,15 @@ class ExtraOptions
     begin
       if config_text.present?
         config_text = include_libraries(config_text)
-        res = YAML.safe_load(config_text, [], [], true)
+        begin
+          res = YAML.safe_load(config_text, [], [], true)
+        rescue Psych::SyntaxError => e
+          linei = 0
+          errtext = config_text.split(/\n/).map { |l| "#{linei += 1}: #{l}" }.join("\n")
+          Rails.logger.warn e
+          Rails.logger.warn errtext
+          raise e
+        end
       else
         res = {}
       end
@@ -414,8 +422,6 @@ class ExtraOptions
 
     Admin::ConfigLibrary.make_substitutions! c, format
   end
-
-  protected
 
   def self.options_text(config_obj)
     if config_obj.is_a?(Report)

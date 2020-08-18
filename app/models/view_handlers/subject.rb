@@ -13,6 +13,9 @@ module ViewHandlers
 
     class_methods do
       def get_rank_name(value)
+        gsrn = Classification::GeneralSelection.name_for self, value, :rank
+        return gsrn if gsrn
+
         Classification::AccuracyScore.name_for(value)
       end
     end
@@ -44,7 +47,9 @@ module ViewHandlers
     def dates_sensible
       return true unless respond_to?(:birth_date)
 
-      errors.add('birth date', 'and death date are not sensible') if respond_to?(:death_date) && birth_date && death_date && birth_date > death_date
+      if respond_to?(:death_date) && birth_date && death_date && birth_date > death_date
+        errors.add('birth date', 'and death date are not sensible')
+      end
       errors.add('birth date', 'is after today') if birth_date && birth_date > DateTime.now
     end
   end

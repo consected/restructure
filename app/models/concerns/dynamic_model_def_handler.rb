@@ -10,11 +10,14 @@ module DynamicModelDefHandler
 
     after_save :generate_model
     after_save :check_implementation_class
+    after_save :force_option_config_parse
+    after_save :generate_migration, if: -> { !disabled }
+    after_save :run_migration, if: -> { @do_migration }
+
     # Reload the routes based on specific controller actions, to allow app type uploads to work faster
     # after_save :reload_routes
     after_save :add_master_association, if: -> { @regenerate }
     after_save :add_user_access_controls, if: -> { @regenerate }
-    after_save :generate_migration
 
     after_commit :update_tracker_events, if: -> { @regenerate }
     after_commit :restart_server, if: -> { @regenerate }
@@ -302,6 +305,9 @@ module DynamicModelDefHandler
         version = DateTime.now.to_i.to_s(36)
         gs = generator_script(version)
         fn = write_db_migration(gs, version)
+      end
+
+      unless !disabled? && ready?
 
         err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created.
 
@@ -396,11 +402,11 @@ module DynamicModelDefHandler
       removed -= [belongs_to_model_id]
     end
 
-    [added, removed]
+    [added, removed, old_colnames]
   end
 
   def migration_update_fields
-    added, removed = field_changes
+    added, removed, prev_fields = field_changes
 
     if table_comments
       new_table_comment = table_comment_changes
@@ -412,10 +418,11 @@ module DynamicModelDefHandler
     new_fields_comments ||= {}
 
     <<~ARCONTENT
-      \# added: #{added}
+      self.prev_fields = %i[#{prev_fields.join(' ')}]
+          \# added: #{added}
           \# removed: #{removed}
-          #{new_table_comment ? "\# new table comment: #{new_table_comment}" : ''}
-          #{new_fields_comments.present? ? "\# new fields comments: #{new_fields_comments}" : ''}
+          #{new_table_comment ? "\# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
+          #{new_fields_comments.present? ? "\# new fields comments: #{new_fields_comments.keys}" : ''}
           update_fields
     ARCONTENT
   end
@@ -465,11 +472,30 @@ module DynamicModelDefHandler
   def write_db_migration(mig_text, version, mode: 'create')
     return unless Rails.env.development?
 
-    dirname = "db/app_migrations/#{db_migration_schema}"
+    dirname = db_migration_dirname
     cname_us = "#{mode}_#{table_name}_#{version}"
     fn = "#{dirname}/#{Time.new.to_s(:number)}_#{cname_us}.rb"
     FileUtils.mkdir_p dirname
     File.write(fn, mig_text)
+
+    @do_migration = fn
     fn
+  end
+
+  def run_migration
+    byebug
+    # Outside the current transaction
+    Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do
+        ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+        pid = spawn('bin/rake db:schema:dump')
+        Process.detach pid
+      end
+    end.join
+
+    true
+  rescue StandardError => e
+    FileUtils.rm @do_migration
+    raise e
   end
 end
