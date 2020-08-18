@@ -15040,14 +15040,14 @@ CREATE FUNCTION pitt_bhi.log_pitt_bhi_ps_eligibles_update() RETURNS trigger
 BEGIN
   INSERT INTO pitt_bhi_ps_eligible_history (
     master_id,
-    interested_yes_no, notes, not_interested_notes, consent_to_pass_info_to_msm_yes_no, consent_to_pass_info_to_msm_2_yes_no, contact_info_notes, more_questions_yes_no, more_questions_notes, select_still_interested,
+    consent_to_pass_info_to_pitt_yes_no, consent_to_pass_info_to_pitt_2_yes_no, not_interested_notes, contact_info_notes,
     user_id,
     created_at,
     updated_at,
     pitt_bhi_ps_eligible_id)
   SELECT
     NEW.master_id,
-    NEW.interested_yes_no, NEW.notes, NEW.not_interested_notes, NEW.consent_to_pass_info_to_msm_yes_no, NEW.consent_to_pass_info_to_msm_2_yes_no, NEW.contact_info_notes, NEW.more_questions_yes_no, NEW.more_questions_notes, NEW.select_still_interested,
+    NEW.consent_to_pass_info_to_pitt_yes_no, NEW.consent_to_pass_info_to_pitt_2_yes_no, NEW.not_interested_notes, NEW.contact_info_notes,
     NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
@@ -34938,19 +34938,14 @@ ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_eligibility_followups_id_seq OWNED BY pitt_b
 CREATE TABLE pitt_bhi.pitt_bhi_ps_eligible_history (
     id bigint NOT NULL,
     master_id bigint,
-    interested_yes_no character varying,
-    notes character varying,
-    not_interested_notes character varying,
-    consent_to_pass_info_to_msm_yes_no character varying,
-    consent_to_pass_info_to_msm_2_yes_no character varying,
     contact_info_notes character varying,
-    more_questions_yes_no character varying,
-    more_questions_notes character varying,
-    select_still_interested character varying,
     user_id bigint,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    pitt_bhi_ps_eligible_id bigint
+    pitt_bhi_ps_eligible_id bigint,
+    consent_to_pass_info_to_pitt_yes_no character varying,
+    consent_to_pass_info_to_pitt_2_yes_no character varying,
+    not_interested_notes character varying
 );
 
 
@@ -34980,18 +34975,13 @@ ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_eligible_history_id_seq OWNED BY pitt_bhi.pi
 CREATE TABLE pitt_bhi.pitt_bhi_ps_eligibles (
     id bigint NOT NULL,
     master_id bigint,
-    interested_yes_no character varying,
-    notes character varying,
-    not_interested_notes character varying,
-    consent_to_pass_info_to_msm_yes_no character varying,
-    consent_to_pass_info_to_msm_2_yes_no character varying,
     contact_info_notes character varying,
-    more_questions_yes_no character varying,
-    more_questions_notes character varying,
-    select_still_interested character varying,
     user_id bigint,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    consent_to_pass_info_to_pitt_yes_no character varying,
+    consent_to_pass_info_to_pitt_2_yes_no character varying,
+    not_interested_notes character varying
 );
 
 
@@ -75367,6 +75357,8 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200814114908'),
 ('20200817140231'),
 ('20200817152630'),
-('20200818090628');
+('20200818090628'),
+('20200818105202'),
+('20200818105216');
 
 
