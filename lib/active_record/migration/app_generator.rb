@@ -6,7 +6,7 @@ module ActiveRecord
       extend ActiveSupport::Concern
 
       included do
-        attr_accessor :fields, :new_fields, :field_defs,
+        attr_accessor :fields, :new_fields, :field_defs, :prev_fields,
                       :field_opts, :schema, :owner, :table_name,
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
                       :table_comment, :fields_comments, :mode
@@ -25,33 +25,37 @@ module ActiveRecord
         add_fields "#{schema}.#{history_table_name}"
       end
 
+      def rand_id
+        Digest::MD5.hexdigest("#{schema}.#{table_name}")[0..7]
+      end
+
       def create_activity_log_tables
         setup_fields
 
         self.belongs_to_model = belongs_to_model.to_s.underscore
 
         create_table "#{schema}.#{table_name}", comment: table_comment do |t|
-          t.belongs_to :master, index: { name: "al_#{belongs_to_model.singularize}_master_id_idx" }, foreign_key: true
+          t.belongs_to :master, index: { name: "#{rand_id}_master_id_idx" }, foreign_key: true
           t.belongs_to belongs_to_model,
-                       index: { name: "al_#{belongs_to_model.singularize}_id_idx" },
+                       index: { name: "#{rand_id}_id_idx" },
                        foreign_key: { to_table: "#{schema}.#{belongs_to_model.pluralize}" }
           create_fields t
           t.string :extra_log_type
-          t.references :user, index: { name: "al_#{belongs_to_model.singularize}_user_id_idx" }, foreign_key: true
+          t.references :user, index: { name: "#{rand_id}_user_id_idx" }, foreign_key: true
           t.timestamps null: false
         end
 
         create_table "#{schema}.#{history_table_name}" do |t|
-          t.belongs_to :master, index: { name: "al_#{belongs_to_model.singularize}_master_id_h_idx" }, foreign_key: true
+          t.belongs_to :master, index: { name: "#{rand_id}_master_id_h_idx" }, foreign_key: true
           t.belongs_to belongs_to_model,
-                       index: { name: "al_#{belongs_to_model.singularize}_id_h_idx" },
+                       index: { name: "#{rand_id}_id_h_idx" },
                        foreign_key: { to_table: "#{schema}.#{belongs_to_model.pluralize}" }
           create_fields t
           t.string :extra_log_type
-          t.references :user, index: { name: "al_#{belongs_to_model.singularize}_user_id_h_idx" }, foreign_key: true
+          t.references :user, index: { name: "#{rand_id}_user_id_h_idx" }, foreign_key: true
           t.timestamps null: false
 
-          t.belongs_to table_name.singularize, index: { name: "#{table_name.singularize}_id_h_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
+          t.belongs_to table_name.singularize, index: { name: "#{rand_id}_id_h_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
         end
       end
 
@@ -79,12 +83,12 @@ module ActiveRecord
         end
 
         create_table "#{schema}.#{history_table_name}" do |t|
-          t.belongs_to :master, index: true, foreign_key: true
+          t.belongs_to :master, index: { name: "#{rand_id}_history_master_id" }, foreign_key: true
           create_fields t
-          t.references :user, index: true, foreign_key: true
+          t.references :user, index: { name: "#{rand_id}_user_idx" }, foreign_key: true
           t.timestamps null: false
 
-          t.belongs_to table_name.singularize, index: { name: "#{table_name.singularize}_id_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
+          t.belongs_to table_name.singularize, index: { name: "#{rand_id}_id_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
         end
       end
 
@@ -148,11 +152,12 @@ module ActiveRecord
         self.mode = :update
         setup_fields
         cols = ActiveRecord::Base.connection.columns("#{schema}.#{table_name}")
+        col_names = prev_fields.map(&:to_s) || cols.map(&:name)
         old_table_comment = ActiveRecord::Base.connection.table_comment(table_name)
 
         belongs_to_model_field = "#{belongs_to_model}_id" if belongs_to_model
 
-        old_colnames = cols.map(&:name) - standard_columns
+        old_colnames = col_names - standard_columns
         new_colnames = fields.map(&:to_s) - standard_columns
         added = new_colnames - old_colnames - [belongs_to_model_field]
         removed = old_colnames - new_colnames - [belongs_to_model_field]
@@ -172,10 +177,12 @@ module ActiveRecord
           comment = fields_comments[c.to_sym]
           options[:comment] = comment if comment.present?
           add_column "#{schema}.#{table_name}", c, field_defs[c.to_sym], options
+          add_column "#{schema}.#{history_table_name}", c, field_defs[c.to_sym], options
         end
 
         removed.each do |c|
           remove_column "#{schema}.#{table_name}", c
+          remove_column "#{schema}.#{history_table_name}", c
         end
 
         changed.each do |c|
@@ -183,7 +190,7 @@ module ActiveRecord
 
           col = cols.select { |csel| csel.name == c }.first
           new_comment = fields_comments[c.to_sym]
-          next if col.comment == new_comment
+          next if col&.comment == new_comment
 
           change_column_comment "#{schema}.#{table_name}", c, new_comment
         end
@@ -246,13 +253,13 @@ module ActiveRecord
         end
       end
 
-      def create_fields(t)
+      def create_fields(tbl)
         field_defs.each do |attr_name, f|
           fopts = field_opts[attr_name]
           if fopts
-            t.send(f, attr_name, fopts)
+            tbl.send(f, attr_name, fopts)
           else
-            t.send(f, attr_name)
+            tbl.send(f, attr_name)
           end
         end
       end
@@ -278,7 +285,7 @@ module ActiveRecord
 
       def activity_log_trigger_sql
         base_name_id = "#{belongs_to_model.to_s.underscore.gsub(%r{__|/}, '_')}_id"
-        <<~EOF
+        <<~DO_TEXT
 
           CREATE OR REPLACE FUNCTION #{trigger_fn_name} ()
             RETURNS TRIGGER
@@ -288,7 +295,7 @@ module ActiveRecord
             INSERT INTO #{history_table_name} (
               master_id,
               #{base_name_id},
-              #{fields.join(', ')},
+              #{"#{fields.join(', ')}," if fields.present?}
               extra_log_type,
               user_id,
               created_at,
@@ -297,7 +304,7 @@ module ActiveRecord
             SELECT
               NEW.master_id,
               NEW.#{base_name_id},
-              #{new_fields.join(', ')},
+              #{"#{new_fields.join(', ')}," if fields.present?}
               NEW.extra_log_type,
               NEW.user_id,
               NEW.created_at,
@@ -321,7 +328,7 @@ module ActiveRecord
             WHEN ((OLD.* IS DISTINCT FROM NEW.*))
             EXECUTE PROCEDURE #{trigger_fn_name} ();
 
-        EOF
+        DO_TEXT
       end
 
       def reverse_activity_log_trigger_sql
@@ -333,7 +340,7 @@ module ActiveRecord
       end
 
       def dynamic_model_trigger_sql
-        <<~EOF
+        <<~DO_TEXT
 
           CREATE OR REPLACE FUNCTION #{trigger_fn_name} ()
             RETURNS TRIGGER
@@ -372,7 +379,7 @@ module ActiveRecord
             WHEN ((OLD.* IS DISTINCT FROM NEW.*))
             EXECUTE PROCEDURE #{trigger_fn_name} ();
 
-        EOF
+        DO_TEXT
       end
 
       def reverse_dynamic_model_trigger_sql
@@ -384,7 +391,7 @@ module ActiveRecord
       end
 
       def external_identifier_trigger_sql
-        <<~EOF
+        <<~DO_TEXT
 
           CREATE OR REPLACE FUNCTION #{trigger_fn_name} ()
             RETURNS TRIGGER
@@ -425,7 +432,7 @@ module ActiveRecord
             WHEN ((OLD.* IS DISTINCT FROM NEW.*))
             EXECUTE PROCEDURE #{trigger_fn_name} ();
 
-        EOF
+        DO_TEXT
       end
 
       def reverse_external_identifier_trigger_sql

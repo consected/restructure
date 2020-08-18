@@ -1067,14 +1067,14 @@ CREATE FUNCTION femfl.log_femfl_subjects_update() RETURNS trigger
 BEGIN
   INSERT INTO femfl_subject_history (
     master_id,
-    first_name, last_name, middle_name, nick_name, birth_date, source,
+    first_name, last_name, middle_name, nick_name, birth_date, source, rank,
     user_id,
     created_at,
     updated_at,
     femfl_subject_id)
   SELECT
     NEW.master_id,
-    NEW.first_name, NEW.last_name, NEW.middle_name, NEW.nick_name, NEW.birth_date, NEW.source,
+    NEW.first_name, NEW.last_name, NEW.middle_name, NEW.nick_name, NEW.birth_date, NEW.source, NEW.rank,
     NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
@@ -14886,6 +14886,37 @@ CREATE FUNCTION persnet.log_persnet_assignment_update() RETURNS trigger
 
 
 --
+-- Name: log_activity_log_pitt_bhi_assignment_phone_screens_update(); Type: FUNCTION; Schema: pitt_bhi; Owner: -
+--
+
+CREATE FUNCTION pitt_bhi.log_activity_log_pitt_bhi_assignment_phone_screens_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_pitt_bhi_assignment_phone_screen_history (
+    master_id,
+    pitt_bhi_assignment_id,
+    
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_pitt_bhi_assignment_phone_screen_id)
+  SELECT
+    NEW.master_id,
+    NEW.pitt_bhi_assignment_id,
+    
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_activity_log_pitt_bhi_assignments_update(); Type: FUNCTION; Schema: pitt_bhi; Owner: -
 --
 
@@ -14964,6 +14995,195 @@ BEGIN
     NEW.pitt_bhi_id,
     NEW.user_id,
     NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_pitt_bhi_ps_eligibility_followups_update(); Type: FUNCTION; Schema: pitt_bhi; Owner: -
+--
+
+CREATE FUNCTION pitt_bhi.log_pitt_bhi_ps_eligibility_followups_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO pitt_bhi_ps_eligibility_followup_history (
+    master_id,
+    outcome, any_questions_yes_no, notes, interested_yes_no, not_interested_notes, contact_pi_yes_no, additional_questions_yes_no, consent_to_pass_info_to_msm_yes_no, consent_to_pass_info_to_msm_2_yes_no, contact_info_notes, more_questions_yes_no, more_questions_notes, select_still_interested,
+    user_id,
+    created_at,
+    updated_at,
+    pitt_bhi_ps_eligibility_followup_id)
+  SELECT
+    NEW.master_id,
+    NEW.outcome, NEW.any_questions_yes_no, NEW.notes, NEW.interested_yes_no, NEW.not_interested_notes, NEW.contact_pi_yes_no, NEW.additional_questions_yes_no, NEW.consent_to_pass_info_to_msm_yes_no, NEW.consent_to_pass_info_to_msm_2_yes_no, NEW.contact_info_notes, NEW.more_questions_yes_no, NEW.more_questions_notes, NEW.select_still_interested,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_pitt_bhi_ps_eligibles_update(); Type: FUNCTION; Schema: pitt_bhi; Owner: -
+--
+
+CREATE FUNCTION pitt_bhi.log_pitt_bhi_ps_eligibles_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO pitt_bhi_ps_eligible_history (
+    master_id,
+    interested_yes_no, notes, not_interested_notes, consent_to_pass_info_to_msm_yes_no, consent_to_pass_info_to_msm_2_yes_no, contact_info_notes, more_questions_yes_no, more_questions_notes, select_still_interested,
+    user_id,
+    created_at,
+    updated_at,
+    pitt_bhi_ps_eligible_id)
+  SELECT
+    NEW.master_id,
+    NEW.interested_yes_no, NEW.notes, NEW.not_interested_notes, NEW.consent_to_pass_info_to_msm_yes_no, NEW.consent_to_pass_info_to_msm_2_yes_no, NEW.contact_info_notes, NEW.more_questions_yes_no, NEW.more_questions_notes, NEW.select_still_interested,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_pitt_bhi_ps_initial_screenings_update(); Type: FUNCTION; Schema: pitt_bhi; Owner: -
+--
+
+CREATE FUNCTION pitt_bhi.log_pitt_bhi_ps_initial_screenings_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO pitt_bhi_ps_initial_screening_history (
+    master_id,
+    select_is_good_time_to_speak, question_notes, select_still_interested, follow_up_date, follow_up_time, notes,
+    user_id,
+    created_at,
+    updated_at,
+    pitt_bhi_ps_initial_screening_id)
+  SELECT
+    NEW.master_id,
+    NEW.select_is_good_time_to_speak, NEW.question_notes, NEW.select_still_interested, NEW.follow_up_date, NEW.follow_up_time, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_pitt_bhi_ps_non_eligibles_update(); Type: FUNCTION; Schema: pitt_bhi; Owner: -
+--
+
+CREATE FUNCTION pitt_bhi.log_pitt_bhi_ps_non_eligibles_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO pitt_bhi_ps_non_eligible_history (
+    master_id,
+    any_questions_yes_no, notes, contact_pi_yes_no, additional_questions_yes_no, consent_to_pass_info_to_msm_yes_no, consent_to_pass_info_to_msm_2_yes_no, contact_info_notes,
+    user_id,
+    created_at,
+    updated_at,
+    pitt_bhi_ps_non_eligible_id)
+  SELECT
+    NEW.master_id,
+    NEW.any_questions_yes_no, NEW.notes, NEW.contact_pi_yes_no, NEW.additional_questions_yes_no, NEW.consent_to_pass_info_to_msm_yes_no, NEW.consent_to_pass_info_to_msm_2_yes_no, NEW.contact_info_notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_pitt_bhi_ps_screener_responses_update(); Type: FUNCTION; Schema: pitt_bhi; Owner: -
+--
+
+CREATE FUNCTION pitt_bhi.log_pitt_bhi_ps_screener_responses_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO pitt_bhi_ps_screener_response_history (
+    master_id,
+    comm_clearly_in_english_yes_no, give_informed_consent_yes_no_dont_know, give_informed_consent_notes, outcome, notes,
+    user_id,
+    created_at,
+    updated_at,
+    pitt_bhi_ps_screener_response_id)
+  SELECT
+    NEW.master_id,
+    NEW.comm_clearly_in_english_yes_no, NEW.give_informed_consent_yes_no_dont_know, NEW.give_informed_consent_notes, NEW.outcome, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_pitt_bhi_ps_suitability_questions_update(); Type: FUNCTION; Schema: pitt_bhi; Owner: -
+--
+
+CREATE FUNCTION pitt_bhi.log_pitt_bhi_ps_suitability_questions_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO pitt_bhi_ps_suitability_question_history (
+    master_id,
+    birth_date, eligible_pension_yes_no, age, notes,
+    user_id,
+    created_at,
+    updated_at,
+    pitt_bhi_ps_suitability_question_id)
+  SELECT
+    NEW.master_id,
+    NEW.birth_date, NEW.eligible_pension_yes_no, NEW.age, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_pitt_bhi_screenings_update(); Type: FUNCTION; Schema: pitt_bhi; Owner: -
+--
+
+CREATE FUNCTION pitt_bhi.log_pitt_bhi_screenings_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO pitt_bhi_screening_history (
+    master_id,
+    eligible_for_study_blank_yes_no, good_time_to_speak_blank_yes_no, still_interested_blank_yes_no, callback_date, callback_time, consent_performed_yes_no, did_subject_consent_yes_no, ineligible_notes, eligible_notes, not_interested_notes, contact_in_future_yes_no,
+    user_id,
+    created_at,
+    updated_at,
+    pitt_bhi_screening_id)
+  SELECT
+    NEW.master_id,
+    NEW.eligible_for_study_blank_yes_no, NEW.good_time_to_speak_blank_yes_no, NEW.still_interested_blank_yes_no, NEW.callback_date, NEW.callback_time, NEW.consent_performed_yes_no, NEW.did_subject_consent_yes_no, NEW.ineligible_notes, NEW.eligible_notes, NEW.not_interested_notes, NEW.contact_in_future_yes_no,
+    NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
     NEW.id;
@@ -20801,7 +21021,8 @@ CREATE TABLE femfl.femfl_subjects (
     source character varying,
     user_id bigint,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    rank integer
 );
 
 
@@ -34364,6 +34585,75 @@ ALTER SEQUENCE pitt_bhi.activity_log_pitt_bhi_assignment_history_id_seq OWNED BY
 
 
 --
+-- Name: activity_log_pitt_bhi_assignment_phone_screen_history; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    pitt_bhi_assignment_id bigint,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_pitt_bhi_assignment_phone_screen_id bigint
+);
+
+
+--
+-- Name: activity_log_pitt_bhi_assignment_phone_screen_history_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_pitt_bhi_assignment_phone_screen_history_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history_id_seq OWNED BY pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history.id;
+
+
+--
+-- Name: activity_log_pitt_bhi_assignment_phone_screens; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens (
+    id bigint NOT NULL,
+    master_id bigint,
+    pitt_bhi_assignment_id bigint,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_pitt_bhi_assignment_phone_screens_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_pitt_bhi_assignment_phone_screens_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens_id_seq OWNED BY pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens.id;
+
+
+--
 -- Name: activity_log_pitt_bhi_assignments; Type: TABLE; Schema: pitt_bhi; Owner: -
 --
 
@@ -34548,6 +34838,614 @@ CREATE SEQUENCE pitt_bhi.pitt_bhi_assignments_id_seq
 --
 
 ALTER SEQUENCE pitt_bhi.pitt_bhi_assignments_id_seq OWNED BY pitt_bhi.pitt_bhi_assignments.id;
+
+
+--
+-- Name: pitt_bhi_ps_eligibility_followup_history; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_ps_eligibility_followup_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    outcome character varying,
+    any_questions_yes_no character varying,
+    notes character varying,
+    interested_yes_no character varying,
+    not_interested_notes character varying,
+    contact_pi_yes_no character varying,
+    additional_questions_yes_no character varying,
+    consent_to_pass_info_to_msm_yes_no character varying,
+    consent_to_pass_info_to_msm_2_yes_no character varying,
+    contact_info_notes character varying,
+    more_questions_yes_no character varying,
+    more_questions_notes character varying,
+    select_still_interested character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    pitt_bhi_ps_eligibility_followup_id bigint
+);
+
+
+--
+-- Name: pitt_bhi_ps_eligibility_followup_history_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_ps_eligibility_followup_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_ps_eligibility_followup_history_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_eligibility_followup_history_id_seq OWNED BY pitt_bhi.pitt_bhi_ps_eligibility_followup_history.id;
+
+
+--
+-- Name: pitt_bhi_ps_eligibility_followups; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_ps_eligibility_followups (
+    id bigint NOT NULL,
+    master_id bigint,
+    outcome character varying,
+    any_questions_yes_no character varying,
+    notes character varying,
+    interested_yes_no character varying,
+    not_interested_notes character varying,
+    contact_pi_yes_no character varying,
+    additional_questions_yes_no character varying,
+    consent_to_pass_info_to_msm_yes_no character varying,
+    consent_to_pass_info_to_msm_2_yes_no character varying,
+    contact_info_notes character varying,
+    more_questions_yes_no character varying,
+    more_questions_notes character varying,
+    select_still_interested character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: pitt_bhi_ps_eligibility_followups_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_ps_eligibility_followups_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_ps_eligibility_followups_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_eligibility_followups_id_seq OWNED BY pitt_bhi.pitt_bhi_ps_eligibility_followups.id;
+
+
+--
+-- Name: pitt_bhi_ps_eligible_history; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_ps_eligible_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    interested_yes_no character varying,
+    notes character varying,
+    not_interested_notes character varying,
+    consent_to_pass_info_to_msm_yes_no character varying,
+    consent_to_pass_info_to_msm_2_yes_no character varying,
+    contact_info_notes character varying,
+    more_questions_yes_no character varying,
+    more_questions_notes character varying,
+    select_still_interested character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    pitt_bhi_ps_eligible_id bigint
+);
+
+
+--
+-- Name: pitt_bhi_ps_eligible_history_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_ps_eligible_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_ps_eligible_history_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_eligible_history_id_seq OWNED BY pitt_bhi.pitt_bhi_ps_eligible_history.id;
+
+
+--
+-- Name: pitt_bhi_ps_eligibles; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_ps_eligibles (
+    id bigint NOT NULL,
+    master_id bigint,
+    interested_yes_no character varying,
+    notes character varying,
+    not_interested_notes character varying,
+    consent_to_pass_info_to_msm_yes_no character varying,
+    consent_to_pass_info_to_msm_2_yes_no character varying,
+    contact_info_notes character varying,
+    more_questions_yes_no character varying,
+    more_questions_notes character varying,
+    select_still_interested character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: pitt_bhi_ps_eligibles_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_ps_eligibles_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_ps_eligibles_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_eligibles_id_seq OWNED BY pitt_bhi.pitt_bhi_ps_eligibles.id;
+
+
+--
+-- Name: pitt_bhi_ps_initial_screening_history; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_ps_initial_screening_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    select_is_good_time_to_speak character varying,
+    any_questions_blank_yes_no character varying,
+    question_notes character varying,
+    select_still_interested character varying,
+    follow_up_date date,
+    follow_up_time time without time zone,
+    more_questions_yes_no character varying,
+    more_questions_notes character varying,
+    still_interested_2_yes_no character varying,
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    pitt_bhi_ps_initial_screening_id bigint
+);
+
+
+--
+-- Name: pitt_bhi_ps_initial_screening_history_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_ps_initial_screening_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_ps_initial_screening_history_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_initial_screening_history_id_seq OWNED BY pitt_bhi.pitt_bhi_ps_initial_screening_history.id;
+
+
+--
+-- Name: pitt_bhi_ps_initial_screenings; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_ps_initial_screenings (
+    id bigint NOT NULL,
+    master_id bigint,
+    select_is_good_time_to_speak character varying,
+    question_notes character varying,
+    select_still_interested character varying,
+    follow_up_date date,
+    follow_up_time time without time zone,
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: pitt_bhi_ps_initial_screenings_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_ps_initial_screenings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_ps_initial_screenings_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_initial_screenings_id_seq OWNED BY pitt_bhi.pitt_bhi_ps_initial_screenings.id;
+
+
+--
+-- Name: pitt_bhi_ps_non_eligible_history; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_ps_non_eligible_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    any_questions_yes_no character varying,
+    notes character varying,
+    contact_pi_yes_no character varying,
+    additional_questions_yes_no character varying,
+    consent_to_pass_info_to_msm_yes_no character varying,
+    consent_to_pass_info_to_msm_2_yes_no character varying,
+    contact_info_notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    pitt_bhi_ps_non_eligible_id bigint
+);
+
+
+--
+-- Name: pitt_bhi_ps_non_eligible_history_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_ps_non_eligible_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_ps_non_eligible_history_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_non_eligible_history_id_seq OWNED BY pitt_bhi.pitt_bhi_ps_non_eligible_history.id;
+
+
+--
+-- Name: pitt_bhi_ps_non_eligibles; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_ps_non_eligibles (
+    id bigint NOT NULL,
+    master_id bigint,
+    any_questions_yes_no character varying,
+    notes character varying,
+    contact_pi_yes_no character varying,
+    additional_questions_yes_no character varying,
+    consent_to_pass_info_to_msm_yes_no character varying,
+    consent_to_pass_info_to_msm_2_yes_no character varying,
+    contact_info_notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: pitt_bhi_ps_non_eligibles_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_ps_non_eligibles_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_ps_non_eligibles_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_non_eligibles_id_seq OWNED BY pitt_bhi.pitt_bhi_ps_non_eligibles.id;
+
+
+--
+-- Name: pitt_bhi_ps_screener_response_history; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_ps_screener_response_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    comm_clearly_in_english_yes_no character varying,
+    give_informed_consent_yes_no_dont_know character varying,
+    give_informed_consent_notes character varying,
+    outcome character varying,
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    pitt_bhi_ps_screener_response_id bigint
+);
+
+
+--
+-- Name: pitt_bhi_ps_screener_response_history_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_ps_screener_response_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_ps_screener_response_history_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_screener_response_history_id_seq OWNED BY pitt_bhi.pitt_bhi_ps_screener_response_history.id;
+
+
+--
+-- Name: pitt_bhi_ps_screener_responses; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_ps_screener_responses (
+    id bigint NOT NULL,
+    master_id bigint,
+    comm_clearly_in_english_yes_no character varying,
+    give_informed_consent_yes_no_dont_know character varying,
+    give_informed_consent_notes character varying,
+    outcome character varying,
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: pitt_bhi_ps_screener_responses_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_ps_screener_responses_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_ps_screener_responses_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_screener_responses_id_seq OWNED BY pitt_bhi.pitt_bhi_ps_screener_responses.id;
+
+
+--
+-- Name: pitt_bhi_ps_suitability_question_history; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_ps_suitability_question_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    birth_date date,
+    eligible_pension_yes_no character varying,
+    any_questions_yes_no character varying,
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    pitt_bhi_ps_suitability_question_id bigint,
+    age integer
+);
+
+
+--
+-- Name: pitt_bhi_ps_suitability_question_history_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_ps_suitability_question_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_ps_suitability_question_history_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_suitability_question_history_id_seq OWNED BY pitt_bhi.pitt_bhi_ps_suitability_question_history.id;
+
+
+--
+-- Name: pitt_bhi_ps_suitability_questions; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_ps_suitability_questions (
+    id bigint NOT NULL,
+    master_id bigint,
+    birth_date date,
+    eligible_pension_yes_no character varying,
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    age integer
+);
+
+
+--
+-- Name: TABLE pitt_bhi_ps_suitability_questions; Type: COMMENT; Schema: pitt_bhi; Owner: -
+--
+
+COMMENT ON TABLE pitt_bhi.pitt_bhi_ps_suitability_questions IS 'Suitability assessment form for BHI phone screening, recording responses from subject
+';
+
+
+--
+-- Name: COLUMN pitt_bhi_ps_suitability_questions.birth_date; Type: COMMENT; Schema: pitt_bhi; Owner: -
+--
+
+COMMENT ON COLUMN pitt_bhi.pitt_bhi_ps_suitability_questions.birth_date IS 'Date of birth';
+
+
+--
+-- Name: COLUMN pitt_bhi_ps_suitability_questions.eligible_pension_yes_no; Type: COMMENT; Schema: pitt_bhi; Owner: -
+--
+
+COMMENT ON COLUMN pitt_bhi.pitt_bhi_ps_suitability_questions.eligible_pension_yes_no IS 'Eligible for a pension from the NFL
+(At least 3 seasons with 3 games per season)
+';
+
+
+--
+-- Name: COLUMN pitt_bhi_ps_suitability_questions.notes; Type: COMMENT; Schema: pitt_bhi; Owner: -
+--
+
+COMMENT ON COLUMN pitt_bhi.pitt_bhi_ps_suitability_questions.notes IS 'Question and notes recorded by interviewer';
+
+
+--
+-- Name: COLUMN pitt_bhi_ps_suitability_questions.age; Type: COMMENT; Schema: pitt_bhi; Owner: -
+--
+
+COMMENT ON COLUMN pitt_bhi.pitt_bhi_ps_suitability_questions.age IS 'Calculated age at the time the response was saved';
+
+
+--
+-- Name: pitt_bhi_ps_suitability_questions_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_ps_suitability_questions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_ps_suitability_questions_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_ps_suitability_questions_id_seq OWNED BY pitt_bhi.pitt_bhi_ps_suitability_questions.id;
+
+
+--
+-- Name: pitt_bhi_screening_history; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_screening_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    eligible_for_study_blank_yes_no character varying,
+    good_time_to_speak_blank_yes_no character varying,
+    still_interested_blank_yes_no character varying,
+    callback_date date,
+    callback_time time without time zone,
+    consent_performed_yes_no character varying,
+    did_subject_consent_yes_no character varying,
+    ineligible_notes character varying,
+    eligible_notes character varying,
+    not_interested_notes character varying,
+    contact_in_future_yes_no character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    pitt_bhi_screening_id bigint
+);
+
+
+--
+-- Name: pitt_bhi_screening_history_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_screening_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_screening_history_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_screening_history_id_seq OWNED BY pitt_bhi.pitt_bhi_screening_history.id;
+
+
+--
+-- Name: pitt_bhi_screenings; Type: TABLE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TABLE pitt_bhi.pitt_bhi_screenings (
+    id bigint NOT NULL,
+    master_id bigint,
+    eligible_for_study_blank_yes_no character varying,
+    good_time_to_speak_blank_yes_no character varying,
+    still_interested_blank_yes_no character varying,
+    callback_date date,
+    callback_time time without time zone,
+    consent_performed_yes_no character varying,
+    did_subject_consent_yes_no character varying,
+    ineligible_notes character varying,
+    eligible_notes character varying,
+    not_interested_notes character varying,
+    contact_in_future_yes_no character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: pitt_bhi_screenings_id_seq; Type: SEQUENCE; Schema: pitt_bhi; Owner: -
+--
+
+CREATE SEQUENCE pitt_bhi.pitt_bhi_screenings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_screenings_id_seq; Type: SEQUENCE OWNED BY; Schema: pitt_bhi; Owner: -
+--
+
+ALTER SEQUENCE pitt_bhi.pitt_bhi_screenings_id_seq OWNED BY pitt_bhi.pitt_bhi_screenings.id;
 
 
 --
@@ -44069,6 +44967,20 @@ ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_history ALTER COLUMN 
 -- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
 --
 
+ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
 ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignments ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.activity_log_pitt_bhi_assignments_id_seq'::regclass);
 
 
@@ -44098,6 +45010,104 @@ ALTER TABLE ONLY pitt_bhi.pitt_bhi_assignment_history ALTER COLUMN id SET DEFAUL
 --
 
 ALTER TABLE ONLY pitt_bhi.pitt_bhi_assignments ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligibility_followup_history ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_ps_eligibility_followup_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligibility_followups ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_ps_eligibility_followups_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligible_history ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_ps_eligible_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligibles ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_ps_eligibles_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_initial_screening_history ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_ps_initial_screening_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_initial_screenings ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_ps_initial_screenings_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_non_eligible_history ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_ps_non_eligible_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_non_eligibles ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_ps_non_eligibles_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_screener_response_history ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_ps_screener_response_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_screener_responses ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_ps_screener_responses_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_suitability_question_history ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_ps_suitability_question_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_suitability_questions ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_ps_suitability_questions_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_screening_history ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_screening_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_screenings ALTER COLUMN id SET DEFAULT nextval('pitt_bhi.pitt_bhi_screenings_id_seq'::regclass);
 
 
 --
@@ -48059,6 +49069,22 @@ ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_history
 
 
 --
+-- Name: activity_log_pitt_bhi_assignment_phone_screen_history_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history
+    ADD CONSTRAINT activity_log_pitt_bhi_assignment_phone_screen_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_pitt_bhi_assignment_phone_screens_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens
+    ADD CONSTRAINT activity_log_pitt_bhi_assignment_phone_screens_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: activity_log_pitt_bhi_assignments_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
 --
 
@@ -48096,6 +49122,118 @@ ALTER TABLE ONLY pitt_bhi.pitt_bhi_assignment_history
 
 ALTER TABLE ONLY pitt_bhi.pitt_bhi_assignments
     ADD CONSTRAINT pitt_bhi_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_ps_eligibility_followup_history_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligibility_followup_history
+    ADD CONSTRAINT pitt_bhi_ps_eligibility_followup_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_ps_eligibility_followups_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligibility_followups
+    ADD CONSTRAINT pitt_bhi_ps_eligibility_followups_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_ps_eligible_history_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligible_history
+    ADD CONSTRAINT pitt_bhi_ps_eligible_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_ps_eligibles_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligibles
+    ADD CONSTRAINT pitt_bhi_ps_eligibles_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_ps_initial_screening_history_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_initial_screening_history
+    ADD CONSTRAINT pitt_bhi_ps_initial_screening_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_ps_initial_screenings_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_initial_screenings
+    ADD CONSTRAINT pitt_bhi_ps_initial_screenings_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_ps_non_eligible_history_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_non_eligible_history
+    ADD CONSTRAINT pitt_bhi_ps_non_eligible_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_ps_non_eligibles_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_non_eligibles
+    ADD CONSTRAINT pitt_bhi_ps_non_eligibles_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_ps_screener_response_history_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_screener_response_history
+    ADD CONSTRAINT pitt_bhi_ps_screener_response_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_ps_screener_responses_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_screener_responses
+    ADD CONSTRAINT pitt_bhi_ps_screener_responses_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_ps_suitability_question_history_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_suitability_question_history
+    ADD CONSTRAINT pitt_bhi_ps_suitability_question_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_ps_suitability_questions_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_suitability_questions
+    ADD CONSTRAINT pitt_bhi_ps_suitability_questions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_screening_history_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_screening_history
+    ADD CONSTRAINT pitt_bhi_screening_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_screenings_pkey; Type: CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_screenings
+    ADD CONSTRAINT pitt_bhi_screenings_pkey PRIMARY KEY (id);
 
 
 --
@@ -55667,6 +56805,69 @@ CREATE INDEX index_persnet_assignments_on_user_id ON persnet.persnet_assignments
 
 
 --
+-- Name: 271fb131_history_master_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "271fb131_history_master_id" ON pitt_bhi.pitt_bhi_ps_eligibility_followup_history USING btree (master_id);
+
+
+--
+-- Name: 271fb131_id_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "271fb131_id_idx" ON pitt_bhi.pitt_bhi_ps_eligibility_followup_history USING btree (pitt_bhi_ps_eligibility_followup_id);
+
+
+--
+-- Name: 271fb131_user_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "271fb131_user_idx" ON pitt_bhi.pitt_bhi_ps_eligibility_followup_history USING btree (user_id);
+
+
+--
+-- Name: 31f4f0d0_history_master_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "31f4f0d0_history_master_id" ON pitt_bhi.pitt_bhi_ps_screener_response_history USING btree (master_id);
+
+
+--
+-- Name: 31f4f0d0_id_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "31f4f0d0_id_idx" ON pitt_bhi.pitt_bhi_ps_screener_response_history USING btree (pitt_bhi_ps_screener_response_id);
+
+
+--
+-- Name: 31f4f0d0_user_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "31f4f0d0_user_idx" ON pitt_bhi.pitt_bhi_ps_screener_response_history USING btree (user_id);
+
+
+--
+-- Name: 5h1r4d_id_h_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "5h1r4d_id_h_idx" ON pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history USING btree (activity_log_pitt_bhi_assignment_phone_screen_id);
+
+
+--
+-- Name: 97fdth_user_id_h_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "97fdth_user_id_h_idx" ON pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history USING btree (user_id);
+
+
+--
+-- Name: a3i2cl_master_id_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX a3i2cl_master_id_idx ON pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens USING btree (master_id);
+
+
+--
 -- Name: activity_log_pitt_bhi_assignment_id_h_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
 --
 
@@ -55713,6 +56914,48 @@ CREATE INDEX al_pitt_bhi_assignment_user_id_h_idx ON pitt_bhi.activity_log_pitt_
 --
 
 CREATE INDEX al_pitt_bhi_assignment_user_id_idx ON pitt_bhi.activity_log_pitt_bhi_assignments USING btree (user_id);
+
+
+--
+-- Name: cgv8p7_id_h_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX cgv8p7_id_h_idx ON pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history USING btree (pitt_bhi_assignment_id);
+
+
+--
+-- Name: cio0cq_id_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX cio0cq_id_idx ON pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens USING btree (pitt_bhi_assignment_id);
+
+
+--
+-- Name: e0brzq_master_id_h_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX e0brzq_master_id_h_idx ON pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history USING btree (master_id);
+
+
+--
+-- Name: fr0v7t_user_id_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX fr0v7t_user_id_idx ON pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens USING btree (user_id);
+
+
+--
+-- Name: history_master_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX history_master_id ON pitt_bhi.pitt_bhi_ps_suitability_question_history USING btree (master_id);
+
+
+--
+-- Name: id_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX id_idx ON pitt_bhi.pitt_bhi_ps_suitability_question_history USING btree (pitt_bhi_ps_suitability_question_id);
 
 
 --
@@ -55786,6 +57029,132 @@ CREATE INDEX "index_pitt_bhi.pitt_bhi_assignments_on_user_id" ON pitt_bhi.pitt_b
 
 
 --
+-- Name: index_pitt_bhi.pitt_bhi_ps_eligibility_followups_on_master_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_eligibility_followups_on_master_id" ON pitt_bhi.pitt_bhi_ps_eligibility_followups USING btree (master_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_eligibility_followups_on_user_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_eligibility_followups_on_user_id" ON pitt_bhi.pitt_bhi_ps_eligibility_followups USING btree (user_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_eligible_history_on_user_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_eligible_history_on_user_id" ON pitt_bhi.pitt_bhi_ps_eligible_history USING btree (user_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_eligibles_on_master_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_eligibles_on_master_id" ON pitt_bhi.pitt_bhi_ps_eligibles USING btree (master_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_eligibles_on_user_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_eligibles_on_user_id" ON pitt_bhi.pitt_bhi_ps_eligibles USING btree (user_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_initial_screening_history_on_user_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_initial_screening_history_on_user_id" ON pitt_bhi.pitt_bhi_ps_initial_screening_history USING btree (user_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_initial_screenings_on_master_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_initial_screenings_on_master_id" ON pitt_bhi.pitt_bhi_ps_initial_screenings USING btree (master_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_initial_screenings_on_user_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_initial_screenings_on_user_id" ON pitt_bhi.pitt_bhi_ps_initial_screenings USING btree (user_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_non_eligible_history_on_user_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_non_eligible_history_on_user_id" ON pitt_bhi.pitt_bhi_ps_non_eligible_history USING btree (user_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_non_eligibles_on_master_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_non_eligibles_on_master_id" ON pitt_bhi.pitt_bhi_ps_non_eligibles USING btree (master_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_non_eligibles_on_user_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_non_eligibles_on_user_id" ON pitt_bhi.pitt_bhi_ps_non_eligibles USING btree (user_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_screener_responses_on_master_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_screener_responses_on_master_id" ON pitt_bhi.pitt_bhi_ps_screener_responses USING btree (master_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_screener_responses_on_user_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_screener_responses_on_user_id" ON pitt_bhi.pitt_bhi_ps_screener_responses USING btree (user_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_suitability_questions_on_master_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_suitability_questions_on_master_id" ON pitt_bhi.pitt_bhi_ps_suitability_questions USING btree (master_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_ps_suitability_questions_on_user_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_ps_suitability_questions_on_user_id" ON pitt_bhi.pitt_bhi_ps_suitability_questions USING btree (user_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_screening_history_on_user_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_screening_history_on_user_id" ON pitt_bhi.pitt_bhi_screening_history USING btree (user_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_screenings_on_master_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_screenings_on_master_id" ON pitt_bhi.pitt_bhi_screenings USING btree (master_id);
+
+
+--
+-- Name: index_pitt_bhi.pitt_bhi_screenings_on_user_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX "index_pitt_bhi.pitt_bhi_screenings_on_user_id" ON pitt_bhi.pitt_bhi_screenings USING btree (user_id);
+
+
+--
 -- Name: index_pitt_bhi.pitt_bhi_secure_note_history_on_master_id; Type: INDEX; Schema: pitt_bhi; Owner: -
 --
 
@@ -55856,6 +57225,62 @@ CREATE INDEX pitt_bhi_assignment_id_idx ON pitt_bhi.pitt_bhi_assignment_history 
 
 
 --
+-- Name: pitt_bhi_ps_eligible_h_m_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX pitt_bhi_ps_eligible_h_m_id ON pitt_bhi.pitt_bhi_ps_eligible_history USING btree (master_id);
+
+
+--
+-- Name: pitt_bhi_ps_eligible_id_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX pitt_bhi_ps_eligible_id_idx ON pitt_bhi.pitt_bhi_ps_eligible_history USING btree (pitt_bhi_ps_eligible_id);
+
+
+--
+-- Name: pitt_bhi_ps_initial_screening_h_m_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX pitt_bhi_ps_initial_screening_h_m_id ON pitt_bhi.pitt_bhi_ps_initial_screening_history USING btree (master_id);
+
+
+--
+-- Name: pitt_bhi_ps_initial_screening_id_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX pitt_bhi_ps_initial_screening_id_idx ON pitt_bhi.pitt_bhi_ps_initial_screening_history USING btree (pitt_bhi_ps_initial_screening_id);
+
+
+--
+-- Name: pitt_bhi_ps_non_eligible_h_m_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX pitt_bhi_ps_non_eligible_h_m_id ON pitt_bhi.pitt_bhi_ps_non_eligible_history USING btree (master_id);
+
+
+--
+-- Name: pitt_bhi_ps_non_eligible_id_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX pitt_bhi_ps_non_eligible_id_idx ON pitt_bhi.pitt_bhi_ps_non_eligible_history USING btree (pitt_bhi_ps_non_eligible_id);
+
+
+--
+-- Name: pitt_bhi_screening_h_m_id; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX pitt_bhi_screening_h_m_id ON pitt_bhi.pitt_bhi_screening_history USING btree (master_id);
+
+
+--
+-- Name: pitt_bhi_screening_id_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX pitt_bhi_screening_id_idx ON pitt_bhi.pitt_bhi_screening_history USING btree (pitt_bhi_screening_id);
+
+
+--
 -- Name: pitt_bhi_secure_note_id_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
 --
 
@@ -55867,6 +57292,13 @@ CREATE INDEX pitt_bhi_secure_note_id_idx ON pitt_bhi.pitt_bhi_secure_note_histor
 --
 
 CREATE INDEX pitt_bhi_withdrawal_id_idx ON pitt_bhi.pitt_bhi_withdrawal_history USING btree (pitt_bhi_withdrawal_id);
+
+
+--
+-- Name: user_idx; Type: INDEX; Schema: pitt_bhi; Owner: -
+--
+
+CREATE INDEX user_idx ON pitt_bhi.pitt_bhi_ps_suitability_question_history USING btree (user_id);
 
 
 --
@@ -61288,6 +62720,20 @@ CREATE TRIGGER log_activity_log_pitt_bhi_assignment_history_update AFTER UPDATE 
 
 
 --
+-- Name: log_activity_log_pitt_bhi_assignment_phone_screen_history_inser; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_pitt_bhi_assignment_phone_screen_history_inser AFTER INSERT ON pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens FOR EACH ROW EXECUTE PROCEDURE pitt_bhi.log_activity_log_pitt_bhi_assignment_phone_screens_update();
+
+
+--
+-- Name: log_activity_log_pitt_bhi_assignment_phone_screen_history_updat; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_pitt_bhi_assignment_phone_screen_history_updat AFTER UPDATE ON pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE pitt_bhi.log_activity_log_pitt_bhi_assignment_phone_screens_update();
+
+
+--
 -- Name: log_pitt_bhi_appointment_history_insert; Type: TRIGGER; Schema: pitt_bhi; Owner: -
 --
 
@@ -61313,6 +62759,104 @@ CREATE TRIGGER log_pitt_bhi_assignment_history_insert AFTER INSERT ON pitt_bhi.p
 --
 
 CREATE TRIGGER log_pitt_bhi_assignment_history_update AFTER UPDATE ON pitt_bhi.pitt_bhi_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_assignments_update();
+
+
+--
+-- Name: log_pitt_bhi_ps_eligibility_followup_history_insert; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_ps_eligibility_followup_history_insert AFTER INSERT ON pitt_bhi.pitt_bhi_ps_eligibility_followups FOR EACH ROW EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_ps_eligibility_followups_update();
+
+
+--
+-- Name: log_pitt_bhi_ps_eligibility_followup_history_update; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_ps_eligibility_followup_history_update AFTER UPDATE ON pitt_bhi.pitt_bhi_ps_eligibility_followups FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_ps_eligibility_followups_update();
+
+
+--
+-- Name: log_pitt_bhi_ps_eligible_history_insert; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_ps_eligible_history_insert AFTER INSERT ON pitt_bhi.pitt_bhi_ps_eligibles FOR EACH ROW EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_ps_eligibles_update();
+
+
+--
+-- Name: log_pitt_bhi_ps_eligible_history_update; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_ps_eligible_history_update AFTER UPDATE ON pitt_bhi.pitt_bhi_ps_eligibles FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_ps_eligibles_update();
+
+
+--
+-- Name: log_pitt_bhi_ps_initial_screening_history_insert; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_ps_initial_screening_history_insert AFTER INSERT ON pitt_bhi.pitt_bhi_ps_initial_screenings FOR EACH ROW EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_ps_initial_screenings_update();
+
+
+--
+-- Name: log_pitt_bhi_ps_initial_screening_history_update; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_ps_initial_screening_history_update AFTER UPDATE ON pitt_bhi.pitt_bhi_ps_initial_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_ps_initial_screenings_update();
+
+
+--
+-- Name: log_pitt_bhi_ps_non_eligible_history_insert; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_ps_non_eligible_history_insert AFTER INSERT ON pitt_bhi.pitt_bhi_ps_non_eligibles FOR EACH ROW EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_ps_non_eligibles_update();
+
+
+--
+-- Name: log_pitt_bhi_ps_non_eligible_history_update; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_ps_non_eligible_history_update AFTER UPDATE ON pitt_bhi.pitt_bhi_ps_non_eligibles FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_ps_non_eligibles_update();
+
+
+--
+-- Name: log_pitt_bhi_ps_screener_response_history_insert; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_ps_screener_response_history_insert AFTER INSERT ON pitt_bhi.pitt_bhi_ps_screener_responses FOR EACH ROW EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_ps_screener_responses_update();
+
+
+--
+-- Name: log_pitt_bhi_ps_screener_response_history_update; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_ps_screener_response_history_update AFTER UPDATE ON pitt_bhi.pitt_bhi_ps_screener_responses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_ps_screener_responses_update();
+
+
+--
+-- Name: log_pitt_bhi_ps_suitability_question_history_insert; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_ps_suitability_question_history_insert AFTER INSERT ON pitt_bhi.pitt_bhi_ps_suitability_questions FOR EACH ROW EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_ps_suitability_questions_update();
+
+
+--
+-- Name: log_pitt_bhi_ps_suitability_question_history_update; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_ps_suitability_question_history_update AFTER UPDATE ON pitt_bhi.pitt_bhi_ps_suitability_questions FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_ps_suitability_questions_update();
+
+
+--
+-- Name: log_pitt_bhi_screening_history_insert; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_screening_history_insert AFTER INSERT ON pitt_bhi.pitt_bhi_screenings FOR EACH ROW EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_screenings_update();
+
+
+--
+-- Name: log_pitt_bhi_screening_history_update; Type: TRIGGER; Schema: pitt_bhi; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_screening_history_update AFTER UPDATE ON pitt_bhi.pitt_bhi_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE pitt_bhi.log_pitt_bhi_screenings_update();
 
 
 --
@@ -69577,11 +71121,91 @@ ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_history
 
 
 --
+-- Name: fk_rails_154c3ad5f0; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_initial_screening_history
+    ADD CONSTRAINT fk_rails_154c3ad5f0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a89feaf2c; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_screener_response_history
+    ADD CONSTRAINT fk_rails_1a89feaf2c FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_1bcb4d3653; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligibles
+    ADD CONSTRAINT fk_rails_1bcb4d3653 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_1dc985c55c; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_initial_screenings
+    ADD CONSTRAINT fk_rails_1dc985c55c FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_24bad22601; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligibility_followup_history
+    ADD CONSTRAINT fk_rails_24bad22601 FOREIGN KEY (pitt_bhi_ps_eligibility_followup_id) REFERENCES pitt_bhi.pitt_bhi_ps_eligibility_followups(id);
+
+
+--
+-- Name: fk_rails_2778237df4; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history
+    ADD CONSTRAINT fk_rails_2778237df4 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_281d5195ab; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
 --
 
 ALTER TABLE ONLY pitt_bhi.pitt_bhi_withdrawals
     ADD CONSTRAINT fk_rails_281d5195ab FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_2bd6512b56; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_initial_screening_history
+    ADD CONSTRAINT fk_rails_2bd6512b56 FOREIGN KEY (pitt_bhi_ps_initial_screening_id) REFERENCES pitt_bhi.pitt_bhi_ps_initial_screenings(id);
+
+
+--
+-- Name: fk_rails_2caaa8af6e; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_initial_screenings
+    ADD CONSTRAINT fk_rails_2caaa8af6e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_2e74923d97; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_initial_screening_history
+    ADD CONSTRAINT fk_rails_2e74923d97 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_300568050e; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_suitability_question_history
+    ADD CONSTRAINT fk_rails_300568050e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -69609,11 +71233,35 @@ ALTER TABLE ONLY pitt_bhi.pitt_bhi_assignment_history
 
 
 --
+-- Name: fk_rails_3a1b82ffb2; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_screening_history
+    ADD CONSTRAINT fk_rails_3a1b82ffb2 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_3aef21e900; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
 --
 
 ALTER TABLE ONLY pitt_bhi.pitt_bhi_withdrawal_history
     ADD CONSTRAINT fk_rails_3aef21e900 FOREIGN KEY (pitt_bhi_withdrawal_id) REFERENCES pitt_bhi.pitt_bhi_withdrawals(id);
+
+
+--
+-- Name: fk_rails_3c3bc752a9; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_screener_responses
+    ADD CONSTRAINT fk_rails_3c3bc752a9 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_3e5dbe01bb; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_screener_responses
+    ADD CONSTRAINT fk_rails_3e5dbe01bb FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
@@ -69625,11 +71273,35 @@ ALTER TABLE ONLY pitt_bhi.pitt_bhi_assignments
 
 
 --
+-- Name: fk_rails_405f38db0b; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligibility_followups
+    ADD CONSTRAINT fk_rails_405f38db0b FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_432d49db9a; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_screening_history
+    ADD CONSTRAINT fk_rails_432d49db9a FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_4408c83dc8; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
 --
 
 ALTER TABLE ONLY pitt_bhi.pitt_bhi_appointments
     ADD CONSTRAINT fk_rails_4408c83dc8 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_4b4087e388; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens
+    ADD CONSTRAINT fk_rails_4b4087e388 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
@@ -69641,6 +71313,30 @@ ALTER TABLE ONLY pitt_bhi.pitt_bhi_assignments
 
 
 --
+-- Name: fk_rails_4c7f7ae88d; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens
+    ADD CONSTRAINT fk_rails_4c7f7ae88d FOREIGN KEY (pitt_bhi_assignment_id) REFERENCES pitt_bhi.pitt_bhi_assignments(id);
+
+
+--
+-- Name: fk_rails_51a3acb527; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_suitability_question_history
+    ADD CONSTRAINT fk_rails_51a3acb527 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_529a8bd15b; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_non_eligibles
+    ADD CONSTRAINT fk_rails_529a8bd15b FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_5a001c8964; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
 --
 
@@ -69649,11 +71345,43 @@ ALTER TABLE ONLY pitt_bhi.pitt_bhi_appointment_history
 
 
 --
+-- Name: fk_rails_5e2923403c; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history
+    ADD CONSTRAINT fk_rails_5e2923403c FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_5f6bdcb022; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
 --
 
 ALTER TABLE ONLY pitt_bhi.pitt_bhi_secure_notes
     ADD CONSTRAINT fk_rails_5f6bdcb022 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_61234862c0; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history
+    ADD CONSTRAINT fk_rails_61234862c0 FOREIGN KEY (activity_log_pitt_bhi_assignment_phone_screen_id) REFERENCES pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens(id);
+
+
+--
+-- Name: fk_rails_69fa838a80; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_non_eligible_history
+    ADD CONSTRAINT fk_rails_69fa838a80 FOREIGN KEY (pitt_bhi_ps_non_eligible_id) REFERENCES pitt_bhi.pitt_bhi_ps_non_eligibles(id);
+
+
+--
+-- Name: fk_rails_6b6e49fec7; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligibility_followup_history
+    ADD CONSTRAINT fk_rails_6b6e49fec7 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
@@ -69673,11 +71401,43 @@ ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignments
 
 
 --
+-- Name: fk_rails_7559629f3a; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_screener_response_history
+    ADD CONSTRAINT fk_rails_7559629f3a FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_78fe1318eb; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
 --
 
 ALTER TABLE ONLY pitt_bhi.pitt_bhi_appointments
     ADD CONSTRAINT fk_rails_78fe1318eb FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_7d57b9af9e; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligibles
+    ADD CONSTRAINT fk_rails_7d57b9af9e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_7f9fcb2aec; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligible_history
+    ADD CONSTRAINT fk_rails_7f9fcb2aec FOREIGN KEY (pitt_bhi_ps_eligible_id) REFERENCES pitt_bhi.pitt_bhi_ps_eligibles(id);
+
+
+--
+-- Name: fk_rails_823bdc5102; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligibility_followup_history
+    ADD CONSTRAINT fk_rails_823bdc5102 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -69713,11 +71473,67 @@ ALTER TABLE ONLY pitt_bhi.pitt_bhi_secure_note_history
 
 
 --
+-- Name: fk_rails_92ebe24fa2; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_screener_response_history
+    ADD CONSTRAINT fk_rails_92ebe24fa2 FOREIGN KEY (pitt_bhi_ps_screener_response_id) REFERENCES pitt_bhi.pitt_bhi_ps_screener_responses(id);
+
+
+--
+-- Name: fk_rails_96f54a981d; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_suitability_questions
+    ADD CONSTRAINT fk_rails_96f54a981d FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_9703ce17dd; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_screening_history
+    ADD CONSTRAINT fk_rails_9703ce17dd FOREIGN KEY (pitt_bhi_screening_id) REFERENCES pitt_bhi.pitt_bhi_screenings(id);
+
+
+--
+-- Name: fk_rails_9835c966dd; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_suitability_questions
+    ADD CONSTRAINT fk_rails_9835c966dd FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_9d8dac717e; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_non_eligible_history
+    ADD CONSTRAINT fk_rails_9d8dac717e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_9d8f8c7f42; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
 --
 
 ALTER TABLE ONLY pitt_bhi.pitt_bhi_assignments
     ADD CONSTRAINT fk_rails_9d8f8c7f42 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_a22a82eb10; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligible_history
+    ADD CONSTRAINT fk_rails_a22a82eb10 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_a43f72c30d; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_screenings
+    ADD CONSTRAINT fk_rails_a43f72c30d FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -69737,6 +71553,30 @@ ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_history
 
 
 --
+-- Name: fk_rails_b8203df8f6; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_phone_screen_history
+    ADD CONSTRAINT fk_rails_b8203df8f6 FOREIGN KEY (pitt_bhi_assignment_id) REFERENCES pitt_bhi.pitt_bhi_assignments(id);
+
+
+--
+-- Name: fk_rails_c23f3d6002; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_suitability_question_history
+    ADD CONSTRAINT fk_rails_c23f3d6002 FOREIGN KEY (pitt_bhi_ps_suitability_question_id) REFERENCES pitt_bhi.pitt_bhi_ps_suitability_questions(id);
+
+
+--
+-- Name: fk_rails_c89caf5320; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_screenings
+    ADD CONSTRAINT fk_rails_c89caf5320 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_c978332bfd; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
 --
 
@@ -69753,11 +71593,51 @@ ALTER TABLE ONLY pitt_bhi.pitt_bhi_withdrawal_history
 
 
 --
+-- Name: fk_rails_d49fc8abae; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligibility_followups
+    ADD CONSTRAINT fk_rails_d49fc8abae FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_dae400ac09; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_eligible_history
+    ADD CONSTRAINT fk_rails_dae400ac09 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_db929befcb; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
 --
 
 ALTER TABLE ONLY pitt_bhi.pitt_bhi_secure_note_history
     ADD CONSTRAINT fk_rails_db929befcb FOREIGN KEY (pitt_bhi_secure_note_id) REFERENCES pitt_bhi.pitt_bhi_secure_notes(id);
+
+
+--
+-- Name: fk_rails_de3e13b918; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_non_eligibles
+    ADD CONSTRAINT fk_rails_de3e13b918 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_e263f32ca7; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_phone_screens
+    ADD CONSTRAINT fk_rails_e263f32ca7 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_e80e5fcdd3; Type: FK CONSTRAINT; Schema: pitt_bhi; Owner: -
+--
+
+ALTER TABLE ONLY pitt_bhi.pitt_bhi_ps_non_eligible_history
+    ADD CONSTRAINT fk_rails_e80e5fcdd3 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
@@ -73474,6 +75354,19 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200804145940'),
 ('20200804150142'),
 ('20200812130051'),
-('20200814151056');
+('20200812175807'),
+('20200812180350'),
+('20200812180924'),
+('20200813162728'),
+('20200814092726'),
+('20200814092900'),
+('20200814103248'),
+('20200814104336'),
+('20200814105415'),
+('20200814114646'),
+('20200814114908'),
+('20200817140231'),
+('20200817152630'),
+('20200818090628');
 
 
