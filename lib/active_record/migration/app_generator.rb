@@ -64,9 +64,11 @@ module ActiveRecord
 
         reversible do |dir|
           dir.up do
+            puts "-- create or replace function #{trigger_fn_name}"
             ActiveRecord::Base.connection.execute activity_log_trigger_sql
           end
           dir.down do
+            puts "-- drop function #{trigger_fn_name}"
             ActiveRecord::Base.connection.execute reverse_activity_log_trigger_sql
           end
         end
@@ -97,9 +99,11 @@ module ActiveRecord
 
         reversible do |dir|
           dir.up do
+            puts "-- create or replace function #{trigger_fn_name}"
             ActiveRecord::Base.connection.execute dynamic_model_trigger_sql
           end
           dir.down do
+            puts "-- drop function #{trigger_fn_name}"
             ActiveRecord::Base.connection.execute reverse_dynamic_model_trigger_sql
           end
         end
@@ -140,9 +144,11 @@ module ActiveRecord
 
         reversible do |dir|
           dir.up do
+            puts "-- create or replace function #{trigger_fn_name}"
             ActiveRecord::Base.connection.execute external_identifier_trigger_sql
           end
           dir.down do
+            puts "-- drop function #{trigger_fn_name}"
             ActiveRecord::Base.connection.execute reverse_external_identifier_trigger_sql
           end
         end
@@ -152,7 +158,7 @@ module ActiveRecord
         self.mode = :update
         setup_fields
         cols = ActiveRecord::Base.connection.columns("#{schema}.#{table_name}")
-        col_names = prev_fields.map(&:to_s) || cols.map(&:name)
+        col_names = prev_fields&.map(&:to_s) || cols.map(&:name)
         old_table_comment = ActiveRecord::Base.connection.table_comment(table_name)
 
         belongs_to_model_field = "#{belongs_to_model}_id" if belongs_to_model
@@ -166,10 +172,14 @@ module ActiveRecord
         commented_colnames = fields_comments.keys.map(&:to_s)
         changed = commented_colnames - added - removed
 
-        change_table_comment("#{schema}.#{table_name}", table_comment) if old_table_comment != table_comment
+        if old_table_comment != table_comment
+          if ActiveRecord::Base.connection.table_exists? "#{schema}.#{table_name}"
+            change_table_comment("#{schema}.#{table_name}", table_comment)
+          end
+        end
 
         if belongs_to_model && !old_colnames.include?(belongs_to_model)
-          add_reference "#{schema}.#{table_name}", belongs_to_model
+          add_reference "#{schema}.#{table_name}", belongs_to_model, index: { name: "#{rand_id}_bt_id_idx" }
         end
 
         added.each do |c|

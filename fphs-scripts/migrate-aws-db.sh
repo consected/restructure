@@ -53,12 +53,19 @@ fi
 
 echo "Enter password for the $TEMP_ENV AWS database user FPHS:"
 read -s -p "FPHS user password: " TEMP_DB_PW
-
+echo
 echo "migrate or rollback?"
 read MODE
+echo "Specify a migration path MIG_PATH or just hit enter"
+read MIG_PATH
+if [ "$MIG_PATH" ]; then
+  export MIG_PATH
+fi
 
 echo
-FPHS_POSTGRESQL_HOSTNAME=$TEMP_HOSTNAME \
+
+MIG_PATH=$MIG_PATH \
+  FPHS_POSTGRESQL_HOSTNAME=$TEMP_HOSTNAME \
   FPHS_POSTGRESQL_DATABASE=$TEMP_DBNAME \
   RAILS_ENV=production \
   FPHS_POSTGRESQL_SCHEMA="$DB_SEARCH_PATH" \

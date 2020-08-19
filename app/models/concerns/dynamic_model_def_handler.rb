@@ -484,6 +484,8 @@ module DynamicModelDefHandler
   end
 
   def run_migration
+    return unless Rails.env.development? && db_migration_schema != 'ml_app'
+
     # Outside the current transaction
     Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do
