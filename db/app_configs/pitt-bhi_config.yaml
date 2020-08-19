@@ -1448,6 +1448,110 @@ app_type:
     created_at: '2020-08-18T13:47:39.704Z'
     updated_at: '2020-08-18T13:47:39.704Z'
     user_email: 
+  - id: 2593
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__archived_files
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-19T15:09:30.851Z'
+    updated_at: '2020-08-19T15:09:30.851Z'
+    user_email: 
+  - id: 2594
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__containers
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-19T15:09:43.715Z'
+    updated_at: '2020-08-19T15:09:43.715Z'
+    user_email: 
+  - id: 2595
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__stored_files
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-19T15:09:51.829Z'
+    updated_at: '2020-08-19T15:09:51.829Z'
+    user_email: 
+  - id: 2596
+    user_id: 
+    resource_type: general
+    resource_name: view_files_as_image
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-19T15:15:44.563Z'
+    updated_at: '2020-08-19T15:15:44.563Z'
+    user_email: 
+  - id: 2597
+    user_id: 
+    resource_type: general
+    resource_name: view_files_as_html
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-19T15:15:58.302Z'
+    updated_at: '2020-08-19T15:15:58.302Z'
+    user_email: 
+  - id: 2598
+    user_id: 
+    resource_type: general
+    resource_name: send_files_to_trash
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-19T15:16:22.265Z'
+    updated_at: '2020-08-19T15:16:22.265Z'
+    user_email: 
+  - id: 2599
+    user_id: 
+    resource_type: general
+    resource_name: download_files
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: user - recruitment
+    created_at: '2020-08-19T15:17:18.135Z'
+    updated_at: '2020-08-19T15:17:18.135Z'
+    user_email: 
+  - id: 2600
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__pitt_bhi_assignment_discussion__files
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 44
+    role_name: admin
+    created_at: '2020-08-19T15:24:28.310Z'
+    updated_at: '2020-08-19T15:24:28.310Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 153
     name: Recruitment & Logistics
@@ -1456,7 +1560,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-08-04T14:05:48.946Z'
-    updated_at: '2020-08-18T12:54:40.204Z'
+    updated_at: '2020-08-19T14:57:48.525Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -1548,14 +1652,15 @@ app_type:
       \   \r\n    not_any_exit: *any_exit_or_complete\r\n\r\n  # Always show, so we
       know why a player's records may be locked down\r\n  showable_if:\r\n    always:
       true\r\n\r\n\r\n###################################\r\nwithdraw:\r\n  label:
-      Withdraw\r\n###################################\r\n  \r\n  fields:\r\n  references:\r\n
-      \   pitt_bhi_withdrawal:\r\n      from: master\r\n      add: one_to_master\r\n
-      \ creatable_if:\r\n    <<: *enabled_if\r\n    not_any_exit: *any_exit_or_complete\r\n
-      \   <<: *all_enrolled\r\n\r\n\r\n  # Always show, so we know why a player's
-      records may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\nineligible:\r\n
-      \ label: Ineligible\r\n###################################\r\n  \r\n  fields:\r\n
-      \ \r\n  caption_before:\r\n    all_fields: |\r\n      The subject was found
-      to be ineligible. \r\n      \r\n      All records are locked down after 14 days.\r\n
+      Withdraw / L2FU\r\n###################################\r\n  \r\n  fields:\r\n
+      \ references:\r\n    pitt_bhi_withdrawal:\r\n      from: master\r\n      add:
+      one_to_master\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any_exit:
+      *any_exit_or_complete\r\n    <<: *all_enrolled\r\n\r\n\r\n  # Always show, so
+      we know why a player's records may be locked down\r\n  showable_if:\r\n    always:
+      true\r\n\r\n\r\n###################################\r\nineligible:\r\n  label:
+      Ineligible\r\n###################################\r\n  \r\n  fields:\r\n  \r\n
+      \ caption_before:\r\n    all_fields: |\r\n      The subject was found to be
+      ineligible. \r\n      \r\n      All records are locked down after 14 days.\r\n
       \ \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    any_transferred_to_pitt:\r\n
       \     activity_log__pitt_bhi_assignments:\r\n        extra_log_type: \r\n          -
       pitt_screening_appointment\r\n    <<: *not_enrolled\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
@@ -1805,7 +1910,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-08-18T13:39:54.970Z'
-    updated_at: '2020-08-18T13:55:16.570Z'
+    updated_at: '2020-08-19T15:37:11.084Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -1837,8 +1942,18 @@ app_type:
       \       label: New Message\r\n        from: this\r\n        add: many\r\n        prevent_disable:
       true\r\n        add_with:\r\n          extra_log_type: general_discussion\r\n
       \         prev_activity_type: general_discussion\r\n        filter_by:\r\n          extra_log_type:
-      general_discussion\r\n\r\n\r\n\r\ngeneral_discussion:\r\n  label: Message\r\n\r\n
-      \ <<: *discussion_message_defaults\r\n\r\n\r\n\r\n"
+      general_discussion\r\n\r\n    - activity_log__pitt_bhi_assignment_discussion:\r\n
+      \       label: Share Files\r\n        from: this\r\n        add: one_to_this\r\n
+      \       prevent_disable: true\r\n        add_with:\r\n          extra_log_type:
+      files\r\n        filter_by:\r\n          extra_log_type: files\r\n\r\n\r\n\r\ngeneral_discussion:\r\n
+      \ label: Message\r\n\r\n  <<: *discussion_message_defaults\r\n\r\n\r\n\r\n###################################\r\nfiles:\r\n
+      \ label: Files\r\n###################################\r\n\r\n  <<: *files_activity
+      \ \r\n  \r\n  view_options:\r\n    hide_unless_creatable: true\r\n  \r\n  caption_before:\r\n
+      \   submit: Save to add a secure file sharing container\r\n  \r\n  show_if:\r\n
+      \   notes:\r\n      never: true\r\n    data:\r\n      never: true\r\n      \r\n
+      \ creatable_if:\r\n    never: true\r\n\r\n  showable_if:\r\n    never: true\r\n\r\n
+      \ save_trigger:\r\n    on_create:\r\n      <<: *create_filestore_container \r\n
+      \ references:\r\n    <<: *ref_filestore_container\r\n\r\n"
     hide_item_list_panel: true
     main_log_name: ''
     process_name: discussion
@@ -1885,6 +2000,36 @@ app_type:
     options: "_comments:\r\n  table: A record referencing a master record indicates
       PITT BHI staff have access to this participant\r\n\r\ndefault:\r\n  caption_before:\r\n
       \   placeholder_top: Allows access to PITT Staff"
+    user_email: 
+  - id: 645
+    name: Suitability
+    table_name: pitt_bhi_ps_suitability_questions
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-14T09:27:50.744Z'
+    updated_at: '2020-08-19T15:06:21.810Z'
+    position: 
+    category: pitt-bhi-phone-screen
+    table_key_name: ''
+    field_list: birth_date eligible_pension_yes_no age notes
+    result_order: ''
+    options: "# @library grit ps_forms_eligibility\r\n\r\n_comments:\r\n  table: |\r\n
+      \   Suitability assessment form for BHI phone screening, recording responses
+      from subject\r\n  fields:\r\n    birth_date: Date of birth\r\n    eligible_pension_yes_no:
+      |\r\n      Eligible for a pension from the NFL\r\n      (At least 3 seasons
+      with 3 games per season)\r\n    age: Calculated age at the time the response
+      was saved\r\n    notes: Question and notes recorded by interviewer\r\n\r\n\r\n\r\ndefault:\r\n\r\n
+      \ field_options:\r\n    age:\r\n      edit_as:\r\n        field_type: fixed_age\r\n\r\n\r\n
+      \ caption_before:\r\n    \r\n    birth_date: What is your date of birth?\r\n\r\n
+      \   eligible_pension_yes_no: |\r\n      Can you confirm that you are eligible
+      for a pension from the NFL? \r\n      (Must be at least 3 seasons with 3 games
+      per season)\r\n\r\n    age: Age\r\n        \r\n        \r\n    notes: Record
+      question and notes\r\n\r\n  show_if:\r\n    age:\r\n      not_any:\r\n        current_mode:
+      edit\r\n      \r\n"
     user_email: 
   - id: 641
     name: BHI Phone Screen Non-Eligible
@@ -1985,35 +2130,6 @@ app_type:
       'no'\r\n        consent_to_pass_info_to_pitt_2_yes_no: 'no'\r\n      not_any:
       *ok_to_continue\r\n      \r\n    placeholder_continue:\r\n      <<: *ok_to_continue\r\n
       \     \r\n    \r\n\r\n "
-    user_email: 
-  - id: 645
-    name: Suitability
-    table_name: pitt_bhi_ps_suitability_questions
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2020-08-14T09:27:50.744Z'
-    updated_at: '2020-08-18T08:43:32.279Z'
-    position: 
-    category: pitt-bhi-phone-screen
-    table_key_name: ''
-    field_list: birth_date eligible_pension_yes_no age notes
-    result_order: ''
-    options: "# @library grit ps_forms_eligibility\r\n\r\n_comments:\r\n  table: |\r\n
-      \   Suitability assessment form for BHI phone screening, recording responses
-      from subject\r\n  fields:\r\n    birth_date: Date of birth\r\n    eligible_pension_yes_no:
-      |\r\n      Eligible for a pension from the NFL\r\n      (At least 3 seasons
-      with 3 games per season)\r\n    age: Calculated age at the time the response
-      was saved\r\n    notes: Question and notes recorded by interviewer\r\n\r\n\r\n\r\ndefault:\r\n\r\n
-      \ field_options:\r\n    age:\r\n      edit_as:\r\n        field_type: fixed_age\r\n\r\n\r\n
-      \ caption_before:\r\n    \r\n    birth_date: What is your date of birth?\r\n\r\n
-      \   eligible_pension_yes_no: |\r\n      Can you confirm that you are eligible
-      for a pension from the NFL? \r\n      (Must be at least 3 seasons with 3 games
-      per season)\r\n\r\n    age: Age\r\n        \r\n        \r\n    notes: Record
-      question and notes\r\n\r\n"
     user_email: 
   - id: 637
     name: BHI Initial Screening
@@ -2323,7 +2439,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-08-04T13:57:25.185Z'
-    updated_at: '2020-08-18T13:02:36.304Z'
+    updated_at: '2020-08-19T14:20:30.215Z'
     position: 1
     category: pitt-bhi-records
     table_key_name: ''
@@ -2335,11 +2451,11 @@ app_type:
       \     edit_as:\r\n        field_type: status\r\n      value: confirmed\r\n\r\n
       \ caption_before: \r\n    placeholder_set_sd: |\r\n      **The subject has been
       enrolled. A training start date is required**\r\n      \r\n      Edit this form
-      to set the start date.\r\n      \r\n    visit_start_date: Participation start
-      date\r\n    visit_end_date: Expected participation end date\r\n    select_status:
-      Status\r\n    notes: Additional notes  \r\n  \r\n  \r\n  show_if:\r\n    visit_end_date:\r\n
-      \     never: true\r\n    select_status:\r\n      never: true\r\n    placeholder_set_sd:\r\n
-      \     visit_start_date: \r\n        - ''\r\n        - null"
+      to set the start date. The date may be changed if necessary.\r\n      \r\n    visit_start_date:
+      Participation start date\r\n    visit_end_date: Expected participation end date\r\n
+      \   select_status: Status\r\n    notes: Additional notes  \r\n  \r\n  \r\n  show_if:\r\n
+      \   visit_end_date:\r\n      never: true\r\n    placeholder_set_sd:\r\n      visit_start_date:
+      \r\n        - ''\r\n        - null"
     user_email: 
   - id: 634
     name: PITT BHI Secure Notes
@@ -2456,19 +2572,28 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2020-08-04T14:00:29.936Z'
-    updated_at: '2020-08-04T14:00:29.936Z'
+    updated_at: '2020-08-19T15:02:31.015Z'
     position: 
     category: pitt-bhi-records
     table_key_name: ''
     field_list: select_subject_withdrew_reason select_investigator_terminated lost_to_follow_up_no_yes
       no_longer_participating_no_yes notes
     result_order: ''
-    options: "default:\r\n\r\n  caption_before:\r\n    select_subject_withdrew_reason:
-      If the subject withdrew, select the reason\r\n    select_investigator_terminated:
-      Did the investigator terminate the participant from the study for safety reasons,
+    options: "default:\r\n\r\n  field_options:\r\n    select_subject_withdrew_reason:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          - withdrew\r\n          -
+      did not withdraw\r\n\r\n    select_investigator_terminated:\r\n      edit_as:\r\n
+      \       alt_options:\r\n          'No': 'no'\r\n          'Yes - due to Adverse
+      Event': 'yes - due to ae'\r\n          'Yes - other reason': 'yes - other reason'\r\n
+      \   \r\n  show_if:\r\n    select_investigator_terminated: \r\n      select_subject_withdrew_reason:
+      did not withdraw\r\n    lost_to_follow_up_no_yes: \r\n      select_subject_withdrew_reason:
+      did not withdraw\r\n\r\n  caption_before:\r\n    select_subject_withdrew_reason:
+      |\r\n      Did the subject choose to withdraw? Enter notes below.\r\n      \r\n
+      \     If *lost to follow up* or terminated by the \r\n      investigator, select
+      *did not withdraw*\r\n      \r\n    select_investigator_terminated: |\r\n      Did
+      the investigator terminate the participant from the study for safety reasons,
       non-adherence, or another reason that would deter the participant from completing
-      the study?\r\n    lost_to_follow_up_no_yes: |\r\n      Was the subject \"lost
-      to follow up\"?\r\n    no_longer_participating_no_yes: Is there another reason
+      the study?\r\n    lost_to_follow_up_no_yes: |\r\n      Was the subject *lost
+      to follow up*?\r\n    no_longer_participating_no_yes: Is there another reason
       the subject is no longer participating? Provide details in the notes below.\r\n
       \   "
     user_email: 
@@ -2494,40 +2619,50 @@ app_type:
   associated_reports:
   - id: 311
     name: Subjects In Process & Exited
-    description: 'All subjects that have joined or exited the study: in process (phone
+    description: "All subjects that have joined or exited the study: in process (phone
       screening scheduled), enrolled, completed, withdrawn, ineligible, other exit
-      (not interested, etc). The search matches the latest status of a participant,
-      so as they pass through the process they will only be matched by one status.'
+      (not interested, etc). \r\n\r\nIf **latest status only** is *yes* then the search
+      matches the latest status of a participant, so as they pass through the process
+      they will only be matched by one status. Otherwise any participant that has
+      passed through the status at some point will be matched."
     sql: "SELECT * from (\r\n  SELECT distinct dt.master_id, pitt_bhi.pitt_bhi_id,\r\n
       \ CASE \r\n  WHEN extra_log_type = 'completed' THEN 'completed study'\r\n  WHEN
       extra_log_type = 'completed_intervention' THEN 'completed bbti'\r\n  WHEN extra_log_type
       = 'withdraw' THEN 'withdrawn'\r\n  WHEN extra_log_type IN ('exit_not_consented',
       'exit_ps', 'exit_ps_msm', 'exit_opt_out', 'exit_l2fu') THEN 'exited'\r\n  WHEN
-      extra_log_type = 'ineligible' THEN 'ineligible'\r\n  WHEN extra_log_type = 'msm_ps_eligible'
-      THEN 'eligible'\r\n  WHEN extra_log_type = 'schedule_screening' THEN 'in process'\r\n
-      \ WHEN extra_log_type = 'appointment' THEN 'enrolled'\r\n  ELSE extra_log_type\r\n
-      \ END \"status\", \r\n  dt.created_at \r\n  FROM \r\n  (\r\n    SELECT\r\n    al.master_id,
+      extra_log_type = 'ineligible' THEN 'ineligible'\r\n  WHEN extra_log_type = 'hms_ps_eligible'
+      THEN 'eligible'\r\n  WHEN extra_log_type = 'schedule_screening' THEN 'screening
+      scheduled'\r\n  WHEN extra_log_type = 'appointment' THEN 'enrolled'\r\n  WHEN
+      extra_log_type = 'not_screened' THEN 'not screened'\r\n  ELSE extra_log_type\r\n
+      \ END \"status\", \r\n  dt.created_at \r\n  FROM \r\n  (\r\n    SELECT \r\n
+      \   bhi.master_id, bhi.created_at, 'not_screened' extra_log_type, \r\n    1
+      r\r\n    FROM pitt_bhi_assignments bhi\r\n    LEFT JOIN activity_log_pitt_bhi_assignment_phone_screens
+      al\r\n    ON bhi.master_id = al.master_id \r\n    AND al.extra_log_type = 'start_phone_screen'\r\n
+      \   WHERE al.id IS NULL\r\n    \r\n    UNION \r\n    \r\n    SELECT\r\n    al.master_id,
       al.created_at, al.extra_log_type,    \r\n    rank()\r\n     OVER (\r\n      PARTITION
       BY al.master_id \r\n      ORDER BY al.created_at DESC\r\n     ) AS r\r\n\r\n
       \   FROM activity_log_pitt_bhi_assignments al\r\n    WHERE   \r\n    extra_log_type
-      IN (\r\n      'schedule_screening', \r\n      'msm_ps_eligible', \r\n      'ineligible',
+      IN (\r\n      'schedule_screening', \r\n      'hms_ps_eligible', \r\n      'ineligible',
       \r\n      'exit_not_consented', \r\n      'exit_ps', \r\n      'exit_opt_out',\r\n
       \     'exit_l2fu',\r\n      'appointment',\r\n      'completed',\r\n      'completed_intervention',\r\n
       \     'withdraw'\r\n    )\r\n  ) dt\r\n  INNER JOIN pitt_bhi_assignments pitt_bhi
-      ON dt.master_id = pitt_bhi.master_id\r\n  WHERE r = 1 \r\n) dt2\r\nWHERE status
-      IN(:select_status)\r\nORDER BY status, created_at desc\r\n;\r\n"
+      ON dt.master_id = pitt_bhi.master_id\r\n  WHERE ( \r\n    :latest_status_only
+      = 'yes' AND r = 1 \r\n    OR :latest_status_only = 'no'\r\n  )\r\n) dt2\r\nWHERE
+      status IN(:select_status)\r\nORDER BY status, created_at desc\r\n;\r\n"
     search_attrs: "\r\nselect_status: \r\n  config_selector:\r\n    label: Select
       / de-select statuses to report  \r\n    all: true\r\n    multiple: multiple\r\n
-      \   default: \r\n      - eligible\r\n#      - ineligible\r\n#      - completed\r\n#
-      \     - withdrawn\r\n#      - exited\r\n      - enrolled\r\n      - in process\r\n
-      \   selections: \r\n      eligible: eligible\r\n      ineligible: ineligible\r\n
-      \     completed study: completed study\r\n      completed bbti: completed bbti\r\n
-      \     withdrawn: withdrawn\r\n      exited: exited\r\n      enrolled: enrolled\r\n
-      \     in process: in process\r\n      \r\n      "
+      \   default: \r\n      - eligible\r\n      - enrolled\r\n\r\n    selections:
+      \r\n      \r\n      eligible: eligible\r\n      ineligible: ineligible\r\n      completed
+      study: completed study\r\n      completed bbti: completed bbti\r\n      withdrawn:
+      withdrawn\r\n      exited: exited\r\n      enrolled: enrolled\r\n      screening
+      scheduled: screening scheduled\r\n      not screened: not screened\r\n      \r\n
+      \     \r\n\r\nlatest_status_only: \r\n  config_selector: \r\n    all: true\r\n
+      \   multiple: single\r\n    disabled: false\r\n    default: 'yes'\r\n    selections:
+      \r\n      'yes': 'yes'\r\n      'no': 'no'"
     admin_id: 21
     disabled: false
     created_at: '2020-08-14T08:35:13.861Z'
-    updated_at: '2020-08-14T08:35:13.861Z'
+    updated_at: '2020-08-19T14:44:17.333Z'
     report_type: search
     auto: false
     searchable: true
@@ -2955,30 +3090,30 @@ app_type:
     value: cis-paper
     item_type: addresses_source
     created_at: '2015-09-24T19:00:27.920Z'
-    updated_at: '2020-03-31T09:14:55.172Z'
-    disabled: false
+    updated_at: '2020-08-19T10:22:11.950Z'
+    disabled: 
     admin_id: 21
-    create_with: false
-    edit_if_set: false
-    edit_always: false
+    create_with: true
+    edit_if_set: 
+    edit_always: true
     position: 1390
-    description: ''
-    lock: true
+    description: 
+    lock: 
     user_email: 
   - id: 41
     name: cis-email
     value: cis-email
     item_type: addresses_source
     created_at: '2015-09-24T19:00:45.434Z'
-    updated_at: '2020-03-31T09:14:55.129Z'
+    updated_at: '2020-08-19T10:22:11.944Z'
     disabled: false
     admin_id: 21
-    create_with: false
+    create_with: true
     edit_if_set: false
-    edit_always: false
+    edit_always: true
     position: 1380
     description: ''
-    lock: true
+    lock: false
     user_email: 
   - id: 42
     name: nflpa2
@@ -3061,27 +3196,27 @@ app_type:
     value: cis-paper
     item_type: player_contacts_source
     created_at: '2015-09-24T20:27:47.697Z'
-    updated_at: '2020-03-31T09:14:55.113Z'
-    disabled: false
+    updated_at: '2020-08-19T10:22:11.876Z'
+    disabled: 
     admin_id: 21
-    create_with: false
-    edit_if_set: true
-    edit_always: false
+    create_with: true
+    edit_if_set: 
+    edit_always: true
     position: 1220
-    description: ''
-    lock: false
+    description: 
+    lock: 
     user_email: 
   - id: 48
     name: cis-email
     value: cis-email
     item_type: player_contacts_source
     created_at: '2015-09-24T20:28:09.928Z'
-    updated_at: '2020-03-31T09:14:55.091Z'
+    updated_at: '2020-08-19T10:22:11.867Z'
     disabled: false
     admin_id: 21
-    create_with: false
-    edit_if_set: true
-    edit_always: false
+    create_with: true
+    edit_if_set: false
+    edit_always: true
     position: 1210
     description: ''
     lock: false
@@ -3136,12 +3271,12 @@ app_type:
     value: cis-redcap
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.596Z'
-    updated_at: '2020-03-31T09:14:55.212Z'
+    updated_at: '2020-08-19T10:22:11.890Z'
     disabled: false
     admin_id: 21
-    create_with: false
-    edit_if_set: true
-    edit_always: false
+    create_with: true
+    edit_if_set: false
+    edit_always: true
     position: 1240
     description: ''
     lock: false
@@ -3181,12 +3316,12 @@ app_type:
     value: player referral
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.612Z'
-    updated_at: '2020-03-31T09:14:55.235Z'
+    updated_at: '2020-08-19T10:22:12.079Z'
     disabled: false
     admin_id: 21
-    create_with: false
-    edit_if_set: true
-    edit_always: false
+    create_with: true
+    edit_if_set: false
+    edit_always: true
     position: 
     description: ''
     lock: false
@@ -3196,12 +3331,12 @@ app_type:
     value: public source
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.617Z'
-    updated_at: '2020-03-31T09:14:55.241Z'
+    updated_at: '2020-08-19T10:22:12.084Z'
     disabled: false
     admin_id: 21
-    create_with: false
-    edit_if_set: true
-    edit_always: false
+    create_with: true
+    edit_if_set: false
+    edit_always: true
     position: 
     description: ''
     lock: false
@@ -3211,12 +3346,12 @@ app_type:
     value: event
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.622Z'
-    updated_at: '2020-03-31T09:14:55.247Z'
+    updated_at: '2020-08-19T10:22:12.068Z'
     disabled: false
     admin_id: 21
-    create_with: false
-    edit_if_set: true
-    edit_always: false
+    create_with: true
+    edit_if_set: false
+    edit_always: true
     position: 
     description: ''
     lock: false
@@ -3226,15 +3361,15 @@ app_type:
     value: cis-phone
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.627Z'
-    updated_at: '2020-03-31T09:14:55.252Z'
-    disabled: false
+    updated_at: '2020-08-19T10:22:11.883Z'
+    disabled: 
     admin_id: 21
-    create_with: false
-    edit_if_set: true
-    edit_always: false
+    create_with: true
+    edit_if_set: 
+    edit_always: true
     position: 1230
-    description: ''
-    lock: false
+    description: 
+    lock: 
     user_email: 
   - id: 196
     name: not set
@@ -3496,15 +3631,15 @@ app_type:
     value: cis-redcap
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.115Z'
-    updated_at: '2020-03-31T09:14:55.134Z'
+    updated_at: '2020-08-19T10:22:11.963Z'
     disabled: false
     admin_id: 21
-    create_with: false
+    create_with: true
     edit_if_set: false
-    edit_always: false
+    edit_always: true
     position: 1410
     description: ''
-    lock: true
+    lock: false
     user_email: 
   - id: 374
     name: nflpa4
@@ -3541,60 +3676,60 @@ app_type:
     value: public source
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.135Z'
-    updated_at: '2020-03-31T09:14:55.154Z'
+    updated_at: '2020-08-19T10:22:12.095Z'
     disabled: false
     admin_id: 21
-    create_with: false
+    create_with: true
     edit_if_set: false
-    edit_always: false
+    edit_always: true
     position: 
     description: ''
-    lock: true
+    lock: false
     user_email: 
   - id: 377
     name: player referral
     value: player referral
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.139Z'
-    updated_at: '2020-03-31T09:14:55.161Z'
+    updated_at: '2020-08-19T10:22:12.090Z'
     disabled: false
     admin_id: 21
-    create_with: false
+    create_with: true
     edit_if_set: false
-    edit_always: false
+    edit_always: true
     position: 
     description: ''
-    lock: true
+    lock: false
     user_email: 
   - id: 378
     name: event
     value: event
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.144Z'
-    updated_at: '2020-03-31T09:14:55.167Z'
+    updated_at: '2020-08-19T10:22:12.074Z'
     disabled: false
     admin_id: 21
-    create_with: false
+    create_with: true
     edit_if_set: false
-    edit_always: false
+    edit_always: true
     position: 
     description: ''
-    lock: true
+    lock: false
     user_email: 
   - id: 379
     name: cis-phone
     value: cis-phone
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.151Z'
-    updated_at: '2020-03-31T09:14:55.177Z'
-    disabled: false
+    updated_at: '2020-08-19T10:22:11.956Z'
+    disabled: 
     admin_id: 21
-    create_with: false
-    edit_if_set: false
-    edit_always: false
+    create_with: true
+    edit_if_set: 
+    edit_always: true
     position: 1400
-    description: ''
-    lock: true
+    description: 
+    lock: 
     user_email: 
   - id: 380
     name: not set
@@ -3616,15 +3751,15 @@ app_type:
     value: business
     item_type: addresses_type
     created_at: '2019-01-18T11:24:31.167Z'
-    updated_at: '2020-03-31T09:14:55.198Z'
-    disabled: false
+    updated_at: '2020-08-19T10:22:11.998Z'
+    disabled: 
     admin_id: 21
     create_with: true
-    edit_if_set: false
+    edit_if_set: 
     edit_always: true
-    position: 1521
-    description: ''
-    lock: false
+    position: 1510
+    description: 
+    lock: 
     user_email: 
   - id: 382
     name: home
@@ -4248,6 +4383,24 @@ app_type:
     created_at: '2020-08-18T13:42:09.069Z'
     updated_at: '2020-08-18T13:42:09.069Z'
     user_email: template@template
+  - id: 1017
+    app_type_id: 44
+    role_name: nfs_store group 600
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-19T15:07:18.676Z'
+    updated_at: '2020-08-19T15:07:18.676Z'
+    user_email: phil_ayres@test.com
+  - id: 1018
+    app_type_id: 44
+    role_name: nfs_store group 600
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-08-19T15:07:18.689Z'
+    updated_at: '2020-08-19T15:07:18.689Z'
+    user_email: template@template
   associated_message_templates:
   - id: 22
     name: standard sms layout
@@ -4480,19 +4633,19 @@ app_type:
       filestore\r\n        new: not_embedded\r\n      creatable_if:\r\n        never:
       true\r\n        \r\n  save_trigger:\r\n    on_create_filestore_container: &create_filestore_container\r\n
       \     create_filestore_container: \r\n        name: general files\r\n        label:
-      General Files\r\n        create_with_role: nfs_store group 600\r\n\r\n\r\n\r\n
-      \ files_activity: &files_activity\r\n    label: Supporting Files\r\n    fields:\r\n
-      \     - notes\r\n\r\n    caption_before:\r\n      notes: Describe the files
-      in this container. Individual files can also be given a title and description
-      in the file classifications.\r\n\r\n    creatable_if:\r\n      <<: *enabled_if\r\n\r\n
-      \   editable_if:\r\n      <<: *enabled_if\r\n\r\n    save_trigger:\r\n      on_create:\r\n
-      \       <<: *create_filestore_container\r\n\r\n    references:\r\n      nfs_store__manage__container:\r\n
-      \       <<: *ref_nfs_store__manage__container\r\n\r\n"
+      General Files\r\n        create_with_role: nfs_store group 600\r\n\r\n  show_if:\r\n
+      \   data: \r\n      never: true\r\n\r\n  files_activity: &files_activity\r\n
+      \   label: Supporting Files\r\n    fields:\r\n      - notes\r\n\r\n    caption_before:\r\n
+      \     notes: Describe the files in this container. Individual files can also
+      be given a title and description in the file classifications.\r\n\r\n    creatable_if:\r\n
+      \     <<: *enabled_if\r\n\r\n    editable_if:\r\n      <<: *enabled_if\r\n\r\n
+      \   save_trigger:\r\n      on_create:\r\n        <<: *create_filestore_container\r\n\r\n
+      \   references:\r\n      nfs_store__manage__container:\r\n        <<: *ref_nfs_store__manage__container\r\n\r\n"
     format: yaml
     disabled: false
     admin_id: 21
     created_at: '2020-08-04T13:43:52.341Z'
-    updated_at: '2020-08-04T13:43:52.341Z'
+    updated_at: '2020-08-19T15:32:22.431Z'
     user_email: 
   - id: 82
     category: pitt_bhi
@@ -4676,5 +4829,41 @@ app_type:
   associated_protocols: []
   associated_sub_processes: []
   associated_protocol_events: []
-  nfs_store_filters: []
+  nfs_store_filters:
+  - id: 87
+    app_type_id: 44
+    role_name: user - recruitment
+    user_id: 
+    resource_name: activity_log__pitt_bhi_assignment__files
+    filter: ".*"
+    description: ''
+    disabled: false
+    admin_id: 21
+    created_at: '2020-08-19T15:12:53.482Z'
+    updated_at: '2020-08-19T15:12:53.482Z'
+    user_email: 
+  - id: 88
+    app_type_id: 44
+    role_name: user - recruitment
+    user_id: 
+    resource_name: activity_log__femfl_assignment_femfl_comm__files
+    filter: ".*"
+    description: ''
+    disabled: true
+    admin_id: 21
+    created_at: '2020-08-19T15:13:02.467Z'
+    updated_at: '2020-08-19T15:14:39.176Z'
+    user_email: 
+  - id: 89
+    app_type_id: 44
+    role_name: user - recruitment
+    user_id: 
+    resource_name: activity_log__pitt_bhi_assignment_discussion__files
+    filter: ".*"
+    description: ''
+    disabled: false
+    admin_id: 21
+    created_at: '2020-08-19T15:31:44.900Z'
+    updated_at: '2020-08-19T15:31:44.900Z'
+    user_email: 
   user_email: 
