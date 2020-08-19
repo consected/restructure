@@ -66,7 +66,8 @@ class ExtraOptions
       },
       show_if: {
         field_name: {
-          depends_on_field_name: 'conditional value'
+          depends_on_field_name: 'conditional value',
+          current_mode: 'show | edit'
         }
       },
       view_options: {
