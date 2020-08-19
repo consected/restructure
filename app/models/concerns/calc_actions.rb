@@ -69,7 +69,7 @@ module CalcActions
     # Final result for all selections
     final_res = true
 
-    action_conf.symbolize_keys!
+    self.action_conf = action_conf.symbolize_keys
 
     # Simple conditions to always return
     #   never: true
