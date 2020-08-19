@@ -305,6 +305,7 @@ module DynamicModelDefHandler
         version = DateTime.now.to_i.to_s(36)
         gs = generator_script(version)
         fn = write_db_migration(gs, version)
+        run_migration
       end
 
       unless !disabled? && ready?
