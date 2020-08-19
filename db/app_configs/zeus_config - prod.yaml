@@ -1707,6 +1707,19 @@ app_type:
     created_at: '2020-08-11T17:39:35.049Z'
     updated_at: '2020-08-11T17:39:35.049Z'
     user_email: 
+  - id: 275
+    user_id: 
+    resource_type: table
+    resource_name: pitt_bhi_assignments
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 1
+    app_type_id: 1
+    role_name: user - pitt bhi
+    created_at: '2020-08-19T13:09:42.548Z'
+    updated_at: '2020-08-19T13:09:42.548Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 1
     name: Phone Log
@@ -1967,6 +1980,24 @@ app_type:
     alphanumeric: false
     extra_fields: ''
     category: grit
+    user_email: 
+  - id: 15
+    name: pitt_bhi_assignments
+    label: PITT BHI ID
+    external_id_attribute: pitt_bhi_id
+    external_id_view_formatter: ''
+    external_id_edit_pattern: ''
+    prevent_edit: true
+    pregenerate_ids: true
+    min_id: 100000
+    max_id: 999999
+    admin_id: 1
+    disabled: false
+    created_at: '2020-08-19T13:05:34.055Z'
+    updated_at: '2020-08-19T13:05:34.055Z'
+    alphanumeric: false
+    extra_fields: ''
+    category: pitt-bhi
     user_email: 
   associated_reports:
   - id: 8
@@ -4956,6 +4987,24 @@ app_type:
     created_at: '2020-08-11T08:26:04.965Z'
     updated_at: '2020-08-11T08:26:04.965Z'
     user_email: template@template
+  - id: 94
+    app_type_id: 1
+    role_name: user - pitt bhi
+    user_id: 23
+    admin_id: 1
+    disabled: false
+    created_at: '2020-08-19T13:08:01.734Z'
+    updated_at: '2020-08-19T13:08:01.734Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 95
+    app_type_id: 1
+    role_name: user - pitt bhi
+    user_id: 49
+    admin_id: 1
+    disabled: false
+    created_at: '2020-08-19T13:08:01.753Z'
+    updated_at: '2020-08-19T13:08:01.753Z'
+    user_email: template@template
   associated_message_templates: []
   associated_config_libraries: []
   associated_protocols:
@@ -5095,6 +5144,15 @@ app_type:
     app_type_id: 1
     user_email: 
   associated_sub_processes:
+  - id: 179
+    name: Transferred for Screening
+    disabled: false
+    protocol_id: 16
+    admin_id: 1
+    created_at: '2020-08-19T13:27:49.308Z'
+    updated_at: '2020-08-19T13:27:49.308Z'
+    protocol_name: PITT BHI
+    user_email: 
   - id: 177
     name: Sent
     disabled: false
