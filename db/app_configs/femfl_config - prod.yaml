@@ -609,11 +609,19 @@ app_type:
     admin_id: 1
     disabled: false
     created_at: '2020-08-11T15:36:52.232Z'
-    updated_at: '2020-08-11T15:54:29.652Z'
+    updated_at: '2020-08-13T15:16:54.367Z'
     position: 
     category: femfl-cif
     table_key_name: ''
-    field_list: ''
+    field_list: record_id redcap_survey_identifier femfl_contact_info_timestamp first_name
+      last_name email cell_number other_phone_number hear_about___1 hear_about___10
+      hear_about___11 hear_about___12 hear_about___2 hear_about___3 hear_about___4
+      hear_about___5 hear_about___6 hear_about___7 hear_about___8 hear_about___9 hear_about_wives_group
+      hear_about_event hear_about_other relationship_to_player___1 relationship_to_player___2
+      relationship_to_player___3 relationship_to_player___4 relationship_to_player___5
+      relationship_to_player___6 relationship_to_player___7 relationship_to_player___8
+      relationship_to_player___9 relationship_to_player___10 relationship_to_player___11
+      relationship_other comments femfl_contact_info_complete
     result_order: ''
     options: "\r\n"
     user_email: 
@@ -1057,13 +1065,13 @@ app_type:
     layout_name: nav
     panel_name: reg_details
     panel_label: Registration
-    panel_position: 3
-    options: "contains:\r\n\r\n\r\n#  categories: \r\n#    - femfl-cif\r\n#view_options:\r\n#
+    panel_position: 4
+    options: "contains:\r\n  categories: \r\n    - femfl-cif\r\n\r\n#view_options:\r\n#
       \ initial_show: true\r\n#  orientation: columns"
-    disabled: true
+    disabled: false
     admin_id: 1
     created_at: '2020-08-11T15:48:20.234Z'
-    updated_at: '2020-08-11T16:15:32.970Z'
+    updated_at: '2020-08-13T15:17:58.100Z'
     description: ''
     user_email: 
   user_roles:
@@ -1138,9 +1146,1339 @@ app_type:
     created_at: '2020-08-11T08:26:04.910Z'
     updated_at: '2020-08-11T08:26:04.910Z'
     user_email: 
-  associated_protocols: []
-  associated_sub_processes: []
-  associated_protocol_events: []
+  protocols:
+  - id: 15
+    name: FEMFL
+    created_at: '2020-08-11T08:51:56.759Z'
+    updated_at: '2020-08-11T08:52:58.879Z'
+    disabled: false
+    admin_id: 1
+    position: 1
+    app_type_id: 3
+    user_email: 
+  associated_protocols:
+  - id: 15
+    name: FEMFL
+    created_at: '2020-08-11T08:51:56.759Z'
+    updated_at: '2020-08-11T08:52:58.879Z'
+    disabled: false
+    admin_id: 1
+    position: 1
+    app_type_id: 3
+    user_email: 
+  - id: 4
+    name: Updates
+    created_at: '2015-10-14T16:16:56.095Z'
+    updated_at: '2020-08-11T14:44:08.192Z'
+    disabled: false
+    admin_id: 1
+    position: 100
+    app_type_id: 
+    user_email: 
+  associated_sub_processes:
+  - id: 163
+    name: CIS-received
+    disabled: false
+    protocol_id: 15
+    admin_id: 1
+    created_at: '2020-08-11T09:34:02.516Z'
+    updated_at: '2020-08-11T09:34:02.516Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 162
+    name: Opt Out
+    disabled: false
+    protocol_id: 15
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.873Z'
+    updated_at: '2020-08-11T08:51:56.873Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 161
+    name: Opt In
+    disabled: false
+    protocol_id: 15
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.857Z'
+    updated_at: '2020-08-11T08:51:56.857Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 160
+    name: Sent
+    disabled: false
+    protocol_id: 15
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.842Z'
+    updated_at: '2020-08-11T08:51:56.842Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 159
+    name: Inquiry
+    disabled: false
+    protocol_id: 15
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.826Z'
+    updated_at: '2020-08-11T08:51:56.826Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 158
+    name: Complete
+    disabled: false
+    protocol_id: 15
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.812Z'
+    updated_at: '2020-08-11T08:51:56.812Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 157
+    name: Bounced
+    disabled: false
+    protocol_id: 15
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.798Z'
+    updated_at: '2020-08-11T08:51:56.798Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 156
+    name: Ineligible
+    disabled: false
+    protocol_id: 15
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.778Z'
+    updated_at: '2020-08-11T08:51:56.778Z'
+    protocol_name: FEMFL
+    user_email: 
+  - id: 52
+    name: flag updates
+    disabled: 
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2015-10-14T16:16:56.832Z'
+    updated_at: '2015-10-14T16:16:56.832Z'
+    protocol_name: Updates
+    user_email: 
+  - id: 51
+    name: record updates
+    disabled: 
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2015-10-14T16:16:56.678Z'
+    updated_at: '2015-10-14T16:16:56.678Z'
+    protocol_name: Updates
+    user_email: 
+  associated_protocol_events:
+  - id: 270
+    name: created activity log  femfl assignment femfl comm
+    admin_id: 1
+    created_at: '2020-08-11T08:26:06.399Z'
+    updated_at: '2020-08-11T08:26:06.399Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 115
+    name: created activity log  player contact phone
+    admin_id: 9
+    created_at: '2018-01-30T14:29:30.228Z'
+    updated_at: '2018-01-30T14:29:30.228Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 124
+    name: created activity log  player contact phone
+    admin_id: 1
+    created_at: '2018-02-06T11:04:28.961Z'
+    updated_at: '2018-02-06T11:04:28.961Z'
+    disabled: 
+    sub_process_id: 52
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: flag updates
+    user_email: 
+  - id: 203
+    name: created activity log  zeus bulk message
+    admin_id: 1
+    created_at: '2019-09-23T16:51:52.175Z'
+    updated_at: '2019-09-23T16:51:52.175Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 51
+    name: created address
+    admin_id: 4
+    created_at: '2015-10-14T16:16:56.728Z'
+    updated_at: '2015-10-14T16:16:56.728Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 134
+    name: created address history
+    admin_id: 1
+    created_at: '2018-04-30T08:49:55.518Z'
+    updated_at: '2018-04-30T08:49:55.518Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 140
+    name: created bhs assignment
+    admin_id: 1
+    created_at: '2018-04-30T10:52:29.746Z'
+    updated_at: '2018-04-30T10:52:29.746Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 264
+    name: created femfl address
+    admin_id: 1
+    created_at: '2020-08-11T08:26:06.206Z'
+    updated_at: '2020-08-11T08:26:06.206Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 268
+    name: created femfl assignment
+    admin_id: 1
+    created_at: '2020-08-11T08:26:06.384Z'
+    updated_at: '2020-08-11T08:26:06.384Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 266
+    name: created femfl contact
+    admin_id: 1
+    created_at: '2020-08-11T08:26:06.295Z'
+    updated_at: '2020-08-11T08:26:06.295Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 262
+    name: created femfl subject
+    admin_id: 1
+    created_at: '2020-08-11T08:26:06.107Z'
+    updated_at: '2020-08-11T08:26:06.107Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 245
+    name: created grit assignment
+    admin_id: 1
+    created_at: '2019-12-04T18:52:29.171Z'
+    updated_at: '2019-12-04T18:52:29.171Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 148
+    name: created ipa assignment
+    admin_id: 1
+    created_at: '2018-07-25T15:26:18.003Z'
+    updated_at: '2018-07-25T15:26:18.003Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 145
+    name: created ipa recruitment rank
+    admin_id: 1
+    created_at: '2018-07-09T08:25:56.868Z'
+    updated_at: '2018-07-09T08:25:56.868Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 224
+    name: created marketo master
+    admin_id: 1
+    created_at: '2019-10-16T12:12:24.110Z'
+    updated_at: '2019-10-16T12:12:24.110Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 310
+    name: created nfs store  manage  archived file
+    admin_id: 1
+    created_at: '2020-08-11T14:59:38.386Z'
+    updated_at: '2020-08-11T14:59:38.386Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: ''
+    description: ''
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 306
+    name: created nfs store  manage  container
+    admin_id: 1
+    created_at: '2020-08-11T14:58:37.971Z'
+    updated_at: '2020-08-11T14:58:37.971Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: ''
+    description: ''
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 308
+    name: created nfs store  manage  stored file
+    admin_id: 1
+    created_at: '2020-08-11T14:59:13.870Z'
+    updated_at: '2020-08-11T14:59:13.870Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: ''
+    description: ''
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 150
+    name: created persnet assignment
+    admin_id: 1
+    created_at: '2018-09-17T08:24:44.525Z'
+    updated_at: '2018-09-17T08:24:44.525Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 322
+    name: created pitt bhi assignment
+    admin_id: 1
+    created_at: '2020-08-19T18:59:17.625Z'
+    updated_at: '2020-08-19T18:59:17.625Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 130
+    name: created player career datum
+    admin_id: 1
+    created_at: '2018-04-30T08:49:55.337Z'
+    updated_at: '2018-04-30T08:49:55.337Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 52
+    name: created player contact
+    admin_id: 4
+    created_at: '2015-10-14T16:16:56.745Z'
+    updated_at: '2015-10-14T16:16:56.745Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 136
+    name: created player contact history
+    admin_id: 1
+    created_at: '2018-04-30T08:49:55.583Z'
+    updated_at: '2018-04-30T08:49:55.583Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 191
+    name: created player contact phone info
+    admin_id: 1
+    created_at: '2019-06-27T08:04:07.502Z'
+    updated_at: '2019-06-27T08:04:07.502Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 53
+    name: created player info
+    admin_id: 4
+    created_at: '2015-10-14T16:16:56.759Z'
+    updated_at: '2015-10-14T16:16:56.759Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 59
+    name: created player info
+    admin_id: 4
+    created_at: '2015-10-14T16:16:56.846Z'
+    updated_at: '2015-10-14T16:16:56.846Z'
+    disabled: 
+    sub_process_id: 52
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: flag updates
+    user_email: 
+  - id: 132
+    name: created player info history
+    admin_id: 1
+    created_at: '2018-04-30T08:49:55.441Z'
+    updated_at: '2018-04-30T08:49:55.441Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 138
+    name: created player transaction
+    admin_id: 1
+    created_at: '2018-04-30T08:49:55.647Z'
+    updated_at: '2018-04-30T08:49:55.647Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 128
+    name: created pro football master
+    admin_id: 1
+    created_at: '2018-04-30T08:49:55.172Z'
+    updated_at: '2018-04-30T08:49:55.172Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 220
+    name: created q1 rc link
+    admin_id: 1
+    created_at: '2019-10-02T15:09:40.953Z'
+    updated_at: '2019-10-02T15:09:40.953Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 222
+    name: created q2 rc link
+    admin_id: 1
+    created_at: '2019-10-16T09:52:02.452Z'
+    updated_at: '2019-10-16T09:52:02.452Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 312
+    name: created rc femfl cif
+    admin_id: 1
+    created_at: '2020-08-11T15:36:52.438Z'
+    updated_at: '2020-08-11T15:36:52.438Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 69
+    name: created sage assignment
+    admin_id: 1
+    created_at: '2015-11-17T15:14:59.047Z'
+    updated_at: '2015-11-17T15:14:59.047Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: ''
+    description: ''
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 54
+    name: created scantron
+    admin_id: 4
+    created_at: '2015-10-14T16:16:56.772Z'
+    updated_at: '2015-10-14T16:16:56.772Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 231
+    name: created scantron q2
+    admin_id: 1
+    created_at: '2019-11-04T11:38:37.637Z'
+    updated_at: '2019-11-04T11:38:37.637Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 226
+    name: created sleep assignment
+    admin_id: 1
+    created_at: '2019-10-16T12:24:23.320Z'
+    updated_at: '2019-10-16T12:24:23.320Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 197
+    name: created zeus bulk message
+    admin_id: 1
+    created_at: '2019-09-23T16:51:52.066Z'
+    updated_at: '2019-09-23T16:51:52.066Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 201
+    name: created zeus bulk message recipient
+    admin_id: 1
+    created_at: '2019-09-23T16:51:52.149Z'
+    updated_at: '2019-09-23T16:51:52.149Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 199
+    name: created zeus bulk message status
+    admin_id: 1
+    created_at: '2019-09-23T16:51:52.124Z'
+    updated_at: '2019-09-23T16:51:52.124Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 218
+    name: created zeus short link
+    admin_id: 1
+    created_at: '2019-10-01T12:17:56.777Z'
+    updated_at: '2019-10-01T12:17:56.777Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 216
+    name: created zeus short link click
+    admin_id: 1
+    created_at: '2019-10-01T12:16:49.056Z'
+    updated_at: '2019-10-01T12:16:49.056Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 285
+    name: Email
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.895Z'
+    updated_at: '2020-08-11T08:51:56.895Z'
+    disabled: false
+    sub_process_id: 157
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Bounced
+    user_email: 
+  - id: 299
+    name: Email
+    admin_id: 1
+    created_at: '2020-08-11T09:34:02.632Z'
+    updated_at: '2020-08-11T09:34:02.632Z'
+    disabled: false
+    sub_process_id: 163
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: CIS-received
+    user_email: 
+  - id: 286
+    name: Email from Staff
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.917Z'
+    updated_at: '2020-08-11T08:51:56.917Z'
+    disabled: false
+    sub_process_id: 159
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 287
+    name: Email from Subject
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.923Z'
+    updated_at: '2020-08-11T08:51:56.923Z'
+    disabled: false
+    sub_process_id: 159
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 300
+    name: Event
+    admin_id: 1
+    created_at: '2020-08-11T09:34:02.704Z'
+    updated_at: '2020-08-11T09:34:02.704Z'
+    disabled: false
+    sub_process_id: 163
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: CIS-received
+    user_email: 
+  - id: 288
+    name: Inquiry Complete
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.933Z'
+    updated_at: '2020-08-11T08:51:56.933Z'
+    disabled: false
+    sub_process_id: 159
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 289
+    name: Mail
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.944Z'
+    updated_at: '2020-08-11T08:51:56.944Z'
+    disabled: false
+    sub_process_id: 157
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Bounced
+    user_email: 
+  - id: 301
+    name: Paper
+    admin_id: 1
+    created_at: '2020-08-11T09:34:02.761Z'
+    updated_at: '2020-08-11T09:34:02.761Z'
+    disabled: false
+    sub_process_id: 163
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: CIS-received
+    user_email: 
+  - id: 302
+    name: Phone
+    admin_id: 1
+    created_at: '2020-08-11T09:34:02.780Z'
+    updated_at: '2020-08-11T09:34:02.780Z'
+    disabled: false
+    sub_process_id: 163
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: CIS-received
+    user_email: 
+  - id: 290
+    name: Phone from Staff
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.966Z'
+    updated_at: '2020-08-11T08:51:56.966Z'
+    disabled: false
+    sub_process_id: 159
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 291
+    name: Phone from Subject
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.973Z'
+    updated_at: '2020-08-11T08:51:56.973Z'
+    disabled: false
+    sub_process_id: 159
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 292
+    name: REDCap
+    admin_id: 1
+    created_at: '2020-08-11T08:51:56.993Z'
+    updated_at: '2020-08-11T08:51:56.993Z'
+    disabled: false
+    sub_process_id: 160
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Sent
+    user_email: 
+  - id: 293
+    name: REDCap
+    admin_id: 1
+    created_at: '2020-08-11T08:51:57.016Z'
+    updated_at: '2020-08-11T08:51:57.016Z'
+    disabled: false
+    sub_process_id: 158
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Complete
+    user_email: 
+  - id: 294
+    name: REDCap
+    admin_id: 1
+    created_at: '2020-08-11T08:51:57.043Z'
+    updated_at: '2020-08-11T08:51:57.043Z'
+    disabled: false
+    sub_process_id: 157
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Bounced
+    user_email: 
+  - id: 303
+    name: REDCap
+    admin_id: 1
+    created_at: '2020-08-11T09:34:03.001Z'
+    updated_at: '2020-08-11T09:34:03.001Z'
+    disabled: false
+    sub_process_id: 163
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: CIS-received
+    user_email: 
+  - id: 295
+    name: Reminder - Email
+    admin_id: 1
+    created_at: '2020-08-11T08:51:57.059Z'
+    updated_at: '2020-08-11T08:51:57.059Z'
+    disabled: false
+    sub_process_id: 160
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Sent
+    user_email: 
+  - id: 296
+    name: Reminder Mail
+    admin_id: 1
+    created_at: '2020-08-11T08:51:57.068Z'
+    updated_at: '2020-08-11T08:51:57.068Z'
+    disabled: false
+    sub_process_id: 160
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Sent
+    user_email: 
+  - id: 297
+    name: Thank You
+    admin_id: 1
+    created_at: '2020-08-11T08:51:57.083Z'
+    updated_at: '2020-08-11T08:51:57.083Z'
+    disabled: false
+    sub_process_id: 160
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Sent
+    user_email: 
+  - id: 298
+    name: Thank You
+    admin_id: 1
+    created_at: '2020-08-11T08:51:57.098Z'
+    updated_at: '2020-08-11T08:51:57.098Z'
+    disabled: false
+    sub_process_id: 157
+    milestone: ''
+    description: ''
+    protocol_name: FEMFL
+    sub_process_name: Bounced
+    user_email: 
+  - id: 271
+    name: updated activity log  femfl assignment femfl comm
+    admin_id: 1
+    created_at: '2020-08-11T08:26:06.405Z'
+    updated_at: '2020-08-11T08:26:06.405Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 116
+    name: updated activity log  player contact phone
+    admin_id: 9
+    created_at: '2018-01-30T14:29:30.269Z'
+    updated_at: '2018-01-30T14:29:30.269Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 125
+    name: updated activity log  player contact phone
+    admin_id: 1
+    created_at: '2018-02-06T11:04:29.023Z'
+    updated_at: '2018-02-06T11:04:29.023Z'
+    disabled: 
+    sub_process_id: 52
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: flag updates
+    user_email: 
+  - id: 204
+    name: updated activity log  zeus bulk message
+    admin_id: 1
+    created_at: '2019-09-23T16:51:52.184Z'
+    updated_at: '2019-09-23T16:51:52.184Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 55
+    name: updated address
+    admin_id: 4
+    created_at: '2015-10-14T16:16:56.784Z'
+    updated_at: '2015-10-14T16:16:56.784Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 135
+    name: updated address history
+    admin_id: 1
+    created_at: '2018-04-30T08:49:55.526Z'
+    updated_at: '2018-04-30T08:49:55.526Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 141
+    name: updated bhs assignment
+    admin_id: 1
+    created_at: '2018-04-30T10:52:29.754Z'
+    updated_at: '2018-04-30T10:52:29.754Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 265
+    name: updated femfl address
+    admin_id: 1
+    created_at: '2020-08-11T08:26:06.212Z'
+    updated_at: '2020-08-11T08:26:06.212Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 269
+    name: updated femfl assignment
+    admin_id: 1
+    created_at: '2020-08-11T08:26:06.390Z'
+    updated_at: '2020-08-11T08:26:06.390Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 267
+    name: updated femfl contact
+    admin_id: 1
+    created_at: '2020-08-11T08:26:06.301Z'
+    updated_at: '2020-08-11T08:26:06.301Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 263
+    name: updated femfl subject
+    admin_id: 1
+    created_at: '2020-08-11T08:26:06.121Z'
+    updated_at: '2020-08-11T08:26:06.121Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 246
+    name: updated grit assignment
+    admin_id: 1
+    created_at: '2019-12-04T18:52:29.260Z'
+    updated_at: '2019-12-04T18:52:29.260Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 149
+    name: updated ipa assignment
+    admin_id: 1
+    created_at: '2018-07-25T15:26:18.067Z'
+    updated_at: '2018-07-25T15:26:18.067Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 146
+    name: updated ipa recruitment rank
+    admin_id: 1
+    created_at: '2018-07-09T08:25:56.908Z'
+    updated_at: '2018-07-09T08:25:56.908Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 225
+    name: updated marketo master
+    admin_id: 1
+    created_at: '2019-10-16T12:12:24.124Z'
+    updated_at: '2019-10-16T12:12:24.124Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 311
+    name: updated nfs store  manage  archived file
+    admin_id: 1
+    created_at: '2020-08-11T14:59:51.287Z'
+    updated_at: '2020-08-11T14:59:51.287Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: ''
+    description: ''
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 307
+    name: updated nfs store  manage  container
+    admin_id: 1
+    created_at: '2020-08-11T14:59:01.895Z'
+    updated_at: '2020-08-11T14:59:01.895Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: ''
+    description: ''
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 309
+    name: updated nfs store  manage  stored file
+    admin_id: 1
+    created_at: '2020-08-11T14:59:25.949Z'
+    updated_at: '2020-08-11T14:59:25.949Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: ''
+    description: ''
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 151
+    name: updated persnet assignment
+    admin_id: 1
+    created_at: '2018-09-17T08:24:44.552Z'
+    updated_at: '2018-09-17T08:24:44.552Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 323
+    name: updated pitt bhi assignment
+    admin_id: 1
+    created_at: '2020-08-19T18:59:17.634Z'
+    updated_at: '2020-08-19T18:59:17.634Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 131
+    name: updated player career datum
+    admin_id: 1
+    created_at: '2018-04-30T08:49:55.350Z'
+    updated_at: '2018-04-30T08:49:55.350Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 56
+    name: updated player contact
+    admin_id: 4
+    created_at: '2015-10-14T16:16:56.796Z'
+    updated_at: '2015-10-14T16:16:56.796Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 137
+    name: updated player contact history
+    admin_id: 1
+    created_at: '2018-04-30T08:49:55.592Z'
+    updated_at: '2018-04-30T08:49:55.592Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 192
+    name: updated player contact phone info
+    admin_id: 1
+    created_at: '2019-06-27T08:04:07.576Z'
+    updated_at: '2019-06-27T08:04:07.576Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 57
+    name: updated player info
+    admin_id: 4
+    created_at: '2015-10-14T16:16:56.808Z'
+    updated_at: '2015-10-14T16:16:56.808Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 60
+    name: updated player info
+    admin_id: 4
+    created_at: '2015-10-14T16:16:56.859Z'
+    updated_at: '2015-10-14T16:16:56.859Z'
+    disabled: false
+    sub_process_id: 52
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: flag updates
+    user_email: 
+  - id: 133
+    name: updated player info history
+    admin_id: 1
+    created_at: '2018-04-30T08:49:55.451Z'
+    updated_at: '2018-04-30T08:49:55.451Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 139
+    name: updated player transaction
+    admin_id: 1
+    created_at: '2018-04-30T08:49:55.655Z'
+    updated_at: '2018-04-30T08:49:55.655Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 129
+    name: updated pro football master
+    admin_id: 1
+    created_at: '2018-04-30T08:49:55.258Z'
+    updated_at: '2018-04-30T08:49:55.258Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 221
+    name: updated q1 rc link
+    admin_id: 1
+    created_at: '2019-10-02T15:09:41.009Z'
+    updated_at: '2019-10-02T15:09:41.009Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 223
+    name: updated q2 rc link
+    admin_id: 1
+    created_at: '2019-10-16T09:52:02.475Z'
+    updated_at: '2019-10-16T09:52:02.475Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 313
+    name: updated rc femfl cif
+    admin_id: 1
+    created_at: '2020-08-11T15:36:52.445Z'
+    updated_at: '2020-08-11T15:36:52.445Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 70
+    name: updated sage assignment
+    admin_id: 1
+    created_at: '2015-11-17T15:15:18.282Z'
+    updated_at: '2015-11-17T15:15:18.282Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: ''
+    description: ''
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 58
+    name: updated scantron
+    admin_id: 4
+    created_at: '2015-10-14T16:16:56.822Z'
+    updated_at: '2015-10-14T16:16:56.822Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 232
+    name: updated scantron q2
+    admin_id: 1
+    created_at: '2019-11-04T11:38:37.669Z'
+    updated_at: '2019-11-04T11:38:37.669Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 227
+    name: updated sleep assignment
+    admin_id: 1
+    created_at: '2019-10-16T12:24:23.329Z'
+    updated_at: '2019-10-16T12:24:23.329Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 198
+    name: updated zeus bulk message
+    admin_id: 1
+    created_at: '2019-09-23T16:51:52.108Z'
+    updated_at: '2019-09-23T16:51:52.108Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 202
+    name: updated zeus bulk message recipient
+    admin_id: 1
+    created_at: '2019-09-23T16:51:52.159Z'
+    updated_at: '2019-09-23T16:51:52.159Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 200
+    name: updated zeus bulk message status
+    admin_id: 1
+    created_at: '2019-09-23T16:51:52.133Z'
+    updated_at: '2019-09-23T16:51:52.133Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 219
+    name: updated zeus short link
+    admin_id: 1
+    created_at: '2019-10-01T12:17:56.791Z'
+    updated_at: '2019-10-01T12:17:56.791Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 217
+    name: updated zeus short link click
+    admin_id: 1
+    created_at: '2019-10-01T12:16:49.092Z'
+    updated_at: '2019-10-01T12:16:49.092Z'
+    disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
   nfs_store_filters:
   - id: 1
     app_type_id: 3
