@@ -4,6 +4,12 @@ class Admin::AppTypesController < AdminController
   ValidFormats = %w[json yaml].freeze
   after_action :routes_reload, only: [:upload]
 
+  def restart_server
+    AppControl.restart_server
+    flash.now[:notice] = 'Restarting'
+    render json: 'Restarting'
+  end
+
   def upload
     uploaded_io = params[:config]
 

@@ -282,6 +282,7 @@ class ModelReference < ActiveRecord::Base
     return unless @to_record_editable
 
     if to_record.respond_to?(:can_edit?)
+      to_record.current_user ||= current_user
       @to_record_editable = !!to_record.can_edit?
     else
       @to_record_editable

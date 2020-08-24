@@ -515,6 +515,33 @@ CREATE FUNCTION data_requests.log_data_request_attrib_update() RETURNS trigger
 
 
 --
+-- Name: log_data_request_attribs_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_data_request_attribs_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO data_request_attrib_history (
+    master_id,
+    data_source,
+    user_id,
+    created_at,
+    updated_at,
+    data_request_attrib_id)
+  SELECT
+    NEW.master_id,
+    NEW.data_source,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_data_request_initial_review_update(); Type: FUNCTION; Schema: data_requests; Owner: -
 --
 
@@ -798,14 +825,14 @@ CREATE FUNCTION data_requests.log_data_requests_update() RETURNS trigger
 BEGIN
   INSERT INTO data_request_history (
     master_id,
-    status, project_title, fphs_analyst_yes_no, full_name, title, institution, other_institution, others_handling_data, pm_contact, other_pm_contact, data_start_date, data_end_date, fphs_server_yes_no, fphs_server_tools_notes, off_fphs_server_reason_notes, data_use_agreement_status, data_use_agreement_notes, terms_of_use_yes_no, created_by_user_id,
+    status, project_title, select_purpose, other_purpose, research_question_notes, fphs_analyst_yes_no, full_name, title, institution, other_institution, others_handling_data, pm_contact, other_pm_contact, data_start_date, data_end_date, fphs_server_yes_no, fphs_server_tools_notes, off_fphs_server_reason_notes, data_use_agreement_status, data_use_agreement_notes, terms_of_use_yes_no, created_by_user_id,
     user_id,
     created_at,
     updated_at,
     data_request_id)
   SELECT
     NEW.master_id,
-    NEW.status, NEW.project_title, NEW.fphs_analyst_yes_no, NEW.full_name, NEW.title, NEW.institution, NEW.other_institution, NEW.others_handling_data, NEW.pm_contact, NEW.other_pm_contact, NEW.data_start_date, NEW.data_end_date, NEW.fphs_server_yes_no, NEW.fphs_server_tools_notes, NEW.off_fphs_server_reason_notes, NEW.data_use_agreement_status, NEW.data_use_agreement_notes, NEW.terms_of_use_yes_no, NEW.created_by_user_id,
+    NEW.status, NEW.project_title, NEW.select_purpose, NEW.other_purpose, NEW.research_question_notes, NEW.fphs_analyst_yes_no, NEW.full_name, NEW.title, NEW.institution, NEW.other_institution, NEW.others_handling_data, NEW.pm_contact, NEW.other_pm_contact, NEW.data_start_date, NEW.data_end_date, NEW.fphs_server_yes_no, NEW.fphs_server_tools_notes, NEW.off_fphs_server_reason_notes, NEW.data_use_agreement_status, NEW.data_use_agreement_notes, NEW.terms_of_use_yes_no, NEW.created_by_user_id,
     NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
@@ -11398,6 +11425,38 @@ CREATE FUNCTION ml_app.log_sage_two_update() RETURNS trigger
 
 
 --
+-- Name: log_scantron_q2_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_scantron_q2_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO scantron_q2_history
+                  (
+                      master_id,
+                      q2_scantron_id,
+                      user_id,
+                      admin_id,
+                      created_at,
+                      updated_at,
+                      scantron_q2_table_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.q2_scantron_id,
+                      NEW.user_id,
+                      NEW.admin_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
 -- Name: log_scantron_series_two_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -15464,6 +15523,37 @@ CREATE FUNCTION sleep.log_activity_log_sleep_assignment_inex_checklist_update() 
 
 
 --
+-- Name: log_activity_log_sleep_assignment_inex_checklists_update(); Type: FUNCTION; Schema: sleep; Owner: -
+--
+
+CREATE FUNCTION sleep.log_activity_log_sleep_assignment_inex_checklists_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_sleep_assignment_inex_checklist_history (
+    master_id,
+    sleep_assignment_id,
+    signed_no_yes, e_signed_document, e_signed_status, e_signed_how, e_signed_at, e_signed_by, e_signed_code, notes,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_sleep_assignment_inex_checklist_id)
+  SELECT
+    NEW.master_id,
+    NEW.sleep_assignment_id,
+    NEW.sleep_assignment_id, NEW.prev_activity_type, NEW.contact_role, NEW.select_subject_eligibility, NEW.signed_no_yes, NEW.notes, NEW.e_signed_document, NEW.e_signed_how, NEW.e_signed_at, NEW.e_signed_by, NEW.e_signed_code, NEW.e_signed_status,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_activity_log_sleep_assignment_med_nav_update(); Type: FUNCTION; Schema: sleep; Owner: -
 --
 
@@ -15588,6 +15678,37 @@ CREATE FUNCTION sleep.log_activity_log_sleep_assignment_phone_screen_update() RE
 
 
 --
+-- Name: log_activity_log_sleep_assignment_phone_screens_update(); Type: FUNCTION; Schema: sleep; Owner: -
+--
+
+CREATE FUNCTION sleep.log_activity_log_sleep_assignment_phone_screens_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_sleep_assignment_phone_screen_history (
+    master_id,
+    sleep_assignment_id,
+    
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_sleep_assignment_phone_screen_id)
+  SELECT
+    NEW.master_id,
+    NEW.sleep_assignment_id,
+    
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_activity_log_sleep_assignment_protocol_deviation_update(); Type: FUNCTION; Schema: sleep; Owner: -
 --
 
@@ -15681,6 +15802,37 @@ CREATE FUNCTION sleep.log_activity_log_sleep_assignment_update() RETURNS trigger
                   RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_activity_log_sleep_assignments_update(); Type: FUNCTION; Schema: sleep; Owner: -
+--
+
+CREATE FUNCTION sleep.log_activity_log_sleep_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_sleep_assignment_history (
+    master_id,
+    sleep_assignment_id,
+    select_who, select_record_from_player_contacts, follow_up_when, follow_up_time, notes, activity_date, select_activity, select_record_from_addresses, select_direction, select_result, select_next_step,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_sleep_assignment_id)
+  SELECT
+    NEW.master_id,
+    NEW.sleep_assignment_id,
+    NEW.sleep_assignment_id, NEW.select_activity, NEW.activity_date, NEW.select_record_from_player_contacts, NEW.select_direction, NEW.select_who, NEW.select_result, NEW.select_next_step, NEW.follow_up_when, NEW.follow_up_time, NEW.notes, NEW.protocol_id, NEW.select_record_from_addresses,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -16149,6 +16301,33 @@ CREATE FUNCTION sleep.log_sleep_incidental_finding_update() RETURNS trigger
                   RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_sleep_incidental_findings_update(); Type: FUNCTION; Schema: sleep; Owner: -
+--
+
+CREATE FUNCTION sleep.log_sleep_incidental_findings_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO sleep_incidental_finding_history (
+    master_id,
+    other_notes,
+    user_id,
+    created_at,
+    updated_at,
+    sleep_incidental_finding_id)
+  SELECT
+    NEW.master_id,
+    NEW.anthropometrics_check, NEW.anthropometrics_date, NEW.anthropometrics_notes, NEW.lab_results_check, NEW.lab_results_date, NEW.lab_results_notes, NEW.dexa_check, NEW.dexa_date, NEW.dexa_notes, NEW.brain_mri_check, NEW.brain_mri_date, NEW.brain_mri_notes, NEW.neuro_psych_check, NEW.neuro_psych_date, NEW.neuro_psych_notes, NEW.sensory_testing_check, NEW.sensory_testing_date, NEW.sensory_testing_notes, NEW.liver_mri_check, NEW.liver_mri_date, NEW.liver_mri_notes, NEW.physical_function_check, NEW.physical_function_date, NEW.physical_function_notes, NEW.eeg_check, NEW.eeg_date, NEW.eeg_notes, NEW.sleep_check, NEW.sleep_date, NEW.sleep_notes, NEW.cardiac_check, NEW.cardiac_date, NEW.cardiac_notes, NEW.xray_check, NEW.xray_date, NEW.xray_notes, NEW.other_notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -16668,6 +16847,33 @@ CREATE FUNCTION sleep.log_sleep_ps2_initial_screening_update() RETURNS trigger
 
 
 --
+-- Name: log_sleep_ps2_initial_screenings_update(); Type: FUNCTION; Schema: sleep; Owner: -
+--
+
+CREATE FUNCTION sleep.log_sleep_ps2_initial_screenings_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO sleep_ps2_initial_screening_history (
+    master_id,
+    select_is_good_time_to_speak, any_questions_blank_yes_no, question_notes, follow_up_date, follow_up_time, notes,
+    user_id,
+    created_at,
+    updated_at,
+    sleep_ps2_initial_screening_id)
+  SELECT
+    NEW.master_id,
+    NEW.select_is_good_time_to_speak, NEW.any_questions_blank_yes_no, NEW.question_notes, NEW.select_still_interested, NEW.follow_up_date, NEW.follow_up_time, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_sleep_ps2_non_eligible_update(); Type: FUNCTION; Schema: sleep; Owner: -
 --
 
@@ -16860,6 +17066,33 @@ CREATE FUNCTION sleep.log_sleep_ps_basic_response_update() RETURNS trigger
 
 
 --
+-- Name: log_sleep_ps_basic_responses_update(); Type: FUNCTION; Schema: sleep; Owner: -
+--
+
+CREATE FUNCTION sleep.log_sleep_ps_basic_responses_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO sleep_ps_basic_response_history (
+    master_id,
+    reliable_internet_yes_no, conditions_yes_no, conditions_notes, cbt_yes_no, cbt_how_long_ago, cbt_notes, sleep_times_yes_no, sleep_times_notes, work_night_shifts_yes_no, number_times_per_week_work_night_shifts, narcolepsy_diagnosis_yes_no_dont_know, narcolepsy_diagnosis_notes, antiseizure_meds_yes_no, seizure_in_ten_years_yes_no, major_psychiatric_disorder_yes_no, possibly_eligible_yes_no, possibly_eligible_reason_notes, notes,
+    user_id,
+    created_at,
+    updated_at,
+    sleep_ps_basic_response_id)
+  SELECT
+    NEW.master_id,
+    NEW.reliable_internet_yes_no, NEW.cbt_yes_no, NEW.cbt_how_long_ago, NEW.cbt_notes, NEW.sleep_times_yes_no, NEW.sleep_times_notes, NEW.work_night_shifts_yes_no, NEW.number_times_per_week_work_night_shifts, NEW.narcolepsy_diagnosis_yes_no_dont_know, NEW.narcolepsy_diagnosis_notes, NEW.antiseizure_meds_yes_no, NEW.seizure_in_ten_years_yes_no, NEW.major_psychiatric_disorder_yes_no, NEW.possibly_eligible_yes_no, NEW.possibly_eligible_reason_notes, NEW.notes, NEW.conditions_yes_no, NEW.conditions_notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_sleep_ps_dast2_mod_question_update(); Type: FUNCTION; Schema: sleep; Owner: -
 --
 
@@ -16990,6 +17223,33 @@ CREATE FUNCTION sleep.log_sleep_ps_eligible_update() RETURNS trigger
 
 
 --
+-- Name: log_sleep_ps_eligibles_update(); Type: FUNCTION; Schema: sleep; Owner: -
+--
+
+CREATE FUNCTION sleep.log_sleep_ps_eligibles_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO sleep_ps_eligible_history (
+    master_id,
+    notes, interested_yes_no, not_interested_notes, consent_to_pass_info_to_bwh_yes_no, consent_to_pass_info_to_bwh_2_yes_no, contact_info_notes,
+    user_id,
+    created_at,
+    updated_at,
+    sleep_ps_eligible_id)
+  SELECT
+    NEW.master_id,
+    NEW.interested_yes_no, NEW.not_interested_notes, NEW.consent_to_pass_info_to_bwh_yes_no, NEW.consent_to_pass_info_to_bwh_2_yes_no, NEW.contact_info_notes, NEW.notes, NEW.notes, NEW.interested_yes_no, NEW.not_interested_notes, NEW.consent_to_pass_info_to_bwh_yes_no, NEW.consent_to_pass_info_to_bwh_2_yes_no, NEW.contact_info_notes, NEW.interested_yes_no, NEW.not_interested_notes, NEW.consent_to_pass_info_to_bwh_yes_no, NEW.consent_to_pass_info_to_bwh_2_yes_no, NEW.contact_info_notes, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_sleep_ps_initial_screening_update(); Type: FUNCTION; Schema: sleep; Owner: -
 --
 
@@ -17034,6 +17294,33 @@ CREATE FUNCTION sleep.log_sleep_ps_initial_screening_update() RETURNS trigger
                 RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_sleep_ps_initial_screenings_update(); Type: FUNCTION; Schema: sleep; Owner: -
+--
+
+CREATE FUNCTION sleep.log_sleep_ps_initial_screenings_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO sleep_ps_initial_screening_history (
+    master_id,
+    select_is_good_time_to_speak, any_questions_blank_yes_no, question_notes, select_still_interested, follow_up_date, follow_up_time, notes,
+    user_id,
+    created_at,
+    updated_at,
+    sleep_ps_initial_screening_id)
+  SELECT
+    NEW.master_id,
+    NEW.select_is_good_time_to_speak, NEW.looked_at_website_yes_no, NEW.select_may_i_begin, NEW.any_questions_blank_yes_no, NEW.question_notes, NEW.select_still_interested, NEW.follow_up_date, NEW.follow_up_time, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -17087,6 +17374,33 @@ CREATE FUNCTION sleep.log_sleep_ps_non_eligible_update() RETURNS trigger
 
 
 --
+-- Name: log_sleep_ps_non_eligibles_update(); Type: FUNCTION; Schema: sleep; Owner: -
+--
+
+CREATE FUNCTION sleep.log_sleep_ps_non_eligibles_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO sleep_ps_non_eligible_history (
+    master_id,
+    any_questions_yes_no, notes, contact_pi_yes_no, additional_questions_yes_no, consent_to_pass_info_to_bwh_yes_no, consent_to_pass_info_to_bwh_2_yes_no, contact_info_notes,
+    user_id,
+    created_at,
+    updated_at,
+    sleep_ps_non_eligible_id)
+  SELECT
+    NEW.master_id,
+    NEW.any_questions_yes_no, NEW.contact_pi_yes_no, NEW.additional_questions_yes_no, NEW.consent_to_pass_info_to_bwh_yes_no, NEW.consent_to_pass_info_to_bwh_2_yes_no, NEW.contact_info_notes, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_sleep_ps_possibly_eligible_update(); Type: FUNCTION; Schema: sleep; Owner: -
 --
 
@@ -17126,6 +17440,33 @@ CREATE FUNCTION sleep.log_sleep_ps_possibly_eligible_update() RETURNS trigger
                   RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_sleep_ps_possibly_eligibles_update(); Type: FUNCTION; Schema: sleep; Owner: -
+--
+
+CREATE FUNCTION sleep.log_sleep_ps_possibly_eligibles_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO sleep_ps_possibly_eligible_history (
+    master_id,
+    consent_to_pass_info_to_bwh_yes_no, consent_to_pass_info_to_bwh_2_yes_no, any_questions_yes_no, notes, contact_info_notes,
+    user_id,
+    created_at,
+    updated_at,
+    sleep_ps_possibly_eligible_id)
+  SELECT
+    NEW.master_id,
+    NEW.any_questions_yes_no, NEW.consent_to_pass_info_to_bwh_yes_no, NEW.consent_to_pass_info_to_bwh_2_yes_no, NEW.contact_info_notes, NEW.follow_up_date, NEW.follow_up_time, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -17202,6 +17543,33 @@ CREATE FUNCTION sleep.log_sleep_ps_sleep_apnea_response_update() RETURNS trigger
                   RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_sleep_ps_sleep_apnea_responses_update(); Type: FUNCTION; Schema: sleep; Owner: -
+--
+
+CREATE FUNCTION sleep.log_sleep_ps_sleep_apnea_responses_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO sleep_ps_sleep_apnea_response_history (
+    master_id,
+    diagnosed_yes_no, use_treatment_yes_no, severity, notes,
+    user_id,
+    created_at,
+    updated_at,
+    sleep_ps_sleep_apnea_response_id)
+  SELECT
+    NEW.master_id,
+    NEW.diagnosed_yes_no, NEW.use_treatment_yes_no, NEW.severity, NEW.possibly_eligible_yes_no, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -17290,6 +17658,33 @@ CREATE FUNCTION sleep.log_sleep_screening_update() RETURNS trigger
                   RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_sleep_screenings_update(); Type: FUNCTION; Schema: sleep; Owner: -
+--
+
+CREATE FUNCTION sleep.log_sleep_screenings_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO sleep_screening_history (
+    master_id,
+    eligible_for_study_blank_yes_no, good_time_to_speak_blank_yes_no, still_interested_blank_yes_no, callback_date, callback_time, consent_performed_yes_no, did_subject_consent_yes_no, ineligible_notes, eligible_notes, not_interested_notes, contact_in_future_yes_no,
+    user_id,
+    created_at,
+    updated_at,
+    sleep_screening_id)
+  SELECT
+    NEW.master_id,
+    NEW.eligible_for_study_blank_yes_no, NEW.requires_study_partner_blank_yes_no, NEW.notes, NEW.good_time_to_speak_blank_yes_no, NEW.callback_date, NEW.callback_time, NEW.still_interested_blank_yes_no, NEW.not_interested_notes, NEW.contact_in_future_yes_no, NEW.ineligible_notes, NEW.eligible_notes, NEW.consent_performed_yes_no, NEW.did_subject_consent_yes_no,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -20164,7 +20559,6 @@ CREATE TABLE data_requests.data_request_attrib_history (
     id integer NOT NULL,
     master_id integer,
     data_source character varying,
-    requested_attribs character varying[],
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
@@ -20199,7 +20593,6 @@ CREATE TABLE data_requests.data_request_attribs (
     id integer NOT NULL,
     master_id integer,
     data_source character varying,
-    requested_attribs character varying[],
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -20256,7 +20649,10 @@ CREATE TABLE data_requests.data_request_history (
     fphs_server_yes_no character varying,
     fphs_server_tools_notes character varying,
     status character varying,
-    off_fphs_server_reason_notes character varying
+    off_fphs_server_reason_notes character varying,
+    select_purpose character varying,
+    other_purpose character varying,
+    research_question_notes character varying
 );
 
 
@@ -20593,7 +20989,10 @@ CREATE TABLE data_requests.data_requests (
     fphs_server_yes_no character varying,
     fphs_server_tools_notes character varying,
     status character varying,
-    off_fphs_server_reason_notes character varying
+    off_fphs_server_reason_notes character varying,
+    select_purpose character varying,
+    other_purpose character varying,
+    research_question_notes character varying
 );
 
 
@@ -33305,6 +33704,75 @@ ALTER SEQUENCE ml_app.scantron_history_id_seq OWNED BY ml_app.scantron_history.i
 
 
 --
+-- Name: scantron_q2_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.scantron_q2_history (
+    id integer NOT NULL,
+    master_id integer,
+    q2_scantron_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    scantron_q2_table_id integer
+);
+
+
+--
+-- Name: scantron_q2_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.scantron_q2_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: scantron_q2_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.scantron_q2_history_id_seq OWNED BY ml_app.scantron_q2_history.id;
+
+
+--
+-- Name: scantron_q2s; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.scantron_q2s (
+    id integer NOT NULL,
+    master_id integer,
+    q2_scantron_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: scantron_q2s_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.scantron_q2s_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: scantron_q2s_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.scantron_q2s_id_seq OWNED BY ml_app.scantron_q2s.id;
+
+
+--
 -- Name: scantron_series_two_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -36166,13 +36634,13 @@ CREATE TABLE sleep.activity_log_sleep_assignment_history (
     follow_up_when date,
     follow_up_time time without time zone,
     notes character varying,
-    protocol_id bigint,
     select_record_from_addresses character varying,
     extra_log_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    activity_log_sleep_assignment_id integer
+    activity_log_sleep_assignment_id integer,
+    protocol_id bigint
 );
 
 
@@ -36203,9 +36671,6 @@ CREATE TABLE sleep.activity_log_sleep_assignment_inex_checklist_history (
     id integer NOT NULL,
     master_id integer,
     sleep_assignment_id integer,
-    prev_activity_type character varying,
-    contact_role character varying,
-    select_subject_eligibility character varying,
     signed_no_yes character varying,
     notes character varying,
     e_signed_document character varying,
@@ -36218,7 +36683,10 @@ CREATE TABLE sleep.activity_log_sleep_assignment_inex_checklist_history (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    activity_log_sleep_assignment_inex_checklist_id integer
+    activity_log_sleep_assignment_inex_checklist_id integer,
+    select_subject_eligibility character varying,
+    contact_role character varying,
+    prev_activity_type character varying
 );
 
 
@@ -36249,9 +36717,6 @@ CREATE TABLE sleep.activity_log_sleep_assignment_inex_checklists (
     id integer NOT NULL,
     master_id integer,
     sleep_assignment_id integer,
-    prev_activity_type character varying,
-    contact_role character varying,
-    select_subject_eligibility character varying,
     signed_no_yes character varying,
     notes character varying,
     e_signed_document character varying,
@@ -36263,7 +36728,10 @@ CREATE TABLE sleep.activity_log_sleep_assignment_inex_checklists (
     extra_log_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    select_subject_eligibility character varying,
+    contact_role character varying,
+    prev_activity_type character varying
 );
 
 
@@ -36450,15 +36918,15 @@ CREATE TABLE sleep.activity_log_sleep_assignment_phone_screen_history (
     id integer NOT NULL,
     master_id integer,
     sleep_assignment_id integer,
-    callback_required character varying,
-    callback_date date,
-    callback_time time without time zone,
-    notes character varying,
     extra_log_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    activity_log_sleep_assignment_phone_screen_id integer
+    activity_log_sleep_assignment_phone_screen_id integer,
+    notes character varying,
+    callback_time time without time zone,
+    callback_date date,
+    callback_required character varying
 );
 
 
@@ -36489,14 +36957,14 @@ CREATE TABLE sleep.activity_log_sleep_assignment_phone_screens (
     id integer NOT NULL,
     master_id integer,
     sleep_assignment_id integer,
-    callback_required character varying,
-    callback_date date,
-    callback_time time without time zone,
-    notes character varying,
     extra_log_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    notes character varying,
+    callback_time time without time zone,
+    callback_date date,
+    callback_required character varying
 );
 
 
@@ -36612,12 +37080,12 @@ CREATE TABLE sleep.activity_log_sleep_assignments (
     follow_up_when date,
     follow_up_time time without time zone,
     notes character varying,
-    protocol_id bigint,
     select_record_from_addresses character varying,
     extra_log_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    protocol_id bigint
 );
 
 
@@ -37379,47 +37847,47 @@ ALTER SEQUENCE sleep.sleep_ese_questions_id_seq OWNED BY sleep.sleep_ese_questio
 CREATE TABLE sleep.sleep_incidental_finding_history (
     id integer NOT NULL,
     master_id integer,
-    anthropometrics_check boolean,
-    anthropometrics_date date,
-    anthropometrics_notes character varying,
-    lab_results_check boolean,
-    lab_results_date date,
-    lab_results_notes character varying,
-    dexa_check boolean,
-    dexa_date date,
-    dexa_notes character varying,
-    brain_mri_check boolean,
-    brain_mri_date date,
-    brain_mri_notes character varying,
-    neuro_psych_check boolean,
-    neuro_psych_date date,
-    neuro_psych_notes character varying,
-    sensory_testing_check boolean,
-    sensory_testing_date date,
-    sensory_testing_notes character varying,
-    liver_mri_check boolean,
-    liver_mri_date date,
-    liver_mri_notes character varying,
-    physical_function_check boolean,
-    physical_function_date date,
-    physical_function_notes character varying,
-    eeg_check boolean,
-    eeg_date date,
-    eeg_notes character varying,
-    sleep_check boolean,
-    sleep_date date,
-    sleep_notes character varying,
-    cardiac_check boolean,
-    cardiac_date date,
-    cardiac_notes character varying,
-    xray_check boolean,
-    xray_date date,
-    xray_notes character varying,
     other_notes character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    sleep_incidental_finding_id integer
+    sleep_incidental_finding_id integer,
+    xray_notes character varying,
+    xray_date date,
+    xray_check boolean,
+    cardiac_notes character varying,
+    cardiac_date date,
+    cardiac_check boolean,
+    sleep_notes character varying,
+    sleep_date date,
+    sleep_check boolean,
+    eeg_notes character varying,
+    eeg_date date,
+    eeg_check boolean,
+    physical_function_notes character varying,
+    physical_function_date date,
+    physical_function_check boolean,
+    liver_mri_notes character varying,
+    liver_mri_date date,
+    liver_mri_check boolean,
+    sensory_testing_notes character varying,
+    sensory_testing_date date,
+    sensory_testing_check boolean,
+    neuro_psych_notes character varying,
+    neuro_psych_date date,
+    neuro_psych_check boolean,
+    brain_mri_notes character varying,
+    brain_mri_date date,
+    brain_mri_check boolean,
+    dexa_notes character varying,
+    dexa_date date,
+    dexa_check boolean,
+    lab_results_notes character varying,
+    lab_results_date date,
+    lab_results_check boolean,
+    anthropometrics_notes character varying,
+    anthropometrics_date date,
+    anthropometrics_check boolean
 );
 
 
@@ -37449,46 +37917,46 @@ ALTER SEQUENCE sleep.sleep_incidental_finding_history_id_seq OWNED BY sleep.slee
 CREATE TABLE sleep.sleep_incidental_findings (
     id integer NOT NULL,
     master_id integer,
-    anthropometrics_check boolean,
-    anthropometrics_date date,
-    anthropometrics_notes character varying,
-    lab_results_check boolean,
-    lab_results_date date,
-    lab_results_notes character varying,
-    dexa_check boolean,
-    dexa_date date,
-    dexa_notes character varying,
-    brain_mri_check boolean,
-    brain_mri_date date,
-    brain_mri_notes character varying,
-    neuro_psych_check boolean,
-    neuro_psych_date date,
-    neuro_psych_notes character varying,
-    sensory_testing_check boolean,
-    sensory_testing_date date,
-    sensory_testing_notes character varying,
-    liver_mri_check boolean,
-    liver_mri_date date,
-    liver_mri_notes character varying,
-    physical_function_check boolean,
-    physical_function_date date,
-    physical_function_notes character varying,
-    eeg_check boolean,
-    eeg_date date,
-    eeg_notes character varying,
-    sleep_check boolean,
-    sleep_date date,
-    sleep_notes character varying,
-    cardiac_check boolean,
-    cardiac_date date,
-    cardiac_notes character varying,
-    xray_check boolean,
-    xray_date date,
-    xray_notes character varying,
     other_notes character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    xray_notes character varying,
+    xray_date date,
+    xray_check boolean,
+    cardiac_notes character varying,
+    cardiac_date date,
+    cardiac_check boolean,
+    sleep_notes character varying,
+    sleep_date date,
+    sleep_check boolean,
+    eeg_notes character varying,
+    eeg_date date,
+    eeg_check boolean,
+    physical_function_notes character varying,
+    physical_function_date date,
+    physical_function_check boolean,
+    liver_mri_notes character varying,
+    liver_mri_date date,
+    liver_mri_check boolean,
+    sensory_testing_notes character varying,
+    sensory_testing_date date,
+    sensory_testing_check boolean,
+    neuro_psych_notes character varying,
+    neuro_psych_date date,
+    neuro_psych_check boolean,
+    brain_mri_notes character varying,
+    brain_mri_date date,
+    brain_mri_check boolean,
+    dexa_notes character varying,
+    dexa_date date,
+    dexa_check boolean,
+    lab_results_notes character varying,
+    lab_results_date date,
+    lab_results_check boolean,
+    anthropometrics_notes character varying,
+    anthropometrics_date date,
+    anthropometrics_check boolean
 );
 
 
@@ -38328,14 +38796,14 @@ CREATE TABLE sleep.sleep_ps2_initial_screening_history (
     select_is_good_time_to_speak character varying,
     any_questions_blank_yes_no character varying,
     question_notes character varying,
-    select_still_interested character varying,
     follow_up_date date,
     follow_up_time character varying,
     notes character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    sleep_ps2_initial_screening_id integer
+    sleep_ps2_initial_screening_id integer,
+    select_still_interested character varying
 );
 
 
@@ -38368,13 +38836,13 @@ CREATE TABLE sleep.sleep_ps2_initial_screenings (
     select_is_good_time_to_speak character varying,
     any_questions_blank_yes_no character varying,
     question_notes character varying,
-    select_still_interested character varying,
     follow_up_date date,
     follow_up_time character varying,
     notes character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    select_still_interested character varying
 );
 
 
@@ -38642,7 +39110,6 @@ CREATE TABLE sleep.sleep_ps_basic_response_history (
     id integer NOT NULL,
     master_id integer,
     reliable_internet_yes_no character varying,
-    placeholder_digital_no character varying,
     cbt_yes_no character varying,
     cbt_how_long_ago character varying,
     cbt_notes character varying,
@@ -38694,7 +39161,6 @@ CREATE TABLE sleep.sleep_ps_basic_responses (
     id integer NOT NULL,
     master_id integer,
     reliable_internet_yes_no character varying,
-    placeholder_digital_no character varying,
     cbt_yes_no character varying,
     cbt_how_long_ago character varying,
     cbt_notes character varying,
@@ -38910,7 +39376,6 @@ CREATE TABLE sleep.sleep_ps_eligible_history (
     not_interested_notes character varying,
     consent_to_pass_info_to_bwh_yes_no character varying,
     consent_to_pass_info_to_bwh_2_yes_no character varying,
-    placeholder_consent_to_pass_info_2_no character varying,
     contact_info_notes character varying,
     notes character varying,
     user_id integer,
@@ -38950,7 +39415,6 @@ CREATE TABLE sleep.sleep_ps_eligibles (
     not_interested_notes character varying,
     consent_to_pass_info_to_bwh_yes_no character varying,
     consent_to_pass_info_to_bwh_2_yes_no character varying,
-    placeholder_consent_to_pass_info_2_no character varying,
     contact_info_notes character varying,
     notes character varying,
     user_id integer,
@@ -38986,8 +39450,6 @@ CREATE TABLE sleep.sleep_ps_initial_screening_history (
     id integer NOT NULL,
     master_id integer,
     select_is_good_time_to_speak character varying,
-    looked_at_website_yes_no character varying,
-    select_may_i_begin character varying,
     any_questions_blank_yes_no character varying,
     question_notes character varying,
     select_still_interested character varying,
@@ -38997,7 +39459,9 @@ CREATE TABLE sleep.sleep_ps_initial_screening_history (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    sleep_ps_initial_screening_id integer
+    sleep_ps_initial_screening_id integer,
+    select_may_i_begin character varying,
+    looked_at_website_yes_no character varying
 );
 
 
@@ -39028,8 +39492,6 @@ CREATE TABLE sleep.sleep_ps_initial_screenings (
     id integer NOT NULL,
     master_id integer,
     select_is_good_time_to_speak character varying,
-    looked_at_website_yes_no character varying,
-    select_may_i_begin character varying,
     any_questions_blank_yes_no character varying,
     question_notes character varying,
     select_still_interested character varying,
@@ -39038,7 +39500,9 @@ CREATE TABLE sleep.sleep_ps_initial_screenings (
     notes character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    select_may_i_begin character varying,
+    looked_at_website_yes_no character varying
 );
 
 
@@ -39069,14 +39533,10 @@ CREATE TABLE sleep.sleep_ps_non_eligible_history (
     id integer NOT NULL,
     master_id integer,
     any_questions_yes_no character varying,
-    placeholder_any_questions_no character varying,
     contact_pi_yes_no character varying,
     additional_questions_yes_no character varying,
-    placeholder_additional_questions_no character varying,
-    placeholder_additional_questions_yes character varying,
     consent_to_pass_info_to_bwh_yes_no character varying,
     consent_to_pass_info_to_bwh_2_yes_no character varying,
-    placeholder_consent_to_pass_info_2_no character varying,
     contact_info_notes character varying,
     notes character varying,
     user_id integer,
@@ -39113,14 +39573,10 @@ CREATE TABLE sleep.sleep_ps_non_eligibles (
     id integer NOT NULL,
     master_id integer,
     any_questions_yes_no character varying,
-    placeholder_any_questions_no character varying,
     contact_pi_yes_no character varying,
     additional_questions_yes_no character varying,
-    placeholder_additional_questions_no character varying,
-    placeholder_additional_questions_yes character varying,
     consent_to_pass_info_to_bwh_yes_no character varying,
     consent_to_pass_info_to_bwh_2_yes_no character varying,
-    placeholder_consent_to_pass_info_2_no character varying,
     contact_info_notes character varying,
     notes character varying,
     user_id integer,
@@ -39159,13 +39615,13 @@ CREATE TABLE sleep.sleep_ps_possibly_eligible_history (
     consent_to_pass_info_to_bwh_yes_no character varying,
     consent_to_pass_info_to_bwh_2_yes_no character varying,
     contact_info_notes character varying,
-    follow_up_date date,
-    follow_up_time time without time zone,
     notes character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    sleep_ps_possibly_eligible_id integer
+    sleep_ps_possibly_eligible_id integer,
+    follow_up_time time without time zone,
+    follow_up_date date
 );
 
 
@@ -39199,12 +39655,12 @@ CREATE TABLE sleep.sleep_ps_possibly_eligibles (
     consent_to_pass_info_to_bwh_yes_no character varying,
     consent_to_pass_info_to_bwh_2_yes_no character varying,
     contact_info_notes character varying,
-    follow_up_date date,
-    follow_up_time time without time zone,
     notes character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    follow_up_time time without time zone,
+    follow_up_date date
 );
 
 
@@ -39312,12 +39768,12 @@ CREATE TABLE sleep.sleep_ps_sleep_apnea_response_history (
     diagnosed_yes_no character varying,
     use_treatment_yes_no character varying,
     severity character varying,
-    possibly_eligible_yes_no character varying,
     notes character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    sleep_ps_sleep_apnea_response_id integer
+    sleep_ps_sleep_apnea_response_id integer,
+    possibly_eligible_yes_no character varying
 );
 
 
@@ -39350,11 +39806,11 @@ CREATE TABLE sleep.sleep_ps_sleep_apnea_responses (
     diagnosed_yes_no character varying,
     use_treatment_yes_no character varying,
     severity character varying,
-    possibly_eligible_yes_no character varying,
     notes character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    possibly_eligible_yes_no character varying
 );
 
 
@@ -39456,8 +39912,6 @@ CREATE TABLE sleep.sleep_screening_history (
     id integer NOT NULL,
     master_id integer,
     eligible_for_study_blank_yes_no character varying,
-    requires_study_partner_blank_yes_no character varying,
-    notes character varying,
     good_time_to_speak_blank_yes_no character varying,
     callback_date date,
     callback_time character varying,
@@ -39471,7 +39925,9 @@ CREATE TABLE sleep.sleep_screening_history (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    sleep_screening_id integer
+    sleep_screening_id integer,
+    notes character varying,
+    requires_study_partner_blank_yes_no character varying
 );
 
 
@@ -39502,8 +39958,6 @@ CREATE TABLE sleep.sleep_screenings (
     id integer NOT NULL,
     master_id integer,
     eligible_for_study_blank_yes_no character varying,
-    requires_study_partner_blank_yes_no character varying,
-    notes character varying,
     good_time_to_speak_blank_yes_no character varying,
     callback_date date,
     callback_time character varying,
@@ -39516,7 +39970,9 @@ CREATE TABLE sleep.sleep_screenings (
     did_subject_consent_yes_no character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    notes character varying,
+    requires_study_partner_blank_yes_no character varying
 );
 
 
@@ -44997,6 +45453,20 @@ ALTER TABLE ONLY ml_app.scantron_history ALTER COLUMN id SET DEFAULT nextval('ml
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.scantron_q2_history ALTER COLUMN id SET DEFAULT nextval('ml_app.scantron_q2_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.scantron_q2s ALTER COLUMN id SET DEFAULT nextval('ml_app.scantron_q2s_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.scantron_series_two_history ALTER COLUMN id SET DEFAULT nextval('ml_app.scantron_series_two_history_id_seq'::regclass);
 
 
@@ -49109,6 +49579,22 @@ ALTER TABLE ONLY ml_app.sage_twos
 
 ALTER TABLE ONLY ml_app.scantron_history
     ADD CONSTRAINT scantron_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: scantron_q2_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.scantron_q2_history
+    ADD CONSTRAINT scantron_q2_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: scantron_q2s_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.scantron_q2s
+    ADD CONSTRAINT scantron_q2s_pkey PRIMARY KEY (id);
 
 
 --
@@ -56442,6 +56928,55 @@ CREATE INDEX index_scantron_history_on_user_id ON ml_app.scantron_history USING 
 
 
 --
+-- Name: index_scantron_q2_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_scantron_q2_history_on_admin_id ON ml_app.scantron_q2_history USING btree (admin_id);
+
+
+--
+-- Name: index_scantron_q2_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_scantron_q2_history_on_master_id ON ml_app.scantron_q2_history USING btree (master_id);
+
+
+--
+-- Name: index_scantron_q2_history_on_scantron_q2_table_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_scantron_q2_history_on_scantron_q2_table_id ON ml_app.scantron_q2_history USING btree (scantron_q2_table_id);
+
+
+--
+-- Name: index_scantron_q2_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_scantron_q2_history_on_user_id ON ml_app.scantron_q2_history USING btree (user_id);
+
+
+--
+-- Name: index_scantron_q2s_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_scantron_q2s_on_admin_id ON ml_app.scantron_q2s USING btree (admin_id);
+
+
+--
+-- Name: index_scantron_q2s_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_scantron_q2s_on_master_id ON ml_app.scantron_q2s USING btree (master_id);
+
+
+--
+-- Name: index_scantron_q2s_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_scantron_q2s_on_user_id ON ml_app.scantron_q2s USING btree (user_id);
+
+
+--
 -- Name: index_scantron_series_two_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -60985,6 +61520,20 @@ CREATE TRIGGER log_activity_log_data_request_assignment_history_update AFTER UPD
 
 
 --
+-- Name: log_data_request_attrib_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_attrib_history_insert AFTER INSERT ON data_requests.data_request_attribs FOR EACH ROW EXECUTE PROCEDURE data_requests.log_data_request_attribs_update();
+
+
+--
+-- Name: log_data_request_attrib_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_attrib_history_update AFTER UPDATE ON data_requests.data_request_attribs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_data_request_attribs_update();
+
+
+--
 -- Name: log_data_request_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
 --
 
@@ -62966,6 +63515,20 @@ CREATE TRIGGER scantron_history_update AFTER UPDATE ON ml_app.scantrons FOR EACH
 
 
 --
+-- Name: scantron_q2_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER scantron_q2_history_insert AFTER INSERT ON ml_app.scantron_q2s FOR EACH ROW EXECUTE PROCEDURE ml_app.log_scantron_q2_update();
+
+
+--
+-- Name: scantron_q2_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER scantron_q2_history_update AFTER UPDATE ON ml_app.scantron_q2s FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_scantron_q2_update();
+
+
+--
 -- Name: sleep_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -63551,6 +64114,174 @@ CREATE TRIGGER bwh_sleep_id_number_history_insert AFTER INSERT ON sleep.bwh_slee
 --
 
 CREATE TRIGGER bwh_sleep_id_number_history_update AFTER UPDATE ON sleep.bwh_sleep_id_numbers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE sleep.log_bwh_sleep_id_number_update();
+
+
+--
+-- Name: log_activity_log_sleep_assignment_history_insert; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_sleep_assignment_history_insert AFTER INSERT ON sleep.activity_log_sleep_assignments FOR EACH ROW EXECUTE PROCEDURE sleep.log_activity_log_sleep_assignments_update();
+
+
+--
+-- Name: log_activity_log_sleep_assignment_history_update; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_sleep_assignment_history_update AFTER UPDATE ON sleep.activity_log_sleep_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE sleep.log_activity_log_sleep_assignments_update();
+
+
+--
+-- Name: log_activity_log_sleep_assignment_inex_checklist_history_insert; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_sleep_assignment_inex_checklist_history_insert AFTER INSERT ON sleep.activity_log_sleep_assignment_inex_checklists FOR EACH ROW EXECUTE PROCEDURE sleep.log_activity_log_sleep_assignment_inex_checklists_update();
+
+
+--
+-- Name: log_activity_log_sleep_assignment_inex_checklist_history_update; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_sleep_assignment_inex_checklist_history_update AFTER UPDATE ON sleep.activity_log_sleep_assignment_inex_checklists FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE sleep.log_activity_log_sleep_assignment_inex_checklists_update();
+
+
+--
+-- Name: log_activity_log_sleep_assignment_phone_screen_history_insert; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_sleep_assignment_phone_screen_history_insert AFTER INSERT ON sleep.activity_log_sleep_assignment_phone_screens FOR EACH ROW EXECUTE PROCEDURE sleep.log_activity_log_sleep_assignment_phone_screens_update();
+
+
+--
+-- Name: log_activity_log_sleep_assignment_phone_screen_history_update; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_sleep_assignment_phone_screen_history_update AFTER UPDATE ON sleep.activity_log_sleep_assignment_phone_screens FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE sleep.log_activity_log_sleep_assignment_phone_screens_update();
+
+
+--
+-- Name: log_sleep_incidental_finding_history_insert; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_incidental_finding_history_insert AFTER INSERT ON sleep.sleep_incidental_findings FOR EACH ROW EXECUTE PROCEDURE sleep.log_sleep_incidental_findings_update();
+
+
+--
+-- Name: log_sleep_incidental_finding_history_update; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_incidental_finding_history_update AFTER UPDATE ON sleep.sleep_incidental_findings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE sleep.log_sleep_incidental_findings_update();
+
+
+--
+-- Name: log_sleep_ps2_initial_screening_history_insert; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps2_initial_screening_history_insert AFTER INSERT ON sleep.sleep_ps2_initial_screenings FOR EACH ROW EXECUTE PROCEDURE sleep.log_sleep_ps2_initial_screenings_update();
+
+
+--
+-- Name: log_sleep_ps2_initial_screening_history_update; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps2_initial_screening_history_update AFTER UPDATE ON sleep.sleep_ps2_initial_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE sleep.log_sleep_ps2_initial_screenings_update();
+
+
+--
+-- Name: log_sleep_ps_basic_response_history_insert; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps_basic_response_history_insert AFTER INSERT ON sleep.sleep_ps_basic_responses FOR EACH ROW EXECUTE PROCEDURE sleep.log_sleep_ps_basic_responses_update();
+
+
+--
+-- Name: log_sleep_ps_basic_response_history_update; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps_basic_response_history_update AFTER UPDATE ON sleep.sleep_ps_basic_responses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE sleep.log_sleep_ps_basic_responses_update();
+
+
+--
+-- Name: log_sleep_ps_eligible_history_insert; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps_eligible_history_insert AFTER INSERT ON sleep.sleep_ps_eligibles FOR EACH ROW EXECUTE PROCEDURE sleep.log_sleep_ps_eligibles_update();
+
+
+--
+-- Name: log_sleep_ps_eligible_history_update; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps_eligible_history_update AFTER UPDATE ON sleep.sleep_ps_eligibles FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE sleep.log_sleep_ps_eligibles_update();
+
+
+--
+-- Name: log_sleep_ps_initial_screening_history_insert; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps_initial_screening_history_insert AFTER INSERT ON sleep.sleep_ps_initial_screenings FOR EACH ROW EXECUTE PROCEDURE sleep.log_sleep_ps_initial_screenings_update();
+
+
+--
+-- Name: log_sleep_ps_initial_screening_history_update; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps_initial_screening_history_update AFTER UPDATE ON sleep.sleep_ps_initial_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE sleep.log_sleep_ps_initial_screenings_update();
+
+
+--
+-- Name: log_sleep_ps_non_eligible_history_insert; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps_non_eligible_history_insert AFTER INSERT ON sleep.sleep_ps_non_eligibles FOR EACH ROW EXECUTE PROCEDURE sleep.log_sleep_ps_non_eligibles_update();
+
+
+--
+-- Name: log_sleep_ps_non_eligible_history_update; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps_non_eligible_history_update AFTER UPDATE ON sleep.sleep_ps_non_eligibles FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE sleep.log_sleep_ps_non_eligibles_update();
+
+
+--
+-- Name: log_sleep_ps_possibly_eligible_history_insert; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps_possibly_eligible_history_insert AFTER INSERT ON sleep.sleep_ps_possibly_eligibles FOR EACH ROW EXECUTE PROCEDURE sleep.log_sleep_ps_possibly_eligibles_update();
+
+
+--
+-- Name: log_sleep_ps_possibly_eligible_history_update; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps_possibly_eligible_history_update AFTER UPDATE ON sleep.sleep_ps_possibly_eligibles FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE sleep.log_sleep_ps_possibly_eligibles_update();
+
+
+--
+-- Name: log_sleep_ps_sleep_apnea_response_history_insert; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps_sleep_apnea_response_history_insert AFTER INSERT ON sleep.sleep_ps_sleep_apnea_responses FOR EACH ROW EXECUTE PROCEDURE sleep.log_sleep_ps_sleep_apnea_responses_update();
+
+
+--
+-- Name: log_sleep_ps_sleep_apnea_response_history_update; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_ps_sleep_apnea_response_history_update AFTER UPDATE ON sleep.sleep_ps_sleep_apnea_responses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE sleep.log_sleep_ps_sleep_apnea_responses_update();
+
+
+--
+-- Name: log_sleep_screening_history_insert; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_screening_history_insert AFTER INSERT ON sleep.sleep_screenings FOR EACH ROW EXECUTE PROCEDURE sleep.log_sleep_screenings_update();
+
+
+--
+-- Name: log_sleep_screening_history_update; Type: TRIGGER; Schema: sleep; Owner: -
+--
+
+CREATE TRIGGER log_sleep_screening_history_update AFTER UPDATE ON sleep.sleep_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE sleep.log_sleep_screenings_update();
 
 
 --
@@ -70325,6 +71056,14 @@ ALTER TABLE ONLY ml_app.grit_assignments
 
 
 --
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.scantron_q2s
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -70377,6 +71116,14 @@ ALTER TABLE ONLY ml_app.sleep_assignments
 --
 
 ALTER TABLE ONLY ml_app.grit_assignments
+    ADD CONSTRAINT fk_rails_1a7e2b01e0admin FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.scantron_q2s
     ADD CONSTRAINT fk_rails_1a7e2b01e0admin FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
@@ -70649,6 +71396,14 @@ ALTER TABLE ONLY ml_app.sleep_assignments
 --
 
 ALTER TABLE ONLY ml_app.grit_assignments
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.scantron_q2s
     ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
@@ -71242,6 +71997,38 @@ ALTER TABLE ONLY ml_app.scantron_history
 
 ALTER TABLE ONLY ml_app.scantron_history
     ADD CONSTRAINT fk_scantron_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_scantron_q2_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.scantron_q2_history
+    ADD CONSTRAINT fk_scantron_q2_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_scantron_q2_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.scantron_q2_history
+    ADD CONSTRAINT fk_scantron_q2_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_scantron_q2_history_scantron_q2s; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.scantron_q2_history
+    ADD CONSTRAINT fk_scantron_q2_history_scantron_q2s FOREIGN KEY (scantron_q2_table_id) REFERENCES ml_app.scantron_q2s(id);
+
+
+--
+-- Name: fk_scantron_q2_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.scantron_q2_history
+    ADD CONSTRAINT fk_scantron_q2_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -76051,6 +76838,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200818132644'),
 ('20200818135756'),
 ('20200818140236'),
-('20200818143559');
+('20200818143559'),
+('20200821114133');
 
 

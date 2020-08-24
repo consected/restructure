@@ -5007,7 +5007,7 @@ app_type:
     user_email: template@template
   associated_message_templates: []
   associated_config_libraries: []
-  associated_protocols:
+  protocols:
   - id: 8
     name: Brain Health Study
     created_at: '2018-01-24T19:57:36.258Z'
@@ -5053,14 +5053,132 @@ app_type:
     position: 1
     app_type_id: 1
     user_email: 
-  - id: 15
-    name: FEMFL
-    created_at: '2020-08-11T08:51:56.759Z'
-    updated_at: '2020-08-11T08:52:58.879Z'
+  - id: 11
+    name: Q2
+    created_at: '2019-01-02T20:07:36.818Z'
+    updated_at: '2019-11-20T16:24:56.664Z'
+    disabled: false
+    admin_id: 1
+    position: 2
+    app_type_id: 1
+    user_email: 
+  - id: 6
+    name: Q1 Pilot
+    created_at: '2016-02-17T19:29:24.632Z'
+    updated_at: '2016-07-06T16:15:18.654Z'
+    disabled: true
+    admin_id: 7
+    position: 6
+    app_type_id: 1
+    user_email: 
+  - id: 13
+    name: Sleep Study Phase 2
+    created_at: '2019-10-22T09:35:49.575Z'
+    updated_at: '2019-11-20T16:26:01.435Z'
+    disabled: false
+    admin_id: 1
+    position: 12
+    app_type_id: 1
+    user_email: 
+  - id: 16
+    name: PITT BHI
+    created_at: '2020-08-19T09:52:20.245Z'
+    updated_at: '2020-08-19T09:52:20.245Z'
+    disabled: false
+    admin_id: 1
+    position: 12
+    app_type_id: 1
+    user_email: 
+  - id: 1
+    name: Study
+    created_at: '2015-10-14T12:14:06.709Z'
+    updated_at: '2019-11-20T16:25:10.351Z'
+    disabled: false
+    admin_id: 1
+    position: 80
+    app_type_id: 1
+    user_email: 
+  - id: 3
+    name: General Awareness
+    created_at: '2015-10-14T12:14:06.709Z'
+    updated_at: '2019-11-20T16:24:34.869Z'
+    disabled: false
+    admin_id: 1
+    position: 90
+    app_type_id: 1
+    user_email: 
+  - id: 5
+    name: TeamStudy
+    created_at: '2016-02-08T18:01:46.400Z'
+    updated_at: '2016-02-08T18:01:46.400Z'
+    disabled: false
+    admin_id: 7
+    position: 
+    app_type_id: 1
+    user_email: 
+  - id: 7
+    name: Law and Ethics
+    created_at: '2016-03-24T19:16:15.882Z'
+    updated_at: '2016-03-24T19:16:15.882Z'
+    disabled: false
+    admin_id: 7
+    position: 
+    app_type_id: 1
+    user_email: 
+  - id: 12
+    name: Sleep Study Phase 1
+    created_at: '2019-03-21T13:59:58.962Z'
+    updated_at: '2019-03-21T13:59:58.962Z'
+    disabled: false
+    admin_id: 8
+    position: 
+    app_type_id: 1
+    user_email: 
+  associated_protocols:
+  - id: 8
+    name: Brain Health Study
+    created_at: '2018-01-24T19:57:36.258Z'
+    updated_at: '2019-11-20T16:26:09.647Z'
+    disabled: false
+    admin_id: 1
+    position: -20
+    app_type_id: 1
+    user_email: 
+  - id: 14
+    name: GRIT
+    created_at: '2019-12-06T10:35:09.319Z'
+    updated_at: '2019-12-06T10:35:09.319Z'
+    disabled: false
+    admin_id: 1
+    position: -15
+    app_type_id: 1
+    user_email: 
+  - id: 10
+    name: In-Person Assessment
+    created_at: '2018-07-10T13:54:34.187Z'
+    updated_at: '2019-11-20T16:25:45.818Z'
+    disabled: false
+    admin_id: 1
+    position: -10
+    app_type_id: 1
+    user_email: 
+  - id: 9
+    name: Personal Network
+    created_at: '2018-06-25T14:52:56.516Z'
+    updated_at: '2019-11-20T16:25:33.947Z'
+    disabled: false
+    admin_id: 1
+    position: 0
+    app_type_id: 1
+    user_email: 
+  - id: 2
+    name: Q1
+    created_at: '2015-10-14T12:14:06.709Z'
+    updated_at: '2019-11-20T16:24:51.198Z'
     disabled: false
     admin_id: 1
     position: 1
-    app_type_id: 3
+    app_type_id: 1
     user_email: 
   - id: 11
     name: Q2
@@ -5269,78 +5387,6 @@ app_type:
     created_at: '2020-08-19T09:53:32.455Z'
     updated_at: '2020-08-19T09:53:32.455Z'
     protocol_name: PITT BHI
-    user_email: 
-  - id: 163
-    name: CIS-received
-    disabled: false
-    protocol_id: 15
-    admin_id: 1
-    created_at: '2020-08-11T09:34:02.516Z'
-    updated_at: '2020-08-11T09:34:02.516Z'
-    protocol_name: FEMFL
-    user_email: 
-  - id: 162
-    name: Opt Out
-    disabled: false
-    protocol_id: 15
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.873Z'
-    updated_at: '2020-08-11T08:51:56.873Z'
-    protocol_name: FEMFL
-    user_email: 
-  - id: 161
-    name: Opt In
-    disabled: false
-    protocol_id: 15
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.857Z'
-    updated_at: '2020-08-11T08:51:56.857Z'
-    protocol_name: FEMFL
-    user_email: 
-  - id: 160
-    name: Sent
-    disabled: false
-    protocol_id: 15
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.842Z'
-    updated_at: '2020-08-11T08:51:56.842Z'
-    protocol_name: FEMFL
-    user_email: 
-  - id: 159
-    name: Inquiry
-    disabled: false
-    protocol_id: 15
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.826Z'
-    updated_at: '2020-08-11T08:51:56.826Z'
-    protocol_name: FEMFL
-    user_email: 
-  - id: 158
-    name: Complete
-    disabled: false
-    protocol_id: 15
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.812Z'
-    updated_at: '2020-08-11T08:51:56.812Z'
-    protocol_name: FEMFL
-    user_email: 
-  - id: 157
-    name: Bounced
-    disabled: false
-    protocol_id: 15
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.798Z'
-    updated_at: '2020-08-11T08:51:56.798Z'
-    protocol_name: FEMFL
-    user_email: 
-  - id: 156
-    name: Ineligible
-    disabled: false
-    protocol_id: 15
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.778Z'
-    updated_at: '2020-08-11T08:51:56.778Z'
-    protocol_name: FEMFL
     user_email: 
   - id: 149
     name: Screened
@@ -6586,6 +6632,18 @@ app_type:
     protocol_name: Updates
     sub_process_name: record updates
     user_email: 
+  - id: 322
+    name: created pitt bhi assignment
+    admin_id: 1
+    created_at: '2020-08-19T18:59:17.625Z'
+    updated_at: '2020-08-19T18:59:17.625Z'
+    disabled: false
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
   - id: 130
     name: created player career datum
     admin_id: 1
@@ -6971,30 +7029,6 @@ app_type:
     protocol_name: Sleep Study Phase 2
     sub_process_name: Contacted
     user_email: 
-  - id: 285
-    name: Email
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.895Z'
-    updated_at: '2020-08-11T08:51:56.895Z'
-    disabled: false
-    sub_process_id: 157
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
-    sub_process_name: Bounced
-    user_email: 
-  - id: 299
-    name: Email
-    admin_id: 1
-    created_at: '2020-08-11T09:34:02.632Z'
-    updated_at: '2020-08-11T09:34:02.632Z'
-    disabled: false
-    sub_process_id: 163
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
-    sub_process_name: CIS-received
-    user_email: 
   - id: 195
     name: Email - Bounced
     admin_id: 10
@@ -7211,18 +7245,6 @@ app_type:
     protocol_name: GRIT
     sub_process_name: Inquiry
     user_email: 
-  - id: 286
-    name: Email from Staff
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.917Z'
-    updated_at: '2020-08-11T08:51:56.917Z'
-    disabled: false
-    sub_process_id: 159
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
-    sub_process_name: Inquiry
-    user_email: 
   - id: 317
     name: Email from Staff
     admin_id: 1
@@ -7245,18 +7267,6 @@ app_type:
     milestone: ''
     description: ''
     protocol_name: TeamStudy
-    sub_process_name: Inquiry
-    user_email: 
-  - id: 287
-    name: Email from Subject
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.923Z'
-    updated_at: '2020-08-11T08:51:56.923Z'
-    disabled: false
-    sub_process_id: 159
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
     sub_process_name: Inquiry
     user_email: 
   - id: 261
@@ -7305,18 +7315,6 @@ app_type:
     milestone: ''
     description: ''
     protocol_name: Study
-    sub_process_name: CIS-received
-    user_email: 
-  - id: 300
-    name: Event
-    admin_id: 1
-    created_at: '2020-08-11T09:34:02.704Z'
-    updated_at: '2020-08-11T09:34:02.704Z'
-    disabled: false
-    sub_process_id: 163
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
     sub_process_name: CIS-received
     user_email: 
   - id: 156
@@ -7389,18 +7387,6 @@ app_type:
     milestone: 
     description: 
     protocol_name: Q1
-    sub_process_name: Inquiry
-    user_email: 
-  - id: 288
-    name: Inquiry Complete
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.933Z'
-    updated_at: '2020-08-11T08:51:56.933Z'
-    disabled: false
-    sub_process_id: 159
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
     sub_process_name: Inquiry
     user_email: 
   - id: 73
@@ -7503,18 +7489,6 @@ app_type:
     protocol_name: General Awareness
     sub_process_name: Sent
     user_email: 
-  - id: 289
-    name: Mail
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.944Z'
-    updated_at: '2020-08-11T08:51:56.944Z'
-    disabled: false
-    sub_process_id: 157
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
-    sub_process_name: Bounced
-    user_email: 
   - id: 109
     name: Pamphlet
     admin_id: 3
@@ -7563,18 +7537,6 @@ app_type:
     protocol_name: Study
     sub_process_name: CIS-received
     user_email: 
-  - id: 301
-    name: Paper
-    admin_id: 1
-    created_at: '2020-08-11T09:34:02.761Z'
-    updated_at: '2020-08-11T09:34:02.761Z'
-    disabled: false
-    sub_process_id: 163
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
-    sub_process_name: CIS-received
-    user_email: 
   - id: 127
     name: Personalized Email
     admin_id: 8
@@ -7597,18 +7559,6 @@ app_type:
     milestone: ''
     description: ''
     protocol_name: Study
-    sub_process_name: CIS-received
-    user_email: 
-  - id: 302
-    name: Phone
-    admin_id: 1
-    created_at: '2020-08-11T09:34:02.780Z'
-    updated_at: '2020-08-11T09:34:02.780Z'
-    disabled: false
-    sub_process_id: 163
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
     sub_process_name: CIS-received
     user_email: 
   - id: 11
@@ -7803,18 +7753,6 @@ app_type:
     protocol_name: GRIT
     sub_process_name: Inquiry
     user_email: 
-  - id: 290
-    name: Phone from Staff
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.966Z'
-    updated_at: '2020-08-11T08:51:56.966Z'
-    disabled: false
-    sub_process_id: 159
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
-    sub_process_name: Inquiry
-    user_email: 
   - id: 319
     name: Phone from Staff
     admin_id: 1
@@ -7837,18 +7775,6 @@ app_type:
     milestone: ''
     description: ''
     protocol_name: TeamStudy
-    sub_process_name: Inquiry
-    user_email: 
-  - id: 291
-    name: Phone from Subject
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.973Z'
-    updated_at: '2020-08-11T08:51:56.973Z'
-    disabled: false
-    sub_process_id: 159
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
     sub_process_name: Inquiry
     user_email: 
   - id: 259
@@ -8079,54 +8005,6 @@ app_type:
     protocol_name: Q2
     sub_process_name: Complete
     user_email: 
-  - id: 292
-    name: REDCap
-    admin_id: 1
-    created_at: '2020-08-11T08:51:56.993Z'
-    updated_at: '2020-08-11T08:51:56.993Z'
-    disabled: false
-    sub_process_id: 160
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
-    sub_process_name: Sent
-    user_email: 
-  - id: 293
-    name: REDCap
-    admin_id: 1
-    created_at: '2020-08-11T08:51:57.016Z'
-    updated_at: '2020-08-11T08:51:57.016Z'
-    disabled: false
-    sub_process_id: 158
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
-    sub_process_name: Complete
-    user_email: 
-  - id: 294
-    name: REDCap
-    admin_id: 1
-    created_at: '2020-08-11T08:51:57.043Z'
-    updated_at: '2020-08-11T08:51:57.043Z'
-    disabled: false
-    sub_process_id: 157
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
-    sub_process_name: Bounced
-    user_email: 
-  - id: 303
-    name: REDCap
-    admin_id: 1
-    created_at: '2020-08-11T09:34:03.001Z'
-    updated_at: '2020-08-11T09:34:03.001Z'
-    disabled: false
-    sub_process_id: 163
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
-    sub_process_name: CIS-received
-    user_email: 
   - id: 91
     name: Reminder - Email
     admin_id: 6
@@ -8163,18 +8041,6 @@ app_type:
     protocol_name: Q2
     sub_process_name: Sent
     user_email: 
-  - id: 295
-    name: Reminder - Email
-    admin_id: 1
-    created_at: '2020-08-11T08:51:57.059Z'
-    updated_at: '2020-08-11T08:51:57.059Z'
-    disabled: false
-    sub_process_id: 160
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
-    sub_process_name: Sent
-    user_email: 
   - id: 99
     name: Reminder- Email
     admin_id: 7
@@ -8198,18 +8064,6 @@ app_type:
     milestone: ''
     description: ''
     protocol_name: Brain Health Study
-    sub_process_name: Sent
-    user_email: 
-  - id: 296
-    name: Reminder Mail
-    admin_id: 1
-    created_at: '2020-08-11T08:51:57.068Z'
-    updated_at: '2020-08-11T08:51:57.068Z'
-    disabled: false
-    sub_process_id: 160
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
     sub_process_name: Sent
     user_email: 
   - id: 22
@@ -8488,30 +8342,6 @@ app_type:
     protocol_name: Q2
     sub_process_name: Sent
     user_email: 
-  - id: 297
-    name: Thank You
-    admin_id: 1
-    created_at: '2020-08-11T08:51:57.083Z'
-    updated_at: '2020-08-11T08:51:57.083Z'
-    disabled: false
-    sub_process_id: 160
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
-    sub_process_name: Sent
-    user_email: 
-  - id: 298
-    name: Thank You
-    admin_id: 1
-    created_at: '2020-08-11T08:51:57.098Z'
-    updated_at: '2020-08-11T08:51:57.098Z'
-    disabled: false
-    sub_process_id: 157
-    milestone: ''
-    description: ''
-    protocol_name: FEMFL
-    sub_process_name: Bounced
-    user_email: 
   - id: 67
     name: T-shirt
     admin_id: 7
@@ -8771,6 +8601,18 @@ app_type:
     created_at: '2018-09-17T08:24:44.552Z'
     updated_at: '2018-09-17T08:24:44.552Z'
     disabled: 
+    sub_process_id: 51
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: record updates
+    user_email: 
+  - id: 323
+    name: updated pitt bhi assignment
+    admin_id: 1
+    created_at: '2020-08-19T18:59:17.634Z'
+    updated_at: '2020-08-19T18:59:17.634Z'
+    disabled: false
     sub_process_id: 51
     milestone: 
     description: 

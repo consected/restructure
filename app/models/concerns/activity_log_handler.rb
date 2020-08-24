@@ -410,12 +410,12 @@ module ActivityLogHandler
                                                active: active_only
               else
                 Rails.logger.warn "Find references attempted without known :from key: #{f}"
+                nil
               end
 
-        if got
-          # got = got.reject(&:disabled) if active_only
-          res += got
-        end
+        next unless got
+
+        res += got
       end
     end
     @model_references[mr_key] = res

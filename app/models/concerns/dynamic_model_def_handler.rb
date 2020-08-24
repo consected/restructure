@@ -298,48 +298,48 @@ module DynamicModelDefHandler
   end
 
   def check_implementation_class
-    if !disabled && errors.empty?
+    return unless !disabled && errors.empty?
 
-      unless !disabled? && ready?
+    unless !disabled? && ready?
 
-        version = DateTime.now.to_i.to_s(36)
-        gs = generator_script(version)
-        fn = write_db_migration(gs, version)
-        run_migration
-      end
+      version = DateTime.now.to_i.to_s(36)
+      gs = generator_script(version)
+      fn = write_db_migration(gs, version)
+      run_migration
+    end
 
-      unless !disabled? && ready?
+    unless !disabled? && ready?
 
-        err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created.
-
+      err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created."
+      if Rail.env.development?
+        err += "
         Wrote migration to: #{fn}
         Review it, then run migration with:
         MIG_PATH=#{db_migration_schema} FPHS_LOAD_APP_TYPES= bundle exec rails db:migrate
 
         IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
         "
-
-        err += "(extra error info: #{@extra_error})" if @extra_error
-
-        raise FphsException, err
       end
 
-      begin
-        res = implementation_class_defined?
-      rescue StandardError => e
-        err = "Failed to instantiate the class #{full_implementation_class_name}: #{e}"
-        logger.warn err
-        errors.add :name, err
-        # Force exit of callbacks
-        raise FphsException, err
-      end
-      unless res
-        err = "The implementation of #{model_class_name} was not completed although the DB table #{table_name} has been created."
-        logger.warn err
-        errors.add :name, err
-        # Force exit of callbacks
-        raise FphsException, err
-      end
+      err += "(extra error info: #{@extra_error})" if @extra_error
+      raise FphsException, err
+    end
+
+    begin
+      res = implementation_class_defined?
+    rescue StandardError => e
+      err = "Failed to instantiate the class #{full_implementation_class_name}: #{e}"
+      logger.warn err
+      errors.add :name, err
+      # Force exit of callbacks
+      raise FphsException, err
+    end
+    unless res
+      err = "The implementation of #{model_class_name} was not completed although the DB table #{table_name} has been created."
+      logger.warn err
+      errors.add :name, err
+      # Force exit of callbacks
+      raise FphsException, err
     end
   end
 
@@ -478,7 +478,8 @@ module DynamicModelDefHandler
     fn = "#{dirname}/#{Time.new.to_s(:number)}_#{cname_us}.rb"
     FileUtils.mkdir_p dirname
     File.write(fn, mig_text)
-
+    # Cheat way to ensure multiple migrations can not have the same timestamp during app type loads
+    sleep 1.2
     @do_migration = fn
     fn
   end
