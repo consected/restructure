@@ -174,6 +174,39 @@ app_type:
     created_at: '2020-07-14T12:54:16.598Z'
     updated_at: '2020-07-14T12:54:16.598Z'
     user_email: 
+  - id: 372
+    name: reports list title
+    value: Data Dictionaries
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 23
+    role_name: ''
+    created_at: '2020-08-03T13:27:58.124Z'
+    updated_at: '2020-08-03T13:27:58.124Z'
+    user_email: 
+  - id: 373
+    name: report library button label
+    value: data dictionaries list
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 23
+    role_name: ''
+    created_at: '2020-08-03T13:27:58.137Z'
+    updated_at: '2020-08-03T13:27:58.137Z'
+    user_email: 
+  - id: 374
+    name: hide search form searchable reports
+    value: 'false'
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 23
+    role_name: ''
+    created_at: '2020-08-03T17:03:58.205Z'
+    updated_at: '2020-08-21T10:01:33.893Z'
+    user_email: 
   valid_user_access_controls:
   - id: 1714
     user_id: 
@@ -955,6 +988,19 @@ app_type:
     created_at: '2020-07-30T15:35:20.082Z'
     updated_at: '2020-07-30T15:35:20.082Z'
     user_email: 
+  - id: 1775
+    user_id: 
+    resource_type: report
+    resource_name: data_requests__q2_data_dictionary
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 23
+    role_name: user
+    created_at: '2020-08-03T13:27:59.050Z'
+    updated_at: '2020-08-03T13:27:59.050Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 84
     name: FPHS Data Request Form
@@ -963,10 +1009,10 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2020-07-14T12:54:17.238Z'
-    updated_at: '2020-07-14T12:54:17.238Z'
+    updated_at: '2020-08-03T13:27:58.306Z'
     action_when_attribute: created_at
     field_list: ''
-    blank_log_field_list: placeholder_intro
+    blank_log_field_list: placeholder_intro created_by_user_id
     blank_log_name: ''
     extra_log_types: "_default:\r\n################# Default configurations ###################\r\n\r\n
       \ fields:\r\n#    - follow_up_date\r\n#    - follow_up_time\r\n#    - notes\r\n\r\n
@@ -1419,6 +1465,186 @@ app_type:
     category: data-request
     user_email: 
   associated_dynamic_models:
+  - id: 394
+    name: Data Request
+    table_name: data_requests
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2020-07-14T12:54:16.627Z'
+    updated_at: '2020-08-21T10:26:11.730Z'
+    position: 
+    category: data-requests
+    table_key_name: ''
+    field_list: status, placeholder_banner, placeholder_start, project_title, select_purpose,
+      other_purpose, research_question_notes, fphs_analyst_yes_no, full_name,  title,
+      institution, other_institution, others_handling_data, pm_contact, other_pm_contact,data_start_date,
+      data_end_date, fphs_server_yes_no, fphs_server_tools_notes, off_fphs_server_reason_notes,
+      data_use_agreement_status, data_use_agreement_notes, terms_of_use_yes_no, placeholder_terms_no,
+      placeholder_attrib_requests, embedded_report_data_requests__select_data_attributes_q1
+      embedded_report_data_requests__select_data_attributes_q2, embedded_report_data_requests__select_data_attributes_bhs,
+      embedded_report_data_requests__select_data_attributes_persnet,embedded_report_data_requests__select_data_attributes_ipa,
+      embedded_report_data_requests__selected_data_attributes_all placeholder_final_unsubmitted
+      placeholder_final_submitted, created_by_user_id
+    result_order: ''
+    options: "default:\r\n\r\n  field_options:\r\n    project_title:\r\n      no_downcase:
+      true\r\n    \r\n    select_purpose:\r\n      edit_as:\r\n        alt_options:\r\n
+      \         - data quality / exploratory analysis\r\n          - abstract / conference
+      presentation\r\n          - manuscript\r\n          - grant proposal\r\n          -
+      other\r\n      \r\n    full_name:\r\n      value: \"{{current_user.first_name}}
+      {{current_user.last_name}}\"\r\n      no_downcase: true\r\n    status: \r\n
+      \     value: new\r\n    institution:\r\n      edit_as:\r\n        field_type:
+      select_institution\r\n        alt_options: \r\n          HMS: hms\r\n          BWH:
+      bwh\r\n          MGH: mgh\r\n          BIDMC: bidmc\r\n          SRH: srh\r\n
+      \         other: other\r\n          \r\n    others_handling_data:\r\n      edit_as:\r\n
+      \       field_type: notes\r\n        \r\n    pm_contact:\r\n      edit_as:\r\n
+      \       field_type: select_pm_contact\r\n        alt_options: \r\n          -
+      Jillian Baker\r\n          - Mike Doyle\r\n          - other\r\n          \r\n
+      \   data_use_agreement_status:\r\n      edit_as:\r\n        field_type: select_data_use_agreement_status\r\n
+      \       alt_options:\r\n          - 'yes'\r\n          - 'no'\r\n          -
+      'pending'\r\n    \r\n#    concept_sheet_approved_by:\r\n#      edit_as:\r\n#
+      \       field_type: select_concept_sheet_approved_by\r\n#        alt_options:\r\n#
+      \          Dr. Aaron Baggish: dr. aaron baggish\r\n#           Dr. Lee Nadler:
+      dr. lee nadler\r\n#           Dr. Alvaro Pascual-Leone: dr. alvaro pascual-leone\r\n#
+      \          Dr. Herman Taylor: dr. herman taylor\r\n#           Dr. Marc Weisskopf:
+      dr. marc weisskopf\r\n#           Dr. Ross Zafonte: dr. ross zafonte\r\n           \r\n\r\n\r\n
+      \ caption_before:\r\n    placeholder_banner:\r\n      show_caption: |\r\n        ##
+      Data Request has not been submitted\r\n        \r\n        The data request
+      will only be reviewed when the required data variables\r\n        have been
+      selected below and the data request is submitted by the requester.\r\n        \r\n
+      \       \r\n        \r\n    placeholder_start:\r\n      edit_caption: |\r\n
+      \       **This form must be completed to obtain faculty approval for use of
+      FPHS data**\r\n\r\n        You may save this form at any time and return to
+      it before submission.\r\n\r\n        Please contact the appropriate project
+      manager if you have any questions:\r\n\r\n        - Epidemiology - Jillian Baker\r\n
+      \         Jillian_Baker@hms.harvard.edu\r\n\r\n        - Targeted Studies -
+      Sarah Cohan\r\n          Sarah_Cohan@hms.harvard.edu\r\n\r\n        - In-person
+      Assessments - \r\n\r\n\r\n\r\n    project_title: Project title\r\n    \r\n    select_purpose:
+      Purpose of this data request\r\n    other_purpose: '*other purpose*: please
+      explain'\r\n    \r\n    research_question_notes: |\r\n      Research question
+      and hypothesis for the proposed analysis\r\n      \r\n      *To include supporting
+      documents or files, complete this form, then\r\n      select the Supporting
+      Files section at the end of the form*\r\n    \r\n    fphs_analyst_yes_no: Are
+      you an internal FPHS analyst?\r\n\r\n    full_name: Your full name\r\n    title:
+      Your title\r\n    institution: Your primary affiliation\r\n    others_handling_data:
+      |\r\n      Name and title of others who will be handling FPHS data (one per
+      line)\r\n      \r\n    pm_contact: FPHS Project Manager contact\r\n    other_pm_contact:
+      Project Manager name\r\n    fphs_server_yes_no:\r\n      show_caption: |\r\n
+      \       Will analysis be performed within the *FPHS secure environment*?\r\n
+      \       \r\n      edit_caption: |\r\n        The *FPHS secure environment* provides
+      secure remote desktop servers where\r\n        analysis can be performed using
+      common software tools. Provided data may\r\n        not be transferred out of
+      the environment without prior authorization.\r\n\r\n        Use of this \r\n
+      \       environment may be required for certain data. Selecting to use the \r\n
+      \       secure environment typically \r\n        enables a more streamlined
+      data request review process.\r\n\r\n        **Will analysis be performed within
+      the** *FPHS secure environment*?\r\n\r\n    \r\n    fphs_server_tools_notes:
+      \r\n      show_caption: |\r\n        Any other software applications or tools
+      that \r\n        are required for analysis of this data set within\r\n        the
+      *FPHS secure environment*\r\n        \r\n      edit_caption: |\r\n        By
+      default the *FPHS secure environment* has the following \r\n        software
+      available to all users:\r\n\r\n        - RStudio\r\n        - LibreOffice suite\r\n
+      \       - Metabase\r\n        - JASP\r\n        - Glue\r\n        - Orange\r\n
+      \       - Jupyter Notebooks\r\n        - PgAdmin\r\n        - Visual Studio
+      Code (IDE)\r\n        - Python 3.x\r\n        - Anaconda\r\n\r\n        **Name
+      any other software applications or tools that \r\n        are required** for
+      analysis of this data set within\r\n        the *FPHS secure environment*, including
+      specific Anaconda / R packages.\r\n      \r\n    off_fphs_server_reason_notes:
+      |\r\n      Explain why analysis is to be performed outside of the *FPHS secure
+      environment*\r\n      \r\n    \r\n    data_start_date: Planned analysis start
+      date\r\n    data_end_date: Planned analysis end date\r\n    \r\n    data_use_agreement_status:
+      Do you have a Data Use Agreement or other sort of contractual agreement with
+      FPHS that allows sharing of data?\r\n    data_use_agreement_notes: Additional
+      information about Data Use Agreement\r\n    terms_of_use_yes_no: I attest that
+      I have read, understood, and accepted the terms of use stated in the data use
+      agreement, or other form of contractual agreement, with the Football Players
+      Health Study at Harvard University.\r\n    \r\n    placeholder_terms_no: |\r\n
+      \     The terms of use must be accepted before continuing.\r\n    \r\n    placeholder_attrib_requests:\r\n
+      \     show_caption: |\r\n        ## Select the **required data variables** from
+      each of the sections below.\r\n\r\n    embedded_report_data_requests__select_data_attributes_q1:\r\n
+      \     keep_label: true\r\n      caption: |\r\n        **First Health and Wellness
+      Questionnaire (Q1)**\r\n\r\n    embedded_report_data_requests__select_data_attributes_q2:\r\n
+      \     keep_label: true\r\n      caption: |\r\n        **Second Health and Wellness
+      Questionnaire (Q2)**\r\n\r\n    embedded_report_data_requests__select_data_attributes_bhs:\r\n
+      \     keep_label: true\r\n      caption: |\r\n        **Brain Health Study (BHS)**\r\n
+      \         \r\n    embedded_report_data_requests__select_data_attributes_persnet:\r\n
+      \     keep_label: true\r\n      caption: |\r\n        **Personal Network Study
+      (PersNet)**\r\n        \r\n    embedded_report_data_requests__select_data_attributes_ipa:\r\n
+      \     keep_label: true\r\n      caption: |\r\n        **In-Person Assessments
+      (IPA)**\r\n\r\n    embedded_report_data_requests__selected_data_attributes_all:\r\n
+      \     keep_label: true\r\n      caption: |\r\n        **All Selected Variables**\r\n\r\n\r\n
+      \   placeholder_final_unsubmitted:\r\n      edit_caption: |\r\n        **Save**
+      your changes to update the data variables you require or submit your request
+      for review.\r\n      show_caption: |\r\n        After selecting the data variables
+      for your request click **+Submit Request** to \r\n        send your request
+      for review.\r\n      \r\n\r\n\r\n  labels:\r\n    embedded_report_data_requests__select_data_attributes_q1:
+      edit Q1 variable request\r\n    embedded_report_data_requests__select_data_attributes_q2:
+      edit Q2 variable request\r\n    embedded_report_data_requests__select_data_attributes_bhs:
+      edit BHS variable request\r\n    embedded_report_data_requests__select_data_attributes_persnet:
+      edit PersNet variable request\r\n    embedded_report_data_requests__select_data_attributes_ipa:
+      edit IPA variable request\r\n\r\n    embedded_report_data_requests__selected_data_attributes_all:
+      view all selected variables\r\n    \r\n\r\n    \r\n  show_if:\r\n    created_by_user_id:\r\n
+      \     never: true\r\n      \r\n    status: \r\n      never: true\r\n\r\n    placeholder_banner:\r\n
+      \     status:\r\n        - ''\r\n        - null\r\n        - 'new'\r\n    \r\n
+      \   full_name:\r\n      fphs_analyst_yes_no: \r\n        - 'no'\r\n        -
+      'yes'\r\n          \r\n    title: \r\n      fphs_analyst_yes_no: 'no'\r\n\r\n
+      \   institution: \r\n      fphs_analyst_yes_no: 'no'\r\n\r\n    other_institution:\r\n
+      \     fphs_analyst_yes_no: 'no'\r\n      institution: other\r\n\r\n    others_handling_data:\r\n
+      \     fphs_analyst_yes_no: 'no'\r\n\r\n    pm_contact:\r\n      fphs_analyst_yes_no:
+      'no'\r\n\r\n    other_pm_contact: \r\n      fphs_analyst_yes_no: 'no'\r\n      pm_contact:
+      other\r\n\r\n\r\n    data_start_date: &pm_contact_set\r\n      not_any:\r\n
+      \       pm_contact: \r\n         - ''\r\n         - null\r\n    \r\n    data_end_date:
+      *pm_contact_set    \r\n\r\n    fphs_server_yes_no: &show_data_info\r\n      any:\r\n
+      \       fphs_analyst_yes_no: 'yes'         \r\n        <<: *pm_contact_set\r\n
+      \       \r\n    fphs_server_tools_notes:  \r\n      <<: *show_data_info\r\n
+      \     fphs_server_yes_no: 'yes'\r\n\r\n    off_fphs_server_reason_notes:\r\n
+      \     <<: *show_data_info\r\n      fphs_server_yes_no: 'no'\r\n\r\n    data_use_agreement_status:
+      &show_data_use_agreement\r\n      fphs_analyst_yes_no: 'no'\r\n      fphs_server_yes_no:
+      \r\n        - 'yes'\r\n        - 'no'\r\n    \r\n    data_use_agreement_notes:
+      *show_data_use_agreement\r\n\r\n    terms_of_use_yes_no:\r\n      any:\r\n        fphs_analyst_yes_no:
+      'yes'        \r\n        not_any:\r\n          data_use_agreement_status: \r\n
+      \           - ''\r\n            - null\r\n\r\n    placeholder_terms_no:\r\n
+      \     terms_of_use_yes_no: 'no'\r\n    \r\n    \r\n    placeholder_attrib_requests:
+      &ready_not_submitted\r\n      all:\r\n        terms_of_use_yes_no: 'yes'\r\n
+      \       not_any:\r\n          status: submitted\r\n        \r\n    embedded_report_data_requests__select_data_attributes_q1:
+      &show_embedded_report\r\n      all:\r\n        terms_of_use_yes_no: 'yes'\r\n
+      \       status: \r\n          - new\r\n          - ''\r\n          - NULL\r\n
+      \       not_any:\r\n          id: NULL\r\n          current_mode: edit\r\n          \r\n
+      \           \r\n            \r\n    \r\n    embedded_report_data_requests__select_data_attributes_q2:
+      *show_embedded_report\r\n    embedded_report_data_requests__select_data_attributes_bhs:
+      *show_embedded_report\r\n    embedded_report_data_requests__select_data_attributes_persnet:
+      *show_embedded_report\r\n    embedded_report_data_requests__select_data_attributes_ipa:
+      *show_embedded_report\r\n\r\n\r\n    embedded_report_data_requests__selected_data_attributes_all:
+      \r\n      all:\r\n        terms_of_use_yes_no: 'yes'\r\n        not_any:\r\n
+      \         id: NULL\r\n          current_mode: edit\r\n          \r\n    \r\n\r\n
+      \   placeholder_final_unsubmitted: *ready_not_submitted\r\n    placeholder_final_submitted:\r\n
+      \     all:\r\n        terms_of_use_yes_no: 'yes'\r\n        \r\n        not_any:\r\n
+      \         id: NULL\r\n          current_mode: edit\r\n          status: \r\n
+      \           - new\r\n            - ''\r\n            - NULL\r\n    \r\n    \r\n
+      \ valid_if:\r\n    on_save:\r\n      all:\r\n        this:\r\n          terms_of_use_yes_no:
+      'yes'\r\n          "
+    user_email: 
+  - id: 398
+    name: Selected Data Attributes
+    table_name: data_requests_selected_attribs
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2020-07-14T12:54:16.969Z'
+    updated_at: '2020-08-03T13:27:58.152Z'
+    position: 
+    category: data-requests
+    table_key_name: ''
+    field_list: record_id,data, data_request_id, disabled, variable_name record_type
+    result_order: ''
+    options: ''
+    user_email: 
   - id: 395
     name: Q2 dictionary
     table_name: q2_datadic
@@ -1468,24 +1694,6 @@ app_type:
       lead to a more in-depth review process, and therefore will take more time.\r\n\r\n
       \   embedded_report_data_requests__select_data_attributes_q2: Click to select
       required data attributes\r\n    embedded_report_82: Show selected data attributes\r\n"
-    user_email: 
-  - id: 398
-    name: Selected Data Attributes
-    table_name: data_requests_selected_attribs
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T12:54:16.969Z'
-    updated_at: '2020-07-14T12:54:16.969Z'
-    position: 
-    category: data-requests
-    table_key_name: ''
-    field_list: record_id,data, data_request_id, disabled, variable_name
-    result_order: ''
-    options: ''
     user_email: 
   - id: 397
     name: Message
@@ -1549,157 +1757,6 @@ app_type:
       and can be used to \r\n        help other reviewers understand the rationale
       for your decisions and highlight\r\n        specific attributes requiring attention.*\r\n\r\n"
     user_email: 
-  - id: 394
-    name: Data Request
-    table_name: data_requests
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2020-07-14T12:54:16.627Z'
-    updated_at: '2020-07-14T12:54:16.627Z'
-    position: 
-    category: data-requests
-    table_key_name: ''
-    field_list: status, placeholder_banner, placeholder_start, project_title, fphs_analyst_yes_no,
-      full_name,  title, institution, other_institution, others_handling_data, pm_contact,
-      other_pm_contact,data_start_date, data_end_date, fphs_server_yes_no, fphs_server_tools_notes,
-      off_fphs_server_reason_notes, data_use_agreement_status, data_use_agreement_notes,
-      terms_of_use_yes_no, placeholder_terms_no, placeholder_attrib_requests, embedded_report_data_requests__select_data_attributes_q1
-      embedded_report_data_requests__select_data_attributes_q2, embedded_report_data_requests__select_data_attributes_bhs,
-      embedded_report_data_requests__select_data_attributes_persnet,embedded_report_data_requests__select_data_attributes_ipa,
-      embedded_report_data_requests__selected_data_attributes_all placeholder_final_unsubmitted
-      placeholder_final_submitted
-    result_order: ''
-    options: "default:\r\n\r\n  field_options:\r\n    project_title:\r\n      no_downcase:
-      true\r\n    full_name:\r\n      value: \"{{current_user.first_name}} {{current_user.last_name}}\"\r\n
-      \     no_downcase: true\r\n    status: \r\n      value: new\r\n    institution:\r\n
-      \     edit_as:\r\n        field_type: select_institution\r\n        alt_options:
-      \r\n          HMS: hms\r\n          BWH: bwh\r\n          other: other\r\n          \r\n
-      \   others_handling_data:\r\n      edit_as:\r\n        field_type: notes\r\n
-      \       \r\n    pm_contact:\r\n      edit_as:\r\n        field_type: select_pm_contact\r\n
-      \       alt_options: \r\n          - Jillian Baker\r\n          - Sarah Cohan\r\n
-      \         - other\r\n          \r\n    data_use_agreement_status:\r\n      edit_as:\r\n
-      \       field_type: select_data_use_agreement_status\r\n        alt_options:\r\n
-      \         - 'yes'\r\n          - 'no'\r\n          - 'pending'\r\n    \r\n#
-      \   concept_sheet_approved_by:\r\n#      edit_as:\r\n#        field_type: select_concept_sheet_approved_by\r\n#
-      \       alt_options:\r\n#           Dr. Aaron Baggish: dr. aaron baggish\r\n#
-      \          Dr. Lee Nadler: dr. lee nadler\r\n#           Dr. Alvaro Pascual-Leone:
-      dr. alvaro pascual-leone\r\n#           Dr. Herman Taylor: dr. herman taylor\r\n#
-      \          Dr. Marc Weisskopf: dr. marc weisskopf\r\n#           Dr. Ross Zafonte:
-      dr. ross zafonte\r\n           \r\n\r\n\r\n  caption_before:\r\n    placeholder_banner:\r\n
-      \     show_caption: |\r\n        ## Data Request has not been submitted\r\n
-      \       \r\n        The data request will only be reviewed when the required
-      data variables\r\n        have been selected below and the data request is submitted
-      by the requester.\r\n        \r\n        \r\n        \r\n    placeholder_start:\r\n
-      \     edit_caption: |\r\n        **This form must be completed to obtain faculty
-      approval for use of FPHS data**\r\n\r\n        You may save this form at any
-      time and return to it before submission.\r\n\r\n        Please contact the appropriate
-      project manager if you have any questions:\r\n\r\n        - Epidemiology - Jillian
-      Baker\r\n          Jillian_Baker@hms.harvard.edu\r\n\r\n        - Targeted Studies
-      - Sarah Cohan\r\n          Sarah_Cohan@hms.harvard.edu\r\n\r\n        - In-person
-      Assessments - \r\n\r\n\r\n#      show_caption: |\r\n#        **This form must
-      be completed to obtain faculty approval for use of FPHS data**\r\n\r\n    project_title:
-      Project title\r\n    fphs_analyst_yes_no: Are you an FPHS team analyst?\r\n\r\n
-      \   full_name: Your full name\r\n    title: Your title\r\n    institution: Your
-      primary affiliation\r\n    others_handling_data: Names of others who will be
-      handling FPHS data (one per line)\r\n    pm_contact: Main Project Manager contact\r\n
-      \   other_pm_contact: Project Manager name\r\n    fphs_server_yes_no:\r\n      show_caption:
-      |\r\n        Will analysis be performed within the *FPHS secure environment*?\r\n
-      \       \r\n      edit_caption: |\r\n        The *FPHS secure environment* provides
-      secure remote desktop servers where\r\n        analysis can be performed using
-      common software tools. Provided data may\r\n        not be transferred out of
-      the environment without prior authorization.\r\n\r\n        Use of this \r\n
-      \       environment may be required for certain data. Selecting to use the \r\n
-      \       secure environment typically \r\n        enables a more streamlined
-      data request review process.\r\n\r\n        **Will analysis be performed within
-      the** *FPHS secure environment*?\r\n\r\n    \r\n    fphs_server_tools_notes:
-      \r\n      show_caption: |\r\n        Any other software applications or tools
-      that \r\n        are required for analysis of this data set within\r\n        the
-      *FPHS secure environment*\r\n        \r\n      edit_caption: |\r\n        By
-      default the *FPHS secure environment* has the following \r\n        software
-      available to all users:\r\n\r\n        - RStudio\r\n        - LibreOffice suite\r\n
-      \       - Metabase\r\n        - JASP\r\n        - Glue\r\n        - Orange\r\n
-      \       - Jupyter Notebooks\r\n        - PgAdmin\r\n        - Visual Studio
-      Code (IDE)\r\n        - Python 3.x\r\n        - Anaconda\r\n\r\n        **Name
-      any other software applications or tools that \r\n        are required** for
-      analysis of this data set within\r\n        the *FPHS secure environment*, including
-      specific Anaconda / R packages.\r\n      \r\n    off_fphs_server_reason_notes:
-      |\r\n      Explain why analysis is to be performed outside of the *FPHS secure
-      environment*\r\n      \r\n    \r\n    data_start_date: When is data required?\r\n
-      \   data_end_date: When will data be returned?    \r\n    data_use_agreement_status:
-      Do you have a Data Use Agreement or other sort of contractual agreement with
-      FPHS that allows sharing of data?\r\n    data_use_agreement_notes: Additional
-      information about Data Use Agreement\r\n    terms_of_use_yes_no: I attest that
-      I have read, understood, and accepted the terms of use stated in the data use
-      agreement, or other form of contractual agreement, with the Football Players
-      Health Study at Harvard University.\r\n    \r\n    placeholder_terms_no: |\r\n
-      \     The terms of use must be accepted before continuing.\r\n    \r\n    placeholder_attrib_requests:\r\n
-      \     show_caption: |\r\n        ## Select the **required data variables** from
-      each of the sections below.\r\n\r\n    embedded_report_data_requests__select_data_attributes_q1:\r\n
-      \     keep_label: true\r\n      caption: |\r\n        **First Health and Wellness
-      Questionnaire (Q1)**\r\n\r\n    embedded_report_data_requests__select_data_attributes_q2:\r\n
-      \     keep_label: true\r\n      caption: |\r\n        **Second Health and Wellness
-      Questionnaire (Q2)**\r\n\r\n    embedded_report_data_requests__select_data_attributes_bhs:\r\n
-      \     keep_label: true\r\n      caption: |\r\n        **Brain Health Study (BHS)**\r\n
-      \         \r\n    embedded_report_data_requests__select_data_attributes_persnet:\r\n
-      \     keep_label: true\r\n      caption: |\r\n        **Personal Network Study
-      (PersNet)**\r\n        \r\n    embedded_report_data_requests__select_data_attributes_ipa:\r\n
-      \     keep_label: true\r\n      caption: |\r\n        **In-Person Assessments
-      (IPA)**\r\n\r\n    embedded_report_data_requests__selected_data_attributes_all:\r\n
-      \     keep_label: true\r\n      caption: |\r\n        **All Selected Variables**\r\n\r\n\r\n
-      \   placeholder_final_unsubmitted:\r\n      edit_caption: |\r\n        **Save**
-      your changes to update the data variables you require or submit your request
-      for review.\r\n      show_caption: |\r\n        After selecting the data variables
-      for your request click **+Submit Request** to \r\n        send your request
-      for review.\r\n      \r\n\r\n\r\n  labels:\r\n    embedded_report_data_requests__select_data_attributes_q1:
-      edit Q1 variable request\r\n    embedded_report_data_requests__select_data_attributes_q2:
-      edit Q2 variable request\r\n    embedded_report_data_requests__select_data_attributes_bhs:
-      edit BHS variable request\r\n    embedded_report_data_requests__select_data_attributes_persnet:
-      edit PersNet variable request\r\n    embedded_report_data_requests__select_data_attributes_ipa:
-      edit IPA variable request\r\n\r\n    embedded_report_data_requests__selected_data_attributes_all:
-      view all selected variables\r\n    \r\n\r\n    \r\n  show_if:\r\n    status:
-      \r\n      never: true\r\n\r\n    placeholder_banner:\r\n      status:\r\n        -
-      ''\r\n        - null\r\n        - 'new'\r\n    \r\n    full_name:\r\n      fphs_analyst_yes_no:
-      \r\n        - 'no'\r\n        - 'yes'\r\n          \r\n    title: \r\n      fphs_analyst_yes_no:
-      'no'\r\n\r\n    institution: \r\n      fphs_analyst_yes_no: 'no'\r\n\r\n    other_institution:\r\n
-      \     fphs_analyst_yes_no: 'no'\r\n      institution: other\r\n\r\n    others_handling_data:\r\n
-      \     fphs_analyst_yes_no: 'no'\r\n\r\n    pm_contact:\r\n      fphs_analyst_yes_no:
-      'no'\r\n\r\n    other_pm_contact: \r\n      fphs_analyst_yes_no: 'no'\r\n      pm_contact:
-      other\r\n\r\n\r\n    data_start_date: &pm_contact_set\r\n      not_any:\r\n
-      \       pm_contact: \r\n         - ''\r\n         - null\r\n    \r\n    data_end_date:
-      *pm_contact_set    \r\n\r\n    fphs_server_yes_no: &show_data_info\r\n      any:\r\n
-      \       fphs_analyst_yes_no: 'yes'         \r\n        <<: *pm_contact_set\r\n
-      \       \r\n    fphs_server_tools_notes:  \r\n      <<: *show_data_info\r\n
-      \     fphs_server_yes_no: 'yes'\r\n\r\n    off_fphs_server_reason_notes:\r\n
-      \     <<: *show_data_info\r\n      fphs_server_yes_no: 'no'\r\n\r\n    data_use_agreement_status:
-      &show_data_use_agreement\r\n      fphs_analyst_yes_no: 'no'\r\n      fphs_server_yes_no:
-      \r\n        - 'yes'\r\n        - 'no'\r\n    \r\n    data_use_agreement_notes:
-      *show_data_use_agreement\r\n\r\n    terms_of_use_yes_no:\r\n      any:\r\n        fphs_analyst_yes_no:
-      'yes'        \r\n        not_any:\r\n          data_use_agreement_status: \r\n
-      \           - ''\r\n            - null\r\n\r\n    placeholder_terms_no:\r\n
-      \     terms_of_use_yes_no: 'no'\r\n    \r\n    \r\n    placeholder_attrib_requests:
-      &ready_not_submitted\r\n      all:\r\n        terms_of_use_yes_no: 'yes'\r\n
-      \       not_any:\r\n          status: submitted\r\n        \r\n    embedded_report_data_requests__select_data_attributes_q1:
-      &show_embedded_report\r\n      all:\r\n        terms_of_use_yes_no: 'yes'\r\n
-      \       status: \r\n          - new\r\n          - ''\r\n          - NULL\r\n
-      \       not_any:\r\n          id: NULL\r\n          current_mode: edit\r\n          \r\n
-      \           \r\n            \r\n    \r\n    embedded_report_data_requests__select_data_attributes_q2:
-      *show_embedded_report\r\n    embedded_report_data_requests__select_data_attributes_bhs:
-      *show_embedded_report\r\n    embedded_report_data_requests__select_data_attributes_persnet:
-      *show_embedded_report\r\n    embedded_report_data_requests__select_data_attributes_ipa:
-      *show_embedded_report\r\n\r\n\r\n    embedded_report_data_requests__selected_data_attributes_all:
-      \r\n      all:\r\n        terms_of_use_yes_no: 'yes'\r\n        not_any:\r\n
-      \         id: NULL\r\n          current_mode: edit\r\n          \r\n    \r\n\r\n
-      \   placeholder_final_unsubmitted: *ready_not_submitted\r\n    placeholder_final_submitted:\r\n
-      \     all:\r\n        terms_of_use_yes_no: 'yes'\r\n        \r\n        not_any:\r\n
-      \         id: NULL\r\n          current_mode: edit\r\n          status: \r\n
-      \           - new\r\n            - ''\r\n            - NULL\r\n    \r\n    \r\n
-      \ valid_if:\r\n    on_save:\r\n      all:\r\n        this:\r\n          terms_of_use_yes_no:
-      'yes'\r\n          "
-    user_email: 
   associated_external_identifiers:
   - id: 43
     name: data_request_assignments
@@ -1725,14 +1782,15 @@ app_type:
     description: "# FPHS Data Requests\r\n\r\nThe data requests process follows a
       series of activities. More complex requests, and those requiring analysis outside
       of the **FPHS Secure Environment** may take longer to review if they require
-      specific stakeholder / faculty discussions.\r\n\r\n![Data Requests Process](/app_specific/data_requests/data-requests-process.svg)\r\n\r\nClick
+      specific stakeholder / faculty discussions.\r\n\r\n![Data Requests Process](/app_specific/data_requests/data-requests-process.svg)\r\n\r\n**>**
+      View [data dictionaries](/reports) of available variables\r\n\r\n**>** Click
       the **+ Data Request** button to start a new Data Request\r\n\r\n"
     sql: "select id master_id from masters where id = -1 limit 1;\r\n"
     search_attrs: ''
     admin_id: 2
     disabled: false
     created_at: '2020-07-14T13:18:42.152Z'
-    updated_at: '2020-07-14T13:18:42.152Z'
+    updated_at: '2020-08-03T13:27:58.372Z'
     report_type: search
     auto: true
     searchable: true
@@ -1768,21 +1826,20 @@ app_type:
       join data_requests_selected_attribs sel\r\non sel.record_id = cb.id \r\n  and
       \ sel.record_type = 'q2_datadic'\r\n  and not coalesce(sel.disabled, false)
       \r\n  and :list_id = data_request_id\r\nwhere\r\n  (\r\n    (\r\n      (:domain)
-      is NULL OR cb.domain IN (:domain)\r\n    )\r\n    AND (\r\n      :variable_name
-      is NULL OR cb.variable_name ~* :variable_name\r\n    )\r\n    AND (\r\n      :field_label
-      is NULL OR cb.field_label ~* :field_label\r\n    )\r\n    OR sel.id IS NOT NULL\r\n
-      \ )\r\norder by \r\nselected desc\r\n, cb.id;\r\n"
+      is NULL OR cb.domain IN (:domain)\r\n    )\r\n    AND (\r\n      :name_or_label_contains
+      is NULL \r\n      OR cb.variable_name ~* :name_or_label_contains\r\n      OR
+      cb.field_label ~* :name_or_label_contains      \r\n    )\r\n    OR sel.id IS
+      NOT NULL\r\n  )\r\norder by \r\nselected desc\r\n, cb.id;\r\n"
     search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
       multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
       \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
-      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nvariable_name:
-      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
-      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
-      \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
+      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nname_or_label_contains:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nlist_id:\r\n
+      \ number:\r\n    label: ID\r\n    hidden: true\r\n    "
     admin_id: 2
     disabled: false
     created_at: '2020-07-14T13:18:42.164Z'
-    updated_at: '2020-07-14T18:44:24.491Z'
+    updated_at: '2020-08-03T13:27:58.396Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -2051,21 +2108,21 @@ app_type:
       join data_requests_selected_attribs sel\r\non sel.record_id = cb.id \r\n  and
       sel.record_type = 'ipa_datadic'\r\n  and not coalesce(sel.disabled, false) \r\n
       \ and :list_id = data_request_id\r\nwhere\r\n  (\r\n    (\r\n      (:domain)
-      is NULL OR cb.domain IN (:domain)\r\n    )\r\n    AND (\r\n      :variable_name
-      is NULL OR cb.variable_name ~* :variable_name\r\n    )\r\n    AND (\r\n      :field_label
-      is NULL OR cb.field_label ~* :field_label\r\n    )\r\n    OR sel.id IS NOT NULL\r\n
-      \ )\r\norder by \r\nselected desc\r\n, cb.id;\r\n"
+      is NULL OR cb.domain IN (:domain)\r\n    )\r\n    AND (\r\n      :name_or_label_contains
+      is NULL \r\n      OR cb.variable_name ~* :name_or_label_contains\r\n      OR
+      cb.field_label ~* :name_or_label_contains      \r\n    )\r\n    OR sel.id IS
+      NOT NULL\r\n  )\r\norder by \r\nselected desc\r\n, cb.id;\r\n"
     search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
       multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
       \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
-      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nvariable_name:
-      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n\r\nfield_label:
+      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nname_or_label_contains:
       \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
-      \   \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n    "
+      \   \r\n    \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n
+      \   "
     admin_id: 2
     disabled: false
     created_at: '2020-07-14T13:18:42.224Z'
-    updated_at: '2020-07-14T18:44:52.483Z'
+    updated_at: '2020-08-03T13:27:58.440Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -2188,6 +2245,48 @@ app_type:
       select-items\r\n  tags:\r\n    field_label: pre\r\n    field_attributes: pre\r\n
       \ hide:\r\n    id: true\r\n    selected: true\r\n  \r\nview_css:\r\n  classes:\r\n
       \   table-header.select-items .table-header-col-type: \r\n      display: 'none'"
+    user_email: 
+  - id: 281
+    name: Q2 Data Dictionary
+    description: "Variables can be uniquely identified by the *domain* and \r\n*variable
+      name*. Note this information if you are considering making a data request, \r\nin
+      order to quickly select the variables in the request later.\r\n\r\nIf you are
+      planning on making a data request, you may find it more \r\nexpedient to fill
+      out the data request form and select the required \r\nvariables directly.\r\n\r\n"
+    sql: "\r\n\r\nselect distinct\r\n  cb.id,\r\n  cb.variable_name \"variable name\",\r\n
+      \ cb.domain \"domain\",\r\n  cb.field_type_sa \"type\",\r\n  cb.field_label
+      \"label\",\r\n  cb.field_attributes \"attributes\",\r\n  cb.field_note \"field
+      note\"\r\nfrom q2.q2_datadic cb\r\n\r\nwhere\r\n  (\r\n    (\r\n      (:domain)
+      is NULL OR cb.domain IN (:domain)\r\n    )\r\n    AND (\r\n      :name_or_label_contains
+      is NULL \r\n      OR cb.variable_name ~* :name_or_label_contains\r\n      OR
+      cb.field_label ~* :name_or_label_contains      \r\n    )\r\n  )\r\norder by
+      \r\ncb.id;\r\n"
+    search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
+      multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
+      \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
+      \     other health: other_health\r\n      pain: pain\r\n      tracking: tracking\r\n\r\nname_or_label_contains:
+      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n
+      \   \r\n    "
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-03T13:27:58.387Z'
+    updated_at: '2020-08-03T17:12:23.730Z'
+    report_type: regular_report
+    auto: false
+    searchable: true
+    position: 100
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: data-requests
+    short_name: q2_data_dictionary
+    options: "\r\nview_options:\r\n  hide_table_names: true\r\n  #humanize_column_names:
+      true\r\n\r\nlist_options:\r\n  list_description: |\r\n    View variables from
+      the **Q2 Survey**\r\n  \r\ncolumn_options:\r\n  classes:\r\n    label: datadict-field-label\r\n
+      \   attributes: datadict-field-attributes\r\n  tags:\r\n    label: pre\r\n    attributes:
+      pre\r\n  hide:\r\n    id: true\r\n    selected: true\r\n  \r\nview_css:\r\n
+      \ classes:\r\n    table-header.select-items .table-header-col-type: \r\n      display:
+      'none'"
     user_email: 
   associated_general_selections: []
   page_layouts:
@@ -2683,6 +2782,7 @@ app_type:
     created_at: '2020-07-14T12:54:16.606Z'
     updated_at: '2020-07-14T12:54:16.606Z'
     user_email: 
+  protocols: []
   associated_protocols: []
   associated_sub_processes: []
   associated_protocol_events: []

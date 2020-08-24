@@ -7,6 +7,7 @@ app_type:
   admin_id: 4
   created_at: '2019-11-21T11:00:51.784Z'
   updated_at: '2019-11-21T11:00:51.784Z'
+  default_schema_name: sleep
   app_configurations:
   - id: 67
     name: hide search form simple
@@ -4048,7 +4049,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-11-21T11:00:53.752Z'
-    updated_at: '2020-02-04T18:49:33.957Z'
+    updated_at: '2020-07-29T10:10:51.134Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -4272,7 +4273,7 @@ app_type:
       \           not_all:\r\n              <<: *administer_ess\r\n            all:\r\n
       \             activity_log__sleep_assignment_phone_screens:\r\n                extra_log_type:
       epworth_sleepiness_scale\r\n\r\n          not_any:\r\n            <<: *eligible_ese_questions\r\n
-      \         not_any_2:\r\n            <<: *possibly_eligible_ese_questions\r\n\r\n\r\n#
+      \         not_any_2:\r\n            <<: *possibly_eligible_ese_questions\r\n\r\n\r\n\r\n#
       \       all_audit_c:\r\n#          activity_log__sleep_assignment_phone_screens:\r\n#
       \           extra_log_type: audit_c\r\n#          not_any:\r\n#            <<:
       *eligible_audit_c\r\n#          not_any_2:\r\n#            <<: *possibly_eligible_audit_c\r\n\r\n
@@ -4698,7 +4699,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-11-21T11:00:53.909Z'
-    updated_at: '2020-03-31T09:08:09.636Z'
+    updated_at: '2020-03-31T11:03:31.007Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -4820,7 +4821,7 @@ app_type:
       \     from: master\r\n      add: one_to_master\r\n      \r\n    activity_log__sleep_assignment:\r\n
       \     from: master\r\n      add: one_to_master\r\n      add_with: \r\n        extra_log_type:
       assign_id\r\n      filter_by: \r\n        extra_log_type: assign_id\r\n      view_as:\r\n
-      \       edit: not_embedded\r\n        show: readonly\r\n        new: not_embedded\r\n
+      \       edit: not_embedded\r\n        show: readonly\r\n        new: outside_this\r\n
       \       \r\n  view_options:\r\n    always_embed_reference: dynamic_model__sleep_appointment\r\n
       \   hide_unless_creatable: true\r\n\r\n  caption_before:\r\n    reference_activity_log__sleep_assignment:
       |\r\n      Click **+ Assign ID** to record the BWH Study ID for this participant\r\n\r\n
@@ -4867,10 +4868,10 @@ app_type:
       standard sms layout\r\n        content_template: sleep sms notification\r\n
       \       subject: New SLEEP Enrollment\r\n\r\n\r\n\r\n\r\n###################################\r\nassign_id:\r\n
       \ label: Assign ID\r\n###################################\r\n  \r\n  fields:\r\n\r\n
-      \ references:\r\n    bwh_sleep_id_number:\r\n      from: master\r\n      add:
-      one_to_master\r\n      prevent_disable: true\r\n      creatable_if:\r\n        any:\r\n
-      \         bwh_sleep_id_numbers:\r\n            id: null\r\n      \r\n  creatable_if:\r\n
-      \   <<: *enabled_if\r\n    all:\r\n      activity_log__sleep_assignments:\r\n
+      \ references:\r\n    bwh_sleep_id_number:\r\n      from: master\r\n      without_reference:
+      true      \r\n      add: one_to_master\r\n      prevent_disable: true\r\n#      creatable_if:\r\n#
+      \       any:\r\n#          bwh_sleep_id_numbers:\r\n#            id: null\r\n
+      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__sleep_assignments:\r\n
       \       extra_log_type: appointment\r\n            \r\n    not_any_exit: *any_exit_or_complete\r\n
       \   not_any:\r\n      activity_log__sleep_assignments:\r\n        extra_log_type:
       assign_id\r\n\r\n\r\n#  save_trigger:\r\n#    on_create:\r\n \r\n#      create_reference:\r\n
@@ -7381,6 +7382,7 @@ app_type:
     updated_at: '2019-11-21T11:00:53.529Z'
     alphanumeric: false
     extra_fields: ''
+    category: sleep
     user_email: 
   - id: 8
     name: bwh_sleep_id_numbers
@@ -7398,6 +7400,7 @@ app_type:
     updated_at: '2019-11-21T11:00:53.603Z'
     alphanumeric: false
     extra_fields: ''
+    category: bwh
     user_email: 
   associated_reports:
   - id: 55
@@ -14325,6 +14328,33 @@ app_type:
     created_at: '2020-03-13T08:53:53.677Z'
     updated_at: '2020-03-13T08:53:53.677Z'
     user_email: template@template
+  - id: 1645
+    app_type_id: 11
+    role_name: audit
+    user_id: 1
+    admin_id: 4
+    disabled: false
+    created_at: '2020-07-29T09:49:40.437Z'
+    updated_at: '2020-07-29T10:06:53.429Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1646
+    app_type_id: 11
+    role_name: audit
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-07-29T09:49:40.506Z'
+    updated_at: '2020-07-29T09:49:40.506Z'
+    user_email: template@template
+  - id: 1647
+    app_type_id: 11
+    role_name: audit
+    user_id: 65
+    admin_id: 4
+    disabled: false
+    created_at: '2020-07-29T09:49:59.396Z'
+    updated_at: '2020-07-29T09:49:59.396Z'
+    user_email: nicole_jones@hms.harvard.edu
   associated_message_templates:
   - id: 21
     name: standard sms layout
@@ -14535,13 +14565,14 @@ app_type:
       \         - exit_not_consented\r\n          - exit_opt_out\r\n          - exit_l2fu\r\n
       \         - ineligible\r\n          - completed\r\n        created_at:\r\n          condition:
       <\r\n          value: -14 days\r\n      \r\n      \r\n      \r\n      \r\n  access_defaults:
-      &access_defaults\r\n    showable_if: *enabled_if\r\n    creatable_if: *enabled_if\r\n
-      \   editable_if: *enabled_if\r\n"
+      &access_defaults\r\n    showable_if: \r\n      any:\r\n        all:\r\n          <<:
+      *enabled_if\r\n        any_audit_role:\r\n          user:\r\n            role_name:
+      audit\r\n    creatable_if: *enabled_if\r\n    editable_if: *enabled_if\r\n"
     format: yaml
     disabled: false
     admin_id: 4
     created_at: '2019-11-21T11:00:51.978Z'
-    updated_at: '2019-11-21T11:00:51.978Z'
+    updated_at: '2020-07-29T10:15:20.092Z'
     user_email: 
   - id: 3
     category: sleep
@@ -14866,6 +14897,7 @@ app_type:
     created_at: '2019-11-21T11:00:52.032Z'
     updated_at: '2019-11-21T11:00:52.032Z'
     user_email: 
+  protocols: []
   associated_protocols: []
   associated_sub_processes: []
   associated_protocol_events: []

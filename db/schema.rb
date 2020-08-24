@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_18_140236) do
+ActiveRecord::Schema.define(version: 2020_08_24_084238) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -1038,6 +1038,38 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.index ["user_id"], name: "index_activity_log_persnet_assignments_on_user_id"
   end
 
+  create_table "activity_log_pitt_bhi_assignment_discussion_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "pitt_bhi_assignment_id"
+    t.string "notes"
+    t.string "tag_select_contact_role", array: true
+    t.string "prev_activity_type"
+    t.string "extra_log_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "activity_log_pitt_bhi_assignment_discussion_id"
+    t.index ["activity_log_pitt_bhi_assignment_discussion_id"], name: "2455c589_b_id_h_idx"
+    t.index ["master_id"], name: "2455c589_master_id_h_idx"
+    t.index ["pitt_bhi_assignment_id"], name: "2455c589_id_h_idx"
+    t.index ["user_id"], name: "2455c589_user_id_h_idx"
+  end
+
+  create_table "activity_log_pitt_bhi_assignment_discussions", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "pitt_bhi_assignment_id"
+    t.string "notes"
+    t.string "tag_select_contact_role", array: true
+    t.string "prev_activity_type"
+    t.string "extra_log_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "2455c589_master_id_idx"
+    t.index ["pitt_bhi_assignment_id"], name: "2455c589_id_idx"
+    t.index ["user_id"], name: "2455c589_user_id_idx"
+  end
+
   create_table "activity_log_pitt_bhi_assignment_history", force: :cascade do |t|
     t.bigint "master_id"
     t.bigint "pitt_bhi_assignment_id"
@@ -1290,7 +1322,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.date "follow_up_when"
     t.time "follow_up_time"
     t.string "notes"
-    t.bigint "protocol_id"
     t.string "select_record_from_addresses"
     t.string "extra_log_type"
     t.integer "user_id"
@@ -1306,9 +1337,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "activity_log_sleep_assignment_inex_checklist_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "sleep_assignment_id"
-    t.string "prev_activity_type"
-    t.string "contact_role"
-    t.string "select_subject_eligibility"
     t.string "signed_no_yes"
     t.string "notes"
     t.string "e_signed_document"
@@ -1331,9 +1359,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "activity_log_sleep_assignment_inex_checklists", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "sleep_assignment_id"
-    t.string "prev_activity_type"
-    t.string "contact_role"
-    t.string "select_subject_eligibility"
     t.string "signed_no_yes"
     t.string "notes"
     t.string "e_signed_document"
@@ -1424,10 +1449,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "activity_log_sleep_assignment_phone_screen_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "sleep_assignment_id"
-    t.string "callback_required"
-    t.date "callback_date"
-    t.time "callback_time"
-    t.string "notes"
     t.string "extra_log_type"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -1442,10 +1463,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "activity_log_sleep_assignment_phone_screens", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "sleep_assignment_id"
-    t.string "callback_required"
-    t.date "callback_date"
-    t.time "callback_time"
-    t.string "notes"
     t.string "extra_log_type"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -1500,7 +1517,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.date "follow_up_when"
     t.time "follow_up_time"
     t.string "notes"
-    t.bigint "protocol_id"
     t.string "select_record_from_addresses"
     t.string "extra_log_type"
     t.integer "user_id"
@@ -2289,7 +2305,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "data_request_attrib_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "data_source"
-    t.string "requested_attribs", array: true
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -2302,7 +2317,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "data_request_attribs", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "data_source"
-    t.string "requested_attribs", array: true
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -2337,6 +2351,9 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.string "fphs_server_tools_notes"
     t.string "status"
     t.string "off_fphs_server_reason_notes"
+    t.string "select_purpose"
+    t.string "other_purpose"
+    t.string "research_question_notes"
     t.index ["data_request_id"], name: "index_data_request_history_on_data_request_id"
     t.index ["master_id"], name: "index_data_request_history_on_master_id"
     t.index ["user_id"], name: "index_data_request_history_on_user_id"
@@ -2472,6 +2489,9 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.string "fphs_server_tools_notes"
     t.string "status"
     t.string "off_fphs_server_reason_notes"
+    t.string "select_purpose"
+    t.string "other_purpose"
+    t.string "research_question_notes"
     t.index ["master_id"], name: "index_data_requests_on_master_id"
     t.index ["user_id"], name: "index_data_requests_on_user_id"
   end
@@ -7697,6 +7717,32 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.index ["user_id"], name: "index_scantron_history_on_user_id"
   end
 
+  create_table "scantron_q2_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.bigint "q2_scantron_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "scantron_q2_table_id"
+    t.index ["admin_id"], name: "index_scantron_q2_history_on_admin_id"
+    t.index ["master_id"], name: "index_scantron_q2_history_on_master_id"
+    t.index ["scantron_q2_table_id"], name: "index_scantron_q2_history_on_scantron_q2_table_id"
+    t.index ["user_id"], name: "index_scantron_q2_history_on_user_id"
+  end
+
+  create_table "scantron_q2s", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.bigint "q2_scantron_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_scantron_q2s_on_admin_id"
+    t.index ["master_id"], name: "index_scantron_q2s_on_master_id"
+    t.index ["user_id"], name: "index_scantron_q2s_on_user_id"
+  end
+
   create_table "scantron_series_two_history", id: :serial, force: :cascade do |t|
     t.integer "scantron_series_two_id"
     t.integer "master_id"
@@ -8005,42 +8051,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
 
   create_table "sleep_incidental_finding_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
-    t.boolean "anthropometrics_check"
-    t.date "anthropometrics_date"
-    t.string "anthropometrics_notes"
-    t.boolean "lab_results_check"
-    t.date "lab_results_date"
-    t.string "lab_results_notes"
-    t.boolean "dexa_check"
-    t.date "dexa_date"
-    t.string "dexa_notes"
-    t.boolean "brain_mri_check"
-    t.date "brain_mri_date"
-    t.string "brain_mri_notes"
-    t.boolean "neuro_psych_check"
-    t.date "neuro_psych_date"
-    t.string "neuro_psych_notes"
-    t.boolean "sensory_testing_check"
-    t.date "sensory_testing_date"
-    t.string "sensory_testing_notes"
-    t.boolean "liver_mri_check"
-    t.date "liver_mri_date"
-    t.string "liver_mri_notes"
-    t.boolean "physical_function_check"
-    t.date "physical_function_date"
-    t.string "physical_function_notes"
-    t.boolean "eeg_check"
-    t.date "eeg_date"
-    t.string "eeg_notes"
-    t.boolean "sleep_check"
-    t.date "sleep_date"
-    t.string "sleep_notes"
-    t.boolean "cardiac_check"
-    t.date "cardiac_date"
-    t.string "cardiac_notes"
-    t.boolean "xray_check"
-    t.date "xray_date"
-    t.string "xray_notes"
     t.string "other_notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -8053,42 +8063,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
 
   create_table "sleep_incidental_findings", id: :serial, force: :cascade do |t|
     t.integer "master_id"
-    t.boolean "anthropometrics_check"
-    t.date "anthropometrics_date"
-    t.string "anthropometrics_notes"
-    t.boolean "lab_results_check"
-    t.date "lab_results_date"
-    t.string "lab_results_notes"
-    t.boolean "dexa_check"
-    t.date "dexa_date"
-    t.string "dexa_notes"
-    t.boolean "brain_mri_check"
-    t.date "brain_mri_date"
-    t.string "brain_mri_notes"
-    t.boolean "neuro_psych_check"
-    t.date "neuro_psych_date"
-    t.string "neuro_psych_notes"
-    t.boolean "sensory_testing_check"
-    t.date "sensory_testing_date"
-    t.string "sensory_testing_notes"
-    t.boolean "liver_mri_check"
-    t.date "liver_mri_date"
-    t.string "liver_mri_notes"
-    t.boolean "physical_function_check"
-    t.date "physical_function_date"
-    t.string "physical_function_notes"
-    t.boolean "eeg_check"
-    t.date "eeg_date"
-    t.string "eeg_notes"
-    t.boolean "sleep_check"
-    t.date "sleep_date"
-    t.string "sleep_notes"
-    t.boolean "cardiac_check"
-    t.date "cardiac_date"
-    t.string "cardiac_notes"
-    t.boolean "xray_check"
-    t.date "xray_date"
-    t.string "xray_notes"
     t.string "other_notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -8504,7 +8478,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.string "select_is_good_time_to_speak"
     t.string "any_questions_blank_yes_no"
     t.string "question_notes"
-    t.string "select_still_interested"
     t.date "follow_up_date"
     t.string "follow_up_time"
     t.string "notes"
@@ -8522,7 +8495,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.string "select_is_good_time_to_speak"
     t.string "any_questions_blank_yes_no"
     t.string "question_notes"
-    t.string "select_still_interested"
     t.date "follow_up_date"
     t.string "follow_up_time"
     t.string "notes"
@@ -8638,7 +8610,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "sleep_ps_basic_response_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "reliable_internet_yes_no"
-    t.string "placeholder_digital_no"
     t.string "cbt_yes_no"
     t.string "cbt_how_long_ago"
     t.string "cbt_notes"
@@ -8668,7 +8639,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "sleep_ps_basic_responses", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "reliable_internet_yes_no"
-    t.string "placeholder_digital_no"
     t.string "cbt_yes_no"
     t.string "cbt_how_long_ago"
     t.string "cbt_notes"
@@ -8771,7 +8741,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.string "not_interested_notes"
     t.string "consent_to_pass_info_to_bwh_yes_no"
     t.string "consent_to_pass_info_to_bwh_2_yes_no"
-    t.string "placeholder_consent_to_pass_info_2_no"
     t.string "contact_info_notes"
     t.string "notes"
     t.integer "user_id"
@@ -8789,7 +8758,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.string "not_interested_notes"
     t.string "consent_to_pass_info_to_bwh_yes_no"
     t.string "consent_to_pass_info_to_bwh_2_yes_no"
-    t.string "placeholder_consent_to_pass_info_2_no"
     t.string "contact_info_notes"
     t.string "notes"
     t.integer "user_id"
@@ -8802,8 +8770,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "sleep_ps_initial_screening_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "select_is_good_time_to_speak"
-    t.string "looked_at_website_yes_no"
-    t.string "select_may_i_begin"
     t.string "any_questions_blank_yes_no"
     t.string "question_notes"
     t.string "select_still_interested"
@@ -8822,8 +8788,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "sleep_ps_initial_screenings", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "select_is_good_time_to_speak"
-    t.string "looked_at_website_yes_no"
-    t.string "select_may_i_begin"
     t.string "any_questions_blank_yes_no"
     t.string "question_notes"
     t.string "select_still_interested"
@@ -8840,14 +8804,10 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "sleep_ps_non_eligible_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "any_questions_yes_no"
-    t.string "placeholder_any_questions_no"
     t.string "contact_pi_yes_no"
     t.string "additional_questions_yes_no"
-    t.string "placeholder_additional_questions_no"
-    t.string "placeholder_additional_questions_yes"
     t.string "consent_to_pass_info_to_bwh_yes_no"
     t.string "consent_to_pass_info_to_bwh_2_yes_no"
-    t.string "placeholder_consent_to_pass_info_2_no"
     t.string "contact_info_notes"
     t.string "notes"
     t.integer "user_id"
@@ -8862,14 +8822,10 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "sleep_ps_non_eligibles", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "any_questions_yes_no"
-    t.string "placeholder_any_questions_no"
     t.string "contact_pi_yes_no"
     t.string "additional_questions_yes_no"
-    t.string "placeholder_additional_questions_no"
-    t.string "placeholder_additional_questions_yes"
     t.string "consent_to_pass_info_to_bwh_yes_no"
     t.string "consent_to_pass_info_to_bwh_2_yes_no"
-    t.string "placeholder_consent_to_pass_info_2_no"
     t.string "contact_info_notes"
     t.string "notes"
     t.integer "user_id"
@@ -8885,8 +8841,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.string "consent_to_pass_info_to_bwh_yes_no"
     t.string "consent_to_pass_info_to_bwh_2_yes_no"
     t.string "contact_info_notes"
-    t.date "follow_up_date"
-    t.time "follow_up_time"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -8903,8 +8857,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.string "consent_to_pass_info_to_bwh_yes_no"
     t.string "consent_to_pass_info_to_bwh_2_yes_no"
     t.string "contact_info_notes"
-    t.date "follow_up_date"
-    t.time "follow_up_time"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -8948,7 +8900,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.string "diagnosed_yes_no"
     t.string "use_treatment_yes_no"
     t.string "severity"
-    t.string "possibly_eligible_yes_no"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -8964,7 +8915,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
     t.string "diagnosed_yes_no"
     t.string "use_treatment_yes_no"
     t.string "severity"
-    t.string "possibly_eligible_yes_no"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -9002,8 +8952,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "sleep_screening_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "eligible_for_study_blank_yes_no"
-    t.string "requires_study_partner_blank_yes_no"
-    t.string "notes"
     t.string "good_time_to_speak_blank_yes_no"
     t.date "callback_date"
     t.string "callback_time"
@@ -9026,8 +8974,6 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   create_table "sleep_screenings", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "eligible_for_study_blank_yes_no"
-    t.string "requires_study_partner_blank_yes_no"
-    t.string "notes"
     t.string "good_time_to_speak_blank_yes_no"
     t.date "callback_date"
     t.string "callback_time"
@@ -11185,6 +11131,13 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   add_foreign_key "activity_log_persnet_assignments", "masters"
   add_foreign_key "activity_log_persnet_assignments", "persnet_assignments"
   add_foreign_key "activity_log_persnet_assignments", "users"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussion_history", "activity_log_pitt_bhi_assignment_discussions"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussion_history", "masters"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussion_history", "pitt_bhi_assignments"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussion_history", "users"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussions", "masters"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussions", "pitt_bhi_assignments"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussions", "users"
   add_foreign_key "activity_log_pitt_bhi_assignment_history", "activity_log_pitt_bhi_assignments"
   add_foreign_key "activity_log_pitt_bhi_assignment_history", "masters"
   add_foreign_key "activity_log_pitt_bhi_assignment_history", "pitt_bhi_assignments"
@@ -12117,6 +12070,13 @@ ActiveRecord::Schema.define(version: 2020_08_18_140236) do
   add_foreign_key "scantron_history", "masters", name: "fk_scantron_history_masters"
   add_foreign_key "scantron_history", "scantrons", column: "scantron_table_id", name: "fk_scantron_history_scantrons"
   add_foreign_key "scantron_history", "users", name: "fk_scantron_history_users"
+  add_foreign_key "scantron_q2_history", "admins", name: "fk_scantron_q2_history_admins"
+  add_foreign_key "scantron_q2_history", "masters", name: "fk_scantron_q2_history_masters"
+  add_foreign_key "scantron_q2_history", "scantron_q2s", column: "scantron_q2_table_id", name: "fk_scantron_q2_history_scantron_q2s"
+  add_foreign_key "scantron_q2_history", "users", name: "fk_scantron_q2_history_users"
+  add_foreign_key "scantron_q2s", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "scantron_q2s", "masters"
+  add_foreign_key "scantron_q2s", "users"
   add_foreign_key "scantrons", "masters"
   add_foreign_key "scantrons", "users"
   add_foreign_key "sleep_access_bwh_staff_history", "masters", name: "fk_sleep_access_bwh_staff_history_masters"
