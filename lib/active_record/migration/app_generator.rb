@@ -60,7 +60,7 @@ module ActiveRecord
       end
 
       def create_activity_log_trigger
-        setup_fields
+        setup_fields(fields & col_names)
 
         reversible do |dir|
           dir.up do
@@ -95,7 +95,7 @@ module ActiveRecord
       end
 
       def create_dynamic_model_trigger
-        setup_fields
+        setup_fields(fields & col_names)
 
         reversible do |dir|
           dir.up do
@@ -140,7 +140,7 @@ module ActiveRecord
         self.fields ||= []
         self.fields.unshift id_field
         self.fields = fields.uniq
-        setup_fields
+        setup_fields(fields & col_names)
 
         reversible do |dir|
           dir.up do
@@ -156,17 +156,19 @@ module ActiveRecord
 
       def update_fields
         self.mode = :update
-        setup_fields
+
         cols = ActiveRecord::Base.connection.columns("#{schema}.#{table_name}")
-        col_names = prev_fields&.map(&:to_s) || cols.map(&:name)
         old_table_comment = ActiveRecord::Base.connection.table_comment(table_name)
 
         belongs_to_model_field = "#{belongs_to_model}_id" if belongs_to_model
 
         old_colnames = col_names - standard_columns
         new_colnames = fields.map(&:to_s) - standard_columns
-        added = new_colnames - old_colnames - [belongs_to_model_field]
-        removed = old_colnames - new_colnames - [belongs_to_model_field]
+        added = (new_colnames - old_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(/^placeholder_|^tracker_history_id$/) }
+        removed = (old_colnames - new_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(/^placeholder_|^tracker_history_id$/) }
+
+        full_field_list = (old_colnames + new_colnames + col_names).uniq.map(&:to_sym)
+        setup_fields(full_field_list)
 
         self.fields_comments ||= {}
         commented_colnames = fields_comments.keys.map(&:to_s)
@@ -178,7 +180,7 @@ module ActiveRecord
           end
         end
 
-        if belongs_to_model && !old_colnames.include?(belongs_to_model)
+        if belongs_to_model && !old_colnames.include?(belongs_to_model) && !col_names.include?(belongs_to_model_field)
           add_reference "#{schema}.#{table_name}", belongs_to_model, index: { name: "#{rand_id}_bt_id_idx" }
         end
 
@@ -191,8 +193,8 @@ module ActiveRecord
         end
 
         removed.each do |c|
-          remove_column "#{schema}.#{table_name}", c
-          remove_column "#{schema}.#{history_table_name}", c
+          remove_column "#{schema}.#{table_name}", c, field_defs[c.to_sym]
+          remove_column "#{schema}.#{history_table_name}", c, field_defs[c.to_sym]
         end
 
         changed.each do |c|
@@ -215,11 +217,17 @@ module ActiveRecord
         pset
       end
 
-      def setup_fields
-        self.fields_comments ||= {}
-        return if field_opts
+      def col_names
+        prev_fields&.map(&:to_s) || cols.map(&:name)
+      end
 
-        fields.reject! { |a| a.to_s.index(/^placeholder_|^tracker_history_id$/) }
+      def setup_fields(handle_fields = nil)
+        self.fields_comments ||= {}
+        return if field_opts && !handle_fields
+
+        handle_fields ||= self.fields
+        handle_fields.reject! { |a| a.to_s.index(/^placeholder_|^tracker_history_id$/) }
+        handle_fields = handle_fields.map(&:to_sym)
 
         self.history_table_name = "#{table_name.singularize}_history"
         self.trigger_fn_name = "#{schema}.log_#{table_name}_update"
@@ -227,7 +235,7 @@ module ActiveRecord
         self.field_defs = {}
         self.field_opts = {}
 
-        fields.each do |attr_name|
+        handle_fields.each do |attr_name|
           a = attr_name.to_s
           f = :string
           fopts = nil
