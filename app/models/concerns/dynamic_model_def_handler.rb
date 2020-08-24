@@ -311,7 +311,7 @@ module DynamicModelDefHandler
     unless !disabled? && ready?
 
       err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created."
-      if Rail.env.development?
+      if Rails.env.development?
         err += "
         Wrote migration to: #{fn}
         Review it, then run migration with:
