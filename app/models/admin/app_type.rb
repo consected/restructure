@@ -51,10 +51,10 @@ class Admin::AppType < Admin::AdminBase
 
   def self.all_available_to(user)
     atavail = []
-
+    olat = Settings::OnlyLoadAppTypes
     active.each do |a|
       hat = user.has_access_to?(:access, :general, :app_type, alt_app_type_id: a.id)
-      atavail << hat.app_type if hat
+      atavail << hat.app_type if hat && (!olat || hat.app_type_id.in?(olat))
     end
     atavail
   end

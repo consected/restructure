@@ -410,6 +410,8 @@ module ActivityLogHandler
                                                active: active_only
               else
                 Rails.logger.warn "Find references attempted without known :from key: #{f}"
+                raise FphsException, "Find references attempted without known :from key: #{f}" if Rails.env.development?
+
                 nil
               end
 

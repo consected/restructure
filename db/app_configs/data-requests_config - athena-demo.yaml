@@ -1475,7 +1475,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2020-07-14T12:54:16.627Z'
-    updated_at: '2020-08-21T10:26:11.730Z'
+    updated_at: '2020-08-21T11:07:00.303Z'
     position: 
     category: data-requests
     table_key_name: ''
@@ -1490,7 +1490,7 @@ app_type:
       embedded_report_data_requests__selected_data_attributes_all placeholder_final_unsubmitted
       placeholder_final_submitted, created_by_user_id
     result_order: ''
-    options: "default:\r\n\r\n  field_options:\r\n    project_title:\r\n      no_downcase:
+    options: "default:\r\n\r\n\r\n  field_options:\r\n    project_title:\r\n      no_downcase:
       true\r\n    \r\n    select_purpose:\r\n      edit_as:\r\n        alt_options:\r\n
       \         - data quality / exploratory analysis\r\n          - abstract / conference
       presentation\r\n          - manuscript\r\n          - grant proposal\r\n          -
@@ -1590,17 +1590,17 @@ app_type:
       \     never: true\r\n      \r\n    status: \r\n      never: true\r\n\r\n    placeholder_banner:\r\n
       \     status:\r\n        - ''\r\n        - null\r\n        - 'new'\r\n    \r\n
       \   full_name:\r\n      fphs_analyst_yes_no: \r\n        - 'no'\r\n        -
-      'yes'\r\n          \r\n    title: \r\n      fphs_analyst_yes_no: 'no'\r\n\r\n
-      \   institution: \r\n      fphs_analyst_yes_no: 'no'\r\n\r\n    other_institution:\r\n
-      \     fphs_analyst_yes_no: 'no'\r\n      institution: other\r\n\r\n    others_handling_data:\r\n
-      \     fphs_analyst_yes_no: 'no'\r\n\r\n    pm_contact:\r\n      fphs_analyst_yes_no:
-      'no'\r\n\r\n    other_pm_contact: \r\n      fphs_analyst_yes_no: 'no'\r\n      pm_contact:
-      other\r\n\r\n\r\n    data_start_date: &pm_contact_set\r\n      not_any:\r\n
-      \       pm_contact: \r\n         - ''\r\n         - null\r\n    \r\n    data_end_date:
-      *pm_contact_set    \r\n\r\n    fphs_server_yes_no: &show_data_info\r\n      any:\r\n
-      \       fphs_analyst_yes_no: 'yes'         \r\n        <<: *pm_contact_set\r\n
-      \       \r\n    fphs_server_tools_notes:  \r\n      <<: *show_data_info\r\n
-      \     fphs_server_yes_no: 'yes'\r\n\r\n    off_fphs_server_reason_notes:\r\n
+      'yes'\r\n          \r\n    other_purpose:\r\n      select_purpose: 'other'\r\n
+      \   \r\n    title: \r\n      fphs_analyst_yes_no: 'no'\r\n\r\n    institution:
+      \r\n      fphs_analyst_yes_no: 'no'\r\n\r\n    other_institution:\r\n      fphs_analyst_yes_no:
+      'no'\r\n      institution: other\r\n\r\n    others_handling_data:\r\n      fphs_analyst_yes_no:
+      'no'\r\n\r\n    pm_contact:\r\n      fphs_analyst_yes_no: 'no'\r\n\r\n    other_pm_contact:
+      \r\n      fphs_analyst_yes_no: 'no'\r\n      pm_contact: other\r\n\r\n\r\n    data_start_date:
+      &pm_contact_set\r\n      not_any:\r\n        pm_contact: \r\n         - ''\r\n
+      \        - null\r\n    \r\n    data_end_date: *pm_contact_set    \r\n\r\n    fphs_server_yes_no:
+      &show_data_info\r\n      any:\r\n        fphs_analyst_yes_no: 'yes'         \r\n
+      \       <<: *pm_contact_set\r\n        \r\n    fphs_server_tools_notes:  \r\n
+      \     <<: *show_data_info\r\n      fphs_server_yes_no: 'yes'\r\n\r\n    off_fphs_server_reason_notes:\r\n
       \     <<: *show_data_info\r\n      fphs_server_yes_no: 'no'\r\n\r\n    data_use_agreement_status:
       &show_data_use_agreement\r\n      fphs_analyst_yes_no: 'no'\r\n      fphs_server_yes_no:
       \r\n        - 'yes'\r\n        - 'no'\r\n    \r\n    data_use_agreement_notes:

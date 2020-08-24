@@ -157,7 +157,6 @@ module ActiveRecord
       def update_fields
         self.mode = :update
 
-        cols = ActiveRecord::Base.connection.columns("#{schema}.#{table_name}")
         old_table_comment = ActiveRecord::Base.connection.table_comment(table_name)
 
         belongs_to_model_field = "#{belongs_to_model}_id" if belongs_to_model
@@ -215,6 +214,10 @@ module ActiveRecord
                   extra_log_type admin_id tracker_history_id]
         pset += ["#{table_name.singularize}_table_id", "#{table_name.singularize}_id"]
         pset
+      end
+
+      def cols
+        @cols ||= ActiveRecord::Base.connection.columns("#{schema}.#{table_name}")
       end
 
       def col_names
