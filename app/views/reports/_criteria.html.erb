@@ -57,7 +57,7 @@ btn = !click_to_search && !@embedded_report ? "btn btn-default btn-sm pull-right
               <%= submit_tag :search, value: :search, class: "#{btn} #{!@report_criteria && @report.auto ? 'hidden' : ''} #{!@report_page ? 'auto-submitter' : ''} #{!@report_page && @report.auto ? 'auto-run' : ''}" %>
               <%= submit_tag :table, class: "#{btn}"  unless @view_context==:search %>
               <% else %>
-              <%= submit_tag (@embedded_report ? :list :  (@report.view_options.search_button_label || :table) ), class: "#{btn} #{!@report_page ? 'auto-submitter' : ''} #{ @report.auto ? 'auto-run' : ''}", id: "report-form-submit-btn"  unless @view_context==:search %>
+              <%= submit_tag (@embedded_report ? :list :  (@report.view_options.search_button_label || :table) ), class: "#{btn} #{(!@report_page || @report.view_options.report_auto_submit_on_change) ? 'auto-submitter' : ''} #{ @report.auto ? 'auto-run' : ''}", id: "report-form-submit-btn"  unless @view_context==:search %>
                 <% if @report_page && @report.searchable && @view_context!=:search %>
                 <%= submit_tag 'auto-submitter', class: "hidden auto-submitter", id: "report-form-auto-submitter-btn" %>
                 <% end %>

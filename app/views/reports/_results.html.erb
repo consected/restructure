@@ -1,7 +1,7 @@
 <%
   result_tables = @report.result_tables_by_index || []
   @outer_block_id = "report-container-#{SecureRandom.hex}"
-
+  no_results_scroll = @embedded_report || @report.view_options.no_results_scroll
 %>
 
 <div class="data-results report-container" id="<%=@outer_block_id%>" data-report-id="<%=@report.id%>">
@@ -29,8 +29,8 @@
         <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
       </div>
     </div>
-    <div id="<%=@outer_block_id%>-results-block" class="report-results-block <%= @count_only ? 'hidden' : '' %>">
-      <% unless @embedded_report %>
+    <div id="<%=@outer_block_id%>-results-block" class="report-results-block <%= @count_only ? 'hidden' : '' %> <%=no_results_scroll ? 'no_results_scroll' : ''%>%">
+      <% unless no_results_scroll %>
       <div class="text-center back-to-search-form">
         <a href="#body-top" class="btn btn-default small back-to-search-form-btn"><i class="caret up"></i> back to search form</a>
         <a href="#<%=@outer_block_id%>-results-block" class="btn btn-default small show-results-btn" style="display: none;"><i class="caret"></i> show all results</a>
