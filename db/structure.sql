@@ -373,51 +373,6 @@ CREATE FUNCTION bulk_msg.log_zeus_short_link_update() RETURNS trigger
 
 
 --
--- Name: log_activity_log_data_request_assignment_update(); Type: FUNCTION; Schema: data_requests; Owner: -
---
-
-CREATE FUNCTION data_requests.log_activity_log_data_request_assignment_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$ BEGIN
-    INSERT INTO
-        activity_log_data_request_assignment_history (
-            master_id,
-            data_request_assignment_id,
-            follow_up_date,
-            follow_up_time,
-            next_step,
-            status,
-            notes,
-            extra_log_type,
-            user_id,
-            created_by_user_id,
-            created_at,
-            updated_at,
-            activity_log_data_request_assignment_id
-        )
-    SELECT
-        NEW.master_id,
-        NEW.data_request_assignment_id,
-        NEW.follow_up_date,
-        NEW.follow_up_time,
-        NEW.next_step,
-        NEW.status,
-        NEW .notes,
-        NEW.extra_log_type,
-        NEW.user_id,
-        NEW.created_by_user_id,
-        NEW.created_at,
-        NEW.updated_at,
-        NEW.id;
-
-RETURN NEW;
-
-END;
-
-$$;
-
-
---
 -- Name: log_activity_log_data_request_assignments_update(); Type: FUNCTION; Schema: data_requests; Owner: -
 --
 
@@ -685,67 +640,66 @@ $$;
 CREATE FUNCTION data_requests.log_data_request_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-              BEGIN
-                  INSERT INTO data_request_history
-                  (
-                      master_id,
-                      project_title,
-                      concept_sheet_approved_yes_no,
-                      concept_sheet_approved_by,
-                      full_name,
-                      title,
-                      institution,
-                      other_institution,
-                      others_handling_data,
-                      pm_contact,
-                      other_pm_contact,
-                      data_use_agreement_status,
-                      data_use_agreement_notes,
-                      terms_of_use_yes_no,
-                      data_start_date,
-                      data_end_date,
-                      fphs_analyst_yes_no,
-                      fphs_server_yes_no,
-                      fphs_server_tools_notes,
-                      off_fphs_server_reason_notes,
-                      status,
-                      user_id,
-                      created_by_user_id,
-                      created_at,
-                      updated_at,
-                      data_request_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.project_title,
-                      NEW.concept_sheet_approved_yes_no,
-                      NEW.concept_sheet_approved_by,
-                      NEW.full_name,
-                      NEW.title,
-                      NEW.institution,
-                      NEW.other_institution,
-                      NEW.others_handling_data,
-                      NEW.pm_contact,
-                      NEW.other_pm_contact,
-                      NEW.data_use_agreement_status,
-                      NEW.data_use_agreement_notes,
-                      NEW.terms_of_use_yes_no,
-                      NEW.data_start_date,
-                      NEW.data_end_date,
-                      NEW.fphs_analyst_yes_no,
-                      NEW.fphs_server_yes_no,
-                      NEW.fphs_server_tools_notes,
-                      NEW.off_fphs_server_reason_notes,
-                      NEW.status,
-                      NEW.user_id,
-                      NEW.created_by_user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
+BEGIN
+  INSERT INTO data_request_history (
+    master_id,
+    project_title,
+    full_name,
+    title,
+    institution,
+    other_institution,
+    others_handling_data,
+    pm_contact,
+    other_pm_contact,
+    data_use_agreement_status,
+    data_use_agreement_notes,
+    terms_of_use_yes_no,
+    data_start_date,
+    data_end_date,
+    fphs_analyst_yes_no,
+    fphs_server_yes_no,
+    fphs_server_tools_notes,
+    off_fphs_server_reason_notes,
+    -- select_purpose,
+    -- other_purpose,
+    -- research_question_notes,
+    status,
+    user_id,
+    created_by_user_id,
+    created_at,
+    updated_at,
+    data_request_id)
+  SELECT
+    NEW.master_id,
+    NEW.project_title,
+    NEW.full_name,
+    NEW.title,
+    NEW.institution,
+    NEW.other_institution,
+    NEW.others_handling_data,
+    NEW.pm_contact,
+    NEW.other_pm_contact,
+    NEW.data_use_agreement_status,
+    NEW.data_use_agreement_notes,
+    NEW.terms_of_use_yes_no,
+    NEW.data_start_date,
+    NEW.data_end_date,
+    NEW.fphs_analyst_yes_no,
+    NEW.fphs_server_yes_no,
+    NEW.fphs_server_tools_notes,
+    NEW.off_fphs_server_reason_notes,
+    -- NEW.select_purpose,
+    -- NEW.other_purpose,
+    -- NEW.research_question_notes,
+    NEW.status,
+    NEW.user_id,
+    NEW.created_by_user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+  $$;
 
 
 --
@@ -20459,7 +20413,8 @@ CREATE TABLE data_requests.activity_log_data_request_assignments (
     updated_at timestamp without time zone NOT NULL,
     created_by_user_id integer,
     next_step character varying,
-    status character varying
+    status character varying,
+    data_request_assignment_id bigint
 );
 
 
@@ -21023,7 +20978,6 @@ CREATE TABLE data_requests.data_requests_selected_attrib_history (
     id integer NOT NULL,
     master_id integer,
     record_id integer,
-    record_type character varying,
     data_request_id integer,
     data character varying,
     variable_name character varying,
@@ -21031,7 +20985,8 @@ CREATE TABLE data_requests.data_requests_selected_attrib_history (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    data_requests_selected_attrib_id integer
+    data_requests_selected_attrib_id integer,
+    record_type character varying
 );
 
 
@@ -51650,6 +51605,13 @@ CREATE UNIQUE INDEX unique_recipient ON bulk_msg.zeus_bulk_message_recipients US
 
 
 --
+-- Name: 36bd4ead_bt_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_bt_id_idx" ON data_requests.activity_log_data_request_assignments USING btree (data_request_assignment_id);
+
+
+--
 -- Name: index_activity_log_data_request_assignments_on_master_id; Type: INDEX; Schema: data_requests; Owner: -
 --
 
@@ -61377,20 +61339,6 @@ CREATE TRIGGER zeus_short_link_history_insert AFTER INSERT ON bulk_msg.zeus_shor
 --
 
 CREATE TRIGGER zeus_short_link_history_update AFTER UPDATE ON bulk_msg.zeus_short_links FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE bulk_msg.log_zeus_short_link_update();
-
-
---
--- Name: activity_log_data_request_assignment_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
---
-
-CREATE TRIGGER activity_log_data_request_assignment_history_insert AFTER INSERT ON data_requests.activity_log_data_request_assignments FOR EACH ROW EXECUTE PROCEDURE data_requests.log_activity_log_data_request_assignment_update();
-
-
---
--- Name: activity_log_data_request_assignment_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
---
-
-CREATE TRIGGER activity_log_data_request_assignment_history_update AFTER UPDATE ON data_requests.activity_log_data_request_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_activity_log_data_request_assignment_update();
 
 
 --
@@ -76824,21 +76772,6 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200814092726'),
 ('20200814092900'),
 ('20200814103248'),
-('20200814104336'),
-('20200814105415'),
-('20200814114646'),
-('20200814114908'),
-('20200817140231'),
-('20200817152630'),
-('20200818090628'),
-('20200818105202'),
-('20200818105216'),
-('20200818124658'),
-('20200818125452'),
-('20200818132644'),
-('20200818135756'),
-('20200818140236'),
-('20200818143559'),
 ('20200821114133');
 
 

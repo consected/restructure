@@ -60,7 +60,7 @@ module ActiveRecord
       end
 
       def create_activity_log_trigger
-        setup_fields(fields & col_names)
+        setup_fields(fields & col_names(:sym))
 
         reversible do |dir|
           dir.up do
@@ -95,7 +95,7 @@ module ActiveRecord
       end
 
       def create_dynamic_model_trigger
-        setup_fields(fields & col_names)
+        setup_fields(fields & col_names(:sym))
 
         reversible do |dir|
           dir.up do
@@ -140,7 +140,7 @@ module ActiveRecord
         self.fields ||= []
         self.fields.unshift id_field
         self.fields = fields.uniq
-        setup_fields(fields & col_names)
+        setup_fields(fields & col_names(:sym))
 
         reversible do |dir|
           dir.up do
@@ -165,6 +165,15 @@ module ActiveRecord
         new_colnames = fields.map(&:to_s) - standard_columns
         added = (new_colnames - old_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(/^placeholder_|^tracker_history_id$/) }
         removed = (old_colnames - new_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(/^placeholder_|^tracker_history_id$/) }
+
+        # Avoid issues if the columns don't match what we expect
+        if reverting?
+          puts removed -= col_names
+          puts added &= col_names
+        else
+          puts added -= col_names
+          puts removed &= col_names
+        end
 
         full_field_list = (old_colnames + new_colnames + col_names).uniq.map(&:to_sym)
         setup_fields(full_field_list)
@@ -220,8 +229,10 @@ module ActiveRecord
         @cols ||= ActiveRecord::Base.connection.columns("#{schema}.#{table_name}")
       end
 
-      def col_names
-        prev_fields&.map(&:to_s) || cols.map(&:name)
+      def col_names(to_type = nil)
+        res = prev_fields&.map(&:to_s) || cols.map(&:name)
+        res = res.map(&:to_sym) if to_type == :sym
+        res
       end
 
       def setup_fields(handle_fields = nil)
@@ -340,9 +351,11 @@ module ActiveRecord
           END;
           $$;
 
+          
+          DROP FUNCTION IF EXISTS #{schema}.log_#{table_name.singularize}_update () CASCADE;
           DROP TRIGGER IF EXISTS log_#{history_table_name}_insert ON #{schema}.#{table_name};
           DROP TRIGGER IF EXISTS log_#{history_table_name}_update ON #{schema}.#{table_name};
-
+          
           CREATE TRIGGER log_#{history_table_name}_insert
             AFTER INSERT ON #{schema}.#{table_name}
             FOR EACH ROW

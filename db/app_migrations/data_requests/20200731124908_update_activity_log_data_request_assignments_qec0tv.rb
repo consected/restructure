@@ -10,11 +10,9 @@ class UpdateActivityLogDataRequestAssignmentsQec0tv < ActiveRecord::Migration[5.
     self.table_comment = ''
     self.fields_comments = {}
 
-
     # added: []
     # removed: ["follow_up_time"]
-    
-    
+
     update_fields
 
     create_activity_log_trigger
