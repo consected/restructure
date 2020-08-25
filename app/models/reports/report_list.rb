@@ -68,6 +68,11 @@ module Reports
       return general_error("list id does not represent an associated list: #{list_id}") unless assoc_item
 
       self.items_in_list = list_class.active.where(assoc_attr => list_id)
+      # Ensure we work exclusively on the ids for this record type, if the
+      # record_type is available
+      if item_type.present? && list_class.attribute_names.include?('record_type')
+        self.items_in_list = items_in_list.where(record_type: item_type)
+      end
       items_in_list_record_ids = items_in_list.pluck(:record_id)
       items_in_list_ids = items_in_list.pluck(:id)
       self.item_ids_in_list = item_ids & items_in_list_ids

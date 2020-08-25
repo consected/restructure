@@ -1027,6 +1027,32 @@ app_type:
     created_at: '2020-08-24T17:27:07.986Z'
     updated_at: '2020-08-24T17:27:07.986Z'
     user_email: 
+  - id: 1239
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__q1_datadic
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 19
+    role_name: user
+    created_at: '2020-08-25T12:16:53.149Z'
+    updated_at: '2020-08-25T12:16:53.149Z'
+    user_email: 
+  - id: 1240
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_datadic
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 19
+    role_name: user
+    created_at: '2020-08-25T12:17:10.277Z'
+    updated_at: '2020-08-25T12:17:10.277Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 27
     name: FPHS Data Request Form
@@ -1035,7 +1061,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2020-08-24T16:30:25.270Z'
-    updated_at: '2020-08-24T16:30:25.270Z'
+    updated_at: '2020-08-25T13:48:50.896Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: placeholder_intro created_by_user_id
@@ -1274,9 +1300,9 @@ app_type:
       \       creatable_if: \r\n          never: true\r\n\r\n\r\n  save_trigger:\r\n
       \   on_create:\r\n      create_master:\r\n        if:\r\n          always: true\r\n
       \       move_this: true\r\n    \r\n      create_reference:\r\n        - activity_log__data_request_assignments:\r\n
-      \           in: this\r\n            with:\r\n              extra_log_type: supporting_files\r\n\r\n\r\n
-      \ save_action:\r\n    on_create:\r\n      go_to_master: true\r\n\r\n\r\n########################################\r\n#
-      Submit Request\r\n########################################\r\nsubmit_request:\r\n
+      \           in: this\r\n            with:\r\n              extra_log_type: supporting_files\r\n
+      \           force_create: true\r\n\r\n  save_action:\r\n    on_create:\r\n      go_to_master:
+      true\r\n\r\n\r\n########################################\r\n# Submit Request\r\n########################################\r\nsubmit_request:\r\n
       \ label: Submit Request\r\n\r\n  editable_if: \r\n    never: true\r\n\r\n  caption_before:\r\n
       \   submit: To confirm submission of this data request, click **Submit Now**\r\n
       \   all_fields:\r\n      show_caption: This data request has been submitted.\r\n\r\n
@@ -1491,6 +1517,44 @@ app_type:
     category: data-request
     user_email: 
   associated_dynamic_models:
+  - id: 118
+    name: IPA dictionary
+    table_name: ipa_datadic
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: ''
+    description: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2020-08-25T12:16:32.957Z'
+    updated_at: '2020-08-25T12:16:32.957Z'
+    position: 
+    category: data-requests
+    table_key_name: ''
+    field_list: ''
+    result_order: ''
+    options: "default:\r\n\r\n  view_options:\r\n    data_attribute: \r\n      - domain\r\n
+      \     - '|'\r\n      - variable_name\r\n      - ':'\r\n      - field_label"
+    user_email: 
+  - id: 117
+    name: Q1 dictionary
+    table_name: q1_datadic
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: ''
+    description: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2020-08-25T12:16:03.249Z'
+    updated_at: '2020-08-25T12:16:03.249Z'
+    position: 
+    category: data-requests
+    table_key_name: ''
+    field_list: ''
+    result_order: ''
+    options: "default:\r\n\r\n  view_options:\r\n    data_attribute: \r\n      - domain\r\n
+      \     - '|'\r\n      - variable_name\r\n      - ':'\r\n      - field_label"
+    user_email: 
   - id: 111
     name: Data Request
     table_name: data_requests
