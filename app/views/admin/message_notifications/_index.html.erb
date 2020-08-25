@@ -16,6 +16,7 @@
 
   <tbody>
     <% objects_instance.each do |list_item| %>
+     <% begin %>
      <% list_item.item&.current_user ||= current_user  if list_item.item&.respond_to? :current_user %>
       <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
         <td>
@@ -52,6 +53,14 @@
 
         </td>
       </tr>
+      <% rescue StandardError => e %>
+        <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+          <td>
+            <h3>Error retrieving message</h3>
+            <p><%= e %></p>
+          </td>
+        </tr>
+      <% end %>
     <% end %>
   </tbody>
 </table>

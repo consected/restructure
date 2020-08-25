@@ -168,7 +168,7 @@ module NfsStore
 
           dir = File.join(Manage::Filesystem.temp_directory, "__filestore__#{SecureRandom.hex}")
 
-          FileUtils.mkdir dir
+          FileUtils.mkdir_p dir
 
           tmpzipdir = "#{dir}/zip"
           FileUtils.mkdir tmpzipdir

@@ -32,11 +32,11 @@ class Admin::JobReviewsController < AdminController
     if res[:failed].blank?
       res.delete(:failed)
     else
-      res = if res[:failed] == 'true'
-              'failed_at is not null'
-            else
-              'failed_at is null'
-            end
+      res[:failed_at] = if res[:failed] == 'true'
+                          'is not null'
+                        else
+                          'is null'
+                        end
     end
     res
   end

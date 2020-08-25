@@ -9,11 +9,9 @@ class UpdateDataRequestsSelectedAttribsQebzkb < ActiveRecord::Migration[5.2]
     self.table_comment = ''
     self.fields_comments = {}
 
-
     # added: []
     # removed: ["record_type"]
-    
-    
+
     update_fields
 
     create_dynamic_model_trigger

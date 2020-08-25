@@ -10,24 +10,32 @@ module FilterUtils
   # @return [ActiveRecord::Relation] <description>
   def filtered_primary_model(pm = nil)
     pm ||= primary_model
+
     if filter_params
       pm = pm.active if filter_params[:disabled] == 'enabled' || !current_admin
       pm = pm.disabled if filter_params[:disabled] == 'disabled' && current_admin
       p = filter_params
       p.delete(:disabled)
+      p.delete(:failed)
 
       likes = ['']
       p.each do |k, v|
-        next unless v&.end_with?('%')
+        if v&.end_with?('%')
 
-        likes[0] += ' AND ' if likes.length > 1
-        likes[0] += "#{k} LIKE ?"
-        likes << v
-        p.delete(k)
+          likes[0] += ' AND ' if likes.length > 1
+          likes[0] += "#{k} LIKE ?"
+          likes << v
+          p.delete(k)
+
+        elsif v&.index(/is (not )?null/)
+
+          likes[0] += "#{k} #{v}"
+          p.delete(k)
+        end
       end
 
       pm = pm.where(p)
-      pm = pm.where(likes) if likes.length > 1
+      pm = pm.where(likes) if likes.length > 0 && likes.first.present?
 
       pm = pm.all
     end
