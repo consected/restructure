@@ -1,1566 +1,1579 @@
 ---
 app_type:
-  id: 44
+  id: 25
   name: pitt-bhi
   label: PITT BHI
   disabled: false
-  admin_id: 21
-  created_at: '2020-08-04T11:14:42.362Z'
-  updated_at: '2020-08-04T11:14:42.362Z'
+  admin_id: 2
+  created_at: '2020-08-26T15:11:13.596Z'
+  updated_at: '2020-08-26T15:11:13.596Z'
   default_schema_name: pitt_bhi
   app_configurations:
-  - id: 564
+  - id: 384
     name: hide tracker panel
     value: 'true'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     user_id: 
-    app_type_id: 44
+    app_type_id: 25
     role_name: ''
-    created_at: '2020-08-12T16:14:30.162Z'
-    updated_at: '2020-08-12T16:14:30.162Z'
+    created_at: '2020-08-26T15:11:13.631Z'
+    updated_at: '2020-08-26T15:11:13.631Z'
     user_email: 
-  - id: 565
+  - id: 385
     name: menu research label
     value: Home
     disabled: false
-    admin_id: 21
+    admin_id: 2
     user_id: 
-    app_type_id: 44
+    app_type_id: 25
     role_name: ''
-    created_at: '2020-08-14T08:39:23.719Z'
-    updated_at: '2020-08-14T08:39:23.719Z'
+    created_at: '2020-08-26T15:11:13.641Z'
+    updated_at: '2020-08-26T15:11:13.641Z'
     user_email: 
-  - id: 566
+  - id: 386
     name: default search form
     value: pitt_bhi__search_bhi_study_subject
     disabled: false
-    admin_id: 21
+    admin_id: 2
     user_id: 
-    app_type_id: 44
+    app_type_id: 25
     role_name: ''
-    created_at: '2020-08-14T08:40:04.717Z'
-    updated_at: '2020-08-14T08:40:04.717Z'
+    created_at: '2020-08-26T15:11:13.649Z'
+    updated_at: '2020-08-26T15:11:13.649Z'
     user_email: 
-  - id: 567
+  - id: 387
     name: hide pro info
     value: 'true'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     user_id: 
-    app_type_id: 44
+    app_type_id: 25
     role_name: ''
-    created_at: '2020-08-14T08:40:33.784Z'
-    updated_at: '2020-08-14T08:40:33.784Z'
+    created_at: '2020-08-26T15:11:13.657Z'
+    updated_at: '2020-08-26T15:11:13.657Z'
     user_email: 
-  - id: 568
+  - id: 388
     name: hide player accuracy
     value: 'true'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     user_id: 
-    app_type_id: 44
+    app_type_id: 25
     role_name: ''
-    created_at: '2020-08-14T08:40:46.930Z'
-    updated_at: '2020-08-14T08:40:46.930Z'
+    created_at: '2020-08-26T15:11:13.665Z'
+    updated_at: '2020-08-26T15:11:13.665Z'
     user_email: 
-  - id: 569
+  - id: 389
     name: hide search form advanced
     value: 'true'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     user_id: 
-    app_type_id: 44
+    app_type_id: 25
     role_name: ''
-    created_at: '2020-08-14T08:40:59.624Z'
-    updated_at: '2020-08-14T08:40:59.624Z'
+    created_at: '2020-08-26T15:11:13.673Z'
+    updated_at: '2020-08-26T15:11:13.673Z'
     user_email: 
-  - id: 570
+  - id: 390
     name: hide search form simple
     value: 'true'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     user_id: 
-    app_type_id: 44
+    app_type_id: 25
     role_name: ''
-    created_at: '2020-08-14T08:41:21.012Z'
-    updated_at: '2020-08-14T08:41:21.012Z'
+    created_at: '2020-08-26T15:11:13.681Z'
+    updated_at: '2020-08-26T15:11:13.681Z'
     user_email: 
-  - id: 571
+  - id: 391
     name: notes field format
     value: markdown
     disabled: false
-    admin_id: 21
+    admin_id: 2
     user_id: 
-    app_type_id: 44
+    app_type_id: 25
     role_name: ''
-    created_at: '2020-08-14T08:42:04.400Z'
-    updated_at: '2020-08-14T08:42:04.400Z'
+    created_at: '2020-08-26T15:11:13.689Z'
+    updated_at: '2020-08-26T15:11:13.689Z'
     user_email: 
-  - id: 572
+  - id: 392
     name: hide navbar search
     value: 'true'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     user_id: 
-    app_type_id: 44
+    app_type_id: 25
     role_name: ''
-    created_at: '2020-08-14T11:20:48.786Z'
-    updated_at: '2020-08-14T11:21:08.532Z'
+    created_at: '2020-08-26T15:11:13.699Z'
+    updated_at: '2020-08-26T15:11:13.699Z'
     user_email: 
   valid_user_access_controls:
-  - id: 2430
+  - id: 1792
     user_id: 
     resource_type: general
     resource_name: app_type
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-04T11:54:55.934Z'
-    updated_at: '2020-08-04T13:10:55.996Z'
+    created_at: '2020-08-26T15:11:16.289Z'
+    updated_at: '2020-08-26T15:11:16.289Z'
     user_email: 
-  - id: 2431
+  - id: 1793
     user_id: 
     resource_type: table
     resource_name: pitt_bhi_assignments
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-04T12:11:18.923Z'
-    updated_at: '2020-08-04T14:06:25.730Z'
+    created_at: '2020-08-26T15:11:16.297Z'
+    updated_at: '2020-08-26T15:11:16.297Z'
     user_email: 
-  - id: 2432
+  - id: 1794
     user_id: 
     resource_type: general
     resource_name: app_type
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: admin
-    created_at: '2020-08-04T13:11:02.808Z'
-    updated_at: '2020-08-04T13:11:02.808Z'
+    created_at: '2020-08-26T15:11:16.305Z'
+    updated_at: '2020-08-26T15:11:16.305Z'
     user_email: 
-  - id: 2433
+  - id: 1795
     user_id: 
     resource_type: table
     resource_name: pitt_bhi_assignments
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-04T13:11:31.849Z'
-    updated_at: '2020-08-04T13:11:31.849Z'
+    created_at: '2020-08-26T15:11:16.312Z'
+    updated_at: '2020-08-26T15:11:16.312Z'
     user_email: 
-  - id: 2434
+  - id: 1796
     user_id: 
     resource_type: limited_access
     resource_name: pitt_bhi_assignments
     options: ''
     access: limited
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-04T13:12:17.213Z'
-    updated_at: '2020-08-04T13:12:17.213Z'
+    created_at: '2020-08-26T15:11:16.320Z'
+    updated_at: '2020-08-26T15:11:16.320Z'
     user_email: 
-  - id: 2436
+  - id: 1797
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_appointments
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-04T13:57:25.335Z'
-    updated_at: '2020-08-04T13:57:25.335Z'
+    created_at: '2020-08-26T15:11:16.328Z'
+    updated_at: '2020-08-26T15:11:16.328Z'
     user_email: 
-  - id: 2437
+  - id: 1798
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_withdrawals
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-04T14:00:30.095Z'
-    updated_at: '2020-08-04T14:00:30.095Z'
+    created_at: '2020-08-26T15:11:16.337Z'
+    updated_at: '2020-08-26T15:11:16.337Z'
     user_email: 
-  - id: 2439
+  - id: 1799
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_secure_notes
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-04T14:02:15.288Z'
-    updated_at: '2020-08-04T14:02:15.288Z'
+    created_at: '2020-08-26T15:11:16.344Z'
+    updated_at: '2020-08-26T15:11:16.344Z'
     user_email: 
-  - id: 2440
+  - id: 1800
     user_id: 
     resource_type: table
     resource_name: activity_log__pitt_bhi_assignments
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-04T14:05:49.056Z'
-    updated_at: '2020-08-04T14:05:49.056Z'
+    created_at: '2020-08-26T15:11:16.353Z'
+    updated_at: '2020-08-26T15:11:16.353Z'
     user_email: 
-  - id: 2441
+  - id: 1801
     user_id: 
     resource_type: table
     resource_name: activity_log__pitt_bhi_assignments
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-04T14:07:27.557Z'
-    updated_at: '2020-08-04T14:08:10.396Z'
+    created_at: '2020-08-26T15:11:16.361Z'
+    updated_at: '2020-08-26T15:11:16.361Z'
     user_email: 
-  - id: 2442
+  - id: 1802
     user_id: 
     resource_type: limited_access
     resource_name: pitt_bhi_assignments
     options: ''
     access: limited
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-04T14:07:38.395Z'
-    updated_at: '2020-08-04T14:07:38.395Z'
+    created_at: '2020-08-26T15:11:16.369Z'
+    updated_at: '2020-08-26T15:11:16.369Z'
     user_email: 
-  - id: 2443
+  - id: 1803
     user_id: 
     resource_type: general
     resource_name: app_type
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-04T14:07:47.154Z'
-    updated_at: '2020-08-04T14:07:47.154Z'
+    created_at: '2020-08-26T15:11:16.377Z'
+    updated_at: '2020-08-26T15:11:16.377Z'
     user_email: 
-  - id: 2444
+  - id: 1804
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_appointments
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-04T14:08:00.844Z'
-    updated_at: '2020-08-04T14:08:00.844Z'
+    created_at: '2020-08-26T15:11:16.386Z'
+    updated_at: '2020-08-26T15:11:16.386Z'
     user_email: 
-  - id: 2445
+  - id: 1805
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_secure_notes
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-04T14:08:21.969Z'
-    updated_at: '2020-08-04T14:08:21.969Z'
+    created_at: '2020-08-26T15:11:16.395Z'
+    updated_at: '2020-08-26T15:11:16.395Z'
     user_email: 
-  - id: 2446
+  - id: 1806
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_withdrawals
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-04T14:08:31.965Z'
-    updated_at: '2020-08-04T14:08:31.965Z'
+    created_at: '2020-08-26T15:11:16.404Z'
+    updated_at: '2020-08-26T15:11:16.404Z'
     user_email: 
-  - id: 2447
+  - id: 1807
     user_id: 
     resource_type: table
     resource_name: pitt_bhi_assignments
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-04T14:08:48.384Z'
-    updated_at: '2020-08-04T14:08:48.384Z'
+    created_at: '2020-08-26T15:11:16.412Z'
+    updated_at: '2020-08-26T15:11:16.412Z'
     user_email: 
-  - id: 2448
+  - id: 1808
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_appointments
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-04T14:09:15.705Z'
-    updated_at: '2020-08-04T14:09:15.705Z'
+    created_at: '2020-08-26T15:11:16.419Z'
+    updated_at: '2020-08-26T15:11:16.419Z'
     user_email: 
-  - id: 2449
+  - id: 1809
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_secure_notes
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-04T14:09:24.002Z'
-    updated_at: '2020-08-04T14:09:24.002Z'
+    created_at: '2020-08-26T15:11:16.427Z'
+    updated_at: '2020-08-26T15:11:16.427Z'
     user_email: 
-  - id: 2450
+  - id: 1810
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_withdrawals
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-04T14:09:31.131Z'
-    updated_at: '2020-08-04T14:09:31.131Z'
+    created_at: '2020-08-26T15:11:16.436Z'
+    updated_at: '2020-08-26T15:11:16.436Z'
     user_email: 
-  - id: 2454
+  - id: 1811
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__appointment
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:24:16.709Z'
-    updated_at: '2020-08-12T16:24:16.709Z'
+    created_at: '2020-08-26T15:11:16.444Z'
+    updated_at: '2020-08-26T15:11:16.444Z'
     user_email: 
-  - id: 2455
+  - id: 1812
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__completed
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:24:27.961Z'
-    updated_at: '2020-08-12T16:24:27.961Z'
+    created_at: '2020-08-26T15:11:16.453Z'
+    updated_at: '2020-08-26T15:11:16.453Z'
     user_email: 
-  - id: 2456
+  - id: 1813
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__consent_to_share_details
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:24:34.804Z'
-    updated_at: '2020-08-12T16:24:34.804Z'
+    created_at: '2020-08-26T15:11:16.461Z'
+    updated_at: '2020-08-26T15:11:16.461Z'
     user_email: 
-  - id: 2457
+  - id: 1814
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__exit_l2fu
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:24:41.249Z'
-    updated_at: '2020-08-12T16:24:41.249Z'
+    created_at: '2020-08-26T15:11:16.469Z'
+    updated_at: '2020-08-26T15:11:16.469Z'
     user_email: 
-  - id: 2458
+  - id: 1815
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__exit_not_consented
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:24:48.360Z'
-    updated_at: '2020-08-12T16:24:48.360Z'
+    created_at: '2020-08-26T15:11:16.476Z'
+    updated_at: '2020-08-26T15:11:16.476Z'
     user_email: 
-  - id: 2459
+  - id: 1816
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__exit_opt_out
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:24:54.364Z'
-    updated_at: '2020-08-12T16:24:54.364Z'
+    created_at: '2020-08-26T15:11:16.484Z'
+    updated_at: '2020-08-26T15:11:16.484Z'
     user_email: 
-  - id: 2460
+  - id: 1817
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__exit_ps
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:25:00.546Z'
-    updated_at: '2020-08-12T16:25:00.546Z'
+    created_at: '2020-08-26T15:11:16.492Z'
+    updated_at: '2020-08-26T15:11:16.492Z'
     user_email: 
-  - id: 2462
+  - id: 1818
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__files
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:25:12.256Z'
-    updated_at: '2020-08-12T16:25:12.256Z'
+    created_at: '2020-08-26T15:11:16.501Z'
+    updated_at: '2020-08-26T15:11:16.501Z'
     user_email: 
-  - id: 2463
+  - id: 1819
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__general
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:25:18.369Z'
-    updated_at: '2020-08-12T16:25:18.369Z'
+    created_at: '2020-08-26T15:11:16.509Z'
+    updated_at: '2020-08-26T15:11:16.509Z'
     user_email: 
-  - id: 2464
+  - id: 1820
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__hms_ps_eligible
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:25:25.151Z'
-    updated_at: '2020-08-12T16:25:25.151Z'
+    created_at: '2020-08-26T15:11:16.517Z'
+    updated_at: '2020-08-26T15:11:16.517Z'
     user_email: 
-  - id: 2465
+  - id: 1821
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__ineligible
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:25:31.622Z'
-    updated_at: '2020-08-12T16:25:31.622Z'
+    created_at: '2020-08-26T15:11:16.524Z'
+    updated_at: '2020-08-26T15:11:16.524Z'
     user_email: 
-  - id: 2468
+  - id: 1822
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__schedule_screening
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:25:59.142Z'
-    updated_at: '2020-08-12T16:25:59.142Z'
+    created_at: '2020-08-26T15:11:16.532Z'
+    updated_at: '2020-08-26T15:11:16.532Z'
     user_email: 
-  - id: 2469
+  - id: 1823
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__secure_notes
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:26:06.381Z'
-    updated_at: '2020-08-12T16:26:06.381Z'
+    created_at: '2020-08-26T15:11:16.539Z'
+    updated_at: '2020-08-26T15:11:16.539Z'
     user_email: 
-  - id: 2471
+  - id: 1824
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__withdraw
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-12T16:26:20.006Z'
-    updated_at: '2020-08-12T16:26:20.006Z'
+    created_at: '2020-08-26T15:11:16.547Z'
+    updated_at: '2020-08-26T15:11:16.547Z'
     user_email: 
-  - id: 2472
+  - id: 1825
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_initial_screenings
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-12T17:02:35.611Z'
-    updated_at: '2020-08-12T17:02:35.611Z'
+    created_at: '2020-08-26T15:11:16.555Z'
+    updated_at: '2020-08-26T15:11:16.555Z'
     user_email: 
-  - id: 2473
+  - id: 1826
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_screenings
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-12T17:04:28.665Z'
-    updated_at: '2020-08-12T17:04:28.665Z'
+    created_at: '2020-08-26T15:11:16.563Z'
+    updated_at: '2020-08-26T15:11:16.563Z'
     user_email: 
-  - id: 2479
+  - id: 1827
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_non_eligibles
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-14T08:28:19.911Z'
-    updated_at: '2020-08-14T08:28:19.911Z'
+    created_at: '2020-08-26T15:11:16.570Z'
+    updated_at: '2020-08-26T15:11:16.570Z'
     user_email: 
-  - id: 2480
+  - id: 1828
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_eligibles
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-14T08:29:19.132Z'
-    updated_at: '2020-08-14T08:29:19.132Z'
+    created_at: '2020-08-26T15:11:16.578Z'
+    updated_at: '2020-08-26T15:11:16.578Z'
     user_email: 
-  - id: 2481
+  - id: 1829
     user_id: 
     resource_type: table
     resource_name: activity_log__pitt_bhi_assignment_phone_screens
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-14T08:29:29.295Z'
-    updated_at: '2020-08-14T08:29:29.295Z'
+    created_at: '2020-08-26T15:11:16.586Z'
+    updated_at: '2020-08-26T15:11:16.586Z'
     user_email: 
-  - id: 2482
+  - id: 1830
     user_id: 
     resource_type: report
     resource_name: pitt_bhi__search_bhi_study_subject
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T08:38:07.203Z'
-    updated_at: '2020-08-14T08:38:07.203Z'
+    created_at: '2020-08-26T15:11:16.593Z'
+    updated_at: '2020-08-26T15:11:16.593Z'
     user_email: 
-  - id: 2483
+  - id: 1831
     user_id: 
     resource_type: report
     resource_name: pitt_bhi__subjects_in_process_exited
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T08:38:14.985Z'
-    updated_at: '2020-08-14T08:38:14.985Z'
+    created_at: '2020-08-26T15:11:16.601Z'
+    updated_at: '2020-08-26T15:11:16.601Z'
     user_email: 
-  - id: 2484
+  - id: 1832
     user_id: 
     resource_type: report
     resource_name: pitt_bhi__subjects_in_process_exited
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T08:38:24.881Z'
-    updated_at: '2020-08-14T08:38:24.881Z'
+    created_at: '2020-08-26T15:11:16.609Z'
+    updated_at: '2020-08-26T15:11:16.609Z'
     user_email: 
-  - id: 2485
+  - id: 1833
     user_id: 
     resource_type: report
     resource_name: pitt_bhi__search_bhi_study_subject
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T08:38:42.811Z'
-    updated_at: '2020-08-14T08:38:42.811Z'
+    created_at: '2020-08-26T15:11:16.616Z'
+    updated_at: '2020-08-26T15:11:16.616Z'
     user_email: 
-  - id: 2486
+  - id: 1834
     user_id: 
     resource_type: table
     resource_name: player_contacts
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T08:45:07.931Z'
-    updated_at: '2020-08-14T08:45:07.931Z'
+    created_at: '2020-08-26T15:11:16.624Z'
+    updated_at: '2020-08-26T15:11:16.624Z'
     user_email: 
-  - id: 2487
+  - id: 1835
     user_id: 
     resource_type: table
     resource_name: player_contacts
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T08:45:24.097Z'
-    updated_at: '2020-08-14T08:45:24.097Z'
+    created_at: '2020-08-26T15:11:16.632Z'
+    updated_at: '2020-08-26T15:11:16.632Z'
     user_email: 
-  - id: 2488
+  - id: 1836
     user_id: 
     resource_type: table
     resource_name: player_infos
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T08:45:34.539Z'
-    updated_at: '2020-08-14T08:45:34.539Z'
+    created_at: '2020-08-26T15:11:16.640Z'
+    updated_at: '2020-08-26T15:11:16.640Z'
     user_email: 
-  - id: 2489
+  - id: 1837
     user_id: 
     resource_type: table
     resource_name: player_infos
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T08:45:43.685Z'
-    updated_at: '2020-08-14T08:45:43.685Z'
+    created_at: '2020-08-26T15:11:16.648Z'
+    updated_at: '2020-08-26T15:11:16.648Z'
     user_email: 
-  - id: 2490
+  - id: 1838
     user_id: 
     resource_type: table
     resource_name: addresses
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T08:51:55.505Z'
-    updated_at: '2020-08-14T08:51:55.505Z'
+    created_at: '2020-08-26T15:11:16.656Z'
+    updated_at: '2020-08-26T15:11:16.656Z'
     user_email: 
-  - id: 2491
+  - id: 1839
     user_id: 
     resource_type: table
     resource_name: addresses
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T08:52:15.589Z'
-    updated_at: '2020-08-14T08:52:15.589Z'
+    created_at: '2020-08-26T15:11:16.663Z'
+    updated_at: '2020-08-26T15:11:16.663Z'
     user_email: 
-  - id: 2492
+  - id: 1840
     user_id: 
     resource_type: table
     resource_name: activity_log__pitt_bhi_assignment_phone_screens
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T08:53:23.761Z'
-    updated_at: '2020-08-14T08:53:23.761Z'
+    created_at: '2020-08-26T15:11:16.671Z'
+    updated_at: '2020-08-26T15:11:16.671Z'
     user_email: 
-  - id: 2493
+  - id: 1841
     user_id: 
     resource_type: table
     resource_name: activity_log__pitt_bhi_assignment_phone_screens
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T08:53:38.195Z'
-    updated_at: '2020-08-14T08:53:38.195Z'
+    created_at: '2020-08-26T15:11:16.678Z'
+    updated_at: '2020-08-26T15:11:16.678Z'
     user_email: 
-  - id: 2494
+  - id: 1842
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_phone_screen__eligible
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T08:59:06.552Z'
-    updated_at: '2020-08-14T08:59:06.552Z'
+    created_at: '2020-08-26T15:11:16.686Z'
+    updated_at: '2020-08-26T15:11:16.686Z'
     user_email: 
-  - id: 2495
+  - id: 1843
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_phone_screen__finalize
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T08:59:14.592Z'
-    updated_at: '2020-08-14T08:59:14.592Z'
+    created_at: '2020-08-26T15:11:16.694Z'
+    updated_at: '2020-08-26T15:11:16.694Z'
     user_email: 
-  - id: 2496
+  - id: 1844
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_phone_screen__ineligible
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T08:59:21.260Z'
-    updated_at: '2020-08-14T08:59:21.260Z'
+    created_at: '2020-08-26T15:11:16.701Z'
+    updated_at: '2020-08-26T15:11:16.701Z'
     user_email: 
-  - id: 2497
+  - id: 1845
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_phone_screen__start_phone_screen
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T08:59:29.025Z'
-    updated_at: '2020-08-14T08:59:29.025Z'
+    created_at: '2020-08-26T15:11:16.709Z'
+    updated_at: '2020-08-26T15:11:16.709Z'
     user_email: 
-  - id: 2498
+  - id: 1846
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_phone_screen__eligible
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T08:59:57.010Z'
-    updated_at: '2020-08-14T08:59:57.010Z'
+    created_at: '2020-08-26T15:11:16.716Z'
+    updated_at: '2020-08-26T15:11:16.716Z'
     user_email: 
-  - id: 2499
+  - id: 1847
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_phone_screen__finalize
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T09:00:07.715Z'
-    updated_at: '2020-08-14T09:00:07.715Z'
+    created_at: '2020-08-26T15:11:16.724Z'
+    updated_at: '2020-08-26T15:11:16.724Z'
     user_email: 
-  - id: 2500
+  - id: 1848
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_phone_screen__ineligible
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T09:00:13.796Z'
-    updated_at: '2020-08-14T09:00:13.796Z'
+    created_at: '2020-08-26T15:11:16.731Z'
+    updated_at: '2020-08-26T15:11:16.731Z'
     user_email: 
-  - id: 2501
+  - id: 1849
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_phone_screen__start_phone_screen
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T09:00:22.243Z'
-    updated_at: '2020-08-14T09:00:22.243Z'
+    created_at: '2020-08-26T15:11:16.738Z'
+    updated_at: '2020-08-26T15:11:16.738Z'
     user_email: 
-  - id: 2503
+  - id: 1850
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_suitability_questions
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T09:39:18.141Z'
-    updated_at: '2020-08-14T09:39:18.141Z'
+    created_at: '2020-08-26T15:11:16.746Z'
+    updated_at: '2020-08-26T15:11:16.746Z'
     user_email: 
-  - id: 2504
+  - id: 1851
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_suitability_questions
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T09:39:30.423Z'
-    updated_at: '2020-08-14T09:39:30.423Z'
+    created_at: '2020-08-26T15:11:16.754Z'
+    updated_at: '2020-08-26T15:11:16.754Z'
     user_email: 
-  - id: 2505
+  - id: 1852
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_screener_responses
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-14T09:48:56.744Z'
-    updated_at: '2020-08-14T09:48:56.744Z'
+    created_at: '2020-08-26T15:11:16.762Z'
+    updated_at: '2020-08-26T15:11:16.762Z'
     user_email: 
-  - id: 2506
+  - id: 1853
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_eligibility_followups
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-14T09:54:36.331Z'
-    updated_at: '2020-08-14T09:54:36.331Z'
+    created_at: '2020-08-26T15:11:16.770Z'
+    updated_at: '2020-08-26T15:11:16.770Z'
     user_email: 
-  - id: 2507
+  - id: 1854
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_eligibility_followups
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T09:55:12.361Z'
-    updated_at: '2020-08-14T09:55:12.361Z'
+    created_at: '2020-08-26T15:11:16.778Z'
+    updated_at: '2020-08-26T15:11:16.778Z'
     user_email: 
-  - id: 2508
+  - id: 1855
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_eligibility_followups
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T09:55:22.801Z'
-    updated_at: '2020-08-14T09:55:22.801Z'
+    created_at: '2020-08-26T15:11:16.786Z'
+    updated_at: '2020-08-26T15:11:16.786Z'
     user_email: 
-  - id: 2509
+  - id: 1856
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_initial_screenings
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T09:56:34.833Z'
-    updated_at: '2020-08-14T09:56:34.833Z'
+    created_at: '2020-08-26T15:11:16.793Z'
+    updated_at: '2020-08-26T15:11:16.793Z'
     user_email: 
-  - id: 2510
+  - id: 1857
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_initial_screenings
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T09:56:49.594Z'
-    updated_at: '2020-08-14T09:56:49.594Z'
+    created_at: '2020-08-26T15:11:16.801Z'
+    updated_at: '2020-08-26T15:11:16.801Z'
     user_email: 
-  - id: 2511
+  - id: 1858
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_eligibles
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T09:57:52.570Z'
-    updated_at: '2020-08-14T09:57:52.570Z'
+    created_at: '2020-08-26T15:11:16.808Z'
+    updated_at: '2020-08-26T15:11:16.808Z'
     user_email: 
-  - id: 2512
+  - id: 1859
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_eligibles
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T09:58:02.964Z'
-    updated_at: '2020-08-14T09:58:02.964Z'
+    created_at: '2020-08-26T15:11:16.816Z'
+    updated_at: '2020-08-26T15:11:16.816Z'
     user_email: 
-  - id: 2513
+  - id: 1860
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_non_eligibles
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T09:58:14.807Z'
-    updated_at: '2020-08-14T09:58:14.807Z'
+    created_at: '2020-08-26T15:11:16.824Z'
+    updated_at: '2020-08-26T15:11:16.824Z'
     user_email: 
-  - id: 2514
+  - id: 1861
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_non_eligibles
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T09:58:28.985Z'
-    updated_at: '2020-08-14T09:58:28.985Z'
+    created_at: '2020-08-26T15:11:16.831Z'
+    updated_at: '2020-08-26T15:11:16.831Z'
     user_email: 
-  - id: 2515
+  - id: 1862
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_screener_responses
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T09:58:40.851Z'
-    updated_at: '2020-08-14T09:58:40.851Z'
+    created_at: '2020-08-26T15:11:16.839Z'
+    updated_at: '2020-08-26T15:11:16.839Z'
     user_email: 
-  - id: 2516
+  - id: 1863
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_ps_screener_responses
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T09:58:51.347Z'
-    updated_at: '2020-08-14T09:58:51.347Z'
+    created_at: '2020-08-26T15:11:16.847Z'
+    updated_at: '2020-08-26T15:11:16.847Z'
     user_email: 
-  - id: 2517
+  - id: 1864
     user_id: 
     resource_type: table
     resource_name: trackers
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-14T10:25:09.501Z'
-    updated_at: '2020-08-14T10:25:09.501Z'
+    created_at: '2020-08-26T15:11:16.854Z'
+    updated_at: '2020-08-26T15:11:16.854Z'
     user_email: 
-  - id: 2518
+  - id: 1865
     user_id: 
     resource_type: table
     resource_name: trackers
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-14T10:25:22.711Z'
-    updated_at: '2020-08-14T10:25:22.711Z'
+    created_at: '2020-08-26T15:11:16.861Z'
+    updated_at: '2020-08-26T15:11:16.861Z'
     user_email: 
-  - id: 2519
+  - id: 1866
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_phone_screen__suitability
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-17T12:58:22.317Z'
-    updated_at: '2020-08-17T12:58:22.317Z'
+    created_at: '2020-08-26T15:11:16.869Z'
+    updated_at: '2020-08-26T15:11:16.869Z'
     user_email: 
-  - id: 2520
+  - id: 1867
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_phone_screen__suitability
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-17T12:58:32.344Z'
-    updated_at: '2020-08-17T12:58:32.344Z'
+    created_at: '2020-08-26T15:11:16.878Z'
+    updated_at: '2020-08-26T15:11:16.878Z'
     user_email: 
-  - id: 2521
+  - id: 1868
     user_id: 
     resource_type: report
     resource_name: pitt_bhi__pitt_bhi_calendar
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-18T11:04:13.086Z'
-    updated_at: '2020-08-18T11:04:13.086Z'
+    created_at: '2020-08-26T15:11:16.885Z'
+    updated_at: '2020-08-26T15:11:16.885Z'
     user_email: 
-  - id: 2522
+  - id: 1869
     user_id: 
     resource_type: report
     resource_name: pitt_bhi__pitt_bhi_calendar
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-18T11:04:20.008Z'
-    updated_at: '2020-08-18T11:04:20.008Z'
+    created_at: '2020-08-26T15:11:16.892Z'
+    updated_at: '2020-08-26T15:11:16.892Z'
     user_email: 
-  - id: 2523
+  - id: 1870
     user_id: 
     resource_type: general
     resource_name: view_reports
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-18T11:08:40.519Z'
-    updated_at: '2020-08-18T11:15:00.929Z'
+    created_at: '2020-08-26T15:11:16.900Z'
+    updated_at: '2020-08-26T15:11:16.900Z'
     user_email: 
-  - id: 2524
+  - id: 1871
     user_id: 
     resource_type: general
     resource_name: view_reports
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-18T11:08:47.692Z'
-    updated_at: '2020-08-18T11:15:05.598Z'
+    created_at: '2020-08-26T15:11:16.908Z'
+    updated_at: '2020-08-26T15:11:16.908Z'
     user_email: 
-  - id: 2525
+  - id: 1872
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_access_pitt_staffs
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-18T11:53:55.054Z'
-    updated_at: '2020-08-18T11:53:55.054Z'
+    created_at: '2020-08-26T15:11:16.916Z'
+    updated_at: '2020-08-26T15:11:16.916Z'
     user_email: 
-  - id: 2526
+  - id: 1873
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_access_pis
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-18T12:14:31.605Z'
-    updated_at: '2020-08-18T12:14:31.605Z'
+    created_at: '2020-08-26T15:11:16.923Z'
+    updated_at: '2020-08-26T15:11:16.923Z'
     user_email: 
-  - id: 2527
+  - id: 1874
     user_id: 
     resource_type: limited_access
     resource_name: dynamic_model__pitt_bhi_access_pis
     options: ''
     access: limited
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - pitt pi
-    created_at: '2020-08-18T12:19:07.293Z'
-    updated_at: '2020-08-18T12:19:07.293Z'
+    created_at: '2020-08-26T15:11:16.931Z'
+    updated_at: '2020-08-26T15:11:16.931Z'
     user_email: 
-  - id: 2528
+  - id: 1875
     user_id: 
     resource_type: limited_access
     resource_name: dynamic_model__pitt_bhi_access_pitt_staffs
     options: ''
     access: limited
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - pitt staff
-    created_at: '2020-08-18T12:19:30.767Z'
-    updated_at: '2020-08-18T12:19:30.767Z'
+    created_at: '2020-08-26T15:11:16.939Z'
+    updated_at: '2020-08-26T15:11:16.939Z'
     user_email: 
-  - id: 2529
+  - id: 1876
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment__transferred_to_pitt
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-18T12:46:35.155Z'
-    updated_at: '2020-08-18T12:46:35.155Z'
+    created_at: '2020-08-26T15:11:16.947Z'
+    updated_at: '2020-08-26T15:11:16.947Z'
     user_email: 
-  - id: 2530
+  - id: 1877
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_access_pis
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-18T12:50:07.517Z'
-    updated_at: '2020-08-18T12:50:07.517Z'
+    created_at: '2020-08-26T15:11:16.955Z'
+    updated_at: '2020-08-26T15:11:16.955Z'
     user_email: 
-  - id: 2531
+  - id: 1878
     user_id: 
     resource_type: table
     resource_name: dynamic_model__pitt_bhi_access_pitt_staffs
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-18T12:50:23.324Z'
-    updated_at: '2020-08-18T12:50:23.324Z'
+    created_at: '2020-08-26T15:11:16.963Z'
+    updated_at: '2020-08-26T15:11:16.963Z'
     user_email: 
-  - id: 2532
+  - id: 1879
     user_id: 
     resource_type: table
     resource_name: activity_log__pitt_bhi_assignment_discussions
     options: 
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: _app_
-    created_at: '2020-08-18T13:39:55.279Z'
-    updated_at: '2020-08-18T13:39:55.279Z'
+    created_at: '2020-08-26T15:11:16.970Z'
+    updated_at: '2020-08-26T15:11:16.970Z'
     user_email: 
-  - id: 2533
+  - id: 1880
     user_id: 
     resource_type: table
     resource_name: activity_log__pitt_bhi_assignment_discussions
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-18T13:44:23.274Z'
-    updated_at: '2020-08-18T13:44:23.274Z'
+    created_at: '2020-08-26T15:11:16.978Z'
+    updated_at: '2020-08-26T15:11:16.978Z'
     user_email: 
-  - id: 2534
+  - id: 1881
     user_id: 
     resource_type: table
     resource_name: activity_log__pitt_bhi_assignment_discussions
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-18T13:44:31.166Z'
-    updated_at: '2020-08-18T13:44:31.166Z'
+    created_at: '2020-08-26T15:11:16.986Z'
+    updated_at: '2020-08-26T15:11:16.986Z'
     user_email: 
-  - id: 2535
+  - id: 1882
     user_id: 
     resource_type: table
     resource_name: activity_log__pitt_bhi_assignment_discussions
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - pitt staff
-    created_at: '2020-08-18T13:44:40.081Z'
-    updated_at: '2020-08-18T13:44:40.081Z'
+    created_at: '2020-08-26T15:11:16.994Z'
+    updated_at: '2020-08-26T15:11:16.994Z'
     user_email: 
-  - id: 2536
+  - id: 1883
     user_id: 
     resource_type: table
     resource_name: activity_log__pitt_bhi_assignment_discussions
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - pitt pi
-    created_at: '2020-08-18T13:44:51.088Z'
-    updated_at: '2020-08-18T13:44:51.088Z'
+    created_at: '2020-08-26T15:11:17.004Z'
+    updated_at: '2020-08-26T15:11:17.004Z'
     user_email: 
-  - id: 2537
+  - id: 1884
     user_id: 
     resource_type: table
     resource_name: activity_log__pitt_bhi_assignment_discussions
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: admin
-    created_at: '2020-08-18T13:45:04.282Z'
-    updated_at: '2020-08-18T13:45:04.282Z'
+    created_at: '2020-08-26T15:11:17.018Z'
+    updated_at: '2020-08-26T15:11:17.018Z'
     user_email: 
-  - id: 2538
+  - id: 1885
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_discussion__start_new_discussion
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-18T13:46:20.728Z'
-    updated_at: '2020-08-18T13:46:20.728Z'
+    created_at: '2020-08-26T15:11:17.026Z'
+    updated_at: '2020-08-26T15:11:17.026Z'
     user_email: 
-  - id: 2539
+  - id: 1886
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_discussion__start_new_discussion
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - pitt pi
-    created_at: '2020-08-18T13:46:42.532Z'
-    updated_at: '2020-08-18T13:46:42.532Z'
+    created_at: '2020-08-26T15:11:17.033Z'
+    updated_at: '2020-08-26T15:11:17.033Z'
     user_email: 
-  - id: 2540
+  - id: 1887
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_discussion__start_new_discussion
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - pitt staff
-    created_at: '2020-08-18T13:46:49.083Z'
-    updated_at: '2020-08-18T13:46:49.083Z'
+    created_at: '2020-08-26T15:11:17.041Z'
+    updated_at: '2020-08-26T15:11:17.041Z'
     user_email: 
-  - id: 2541
+  - id: 1888
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_discussion__start_new_discussion
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-18T13:46:55.008Z'
-    updated_at: '2020-08-18T13:46:55.008Z'
+    created_at: '2020-08-26T15:11:17.051Z'
+    updated_at: '2020-08-26T15:11:17.051Z'
     user_email: 
-  - id: 2542
+  - id: 1889
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_discussion__start_new_discussion
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: admin
-    created_at: '2020-08-18T13:47:06.433Z'
-    updated_at: '2020-08-18T13:47:06.433Z'
+    created_at: '2020-08-26T15:11:17.059Z'
+    updated_at: '2020-08-26T15:11:17.059Z'
     user_email: 
-  - id: 2543
+  - id: 1890
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_discussion__general_discussion
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: admin
-    created_at: '2020-08-18T13:47:14.403Z'
-    updated_at: '2020-08-18T13:47:14.403Z'
+    created_at: '2020-08-26T15:11:17.067Z'
+    updated_at: '2020-08-26T15:11:17.067Z'
     user_email: 
-  - id: 2544
+  - id: 1891
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_discussion__general_discussion
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - phone screen
-    created_at: '2020-08-18T13:47:20.750Z'
-    updated_at: '2020-08-18T13:47:20.750Z'
+    created_at: '2020-08-26T15:11:17.074Z'
+    updated_at: '2020-08-26T15:11:17.074Z'
     user_email: 
-  - id: 2545
+  - id: 1892
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_discussion__general_discussion
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - pitt pi
-    created_at: '2020-08-18T13:47:28.570Z'
-    updated_at: '2020-08-18T13:47:28.570Z'
+    created_at: '2020-08-26T15:11:17.082Z'
+    updated_at: '2020-08-26T15:11:17.082Z'
     user_email: 
-  - id: 2546
+  - id: 1893
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_discussion__general_discussion
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - pitt staff
-    created_at: '2020-08-18T13:47:34.053Z'
-    updated_at: '2020-08-18T13:47:34.053Z'
+    created_at: '2020-08-26T15:11:17.091Z'
+    updated_at: '2020-08-26T15:11:17.091Z'
     user_email: 
-  - id: 2547
+  - id: 1894
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_discussion__general_discussion
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-18T13:47:39.704Z'
-    updated_at: '2020-08-18T13:47:39.704Z'
+    created_at: '2020-08-26T15:11:17.099Z'
+    updated_at: '2020-08-26T15:11:17.099Z'
     user_email: 
-  - id: 2593
+  - id: 1895
     user_id: 
     resource_type: table
     resource_name: nfs_store__manage__archived_files
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-19T15:09:30.851Z'
-    updated_at: '2020-08-19T15:09:30.851Z'
+    created_at: '2020-08-26T15:11:17.106Z'
+    updated_at: '2020-08-26T15:11:17.106Z'
     user_email: 
-  - id: 2594
+  - id: 1896
     user_id: 
     resource_type: table
     resource_name: nfs_store__manage__containers
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-19T15:09:43.715Z'
-    updated_at: '2020-08-19T15:09:43.715Z'
+    created_at: '2020-08-26T15:11:17.113Z'
+    updated_at: '2020-08-26T15:11:17.113Z'
     user_email: 
-  - id: 2595
+  - id: 1897
     user_id: 
     resource_type: table
     resource_name: nfs_store__manage__stored_files
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-19T15:09:51.829Z'
-    updated_at: '2020-08-19T15:09:51.829Z'
+    created_at: '2020-08-26T15:11:17.121Z'
+    updated_at: '2020-08-26T15:11:17.121Z'
     user_email: 
-  - id: 2596
+  - id: 1898
     user_id: 
     resource_type: general
     resource_name: view_files_as_image
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-19T15:15:44.563Z'
-    updated_at: '2020-08-19T15:15:44.563Z'
+    created_at: '2020-08-26T15:11:17.128Z'
+    updated_at: '2020-08-26T15:11:17.128Z'
     user_email: 
-  - id: 2597
+  - id: 1899
     user_id: 
     resource_type: general
     resource_name: view_files_as_html
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-19T15:15:58.302Z'
-    updated_at: '2020-08-19T15:15:58.302Z'
+    created_at: '2020-08-26T15:11:17.136Z'
+    updated_at: '2020-08-26T15:11:17.136Z'
     user_email: 
-  - id: 2598
+  - id: 1900
     user_id: 
     resource_type: general
     resource_name: send_files_to_trash
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-19T15:16:22.265Z'
-    updated_at: '2020-08-19T15:16:22.265Z'
+    created_at: '2020-08-26T15:11:17.143Z'
+    updated_at: '2020-08-26T15:11:17.143Z'
     user_email: 
-  - id: 2599
+  - id: 1901
     user_id: 
     resource_type: general
     resource_name: download_files
     options: ''
     access: read
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: user - recruitment
-    created_at: '2020-08-19T15:17:18.135Z'
-    updated_at: '2020-08-19T15:17:18.135Z'
+    created_at: '2020-08-26T15:11:17.151Z'
+    updated_at: '2020-08-26T15:11:17.151Z'
     user_email: 
-  - id: 2600
+  - id: 1902
     user_id: 
     resource_type: activity_log_type
     resource_name: activity_log__pitt_bhi_assignment_discussion__files
     options: ''
     access: create
     disabled: false
-    admin_id: 21
-    app_type_id: 44
+    admin_id: 2
+    app_type_id: 25
     role_name: admin
-    created_at: '2020-08-19T15:24:28.310Z'
-    updated_at: '2020-08-19T15:24:28.310Z'
+    created_at: '2020-08-26T15:11:17.160Z'
+    updated_at: '2020-08-26T15:11:17.160Z'
+    user_email: 
+  - id: 1966
+    user_id: 
+    resource_type: report
+    resource_name: pitt_bhi__needs_follow_up_communication
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 25
+    role_name: user - recruitment
+    created_at: '2020-09-01T10:28:42.031Z'
+    updated_at: '2020-09-01T10:28:42.031Z'
     user_email: 
   valid_associated_activity_logs:
-  - id: 153
+  - id: 85
     name: Recruitment & Logistics
     item_type: pitt_bhi_assignment
     rec_type: ''
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-04T14:05:48.946Z'
-    updated_at: '2020-08-19T14:57:48.525Z'
+    created_at: '2020-08-26T15:11:15.057Z'
+    updated_at: '2020-08-28T09:20:30.581Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -1569,8 +1582,8 @@ app_type:
       @library pitt_bhi eligibility\r\n# @library pitt_bhi secure_notes\r\n\r\n# @library
       pitt_bhi filestore_container\r\n\r\n\r\n_definitions:\r\n\r\n\r\n  # Default
       email - just add roles or users\r\n  notify_email_default: &notify_email_default\r\n
-      \   type: email\r\n\r\n    layout_template: pitt_bhi notification layout\r\n
-      \   content_template: pitt_bhi notification message\r\n    extra_substitutions:\r\n
+      \   type: email\r\n\r\n    layout_template: pitt bhi notification layout\r\n
+      \   content_template: pitt bhi notification message\r\n    extra_substitutions:\r\n
       \     reason: ''\r\n      extra_text: |\r\n        The PITT BHI Study participant
       has completed an activity you \r\n        are to be notified about\r\n      panel_tab:
       activity-log--pitt_bhi-assignments\r\n    subject: \"PITT BHI: HMS Recruitment
@@ -1588,12 +1601,11 @@ app_type:
       \   select_who: Who will perform the phone screening?\r\n    select_record_from_player_contacts:
       Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
       Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes for
-      the screener    \r\n      \r\n      *Do not enter personal health information
-      here*\r\n\r\n      \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any:\r\n
-      \     activity_log__pitt_bhi_assignment_phone_screens:\r\n        extra_log_type:
-      finalize\r\n    not_any_exit:\r\n      <<: *any_exit_or_complete      \r\n\r\n\r\n
-      \ field_options:\r\n    select_who:\r\n      edit_as:\r\n        field_type:
-      select_user_with_role_user_-_phone_screen\r\n    select_record_from_player_contacts:\r\n
+      the screener    \r\n      \r\n      *Do not enter health information here*\r\n\r\n
+      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any:\r\n      activity_log__pitt_bhi_assignment_phone_screens:\r\n
+      \       extra_log_type: finalize\r\n    not_any_exit:\r\n      <<: *any_exit_or_complete
+      \     \r\n\r\n\r\n  field_options:\r\n    select_who:\r\n      edit_as:\r\n
+      \       field_type: select_user_with_role_user_-_phone_screen\r\n    select_record_from_player_contacts:\r\n
       \     edit_as:\r\n        field_type: select_record_from_player_contact_phone\r\n\r\n
       \ showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\nconsent_to_share_details:\r\n
       \ label: Consent To Share Details\r\n###################################\r\n
@@ -1762,14 +1774,14 @@ app_type:
     table_name: activity_log_pitt_bhi_assignments
     category: pitt-bhi
     user_email: 
-  - id: 157
+  - id: 86
     name: BHI Phone Screen
     item_type: pitt_bhi_assignment
     rec_type: ''
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-12T17:19:30.308Z'
-    updated_at: '2020-08-18T11:19:18.332Z'
+    created_at: '2020-08-26T15:11:15.182Z'
+    updated_at: '2020-08-28T09:24:35.178Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -1784,7 +1796,7 @@ app_type:
       \   type: email\r\n\r\n    layout_template: pitt bhi notification layout\r\n
       \   content_template: pitt bhi notification message\r\n    extra_substitutions:\r\n
       \     reason: ''\r\n      extra_text: |\r\n        The PITT BHI Study participant
-      has completed the HMS phone screen.\r\n      panel_tab: activity-log--grit-assignment-phone-screens\r\n
+      has completed the HMS phone screen.\r\n      panel_tab: activity-log--pitt-bhi-assignment-phone-screens\r\n
       \   subject: \"PITT BHI Study: HMS Phone Screen Complete\"\r\n\r\n\r\n  # Default
       SMS - just add roles or users\r\n  notify_sms_default: &notify_sms_default\r\n
       \   type: sms\r\n    layout_template: standard sms layout\r\n    content_template:
@@ -1903,14 +1915,14 @@ app_type:
     table_name: activity_log_pitt_bhi_assignment_phone_screens
     category: pitt-bhi
     user_email: 
-  - id: 178
+  - id: 87
     name: PITT BHI Discussions
     item_type: pitt_bhi_assignment
     rec_type: ''
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-18T13:39:54.970Z'
-    updated_at: '2020-08-19T15:37:11.084Z'
+    created_at: '2020-08-26T15:11:15.282Z'
+    updated_at: '2020-08-28T09:23:37.031Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -1921,13 +1933,13 @@ app_type:
       to refine operation\r\n  ####\r\n\r\n  # Default email - just add roles or users\r\n
       \ notify_email_default: &notify_email_default\r\n    type: email\r\n    layout_template:
       pitt bhi notification layout\r\n    content_template: pitt bhi notification
-      message\r\n    subject: \"GRIT Study App: Discussion Message - {{referring_record.id}}\"\r\n
+      message\r\n    subject: \"PITT BHI Study App: Discussion Message - {{referring_record.id}}\"\r\n
       \   extra_substitutions:\r\n      reason: 'New Discussion Message'\r\n      extra_text:
       |\r\n        Discussion Subject: *{{referring_record.notes}}*\r\n      panel_tab:
       activity-log--pitt-bhi-assignment-discussions\r\n      \r\n      \r\n\r\n  #
       Default SMS - just add roles or users\r\n  notify_sms_default: &notify_sms_default\r\n
       \   type: sms\r\n    layout_template: standard sms layout\r\n    content_template:
-      pitt bhi sms notification\r\n    subject: \"GRIT Study Discussion\"\r\n\r\n\r\n###############################################\r\n#
+      pitt bhi sms notification\r\n    subject: \"PITT BHI App Discussion\"\r\n\r\n\r\n###############################################\r\n#
       @library pitt_bhi notify_roles\r\n# @library pitt_bhi discussions\r\n###############################################\r\n\r\n\r\n\r\nstart_new_discussion:\r\n
       \ label: '{{notes}}'\r\n  button_label: Start New Discussion\r\n  <<: *setup_discussion\r\n
       \ \r\n  field_options: \r\n    <<: *start_discussion_field_options\r\n    tag_select_contact_role:\r\n
@@ -1961,37 +1973,17 @@ app_type:
     category: pitt-bhi
     user_email: 
   associated_dynamic_models:
-  - id: 660
-    name: PITT BHI PI Access
-    table_name: pitt_bhi_access_pis
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2020-08-18T12:14:31.429Z'
-    updated_at: '2020-08-18T12:14:31.429Z'
-    position: 
-    category: pitt-bhi-access
-    table_key_name: ''
-    field_list: placeholder_top
-    result_order: ''
-    options: "_comments:\r\n  table: A record referencing a master record indicates
-      PITT BHI PI has access to this participant\r\n\r\n\r\ndefault:\r\n\r\n  caption_before:\r\n
-      \   placeholder_top: Allows access to PI"
-    user_email: 
-  - id: 658
+  - id: 403
     name: PITT BHI Staff Access
     table_name: pitt_bhi_access_pitt_staffs
     schema_name: 
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-18T11:53:54.866Z'
-    updated_at: '2020-08-18T11:53:54.866Z'
+    created_at: '2020-08-26T15:11:13.886Z'
+    updated_at: '2020-08-26T15:11:13.886Z'
     position: 
     category: pitt-bhi-access
     table_key_name: ''
@@ -2001,203 +1993,91 @@ app_type:
       PITT BHI staff have access to this participant\r\n\r\ndefault:\r\n  caption_before:\r\n
       \   placeholder_top: Allows access to PITT Staff"
     user_email: 
-  - id: 645
-    name: Suitability
-    table_name: pitt_bhi_ps_suitability_questions
+  - id: 402
+    name: PITT BHI PI Access
+    table_name: pitt_bhi_access_pis
     schema_name: 
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-14T09:27:50.744Z'
-    updated_at: '2020-08-19T15:06:21.810Z'
+    created_at: '2020-08-26T15:11:13.767Z'
+    updated_at: '2020-08-26T15:11:13.767Z'
     position: 
-    category: pitt-bhi-phone-screen
+    category: pitt-bhi-access
     table_key_name: ''
-    field_list: birth_date eligible_pension_yes_no age notes
+    field_list: placeholder_top
     result_order: ''
-    options: "# @library grit ps_forms_eligibility\r\n\r\n_comments:\r\n  table: |\r\n
-      \   Suitability assessment form for BHI phone screening, recording responses
-      from subject\r\n  fields:\r\n    birth_date: Date of birth\r\n    eligible_pension_yes_no:
-      |\r\n      Eligible for a pension from the NFL\r\n      (At least 3 seasons
-      with 3 games per season)\r\n    age: Calculated age at the time the response
-      was saved\r\n    notes: Question and notes recorded by interviewer\r\n\r\n\r\n\r\ndefault:\r\n\r\n
-      \ field_options:\r\n    age:\r\n      edit_as:\r\n        field_type: fixed_age\r\n\r\n\r\n
-      \ caption_before:\r\n    \r\n    birth_date: What is your date of birth?\r\n\r\n
-      \   eligible_pension_yes_no: |\r\n      Can you confirm that you are eligible
-      for a pension from the NFL? \r\n      (Must be at least 3 seasons with 3 games
-      per season)\r\n\r\n    age: Age\r\n        \r\n        \r\n    notes: Record
-      question and notes\r\n\r\n  show_if:\r\n    age:\r\n      not_any:\r\n        current_mode:
-      edit\r\n      \r\n"
+    options: "_comments:\r\n  table: A record referencing a master record indicates
+      PITT BHI PI has access to this participant\r\n\r\n\r\ndefault:\r\n\r\n  caption_before:\r\n
+      \   placeholder_top: Allows access to PI"
     user_email: 
-  - id: 641
-    name: BHI Phone Screen Non-Eligible
-    table_name: pitt_bhi_ps_non_eligibles
+  - id: 409
+    name: PITT BHI Screener Responses
+    table_name: pitt_bhi_ps_screener_responses
     schema_name: 
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-14T08:28:19.750Z'
-    updated_at: '2020-08-18T12:26:44.772Z'
+    created_at: '2020-08-26T15:11:14.440Z'
+    updated_at: '2020-08-26T15:11:14.440Z'
     position: 
     category: pitt-bhi-phone-screen
     table_key_name: ''
-    field_list: placeholder_initial notes
+    field_list: comm_clearly_in_english_yes_no, give_informed_consent_yes_no_dont_know,
+      give_informed_consent_notes, outcome, placeholder_eligible, placeholder_ineligible,
+      placeholder_possibly_eligible, notes
     result_order: ''
-    options: "default:\r\n\r\n  caption_before:\r\n  \r\n    placeholder_initial:
-      | \r\n      Thank you for answering these questions. Unfortunately, at this
-      \r\n      time you are not eligible for this particular study. We \r\n      appreciate
-      your interest and participation in our research \r\n      and your commitment
-      to support improving former player health.  \r\n      \r\n      As a reminder,
-      even though you are not eligible for this particular \r\n      study that does
-      not mean that you can’t participate in other \r\n      future Football Players
-      Health Study research studies. \r\n      Please feel free to reach out to our
-      team in the future \r\n      if you have any questions. \r\n      \r\n      \r\n
-      \   notes: Additional Notes\r\n      \r\n"
+    options: "default:\r\n\r\n  field_options:\r\n    outcome:\r\n      edit_as:\r\n
+      \       field_type: select_outcome\r\n        alt_options:\r\n          eligible:
+      eligible\r\n          ineligible: ineligible\r\n          possibly eligible:
+      possibly_eligible         \r\n          \r\n      value: \r\n        all:\r\n
+      \         activity_log__grit_assignment_phone_screens:\r\n            extra_log_type:
+      \r\n              - eligible\r\n              - ineligible\r\n              -
+      possibly_eligible\r\n              - return_value\r\n          \r\n\r\n  caption_before:\r\n
+      \   all_fields: |\r\n      The screening is complete. The following questions
+      are for \r\n      the screening interviewer to \r\n      indicate whether they
+      believe the participant could communicate clearly and\r\n      give informed
+      consent.\r\n      \r\n    \r\n    comm_clearly_in_english_yes_no: Is the subject
+      able to communicate clearly in English?\r\n    give_informed_consent_yes_no_dont_know:
+      Does the subject appear to be able to give informed consent?\r\n    give_informed_consent_notes:
+      Notes\r\n    \r\n    \r\n    outcome: |\r\n      Set the eligibility status
+      for the participant.\r\n      \r\n\r\n    placeholder_possibly_eligible: |\r\n
+      \     The participant is *possibly eligible*. The PI will be notified that a
+      review is\r\n      required. Once confirmation of status has been received from
+      the PI, \r\n      click the **Eligibility Follow Up** button to follow the script
+      for communicating\r\n      this result to the participant.\r\n    \r\n    placeholder_ineligible:
+      |\r\n      The participant was ineligible \r\n      \r\n      If they requested
+      a\r\n      follow up from the PI a notification will be sent to the PI automatically.
+      The\r\n      request for follow up can be tracked in the **follow ups** panel.\r\n
+      \     \r\n      When ready, continue to the **Finalize** activity.\r\n    \r\n
+      \   placeholder_eligible: |\r\n      The participant was eligible. When ready,
+      continue to the **Finalize** activity.\r\n\r\n    notes: |\r\n      Any notes
+      about the screener can be recorded below.\r\n\r\n    submit: |\r\n      When
+      this form is saved communications with the MSM team can continue if necessary.\r\n
+      \     The screener results will not be locked down until the **Finalize** activity\r\n
+      \     is completed.\r\n      \r\n      Consent to passing information to MSM
+      will be recorded in the \r\n      **recruitment & logistics** panel.\r\n\r\n\r\n
+      \   \r\n  show_if:\r\n    give_informed_consent_notes:\r\n      give_informed_consent_yes_no_dont_know:\r\n
+      \       - \"no\"\r\n        - \"don't know\"\r\n\r\n    outcome:\r\n      never:
+      true\r\n\r\n    placeholder_possibly_eligible:\r\n      outcome: possibly_eligible\r\n
+      \     \r\n    placeholder_eligible:\r\n      outcome: eligible\r\n    \r\n    placeholder_ineligible:\r\n
+      \     outcome: ineligible\r\n      \r\n      "
     user_email: 
-  - id: 643
-    name: BHI Phone Screen Eligible
-    table_name: pitt_bhi_ps_eligibles
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2020-08-14T08:29:18.973Z'
-    updated_at: '2020-08-18T10:20:49.134Z'
-    position: 
-    category: pitt-bhi-phone-screen
-    table_key_name: ''
-    field_list: consent_to_pass_info_to_pitt_yes_no consent_to_pass_info_to_pitt_2_yes_no
-      placeholder_consent_to_pass_info_2_no not_interested_notes contact_info_notes
-      placeholder_continue placeholder_end
-    result_order: ''
-    options: "default:\r\n\r\n  field_options:\r\n    select_still_interested:\r\n
-      \     edit_as:\r\n        alt_options:\r\n          No Longer Interested: \"no
-      longer interested\"\r\n          Yes - Still Interested: \"yes - still interested\"\r\n\r\n
-      \ caption_before: \r\n    all_fields: |\r\n      Thank you for taking the time
-      to answer these questions. Based on \r\n      your responses, you are preliminarily
-      \r\n      eligible to participate in the study. \r\n\r\n      The next step
-      of screening will be done by the team at \r\n      the University of Pittsburgh.
-      They will contact you \r\n      to schedule a screening phone call to further
-      determine \r\n      your eligibility and to provide a more detailed overview
-      of\r\n      the study participation. All further study participation \r\n      and
-      communications will take place with our partners at \r\n      the University
-      of Pittsburgh, although if \r\n      you have any questions or concerns you
-      can still contact us at any time. \r\n      \r\n      \r\n    interested_yes_no:
-      \r\n      \r\n\r\n    not_interested_notes: |\r\n      *record reason not interested
-      or won't consent* \r\n      \r\n    consent_to_pass_info_to_pitt_yes_no: |\r\n
-      \     As a next step, I will need your permission to share your \r\n      contact
-      information with the University of Pittsburgh team. \r\n      Your contact information
-      will still be stored only by \r\n      us in a secure environment, and we would
-      provide the \r\n      University of Pittsburgh secure access to your \r\n      contact
-      information. Providing your permission for us \r\n      to share your contact
-      information does not mean that \r\n      you are agreeing to participate in
-      the \r\n      Brain Health Initiative but rather that you are \r\n      willing
-      to talk with the University of Pittsburgh \r\n      team about the study. You
-      can decide that you do \r\n      not want to participate at any time. \r\n    \r\n
-      \     Do we have your permission to share your contact \r\n      information
-      with the University of Pittsburgh team? \r\n\r\n\r\n\r\n    consent_to_pass_info_to_pitt_2_yes_no:
-      |\r\n      Just to confirm, your data and contact information lives \r\n      in
-      a highly secure and private environment, accessible \r\n      only to approved
-      researchers on the Harvard study team. \r\n      The data we store is protected
-      by a Certificate of \r\n      Confidentiality issued by the National Institute
-      of Health. \r\n      This means that your identifiable information is \r\n      protected
-      from forced disclosure (i.e. subpoenas) by all possible means.\r\n\r\n      Does
-      this alleviate any concerns you have? Do you have other \r\n      questions?
-      If you would prefer not to participate I understand.\r\n\r\n    \r\n    placeholder_consent_to_pass_info_2_no:
-      |\r\n      Thank you so much for speaking with me today.  \r\n      \r\n      Do
-      you have any other questions I can answer \r\n      while we are on the phone
-      right now? \r\n      \r\n      \r\n    contact_info_notes: |\r\n      Great!
-      Thank you for agreeing to let us share your \r\n      information with our research
-      partners at the University of Pittsburgh.\r\n      \r\n      *Scroll to Participant
-      Details to check and add any contact information*\r\n\r\n    placeholder_continue:
-      |    \r\n      Great, then we will be in touch by email to confirm that we \r\n
-      \     have provided the researchers at the University of Pittsburgh \r\n      with
-      your contact information.\r\n \r\n        \r\n    placeholder_end: |\r\n      If
-      you have any questions or want to contact us at \r\n      any time, you can
-      reach me at 617-432-5000 or \r\n      players@footballplayershealth.harvard.edu.
-      \r\n\r\n      \r\n      **END SCREENING**\r\n      \r\n  show_if:\r\n    \r\n\r\n
-      \   consent_to_pass_info_to_pitt_2_yes_no:\r\n      consent_to_pass_info_to_pitt_yes_no:
-      'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n      consent_to_pass_info_to_pitt_2_yes_no:
-      'no'\r\n      \r\n    contact_info_notes: &ok_to_continue\r\n      any_ok_to_continue:\r\n
-      \       consent_to_pass_info_to_pitt_yes_no: 'yes'\r\n        consent_to_pass_info_to_pitt_2_yes_no:
-      'yes'\r\n\r\n\r\n    not_interested_notes:\r\n      any:\r\n        consent_to_pass_info_to_pitt_yes_no:
-      'no'\r\n        consent_to_pass_info_to_pitt_2_yes_no: 'no'\r\n      not_any:
-      *ok_to_continue\r\n      \r\n    placeholder_continue:\r\n      <<: *ok_to_continue\r\n
-      \     \r\n    \r\n\r\n "
-    user_email: 
-  - id: 637
-    name: BHI Initial Screening
-    table_name: pitt_bhi_ps_initial_screenings
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2020-08-12T17:02:35.423Z'
-    updated_at: '2020-08-14T11:18:00.058Z'
-    position: 
-    category: pitt-bhi-phone-screen
-    table_key_name: ''
-    field_list: select_is_good_time_to_speak,placeholder_not_appropriate_time,placeholder_intro,question_notes,select_still_interested,follow_up_date,follow_up_time,placeholder_not_interested,placeholder_complete_intro,notes
-    result_order: ''
-    options: "# Unused fields: looked_at_website_yes_no\r\n\r\ndefault:\r\n\r\n  field_options:\r\n
-      \   select_still_interested:\r\n      edit_as:\r\n        alt_options:\r\n          \"No\":
-      \"no\"\r\n          \"Yes\": \"yes\"\r\n          Yes, but call me back: yes
-      - call back\r\n      \r\n  \r\n\r\n  show_if:\r\n  \r\n  \r\n    placeholder_intro:\r\n
-      \     select_is_good_time_to_speak: \"yes\"\r\n\r\n\r\n    question_notes:\r\n
-      \     any:\r\n        select_is_good_time_to_speak:\r\n          - \"yes\"\r\n\r\n
-      \   select_still_interested:\r\n      select_is_good_time_to_speak: 'yes'\r\n\r\n\r\n\r\n
-      \   placeholder_not_appropriate_time:\r\n      select_is_good_time_to_speak:
-      not appropriate time\r\n          \r\n    follow_up_date:\r\n      any:\r\n
-      \       select_is_good_time_to_speak: \r\n          - not appropriate time\r\n
-      \         - left voicemail\r\n        select_still_interested: yes - call back\r\n\r\n
-      \   follow_up_time:\r\n      any:\r\n        select_is_good_time_to_speak:\r\n
-      \         - not appropriate time\r\n          - left voicemail        \r\n        select_still_interested:
-      yes - call back\r\n        \r\n            \r\n\r\n    placeholder_not_interested:\r\n
-      \     any:\r\n        select_is_good_time_to_speak: not interested\r\n        select_still_interested:
-      no\r\n        \r\n    placeholder_complete_intro:\r\n      any:\r\n        select_still_interested:\r\n
-      \         - \"yes\"\r\n\r\n\r\n  dialog_before:\r\n    select_is_good_time_to_speak:
-      \r\n      name: pitt bhi ps intro\r\n    placeholder_intro: \r\n      name:
-      pitt bhi ps intro overview\r\n      label: show script\r\n\r\n  caption_before:\r\n\r\n\r\n
-      \   # select_is_good_time_to_speak => dialog\r\n      \r\n    placeholder_not_appropriate_time:
-      |\r\n      \r\n      Is there a better time I can call you to discuss the study
-      and \r\n      also determine if you are interested? \r\n      \r\n      *(Record
-      time, best number to call)*\r\n      \r\n      Okay, I will give you a call
-      back then.\r\n\r\n\r\n    follow_up_date: |    \r\n      Enter a follow up date
-      and time if the subject wishes for a call back before continuing with the screening,
-      or you left a voicemail. \r\n      \r\n    follow_up_time: Follow up time\r\n\r\n
-      \   # placeholder_intro => dialog\r\n\r\n    question_notes: |\r\n      *Respond
-      to questions and take notes below*\r\n\r\n    select_still_interested: |\r\n
-      \     *(still interested?)*\r\n    \r\n\r\n    placeholder_not_interested: |\r\n
-      \     Okay, is there a specific reason that you are not interested?  \r\n      \r\n
-      \     *(Record reason, as relevant provide information \r\n      about other
-      FPHS studies, send links to other studies)*\r\n      \r\n      Okay, thank you
-      for your time and for participating in our \r\n      other research opportunities.
-      \ If you have any \r\n      questions in the future feel free to reach out to
-      our team. \r\n\r\n\r\n    placeholder_complete_intro: |\r\n      Great! The
-      next step is for me to ask you two quick screening \r\n      questions right
-      now to see if you are a candidate for \r\n      further screening with the University
-      of Pittsburgh team.  \r\n\r\n      \r\n    notes: |\r\n      *Notes, questions
-      or other information for follow up*\r\n    \r\n\r\n\r\n  \r\n\r\n"
-    user_email: 
-  - id: 649
+  - id: 408
     name: BHI Eligibility Follow Up
     table_name: pitt_bhi_ps_eligibility_followups
     schema_name: 
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-14T09:54:36.066Z'
-    updated_at: '2020-08-14T09:54:36.066Z'
+    created_at: '2020-08-26T15:11:14.327Z'
+    updated_at: '2020-08-26T15:11:14.327Z'
     position: 
     category: pitt-bhi-phone-screen
     table_key_name: ''
@@ -2375,71 +2255,203 @@ app_type:
       'yes'\r\n        contact_pi_yes_no: 'yes'\r\n        consent_to_pass_info_to_msm_yes_no:
       'no'\r\n        consent_to_pass_info_to_msm_2_yes_no: 'no'\r\n      \r\n    "
     user_email: 
-  - id: 647
-    name: PITT BHI Screener Responses
-    table_name: pitt_bhi_ps_screener_responses
+  - id: 407
+    name: BHI Initial Screening
+    table_name: pitt_bhi_ps_initial_screenings
     schema_name: 
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-14T09:48:56.581Z'
-    updated_at: '2020-08-14T09:48:56.581Z'
+    created_at: '2020-08-26T15:11:14.240Z'
+    updated_at: '2020-08-26T15:11:14.240Z'
     position: 
     category: pitt-bhi-phone-screen
     table_key_name: ''
-    field_list: comm_clearly_in_english_yes_no, give_informed_consent_yes_no_dont_know,
-      give_informed_consent_notes, outcome, placeholder_eligible, placeholder_ineligible,
-      placeholder_possibly_eligible, notes
+    field_list: select_is_good_time_to_speak,placeholder_not_appropriate_time,placeholder_intro,question_notes,select_still_interested,follow_up_date,follow_up_time,placeholder_not_interested,placeholder_complete_intro,notes
     result_order: ''
-    options: "default:\r\n\r\n  field_options:\r\n    outcome:\r\n      edit_as:\r\n
-      \       field_type: select_outcome\r\n        alt_options:\r\n          eligible:
-      eligible\r\n          ineligible: ineligible\r\n          possibly eligible:
-      possibly_eligible         \r\n          \r\n      value: \r\n        all:\r\n
-      \         activity_log__grit_assignment_phone_screens:\r\n            extra_log_type:
-      \r\n              - eligible\r\n              - ineligible\r\n              -
-      possibly_eligible\r\n              - return_value\r\n          \r\n\r\n  caption_before:\r\n
-      \   all_fields: |\r\n      The screening is complete. The following questions
-      are for \r\n      the screening interviewer to \r\n      indicate whether they
-      believe the participant could communicate clearly and\r\n      give informed
-      consent.\r\n      \r\n    \r\n    comm_clearly_in_english_yes_no: Is the subject
-      able to communicate clearly in English?\r\n    give_informed_consent_yes_no_dont_know:
-      Does the subject appear to be able to give informed consent?\r\n    give_informed_consent_notes:
-      Notes\r\n    \r\n    \r\n    outcome: |\r\n      Set the eligibility status
-      for the participant.\r\n      \r\n\r\n    placeholder_possibly_eligible: |\r\n
-      \     The participant is *possibly eligible*. The PI will be notified that a
-      review is\r\n      required. Once confirmation of status has been received from
-      the PI, \r\n      click the **Eligibility Follow Up** button to follow the script
-      for communicating\r\n      this result to the participant.\r\n    \r\n    placeholder_ineligible:
-      |\r\n      The participant was ineligible \r\n      \r\n      If they requested
-      a\r\n      follow up from the PI a notification will be sent to the PI automatically.
-      The\r\n      request for follow up can be tracked in the **follow ups** panel.\r\n
-      \     \r\n      When ready, continue to the **Finalize** activity.\r\n    \r\n
-      \   placeholder_eligible: |\r\n      The participant was eligible. When ready,
-      continue to the **Finalize** activity.\r\n\r\n    notes: |\r\n      Any notes
-      about the screener can be recorded below.\r\n\r\n    submit: |\r\n      When
-      this form is saved communications with the MSM team can continue if necessary.\r\n
-      \     The screener results will not be locked down until the **Finalize** activity\r\n
-      \     is completed.\r\n      \r\n      Consent to passing information to MSM
-      will be recorded in the \r\n      **recruitment & logistics** panel.\r\n\r\n\r\n
-      \   \r\n  show_if:\r\n    give_informed_consent_notes:\r\n      give_informed_consent_yes_no_dont_know:\r\n
-      \       - \"no\"\r\n        - \"don't know\"\r\n\r\n    outcome:\r\n      never:
-      true\r\n\r\n    placeholder_possibly_eligible:\r\n      outcome: possibly_eligible\r\n
-      \     \r\n    placeholder_eligible:\r\n      outcome: eligible\r\n    \r\n    placeholder_ineligible:\r\n
-      \     outcome: ineligible\r\n      \r\n      "
+    options: "# Unused fields: looked_at_website_yes_no\r\n\r\ndefault:\r\n\r\n  field_options:\r\n
+      \   select_still_interested:\r\n      edit_as:\r\n        alt_options:\r\n          \"No\":
+      \"no\"\r\n          \"Yes\": \"yes\"\r\n          Yes, but call me back: yes
+      - call back\r\n      \r\n  \r\n\r\n  show_if:\r\n  \r\n  \r\n    placeholder_intro:\r\n
+      \     select_is_good_time_to_speak: \"yes\"\r\n\r\n\r\n    question_notes:\r\n
+      \     any:\r\n        select_is_good_time_to_speak:\r\n          - \"yes\"\r\n\r\n
+      \   select_still_interested:\r\n      select_is_good_time_to_speak: 'yes'\r\n\r\n\r\n\r\n
+      \   placeholder_not_appropriate_time:\r\n      select_is_good_time_to_speak:
+      not appropriate time\r\n          \r\n    follow_up_date:\r\n      any:\r\n
+      \       select_is_good_time_to_speak: \r\n          - not appropriate time\r\n
+      \         - left voicemail\r\n        select_still_interested: yes - call back\r\n\r\n
+      \   follow_up_time:\r\n      any:\r\n        select_is_good_time_to_speak:\r\n
+      \         - not appropriate time\r\n          - left voicemail        \r\n        select_still_interested:
+      yes - call back\r\n        \r\n            \r\n\r\n    placeholder_not_interested:\r\n
+      \     any:\r\n        select_is_good_time_to_speak: not interested\r\n        select_still_interested:
+      no\r\n        \r\n    placeholder_complete_intro:\r\n      any:\r\n        select_still_interested:\r\n
+      \         - \"yes\"\r\n\r\n\r\n  dialog_before:\r\n    select_is_good_time_to_speak:
+      \r\n      name: pitt bhi ps intro\r\n    placeholder_intro: \r\n      name:
+      pitt bhi ps intro overview\r\n      label: show script\r\n\r\n  caption_before:\r\n\r\n\r\n
+      \   # select_is_good_time_to_speak => dialog\r\n      \r\n    placeholder_not_appropriate_time:
+      |\r\n      \r\n      Is there a better time I can call you to discuss the study
+      and \r\n      also determine if you are interested? \r\n      \r\n      *(Record
+      time, best number to call)*\r\n      \r\n      Okay, I will give you a call
+      back then.\r\n\r\n\r\n    follow_up_date: |    \r\n      Enter a follow up date
+      and time if the subject wishes for a call back before continuing with the screening,
+      or you left a voicemail. \r\n      \r\n    follow_up_time: Follow up time\r\n\r\n
+      \   # placeholder_intro => dialog\r\n\r\n    question_notes: |\r\n      *Respond
+      to questions and take notes below*\r\n\r\n    select_still_interested: |\r\n
+      \     *(still interested?)*\r\n    \r\n\r\n    placeholder_not_interested: |\r\n
+      \     Okay, is there a specific reason that you are not interested?  \r\n      \r\n
+      \     *(Record reason, as relevant provide information \r\n      about other
+      FPHS studies, send links to other studies)*\r\n      \r\n      Okay, thank you
+      for your time and for participating in our \r\n      other research opportunities.
+      \ If you have any \r\n      questions in the future feel free to reach out to
+      our team. \r\n\r\n\r\n    placeholder_complete_intro: |\r\n      Great! The
+      next step is for me to ask you two quick screening \r\n      questions right
+      now to see if you are a candidate for \r\n      further screening with the University
+      of Pittsburgh team.  \r\n\r\n      \r\n    notes: |\r\n      *Notes, questions
+      or other information for follow up*\r\n    \r\n\r\n\r\n  \r\n\r\n"
     user_email: 
-  - id: 628
+  - id: 406
+    name: BHI Phone Screen Eligible
+    table_name: pitt_bhi_ps_eligibles
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:11:14.151Z'
+    updated_at: '2020-08-26T15:11:14.151Z'
+    position: 
+    category: pitt-bhi-phone-screen
+    table_key_name: ''
+    field_list: consent_to_pass_info_to_pitt_yes_no consent_to_pass_info_to_pitt_2_yes_no
+      placeholder_consent_to_pass_info_2_no not_interested_notes contact_info_notes
+      placeholder_continue placeholder_end
+    result_order: ''
+    options: "default:\r\n\r\n  field_options:\r\n    select_still_interested:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          No Longer Interested: \"no
+      longer interested\"\r\n          Yes - Still Interested: \"yes - still interested\"\r\n\r\n
+      \ caption_before: \r\n    all_fields: |\r\n      Thank you for taking the time
+      to answer these questions. Based on \r\n      your responses, you are preliminarily
+      \r\n      eligible to participate in the study. \r\n\r\n      The next step
+      of screening will be done by the team at \r\n      the University of Pittsburgh.
+      They will contact you \r\n      to schedule a screening phone call to further
+      determine \r\n      your eligibility and to provide a more detailed overview
+      of\r\n      the study participation. All further study participation \r\n      and
+      communications will take place with our partners at \r\n      the University
+      of Pittsburgh, although if \r\n      you have any questions or concerns you
+      can still contact us at any time. \r\n      \r\n      \r\n    interested_yes_no:
+      \r\n      \r\n\r\n    not_interested_notes: |\r\n      *record reason not interested
+      or won't consent* \r\n      \r\n    consent_to_pass_info_to_pitt_yes_no: |\r\n
+      \     As a next step, I will need your permission to share your \r\n      contact
+      information with the University of Pittsburgh team. \r\n      Your contact information
+      will still be stored only by \r\n      us in a secure environment, and we would
+      provide the \r\n      University of Pittsburgh secure access to your \r\n      contact
+      information. Providing your permission for us \r\n      to share your contact
+      information does not mean that \r\n      you are agreeing to participate in
+      the \r\n      Brain Health Initiative but rather that you are \r\n      willing
+      to talk with the University of Pittsburgh \r\n      team about the study. You
+      can decide that you do \r\n      not want to participate at any time. \r\n    \r\n
+      \     Do we have your permission to share your contact \r\n      information
+      with the University of Pittsburgh team? \r\n\r\n\r\n\r\n    consent_to_pass_info_to_pitt_2_yes_no:
+      |\r\n      Just to confirm, your data and contact information lives \r\n      in
+      a highly secure and private environment, accessible \r\n      only to approved
+      researchers on the Harvard study team. \r\n      The data we store is protected
+      by a Certificate of \r\n      Confidentiality issued by the National Institute
+      of Health. \r\n      This means that your identifiable information is \r\n      protected
+      from forced disclosure (i.e. subpoenas) by all possible means.\r\n\r\n      Does
+      this alleviate any concerns you have? Do you have other \r\n      questions?
+      If you would prefer not to participate I understand.\r\n\r\n    \r\n    placeholder_consent_to_pass_info_2_no:
+      |\r\n      Thank you so much for speaking with me today.  \r\n      \r\n      Do
+      you have any other questions I can answer \r\n      while we are on the phone
+      right now? \r\n      \r\n      \r\n    contact_info_notes: |\r\n      Great!
+      Thank you for agreeing to let us share your \r\n      information with our research
+      partners at the University of Pittsburgh.\r\n      \r\n      *Scroll to Participant
+      Details to check and add any contact information*\r\n\r\n    placeholder_continue:
+      |    \r\n      Great, then we will be in touch by email to confirm that we \r\n
+      \     have provided the researchers at the University of Pittsburgh \r\n      with
+      your contact information.\r\n \r\n        \r\n    placeholder_end: |\r\n      If
+      you have any questions or want to contact us at \r\n      any time, you can
+      reach me at 617-432-5000 or \r\n      players@footballplayershealth.harvard.edu.
+      \r\n\r\n      \r\n      **END SCREENING**\r\n      \r\n  show_if:\r\n    \r\n\r\n
+      \   consent_to_pass_info_to_pitt_2_yes_no:\r\n      consent_to_pass_info_to_pitt_yes_no:
+      'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n      consent_to_pass_info_to_pitt_2_yes_no:
+      'no'\r\n      \r\n    contact_info_notes: &ok_to_continue\r\n      any_ok_to_continue:\r\n
+      \       consent_to_pass_info_to_pitt_yes_no: 'yes'\r\n        consent_to_pass_info_to_pitt_2_yes_no:
+      'yes'\r\n\r\n\r\n    not_interested_notes:\r\n      any:\r\n        consent_to_pass_info_to_pitt_yes_no:
+      'no'\r\n        consent_to_pass_info_to_pitt_2_yes_no: 'no'\r\n      not_any:
+      *ok_to_continue\r\n      \r\n    placeholder_continue:\r\n      <<: *ok_to_continue\r\n
+      \     \r\n    \r\n\r\n "
+    user_email: 
+  - id: 405
+    name: BHI Phone Screen Non-Eligible
+    table_name: pitt_bhi_ps_non_eligibles
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:11:14.077Z'
+    updated_at: '2020-08-26T15:11:14.077Z'
+    position: 
+    category: pitt-bhi-phone-screen
+    table_key_name: ''
+    field_list: placeholder_initial notes
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before:\r\n  \r\n    placeholder_initial:
+      | \r\n      Thank you for answering these questions. Unfortunately, at this
+      \r\n      time you are not eligible for this particular study. We \r\n      appreciate
+      your interest and participation in our research \r\n      and your commitment
+      to support improving former player health.  \r\n      \r\n      As a reminder,
+      even though you are not eligible for this particular \r\n      study that does
+      not mean that you can’t participate in other \r\n      future Football Players
+      Health Study research studies. \r\n      Please feel free to reach out to our
+      team in the future \r\n      if you have any questions. \r\n      \r\n      \r\n
+      \   notes: Additional Notes\r\n      \r\n"
+    user_email: 
+  - id: 404
+    name: Suitability
+    table_name: pitt_bhi_ps_suitability_questions
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:11:13.965Z'
+    updated_at: '2020-08-26T15:11:13.965Z'
+    position: 
+    category: pitt-bhi-phone-screen
+    table_key_name: ''
+    field_list: birth_date eligible_pension_yes_no age notes
+    result_order: ''
+    options: "# @library grit ps_forms_eligibility\r\n\r\n_comments:\r\n  table: |\r\n
+      \   Suitability assessment form for BHI phone screening, recording responses
+      from subject\r\n  fields:\r\n    birth_date: Date of birth\r\n    eligible_pension_yes_no:
+      |\r\n      Eligible for a pension from the NFL\r\n      (At least 3 seasons
+      with 3 games per season)\r\n    age: Calculated age at the time the response
+      was saved\r\n    notes: Question and notes recorded by interviewer\r\n\r\n\r\n\r\ndefault:\r\n\r\n
+      \ field_options:\r\n    age:\r\n      edit_as:\r\n        field_type: fixed_age\r\n\r\n\r\n
+      \ caption_before:\r\n    \r\n    birth_date: What is your date of birth?\r\n\r\n
+      \   eligible_pension_yes_no: |\r\n      Can you confirm that you are eligible
+      for a pension from the NFL? \r\n      (Must be at least 3 seasons with 3 games
+      per season)\r\n\r\n    age: Age\r\n        \r\n        \r\n    notes: Record
+      question and notes\r\n\r\n  show_if:\r\n    age:\r\n      not_any:\r\n        current_mode:
+      edit\r\n      \r\n"
+    user_email: 
+  - id: 410
     name: PITT BHI Participation Details
     table_name: pitt_bhi_appointments
     schema_name: 
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-04T13:57:25.185Z'
-    updated_at: '2020-08-19T14:20:30.215Z'
+    created_at: '2020-08-26T15:11:14.526Z'
+    updated_at: '2020-09-01T10:23:00.886Z'
     position: 1
     category: pitt-bhi-records
     table_key_name: ''
@@ -2447,27 +2459,27 @@ app_type:
     result_order: updated_at desc
     options: "_comments:\r\n  table: PITT BHI study participation dates and status\r\n\r\ndefault:\r\n\r\n
       \ field_options:\r\n    select_status:\r\n      edit_as:\r\n        alt_options:
-      \r\n          - confirmed\r\n          - uncomfirmed\r\n    \r\n      \r\n    select_status:\r\n
-      \     edit_as:\r\n        field_type: status\r\n      value: confirmed\r\n\r\n
-      \ caption_before: \r\n    placeholder_set_sd: |\r\n      **The subject has been
-      enrolled. A training start date is required**\r\n      \r\n      Edit this form
-      to set the start date. The date may be changed if necessary.\r\n      \r\n    visit_start_date:
+      \r\n          - confirmed\r\n          - uncomfirmed\r\n          - pending
+      participation date\r\n\r\n      value: confirmed\r\n\r\n  caption_before: \r\n
+      \   placeholder_set_sd: |\r\n      **The subject has been enrolled. A training
+      start date is required**\r\n      \r\n      Edit this form to set the start
+      date. The date may be changed if necessary.\r\n      \r\n    visit_start_date:
       Participation start date\r\n    visit_end_date: Expected participation end date\r\n
       \   select_status: Status\r\n    notes: Additional notes  \r\n  \r\n  \r\n  show_if:\r\n
       \   visit_end_date:\r\n      never: true\r\n    placeholder_set_sd:\r\n      visit_start_date:
       \r\n        - ''\r\n        - null"
     user_email: 
-  - id: 634
+  - id: 411
     name: PITT BHI Secure Notes
     table_name: pitt_bhi_secure_notes
     schema_name: 
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-04T14:02:15.136Z'
-    updated_at: '2020-08-04T14:02:15.136Z'
+    created_at: '2020-08-26T15:11:14.609Z'
+    updated_at: '2020-08-26T15:11:14.609Z'
     position: 1
     category: pitt-bhi-records
     table_key_name: ''
@@ -2479,17 +2491,17 @@ app_type:
       participant's study records, and are\r\n      retained and viewable according
       to the study protocol rules.\r\n    \r\n  <<: *access_defaults\r\n"
     user_email: 
-  - id: 639
+  - id: 412
     name: BHI Informed Consent Review
     table_name: pitt_bhi_screenings
     schema_name: 
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-12T17:04:28.491Z'
-    updated_at: '2020-08-12T17:04:28.491Z'
+    created_at: '2020-08-26T15:11:14.729Z'
+    updated_at: '2020-08-26T15:11:14.729Z'
     position: 20
     category: pitt-bhi-records
     table_key_name: ''
@@ -2562,17 +2574,17 @@ app_type:
       information here*\r\n\r\n    \r\n  dialog_before:\r\n\r\n    ineligible_notes:\r\n
       \     name: grit eligibility call not eligible\r\n    \r\n\r\n"
     user_email: 
-  - id: 632
+  - id: 413
     name: PITT BHI Withdrawal
     table_name: pitt_bhi_withdrawals
     schema_name: 
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-04T14:00:29.936Z'
-    updated_at: '2020-08-19T15:02:31.015Z'
+    created_at: '2020-08-26T15:11:14.816Z'
+    updated_at: '2020-08-26T15:11:14.816Z'
     position: 
     category: pitt-bhi-records
     table_key_name: ''
@@ -2598,7 +2610,7 @@ app_type:
       \   "
     user_email: 
   associated_external_identifiers:
-  - id: 56
+  - id: 44
     name: pitt_bhi_assignments
     label: PITT BHI ID
     external_id_attribute: pitt_bhi_id
@@ -2608,16 +2620,16 @@ app_type:
     pregenerate_ids: true
     min_id: 100000
     max_id: 999999
-    admin_id: 21
+    admin_id: 1
     disabled: false
-    created_at: '2020-08-04T11:53:46.082Z'
-    updated_at: '2020-08-07T16:13:57.335Z'
+    created_at: '2020-08-26T15:11:14.900Z'
+    updated_at: '2020-08-26T17:11:36.801Z'
     alphanumeric: false
     extra_fields: ''
     category: pitt-bhi
     user_email: 
   associated_reports:
-  - id: 311
+  - id: 285
     name: Subjects In Process & Exited
     description: "All subjects that have joined or exited the study: in process (phone
       screening scheduled), enrolled, completed, withdrawn, ineligible, other exit
@@ -2632,11 +2644,13 @@ app_type:
       'exit_ps', 'exit_ps_msm', 'exit_opt_out', 'exit_l2fu') THEN 'exited'\r\n  WHEN
       extra_log_type = 'ineligible' THEN 'ineligible'\r\n  WHEN extra_log_type = 'hms_ps_eligible'
       THEN 'eligible'\r\n  WHEN extra_log_type = 'schedule_screening' THEN 'screening
-      scheduled'\r\n  WHEN extra_log_type = 'appointment' THEN 'enrolled'\r\n  WHEN
-      extra_log_type = 'not_screened' THEN 'not screened'\r\n  ELSE extra_log_type\r\n
-      \ END \"status\", \r\n  dt.created_at \r\n  FROM \r\n  (\r\n    SELECT \r\n
-      \   bhi.master_id, bhi.created_at, 'not_screened' extra_log_type, \r\n    1
-      r\r\n    FROM pitt_bhi_assignments bhi\r\n    LEFT JOIN activity_log_pitt_bhi_assignment_phone_screens
+      scheduled'\r\n  WHEN extra_log_type = 'appointment' AND (\r\n    select_status
+      IS NOT NULL AND select_status = 'pending participation date' OR visit_start_date
+      IS NULL) THEN 'enrolled - not scheduled'\r\n  WHEN extra_log_type = 'appointment'
+      THEN 'enrolled'\r\n  WHEN extra_log_type = 'not_screened' THEN 'not screened'\r\n
+      \ ELSE extra_log_type\r\n  END \"status\", \r\n  dt.created_at \r\n  FROM \r\n
+      \ (\r\n    SELECT \r\n    bhi.master_id, bhi.created_at, 'not_screened' extra_log_type,
+      \r\n    1 r\r\n    FROM pitt_bhi_assignments bhi\r\n    LEFT JOIN activity_log_pitt_bhi_assignment_phone_screens
       al\r\n    ON bhi.master_id = al.master_id \r\n    AND al.extra_log_type = 'start_phone_screen'\r\n
       \   WHERE al.id IS NULL\r\n    \r\n    UNION \r\n    \r\n    SELECT\r\n    al.master_id,
       al.created_at, al.extra_log_type,    \r\n    rank()\r\n     OVER (\r\n      PARTITION
@@ -2652,17 +2666,17 @@ app_type:
     search_attrs: "\r\nselect_status: \r\n  config_selector:\r\n    label: Select
       / de-select statuses to report  \r\n    all: true\r\n    multiple: multiple\r\n
       \   default: \r\n      - eligible\r\n      - enrolled\r\n\r\n    selections:
-      \r\n      \r\n      eligible: eligible\r\n      ineligible: ineligible\r\n      completed
-      study: completed study\r\n      completed bbti: completed bbti\r\n      withdrawn:
-      withdrawn\r\n      exited: exited\r\n      enrolled: enrolled\r\n      screening
-      scheduled: screening scheduled\r\n      not screened: not screened\r\n      \r\n
-      \     \r\n\r\nlatest_status_only: \r\n  config_selector: \r\n    all: true\r\n
-      \   multiple: single\r\n    disabled: false\r\n    default: 'yes'\r\n    selections:
-      \r\n      'yes': 'yes'\r\n      'no': 'no'"
-    admin_id: 21
+      \r\n      \r\n      not screened: not screened\r\n      screening scheduled:
+      screening scheduled\r\n      eligible: eligible\r\n      ineligible: ineligible\r\n
+      \     exited: exited\r\n      enrolled - not scheduled: enrolled - not scheduled\r\n
+      \     enrolled: enrolled\r\n      completed study: completed study\r\n      withdrawn:
+      withdrawn\r\n      \r\n      \r\n\r\nlatest_status_only: \r\n  config_selector:
+      \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n    default:
+      'yes'\r\n    selections: \r\n      'yes': 'yes'\r\n      'no': 'no'"
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-14T08:35:13.861Z'
-    updated_at: '2020-08-19T14:44:17.333Z'
+    created_at: '2020-08-26T15:11:15.853Z'
+    updated_at: '2020-09-01T10:24:31.197Z'
     report_type: search
     auto: false
     searchable: true
@@ -2674,7 +2688,7 @@ app_type:
     short_name: subjects_in_process_exited
     options: ''
     user_email: 
-  - id: 312
+  - id: 286
     name: Search BHI Study Subject
     description: "Search subjects by name, phone, email or ID.\r\nLeave the search
       field empty to see all subjects."
@@ -2690,10 +2704,10 @@ app_type:
       '\\W+', '', 'g') ~* regexp_replace(:name, '\\W+', '', 'g')\r\n) OR\r\n(\r\nb.pitt_bhi_id::varchar
       = :name\r\n)\r\n"
     search_attrs: "name: \r\n  text: \r\n    all: true\r\n    multiple: single\r\n"
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-14T08:36:59.211Z'
-    updated_at: '2020-08-14T08:44:08.776Z'
+    created_at: '2020-08-26T15:11:15.861Z'
+    updated_at: '2020-08-26T15:11:15.861Z'
     report_type: search
     auto: false
     searchable: true
@@ -2705,7 +2719,7 @@ app_type:
     short_name: search_bhi_study_subject
     options: ''
     user_email: 
-  - id: 313
+  - id: 287
     name: PITT BHI Calendar
     description: ''
     sql: "\r\ncreate temp table appointments\r\nas select\r\nvisit_start_date,\r\nap.master_id,\r\npitt_bhi.pitt_bhi_id,\r\npi.first_name,\r\npi.last_name,\r\nmax(ap.id)
@@ -2744,10 +2758,10 @@ app_type:
       \   default: -6 months\r\n\r\nto_date: \r\n  date: \r\n    all: true\r\n    multiple:
       single\r\n    default: +12 months\r\n    \r\n\r\n\r\npitt_bhi_id: \r\n  number:
       \r\n    label: PITT BHI ID\r\n    all: true\r\n    multiple: single\r\n\r\n\r\n"
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-18T11:03:19.210Z'
-    updated_at: '2020-08-18T11:03:19.210Z'
+    created_at: '2020-08-26T15:11:15.867Z'
+    updated_at: '2020-08-26T15:11:15.867Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -2765,15 +2779,97 @@ app_type:
       '#155fbb'\r\n      border-color: gray\r\n    report-cal-pi-call-event:\r\n      background-color:
       '#044'\r\n      border-color: gray\r\n"
     user_email: 
+  - id: 297
+    name: Needs Follow Up Communication
+    description: Participants with an appointment set that are ready for specific
+      follow up activities.
+    sql: "select al0.master_id, max(al0.updated_at) \"updated_at\"\r\nfrom \r\n  activity_log_pitt_bhi_assignments
+      al0\r\n  \r\n-- Ensure this is a record appearing at the top level, not referenced
+      from \r\n-- a top level activity\r\nleft join model_references mr1\r\n  on mr1.to_record_master_id
+      = al0.master_id\r\n  and mr1.to_record_type = 'ActivityLog::PittBhiAssignment'\r\n
+      \ and mr1.to_record_id = al0.id\r\nleft join activity_log_pitt_bhi_assignments
+      al02\r\n  on mr1.from_record_master_id = al02.master_id\r\n  and mr1.from_record_type
+      = 'ActivityLog::PittBhiAssignment'\r\n  and mr1.from_record_id = al02.id\r\n
+      \ and al02.extra_log_type = 'general'  \r\n  \r\nwhere \r\n  al0.extra_log_type
+      = 'general'\r\n  and ( \r\n    al02.id is null \r\n    and\r\n    (\r\n      coalesce(al0.select_result,
+      'none') <> 'completed' \r\n      and coalesce(al0.select_activity, 'none') <>
+      'completed' \r\n    )\r\n    and\r\n      -- Check this does not have a referenced
+      record \r\n      -- marked as completed\r\n      al0.id not in \r\n      (\r\n
+      \       select al.id\r\n        from activity_log_pitt_bhi_assignments al\r\n
+      \       inner join model_references mr\r\n          on mr.from_record_master_id
+      = al.master_id\r\n          and mr.from_record_type = 'ActivityLog::PittBhiAssignment'\r\n
+      \         and mr.from_record_id = al.id\r\n        inner join activity_log_pitt_bhi_assignments
+      al2\r\n          on mr.to_record_master_id = al2.master_id\r\n          and
+      mr.to_record_type = 'ActivityLog::PittBhiAssignment'\r\n          and mr.to_record_id
+      = al2.id\r\n          and al2.extra_log_type = 'general'\r\n        where \r\n
+      \         al.master_id = al0.master_id\r\n          and al.extra_log_type =
+      'general'\r\n          and  (\r\n            coalesce(al.select_result, 'none')
+      = 'completed' \r\n            or coalesce(al2.select_result, 'none') = 'completed'
+      \r\n            or coalesce(al.select_activity, 'none') = 'completed' \r\n            or
+      coalesce(al2.select_activity, 'none') = 'completed' \r\n          )\r\n      )\r\n
+      \   ) \r\n    \r\n  and al0.master_id not in (\r\n    select sa2.master_id \r\n
+      \   from activity_log_pitt_bhi_assignments sa2\r\n    where extra_log_type in
+      ('exit_ps', 'exit_not_consented', 'ineligible', 'exit_ps_bwh', 'completed',
+      'exit_opt_out', 'exit_l2fu')\r\n    and created_at < (current_date - 14)\r\n
+      \ )\r\n  and al0.master_id not in (\r\n    select dsw.master_id \r\n    from
+      pitt_bhi_withdrawals dsw\r\n    where \r\n    select_subject_withdrew_reason
+      = 'withdrew'\r\n    and created_at < (current_date - 14)\r\n  )    \r\ngroup
+      by al0.master_id\r\norder by \r\n  \"updated_at\" desc;"
+    search_attrs: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-01T10:27:29.950Z'
+    updated_at: '2020-09-01T10:27:29.950Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 5
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: pitt-bhi
+    short_name: needs_follow_up_communication
+    options: ''
+    user_email: 
   associated_general_selections:
+  - id: 12
+    name: nflpa
+    value: nflpa
+    item_type: player_infos_source
+    created_at: '2018-02-15T15:52:01.475Z'
+    updated_at: '2020-08-26T17:11:37.166Z'
+    disabled: 
+    admin_id: 1
+    create_with: false
+    edit_if_set: 
+    edit_always: false
+    position: 1600
+    description: 
+    lock: true
+    user_email: 
+  - id: 13
+    name: nflpa2
+    value: nflpa2
+    item_type: player_infos_source
+    created_at: '2018-02-15T15:52:01.491Z'
+    updated_at: '2020-08-26T17:11:36.912Z'
+    disabled: 
+    admin_id: 1
+    create_with: false
+    edit_if_set: 
+    edit_always: false
+    position: 1160
+    description: 
+    lock: true
+    user_email: 
   - id: 14
     name: primary
     value: '10'
     item_type: player_contacts_rank
     created_at: '2018-02-15T15:52:01.514Z'
-    updated_at: '2020-03-31T09:14:55.022Z'
+    updated_at: '2020-08-26T17:11:36.873Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -2786,9 +2882,9 @@ app_type:
     value: '5'
     item_type: player_contacts_rank
     created_at: '2018-02-15T15:52:01.543Z'
-    updated_at: '2020-03-31T09:14:55.028Z'
+    updated_at: '2020-08-26T17:11:36.880Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -2801,9 +2897,9 @@ app_type:
     value: "-1"
     item_type: player_contacts_rank
     created_at: '2018-02-15T15:52:01.689Z'
-    updated_at: '2020-03-31T09:14:55.038Z'
+    updated_at: '2020-08-26T17:11:36.893Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -2816,9 +2912,9 @@ app_type:
     value: nfl
     item_type: player_contacts_source
     created_at: '2018-02-15T15:52:01.716Z'
-    updated_at: '2020-03-31T09:14:55.043Z'
+    updated_at: '2018-09-19T12:08:27.283Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -2831,9 +2927,9 @@ app_type:
     value: nflpa
     item_type: player_contacts_source
     created_at: '2018-02-15T15:52:01.731Z'
-    updated_at: '2020-03-31T09:14:55.048Z'
+    updated_at: '2020-08-26T17:11:36.980Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -2846,9 +2942,9 @@ app_type:
     value: nfl
     item_type: addresses_source
     created_at: '2018-02-15T15:52:01.814Z'
-    updated_at: '2020-03-31T09:14:55.063Z'
+    updated_at: '2019-12-03T13:59:02.930Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -2861,9 +2957,9 @@ app_type:
     value: nflpa
     item_type: addresses_source
     created_at: '2018-02-15T15:52:01.827Z'
-    updated_at: '2020-03-31T09:14:55.067Z'
+    updated_at: '2020-08-26T17:11:37.086Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -2876,9 +2972,9 @@ app_type:
     value: '10'
     item_type: addresses_rank
     created_at: '2018-02-15T15:52:01.847Z'
-    updated_at: '2020-03-31T09:14:55.072Z'
+    updated_at: '2020-08-26T17:11:36.842Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -2891,28 +2987,13 @@ app_type:
     value: '5'
     item_type: addresses_rank
     created_at: '2018-02-15T15:52:01.860Z'
-    updated_at: '2020-03-31T09:14:55.076Z'
+    updated_at: '2020-08-26T17:11:36.854Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
     position: 1070
-    description: 
-    lock: 
-    user_email: 
-  - id: 26
-    name: do not use
-    value: '0'
-    item_type: addresses_rank
-    created_at: '2018-02-15T15:52:01.880Z'
-    updated_at: '2020-03-31T09:14:55.080Z'
-    disabled: 
-    admin_id: 21
-    create_with: true
-    edit_if_set: 
-    edit_always: true
-    position: 1080
     description: 
     lock: 
     user_email: 
@@ -2921,9 +3002,9 @@ app_type:
     value: "-1"
     item_type: addresses_rank
     created_at: '2018-02-15T15:52:01.895Z'
-    updated_at: '2020-03-31T09:14:55.085Z'
+    updated_at: '2020-08-26T17:11:36.867Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -2931,29 +3012,14 @@ app_type:
     description: 
     lock: 
     user_email: 
-  - id: 29
-    name: nflpa
-    value: nflpa
-    item_type: player_infos_source
-    created_at: '2015-08-12T19:43:23.821Z'
-    updated_at: '2020-03-31T09:14:55.007Z'
-    disabled: 
-    admin_id: 21
-    create_with: false
-    edit_if_set: 
-    edit_always: false
-    position: 1600
-    description: 
-    lock: true
-    user_email: 
   - id: 31
     name: Community
     value: comm
     item_type: player_infos_source
     created_at: '2015-08-12T19:49:04.603Z'
-    updated_at: '2020-03-31T09:14:55.124Z'
+    updated_at: '2018-05-29T13:24:49.650Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -2966,9 +3032,9 @@ app_type:
     value: nflpa2
     item_type: addresses_source
     created_at: '2015-08-12T20:09:46.808Z'
-    updated_at: '2020-03-31T09:14:55.193Z'
+    updated_at: '2020-08-26T17:11:37.092Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -2981,9 +3047,9 @@ app_type:
     value: cis
     item_type: addresses_source
     created_at: '2015-08-14T16:09:09.694Z'
-    updated_at: '2020-03-31T09:14:55.353Z'
+    updated_at: '2018-09-19T12:12:32.854Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -2999,9 +3065,9 @@ app_type:
     value: email
     item_type: player_contacts_type
     created_at: '2015-09-10T15:15:31.892Z'
-    updated_at: '2020-03-31T09:14:55.053Z'
+    updated_at: '2020-08-26T17:11:37.000Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3014,9 +3080,9 @@ app_type:
     value: phone
     item_type: player_contacts_type
     created_at: '2015-09-10T15:15:31.897Z'
-    updated_at: '2020-03-31T09:14:55.058Z'
+    updated_at: '2020-08-26T17:11:37.033Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3029,9 +3095,9 @@ app_type:
     value: integrate1
     item_type: addresses_source
     created_at: '2015-09-24T18:58:00.195Z'
-    updated_at: '2020-03-31T09:14:55.140Z'
+    updated_at: '2020-08-26T17:11:37.073Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3044,9 +3110,9 @@ app_type:
     value: integrate2
     item_type: addresses_source
     created_at: '2015-09-24T18:58:27.899Z'
-    updated_at: '2020-03-31T09:14:55.183Z'
+    updated_at: '2020-08-26T17:11:37.079Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3059,9 +3125,9 @@ app_type:
     value: other
     item_type: addresses_source
     created_at: '2015-09-24T18:58:56.893Z'
-    updated_at: '2020-03-31T09:14:55.359Z'
+    updated_at: '2018-09-19T12:12:26.767Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3075,9 +3141,9 @@ app_type:
     value: cis-paper
     item_type: player_infos_source
     created_at: '2015-09-24T19:00:01.751Z'
-    updated_at: '2020-03-31T09:14:55.119Z'
+    updated_at: '2020-08-26T17:11:37.137Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3090,9 +3156,9 @@ app_type:
     value: cis-paper
     item_type: addresses_source
     created_at: '2015-09-24T19:00:27.920Z'
-    updated_at: '2020-08-19T10:22:11.950Z'
+    updated_at: '2020-08-26T17:11:37.053Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3105,9 +3171,9 @@ app_type:
     value: cis-email
     item_type: addresses_source
     created_at: '2015-09-24T19:00:45.434Z'
-    updated_at: '2020-08-19T10:22:11.944Z'
+    updated_at: '2020-08-26T17:11:37.046Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3115,29 +3181,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 42
-    name: nflpa2
-    value: nflpa2
-    item_type: player_infos_source
-    created_at: '2015-09-24T20:20:44.103Z'
-    updated_at: '2020-03-31T09:14:55.017Z'
-    disabled: 
-    admin_id: 21
-    create_with: false
-    edit_if_set: 
-    edit_always: false
-    position: 1160
-    description: 
-    lock: true
-    user_email: 
   - id: 43
     name: nflpa2
     value: nflpa2
     item_type: player_contacts_source
     created_at: '2015-09-24T20:26:05.392Z'
-    updated_at: '2020-03-31T09:14:55.095Z'
+    updated_at: '2020-08-26T17:11:36.986Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3150,9 +3201,9 @@ app_type:
     value: integrate1
     item_type: player_contacts_source
     created_at: '2015-09-24T20:26:39.899Z'
-    updated_at: '2020-03-31T09:14:55.099Z'
+    updated_at: '2020-08-26T17:11:36.968Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3165,9 +3216,9 @@ app_type:
     value: integrate2
     item_type: player_contacts_source
     created_at: '2015-09-24T20:26:51.693Z'
-    updated_at: '2020-03-31T09:14:55.103Z'
+    updated_at: '2020-08-26T17:11:36.974Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3181,9 +3232,9 @@ app_type:
     value: cis
     item_type: player_contacts_source
     created_at: '2015-09-24T20:27:19.419Z'
-    updated_at: '2020-03-31T09:14:55.109Z'
+    updated_at: '2018-09-19T12:08:31.759Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3196,9 +3247,9 @@ app_type:
     value: cis-paper
     item_type: player_contacts_source
     created_at: '2015-09-24T20:27:47.697Z'
-    updated_at: '2020-08-19T10:22:11.876Z'
+    updated_at: '2020-08-26T17:11:36.944Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3211,9 +3262,9 @@ app_type:
     value: cis-email
     item_type: player_contacts_source
     created_at: '2015-09-24T20:28:09.928Z'
-    updated_at: '2020-08-19T10:22:11.867Z'
+    updated_at: '2020-08-26T17:11:36.938Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3226,13 +3277,28 @@ app_type:
     value: '0'
     item_type: player_contacts_rank
     created_at: '2015-10-20T16:24:09.278Z'
-    updated_at: '2020-03-31T09:14:55.033Z'
+    updated_at: '2020-08-26T17:11:36.886Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
     position: 1120
+    description: 
+    lock: 
+    user_email: 
+  - id: 52
+    name: do not use
+    value: '0'
+    item_type: addresses_rank
+    created_at: '2015-10-20T16:24:09.308Z'
+    updated_at: '2020-08-26T17:11:36.860Z'
+    disabled: 
+    admin_id: 1
+    create_with: true
+    edit_if_set: 
+    edit_always: true
+    position: 1080
     description: 
     lock: 
     user_email: 
@@ -3241,9 +3307,9 @@ app_type:
     value: phone
     item_type: player_contacts_rec_type
     created_at: '2018-05-29T13:24:49.682Z'
-    updated_at: '2020-03-31T09:14:55.333Z'
+    updated_at: '2018-05-29T13:24:49.682Z'
     disabled: 
-    admin_id: 21
+    admin_id: 2
     create_with: 
     edit_if_set: 
     edit_always: 
@@ -3256,9 +3322,9 @@ app_type:
     value: email
     item_type: player_contacts_rec_type
     created_at: '2018-05-29T13:24:49.689Z'
-    updated_at: '2020-03-31T09:14:55.339Z'
+    updated_at: '2018-05-29T13:24:49.689Z'
     disabled: 
-    admin_id: 21
+    admin_id: 2
     create_with: 
     edit_if_set: 
     edit_always: 
@@ -3271,9 +3337,9 @@ app_type:
     value: cis-redcap
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.596Z'
-    updated_at: '2020-08-19T10:22:11.890Z'
+    updated_at: '2020-08-26T17:11:36.961Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3286,9 +3352,9 @@ app_type:
     value: nflpa4
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.602Z'
-    updated_at: '2020-03-31T09:14:55.216Z'
+    updated_at: '2020-08-26T17:11:37.245Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3301,9 +3367,9 @@ app_type:
     value: nflpa3
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.607Z'
-    updated_at: '2020-03-31T09:14:55.221Z'
+    updated_at: '2020-08-26T17:11:37.224Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3316,9 +3382,9 @@ app_type:
     value: player referral
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.612Z'
-    updated_at: '2020-08-19T10:22:12.079Z'
+    updated_at: '2020-08-26T17:11:37.193Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3331,9 +3397,9 @@ app_type:
     value: public source
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.617Z'
-    updated_at: '2020-08-19T10:22:12.084Z'
+    updated_at: '2020-08-26T17:11:37.200Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3346,9 +3412,9 @@ app_type:
     value: event
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.622Z'
-    updated_at: '2020-08-19T10:22:12.068Z'
+    updated_at: '2020-08-26T17:11:37.180Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3361,9 +3427,9 @@ app_type:
     value: cis-phone
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.627Z'
-    updated_at: '2020-08-19T10:22:11.883Z'
+    updated_at: '2020-08-26T17:11:36.951Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3376,9 +3442,9 @@ app_type:
     value: not set
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.632Z'
-    updated_at: '2020-03-31T09:14:55.257Z'
+    updated_at: '2020-08-26T17:11:36.993Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3391,9 +3457,9 @@ app_type:
     value: facebook
     item_type: player_contacts_type
     created_at: '2018-09-11T11:53:34.637Z'
-    updated_at: '2020-03-31T09:14:55.262Z'
+    updated_at: '2020-08-26T17:11:37.026Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3406,9 +3472,9 @@ app_type:
     value: twitter
     item_type: player_contacts_type
     created_at: '2018-09-11T11:53:34.642Z'
-    updated_at: '2020-03-31T09:14:55.266Z'
+    updated_at: '2020-08-26T17:11:37.039Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3421,9 +3487,9 @@ app_type:
     value: nflpa4
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.647Z'
-    updated_at: '2020-03-31T09:14:55.271Z'
+    updated_at: '2020-08-26T17:11:37.238Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3436,9 +3502,9 @@ app_type:
     value: integrate1
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.651Z'
-    updated_at: '2020-03-31T09:14:55.276Z'
+    updated_at: '2020-08-26T17:11:36.899Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3451,9 +3517,9 @@ app_type:
     value: integrate2
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.656Z'
-    updated_at: '2020-03-31T09:14:55.281Z'
+    updated_at: '2020-08-26T17:11:36.905Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3466,9 +3532,9 @@ app_type:
     value: not set
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.661Z'
-    updated_at: '2020-03-31T09:14:55.287Z'
+    updated_at: '2020-08-26T17:11:36.919Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3481,9 +3547,9 @@ app_type:
     value: other
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.666Z'
-    updated_at: '2020-03-31T09:14:55.292Z'
+    updated_at: '2020-08-26T17:11:36.925Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3496,9 +3562,9 @@ app_type:
     value: redcap
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.671Z'
-    updated_at: '2020-03-31T09:14:55.297Z'
+    updated_at: '2020-08-26T17:11:36.931Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3511,9 +3577,9 @@ app_type:
     value: cis
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.677Z'
-    updated_at: '2020-03-31T09:14:55.301Z'
+    updated_at: '2020-08-26T17:11:37.124Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3526,9 +3592,9 @@ app_type:
     value: cis-email
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.682Z'
-    updated_at: '2020-03-31T09:14:55.306Z'
+    updated_at: '2020-08-26T17:11:37.131Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3541,9 +3607,9 @@ app_type:
     value: cis-phone
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.687Z'
-    updated_at: '2020-03-31T09:14:55.311Z'
+    updated_at: '2020-08-26T17:11:37.147Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3556,9 +3622,9 @@ app_type:
     value: cis-redcap
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.691Z'
-    updated_at: '2020-03-31T09:14:55.315Z'
+    updated_at: '2020-08-26T17:11:37.154Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3571,9 +3637,9 @@ app_type:
     value: contactinfo
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.697Z'
-    updated_at: '2020-03-31T09:14:55.321Z'
+    updated_at: '2020-08-26T17:11:37.160Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3586,9 +3652,9 @@ app_type:
     value: usps
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.703Z'
-    updated_at: '2020-03-31T09:14:55.327Z'
+    updated_at: '2020-08-26T17:11:37.172Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3601,9 +3667,9 @@ app_type:
     value: app entry
     item_type: player_contacts_source
     created_at: '2018-09-19T12:07:41.040Z'
-    updated_at: '2020-03-31T09:14:55.344Z'
+    updated_at: '2018-09-19T12:07:41.040Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3616,9 +3682,9 @@ app_type:
     value: app entry
     item_type: addresses_source
     created_at: '2018-09-19T12:11:58.913Z'
-    updated_at: '2020-03-31T09:14:55.348Z'
+    updated_at: '2018-09-19T12:11:58.913Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3631,9 +3697,9 @@ app_type:
     value: cis-redcap
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.115Z'
-    updated_at: '2020-08-19T10:22:11.963Z'
+    updated_at: '2020-08-26T17:11:37.067Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3646,9 +3712,9 @@ app_type:
     value: nflpa4
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.126Z'
-    updated_at: '2020-03-31T09:14:55.145Z'
+    updated_at: '2020-08-26T17:11:37.306Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3661,9 +3727,9 @@ app_type:
     value: nflpa3
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.130Z'
-    updated_at: '2020-03-31T09:14:55.149Z'
+    updated_at: '2020-08-26T17:11:37.232Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3676,9 +3742,9 @@ app_type:
     value: public source
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.135Z'
-    updated_at: '2020-08-19T10:22:12.095Z'
+    updated_at: '2020-08-26T17:11:37.213Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3691,9 +3757,9 @@ app_type:
     value: player referral
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.139Z'
-    updated_at: '2020-08-19T10:22:12.090Z'
+    updated_at: '2020-08-26T17:11:37.206Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3706,9 +3772,9 @@ app_type:
     value: event
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.144Z'
-    updated_at: '2020-08-19T10:22:12.074Z'
+    updated_at: '2020-08-26T17:11:37.186Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3721,9 +3787,9 @@ app_type:
     value: cis-phone
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.151Z'
-    updated_at: '2020-08-19T10:22:11.956Z'
+    updated_at: '2020-08-26T17:11:37.059Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3736,9 +3802,9 @@ app_type:
     value: not set
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.160Z'
-    updated_at: '2020-03-31T09:14:55.188Z'
+    updated_at: '2020-08-26T17:11:37.098Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3751,9 +3817,9 @@ app_type:
     value: business
     item_type: addresses_type
     created_at: '2019-01-18T11:24:31.167Z'
-    updated_at: '2020-08-19T10:22:11.998Z'
+    updated_at: '2020-08-26T17:11:37.104Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3766,9 +3832,9 @@ app_type:
     value: home
     item_type: addresses_type
     created_at: '2019-01-18T11:24:31.171Z'
-    updated_at: '2020-03-31T09:14:55.203Z'
+    updated_at: '2020-08-26T17:11:37.111Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3781,9 +3847,9 @@ app_type:
     value: not set
     item_type: addresses_type
     created_at: '2019-01-18T11:24:31.176Z'
-    updated_at: '2020-03-31T09:14:55.207Z'
+    updated_at: '2020-08-26T17:11:37.118Z'
     disabled: 
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3791,14 +3857,14 @@ app_type:
     description: 
     lock: false
     user_email: 
-  - id: 728
+  - id: 578
     name: escrow
     value: '1'
     item_type: player_contacts_rank
-    created_at: '2019-10-22T11:31:19.799Z'
-    updated_at: '2020-03-31T09:14:55.757Z'
+    created_at: '2019-10-22T10:59:18.302Z'
+    updated_at: '2020-08-26T17:11:37.357Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: true
@@ -3806,14 +3872,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 729
+  - id: 579
     name: escrow-secondary
     value: '2'
     item_type: player_contacts_rank
-    created_at: '2019-10-22T11:31:19.802Z'
-    updated_at: '2020-03-31T09:14:55.762Z'
+    created_at: '2019-10-22T10:59:18.305Z'
+    updated_at: '2020-08-26T17:11:37.364Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: true
@@ -3821,14 +3887,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 730
+  - id: 580
     name: nflpa5
     value: nflpa5
     item_type: player_infos_source
-    created_at: '2019-10-22T11:31:19.805Z'
-    updated_at: '2020-03-31T09:14:55.770Z'
+    created_at: '2019-10-22T10:59:18.309Z'
+    updated_at: '2020-08-26T17:11:37.370Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3836,14 +3902,14 @@ app_type:
     description: ''
     lock: true
     user_email: 
-  - id: 731
+  - id: 581
     name: nflpa5
     value: nflpa5
     item_type: player_contacts_source
-    created_at: '2019-10-22T11:31:19.809Z'
-    updated_at: '2020-03-31T09:14:55.778Z'
+    created_at: '2019-10-22T10:59:18.312Z'
+    updated_at: '2020-08-26T17:11:37.377Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3851,14 +3917,14 @@ app_type:
     description: ''
     lock: true
     user_email: 
-  - id: 732
+  - id: 582
     name: nflpa5
     value: nflpa5
     item_type: addresses_source
-    created_at: '2019-10-22T11:31:19.812Z'
-    updated_at: '2020-03-31T09:14:55.782Z'
+    created_at: '2019-10-22T10:59:18.316Z'
+    updated_at: '2020-08-26T17:11:37.384Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3866,14 +3932,14 @@ app_type:
     description: ''
     lock: true
     user_email: 
-  - id: 734
+  - id: 584
     name: nflpa6
     value: nflpa6
     item_type: player_infos_source
-    created_at: '2019-10-22T11:31:19.819Z'
-    updated_at: '2020-03-31T09:14:55.787Z'
+    created_at: '2019-10-22T10:59:18.323Z'
+    updated_at: '2020-08-26T17:11:37.395Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3881,14 +3947,14 @@ app_type:
     description: ''
     lock: true
     user_email: 
-  - id: 735
+  - id: 585
     name: nflpa6
     value: nflpa6
     item_type: player_contacts_source
-    created_at: '2019-10-22T11:31:19.822Z'
-    updated_at: '2020-03-31T09:14:55.792Z'
+    created_at: '2019-10-22T10:59:18.326Z'
+    updated_at: '2020-08-26T17:11:37.402Z'
     disabled: false
-    admin_id: 21
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3896,14 +3962,14 @@ app_type:
     description: ''
     lock: true
     user_email: 
-  - id: 850
+  - id: 681
     name: Record Communications
     value: general communications
     item_type: activity_log__pitt_bhi_assignment_select_activity
-    created_at: '2020-08-14T10:11:27.763Z'
-    updated_at: '2020-08-14T10:11:27.763Z'
+    created_at: '2020-08-26T15:11:15.741Z'
+    updated_at: '2020-08-26T15:11:15.741Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3911,14 +3977,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 851
+  - id: 682
     name: Mark All Previous As Completed
     value: completed
     item_type: activity_log__pitt_bhi_assignment_select_activity
-    created_at: '2020-08-14T10:11:52.861Z'
-    updated_at: '2020-08-14T10:11:52.861Z'
+    created_at: '2020-08-26T15:11:15.752Z'
+    updated_at: '2020-08-26T15:11:15.752Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3926,14 +3992,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 852
+  - id: 683
     name: Schedule Follow Up
     value: schedule follow up
     item_type: activity_log__pitt_bhi_assignment_select_activity
-    created_at: '2020-08-14T10:12:12.245Z'
-    updated_at: '2020-08-14T10:12:12.245Z'
+    created_at: '2020-08-26T15:11:15.759Z'
+    updated_at: '2020-08-26T15:11:15.759Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3941,14 +4007,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 853
+  - id: 684
     name: From Subject
     value: to staff
     item_type: activity_log__pitt_bhi_assignment_select_direction
-    created_at: '2020-08-14T10:12:26.912Z'
-    updated_at: '2020-08-14T10:12:26.912Z'
+    created_at: '2020-08-26T15:11:15.765Z'
+    updated_at: '2020-08-26T15:11:15.765Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3956,14 +4022,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 854
+  - id: 685
     name: To Subject
     value: to subject
     item_type: activity_log__pitt_bhi_assignment_select_direction
-    created_at: '2020-08-14T10:12:44.908Z'
-    updated_at: '2020-08-14T10:12:44.908Z'
+    created_at: '2020-08-26T15:11:15.772Z'
+    updated_at: '2020-08-26T15:11:15.772Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3971,14 +4037,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 855
+  - id: 686
     name: No Follow Up
     value: no follow up
     item_type: activity_log__pitt_bhi_assignment_select_next_step
-    created_at: '2020-08-14T10:13:44.514Z'
-    updated_at: '2020-08-14T10:13:44.514Z'
+    created_at: '2020-08-26T15:11:15.779Z'
+    updated_at: '2020-08-26T15:11:15.779Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -3986,14 +4052,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 856
+  - id: 687
     name: More Info Requested
     value: more info requested
     item_type: activity_log__pitt_bhi_assignment_select_next_step
-    created_at: '2020-08-14T10:14:06.559Z'
-    updated_at: '2020-08-14T10:14:06.559Z'
+    created_at: '2020-08-26T15:11:15.786Z'
+    updated_at: '2020-08-26T15:11:15.786Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -4001,14 +4067,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 857
+  - id: 688
     name: Call Back
     value: call back
     item_type: activity_log__pitt_bhi_assignment_select_next_step
-    created_at: '2020-08-14T10:14:26.407Z'
-    updated_at: '2020-08-14T10:14:26.407Z'
+    created_at: '2020-08-26T15:11:15.792Z'
+    updated_at: '2020-08-26T15:11:15.792Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -4016,14 +4082,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 858
+  - id: 689
     name: Email Back
     value: email back
     item_type: activity_log__pitt_bhi_assignment_select_next_step
-    created_at: '2020-08-14T10:14:45.142Z'
-    updated_at: '2020-08-14T10:14:45.142Z'
+    created_at: '2020-08-26T15:11:15.799Z'
+    updated_at: '2020-08-26T15:11:15.799Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -4031,14 +4097,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 859
+  - id: 690
     name: Completed
     value: completed
     item_type: activity_log__pitt_bhi_assignment_select_result
-    created_at: '2020-08-14T10:15:12.316Z'
-    updated_at: '2020-08-14T10:15:12.316Z'
+    created_at: '2020-08-26T15:11:15.806Z'
+    updated_at: '2020-08-26T15:11:15.806Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: false
@@ -4046,14 +4112,14 @@ app_type:
     description: ''
     lock: true
     user_email: 
-  - id: 860
+  - id: 691
     name: Follow up
     value: follow up
     item_type: activity_log__pitt_bhi_assignment_select_result
-    created_at: '2020-08-14T10:15:31.810Z'
-    updated_at: '2020-08-14T10:15:31.810Z'
+    created_at: '2020-08-26T15:11:15.812Z'
+    updated_at: '2020-08-26T15:11:15.812Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: false
@@ -4061,14 +4127,14 @@ app_type:
     description: ''
     lock: true
     user_email: 
-  - id: 861
+  - id: 692
     name: User
     value: user
     item_type: activity_log__pitt_bhi_assignment_select_who
-    created_at: '2020-08-14T10:16:17.528Z'
-    updated_at: '2020-08-14T10:16:17.528Z'
+    created_at: '2020-08-26T15:11:15.819Z'
+    updated_at: '2020-08-26T15:11:15.819Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -4076,14 +4142,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 862
+  - id: 693
     name: Not interested
     value: not interested
     item_type: dynamic_model__pitt_bhi_ps_initial_screenings_select_is_good_time_to_speak
-    created_at: '2020-08-14T10:18:05.167Z'
-    updated_at: '2020-08-14T10:18:05.167Z'
+    created_at: '2020-08-26T15:11:15.826Z'
+    updated_at: '2020-08-26T15:11:15.826Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -4091,14 +4157,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 863
+  - id: 694
     name: Not appropriate time
     value: not appropriate time
     item_type: dynamic_model__pitt_bhi_ps_initial_screenings_select_is_good_time_to_speak
-    created_at: '2020-08-14T10:18:31.459Z'
-    updated_at: '2020-08-14T10:18:31.459Z'
+    created_at: '2020-08-26T15:11:15.832Z'
+    updated_at: '2020-08-26T15:11:15.832Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -4106,14 +4172,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 864
+  - id: 695
     name: Left Voicemail
     value: left voicemail
     item_type: dynamic_model__pitt_bhi_ps_initial_screenings_select_is_good_time_to_speak
-    created_at: '2020-08-14T10:18:49.538Z'
-    updated_at: '2020-08-14T10:18:49.538Z'
+    created_at: '2020-08-26T15:11:15.839Z'
+    updated_at: '2020-08-26T15:11:15.839Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -4121,14 +4187,14 @@ app_type:
     description: ''
     lock: false
     user_email: 
-  - id: 865
+  - id: 696
     name: 'Yes'
     value: 'yes'
     item_type: dynamic_model__pitt_bhi_ps_initial_screenings_select_is_good_time_to_speak
-    created_at: '2020-08-14T10:19:10.258Z'
-    updated_at: '2020-08-14T10:19:10.258Z'
+    created_at: '2020-08-26T15:11:15.845Z'
+    updated_at: '2020-08-26T15:11:15.845Z'
     disabled: false
-    admin_id: 21
+    admin_id: 2
     create_with: true
     edit_if_set: false
     edit_always: true
@@ -4137,8 +4203,8 @@ app_type:
     lock: false
     user_email: 
   page_layouts:
-  - id: 81
-    app_type_id: 44
+  - id: 55
+    app_type_id: 25
     layout_name: master
     panel_name: pitt-bhi-tracker
     panel_label: Recruitment & Logistics
@@ -4146,26 +4212,26 @@ app_type:
     options: "contains: \r\n  resources:\r\n  - activity_log__pitt_bhi_assignments\r\n\r\nview_options:\r\n
       \ initial_show: true\r\n\r\n"
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-14T08:54:42.871Z'
-    updated_at: '2020-08-14T08:55:35.300Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:15.895Z'
+    updated_at: '2020-08-26T15:11:15.895Z'
     description: ''
     user_email: 
-  - id: 82
-    app_type_id: 44
+  - id: 56
+    app_type_id: 25
     layout_name: master
     panel_name: pitt-bhi-phone-screen
     panel_label: Phone Screen
     panel_position: 2
     options: "contains: \r\n  resources:\r\n  - activity_log__pitt_bhi_assignment_phone_screens"
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-14T08:55:18.812Z'
-    updated_at: '2020-08-14T08:55:35.298Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:15.906Z'
+    updated_at: '2020-08-26T15:11:15.906Z'
     description: ''
     user_email: 
-  - id: 83
-    app_type_id: 44
+  - id: 57
+    app_type_id: 25
     layout_name: master
     panel_name: external-ids
     panel_label: External IDs
@@ -4173,13 +4239,13 @@ app_type:
     options: "contains:\r\n  categories:\r\n  - external-ids\r\n\r\ntab:\r\n  parent:
       participant_details"
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-14T08:56:09.677Z'
-    updated_at: '2020-08-14T08:56:09.677Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:15.914Z'
+    updated_at: '2020-08-26T15:11:15.914Z'
     description: ''
     user_email: 
-  - id: 84
-    app_type_id: 44
+  - id: 58
+    app_type_id: 25
     layout_name: master
     panel_name: details
     panel_label: Participant Details
@@ -4187,13 +4253,13 @@ app_type:
     options: "contains:\r\n  categories: \r\n  - details\r\n\r\nview_options:\r\n
       \ initial_show: true\r\n\r\ntab:\r\n  parent: participant_details"
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-14T08:56:39.243Z'
-    updated_at: '2020-08-14T08:56:39.243Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:15.923Z'
+    updated_at: '2020-08-26T15:11:15.923Z'
     description: ''
     user_email: 
-  - id: 85
-    app_type_id: 44
+  - id: 59
+    app_type_id: 25
     layout_name: nav
     panel_name: all
     panel_label: Navigation
@@ -4202,218 +4268,299 @@ app_type:
       \     resource_name: pitt_bhi__pitt_bhi_calendar\r\n      url: /reports/pitt_bhi__pitt_bhi_calendar\r\n
       \     \r\n"
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-18T11:06:17.366Z'
-    updated_at: '2020-08-18T11:13:05.157Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:15.931Z'
+    updated_at: '2020-08-26T15:11:15.931Z'
     description: ''
     user_email: 
-  - id: 86
-    app_type_id: 44
+  - id: 60
+    app_type_id: 25
     layout_name: master
     panel_name: pitt-bhi-discussions
     panel_label: Discussions
     panel_position: 2
     options: "contains: \r\n  resources:\r\n  - activity_log__pitt_bhi_assignment_discussions"
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-18T13:48:33.774Z'
-    updated_at: '2020-08-18T13:48:33.774Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:15.941Z'
+    updated_at: '2020-08-26T15:11:15.941Z'
     description: ''
     user_email: 
   user_roles:
-  - id: 984
-    app_type_id: 44
+  - id: 1281
+    app_type_id: 25
     role_name: _app_
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-04T12:11:18.876Z'
-    updated_at: '2020-08-04T12:11:18.876Z'
+    created_at: '2020-08-26T15:11:15.951Z'
+    updated_at: '2020-08-26T15:11:15.951Z'
     user_email: template@template
-  - id: 985
-    app_type_id: 44
-    role_name: user - phone screen
-    user_id: 1
-    admin_id: 21
-    disabled: false
-    created_at: '2020-08-04T13:09:27.023Z'
-    updated_at: '2020-08-04T13:09:27.023Z'
-    user_email: phil_ayres@test.com
-  - id: 986
-    app_type_id: 44
+  - id: 1282
+    app_type_id: 25
     role_name: user - phone screen
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-04T13:09:27.034Z'
-    updated_at: '2020-08-04T13:09:27.034Z'
+    created_at: '2020-08-26T15:11:15.974Z'
+    updated_at: '2020-08-26T15:11:15.974Z'
     user_email: template@template
-  - id: 987
-    app_type_id: 44
-    role_name: admin
-    user_id: 1
-    admin_id: 21
-    disabled: false
-    created_at: '2020-08-04T13:10:20.956Z'
-    updated_at: '2020-08-04T13:10:20.956Z'
-    user_email: phil_ayres@test.com
-  - id: 988
-    app_type_id: 44
+  - id: 1283
+    app_type_id: 25
     role_name: admin
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-04T13:10:20.963Z'
-    updated_at: '2020-08-04T13:10:20.963Z'
+    created_at: '2020-08-26T15:11:15.990Z'
+    updated_at: '2020-08-26T15:11:15.990Z'
     user_email: template@template
-  - id: 989
-    app_type_id: 44
-    role_name: user - recruitment
-    user_id: 1
-    admin_id: 21
-    disabled: false
-    created_at: '2020-08-04T14:07:12.079Z'
-    updated_at: '2020-08-04T14:07:12.079Z'
-    user_email: phil_ayres@test.com
-  - id: 990
-    app_type_id: 44
+  - id: 1284
+    app_type_id: 25
     role_name: user - recruitment
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-04T14:07:12.090Z'
-    updated_at: '2020-08-04T14:07:12.090Z'
+    created_at: '2020-08-26T15:11:16.006Z'
+    updated_at: '2020-08-26T15:11:16.006Z'
     user_email: template@template
-  - id: 993
-    app_type_id: 44
-    role_name: email - pitt transfer
-    user_id: 1
-    admin_id: 21
-    disabled: false
-    created_at: '2020-08-18T11:18:02.812Z'
-    updated_at: '2020-08-18T11:30:16.445Z'
-    user_email: phil_ayres@test.com
-  - id: 994
-    app_type_id: 44
+  - id: 1285
+    app_type_id: 25
     role_name: email - hms phone screener
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-18T11:18:02.830Z'
-    updated_at: '2020-08-18T13:42:58.250Z'
+    created_at: '2020-08-26T15:11:16.021Z'
+    updated_at: '2020-08-26T15:11:16.021Z'
     user_email: template@template
-  - id: 995
-    app_type_id: 44
-    role_name: sms - pitt transfer
-    user_id: 1
-    admin_id: 21
-    disabled: false
-    created_at: '2020-08-18T11:18:08.558Z'
-    updated_at: '2020-08-18T11:30:09.750Z'
-    user_email: phil_ayres@test.com
-  - id: 996
-    app_type_id: 44
+  - id: 1286
+    app_type_id: 25
     role_name: sms - pitt phone screener
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-18T11:18:08.564Z'
-    updated_at: '2020-08-18T11:18:08.564Z'
+    created_at: '2020-08-26T15:11:16.035Z'
+    updated_at: '2020-08-26T15:11:16.035Z'
     user_email: template@template
-  - id: 997
-    app_type_id: 44
+  - id: 1287
+    app_type_id: 25
     role_name: sms - pitt transfer
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-18T11:30:09.761Z'
-    updated_at: '2020-08-18T11:30:09.761Z'
+    created_at: '2020-08-26T15:11:16.047Z'
+    updated_at: '2020-08-26T15:11:16.047Z'
     user_email: template@template
-  - id: 998
-    app_type_id: 44
+  - id: 1288
+    app_type_id: 25
     role_name: email - pitt transfer
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-18T11:30:16.455Z'
-    updated_at: '2020-08-18T11:30:16.455Z'
+    created_at: '2020-08-26T15:11:16.111Z'
+    updated_at: '2020-08-26T15:11:16.111Z'
     user_email: template@template
-  - id: 1003
-    app_type_id: 44
+  - id: 1289
+    app_type_id: 25
     role_name: user - pitt pi
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-18T12:18:21.462Z'
-    updated_at: '2020-08-18T12:18:21.462Z'
+    created_at: '2020-08-26T15:11:16.123Z'
+    updated_at: '2020-08-26T15:11:16.123Z'
     user_email: template@template
-  - id: 1004
-    app_type_id: 44
+  - id: 1290
+    app_type_id: 25
     role_name: user - pitt staff
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-18T12:18:32.673Z'
-    updated_at: '2020-08-18T12:18:32.673Z'
+    created_at: '2020-08-26T15:11:16.135Z'
+    updated_at: '2020-08-26T15:11:16.135Z'
     user_email: template@template
-  - id: 1005
-    app_type_id: 44
+  - id: 1291
+    app_type_id: 25
     role_name: email - pitt staff
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-18T13:41:06.296Z'
-    updated_at: '2020-08-18T13:41:06.296Z'
+    created_at: '2020-08-26T15:11:16.148Z'
+    updated_at: '2020-08-26T15:11:16.148Z'
     user_email: template@template
-  - id: 1006
-    app_type_id: 44
+  - id: 1292
+    app_type_id: 25
     role_name: email - pi
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-18T13:41:17.139Z'
-    updated_at: '2020-08-18T13:42:02.304Z'
+    created_at: '2020-08-26T15:11:16.161Z'
+    updated_at: '2020-08-26T15:11:16.161Z'
     user_email: template@template
-  - id: 1007
-    app_type_id: 44
+  - id: 1293
+    app_type_id: 25
     role_name: email - hms admin
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-18T13:42:09.069Z'
-    updated_at: '2020-08-18T13:42:09.069Z'
+    created_at: '2020-08-26T15:11:16.175Z'
+    updated_at: '2020-08-26T15:11:16.175Z'
     user_email: template@template
-  - id: 1017
-    app_type_id: 44
-    role_name: nfs_store group 600
-    user_id: 1
-    admin_id: 21
-    disabled: false
-    created_at: '2020-08-19T15:07:18.676Z'
-    updated_at: '2020-08-19T15:07:18.676Z'
-    user_email: phil_ayres@test.com
-  - id: 1018
-    app_type_id: 44
+  - id: 1294
+    app_type_id: 25
     role_name: nfs_store group 600
     user_id: 82
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-19T15:07:18.689Z'
-    updated_at: '2020-08-19T15:07:18.689Z'
+    created_at: '2020-08-26T15:11:16.189Z'
+    updated_at: '2020-08-26T15:11:16.189Z'
     user_email: template@template
+  - id: 1295
+    app_type_id: 25
+    role_name: user - recruitment
+    user_id: 1
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:21:44.543Z'
+    updated_at: '2020-08-26T15:21:44.543Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1296
+    app_type_id: 25
+    role_name: user - phone screen
+    user_id: 1
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:22:10.811Z'
+    updated_at: '2020-08-26T15:22:10.811Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1297
+    app_type_id: 25
+    role_name: nfs_store group 600
+    user_id: 1
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:22:27.950Z'
+    updated_at: '2020-08-26T15:22:27.950Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1298
+    app_type_id: 25
+    role_name: email - hms phone screener
+    user_id: 1
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:22:49.042Z'
+    updated_at: '2020-08-26T15:22:49.042Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1299
+    app_type_id: 25
+    role_name: email - hms admin
+    user_id: 1
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:24:06.548Z'
+    updated_at: '2020-08-26T15:24:06.548Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1300
+    app_type_id: 25
+    role_name: email - hms admin
+    user_id: 138
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:28:39.624Z'
+    updated_at: '2020-08-26T15:28:39.624Z'
+    user_email: pitt-bhi-hms-admin@template
+  - id: 1301
+    app_type_id: 25
+    role_name: admin
+    user_id: 138
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:28:54.201Z'
+    updated_at: '2020-08-26T15:28:54.201Z'
+    user_email: pitt-bhi-hms-admin@template
+  - id: 1302
+    app_type_id: 25
+    role_name: sms - hms admin
+    user_id: 138
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:30:15.132Z'
+    updated_at: '2020-08-26T15:30:15.132Z'
+    user_email: pitt-bhi-hms-admin@template
+  - id: 1303
+    app_type_id: 25
+    role_name: sms - hms admin
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:30:15.142Z'
+    updated_at: '2020-08-26T15:30:15.142Z'
+    user_email: template@template
+  - id: 1304
+    app_type_id: 25
+    role_name: user - recruitment
+    user_id: 137
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:30:40.333Z'
+    updated_at: '2020-08-26T15:30:40.333Z'
+    user_email: pitt-bhi-pitt-staff@template
+  - id: 1305
+    app_type_id: 25
+    role_name: user - pitt staff
+    user_id: 137
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:30:52.390Z'
+    updated_at: '2020-08-26T15:30:52.390Z'
+    user_email: pitt-bhi-pitt-staff@template
+  - id: 1306
+    app_type_id: 25
+    role_name: nfs_store group 600
+    user_id: 137
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:31:15.309Z'
+    updated_at: '2020-08-26T15:31:15.309Z'
+    user_email: pitt-bhi-pitt-staff@template
+  - id: 1307
+    app_type_id: 25
+    role_name: nfs_store group 600
+    user_id: 138
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:31:23.598Z'
+    updated_at: '2020-08-26T15:31:23.598Z'
+    user_email: pitt-bhi-hms-admin@template
+  - id: 1308
+    app_type_id: 25
+    role_name: sms - hms phone screener
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:32:00.888Z'
+    updated_at: '2020-08-26T15:32:00.888Z'
+    user_email: template@template
+  - id: 1309
+    app_type_id: 25
+    role_name: sms - hms phone screener
+    user_id: 136
+    admin_id: 2
+    disabled: false
+    created_at: '2020-08-26T15:32:14.050Z'
+    updated_at: '2020-08-26T15:32:14.050Z'
+    user_email: pitt-bhi-hms@template
   associated_message_templates:
   - id: 22
     name: standard sms layout
     message_type: sms
     template_type: layout
     template: "{{main_content}}"
-    admin_id: 21
+    admin_id: 2
     disabled: false
     created_at: '2019-01-08T14:11:25.775Z'
-    updated_at: '2020-03-31T09:14:57.084Z'
+    updated_at: '2019-01-08T14:11:25.775Z'
     category: 
     user_email: 
-  - id: 59
+  - id: 46
     name: grit eligibility call not eligible
     message_type: dialog
     template_type: content
@@ -4427,13 +4574,13 @@ app_type:
       will be receiving a gift card for taking the time to answer our questions. Thank
       you very much for your time.\r\n</p>\r\n<p><i>\r\nConfirm contact information
       and END CALL.\r\n</i></p>"
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2019-11-27T15:43:10.618Z'
-    updated_at: '2019-11-27T15:43:10.618Z'
+    created_at: '2019-12-03T13:59:32.863Z'
+    updated_at: '2019-12-03T13:59:32.863Z'
     category: 
     user_email: 
-  - id: 73
+  - id: 58
     name: pitt bhi notification layout
     message_type: email
     template_type: layout
@@ -4443,13 +4590,13 @@ app_type:
       />\r\n    <h1>PITT BHI App Message Notification</h1>\r\n    <div>\r\n      {{main_content}}\r\n
       \   </div>\r\n    <div>If you received this email in error, please contact fphsetl@hms.harvard.edu
       to ensure we can update our records appropriately.</div>\r\n  </body>\r\n<html>"
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-14T09:18:14.781Z'
-    updated_at: '2020-08-14T09:18:14.781Z'
+    created_at: '2020-08-26T15:11:16.261Z'
+    updated_at: '2020-08-26T15:11:16.261Z'
     category: pitt-bhi
     user_email: 
-  - id: 75
+  - id: 59
     name: pitt bhi notification message
     message_type: email
     template_type: content
@@ -4458,13 +4605,13 @@ app_type:
       PITT BHI Study ID: <b>{{ids.pitt_bhi_id}}</b></p>\r\n<div>{{extra_substitutions.extra_text::markup}}<div>\r\n<hr/>\r\n<p>Please
       login to Athena to view the request. Click the following link to access the
       subject record directly:</p>\r\n<p><a href=\"{{base_url}}/masters/{{master_id}}#{{extra_substitutions.panel_tab::hyphenate}}-{{master_id}}\">{{base_url}}/masters/{{master_id}}</a></p>\r\n<hr/>"
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-14T09:20:28.137Z'
-    updated_at: '2020-08-14T09:20:28.137Z'
+    created_at: '2020-08-26T15:11:16.272Z'
+    updated_at: '2020-08-26T15:11:16.272Z'
     category: pitt-bhi
     user_email: 
-  - id: 76
+  - id: 60
     name: pitt bhi ps intro
     message_type: dialog
     template_type: content
@@ -4482,13 +4629,13 @@ app_type:
       call me back at 617-432-5000, \r\nthat number again is 617-432-5000. If you
       would rather \r\nreach out through email you can email me at \r\nplayers@footballplayersheath.harvard.edu.
       \r\n\r\nThank you.\r\n"
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-14T09:20:46.414Z'
-    updated_at: '2020-08-14T10:29:51.410Z'
+    created_at: '2020-08-26T15:11:16.276Z'
+    updated_at: '2020-08-26T15:11:16.276Z'
     category: pitt-bhi
     user_email: 
-  - id: 77
+  - id: 61
     name: pitt bhi ps intro overview
     message_type: dialog
     template_type: content
@@ -4508,14 +4655,14 @@ app_type:
       and choose to participate, all of the travel expenses \r\nwill be covered and
       you will receive compensation of up to $2000 once you \r\nhave completed the
       study.\r\n\r\nDo you have any questions?\r\n"
-    admin_id: 21
+    admin_id: 2
     disabled: false
-    created_at: '2020-08-14T09:21:04.585Z'
-    updated_at: '2020-08-14T11:18:24.217Z'
+    created_at: '2020-08-26T15:11:16.280Z'
+    updated_at: '2020-08-26T15:11:16.280Z'
     category: pitt-bhi
     user_email: 
   associated_config_libraries:
-  - id: 70
+  - id: 52
     category: grit
     name: ps_forms_eligibility
     options: "_definitions:\r\n\r\n  ###################################\r\n  # HMS
@@ -4551,11 +4698,11 @@ app_type:
       \r\n        <<: *ineligible_fields_participation\r\n\r\n"
     format: yaml
     disabled: false
-    admin_id: 21
-    created_at: '2019-11-29T12:32:47.528Z'
-    updated_at: '2019-11-29T16:17:59.678Z'
+    admin_id: 2
+    created_at: '2019-12-03T13:58:59.895Z'
+    updated_at: '2019-12-03T13:58:59.895Z'
     user_email: 
-  - id: 79
+  - id: 70
     category: pitt_bhi
     name: eligibility
     options: "_definitions:\r\n\r\n  ###################################\r\n  # HMS
@@ -4577,11 +4724,11 @@ app_type:
       \ \r\n  \r\n  "
     format: yaml
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-04T13:43:09.332Z'
-    updated_at: '2020-08-18T10:39:26.075Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:13.711Z'
+    updated_at: '2020-08-26T15:11:13.711Z'
     user_email: 
-  - id: 80
+  - id: 71
     category: pitt_bhi
     name: enabled_if
     options: "_definitions:\r\n\r\n\r\n  any_exit_or_complete: &any_exit_or_complete\r\n
@@ -4620,11 +4767,11 @@ app_type:
       \   editable_if: *enabled_if\r\n"
     format: yaml
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-04T13:43:40.133Z'
-    updated_at: '2020-08-18T11:33:55.407Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:13.717Z'
+    updated_at: '2020-08-26T15:11:13.717Z'
     user_email: 
-  - id: 81
+  - id: 72
     category: pitt_bhi
     name: filestore_container
     options: "_definitions:\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n
@@ -4643,11 +4790,11 @@ app_type:
       \   references:\r\n      nfs_store__manage__container:\r\n        <<: *ref_nfs_store__manage__container\r\n\r\n"
     format: yaml
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-04T13:43:52.341Z'
-    updated_at: '2020-08-19T15:32:22.431Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:13.723Z'
+    updated_at: '2020-08-26T15:11:13.723Z'
     user_email: 
-  - id: 82
+  - id: 73
     category: pitt_bhi
     name: notification_base
     options: "_definitions:\r\n\r\n\r\n  ####\r\n  # Boilerplace for notifying roles\r\n
@@ -4663,21 +4810,21 @@ app_type:
       \"PITT BHI Study Notification\"\r\n\r\n"
     format: yaml
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-04T13:44:02.073Z'
-    updated_at: '2020-08-04T14:05:15.183Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:13.731Z'
+    updated_at: '2020-08-26T15:11:13.731Z'
     user_email: 
-  - id: 83
+  - id: 74
     category: pitt_bhi
     name: exit
     options: "_definitions:\r\n\r\n"
     format: yaml
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-04T13:44:09.496Z'
-    updated_at: '2020-08-04T13:44:09.496Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:13.737Z'
+    updated_at: '2020-08-26T15:11:13.737Z'
     user_email: 
-  - id: 85
+  - id: 75
     category: pitt_bhi
     name: ps_forms_eligibility
     options: "_definitions:\r\n\r\n  ###################################\r\n  # HMS
@@ -4691,11 +4838,11 @@ app_type:
       \     <<: *eligible_suitability\r\n        \r\n\r\n"
     format: yaml
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-04T13:44:35.847Z'
-    updated_at: '2020-08-18T12:35:52.355Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:13.743Z'
+    updated_at: '2020-08-26T15:11:13.743Z'
     user_email: 
-  - id: 86
+  - id: 76
     category: pitt_bhi
     name: discussions
     options: "# NOTE: \r\n# It is essential to load the following libraries before
@@ -4776,11 +4923,11 @@ app_type:
       \             updated_at: now()\r\n"
     format: yaml
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-04T13:44:51.521Z'
-    updated_at: '2020-08-18T13:18:03.166Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:13.750Z'
+    updated_at: '2020-08-26T15:11:13.750Z'
     user_email: 
-  - id: 87
+  - id: 77
     category: pitt_bhi
     name: secure_notes
     options: "####################\r\n# Simple definition to allow add button for
@@ -4792,11 +4939,11 @@ app_type:
       \     from: this\r\n      add: one_to_this\r\n      prevent_disable: true"
     format: yaml
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-04T13:45:42.168Z'
-    updated_at: '2020-08-04T14:03:27.879Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:13.756Z'
+    updated_at: '2020-08-26T15:11:13.756Z'
     user_email: 
-  - id: 88
+  - id: 78
     category: pitt_bhi
     name: notify_roles
     options: "_definitions:\r\n\r\n\r\n  ####\r\n  # Boilerplace for notifying roles\r\n
@@ -4821,49 +4968,688 @@ app_type:
       \   <<: *notify_sms_default\r\n    role: sms - hms admin\r\n"
     format: yaml
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-18T13:13:51.832Z'
-    updated_at: '2020-08-18T13:16:26.472Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:13.762Z'
+    updated_at: '2020-08-26T15:11:13.762Z'
     user_email: 
   protocols: []
-  associated_protocols: []
-  associated_sub_processes: []
-  associated_protocol_events: []
+  associated_protocols:
+  - id: 108
+    name: GRIT
+    created_at: '2020-08-26T17:11:38.217Z'
+    updated_at: '2020-08-26T17:11:38.217Z'
+    disabled: false
+    admin_id: 1
+    position: -15
+    app_type_id: 
+    user_email: 
+  - id: 109
+    name: Sleep Study Phase 2
+    created_at: '2020-08-26T17:11:38.243Z'
+    updated_at: '2020-08-26T17:11:38.243Z'
+    disabled: false
+    admin_id: 1
+    position: 12
+    app_type_id: 
+    user_email: 
+  - id: 110
+    name: PITT BHI
+    created_at: '2020-08-26T17:11:38.247Z'
+    updated_at: '2020-08-26T17:11:38.247Z'
+    disabled: false
+    admin_id: 1
+    position: 12
+    app_type_id: 
+    user_email: 
+  associated_sub_processes:
+  - id: 288
+    name: Inquiry
+    disabled: false
+    protocol_id: 109
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.938Z'
+    updated_at: '2020-08-26T17:11:38.938Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 287
+    name: Bounced
+    disabled: false
+    protocol_id: 109
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.919Z'
+    updated_at: '2020-08-26T17:11:38.919Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 286
+    name: Opt In
+    disabled: false
+    protocol_id: 109
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.901Z'
+    updated_at: '2020-08-26T17:11:38.901Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 285
+    name: Opt Out
+    disabled: false
+    protocol_id: 109
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.878Z'
+    updated_at: '2020-08-26T17:11:38.878Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 284
+    name: Complete
+    disabled: false
+    protocol_id: 109
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.856Z'
+    updated_at: '2020-08-26T17:11:38.856Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 283
+    name: Enrolled
+    disabled: false
+    protocol_id: 109
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.836Z'
+    updated_at: '2020-08-26T17:11:38.836Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 282
+    name: Withdrew
+    disabled: false
+    protocol_id: 109
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.825Z'
+    updated_at: '2020-08-26T17:11:38.825Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 281
+    name: Sent
+    disabled: false
+    protocol_id: 109
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.813Z'
+    updated_at: '2020-08-26T17:11:38.813Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 280
+    name: Sent
+    disabled: false
+    protocol_id: 108
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.792Z'
+    updated_at: '2020-08-26T17:11:38.792Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 279
+    name: Complete
+    disabled: false
+    protocol_id: 108
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.772Z'
+    updated_at: '2020-08-26T17:11:38.772Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 278
+    name: Opt In
+    disabled: false
+    protocol_id: 108
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.736Z'
+    updated_at: '2020-08-26T17:11:38.736Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 277
+    name: Opt Out
+    disabled: false
+    protocol_id: 108
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.713Z'
+    updated_at: '2020-08-26T17:11:38.713Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 276
+    name: Bounced
+    disabled: false
+    protocol_id: 108
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.690Z'
+    updated_at: '2020-08-26T17:11:38.690Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 275
+    name: Inquiry
+    disabled: false
+    protocol_id: 108
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.673Z'
+    updated_at: '2020-08-26T17:11:38.673Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 274
+    name: Enrolled
+    disabled: false
+    protocol_id: 108
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.656Z'
+    updated_at: '2020-08-26T17:11:38.656Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 273
+    name: Withdrew
+    disabled: false
+    protocol_id: 108
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.648Z'
+    updated_at: '2020-08-26T17:11:38.648Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 272
+    name: Lost to Follow Up, Not Enrolled
+    disabled: false
+    protocol_id: 108
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.634Z'
+    updated_at: '2020-08-26T17:11:38.634Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 271
+    name: Screened
+    disabled: false
+    protocol_id: 109
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.623Z'
+    updated_at: '2020-08-26T17:11:38.623Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 270
+    name: Eligible
+    disabled: false
+    protocol_id: 109
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.612Z'
+    updated_at: '2020-08-26T17:11:38.612Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 269
+    name: Ineligible
+    disabled: false
+    protocol_id: 109
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.602Z'
+    updated_at: '2020-08-26T17:11:38.602Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 268
+    name: Contacted
+    disabled: false
+    protocol_id: 109
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.590Z'
+    updated_at: '2020-08-26T17:11:38.590Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 264
+    name: Lost to Follow Up, Not Enrolled
+    disabled: false
+    protocol_id: 109
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.553Z'
+    updated_at: '2020-08-26T17:11:38.553Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 263
+    name: Ineligible
+    disabled: false
+    protocol_id: 108
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.542Z'
+    updated_at: '2020-08-26T17:11:38.542Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 262
+    name: Eligible
+    disabled: false
+    protocol_id: 108
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.534Z'
+    updated_at: '2020-08-26T17:11:38.534Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 261
+    name: Contacted
+    disabled: false
+    protocol_id: 108
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.526Z'
+    updated_at: '2020-08-26T17:11:38.526Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 260
+    name: Screened
+    disabled: false
+    protocol_id: 108
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.516Z'
+    updated_at: '2020-08-26T17:11:38.516Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 259
+    name: Screened
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.505Z'
+    updated_at: '2020-08-26T17:11:38.505Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 258
+    name: Contacted
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.496Z'
+    updated_at: '2020-08-26T17:11:38.496Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 257
+    name: Eligible
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.487Z'
+    updated_at: '2020-08-26T17:11:38.487Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 256
+    name: Ineligible
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.479Z'
+    updated_at: '2020-08-26T17:11:38.479Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 255
+    name: Lost to Follow Up, Not Enrolled
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.472Z'
+    updated_at: '2020-08-26T17:11:38.472Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 254
+    name: Withdrew
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.462Z'
+    updated_at: '2020-08-26T17:11:38.462Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 253
+    name: Enrolled
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.452Z'
+    updated_at: '2020-08-26T17:11:38.452Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 252
+    name: Inquiry
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.445Z'
+    updated_at: '2020-08-26T17:11:38.445Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 251
+    name: Bounced
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.426Z'
+    updated_at: '2020-08-26T17:11:38.426Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 250
+    name: Opt Out
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.411Z'
+    updated_at: '2020-08-26T17:11:38.411Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 249
+    name: Opt In
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.392Z'
+    updated_at: '2020-08-26T17:11:38.392Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 248
+    name: Complete
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.374Z'
+    updated_at: '2020-08-26T17:11:38.374Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 247
+    name: Sent
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.357Z'
+    updated_at: '2020-08-26T17:11:38.357Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 246
+    name: Transferred for Screening
+    disabled: false
+    protocol_id: 110
+    admin_id: 1
+    created_at: '2020-08-26T17:11:38.323Z'
+    updated_at: '2020-08-26T17:11:38.323Z'
+    protocol_name: PITT BHI
+    user_email: 
+  associated_protocol_events:
+  - id: 1022
+    name: Complete
+    admin_id: 1
+    created_at: '2020-08-26T17:11:39.685Z'
+    updated_at: '2020-08-26T17:11:39.685Z'
+    disabled: false
+    sub_process_id: 288
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1023
+    name: Complete
+    admin_id: 1
+    created_at: '2020-08-26T17:11:39.708Z'
+    updated_at: '2020-08-26T17:11:39.708Z'
+    disabled: false
+    sub_process_id: 275
+    milestone: ''
+    description: ''
+    protocol_name: GRIT
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1024
+    name: Complete
+    admin_id: 1
+    created_at: '2020-08-26T17:11:39.731Z'
+    updated_at: '2020-08-26T17:11:39.731Z'
+    disabled: false
+    sub_process_id: 252
+    milestone: ''
+    description: ''
+    protocol_name: PITT BHI
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1032
+    name: Email
+    admin_id: 1
+    created_at: '2020-08-26T17:11:40.286Z'
+    updated_at: '2020-08-26T17:11:40.286Z'
+    disabled: false
+    sub_process_id: 268
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Contacted
+    user_email: 
+  - id: 1033
+    name: Email - Bounced
+    admin_id: 1
+    created_at: '2020-08-26T17:11:40.308Z'
+    updated_at: '2020-08-26T17:11:40.308Z'
+    disabled: false
+    sub_process_id: 268
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Contacted
+    user_email: 
+  - id: 1034
+    name: Email from Player
+    admin_id: 1
+    created_at: '2020-08-26T17:11:40.382Z'
+    updated_at: '2020-08-26T17:11:40.382Z'
+    disabled: false
+    sub_process_id: 288
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1035
+    name: Email from Player
+    admin_id: 1
+    created_at: '2020-08-26T17:11:40.409Z'
+    updated_at: '2020-08-26T17:11:40.409Z'
+    disabled: false
+    sub_process_id: 275
+    milestone: ''
+    description: ''
+    protocol_name: GRIT
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1036
+    name: Email from Player
+    admin_id: 1
+    created_at: '2020-08-26T17:11:40.436Z'
+    updated_at: '2020-08-26T17:11:40.436Z'
+    disabled: false
+    sub_process_id: 252
+    milestone: ''
+    description: ''
+    protocol_name: PITT BHI
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1037
+    name: Email from Staff
+    admin_id: 1
+    created_at: '2020-08-26T17:11:40.522Z'
+    updated_at: '2020-08-26T17:11:40.522Z'
+    disabled: false
+    sub_process_id: 288
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1038
+    name: Email from Staff
+    admin_id: 1
+    created_at: '2020-08-26T17:11:40.552Z'
+    updated_at: '2020-08-26T17:11:40.552Z'
+    disabled: false
+    sub_process_id: 275
+    milestone: ''
+    description: ''
+    protocol_name: GRIT
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1039
+    name: Email from Staff
+    admin_id: 1
+    created_at: '2020-08-26T17:11:40.579Z'
+    updated_at: '2020-08-26T17:11:40.579Z'
+    disabled: false
+    sub_process_id: 252
+    milestone: ''
+    description: ''
+    protocol_name: PITT BHI
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1043
+    name: Phone from Player
+    admin_id: 1
+    created_at: '2020-08-26T17:11:40.828Z'
+    updated_at: '2020-08-26T17:11:40.828Z'
+    disabled: false
+    sub_process_id: 288
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1044
+    name: Phone from Player
+    admin_id: 1
+    created_at: '2020-08-26T17:11:40.852Z'
+    updated_at: '2020-08-26T17:11:40.852Z'
+    disabled: false
+    sub_process_id: 275
+    milestone: ''
+    description: ''
+    protocol_name: GRIT
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1045
+    name: Phone from Player
+    admin_id: 1
+    created_at: '2020-08-26T17:11:40.878Z'
+    updated_at: '2020-08-26T17:11:40.878Z'
+    disabled: false
+    sub_process_id: 252
+    milestone: ''
+    description: ''
+    protocol_name: PITT BHI
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1046
+    name: Phone from Staff
+    admin_id: 1
+    created_at: '2020-08-26T17:11:40.988Z'
+    updated_at: '2020-08-26T17:11:40.988Z'
+    disabled: false
+    sub_process_id: 288
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1047
+    name: Phone from Staff
+    admin_id: 1
+    created_at: '2020-08-26T17:11:41.022Z'
+    updated_at: '2020-08-26T17:11:41.022Z'
+    disabled: false
+    sub_process_id: 275
+    milestone: ''
+    description: ''
+    protocol_name: GRIT
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1048
+    name: Phone from Staff
+    admin_id: 1
+    created_at: '2020-08-26T17:11:41.053Z'
+    updated_at: '2020-08-26T17:11:41.053Z'
+    disabled: false
+    sub_process_id: 252
+    milestone: ''
+    description: ''
+    protocol_name: PITT BHI
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 1050
+    name: Recruitment Email
+    admin_id: 1
+    created_at: '2020-08-26T17:11:41.138Z'
+    updated_at: '2020-08-26T17:11:41.138Z'
+    disabled: false
+    sub_process_id: 281
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Sent
+    user_email: 
+  - id: 1051
+    name: Recruitment Email
+    admin_id: 1
+    created_at: '2020-08-26T17:11:41.151Z'
+    updated_at: '2020-08-26T17:11:41.151Z'
+    disabled: false
+    sub_process_id: 280
+    milestone: ''
+    description: ''
+    protocol_name: GRIT
+    sub_process_name: Sent
+    user_email: 
+  - id: 1052
+    name: Recruitment Email
+    admin_id: 1
+    created_at: '2020-08-26T17:11:41.167Z'
+    updated_at: '2020-08-26T17:11:41.167Z'
+    disabled: false
+    sub_process_id: 247
+    milestone: ''
+    description: ''
+    protocol_name: PITT BHI
+    sub_process_name: Sent
+    user_email: 
+  - id: 1056
+    name: Text
+    admin_id: 1
+    created_at: '2020-08-26T17:11:41.523Z'
+    updated_at: '2020-08-26T17:11:41.523Z'
+    disabled: false
+    sub_process_id: 268
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Contacted
+    user_email: 
+  - id: 1057
+    name: Text - Bounced
+    admin_id: 1
+    created_at: '2020-08-26T17:11:41.544Z'
+    updated_at: '2020-08-26T17:11:41.544Z'
+    disabled: false
+    sub_process_id: 268
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Contacted
+    user_email: 
   nfs_store_filters:
-  - id: 87
-    app_type_id: 44
+  - id: 62
+    app_type_id: 25
     role_name: user - recruitment
     user_id: 
     resource_name: activity_log__pitt_bhi_assignment__files
     filter: ".*"
     description: ''
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-19T15:12:53.482Z'
-    updated_at: '2020-08-19T15:12:53.482Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:16.221Z'
+    updated_at: '2020-08-26T15:11:16.221Z'
     user_email: 
-  - id: 88
-    app_type_id: 44
-    role_name: user - recruitment
-    user_id: 
-    resource_name: activity_log__femfl_assignment_femfl_comm__files
-    filter: ".*"
-    description: ''
-    disabled: true
-    admin_id: 21
-    created_at: '2020-08-19T15:13:02.467Z'
-    updated_at: '2020-08-19T15:14:39.176Z'
-    user_email: 
-  - id: 89
-    app_type_id: 44
+  - id: 63
+    app_type_id: 25
     role_name: user - recruitment
     user_id: 
     resource_name: activity_log__pitt_bhi_assignment_discussion__files
     filter: ".*"
     description: ''
     disabled: false
-    admin_id: 21
-    created_at: '2020-08-19T15:31:44.900Z'
-    updated_at: '2020-08-19T15:31:44.900Z'
+    admin_id: 2
+    created_at: '2020-08-26T15:11:16.234Z'
+    updated_at: '2020-08-26T15:11:16.234Z'
     user_email: 
   user_email: 

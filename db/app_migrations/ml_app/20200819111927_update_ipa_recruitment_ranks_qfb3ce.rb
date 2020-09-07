@@ -9,12 +9,10 @@ class UpdateIpaRecruitmentRanksQfb3ce < ActiveRecord::Migration[5.2]
     self.table_comment = ''
     self.fields_comments = {}
 
-
     self.prev_fields = %i[rank ml_app_age_eligible_for_ipa]
     # added: ["eligible"]
     # removed: ["rank", "ml_app_age_eligible_for_ipa"]
-    
-    
+
     update_fields
 
     create_dynamic_model_trigger
