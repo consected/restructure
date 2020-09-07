@@ -56,7 +56,7 @@ class Admin::ManageUsersController < AdminController
   end
 
   def filters
-    res = {
+    {
       app_type_id: Admin::AppType.all_by_name
     }
   end
@@ -65,9 +65,14 @@ class Admin::ManageUsersController < AdminController
     [:app_type_id]
   end
 
+  # Override regular defaults, which force the current user's app_type_id
+  def filter_defaults
+    {}
+  end
+
   # Run a special filter on app_type_id, so that we don't just get the
   # users current app, but all they have access to
-  def filtered_primary_model(pm = nil)
+  def filtered_primary_model(_ = nil)
     pm = primary_model
     a = filter_params_permitted[:app_type_id] if filter_params_permitted
     if a.present?
