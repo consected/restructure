@@ -21,7 +21,7 @@
   <% if object_instance.respond_to?(:id) %>
    <td class="report-el report-el-object-id"><%= object_instance.id %></td>
   <% end %>
-  <% (@report.all_edit_fields - [:id]).each do |field_name_sym| %>
+  <% (@report.all_configured_edit_fields - [:id]).each do |field_name_sym| %>
 
         <%
           form_object_instance = object_instance

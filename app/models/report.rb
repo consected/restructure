@@ -144,7 +144,7 @@ class Report < ActiveRecord::Base
 
   # List all configured fields for editing, although not all of these fields may actually be updatable in reality
   def all_configured_edit_fields
-    @all_edit_fields ||= edit_field_names.split(/[^a-zA-Z0-9_]/).reject(&:blank?).collect(&:to_sym)
+    @all_configured_edit_fields ||= edit_field_names.split(/[^a-zA-Z0-9_]/).reject(&:blank?).collect(&:to_sym)
   end
 
   # Edit fields that can be updated in a record
