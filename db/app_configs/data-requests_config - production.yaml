@@ -1964,14 +1964,20 @@ app_type:
       \   replace(cb.field_attributes, ' | ',\r\n'\r\n') field_attributes,\r\n    cb.field_note,\r\n
       \   cb.datadic\r\nfrom datadics cb\r\ninner join data_requests_selected_attribs
       sel\r\non \r\n  sel.record_id = cb.id \r\n  and not coalesce(sel.disabled, false)
-      \r\n  and cb.datadic = sel.record_type\r\n  and sel.data_request_id = :list_id
-      \r\n\r\nwhere\r\n  sel.id IS NOT NULL\r\norder by \r\n  cb.study, cb.id;\r\n"
+      \r\n  and cb.datadic = sel.record_type\r\n  and (\r\n    :list_type is NULL
+      \r\n    and sel.data_request_id = :list_id \r\n   \r\n    OR \r\n    :list_type
+      = 'ActivityLog::DataRequestAssignment'\r\n    and sel.data_request_id = (\r\n
+      \     select to_record_id from model_references mr\r\n      where from_record_type
+      = :list_type\r\n      and from_record_id = :list_id\r\n      and to_record_type
+      = 'DynamicModel::DataRequest'\r\n      order by id desc\r\n      limit 1\r\n
+      \   )\r\n  )\r\n\r\nwhere\r\n  sel.id IS NOT NULL\r\norder by \r\n  cb.study,
+      cb.id;\r\n"
     search_attrs: "\r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden: true\r\n
       \   \r\n    \r\nlist_type:\r\n  text:\r\n    label: Type\r\n    hidden: true\r\n"
     admin_id: 4
     disabled: false
     created_at: '2020-08-24T16:30:25.408Z'
-    updated_at: '2020-08-24T17:30:58.794Z'
+    updated_at: '2020-08-25T17:12:12.684Z'
     report_type: regular_report
     auto: true
     searchable: false

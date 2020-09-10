@@ -56,10 +56,21 @@ _definitions:
       reason: 'Data Request Initial Review Approved"'
       extra_text: ''
       extra_html: |
-        <p>A data request for FPHS has passed initial review. The request is for:</p>
-
+        <p>A data request for FPHS has passed initial review. 
+        You are welcome to review the information below and either login using the link at the end of this email,
+        or email <a href="bir_kafle@hms.harvard.edu">bir_kafle@hms.harvard.edu</a> stating if 
+        you approve the request, reject it, or require more information.
+        </p>
+        
+        <p>The request is for:</p>
         <ul>
           <li>Project title: <b>{{top_referring_record.dynamic_model__data_requests.project_title}}</b></li>
+          <li>Purpose: <b>{{top_referring_record.dynamic_model__data_requests.select_purpose}}</b> {{top_referring_record.dynamic_model__data_requests.other_purpose}}</li>
+          <li>Research question:
+          <pre>
+          {{top_referring_record.dynamic_model__data_requests.research_question_notes}}          
+          </pre>
+          </li>
           <li>Analysis to be performed within the secure FPHS environment: 
               <b>{{top_referring_record.dynamic_model__data_requests.fphs_server_yes_no}}</b>
             <ul>  
@@ -71,7 +82,7 @@ _definitions:
           <li>Requester is an FPHS analyst: 
           <b>{{top_referring_record.dynamic_model__data_requests.fphs_analyst_yes_no}}</b>
             <ul>  
-              <li>If not FPHS, which institution: 
+              <li>If not FPHS, primary affiliation: 
                   <b>{{top_referring_record.dynamic_model__data_requests.institution}} {{top_referring_record.dynamic_model__data_requests.other_institution}}</b>
               </li>
               <li>Any others handling data: 
@@ -620,7 +631,7 @@ request:
             in: this
             with:
               extra_log_type: supporting_files
-
+            force_create: true
 
   save_action:
     on_create:
