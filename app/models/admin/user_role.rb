@@ -6,10 +6,10 @@ class Admin::UserRole < ActiveRecord::Base
   include AdminHandler
   include AppTyped
 
-  belongs_to :user
+  belongs_to :user, optional: true
 
   validates :role_name, presence: true
-  validates :user_id, uniqueness: { scope: %i[app_type_id role_name disabled] }, unless: :disabled?
+  validates :user_id, uniqueness: { scope: %i[app_type_id role_name disabled] }, unless: -> { user_id.nil? || disabled? }
 
   after_save :save_template
   after_save :invalidate_cache
