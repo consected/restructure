@@ -163,10 +163,15 @@ module ActiveRecord
 
         old_colnames = col_names - standard_columns
         new_colnames = fields.map(&:to_s) - standard_columns
-        added = (new_colnames - old_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(/^placeholder_|^tracker_history_id$/) }
-        removed = (old_colnames - new_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(/^placeholder_|^tracker_history_id$/) }
+        added = (new_colnames - old_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
+        removed = (old_colnames - new_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
 
-        # Avoid issues if the columns don't match what we expect
+        idx = added.index('created_by_user_id')
+        added[idx] = 'created_by_user' if idx
+
+        idx = removed.index('created_by_user_id')
+        removed[idx] = 'created_by_user' if idx
+
         if reverting?
           puts removed -= col_names
           puts added &= col_names
@@ -193,16 +198,30 @@ module ActiveRecord
         end
 
         added.each do |c|
-          options = {}
+          options = field_opts[c.to_sym]
           comment = fields_comments[c.to_sym]
           options[:comment] = comment if comment.present?
-          add_column "#{schema}.#{table_name}", c, field_defs[c.to_sym], options
-          add_column "#{schema}.#{history_table_name}", c, field_defs[c.to_sym], options
+          fdef = field_defs[c.to_sym]
+          if fdef == :references
+            add_reference "#{schema}.#{table_name}", c, options
+            options[:index][:name] += '_hist'
+            add_reference "#{schema}.#{history_table_name}", c, options unless c.in? history_cols
+          else
+            add_column "#{schema}.#{table_name}", c, fdef, options
+            add_column "#{schema}.#{history_table_name}", c, fdef, options unless c.in? history_cols
+          end
         end
 
         removed.each do |c|
-          remove_column "#{schema}.#{table_name}", c, field_defs[c.to_sym]
-          remove_column "#{schema}.#{history_table_name}", c, field_defs[c.to_sym]
+          fdef = field_defs[c.to_sym]
+          if fdef == :references
+            remove_reference "#{schema}.#{table_name}", c, options
+            options[:index][:name] += '_hist'
+            remove_reference "#{schema}.#{history_table_name}", c, options if c.in? history_cols
+          else
+            remove_column "#{schema}.#{table_name}", c, fdef
+            remove_column "#{schema}.#{history_table_name}", c, fdef if c.in? history_cols
+          end
         end
 
         changed.each do |c|
@@ -218,6 +237,10 @@ module ActiveRecord
 
       protected
 
+      def ignore_fields
+        /^placeholder_|^embedded_report_|^tracker_history_id$/
+      end
+
       def standard_columns
         pset = %w[id created_at updated_at contactid user_id master_id
                   extra_log_type admin_id tracker_history_id]
@@ -227,6 +250,10 @@ module ActiveRecord
 
       def cols
         @cols ||= ActiveRecord::Base.connection.columns("#{schema}.#{table_name}")
+      end
+
+      def history_cols
+        @history_cols ||= ActiveRecord::Base.connection.columns("#{schema}.#{history_table_name}")
       end
 
       def col_names(to_type = nil)
@@ -240,7 +267,7 @@ module ActiveRecord
         return if field_opts && !handle_fields
 
         handle_fields ||= self.fields
-        handle_fields.reject! { |a| a.to_s.index(/^placeholder_|^tracker_history_id$/) }
+        handle_fields.reject! { |a| a.to_s.index(ignore_fields) }
         handle_fields = handle_fields.map(&:to_sym)
 
         self.history_table_name = "#{table_name.singularize}_history"
@@ -256,7 +283,7 @@ module ActiveRecord
           if a == 'created_by_user_id'
             attr_name = :created_by_user
             f = :references
-            fopts = { index: true, foreign_key: { to_table: :users } }
+            fopts = { index: { name: "#{rand_id}_ref_cb_user_idx" }, foreign_key: { to_table: :users } }
           elsif a.index(/(?:_when|_date)$/)
             f = :date
           elsif a.index(/(?:_time)$/)
