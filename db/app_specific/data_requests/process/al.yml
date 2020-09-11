@@ -63,41 +63,40 @@ _definitions:
         </p>
         
         <p>The request is for:</p>
-        <ul>
-          <li>Project title: <b>{{top_referring_record.dynamic_model__data_requests.project_title}}</b></li>
-          <li>Purpose: <b>{{top_referring_record.dynamic_model__data_requests.select_purpose}}</b> {{top_referring_record.dynamic_model__data_requests.other_purpose}}</li>
-          <li>Research question:
-          <pre>
-          {{top_referring_record.dynamic_model__data_requests.research_question_notes}}          
-          </pre>
-          </li>
-          <li>Analysis to be performed within the secure FPHS environment: 
-              <b>{{top_referring_record.dynamic_model__data_requests.fphs_server_yes_no}}</b>
-            <ul>  
-              <li>If the request is for data use outside of the secure FPHS environment, what is the reason: 
-                  <b>{{top_referring_record.dynamic_model__data_requests.off_fphs_server_reason_notes::markdown}}</b>
-              </li>
-            </ul>
-          </li>
-          <li>Requester is an FPHS analyst: 
+        <div>
+          <p>Project title: <b>{{top_referring_record.dynamic_model__data_requests.project_title}}</b></p>
+          <p>Purpose: <b>{{top_referring_record.dynamic_model__data_requests.select_purpose}}</b> {{top_referring_record.dynamic_model__data_requests.other_purpose}}</p>
+          <p>Research question:</p>
+          <div class="content-block">
+          {{top_referring_record.dynamic_model__data_requests.research_question_notes::markup}}          
+          </div>
+          <p>Analysis to be performed within the secure FPHS environment: 
+            <b>{{top_referring_record.dynamic_model__data_requests.fphs_server_yes_no}}</b>
+          </p>
+              
+          <p>If the request is for data use outside of the secure FPHS environment, what is the reason: 
+              <b>{{top_referring_record.dynamic_model__data_requests.off_fphs_server_reason_notes::markdown}}</b>
+          </p>
+            
+          <p>Requester is an FPHS analyst: 
           <b>{{top_referring_record.dynamic_model__data_requests.fphs_analyst_yes_no}}</b>
-            <ul>  
-              <li>If not FPHS, primary affiliation: 
-                  <b>{{top_referring_record.dynamic_model__data_requests.institution}} {{top_referring_record.dynamic_model__data_requests.other_institution}}</b>
-              </li>
-              <li>Any others handling data: 
-              <b>{{top_referring_record.dynamic_model__data_requests.others_handling_data::markdown}}</b>
-              </li>
-              <li>Duration: 
-              <b>{{top_referring_record.dynamic_model__data_requests.data_start_date}} {{top_referring_record.dynamic_model__data_requests.data_end_date}}</b>
-              </li>
-            </ul>  
-          </li>
+          </p>
+            
+          <p>If not FPHS, primary affiliation: 
+              <b>{{top_referring_record.dynamic_model__data_requests.institution}} {{top_referring_record.dynamic_model__data_requests.other_institution}}</b>
+          </p>
+          <p>Any others handling data: 
+          <b>{{top_referring_record.dynamic_model__data_requests.others_handling_data::markdown}}</b>
+          </p>
+          <p>Duration: 
+          <b>{{top_referring_record.dynamic_model__data_requests.data_start_date}} {{top_referring_record.dynamic_model__data_requests.data_end_date}}</b>
+          </p>
+              
 
-          <li>Data classifications: 
+          <p>Data classifications: 
           <b>{{top_referring_record.activity_log__data_request_assignment__initial_review.latest_reference.tag_select_data_classifications::compact::html_list}}</b>
-          </li>
-        </ul>
+          </p>
+        </div>
 
         <h3>Requested Attributes</h3>
         {{embedded_report_data_requests__selected_data_attributes_all}}
