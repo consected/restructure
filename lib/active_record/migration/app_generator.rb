@@ -204,14 +204,13 @@ module ActiveRecord
           puts 'Migrate'
           puts "Adding: #{added -= col_names}"
           puts "Removing: #{removed &= col_names}"
-          puts "Adding (history): #{removed_history &= history_col_names}"
-          puts "Removing (history): #{added_history -= history_col_names}"
+          puts "Adding (history): #{added_history -= history_col_names}"
+          puts "Removing (history): #{removed_history &= history_col_names}"
         end
 
-        if Rails.env.production?
-          puts 'Continue? y/n'
-          prod_continue = gets.chomp
-          exit unless prod_continue == 'y'
+        if Rails.env.production? && (removed.present? || removed_history.present?) && ENV['ALLOW_DROP_COLUMNS'] != 'true'
+          puts 'Specify "allow drop columns" is required'
+          exit
         end
 
         full_field_list = (old_colnames + new_colnames + col_names).uniq.map(&:to_sym)
