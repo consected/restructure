@@ -27,8 +27,21 @@ _definitions:
   notify_email_default: &notify_email_default
     type: email
     layout_template: ipa notification layout
-    content_template: ipa inex message
-    subject: "IPA App: Phone Screen Complete"
+    content_template: ipa notification message
+    subject: "IPA: Phone Screen Complete - {{id}}"
+    extra_substitutions:
+      reason: 'Phone Screen Complete'
+      extra_text: |        
+        The **phone screen** for this participant has been completed.
+        
+        *Participant Summary* and the *Inclusion / Exclusion Checklist* have been prepared
+        for completion and review.
+        
+        If you have questions about this screening, contact the original 
+        phone screening interviewer from the **Discussions** panel in the participant's 
+        record, selecting the role: *Phone Screen Interviewer*.
+        
+      panel_tab: activity-log--ipa-assignment-summaries
 
 
   # Default SMS - just add roles or users
@@ -49,17 +62,6 @@ _definitions:
   notify_reviewer_sms: &notify_reviewer_sms
     <<: *notify_sms_default
     role: sms - inex reviewer
-
-  # PI
-  notify_pi: &notify_pi
-    <<: *notify_email_default
-    role: email - inex pi
-
-
-  # PI SMS
-  notify_pi_sms: &notify_pi_sms
-    <<: *notify_sms_default
-    role: sms - inex pi
 
 
 _default:
@@ -85,8 +87,9 @@ start_phone_screen:
       add: one_to_this
 
   caption_before:
-    all_fields: Record initial screening responses. If necessary, enter a date and time to follow up.
-    submit: If the subject is ready to continue, save this form and continue with the next form.
+
+    submit: |
+      *If the subject is ready to continue, save this form and continue with the next form.*
   view_options:
     show_embedded_at_top: true
 
@@ -174,8 +177,12 @@ tmoca_scores:
 
   caption_before:
     all_fields: |
-      I am now going to ask you to do some cognitive tasks and will provide you with instructions throughout.You should be in a quiet room without anything to distract you (for example, a television or computer or background noise that could make it difficult to hear). You will need a pencil or pen to complete this portion… Are you ready?<hr>
-      <b>When questions are complete</b>
+      I am now going to ask you to do some cognitive tasks and will provide you with instructions throughout.You should be in a quiet room without anything to distract you (for example, a television or computer or background noise that could make it difficult to hear). You will need a pencil or pen to complete this portion, but you do not need a piece of paper… Are you ready? 
+      
+      ---
+      
+      **When questions are complete**
+      
       Thank you for your patience and for completing these tasks.
 
       Please note that we will keep this information with your research records. As I mention before, some of your responses may be shared with our Football Player Health Study staff members and you may be contacted to participate in additional research opportunities.
@@ -949,8 +956,6 @@ finalize:
       notify:
         - *notify_reviewer
         - *notify_reviewer_sms
-#        - *notify_pi
-#        - *notify_pi_sms
 
 rescreen:
 

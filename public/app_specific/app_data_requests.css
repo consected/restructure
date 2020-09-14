@@ -363,9 +363,14 @@ h4.container-name {
 span.master-header-prefix {
   color: rgb(100, 100, 100);
   font-size: 19px;
-  width: 500px;
+  min-width: 500px;
+  width: 100%;
   display: block;
   /* text-transform: capitalize; */
+}
+
+.master-header-prefix-block {
+  width: 90%;
 }
 
 .master-result.num-masters-1,

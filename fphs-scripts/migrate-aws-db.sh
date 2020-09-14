@@ -64,6 +64,17 @@ fi
 
 echo
 
+echo "Allow migration / rollback to drop columns? Enter 'true' to allow."
+read ALLOW_DROP_COLUMNS
+if [ "$ALLOW_DROP_COLUMNS" == 'true' ]; then
+  export ALLOW_DROP_COLUMNS
+  export STEPS='STEP=1'
+  echo "Will drop columns if needed."
+  echo "Migration limited to 1 step. Re-run to check the next one"
+fi
+
+echo
+
 FPHS_POSTGRESQL_HOSTNAME=$TEMP_HOSTNAME \
   FPHS_POSTGRESQL_DATABASE=$TEMP_DBNAME \
   RAILS_ENV=production \
@@ -74,7 +85,7 @@ FPHS_POSTGRESQL_HOSTNAME=$TEMP_HOSTNAME \
   FPHS_RAILS_DEVISE_SECRET_KEY=temp \
   FPHS_POSTGRESQL_PASSWORD="$TEMP_DB_PW" \
   FPHS_LOAD_APP_TYPES=1 \
-  bundle exec rake db:${MODE}
+  bundle exec rake db:${MODE} ${STEPS}
 
 export PGPASSWORD="$TEMP_DB_PW"
 

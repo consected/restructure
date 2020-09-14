@@ -1,43 +1,142 @@
-# Fields:
-
-# form_version,select_schedule
-# placeholder_ps_intro_v1,placeholder_ps_intro_v2,select_is_good_time_to_speak,
-# looked_at_website_yes_no,
-# placeholder_ps_overview_v1,placeholder_ps_overview_v2,any_questions_blank_yes_no,
-# placeholder_ps_details_v1,placeholder_ps_details_v2,same_hotel_yes_no,
-# placeholder_ps_details_sched_a_v2,placeholder_ps_details_sched_b_v2,select_still_interested,
-# placeholder_complete_intro,follow_up_date,follow_up_time,placeholder_not_interested,notes
-
-
 default:
+
+  field_options:
+    form_version:
+      value: v2
+    select_schedule:
+      edit_as:
+        alt_options:
+          A: a
+          B: b
+
   dialog_before:
-    select_is_good_time_to_speak: 
+    
+  
+    placeholder_ps_intro_v1:
       name: ipa ps intro
 
-    any_questions_blank_yes_no: 
+    placeholder_ps_intro_v2:
+      name: ipa ps intro v2
+      
+    looked_at_website_yes_no: 
+      name: ipa ps looked at website      
+
+    placeholder_ps_overview_v1: 
       name: ipa ps intro overview
       label: show script
-    select_still_interested: 
+      
+    placeholder_ps_overview_v2: 
+      name: ipa ps intro overview v2
+      label: show script
+      
+      
+    placeholder_ps_details_v1: 
       name: ipa ps intro details
       label: show script
-#    select_still_interested: 
-#      name: ipa ps intro time to continue
-#      label: show script
+
+    placeholder_ps_details_v2: 
+      name: ipa ps intro details v2
+      label: show script
+
+    placeholder_ps_details_sched_a_v2: 
+      name: ipa ps intro details sched a v2
+      label: show script
+
+    placeholder_ps_details_sched_b_v2: 
+      name: ipa ps intro details sched b v2
+      label: show script
+
+
     placeholder_complete_intro: 
       name: ipa ps intro complete intro
       label: show script
 
   show_if:
   
+    form_version:
+      never: true
+      
+    select_schedule: &show_if_not_v1
+      form_version:
+        - v2
+          
+    placeholder_ps_intro_v1: &show_v1
+      not_any: *show_if_not_v1
+    
+    placeholder_ps_intro_v2: &show_v2
+      form_version: v2
   
-    looked_at_website_yes_no:  
+    looked_at_website_yes_no:
       select_is_good_time_to_speak: "yes"
+
+    _show_overview: &show_overview
+      looked_at_website_yes_no: 
+        - 'yes'
+        - 'no'
+
+    placeholder_ps_overview_v1: 
+      <<: *show_overview    
+      <<: *show_v1
+    
+    placeholder_ps_overview_v2: 
+      <<: *show_overview    
+      <<: *show_v2
+    
     any_questions_blank_yes_no:
       looked_at_website_yes_no: 
         - "yes"
         - "no"
-      
+
+    placeholder_ps_details_v1:
+      <<: *show_v1
+      <<: *show_overview    
+      any_questions_blank_yes_no: 
+        - "yes"
+        - "no"
+    
+    placeholder_ps_details_v2:
+      <<: *show_v2
+      <<: *show_overview    
+      any_questions_blank_yes_no: 
+        - "yes"
+        - "no"
+    
+    same_hotel_yes_no:
+      <<: *show_overview    
+      <<: *show_if_not_v1
+      any_questions_blank_yes_no: 
+        - "yes"
+        - "no"
+
+    placeholder_select_schedule: &show_select_schedule
+      <<: *show_v2    
+      same_hotel_yes_no:
+        - 'yes'
+        - 'no'
+    
+    embedded_report_ipa__ipa_appointments: *show_select_schedule
+
+    select_schedule: *show_select_schedule
+
+    placeholder_ps_details_sched_a_v2:
+      <<: *show_v2
+      select_schedule: a
+      same_hotel_yes_no: 
+        - 'yes'
+        - 'no'
+
+    placeholder_ps_details_sched_b_v2:
+      <<: *show_overview    
+      <<: *show_v2
+      select_schedule: b
+      same_hotel_yes_no: 
+        - 'yes'
+        - 'no'
+
     select_still_interested:
+      select_schedule:
+        - a
+        - b
       any_questions_blank_yes_no: 
         - "yes"
         - "no"        
@@ -66,18 +165,13 @@ default:
         select_is_good_time_to_speak: not interested
         select_still_interested: no
         
-      
+  labels:
+    embedded_report_ipa__ipa_appointments: View calendar
 
-  caption_before:
+  caption_before:    
+    placeholder_select_schedule: |
+      *Select a schedule. To view the calendar, click the icon below.*    
     select_is_good_time_to_speak: Is this a good time to speak?
-    looked_at_website_yes_no: |
-        Okay great, thank you for expressing interest in our study.  Did you have a chance to look at the website that had more details about the In-Person Assessments?
-        <i>(yes)</i> Great, do you have any specific questions about it before I briefly go over the study?
-        <i>(no)</i> That is alright, I can tell you more about the study right now.
-#    select_may_i_begin: May I begin?
-#    any_questions_blank_yes_no: I am going to go over the study in some more detail. Do you have any questions so far?
-#    select_still_interested: Are you still interested in hearing more about the study or do you have any additional questions? (offer to mail materials and call them back if they want to review materials; offer to send them a link to the IPA webpage)
-
     follow_up_date: Enter a follow up date and time if the subject wishes for a call back before continuing with the screening, or you left a voicemail. 
     follow_up_time: Follow up time
     placeholder_not_interested: Thank and end call

@@ -40,11 +40,11 @@ class CreateAthenaWebApp < ActiveRecord::Migration[5.2]
 
       ALTER SEQUENCE athena_web_app.delayed_jobs_id_seq OWNER TO fphs;
 
-      GRANT SELECT ON athena_web_app.delayed_jobs_id_seq TO fphsusr;
-      GRANT SELECT ON athena_web_app.delayed_jobs_id_seq TO fphsadm;
-      GRANT SELECT ON athena_web_app.delayed_jobs_id_seq TO fphsetl;
-      GRANT SELECT ON athena_web_app.delayed_jobs_id_seq TO fphsrailsapp;
-      GRANT SELECT ON athena_web_app.delayed_jobs_id_seq TO fphsbkp;
+      GRANT SELECT, USAGE ON athena_web_app.delayed_jobs_id_seq TO fphsusr;
+      GRANT SELECT, USAGE ON athena_web_app.delayed_jobs_id_seq TO fphsadm;
+      GRANT SELECT, USAGE ON athena_web_app.delayed_jobs_id_seq TO fphsetl;
+      GRANT SELECT, USAGE ON athena_web_app.delayed_jobs_id_seq TO fphsrailsapp;
+      GRANT SELECT, USAGE ON athena_web_app.delayed_jobs_id_seq TO fphsbkp;
 
 
       

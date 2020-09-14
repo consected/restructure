@@ -1,0 +1,22 @@
+require 'active_record/migration/app_generator'
+class UpdateIpaPsTmsTestsQghrzj < ActiveRecord::Migration[5.2]
+  include ActiveRecord::Migration::AppGenerator
+
+  def change
+    self.schema = 'ipa_ops'
+    self.table_name = 'ipa_ps_tms_tests'
+    self.fields = %i[form_version past_tms_blank_yes_no_dont_know past_tms_details convulsion_or_seizure_blank_yes_no_dont_know convulsion_or_seizure_details epilepsy_blank_yes_no_dont_know epilepsy_details fainting_blank_yes_no_dont_know fainting_details concussion_blank_yes_no_dont_know loss_of_conciousness_details hairstyle_scalp_blank_yes_no_dont_know hairstyle_scalp_details hearing_problems_blank_yes_no_dont_know cochlear_implants_blank_yes_no_dont_know neurostimulator_blank_yes_no_dont_know neurostimulator_details med_infusion_device_blank_yes_no_dont_know med_infusion_device_details metal_blank_yes_no_dont_know metal_details current_meds_blank_yes_no_dont_know current_meds_details other_chronic_problems_blank_yes_no_dont_know other_chronic_problems_details hospital_visits_blank_yes_no_dont_know hospital_visits_details dietary_restrictions_blank_yes_no_dont_know dietary_restrictions_details tobacco_smoker_blank_yes_no tobacco_smoker_details healthcare_anxiety_blank_yes_no healthcare_anxiety_details anything_else_blank_yes_no anything_else_details]
+    self.table_comment = ''
+    self.fields_comments = {}
+
+
+    self.prev_fields = %i[convulsion_or_seizure_blank_yes_no_dont_know epilepsy_blank_yes_no_dont_know fainting_blank_yes_no_dont_know concussion_blank_yes_no_dont_know hearing_problems_blank_yes_no_dont_know cochlear_implants_blank_yes_no_dont_know metal_blank_yes_no_dont_know metal_details neurostimulator_blank_yes_no_dont_know neurostimulator_details med_infusion_device_blank_yes_no_dont_know past_tms_blank_yes_no_dont_know past_tms_details current_meds_blank_yes_no_dont_know current_meds_details other_chronic_problems_blank_yes_no_dont_know other_chronic_problems_details hospital_visits_blank_yes_no_dont_know hospital_visits_details dietary_restrictions_blank_yes_no_dont_know dietary_restrictions_details anything_else_blank_yes_no anything_else_details loss_of_conciousness_details med_infusion_device_details convulsion_or_seizure_details epilepsy_details fainting_details hairstyle_scalp_blank_yes_no_dont_know hairstyle_scalp_details]
+    # added: ["form_version", "tobacco_smoker_blank_yes_no", "tobacco_smoker_details", "healthcare_anxiety_blank_yes_no", "healthcare_anxiety_details"]
+    # removed: []
+    
+    
+    update_fields
+
+    create_dynamic_model_trigger
+  end
+end

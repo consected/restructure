@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_24_084238) do
+ActiveRecord::Schema.define(version: 2020_09_14_163936) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -111,6 +111,8 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "created_by_user_id"
     t.string "next_step"
     t.string "status"
+    t.bigint "data_request_assignment_id"
+    t.index ["data_request_assignment_id"], name: "36bd4ead_bt_id_idx"
     t.index ["master_id"], name: "index_activity_log_data_request_assignments_on_master_id"
     t.index ["user_id"], name: "index_activity_log_data_request_assignments_on_user_id"
   end
@@ -483,7 +485,9 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "activity_log_ipa_assignment_discussion_id"
+    t.bigint "created_by_user_id"
     t.index ["activity_log_ipa_assignment_discussion_id"], name: "index_al_ipa_assignment_discussion_history_on_activity_log_ipa_"
+    t.index ["created_by_user_id"], name: "8d569f72_ref_cb_user_idx_hist"
     t.index ["ipa_assignment_id"], name: "index_al_ipa_assignment_discussion_history_on_ipa_assignment_di"
     t.index ["master_id"], name: "index_al_ipa_assignment_discussion_history_on_master_id"
     t.index ["user_id"], name: "index_al_ipa_assignment_discussion_history_on_user_id"
@@ -499,6 +503,8 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "created_by_user_id"
+    t.index ["created_by_user_id"], name: "8d569f72_ref_cb_user_idx"
     t.index ["ipa_assignment_id"], name: "index_activity_log_ipa_assignment_discussions_on_ipa_assignment"
     t.index ["master_id"], name: "index_activity_log_ipa_assignment_discussions_on_master_id"
     t.index ["user_id"], name: "index_activity_log_ipa_assignment_discussions_on_user_id"
@@ -701,8 +707,6 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.time "completion_time"
     t.string "participant_feedback_notes"
     t.string "other_navigator_notes"
-    t.string "add_protocol_deviation_record_no_yes"
-    t.string "add_adverse_event_record_no_yes"
     t.string "select_event_type"
     t.string "other_event_type"
     t.string "extra_log_type"
@@ -914,7 +918,6 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.date "follow_up_when"
     t.time "follow_up_time"
     t.string "notes"
-    t.bigint "protocol_id"
     t.string "select_record_from_addresses"
     t.string "extra_log_type"
     t.integer "user_id"
@@ -1328,6 +1331,7 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "activity_log_sleep_assignment_id"
+    t.bigint "protocol_id"
     t.index ["activity_log_sleep_assignment_id"], name: "index_activity_log_sleep_assignment_history_on_activity_log_sle"
     t.index ["master_id"], name: "index_activity_log_sleep_assignment_history_on_master_id"
     t.index ["sleep_assignment_id"], name: "index_activity_log_sleep_assignment_history_on_sleep_assignment"
@@ -1350,6 +1354,9 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "activity_log_sleep_assignment_inex_checklist_id"
+    t.string "select_subject_eligibility"
+    t.string "contact_role"
+    t.string "prev_activity_type"
     t.index ["activity_log_sleep_assignment_inex_checklist_id"], name: "index_activity_log_sleep_assignment_inex_checklist_history_on_a"
     t.index ["master_id"], name: "index_activity_log_sleep_assignment_inex_checklist_history_on_m"
     t.index ["sleep_assignment_id"], name: "index_activity_log_sleep_assignment_inex_checklist_history_on_s"
@@ -1371,6 +1378,9 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "select_subject_eligibility"
+    t.string "contact_role"
+    t.string "prev_activity_type"
     t.index ["master_id"], name: "index_activity_log_sleep_assignment_inex_checklists_on_master_i"
     t.index ["sleep_assignment_id"], name: "index_activity_log_sleep_assignment_inex_checklists_on_sleep_as"
     t.index ["user_id"], name: "index_activity_log_sleep_assignment_inex_checklists_on_user_id"
@@ -1454,6 +1464,10 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "activity_log_sleep_assignment_phone_screen_id"
+    t.string "notes"
+    t.time "callback_time"
+    t.date "callback_date"
+    t.string "callback_required"
     t.index ["activity_log_sleep_assignment_phone_screen_id"], name: "index_activity_log_sleep_assignment_phone_screen_history_on_act"
     t.index ["master_id"], name: "index_activity_log_sleep_assignment_phone_screen_history_on_mas"
     t.index ["sleep_assignment_id"], name: "index_activity_log_sleep_assignment_phone_screen_history_on_sle"
@@ -1467,6 +1481,10 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "notes"
+    t.time "callback_time"
+    t.date "callback_date"
+    t.string "callback_required"
     t.index ["master_id"], name: "index_activity_log_sleep_assignment_phone_screens_on_master_id"
     t.index ["sleep_assignment_id"], name: "index_activity_log_sleep_assignment_phone_screens_on_sleep_assi"
     t.index ["user_id"], name: "index_activity_log_sleep_assignment_phone_screens_on_user_id"
@@ -1522,6 +1540,7 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "protocol_id"
     t.index ["master_id"], name: "index_activity_log_sleep_assignments_on_master_id"
     t.index ["sleep_assignment_id"], name: "index_activity_log_sleep_assignments_on_sleep_assignment_id"
     t.index ["user_id"], name: "index_activity_log_sleep_assignments_on_user_id"
@@ -2499,7 +2518,6 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
   create_table "data_requests_selected_attrib_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "record_id"
-    t.string "record_type"
     t.integer "data_request_id"
     t.string "data"
     t.string "variable_name"
@@ -2508,6 +2526,7 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "data_requests_selected_attrib_id"
+    t.string "record_type"
     t.index ["data_requests_selected_attrib_id"], name: "index_data_requests_selected_attrib_history_on_data_requests_se"
     t.index ["master_id"], name: "index_data_requests_selected_attrib_history_on_master_id"
     t.index ["user_id"], name: "index_data_requests_selected_attrib_history_on_user_id"
@@ -4014,6 +4033,8 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.string "select_status"
     t.string "notes"
     t.string "select_schedule"
+    t.date "covid19_test_date"
+    t.time "covid19_test_time"
     t.index ["ipa_appointment_id"], name: "index_ipa_appointment_history_on_ipa_appointment_id"
     t.index ["master_id"], name: "index_ipa_appointment_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_appointment_history_on_user_id"
@@ -4029,6 +4050,8 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.string "select_status"
     t.string "notes"
     t.string "select_schedule"
+    t.date "covid19_test_date"
+    t.time "covid19_test_time"
     t.index ["master_id"], name: "index_ipa_appointments_on_master_id"
     t.index ["user_id"], name: "index_ipa_appointments_on_user_id"
     t.index ["visit_start_date"], name: "ipa_appointments_visit_start_date_key", unique: true
@@ -4528,6 +4551,10 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.string "metal_implants_mri_approval_details"
     t.string "radiation_details"
     t.string "radiation_blank_yes_no"
+    t.string "form_version"
+    t.integer "number_of_nights_sleep_apnea_device"
+    t.string "sleep_apnea_travel_with_device_yes_no"
+    t.string "select_radiation_type"
     t.index ["ipa_medical_detail_id"], name: "index_ipa_medical_detail_history_on_ipa_medical_detail_id"
     t.index ["master_id"], name: "index_ipa_medical_detail_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_medical_detail_history_on_user_id"
@@ -4580,6 +4607,10 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.string "metal_implants_mri_approval_details"
     t.string "radiation_details"
     t.string "radiation_blank_yes_no"
+    t.string "form_version"
+    t.integer "number_of_nights_sleep_apnea_device"
+    t.string "sleep_apnea_travel_with_device_yes_no"
+    t.string "select_radiation_type"
     t.index ["master_id"], name: "index_ipa_medical_details_on_master_id"
     t.index ["user_id"], name: "index_ipa_medical_details_on_user_id"
   end
@@ -4944,12 +4975,34 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.index ["user_id"], name: "index_ipa_ps_comp_reviews_on_user_id"
   end
 
+  create_table "ipa_ps_covid_closing_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "contact_later_yes_no"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "ipa_ps_covid_closing_id"
+    t.index ["ipa_ps_covid_closing_id"], name: "be7e93a6_id_idx"
+    t.index ["master_id"], name: "be7e93a6_history_master_id"
+    t.index ["user_id"], name: "be7e93a6_user_idx"
+  end
+
+  create_table "ipa_ps_covid_closings", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "contact_later_yes_no"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_ipa_ops.ipa_ps_covid_closings_on_master_id"
+    t.index ["user_id"], name: "index_ipa_ops.ipa_ps_covid_closings_on_user_id"
+  end
+
   create_table "ipa_ps_football_experience_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "age"
     t.string "played_in_nfl_blank_yes_no"
-    t.string "played_before_nfl_blank_yes_no"
-    t.string "football_experience_notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -4963,8 +5016,6 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "master_id"
     t.integer "age"
     t.string "played_in_nfl_blank_yes_no"
-    t.string "played_before_nfl_blank_yes_no"
-    t.string "football_experience_notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -5118,6 +5169,9 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "ipa_ps_initial_screening_id"
     t.string "looked_at_website_yes_no"
     t.string "select_still_interested"
+    t.string "form_version"
+    t.string "same_hotel_yes_no"
+    t.string "select_schedule"
     t.index ["ipa_ps_initial_screening_id"], name: "index_ipa_ps_initial_screening_history_on_ipa_ps_initial_screen"
     t.index ["master_id"], name: "index_ipa_ps_initial_screening_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_initial_screening_history_on_user_id"
@@ -5139,6 +5193,7 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.string "same_hotel_yes_no"
     t.string "embedded_report_ipa__ipa_appointments"
     t.string "select_schedule"
+    t.string "select_may_i_begin"
     t.index ["master_id"], name: "index_ipa_ps_initial_screenings_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_initial_screenings_on_user_id"
   end
@@ -5159,6 +5214,8 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.string "past_mri_details"
     t.string "radiation_blank_yes_no"
     t.string "radiation_details"
+    t.string "form_version"
+    t.string "select_radiation_type"
     t.index ["ipa_ps_mri_id"], name: "index_ipa_ps_mri_history_on_ipa_ps_mri_id"
     t.index ["master_id"], name: "index_ipa_ps_mri_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_mri_history_on_user_id"
@@ -5179,6 +5236,8 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.string "past_mri_details"
     t.string "radiation_blank_yes_no"
     t.string "radiation_details"
+    t.string "form_version"
+    t.string "select_radiation_type"
     t.index ["master_id"], name: "index_ipa_ps_mris_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_mris_on_user_id"
   end
@@ -5228,6 +5287,10 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "ipa_ps_sleep_id"
+    t.string "form_version"
+    t.integer "number_of_nights_sleep_apnea_device"
+    t.string "sleep_apnea_travel_with_device_yes_no"
+    t.string "sleep_apnea_bring_device_yes_no"
     t.index ["ipa_ps_sleep_id"], name: "index_ipa_ps_sleep_history_on_ipa_ps_sleep_id"
     t.index ["master_id"], name: "index_ipa_ps_sleep_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_sleep_history_on_user_id"
@@ -5243,6 +5306,10 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "form_version"
+    t.integer "number_of_nights_sleep_apnea_device"
+    t.string "sleep_apnea_travel_with_device_yes_no"
+    t.string "sleep_apnea_bring_device_yes_no"
     t.index ["master_id"], name: "index_ipa_ps_sleeps_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_sleeps_on_user_id"
   end
@@ -5323,6 +5390,15 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.string "fainting_details"
     t.string "hairstyle_scalp_blank_yes_no_dont_know"
     t.string "hairstyle_scalp_details"
+    t.string "form_version"
+    t.string "tobacco_smoker_blank_yes_no"
+    t.string "tobacco_smoker_details"
+    t.string "healthcare_anxiety_blank_yes_no"
+    t.string "healthcare_anxiety_details"
+    t.string "covid19_test_consent_yes_no"
+    t.string "covid19_concerns_yes_no"
+    t.string "covid19_concerns_notes"
+    t.string "wear_mask_yes_no"
     t.index ["ipa_ps_tms_test_id"], name: "index_ipa_ps_tms_test_history_on_ipa_ps_tms_test_id"
     t.index ["master_id"], name: "index_ipa_ps_tms_test_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_tms_test_history_on_user_id"
@@ -5363,6 +5439,15 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.string "fainting_details"
     t.string "hairstyle_scalp_blank_yes_no_dont_know"
     t.string "hairstyle_scalp_details"
+    t.string "form_version"
+    t.string "tobacco_smoker_blank_yes_no"
+    t.string "tobacco_smoker_details"
+    t.string "healthcare_anxiety_blank_yes_no"
+    t.string "healthcare_anxiety_details"
+    t.string "covid19_test_consent_yes_no"
+    t.string "covid19_concerns_yes_no"
+    t.string "covid19_concerns_notes"
+    t.string "wear_mask_yes_no"
     t.index ["master_id"], name: "index_ipa_ps_tms_tests_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_tms_tests_on_user_id"
   end
@@ -5419,6 +5504,7 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.string "eligible_notes"
     t.string "requires_study_partner_blank_yes_no"
     t.string "contact_in_future_yes_no"
+    t.string "form_version"
     t.index ["ipa_screening_id"], name: "index_ipa_screening_history_on_ipa_screening_id"
     t.index ["master_id"], name: "index_ipa_screening_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_screening_history_on_user_id"
@@ -5438,9 +5524,9 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.string "not_interested_notes"
     t.string "ineligible_notes"
     t.string "eligible_notes"
-    t.string "eligible_with_partner_notes"
     t.string "requires_study_partner_blank_yes_no"
     t.string "contact_in_future_yes_no"
+    t.string "form_version"
     t.index ["master_id"], name: "index_ipa_screenings_on_master_id"
     t.index ["user_id"], name: "index_ipa_screenings_on_user_id"
   end
@@ -5459,6 +5545,7 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "updated_at", null: false
     t.integer "ipa_special_consideration_id"
     t.string "mmse_details"
+    t.string "same_hotel_yes_no"
     t.index ["ipa_special_consideration_id"], name: "index_ipa_special_consideration_history_on_ipa_special_consider"
     t.index ["master_id"], name: "index_ipa_special_consideration_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_special_consideration_history_on_user_id"
@@ -5477,6 +5564,7 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "mmse_details"
+    t.string "same_hotel_yes_no"
     t.index ["master_id"], name: "index_ipa_special_considerations_on_master_id"
     t.index ["user_id"], name: "index_ipa_special_considerations_on_user_id"
   end
@@ -5536,7 +5624,6 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.string "select_survey_type"
     t.date "sent_date"
     t.date "completed_date"
-    t.date "send_next_survey_when"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -8056,6 +8143,42 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_incidental_finding_id"
+    t.string "xray_notes"
+    t.date "xray_date"
+    t.boolean "xray_check"
+    t.string "cardiac_notes"
+    t.date "cardiac_date"
+    t.boolean "cardiac_check"
+    t.string "sleep_notes"
+    t.date "sleep_date"
+    t.boolean "sleep_check"
+    t.string "eeg_notes"
+    t.date "eeg_date"
+    t.boolean "eeg_check"
+    t.string "physical_function_notes"
+    t.date "physical_function_date"
+    t.boolean "physical_function_check"
+    t.string "liver_mri_notes"
+    t.date "liver_mri_date"
+    t.boolean "liver_mri_check"
+    t.string "sensory_testing_notes"
+    t.date "sensory_testing_date"
+    t.boolean "sensory_testing_check"
+    t.string "neuro_psych_notes"
+    t.date "neuro_psych_date"
+    t.boolean "neuro_psych_check"
+    t.string "brain_mri_notes"
+    t.date "brain_mri_date"
+    t.boolean "brain_mri_check"
+    t.string "dexa_notes"
+    t.date "dexa_date"
+    t.boolean "dexa_check"
+    t.string "lab_results_notes"
+    t.date "lab_results_date"
+    t.boolean "lab_results_check"
+    t.string "anthropometrics_notes"
+    t.date "anthropometrics_date"
+    t.boolean "anthropometrics_check"
     t.index ["master_id"], name: "index_sleep_incidental_finding_history_on_master_id"
     t.index ["sleep_incidental_finding_id"], name: "index_sleep_incidental_finding_history_on_sleep_incidental_find"
     t.index ["user_id"], name: "index_sleep_incidental_finding_history_on_user_id"
@@ -8067,6 +8190,42 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "xray_notes"
+    t.date "xray_date"
+    t.boolean "xray_check"
+    t.string "cardiac_notes"
+    t.date "cardiac_date"
+    t.boolean "cardiac_check"
+    t.string "sleep_notes"
+    t.date "sleep_date"
+    t.boolean "sleep_check"
+    t.string "eeg_notes"
+    t.date "eeg_date"
+    t.boolean "eeg_check"
+    t.string "physical_function_notes"
+    t.date "physical_function_date"
+    t.boolean "physical_function_check"
+    t.string "liver_mri_notes"
+    t.date "liver_mri_date"
+    t.boolean "liver_mri_check"
+    t.string "sensory_testing_notes"
+    t.date "sensory_testing_date"
+    t.boolean "sensory_testing_check"
+    t.string "neuro_psych_notes"
+    t.date "neuro_psych_date"
+    t.boolean "neuro_psych_check"
+    t.string "brain_mri_notes"
+    t.date "brain_mri_date"
+    t.boolean "brain_mri_check"
+    t.string "dexa_notes"
+    t.date "dexa_date"
+    t.boolean "dexa_check"
+    t.string "lab_results_notes"
+    t.date "lab_results_date"
+    t.boolean "lab_results_check"
+    t.string "anthropometrics_notes"
+    t.date "anthropometrics_date"
+    t.boolean "anthropometrics_check"
     t.index ["master_id"], name: "index_sleep_incidental_findings_on_master_id"
     t.index ["user_id"], name: "index_sleep_incidental_findings_on_user_id"
   end
@@ -8485,6 +8644,7 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_ps2_initial_screening_id"
+    t.string "select_still_interested"
     t.index ["master_id"], name: "index_sleep_ps2_initial_screening_history_on_master_id"
     t.index ["sleep_ps2_initial_screening_id"], name: "index_sleep_ps2_initial_screening_history_on_sleep_ps2_initial_"
     t.index ["user_id"], name: "index_sleep_ps2_initial_screening_history_on_user_id"
@@ -8501,6 +8661,7 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "select_still_interested"
     t.index ["master_id"], name: "index_sleep_ps2_initial_screenings_on_master_id"
     t.index ["user_id"], name: "index_sleep_ps2_initial_screenings_on_user_id"
   end
@@ -8780,6 +8941,8 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_ps_initial_screening_id"
+    t.string "select_may_i_begin"
+    t.string "looked_at_website_yes_no"
     t.index ["master_id"], name: "index_sleep_ps_initial_screening_history_on_master_id"
     t.index ["sleep_ps_initial_screening_id"], name: "index_sleep_ps_initial_screening_history_on_sleep_ps_initial_sc"
     t.index ["user_id"], name: "index_sleep_ps_initial_screening_history_on_user_id"
@@ -8797,6 +8960,8 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "select_may_i_begin"
+    t.string "looked_at_website_yes_no"
     t.index ["master_id"], name: "index_sleep_ps_initial_screenings_on_master_id"
     t.index ["user_id"], name: "index_sleep_ps_initial_screenings_on_user_id"
   end
@@ -8846,6 +9011,8 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_ps_possibly_eligible_id"
+    t.time "follow_up_time"
+    t.date "follow_up_date"
     t.index ["master_id"], name: "index_sleep_ps_possibly_eligible_history_on_master_id"
     t.index ["sleep_ps_possibly_eligible_id"], name: "index_sleep_ps_possibly_eligible_history_on_sleep_ps_possibly_e"
     t.index ["user_id"], name: "index_sleep_ps_possibly_eligible_history_on_user_id"
@@ -8861,6 +9028,8 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.time "follow_up_time"
+    t.date "follow_up_date"
     t.index ["master_id"], name: "index_sleep_ps_possibly_eligibles_on_master_id"
     t.index ["user_id"], name: "index_sleep_ps_possibly_eligibles_on_user_id"
   end
@@ -8905,6 +9074,7 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_ps_sleep_apnea_response_id"
+    t.string "possibly_eligible_yes_no"
     t.index ["master_id"], name: "index_sleep_ps_sleep_apnea_response_history_on_master_id"
     t.index ["sleep_ps_sleep_apnea_response_id"], name: "index_sleep_ps_sleep_apnea_response_history_on_sleep_ps_sleep_a"
     t.index ["user_id"], name: "index_sleep_ps_sleep_apnea_response_history_on_user_id"
@@ -8919,6 +9089,7 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "possibly_eligible_yes_no"
     t.index ["master_id"], name: "index_sleep_ps_sleep_apnea_responses_on_master_id"
     t.index ["user_id"], name: "index_sleep_ps_sleep_apnea_responses_on_user_id"
   end
@@ -8966,6 +9137,8 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_screening_id"
+    t.string "notes"
+    t.string "requires_study_partner_blank_yes_no"
     t.index ["master_id"], name: "index_sleep_screening_history_on_master_id"
     t.index ["sleep_screening_id"], name: "index_sleep_screening_history_on_sleep_screening_id"
     t.index ["user_id"], name: "index_sleep_screening_history_on_user_id"
@@ -8987,6 +9160,8 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "notes"
+    t.string "requires_study_partner_blank_yes_no"
     t.index ["master_id"], name: "index_sleep_screenings_on_master_id"
     t.index ["user_id"], name: "index_sleep_screenings_on_user_id"
   end
@@ -11036,10 +11211,12 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
   add_foreign_key "activity_log_ipa_assignment_discussion_history", "activity_log_ipa_assignment_discussions", name: "fk_activity_log_ipa_assignment_discussion_history_activity_log_"
   add_foreign_key "activity_log_ipa_assignment_discussion_history", "ipa_assignments", name: "fk_activity_log_ipa_assignment_discussion_history_ipa_assignmen"
   add_foreign_key "activity_log_ipa_assignment_discussion_history", "masters", name: "fk_activity_log_ipa_assignment_discussion_history_masters"
+  add_foreign_key "activity_log_ipa_assignment_discussion_history", "users", column: "created_by_user_id"
   add_foreign_key "activity_log_ipa_assignment_discussion_history", "users", name: "fk_activity_log_ipa_assignment_discussion_history_users"
   add_foreign_key "activity_log_ipa_assignment_discussions", "ipa_assignments"
   add_foreign_key "activity_log_ipa_assignment_discussions", "masters"
   add_foreign_key "activity_log_ipa_assignment_discussions", "users"
+  add_foreign_key "activity_log_ipa_assignment_discussions", "users", column: "created_by_user_id"
   add_foreign_key "activity_log_ipa_assignment_history", "activity_log_ipa_assignments", name: "fk_activity_log_ipa_assignment_history_activity_log_ipa_assignm"
   add_foreign_key "activity_log_ipa_assignment_history", "ipa_assignments", name: "fk_activity_log_ipa_assignment_history_ipa_assignment_id"
   add_foreign_key "activity_log_ipa_assignment_history", "masters", name: "fk_activity_log_ipa_assignment_history_masters"
@@ -11675,6 +11852,11 @@ ActiveRecord::Schema.define(version: 2020_08_24_084238) do
   add_foreign_key "ipa_ps_comp_review_history", "users", name: "fk_ipa_ps_comp_review_history_users"
   add_foreign_key "ipa_ps_comp_reviews", "masters"
   add_foreign_key "ipa_ps_comp_reviews", "users"
+  add_foreign_key "ipa_ps_covid_closing_history", "ipa_ps_covid_closings"
+  add_foreign_key "ipa_ps_covid_closing_history", "masters"
+  add_foreign_key "ipa_ps_covid_closing_history", "users"
+  add_foreign_key "ipa_ps_covid_closings", "masters"
+  add_foreign_key "ipa_ps_covid_closings", "users"
   add_foreign_key "ipa_ps_football_experience_history", "ipa_ps_football_experiences", name: "fk_ipa_ps_football_experience_history_ipa_ps_football_experienc"
   add_foreign_key "ipa_ps_football_experience_history", "masters", name: "fk_ipa_ps_football_experience_history_masters"
   add_foreign_key "ipa_ps_football_experience_history", "users", name: "fk_ipa_ps_football_experience_history_users"

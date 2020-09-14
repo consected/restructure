@@ -3036,41 +3036,34 @@ $$;
 
 
 --
--- Name: log_activity_log_ipa_assignment_discussion_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+-- Name: log_activity_log_ipa_assignment_discussions_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
-CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_discussion_update() RETURNS trigger
+CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_discussions_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-              BEGIN
-                  INSERT INTO activity_log_ipa_assignment_discussion_history
-                  (
-                      master_id,
-                      ipa_assignment_id,
-                      tag_select_contact_role,
-                      notes,
-                      prev_activity_type,
-                      extra_log_type,
-                      user_id,
-                      created_at,
-                      updated_at,
-                      activity_log_ipa_assignment_discussion_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.ipa_assignment_id,
-                      NEW.tag_select_contact_role,
-                      NEW.notes,
-                      NEW.prev_activity_type,
-                      NEW.extra_log_type,
-                      NEW.user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
+BEGIN
+  INSERT INTO activity_log_ipa_assignment_discussion_history (
+    master_id,
+    ipa_assignment_id,
+    notes, tag_select_contact_role, prev_activity_type, created_by_user_id,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_ipa_assignment_discussion_id)
+  SELECT
+    NEW.master_id,
+    NEW.ipa_assignment_id,
+    NEW.notes, NEW.tag_select_contact_role, NEW.prev_activity_type, NEW.created_by_user_id,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -3178,67 +3171,34 @@ CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_med_nav_update() RETURNS
 
 
 --
--- Name: log_activity_log_ipa_assignment_navigation_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+-- Name: log_activity_log_ipa_assignment_navigations_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
-CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_navigation_update() RETURNS trigger
+CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_navigations_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-        BEGIN
-            INSERT INTO activity_log_ipa_assignment_navigation_history
-            (
-                master_id,
-                ipa_assignment_id,
-                event_date,
-                select_station,
-                select_navigator,
-                select_pi,
-                location,
-                arrival_time,
-                start_time,
-                event_notes,
-                completion_time,
-                participant_feedback_notes,
-                other_navigator_notes,
-                add_protocol_deviation_record_no_yes,
-                add_adverse_event_record_no_yes,
-                select_event_type,
-                other_event_type,
-                select_status,
-                extra_log_type,
-                user_id,
-                created_at,
-                updated_at,
-                activity_log_ipa_assignment_navigation_id
-                )
-            SELECT
-                NEW.master_id,
-                NEW.ipa_assignment_id,
-                NEW.event_date,
-                NEW.select_station,
-                NEW.select_navigator,
-                NEW.select_pi,
-                NEW.location,
-                NEW.arrival_time,
-                NEW.start_time,
-                NEW.event_notes,
-                NEW.completion_time,
-                NEW.participant_feedback_notes,
-                NEW.other_navigator_notes,
-                NEW.add_protocol_deviation_record_no_yes,
-                NEW.add_adverse_event_record_no_yes,
-                NEW.select_event_type,
-                NEW.other_event_type,
-                NEW.select_status,
-                NEW.extra_log_type,
-                NEW.user_id,
-                NEW.created_at,
-                NEW.updated_at,
-                NEW.id
-            ;
-            RETURN NEW;
-        END;
-    $$;
+BEGIN
+  INSERT INTO activity_log_ipa_assignment_navigation_history (
+    master_id,
+    ipa_assignment_id,
+    select_event_type, other_event_type, select_station, location, event_date, start_time, completion_time, select_status, select_navigator, select_pi, other_navigator_notes, arrival_time, event_notes, participant_feedback_notes,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_ipa_assignment_navigation_id)
+  SELECT
+    NEW.master_id,
+    NEW.ipa_assignment_id,
+    NEW.select_event_type, NEW.other_event_type, NEW.select_station, NEW.location, NEW.event_date, NEW.start_time, NEW.completion_time, NEW.select_status, NEW.select_navigator, NEW.select_pi, NEW.other_navigator_notes, NEW.arrival_time, NEW.event_notes, NEW.participant_feedback_notes,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -3273,6 +3233,37 @@ CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_summary_update() RETURNS
                   RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_activity_log_ipa_assignments_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_ipa_assignment_history (
+    master_id,
+    ipa_assignment_id,
+    select_who, select_record_from_player_contacts, follow_up_when, follow_up_time, notes, select_activity, activity_date, select_record_from_addresses, select_direction, select_result, select_next_step,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_ipa_assignment_id)
+  SELECT
+    NEW.master_id,
+    NEW.ipa_assignment_id,
+    NEW.select_who, NEW.select_record_from_player_contacts, NEW.follow_up_when, NEW.follow_up_time, NEW.notes, NEW.select_activity, NEW.activity_date, NEW.select_record_from_addresses, NEW.select_direction, NEW.select_result, NEW.select_next_step,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -4148,6 +4139,33 @@ CREATE FUNCTION ipa_ops.log_ipa_medical_detail_update() RETURNS trigger
 
 
 --
+-- Name: log_ipa_medical_details_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_medical_details_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_medical_detail_history (
+    master_id,
+    form_version, convulsion_or_seizure_blank_yes_no_dont_know, convulsion_or_seizure_details, sleep_disorder_blank_yes_no_dont_know, sleep_disorder_details, sleep_apnea_device_no_yes, number_of_nights_sleep_apnea_device, sleep_apnea_travel_with_device_yes_no, sleep_apnea_device_details, chronic_pain_blank_yes_no, chronic_pain_details, chronic_pain_meds_blank_yes_no_dont_know, chronic_pain_meds_details, hypertension_diagnosis_blank_yes_no_dont_know, hypertension_medications_blank_yes_no, hypertension_diagnosis_details, diabetes_diagnosis_blank_yes_no_dont_know, diabetes_medications_blank_yes_no, diabetes_diagnosis_details, hemophilia_blank_yes_no_dont_know, hemophilia_details, high_cholesterol_diagnosis_blank_yes_no_dont_know, high_cholesterol_medications_blank_yes_no, high_cholesterol_diagnosis_details, caridiac_pacemaker_blank_yes_no_dont_know, caridiac_pacemaker_details, other_heart_conditions_blank_yes_no_dont_know, other_heart_conditions_details, memory_problems_blank_yes_no_dont_know, memory_problems_details, mental_health_conditions_blank_yes_no_dont_know, mental_health_conditions_details, mental_health_help_blank_yes_no_dont_know, mental_health_help_details, neurological_problems_blank_yes_no_dont_know, neurological_problems_details, past_mri_yes_no_dont_know, past_mri_details, metal_implants_blank_yes_no_dont_know, metal_implants_details, metal_implants_mri_approval_details, radiation_blank_yes_no, select_radiation_type, radiation_details, dietary_restrictions_blank_yes_no_dont_know, dietary_restrictions_details,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_medical_detail_id)
+  SELECT
+    NEW.master_id,
+    NEW.form_version, NEW.convulsion_or_seizure_blank_yes_no_dont_know, NEW.convulsion_or_seizure_details, NEW.sleep_disorder_blank_yes_no_dont_know, NEW.sleep_disorder_details, NEW.sleep_apnea_device_no_yes, NEW.number_of_nights_sleep_apnea_device, NEW.sleep_apnea_travel_with_device_yes_no, NEW.sleep_apnea_device_details, NEW.chronic_pain_blank_yes_no, NEW.chronic_pain_details, NEW.chronic_pain_meds_blank_yes_no_dont_know, NEW.chronic_pain_meds_details, NEW.hypertension_diagnosis_blank_yes_no_dont_know, NEW.hypertension_medications_blank_yes_no, NEW.hypertension_diagnosis_details, NEW.diabetes_diagnosis_blank_yes_no_dont_know, NEW.diabetes_medications_blank_yes_no, NEW.diabetes_diagnosis_details, NEW.hemophilia_blank_yes_no_dont_know, NEW.hemophilia_details, NEW.high_cholesterol_diagnosis_blank_yes_no_dont_know, NEW.high_cholesterol_medications_blank_yes_no, NEW.high_cholesterol_diagnosis_details, NEW.caridiac_pacemaker_blank_yes_no_dont_know, NEW.caridiac_pacemaker_details, NEW.other_heart_conditions_blank_yes_no_dont_know, NEW.other_heart_conditions_details, NEW.memory_problems_blank_yes_no_dont_know, NEW.memory_problems_details, NEW.mental_health_conditions_blank_yes_no_dont_know, NEW.mental_health_conditions_details, NEW.mental_health_help_blank_yes_no_dont_know, NEW.mental_health_help_details, NEW.neurological_problems_blank_yes_no_dont_know, NEW.neurological_problems_details, NEW.past_mri_yes_no_dont_know, NEW.past_mri_details, NEW.metal_implants_blank_yes_no_dont_know, NEW.metal_implants_details, NEW.metal_implants_mri_approval_details, NEW.radiation_blank_yes_no, NEW.select_radiation_type, NEW.radiation_details, NEW.dietary_restrictions_blank_yes_no_dont_know, NEW.dietary_restrictions_details,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_ipa_medication_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
@@ -4500,6 +4518,60 @@ CREATE FUNCTION ipa_ops.log_ipa_ps_comp_review_update() RETURNS trigger
 
 
 --
+-- Name: log_ipa_ps_covid_closings_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_ps_covid_closings_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_ps_covid_closing_history (
+    master_id,
+    contact_later_yes_no, notes,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_ps_covid_closing_id)
+  SELECT
+    NEW.master_id,
+    NEW.contact_later_yes_no, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_ipa_ps_football_experiences_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_ps_football_experiences_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_ps_football_experience_history (
+    master_id,
+    played_in_nfl_blank_yes_no, age,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_ps_football_experience_id)
+  SELECT
+    NEW.master_id,
+    NEW.played_in_nfl_blank_yes_no, NEW.age,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_ipa_ps_informant_detail_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
@@ -4549,14 +4621,14 @@ CREATE FUNCTION ipa_ops.log_ipa_ps_initial_screenings_update() RETURNS trigger
 BEGIN
   INSERT INTO ipa_ps_initial_screening_history (
     master_id,
-    form_version, select_is_good_time_to_speak, looked_at_website_yes_no, any_questions_blank_yes_no, same_hotel_yes_no, embedded_report_ipa__ipa_appointments, select_schedule, select_still_interested, follow_up_date, follow_up_time, notes,
+    form_version, select_is_good_time_to_speak, looked_at_website_yes_no, select_may_i_begin, any_questions_blank_yes_no, same_hotel_yes_no, select_schedule, select_still_interested, follow_up_date, follow_up_time, notes,
     user_id,
     created_at,
     updated_at,
     ipa_ps_initial_screening_id)
   SELECT
     NEW.master_id,
-    NEW.form_version, NEW.select_is_good_time_to_speak, NEW.looked_at_website_yes_no, NEW.any_questions_blank_yes_no, NEW.same_hotel_yes_no, NEW.embedded_report_ipa__ipa_appointments, NEW.select_schedule, NEW.select_still_interested, NEW.follow_up_date, NEW.follow_up_time, NEW.notes,
+    NEW.form_version, NEW.select_is_good_time_to_speak, NEW.looked_at_website_yes_no, NEW.select_may_i_begin, NEW.any_questions_blank_yes_no, NEW.same_hotel_yes_no, NEW.select_schedule, NEW.select_still_interested, NEW.follow_up_date, NEW.follow_up_time, NEW.notes,
     NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
@@ -4612,6 +4684,60 @@ CREATE FUNCTION ipa_ops.log_ipa_ps_mri_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
+
+
+--
+-- Name: log_ipa_ps_mris_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_ps_mris_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_ps_mri_history (
+    master_id,
+    form_version, past_mri_yes_no_dont_know, past_mri_details, metal_implants_blank_yes_no_dont_know, metal_implants_details, electrical_implants_blank_yes_no_dont_know, electrical_implants_details, metal_jewelry_blank_yes_no, hearing_aid_blank_yes_no, radiation_blank_yes_no, select_radiation_type, radiation_details,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_ps_mri_id)
+  SELECT
+    NEW.master_id,
+    NEW.form_version, NEW.past_mri_yes_no_dont_know, NEW.past_mri_details, NEW.metal_implants_blank_yes_no_dont_know, NEW.metal_implants_details, NEW.electrical_implants_blank_yes_no_dont_know, NEW.electrical_implants_details, NEW.metal_jewelry_blank_yes_no, NEW.hearing_aid_blank_yes_no, NEW.radiation_blank_yes_no, NEW.select_radiation_type, NEW.radiation_details,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_ipa_ps_sleeps_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_ps_sleeps_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_ps_sleep_history (
+    master_id,
+    form_version, sleep_disorder_blank_yes_no_dont_know, sleep_disorder_details, sleep_apnea_device_no_yes, number_of_nights_sleep_apnea_device, sleep_apnea_travel_with_device_yes_no, sleep_apnea_bring_device_yes_no, sleep_apnea_device_details, bed_and_wake_time_details,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_ps_sleep_id)
+  SELECT
+    NEW.master_id,
+    NEW.form_version, NEW.sleep_disorder_blank_yes_no_dont_know, NEW.sleep_disorder_details, NEW.sleep_apnea_device_no_yes, NEW.number_of_nights_sleep_apnea_device, NEW.sleep_apnea_travel_with_device_yes_no, NEW.sleep_apnea_bring_device_yes_no, NEW.sleep_apnea_device_details, NEW.bed_and_wake_time_details,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -4703,6 +4829,33 @@ CREATE FUNCTION ipa_ops.log_ipa_ps_tms_test_update() RETURNS trigger
 
 
 --
+-- Name: log_ipa_ps_tms_tests_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_ps_tms_tests_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_ps_tms_test_history (
+    master_id,
+    form_version, past_tms_blank_yes_no_dont_know, past_tms_details, convulsion_or_seizure_blank_yes_no_dont_know, convulsion_or_seizure_details, epilepsy_blank_yes_no_dont_know, epilepsy_details, fainting_blank_yes_no_dont_know, fainting_details, concussion_blank_yes_no_dont_know, loss_of_conciousness_details, hairstyle_scalp_blank_yes_no_dont_know, hairstyle_scalp_details, hearing_problems_blank_yes_no_dont_know, cochlear_implants_blank_yes_no_dont_know, neurostimulator_blank_yes_no_dont_know, neurostimulator_details, med_infusion_device_blank_yes_no_dont_know, med_infusion_device_details, metal_blank_yes_no_dont_know, metal_details, current_meds_blank_yes_no_dont_know, current_meds_details, other_chronic_problems_blank_yes_no_dont_know, other_chronic_problems_details, hospital_visits_blank_yes_no_dont_know, hospital_visits_details, dietary_restrictions_blank_yes_no_dont_know, dietary_restrictions_details, tobacco_smoker_blank_yes_no, tobacco_smoker_details, healthcare_anxiety_blank_yes_no, healthcare_anxiety_details, covid19_test_consent_yes_no, covid19_concerns_yes_no, covid19_concerns_notes, wear_mask_yes_no, anything_else_blank_yes_no, anything_else_details,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_ps_tms_test_id)
+  SELECT
+    NEW.master_id,
+    NEW.form_version, NEW.past_tms_blank_yes_no_dont_know, NEW.past_tms_details, NEW.convulsion_or_seizure_blank_yes_no_dont_know, NEW.convulsion_or_seizure_details, NEW.epilepsy_blank_yes_no_dont_know, NEW.epilepsy_details, NEW.fainting_blank_yes_no_dont_know, NEW.fainting_details, NEW.concussion_blank_yes_no_dont_know, NEW.loss_of_conciousness_details, NEW.hairstyle_scalp_blank_yes_no_dont_know, NEW.hairstyle_scalp_details, NEW.hearing_problems_blank_yes_no_dont_know, NEW.cochlear_implants_blank_yes_no_dont_know, NEW.neurostimulator_blank_yes_no_dont_know, NEW.neurostimulator_details, NEW.med_infusion_device_blank_yes_no_dont_know, NEW.med_infusion_device_details, NEW.metal_blank_yes_no_dont_know, NEW.metal_details, NEW.current_meds_blank_yes_no_dont_know, NEW.current_meds_details, NEW.other_chronic_problems_blank_yes_no_dont_know, NEW.other_chronic_problems_details, NEW.hospital_visits_blank_yes_no_dont_know, NEW.hospital_visits_details, NEW.dietary_restrictions_blank_yes_no_dont_know, NEW.dietary_restrictions_details, NEW.tobacco_smoker_blank_yes_no, NEW.tobacco_smoker_details, NEW.healthcare_anxiety_blank_yes_no, NEW.healthcare_anxiety_details, NEW.covid19_test_consent_yes_no, NEW.covid19_concerns_yes_no, NEW.covid19_concerns_notes, NEW.wear_mask_yes_no, NEW.anything_else_blank_yes_no, NEW.anything_else_details,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_ipa_reimbursement_req_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
@@ -4786,6 +4939,33 @@ CREATE FUNCTION ipa_ops.log_ipa_screening_update() RETURNS trigger
 
 
 --
+-- Name: log_ipa_screenings_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_screenings_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_screening_history (
+    master_id,
+    eligible_for_study_blank_yes_no, requires_study_partner_blank_yes_no, notes, good_time_to_speak_blank_yes_no, callback_date, callback_time, still_interested_blank_yes_no, ineligible_notes, eligible_notes, not_interested_notes, contact_in_future_yes_no,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_screening_id)
+  SELECT
+    NEW.master_id,
+    NEW.eligible_for_study_blank_yes_no, NEW.requires_study_partner_blank_yes_no, NEW.notes, NEW.good_time_to_speak_blank_yes_no, NEW.callback_date, NEW.callback_time, NEW.still_interested_blank_yes_no, NEW.ineligible_notes, NEW.eligible_notes, NEW.not_interested_notes, NEW.contact_in_future_yes_no,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_ipa_special_consideration_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
@@ -4827,6 +5007,60 @@ CREATE FUNCTION ipa_ops.log_ipa_special_consideration_update() RETURNS trigger
                   RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_ipa_special_considerations_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_special_considerations_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_special_consideration_history (
+    master_id,
+    travel_with_wife_yes_no, travel_with_wife_details, tmoca_score, mmse_yes_no, mmse_details, bringing_cpap_yes_no, tms_exempt_yes_no, taking_med_for_mri_pet_yes_no, same_hotel_yes_no,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_special_consideration_id)
+  SELECT
+    NEW.master_id,
+    NEW.travel_with_wife_yes_no, NEW.travel_with_wife_details, NEW.tmoca_score, NEW.mmse_yes_no, NEW.mmse_details, NEW.bringing_cpap_yes_no, NEW.tms_exempt_yes_no, NEW.taking_med_for_mri_pet_yes_no, NEW.same_hotel_yes_no,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_ipa_surveys_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_surveys_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_survey_history (
+    master_id,
+    select_survey_type, sent_date, completed_date, notes,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_survey_id)
+  SELECT
+    NEW.master_id,
+    NEW.select_survey_type, NEW.sent_date, NEW.completed_date, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -8753,62 +8987,6 @@ CREATE FUNCTION ml_app.log_activity_log_ipa_assignment_protocol_deviation_update
                       NEW.master_id,
                       NEW.ipa_assignment_id,
                       
-                      NEW.extra_log_type,
-                      NEW.user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
-
-
---
--- Name: log_activity_log_ipa_assignment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
---
-
-CREATE FUNCTION ml_app.log_activity_log_ipa_assignment_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-              BEGIN
-                  INSERT INTO activity_log_ipa_assignment_history
-                  (
-                      master_id,
-                      ipa_assignment_id,
-                      select_activity,
-                      activity_date,
-                      select_record_from_player_contacts,
-                      select_direction,
-                      select_who,
-                      select_result,
-                      select_next_step,
-                      follow_up_when,
-                      follow_up_time,
-                      notes,
-                      protocol_id,
-                      select_record_from_addresses,
-                      extra_log_type,
-                      user_id,
-                      created_at,
-                      updated_at,
-                      activity_log_ipa_assignment_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.ipa_assignment_id,
-                      NEW.select_activity,
-                      NEW.activity_date,
-                      NEW.select_record_from_player_contacts,
-                      NEW.select_direction,
-                      NEW.select_who,
-                      NEW.select_result,
-                      NEW.select_next_step,
-                      NEW.follow_up_when,
-                      NEW.follow_up_time,
-                      NEW.notes,
-                      NEW.protocol_id,
-                      NEW.select_record_from_addresses,
                       NEW.extra_log_type,
                       NEW.user_id,
                       NEW.created_at,
@@ -24409,7 +24587,8 @@ CREATE TABLE ipa_ops.activity_log_ipa_assignment_discussion_history (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    activity_log_ipa_assignment_discussion_id integer
+    activity_log_ipa_assignment_discussion_id integer,
+    created_by_user_id bigint
 );
 
 
@@ -24446,7 +24625,8 @@ CREATE TABLE ipa_ops.activity_log_ipa_assignment_discussions (
     extra_log_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    created_by_user_id bigint
 );
 
 
@@ -24842,8 +25022,6 @@ CREATE TABLE ipa_ops.activity_log_ipa_assignment_navigations (
     completion_time time without time zone,
     participant_feedback_notes character varying,
     other_navigator_notes character varying,
-    add_protocol_deviation_record_no_yes character varying,
-    add_adverse_event_record_no_yes character varying,
     select_event_type character varying,
     other_event_type character varying,
     extra_log_type character varying,
@@ -25205,7 +25383,6 @@ CREATE TABLE ipa_ops.activity_log_ipa_assignments (
     follow_up_when date,
     follow_up_time time without time zone,
     notes character varying,
-    protocol_id bigint,
     select_record_from_addresses character varying,
     extra_log_type character varying,
     user_id integer,
@@ -26849,7 +27026,11 @@ CREATE TABLE ipa_ops.ipa_medical_detail_history (
     metal_implants_details character varying,
     metal_implants_mri_approval_details character varying,
     radiation_details character varying,
-    radiation_blank_yes_no character varying
+    radiation_blank_yes_no character varying,
+    form_version character varying,
+    number_of_nights_sleep_apnea_device integer,
+    sleep_apnea_travel_with_device_yes_no character varying,
+    select_radiation_type character varying
 );
 
 
@@ -26923,7 +27104,11 @@ CREATE TABLE ipa_ops.ipa_medical_details (
     metal_implants_details character varying,
     metal_implants_mri_approval_details character varying,
     radiation_details character varying,
-    radiation_blank_yes_no character varying
+    radiation_blank_yes_no character varying,
+    form_version character varying,
+    number_of_nights_sleep_apnea_device integer,
+    sleep_apnea_travel_with_device_yes_no character varying,
+    select_radiation_type character varying
 );
 
 
@@ -27667,6 +27852,75 @@ ALTER SEQUENCE ipa_ops.ipa_ps_comp_reviews_id_seq OWNED BY ipa_ops.ipa_ps_comp_r
 
 
 --
+-- Name: ipa_ps_covid_closing_history; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.ipa_ps_covid_closing_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    contact_later_yes_no character varying,
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ipa_ps_covid_closing_id bigint
+);
+
+
+--
+-- Name: ipa_ps_covid_closing_history_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
+--
+
+CREATE SEQUENCE ipa_ops.ipa_ps_covid_closing_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_ps_covid_closing_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ipa_ops; Owner: -
+--
+
+ALTER SEQUENCE ipa_ops.ipa_ps_covid_closing_history_id_seq OWNED BY ipa_ops.ipa_ps_covid_closing_history.id;
+
+
+--
+-- Name: ipa_ps_covid_closings; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.ipa_ps_covid_closings (
+    id bigint NOT NULL,
+    master_id bigint,
+    contact_later_yes_no character varying,
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ipa_ps_covid_closings_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
+--
+
+CREATE SEQUENCE ipa_ops.ipa_ps_covid_closings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_ps_covid_closings_id_seq; Type: SEQUENCE OWNED BY; Schema: ipa_ops; Owner: -
+--
+
+ALTER SEQUENCE ipa_ops.ipa_ps_covid_closings_id_seq OWNED BY ipa_ops.ipa_ps_covid_closings.id;
+
+
+--
 -- Name: ipa_ps_football_experience_history; Type: TABLE; Schema: ipa_ops; Owner: -
 --
 
@@ -27675,8 +27929,6 @@ CREATE TABLE ipa_ops.ipa_ps_football_experience_history (
     master_id integer,
     age integer,
     played_in_nfl_blank_yes_no character varying,
-    played_before_nfl_blank_yes_no character varying,
-    football_experience_notes character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
@@ -27712,8 +27964,6 @@ CREATE TABLE ipa_ops.ipa_ps_football_experiences (
     master_id integer,
     age integer,
     played_in_nfl_blank_yes_no character varying,
-    played_before_nfl_blank_yes_no character varying,
-    football_experience_notes character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -27979,7 +28229,10 @@ CREATE TABLE ipa_ops.ipa_ps_initial_screening_history (
     updated_at timestamp without time zone NOT NULL,
     ipa_ps_initial_screening_id integer,
     looked_at_website_yes_no character varying,
-    select_still_interested character varying
+    select_still_interested character varying,
+    form_version character varying,
+    same_hotel_yes_no character varying,
+    select_schedule character varying
 );
 
 
@@ -28022,7 +28275,8 @@ CREATE TABLE ipa_ops.ipa_ps_initial_screenings (
     form_version character varying,
     same_hotel_yes_no character varying,
     embedded_report_ipa__ipa_appointments character varying,
-    select_schedule character varying
+    select_schedule character varying,
+    select_may_i_begin character varying
 );
 
 
@@ -28065,7 +28319,9 @@ CREATE TABLE ipa_ops.ipa_ps_mri_history (
     past_mri_yes_no_dont_know character varying,
     past_mri_details character varying,
     radiation_blank_yes_no character varying,
-    radiation_details character varying
+    radiation_details character varying,
+    form_version character varying,
+    select_radiation_type character varying
 );
 
 
@@ -28107,7 +28363,9 @@ CREATE TABLE ipa_ops.ipa_ps_mris (
     past_mri_yes_no_dont_know character varying,
     past_mri_details character varying,
     radiation_blank_yes_no character varying,
-    radiation_details character varying
+    radiation_details character varying,
+    form_version character varying,
+    select_radiation_type character varying
 );
 
 
@@ -28224,7 +28482,11 @@ CREATE TABLE ipa_ops.ipa_ps_sleep_history (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    ipa_ps_sleep_id integer
+    ipa_ps_sleep_id integer,
+    form_version character varying,
+    number_of_nights_sleep_apnea_device integer,
+    sleep_apnea_travel_with_device_yes_no character varying,
+    sleep_apnea_bring_device_yes_no character varying
 );
 
 
@@ -28261,7 +28523,11 @@ CREATE TABLE ipa_ops.ipa_ps_sleeps (
     bed_and_wake_time_details character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    form_version character varying,
+    number_of_nights_sleep_apnea_device integer,
+    sleep_apnea_travel_with_device_yes_no character varying,
+    sleep_apnea_bring_device_yes_no character varying
 );
 
 
@@ -28409,7 +28675,16 @@ CREATE TABLE ipa_ops.ipa_ps_tms_test_history (
     epilepsy_details character varying,
     fainting_details character varying,
     hairstyle_scalp_blank_yes_no_dont_know character varying,
-    hairstyle_scalp_details character varying
+    hairstyle_scalp_details character varying,
+    form_version character varying,
+    tobacco_smoker_blank_yes_no character varying,
+    tobacco_smoker_details character varying,
+    healthcare_anxiety_blank_yes_no character varying,
+    healthcare_anxiety_details character varying,
+    covid19_test_consent_yes_no character varying,
+    covid19_concerns_yes_no character varying,
+    covid19_concerns_notes character varying,
+    wear_mask_yes_no character varying
 );
 
 
@@ -28471,7 +28746,16 @@ CREATE TABLE ipa_ops.ipa_ps_tms_tests (
     epilepsy_details character varying,
     fainting_details character varying,
     hairstyle_scalp_blank_yes_no_dont_know character varying,
-    hairstyle_scalp_details character varying
+    hairstyle_scalp_details character varying,
+    form_version character varying,
+    tobacco_smoker_blank_yes_no character varying,
+    tobacco_smoker_details character varying,
+    healthcare_anxiety_blank_yes_no character varying,
+    healthcare_anxiety_details character varying,
+    covid19_test_consent_yes_no character varying,
+    covid19_concerns_yes_no character varying,
+    covid19_concerns_notes character varying,
+    wear_mask_yes_no character varying
 );
 
 
@@ -28658,7 +28942,6 @@ CREATE TABLE ipa_ops.ipa_screenings (
     not_interested_notes character varying,
     ineligible_notes character varying,
     eligible_notes character varying,
-    eligible_with_partner_notes character varying,
     requires_study_partner_blank_yes_no character varying,
     contact_in_future_yes_no character varying
 );
@@ -28701,7 +28984,8 @@ CREATE TABLE ipa_ops.ipa_special_consideration_history (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     ipa_special_consideration_id integer,
-    mmse_details character varying
+    mmse_details character varying,
+    same_hotel_yes_no character varying
 );
 
 
@@ -28741,7 +29025,8 @@ CREATE TABLE ipa_ops.ipa_special_considerations (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    mmse_details character varying
+    mmse_details character varying,
+    same_hotel_yes_no character varying
 );
 
 
@@ -28893,7 +29178,6 @@ CREATE TABLE ipa_ops.ipa_surveys (
     select_survey_type character varying,
     sent_date date,
     completed_date date,
-    send_next_survey_when date,
     notes character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
@@ -28925,6 +29209,111 @@ ALTER SEQUENCE ipa_ops.ipa_surveys_id_seq OWNED BY ipa_ops.ipa_surveys.id;
 --
 
 CREATE VIEW ipa_ops.ipa_tms_reviews AS
+ WITH tms AS (
+         SELECT rank() OVER (PARTITION BY ipa_ps_tms_tests.master_id ORDER BY ipa_ps_tms_tests.id DESC) AS r,
+            ipa_ps_tms_tests.id,
+            ipa_ps_tms_tests.master_id,
+            ipa_ps_tms_tests.convulsion_or_seizure_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.epilepsy_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.fainting_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.concussion_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.hearing_problems_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.cochlear_implants_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.metal_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.metal_details,
+            ipa_ps_tms_tests.neurostimulator_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.neurostimulator_details,
+            ipa_ps_tms_tests.med_infusion_device_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.past_tms_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.past_tms_details,
+            ipa_ps_tms_tests.current_meds_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.current_meds_details,
+            ipa_ps_tms_tests.other_chronic_problems_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.other_chronic_problems_details,
+            ipa_ps_tms_tests.hospital_visits_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.hospital_visits_details,
+            ipa_ps_tms_tests.dietary_restrictions_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.dietary_restrictions_details,
+            ipa_ps_tms_tests.anything_else_blank_yes_no,
+            ipa_ps_tms_tests.anything_else_details,
+            ipa_ps_tms_tests.user_id,
+            ipa_ps_tms_tests.created_at,
+            ipa_ps_tms_tests.updated_at,
+            ipa_ps_tms_tests.loss_of_conciousness_details,
+            ipa_ps_tms_tests.med_infusion_device_details,
+            ipa_ps_tms_tests.convulsion_or_seizure_details,
+            ipa_ps_tms_tests.epilepsy_details,
+            ipa_ps_tms_tests.fainting_details,
+            ipa_ps_tms_tests.hairstyle_scalp_blank_yes_no_dont_know,
+            ipa_ps_tms_tests.hairstyle_scalp_details
+           FROM ipa_ops.ipa_ps_tms_tests
+        ), mri AS (
+         SELECT rank() OVER (PARTITION BY ipa_ps_mris.master_id ORDER BY ipa_ps_mris.id DESC) AS r,
+            ipa_ps_mris.id,
+            ipa_ps_mris.master_id,
+            ipa_ps_mris.electrical_implants_blank_yes_no_dont_know,
+            ipa_ps_mris.electrical_implants_details,
+            ipa_ps_mris.metal_implants_blank_yes_no_dont_know,
+            ipa_ps_mris.metal_implants_details,
+            ipa_ps_mris.metal_jewelry_blank_yes_no,
+            ipa_ps_mris.hearing_aid_blank_yes_no,
+            ipa_ps_mris.user_id,
+            ipa_ps_mris.created_at,
+            ipa_ps_mris.updated_at,
+            ipa_ps_mris.past_mri_yes_no_dont_know,
+            ipa_ps_mris.past_mri_details,
+            ipa_ps_mris.radiation_blank_yes_no,
+            ipa_ps_mris.radiation_details
+           FROM ipa_ops.ipa_ps_mris
+        ), health AS (
+         SELECT rank() OVER (PARTITION BY ipa_ps_healths.master_id ORDER BY ipa_ps_healths.id DESC) AS r,
+            ipa_ps_healths.id,
+            ipa_ps_healths.master_id,
+            ipa_ps_healths.physical_limitations_blank_yes_no,
+            ipa_ps_healths.physical_limitations_details,
+            ipa_ps_healths.sit_back_blank_yes_no,
+            ipa_ps_healths.sit_back_details,
+            ipa_ps_healths.cycle_blank_yes_no,
+            ipa_ps_healths.cycle_details,
+            ipa_ps_healths.chronic_pain_blank_yes_no,
+            ipa_ps_healths.chronic_pain_details,
+            ipa_ps_healths.chronic_pain_meds_blank_yes_no_dont_know,
+            ipa_ps_healths.chronic_pain_meds_details,
+            ipa_ps_healths.hemophilia_blank_yes_no_dont_know,
+            ipa_ps_healths.hemophilia_details,
+            ipa_ps_healths.raynauds_syndrome_blank_yes_no_dont_know,
+            ipa_ps_healths.raynauds_syndrome_severity_selection,
+            ipa_ps_healths.raynauds_syndrome_details,
+            ipa_ps_healths.hypertension_diagnosis_blank_yes_no_dont_know,
+            ipa_ps_healths.hypertension_diagnosis_details,
+            ipa_ps_healths.other_heart_conditions_blank_yes_no_dont_know,
+            ipa_ps_healths.other_heart_conditions_details,
+            ipa_ps_healths.memory_problems_blank_yes_no_dont_know,
+            ipa_ps_healths.memory_problems_details,
+            ipa_ps_healths.mental_health_conditions_blank_yes_no_dont_know,
+            ipa_ps_healths.mental_health_conditions_details,
+            ipa_ps_healths.neurological_problems_blank_yes_no_dont_know,
+            ipa_ps_healths.neurological_problems_details,
+            ipa_ps_healths.user_id,
+            ipa_ps_healths.created_at,
+            ipa_ps_healths.updated_at,
+            ipa_ps_healths.diabetes_diagnosis_blank_yes_no_dont_know,
+            ipa_ps_healths.diabetes_diagnosis_details,
+            ipa_ps_healths.high_cholesterol_diagnosis_blank_yes_no_dont_know,
+            ipa_ps_healths.high_cholesterol_diagnosis_details,
+            ipa_ps_healths.heart_surgeries_blank_yes_no_dont_know,
+            ipa_ps_healths.heart_surgeries_details,
+            ipa_ps_healths.caridiac_pacemaker_blank_yes_no_dont_know,
+            ipa_ps_healths.caridiac_pacemaker_details,
+            ipa_ps_healths.mental_health_help_blank_yes_no_dont_know,
+            ipa_ps_healths.mental_health_help_details,
+            ipa_ps_healths.neurological_surgeries_blank_yes_no_dont_know,
+            ipa_ps_healths.neurological_surgeries_details,
+            ipa_ps_healths.hypertension_medications_blank_yes_no,
+            ipa_ps_healths.diabetes_medications_blank_yes_no,
+            ipa_ps_healths.high_cholesterol_medications_blank_yes_no
+           FROM ipa_ops.ipa_ps_healths
+        )
  SELECT tms.id,
     tms.master_id,
     tms.user_id,
@@ -28954,17 +29343,12 @@ CREATE VIEW ipa_ops.ipa_tms_reviews AS
     tms.current_meds_details,
     mri.past_mri_yes_no_dont_know,
     mri.past_mri_details,
-    mri.metal_implants_blank_yes_no_dont_know,
-    mri.metal_implants_details,
-    mri.electrical_implants_blank_yes_no_dont_know,
-    mri.electrical_implants_details,
-    mri.metal_jewelry_blank_yes_no,
-    mri.hearing_aid_blank_yes_no,
     health.caridiac_pacemaker_blank_yes_no_dont_know,
     health.caridiac_pacemaker_details
-   FROM ((ipa_ops.ipa_ps_tms_tests tms
-     JOIN ipa_ops.ipa_ps_mris mri ON ((tms.master_id = mri.master_id)))
-     JOIN ipa_ops.ipa_ps_healths health ON ((tms.master_id = health.master_id)));
+   FROM ((tms
+     JOIN mri ON ((tms.master_id = mri.master_id)))
+     JOIN health ON ((tms.master_id = health.master_id)))
+  WHERE ((tms.r = 1) AND (health.r = 1) AND (mri.r = 1));
 
 
 --
@@ -44463,6 +44847,20 @@ ALTER TABLE ONLY ipa_ops.ipa_ps_comp_reviews ALTER COLUMN id SET DEFAULT nextval
 -- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
 --
 
+ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closing_history ALTER COLUMN id SET DEFAULT nextval('ipa_ops.ipa_ps_covid_closing_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closings ALTER COLUMN id SET DEFAULT nextval('ipa_ops.ipa_ps_covid_closings_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
+--
+
 ALTER TABLE ONLY ipa_ops.ipa_ps_football_experience_history ALTER COLUMN id SET DEFAULT nextval('ipa_ops.ipa_ps_football_experience_history_id_seq'::regclass);
 
 
@@ -48462,6 +48860,22 @@ ALTER TABLE ONLY ipa_ops.ipa_ps_comp_review_history
 
 ALTER TABLE ONLY ipa_ops.ipa_ps_comp_reviews
     ADD CONSTRAINT ipa_ps_comp_reviews_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_ps_covid_closing_history_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closing_history
+    ADD CONSTRAINT ipa_ps_covid_closing_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_ps_covid_closings_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closings
+    ADD CONSTRAINT ipa_ps_covid_closings_pkey PRIMARY KEY (id);
 
 
 --
@@ -53516,6 +53930,41 @@ CREATE INDEX index_ipa_file_creators_on_user_id ON ipa_files.ipa_file_creators U
 
 
 --
+-- Name: 8d569f72_ref_cb_user_idx; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "8d569f72_ref_cb_user_idx" ON ipa_ops.activity_log_ipa_assignment_discussions USING btree (created_by_user_id);
+
+
+--
+-- Name: 8d569f72_ref_cb_user_idx_hist; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "8d569f72_ref_cb_user_idx_hist" ON ipa_ops.activity_log_ipa_assignment_discussion_history USING btree (created_by_user_id);
+
+
+--
+-- Name: be7e93a6_history_master_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX be7e93a6_history_master_id ON ipa_ops.ipa_ps_covid_closing_history USING btree (master_id);
+
+
+--
+-- Name: be7e93a6_id_idx; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX be7e93a6_id_idx ON ipa_ops.ipa_ps_covid_closing_history USING btree (ipa_ps_covid_closing_id);
+
+
+--
+-- Name: be7e93a6_user_idx; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX be7e93a6_user_idx ON ipa_ops.ipa_ps_covid_closing_history USING btree (user_id);
+
+
+--
 -- Name: index_activity_log_ipa_assignment_adverse_events_on_ipa_assignm; Type: INDEX; Schema: ipa_ops; Owner: -
 --
 
@@ -54738,6 +55187,20 @@ CREATE INDEX index_ipa_mednav_provider_reports_on_master_id ON ipa_ops.ipa_medna
 --
 
 CREATE INDEX index_ipa_mednav_provider_reports_on_user_id ON ipa_ops.ipa_mednav_provider_reports USING btree (user_id);
+
+
+--
+-- Name: index_ipa_ops.ipa_ps_covid_closings_on_master_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "index_ipa_ops.ipa_ps_covid_closings_on_master_id" ON ipa_ops.ipa_ps_covid_closings USING btree (master_id);
+
+
+--
+-- Name: index_ipa_ops.ipa_ps_covid_closings_on_user_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "index_ipa_ops.ipa_ps_covid_closings_on_user_id" ON ipa_ops.ipa_ps_covid_closings USING btree (user_id);
 
 
 --
@@ -62091,34 +62554,6 @@ CREATE TRIGGER activity_log_ipa_assignment_adverse_event_history_update AFTER UP
 
 
 --
--- Name: activity_log_ipa_assignment_discussion_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER activity_log_ipa_assignment_discussion_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_discussions FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_discussion_update();
-
-
---
--- Name: activity_log_ipa_assignment_discussion_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER activity_log_ipa_assignment_discussion_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_discussions FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_discussion_update();
-
-
---
--- Name: activity_log_ipa_assignment_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER activity_log_ipa_assignment_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_ipa_assignment_update();
-
-
---
--- Name: activity_log_ipa_assignment_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER activity_log_ipa_assignment_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_ipa_assignment_update();
-
-
---
 -- Name: activity_log_ipa_assignment_inex_checklist_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
 --
 
@@ -62798,6 +63233,90 @@ CREATE TRIGGER ipa_withdrawal_history_update AFTER UPDATE ON ipa_ops.ipa_withdra
 
 
 --
+-- Name: log_activity_log_ipa_assignment_discussion_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_discussion_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_discussions FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_discussions_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_discussion_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_discussion_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_discussions FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_discussions_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_assignments FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignments_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignments_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_navigation_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_navigation_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_navigations FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_navigations_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_navigation_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_navigation_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_navigations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_navigations_update();
+
+
+--
+-- Name: log_ipa_medical_detail_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_medical_detail_history_insert AFTER INSERT ON ipa_ops.ipa_medical_details FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_medical_details_update();
+
+
+--
+-- Name: log_ipa_medical_detail_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_medical_detail_history_update AFTER UPDATE ON ipa_ops.ipa_medical_details FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_medical_details_update();
+
+
+--
+-- Name: log_ipa_ps_covid_closing_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_covid_closing_history_insert AFTER INSERT ON ipa_ops.ipa_ps_covid_closings FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_ps_covid_closings_update();
+
+
+--
+-- Name: log_ipa_ps_covid_closing_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_covid_closing_history_update AFTER UPDATE ON ipa_ops.ipa_ps_covid_closings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_ps_covid_closings_update();
+
+
+--
+-- Name: log_ipa_ps_football_experience_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_football_experience_history_insert AFTER INSERT ON ipa_ops.ipa_ps_football_experiences FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_ps_football_experiences_update();
+
+
+--
+-- Name: log_ipa_ps_football_experience_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_football_experience_history_update AFTER UPDATE ON ipa_ops.ipa_ps_football_experiences FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_ps_football_experiences_update();
+
+
+--
 -- Name: log_ipa_ps_initial_screening_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
 --
 
@@ -62809,6 +63328,90 @@ CREATE TRIGGER log_ipa_ps_initial_screening_history_insert AFTER INSERT ON ipa_o
 --
 
 CREATE TRIGGER log_ipa_ps_initial_screening_history_update AFTER UPDATE ON ipa_ops.ipa_ps_initial_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_ps_initial_screenings_update();
+
+
+--
+-- Name: log_ipa_ps_mri_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_mri_history_insert AFTER INSERT ON ipa_ops.ipa_ps_mris FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_ps_mris_update();
+
+
+--
+-- Name: log_ipa_ps_mri_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_mri_history_update AFTER UPDATE ON ipa_ops.ipa_ps_mris FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_ps_mris_update();
+
+
+--
+-- Name: log_ipa_ps_sleep_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_sleep_history_insert AFTER INSERT ON ipa_ops.ipa_ps_sleeps FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_ps_sleeps_update();
+
+
+--
+-- Name: log_ipa_ps_sleep_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_sleep_history_update AFTER UPDATE ON ipa_ops.ipa_ps_sleeps FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_ps_sleeps_update();
+
+
+--
+-- Name: log_ipa_ps_tms_test_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_tms_test_history_insert AFTER INSERT ON ipa_ops.ipa_ps_tms_tests FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_ps_tms_tests_update();
+
+
+--
+-- Name: log_ipa_ps_tms_test_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_ps_tms_test_history_update AFTER UPDATE ON ipa_ops.ipa_ps_tms_tests FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_ps_tms_tests_update();
+
+
+--
+-- Name: log_ipa_screening_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_screening_history_insert AFTER INSERT ON ipa_ops.ipa_screenings FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_screenings_update();
+
+
+--
+-- Name: log_ipa_screening_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_screening_history_update AFTER UPDATE ON ipa_ops.ipa_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_screenings_update();
+
+
+--
+-- Name: log_ipa_special_consideration_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_special_consideration_history_insert AFTER INSERT ON ipa_ops.ipa_special_considerations FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_special_considerations_update();
+
+
+--
+-- Name: log_ipa_special_consideration_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_special_consideration_history_update AFTER UPDATE ON ipa_ops.ipa_special_considerations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_special_considerations_update();
+
+
+--
+-- Name: log_ipa_survey_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_survey_history_insert AFTER INSERT ON ipa_ops.ipa_surveys FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_surveys_update();
+
+
+--
+-- Name: log_ipa_survey_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_survey_history_update AFTER UPDATE ON ipa_ops.ipa_surveys FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_surveys_update();
 
 
 --
@@ -69252,6 +69855,14 @@ ALTER TABLE ONLY ipa_ops.nfs_store_trash_actions
 
 
 --
+-- Name: fk_rails_10da8dc29f; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closing_history
+    ADD CONSTRAINT fk_rails_10da8dc29f FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -69676,6 +70287,22 @@ ALTER TABLE ONLY ipa_ops.mrn_numbers
 
 
 --
+-- Name: fk_rails_227b927588; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_discussion_history
+    ADD CONSTRAINT fk_rails_227b927588 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_41d2a60bd1; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_discussions
+    ADD CONSTRAINT fk_rails_41d2a60bd1 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -70084,6 +70711,14 @@ ALTER TABLE ONLY ipa_ops.users_contact_infos
 
 
 --
+-- Name: fk_rails_503f5b45f5; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closings
+    ADD CONSTRAINT fk_rails_503f5b45f5 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_7808f5fdb3; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -70185,6 +70820,30 @@ ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_summaries
 
 ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_discussions
     ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_ops.ipa_assignments(id);
+
+
+--
+-- Name: fk_rails_ad31933eb0; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closings
+    ADD CONSTRAINT fk_rails_ad31933eb0 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_c0d43447fc; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closing_history
+    ADD CONSTRAINT fk_rails_c0d43447fc FOREIGN KEY (ipa_ps_covid_closing_id) REFERENCES ipa_ops.ipa_ps_covid_closings(id);
+
+
+--
+-- Name: fk_rails_d50c71622c; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closing_history
+    ADD CONSTRAINT fk_rails_d50c71622c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -76772,6 +77431,55 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200814092726'),
 ('20200814092900'),
 ('20200814103248'),
-('20200821114133');
+('20200821114133'),
+('20200911123052'),
+('20200911123053'),
+('20200911123055'),
+('20200911123056'),
+('20200911131237'),
+('20200911131246'),
+('20200911131317'),
+('20200911131556'),
+('20200911131631'),
+('20200911131633'),
+('20200911131634'),
+('20200911131636'),
+('20200911131637'),
+('20200911131905'),
+('20200911132124'),
+('20200911132315'),
+('20200911132442'),
+('20200911132926'),
+('20200911133043'),
+('20200911133203'),
+('20200911133300'),
+('20200911133450'),
+('20200911133749'),
+('20200911134009'),
+('20200911134237'),
+('20200911134327'),
+('20200911134413'),
+('20200911134749'),
+('20200911135257'),
+('20200911135428'),
+('20200911135514'),
+('20200911135516'),
+('20200911135706'),
+('20200911140450'),
+('20200911140600'),
+('20200911142536'),
+('20200911143042'),
+('20200911143100'),
+('20200911144023'),
+('20200911145939'),
+('20200911165448'),
+('20200911172935'),
+('20200911173337'),
+('20200911174444'),
+('20200914095348'),
+('20200914101207'),
+('20200914101758'),
+('20200914102206'),
+('20200914102627');
 
 
