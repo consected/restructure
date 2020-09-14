@@ -7,9 +7,18 @@ module ActiveRecord
 
       included do
         attr_accessor :fields, :new_fields, :field_defs, :prev_fields,
-                      :field_opts, :schema, :owner, :table_name,
+                      :field_opts, :schema, :owner,
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
                       :table_comment, :fields_comments, :mode
+      end
+
+      def table_name=(tname)
+        @table_name = tname
+        self.history_table_name = "#{@table_name.singularize}_history"
+      end
+
+      def table_name
+        @table_name
       end
 
       def create_schema
@@ -161,23 +170,48 @@ module ActiveRecord
 
         belongs_to_model_field = "#{belongs_to_model}_id" if belongs_to_model
 
+        col_names = if reverting?
+                      prev_col_names
+                    else
+                      self.col_names
+                    end
+
         old_colnames = col_names - standard_columns
+        old_history_colnames = history_col_names - standard_columns
         new_colnames = fields.map(&:to_s) - standard_columns
         added = (new_colnames - old_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
         removed = (old_colnames - new_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
+        added_history = (new_colnames - old_history_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
+        removed_history = (old_history_colnames - new_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
 
         idx = added.index('created_by_user_id')
         added[idx] = 'created_by_user' if idx
+        idx = added_history.index('created_by_user_id')
+        added_history[idx] = 'created_by_user' if idx
 
         idx = removed.index('created_by_user_id')
         removed[idx] = 'created_by_user' if idx
+        idx = removed_history.index('created_by_user_id')
+        removed_history[idx] = 'created_by_user' if idx
 
         if reverting?
-          puts removed -= col_names
-          puts added &= col_names
+          puts 'Rollback'
+          puts "Adding: #{removed -= col_names}"
+          puts "Removing: #{added &= col_names}"
+          puts "Adding (history): #{removed_history -= history_col_names}"
+          puts "Removing (history): #{added_history &= history_col_names}"
         else
-          puts added -= col_names
-          puts removed &= col_names
+          puts 'Migrate'
+          puts "Adding: #{added -= col_names}"
+          puts "Removing: #{removed &= col_names}"
+          puts "Adding (history): #{removed_history &= history_col_names}"
+          puts "Removing (history): #{added_history -= history_col_names}"
+        end
+
+        if Rails.env.production?
+          puts 'Continue? y/n'
+          prod_continue = gets.chomp
+          exit unless prod_continue == 'y'
         end
 
         full_field_list = (old_colnames + new_colnames + col_names).uniq.map(&:to_sym)
@@ -198,29 +232,46 @@ module ActiveRecord
         end
 
         added.each do |c|
-          options = field_opts[c.to_sym]
+          options = field_opts[c.to_sym] || {}
           comment = fields_comments[c.to_sym]
           options[:comment] = comment if comment.present?
           fdef = field_defs[c.to_sym]
           if fdef == :references
-            add_reference "#{schema}.#{table_name}", c, options
-            options[:index][:name] += '_hist'
-            add_reference "#{schema}.#{history_table_name}", c, options unless c.in? history_cols
+            add_reference "#{schema}.#{table_name}", c, options unless c.in? col_names
           else
-            add_column "#{schema}.#{table_name}", c, fdef, options
-            add_column "#{schema}.#{history_table_name}", c, fdef, options unless c.in? history_cols
+            add_column "#{schema}.#{table_name}", c, fdef, options unless c.in? col_names
           end
         end
 
         removed.each do |c|
+          fdef = field_defs[c.to_sym] || {}
+          if fdef == :references
+            remove_reference "#{schema}.#{table_name}", c, options if c.in?(col_names)
+          else
+            remove_column "#{schema}.#{table_name}", c, fdef if c.in? col_names
+          end
+        end
+
+        added_history.each do |c|
+          options = field_opts[c.to_sym] || {}
+          comment = fields_comments[c.to_sym]
+          options[:comment] = comment if comment.present?
           fdef = field_defs[c.to_sym]
           if fdef == :references
-            remove_reference "#{schema}.#{table_name}", c, options
             options[:index][:name] += '_hist'
-            remove_reference "#{schema}.#{history_table_name}", c, options if c.in? history_cols
+            add_reference "#{schema}.#{history_table_name}", c, options unless c.in? history_col_names
           else
-            remove_column "#{schema}.#{table_name}", c, fdef
-            remove_column "#{schema}.#{history_table_name}", c, fdef if c.in? history_cols
+            add_column "#{schema}.#{history_table_name}", c, fdef, options unless c.in? history_col_names
+          end
+        end
+
+        removed_history.each do |c|
+          fdef = field_defs[c.to_sym] || {}
+          if fdef == :references
+            options[:index][:name] += '_hist'
+            remove_reference "#{schema}.#{history_table_name}", c, options if c.in? history_col_names
+          else
+            remove_column "#{schema}.#{history_table_name}", c, fdef if c.in? history_col_names
           end
         end
 
@@ -232,6 +283,7 @@ module ActiveRecord
           next if col&.comment == new_comment
 
           change_column_comment "#{schema}.#{table_name}", c, new_comment
+          change_column_comment "#{schema}.#{history_table_name}", c, new_comment
         end
       end
 
@@ -249,15 +301,27 @@ module ActiveRecord
       end
 
       def cols
-        @cols ||= ActiveRecord::Base.connection.columns("#{schema}.#{table_name}")
+        ActiveRecord::Base.connection.columns("#{schema}.#{table_name}")
       end
 
       def history_cols
-        @history_cols ||= ActiveRecord::Base.connection.columns("#{schema}.#{history_table_name}")
+        ActiveRecord::Base.connection.columns("#{schema}.#{history_table_name}")
+      end
+
+      def history_col_names(to_type = nil)
+        res = history_cols.map(&:name)
+        res = res.map(&:to_sym) if to_type == :sym
+        res
+      end
+
+      def prev_col_names(to_type = nil)
+        res = prev_fields
+        res = res.map(&:to_sym) if to_type == :sym
+        res
       end
 
       def col_names(to_type = nil)
-        res = prev_fields&.map(&:to_s) || cols.map(&:name)
+        res = cols.map(&:name)
         res = res.map(&:to_sym) if to_type == :sym
         res
       end
@@ -270,7 +334,6 @@ module ActiveRecord
         handle_fields.reject! { |a| a.to_s.index(ignore_fields) }
         handle_fields = handle_fields.map(&:to_sym)
 
-        self.history_table_name = "#{table_name.singularize}_history"
         self.trigger_fn_name = "#{schema}.log_#{table_name}_update"
         self.new_fields = fields.map { |f| "NEW.#{f}" }
         self.field_defs = {}

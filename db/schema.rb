@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_11_140600) do
+ActiveRecord::Schema.define(version: 2020_09_14_163936) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -4033,6 +4033,8 @@ ActiveRecord::Schema.define(version: 2020_09_11_140600) do
     t.string "select_status"
     t.string "notes"
     t.string "select_schedule"
+    t.date "covid19_test_date"
+    t.time "covid19_test_time"
     t.index ["ipa_appointment_id"], name: "index_ipa_appointment_history_on_ipa_appointment_id"
     t.index ["master_id"], name: "index_ipa_appointment_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_appointment_history_on_user_id"
@@ -4048,6 +4050,8 @@ ActiveRecord::Schema.define(version: 2020_09_11_140600) do
     t.string "select_status"
     t.string "notes"
     t.string "select_schedule"
+    t.date "covid19_test_date"
+    t.time "covid19_test_time"
     t.index ["master_id"], name: "index_ipa_appointments_on_master_id"
     t.index ["user_id"], name: "index_ipa_appointments_on_user_id"
     t.index ["visit_start_date"], name: "ipa_appointments_visit_start_date_key", unique: true
@@ -4971,6 +4975,30 @@ ActiveRecord::Schema.define(version: 2020_09_11_140600) do
     t.index ["user_id"], name: "index_ipa_ps_comp_reviews_on_user_id"
   end
 
+  create_table "ipa_ps_covid_closing_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "contact_later_yes_no"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "ipa_ps_covid_closing_id"
+    t.index ["ipa_ps_covid_closing_id"], name: "be7e93a6_id_idx"
+    t.index ["master_id"], name: "be7e93a6_history_master_id"
+    t.index ["user_id"], name: "be7e93a6_user_idx"
+  end
+
+  create_table "ipa_ps_covid_closings", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "contact_later_yes_no"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_ipa_ops.ipa_ps_covid_closings_on_master_id"
+    t.index ["user_id"], name: "index_ipa_ops.ipa_ps_covid_closings_on_user_id"
+  end
+
   create_table "ipa_ps_football_experience_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "age"
@@ -5141,6 +5169,9 @@ ActiveRecord::Schema.define(version: 2020_09_11_140600) do
     t.integer "ipa_ps_initial_screening_id"
     t.string "looked_at_website_yes_no"
     t.string "select_still_interested"
+    t.string "form_version"
+    t.string "same_hotel_yes_no"
+    t.string "select_schedule"
     t.index ["ipa_ps_initial_screening_id"], name: "index_ipa_ps_initial_screening_history_on_ipa_ps_initial_screen"
     t.index ["master_id"], name: "index_ipa_ps_initial_screening_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_initial_screening_history_on_user_id"
@@ -5162,6 +5193,7 @@ ActiveRecord::Schema.define(version: 2020_09_11_140600) do
     t.string "same_hotel_yes_no"
     t.string "embedded_report_ipa__ipa_appointments"
     t.string "select_schedule"
+    t.string "select_may_i_begin"
     t.index ["master_id"], name: "index_ipa_ps_initial_screenings_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_initial_screenings_on_user_id"
   end
@@ -5363,6 +5395,10 @@ ActiveRecord::Schema.define(version: 2020_09_11_140600) do
     t.string "tobacco_smoker_details"
     t.string "healthcare_anxiety_blank_yes_no"
     t.string "healthcare_anxiety_details"
+    t.string "covid19_test_consent_yes_no"
+    t.string "covid19_concerns_yes_no"
+    t.string "covid19_concerns_notes"
+    t.string "wear_mask_yes_no"
     t.index ["ipa_ps_tms_test_id"], name: "index_ipa_ps_tms_test_history_on_ipa_ps_tms_test_id"
     t.index ["master_id"], name: "index_ipa_ps_tms_test_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_tms_test_history_on_user_id"
@@ -5408,6 +5444,10 @@ ActiveRecord::Schema.define(version: 2020_09_11_140600) do
     t.string "tobacco_smoker_details"
     t.string "healthcare_anxiety_blank_yes_no"
     t.string "healthcare_anxiety_details"
+    t.string "covid19_test_consent_yes_no"
+    t.string "covid19_concerns_yes_no"
+    t.string "covid19_concerns_notes"
+    t.string "wear_mask_yes_no"
     t.index ["master_id"], name: "index_ipa_ps_tms_tests_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_tms_tests_on_user_id"
   end
@@ -5464,6 +5504,7 @@ ActiveRecord::Schema.define(version: 2020_09_11_140600) do
     t.string "eligible_notes"
     t.string "requires_study_partner_blank_yes_no"
     t.string "contact_in_future_yes_no"
+    t.string "form_version"
     t.index ["ipa_screening_id"], name: "index_ipa_screening_history_on_ipa_screening_id"
     t.index ["master_id"], name: "index_ipa_screening_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_screening_history_on_user_id"
@@ -5485,6 +5526,7 @@ ActiveRecord::Schema.define(version: 2020_09_11_140600) do
     t.string "eligible_notes"
     t.string "requires_study_partner_blank_yes_no"
     t.string "contact_in_future_yes_no"
+    t.string "form_version"
     t.index ["master_id"], name: "index_ipa_screenings_on_master_id"
     t.index ["user_id"], name: "index_ipa_screenings_on_user_id"
   end
@@ -11810,6 +11852,11 @@ ActiveRecord::Schema.define(version: 2020_09_11_140600) do
   add_foreign_key "ipa_ps_comp_review_history", "users", name: "fk_ipa_ps_comp_review_history_users"
   add_foreign_key "ipa_ps_comp_reviews", "masters"
   add_foreign_key "ipa_ps_comp_reviews", "users"
+  add_foreign_key "ipa_ps_covid_closing_history", "ipa_ps_covid_closings"
+  add_foreign_key "ipa_ps_covid_closing_history", "masters"
+  add_foreign_key "ipa_ps_covid_closing_history", "users"
+  add_foreign_key "ipa_ps_covid_closings", "masters"
+  add_foreign_key "ipa_ps_covid_closings", "users"
   add_foreign_key "ipa_ps_football_experience_history", "ipa_ps_football_experiences", name: "fk_ipa_ps_football_experience_history_ipa_ps_football_experienc"
   add_foreign_key "ipa_ps_football_experience_history", "masters", name: "fk_ipa_ps_football_experience_history_masters"
   add_foreign_key "ipa_ps_football_experience_history", "users", name: "fk_ipa_ps_football_experience_history_users"

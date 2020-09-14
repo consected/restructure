@@ -16,6 +16,7 @@ WHEN extra_log_type = 'perform_screening_follow_up' AND follow_up_still_interest
   THEN 'not interest during screening follow-up'
 WHEN extra_log_type = 'schedule_screening' THEN 'in process'
 WHEN extra_log_type = 'exit_opt_out' THEN 'opted out'
+WHEN extra_log_type = 'exit_opt_out_covid19' THEN 'exit (no COVID-19 test)'
 WHEN extra_log_type = 'exit_l2fu' THEN 'lost to follow-up (before scheduling)'
 ELSE extra_log_type
 END "status",
@@ -58,7 +59,7 @@ OR
 )
 OR
 (
-  extra_log_type IN ('completed', 'exit_opt_out', 'exit_l2fu')
+  extra_log_type IN ('completed', 'exit_opt_out', 'exit_l2fu', 'exit_opt_out_covid19')
 )
 OR
 (
