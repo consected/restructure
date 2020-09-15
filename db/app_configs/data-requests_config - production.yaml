@@ -1061,7 +1061,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2020-08-24T16:30:25.270Z'
-    updated_at: '2020-09-11T08:49:26.567Z'
+    updated_at: '2020-09-15T15:39:53.520Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: placeholder_intro created_by_user_id
@@ -1314,8 +1314,8 @@ app_type:
       \   submit: To confirm submission of this data request, click **Submit Now**\r\n
       \   all_fields:\r\n      show_caption: This data request has been submitted.\r\n\r\n
       \ save_action:\r\n    label: Submit Now\r\n\r\n  save_trigger:\r\n  \r\n    on_create:\r\n\r\n
-      \     update_reference:\r\n        ref_data_requests_form: \r\n          force_not_editable_save:
-      true        \r\n          first:\r\n            dynamic_model__data_requests:\r\n
+      \     update_reference:\r\n        ref_data_requests_form: &update_ref_data_requests_form\r\n
+      \         force_not_editable_save: true        \r\n          first:\r\n            dynamic_model__data_requests:\r\n
       \             id:\r\n                parent_references:\r\n                  dynamic_model__data_requests:
       id\r\n              update: return_result\r\n          with:\r\n            status:
       submitted        \r\n\r\n        ref_top_level: &update_reference_ref_status\r\n
@@ -1388,7 +1388,9 @@ app_type:
       \ label: Initial Review Not Approved\r\n\r\n  editable_if:\r\n    never: true\r\n\r\n
       \ save_trigger:\r\n    on_create:\r\n      update_reference:\r\n        ref:
       \r\n            <<: *update_reference_ref_status\r\n            with:\r\n              status:
-      initial review not approved\r\n\r\n\r\n##################### NOTIFY PIs #######################\r\n\r\n\r\n########################################\r\n#
+      initial review not approved\r\n\r\n        ref_data_requests_form: \r\n          <<:
+      *update_ref_data_requests_form\r\n          with:\r\n            status: rejected\r\n\r\n\r\n#####################
+      NOTIFY PIs #######################\r\n\r\n\r\n########################################\r\n#
       Review by IPA PI\r\n########################################\r\ndo_review_ipa_pi:\r\n
       \ label: Review by IPA PI\r\n  \r\n  <<: *do_pi_review\r\n  \r\n\r\n  save_trigger:\r\n
       \   <<: *do_pi_review_save_trigger\r\n    on_create:\r\n      notify:\r\n        -
@@ -1420,9 +1422,11 @@ app_type:
       \r\n########################################\r\nrequest_rejected:\r\n  label:
       Request Rejected\r\n\r\n  save_trigger:\r\n    on_create:\r\n    \r\n      update_reference:\r\n
       \       ref: \r\n          <<: *update_reference_ref_status\r\n          with:\r\n
-      \           status: rejected        \r\n              \r\n      notify:\r\n
-      \       #### \r\n        # Notify Rejected!\r\n        - <<: *initial_review_approved_email_notification\r\n
-      \         role: reviewer - initial review\r\n          users: \r\n            referring_record:\r\n
+      \           status: rejected        \r\n\r\n        ref_data_requests_form:
+      \r\n          <<: *update_ref_data_requests_form\r\n          with:\r\n            status:
+      rejected\r\n\r\n      notify:\r\n        #### \r\n        # Notify Rejected!\r\n
+      \       - <<: *initial_review_approved_email_notification\r\n          role:
+      reviewer - initial review\r\n          users: \r\n            referring_record:\r\n
       \             created_by_user_id: return_value\r\n          \r\n          extra_substitutions:
       \r\n            <<: *initial_review_approved_extra_substitutions\r\n            reason:
       'Data Request Rejected'                      \r\n\r\n\r\n########################################\r\n#
@@ -1436,7 +1440,10 @@ app_type:
       request.\r\n\r\n  save_trigger:\r\n \r\n    on_update:\r\n    \r\n      update_reference:\r\n
       \       ref: \r\n          <<: *update_reference_ref_status\r\n          with:\r\n
       \           status: complete        \r\n          if:\r\n            all:\r\n
-      \             this:\r\n                next_step: complete\r\n\r\n\r\n########################################\r\n#
+      \             this:\r\n                next_step: complete\r\n        ref_data_requests_form:
+      \r\n          <<: *update_ref_data_requests_form\r\n          with:\r\n            status:
+      complete        \r\n          if:\r\n            all:\r\n              this:\r\n
+      \               next_step: complete\r\n    \r\n\r\n\r\n########################################\r\n#
       Supporting Files \r\n########################################\r\nsupporting_files:
       \r\n  <<: *files_activity\r\n  creatable_if: \r\n    never: true\r\n    \r\n
       \ caption_before:\r\n    notes: Notes related to uploaded files\r\n\r\n\r\n\r\n################################################################################\r\n#

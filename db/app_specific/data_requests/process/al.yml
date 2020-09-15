@@ -659,7 +659,7 @@ submit_request:
     on_create:
 
       update_reference:
-        ref_data_requests_form: 
+        ref_data_requests_form: &update_ref_data_requests_form
           force_not_editable_save: true        
           first:
             dynamic_model__data_requests:
@@ -871,6 +871,11 @@ initial_review_not_approved:
             with:
               status: initial review not approved
 
+        ref_data_requests_form: 
+          <<: *update_ref_data_requests_form
+          with:
+            status: rejected
+
 
 ##################### NOTIFY PIs #######################
 
@@ -975,7 +980,12 @@ request_rejected:
           <<: *update_reference_ref_status
           with:
             status: rejected        
-              
+
+        ref_data_requests_form: 
+          <<: *update_ref_data_requests_form
+          with:
+            status: rejected
+
       notify:
         #### 
         # Notify Rejected!
@@ -1031,6 +1041,15 @@ data_prep:
             all:
               this:
                 next_step: complete
+        ref_data_requests_form: 
+          <<: *update_ref_data_requests_form
+          with:
+            status: complete        
+          if:
+            all:
+              this:
+                next_step: complete
+    
 
 
 ########################################
