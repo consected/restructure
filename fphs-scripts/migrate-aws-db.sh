@@ -91,6 +91,10 @@ export PGPASSWORD="$TEMP_DB_PW"
 
 psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < fphs-sql/grant_roles_access_to_ml_app.sql
 
+if [ -f "fphs-sql/grant_roles_access_to_${MIG_PATH}.sql" ]; then
+  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < fphs-sql/grant_roles_access_to_${MIG_PATH}.sql
+fi
+
 if [ "$TEMP_ENV" == 'filestore-production' ]; then
   psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < fphs-sql/grant_roles_access_to_filestore.sql
 fi
