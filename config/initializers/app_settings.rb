@@ -2,6 +2,7 @@
 
 class Settings
   DefaultMigrationSchema = 'ml_app'
+  DefaultSchemaOwner = 'fphs'
 
   StartYearRange = (1900..(Date.current.year)).freeze
   EndYearRange = (1900..(Date.current.year)).freeze

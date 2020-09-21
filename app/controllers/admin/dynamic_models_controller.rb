@@ -53,6 +53,9 @@ class Admin::DynamicModelsController < AdminController
   end
 
   def permitted_params
-    @permitted_params = %i[id name table_name category table_key_name primary_key_name foreign_key_name result_order field_list position options description disabled]
+    @permitted_params = %i[id name table_name schema_name category
+                           table_key_name primary_key_name
+                           foreign_key_name result_order field_list position options
+                           description disabled]
   end
 end

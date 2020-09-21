@@ -16,6 +16,8 @@ class Admin::AppType < Admin::AdminBase
   validate :name_not_already_taken
   validates :label, presence: true
 
+  after_create :setup_migrations
+
   attr_accessor :import_results
 
   def name_not_already_taken
@@ -411,6 +413,13 @@ class Admin::AppType < Admin::AdminBase
     elsif format == :yaml
       YAML.dump(JSON.parse(to_json))
     end
+  end
+
+  def setup_migrations
+    return true unless Rails.env.development?
+
+    migration_generator = MigrationGenerator.new(default_schema_name)
+    migration_generator.add_schema
   end
 
   def as_json(options = {})

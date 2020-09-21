@@ -7,9 +7,21 @@ module ActiveRecord
 
       included do
         attr_accessor :fields, :new_fields, :field_defs, :prev_fields,
-                      :field_opts, :schema, :owner,
+                      :field_opts, :owner,
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
                       :table_comment, :fields_comments, :mode
+      end
+
+      def schema=(new_schema)
+        unless Admin::MigrationGenerator.current_search_paths.include?(new_schema)
+          raise FphsException, "Current search_path does not include the schema (#{new_schema}) for the migration"
+        end
+
+        @schema = new_schema
+      end
+
+      def schema
+        @schema
       end
 
       def table_name=(tname)
@@ -23,7 +35,7 @@ module ActiveRecord
 
       def create_schema
         sql = "CREATE SCHEMA IF NOT EXISTS #{schema}"
-        sql += " AUTHORIZATION #{owner}" if owner.present?
+        sql += " AUTHORIZATION #{owner}" if owner.present? && !Rails.env.development?
         ActiveRecord::Base.connection.execute sql
       end
 
