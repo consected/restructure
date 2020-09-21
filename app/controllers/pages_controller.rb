@@ -25,6 +25,10 @@ class PagesController < ApplicationController
     end
   end
 
+  def reference_data
+    render 'admin/reference_data/index'
+  end
+
   private
 
   def no_action_log

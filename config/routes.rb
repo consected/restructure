@@ -64,6 +64,7 @@ Rails.application.routes.draw do
     resources :contact_infos, except: %i[show destroy]
   end
 
+  get 'admin/reference_data' => 'pages#reference_data'
   resources :pages, only: %i[index show] do
     member do
       get :template
