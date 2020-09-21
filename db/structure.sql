@@ -3715,6 +3715,33 @@ CREATE FUNCTION ipa_ops.log_ipa_appointment_update() RETURNS trigger
 
 
 --
+-- Name: log_ipa_appointments_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_appointments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_appointment_history (
+    master_id,
+    covid19_test_date, covid19_test_time, visit_start_date, visit_end_date, select_schedule, select_status, notes,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_appointment_id)
+  SELECT
+    NEW.master_id,
+    NEW.covid19_test_date, NEW.covid19_test_time, NEW.visit_start_date, NEW.visit_end_date, NEW.select_schedule, NEW.select_status, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_ipa_exit_interview_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
@@ -4948,14 +4975,14 @@ CREATE FUNCTION ipa_ops.log_ipa_screenings_update() RETURNS trigger
 BEGIN
   INSERT INTO ipa_screening_history (
     master_id,
-    eligible_for_study_blank_yes_no, requires_study_partner_blank_yes_no, notes, good_time_to_speak_blank_yes_no, callback_date, callback_time, still_interested_blank_yes_no, ineligible_notes, eligible_notes, not_interested_notes, contact_in_future_yes_no,
+    form_version, eligible_for_study_blank_yes_no, requires_study_partner_blank_yes_no, notes, good_time_to_speak_blank_yes_no, callback_date, callback_time, still_interested_blank_yes_no, ineligible_notes, eligible_notes, not_interested_notes, contact_in_future_yes_no,
     user_id,
     created_at,
     updated_at,
     ipa_screening_id)
   SELECT
     NEW.master_id,
-    NEW.eligible_for_study_blank_yes_no, NEW.requires_study_partner_blank_yes_no, NEW.notes, NEW.good_time_to_speak_blank_yes_no, NEW.callback_date, NEW.callback_time, NEW.still_interested_blank_yes_no, NEW.ineligible_notes, NEW.eligible_notes, NEW.not_interested_notes, NEW.contact_in_future_yes_no,
+    NEW.form_version, NEW.eligible_for_study_blank_yes_no, NEW.requires_study_partner_blank_yes_no, NEW.notes, NEW.good_time_to_speak_blank_yes_no, NEW.callback_date, NEW.callback_time, NEW.still_interested_blank_yes_no, NEW.ineligible_notes, NEW.eligible_notes, NEW.not_interested_notes, NEW.contact_in_future_yes_no,
     NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
@@ -9921,38 +9948,6 @@ CREATE FUNCTION ml_app.log_ipa_adverse_event_update() RETURNS trigger
 
 
 --
--- Name: log_ipa_appointment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
---
-
-CREATE FUNCTION ml_app.log_ipa_appointment_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-              BEGIN
-                  INSERT INTO ipa_appointment_history
-                  (
-                      master_id,
-                      visit_start_date,
-                      select_navigator,
-                      user_id,
-                      created_at,
-                      updated_at,
-                      ipa_appointment_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.visit_start_date,
-                      NEW.select_navigator,
-                      NEW.user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
-
-
---
 -- Name: log_ipa_assignment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -10707,56 +10702,6 @@ CREATE FUNCTION ml_app.log_ipa_ps_tms_test_update() RETURNS trigger
                       NEW.dietary_restrictions_details,
                       NEW.anything_else_blank_yes_no,
                       NEW.anything_else_details,
-                      NEW.user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
-
-
---
--- Name: log_ipa_screening_update(); Type: FUNCTION; Schema: ml_app; Owner: -
---
-
-CREATE FUNCTION ml_app.log_ipa_screening_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-              BEGIN
-                  INSERT INTO ipa_screening_history
-                  (
-                      master_id,
-                      eligible_for_study_blank_yes_no,
-                      requires_study_partner_blank_yes_no,
-                      notes,
-                      good_time_to_speak_blank_yes_no,
-                      callback_date,
-                      callback_time,
-                      still_interested_blank_yes_no,
-                      not_interested_notes,
-                      ineligible_notes,
-                      eligible_notes,
-                      contact_in_future_yes_no,
-                      user_id,
-                      created_at,
-                      updated_at,
-                      ipa_screening_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.eligible_for_study_blank_yes_no,
-                      NEW.requires_study_partner_blank_yes_no,
-                      NEW.notes,
-                      NEW.good_time_to_speak_blank_yes_no,
-                      NEW.callback_date,
-                      NEW.callback_time,
-                      NEW.still_interested_blank_yes_no,
-                      NEW.not_interested_notes,
-                      NEW.ineligible_notes,
-                      NEW.eligible_notes,
-                      NEW.contact_in_future_yes_no,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -26122,7 +26067,9 @@ CREATE TABLE ipa_ops.ipa_appointment_history (
     visit_end_date date,
     select_status character varying,
     notes character varying,
-    select_schedule character varying
+    select_schedule character varying,
+    covid19_test_date date,
+    covid19_test_time time without time zone
 );
 
 
@@ -26159,7 +26106,9 @@ CREATE TABLE ipa_ops.ipa_appointments (
     visit_end_date date,
     select_status character varying,
     notes character varying,
-    select_schedule character varying
+    select_schedule character varying,
+    covid19_test_date date,
+    covid19_test_time time without time zone
 );
 
 
@@ -27552,6 +27501,99 @@ ALTER SEQUENCE ipa_ops.ipa_mednav_provider_reports_id_seq OWNED BY ipa_ops.ipa_m
 
 
 --
+-- Name: ipa_ps_initial_screenings; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.ipa_ps_initial_screenings (
+    id integer NOT NULL,
+    master_id integer,
+    select_is_good_time_to_speak character varying,
+    any_questions_blank_yes_no character varying,
+    follow_up_date date,
+    follow_up_time time without time zone,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    notes character varying,
+    looked_at_website_yes_no character varying,
+    select_still_interested character varying,
+    form_version character varying,
+    same_hotel_yes_no character varying,
+    embedded_report_ipa__ipa_appointments character varying,
+    select_schedule character varying,
+    select_may_i_begin character varying
+);
+
+
+--
+-- Name: ipa_screenings; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.ipa_screenings (
+    id integer NOT NULL,
+    master_id integer,
+    eligible_for_study_blank_yes_no character varying,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    good_time_to_speak_blank_yes_no character varying,
+    callback_date date,
+    callback_time time without time zone,
+    still_interested_blank_yes_no character varying,
+    not_interested_notes character varying,
+    ineligible_notes character varying,
+    eligible_notes character varying,
+    requires_study_partner_blank_yes_no character varying,
+    contact_in_future_yes_no character varying,
+    form_version character varying
+);
+
+
+--
+-- Name: ipa_participant_exits; Type: VIEW; Schema: ipa_ops; Owner: -
+--
+
+CREATE VIEW ipa_ops.ipa_participant_exits AS
+ SELECT dt2.master_id,
+    dt2.ipa_id,
+    dt2.status,
+    dt2."when"
+   FROM ( SELECT DISTINCT dt.master_id,
+            ipa.ipa_id,
+                CASE
+                    WHEN ((dt.extra_log_type)::text = 'completed'::text) THEN 'completed'::character varying
+                    WHEN ((dt.extra_log_type)::text = 'withdraw'::text) THEN 'withdrawn'::character varying
+                    WHEN (((dt.ps_interested1)::text = 'not interested'::text) OR ((dt.ps_interested2)::text = 'not interested'::text) OR ((dt.ps_still_interested)::text = 'no'::text)) THEN 'not interested during phone screening'::character varying
+                    WHEN (((dt.extra_log_type)::text = 'perform_screening_follow_up'::text) AND ((dt.eligible_for_study_blank_yes_no)::text = 'no'::text)) THEN 'ineligible'::character varying
+                    WHEN (((dt.extra_log_type)::text = 'perform_screening_follow_up'::text) AND ((dt.follow_up_still_interested)::text = 'no'::text)) THEN 'not interested during screening follow-up'::character varying
+                    WHEN ((dt.extra_log_type)::text = 'schedule_screening'::text) THEN 'in process'::character varying
+                    WHEN ((dt.extra_log_type)::text = 'exit_opt_out'::text) THEN 'opted out'::character varying
+                    WHEN ((dt.extra_log_type)::text = 'exit_opt_out_covid19'::text) THEN 'exit (no COVID-19 test)'::character varying
+                    WHEN ((dt.extra_log_type)::text = 'exit_l2fu'::text) THEN 'lost to follow-up (before scheduling)'::character varying
+                    WHEN ((dt.extra_log_type)::text = 'on_hold'::text) THEN 'on hold'::character varying
+                    ELSE dt.extra_log_type
+                END AS status,
+            dt.created_at AS "when"
+           FROM (( SELECT al.master_id,
+                    al.created_at,
+                    al.extra_log_type,
+                    ipa_screenings.eligible_for_study_blank_yes_no,
+                    ipa_screenings.still_interested_blank_yes_no AS follow_up_still_interested,
+                    ipa_ps_initial_screenings.select_is_good_time_to_speak AS ps_interested1,
+                    ipa_ps_initial_screenings.select_may_i_begin AS ps_interested2,
+                    ipa_ps_initial_screenings.select_still_interested AS ps_still_interested,
+                    rank() OVER (PARTITION BY al.master_id ORDER BY al.created_at DESC) AS r
+                   FROM ((ipa_ops.activity_log_ipa_assignments al
+                     LEFT JOIN ipa_ops.ipa_screenings ON ((al.master_id = ipa_screenings.master_id)))
+                     LEFT JOIN ipa_ops.ipa_ps_initial_screenings ON ((al.master_id = ipa_ps_initial_screenings.master_id)))
+                  WHERE (((ipa_ps_initial_screenings.select_is_good_time_to_speak)::text = 'not interested'::text) OR ((ipa_ps_initial_screenings.select_may_i_begin)::text = 'not interested'::text) OR ((ipa_ps_initial_screenings.select_still_interested)::text = 'no'::text) OR (((al.extra_log_type)::text = 'perform_screening_follow_up'::text) AND (((ipa_screenings.eligible_for_study_blank_yes_no)::text = 'no'::text) OR ((ipa_screenings.still_interested_blank_yes_no)::text = 'no'::text))) OR ((al.extra_log_type)::text = ANY ((ARRAY['completed'::character varying, 'exit_opt_out'::character varying, 'exit_l2fu'::character varying, 'exit_opt_out_covid19'::character varying, 'on_hold'::character varying])::text[])) OR ((al.extra_log_type)::text = 'withdraw'::text) OR ((al.extra_log_type)::text = 'schedule_screening'::text))) dt
+             JOIN ipa_ops.ipa_assignments ipa ON ((dt.master_id = ipa.master_id)))
+          WHERE (dt.r = 1)) dt2
+  ORDER BY dt2.status, dt2."when" DESC;
+
+
+--
 -- Name: ipa_payment_history; Type: TABLE; Schema: ipa_ops; Owner: -
 --
 
@@ -28256,31 +28298,6 @@ ALTER SEQUENCE ipa_ops.ipa_ps_initial_screening_history_id_seq OWNED BY ipa_ops.
 
 
 --
--- Name: ipa_ps_initial_screenings; Type: TABLE; Schema: ipa_ops; Owner: -
---
-
-CREATE TABLE ipa_ops.ipa_ps_initial_screenings (
-    id integer NOT NULL,
-    master_id integer,
-    select_is_good_time_to_speak character varying,
-    any_questions_blank_yes_no character varying,
-    follow_up_date date,
-    follow_up_time time without time zone,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    notes character varying,
-    looked_at_website_yes_no character varying,
-    select_still_interested character varying,
-    form_version character varying,
-    same_hotel_yes_no character varying,
-    embedded_report_ipa__ipa_appointments character varying,
-    select_schedule character varying,
-    select_may_i_begin character varying
-);
-
-
---
 -- Name: ipa_ps_initial_screenings_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
 --
 
@@ -28900,7 +28917,8 @@ CREATE TABLE ipa_ops.ipa_screening_history (
     ineligible_notes character varying,
     eligible_notes character varying,
     requires_study_partner_blank_yes_no character varying,
-    contact_in_future_yes_no character varying
+    contact_in_future_yes_no character varying,
+    form_version character varying
 );
 
 
@@ -28921,30 +28939,6 @@ CREATE SEQUENCE ipa_ops.ipa_screening_history_id_seq
 --
 
 ALTER SEQUENCE ipa_ops.ipa_screening_history_id_seq OWNED BY ipa_ops.ipa_screening_history.id;
-
-
---
--- Name: ipa_screenings; Type: TABLE; Schema: ipa_ops; Owner: -
---
-
-CREATE TABLE ipa_ops.ipa_screenings (
-    id integer NOT NULL,
-    master_id integer,
-    eligible_for_study_blank_yes_no character varying,
-    notes character varying,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    good_time_to_speak_blank_yes_no character varying,
-    callback_date date,
-    callback_time time without time zone,
-    still_interested_blank_yes_no character varying,
-    not_interested_notes character varying,
-    ineligible_notes character varying,
-    eligible_notes character varying,
-    requires_study_partner_blank_yes_no character varying,
-    contact_in_future_yes_no character varying
-);
 
 
 --
@@ -62722,20 +62716,6 @@ CREATE TRIGGER ipa_adverse_event_history_update AFTER UPDATE ON ipa_ops.ipa_adve
 
 
 --
--- Name: ipa_appointment_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER ipa_appointment_history_insert AFTER INSERT ON ipa_ops.ipa_appointments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_ipa_appointment_update();
-
-
---
--- Name: ipa_appointment_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER ipa_appointment_history_update AFTER UPDATE ON ipa_ops.ipa_appointments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ipa_appointment_update();
-
-
---
 -- Name: ipa_assignment_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
 --
 
@@ -63135,20 +63115,6 @@ CREATE TRIGGER ipa_reimbursement_req_history_update AFTER UPDATE ON ipa_ops.ipa_
 
 
 --
--- Name: ipa_screening_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER ipa_screening_history_insert AFTER INSERT ON ipa_ops.ipa_screenings FOR EACH ROW EXECUTE PROCEDURE ml_app.log_ipa_screening_update();
-
-
---
--- Name: ipa_screening_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER ipa_screening_history_update AFTER UPDATE ON ipa_ops.ipa_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ipa_screening_update();
-
-
---
 -- Name: ipa_special_consideration_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
 --
 
@@ -63272,6 +63238,20 @@ CREATE TRIGGER log_activity_log_ipa_assignment_navigation_history_insert AFTER I
 --
 
 CREATE TRIGGER log_activity_log_ipa_assignment_navigation_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_navigations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_navigations_update();
+
+
+--
+-- Name: log_ipa_appointment_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_appointment_history_insert AFTER INSERT ON ipa_ops.ipa_appointments FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_appointments_update();
+
+
+--
+-- Name: log_ipa_appointment_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_appointment_history_update AFTER UPDATE ON ipa_ops.ipa_appointments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_appointments_update();
 
 
 --
@@ -77480,6 +77460,13 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200914101207'),
 ('20200914101758'),
 ('20200914102206'),
-('20200914102627');
+('20200914102627'),
+('20200914143300'),
+('20200914163633'),
+('20200914163936'),
+('20200917113300'),
+('20200921110750'),
+('20200921172540'),
+('20200921173450');
 
 

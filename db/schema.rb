@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_14_163936) do
+ActiveRecord::Schema.define(version: 2020_09_21_185531) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -2689,6 +2689,96 @@ ActiveRecord::Schema.define(version: 2020_09_14_163936) do
     t.index ["master_id"], name: "index_emergency_contacts_on_master_id"
     t.index ["user_id"], name: "index_emergency_contacts_on_user_id"
     t.index ["user_id"], name: "index_emergency_contacts_on_user_id"
+  end
+
+  create_table "env_environment_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "name"
+    t.string "description"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "env_environment_id"
+    t.index ["env_environment_id"], name: "3cea3c1a_id_idx"
+    t.index ["master_id"], name: "3cea3c1a_history_master_id"
+    t.index ["user_id"], name: "3cea3c1a_user_idx"
+  end
+
+  create_table "env_environments", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "name"
+    t.string "description"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_environments.env_environments_on_master_id"
+    t.index ["user_id"], name: "index_environments.env_environments_on_user_id"
+  end
+
+  create_table "env_hosting_account_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "name"
+    t.string "provider"
+    t.integer "account_number"
+    t.string "login_url"
+    t.string "primary_admin"
+    t.string "description"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "env_hosting_account_id"
+    t.index ["env_hosting_account_id"], name: "d2093078_id_idx"
+    t.index ["master_id"], name: "d2093078_history_master_id"
+    t.index ["user_id"], name: "d2093078_user_idx"
+  end
+
+  create_table "env_hosting_accounts", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "name"
+    t.string "provider"
+    t.integer "account_number"
+    t.string "login_url"
+    t.string "primary_admin"
+    t.string "description"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_environments.env_hosting_accounts_on_master_id"
+    t.index ["user_id"], name: "index_environments.env_hosting_accounts_on_user_id"
+  end
+
+  create_table "env_server_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "name"
+    t.string "server_type"
+    t.string "hosting_category"
+    t.string "server_hosting_name"
+    t.string "server_primary_admin"
+    t.string "description"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "env_server_id"
+    t.bigint "hosting_account_id"
+    t.index ["env_server_id"], name: "304c86bf_id_idx"
+    t.index ["master_id"], name: "304c86bf_history_master_id"
+    t.index ["user_id"], name: "304c86bf_user_idx"
+  end
+
+  create_table "env_servers", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "name"
+    t.string "server_type"
+    t.string "hosting_category"
+    t.string "server_hosting_name"
+    t.string "server_primary_admin"
+    t.string "description"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "hosting_account_id"
+    t.index ["master_id"], name: "index_environments.env_servers_on_master_id"
+    t.index ["user_id"], name: "index_environments.env_servers_on_user_id"
   end
 
   create_table "exception_logs", id: :serial, force: :cascade do |t|
@@ -11561,6 +11651,21 @@ ActiveRecord::Schema.define(version: 2020_09_14_163936) do
   add_foreign_key "emergency_contacts", "masters"
   add_foreign_key "emergency_contacts", "users"
   add_foreign_key "emergency_contacts", "users"
+  add_foreign_key "env_environment_history", "env_environments"
+  add_foreign_key "env_environment_history", "masters"
+  add_foreign_key "env_environment_history", "users"
+  add_foreign_key "env_environments", "masters"
+  add_foreign_key "env_environments", "users"
+  add_foreign_key "env_hosting_account_history", "env_hosting_accounts"
+  add_foreign_key "env_hosting_account_history", "masters"
+  add_foreign_key "env_hosting_account_history", "users"
+  add_foreign_key "env_hosting_accounts", "masters"
+  add_foreign_key "env_hosting_accounts", "users"
+  add_foreign_key "env_server_history", "env_servers"
+  add_foreign_key "env_server_history", "masters"
+  add_foreign_key "env_server_history", "users"
+  add_foreign_key "env_servers", "masters"
+  add_foreign_key "env_servers", "users"
   add_foreign_key "exception_logs", "admins"
   add_foreign_key "exception_logs", "users"
   add_foreign_key "ext_assignment_history", "ext_assignments", column: "ext_assignment_table_id", name: "fk_ext_assignment_history_ext_assignments"
