@@ -118,23 +118,6 @@
   </ul>
 </div>
 <div class="col-sm-5" style="text-align: left">
-  <%= f.label 'Primary Tables'%> 
-  <ul id="as-list" style="max-height: 800px; overflow: auto; background-color: white;">
-    <%  
-      cn = ActiveRecord::Base.connection
-      tables = cn.tables + cn.views
-    
-      tables.sort.each do |table_name| %>
-      
-      <li  id="t-<%=table_name%>">
-          <a href="#tblock-<%=table_name%>" data-toggle="collapse"  class="collapsed" "><%= table_name  %></a>
-      </li>      
-      <ul id="tblock-<%=table_name%>" class="collapse">
-        <% cn.columns(table_name).each  do |c| %>
-          <li id="table-<%=c.name%>"><%=c.name%> <small style="color: gray"><%=c.type.to_s%></small></li>
-        <% end %>
-      </ul>
-      
-    <%  end %>
-  </ul>  
+  <%= f.label 'Tables' %>
+  <%= render partial: 'admin/reference_data/table_list_block'%>
 </div>    

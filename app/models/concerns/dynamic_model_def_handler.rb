@@ -243,6 +243,10 @@ module DynamicModelDefHandler
     full_implementation_class_name.ns_constantize
   end
 
+  def implementation_no_master_association
+    defined?(foreign_key_name) && foreign_key_name.blank?
+  end
+
   def update_tracker_events
     raise 'DynamicModel configuration implementation must define update_tracker_events'
   end
@@ -441,6 +445,7 @@ module DynamicModelDefHandler
           self.fields = %i[#{migration_fields_array.join(' ')}]
           self.table_comment = '#{table_comments[:table]}'
           self.fields_comments = #{(table_comments[:fields] || {}).to_json}
+          self.no_master_association = #{implementation_no_master_association}
     SETATRRIBS
   end
 

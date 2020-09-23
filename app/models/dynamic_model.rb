@@ -83,19 +83,19 @@ class DynamicModel < ActiveRecord::Base
   def add_master_association
     # Now forcibly set the Master association if there is a foreign_key_name set
     # If there is no foreign_key_name set, then this is not attached to a master record
-    if foreign_key_name.present?
+    return if foreign_key_name.blank?
 
-      man = model_association_name
+    man = model_association_name
+    Master.has_many man, inverse_of: :master,
+                         class_name: "DynamicModel::#{model_class_name}",
+                         foreign_key: foreign_key_name,
+                         primary_key: primary_key_name
 
-      Master.has_many man, inverse_of: :master, class_name: "DynamicModel::#{model_class_name}", foreign_key: foreign_key_name, primary_key: primary_key_name
-
-      # Add a filtered scope method, which allows master associations to remove non-accessible items automatically
-      # This is not the default scope, since it calls calc_showable_if under the covers, and that may
-      # reference the associations itself, causing a cascade of calls
-      Master.send :define_method, "#{Master::FilteredAssocPrefix}#{model_association_name}" do
-        send(man).filter_results
-      end
-
+    # Add a filtered scope method, which allows master associations to remove non-accessible items automatically
+    # This is not the default scope, since it calls calc_showable_if under the covers, and that may
+    # reference the associations itself, causing a cascade of calls
+    Master.send :define_method, "#{Master::FilteredAssocPrefix}#{man}" do
+      send(man).filter_results
     end
   end
 
@@ -169,6 +169,11 @@ class DynamicModel < ActiveRecord::Base
 
           class << self
             attr_reader :definition
+
+            # Add definition here, since UserHandler relies on it during include
+            def no_master_association
+              definition.foreign_key_name.blank?
+            end
           end
 
           self.definition = definition

@@ -43,6 +43,9 @@ class ReportsController < UserBaseController
     search_attrs = search_attrs_params_hash
     @search_attrs = search_attrs
 
+    table_name = params[:table_name]
+    schema_name = params[:schema_name]
+
     @view_context = params[:view_context]
     @view_context = if @view_context.blank?
                       nil
@@ -71,9 +74,28 @@ class ReportsController < UserBaseController
       return
     end
 
-    if search_attrs && !no_run
+    if (search_attrs || table_name && schema_name) && !no_run
       begin
-        @results =  @report.run(search_attrs, options)
+        if table_name && schema_name
+
+          return not_authorized unless current_user.can? :view_data_reference
+
+          search_attrs = '_use_defaults_'
+
+          table_fields = '*' if params[:table_fields].blank?
+
+          @results = @report.run(search_attrs,
+                                 table_name: table_name,
+                                 schema_name: schema_name,
+                                 table_fields: table_fields)
+        else
+          @results = @report.run(search_attrs, options)
+        end
+
+        if params[:commit] == 'search'
+          run 'REPORT'
+          return
+        end
       rescue ActiveRecord::PreparedStatementInvalid => e
         logger.info "Prepared statement invalid in reports_controller (#{search_attrs}) show: #{e.inspect}\n#{e.backtrace.join("\n")}"
         @results = nil
@@ -92,11 +114,6 @@ class ReportsController < UserBaseController
             return general_error 'invalid query for report. Please check search fields or try to run the report again.'
           end
         end
-        return
-      end
-
-      if params[:commit] == 'search'
-        run 'REPORT'
         return
       end
 
@@ -238,6 +255,8 @@ class ReportsController < UserBaseController
     if @report_item.respond_to?(:master) && !@report_item.class.no_master_association
       @master = @report_item.master
       @master.current_user = current_user if @master
+    elsif @report_item.respond_to? :current_user
+      @report_item.current_user = current_user
     elsif @report_item.respond_to? :user_id
       @report_item.user_id = current_user.id
     end

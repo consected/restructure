@@ -1,6 +1,6 @@
 <div class="col-sm-12" style="text-align: left">
     
-  <%=  'Classification::Protocol / status (sub_process) / method (protocol_event)'%> <a class="glyphicon glyphicon-info-sign" href="#p-help" class="collapsed" data-toggle="collapse"></a>    
+  <h4>Classification::Protocol / status (sub_process) / method (protocol_event) <a class="glyphicon glyphicon-info-sign" href="#p-help" class="collapsed" data-toggle="collapse"></a>    </h4>
     <div class="help-block collapse" id="p-help">
       <p>
       Use a protocol, status or method lookup directly against a master record. For example, to find a player who has ever had a status of 144 or 24:
@@ -37,7 +37,7 @@
   </ul>
 
 
-  <%=  'General Selections'%> <a class="glyphicon glyphicon-info-sign" href="#gs-help" class="collapsed" data-toggle="collapse"></a>    
+  <h4>General Selections <a class="glyphicon glyphicon-info-sign" href="#gs-help" class="collapsed" data-toggle="collapse"></a></h4>
     <div class="help-block collapse" id="gs-help">
       <p>
       Use a general select lookup directly against a table, such as addresses, player_contacts, player_infos. For example:
@@ -67,7 +67,7 @@
   </ul>
 
     
-  <%=  'Item Flags'%> <a class="glyphicon glyphicon-info-sign" href="#if-help" class="collapsed" data-toggle="collapse"></a>    
+  <h4>Item Flags <a class="glyphicon glyphicon-info-sign" href="#if-help" class="collapsed" data-toggle="collapse"></a></h4>
     <div class="help-block collapse" id="if-help">
     <p>
         Join with appropriate table using item_id and item_type. For example joining with the player_infos table: <br/>              
@@ -95,7 +95,7 @@
   </ul>
 
   
-    <%=  'Accuracy Score (player_info rank)'%> <a class="glyphicon glyphicon-info-sign" href="#as-help" class="collapsed" data-toggle="collapse"></a>    
+    <h4>Accuracy Score (player_info rank)</h4> <a class="glyphicon glyphicon-info-sign" href="#as-help" class="collapsed" data-toggle="collapse"></a>    
     <div class="help-block collapse" id="as-help">
     <p>
         Use an accuracy score lookup directly against the <strong>rank</strong> field of the <strong>player_infos</strong> table only. For example:
@@ -118,26 +118,7 @@
   </ul>
 </div>
 <div class="col-sm-12" style="text-align: left">
-  <%=  'Primary Tables'%> 
-  <ul id="as-list" style="max-height: 800px; overflow: auto; background-color: white;">
-    <%  
-
-      table_info = Admin::MigrationGenerator.tables_and_views
-    
-      table_info.each do |table| %>
-      <%
-        table_name = table['table_name']
-        table_schema = table['table_schema']
-      %>
-      <li  id="t-<%=table_name%>">
-          <a href="#tblock-<%=table_schema%>-<%=table_name%>" data-toggle="collapse"  class="collapsed" "><span class="small"><%=table_schema%></span>.<b><%= table_name  %></b></a>
-      </li>      
-      <ul id="tblock-<%=table_schema%>-<%=table_name%>" class="collapse">
-        <% cn.columns(table_name).each  do |c| %>
-          <li id="table-<%=c.name%>"><%=c.name%> <small style="color: gray"><%=c.type.to_s%></small></li>
-        <% end %>
-      </ul>
-      
-    <%  end %>
-  </ul>  
+  <h4>Tables</h4>
+  <%= render partial: 'admin/reference_data/table_list_block'%>
 </div>    
+

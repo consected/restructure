@@ -23,6 +23,13 @@ CREATE SCHEMA data_requests;
 
 
 --
+-- Name: environments; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA environments;
+
+
+--
 -- Name: femfl; Type: SCHEMA; Schema: -; Owner: -
 --
 
@@ -787,6 +794,60 @@ BEGIN
   SELECT
     NEW.master_id,
     NEW.status, NEW.project_title, NEW.select_purpose, NEW.other_purpose, NEW.research_question_notes, NEW.fphs_analyst_yes_no, NEW.full_name, NEW.title, NEW.institution, NEW.other_institution, NEW.others_handling_data, NEW.pm_contact, NEW.other_pm_contact, NEW.data_start_date, NEW.data_end_date, NEW.fphs_server_yes_no, NEW.fphs_server_tools_notes, NEW.off_fphs_server_reason_notes, NEW.data_use_agreement_status, NEW.data_use_agreement_notes, NEW.terms_of_use_yes_no, NEW.created_by_user_id,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_env_environments_update(); Type: FUNCTION; Schema: environments; Owner: -
+--
+
+CREATE FUNCTION environments.log_env_environments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO env_environment_history (
+    master_id,
+    name, description,
+    user_id,
+    created_at,
+    updated_at,
+    env_environment_id)
+  SELECT
+    NEW.master_id,
+    NEW.name, NEW.description,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_env_servers_update(); Type: FUNCTION; Schema: environments; Owner: -
+--
+
+CREATE FUNCTION environments.log_env_servers_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO env_server_history (
+    master_id,
+    name, server_type, hosting_account_id, hosting_category, server_hosting_name, server_primary_admin, description,
+    user_id,
+    created_at,
+    updated_at,
+    env_server_id)
+  SELECT
+    NEW.master_id,
+    NEW.name, NEW.server_type, NEW.hosting_account_id, NEW.hosting_category, NEW.server_hosting_name, NEW.server_primary_admin, NEW.description,
     NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
@@ -21202,6 +21263,154 @@ CREATE SEQUENCE data_requests.q2_rc_codebook_id_seq
 --
 
 ALTER SEQUENCE data_requests.q2_rc_codebook_id_seq OWNED BY data_requests.q2_rc_codebook.id;
+
+
+--
+-- Name: env_environment_history; Type: TABLE; Schema: environments; Owner: -
+--
+
+CREATE TABLE environments.env_environment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    name character varying,
+    description character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    env_environment_id bigint
+);
+
+
+--
+-- Name: env_environment_history_id_seq; Type: SEQUENCE; Schema: environments; Owner: -
+--
+
+CREATE SEQUENCE environments.env_environment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: env_environment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: environments; Owner: -
+--
+
+ALTER SEQUENCE environments.env_environment_history_id_seq OWNED BY environments.env_environment_history.id;
+
+
+--
+-- Name: env_environments; Type: TABLE; Schema: environments; Owner: -
+--
+
+CREATE TABLE environments.env_environments (
+    id bigint NOT NULL,
+    master_id bigint,
+    name character varying,
+    description character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: env_environments_id_seq; Type: SEQUENCE; Schema: environments; Owner: -
+--
+
+CREATE SEQUENCE environments.env_environments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: env_environments_id_seq; Type: SEQUENCE OWNED BY; Schema: environments; Owner: -
+--
+
+ALTER SEQUENCE environments.env_environments_id_seq OWNED BY environments.env_environments.id;
+
+
+--
+-- Name: env_server_history; Type: TABLE; Schema: environments; Owner: -
+--
+
+CREATE TABLE environments.env_server_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    name character varying,
+    server_type character varying,
+    hosting_category character varying,
+    server_hosting_name character varying,
+    server_primary_admin character varying,
+    description character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    env_server_id bigint,
+    hosting_account_id bigint
+);
+
+
+--
+-- Name: env_server_history_id_seq; Type: SEQUENCE; Schema: environments; Owner: -
+--
+
+CREATE SEQUENCE environments.env_server_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: env_server_history_id_seq; Type: SEQUENCE OWNED BY; Schema: environments; Owner: -
+--
+
+ALTER SEQUENCE environments.env_server_history_id_seq OWNED BY environments.env_server_history.id;
+
+
+--
+-- Name: env_servers; Type: TABLE; Schema: environments; Owner: -
+--
+
+CREATE TABLE environments.env_servers (
+    id bigint NOT NULL,
+    master_id bigint,
+    name character varying,
+    server_type character varying,
+    hosting_category character varying,
+    server_hosting_name character varying,
+    server_primary_admin character varying,
+    description character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    hosting_account_id bigint
+);
+
+
+--
+-- Name: env_servers_id_seq; Type: SEQUENCE; Schema: environments; Owner: -
+--
+
+CREATE SEQUENCE environments.env_servers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: env_servers_id_seq; Type: SEQUENCE OWNED BY; Schema: environments; Owner: -
+--
+
+ALTER SEQUENCE environments.env_servers_id_seq OWNED BY environments.env_servers.id;
 
 
 --
@@ -43788,6 +43997,34 @@ ALTER TABLE ONLY data_requests.q2_rc_codebook ALTER COLUMN id SET DEFAULT nextva
 
 
 --
+-- Name: id; Type: DEFAULT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environment_history ALTER COLUMN id SET DEFAULT nextval('environments.env_environment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environments ALTER COLUMN id SET DEFAULT nextval('environments.env_environments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_server_history ALTER COLUMN id SET DEFAULT nextval('environments.env_server_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_servers ALTER COLUMN id SET DEFAULT nextval('environments.env_servers_id_seq'::regclass);
+
+
+--
 -- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
 --
 
@@ -47646,6 +47883,38 @@ ALTER TABLE ONLY data_requests.data_requests_selected_attribs
 
 ALTER TABLE ONLY data_requests.q2_rc_codebook
     ADD CONSTRAINT q2_rc_codebook_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: env_environment_history_pkey; Type: CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environment_history
+    ADD CONSTRAINT env_environment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: env_environments_pkey; Type: CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environments
+    ADD CONSTRAINT env_environments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: env_server_history_pkey; Type: CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_server_history
+    ADD CONSTRAINT env_server_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: env_servers_pkey; Type: CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_servers
+    ADD CONSTRAINT env_servers_pkey PRIMARY KEY (id);
 
 
 --
@@ -52353,6 +52622,76 @@ CREATE INDEX index_data_requests_selected_attribs_on_master_id ON data_requests.
 --
 
 CREATE INDEX index_data_requests_selected_attribs_on_user_id ON data_requests.data_requests_selected_attribs USING btree (user_id);
+
+
+--
+-- Name: 304c86bf_history_master_id; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "304c86bf_history_master_id" ON environments.env_server_history USING btree (master_id);
+
+
+--
+-- Name: 304c86bf_id_idx; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "304c86bf_id_idx" ON environments.env_server_history USING btree (env_server_id);
+
+
+--
+-- Name: 304c86bf_user_idx; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "304c86bf_user_idx" ON environments.env_server_history USING btree (user_id);
+
+
+--
+-- Name: 3cea3c1a_history_master_id; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "3cea3c1a_history_master_id" ON environments.env_environment_history USING btree (master_id);
+
+
+--
+-- Name: 3cea3c1a_id_idx; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "3cea3c1a_id_idx" ON environments.env_environment_history USING btree (env_environment_id);
+
+
+--
+-- Name: 3cea3c1a_user_idx; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "3cea3c1a_user_idx" ON environments.env_environment_history USING btree (user_id);
+
+
+--
+-- Name: index_environments.env_environments_on_master_id; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "index_environments.env_environments_on_master_id" ON environments.env_environments USING btree (master_id);
+
+
+--
+-- Name: index_environments.env_environments_on_user_id; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "index_environments.env_environments_on_user_id" ON environments.env_environments USING btree (user_id);
+
+
+--
+-- Name: index_environments.env_servers_on_master_id; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "index_environments.env_servers_on_master_id" ON environments.env_servers USING btree (master_id);
+
+
+--
+-- Name: index_environments.env_servers_on_user_id; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "index_environments.env_servers_on_user_id" ON environments.env_servers USING btree (user_id);
 
 
 --
@@ -61967,6 +62306,34 @@ CREATE TRIGGER log_data_requests_selected_attrib_history_update AFTER UPDATE ON 
 
 
 --
+-- Name: log_env_environment_history_insert; Type: TRIGGER; Schema: environments; Owner: -
+--
+
+CREATE TRIGGER log_env_environment_history_insert AFTER INSERT ON environments.env_environments FOR EACH ROW EXECUTE PROCEDURE environments.log_env_environments_update();
+
+
+--
+-- Name: log_env_environment_history_update; Type: TRIGGER; Schema: environments; Owner: -
+--
+
+CREATE TRIGGER log_env_environment_history_update AFTER UPDATE ON environments.env_environments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE environments.log_env_environments_update();
+
+
+--
+-- Name: log_env_server_history_insert; Type: TRIGGER; Schema: environments; Owner: -
+--
+
+CREATE TRIGGER log_env_server_history_insert AFTER INSERT ON environments.env_servers FOR EACH ROW EXECUTE PROCEDURE environments.log_env_servers_update();
+
+
+--
+-- Name: log_env_server_history_update; Type: TRIGGER; Schema: environments; Owner: -
+--
+
+CREATE TRIGGER log_env_server_history_update AFTER UPDATE ON environments.env_servers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE environments.log_env_servers_update();
+
+
+--
 -- Name: femfl_subject_rc_insert; Type: TRIGGER; Schema: femfl; Owner: -
 --
 
@@ -66560,6 +66927,86 @@ ALTER TABLE ONLY data_requests.data_request_message_to_reviewers
 
 ALTER TABLE ONLY data_requests.data_request_messages
     ADD CONSTRAINT fk_rails_982635401e0 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1fb2da4985; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environment_history
+    ADD CONSTRAINT fk_rails_1fb2da4985 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_36c4a018b2; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environment_history
+    ADD CONSTRAINT fk_rails_36c4a018b2 FOREIGN KEY (env_environment_id) REFERENCES environments.env_environments(id);
+
+
+--
+-- Name: fk_rails_5ca22929e0; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_server_history
+    ADD CONSTRAINT fk_rails_5ca22929e0 FOREIGN KEY (env_server_id) REFERENCES environments.env_servers(id);
+
+
+--
+-- Name: fk_rails_73ac6d2c1d; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_server_history
+    ADD CONSTRAINT fk_rails_73ac6d2c1d FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_9c080ad476; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environments
+    ADD CONSTRAINT fk_rails_9c080ad476 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_b3708f84a4; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_servers
+    ADD CONSTRAINT fk_rails_b3708f84a4 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_be1cd2eb62; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_server_history
+    ADD CONSTRAINT fk_rails_be1cd2eb62 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_d8f88289f3; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environments
+    ADD CONSTRAINT fk_rails_d8f88289f3 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_fb30afe9c0; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_servers
+    ADD CONSTRAINT fk_rails_fb30afe9c0 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_fb8c6fbc1e; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environment_history
+    ADD CONSTRAINT fk_rails_fb8c6fbc1e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -77102,7 +77549,7 @@ ALTER TABLE ONLY tbs.tbs_withdrawal_history
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests,femfl,pitt_bhi,q1,q2;
+SET search_path TO ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests,femfl,pitt_bhi,q1,q2,environments;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20150602181200'),
@@ -77467,6 +77914,9 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200917113300'),
 ('20200921110750'),
 ('20200921172540'),
-('20200921173450');
+('20200921173450'),
+('20200921184247'),
+('20200921184426'),
+('20200921185531');
 
 

@@ -4,27 +4,66 @@ class Admin::MigrationGenerator
 
   attr_accessor :db_migration_schema
 
+  def self.connection
+    ActiveRecord::Base.connection
+  end
+
+  def self.quoted_schemas
+    @quoted_schemas ||= current_search_paths.map { |s| "'#{s}'" }.join(',')
+  end
+
   # Get the current list of table and views with the schema they belong to
   #
-  # @return [Array(Hash {table_schema, table_name})] array of table_schema and table_name hashes for each table
+  # @return [Array(Hash {schema_name, table_name})] array of schema_name and table_name hashes for each table
   def self.tables_and_views
-    cn = ActiveRecord::Base.connection
-
-    schemas = current_search_paths.map { |s| "'#{s}'" }.join(',')
-
-    cn.execute <<~END_SQL
-      select table_schema, table_name from information_schema.tables 
-      where table_schema IN (#{schemas})
+    connection.execute <<~END_SQL
+      select table_schema "schema_name", table_name from information_schema.tables 
+      where table_schema IN (#{quoted_schemas})
+      and table_catalog = '#{current_database}'
       UNION 
-      select table_schema, table_name from information_schema.views
-      where table_schema IN (#{schemas})
-      order by table_schema, table_name
+      select table_schema "schema_name", table_name from information_schema.views
+      where table_schema IN (#{quoted_schemas})
+      and table_catalog = '#{current_database}'
+      order by "schema_name", table_name
     END_SQL
   end
 
+  def self.table_comment(table_name)
+    connection.table_comment(table_name)
+  end
+
   def self.current_search_paths
-    cn = ActiveRecord::Base.connection
-    cn.schema_search_path.split(',')
+    connection.schema_search_path.split(',')
+  end
+
+  def self.current_database
+    connection.current_database
+  end
+
+  def self.column_comments
+    Rails.cache.fetch("db_column_comments-#{Application.version}") do
+      res = connection.execute <<~END_SQL
+        SELECT
+            cols.table_schema "schema_name",
+            cols.table_name,
+            cols.column_name,
+            pg_catalog.col_description(c.oid, cols.ordinal_position::int) AS column_comment
+        FROM
+            information_schema.columns cols
+        INNER JOIN pg_catalog.pg_class c
+        ON 
+          c.oid = ('"' || cols.table_name || '"')::regclass::oid
+          AND c.relname = cols.table_name
+
+        WHERE
+            cols.table_catalog = '#{current_database}' AND
+            cols.table_schema IN (#{quoted_schemas}) AND
+            pg_catalog.col_description(c.oid, cols.ordinal_position::int) IS NOT NULL
+        ;
+      END_SQL
+
+      res.to_a
+    end
   end
 
   def initialize(db_migration_schema)

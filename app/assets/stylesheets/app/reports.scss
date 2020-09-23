@@ -166,3 +166,55 @@ textarea.admin-clean-sql {
 .rep-sel-action-update-list {
   display: none;
 }
+
+#protocols-list,
+#gs-list,
+#if-list,
+#as-list,
+#report-table-list {
+  li {
+    font-family: monospace;
+    font-size: 94%;
+  }
+}
+
+.ref-table-item {
+  list-style: none;
+  a {
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 94%;
+    text-decoration: none;
+  }
+}
+
+.ref-table-col-item {
+  list-style: none;
+  span {
+    font-family: monospace;
+    font-size: 94%;
+  }
+}
+
+.table-comment.help-block,
+.column-comment.help-block {
+  font-size: 94%;
+  padding: 0.4em;
+  background: rgb(250, 250, 250);
+  display: block;
+  margin-left: 1em;
+  white-space: pre;
+}
+
+.glyphicon {
+  font-family: "Glyphicons Halflings" !important;
+}
+
+p.report-column-comment {
+  font-weight: normal;
+  font-size: 94%;
+}
+
+th.has-comment {
+  min-width: 150px;
+}

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_21_185531) do
+ActiveRecord::Schema.define(version: 2020_09_23_103106) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -2716,34 +2716,34 @@ ActiveRecord::Schema.define(version: 2020_09_21_185531) do
   end
 
   create_table "env_hosting_account_history", force: :cascade do |t|
-    t.bigint "master_id"
     t.string "name"
     t.string "provider"
     t.integer "account_number"
     t.string "login_url"
     t.string "primary_admin"
     t.string "description"
+    t.bigint "created_by_user_id"
     t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "env_hosting_account_id"
+    t.index ["created_by_user_id"], name: "d2093078_ref_cb_user_idx_hist"
     t.index ["env_hosting_account_id"], name: "d2093078_id_idx"
-    t.index ["master_id"], name: "d2093078_history_master_id"
     t.index ["user_id"], name: "d2093078_user_idx"
   end
 
   create_table "env_hosting_accounts", force: :cascade do |t|
-    t.bigint "master_id"
     t.string "name"
     t.string "provider"
     t.integer "account_number"
     t.string "login_url"
     t.string "primary_admin"
     t.string "description"
+    t.bigint "created_by_user_id"
     t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["master_id"], name: "index_environments.env_hosting_accounts_on_master_id"
+    t.index ["created_by_user_id"], name: "d2093078_ref_cb_user_idx"
     t.index ["user_id"], name: "index_environments.env_hosting_accounts_on_user_id"
   end
 
@@ -11657,10 +11657,10 @@ ActiveRecord::Schema.define(version: 2020_09_21_185531) do
   add_foreign_key "env_environments", "masters"
   add_foreign_key "env_environments", "users"
   add_foreign_key "env_hosting_account_history", "env_hosting_accounts"
-  add_foreign_key "env_hosting_account_history", "masters"
   add_foreign_key "env_hosting_account_history", "users"
-  add_foreign_key "env_hosting_accounts", "masters"
+  add_foreign_key "env_hosting_account_history", "users", column: "created_by_user_id"
   add_foreign_key "env_hosting_accounts", "users"
+  add_foreign_key "env_hosting_accounts", "users", column: "created_by_user_id"
   add_foreign_key "env_server_history", "env_servers"
   add_foreign_key "env_server_history", "masters"
   add_foreign_key "env_server_history", "users"
