@@ -97,6 +97,10 @@ class Admin::MigrationGenerator
     "db/app_migrations/#{db_migration_schema}"
   end
 
+  def db_migration_failed_dirname
+    'db/app_migrations/failed'
+  end
+
   def run_migration
     return unless Rails.env.development? && db_migration_schema != DefaultMigrationSchema
 
@@ -111,10 +115,12 @@ class Admin::MigrationGenerator
 
     true
   rescue StandardError => e
-    FileUtils.rm @do_migration
+    FileUtils.mkdir_p db_migration_failed_dirname
+    FileUtils.mv @do_migration, db_migration_failed_dirname
     raise e
   rescue FphsException => e
-    FileUtils.rm @do_migration
+    FileUtils.mkdir_p db_migration_failed_dirname
+    FileUtils.mv @do_migration, db_migration_failed_dirname
     raise e
   end
 

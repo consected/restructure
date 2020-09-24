@@ -99,6 +99,9 @@ class Admin::AppType < Admin::AdminBase
 
       app_type = Admin::AppType.where(name: a_conf['name']).first || Admin::AppType.create!(a_conf)
 
+      # set the app type to allow automatic migrations to work
+      current_admin.matching_user_app_type = app_type
+
       res = results['app_type']
 
       ### Force update of reports that don't have a short_name (yet)
@@ -135,6 +138,9 @@ class Admin::AppType < Admin::AdminBase
 
       app_type.reload
       new_id = app_type.id
+
+      # Reset the app type to allow the actual value to be used
+      current_admin.matching_user_app_type = nil
     end
 
     app_type = find(new_id)
@@ -418,7 +424,7 @@ class Admin::AppType < Admin::AdminBase
   def setup_migrations
     return true unless Rails.env.development?
 
-    migration_generator = MigrationGenerator.new(default_schema_name)
+    migration_generator = Admin::MigrationGenerator.new(default_schema_name)
     migration_generator.add_schema
   end
 

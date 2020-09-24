@@ -189,6 +189,7 @@ module ActiveRecord
                     else
                       self.col_names
                     end
+        col_names ||= []
 
         old_colnames = col_names - standard_columns
         old_history_colnames = history_col_names - standard_columns
