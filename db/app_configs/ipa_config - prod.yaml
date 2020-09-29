@@ -3,10 +3,10 @@ app_type:
   id: 9
   name: ipa
   label: IPA
-  disabled: 
+  disabled: false
   admin_id: 4
   created_at: '2019-01-17T11:50:28.515Z'
-  updated_at: '2019-01-17T11:50:28.515Z'
+  updated_at: '2020-09-11T10:47:17.000Z'
   default_schema_name: ipa_ops
   app_configurations:
   - id: 52
@@ -162,6 +162,28 @@ app_type:
     role_name: ''
     created_at: '2019-09-23T10:32:14.631Z'
     updated_at: '2019-09-23T10:32:14.631Z'
+    user_email: 
+  - id: 235
+    name: hide tracker panel
+    value: 'true'
+    disabled: false
+    admin_id: 4
+    user_id: 
+    app_type_id: 9
+    role_name: ''
+    created_at: '2020-09-14T18:08:44.135Z'
+    updated_at: '2020-09-14T18:08:44.135Z'
+    user_email: 
+  - id: 236
+    name: open panels
+    value: details
+    disabled: false
+    admin_id: 4
+    user_id: 
+    app_type_id: 9
+    role_name: ''
+    created_at: '2020-09-14T18:08:44.180Z'
+    updated_at: '2020-09-14T18:08:44.180Z'
     user_email: 
   valid_user_access_controls:
   - id: 183
@@ -4207,6 +4229,123 @@ app_type:
     created_at: '2020-02-06T09:22:08.435Z'
     updated_at: '2020-02-06T09:22:08.435Z'
     user_email: 
+  - id: 1241
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_ps_covid_closings
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: _app_
+    created_at: '2020-09-14T18:08:44.596Z'
+    updated_at: '2020-09-14T18:08:44.596Z'
+    user_email: 
+  - id: 1242
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_phone_screen__covid19_no_test_closing
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: user - phone screen
+    created_at: '2020-09-14T18:08:50.764Z'
+    updated_at: '2020-09-14T18:08:50.764Z'
+    user_email: 
+  - id: 1243
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_phone_screen__covid19_no_test_closing
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: phone screener
+    created_at: '2020-09-14T18:08:50.772Z'
+    updated_at: '2020-09-14T18:08:50.772Z'
+    user_email: 
+  - id: 1244
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__exit_opt_out_covid19
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: phone screener
+    created_at: '2020-09-14T18:08:50.784Z'
+    updated_at: '2020-09-14T18:08:50.784Z'
+    user_email: 
+  - id: 1245
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__exit_opt_out_covid19
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: tracker
+    created_at: '2020-09-14T18:08:50.792Z'
+    updated_at: '2020-09-14T18:08:50.792Z'
+    user_email: 
+  - id: 1246
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_ps_covid_closings
+    options: ''
+    access: 
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: ''
+    created_at: '2020-09-14T18:08:50.799Z'
+    updated_at: '2020-09-14T18:08:50.799Z'
+    user_email: 
+  - id: 1247
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_ps_covid_closings
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: user - phone screen
+    created_at: '2020-09-14T18:08:50.808Z'
+    updated_at: '2020-09-14T18:08:50.808Z'
+    user_email: 
+  - id: 1248
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_ps_covid_closings
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: phone screener
+    created_at: '2020-09-14T18:08:50.815Z'
+    updated_at: '2020-09-14T18:08:50.815Z'
+    user_email: 
+  - id: 1379
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__on_hold
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: tracker
+    created_at: '2020-09-17T08:32:14.320Z'
+    updated_at: '2020-09-17T08:32:14.320Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 4
     name: Protocol Deviations & Exceptions
@@ -4344,7 +4483,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-01-17T11:50:53.336Z'
-    updated_at: '2020-03-16T09:04:29.073Z'
+    updated_at: '2020-09-14T18:08:45.159Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -4504,42 +4643,52 @@ app_type:
       one_to_this\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
       \       extra_log_type: sleep_1\r\n    any_done:\r\n      all:\r\n        activity_log__ipa_assignment_phone_screens:\r\n
       \         extra_log_type: rescreen\r\n      not_any:\r\n        activity_log__ipa_assignment_phone_screens:\r\n
-      \         extra_log_type: mri_1\r\n\r\n\r\n\r\ntms_1:\r\n  label: TMS\r\n  fields:\r\n
-      \ references:\r\n    dynamic_model__ipa_ps_tms_test:\r\n      from: this\r\n
-      \     add: one_to_this\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n
-      \     activity_log__ipa_assignment_phone_screens:\r\n        extra_log_type:
+      \         extra_log_type: mri_1\r\n\r\n\r\n#######################\r\n# TMS
+      - including additional health and COVID-19 questions\r\n#######################\r\ntms_1:\r\n
+      \ label: TMS\r\n  fields:\r\n  references:\r\n    dynamic_model__ipa_ps_tms_test:\r\n
+      \     from: this\r\n      add: one_to_this\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
+      \   all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n        extra_log_type:
       mri_1\r\n    any_done:\r\n      all:\r\n        activity_log__ipa_assignment_phone_screens:\r\n
       \         extra_log_type: rescreen\r\n      not_any:\r\n        activity_log__ipa_assignment_phone_screens:\r\n
-      \         extra_log_type: tms_1\r\n\r\n#######################\r\n# T-MoCA has
-      moved\r\n#######################\r\ntmoca_0:\r\n  label: Continue?\r\n  fields:\r\n
-      \   - callback_required\r\n    - callback_date\r\n    - callback_time\r\n    -
-      placeholder_callback\r\n    - notes\r\n\r\n  caption_before:\r\n    all_fields:
-      |\r\n      Thank you for your patience and for answering the previous questions.\r\n
-      \     I am now going to ask you to do some tasks and will provide you with instructions
-      throughout. This should take approximately 15 minutes.\r\n    callback_required:
-      Do you have still have time to complete this right now or would you like me
-      to call you back at a more convenient time?\r\n    notes: Enter any notes from
-      the end of the call. If the subject no longer wishes to participate, enter a
-      Withdraw record in the IPA Tracker.\r\n    placeholder_callback: When calling
-      back the participant, click <b>Continue?</b> in the menu above to restart the
-      screener process.\r\n\r\n  field_options:\r\n    callback_required:\r\n      edit_as:\r\n
-      \       field_type: select_callback_required\r\n        alt_options:\r\n          \"Yes,
-      ok to continue\": 'ok to continue'\r\n          \"No - Thank and end call\":
-      'not ok to continue'\r\n          \"Yes, but call me back\": 'call me back'\r\n\r\n
-      \ show_if:\r\n    callback_date:\r\n      callback_required: 'call me back'\r\n
-      \   callback_time:\r\n      callback_required: 'call me back'\r\n    notes:\r\n
-      \     callback_required: 'not ok to continue'\r\n    placeholder_callback:\r\n
+      \         extra_log_type: tms_1\r\n\r\n\r\n#######################\r\n# COVID-19
+      - not consented to test - closing\r\n#######################\r\ncovid19_no_test_closing:\r\n
+      \ label: No COVID-19 Test\r\n  fields:\r\n\r\n  references:\r\n    dynamic_model__ipa_ps_covid_closing:\r\n
+      \     from: master\r\n      add: one_to_master\r\n\r\n\r\n  creatable_if:\r\n
+      \   <<: *enabled_if\r\n    all:\r\n      dynamic_model__ipa_ps_tms_tests:\r\n
+      \       covid19_test_consent_yes_no: 'no'\r\n      activity_log__ipa_assignment_phone_screens:\r\n
+      \       extra_log_type: tms_1\r\n        \r\n    any_done:\r\n      all:\r\n
+      \       activity_log__ipa_assignment_phone_screens:\r\n          extra_log_type:
+      rescreen\r\n      not_any:\r\n        activity_log__ipa_assignment_phone_screens:\r\n
+      \         extra_log_type: \r\n            - schedule_callback_v2\r\n            -
+      covid19_no_test_closing\r\n\r\n\r\n#######################\r\n# T-MoCA has moved\r\n#######################\r\ntmoca_0:\r\n
+      \ label: Continue?\r\n  fields:\r\n    - callback_required\r\n    - callback_date\r\n
+      \   - callback_time\r\n    - placeholder_callback\r\n    - notes\r\n\r\n  caption_before:\r\n
+      \   all_fields: |\r\n      Thank you for your patience and for answering the
+      previous questions.\r\n      I am now going to ask you to do some tasks and
+      will provide you with instructions throughout. This should take approximately
+      15 minutes.\r\n    callback_required: Do you have still have time to complete
+      this right now or would you like me to call you back at a more convenient time?\r\n
+      \   notes: Enter any notes from the end of the call. If the subject no longer
+      wishes to participate, enter a Withdraw record in the IPA Tracker.\r\n    placeholder_callback:
+      When calling back the participant, click <b>Continue?</b> in the menu above
+      to restart the screener process.\r\n\r\n  field_options:\r\n    callback_required:\r\n
+      \     edit_as:\r\n        field_type: select_callback_required\r\n        alt_options:\r\n
+      \         \"Yes, ok to continue\": 'ok to continue'\r\n          \"No - Thank
+      and end call\": 'not ok to continue'\r\n          \"Yes, but call me back\":
+      'call me back'\r\n\r\n  show_if:\r\n    callback_date:\r\n      callback_required:
+      'call me back'\r\n    callback_time:\r\n      callback_required: 'call me back'\r\n
+      \   notes:\r\n      callback_required: 'not ok to continue'\r\n    placeholder_callback:\r\n
       \     callback_required: 'call me back'\r\n\r\n#  references:\r\n#    activity_log__ipa_assignment:\r\n#
       \     from: this\r\n#      add: many\r\n#      add_with:\r\n#        extra_log_type:
       withdraw\r\n\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
       \       extra_log_type: tms_1\r\n    not_all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
-      \       extra_log_type: tmoca_0\r\n        callback_required:\r\n          -
-      ok to continue\r\n          - not ok to continue\r\n\r\n\r\n  save_action:\r\n
-      \   on_create:\r\n      create_next_creatable:\r\n        if:\r\n          all:\r\n
-      \           this:\r\n              callback_required: \"ok to continue\"\r\n\r\n
-      \     show_panel:\r\n        value: activity_log__ipa_assignments\r\n        if:\r\n
-      \         all:\r\n            this:\r\n              callback_required: call
-      me back\r\n\r\n\r\n  save_trigger:\r\n    on_create:\r\n\r\n      create_reference:\r\n\r\n
+      \       extra_log_type:\r\n          - tmoca_0\r\n          - covid19_no_test_closing\r\n
+      \       callback_required:\r\n          - ok to continue\r\n          - not
+      ok to continue\r\n\r\n\r\n  save_action:\r\n    on_create:\r\n      create_next_creatable:\r\n
+      \       if:\r\n          all:\r\n            this:\r\n              callback_required:
+      \"ok to continue\"\r\n\r\n      show_panel:\r\n        value: activity_log__ipa_assignments\r\n
+      \       if:\r\n          all:\r\n            this:\r\n              callback_required:
+      call me back\r\n\r\n\r\n  save_trigger:\r\n    on_create:\r\n\r\n      create_reference:\r\n\r\n
       \       - activity_log__ipa_assignment:\r\n            if:\r\n              all:\r\n
       \               this:\r\n                  callback_required: call me back\r\n\r\n
       \           in: master\r\n            with:\r\n              extra_log_type:
@@ -4565,12 +4714,12 @@ app_type:
       *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
       \       extra_log_type: tmoca_0\r\n        callback_required: \"ok to continue\"\r\n\r\n
       \   not_any:\r\n      activity_log__ipa_assignment_phone_screens:\r\n        extra_log_type:
-      tmoca_1\r\n\r\n\r\ncompleted_questions:\r\n  label: Review Details\r\n  fields:\r\n\r\n
-      \ references:\r\n    dynamic_model__ipa_ps_comp_review:\r\n      from: this\r\n
-      \     add: one_to_this\r\n\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
-      \   all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n        extra_log_type:
-      tms_1\r\n    not_any:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
-      \       extra_log_type: completed_questions\r\n\r\n\r\n#cognitive_screening_completed:\r\n#
+      \r\n          - tmoca_1\r\n          - covid19_no_test_closing\r\n\r\n\r\ncompleted_questions:\r\n
+      \ label: Review Details\r\n  fields:\r\n\r\n  references:\r\n    dynamic_model__ipa_ps_comp_review:\r\n
+      \     from: this\r\n      add: one_to_this\r\n\r\n\r\n  creatable_if:\r\n    <<:
+      *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
+      \       extra_log_type: tms_1\r\n    not_any:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
+      \       extra_log_type: \r\n          - completed_questions\r\n          - covid19_no_test_closing\r\n\r\n\r\n#cognitive_screening_completed:\r\n#
       \ label: Cognitive Screening Completed\r\n#  caption_before:\r\n#    all_fields:
       |\r\n#      Thank you for your patience and for answering these previous questions.\r\n#\r\n#
       \     Please note that we will keep this information with your research records.
@@ -4603,11 +4752,11 @@ app_type:
       \   all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n        extra_log_type:
       tmoca_1\r\n      dynamic_model__ipa_ps_tmocas:\r\n        tmoca_score:\r\n          condition:
       <=\r\n          value: 19\r\n\r\n    not_any:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
-      \       extra_log_type: informant_details\r\n\r\n  save_trigger:\r\n    on_create:\r\n
-      \     create_reference:\r\n        - activity_log__ipa_assignment:\r\n            in:
-      master\r\n            with:\r\n              extra_log_type: schedule_informant_screener\r\n
-      \             notes: ADL Informant Screener required based on T-MoCA result.
-      Schedule a call with the informant.\r\n\r\n\r\n#######################\r\n#
+      \       extra_log_type: \r\n          - informant_details\r\n          - covid19_no_test_closing\r\n\r\n
+      \ save_trigger:\r\n    on_create:\r\n      create_reference:\r\n        - activity_log__ipa_assignment:\r\n
+      \           in: master\r\n            with:\r\n              extra_log_type:
+      schedule_informant_screener\r\n              notes: ADL Informant Screener required
+      based on T-MoCA result. Schedule a call with the informant.\r\n\r\n\r\n#######################\r\n#
       Schedule Callback - V1\r\n#######################\r\nschedule_callback:\r\n
       \ label: Schedule Callback\r\n  fields:\r\n    - callback_date\r\n    - callback_time\r\n
       \   - notes\r\n  caption_before:\r\n    all_fields: |\r\n      Thank you for
@@ -4657,12 +4806,13 @@ app_type:
       \       - activity_log__ipa_assignment:\r\n            in: master\r\n            with:\r\n
       \             extra_log_type: schedule_informant_screener\r\n              notes:
       ADL Informant Screener required based on T-MoCA result. Schedule a call with
-      the informant.\r\n\r\n#######################\r\n# Schedule Callback - V2\r\n#######################\r\nschedule_callback_v2:\r\n
-      \ label: Schedule Callback\r\n  fields:\r\n    - callback_date\r\n    - callback_time\r\n
-      \   - notes\r\n  caption_before:\r\n    all_fields: |\r\n       Thank you for
-      your patience and for answering these previous questions.\r\n\r\n       Our
-      study physician and study nurse will be reviewing the answers to the questions
-      we just discussed.  [It is possible that you will OR You will] receive a follow-up
+      the informant.\r\n\r\n\r\n\r\n#######################\r\n# Schedule Callback
+      - V2\r\n#######################\r\nschedule_callback_v2:\r\n  label: Schedule
+      Callback\r\n  fields:\r\n    - callback_date\r\n    - callback_time\r\n    -
+      notes\r\n  caption_before:\r\n    all_fields: |\r\n       Thank you for your
+      patience and for answering these previous questions.\r\n\r\n       Our study
+      physician and study nurse will be reviewing the answers to the questions we
+      just discussed.  [It is possible that you will OR You will] receive a follow-up
       phone call from me or from our study nurse to get clarification on some of the
       questions that I asked you today. I will be contacting you to let you know if
       you are eligible or not. If you are eligible, we will let you know the next
@@ -4674,8 +4824,9 @@ app_type:
       \   all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n        extra_log_type:
       completed_questions\r\n    any_done:\r\n      all:\r\n        activity_log__ipa_assignment_phone_screens:\r\n
       \         extra_log_type: rescreen\r\n      not_any:\r\n        activity_log__ipa_assignment_phone_screens:\r\n
-      \         extra_log_type: schedule_callback_v2\r\n\r\n\r\n  save_trigger:\r\n
-      \   on_create:\r\n\r\n      create_reference:\r\n\r\n        - activity_log__ipa_assignment:\r\n\r\n
+      \         extra_log_type: \r\n            - schedule_callback_v2\r\n            -
+      covid19_no_test_closing\r\n\r\n\r\n  save_trigger:\r\n    on_create:\r\n\r\n
+      \     create_reference:\r\n\r\n        - activity_log__ipa_assignment:\r\n\r\n
       \           in: master\r\n            with:\r\n              extra_log_type:
       screening_follow_up\r\n              select_who: current_user_email\r\n              follow_up_when:\r\n
       \               this:\r\n                  callback_date: return_value\r\n              follow_up_time:\r\n
@@ -4683,39 +4834,50 @@ app_type:
       Participant phone screening completed. Follow-up has been scheduled.\r\n              select_record_from_player_contacts:\r\n
       \               activity_log__ipa_assignments:\r\n                  extra_log_type:
       schedule_screening\r\n                  select_record_from_player_contacts:
-      return_value\r\n\r\nfinalize:\r\n  label: Finalize Entries\r\n  caption_before:\r\n
-      \   all_fields: |\r\n      When finalized the phone screen forms are locked
-      from editing.\r\n    submit: |\r\n      Save this entry to lock the phone screen
-      forms and generate an inclusion/exclusion checklist record.\r\n      Click the
-      cancel button instead if review or revision of the phone screen forms is still
-      required.\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
-      \       extra_log_type:\r\n          - schedule_callback\r\n          - schedule_callback_v2\r\n
-      \   <<: *not_finalized\r\n    not_any_inex_finalized:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
-      \       extra_log_type: finalize_phone_screen_checklist\r\n\r\n\r\n  # Override
-      the default that hides activities after a certain stage,\r\n  # so that any
-      user can see that the phone screen process has been completed\r\n  showable_if:\r\n
-      \   always: true\r\n\r\n\r\n  save_action:\r\n    on_create:\r\n      show_panel:\r\n
-      \       value: activity_log__ipa_assignment_inex_checklists\r\n      hide_panel:\r\n
+      return_value\r\n\r\n\r\n#######################\r\n# Finalize\r\n#######################\r\nfinalize:\r\n
+      \ label: Finalize Entries\r\n  caption_before:\r\n    all_fields: |\r\n      When
+      finalized the phone screen forms are locked from editing.\r\n    submit: |\r\n
+      \     Save this entry to lock the phone screen forms and generate an inclusion/exclusion
+      checklist record.\r\n      Click the cancel button instead if review or revision
+      of the phone screen forms is still required.\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
+      \   all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n        extra_log_type:\r\n
+      \         - schedule_callback\r\n          - schedule_callback_v2\r\n          -
+      covid19_no_test_closing\r\n    <<: *not_finalized\r\n    not_any_inex_finalized:\r\n
+      \     activity_log__ipa_assignment_inex_checklists:\r\n        extra_log_type:
+      finalize_phone_screen_checklist\r\n\r\n\r\n  # Override the default that hides
+      activities after a certain stage,\r\n  # so that any user can see that the phone
+      screen process has been completed\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n
+      \ save_action:\r\n    on_create:\r\n      show_panel:\r\n        value: activity_log__ipa_assignment_inex_checklists\r\n
+      \       if:\r\n          not_any:\r\n            activity_log__ipa_assignment_phone_screens:\r\n
+      \             extra_log_type: covid19_no_test_closing\r\n        \r\n      hide_panel:\r\n
       \       value: activity_log__ipa_assignment_phone_screens\r\n\r\n  save_trigger:\r\n
       \   on_create:\r\n      create_reference:\r\n        - activity_log__ipa_assignment_inex_checklist:\r\n
-      \           #if:\r\n            #  not_any:\r\n            #    activity_log__ipa_assignment_inex_checklists:\r\n
-      \           #      extra_log_type: tms_responses\r\n\r\n            in: master\r\n
-      \           with:\r\n              extra_log_type: tms_responses\r\n\r\n        -
-      activity_log__ipa_assignment_summary:\r\n            if:\r\n              not_any:\r\n
+      \           if:\r\n              not_any:\r\n                activity_log__ipa_assignment_phone_screens:\r\n
+      \                 extra_log_type: covid19_no_test_closing\r\n\r\n            in:
+      master\r\n            with:\r\n              extra_log_type: tms_responses\r\n\r\n
+      \       - activity_log__ipa_assignment_summary:\r\n            if:\r\n              not_any:\r\n
       \               activity_log__ipa_assignment_summaries:\r\n                  extra_log_type:
-      medical_history\r\n\r\n            in: master\r\n            with:\r\n              extra_log_type:
-      medical_history\r\n\r\n        - activity_log__ipa_assignment_summary:\r\n            if:\r\n
-      \             not_any:\r\n                activity_log__ipa_assignment_summaries:\r\n
-      \                 extra_log_type: medications\r\n\r\n            in: master\r\n
-      \           with:\r\n              extra_log_type: medications\r\n\r\n        -
-      activity_log__ipa_assignment_summary:\r\n            if:\r\n              not_any:\r\n
+      medical_history\r\n                activity_log__ipa_assignment_phone_screens:\r\n
+      \                 extra_log_type: covid19_no_test_closing\r\n\r\n            in:
+      master\r\n            with:\r\n              extra_log_type: medical_history\r\n\r\n
+      \       - activity_log__ipa_assignment_summary:\r\n            if:\r\n              not_any:\r\n
       \               activity_log__ipa_assignment_summaries:\r\n                  extra_log_type:
-      special_considerations\r\n\r\n            in: master\r\n            with:\r\n
-      \             extra_log_type: special_considerations\r\n\r\n      update_reference:\r\n
-      \       - player_info:\r\n            if:\r\n              not_any:\r\n                player_infos:\r\n
-      \                 birth_date:\r\n                    this: birth_date\r\n            first:\r\n
-      \             player_infos:\r\n                update: return_result\r\n            with:\r\n
-      \             birth_date:\r\n                dynamic_model__ipa_ps_sizes:\r\n
+      medications\r\n                activity_log__ipa_assignment_phone_screens:\r\n
+      \                 extra_log_type: covid19_no_test_closing\r\n\r\n            in:
+      master\r\n            with:\r\n              extra_log_type: medications\r\n\r\n
+      \       - activity_log__ipa_assignment_summary:\r\n            if:\r\n              not_any:\r\n
+      \               activity_log__ipa_assignment_summaries:\r\n                  extra_log_type:
+      special_considerations\r\n                activity_log__ipa_assignment_phone_screens:\r\n
+      \                 extra_log_type: covid19_no_test_closing\r\n\r\n            in:
+      master\r\n            with:\r\n              extra_log_type: special_considerations\r\n\r\n
+      \       - activity_log__ipa_assignment:\r\n            if:\r\n              any:\r\n
+      \               activity_log__ipa_assignment_phone_screens:\r\n                  extra_log_type:
+      covid19_no_test_closing\r\n        \r\n            in: master\r\n            with:\r\n
+      \             extra_log_type: exit_opt_out_covid19\r\n              \r\n\r\n
+      \     update_reference:\r\n        - player_info:\r\n            if:\r\n              not_any:\r\n
+      \               player_infos:\r\n                  birth_date:\r\n                    this:
+      birth_date\r\n            first:\r\n              player_infos:\r\n                update:
+      return_result\r\n            with:\r\n              birth_date:\r\n                dynamic_model__ipa_ps_sizes:\r\n
       \                 birth_date: return_value\r\n\r\n\r\n\r\n\r\n  # Notify the
       reviewers that the phone screen has been completed\r\n      notify:\r\n        -
       *notify_reviewer\r\n        - *notify_reviewer_sms\r\n\r\nrescreen:\r\n\r\n
@@ -5158,7 +5320,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-01-17T11:50:56.307Z'
-    updated_at: '2020-05-21T09:43:08.559Z'
+    updated_at: '2020-09-17T08:49:15.056Z'
     action_when_attribute: activity_date
     field_list: ''
     blank_log_field_list: ''
@@ -5274,7 +5436,15 @@ app_type:
       many\r\n      limit: 2\r\n    ipa_reimbursement_reqs:\r\n      label: Reimbursement
       Request\r\n      from: master\r\n      add: many\r\n\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n
-      \       extra_log_type: screening_follow_up\r\n\r\n###################################\r\nexit_l2fu:\r\n
+      \       extra_log_type: screening_follow_up\r\n\r\n\r\n###################################\r\non_hold:\r\n
+      \ label: On Hold\r\n###################################\r\n\r\n  fields:\r\n
+      \   - follow_up_when\r\n    - notes\r\n    \r\n  caption_before:\r\n    all_fields:
+      |\r\n      The subject's participation is on hold until the *follow up date*
+      set.\r\n      \r\n      Use the *General Communications* activity to record
+      future communications with \r\n      the subject.\r\n      \r\n    follow_up_when:
+      Follow up date\r\n    notes: Reason for the *on hold* status and any notes to
+      assist with the future follow up\r\n      \r\n\r\n  creatable_if:\r\n    <<:
+      *enabled_if\r\n    #not_any_exit: *any_exit_or_complete\r\n\r\n\r\n\r\n###################################\r\nexit_l2fu:\r\n
       \ label: Lost to Follow Up\r\n###################################\r\n\r\n  fields:\r\n\r\n
       \ caption_before:\r\n    all_fields: |\r\n      The subject was lost to follow
       up before being scheduled for an appointment.\r\n\r\n      A staff member typically
@@ -5298,7 +5468,16 @@ app_type:
       \   not_any_opt_out:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:\r\n
       \         - exit_opt_out\r\n          - appointment\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
       \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
-      \   always: true\r\n\r\n\r\n\r\n###################################\r\nwithdraw:\r\n
+      \   always: true\r\n\r\n\r\n\r\n###################################\r\nexit_opt_out_covid19:\r\n
+      \ label: Exit (no COVID-19 test)\r\n###################################\r\n\r\n
+      \ fields:\r\n\r\n  caption_before:\r\n    all_fields: |\r\n      The subject
+      exited by opting out before being scheduled for an appointment, \r\n      due
+      to not being willing to take a COVID-19 test at this time.\r\n\r\n      All
+      records are locked down after 14 days.\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
+      \   not_any_opt_out:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:\r\n
+      \         - exit_opt_out_covid19\r\n          - appointment\r\n    not_any_exit:
+      *any_exit_or_complete\r\n\r\n  # Always show, so we know why a player's records
+      may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\nwithdraw:\r\n
       \ label: Withdraw\r\n###################################\r\n\r\n  fields:\r\n
       \ references:\r\n    ipa_withdrawal:\r\n      from: master\r\n      add: one_to_master\r\n
       \ creatable_if:\r\n    <<: *enabled_if\r\n    not_any_exit: *any_exit_or_complete\r\n
@@ -6864,7 +7043,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-01-17T11:50:33.782Z'
-    updated_at: '2020-03-16T09:04:28.812Z'
+    updated_at: '2020-09-14T18:08:44.621Z'
     position: 
     category: ipa-phone-screen
     table_key_name: ''
@@ -6878,8 +7057,9 @@ app_type:
       current_meds_details, other_chronic_problems_blank_yes_no_dont_know, other_chronic_problems_details,
       hospital_visits_blank_yes_no_dont_know, hospital_visits_details, dietary_restrictions_blank_yes_no_dont_know,
       dietary_restrictions_details ,tobacco_smoker_blank_yes_no, tobacco_smoker_details,
-      healthcare_anxiety_blank_yes_no, healthcare_anxiety_details , anything_else_blank_yes_no,
-      anything_else_details
+      healthcare_anxiety_blank_yes_no, healthcare_anxiety_details , covid19_test_consent_yes_no,
+      covid19_concerns_yes_no, covid19_concerns_notes, wear_mask_yes_no, placeholder_no_wear_mask,
+      anything_else_blank_yes_no, anything_else_details
     result_order: ''
     options: "# Fields\r\n# past_tms_blank_yes_no_dont_know, past_tms_details, convulsion_or_seizure_blank_yes_no_dont_know,
       convulsion_or_seizure_details, epilepsy_blank_yes_no_dont_know, epilepsy_details,
@@ -6891,10 +7071,11 @@ app_type:
       current_meds_details, other_chronic_problems_blank_yes_no_dont_know, other_chronic_problems_details,
       hospital_visits_blank_yes_no_dont_know, hospital_visits_details, dietary_restrictions_blank_yes_no_dont_know,
       dietary_restrictions_details, anything_else_blank_yes_no, anything_else_details\r\ndefault:\r\n
-      \ field_options:\r\n    form_version:\r\n      value: v2\r\n\r\n  show_if:\r\n
+      \ field_options:\r\n    form_version:\r\n      value: v3\r\n\r\n  show_if:\r\n
       \   form_version:\r\n      never: true\r\n\r\n    _show_if_not_v1: &show_if_not_v1\r\n
-      \     form_version:\r\n        - v2\r\n        \r\n    _show_v1: &show_v1\r\n
-      \     not_any: *show_if_not_v1\r\n\r\n    past_tms_details:\r\n      past_tms_blank_yes_no_dont_know:
+      \     form_version:\r\n        - v2\r\n        - v3\r\n        \r\n    _show_v1:
+      &show_v1\r\n      not_any: *show_if_not_v1\r\n\r\n    _show_v3: &show_v3\r\n
+      \     form_version: v3\r\n\r\n    past_tms_details:\r\n      past_tms_blank_yes_no_dont_know:
       \"yes\"\r\n    convulsion_or_seizure_details:\r\n      convulsion_or_seizure_blank_yes_no_dont_know:
       'yes'\r\n    epilepsy_details:\r\n      epilepsy_blank_yes_no_dont_know: 'yes'\r\n
       \   fainting_details:\r\n      fainting_blank_yes_no_dont_know: 'yes'\r\n    metal_details:\r\n
@@ -6912,22 +7093,30 @@ app_type:
       *show_if_not_v1\r\n    tobacco_smoker_details:\r\n      <<: *show_if_not_v1\r\n
       \     tobacco_smoker_blank_yes_no: 'yes'\r\n    \r\n    healthcare_anxiety_blank_yes_no:
       *show_if_not_v1\r\n    healthcare_anxiety_details:\r\n      <<: *show_if_not_v1\r\n
-      \     healthcare_anxiety_blank_yes_no: 'yes'\r\n\r\n  caption_before:\r\n    all_fields:
-      I am now going to ask you some questions to see if it is safe for you to undergo
-      one of the tests previously mentioned – TMS or transcranial magnetic stimulation.
-      May I continue?\r\n    past_tms_blank_yes_no_dont_know: Did you ever undergo
-      TMS in the past?\r\n    past_tms_details: <i>IF YES</i> , were there any problems?\r\n
-      \   convulsion_or_seizure_blank_yes_no_dont_know: Have you ever had a convulsion
-      or a seizure?\r\n    convulsion_or_seizure_details: <i>IF YES</i>, how long
-      ago, did you go to the hospital, were you put on medication, was it determined
-      why?\r\n    epilepsy_blank_yes_no_dont_know: Do you or a family member have
-      a history of epilepsy?\r\n    epilepsy_details: <i>IF YES</i>, can you please
-      explain?\r\n    fainting_blank_yes_no_dont_know: Have you ever had a fainting
-      spell?\r\n    fainting_details: <i>IF YES</i>, can you please tell me what happened?\r\n
-      \   concussion_blank_yes_no_dont_know: Have you ever had a head trauma that
-      was diagnosed as a concussion or was associated with a loss of consciousness?\r\n
-      \   loss_of_conciousness_details: <i>IF YES for LOC</i> How long were you unconscious?
-      How long ago was this concussion?\r\n\r\n    hairstyle_scalp_blank_yes_no_dont_know:
+      \     healthcare_anxiety_blank_yes_no: 'yes'\r\n\r\n    covid19_test_consent_yes_no:
+      *show_v3\r\n    \r\n    covid19_concerns_yes_no: \r\n      <<: *show_v3\r\n
+      \     covid19_test_consent_yes_no: 'yes'\r\n\r\n    covid19_concerns_notes:
+      \r\n      <<: *show_v3\r\n      covid19_test_consent_yes_no: 'yes'\r\n      covid19_concerns_yes_no:
+      'yes'\r\n    \r\n    wear_mask_yes_no:\r\n      <<: *show_v3\r\n      covid19_test_consent_yes_no:
+      'yes'\r\n    \r\n    placeholder_no_wear_mask:\r\n      <<: *show_v3\r\n      covid19_test_consent_yes_no:
+      'yes'\r\n      wear_mask_yes_no: 'no'\r\n\r\n    anything_else_blank_yes_no:\r\n
+      \     <<: *show_v3\r\n      covid19_test_consent_yes_no: 'yes'\r\n    \r\n    anything_else_details:\r\n
+      \     <<: *show_v3\r\n      covid19_test_consent_yes_no: 'yes'\r\n    \r\n\r\n
+      \ caption_before:\r\n    all_fields: I am now going to ask you some questions
+      to see if it is safe for you to undergo one of the tests previously mentioned
+      – TMS or transcranial magnetic stimulation. May I continue?\r\n    past_tms_blank_yes_no_dont_know:
+      Did you ever undergo TMS in the past?\r\n    past_tms_details: <i>IF YES</i>
+      , were there any problems?\r\n    convulsion_or_seizure_blank_yes_no_dont_know:
+      Have you ever had a convulsion or a seizure?\r\n    convulsion_or_seizure_details:
+      <i>IF YES</i>, how long ago, did you go to the hospital, were you put on medication,
+      was it determined why?\r\n    epilepsy_blank_yes_no_dont_know: Do you or a family
+      member have a history of epilepsy?\r\n    epilepsy_details: <i>IF YES</i>, can
+      you please explain?\r\n    fainting_blank_yes_no_dont_know: Have you ever had
+      a fainting spell?\r\n    fainting_details: <i>IF YES</i>, can you please tell
+      me what happened?\r\n    concussion_blank_yes_no_dont_know: Have you ever had
+      a head trauma that was diagnosed as a concussion or was associated with a loss
+      of consciousness?\r\n    loss_of_conciousness_details: <i>IF YES for LOC</i>
+      How long were you unconscious? How long ago was this concussion?\r\n\r\n    hairstyle_scalp_blank_yes_no_dont_know:
       Do you have a hairstyle that would make it difficult to access your scalp?\r\n
       \   hairstyle_scalp_details: <i>IF YES</i>, please explain?\r\n\r\n    hearing_problems_blank_yes_no_dont_know:
       Do you have any hearing problems or ringing in your ears?\r\n    cochlear_implants_blank_yes_no_dont_know:
@@ -6959,8 +7148,152 @@ app_type:
       |\r\n      *IF YES* Can you tell me how often you smoke?\r\n    \r\n    healthcare_anxiety_blank_yes_no:
       |\r\n      Do you have any anxiety about being in a healthcare setting (ex.
       hospital, doctor’s office)?\r\n    healthcare_anxiety_details: Details\r\n    \r\n
+      \   covid19_test_consent_yes_no: |\r\n      As we discussed earlier, we are
+      asking all people that come for a study visit to complete an at-home COVID test
+      before arrival to Boston and after their visit. Is this something that you would
+      be comfortable with and willing to do?\r\n    \r\n    covid19_concerns_yes_no:
+      |\r\n      Regarding COVID-19 safety, do you have any concerns about yourself
+      or any family members/members of your social circle?\r\n\r\n    covid19_concerns_notes:
+      Please tell me what concerns you.\r\n\r\n    wear_mask_yes_no: |\r\n      While
+      you are in Boston, you will have to wear a mask at all of the assessments, while
+      travelling between assessments and in general when out in public spaces. Is
+      this something that you are comfortable with? \r\n\r\n    placeholder_no_wear_mask:
+      |\r\n      Thank you for letting us know. In this case, our study doctor might
+      feel that participating at a later date may be better for your safety. After
+      discussing with the study doctor, we will call you to confirm this.\r\n\r\n\r\n
       \   anything_else_blank_yes_no: Is there anything else that you want to tell
       me about?\r\n    anything_else_details: <i>IF YES</i> Please tell me\r\n"
+    user_email: 
+  - id: 16
+    name: IPA Initial Screening
+    table_name: ipa_ps_initial_screenings
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-01-17T11:50:35.252Z'
+    updated_at: '2020-09-14T18:08:44.604Z'
+    position: 
+    category: ipa-phone-screen
+    table_key_name: ''
+    field_list: form_version, placeholder_ps_intro_v1,placeholder_ps_intro_v2,placeholder_ps_intro_v3,select_is_good_time_to_speak,
+      placeholder_looked_at_website_orig,placeholder_looked_at_website_v3,looked_at_website_yes_no,
+      select_may_i_begin, placeholder_ps_overview_v1,placeholder_ps_overview_v2,placeholder_ps_overview_v3,any_questions_blank_yes_no,
+      placeholder_ps_details_v1,placeholder_ps_details_v2,placeholder_ps_details_v3,same_hotel_yes_no,placeholder_select_schedule,
+      embedded_report_ipa__ipa_appointments, select_schedule, placeholder_ps_details_sched_a_v2,placeholder_ps_details_sched_a_v3,placeholder_ps_details_sched_b_v2,placeholder_ps_details_sched_b_v3,select_still_interested,
+      placeholder_complete_intro,follow_up_date,follow_up_time,placeholder_not_interested,notes
+    result_order: ''
+    options: "default:\r\n\r\n  field_options:\r\n    form_version:\r\n      value:
+      v3\r\n    select_schedule:\r\n      edit_as:\r\n        alt_options:\r\n          A:
+      a\r\n          B: b\r\n\r\n  dialog_before:\r\n    \r\n  \r\n    placeholder_ps_intro_v1:\r\n
+      \     name: ipa ps intro\r\n\r\n    placeholder_ps_intro_v2:\r\n      name:
+      ipa ps intro v2\r\n      \r\n    placeholder_ps_intro_v3:\r\n      name: ipa
+      ps intro v3\r\n      \r\n    placeholder_looked_at_website_orig: \r\n      name:
+      ipa ps looked at website orig     \r\n\r\n    placeholder_looked_at_website_v3:
+      \r\n      name: ipa ps looked at website v3 \r\n\r\n\r\n    placeholder_ps_overview_v1:
+      \r\n      name: ipa ps intro overview\r\n      label: show script\r\n      \r\n
+      \   placeholder_ps_overview_v2: \r\n      name: ipa ps intro overview v2\r\n
+      \     label: show script\r\n\r\n    placeholder_ps_overview_v3: \r\n      name:
+      ipa ps intro overview v3\r\n      label: show script\r\n\r\n      \r\n    placeholder_ps_details_v1:
+      \r\n      name: ipa ps intro details\r\n      label: show script\r\n\r\n    placeholder_ps_details_v2:
+      \r\n      name: ipa ps intro details v2\r\n      label: show script\r\n\r\n
+      \   placeholder_ps_details_v3: \r\n      name: ipa ps intro details v3\r\n      label:
+      show script\r\n\r\n    placeholder_ps_details_sched_a_v2: \r\n      name: ipa
+      ps intro details sched a v2\r\n      label: show script\r\n      \r\n    placeholder_ps_details_sched_a_v3:
+      \r\n      name: ipa ps intro details sched a v3\r\n      label: show script\r\n\r\n
+      \   placeholder_ps_details_sched_b_v2: \r\n      name: ipa ps intro details
+      sched b v2\r\n      label: show script\r\n\r\n    placeholder_ps_details_sched_b_v3:
+      \r\n      name: ipa ps intro details sched b v3\r\n      label: show script\r\n\r\n\r\n
+      \   placeholder_complete_intro: \r\n      name: ipa ps intro complete intro\r\n
+      \     label: show script\r\n\r\n  show_if:\r\n  \r\n    form_version:\r\n      never:
+      true\r\n      \r\n    select_may_i_begin:\r\n      never: true\r\n      \r\n
+      \   select_schedule: &show_if_not_v1\r\n      form_version:\r\n        - v2\r\n
+      \       - v3\r\n          \r\n    placeholder_ps_intro_v1: &show_v1\r\n      not_all:
+      *show_if_not_v1\r\n    \r\n    placeholder_ps_intro_v2: &show_v2\r\n      form_version:
+      v2\r\n\r\n    placeholder_ps_intro_v3: &show_v3\r\n      form_version: v3\r\n\r\n
+      \   placeholder_looked_at_website_orig:\r\n      not_any: *show_v3\r\n      select_is_good_time_to_speak:
+      \"yes\"\r\n      \r\n    placeholder_looked_at_website_v3:\r\n      <<: *show_v3\r\n
+      \     select_is_good_time_to_speak: \"yes\"\r\n\r\n    looked_at_website_yes_no:\r\n
+      \     select_is_good_time_to_speak: \"yes\"\r\n\r\n    _show_overview: &show_overview\r\n
+      \     looked_at_website_yes_no: \r\n        - 'yes'\r\n        - 'no'\r\n\r\n
+      \   placeholder_ps_overview_v1: \r\n      <<: *show_overview    \r\n      <<:
+      *show_v1\r\n    \r\n    placeholder_ps_overview_v2: \r\n      <<: *show_overview
+      \   \r\n      <<: *show_v2\r\n\r\n    placeholder_ps_overview_v3: \r\n      <<:
+      *show_overview    \r\n      <<: *show_v3\r\n\r\n    any_questions_blank_yes_no:\r\n
+      \     looked_at_website_yes_no: \r\n        - \"yes\"\r\n        - \"no\"\r\n\r\n
+      \   placeholder_ps_details_v1:\r\n      <<: *show_v1\r\n      <<: *show_overview
+      \   \r\n      any_questions_blank_yes_no: \r\n        - \"yes\"\r\n        -
+      \"no\"\r\n    \r\n    placeholder_ps_details_v2:\r\n      <<: *show_v2\r\n      <<:
+      *show_overview    \r\n      any_questions_blank_yes_no: \r\n        - \"yes\"\r\n
+      \       - \"no\"\r\n\r\n    placeholder_ps_details_v3:\r\n      <<: *show_v3\r\n
+      \     <<: *show_overview    \r\n      any_questions_blank_yes_no: \r\n        -
+      \"yes\"\r\n        - \"no\"\r\n\r\n    same_hotel_yes_no:\r\n      <<: *show_overview
+      \   \r\n      <<: *show_if_not_v1\r\n      any_questions_blank_yes_no: \r\n
+      \       - \"yes\"\r\n        - \"no\"\r\n\r\n    placeholder_select_schedule:
+      &show_select_schedule\r\n      <<: *show_if_not_v1    \r\n      same_hotel_yes_no:\r\n
+      \       - 'yes'\r\n        - 'no'\r\n    \r\n    embedded_report_ipa__ipa_appointments:
+      *show_select_schedule\r\n\r\n    select_schedule: *show_select_schedule\r\n\r\n
+      \   placeholder_ps_details_sched_a_v2:\r\n      <<: *show_v2\r\n      select_schedule:
+      a\r\n      same_hotel_yes_no: \r\n        - 'yes'\r\n        - 'no'\r\n\r\n
+      \   placeholder_ps_details_sched_b_v2:\r\n      <<: *show_overview    \r\n      <<:
+      *show_v2\r\n      select_schedule: b\r\n      same_hotel_yes_no: \r\n        -
+      'yes'\r\n        - 'no'\r\n\r\n    placeholder_ps_details_sched_a_v3:\r\n      <<:
+      *show_v3\r\n      select_schedule: a\r\n      same_hotel_yes_no: \r\n        -
+      'yes'\r\n        - 'no'\r\n\r\n    placeholder_ps_details_sched_b_v3:\r\n      <<:
+      *show_overview    \r\n      <<: *show_v3\r\n      select_schedule: b\r\n      same_hotel_yes_no:
+      \r\n        - 'yes'\r\n        - 'no'\r\n\r\n    select_still_interested:\r\n
+      \     select_schedule:\r\n        - a\r\n        - b\r\n      any_questions_blank_yes_no:
+      \r\n        - \"yes\"\r\n        - \"no\"        \r\n\r\n    placeholder_complete_intro:\r\n
+      \     any:\r\n        select_still_interested:\r\n          - \"yes\"\r\n\r\n
+      \   follow_up_date:\r\n      any:\r\n        select_is_good_time_to_speak: \r\n
+      \         - not appropriate time\r\n          - left voicemail\r\n        select_still_interested:
+      yes - call back\r\n\r\n    follow_up_time:\r\n      any:\r\n        select_is_good_time_to_speak:\r\n
+      \         - not appropriate time\r\n          - left voicemail        \r\n        select_still_interested:
+      yes - call back\r\n        \r\n    placeholder_not_interested:\r\n      any:\r\n
+      \       select_is_good_time_to_speak: not interested\r\n        select_still_interested:
+      no\r\n        \r\n  labels:\r\n    embedded_report_ipa__ipa_appointments: View
+      calendar\r\n\r\n  caption_before:    \r\n    placeholder_select_schedule: |\r\n
+      \     *Select a schedule. To view the calendar, click the icon below.*    \r\n
+      \   select_is_good_time_to_speak: Is this a good time to speak?\r\n    follow_up_date:
+      Enter a follow up date and time if the subject wishes for a call back before
+      continuing with the screening, or you left a voicemail. \r\n    follow_up_time:
+      Follow up time\r\n    placeholder_not_interested: Thank and end call\r\n    notes:
+      Notes, questions or other information for follow up\r\n    \r\n\r\n#    contact_details_notes:
+      Contact details notes for gift card. After completing the call, ensure contact
+      details recorded here are transferred to the subject's address record."
+    user_email: 
+  - id: 119
+    name: No COVID-19 Test
+    table_name: ipa_ps_covid_closings
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:44.512Z'
+    updated_at: '2020-09-14T18:08:44.512Z'
+    position: 
+    category: ipa-phone-screen
+    table_key_name: ''
+    field_list: contact_later_yes_no placeholder_contact_later_yes placeholder_contact_later_no
+      notes
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before:\r\n     contact_later_yes_no: |\r\n
+      \      Thank you for letting us know. This does not mean you cannot participate
+      in our study at a future date – you may be able to participate at a later date
+      when we no longer ask participants to complete COVID-19 testing. Would contacting
+      you at a later date about participation be OK with you?\r\n     \r\n     placeholder_contact_later_yes:
+      |\r\n       Thank you. We will contact you at a later date about participating.
+      Please contact us in the meantime with any questions. \r\n     \r\n     placeholder_contact_later_no:
+      |\r\n       OK. We will not add you to this list. If you have any questions,
+      or change your mind and want to participate, please contact us at any time.
+      Thank you for your time and understanding today.\r\n     \r\n     notes: Additional
+      notes\r\n       \r\n  show_if:\r\n    placeholder_contact_later_yes:\r\n      contact_later_yes_no:
+      'yes'\r\n     \r\n    placeholder_contact_later_no:\r\n      contact_later_yes_no:
+      'no'"
     user_email: 
   - id: 15
     name: IPA MRI
@@ -7012,85 +7345,6 @@ app_type:
       study) involving radiation exposure within the last 12 months?\r\n    radiation_details:
       |\r\n      IF YES, can you please tell me what type of radiation research \r\n
       \     assessments you have undergone?\r\n    "
-    user_email: 
-  - id: 16
-    name: IPA Initial Screening
-    table_name: ipa_ps_initial_screenings
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-01-17T11:50:35.252Z'
-    updated_at: '2020-03-16T09:04:28.788Z'
-    position: 
-    category: ipa-phone-screen
-    table_key_name: ''
-    field_list: form_version, placeholder_ps_intro_v1,placeholder_ps_intro_v2,select_is_good_time_to_speak,
-      looked_at_website_yes_no, placeholder_ps_overview_v1,placeholder_ps_overview_v2,any_questions_blank_yes_no,
-      placeholder_ps_details_v1,placeholder_ps_details_v2,same_hotel_yes_no,placeholder_select_schedule,
-      embedded_report_ipa__ipa_appointments, select_schedule, placeholder_ps_details_sched_a_v2,placeholder_ps_details_sched_b_v2,select_still_interested,
-      placeholder_complete_intro,follow_up_date,follow_up_time,placeholder_not_interested,notes
-    result_order: ''
-    options: "default:\r\n\r\n  field_options:\r\n    form_version:\r\n      value:
-      v2\r\n    select_schedule:\r\n      edit_as:\r\n        alt_options:\r\n          A:
-      a\r\n          B: b\r\n\r\n  dialog_before:\r\n    \r\n  \r\n    placeholder_ps_intro_v1:\r\n
-      \     name: ipa ps intro\r\n\r\n    placeholder_ps_intro_v2:\r\n      name:
-      ipa ps intro v2\r\n      \r\n    looked_at_website_yes_no: \r\n      name: ipa
-      ps looked at website      \r\n\r\n    placeholder_ps_overview_v1: \r\n      name:
-      ipa ps intro overview\r\n      label: show script\r\n      \r\n    placeholder_ps_overview_v2:
-      \r\n      name: ipa ps intro overview v2\r\n      label: show script\r\n      \r\n
-      \     \r\n    placeholder_ps_details_v1: \r\n      name: ipa ps intro details\r\n
-      \     label: show script\r\n\r\n    placeholder_ps_details_v2: \r\n      name:
-      ipa ps intro details v2\r\n      label: show script\r\n\r\n    placeholder_ps_details_sched_a_v2:
-      \r\n      name: ipa ps intro details sched a v2\r\n      label: show script\r\n\r\n
-      \   placeholder_ps_details_sched_b_v2: \r\n      name: ipa ps intro details
-      sched b v2\r\n      label: show script\r\n\r\n\r\n    placeholder_complete_intro:
-      \r\n      name: ipa ps intro complete intro\r\n      label: show script\r\n\r\n
-      \ show_if:\r\n  \r\n    form_version:\r\n      never: true\r\n      \r\n    select_schedule:
-      &show_if_not_v1\r\n      form_version:\r\n        - v2\r\n          \r\n    placeholder_ps_intro_v1:
-      &show_v1\r\n      not_any: *show_if_not_v1\r\n    \r\n    placeholder_ps_intro_v2:
-      &show_v2\r\n      form_version: v2\r\n  \r\n    looked_at_website_yes_no:\r\n
-      \     select_is_good_time_to_speak: \"yes\"\r\n\r\n    _show_overview: &show_overview\r\n
-      \     looked_at_website_yes_no: \r\n        - 'yes'\r\n        - 'no'\r\n\r\n
-      \   placeholder_ps_overview_v1: \r\n      <<: *show_overview    \r\n      <<:
-      *show_v1\r\n    \r\n    placeholder_ps_overview_v2: \r\n      <<: *show_overview
-      \   \r\n      <<: *show_v2\r\n    \r\n    any_questions_blank_yes_no:\r\n      looked_at_website_yes_no:
-      \r\n        - \"yes\"\r\n        - \"no\"\r\n\r\n    placeholder_ps_details_v1:\r\n
-      \     <<: *show_v1\r\n      <<: *show_overview    \r\n      any_questions_blank_yes_no:
-      \r\n        - \"yes\"\r\n        - \"no\"\r\n    \r\n    placeholder_ps_details_v2:\r\n
-      \     <<: *show_v2\r\n      <<: *show_overview    \r\n      any_questions_blank_yes_no:
-      \r\n        - \"yes\"\r\n        - \"no\"\r\n    \r\n    same_hotel_yes_no:\r\n
-      \     <<: *show_overview    \r\n      <<: *show_if_not_v1\r\n      any_questions_blank_yes_no:
-      \r\n        - \"yes\"\r\n        - \"no\"\r\n\r\n    placeholder_select_schedule:
-      &show_select_schedule\r\n      <<: *show_v2    \r\n      same_hotel_yes_no:\r\n
-      \       - 'yes'\r\n        - 'no'\r\n    \r\n    embedded_report_ipa__ipa_appointments:
-      *show_select_schedule\r\n\r\n    select_schedule: *show_select_schedule\r\n\r\n
-      \   placeholder_ps_details_sched_a_v2:\r\n      <<: *show_v2\r\n      select_schedule:
-      a\r\n      same_hotel_yes_no: \r\n        - 'yes'\r\n        - 'no'\r\n\r\n
-      \   placeholder_ps_details_sched_b_v2:\r\n      <<: *show_overview    \r\n      <<:
-      *show_v2\r\n      select_schedule: b\r\n      same_hotel_yes_no: \r\n        -
-      'yes'\r\n        - 'no'\r\n\r\n    select_still_interested:\r\n      select_schedule:\r\n
-      \       - a\r\n        - b\r\n      any_questions_blank_yes_no: \r\n        -
-      \"yes\"\r\n        - \"no\"        \r\n\r\n    placeholder_complete_intro:\r\n
-      \     any:\r\n        select_still_interested:\r\n          - \"yes\"\r\n\r\n
-      \   follow_up_date:\r\n      any:\r\n        select_is_good_time_to_speak: \r\n
-      \         - not appropriate time\r\n          - left voicemail\r\n        select_still_interested:
-      yes - call back\r\n\r\n    follow_up_time:\r\n      any:\r\n        select_is_good_time_to_speak:\r\n
-      \         - not appropriate time\r\n          - left voicemail        \r\n        select_still_interested:
-      yes - call back\r\n        \r\n    placeholder_not_interested:\r\n      any:\r\n
-      \       select_is_good_time_to_speak: not interested\r\n        select_still_interested:
-      no\r\n        \r\n  labels:\r\n    embedded_report_ipa__ipa_appointments: View
-      calendar\r\n\r\n  caption_before:    \r\n    placeholder_select_schedule: |\r\n
-      \     *Select a schedule. To view the calendar, click the icon below.*    \r\n
-      \   select_is_good_time_to_speak: Is this a good time to speak?\r\n    follow_up_date:
-      Enter a follow up date and time if the subject wishes for a call back before
-      continuing with the screening, or you left a voicemail. \r\n    follow_up_time:
-      Follow up time\r\n    placeholder_not_interested: Thank and end call\r\n    notes:
-      Notes, questions or other information for follow up\r\n    \r\n\r\n#    contact_details_notes:
-      Contact details notes for gift card. After completing the call, ensure contact
-      details recorded here are transferred to the subject's address record."
     user_email: 
   - id: 17
     name: IPA Sleep
@@ -7506,18 +7760,19 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-01-17T11:50:39.532Z'
-    updated_at: '2020-01-24T09:19:45.674Z'
+    updated_at: '2020-09-14T18:08:44.809Z'
     position: 1
     category: ipa-records
     table_key_name: ''
-    field_list: visit_start_date,visit_end_date,select_schedule,select_status,notes
+    field_list: covid19_test_date,covid19_test_time,visit_start_date,visit_end_date,select_schedule,select_status,notes
     result_order: updated_at desc
     options: "default:\r\n\r\n  field_options:\r\n    select_status:\r\n      edit_as:\r\n
       \       alt_options: \r\n          - confirmed\r\n          - uncomfirmed\r\n
       \   select_schedule:\r\n      value: a\r\n      edit_as:\r\n        alt_options:
       \r\n          Schedule A: a\r\n          Schedule B: b\r\n          \r\n  caption_before:
-      \r\n    visit_start_date: Visit start date\r\n    visit_end_date: Visit end
-      date\r\n    select_schedule: Schedule\r\n    select_status: Status\r\n    notes:
+      \r\n    covid19_test_date: COVID-19 test date\r\n    covid19_test_time: COVID-19
+      test time\r\n    visit_start_date: Visit start date\r\n    visit_end_date: Visit
+      end date\r\n    select_schedule: Schedule\r\n    select_status: Status\r\n    notes:
       Additional notes  \r\n  "
     user_email: 
   - id: 22
@@ -7530,16 +7785,17 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-01-17T11:50:40.459Z'
-    updated_at: '2019-01-17T11:50:40.459Z'
+    updated_at: '2020-09-14T18:08:44.828Z'
     position: 20
     category: ipa-records
     table_key_name: ''
-    field_list: eligible_for_study_blank_yes_no,requires_study_partner_blank_yes_no,notes,good_time_to_speak_blank_yes_no,callback_date,callback_time,placeholder_requires_partner,placeholder_eligible,still_interested_blank_yes_no,ineligible_notes,eligible_notes,not_interested_notes,contact_in_future_yes_no
+    field_list: form_version,eligible_for_study_blank_yes_no,requires_study_partner_blank_yes_no,notes,good_time_to_speak_blank_yes_no,callback_date,callback_time,placeholder_requires_partner,placeholder_eligible,still_interested_blank_yes_no,ineligible_notes,placeholder_eligible_2_orig,placeholder_eligible_2_v3,eligible_notes,not_interested_notes,contact_in_future_yes_no
     result_order: updated_at desc
-    options: "default:\r\n\r\n\r\n  field_options:\r\n    good_time_to_speak_blank_yes_no:\r\n
-      \     edit_as:\r\n        field_type: select_is_good_time_to_speak\r\n        alt_options:\r\n
-      \         Left Voicemail: left voicemail\r\n          'No': 'no'\r\n          'Yes':
-      'yes'\r\n\r\n\r\n  show_if:\r\n\r\n    requires_study_partner_blank_yes_no:\r\n
+    options: "default:\r\n\r\n\r\n  field_options:\r\n    form_version:\r\n      value:
+      v3\r\n    good_time_to_speak_blank_yes_no:\r\n      edit_as:\r\n        field_type:
+      select_is_good_time_to_speak\r\n        alt_options:\r\n          Left Voicemail:
+      left voicemail\r\n          'No': 'no'\r\n          'Yes': 'yes'\r\n\r\n\r\n
+      \ show_if:\r\n    form_version:\r\n      never: true\r\n      \r\n    requires_study_partner_blank_yes_no:\r\n
       \       eligible_for_study_blank_yes_no: \r\n          - yes\r\n\r\n    good_time_to_speak_blank_yes_no:\r\n
       \     any:\r\n        eligible_for_study_blank_yes_no: 'no'          \r\n        requires_study_partner_blank_yes_no:
       \r\n          - 'yes'\r\n          - 'no'\r\n\r\n\r\n    callback_date:\r\n
@@ -7551,7 +7807,12 @@ app_type:
       \       eligible_for_study_blank_yes_no: yes\r\n        good_time_to_speak_blank_yes_no:
       yes\r\n        requires_study_partner_blank_yes_no: no\r\n\r\n    still_interested_blank_yes_no:\r\n
       \       eligible_for_study_blank_yes_no: yes\r\n        good_time_to_speak_blank_yes_no:
-      yes\r\n\r\n\r\n    eligible_notes:\r\n        eligible_for_study_blank_yes_no:
+      yes\r\n\r\n    placeholder_eligible_2_orig:\r\n      all:\r\n        eligible_for_study_blank_yes_no:
+      yes\r\n        good_time_to_speak_blank_yes_no: yes\r\n        still_interested_blank_yes_no:
+      yes\r\n      not_any:\r\n        form_version: \r\n          - v3\r\n    \r\n
+      \   placeholder_eligible_2_v3:\r\n        eligible_for_study_blank_yes_no: yes\r\n
+      \       good_time_to_speak_blank_yes_no: yes\r\n        still_interested_blank_yes_no:
+      yes\r\n        form_version: v3\r\n\r\n    eligible_notes:\r\n        eligible_for_study_blank_yes_no:
       yes\r\n        good_time_to_speak_blank_yes_no: yes\r\n        still_interested_blank_yes_no:
       yes\r\n\r\n\r\n    ineligible_notes:\r\n        eligible_for_study_blank_yes_no:
       no\r\n        good_time_to_speak_blank_yes_no: yes\r\n\r\n    contact_in_future_yes_no:\r\n
@@ -7574,8 +7835,9 @@ app_type:
       \   ineligible_notes:\r\n      name: ipa eligibility call not eligible\r\n    \r\n
       \   placeholder_eligible:\r\n      name: ipa eligibility call eligible 1\r\n\r\n
       \   placeholder_requires_partner:\r\n      name: ipa eligibility call needs
-      partner\r\n\r\n    eligible_notes:\r\n      name: ipa eligibility call eligible
-      2\r\n\r\n"
+      partner\r\n\r\n    placeholder_eligible_2_orig:\r\n      name: ipa eligibility
+      call eligible 2\r\n\r\n    placeholder_eligible_2_v3:\r\n      name: ipa eligibility
+      call eligible 2 v3\r\n"
     user_email: 
   - id: 23
     name: IPA Transportation
@@ -7997,18 +8259,18 @@ app_type:
       \   --\r\n    -- Exited, L2FU (before scheduling) or Completed study\r\n    --\r\n
       \   SELECT\r\n      master_id,\r\n      CASE extra_log_type\r\n      WHEN 'completed'
       THEN 'completed study'\r\n      WHEN 'exit_opt_out' THEN 'opted out'\r\n      WHEN
-      'exit_l2fu' THEN 'lost to follow-up (before scheduling)'\r\n      END \"exit_type\"\r\n
-      \   FROM activity_log_ipa_assignments\r\n    WHERE\r\n      extra_log_type IN
-      ('completed', 'exit_opt_out', 'exit_l2fu')\r\n\r\n  -- End left outer join\r\n
-      \ ) dlo ON dlo.master_id = di.master_id\r\n\r\n-- End ranked selection\r\n)
-      AS dt\r\n\r\n-- Include player details\r\ninner join player_infos pi on dt.master_id
-      = pi.master_id\r\n-- Match IPA ID to master_id\r\ninner join ipa_assignments
-      ipa on dt.master_id = ipa.master_id\r\n\r\nWHERE\r\n(\r\n  -- Either:\r\n  --
-      no outstanding activity has been selected, so just perform a plain query\r\n
-      \ -- or:\r\n  -- we want the first record from the results based\r\n  -- on
-      an order of most recently created appearing first (and therefore overriding
-      older records)\r\n  :activity_outstanding IS NULL OR :activity_outstanding IS
-      NOT NULL AND r = 1\r\n)\r\nAND\r\n(\r\n  -- Based on the activity performed
+      'exit_l2fu' THEN 'lost to follow-up (before scheduling)'\r\n      WHEN 'exit_opt_out_covid19'
+      THEN 'exit (no COVID-19 test)'\r\n      END \"exit_type\"\r\n    FROM activity_log_ipa_assignments\r\n
+      \   WHERE\r\n      extra_log_type IN ('completed', 'exit_opt_out', 'exit_l2fu',
+      'exit_opt_out_covid19')\r\n\r\n  -- End left outer join\r\n  ) dlo ON dlo.master_id
+      = di.master_id\r\n\r\n-- End ranked selection\r\n) AS dt\r\n\r\n-- Include player
+      details\r\ninner join player_infos pi on dt.master_id = pi.master_id\r\n-- Match
+      IPA ID to master_id\r\ninner join ipa_assignments ipa on dt.master_id = ipa.master_id\r\n\r\nWHERE\r\n(\r\n
+      \ -- Either:\r\n  -- no outstanding activity has been selected, so just perform
+      a plain query\r\n  -- or:\r\n  -- we want the first record from the results
+      based\r\n  -- on an order of most recently created appearing first (and therefore
+      overriding older records)\r\n  :activity_outstanding IS NULL OR :activity_outstanding
+      IS NOT NULL AND r = 1\r\n)\r\nAND\r\n(\r\n  -- Based on the activity performed
       selection pick the appropriate conditions\r\n  :activity_performed = 'general-follow-up'
       AND extra_log_type='general' AND dt.communication_result='follow up'\r\n  OR
       :activity_performed = 'general-completed' AND extra_log_type='general' AND dt.communication_result='completed'\r\n
@@ -8065,8 +8327,8 @@ app_type:
       \   multiple: single\r\n    default: general-follow-up\r\n    selections: &selections\r\n
       \     general communication - follow-up: general-follow-up\r\n      general
       communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n
-      \     phone screen complete: phone-screen-complete\r\n      inclusion/exclusion
-      phone screen finalized (ready for sign-off): inex-phone-screen-finalized\r\n
+      \     phone screen complete: phone-screen-complete\r\n      on hold: on_hold\r\n
+      \     inclusion/exclusion phone screen finalized (ready for sign-off): inex-phone-screen-finalized\r\n
       \     inclusion/exclusion phone screen sign-off (PI): inex-phone-screen-so-pi\r\n
       \     inclusion/exclusion phone screen sign-off (MedNav): inex-phone-screen-so-mednav\r\n
       \     inclusion/exclusion phone screen sign-off (Staff): inex-phone-screen-so-staff\r\n
@@ -8079,17 +8341,18 @@ app_type:
       planned event: has-planned-event\r\n      navigation event feedback: has-event-feedback\r\n
       \     consent mailing: consent_mailing\r\n      follow up survey sent: survey-sent\r\n
       \     follow up survey completed: survey-completed\r\n      exit (opt-out):
-      exit_opt_out\r\n      lost to follow-up (before scheduling): exit_l2fu\r\n      withdraw:
-      withdraw\r\n      complete: completed\r\n\r\n\r\nactivity_outstanding: \r\n
-      \ config_selector: \r\n    label: Activity outstanding (optional)\r\n    all:
-      true\r\n    multiple: single\r\n    default: general-completed\r\n    selections:\r\n
-      \     <<: *selections\r\n\r\ncompleted_or_withdrawn: \r\n  config_selector:
-      \r\n    all: true\r\n    multiple: single\r\n    default: in_study\r\n    selections:
-      \r\n      in study: in_study\r\n      completed, exited or withdrawn: not_in_study"
+      exit_opt_out\r\n      lost to follow-up (before scheduling): exit_l2fu\r\n      exit
+      (no COVID-19 test): exit_opt_out_covid19\r\n      withdraw: withdraw\r\n      complete:
+      completed\r\n\r\n\r\nactivity_outstanding: \r\n  config_selector: \r\n    label:
+      Activity outstanding (optional)\r\n    all: true\r\n    multiple: single\r\n
+      \   default: general-completed\r\n    selections:\r\n      <<: *selections\r\n\r\ncompleted_or_withdrawn:
+      \r\n  config_selector: \r\n    label: In process, on hold, or exited\r\n    all:
+      true\r\n    multiple: single\r\n    default: in_study\r\n    selections: \r\n
+      \     in study: in_study\r\n      completed, exited or withdrawn: not_in_study"
     admin_id: 4
     disabled: false
     created_at: '2019-01-17T11:51:02.576Z'
-    updated_at: '2020-05-21T09:58:56.094Z'
+    updated_at: '2020-09-17T11:18:14.085Z'
     report_type: search
     auto: false
     searchable: true
@@ -8253,24 +8516,25 @@ app_type:
     description: 'All subjects that have joined or exited the study: in process (phone
       screening scheduled), completed, withdrawn, ineligible, not interested (during
       phone screen or follow-up)'
-    sql: "SELECT * from ipa_ops.ipa_participant_exits\r\nWHERE status IN(:select_status)\r\nORDER
-      BY status, \"when\" desc\r\n;\r\n"
+    sql: "SELECT * from ipa_ops.ipa_participant_exits\r\nWHERE (:select_status) IS
+      NULL OR status IN(:select_status)\r\nORDER BY status, \"when\" desc\r\n;\r\n"
     search_attrs: "\r\nselect_status: \r\n  config_selector:\r\n    label: Select
       / de-select statuses to report  \r\n    all: true\r\n    multiple: multiple\r\n
-      \   default: \r\n      - ineligible\r\n      - completed\r\n      - withdrawn\r\n
-      \     - in process\r\n      - not interest during phone screening\r\n      -
-      not interest during screening follow-up\r\n    selections: \r\n      ineligible:
-      ineligible\r\n      completed: completed\r\n      withdrawn: withdrawn\r\n      in
-      process: in process\r\n      not interest during phone screening: not interest
-      during phone screening\r\n      not interest during screening follow-up: not
-      interest during screening follow-up"
+      \   default: \r\n      - on hold\r\n    selections: \r\n      ineligible: ineligible\r\n
+      \     completed: completed\r\n      withdrawn: withdrawn\r\n      in process:
+      in process\r\n      not interested during phone screening: not interested during
+      phone screening\r\n      not interested during screening follow-up: not interested
+      during screening follow-up\r\n      on hold: on hold\r\n      opted out: opted
+      out\r\n      'exit (no COVID-19 test)': 'exit (no COVID-19 test)'\r\n      'lost
+      to follow-up (before scheduling)': 'lost to follow-up (before scheduling)'\r\n
+      \     "
     admin_id: 4
     disabled: false
     created_at: '2019-01-17T11:51:02.594Z'
-    updated_at: '2020-03-02T12:36:01.557Z'
-    report_type: regular_report
+    updated_at: '2020-09-17T10:45:50.579Z'
+    report_type: search
     auto: false
-    searchable: false
+    searchable: true
     position: 2
     edit_model: ''
     edit_field_names: ''
@@ -9232,17 +9496,18 @@ app_type:
       <= :to_date)\r\nAND ((:type) IS NULL or extra_log_type in (:type))\r\nAND ((:confirmed)
       IS NULL or select_status in (:confirmed))\r\nAND ((:station) IS NULL or select_station
       in (:station))\r\nAND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)\r\n;\r\n\r\n\r\ncreate
-      temp table appointments\r\nas select\r\nvisit_start_date,\r\ncoalesce(select_schedule,
-      '') select_schedule,\r\nap.master_id,\r\nipa.ipa_id,\r\npi.first_name,\r\npi.last_name,\r\nmax(ap.id)
+      temp table appointments\r\nas select\r\nvisit_start_date,\r\ncovid19_test_date,
+      covid19_test_time,\r\ncoalesce(select_schedule, '') select_schedule,\r\nap.master_id,\r\nipa.ipa_id,\r\npi.first_name,\r\npi.last_name,\r\nmax(ap.id)
       appointment_id\r\nfrom ipa_appointments ap\r\ninner join activity_log_ipa_assignments
       al\r\non al.master_id = ap.master_id\r\n\r\ninner join player_infos pi\r\non
       ap.master_id = pi.master_id\r\n\r\ninner join ipa_assignments ipa\r\non ipa.master_id
       = al.master_id\r\n\r\n\r\nwhere\r\n  visit_start_date IS NOT NULL\r\n  AND (:from_date
       IS NULL or visit_start_date >= :from_date)\r\n  AND (:to_date IS NULL or visit_start_date
       <= :to_date)\r\n  AND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)\r\nGROUP BY\r\nap.master_id,
-      visit_start_date, pi.first_name, pi.last_name, ipa.ipa_id, select_schedule\r\n;\r\n\r\ncreate
-      temp table scheduled_calls\r\nas select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n
-      \ dt.master_id,\r\n  ipa.ipa_id,\r\n  p.first_name,\r\n  p.last_name,\r\n  dt.extra_log_type,\r\n
+      visit_start_date, covid19_test_date, covid19_test_time, pi.first_name, pi.last_name,
+      ipa.ipa_id, select_schedule\r\n;\r\n\r\ncreate temp table scheduled_calls\r\nas
+      select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n  dt.master_id,\r\n
+      \ ipa.ipa_id,\r\n  p.first_name,\r\n  p.last_name,\r\n  dt.extra_log_type,\r\n
       \ dt.select_who\r\nfrom\r\n  (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n
       \     a.select_who,\r\n      a.follow_up_when,\r\n      a.follow_up_time,\r\n
       \     a.notes,\r\n      rank()\r\n    OVER (\r\n      PARTITION BY a.master_id,
@@ -9259,12 +9524,18 @@ app_type:
       || 'T' || al.completion_time::varchar \"end\",\r\n  ipa_id || ': ' || al.select_station
       || ' ' || al.select_event_type || ' ' || al.other_event_type \"title\",\r\n
       \ array['report-cal-nav-event'] \"classNames\",\r\n  '/masters/' || master_id
-      \"url\"\r\nFROM nav_events al\r\n\r\nUNION\r\n\r\n\r\nSELECT\r\n  true ,\r\n
-      \ visit_start_date::varchar || 'T' || '00:00:00' ,\r\n  null ,\r\n  ipa_id ||
-      ': ' || 'appointment start ' ||\r\n  CASE WHEN select_schedule <> '' THEN '(Group
-      ' || upper(select_schedule) || ')'\r\n  ELSE ''\r\n  END\r\n  ,\r\n  array['report-cal-start-event']
-      \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n
-      \ false,\r\n  follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n
+      \"url\"\r\nFROM nav_events al\r\n\r\nUNION\r\n\r\n\r\nSELECT\r\n  false ,\r\n
+      \ covid19_test_date::varchar || 'T' || covid19_test_time::varchar ,\r\n  null
+      ,\r\n  ipa_id || ': ' || 'COVID-19 test ' ||\r\n  CASE WHEN select_schedule
+      <> '' THEN '(Group ' || upper(select_schedule) || ')'\r\n  ELSE ''\r\n  END\r\n
+      \ ,\r\n  array['report-cal-covidtest-event'] \"classNames\",\r\n  '/masters/'
+      || master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n
+      \ true ,\r\n  visit_start_date::varchar || 'T' || '00:00:00' ,\r\n  null ,\r\n
+      \ ipa_id || ': ' || 'appointment start ' ||\r\n  CASE WHEN select_schedule <>
+      '' THEN '(Group ' || upper(select_schedule) || ')'\r\n  ELSE ''\r\n  END\r\n
+      \ ,\r\n  array['report-cal-start-event'] \"classNames\",\r\n  '/masters/' ||
+      master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n
+      \ follow_up_when::varchar || 'T' || coalesce(follow_up_time, '14:00:00')::varchar,\r\n
       \ NULL,\r\n  ipa_id || ': ' || '(call) ' || replace(extra_log_type, '_', ' '),\r\n
       \ array['report-cal-call-event'] \"classNames\",\r\n  '/masters/' || master_id
       \"url\"\r\nFROM scheduled_calls\r\n\r\n\r\n;\r\n"
@@ -9284,7 +9555,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-06-24T10:37:11.993Z'
-    updated_at: '2020-01-24T09:31:12.266Z'
+    updated_at: '2020-09-17T08:54:57.990Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -9297,8 +9568,9 @@ app_type:
     options: "view_options:\r\n  view_as: calendar\r\n  search_button_label: calendar\r\n\r\ncomponent:\r\n
       \ options:\r\n#    height: 200\r\n\r\nview_css:\r\n  classes:\r\n    report-cal-start-event:\r\n
       \     background-color: red\r\n      border-color: red\r\n      text-align:
-      center\r\n    report-cal-call-event:\r\n      background-color: '#080'\r\n      border-color:
-      gray\r\n    "
+      center\r\n    report-cal-covidtest-event:\r\n      background-color: rgb(0,102,255)\r\n
+      \     border-color: rgb(0,102,255)\r\n      text-align: center\r\n    report-cal-call-event:\r\n
+      \     background-color: '#080'\r\n      border-color: gray\r\n    "
     user_email: 
   - id: 45
     name: Participant Status
@@ -11201,6 +11473,36 @@ app_type:
     item_type: dynamic_model__ipa_payments_select_type
     created_at: '2019-01-17T11:51:01.753Z'
     updated_at: '2019-01-17T11:51:01.753Z'
+    disabled: false
+    admin_id: 4
+    create_with: true
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 129
+    name: Exit Survey
+    value: exit survey
+    item_type: dynamic_model__ipa_surveys_select_survey_type
+    created_at: '2019-01-17T11:51:01.758Z'
+    updated_at: '2020-09-14T18:08:45.909Z'
+    disabled: false
+    admin_id: 4
+    create_with: true
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 130
+    name: Follow Up Survey
+    value: follow up survey
+    item_type: dynamic_model__ipa_surveys_select_survey_type
+    created_at: '2019-01-17T11:51:01.762Z'
+    updated_at: '2020-09-14T18:08:45.927Z'
     disabled: false
     admin_id: 4
     create_with: true
@@ -14394,6 +14696,81 @@ app_type:
     description: ''
     lock: false
     user_email: 
+  - id: 503
+    name: PETCT-1
+    value: petct-1
+    item_type: activity_log__ipa_assignment_session_filestore_select_scanner
+    created_at: '2020-09-14T18:08:47.027Z'
+    updated_at: '2020-09-14T18:08:47.027Z'
+    disabled: false
+    admin_id: 4
+    create_with: true
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 504
+    name: PETCT-2
+    value: petct-2
+    item_type: activity_log__ipa_assignment_session_filestore_select_scanner
+    created_at: '2020-09-14T18:08:47.035Z'
+    updated_at: '2020-09-14T18:08:47.035Z'
+    disabled: false
+    admin_id: 4
+    create_with: true
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 505
+    name: brain
+    value: brain
+    item_type: activity_log__ipa_assignment_session_filestore_select_type
+    created_at: '2020-09-14T18:08:47.042Z'
+    updated_at: '2020-09-14T18:08:47.042Z'
+    disabled: false
+    admin_id: 4
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 506
+    name: liver
+    value: liver
+    item_type: activity_log__ipa_assignment_session_filestore_select_type
+    created_at: '2020-09-14T18:08:47.048Z'
+    updated_at: '2020-09-14T18:08:47.048Z'
+    disabled: false
+    admin_id: 4
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 507
+    name: twix
+    value: twix
+    item_type: activity_log__ipa_assignment_session_filestore_select_type
+    created_at: '2020-09-14T18:08:47.054Z'
+    updated_at: '2020-09-14T18:08:47.054Z'
+    disabled: false
+    admin_id: 4
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
   page_layouts:
   - id: 1
     app_type_id: 9
@@ -14507,13 +14884,13 @@ app_type:
     layout_name: master
     panel_name: ipa-audit
     panel_label: Audit
-    panel_position: 13
+    panel_position: 12
     options: "contains:\r\n  categories:\r\n    - ipa-audit-history\r\n#  - ipa-in-ex-records\r\n\r\n#tab:\r\n#
       \ parent: participant_details"
     disabled: false
     admin_id: 4
     created_at: '2019-01-17T11:51:02.697Z'
-    updated_at: '2020-03-16T09:04:31.569Z'
+    updated_at: '2020-09-14T18:08:47.240Z'
     description: 
     user_email: 
   - id: 10
@@ -14702,7 +15079,7 @@ app_type:
     admin_id: 4
     disabled: true
     created_at: '2019-01-17T11:51:02.774Z'
-    updated_at: '2019-06-24T11:05:26.224Z'
+    updated_at: '2020-09-15T08:52:40.626Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 44
     app_type_id: 9
@@ -14711,7 +15088,7 @@ app_type:
     admin_id: 4
     disabled: true
     created_at: '2019-01-17T11:51:02.781Z'
-    updated_at: '2019-06-24T11:06:06.987Z'
+    updated_at: '2020-09-15T08:52:03.048Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 45
     app_type_id: 9
@@ -14873,7 +15250,7 @@ app_type:
     admin_id: 4
     disabled: true
     created_at: '2019-01-17T11:51:02.947Z'
-    updated_at: '2019-06-24T11:06:59.105Z'
+    updated_at: '2020-09-15T08:53:11.052Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 95
     app_type_id: 9
@@ -16871,7 +17248,7 @@ app_type:
     admin_id: 4
     disabled: true
     created_at: '2019-06-24T10:37:12.145Z'
-    updated_at: '2019-06-24T10:41:44.791Z'
+    updated_at: '2020-09-15T08:52:07.962Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 559
     app_type_id: 9
@@ -16889,7 +17266,7 @@ app_type:
     admin_id: 4
     disabled: true
     created_at: '2019-06-24T10:37:12.296Z'
-    updated_at: '2019-06-24T10:43:21.497Z'
+    updated_at: '2020-09-15T08:51:25.866Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 561
     app_type_id: 9
@@ -19352,10 +19729,10 @@ app_type:
     app_type_id: 9
     role_name: reviewer - tms
     user_id: 71
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2020-05-07T15:44:42.455Z'
-    updated_at: '2020-05-07T15:44:42.455Z'
+    updated_at: '2020-09-14T18:08:48.089Z'
     user_email: template@template
   - id: 1533
     app_type_id: 9
@@ -19627,6 +20004,132 @@ app_type:
     created_at: '2020-05-21T15:31:50.497Z'
     updated_at: '2020-05-21T15:35:10.383Z'
     user_email: heather_digregorio@hms.harvard.edu
+  - id: 1702
+    app_type_id: 9
+    role_name: ra
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:47.655Z'
+    updated_at: '2020-09-14T18:08:47.655Z'
+    user_email: template@template
+  - id: 1703
+    app_type_id: 9
+    role_name: pi
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:47.735Z'
+    updated_at: '2020-09-14T18:08:47.735Z'
+    user_email: template@template
+  - id: 1704
+    app_type_id: 9
+    role_name: pi!
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:47.782Z'
+    updated_at: '2020-09-14T18:08:47.782Z'
+    user_email: template@template
+  - id: 1705
+    app_type_id: 9
+    role_name: email - adverse event pi
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:47.949Z'
+    updated_at: '2020-09-14T18:08:47.949Z'
+    user_email: template@template
+  - id: 1706
+    app_type_id: 9
+    role_name: email - inex pi
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:47.978Z'
+    updated_at: '2020-09-14T18:08:47.978Z'
+    user_email: template@template
+  - id: 1707
+    app_type_id: 9
+    role_name: email - protocol deviation pi
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.014Z'
+    updated_at: '2020-09-14T18:08:48.014Z'
+    user_email: template@template
+  - id: 1708
+    app_type_id: 9
+    role_name: email - inex tms
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.104Z'
+    updated_at: '2020-09-14T18:08:48.104Z'
+    user_email: template@template
+  - id: 1709
+    app_type_id: 9
+    role_name: sms - inex reviewer
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.134Z'
+    updated_at: '2020-09-14T18:08:48.134Z'
+    user_email: template@template
+  - id: 1710
+    app_type_id: 9
+    role_name: sms - inex pi
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.159Z'
+    updated_at: '2020-09-14T18:08:48.159Z'
+    user_email: template@template
+  - id: 1711
+    app_type_id: 9
+    role_name: sms - ipa tracker new participant
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.172Z'
+    updated_at: '2020-09-14T18:08:48.172Z'
+    user_email: template@template
+  - id: 1712
+    app_type_id: 9
+    role_name: sms - adverse event pi
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.193Z'
+    updated_at: '2020-09-14T18:08:48.193Z'
+    user_email: template@template
+  - id: 1713
+    app_type_id: 9
+    role_name: sms - protocol deviation pi
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.226Z'
+    updated_at: '2020-09-14T18:08:48.226Z'
+    user_email: template@template
+  - id: 1714
+    app_type_id: 9
+    role_name: email - inex crc
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.350Z'
+    updated_at: '2020-09-14T18:08:48.350Z'
+    user_email: template@template
+  - id: 1715
+    app_type_id: 9
+    role_name: sms - inex crc
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.363Z'
+    updated_at: '2020-09-14T18:08:48.363Z'
+    user_email: template@template
   associated_message_templates:
   - id: 7
     name: ipa ps intro
@@ -20275,8 +20778,8 @@ app_type:
     updated_at: '2020-03-16T09:04:32.604Z'
     category: ipa
     user_email: 
-  - id: 45
-    name: ipa ps looked at website
+  - id: 48
+    name: ipa ps looked at website orig
     message_type: dialog
     template_type: content
     template: "Okay great, thank you for expressing interest in our study.  Did you
@@ -20286,8 +20789,460 @@ app_type:
       I can tell you more about the study right now.\r\n"
     admin_id: 4
     disabled: false
-    created_at: '2020-03-16T09:04:32.608Z'
-    updated_at: '2020-03-16T09:04:32.608Z'
+    created_at: '2020-09-14T18:08:48.929Z'
+    updated_at: '2020-09-14T18:08:48.929Z'
+    category: ipa
+    user_email: 
+  - id: 49
+    name: ipa ps intro v3
+    message_type: dialog
+    template_type: content
+    template: "<p>\r\nHello, my name is ____, and I am calling from the Football Players
+      Health Study at Harvard University. \r\nIs Mr. {{player_info.last_name}} available?\r\n</p>\r\n<p>\r\n
+      \ I am reaching out to talk to you about the In-Person Assessment research study.
+      \r\n  Is this still a good time to speak? During this call I will go over the
+      \r\n  study in more detail, including the precautions we are taking \r\n  regarding
+      COVID-19 and if you are still interested in participating \r\n  I will ask you
+      to complete a brief cognitive \r\n  task (for example – asking you to repeat
+      and remember some words and numbers). \r\n  I will also ask you some medical
+      questions to see if it is safe for \r\n  you to participate in the study.  \r\n
+      \ This should take about an hour. Does this sound okay?\r\n</p>\r\n<hr>\r\n<p><b>Voicemail</b></p>\r\n<p>Hi,
+      my name is ____ and I’m calling from the Football Players Health Study at Harvard
+      University.\r\nWhen you have a chance please call me back at 617-432-5000. \r\nI
+      look forward to speaking with you.  Thank you\r\n</p>\r\n<hr>"
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.940Z'
+    updated_at: '2020-09-14T18:08:48.940Z'
+    category: ipa
+    user_email: 
+  - id: 50
+    name: ipa ps intro overview v3
+    message_type: dialog
+    template_type: content
+    template: "As you may know, The Football Players Health Study is a research initiative
+      dedicated to understanding the current health and well-being of former NFL players.
+      The research study that I want to talk to you about today is an In-Person study
+      that focuses on four areas of player health that have been identified by former
+      players such as yourself, as critical areas to be studied  – heart function,
+      neurocognitive health (e.g. memory/thinking/problem solving and brain imaging),
+      pain and physical function, and sleep. \r\n\r\nThe purpose of this study is
+      to obtain in-person measurements of these health conditions in former players.
+      We hope that this will help us better understand the relationship of a professional
+      football career to overall health. \r\n\r\nParticipation will involve a 3 day
+      study visit in Boston that includes assessments of the four areas. You will
+      be compensated up to $1800 for participanting. All nights will be spent in a
+      local hotel. The visits will take place at various Harvard-affiliated institutions.
+      Throughout the study, a team of study navigators help to guide you through all
+      of the visits. All transportation, meal and lodging costs will be covered by
+      the Study. Meals will be covered in the form of meal vouchers through the hospitals
+      and reimbursements.  You will have the option of charging dinner to the hotel
+      room or saving your dinner receipt for reimbursement.  The reimbursement and
+      study payment checks will come in the mail 3-4 weeks after your visit.\r\n\r\nBy
+      participating, you will be helping us better understand player health. Additionally,
+      you will also have the opportunity to learn more about yourself as we will be
+      providing results from some of the assessments at the end of the study. At your
+      request, these can be shared with a health care provider for further guidance
+      and interpretation. \r\n\r\nFor your safety and for the safety of our study
+      staff, we ask that you take a COVID-19 test approximately 4 days before travelling
+      to Boston and when you return home after your visit. This is a saliva test that
+      we will mail to you. Our medical navigation nurse will call you to walk you
+      through completing the test. We will also work with you to help arrange shipping
+      the test once completed. We will be paying for the test and related-shipping
+      costs. We ask that you take necessary precautions to minimize your risk for
+      COVID-19 after your test and before coming to Boston.\r\n\r\nOur study navigators
+      and study staff will also be acting in accordance with COVID-19 guidelines set
+      by our institution and our study facilities. Our study navigators will also
+      undergo COVID-19 testing on a weekly basis. Any navigators that test positive
+      will not be allowed to navigate during your visit.  Other study staff that won’t
+      be getting COVID testing will be following strict COVID guidlindes for intereacting
+      with participants in the study facilities (i.e. wearing masks, attestation,
+      face shields, frequent hand washing).\r\n\r\nWe will receive the results to
+      your COVID-19 test before you travel to Boston. We will contact you when the
+      results are available to discuss next steps. Our navigators will also have their
+      test results by that day. In the event that you test positive for COVID-19 we
+      will cancel your visit and can help you with next steps as needed. We may also
+      cancel your visit if our study navigators test positive for COVID-19. \r\n\r\nI
+      am going to go over the study in some more detail. As I go over the study, I
+      will also give you specific details of what to expect in regards to COVID-19
+      safety precautions. If you have any questions while I explain the study please
+      stop me and ask.  Do you have any questions so far?"
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.944Z'
+    updated_at: '2020-09-14T18:08:48.944Z'
+    category: ipa
+    user_email: 
+  - id: 51
+    name: ipa ps intro details v3
+    message_type: dialog
+    template_type: content
+    template: "*INTERVIEWER: HAVE THE CONSENT FORM ON HAND TO PROVIDE ADDITIONAL DETAILS
+      ABOUT THE STUDY VISITS AS NEEDED.*\r\n\r\n*(only say if scheduling 2 participants
+      at this time)*\r\n\r\nThere are two potential schedules for the 3 day visit.
+      Both schedules \r\ninvolve the same assessments, just in a different order from
+      \r\none another. Prior to your arrival in Boston, we will review \r\nthe schedule
+      options with you when coordinating your travel \r\nto see which option fits
+      best. \r\n\r\nThere may be circumstances where we need to cancel your visit
+      due to \r\nthe changing status of COVID-19. \r\n\r\nWe can give you dates that
+      are currently available and work with you\r\non finding one that fits your schedule.
+      We will also keep you updated\r\nif the tentative restart date changes.\r\n\r\n(only
+      say if scheduling 2 participants at this time)\r\n\r\nAt times, we will be scheduling
+      two participants to complete their study during \r\nthe same time in Boston.
+      \ There is a chance that you could run into \r\nanother study participant in
+      the hotel lobby or at another time \r\nduring the study.  Due to confidentiality
+      we would like to ask if it is \r\nokay with you to stay in the same hotel as
+      another participant?  \r\nIf not, we can make arrangements for another hotel."
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.953Z'
+    updated_at: '2020-09-14T18:08:48.953Z'
+    category: ipa
+    user_email: 
+  - id: 52
+    name: ipa ps intro details sched a v3
+    message_type: dialog
+    template_type: content
+    template: "### Day 0\r\n\r\n\r\nOur team will coordinate your arrival to Boston
+      to arrive the day before the study begins.  You staying in a local hotel. When
+      you arrive you will check in with the hotel staff and they will provide you
+      with a study backpack.  Inside the bag you will find masks, hand sanitizer,
+      antiviral wipes, scrubs and study resources.  We provide these for you to use
+      throughout your time in Boston.\r\n\r\n### Day 1\r\n\r\n\r\nOur study navigator
+      will meet you at the hotel on the morning of Day 1. Prior to meeting you, our
+      staff will call you to ask you COVID-19 screening questions (this will occur
+      every morning).  We will then accompany you to Mass General Hospital (MGH) where
+      you will review the consent form with a study physician and study staff member.
+      \ Any specific questions you have will be answered then.  You will then go through
+      a DEXA scan, which is similar to an x-ray but looks at bone density. Next, you
+      will have your blood drawn and go through a general assessment of your health
+      similar to a physical at a doctor’s appointment.  You will have to fast prior
+      to this blood draw. In the afternoon, you will go through two PET scans, a sense
+      of smell test and a test of your sensory responses.  Throughout the hospital
+      there will be a limit to the amount of personnel allowed in a room, therefore
+      our study team member may have to wait for you in a separate room.  You may
+      be asked COVID-19 screening questions before each test.  The day will end around
+      6pm. \r\n\r\n\r\n- **Consent review:** The first day will start with a review
+      of the consent. You will meet with a study coordinator and the study physician
+      in order to review the study assessments and the consent form. During this time,
+      you will be able to ask any questions or voice any concerns you may have.\r\n-
+      **DEXA:** Once you have agreed to participate, you will undergo a DEXA scan.
+      A DEXA scan is similar to an x-ray, but it is a scan that looks at bone density
+      and body composition. \r\n- **OGTT:** You will then get your blood drawn. Please
+      note that will ask that you do not eat for at least 8 hours prior to this blood
+      draw – we will be sure to remind you when you arrive. You will have breakfast
+      following the blood draw.\r\n- During the rest of the first day you will: \r\n
+      \ \r\n    - Undergo an **assessment of your health** such as a review of your
+      medical history, medications, and a brief physical exam that includes body composition
+      measures (e.g. height, weight, waist size…)\r\n    - Fill out some **questionnaires**
+      about your health    \r\n    - **PET** (Positron Emission Tomography) with **CT**
+      (Computed Tomography) – PET/CT scans take pictures of what is going on inside
+      the body using special dyes with radiation that “light up” inside the body to
+      make a picture. The scanner is shaped like a big ring and you will be positioned
+      on your back on the scanner table. The table may move forward and backward as
+      part of the testing the procedures. You will complete two different PET scans.
+      \r\n    - **Sense of smell testing** (olfactory)– This brief test consists of
+      breathing different odors from a small handheld odor delivery device and being
+      asked questions about your familiarity, memory and ability to name each odor.\r\n
+      \   - **Sensory testing** – An assessment that consists of tests to measure
+      your sensory responses – for example, having pressure applied to different parts
+      of your body or putting you hand in ice water – you will be asked to report
+      when these sensations are uncomfortable. \r\n\r\n\r\n### Day 2\r\n\r\nOnce again,
+      our study navigator will call you to ask you COVID-19 screening questions prior
+      to meeting you at the hotel on the second full study day.  After meeting you
+      at the hotel, our staff will travel with you to another hospital using a ride
+      share app (Uber or Lyft) that we can call.  At some points in this study you
+      will have to travel by ride share.  In this event, we encourage you to use the
+      cleaning supplies provided as you see fit in the car ride. You will begin the
+      morning with neuropsychological testing.  After this, you will have an MRI of
+      your brain and your liver.  In the afternoon, you will travel to a different
+      hospital to do physical functioning testing.  After physical functioning, you
+      will go through our TMS and EEG assessment.  TMS is noninvasive and uses magnetic
+      fields to measure connectivity in the brain. After the TMS, you will return
+      to the hotel to eat dinner, shower and change before the sleep study.  A sleep
+      tech will set you up for the sleep assessment in your hotel room.  You will
+      sleep with various sensors on your body to analyze your sleeping patterns. You
+      will return the equipment to us in the morning.\r\n\r\n- **Neuropsychological
+      testing** – An assessment that consists of tests that evaluate your mood, memory
+      and how you think, learn and solve problems. This will be conducted with a trained
+      neuropsychologist.\r\n- **MRI** (Magnetic resonance imaging) _of your brain
+      and liver_ – This is a scan that takes pictures of your brain and liver using
+      a large magnet and radio signals.\r\n- **Physical function testing** – Testing
+      that consists of a series of tests such as lifting weights, a timed walking
+      test, walking upstairs carrying weights, walking while doing another task (simple
+      math), and testing your balance. These assessments will be administered and
+      overseen by a trained exercise physiologist.\r\n- **TMS** (Transcranial Magnetic
+      Stimulation) and **EEG** (Electroencephalogram)  – The TMS will measure brain
+      plasticity. Brain plasticity is the ability of the brain to change and learn
+      through experience. TMS is a noninvasive way of stimulating the brain. TMS uses
+      a magnetic field to cause activity in the brain. The magnetic field is produced
+      by a coil that is held next to your scalp. In this study, we will use TMS to
+      create activity in your brain and will measure your brain’s response to the
+      activity. This is how we measure brain plasticity. During the TMS assessment,
+      you will have a series of electrodes (small round discs) will be placed on your
+      head and your brain waves will be measured while you sit quietly and then while
+      you complete a few simple tasks on a computer. \r\n- **Sleep study** – During
+      the second night, you will have a sleep study in your hotel room.  This will
+      include having sensors placed on your body to monitor your movement, heart rate,
+      breathing and brain waves while you sleep. A trained technician will assist
+      you in placing various sensors on your body, but they will leave you for the
+      night. Additionally, you will be asked to complete several questionnaires on
+      your sleep habits.\r\n\r\n\r\n\r\n### Day 3\r\n\r\nOn the third and final study
+      day, you will begin with a cardiac testing and then X-rays.  After you have
+      completed all of the assessments, we will be returning some preliminary results
+      from your testing.  Our medical navigation nurse and study doctor will meet
+      with you and discuss some of the results.  Additional results will be reported
+      to you in the coming weeks and that process will be explained to you at that
+      time. We will be giving you another COVID-19 test to complete after your visit.
+      \ Our medical navigation nurse will guide you through this process.\r\n\r\n-
+      **Cardiac testing** – This testing consists of activities such as having pictures
+      taken of your heart (ultrasound), assessment of your resting metabolic rate
+      which will include you having to wear light headgear with a breathing tube,
+      and a bicycle exercise test.\r\n- **X-rays** – You will undergo an X-ray exam,
+      where you will be asked several questions, prepped and asked to stand in the
+      equipment for the duration of the scan. \r\n- **Results Return** – At the end
+      of your last day we are going to go over some of the results that we collected
+      so that you have something to take away\r\n\r\n\r\n\r\nA few risks associated
+      with this study include: \r\n\r\n\r\n- Skin irritation, redness, or bruising
+      \ (e.g. from blood draw, IV….)\r\n- Disruption of sleep or fatigue, emotional
+      distress (e.g. due to sleep study, neuropsych testing)\r\n- Radiation exposure
+      from the PET/CT, x-ray and DEXA scans \r\n- Muscle soreness, lightheadedness,
+      nausea or fainting (e.g. during physical assessments and cardiac exercise testing)\r\n\r\n\r\n\r\nAre
+      you still interested in hearing more about the study or do you have any questions
+      at this time?\r\n\r\n---\r\n\r\nWould you be willing to perform a brief cognitive
+      task and answer questions about your health and medical history to find out
+      if you might qualify for the study?  This should take about 30 minutes and you
+      will receive a $20 gift card for your time.  Do you have time now to continue?\r\n"
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.958Z'
+    updated_at: '2020-09-14T18:08:48.958Z'
+    category: ipa
+    user_email: 
+  - id: 53
+    name: ipa ps intro details sched b v3
+    message_type: dialog
+    template_type: content
+    template: "### Day 0\r\n\r\n\r\nOur team will coordinate your arrival to Boston
+      to arrive the day before the study begins.  You will check into a local hotel.
+      \ When you arrive you will check in with the hotel staff and they will provide
+      you with a study backpack.  Inside the bag you will find masks, hand sanitizer,
+      antiviral wipes, scrubs and study resources.  We provide these for you to use
+      throughout your time in Boston.\r\n\r\n### Day 1\r\n\r\n\r\nOur study navigator
+      will meet you at the hotel on the morning of Day 1. Prior to meeting you, our
+      staff will call you to ask you COVID-19 screening questions (this will occur
+      every morning).  We will then accompany you to  to MGH where you will review
+      the consent form with a study physician and study staff member.  Any specific
+      questions you have will be answered then.  You will then go through a DEXA scan,
+      which is similar to an x-ray but looks at bone density. Next, you will have
+      your blood drawn and go through a general assessment of your health similar
+      to a physical at a doctor’s appointment.  You will have to fast prior to this
+      blood draw.  You will then eat lunch and travel to Charlestown Navy Yard for
+      a MRI of your brain and liver. After meeting you at the hotel, our staff will
+      travel with you to another hospital using a ride share app (Uber or Lyft) that
+      our team can call. This MRI will take about an hour to complete.  After the
+      MRI, you will travel back to MGH for a quick, full body X-ray. Throughout the
+      hospital there will be a limit to the amount of personnel allowed in a room,
+      therefore our study team member may have to wait for you in a separate room.
+      \ You may be asked COVID-19 screening questions before each test. The day will
+      end around 3pm.\r\n\r\n\r\n- **Consent review:** The first day will start with
+      a review of the consent. You will meet with a study coordinator and the study
+      physician in order to review the study assessments and the consent form. During
+      this time, you will be able to ask any questions or voice any concerns you may
+      have.\r\n- **DEXA:** Once you have agreed to participate, you will undergo a
+      DEXA scan. A DEXA scan is similar to an x-ray, but it is a scan that looks at
+      bone density and body composition. \r\n- **OGTT:** You will then get your blood
+      drawn. Please note that will ask that you do not eat for at least 8 hours prior
+      to this blood draw – we will be sure to remind you when you arrive. You will
+      have breakfast following the blood draw.\r\n- During the rest of the morning
+      you will: \r\n  \r\n    - Undergo an **assessment of your health** such as a
+      review of your medical history, medications, and a brief physical exam that
+      includes body composition measures (e.g. height, weight, waist size…)\r\n    -
+      Fill out some **questionnaires** about your health    \r\n- During the rest
+      of the day you wil undergo:\r\n    - **MRI** (Magnetic resonance imaging) _of
+      your brain and liver_ – This is a scan that takes pictures of your brain and
+      liver using a large magnet and radio signals.\r\n    - **X-rays** – You will
+      undergo an X-ray exam, where you will be asked several questions, prepped and
+      asked to stand in the equipment for the duration of the scan. \r\n\r\n\r\n###
+      Day 2\r\n\r\nOnce again, our study navigator will call you to ask you COVID-19
+      screening questions prior to meeting you at the hotel on the second full study
+      day. You will begin the second day with cardiac testing at MGH.  You will then
+      travel to Charlestown Navy Yard for Neuropsychological Testing.  This will take
+      about 2.5 hours to complete.  After the neuropsychological testing you will
+      have lunch and travel back to MGH for two PET scans.  In between the PET scans
+      you will complete two assessments, a sense of smell test and a test of your
+      sensory responses.  After your PET scans you will return to the hotel to eat
+      dinner, shower and change before the sleep study.  A sleep tech will set you
+      up for the sleep assessment in your hotel room.  You will sleep with various
+      sensors on your body to analyze your sleeping patterns. You will return the
+      equipment to us in the morning.\r\n\r\n- **Cardiac testing** – This testing
+      consists of activities such as having pictures taken of your heart (ultrasound),
+      assessment of your resting metabolic rate which will include you having to wear
+      light headgear with a breathing tube, and a bicycle exercise test.\r\n- **Neuropsychological
+      testing** – An assessment that consists of tests that evaluate your mood, memory
+      and how you think, learn and solve problems. This will be conducted with a trained
+      neuropsychologist.\r\n- **PET** (Positron Emission Tomography) with **CT** (Computed
+      Tomography) – PET/CT scans take pictures of what is going on inside the body
+      using special dyes with radiation that “light up” inside the body to make a
+      picture. The scanner is shaped like a big ring and you will be positioned on
+      your back on the scanner table. The table may move forward and backward as part
+      of the testing the procedures. You will complete two different PET scans. \r\n-
+      **Sense of smell testing** (olfactory)– This brief test consists of breathing
+      different odors from a small handheld odor delivery device and being asked questions
+      about your familiarity, memory and ability to name each odor.\r\n- **Sensory
+      testing** – An assessment that consists of tests to measure your sensory responses
+      – for example, having pressure applied to different parts of your body or putting
+      you hand in ice water – you will be asked to report when these sensations are
+      uncomfortable. \r\n- **Sleep study** – During the second night, you will have
+      a sleep study in your hotel room.  This will include having sensors placed on
+      your body to monitor your movement, heart rate, breathing and brain waves while
+      you sleep. A trained technician will assist you in placing various sensors on
+      your body, but they will leave you for the night. Additionally, you will be
+      asked to complete several questionnaires on your sleep habits.\r\n\r\n\r\n\r\n###
+      Day 3\r\n\r\nOn the third and final day you will travel to a different hospital
+      and begin with the TMS and EEG assessment using a ride share app (Uber or Lyft)
+      that our team can call.  TMS is noninvasive and uses magnetic fields to measure
+      connectivity in the brain.  You will then have a break for lunch and some down
+      time.  In the afternoon you will complete the physical function testing.  After
+      you have completed all of the assessments, we will be returning some preliminary
+      results from your testing.  Our medical navigation nurse and study doctor will
+      meet with you and discuss some of the results.  Additional results will be reported
+      to you in the coming weeks and that process will be explained to you at that
+      time.  The day will end around 6pm.  We will be giving you another COVID-19
+      test to complete after your visit.  Our medical navigation nurse will guide
+      you through this process.\r\n\r\n- **TMS** (Transcranial Magnetic Stimulation)
+      and **EEG** (Electroencephalogram)  – The TMS will measure brain plasticity.
+      Brain plasticity is the ability of the brain to change and learn through experience.
+      TMS is a noninvasive way of stimulating the brain. TMS uses a magnetic field
+      to cause activity in the brain. The magnetic field is produced by a coil that
+      is held next to your scalp. In this study, we will use TMS to create activity
+      in your brain and will measure your brain’s response to the activity. This is
+      how we measure brain plasticity. During the TMS assessment, you will have a
+      series of electrodes (small round discs) will be placed on your head and your
+      brain waves will be measured while you sit quietly and then while you complete
+      a few simple tasks on a computer. \r\n- **Physical function testing** – Testing
+      that consists of a series of tests such as lifting weights, a timed walking
+      test, walking upstairs carrying weights, walking while doing another task (simple
+      math), and testing your balance. These assessments will be administered and
+      overseen by a trained exercise physiologist.\r\n- **Results Return** – At the
+      end of your last day we are going to go over some of the results that we collected
+      so that you have something to take away\r\n\r\n\r\n\r\nA few risks associated
+      with this study include: \r\n\r\n\r\n- Skin irritation, redness, or bruising
+      \ (e.g. from blood draw, IV….)\r\n- Disruption of sleep or fatigue, emotional
+      distress (e.g. due to sleep study, neuropsych testing)\r\n- Radiation exposure
+      from the PET/CT, x-ray and DEXA scans \r\n- Muscle soreness, lightheadedness,
+      nausea or fainting (e.g. during physical assessments and cardiac exercise testing)\r\n\r\n\r\n\r\nAre
+      you still interested in hearing more about the study or do you have any questions
+      at this time?\r\n\r\n---\r\n\r\nWould you be willing to perform a brief cognitive
+      task and answer questions about your health and medical history to find out
+      if you might qualify for the study?  This should take about 30 minutes and you
+      will receive a $20 gift card for your time.  Do you have time now to continue?\r\n"
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.966Z'
+    updated_at: '2020-09-14T18:08:48.966Z'
+    category: ipa
+    user_email: 
+  - id: 54
+    name: ipa ps looked at website v3
+    message_type: dialog
+    template_type: content
+    template: "Okay great, thank you for expressing interest in our study.  \r\nDid
+      you have a chance to look at the website and documents I sent \r\nyou that had
+      more details about the In-Person Assessments and the \r\nprecautions we are
+      taking regarding COVID-19?\r\n\r\n- *(yes)* Great, do you have any specific
+      questions about \r\n  it before I briefly go over the study?\r\n- *(no)* That
+      is alright, I can tell you more about the study right now.\r\n"
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.971Z'
+    updated_at: '2020-09-14T18:08:48.971Z'
+    category: ipa
+    user_email: 
+  - id: 55
+    name: ipa eligibility call eligible 2 v3
+    message_type: dialog
+    template_type: content
+    template: "<p>\r\nWould you like me to review the details about the study again?\r\n</p>\r\n<p>\r\n
+      \ The study will take place at multiple hospitals in the Boston area \r\n  over
+      2 1/2 days with overnight stays at a local hotel. Each \r\n  day will consist
+      of different testing. You will be provided with \r\n  your personal study visit
+      schedule ahead of your visit. \r\n  You will be given breaks and meals throughout
+      the days.\r\n</p>\r\n<p>\r\n  As a reminder our team will be taking precautions
+      regarding COVID-19.\r\n  This includes testing some of our staff, providing
+      you with COVID-19 \r\n  tests before and after your visit, and following necessary
+      \r\n  guidelines outlined by the CDC and our partnering hospitals.\r\n</p>\r\n<p>\r\n
+      \ You will be assigned a study navigator, a member of the Football Players \r\n
+      \ Health Study staff, who will accompany you throughout each day of the study.
+      \r\n  The navigator will assure that you get to each test. They will also \r\n
+      \ handle scheduling issues or conflicts and provide assistance \r\n  and act
+      as a resource to you throughout the study.\r\n</p>\r\n<p>\r\n  Your mornings
+      will begin between 7-8am and will end around 6-9pm, \r\n  depending on the schedule
+      for that particular day. \r\n  Each day will begin with a review of that day’s
+      schedule and \r\n  any questions you may have will be answered. Each day will
+      \r\n  end with a review of how the procedures went. We may contact \r\n  you
+      after you complete the study visit with additional questions and follow-up.\r\n</p>\r\n<p>\r\n
+      \ The first day of the study a study navigator will greet you and a \r\n  study
+      physician will review the consent form with you and help to answer \r\n  any
+      questions that you have. A nurse practitioner will conduct a \r\n  baseline
+      physical exam and collect information about your health \r\n  and medical history.
+      Over the next two and a half days, you will \r\n  undergo assessments such as
+      PET/CT scans, sense of smell test, \r\n  neuropsychological testing, MRI scans,
+      physical function assessments, \r\n  TMS and EEG, an overnight sleep study,
+      cardiac testing, pain assessments, \r\n  and an X-ray exam. \r\n</p>\r\n<p>\r\n
+      \ Compensation up to $1800 will be given to you for your time and \r\n  efforts
+      involved in participating in this study. In order to pay \r\n  you, you will
+      need to provide your Social Security Number (SSN) or \r\n  Individual Taxpayer
+      Identification Number (ITIN). \r\n  Your payment will be processed 30 days after
+      the study visit. \r\n  You will need to fill out a W9 and any other pertinent
+      tax \r\n  information in order to receive payment.\r\n</p>\r\n<p>\r\n  Just
+      as a reminder, we will cover the costs of your \r\n  transportation, (parking),
+      lodging and meals during \r\n  the study visit. (ask where they are coming from)\r\n</p>\r\n<p>\r\n
+      \ Costs for your ground transportation and any meals purchased \r\n  outside
+      of the hotel will be reimbursed to you in the form \r\n  of a check. We will
+      send this to you in the mail for arrival \r\n  about 3 - 4 weeks after your
+      visit.\r\n</p>\r\n<p>\r\n  Do you have any questions?\r\n</p>\r\n<p>\r\n  What
+      dates work the best for you to travel to Boston? \r\n</p>\r\n<p><a href=\"/reports/ipa__ipa_appointments?embed=true\"
+      data-remote=\"true\" data-preprocessor=\"embedded_report\" data-parent=\"primary-modal\"
+      data-result-target=\"#modal_results_block\" data-target=\"#modal_results_block\"
+      data-target-force=\"true\">show appointments</a>\r\n</p>\r\n<p>\r\n  <i>[offer
+      dates and log in Athena]</i>\r\n</p>\r\n<p>\r\n  <i>Next Steps for COVID-19
+      Testing</i>\r\n</p>\r\n<p>\r\n  Great! We will schedule your visit for <b>[date
+      of visit]</b>. \r\n  As we previously discussed, we are asking that all participants
+      \r\n  complete a COVID-19 saliva test at home before you travel to Boston. \r\n
+      \ This is an extra step we are taking to minimize risk for \r\n  you and our
+      staff. We will purchase the test through a company \r\n  called Vault Health
+      and the test will be analyzed at the \r\n  Rutgers Clinical Genomics Laboratory.
+      You will be required to \r\n  provide personal information, such as your name
+      and email, \r\n  so that they can send the test results to you. \r\n  When you
+      login to the testing website, you will be asked to \r\n  sign authorization
+      so that the results are sent to both you \r\n  and our medical navigation nurse
+      or one of our study doctors. \r\n</p>\r\n<p>  \r\n  At least a week before your
+      visit, we will mail you a test kit. \r\n  Our study nurse will walk you through
+      completing the test over the phone. \r\n</p>\r\n<p>  \r\n  We ask that you complete
+      the test, with our nurse, a few days \r\n  before you are due to travel for
+      your visits (e.g. Wednesday). \r\n  What time on <b>[target pre-visit date]</b>
+      would it be best \r\n  for our nurse to call you to walk you through completing
+      the test? \r\n</p>\r\n<p>\r\n  <i>[record scheduled date/time of COVID-19 test
+      completion in Athena]</i>\r\n</p>\r\n<p>\r\n  Thank you! We will mail the test
+      kit to your address to arrive at least \r\n  a week prior to your visit. We
+      can also help arrange a UPS pickup at \r\n  your house. As reminder, please
+      do not complete the test before \r\n  our nurse has called to walk you through
+      it. Once your have \r\n  completed the test, you can either bring it to the
+      nearest \r\n  UPS store location or we can arrange for UPS scheduled pickup
+      at your \r\n  house. It may take up to 72 hours to get a result, \r\n  but once
+      we receive your test results, we will call you. \r\n</p>\r\n<p>\r\n  Do you
+      have any questions about COVID-19 testing?\r\n</p>\r\n<p>\r\n  If you are uncomfortable
+      at any point with COVID testing or \r\n  have any questions about the testing,
+      please feel free to let us know.\r\n</p>\r\n<p>  \r\n  Thank you for your time
+      today.\r\n</p>\r\n<p>\r\nWe will send you additional study information to review
+      and our travel partners will be contacting you to make arrangements for your
+      visit to Boston.\r\n</p>\r\n<p>\r\nPlease feel free to contact us at any time
+      should you have any questions. \r\n</p>\r\n<p><i>END CALL</i></p>"
+    admin_id: 4
+    disabled: false
+    created_at: '2020-09-14T18:08:48.975Z'
+    updated_at: '2020-09-14T18:08:48.975Z'
     category: ipa
     user_email: 
   associated_config_libraries:
@@ -20316,30 +21271,31 @@ app_type:
       days\r\n\r\n    # if an exit or lost to follow up before scheduled, disable
       after 14 days\r\n    not_all_tracker_exits:\r\n      activity_log__ipa_assignments:\r\n
       \       extra_log_type:\r\n          - exit_opt_out\r\n          - exit_l2fu\r\n
-      \         # if the exit survey has been completed, do not disable after 14 days\r\n
-      \         #- completed\r\n        created_at:\r\n          condition: <\r\n
-      \         value: -14 days\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n
-      \   nfs_store__manage__container: &ref_nfs_store__manage__container\r\n      from:
-      this\r\n      add: one_to_this\r\n      view_as:\r\n        edit: hide\r\n        show:
-      filestore\r\n        new: not_embedded\r\n      creatable_if:\r\n        never:
-      true\r\n\r\n  save_trigger:\r\n    on_create_filestore_container: &create_filestore_container\r\n
-      \     create_filestore_container:\r\n        name: general files\r\n        label:
-      General Files\r\n        create_with_role: nfs_store group 600\r\n\r\n\r\n\r\n
-      \ any_exit_or_complete: &any_exit_or_complete\r\n    any_exit_or_complete:\r\n
+      \         - exit_opt_out_covid19\r\n          # if the exit survey has been
+      completed, do not disable after 14 days\r\n          #- completed\r\n        created_at:\r\n
+      \         condition: <\r\n          value: -14 days\r\n\r\n  ref_filestore_container:
+      &ref_filestore_container\r\n    nfs_store__manage__container: &ref_nfs_store__manage__container\r\n
+      \     from: this\r\n      add: one_to_this\r\n      view_as:\r\n        edit:
+      hide\r\n        show: filestore\r\n        new: not_embedded\r\n      creatable_if:\r\n
+      \       never: true\r\n\r\n  save_trigger:\r\n    on_create_filestore_container:
+      &create_filestore_container\r\n      create_filestore_container:\r\n        name:
+      general files\r\n        label: General Files\r\n        create_with_role: nfs_store
+      group 600\r\n\r\n\r\n\r\n  any_exit_or_complete: &any_exit_or_complete\r\n    any_exit_or_complete:\r\n
       \     any_exit: &any_exit\r\n        any_tracker_exits: &any_tracker_exit\r\n
       \         activity_log__ipa_assignments:\r\n            extra_log_type:\r\n
       \             - exit_opt_out\r\n              - exit_l2fu\r\n              -
-      completed\r\n        any_withdrawal: &any_withdrawal\r\n          dynamic_model__ipa_withdrawals:\r\n
-      \           no_longer_participating_no_yes: 'yes'\r\n            lost_to_follow_up_no_yes:
-      'yes'\r\n            select_subject_withdrew_reason: withdrew\r\n            select_investigator_terminated:\r\n
-      \             - yes - due to ae\r\n              - yes - other reason\r\n\r\n
-      \     all_completed: &all_completed\r\n        activity_log__ipa_assignments:\r\n
-      \         extra_log_type: completed\r\n"
+      exit_opt_out_covid19\r\n              - completed\r\n        any_withdrawal:
+      &any_withdrawal\r\n          dynamic_model__ipa_withdrawals:\r\n            no_longer_participating_no_yes:
+      'yes'\r\n            lost_to_follow_up_no_yes: 'yes'\r\n            select_subject_withdrew_reason:
+      withdrew\r\n            select_investigator_terminated:\r\n              - yes
+      - due to ae\r\n              - yes - other reason\r\n\r\n      all_completed:
+      &all_completed\r\n        activity_log__ipa_assignments:\r\n          extra_log_type:
+      completed\r\n"
     format: yaml
     disabled: false
     admin_id: 4
     created_at: '2019-10-17T07:46:32.087Z'
-    updated_at: '2020-01-20T10:15:12.422Z'
+    updated_at: '2020-09-14T18:08:44.197Z'
     user_email: 
   - id: 22
     category: ipa
