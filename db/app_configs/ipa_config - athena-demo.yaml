@@ -4355,6 +4355,19 @@ app_type:
     created_at: '2020-09-14T17:36:58.777Z'
     updated_at: '2020-09-14T17:36:58.777Z'
     user_email: 
+  - id: 1980
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__on_hold
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: tracker
+    created_at: '2020-09-29T15:14:08.723Z'
+    updated_at: '2020-09-29T15:14:08.723Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 47
     name: Protocol Deviations & Exceptions
@@ -5329,7 +5342,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2018-05-31T14:56:43.064Z'
-    updated_at: '2020-09-14T17:36:53.396Z'
+    updated_at: '2020-09-29T15:14:01.389Z'
     action_when_attribute: activity_date
     field_list: ''
     blank_log_field_list: ''
@@ -5445,7 +5458,15 @@ app_type:
       many\r\n      limit: 2\r\n    ipa_reimbursement_reqs:\r\n      label: Reimbursement
       Request\r\n      from: master\r\n      add: many\r\n\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n
-      \       extra_log_type: screening_follow_up\r\n\r\n###################################\r\nexit_l2fu:\r\n
+      \       extra_log_type: screening_follow_up\r\n\r\n\r\n###################################\r\non_hold:\r\n
+      \ label: On Hold\r\n###################################\r\n\r\n  fields:\r\n
+      \   - follow_up_when\r\n    - notes\r\n    \r\n  caption_before:\r\n    all_fields:
+      |\r\n      The subject's participation is on hold until the *follow up date*
+      set.\r\n      \r\n      Use the *General Communications* activity to record
+      future communications with \r\n      the subject.\r\n      \r\n    follow_up_when:
+      Follow up date\r\n    notes: Reason for the *on hold* status and any notes to
+      assist with the future follow up\r\n      \r\n\r\n  creatable_if:\r\n    <<:
+      *enabled_if\r\n    #not_any_exit: *any_exit_or_complete\r\n\r\n\r\n\r\n###################################\r\nexit_l2fu:\r\n
       \ label: Lost to Follow Up\r\n###################################\r\n\r\n  fields:\r\n\r\n
       \ caption_before:\r\n    all_fields: |\r\n      The subject was lost to follow
       up before being scheduled for an appointment.\r\n\r\n      A staff member typically
@@ -8328,8 +8349,8 @@ app_type:
       \   multiple: single\r\n    default: general-follow-up\r\n    selections: &selections\r\n
       \     general communication - follow-up: general-follow-up\r\n      general
       communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n
-      \     phone screen complete: phone-screen-complete\r\n      inclusion/exclusion
-      phone screen finalized (ready for sign-off): inex-phone-screen-finalized\r\n
+      \     phone screen complete: phone-screen-complete\r\n      on hold: on_hold\r\n
+      \     inclusion/exclusion phone screen finalized (ready for sign-off): inex-phone-screen-finalized\r\n
       \     inclusion/exclusion phone screen sign-off (PI): inex-phone-screen-so-pi\r\n
       \     inclusion/exclusion phone screen sign-off (MedNav): inex-phone-screen-so-mednav\r\n
       \     inclusion/exclusion phone screen sign-off (Staff): inex-phone-screen-so-staff\r\n
@@ -8347,13 +8368,13 @@ app_type:
       completed\r\n\r\n\r\nactivity_outstanding: \r\n  config_selector: \r\n    label:
       Activity outstanding (optional)\r\n    all: true\r\n    multiple: single\r\n
       \   default: general-completed\r\n    selections:\r\n      <<: *selections\r\n\r\ncompleted_or_withdrawn:
-      \r\n  config_selector: \r\n    all: true\r\n    multiple: single\r\n    default:
-      in_study\r\n    selections: \r\n      in study: in_study\r\n      completed,
-      exited or withdrawn: not_in_study"
+      \r\n  config_selector: \r\n    label: In process, on hold, or exited\r\n    all:
+      true\r\n    multiple: single\r\n    default: in_study\r\n    selections: \r\n
+      \     in study: in_study\r\n      completed, exited or withdrawn: not_in_study"
     admin_id: 2
     disabled: false
     created_at: '2018-06-04T17:22:35.951Z'
-    updated_at: '2020-09-14T17:36:55.327Z'
+    updated_at: '2020-09-29T15:14:03.414Z'
     report_type: search
     auto: false
     searchable: true
@@ -8650,17 +8671,18 @@ app_type:
       <= :to_date)\r\nAND ((:type) IS NULL or extra_log_type in (:type))\r\nAND ((:confirmed)
       IS NULL or select_status in (:confirmed))\r\nAND ((:station) IS NULL or select_station
       in (:station))\r\nAND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)\r\n;\r\n\r\n\r\ncreate
-      temp table appointments\r\nas select\r\nvisit_start_date,\r\ncoalesce(select_schedule,
-      '') select_schedule,\r\nap.master_id,\r\nipa.ipa_id,\r\npi.first_name,\r\npi.last_name,\r\nmax(ap.id)
+      temp table appointments\r\nas select\r\nvisit_start_date,\r\ncovid19_test_date,
+      covid19_test_time,\r\ncoalesce(select_schedule, '') select_schedule,\r\nap.master_id,\r\nipa.ipa_id,\r\npi.first_name,\r\npi.last_name,\r\nmax(ap.id)
       appointment_id\r\nfrom ipa_appointments ap\r\ninner join activity_log_ipa_assignments
       al\r\non al.master_id = ap.master_id\r\n\r\ninner join player_infos pi\r\non
       ap.master_id = pi.master_id\r\n\r\ninner join ipa_assignments ipa\r\non ipa.master_id
       = al.master_id\r\n\r\n\r\nwhere\r\n  visit_start_date IS NOT NULL\r\n  AND (:from_date
       IS NULL or visit_start_date >= :from_date)\r\n  AND (:to_date IS NULL or visit_start_date
       <= :to_date)\r\n  AND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)\r\nGROUP BY\r\nap.master_id,
-      visit_start_date, pi.first_name, pi.last_name, ipa.ipa_id, select_schedule\r\n;\r\n\r\ncreate
-      temp table scheduled_calls\r\nas select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n
-      \ dt.master_id,\r\n  ipa.ipa_id,\r\n  p.first_name,\r\n  p.last_name,\r\n  dt.extra_log_type,\r\n
+      visit_start_date, covid19_test_date, covid19_test_time, pi.first_name, pi.last_name,
+      ipa.ipa_id, select_schedule\r\n;\r\n\r\ncreate temp table scheduled_calls\r\nas
+      select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n  dt.master_id,\r\n
+      \ ipa.ipa_id,\r\n  p.first_name,\r\n  p.last_name,\r\n  dt.extra_log_type,\r\n
       \ dt.select_who\r\nfrom\r\n  (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n
       \     a.select_who,\r\n      a.follow_up_when,\r\n      a.follow_up_time,\r\n
       \     a.notes,\r\n      rank()\r\n    OVER (\r\n      PARTITION BY a.master_id,
@@ -8677,12 +8699,18 @@ app_type:
       || 'T' || al.completion_time::varchar \"end\",\r\n  ipa_id || ': ' || al.select_station
       || ' ' || al.select_event_type || ' ' || al.other_event_type \"title\",\r\n
       \ array['report-cal-nav-event'] \"classNames\",\r\n  '/masters/' || master_id
-      \"url\"\r\nFROM nav_events al\r\n\r\nUNION\r\n\r\n\r\nSELECT\r\n  true ,\r\n
-      \ visit_start_date::varchar || 'T' || '00:00:00' ,\r\n  null ,\r\n  ipa_id ||
-      ': ' || 'appointment start ' ||\r\n  CASE WHEN select_schedule <> '' THEN '(Group
-      ' || upper(select_schedule) || ')'\r\n  ELSE ''\r\n  END\r\n  ,\r\n  array['report-cal-start-event']
-      \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n
-      \ false,\r\n  follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n
+      \"url\"\r\nFROM nav_events al\r\n\r\nUNION\r\n\r\n\r\nSELECT\r\n  false ,\r\n
+      \ covid19_test_date::varchar || 'T' || covid19_test_time::varchar ,\r\n  null
+      ,\r\n  ipa_id || ': ' || 'COVID-19 test ' ||\r\n  CASE WHEN select_schedule
+      <> '' THEN '(Group ' || upper(select_schedule) || ')'\r\n  ELSE ''\r\n  END\r\n
+      \ ,\r\n  array['report-cal-covidtest-event'] \"classNames\",\r\n  '/masters/'
+      || master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n
+      \ true ,\r\n  visit_start_date::varchar || 'T' || '00:00:00' ,\r\n  null ,\r\n
+      \ ipa_id || ': ' || 'appointment start ' ||\r\n  CASE WHEN select_schedule <>
+      '' THEN '(Group ' || upper(select_schedule) || ')'\r\n  ELSE ''\r\n  END\r\n
+      \ ,\r\n  array['report-cal-start-event'] \"classNames\",\r\n  '/masters/' ||
+      master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n
+      \ follow_up_when::varchar || 'T' || coalesce(follow_up_time, '14:00:00')::varchar,\r\n
       \ NULL,\r\n  ipa_id || ': ' || '(call) ' || replace(extra_log_type, '_', ' '),\r\n
       \ array['report-cal-call-event'] \"classNames\",\r\n  '/masters/' || master_id
       \"url\"\r\nFROM scheduled_calls\r\n\r\n\r\n;\r\n"
@@ -8702,7 +8730,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-06-20T13:49:41.435Z'
-    updated_at: '2020-03-09T19:21:16.735Z'
+    updated_at: '2020-09-29T15:14:03.500Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -8715,8 +8743,9 @@ app_type:
     options: "view_options:\r\n  view_as: calendar\r\n  search_button_label: calendar\r\n\r\ncomponent:\r\n
       \ options:\r\n#    height: 200\r\n\r\nview_css:\r\n  classes:\r\n    report-cal-start-event:\r\n
       \     background-color: red\r\n      border-color: red\r\n      text-align:
-      center\r\n    report-cal-call-event:\r\n      background-color: '#080'\r\n      border-color:
-      gray\r\n    "
+      center\r\n    report-cal-covidtest-event:\r\n      background-color: rgb(0,102,255)\r\n
+      \     border-color: rgb(0,102,255)\r\n      text-align: center\r\n    report-cal-call-event:\r\n
+      \     background-color: '#080'\r\n      border-color: gray\r\n    "
     user_email: 
   - id: 248
     name: Ready for Sign Off - PI
@@ -9687,28 +9716,25 @@ app_type:
     description: 'All subjects that have joined or exited the study: in process (phone
       screening scheduled), completed, withdrawn, ineligible, not interested (during
       phone screen or follow-up)'
-    sql: "SELECT * from ipa_ops.ipa_participant_exits\r\nWHERE status IN(:select_status)\r\nORDER
-      BY status, \"when\" desc\r\n;\r\n"
+    sql: "SELECT * from ipa_ops.ipa_participant_exits\r\nWHERE (:select_status) IS
+      NULL OR status IN(:select_status)\r\nORDER BY status, \"when\" desc\r\n;\r\n"
     search_attrs: "\r\nselect_status: \r\n  config_selector:\r\n    label: Select
       / de-select statuses to report  \r\n    all: true\r\n    multiple: multiple\r\n
-      \   default: \r\n      - ineligible\r\n      - completed\r\n      - withdrawn\r\n
-      \     - in process\r\n      - not interested during phone screening\r\n      -
-      not interested during screening follow-up\r\n      - opted out\r\n      - 'exit
-      (no COVID-19 test)'\r\n      - 'lost to follow-up (before scheduling)'\r\n    selections:
-      \r\n      ineligible: ineligible\r\n      completed: completed\r\n      withdrawn:
-      withdrawn\r\n      in process: in process\r\n      not interested during phone
-      screening: not interested during phone screening\r\n      not interested during
-      screening follow-up: not interested during screening follow-up\r\n      opted
-      out: opted out\r\n      'exit (no COVID-19 test)': 'exit (no COVID-19 test)'\r\n
-      \     'lost to follow-up (before scheduling)': 'lost to follow-up (before scheduling)'\r\n
+      \   default: \r\n      - on hold\r\n    selections: \r\n      ineligible: ineligible\r\n
+      \     completed: completed\r\n      withdrawn: withdrawn\r\n      in process:
+      in process\r\n      not interested during phone screening: not interested during
+      phone screening\r\n      not interested during screening follow-up: not interested
+      during screening follow-up\r\n      on hold: on hold\r\n      opted out: opted
+      out\r\n      'exit (no COVID-19 test)': 'exit (no COVID-19 test)'\r\n      'lost
+      to follow-up (before scheduling)': 'lost to follow-up (before scheduling)'\r\n
       \     "
     admin_id: 2
     disabled: false
     created_at: '2020-03-09T19:21:16.768Z'
-    updated_at: '2020-09-14T17:36:55.435Z'
-    report_type: regular_report
+    updated_at: '2020-09-29T15:14:03.438Z'
+    report_type: search
     auto: false
-    searchable: false
+    searchable: true
     position: 2
     edit_model: ''
     edit_field_names: ''
@@ -17471,6 +17497,780 @@ app_type:
     created_at: '2020-09-14T17:36:56.966Z'
     updated_at: '2020-09-14T17:36:56.966Z'
     user_email: 
+  - id: 1401
+    app_type_id: 3
+    role_name: phone screener
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.090Z'
+    updated_at: '2020-09-29T15:14:04.090Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1402
+    app_type_id: 3
+    role_name: user - inex
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.110Z'
+    updated_at: '2020-09-29T15:14:04.110Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1403
+    app_type_id: 3
+    role_name: staff - inex
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.124Z'
+    updated_at: '2020-09-29T15:14:04.124Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1404
+    app_type_id: 3
+    role_name: user - navigation
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.137Z'
+    updated_at: '2020-09-29T15:14:04.137Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1405
+    app_type_id: 3
+    role_name: user - adverse event
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.150Z'
+    updated_at: '2020-09-29T15:14:04.150Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1406
+    app_type_id: 3
+    role_name: reviewer - adverse event
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.162Z'
+    updated_at: '2020-09-29T15:14:04.162Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1407
+    app_type_id: 3
+    role_name: irb reporting
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.174Z'
+    updated_at: '2020-09-29T15:14:04.174Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1408
+    app_type_id: 3
+    role_name: email - adverse event irb report
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.186Z'
+    updated_at: '2020-09-29T15:14:04.186Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1409
+    app_type_id: 3
+    role_name: email - adverse event review
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.199Z'
+    updated_at: '2020-09-29T15:14:04.199Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1410
+    app_type_id: 3
+    role_name: sms - adverse event review
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.211Z'
+    updated_at: '2020-09-29T15:14:04.211Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1411
+    app_type_id: 3
+    role_name: sms - adverse event irb report
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.223Z'
+    updated_at: '2020-09-29T15:14:04.223Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1412
+    app_type_id: 3
+    role_name: user - protocol deviation
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.236Z'
+    updated_at: '2020-09-29T15:14:04.236Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1413
+    app_type_id: 3
+    role_name: reviewer - protocol deviation
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.249Z'
+    updated_at: '2020-09-29T15:14:04.249Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1414
+    app_type_id: 3
+    role_name: email - protocol deviation irb report
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.261Z'
+    updated_at: '2020-09-29T15:14:04.261Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1415
+    app_type_id: 3
+    role_name: email - protocol deviation review
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.275Z'
+    updated_at: '2020-09-29T15:14:04.275Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1416
+    app_type_id: 3
+    role_name: sms - protocol deviation irb report
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.288Z'
+    updated_at: '2020-09-29T15:14:04.288Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1417
+    app_type_id: 3
+    role_name: sms - protocol deviation review
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.301Z'
+    updated_at: '2020-09-29T15:14:04.301Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1418
+    app_type_id: 3
+    role_name: reviewer - tms
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.355Z'
+    updated_at: '2020-09-29T15:14:04.355Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1419
+    app_type_id: 3
+    role_name: nfs_store group 600
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.381Z'
+    updated_at: '2020-09-29T15:14:04.381Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1420
+    app_type_id: 3
+    role_name: user - phone screen
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.410Z'
+    updated_at: '2020-09-29T15:14:04.410Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1421
+    app_type_id: 3
+    role_name: user - participant details
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.452Z'
+    updated_at: '2020-09-29T15:14:04.452Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1422
+    app_type_id: 3
+    role_name: tracker
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.485Z'
+    updated_at: '2020-09-29T15:14:04.485Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1423
+    app_type_id: 3
+    role_name: user - inex
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.544Z'
+    updated_at: '2020-09-29T15:14:04.544Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1424
+    app_type_id: 3
+    role_name: reviewer - inex
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.557Z'
+    updated_at: '2020-09-29T15:14:04.557Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1425
+    app_type_id: 3
+    role_name: baseline creator - inex
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.569Z'
+    updated_at: '2020-09-29T15:14:04.569Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1426
+    app_type_id: 3
+    role_name: email - inex reviewer
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.581Z'
+    updated_at: '2020-09-29T15:14:04.581Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1427
+    app_type_id: 3
+    role_name: sms - inex reviewer
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.593Z'
+    updated_at: '2020-09-29T15:14:04.593Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1428
+    app_type_id: 3
+    role_name: reviewer - adverse event
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.605Z'
+    updated_at: '2020-09-29T15:14:04.605Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1429
+    app_type_id: 3
+    role_name: email - adverse event review
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.618Z'
+    updated_at: '2020-09-29T15:14:04.618Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1430
+    app_type_id: 3
+    role_name: sms - adverse event review
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.631Z'
+    updated_at: '2020-09-29T15:14:04.631Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1431
+    app_type_id: 3
+    role_name: reviewer - protocol deviation
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.644Z'
+    updated_at: '2020-09-29T15:14:04.644Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1432
+    app_type_id: 3
+    role_name: email - protocol deviation review
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.657Z'
+    updated_at: '2020-09-29T15:14:04.657Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1433
+    app_type_id: 3
+    role_name: sms - protocol deviation review
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.670Z'
+    updated_at: '2020-09-29T15:14:04.670Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1434
+    app_type_id: 3
+    role_name: nfs_store group 600
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.683Z'
+    updated_at: '2020-09-29T15:14:04.683Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1435
+    app_type_id: 3
+    role_name: user - phone screen
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.696Z'
+    updated_at: '2020-09-29T15:14:04.696Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1436
+    app_type_id: 3
+    role_name: user - adverse event
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.708Z'
+    updated_at: '2020-09-29T15:14:04.708Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1437
+    app_type_id: 3
+    role_name: user - protocol deviation
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.720Z'
+    updated_at: '2020-09-29T15:14:04.720Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1438
+    app_type_id: 3
+    role_name: user - participant details
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.733Z'
+    updated_at: '2020-09-29T15:14:04.733Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1439
+    app_type_id: 3
+    role_name: user - protocol exception
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.745Z'
+    updated_at: '2020-09-29T15:14:04.745Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1440
+    app_type_id: 3
+    role_name: user - mrn
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.756Z'
+    updated_at: '2020-09-29T15:14:04.756Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1441
+    app_type_id: 3
+    role_name: user - mrn
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.764Z'
+    updated_at: '2020-09-29T15:14:04.764Z'
+    user_email: template@template
+  - id: 1442
+    app_type_id: 3
+    role_name: reviewer - tms
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.778Z'
+    updated_at: '2020-09-29T15:14:04.778Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1443
+    app_type_id: 3
+    role_name: user - mednav
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.824Z'
+    updated_at: '2020-09-29T15:14:04.824Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1444
+    app_type_id: 3
+    role_name: user - protocol exception
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.837Z'
+    updated_at: '2020-09-29T15:14:04.837Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1445
+    app_type_id: 3
+    role_name: user - reports
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:04.851Z'
+    updated_at: '2020-09-29T15:14:04.851Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1446
+    app_type_id: 3
+    role_name: user - dashboards
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.105Z'
+    updated_at: '2020-09-29T15:14:05.105Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1447
+    app_type_id: 3
+    role_name: user - dashboards
+    user_id: 133
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.123Z'
+    updated_at: '2020-09-29T15:14:05.123Z'
+    user_email: dean_marengi@hms.harvard.edu
+  - id: 1448
+    app_type_id: 3
+    role_name: user - mednav
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.136Z'
+    updated_at: '2020-09-29T15:14:05.136Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1449
+    app_type_id: 3
+    role_name: user - summary
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.167Z'
+    updated_at: '2020-09-29T15:14:05.167Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1450
+    app_type_id: 3
+    role_name: user - summary
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.181Z'
+    updated_at: '2020-09-29T15:14:05.181Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1451
+    app_type_id: 3
+    role_name: email - adverse event irb report
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.480Z'
+    updated_at: '2020-09-29T15:14:05.480Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1452
+    app_type_id: 3
+    role_name: email - adverse event review
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.492Z'
+    updated_at: '2020-09-29T15:14:05.492Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1453
+    app_type_id: 3
+    role_name: email - protocol deviation irb report
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.504Z'
+    updated_at: '2020-09-29T15:14:05.504Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1454
+    app_type_id: 3
+    role_name: email - protocol deviation review
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.517Z'
+    updated_at: '2020-09-29T15:14:05.517Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1455
+    app_type_id: 3
+    role_name: irb reporting
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.529Z'
+    updated_at: '2020-09-29T15:14:05.529Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1456
+    app_type_id: 3
+    role_name: nfs_store group 600
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.542Z'
+    updated_at: '2020-09-29T15:14:05.542Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1457
+    app_type_id: 3
+    role_name: phone screener
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.554Z'
+    updated_at: '2020-09-29T15:14:05.554Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1458
+    app_type_id: 3
+    role_name: reviewer - adverse event
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.567Z'
+    updated_at: '2020-09-29T15:14:05.567Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1459
+    app_type_id: 3
+    role_name: reviewer - protocol deviation
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.581Z'
+    updated_at: '2020-09-29T15:14:05.581Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1460
+    app_type_id: 3
+    role_name: staff - inex
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.593Z'
+    updated_at: '2020-09-29T15:14:05.593Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1461
+    app_type_id: 3
+    role_name: tracker
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.606Z'
+    updated_at: '2020-09-29T15:14:05.606Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1462
+    app_type_id: 3
+    role_name: user - adverse event
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.618Z'
+    updated_at: '2020-09-29T15:14:05.618Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1463
+    app_type_id: 3
+    role_name: user - dashboards
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.631Z'
+    updated_at: '2020-09-29T15:14:05.631Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1464
+    app_type_id: 3
+    role_name: user - inex
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.642Z'
+    updated_at: '2020-09-29T15:14:05.642Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1465
+    app_type_id: 3
+    role_name: user - navigation
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.655Z'
+    updated_at: '2020-09-29T15:14:05.655Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1466
+    app_type_id: 3
+    role_name: user - participant details
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.668Z'
+    updated_at: '2020-09-29T15:14:05.668Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1467
+    app_type_id: 3
+    role_name: user - phone screen
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.680Z'
+    updated_at: '2020-09-29T15:14:05.680Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1468
+    app_type_id: 3
+    role_name: user - protocol deviation
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.693Z'
+    updated_at: '2020-09-29T15:14:05.693Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1469
+    app_type_id: 3
+    role_name: user - protocol exception
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.705Z'
+    updated_at: '2020-09-29T15:14:05.705Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1470
+    app_type_id: 3
+    role_name: user - summary
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.718Z'
+    updated_at: '2020-09-29T15:14:05.718Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1471
+    app_type_id: 3
+    role_name: user - dashboards
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:05.856Z'
+    updated_at: '2020-09-29T15:14:05.856Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1472
+    app_type_id: 3
+    role_name: email - phone screener
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.031Z'
+    updated_at: '2020-09-29T15:14:06.031Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1473
+    app_type_id: 3
+    role_name: email - phone screener
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.056Z'
+    updated_at: '2020-09-29T15:14:06.056Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 1474
+    app_type_id: 3
+    role_name: email - phone screener
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.069Z'
+    updated_at: '2020-09-29T15:14:06.069Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1475
+    app_type_id: 3
+    role_name: email - navigator
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.095Z'
+    updated_at: '2020-09-29T15:14:06.095Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1476
+    app_type_id: 3
+    role_name: email - navigator
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.117Z'
+    updated_at: '2020-09-29T15:14:06.117Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 1477
+    app_type_id: 3
+    role_name: email - navigator
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.131Z'
+    updated_at: '2020-09-29T15:14:06.131Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1478
+    app_type_id: 3
+    role_name: email - mednav
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.150Z'
+    updated_at: '2020-09-29T15:14:06.150Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1479
+    app_type_id: 3
+    role_name: email - tms
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.173Z'
+    updated_at: '2020-09-29T15:14:06.173Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1480
+    app_type_id: 3
+    role_name: user - discussions
+    user_id: 121
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.201Z'
+    updated_at: '2020-09-29T15:14:06.201Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1481
+    app_type_id: 3
+    role_name: user - discussions
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.214Z'
+    updated_at: '2020-09-29T15:14:06.214Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 1482
+    app_type_id: 3
+    role_name: user - discussions
+    user_id: 123
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.230Z'
+    updated_at: '2020-09-29T15:14:06.230Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 1483
+    app_type_id: 3
+    role_name: user - discussions
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.257Z'
+    updated_at: '2020-09-29T15:14:06.257Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1484
+    app_type_id: 3
+    role_name: nfs_store group 600
+    user_id: 127
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.285Z'
+    updated_at: '2020-09-29T15:14:06.285Z'
+    user_email: heather_digregorio@hms.harvard.edu
+  - id: 1485
+    app_type_id: 3
+    role_name: tracker
+    user_id: 127
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.298Z'
+    updated_at: '2020-09-29T15:14:06.298Z'
+    user_email: heather_digregorio@hms.harvard.edu
+  - id: 1486
+    app_type_id: 3
+    role_name: user - participant details
+    user_id: 127
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-29T15:14:06.310Z'
+    updated_at: '2020-09-29T15:14:06.310Z'
+    user_email: heather_digregorio@hms.harvard.edu
   associated_message_templates:
   - id: 4
     name: ipa ps intro
