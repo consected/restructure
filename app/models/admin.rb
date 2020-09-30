@@ -45,7 +45,13 @@ class Admin < ActiveRecord::Base
   # Get the current app type for the user that corresponds to this admin
   # @return [Admin::AppType | nil]
   def matching_user_app_type
-    matching_user&.app_type
+    @matching_user_app_type || matching_user&.app_type
+  end
+
+  # Set the matching user's app type forcefully, to override the current value
+  # This facilitates app type importing and automatic migrations
+  def matching_user_app_type= app_type
+    @matching_user_app_type = app_type
   end
 
   # Simple way to ensure that this is not being run from inside Passenger

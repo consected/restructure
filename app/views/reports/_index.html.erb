@@ -1,0 +1,38 @@
+<%
+link_extras = {} unless defined? link_extras
+simple_view = false unless defined? simple_view
+
+link_extras ||= {}
+extra_params = {}
+extra_params[:embed] = true if link_extras[:data] && link_extras[:data][:remote]
+%>
+<table class="table tablesorter admin-list">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Name</th>
+      <th>Description</th>
+      <% unless simple_view %>
+      <th></th>
+      <th></th>
+      <% end %>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @reports.each do |list_item| %>
+    <tr class="<%=list_item.disabled ? 'disabled-result' : ''%> report-type-<%= list_item.report_type %> <%= list_item.auto ? 'report-auto' : '' %>" data-report-id="<%=list_item.id %>">
+      <td style="width: 5%"><span class="hidden"><%= list_item.report_type %></span><span class="glyphicon <%= list_item.report_type == 'count' ? 'glyphicon-record' : list_item.report_type == 'regular_report' ? 'glyphicon-list-alt' : 'glyphicon-search'  %>" title="<%= list_item.report_type.humanize %>"></span></td>
+
+      <td style="width: 15%"><%= link_to  list_item.name, report_path(list_item.id, extra_params), link_extras %></td>
+
+      <td style="width: 30%"><%= markdown_to_html list_item.list_description %></td>
+      <% unless simple_view %>
+      <td style="width: 25%" class="report-search-attr"></td>
+      <td style="width: 25%" class="report-measure"></td>
+      <% end %>
+
+    </tr>
+    <% end %>
+  </tbody>
+</table>
