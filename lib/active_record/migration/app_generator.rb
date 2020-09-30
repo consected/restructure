@@ -399,6 +399,7 @@ module ActiveRecord
           end
 
           if a.start_with?('tag_select')
+            byebug
             fopts ||= {}
             fopts[:array] = true
           end
@@ -410,11 +411,15 @@ module ActiveRecord
       def create_fields(tbl, history = false)
         field_defs.each do |attr_name, f|
           fopts = field_opts[attr_name]
-          if fopts
+          if fopts && fopts[:index]
             fopts[:index][:name] += '_hist' if history
             tbl.send(f, attr_name, fopts)
           else
-            tbl.send(f, attr_name)
+            if fopts
+              tbl.send(f, attr_name, fopts)
+            else
+              tbl.send(f, attr_name)
+            end
           end
         end
       end
@@ -425,7 +430,11 @@ module ActiveRecord
           if fopts
             add_column(tbl, attr_name, f, fopts)
           else
-            add_column(tbl, attr_name, f)
+            if fopts
+              add_column(tbl, attr_name, f, fopts)
+            else
+              add_column(tbl, attr_name)
+            end
           end
         end
       end
