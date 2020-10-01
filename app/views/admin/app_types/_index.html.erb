@@ -11,6 +11,7 @@
   <thead>
     <tr>
       <th class="no-sort"></th>
+      <th>ID</th>
       <th>Name</th>
       <th>Label</th>
       <th>Default Schema Name</th>
@@ -23,6 +24,7 @@
     <% objects_instance.each do |list_item| %>
       <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
         <td><%= admin_edit_btn list_item.id%> </td>
+        <td><%= list_item.id %></td>
         <td><%= list_item.name %></td>
         <td><%= list_item.label %></td>
         <td><%= list_item.default_schema_name %></td>

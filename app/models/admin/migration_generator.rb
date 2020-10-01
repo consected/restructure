@@ -28,8 +28,12 @@ class Admin::MigrationGenerator
     END_SQL
   end
 
-  def self.table_comment(table_name)
-    connection.table_comment(table_name)
+  def self.table_comment(table_name, schema_name = nil)
+    tn = []
+    tn << schema_name if schema_name
+    tn << table_name
+    tn = tn.join('.')
+    connection.table_comment(tn)
   end
 
   def self.current_search_paths
@@ -63,6 +67,47 @@ class Admin::MigrationGenerator
       END_SQL
 
       res.to_a
+    end
+  end
+
+  #
+  # Returns a list of foreign key definitions
+  # @return [Array (Hash {constraint_name, source_schema, source_table, source_column, target_schema, target_table, target_column})]
+  def self.foreign_keys
+    Rails.cache.fetch("db_foreign_keys-#{Application.version}") do
+      res = connection.execute <<~END_SQL
+
+        SELECT
+          o.conname AS constraint_name,
+          (SELECT nspname FROM pg_namespace WHERE oid=m.relnamespace) AS source_schema,
+          m.relname AS source_table,
+          (SELECT a.attname FROM pg_attribute a WHERE a.attrelid = m.oid AND a.attnum = o.conkey[1] AND a.attisdropped = false) AS source_column,
+          (SELECT nspname FROM pg_namespace WHERE oid=f.relnamespace) AS target_schema,
+          f.relname AS target_table,
+          (SELECT a.attname FROM pg_attribute a WHERE a.attrelid = f.oid AND a.attnum = o.confkey[1] AND a.attisdropped = false) AS target_column
+        FROM
+          pg_constraint o LEFT JOIN pg_class f ON f.oid = o.confrelid LEFT JOIN pg_class m ON m.oid = o.conrelid
+        WHERE
+          o.contype = 'f' AND o.conrelid IN (SELECT oid FROM pg_class c WHERE c.relkind = 'r');
+      END_SQL
+
+      res.to_a
+    end
+  end
+
+  def self.data_dic(dd, nil_if_empty: false)
+    ddtab = tables_and_views.find { |tn| tn['table_name'] == "#{dd}_datadic" }
+    return unless ddtab
+
+    ddtab = ddtab['table_name']
+
+    Rails.cache.fetch("db_data_dic-#{dd}-#{Application.version}") do
+      res = connection.execute <<~END_SQL
+        SELECT * FROM #{ddtab};
+      END_SQL
+      res = res.to_a
+      res = nil if nil_if_empty && res.blank?
+      res
     end
   end
 

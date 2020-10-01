@@ -1,10 +1,10 @@
-<div class="container-fluid">
+<div class="">
 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#tables" aria-controls="tables" role="tab" data-toggle="tab">Tables</a></li>
-    <li role="presentation"><a href="#data-dicts" aria-controls="data-dicts" role="tab" data-toggle="tab">Data Dictionaries</a></li>
-    <li role="presentation"><a href="#classifications" aria-controls="classifications" role="tab" data-toggle="tab">Classifications</a></li>
+    <li role="presentation" class="active"><a href="#data-dicts" aria-controls="data-dicts" role="tab" data-toggle="tab">Data Dictionaries</a></li>
+    <li role="presentation"><a href="#tables" aria-controls="tables" role="tab" data-toggle="tab">Tables</a></li>
+    <li role="presentation"><a href="#protocol_events" aria-controls="protocol_events" role="tab" data-toggle="tab">Protocol Events</a></li>
     <li role="presentation"><a href="#selection-options" aria-controls="selection-options" role="tab" data-toggle="tab">Selection Options</a></li>
     <li role="presentation"><a href="#flags" aria-controls="flags" role="tab" data-toggle="tab">Flags</a></li>
     <li role="presentation"><a href="#subject-accuracy" aria-controls="subject-accuracy" role="tab" data-toggle="tab">Subject Accuracy</a></li>
@@ -12,165 +12,31 @@
 
   <!-- Tab panes -->
   <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active" id="tables">
+
+    <div role="tabpanel" class="tab-pane active" id="data-dicts">
+      <h4>Data Dictionaries</h4>
+      <%= render partial: 'admin/reference_data/data_dic_block'%>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="tables">
       <h4>Tables</h4>
       <%= render partial: 'admin/reference_data/table_list_block'%>
-
     </div>
-    <div role="tabpanel" class="tab-pane" id="data-dicts">
-      <h4>Data Dictionaries</h4>
-      <%
-        @no_create = true
-        @no_masters = true
-        @embedded_report = true
-
-        pm = @all_reports_for_user = Report.enabled.for_user(current_user)
-        pm = pm.where(item_type: 'data-requests').where("short_name LIKE '%_dictionary'")
-
-        @reports = pm.order auto: :desc, report_type: :asc, position: :asc
-        @reports = @reports.reject { |r| r.list_options.hide_in_list }
-      
-      %>
-      <%= render partial: 'reports/index', 
-                  locals: {
-                    simple_view: true,
-                    link_extras: {
-                      data: {
-                        remote: "true", 
-                        preprocessor: "embedded_report",
-                        parent: "primary-modal",
-                        result_target: "#modal_results_block",
-                        target: "#modal_results_block",
-                        target_force: "true"
-                      }
-                    }
-                  }
-      %>
-
-    </div>
-    <div role="tabpanel" class="tab-pane" id="classifications">
-
-      <h4>Classification::Protocol / status (sub_process) / method (protocol_event) <a class="glyphicon glyphicon-info-sign" href="#p-help" class="collapsed" data-toggle="collapse"></a> </h4>
-      <div class="help-block collapse" id="p-help">
-        <p>
-          Use a protocol, status or method lookup directly against a master record. For example, to find a player who has ever had a status of 144 or 24:
-        </p>
-        <p><code>
-            select distinct pi.* from player_infos pi inner join tracker_history th on th.master_id = pi.master_id<br />
-            where sub_process in (144, 24);
-          </code></p>
-        <p>Since each status (sub_process) for a tracker / tracker history record belongs to a specific protocol, there is no need to explicitly state the protocol_id for simple matches.</p>
-        <p>Similarly, since each method (protocol_event) for a tracker / tracker history record belongs to a specific sub_process and subsequently protocol, there is no need to explicitly state the protocol_id or sub_process_id for simple matches.</p>
-        <p>When using the attributes definer to create a search form, select the <strong>type</strong> as 'tracker protocol', 'tracker status (sub process) or 'tracker method (protocol event)'. The appropriate set of selections (tracker methods for example) will be automatically presented in a drop down or multiple selection field, based on the selection for <strong>single or multiple values</strong>.</p>
-        <p>Reference the user selection in SQL using the name of the field, prefixed with a colon. For example, when the attribute <strong>name</strong> <code>must_have_protocol</code> is entered, use:</p>
-        <p><code>
-            select * from tracker_history where protocol_id in (:must_have_protocol)
-          </code></p>
-
-      </div>
-      <ul id="protocols-list" style="overflow: auto; background-color: white;">
-        <% Classification::Protocol.all.sort.each do |p| %>
-        <li id="protocol-<%=p.id%>">
-          <a href="#pblock-<%=p.id%>" data-toggle="collapse" class="collapsed" style="color: <%= p.disabled ? '#aaa' : 'auto' %>"><%=p.id%> - <%= p.name %></a>
-        </li>
-        <ul id="pblock-<%=p.id%>" class="collapse">
-          <% p.sub_processes.all.each do |sp| %>
-          <li style="color: <%= p.disabled || sp.disabled ? '#aaa' : 'auto' %>" data-protocol-id="<%=p.id%>" id="sub_process-<%=sp.id%>"><%=sp.id%> - <%= sp.name %></li>
-          <ul>
-            <% sp.protocol_events.all.each do |pe| %>
-            <li style="color: <%= p.disabled || sp.disabled || pe.disabled ? '#aaa' : 'auto' %>" data-sub-process-id="<%=sp.id%>" id="protocol_event-<%=sp.id%>"><%=pe.id%> - <%= pe.name %></li>
-            <% end %>
-          </ul>
-          <% end %>
-        </ul>
-        <% end %>
-      </ul>
-
+    <div role="tabpanel" class="tab-pane" id="protocol_events">
+      <h4>Protocol / status / method </h4>
+      <%= render partial: 'admin/reference_data/protocol_block'%>
     </div>
     <div role="tabpanel" class="tab-pane" id="selection-options">
-      <h4>General Selections <a class="glyphicon glyphicon-info-sign" href="#gs-help" class="collapsed" data-toggle="collapse"></a></h4>
-      <div class="help-block collapse" id="gs-help">
-        <p>
-          Use a general select lookup directly against a table, such as addresses, player_contacts, player_infos. For example:
-        </p>
-        <p><code>
-            select * from addresses where source = 'nflpa'
-          </code></p>
-        <p>When using the attributes definer to create a search form, select the <strong>type</strong> 'general selection', then pick an appropriate item type from the <strong>filter dropdown</strong>. The appropriate set of selections (address sources for example) will be automatically presented in a drop down or multiple selection field, based on the selection for <strong>single or multiple values</strong>.</p>
-        <p>Reference the user selection in SQL using the name of the field, prefixed with a colon. For example, when the attribute <strong>name</strong> <code>must_have_source</code> is entered, use:</p>
-        <p><code>
-            select * from addresses where source = :must_have_source
-          </code></p>
-
-      </div>
-      <ul id="gs-list" style=" overflow: auto; background-color: white;">
-
-        <% Classification::GeneralSelection.item_types.each do |p| %>
-        <li id="gs-<%=p%>">
-          <a href="#gsblock-<%=p%>" data-toggle="collapse" class="collapsed" style="color: <%= p ? '#aaa' : 'auto' %>"><%=p %></a>
-        </li>
-        <ul id="gsblock-<%=p%>" class="collapse">
-          <% Classification::GeneralSelection.where(item_type: p).each do |gs| %>
-          <li style="color: <%= gs.disabled ? '#aaa' : 'auto' %>" data-gs-item-type="<%=p%>" id="general_selection-<%=gs.id%>"><%=gs.value%> - <%= gs.name %></li>
-          <% end %>
-        </ul>
-        <% end %>
-      </ul>
+      <h4>General Selections </h4>
+      <%= render partial: 'admin/reference_data/general_selections_block'%>
     </div>
     <div role="tabpanel" class="tab-pane" id="flags">
-      <h4>Item Flags <a class="glyphicon glyphicon-info-sign" href="#if-help" class="collapsed" data-toggle="collapse"></a></h4>
-      <div class="help-block collapse" id="if-help">
-        <p>
-          Join with appropriate table using item_id and item_type. For example joining with the player_infos table: <br />
-        </p>
-        <p><code> item_flag_name_id = 2 AND
-            <br />item_flags.item_id = player_infos.id AND item_flags.item_type = 'PlayerInfo'</code></p>
-        <p>When using the attributes definer to create a search form, select the <strong>type</strong> 'item flag name'. A list of item flags will automatically be generated in a drop down or multiple selection field, based on the selection for <strong>single or multiple values</strong>.</p>
-        <p>Reference the user selection in SQL using the name of the field, prefixed with a colon. For example, when the attribute <strong>name</strong> <code>must_have_flag</code> is entered, use:</p>
-        <p><code>
-            select * from player_infos where item_flags.item_id = player_infos.id AND item_flags.item_type = 'PlayerInfo' and item_flag_name_id = :must_have_flag
-          </code></p>
-      </div>
-      <ul id="if-list" style="overflow: auto; background-color: white;">
-
-        <% Classification::ItemFlagName.item_types.each do |p| %>
-        <li id="gs-<%=p%>">
-          <a href="#ifblock-<%=p%>" data-toggle="collapse" class="collapsed" style="color: <%= p ? '#aaa' : 'auto' %>"><%=p %></a>
-        </li>
-        <ul id="ifblock-<%=p%>" class="collapse">
-          <% Classification::ItemFlagName.where(item_type: p).each do |i| %>
-          <li style="color: <%= i.disabled ? '#aaa' : 'auto' %>" data-if-item-type="<%=p%>" id="general_selection-<%=i.id%>"><%=i.id%> - <%=i.name%></li>
-          <% end %>
-        </ul>
-        <% end %>
-      </ul>
-
+      <h4>Item Flags</h4>
+      <%= render partial: 'admin/reference_data/item_flags_block'%>
     </div>
     <div role="tabpanel" class="tab-pane" id="subject-accuracy">
-      <h4>Accuracy Score (player_info rank)</h4> <a class="glyphicon glyphicon-info-sign" href="#as-help" class="collapsed" data-toggle="collapse"></a>
-      <div class="help-block collapse" id="as-help">
-        <p>
-          Use an accuracy score lookup directly against the <strong>rank</strong> field of the <strong>player_infos</strong> table only. For example:
-        </p>
-        <p><code>select * from player_infos where rank in (12,11) </code></p>
-        <p>When using the attributes definer to create a search form, select the <strong>type</strong> 'accuracy score'. A list of selections will automatically be generated in a drop down or multiple selection field, based on the selection for <strong>single or multiple values</strong>.</p>
-        <p>Reference the user selection in SQL using the name of the field, prefixed with a colon. For example, when the attribute <strong>name</strong> <code>one_of_these_ranks</code> is entered, use:</p>
-        <p><code>
-            select * from player_infos where rank in (:one_of_these_ranks)
-          </code></p>
-
-      </div>
-      <ul id="as-list" style="overflow: auto; background-color: white;">
-
-        <% Classification::AccuracyScore.all.each do |p| %>
-        <li id="as-<%=p.value%>">
-          <span href="#ifblock-<%=p.value%>" data-toggle="collapse" class="collapsed" style="color: <%= p.disabled ? '#aaa' : 'auto' %>"><%=p.value %> - <%=p.name%></span>
-        </li>
-        <% end %>
-      </ul>
+      <h4>Accuracy Score (subject rank)</h4>
+      <%= render partial: 'admin/reference_data/accuracy_score_block'%>
     </div>
 
   </div>
-</div>
-
 </div>

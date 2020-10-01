@@ -100,7 +100,7 @@ class Admin::AppType < Admin::AdminBase
       app_type = Admin::AppType.where(name: a_conf['name']).first || Admin::AppType.create!(a_conf)
 
       # set the app type to allow automatic migrations to work
-      current_admin.matching_user_app_type = app_type
+      admin.matching_user_app_type = app_type
 
       res = results['app_type']
 
@@ -140,7 +140,7 @@ class Admin::AppType < Admin::AdminBase
       new_id = app_type.id
 
       # Reset the app type to allow the actual value to be used
-      current_admin.matching_user_app_type = nil
+      admin.matching_user_app_type = nil
     end
 
     app_type = find(new_id)
@@ -200,7 +200,7 @@ class Admin::AppType < Admin::AdminBase
           user = self.class.user_from_email ac['user_email']
           if user == :unknown && ac['user_email'].end_with?('@template')
             User.create(email: ac['user_email'], first_name: 'template', last_name: 'template', current_admin: admin)
-            end
+          end
           cond[:user] = user
         end
         unless user == :unknown
@@ -252,8 +252,8 @@ class Admin::AppType < Admin::AdminBase
 
   def clean_user_access_controls(id_list)
     # Invalid user access control ID list, so we can disable them
-    vuc = valid_user_access_controls.pluck(:id)
-    # inv =
+    # vuc = valid_user_access_controls.pluck(:id)
+
     inv = user_access_controls.active.pluck(:id) - id_list #- vuc
 
     inv.each do |i|

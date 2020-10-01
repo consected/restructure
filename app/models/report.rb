@@ -26,12 +26,12 @@ class Report < ActiveRecord::Base
   configure :view_options, with: %i[hide_table_names humanize_column_names
                                     hide_result_count hide_export_buttons
                                     hide_criteria_panel prevent_collapse_for_list
-                                    show_column_comments
+                                    show_column_comments corresponding_data_dic
                                     view_as search_button_label report_auto_submit_on_change no_results_scroll]
   configure :list_options, with: %i[hide_in_list list_description]
   configure :view_css, with: %i[classes selectors]
   configure :component, with: [:options]
-  configure :column_options, with: %i[tags classes hide]
+  configure :column_options, with: %i[tags classes hide show_as]
 
   attr_reader :clean_sql
   attr_reader :filtering_on

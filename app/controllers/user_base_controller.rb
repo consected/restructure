@@ -62,6 +62,10 @@ class UserBaseController < ApplicationController
           type.json do
             render json: { message: msg }, status: 401
           end
+          type.html do
+            flash[:warning] = msg
+            redirect_to '/'
+          end
         end
       end
     end
@@ -78,9 +82,13 @@ class UserBaseController < ApplicationController
           # Redirect, to ensure the flash and navs in the layout are updated
           redirect_to masters_search_path
         end
+        msg = 'No app type has been selected. Include use_app_type=<id> parameter to set the current application to work with'
         type.json do
-          msg = 'No app type has been selected. Include use_app_type=<id> parameter to set the current application to work with'
           render json: { message: msg }, status: 400
+        end
+        type.html do
+          flash[:warning] = msg
+          redirect_to '/'
         end
       end
       nil

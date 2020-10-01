@@ -344,14 +344,16 @@ table.table.tablesorter > thead > tr > th {
   // &.tablesorter-header.tablesorter-headerAsc {
   //     border-bottom: 4px solid #c9e2b3 !important;
   // }
+  position: relative;
+
   &:hover {
     cursor: pointer;
   }
 }
 table.table.tablesorter > thead > tr > th.tablesorter-header:after {
   content: "\e150";
-  position: relative;
-  top: 1px;
+  position: absolute;
+  bottom: 3px;
   display: inline-block;
   font-family: "Glyphicons Halflings";
   font-style: normal;
