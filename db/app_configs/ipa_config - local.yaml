@@ -4355,6 +4355,19 @@ app_type:
     created_at: '2020-09-14T12:54:59.331Z'
     updated_at: '2020-09-14T12:54:59.331Z'
     user_email: 
+  - id: 2647
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__on_hold
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: tracker
+    created_at: '2020-09-29T15:34:50.543Z'
+    updated_at: '2020-09-29T15:34:50.543Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 47
     name: Protocol Deviations & Exceptions
@@ -5329,7 +5342,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2018-05-31T14:56:43.064Z'
-    updated_at: '2020-09-11T16:01:22.749Z'
+    updated_at: '2020-09-29T15:34:43.363Z'
     action_when_attribute: activity_date
     field_list: ''
     blank_log_field_list: ''
@@ -5445,7 +5458,15 @@ app_type:
       many\r\n      limit: 2\r\n    ipa_reimbursement_reqs:\r\n      label: Reimbursement
       Request\r\n      from: master\r\n      add: many\r\n\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n
-      \       extra_log_type: screening_follow_up\r\n\r\n###################################\r\nexit_l2fu:\r\n
+      \       extra_log_type: screening_follow_up\r\n\r\n\r\n###################################\r\non_hold:\r\n
+      \ label: On Hold\r\n###################################\r\n\r\n  fields:\r\n
+      \   - follow_up_when\r\n    - notes\r\n    \r\n  caption_before:\r\n    all_fields:
+      |\r\n      The subject's participation is on hold until the *follow up date*
+      set.\r\n      \r\n      Use the *General Communications* activity to record
+      future communications with \r\n      the subject.\r\n      \r\n    follow_up_when:
+      Follow up date\r\n    notes: Reason for the *on hold* status and any notes to
+      assist with the future follow up\r\n      \r\n\r\n  creatable_if:\r\n    <<:
+      *enabled_if\r\n    #not_any_exit: *any_exit_or_complete\r\n\r\n\r\n\r\n###################################\r\nexit_l2fu:\r\n
       \ label: Lost to Follow Up\r\n###################################\r\n\r\n  fields:\r\n\r\n
       \ caption_before:\r\n    all_fields: |\r\n      The subject was lost to follow
       up before being scheduled for an appointment.\r\n\r\n      A staff member typically
@@ -8297,8 +8318,8 @@ app_type:
       \   multiple: single\r\n    default: general-follow-up\r\n    selections: &selections\r\n
       \     general communication - follow-up: general-follow-up\r\n      general
       communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n
-      \     phone screen complete: phone-screen-complete\r\n      inclusion/exclusion
-      phone screen finalized (ready for sign-off): inex-phone-screen-finalized\r\n
+      \     phone screen complete: phone-screen-complete\r\n      on hold: on_hold\r\n
+      \     inclusion/exclusion phone screen finalized (ready for sign-off): inex-phone-screen-finalized\r\n
       \     inclusion/exclusion phone screen sign-off (PI): inex-phone-screen-so-pi\r\n
       \     inclusion/exclusion phone screen sign-off (MedNav): inex-phone-screen-so-mednav\r\n
       \     inclusion/exclusion phone screen sign-off (Staff): inex-phone-screen-so-staff\r\n
@@ -8316,13 +8337,13 @@ app_type:
       completed\r\n\r\n\r\nactivity_outstanding: \r\n  config_selector: \r\n    label:
       Activity outstanding (optional)\r\n    all: true\r\n    multiple: single\r\n
       \   default: general-completed\r\n    selections:\r\n      <<: *selections\r\n\r\ncompleted_or_withdrawn:
-      \r\n  config_selector: \r\n    all: true\r\n    multiple: single\r\n    default:
-      in_study\r\n    selections: \r\n      in study: in_study\r\n      completed,
-      exited or withdrawn: not_in_study"
+      \r\n  config_selector: \r\n    label: In process, on hold, or exited\r\n    all:
+      true\r\n    multiple: single\r\n    default: in_study\r\n    selections: \r\n
+      \     in study: in_study\r\n      completed, exited or withdrawn: not_in_study"
     admin_id: 21
     disabled: false
     created_at: '2018-06-04T17:22:35.951Z'
-    updated_at: '2020-09-14T13:57:34.825Z'
+    updated_at: '2020-09-29T15:34:45.306Z'
     report_type: search
     auto: false
     searchable: true
@@ -8574,17 +8595,18 @@ app_type:
       <= :to_date)\r\nAND ((:type) IS NULL or extra_log_type in (:type))\r\nAND ((:confirmed)
       IS NULL or select_status in (:confirmed))\r\nAND ((:station) IS NULL or select_station
       in (:station))\r\nAND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)\r\n;\r\n\r\n\r\ncreate
-      temp table appointments\r\nas select\r\nvisit_start_date,\r\ncoalesce(select_schedule,
-      '') select_schedule,\r\nap.master_id,\r\nipa.ipa_id,\r\npi.first_name,\r\npi.last_name,\r\nmax(ap.id)
+      temp table appointments\r\nas select\r\nvisit_start_date,\r\ncovid19_test_date,
+      covid19_test_time,\r\ncoalesce(select_schedule, '') select_schedule,\r\nap.master_id,\r\nipa.ipa_id,\r\npi.first_name,\r\npi.last_name,\r\nmax(ap.id)
       appointment_id\r\nfrom ipa_appointments ap\r\ninner join activity_log_ipa_assignments
       al\r\non al.master_id = ap.master_id\r\n\r\ninner join player_infos pi\r\non
       ap.master_id = pi.master_id\r\n\r\ninner join ipa_assignments ipa\r\non ipa.master_id
       = al.master_id\r\n\r\n\r\nwhere\r\n  visit_start_date IS NOT NULL\r\n  AND (:from_date
       IS NULL or visit_start_date >= :from_date)\r\n  AND (:to_date IS NULL or visit_start_date
       <= :to_date)\r\n  AND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)\r\nGROUP BY\r\nap.master_id,
-      visit_start_date, pi.first_name, pi.last_name, ipa.ipa_id, select_schedule\r\n;\r\n\r\ncreate
-      temp table scheduled_calls\r\nas select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n
-      \ dt.master_id,\r\n  ipa.ipa_id,\r\n  p.first_name,\r\n  p.last_name,\r\n  dt.extra_log_type,\r\n
+      visit_start_date, covid19_test_date, covid19_test_time, pi.first_name, pi.last_name,
+      ipa.ipa_id, select_schedule\r\n;\r\n\r\ncreate temp table scheduled_calls\r\nas
+      select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n  dt.master_id,\r\n
+      \ ipa.ipa_id,\r\n  p.first_name,\r\n  p.last_name,\r\n  dt.extra_log_type,\r\n
       \ dt.select_who\r\nfrom\r\n  (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n
       \     a.select_who,\r\n      a.follow_up_when,\r\n      a.follow_up_time,\r\n
       \     a.notes,\r\n      rank()\r\n    OVER (\r\n      PARTITION BY a.master_id,
@@ -8601,12 +8623,18 @@ app_type:
       || 'T' || al.completion_time::varchar \"end\",\r\n  ipa_id || ': ' || al.select_station
       || ' ' || al.select_event_type || ' ' || al.other_event_type \"title\",\r\n
       \ array['report-cal-nav-event'] \"classNames\",\r\n  '/masters/' || master_id
-      \"url\"\r\nFROM nav_events al\r\n\r\nUNION\r\n\r\n\r\nSELECT\r\n  true ,\r\n
-      \ visit_start_date::varchar || 'T' || '00:00:00' ,\r\n  null ,\r\n  ipa_id ||
-      ': ' || 'appointment start ' ||\r\n  CASE WHEN select_schedule <> '' THEN '(Group
-      ' || upper(select_schedule) || ')'\r\n  ELSE ''\r\n  END\r\n  ,\r\n  array['report-cal-start-event']
-      \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n
-      \ false,\r\n  follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n
+      \"url\"\r\nFROM nav_events al\r\n\r\nUNION\r\n\r\n\r\nSELECT\r\n  false ,\r\n
+      \ covid19_test_date::varchar || 'T' || covid19_test_time::varchar ,\r\n  null
+      ,\r\n  ipa_id || ': ' || 'COVID-19 test ' ||\r\n  CASE WHEN select_schedule
+      <> '' THEN '(Group ' || upper(select_schedule) || ')'\r\n  ELSE ''\r\n  END\r\n
+      \ ,\r\n  array['report-cal-covidtest-event'] \"classNames\",\r\n  '/masters/'
+      || master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n
+      \ true ,\r\n  visit_start_date::varchar || 'T' || '00:00:00' ,\r\n  null ,\r\n
+      \ ipa_id || ': ' || 'appointment start ' ||\r\n  CASE WHEN select_schedule <>
+      '' THEN '(Group ' || upper(select_schedule) || ')'\r\n  ELSE ''\r\n  END\r\n
+      \ ,\r\n  array['report-cal-start-event'] \"classNames\",\r\n  '/masters/' ||
+      master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n
+      \ follow_up_when::varchar || 'T' || coalesce(follow_up_time, '14:00:00')::varchar,\r\n
       \ NULL,\r\n  ipa_id || ': ' || '(call) ' || replace(extra_log_type, '_', ' '),\r\n
       \ array['report-cal-call-event'] \"classNames\",\r\n  '/masters/' || master_id
       \"url\"\r\nFROM scheduled_calls\r\n\r\n\r\n;\r\n"
@@ -8626,7 +8654,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2019-06-20T13:49:41.435Z'
-    updated_at: '2020-09-11T12:57:10.523Z'
+    updated_at: '2020-09-29T15:34:45.350Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -8639,8 +8667,9 @@ app_type:
     options: "view_options:\r\n  view_as: calendar\r\n  search_button_label: calendar\r\n\r\ncomponent:\r\n
       \ options:\r\n#    height: 200\r\n\r\nview_css:\r\n  classes:\r\n    report-cal-start-event:\r\n
       \     background-color: red\r\n      border-color: red\r\n      text-align:
-      center\r\n    report-cal-call-event:\r\n      background-color: '#080'\r\n      border-color:
-      gray\r\n    "
+      center\r\n    report-cal-covidtest-event:\r\n      background-color: rgb(0,102,255)\r\n
+      \     border-color: rgb(0,102,255)\r\n      text-align: center\r\n    report-cal-call-event:\r\n
+      \     background-color: '#080'\r\n      border-color: gray\r\n    "
     user_email: 
   - id: 259
     name: Search IPA Subject
@@ -9687,28 +9716,25 @@ app_type:
     description: 'All subjects that have joined or exited the study: in process (phone
       screening scheduled), completed, withdrawn, ineligible, not interested (during
       phone screen or follow-up)'
-    sql: "SELECT * from ipa_ops.ipa_participant_exits\r\nWHERE status IN(:select_status)\r\nORDER
-      BY status, \"when\" desc\r\n;\r\n"
+    sql: "SELECT * from ipa_ops.ipa_participant_exits\r\nWHERE (:select_status) IS
+      NULL OR status IN(:select_status)\r\nORDER BY status, \"when\" desc\r\n;\r\n"
     search_attrs: "\r\nselect_status: \r\n  config_selector:\r\n    label: Select
       / de-select statuses to report  \r\n    all: true\r\n    multiple: multiple\r\n
-      \   default: \r\n      - ineligible\r\n      - completed\r\n      - withdrawn\r\n
-      \     - in process\r\n      - not interested during phone screening\r\n      -
-      not interested during screening follow-up\r\n      - opted out\r\n      - 'exit
-      (no COVID-19 test)'\r\n      - 'lost to follow-up (before scheduling)'\r\n    selections:
-      \r\n      ineligible: ineligible\r\n      completed: completed\r\n      withdrawn:
-      withdrawn\r\n      in process: in process\r\n      not interested during phone
-      screening: not interested during phone screening\r\n      not interested during
-      screening follow-up: not interested during screening follow-up\r\n      opted
-      out: opted out\r\n      'exit (no COVID-19 test)': 'exit (no COVID-19 test)'\r\n
-      \     'lost to follow-up (before scheduling)': 'lost to follow-up (before scheduling)'\r\n
+      \   default: \r\n      - on hold\r\n    selections: \r\n      ineligible: ineligible\r\n
+      \     completed: completed\r\n      withdrawn: withdrawn\r\n      in process:
+      in process\r\n      not interested during phone screening: not interested during
+      phone screening\r\n      not interested during screening follow-up: not interested
+      during screening follow-up\r\n      on hold: on hold\r\n      opted out: opted
+      out\r\n      'exit (no COVID-19 test)': 'exit (no COVID-19 test)'\r\n      'lost
+      to follow-up (before scheduling)': 'lost to follow-up (before scheduling)'\r\n
       \     "
     admin_id: 21
     disabled: false
     created_at: '2020-03-09T17:54:55.195Z'
-    updated_at: '2020-09-14T13:46:41.403Z'
-    report_type: regular_report
+    updated_at: '2020-09-29T15:34:45.403Z'
+    report_type: search
     auto: false
-    searchable: false
+    searchable: true
     position: 2
     edit_model: ''
     edit_field_names: ''
@@ -10958,9 +10984,9 @@ app_type:
     value: exit survey
     item_type: dynamic_model__ipa_surveys_select_survey_type
     created_at: '2018-05-29T13:24:49.900Z'
-    updated_at: '2018-05-29T13:24:49.900Z'
+    updated_at: '2020-09-29T15:34:44.155Z'
     disabled: false
-    admin_id: 2
+    admin_id: 21
     create_with: true
     edit_if_set: false
     edit_always: false
@@ -10973,9 +10999,9 @@ app_type:
     value: follow up survey
     item_type: dynamic_model__ipa_surveys_select_survey_type
     created_at: '2018-05-29T13:24:49.905Z'
-    updated_at: '2018-05-29T13:24:49.905Z'
+    updated_at: '2020-09-29T15:34:44.166Z'
     disabled: false
-    admin_id: 2
+    admin_id: 21
     create_with: true
     edit_if_set: false
     edit_always: false
@@ -15162,172 +15188,172 @@ app_type:
     app_type_id: 3
     role_name: tracker
     user_id: 69
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:13:11.061Z'
-    updated_at: '2018-09-05T15:13:11.061Z'
+    updated_at: '2020-09-29T15:34:45.631Z'
     user_email: ipa_rec@fphs2.harvard.edu
   - id: 17
     app_type_id: 3
     role_name: staff - inex
     user_id: 69
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:13:45.231Z'
-    updated_at: '2018-09-05T15:13:45.231Z'
+    updated_at: '2020-09-29T15:34:45.640Z'
     user_email: ipa_rec@fphs2.harvard.edu
   - id: 18
     app_type_id: 3
     role_name: phone screener
     user_id: 69
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:14:16.417Z'
-    updated_at: '2018-09-05T15:14:16.417Z'
+    updated_at: '2020-09-29T15:34:45.649Z'
     user_email: ipa_rec@fphs2.harvard.edu
   - id: 19
     app_type_id: 3
     role_name: user - inex
     user_id: 69
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:15:17.282Z'
-    updated_at: '2018-09-05T15:15:17.282Z'
+    updated_at: '2020-09-29T15:34:45.659Z'
     user_email: ipa_rec@fphs2.harvard.edu
   - id: 20
     app_type_id: 3
     role_name: user - inex
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:15:37.294Z'
-    updated_at: '2018-09-05T15:15:37.294Z'
+    updated_at: '2020-09-29T15:34:45.668Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 21
     app_type_id: 3
     role_name: user - navigation
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:16:00.242Z'
-    updated_at: '2018-09-05T15:16:00.242Z'
+    updated_at: '2020-09-29T15:34:45.678Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 22
     app_type_id: 3
     role_name: user - adverse event
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:16:20.916Z'
-    updated_at: '2018-09-05T15:16:20.916Z'
+    updated_at: '2020-09-29T15:34:45.687Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 23
     app_type_id: 3
     role_name: user - protocol deviation
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:16:37.271Z'
-    updated_at: '2018-09-05T15:16:37.271Z'
+    updated_at: '2020-09-29T15:34:45.696Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 24
     app_type_id: 3
     role_name: user - inex
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:17:29.639Z'
-    updated_at: '2018-09-05T15:17:29.639Z'
+    updated_at: '2020-09-29T15:34:45.705Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 25
     app_type_id: 3
     role_name: pi
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:17:39.760Z'
-    updated_at: '2018-09-05T15:17:39.760Z'
+    updated_at: '2020-09-29T15:34:45.714Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 26
     app_type_id: 3
     role_name: user - adverse event
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:18:08.930Z'
-    updated_at: '2018-09-05T15:18:08.930Z'
+    updated_at: '2020-09-29T15:34:45.723Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 27
     app_type_id: 3
     role_name: user - protocol deviation
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:18:22.206Z'
-    updated_at: '2018-09-05T15:18:22.206Z'
+    updated_at: '2020-09-29T15:34:45.732Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 28
     app_type_id: 3
     role_name: clinical research coordinator
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:19:04.541Z'
-    updated_at: '2018-09-05T15:19:04.541Z'
+    updated_at: '2020-09-29T15:34:45.740Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 29
     app_type_id: 3
     role_name: user - adverse event
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:19:23.726Z'
-    updated_at: '2018-09-05T15:19:23.726Z'
+    updated_at: '2020-09-29T15:34:45.750Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 30
     app_type_id: 3
     role_name: user - protocol deviation
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:19:42.849Z'
-    updated_at: '2018-09-05T15:19:42.849Z'
+    updated_at: '2020-09-29T15:34:45.759Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 31
     app_type_id: 3
     role_name: phone screener
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:20:28.906Z'
-    updated_at: '2018-09-05T15:20:28.906Z'
+    updated_at: '2020-09-29T15:34:45.768Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 32
     app_type_id: 3
     role_name: staff - inex
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-06T10:52:54.164Z'
-    updated_at: '2018-09-06T10:52:54.164Z'
+    updated_at: '2020-09-29T15:34:45.776Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 33
     app_type_id: 3
     role_name: user - inex
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-06T10:53:16.566Z'
-    updated_at: '2018-09-06T10:53:16.566Z'
+    updated_at: '2020-09-29T15:34:45.786Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 34
     app_type_id: 3
     role_name: irb reporting
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-07T12:49:29.844Z'
-    updated_at: '2019-01-15T16:31:52.103Z'
+    updated_at: '2020-09-29T15:34:45.795Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 35
     app_type_id: 3
@@ -15414,19 +15440,19 @@ app_type:
     app_type_id: 3
     role_name: phone screener
     user_id: 2
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-11T16:12:32.658Z'
-    updated_at: '2018-09-11T16:12:32.658Z'
+    updated_at: '2020-09-29T15:34:45.829Z'
     user_email: james_drummey@hms.harvard.edu
   - id: 47
     app_type_id: 3
     role_name: staff - inex
     user_id: 2
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-11T16:12:46.167Z'
-    updated_at: '2018-09-11T16:12:46.167Z'
+    updated_at: '2020-09-29T15:34:45.838Z'
     user_email: james_drummey@hms.harvard.edu
   - id: 48
     app_type_id: 3
@@ -15450,10 +15476,10 @@ app_type:
     app_type_id: 3
     role_name: user - navigation
     user_id: 2
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-11T16:13:20.613Z'
-    updated_at: '2018-09-11T16:13:26.796Z'
+    updated_at: '2020-09-29T15:34:45.863Z'
     user_email: james_drummey@hms.harvard.edu
   - id: 51
     app_type_id: 3
@@ -15513,28 +15539,28 @@ app_type:
     app_type_id: 3
     role_name: email - adverse event review
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-26T14:55:49.332Z'
-    updated_at: '2019-01-08T13:41:27.295Z'
+    updated_at: '2020-09-29T15:34:45.901Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 64
     app_type_id: 3
     role_name: email - adverse event pi
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-26T14:57:10.953Z'
-    updated_at: '2019-01-08T13:41:09.460Z'
+    updated_at: '2020-09-29T15:34:45.910Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 65
     app_type_id: 3
     role_name: email - adverse event irb report
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-26T14:58:39.421Z'
-    updated_at: '2019-01-08T13:45:00.312Z'
+    updated_at: '2020-09-29T15:34:45.922Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 66
     app_type_id: 3
@@ -15549,55 +15575,55 @@ app_type:
     app_type_id: 3
     role_name: nfs_store group 600
     user_id: 69
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-27T11:29:45.764Z'
-    updated_at: '2018-09-27T11:29:45.764Z'
+    updated_at: '2020-09-29T15:34:45.946Z'
     user_email: ipa_rec@fphs2.harvard.edu
   - id: 68
     app_type_id: 3
     role_name: nfs_store group 600
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-27T11:29:57.833Z'
-    updated_at: '2018-09-27T11:29:57.833Z'
+    updated_at: '2020-09-29T15:34:45.958Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 69
     app_type_id: 3
     role_name: nfs_store group 600
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-27T11:30:07.136Z'
-    updated_at: '2018-09-27T11:30:07.136Z'
+    updated_at: '2020-09-29T15:34:45.971Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 70
     app_type_id: 3
     role_name: nfs_store group 600
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-27T11:30:16.444Z'
-    updated_at: '2018-09-27T11:30:16.444Z'
+    updated_at: '2020-09-29T15:34:45.984Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 71
     app_type_id: 3
     role_name: email - protocol deviation review
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-10-11T17:34:37.290Z'
-    updated_at: '2018-10-11T17:34:37.290Z'
+    updated_at: '2020-09-29T15:34:45.996Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 72
     app_type_id: 3
     role_name: email - protocol deviation pi
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-10-11T19:06:40.167Z'
-    updated_at: '2018-10-11T19:06:40.167Z'
+    updated_at: '2020-09-29T15:34:46.005Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 73
     app_type_id: 3
@@ -15630,37 +15656,37 @@ app_type:
     app_type_id: 3
     role_name: baseline creator - inex
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-11-26T14:44:33.441Z'
-    updated_at: '2019-01-04T17:13:32.736Z'
+    updated_at: '2020-09-29T15:34:46.037Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 77
     app_type_id: 3
     role_name: reviewer - inex
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-11-26T14:46:40.840Z'
-    updated_at: '2018-11-26T14:46:40.840Z'
+    updated_at: '2020-09-29T15:34:46.048Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 78
     app_type_id: 3
     role_name: nfs_store group 600
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-11-26T14:47:03.708Z'
-    updated_at: '2018-11-26T14:49:29.213Z'
+    updated_at: '2020-09-29T15:34:46.059Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 79
     app_type_id: 3
     role_name: user - inex
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-11-26T14:47:36.179Z'
-    updated_at: '2018-11-26T14:49:33.283Z'
+    updated_at: '2020-09-29T15:34:46.068Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 80
     app_type_id: 3
@@ -15675,64 +15701,64 @@ app_type:
     app_type_id: 3
     role_name: email - inex reviewer
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-04T14:54:14.196Z'
-    updated_at: '2019-01-04T14:54:14.196Z'
+    updated_at: '2020-09-29T15:34:46.086Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 82
     app_type_id: 3
     role_name: email - inex tms
     user_id: 77
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-04T14:57:00.326Z'
-    updated_at: '2019-01-07T19:02:33.420Z'
+    updated_at: '2020-09-29T15:34:46.096Z'
     user_email: ipa_tms@fphs2.harvard.edu
   - id: 83
     app_type_id: 3
     role_name: reviewer - tms
     user_id: 77
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-04T15:05:07.850Z'
-    updated_at: '2019-01-04T15:05:07.850Z'
+    updated_at: '2020-09-29T15:34:46.105Z'
     user_email: ipa_tms@fphs2.harvard.edu
   - id: 84
     app_type_id: 3
     role_name: baseline creator - inex
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-08T12:38:24.408Z'
-    updated_at: '2019-01-08T12:38:24.408Z'
+    updated_at: '2020-09-29T15:34:46.115Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 85
     app_type_id: 3
     role_name: email - adverse event irb report
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-08T13:45:20.594Z'
-    updated_at: '2019-01-08T13:45:20.594Z'
+    updated_at: '2020-09-29T15:34:46.124Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 86
     app_type_id: 3
     role_name: email - ipa tracker new participant
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-08T13:57:34.645Z'
-    updated_at: '2019-01-08T13:57:34.645Z'
+    updated_at: '2020-09-29T15:34:46.134Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 87
     app_type_id: 3
     role_name: email - ipa tracker new participant
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-08T13:57:42.588Z'
-    updated_at: '2019-01-08T13:57:42.588Z'
+    updated_at: '2020-09-29T15:34:46.143Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 88
     app_type_id: 3
@@ -15747,118 +15773,118 @@ app_type:
     app_type_id: 3
     role_name: sms - inex reviewer
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-08T15:31:15.854Z'
-    updated_at: '2019-01-08T15:31:15.854Z'
+    updated_at: '2020-09-29T15:34:46.204Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 90
     app_type_id: 3
     role_name: sms - inex pi
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T13:18:48.782Z'
-    updated_at: '2019-01-15T13:20:21.218Z'
+    updated_at: '2020-09-29T15:34:46.216Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 91
     app_type_id: 3
     role_name: sms - ipa tracker new participant
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:10:18.776Z'
-    updated_at: '2019-01-15T15:10:18.776Z'
+    updated_at: '2020-09-29T15:34:46.228Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 92
     app_type_id: 3
     role_name: sms - ipa tracker new participant
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:10:28.834Z'
-    updated_at: '2019-01-15T15:10:28.834Z'
+    updated_at: '2020-09-29T15:34:46.239Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 93
     app_type_id: 3
     role_name: sms - adverse event review
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:20:45.115Z'
-    updated_at: '2019-01-15T15:20:45.115Z'
+    updated_at: '2020-09-29T15:34:46.252Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 94
     app_type_id: 3
     role_name: sms - adverse event pi
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:32:27.728Z'
-    updated_at: '2019-01-15T15:32:27.728Z'
+    updated_at: '2020-09-29T15:34:46.262Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 95
     app_type_id: 3
     role_name: sms - adverse event irb report
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:32:50.075Z'
-    updated_at: '2019-01-15T15:32:50.075Z'
+    updated_at: '2020-09-29T15:34:46.271Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 96
     app_type_id: 3
     role_name: sms - protocol deviation review
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:38:01.520Z'
-    updated_at: '2019-01-15T15:38:01.520Z'
+    updated_at: '2020-09-29T15:34:46.281Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 97
     app_type_id: 3
     role_name: sms - protocol deviation pi
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:38:17.738Z'
-    updated_at: '2019-01-15T15:38:17.738Z'
+    updated_at: '2020-09-29T15:34:46.291Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 98
     app_type_id: 3
     role_name: sms - protocol deviation irb report
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:47:47.280Z'
-    updated_at: '2019-01-15T15:47:47.280Z'
+    updated_at: '2020-09-29T15:34:46.302Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 99
     app_type_id: 3
     role_name: reviewer - adverse event
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T16:35:02.675Z'
-    updated_at: '2019-01-15T16:35:02.675Z'
+    updated_at: '2020-09-29T15:34:46.313Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 100
     app_type_id: 3
     role_name: reviewer - protocol deviation
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T16:35:23.632Z'
-    updated_at: '2019-01-15T16:35:23.632Z'
+    updated_at: '2020-09-29T15:34:46.323Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 101
     app_type_id: 3
     role_name: user - navigation
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-03-15T09:01:17.834Z'
-    updated_at: '2019-03-15T09:01:17.834Z'
+    updated_at: '2020-09-29T15:34:46.334Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 102
     app_type_id: 3
@@ -15927,10 +15953,10 @@ app_type:
     app_type_id: 3
     role_name: user - participant details
     user_id: 69
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-03-19T18:01:16.702Z'
-    updated_at: '2019-03-19T18:01:16.702Z'
+    updated_at: '2020-09-29T15:34:46.413Z'
     user_email: ipa_rec@fphs2.harvard.edu
   - id: 110
     app_type_id: 3
@@ -15945,19 +15971,19 @@ app_type:
     app_type_id: 3
     role_name: email - inex crc
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-04-04T07:55:24.359Z'
-    updated_at: '2019-04-04T07:55:24.359Z'
+    updated_at: '2020-09-29T15:34:46.434Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 112
     app_type_id: 3
     role_name: sms - inex crc
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-04-04T07:55:35.206Z'
-    updated_at: '2019-04-04T07:55:35.206Z'
+    updated_at: '2020-09-29T15:34:46.446Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 113
     app_type_id: 3
@@ -15981,19 +16007,19 @@ app_type:
     app_type_id: 3
     role_name: user - mednav
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-05-08T13:50:46.710Z'
-    updated_at: '2019-05-08T13:50:46.710Z'
+    updated_at: '2020-09-29T15:34:46.479Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 118
     app_type_id: 3
     role_name: user - participant details
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-05-08T13:54:52.043Z'
-    updated_at: '2019-05-08T13:54:52.043Z'
+    updated_at: '2020-09-29T15:34:46.488Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 120
     app_type_id: 3
@@ -16431,19 +16457,19 @@ app_type:
     app_type_id: 3
     role_name: pi!
     user_id: 84
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.388Z'
-    updated_at: '2020-01-29T11:53:44.388Z'
+    updated_at: '2020-09-29T15:34:45.558Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 769
     app_type_id: 3
     role_name: pi!
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.395Z'
-    updated_at: '2020-01-29T11:53:44.395Z'
+    updated_at: '2020-09-29T15:34:47.463Z'
     user_email: template@template
   - id: 770
     app_type_id: 3
@@ -16566,10 +16592,10 @@ app_type:
     app_type_id: 3
     role_name: email - adverse event pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.690Z'
-    updated_at: '2020-01-29T11:53:44.690Z'
+    updated_at: '2020-09-29T15:34:47.472Z'
     user_email: template@template
   - id: 784
     app_type_id: 3
@@ -16584,19 +16610,19 @@ app_type:
     app_type_id: 3
     role_name: email - inex pi
     user_id: 84
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.713Z'
-    updated_at: '2020-01-29T11:53:44.713Z'
+    updated_at: '2020-09-29T15:34:45.934Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 786
     app_type_id: 3
     role_name: email - inex pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.717Z'
-    updated_at: '2020-01-29T11:53:44.717Z'
+    updated_at: '2020-09-29T15:34:47.482Z'
     user_email: template@template
   - id: 787
     app_type_id: 3
@@ -16611,10 +16637,10 @@ app_type:
     app_type_id: 3
     role_name: email - protocol deviation pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.762Z'
-    updated_at: '2020-01-29T11:53:44.762Z'
+    updated_at: '2020-09-29T15:34:47.492Z'
     user_email: template@template
   - id: 789
     app_type_id: 3
@@ -16665,10 +16691,10 @@ app_type:
     app_type_id: 3
     role_name: reviewer - tms
     user_id: 84
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.824Z'
-    updated_at: '2020-01-29T11:53:44.824Z'
+    updated_at: '2020-09-29T15:34:46.078Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 795
     app_type_id: 3
@@ -16683,10 +16709,10 @@ app_type:
     app_type_id: 3
     role_name: email - inex tms
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.863Z'
-    updated_at: '2020-01-29T11:53:44.863Z'
+    updated_at: '2020-09-29T15:34:47.511Z'
     user_email: template@template
   - id: 797
     app_type_id: 3
@@ -16701,37 +16727,37 @@ app_type:
     app_type_id: 3
     role_name: sms - inex reviewer
     user_id: 84
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.909Z'
-    updated_at: '2020-01-29T11:53:44.909Z'
+    updated_at: '2020-09-29T15:34:46.193Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 799
     app_type_id: 3
     role_name: sms - inex reviewer
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.913Z'
-    updated_at: '2020-01-29T11:53:44.913Z'
+    updated_at: '2020-09-29T15:34:47.521Z'
     user_email: template@template
   - id: 800
     app_type_id: 3
     role_name: sms - inex pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.930Z'
-    updated_at: '2020-01-29T11:53:44.930Z'
+    updated_at: '2020-09-29T15:34:47.532Z'
     user_email: template@template
   - id: 801
     app_type_id: 3
     role_name: sms - ipa tracker new participant
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.943Z'
-    updated_at: '2020-01-29T11:53:44.943Z'
+    updated_at: '2020-09-29T15:34:47.541Z'
     user_email: template@template
   - id: 802
     app_type_id: 3
@@ -16746,10 +16772,10 @@ app_type:
     app_type_id: 3
     role_name: sms - adverse event pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.972Z'
-    updated_at: '2020-01-29T11:53:44.972Z'
+    updated_at: '2020-09-29T15:34:47.552Z'
     user_email: template@template
   - id: 804
     app_type_id: 3
@@ -16773,10 +16799,10 @@ app_type:
     app_type_id: 3
     role_name: sms - protocol deviation pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:45.006Z'
-    updated_at: '2020-01-29T11:53:45.006Z'
+    updated_at: '2020-09-29T15:34:47.563Z'
     user_email: template@template
   - id: 807
     app_type_id: 3
@@ -16836,10 +16862,10 @@ app_type:
     app_type_id: 3
     role_name: pi
     user_id: 84
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:45.078Z'
-    updated_at: '2020-01-29T11:53:45.078Z'
+    updated_at: '2020-09-29T15:34:46.363Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 814
     app_type_id: 3
@@ -16899,19 +16925,19 @@ app_type:
     app_type_id: 3
     role_name: email - inex crc
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:45.141Z'
-    updated_at: '2020-01-29T11:53:45.141Z'
+    updated_at: '2020-09-29T15:34:47.574Z'
     user_email: template@template
   - id: 821
     app_type_id: 3
     role_name: sms - inex crc
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:45.156Z'
-    updated_at: '2020-01-29T11:53:45.156Z'
+    updated_at: '2020-09-29T15:34:47.584Z'
     user_email: template@template
   - id: 822
     app_type_id: 3
@@ -17462,6 +17488,87 @@ app_type:
     created_at: '2020-09-11T13:06:06.551Z'
     updated_at: '2020-09-11T13:06:06.551Z'
     user_email: 
+  - id: 1050
+    app_type_id: 3
+    role_name: sms - navigator
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.039Z'
+    updated_at: '2020-09-29T15:34:47.039Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1051
+    app_type_id: 3
+    role_name: email - navigator
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.064Z'
+    updated_at: '2020-09-29T15:34:47.064Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1052
+    app_type_id: 3
+    role_name: email - crc
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.086Z'
+    updated_at: '2020-09-29T15:34:47.086Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1053
+    app_type_id: 3
+    role_name: sms - crc
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.106Z'
+    updated_at: '2020-09-29T15:34:47.106Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1054
+    app_type_id: 3
+    role_name: sms - mednav
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.127Z'
+    updated_at: '2020-09-29T15:34:47.127Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1055
+    app_type_id: 3
+    role_name: email - mednav
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.143Z'
+    updated_at: '2020-09-29T15:34:47.143Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1056
+    app_type_id: 3
+    role_name: email - tms
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.161Z'
+    updated_at: '2020-09-29T15:34:47.161Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1057
+    app_type_id: 3
+    role_name: sms - tms
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.178Z'
+    updated_at: '2020-09-29T15:34:47.178Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1058
+    app_type_id: 3
+    role_name: user - mrn
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.688Z'
+    updated_at: '2020-09-29T15:34:47.688Z'
+    user_email: template@template
   associated_message_templates:
   - id: 4
     name: ipa ps intro
