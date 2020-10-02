@@ -118,10 +118,13 @@ a.open-in-new-window:after {
 
 a.navbar-brand {
   padding-top: 4px;
+  padding-bottom: 4px;
   background-color: white;
   > img {
-    width: 200px;
+    width: auto;
     height: auto;
+    max-width: 100%;
+    max-height: 100%;
   }
 }
 

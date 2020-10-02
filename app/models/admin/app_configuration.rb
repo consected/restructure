@@ -24,6 +24,7 @@ class Admin::AppConfiguration < Admin::AdminBase
       'header subject data type', 'hide navbar search', 'hide player accuracy',
       'hide player tabs', 'hide pro info', 'hide search form advanced', 'hide search form searchable reports',
       'hide search form simple', 'hide tracker panel', 'heading create master record label', 'filestore directory id',
+      'logo filename',
       'master header prefix', 'menu create master record label',
       'menu research label', 'notes field caption', 'notes field format', 'open panels',
       'prevent reload master list', 'reports list title', 'report library button label',

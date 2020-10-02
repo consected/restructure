@@ -42,7 +42,7 @@ fi
 
 if [ "$TEMP_ENV" == 'athena-demo' ]; then
   TEMP_DBNAME=ebdb
-  DB_SEARCH_PATH='ml_app,data_requests, ipa_ops,q1,q2'
+  DB_SEARCH_PATH='ml_app,data_requests,ipa_ops,q1,q2'
   TEMP_HOSTNAME='fphs-aws-db-dev01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
