@@ -6,8 +6,9 @@ class Admin::AppTypesController < AdminController
 
   def restart_server
     AppControl.restart_server
-    flash.now[:notice] = 'Restarting'
-    render json: 'Restarting'
+    Rails.cache.clear
+    flash.now[:notice] = 'Restarting server and clearing cache'
+    render json: 'Restarting server and clearing cache'
   end
 
   def upload
@@ -36,6 +37,8 @@ class Admin::AppTypesController < AdminController
       @primary = YAML.dump results
     end
 
+    Rails.cache.clear
+    
     render 'upload_results'
   end
 
