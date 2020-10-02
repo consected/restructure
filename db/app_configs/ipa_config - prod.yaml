@@ -4346,6 +4346,71 @@ app_type:
     created_at: '2020-09-17T08:32:14.320Z'
     updated_at: '2020-09-17T08:32:14.320Z'
     user_email: 
+  - id: 1432
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_covid_prescreenings
+    options: 
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: _app_
+    created_at: '2020-10-02T09:23:40.707Z'
+    updated_at: '2020-10-02T09:23:40.707Z'
+    user_email: 
+  - id: 1433
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__previsit_covid_screening
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: tracker
+    created_at: '2020-10-02T09:23:40.714Z'
+    updated_at: '2020-10-02T09:23:40.714Z'
+    user_email: 
+  - id: 1434
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__previsit_covid_screening
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: user - mednav
+    created_at: '2020-10-02T09:23:40.721Z'
+    updated_at: '2020-10-02T09:23:40.721Z'
+    user_email: 
+  - id: 1435
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_covid_prescreenings
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: tracker
+    created_at: '2020-10-02T09:23:40.728Z'
+    updated_at: '2020-10-02T09:23:40.728Z'
+    user_email: 
+  - id: 1436
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_covid_prescreenings
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: user - mednav
+    created_at: '2020-10-02T09:23:40.735Z'
+    updated_at: '2020-10-02T09:23:40.735Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 4
     name: Protocol Deviations & Exceptions
@@ -5320,7 +5385,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-01-17T11:50:56.307Z'
-    updated_at: '2020-09-17T08:49:15.056Z'
+    updated_at: '2020-10-02T09:23:34.612Z'
     action_when_attribute: activity_date
     field_list: ''
     blank_log_field_list: ''
@@ -5402,14 +5467,18 @@ app_type:
       \         panel_tab: activity-log--ipa-assignments\r\n          item_id: \"{{id}}\"\r\n
       \         \r\n        \r\n      - type: sms\r\n        role: sms - ipa tracker
       new participant\r\n        layout_template: standard sms layout\r\n        content_template:
-      ipa sms notification\r\n        subject: New IPA Participant\r\n\r\n\r\ncontact_info:\r\n
-      \ label: Emergency Contacts\r\n  fields:\r\n\r\n  caption_before:\r\n    all_fields:
-      One or more emergency contacts should be added.\r\n    submit: When multiple
-      have been added do not edit the block directly.\r\n    metadata: Expand items
-      in the list above to view and allow editing. To remove an item, edit it and
-      select rank '0 - Not Used'.\r\n  references:\r\n\r\n    dynamic_model__emergency_contact:\r\n
-      \     from: master\r\n      add: many\r\n      prevent_disable: true\r\n\r\n
-      \ creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
+      ipa sms notification\r\n        subject: New IPA Participant\r\n\r\n\r\nprevisit_covid_screening:\r\n
+      \ label: Pre-Visit COVID Screening\r\n  references:\r\n\r\n    dynamic_model__ipa_covid_prescreening:\r\n
+      \     from: master\r\n      add: one_to_this\r\n      prevent_disable: true\r\n
+      \ \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
+      \       extra_log_type: appointment\r\n\r\n\r\ncontact_info:\r\n  label: Emergency
+      Contacts\r\n  fields:\r\n\r\n  caption_before:\r\n    all_fields: One or more
+      emergency contacts should be added.\r\n    submit: When multiple have been added
+      do not edit the block directly.\r\n    metadata: Expand items in the list above
+      to view and allow editing. To remove an item, edit it and select rank '0 - Not
+      Used'.\r\n  references:\r\n\r\n    dynamic_model__emergency_contact:\r\n      from:
+      master\r\n      add: many\r\n      prevent_disable: true\r\n\r\n  creatable_if:\r\n
+      \   <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
       \       extra_log_type: appointment\r\n\r\n\r\nmrn:\r\n  label: MRN\r\n  fields:\r\n\r\n
       \ references:\r\n    mrn_number:\r\n      from: master\r\n      add: many\r\n
       \     prevent_disable: true\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
@@ -6100,14 +6169,14 @@ app_type:
   - id: 6
     name: Emergency Contact
     table_name: emergency_contacts
-    schema_name: 
+    schema_name: ''
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
     admin_id: 4
     disabled: false
     created_at: '2019-01-17T11:50:28.718Z'
-    updated_at: '2019-01-17T11:50:28.718Z'
+    updated_at: '2020-10-02T09:23:33.829Z'
     position: 
     category: details
     table_key_name: ''
@@ -7952,6 +8021,50 @@ app_type:
     result_order: ''
     options: "default:\r\n  fields:\r\n    - select_survey_type\r\n    - sent_date\r\n
       \   - completed_date\r\n#    - send_next_survey_when\r\n    - notes"
+    user_email: 
+  - id: 134
+    name: Pre-Arrival COVID-19 Screening
+    table_name: ipa_covid_prescreenings
+    schema_name: ipa_ops
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2020-10-02T09:23:34.425Z'
+    updated_at: '2020-10-02T09:23:34.425Z'
+    position: 
+    category: ipa-records
+    table_key_name: ''
+    field_list: foreign_travel_yes_no covid_tested_yes_no select_test_result test_date
+      test_location_notes covid_contact_yes_no_dont_know contact_date household_isolation_yes_no
+      fever_yes_no tag_select_symptoms notes
+    result_order: created_at
+    options: "default:\r\n\r\n  field_options:\r\n    tag_select_symptoms:\r\n      edit_as:\r\n
+      \       alt_options:\r\n          Fever (100.4 deg F or feeling feverish): fever\r\n
+      \         Cough: cough\r\n          Shortness of breath: shortness of breath\r\n
+      \         Muscle aches: muscle aches\r\n          Runny nose / nasal congestion:
+      runny nose / nasal congestion\r\n          Sore throat: sore throat\r\n          Loss
+      of smell or taste: loss of smell or taste\r\n          Rash: rash\r\n    select_test_result:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          - negative\r\n          -
+      positive\r\n          - pending\r\n          - \"don't know\"\r\n  \r\n  \r\n
+      \ show_if:\r\n    select_test_result:\r\n      covid_tested_yes_no: 'yes'\r\n
+      \   test_date:\r\n      covid_tested_yes_no: 'yes'\r\n    test_location_notes:
+      \r\n      covid_tested_yes_no: 'yes'\r\n    contact_date:\r\n      covid_contact_yes_no_dont_know:
+      'yes'\r\n\r\n  caption_before: \r\n    all_fields: |\r\n      Use this tool
+      72 hours prior to participant arrival. If participant \r\n      answers **YES**
+      to any of these questions connect them to the \r\n      medical Navigation Nurse.\r\n\r\n
+      \   foreign_travel_yes_no: Have you travelled outside the U.S. in the last 30
+      days?\r\n    covid_tested_yes_no: Have you been tested for COVID-19 outside
+      of Partners?\r\n    select_test_result: What was the result of your test?\r\n
+      \   test_date: What was the date of your test?\r\n    test_location_notes: Where
+      did you get your test?\r\n    covid_contact_yes_no_dont_know: |\r\n      Have
+      you had contact with anyone with a confirmed or \r\n      suspected case COVID-19?\r\n
+      \   contact_date: What was the most recent contact date?\r\n    household_isolation_yes_no:
+      Are you or a household member currently on home isolation or quarantined?\r\n
+      \   fever_yes_no: Have you had a fever or felt feverish in the past 24 hours?\r\n
+      \   tag_select_symptoms: Do you have any of the following NEW symptoms?\r\n
+      \   notes: Additional notes"
     user_email: 
   - id: 29
     name: Tech Contact
@@ -15077,18 +15190,18 @@ app_type:
     role_name: reviewer - tms
     user_id: 1
     admin_id: 4
-    disabled: true
+    disabled: false
     created_at: '2019-01-17T11:51:02.774Z'
-    updated_at: '2020-09-15T08:52:40.626Z'
+    updated_at: '2020-10-02T09:23:36.871Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 44
     app_type_id: 9
     role_name: pi
     user_id: 1
     admin_id: 4
-    disabled: true
+    disabled: false
     created_at: '2019-01-17T11:51:02.781Z'
-    updated_at: '2020-09-15T08:52:03.048Z'
+    updated_at: '2020-10-02T09:23:36.929Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 45
     app_type_id: 9
@@ -15248,9 +15361,9 @@ app_type:
     role_name: sms - inex reviewer
     user_id: 1
     admin_id: 4
-    disabled: true
+    disabled: false
     created_at: '2019-01-17T11:51:02.947Z'
-    updated_at: '2020-09-15T08:53:11.052Z'
+    updated_at: '2020-10-02T09:23:36.890Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 95
     app_type_id: 9
@@ -17246,9 +17359,9 @@ app_type:
     role_name: pi!
     user_id: 1
     admin_id: 4
-    disabled: true
+    disabled: false
     created_at: '2019-06-24T10:37:12.145Z'
-    updated_at: '2020-09-15T08:52:07.962Z'
+    updated_at: '2020-10-02T09:23:36.714Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 559
     app_type_id: 9
@@ -17264,9 +17377,9 @@ app_type:
     role_name: email - inex pi
     user_id: 1
     admin_id: 4
-    disabled: true
+    disabled: false
     created_at: '2019-06-24T10:37:12.296Z'
-    updated_at: '2020-09-15T08:51:25.866Z'
+    updated_at: '2020-10-02T09:23:36.825Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 561
     app_type_id: 9
@@ -17569,10 +17682,10 @@ app_type:
     app_type_id: 9
     role_name: user - mednav
     user_id: 23
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-08-15T15:47:25.500Z'
-    updated_at: '2019-08-15T15:47:25.500Z'
+    updated_at: '2020-10-02T09:23:38.157Z'
     user_email: aconnor@bidmc.harvard.edu
   - id: 642
     app_type_id: 9
@@ -18361,181 +18474,181 @@ app_type:
     app_type_id: 9
     role_name: email - adverse event irb report
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:18:21.632Z'
-    updated_at: '2019-10-29T13:18:21.632Z'
+    updated_at: '2020-10-02T09:23:38.180Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 761
     app_type_id: 9
     role_name: email - adverse event review
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:18:28.698Z'
-    updated_at: '2019-10-29T13:18:28.698Z'
+    updated_at: '2020-10-02T09:23:38.192Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 762
     app_type_id: 9
     role_name: email - protocol deviation irb report
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:18:36.891Z'
-    updated_at: '2019-10-29T13:18:36.891Z'
+    updated_at: '2020-10-02T09:23:38.202Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 763
     app_type_id: 9
     role_name: email - protocol deviation review
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:18:47.289Z'
-    updated_at: '2019-10-29T13:18:47.289Z'
+    updated_at: '2020-10-02T09:23:38.216Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 764
     app_type_id: 9
     role_name: irb reporting
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:18:56.752Z'
-    updated_at: '2019-10-29T13:18:56.752Z'
+    updated_at: '2020-10-02T09:23:38.227Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 765
     app_type_id: 9
     role_name: nfs_store group 600
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:19:03.166Z'
-    updated_at: '2019-10-29T13:19:03.166Z'
+    updated_at: '2020-10-02T09:23:38.238Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 766
     app_type_id: 9
     role_name: phone screener
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:19:13.511Z'
-    updated_at: '2019-10-29T13:19:13.511Z'
+    updated_at: '2020-10-02T09:23:38.249Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 767
     app_type_id: 9
     role_name: reviewer - adverse event
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:23:42.089Z'
-    updated_at: '2019-10-29T13:23:42.089Z'
+    updated_at: '2020-10-02T09:23:38.259Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 768
     app_type_id: 9
     role_name: reviewer - protocol deviation
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:23:51.802Z'
-    updated_at: '2019-10-29T13:23:51.802Z'
+    updated_at: '2020-10-02T09:23:38.269Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 769
     app_type_id: 9
     role_name: staff - inex
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:24:24.976Z'
-    updated_at: '2019-10-29T13:24:24.976Z'
+    updated_at: '2020-10-02T09:23:38.282Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 770
     app_type_id: 9
     role_name: tracker
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:24:34.719Z'
-    updated_at: '2019-10-29T13:24:34.719Z'
+    updated_at: '2020-10-02T09:23:38.292Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 771
     app_type_id: 9
     role_name: user - adverse event
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:24:44.181Z'
-    updated_at: '2019-10-29T13:24:44.181Z'
+    updated_at: '2020-10-02T09:23:38.302Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 772
     app_type_id: 9
     role_name: user - dashboards
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:24:55.143Z'
-    updated_at: '2019-10-29T13:24:55.143Z'
+    updated_at: '2020-10-02T09:23:38.316Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 773
     app_type_id: 9
     role_name: user - inex
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:25:04.861Z'
-    updated_at: '2019-10-29T13:25:04.861Z'
+    updated_at: '2020-10-02T09:23:38.326Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 774
     app_type_id: 9
     role_name: user - navigation
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:25:14.737Z'
-    updated_at: '2019-10-29T13:25:14.737Z'
+    updated_at: '2020-10-02T09:23:38.338Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 775
     app_type_id: 9
     role_name: user - participant details
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:25:25.225Z'
-    updated_at: '2019-10-29T13:25:25.225Z'
+    updated_at: '2020-10-02T09:23:38.350Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 776
     app_type_id: 9
     role_name: user - phone screen
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:25:33.678Z'
-    updated_at: '2019-10-29T13:25:33.678Z'
+    updated_at: '2020-10-02T09:23:38.360Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 777
     app_type_id: 9
     role_name: user - protocol deviation
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:25:44.525Z'
-    updated_at: '2019-10-29T13:25:44.525Z'
+    updated_at: '2020-10-02T09:23:38.371Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 778
     app_type_id: 9
     role_name: user - protocol exception
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:25:55.225Z'
-    updated_at: '2019-10-29T13:25:55.225Z'
+    updated_at: '2020-10-02T09:23:38.381Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 779
     app_type_id: 9
     role_name: user - summary
     user_id: 73
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2019-10-29T13:26:04.220Z'
-    updated_at: '2019-10-29T13:26:04.220Z'
+    updated_at: '2020-10-02T09:23:38.392Z'
     user_email: taylor_panczyk@hms.harvard.edu
   - id: 780
     app_type_id: 9
@@ -18721,10 +18834,10 @@ app_type:
     app_type_id: 9
     role_name: user - dashboards
     user_id: 23
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2020-02-14T15:42:38.529Z'
-    updated_at: '2020-02-14T15:42:38.529Z'
+    updated_at: '2020-10-02T09:23:38.404Z'
     user_email: aconnor@bidmc.harvard.edu
   - id: 1357
     app_type_id: 9
@@ -19801,10 +19914,10 @@ app_type:
     app_type_id: 9
     role_name: nfs_store group 600
     user_id: 95
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2020-05-21T15:31:50.293Z'
-    updated_at: '2020-05-21T15:31:50.293Z'
+    updated_at: '2020-10-02T09:23:38.462Z'
     user_email: heather_digregorio@hms.harvard.edu
   - id: 1579
     app_type_id: 9
@@ -19891,10 +20004,10 @@ app_type:
     app_type_id: 9
     role_name: tracker
     user_id: 95
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2020-05-21T15:31:50.386Z'
-    updated_at: '2020-05-21T15:31:50.386Z'
+    updated_at: '2020-10-02T09:23:38.473Z'
     user_email: heather_digregorio@hms.harvard.edu
   - id: 1589
     app_type_id: 9
@@ -19936,10 +20049,10 @@ app_type:
     app_type_id: 9
     role_name: user - participant details
     user_id: 95
-    admin_id: 5
+    admin_id: 4
     disabled: false
     created_at: '2020-05-21T15:31:50.432Z'
-    updated_at: '2020-05-21T15:36:28.195Z'
+    updated_at: '2020-10-02T09:23:38.483Z'
     user_email: heather_digregorio@hms.harvard.edu
   - id: 1594
     app_type_id: 9
@@ -20129,6 +20242,87 @@ app_type:
     disabled: false
     created_at: '2020-09-14T18:08:48.363Z'
     updated_at: '2020-09-14T18:08:48.363Z'
+    user_email: template@template
+  - id: 1766
+    app_type_id: 9
+    role_name: sms - navigator
+    user_id: 1
+    admin_id: 4
+    disabled: false
+    created_at: '2020-10-02T09:23:37.477Z'
+    updated_at: '2020-10-02T09:23:37.477Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1767
+    app_type_id: 9
+    role_name: email - navigator
+    user_id: 1
+    admin_id: 4
+    disabled: false
+    created_at: '2020-10-02T09:23:37.495Z'
+    updated_at: '2020-10-02T09:23:37.495Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1768
+    app_type_id: 9
+    role_name: email - crc
+    user_id: 1
+    admin_id: 4
+    disabled: false
+    created_at: '2020-10-02T09:23:37.513Z'
+    updated_at: '2020-10-02T09:23:37.513Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1769
+    app_type_id: 9
+    role_name: sms - crc
+    user_id: 1
+    admin_id: 4
+    disabled: false
+    created_at: '2020-10-02T09:23:37.532Z'
+    updated_at: '2020-10-02T09:23:37.532Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1770
+    app_type_id: 9
+    role_name: sms - mednav
+    user_id: 1
+    admin_id: 4
+    disabled: false
+    created_at: '2020-10-02T09:23:37.550Z'
+    updated_at: '2020-10-02T09:23:37.550Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1771
+    app_type_id: 9
+    role_name: email - mednav
+    user_id: 1
+    admin_id: 4
+    disabled: false
+    created_at: '2020-10-02T09:23:37.568Z'
+    updated_at: '2020-10-02T09:23:37.568Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1772
+    app_type_id: 9
+    role_name: email - tms
+    user_id: 1
+    admin_id: 4
+    disabled: false
+    created_at: '2020-10-02T09:23:37.587Z'
+    updated_at: '2020-10-02T09:23:37.587Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1773
+    app_type_id: 9
+    role_name: sms - tms
+    user_id: 1
+    admin_id: 4
+    disabled: false
+    created_at: '2020-10-02T09:23:37.605Z'
+    updated_at: '2020-10-02T09:23:37.605Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1774
+    app_type_id: 9
+    role_name: user - mrn
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-10-02T09:23:38.116Z'
+    updated_at: '2020-10-02T09:23:38.116Z'
     user_email: template@template
   associated_message_templates:
   - id: 7

@@ -18,7 +18,7 @@ export FILESTORE_CONFIG_SKIP=true
 
 if [ "$TEMP_ENV" == 'athena-production' ]; then
   TEMP_DBNAME=fphs
-  DB_SEARCH_PATH='ml_app'
+  DB_SEARCH_PATH='ipa_ops,ml_app'
   TEMP_HOSTNAME='fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 

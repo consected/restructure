@@ -4368,6 +4368,71 @@ app_type:
     created_at: '2020-09-29T15:34:50.543Z'
     updated_at: '2020-09-29T15:34:50.543Z'
     user_email: 
+  - id: 2648
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_covid_prescreenings
+    options: 
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: _app_
+    created_at: '2020-09-29T15:57:10.835Z'
+    updated_at: '2020-09-29T15:57:10.835Z'
+    user_email: 
+  - id: 2649
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__previsit_covid_screening
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: tracker
+    created_at: '2020-09-29T17:28:47.720Z'
+    updated_at: '2020-09-29T17:28:47.720Z'
+    user_email: 
+  - id: 2650
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__previsit_covid_screening
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: user - mednav
+    created_at: '2020-09-29T17:29:34.937Z'
+    updated_at: '2020-09-29T17:29:34.937Z'
+    user_email: 
+  - id: 2651
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_covid_prescreenings
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: tracker
+    created_at: '2020-09-29T17:30:08.133Z'
+    updated_at: '2020-09-29T17:30:08.133Z'
+    user_email: 
+  - id: 2652
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_covid_prescreenings
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: user - mednav
+    created_at: '2020-09-29T17:30:26.056Z'
+    updated_at: '2020-09-29T17:30:26.056Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 47
     name: Protocol Deviations & Exceptions
@@ -5342,7 +5407,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2018-05-31T14:56:43.064Z'
-    updated_at: '2020-09-29T15:34:43.363Z'
+    updated_at: '2020-09-29T17:28:14.884Z'
     action_when_attribute: activity_date
     field_list: ''
     blank_log_field_list: ''
@@ -5424,14 +5489,18 @@ app_type:
       \         panel_tab: activity-log--ipa-assignments\r\n          item_id: \"{{id}}\"\r\n
       \         \r\n        \r\n      - type: sms\r\n        role: sms - ipa tracker
       new participant\r\n        layout_template: standard sms layout\r\n        content_template:
-      ipa sms notification\r\n        subject: New IPA Participant\r\n\r\n\r\ncontact_info:\r\n
-      \ label: Emergency Contacts\r\n  fields:\r\n\r\n  caption_before:\r\n    all_fields:
-      One or more emergency contacts should be added.\r\n    submit: When multiple
-      have been added do not edit the block directly.\r\n    metadata: Expand items
-      in the list above to view and allow editing. To remove an item, edit it and
-      select rank '0 - Not Used'.\r\n  references:\r\n\r\n    dynamic_model__emergency_contact:\r\n
-      \     from: master\r\n      add: many\r\n      prevent_disable: true\r\n\r\n
-      \ creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
+      ipa sms notification\r\n        subject: New IPA Participant\r\n\r\n\r\nprevisit_covid_screening:\r\n
+      \ label: Pre-Visit COVID Screening\r\n  references:\r\n\r\n    dynamic_model__ipa_covid_prescreening:\r\n
+      \     from: master\r\n      add: one_to_this\r\n      prevent_disable: true\r\n
+      \ \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
+      \       extra_log_type: appointment\r\n\r\n\r\ncontact_info:\r\n  label: Emergency
+      Contacts\r\n  fields:\r\n\r\n  caption_before:\r\n    all_fields: One or more
+      emergency contacts should be added.\r\n    submit: When multiple have been added
+      do not edit the block directly.\r\n    metadata: Expand items in the list above
+      to view and allow editing. To remove an item, edit it and select rank '0 - Not
+      Used'.\r\n  references:\r\n\r\n    dynamic_model__emergency_contact:\r\n      from:
+      master\r\n      add: many\r\n      prevent_disable: true\r\n\r\n  creatable_if:\r\n
+      \   <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
       \       extra_log_type: appointment\r\n\r\n\r\nmrn:\r\n  label: MRN\r\n  fields:\r\n\r\n
       \ references:\r\n    mrn_number:\r\n      from: master\r\n      add: many\r\n
       \     prevent_disable: true\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
@@ -6122,14 +6191,14 @@ app_type:
   - id: 181
     name: Emergency Contact
     table_name: emergency_contacts
-    schema_name: 
+    schema_name: ''
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
     admin_id: 21
     disabled: false
     created_at: '2018-05-31T14:52:11.628Z'
-    updated_at: '2020-09-11T12:57:05.643Z'
+    updated_at: '2020-10-01T11:04:33.589Z'
     position: 
     category: details
     table_key_name: ''
@@ -7974,6 +8043,50 @@ app_type:
     result_order: ''
     options: "default:\r\n  fields:\r\n    - select_survey_type\r\n    - sent_date\r\n
       \   - completed_date\r\n#    - send_next_survey_when\r\n    - notes"
+    user_email: 
+  - id: 673
+    name: Pre-Arrival COVID-19 Screening
+    table_name: ipa_covid_prescreenings
+    schema_name: ipa_ops
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:57:10.622Z'
+    updated_at: '2020-09-29T17:48:15.729Z'
+    position: 
+    category: ipa-records
+    table_key_name: ''
+    field_list: foreign_travel_yes_no covid_tested_yes_no select_test_result test_date
+      test_location_notes covid_contact_yes_no_dont_know contact_date household_isolation_yes_no
+      fever_yes_no tag_select_symptoms notes
+    result_order: created_at
+    options: "default:\r\n\r\n  field_options:\r\n    tag_select_symptoms:\r\n      edit_as:\r\n
+      \       alt_options:\r\n          Fever (100.4 deg F or feeling feverish): fever\r\n
+      \         Cough: cough\r\n          Shortness of breath: shortness of breath\r\n
+      \         Muscle aches: muscle aches\r\n          Runny nose / nasal congestion:
+      runny nose / nasal congestion\r\n          Sore throat: sore throat\r\n          Loss
+      of smell or taste: loss of smell or taste\r\n          Rash: rash\r\n    select_test_result:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          - negative\r\n          -
+      positive\r\n          - pending\r\n          - \"don't know\"\r\n  \r\n  \r\n
+      \ show_if:\r\n    select_test_result:\r\n      covid_tested_yes_no: 'yes'\r\n
+      \   test_date:\r\n      covid_tested_yes_no: 'yes'\r\n    test_location_notes:
+      \r\n      covid_tested_yes_no: 'yes'\r\n    contact_date:\r\n      covid_contact_yes_no_dont_know:
+      'yes'\r\n\r\n  caption_before: \r\n    all_fields: |\r\n      Use this tool
+      72 hours prior to participant arrival. If participant \r\n      answers **YES**
+      to any of these questions connect them to the \r\n      medical Navigation Nurse.\r\n\r\n
+      \   foreign_travel_yes_no: Have you travelled outside the U.S. in the last 30
+      days?\r\n    covid_tested_yes_no: Have you been tested for COVID-19 outside
+      of Partners?\r\n    select_test_result: What was the result of your test?\r\n
+      \   test_date: What was the date of your test?\r\n    test_location_notes: Where
+      did you get your test?\r\n    covid_contact_yes_no_dont_know: |\r\n      Have
+      you had contact with anyone with a confirmed or \r\n      suspected case COVID-19?\r\n
+      \   contact_date: What was the most recent contact date?\r\n    household_isolation_yes_no:
+      Are you or a household member currently on home isolation or quarantined?\r\n
+      \   fever_yes_no: Have you had a fever or felt feverish in the past 24 hours?\r\n
+      \   tag_select_symptoms: Do you have any of the following NEW symptoms?\r\n
+      \   notes: Additional notes"
     user_email: 
   - id: 200
     name: IPA Withdrawal
