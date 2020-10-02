@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_01_120642) do
+ActiveRecord::Schema.define(version: 2020_10_02_122005) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -8187,22 +8187,6 @@ ActiveRecord::Schema.define(version: 2020_10_01_120642) do
     t.boolean "added_tracker"
   end
 
-  create_table "related_subject", force: :cascade do |t|
-    t.bigint "master_id"
-    t.bigint "contact_master_id"
-    t.string "rec_type"
-    t.string "data"
-    t.string "first_name"
-    t.string "last_name"
-    t.string "select_relationship"
-    t.integer "rank"
-    t.bigint "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["master_id"], name: "index_ipa_ops.related_subject_on_master_id"
-    t.index ["user_id"], name: "index_ipa_ops.related_subject_on_user_id"
-  end
-
   create_table "related_subject_history", force: :cascade do |t|
     t.bigint "master_id"
     t.bigint "contact_master_id"
@@ -8216,9 +8200,25 @@ ActiveRecord::Schema.define(version: 2020_10_01_120642) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "related_subject_id"
-    t.index ["master_id"], name: "d541cadb_history_master_id"
-    t.index ["related_subject_id"], name: "d541cadb_id_idx"
-    t.index ["user_id"], name: "d541cadb_user_idx"
+    t.index ["master_id"], name: "36795ebf_history_master_id"
+    t.index ["related_subject_id"], name: "36795ebf_id_idx"
+    t.index ["user_id"], name: "36795ebf_user_idx"
+  end
+
+  create_table "related_subjects", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "contact_master_id"
+    t.string "rec_type"
+    t.string "data"
+    t.string "first_name"
+    t.string "last_name"
+    t.string "select_relationship"
+    t.integer "rank"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_femfl.related_subjects_on_master_id"
+    t.index ["user_id"], name: "index_femfl.related_subjects_on_user_id"
   end
 
   create_table "report_history", id: :serial, force: :cascade do |t|
@@ -11693,8 +11693,6 @@ ActiveRecord::Schema.define(version: 2020_10_01_120642) do
     t.date "send_date"
     t.time "send_time"
     t.string "status"
-    t.string "cancel"
-    t.string "ready"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -11781,8 +11779,6 @@ ActiveRecord::Schema.define(version: 2020_10_01_120642) do
     t.date "send_date"
     t.time "send_time"
     t.string "status"
-    t.string "cancel"
-    t.string "ready"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -12975,11 +12971,11 @@ ActiveRecord::Schema.define(version: 2020_10_01_120642) do
   add_foreign_key "q2_data", "masters", column: "redcap_survey_identifier", primary_key: "msid", name: "q2_data_msid"
   add_foreign_key "rc_cis", "masters", name: "rc_cis_master_id_fkey"
   add_foreign_key "rc_femfl_cif", "masters"
-  add_foreign_key "related_subject", "masters"
-  add_foreign_key "related_subject", "users"
   add_foreign_key "related_subject_history", "masters"
-  add_foreign_key "related_subject_history", "related_subject"
+  add_foreign_key "related_subject_history", "related_subjects"
   add_foreign_key "related_subject_history", "users"
+  add_foreign_key "related_subjects", "masters"
+  add_foreign_key "related_subjects", "users"
   add_foreign_key "report_history", "reports", name: "fk_report_history_reports"
   add_foreign_key "reports", "admins"
   add_foreign_key "sage_assignments", "admins"

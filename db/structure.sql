@@ -338,6 +338,33 @@ CREATE FUNCTION bulk_msg.log_zeus_bulk_message_update() RETURNS trigger
 
 
 --
+-- Name: log_zeus_bulk_messages_update(); Type: FUNCTION; Schema: bulk_msg; Owner: -
+--
+
+CREATE FUNCTION bulk_msg.log_zeus_bulk_messages_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO zeus_bulk_message_history (
+    master_id,
+    name, notes, channel, message, send_date, send_time, status,
+    user_id,
+    created_at,
+    updated_at,
+    zeus_bulk_message_id)
+  SELECT
+    NEW.master_id,
+    NEW.name, NEW.notes, NEW.channel, NEW.message, NEW.send_date, NEW.send_time, NEW.status,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_zeus_short_link_update(); Type: FUNCTION; Schema: bulk_msg; Owner: -
 --
 
@@ -20281,8 +20308,6 @@ CREATE TABLE bulk_msg.zeus_bulk_message_history (
     send_date date,
     send_time time without time zone,
     status character varying,
-    cancel character varying,
-    ready character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
@@ -20479,8 +20504,6 @@ CREATE TABLE bulk_msg.zeus_bulk_messages (
     send_date date,
     send_time time without time zone,
     status character varying,
-    cancel character varying,
-    ready character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -67583,6 +67606,20 @@ CREATE TRIGGER activity_log_zeus_bulk_message_history_insert AFTER INSERT ON bul
 --
 
 CREATE TRIGGER activity_log_zeus_bulk_message_history_update AFTER UPDATE ON bulk_msg.activity_log_zeus_bulk_messages FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE bulk_msg.log_activity_log_zeus_bulk_message_update();
+
+
+--
+-- Name: log_zeus_bulk_message_history_insert; Type: TRIGGER; Schema: bulk_msg; Owner: -
+--
+
+CREATE TRIGGER log_zeus_bulk_message_history_insert AFTER INSERT ON bulk_msg.zeus_bulk_messages FOR EACH ROW EXECUTE PROCEDURE bulk_msg.log_zeus_bulk_messages_update();
+
+
+--
+-- Name: log_zeus_bulk_message_history_update; Type: TRIGGER; Schema: bulk_msg; Owner: -
+--
+
+CREATE TRIGGER log_zeus_bulk_message_history_update AFTER UPDATE ON bulk_msg.zeus_bulk_messages FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE bulk_msg.log_zeus_bulk_messages_update();
 
 
 --
