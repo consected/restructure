@@ -16,16 +16,21 @@ class Admin::MigrationGenerator
   #
   # @return [Array(Hash {schema_name, table_name})] array of schema_name and table_name hashes for each table
   def self.tables_and_views
-    connection.execute <<~END_SQL
-      select table_schema "schema_name", table_name from information_schema.tables 
-      where table_schema IN (#{quoted_schemas})
-      and table_catalog = '#{current_database}'
-      UNION 
-      select table_schema "schema_name", table_name from information_schema.views
-      where table_schema IN (#{quoted_schemas})
-      and table_catalog = '#{current_database}'
-      order by "schema_name", table_name
-    END_SQL
+    @tables_and_views ||=
+      connection.execute <<~END_SQL
+        select table_schema "schema_name", table_name from information_schema.tables 
+        where table_schema IN (#{quoted_schemas})
+        and table_catalog = '#{current_database}'
+        UNION 
+        select table_schema "schema_name", table_name from information_schema.views
+        where table_schema IN (#{quoted_schemas})
+        and table_catalog = '#{current_database}'
+        order by "schema_name", table_name
+      END_SQL
+  end
+
+  def self.tables_and_views_reset!
+    @tables_and_views = nil
   end
 
   def self.table_comment(table_name, schema_name = nil)
@@ -157,6 +162,8 @@ class Admin::MigrationGenerator
         Process.detach pid
       end
     end.join
+
+    self.class.tables_and_views_reset!
 
     true
   rescue StandardError => e
