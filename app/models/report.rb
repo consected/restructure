@@ -26,17 +26,20 @@ class Report < ActiveRecord::Base
   configure :view_options, with: %i[hide_table_names humanize_column_names
                                     hide_result_count hide_export_buttons
                                     hide_criteria_panel prevent_collapse_for_list
+                                    show_column_comments corresponding_data_dic
                                     view_as search_button_label report_auto_submit_on_change no_results_scroll]
   configure :list_options, with: %i[hide_in_list list_description]
   configure :view_css, with: %i[classes selectors]
   configure :component, with: [:options]
-  configure :column_options, with: %i[tags classes hide]
+  configure :column_options, with: %i[tags classes hide show_as]
 
   attr_reader :clean_sql
   attr_reader :filtering_on
   attr_writer :current_user
   attr_reader :current_user
   attr_writer :search_attr_values
+
+  attr_accessor :data_ref_table_name, :data_ref_schema_name, :data_ref_table_fields
 
   class BadSearchCriteria < FphsException
     def message
@@ -210,6 +213,10 @@ class Report < ActiveRecord::Base
     end
   end
 
+  def uses_table_subs?
+    sql.include?('{{table_name}}') || sql.include?('{{table_fields}}')
+  end
+
   def run(search_attr_values, options = {})
     @search_attr_values = search_attr_values
     @clean_sql = nil
@@ -252,6 +259,21 @@ class Report < ActiveRecord::Base
     end
 
     sql.gsub!(':filter_previous', '') if sql.include?(':filter_previous')
+
+    self.data_ref_table_name = options[:table_name]
+    self.data_ref_schema_name = options[:schema_name]
+    self.data_ref_table_fields = options[:table_fields]
+    if data_ref_table_name && data_ref_schema_name
+      table_exists = Admin::MigrationGenerator.tables_and_views.find { |t| t['table_name'] == data_ref_table_name && t['schema_name'] == data_ref_schema_name }
+      raise FphsException, 'invalid table name' unless table_exists
+
+      raise FphsException, 'table fields incorrect' unless data_ref_table_fields == '*'
+
+      sql = sql.gsub('{{table_name}}', data_ref_table_name)
+      sql = sql.gsub('{{schema_name}}', data_ref_schema_name)
+      sql = sql.gsub('{{table_fields}}', data_ref_table_fields)
+
+    end
 
     sql.scan(/:current_user/) do |cu|
       sql = sql.sub(cu, current_user&.id.to_s || 'NULL')

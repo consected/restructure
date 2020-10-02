@@ -38,6 +38,10 @@
     <li class="{{> field_result_class}}"><small>
     {{#if result_data.rec_type}}{{result_data.rec_type}}{{else}}{{humanize key}}{{/if}}
     </small> <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+  {{else is key 'includes' '_master_id'}}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+    <a href="/masters/{{this_value}}" target="_new" title="open link in new tab">{{this_value}}</a>
+    </span></strong></li>
   {{else is key 'includes' '_url'}}
     <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
     <a href="{{this_value}}" target="_new" title="open link in new tab">{{this_value}}</a>

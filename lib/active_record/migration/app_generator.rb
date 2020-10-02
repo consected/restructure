@@ -7,9 +7,22 @@ module ActiveRecord
 
       included do
         attr_accessor :fields, :new_fields, :field_defs, :prev_fields,
-                      :field_opts, :schema, :owner,
+                      :field_opts, :owner,
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
-                      :table_comment, :fields_comments, :mode
+                      :table_comment, :fields_comments, :mode, :no_master_association
+      end
+
+      def schema=(new_schema)
+        unless Admin::MigrationGenerator.current_search_paths.include?(new_schema)
+          raise FphsException, "Current search_path does not include the schema (#{new_schema}) for the migration. " \
+                               "#{Admin::MigrationGenerator.current_search_paths}"
+        end
+
+        @schema = new_schema
+      end
+
+      def schema
+        @schema
       end
 
       def table_name=(tname)
@@ -23,7 +36,7 @@ module ActiveRecord
 
       def create_schema
         sql = "CREATE SCHEMA IF NOT EXISTS #{schema}"
-        sql += " AUTHORIZATION #{owner}" if owner.present?
+        sql += " AUTHORIZATION #{owner}" if owner.present? && !Rails.env.development?
         ActiveRecord::Base.connection.execute sql
       end
 
@@ -59,7 +72,7 @@ module ActiveRecord
           t.belongs_to belongs_to_model,
                        index: { name: "#{rand_id}_id_h_idx" },
                        foreign_key: { to_table: "#{schema}.#{belongs_to_model.pluralize}" }
-          create_fields t
+          create_fields t, true
           t.string :extra_log_type
           t.references :user, index: { name: "#{rand_id}_user_id_h_idx" }, foreign_key: true
           t.timestamps null: false
@@ -87,15 +100,17 @@ module ActiveRecord
         setup_fields
 
         create_table "#{schema}.#{table_name}", comment: table_comment do |t|
-          t.belongs_to :master, index: true, foreign_key: true
+          t.belongs_to :master, index: true, foreign_key: true unless no_master_association
           create_fields t
           t.references :user, index: true, foreign_key: true
           t.timestamps null: false
         end
 
         create_table "#{schema}.#{history_table_name}" do |t|
-          t.belongs_to :master, index: { name: "#{rand_id}_history_master_id" }, foreign_key: true
-          create_fields t
+          unless no_master_association
+            t.belongs_to :master, index: { name: "#{rand_id}_history_master_id" }, foreign_key: true
+          end
+          create_fields t, true
           t.references :user, index: { name: "#{rand_id}_user_idx" }, foreign_key: true
           t.timestamps null: false
 
@@ -136,7 +151,7 @@ module ActiveRecord
 
         create_table "#{schema}.#{history_table_name}" do |t|
           t.belongs_to :master, index: true, foreign_key: true
-          create_fields t
+          create_fields t, true
           t.references :user, index: true, foreign_key: true
           t.references :admin, index: true, foreign_key: true
           t.timestamps null: false
@@ -175,6 +190,7 @@ module ActiveRecord
                     else
                       self.col_names
                     end
+        col_names ||= []
 
         old_colnames = col_names - standard_columns
         old_history_colnames = history_col_names - standard_columns
@@ -243,9 +259,16 @@ module ActiveRecord
         end
 
         removed.each do |c|
+          options = field_opts[c.to_sym] || {}
+          comment = fields_comments[c.to_sym]
+          options[:comment] = comment if comment.present?
           fdef = field_defs[c.to_sym] || {}
           if fdef == :references
-            remove_reference "#{schema}.#{table_name}", c, options if c.in?(col_names)
+            begin
+              remove_reference "#{schema}.#{table_name}", c, options if c.in?(col_names)
+            rescue StandardError
+              nil
+            end
           else
             remove_column "#{schema}.#{table_name}", c, fdef if c.in? col_names
           end
@@ -265,10 +288,17 @@ module ActiveRecord
         end
 
         removed_history.each do |c|
+          options = field_opts[c.to_sym] || {}
+          comment = fields_comments[c.to_sym]
+          options[:comment] = comment if comment.present?
           fdef = field_defs[c.to_sym] || {}
           if fdef == :references
             options[:index][:name] += '_hist'
-            remove_reference "#{schema}.#{history_table_name}", c, options if c.in? history_col_names
+            begin
+              remove_reference "#{schema}.#{history_table_name}", c, options if c.in? history_col_names
+            rescue StandardError
+              nil
+            end
           else
             remove_column "#{schema}.#{history_table_name}", c, fdef if c.in? history_col_names
           end
@@ -379,13 +409,18 @@ module ActiveRecord
         end
       end
 
-      def create_fields(tbl)
+      def create_fields(tbl, history = false)
         field_defs.each do |attr_name, f|
           fopts = field_opts[attr_name]
-          if fopts
+          if fopts && fopts[:index]
+            fopts[:index][:name] += '_hist' if history
             tbl.send(f, attr_name, fopts)
           else
-            tbl.send(f, attr_name)
+            if fopts
+              tbl.send(f, attr_name, fopts)
+            else
+              tbl.send(f, attr_name)
+            end
           end
         end
       end
@@ -396,7 +431,11 @@ module ActiveRecord
           if fopts
             add_column(tbl, attr_name, f, fopts)
           else
-            add_column(tbl, attr_name, f)
+            if fopts
+              add_column(tbl, attr_name, f, fopts)
+            else
+              add_column(tbl, attr_name)
+            end
           end
         end
       end
@@ -476,14 +515,14 @@ module ActiveRecord
             AS $$
           BEGIN
             INSERT INTO #{history_table_name} (
-              master_id,
+              #{no_master_association ? '' : 'master_id,'}
               #{"#{fields.join(', ')}," if fields.present?}
               user_id,
               created_at,
               updated_at,
               #{table_name.singularize}_id)
             SELECT
-              NEW.master_id,
+              #{no_master_association ? '' : 'NEW.master_id,'}
               #{"#{new_fields.join(', ')}," if fields.present?}
               NEW.user_id,
               NEW.created_at,

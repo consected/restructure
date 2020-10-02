@@ -108,6 +108,17 @@ app_type:
     created_at: '2020-08-26T15:11:13.699Z'
     updated_at: '2020-08-26T15:11:13.699Z'
     user_email: 
+  - id: 393
+    name: master header prefix
+    value: "{{dynamic_model__pitt_bhi_appointments.select_status::uppercase}} {{dynamic_model__pitt_bhi_appointments.visit_start_date}}"
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 25
+    role_name: ''
+    created_at: '2020-09-07T15:33:06.701Z'
+    updated_at: '2020-09-07T15:39:29.712Z'
+    user_email: 
   valid_user_access_controls:
   - id: 1792
     user_id: 
@@ -1565,6 +1576,19 @@ app_type:
     created_at: '2020-09-01T10:28:42.031Z'
     updated_at: '2020-09-01T10:28:42.031Z'
     user_email: 
+  - id: 1970
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_ps_covid_closings
+    options: 
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 25
+    role_name: _app_
+    created_at: '2020-09-14T17:36:52.812Z'
+    updated_at: '2020-09-14T17:36:52.812Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 85
     name: Recruitment & Logistics
@@ -1781,7 +1805,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2020-08-26T15:11:15.182Z'
-    updated_at: '2020-08-28T09:24:35.178Z'
+    updated_at: '2020-09-04T10:54:44.287Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -1907,7 +1931,12 @@ app_type:
       \             extra_log_type: exit_ps\r\n\r\n\r\n        ###### Create tracker
       entry with HMS Eligible record ######\r\n        - activity_log__pitt_bhi_assignment:\r\n
       \           if:\r\n              <<: *all_eligible_and_gave_consent\r\n            in:
-      master\r\n            with:\r\n              extra_log_type: hms_ps_eligible\r\n\r\n\r\n\r\n\r\ntest_condition:\r\n
+      master\r\n            with:\r\n              extra_log_type: hms_ps_eligible\r\n\r\n\r\n
+      \     update_reference:\r\n        - player_info:\r\n            if:\r\n              not_any:\r\n
+      \               player_infos:\r\n                  birth_date:\r\n                    this:
+      birth_date\r\n            first:\r\n              player_infos:\r\n                update:
+      return_result\r\n            with:\r\n              birth_date:\r\n                dynamic_model__pitt_bhi_ps_suitability_questions:\r\n
+      \                 birth_date: return_value\r\n\r\n\r\n\r\n\r\ntest_condition:\r\n
       \ label: Test Condition\r\n  creatable_if:\r\n      <<: *all_eligible_and_gave_consent\r\n"
     hide_item_list_panel: true
     main_log_name: ''
@@ -1973,6 +2002,37 @@ app_type:
     category: pitt-bhi
     user_email: 
   associated_dynamic_models:
+  - id: 419
+    name: No COVID-19 Test
+    table_name: ipa_ps_covid_closings
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-14T17:36:52.703Z'
+    updated_at: '2020-09-14T17:36:52.703Z'
+    position: 
+    category: ipa-phone-screen
+    table_key_name: ''
+    field_list: contact_later_yes_no placeholder_contact_later_yes placeholder_contact_later_no
+      notes
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before:\r\n     contact_later_yes_no: |\r\n
+      \      Thank you for letting us know. This does not mean you cannot participate
+      in our study at a future date – you may be able to participate at a later date
+      when we no longer ask participants to complete COVID-19 testing. Would contacting
+      you at a later date about participation be OK with you?\r\n     \r\n     placeholder_contact_later_yes:
+      |\r\n       Thank you. We will contact you at a later date about participating.
+      Please contact us in the meantime with any questions. \r\n     \r\n     placeholder_contact_later_no:
+      |\r\n       OK. We will not add you to this list. If you have any questions,
+      or change your mind and want to participate, please contact us at any time.
+      Thank you for your time and understanding today.\r\n     \r\n     notes: Additional
+      notes\r\n       \r\n  show_if:\r\n    placeholder_contact_later_yes:\r\n      contact_later_yes_no:
+      'yes'\r\n     \r\n    placeholder_contact_later_no:\r\n      contact_later_yes_no:
+      'no'"
+    user_email: 
   - id: 403
     name: PITT BHI Staff Access
     table_name: pitt_bhi_access_pitt_staffs
@@ -2451,7 +2511,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2020-08-26T15:11:14.526Z'
-    updated_at: '2020-09-01T10:23:00.886Z'
+    updated_at: '2020-09-07T17:02:06.051Z'
     position: 1
     category: pitt-bhi-records
     table_key_name: ''
@@ -2459,7 +2519,7 @@ app_type:
     result_order: updated_at desc
     options: "_comments:\r\n  table: PITT BHI study participation dates and status\r\n\r\ndefault:\r\n\r\n
       \ field_options:\r\n    select_status:\r\n      edit_as:\r\n        alt_options:
-      \r\n          - confirmed\r\n          - uncomfirmed\r\n          - pending
+      \r\n          - confirmed\r\n          - unconfirmed\r\n          - pending
       participation date\r\n\r\n      value: confirmed\r\n\r\n  caption_before: \r\n
       \   placeholder_set_sd: |\r\n      **The subject has been enrolled. A training
       start date is required**\r\n      \r\n      Edit this form to set the start
@@ -2645,13 +2705,18 @@ app_type:
       extra_log_type = 'ineligible' THEN 'ineligible'\r\n  WHEN extra_log_type = 'hms_ps_eligible'
       THEN 'eligible'\r\n  WHEN extra_log_type = 'schedule_screening' THEN 'screening
       scheduled'\r\n  WHEN extra_log_type = 'appointment' AND (\r\n    select_status
-      IS NOT NULL AND select_status = 'pending participation date' OR visit_start_date
-      IS NULL) THEN 'enrolled - not scheduled'\r\n  WHEN extra_log_type = 'appointment'
-      THEN 'enrolled'\r\n  WHEN extra_log_type = 'not_screened' THEN 'not screened'\r\n
-      \ ELSE extra_log_type\r\n  END \"status\", \r\n  dt.created_at \r\n  FROM \r\n
-      \ (\r\n    SELECT \r\n    bhi.master_id, bhi.created_at, 'not_screened' extra_log_type,
-      \r\n    1 r\r\n    FROM pitt_bhi_assignments bhi\r\n    LEFT JOIN activity_log_pitt_bhi_assignment_phone_screens
-      al\r\n    ON bhi.master_id = al.master_id \r\n    AND al.extra_log_type = 'start_phone_screen'\r\n
+      IS NULL OR select_status = 'pending participation date' OR visit_start_date
+      IS NULL) \r\n      THEN 'enrolled - not scheduled'\r\n  WHEN extra_log_type
+      = 'appointment' AND (\r\n    select_status IS NOT NULL AND select_status = 'unconfirmed'
+      AND visit_start_date IS NOT NULL) \r\n      THEN 'enrolled - unconfirmed'\r\n
+      \ WHEN extra_log_type = 'appointment' AND (\r\n    select_status IS NOT NULL
+      AND select_status = 'confirmed') \r\n      THEN 'enrolled'  \r\n  WHEN extra_log_type
+      = 'not_screened' THEN 'not screened'\r\n  ELSE extra_log_type\r\n  END \"status\",
+      \r\n  select_status \"enrolled\",\r\n  visit_start_date \"appointment date\",\r\n
+      \ dt.created_at \r\n  FROM \r\n  (\r\n    SELECT \r\n    bhi.master_id, bhi.created_at,
+      'not_screened' extra_log_type, \r\n    1 r\r\n    FROM pitt_bhi_assignments
+      bhi\r\n    LEFT JOIN activity_log_pitt_bhi_assignment_phone_screens al\r\n    ON
+      bhi.master_id = al.master_id \r\n    AND al.extra_log_type = 'start_phone_screen'\r\n
       \   WHERE al.id IS NULL\r\n    \r\n    UNION \r\n    \r\n    SELECT\r\n    al.master_id,
       al.created_at, al.extra_log_type,    \r\n    rank()\r\n     OVER (\r\n      PARTITION
       BY al.master_id \r\n      ORDER BY al.created_at DESC\r\n     ) AS r\r\n\r\n
@@ -2660,7 +2725,8 @@ app_type:
       \r\n      'exit_not_consented', \r\n      'exit_ps', \r\n      'exit_opt_out',\r\n
       \     'exit_l2fu',\r\n      'appointment',\r\n      'completed',\r\n      'completed_intervention',\r\n
       \     'withdraw'\r\n    )\r\n  ) dt\r\n  INNER JOIN pitt_bhi_assignments pitt_bhi
-      ON dt.master_id = pitt_bhi.master_id\r\n  WHERE ( \r\n    :latest_status_only
+      ON dt.master_id = pitt_bhi.master_id\r\n  LEFT JOIN pitt_bhi_appointments app\r\n
+      \   ON pitt_bhi.master_id = app.master_id \r\n  \r\n  WHERE ( \r\n    :latest_status_only
       = 'yes' AND r = 1 \r\n    OR :latest_status_only = 'no'\r\n  )\r\n) dt2\r\nWHERE
       status IN(:select_status)\r\nORDER BY status, created_at desc\r\n;\r\n"
     search_attrs: "\r\nselect_status: \r\n  config_selector:\r\n    label: Select
@@ -2669,14 +2735,15 @@ app_type:
       \r\n      \r\n      not screened: not screened\r\n      screening scheduled:
       screening scheduled\r\n      eligible: eligible\r\n      ineligible: ineligible\r\n
       \     exited: exited\r\n      enrolled - not scheduled: enrolled - not scheduled\r\n
-      \     enrolled: enrolled\r\n      completed study: completed study\r\n      withdrawn:
-      withdrawn\r\n      \r\n      \r\n\r\nlatest_status_only: \r\n  config_selector:
-      \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n    default:
-      'yes'\r\n    selections: \r\n      'yes': 'yes'\r\n      'no': 'no'"
+      \     enrolled - unconfirmed: enrolled - unconfirmed\r\n      enrolled: enrolled\r\n
+      \     completed study: completed study\r\n      withdrawn: withdrawn\r\n      \r\n
+      \     \r\n\r\nlatest_status_only: \r\n  config_selector: \r\n    all: true\r\n
+      \   multiple: single\r\n    disabled: false\r\n    default: 'yes'\r\n    selections:
+      \r\n      'yes': 'yes'\r\n      'no': 'no'"
     admin_id: 2
     disabled: false
     created_at: '2020-08-26T15:11:15.853Z'
-    updated_at: '2020-09-01T10:24:31.197Z'
+    updated_at: '2020-09-07T17:02:46.608Z'
     report_type: search
     auto: false
     searchable: true
@@ -2837,9 +2904,9 @@ app_type:
     value: nflpa
     item_type: player_infos_source
     created_at: '2018-02-15T15:52:01.475Z'
-    updated_at: '2020-08-26T17:11:37.166Z'
+    updated_at: '2020-09-14T17:36:53.693Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -2852,9 +2919,9 @@ app_type:
     value: nflpa2
     item_type: player_infos_source
     created_at: '2018-02-15T15:52:01.491Z'
-    updated_at: '2020-08-26T17:11:36.912Z'
+    updated_at: '2020-09-14T17:36:53.769Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -2867,9 +2934,9 @@ app_type:
     value: '10'
     item_type: player_contacts_rank
     created_at: '2018-02-15T15:52:01.514Z'
-    updated_at: '2020-08-26T17:11:36.873Z'
+    updated_at: '2020-09-14T17:36:53.623Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -2882,9 +2949,9 @@ app_type:
     value: '5'
     item_type: player_contacts_rank
     created_at: '2018-02-15T15:52:01.543Z'
-    updated_at: '2020-08-26T17:11:36.880Z'
+    updated_at: '2020-09-14T17:36:53.631Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -2897,9 +2964,9 @@ app_type:
     value: "-1"
     item_type: player_contacts_rank
     created_at: '2018-02-15T15:52:01.689Z'
-    updated_at: '2020-08-26T17:11:36.893Z'
+    updated_at: '2020-09-14T17:36:53.637Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -2927,9 +2994,9 @@ app_type:
     value: nflpa
     item_type: player_contacts_source
     created_at: '2018-02-15T15:52:01.731Z'
-    updated_at: '2020-08-26T17:11:36.980Z'
+    updated_at: '2020-09-14T17:36:53.649Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -2957,9 +3024,9 @@ app_type:
     value: nflpa
     item_type: addresses_source
     created_at: '2018-02-15T15:52:01.827Z'
-    updated_at: '2020-08-26T17:11:37.086Z'
+    updated_at: '2020-09-14T17:36:53.660Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -2972,9 +3039,9 @@ app_type:
     value: '10'
     item_type: addresses_rank
     created_at: '2018-02-15T15:52:01.847Z'
-    updated_at: '2020-08-26T17:11:36.842Z'
+    updated_at: '2020-09-14T17:36:53.667Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -2987,9 +3054,9 @@ app_type:
     value: '5'
     item_type: addresses_rank
     created_at: '2018-02-15T15:52:01.860Z'
-    updated_at: '2020-08-26T17:11:36.854Z'
+    updated_at: '2020-09-14T17:36:53.673Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3002,9 +3069,9 @@ app_type:
     value: "-1"
     item_type: addresses_rank
     created_at: '2018-02-15T15:52:01.895Z'
-    updated_at: '2020-08-26T17:11:36.867Z'
+    updated_at: '2020-09-14T17:36:53.686Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3032,9 +3099,9 @@ app_type:
     value: nflpa2
     item_type: addresses_source
     created_at: '2015-08-12T20:09:46.808Z'
-    updated_at: '2020-08-26T17:11:37.092Z'
+    updated_at: '2020-09-14T17:36:53.704Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3065,9 +3132,9 @@ app_type:
     value: email
     item_type: player_contacts_type
     created_at: '2015-09-10T15:15:31.892Z'
-    updated_at: '2020-08-26T17:11:37.000Z'
+    updated_at: '2020-09-14T17:36:53.715Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3080,9 +3147,9 @@ app_type:
     value: phone
     item_type: player_contacts_type
     created_at: '2015-09-10T15:15:31.897Z'
-    updated_at: '2020-08-26T17:11:37.033Z'
+    updated_at: '2020-09-14T17:36:53.722Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3095,9 +3162,9 @@ app_type:
     value: integrate1
     item_type: addresses_source
     created_at: '2015-09-24T18:58:00.195Z'
-    updated_at: '2020-08-26T17:11:37.073Z'
+    updated_at: '2020-09-14T17:36:53.731Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3110,9 +3177,9 @@ app_type:
     value: integrate2
     item_type: addresses_source
     created_at: '2015-09-24T18:58:27.899Z'
-    updated_at: '2020-08-26T17:11:37.079Z'
+    updated_at: '2020-09-14T17:36:53.738Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3141,9 +3208,9 @@ app_type:
     value: cis-paper
     item_type: player_infos_source
     created_at: '2015-09-24T19:00:01.751Z'
-    updated_at: '2020-08-26T17:11:37.137Z'
+    updated_at: '2020-09-14T17:36:53.749Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3156,39 +3223,39 @@ app_type:
     value: cis-paper
     item_type: addresses_source
     created_at: '2015-09-24T19:00:27.920Z'
-    updated_at: '2020-08-26T17:11:37.053Z'
-    disabled: 
-    admin_id: 1
-    create_with: true
-    edit_if_set: 
-    edit_always: true
+    updated_at: '2020-09-14T17:36:53.756Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
     position: 1390
-    description: 
-    lock: 
+    description: ''
+    lock: true
     user_email: 
   - id: 41
     name: cis-email
     value: cis-email
     item_type: addresses_source
     created_at: '2015-09-24T19:00:45.434Z'
-    updated_at: '2020-08-26T17:11:37.046Z'
+    updated_at: '2020-09-14T17:36:53.762Z'
     disabled: false
-    admin_id: 1
-    create_with: true
+    admin_id: 2
+    create_with: false
     edit_if_set: false
-    edit_always: true
+    edit_always: false
     position: 1380
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 43
     name: nflpa2
     value: nflpa2
     item_type: player_contacts_source
     created_at: '2015-09-24T20:26:05.392Z'
-    updated_at: '2020-08-26T17:11:36.986Z'
+    updated_at: '2020-09-14T17:36:53.775Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3201,9 +3268,9 @@ app_type:
     value: integrate1
     item_type: player_contacts_source
     created_at: '2015-09-24T20:26:39.899Z'
-    updated_at: '2020-08-26T17:11:36.968Z'
+    updated_at: '2020-09-14T17:36:53.838Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3216,9 +3283,9 @@ app_type:
     value: integrate2
     item_type: player_contacts_source
     created_at: '2015-09-24T20:26:51.693Z'
-    updated_at: '2020-08-26T17:11:36.974Z'
+    updated_at: '2020-09-14T17:36:53.845Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3247,27 +3314,27 @@ app_type:
     value: cis-paper
     item_type: player_contacts_source
     created_at: '2015-09-24T20:27:47.697Z'
-    updated_at: '2020-08-26T17:11:36.944Z'
-    disabled: 
-    admin_id: 1
-    create_with: true
-    edit_if_set: 
-    edit_always: true
+    updated_at: '2020-09-14T17:36:53.856Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 1220
-    description: 
-    lock: 
+    description: ''
+    lock: false
     user_email: 
   - id: 48
     name: cis-email
     value: cis-email
     item_type: player_contacts_source
     created_at: '2015-09-24T20:28:09.928Z'
-    updated_at: '2020-08-26T17:11:36.938Z'
+    updated_at: '2020-09-14T17:36:53.863Z'
     disabled: false
-    admin_id: 1
-    create_with: true
-    edit_if_set: false
-    edit_always: true
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 1210
     description: ''
     lock: false
@@ -3277,9 +3344,9 @@ app_type:
     value: '0'
     item_type: player_contacts_rank
     created_at: '2015-10-20T16:24:09.278Z'
-    updated_at: '2020-08-26T17:11:36.886Z'
+    updated_at: '2020-09-14T17:36:53.870Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3292,9 +3359,9 @@ app_type:
     value: '0'
     item_type: addresses_rank
     created_at: '2015-10-20T16:24:09.308Z'
-    updated_at: '2020-08-26T17:11:36.860Z'
+    updated_at: '2020-09-14T17:36:53.680Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3337,12 +3404,12 @@ app_type:
     value: cis-redcap
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.596Z'
-    updated_at: '2020-08-26T17:11:36.961Z'
+    updated_at: '2020-09-14T17:36:54.390Z'
     disabled: false
-    admin_id: 1
-    create_with: true
-    edit_if_set: false
-    edit_always: true
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 1240
     description: ''
     lock: false
@@ -3352,9 +3419,9 @@ app_type:
     value: nflpa4
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.602Z'
-    updated_at: '2020-08-26T17:11:37.245Z'
+    updated_at: '2020-09-14T17:36:54.397Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3367,9 +3434,9 @@ app_type:
     value: nflpa3
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.607Z'
-    updated_at: '2020-08-26T17:11:37.224Z'
+    updated_at: '2020-09-14T17:36:54.403Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3382,12 +3449,12 @@ app_type:
     value: player referral
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.612Z'
-    updated_at: '2020-08-26T17:11:37.193Z'
+    updated_at: '2020-09-14T17:36:54.409Z'
     disabled: false
-    admin_id: 1
-    create_with: true
-    edit_if_set: false
-    edit_always: true
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 
     description: ''
     lock: false
@@ -3397,12 +3464,12 @@ app_type:
     value: public source
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.617Z'
-    updated_at: '2020-08-26T17:11:37.200Z'
+    updated_at: '2020-09-14T17:36:54.416Z'
     disabled: false
-    admin_id: 1
-    create_with: true
-    edit_if_set: false
-    edit_always: true
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 
     description: ''
     lock: false
@@ -3412,12 +3479,12 @@ app_type:
     value: event
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.622Z'
-    updated_at: '2020-08-26T17:11:37.180Z'
+    updated_at: '2020-09-14T17:36:54.422Z'
     disabled: false
-    admin_id: 1
-    create_with: true
-    edit_if_set: false
-    edit_always: true
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 
     description: ''
     lock: false
@@ -3427,24 +3494,24 @@ app_type:
     value: cis-phone
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.627Z'
-    updated_at: '2020-08-26T17:11:36.951Z'
-    disabled: 
-    admin_id: 1
-    create_with: true
-    edit_if_set: 
-    edit_always: true
+    updated_at: '2020-09-14T17:36:54.429Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 1230
-    description: 
-    lock: 
+    description: ''
+    lock: false
     user_email: 
   - id: 196
     name: not set
     value: not set
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.632Z'
-    updated_at: '2020-08-26T17:11:36.993Z'
+    updated_at: '2020-09-14T17:36:54.435Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3457,9 +3524,9 @@ app_type:
     value: facebook
     item_type: player_contacts_type
     created_at: '2018-09-11T11:53:34.637Z'
-    updated_at: '2020-08-26T17:11:37.026Z'
+    updated_at: '2020-09-14T17:36:54.442Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3472,9 +3539,9 @@ app_type:
     value: twitter
     item_type: player_contacts_type
     created_at: '2018-09-11T11:53:34.642Z'
-    updated_at: '2020-08-26T17:11:37.039Z'
+    updated_at: '2020-09-14T17:36:54.448Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3487,9 +3554,9 @@ app_type:
     value: nflpa4
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.647Z'
-    updated_at: '2020-08-26T17:11:37.238Z'
+    updated_at: '2020-09-14T17:36:54.455Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3502,9 +3569,9 @@ app_type:
     value: integrate1
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.651Z'
-    updated_at: '2020-08-26T17:11:36.899Z'
+    updated_at: '2020-09-14T17:36:54.461Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3517,9 +3584,9 @@ app_type:
     value: integrate2
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.656Z'
-    updated_at: '2020-08-26T17:11:36.905Z'
+    updated_at: '2020-09-14T17:36:54.467Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3532,9 +3599,9 @@ app_type:
     value: not set
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.661Z'
-    updated_at: '2020-08-26T17:11:36.919Z'
+    updated_at: '2020-09-14T17:36:54.474Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3547,9 +3614,9 @@ app_type:
     value: other
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.666Z'
-    updated_at: '2020-08-26T17:11:36.925Z'
+    updated_at: '2020-09-14T17:36:54.480Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3562,9 +3629,9 @@ app_type:
     value: redcap
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.671Z'
-    updated_at: '2020-08-26T17:11:36.931Z'
+    updated_at: '2020-09-14T17:36:54.486Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3577,9 +3644,9 @@ app_type:
     value: cis
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.677Z'
-    updated_at: '2020-08-26T17:11:37.124Z'
+    updated_at: '2020-09-14T17:36:54.492Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3592,9 +3659,9 @@ app_type:
     value: cis-email
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.682Z'
-    updated_at: '2020-08-26T17:11:37.131Z'
+    updated_at: '2020-09-14T17:36:54.499Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3607,9 +3674,9 @@ app_type:
     value: cis-phone
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.687Z'
-    updated_at: '2020-08-26T17:11:37.147Z'
+    updated_at: '2020-09-14T17:36:54.505Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3622,9 +3689,9 @@ app_type:
     value: cis-redcap
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.691Z'
-    updated_at: '2020-08-26T17:11:37.154Z'
+    updated_at: '2020-09-14T17:36:54.511Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3637,9 +3704,9 @@ app_type:
     value: contactinfo
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.697Z'
-    updated_at: '2020-08-26T17:11:37.160Z'
+    updated_at: '2020-09-14T17:36:54.517Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3652,9 +3719,9 @@ app_type:
     value: usps
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.703Z'
-    updated_at: '2020-08-26T17:11:37.172Z'
+    updated_at: '2020-09-14T17:36:54.524Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: 
     edit_always: false
@@ -3697,24 +3764,24 @@ app_type:
     value: cis-redcap
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.115Z'
-    updated_at: '2020-08-26T17:11:37.067Z'
+    updated_at: '2020-09-14T17:36:55.122Z'
     disabled: false
-    admin_id: 1
-    create_with: true
+    admin_id: 2
+    create_with: false
     edit_if_set: false
-    edit_always: true
+    edit_always: false
     position: 1410
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 374
     name: nflpa4
     value: nflpa4
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.126Z'
-    updated_at: '2020-08-26T17:11:37.306Z'
+    updated_at: '2020-09-14T17:36:55.129Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3727,9 +3794,9 @@ app_type:
     value: nflpa3
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.130Z'
-    updated_at: '2020-08-26T17:11:37.232Z'
+    updated_at: '2020-09-14T17:36:55.135Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3742,69 +3809,69 @@ app_type:
     value: public source
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.135Z'
-    updated_at: '2020-08-26T17:11:37.213Z'
+    updated_at: '2020-09-14T17:36:55.142Z'
     disabled: false
-    admin_id: 1
-    create_with: true
+    admin_id: 2
+    create_with: false
     edit_if_set: false
-    edit_always: true
+    edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 377
     name: player referral
     value: player referral
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.139Z'
-    updated_at: '2020-08-26T17:11:37.206Z'
+    updated_at: '2020-09-14T17:36:55.149Z'
     disabled: false
-    admin_id: 1
-    create_with: true
+    admin_id: 2
+    create_with: false
     edit_if_set: false
-    edit_always: true
+    edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 378
     name: event
     value: event
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.144Z'
-    updated_at: '2020-08-26T17:11:37.186Z'
+    updated_at: '2020-09-14T17:36:55.156Z'
     disabled: false
-    admin_id: 1
-    create_with: true
+    admin_id: 2
+    create_with: false
     edit_if_set: false
-    edit_always: true
+    edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 379
     name: cis-phone
     value: cis-phone
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.151Z'
-    updated_at: '2020-08-26T17:11:37.059Z'
-    disabled: 
-    admin_id: 1
-    create_with: true
-    edit_if_set: 
-    edit_always: true
+    updated_at: '2020-09-14T17:36:55.163Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
     position: 1400
-    description: 
-    lock: 
+    description: ''
+    lock: true
     user_email: 
   - id: 380
     name: not set
     value: not set
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.160Z'
-    updated_at: '2020-08-26T17:11:37.098Z'
+    updated_at: '2020-09-14T17:36:55.169Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3817,24 +3884,24 @@ app_type:
     value: business
     item_type: addresses_type
     created_at: '2019-01-18T11:24:31.167Z'
-    updated_at: '2020-08-26T17:11:37.104Z'
-    disabled: 
-    admin_id: 1
+    updated_at: '2020-09-14T17:36:55.176Z'
+    disabled: false
+    admin_id: 2
     create_with: true
-    edit_if_set: 
+    edit_if_set: false
     edit_always: true
-    position: 1510
-    description: 
-    lock: 
+    position: 1521
+    description: ''
+    lock: false
     user_email: 
   - id: 382
     name: home
     value: home
     item_type: addresses_type
     created_at: '2019-01-18T11:24:31.171Z'
-    updated_at: '2020-08-26T17:11:37.111Z'
+    updated_at: '2020-09-14T17:36:55.182Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: true
     edit_if_set: 
     edit_always: true
@@ -3847,9 +3914,9 @@ app_type:
     value: not set
     item_type: addresses_type
     created_at: '2019-01-18T11:24:31.176Z'
-    updated_at: '2020-08-26T17:11:37.118Z'
+    updated_at: '2020-09-14T17:36:55.188Z'
     disabled: 
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: true
     edit_always: false
@@ -3862,9 +3929,9 @@ app_type:
     value: '1'
     item_type: player_contacts_rank
     created_at: '2019-10-22T10:59:18.302Z'
-    updated_at: '2020-08-26T17:11:37.357Z'
+    updated_at: '2020-09-14T17:36:55.251Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: true
     edit_always: true
@@ -3877,9 +3944,9 @@ app_type:
     value: '2'
     item_type: player_contacts_rank
     created_at: '2019-10-22T10:59:18.305Z'
-    updated_at: '2020-08-26T17:11:37.364Z'
+    updated_at: '2020-09-14T17:36:55.257Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: true
     edit_always: true
@@ -3892,9 +3959,9 @@ app_type:
     value: nflpa5
     item_type: player_infos_source
     created_at: '2019-10-22T10:59:18.309Z'
-    updated_at: '2020-08-26T17:11:37.370Z'
+    updated_at: '2020-09-14T17:36:55.264Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3907,9 +3974,9 @@ app_type:
     value: nflpa5
     item_type: player_contacts_source
     created_at: '2019-10-22T10:59:18.312Z'
-    updated_at: '2020-08-26T17:11:37.377Z'
+    updated_at: '2020-09-14T17:36:55.270Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3922,9 +3989,9 @@ app_type:
     value: nflpa5
     item_type: addresses_source
     created_at: '2019-10-22T10:59:18.316Z'
-    updated_at: '2020-08-26T17:11:37.384Z'
+    updated_at: '2020-09-14T17:36:55.277Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3937,9 +4004,9 @@ app_type:
     value: nflpa6
     item_type: player_infos_source
     created_at: '2019-10-22T10:59:18.323Z'
-    updated_at: '2020-08-26T17:11:37.395Z'
+    updated_at: '2020-09-14T17:36:55.284Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -3952,9 +4019,9 @@ app_type:
     value: nflpa6
     item_type: player_contacts_source
     created_at: '2019-10-22T10:59:18.326Z'
-    updated_at: '2020-08-26T17:11:37.402Z'
+    updated_at: '2020-09-14T17:36:55.290Z'
     disabled: false
-    admin_id: 1
+    admin_id: 2
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -4548,6 +4615,42 @@ app_type:
     created_at: '2020-08-26T15:32:14.050Z'
     updated_at: '2020-08-26T15:32:14.050Z'
     user_email: pitt-bhi-hms@template
+  - id: 1334
+    app_type_id: 25
+    role_name: user - recruitment
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-14T14:33:57.931Z'
+    updated_at: '2020-09-14T14:33:57.931Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1335
+    app_type_id: 25
+    role_name: email - hms phone screener
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-14T14:34:05.969Z'
+    updated_at: '2020-09-14T14:34:05.969Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1336
+    app_type_id: 25
+    role_name: nfs_store group 600
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-14T14:34:16.837Z'
+    updated_at: '2020-09-14T14:34:16.837Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 1337
+    app_type_id: 25
+    role_name: user - phone screen
+    user_id: 139
+    admin_id: 2
+    disabled: false
+    created_at: '2020-09-14T14:34:29.814Z'
+    updated_at: '2020-09-14T14:34:29.814Z'
+    user_email: taylor_panczyk@hms.harvard.edu
   associated_message_templates:
   - id: 22
     name: standard sms layout
@@ -5006,368 +5109,368 @@ app_type:
     name: Inquiry
     disabled: false
     protocol_id: 109
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.938Z'
-    updated_at: '2020-08-26T17:11:38.938Z'
+    updated_at: '2020-09-15T15:41:32.418Z'
     protocol_name: Sleep Study Phase 2
     user_email: 
   - id: 287
     name: Bounced
     disabled: false
     protocol_id: 109
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.919Z'
-    updated_at: '2020-08-26T17:11:38.919Z'
+    updated_at: '2020-09-15T15:41:32.399Z'
     protocol_name: Sleep Study Phase 2
     user_email: 
   - id: 286
     name: Opt In
     disabled: false
     protocol_id: 109
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.901Z'
-    updated_at: '2020-08-26T17:11:38.901Z'
+    updated_at: '2020-09-15T15:41:32.381Z'
     protocol_name: Sleep Study Phase 2
     user_email: 
   - id: 285
     name: Opt Out
     disabled: false
     protocol_id: 109
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.878Z'
-    updated_at: '2020-08-26T17:11:38.878Z'
+    updated_at: '2020-09-15T15:41:32.360Z'
     protocol_name: Sleep Study Phase 2
     user_email: 
   - id: 284
     name: Complete
     disabled: false
     protocol_id: 109
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.856Z'
-    updated_at: '2020-08-26T17:11:38.856Z'
+    updated_at: '2020-09-15T15:41:32.337Z'
     protocol_name: Sleep Study Phase 2
     user_email: 
   - id: 283
     name: Enrolled
     disabled: false
     protocol_id: 109
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.836Z'
-    updated_at: '2020-08-26T17:11:38.836Z'
+    updated_at: '2020-09-15T15:41:32.316Z'
     protocol_name: Sleep Study Phase 2
     user_email: 
   - id: 282
     name: Withdrew
     disabled: false
     protocol_id: 109
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.825Z'
-    updated_at: '2020-08-26T17:11:38.825Z'
+    updated_at: '2020-09-15T15:41:32.306Z'
     protocol_name: Sleep Study Phase 2
     user_email: 
   - id: 281
     name: Sent
     disabled: false
     protocol_id: 109
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.813Z'
-    updated_at: '2020-08-26T17:11:38.813Z'
+    updated_at: '2020-09-15T15:41:32.292Z'
     protocol_name: Sleep Study Phase 2
     user_email: 
   - id: 280
     name: Sent
     disabled: false
     protocol_id: 108
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.792Z'
-    updated_at: '2020-08-26T17:11:38.792Z'
+    updated_at: '2020-09-15T15:41:32.272Z'
     protocol_name: GRIT
     user_email: 
   - id: 279
     name: Complete
     disabled: false
     protocol_id: 108
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.772Z'
-    updated_at: '2020-08-26T17:11:38.772Z'
+    updated_at: '2020-09-15T15:41:32.251Z'
     protocol_name: GRIT
     user_email: 
   - id: 278
     name: Opt In
     disabled: false
     protocol_id: 108
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.736Z'
-    updated_at: '2020-08-26T17:11:38.736Z'
+    updated_at: '2020-09-15T15:41:32.230Z'
     protocol_name: GRIT
     user_email: 
   - id: 277
     name: Opt Out
     disabled: false
     protocol_id: 108
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.713Z'
-    updated_at: '2020-08-26T17:11:38.713Z'
+    updated_at: '2020-09-15T15:41:32.209Z'
     protocol_name: GRIT
     user_email: 
   - id: 276
     name: Bounced
     disabled: false
     protocol_id: 108
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.690Z'
-    updated_at: '2020-08-26T17:11:38.690Z'
+    updated_at: '2020-09-15T15:41:32.186Z'
     protocol_name: GRIT
     user_email: 
   - id: 275
     name: Inquiry
     disabled: false
     protocol_id: 108
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.673Z'
-    updated_at: '2020-08-26T17:11:38.673Z'
+    updated_at: '2020-09-15T15:41:32.168Z'
     protocol_name: GRIT
     user_email: 
   - id: 274
     name: Enrolled
     disabled: false
     protocol_id: 108
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.656Z'
-    updated_at: '2020-08-26T17:11:38.656Z'
+    updated_at: '2020-09-15T15:41:32.148Z'
     protocol_name: GRIT
     user_email: 
   - id: 273
     name: Withdrew
     disabled: false
     protocol_id: 108
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.648Z'
-    updated_at: '2020-08-26T17:11:38.648Z'
+    updated_at: '2020-09-15T15:41:32.136Z'
     protocol_name: GRIT
     user_email: 
   - id: 272
     name: Lost to Follow Up, Not Enrolled
     disabled: false
     protocol_id: 108
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.634Z'
-    updated_at: '2020-08-26T17:11:38.634Z'
+    updated_at: '2020-09-15T15:41:32.123Z'
     protocol_name: GRIT
     user_email: 
   - id: 271
     name: Screened
     disabled: false
     protocol_id: 109
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.623Z'
-    updated_at: '2020-08-26T17:11:38.623Z'
+    updated_at: '2020-09-15T15:41:32.111Z'
     protocol_name: Sleep Study Phase 2
     user_email: 
   - id: 270
     name: Eligible
     disabled: false
     protocol_id: 109
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.612Z'
-    updated_at: '2020-08-26T17:11:38.612Z'
+    updated_at: '2020-09-15T15:41:32.099Z'
     protocol_name: Sleep Study Phase 2
     user_email: 
   - id: 269
     name: Ineligible
     disabled: false
     protocol_id: 109
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.602Z'
-    updated_at: '2020-08-26T17:11:38.602Z'
+    updated_at: '2020-09-15T15:41:32.088Z'
     protocol_name: Sleep Study Phase 2
     user_email: 
   - id: 268
     name: Contacted
     disabled: false
     protocol_id: 109
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.590Z'
-    updated_at: '2020-08-26T17:11:38.590Z'
+    updated_at: '2020-09-15T15:41:32.076Z'
     protocol_name: Sleep Study Phase 2
     user_email: 
   - id: 264
     name: Lost to Follow Up, Not Enrolled
     disabled: false
     protocol_id: 109
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.553Z'
-    updated_at: '2020-08-26T17:11:38.553Z'
+    updated_at: '2020-09-15T15:41:32.063Z'
     protocol_name: Sleep Study Phase 2
     user_email: 
   - id: 263
     name: Ineligible
     disabled: false
     protocol_id: 108
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.542Z'
-    updated_at: '2020-08-26T17:11:38.542Z'
+    updated_at: '2020-09-15T15:41:32.047Z'
     protocol_name: GRIT
     user_email: 
   - id: 262
     name: Eligible
     disabled: false
     protocol_id: 108
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.534Z'
-    updated_at: '2020-08-26T17:11:38.534Z'
+    updated_at: '2020-09-15T15:41:32.033Z'
     protocol_name: GRIT
     user_email: 
   - id: 261
     name: Contacted
     disabled: false
     protocol_id: 108
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.526Z'
-    updated_at: '2020-08-26T17:11:38.526Z'
+    updated_at: '2020-09-15T15:41:32.019Z'
     protocol_name: GRIT
     user_email: 
   - id: 260
     name: Screened
     disabled: false
     protocol_id: 108
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.516Z'
-    updated_at: '2020-08-26T17:11:38.516Z'
+    updated_at: '2020-09-15T15:41:31.996Z'
     protocol_name: GRIT
     user_email: 
   - id: 259
     name: Screened
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.505Z'
-    updated_at: '2020-08-26T17:11:38.505Z'
+    updated_at: '2020-09-15T15:41:31.983Z'
     protocol_name: PITT BHI
     user_email: 
   - id: 258
     name: Contacted
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.496Z'
-    updated_at: '2020-08-26T17:11:38.496Z'
+    updated_at: '2020-09-15T15:41:31.971Z'
     protocol_name: PITT BHI
     user_email: 
   - id: 257
     name: Eligible
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.487Z'
-    updated_at: '2020-08-26T17:11:38.487Z'
+    updated_at: '2020-09-15T15:41:31.958Z'
     protocol_name: PITT BHI
     user_email: 
   - id: 256
     name: Ineligible
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.479Z'
-    updated_at: '2020-08-26T17:11:38.479Z'
+    updated_at: '2020-09-15T15:41:31.946Z'
     protocol_name: PITT BHI
     user_email: 
   - id: 255
     name: Lost to Follow Up, Not Enrolled
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.472Z'
-    updated_at: '2020-08-26T17:11:38.472Z'
+    updated_at: '2020-09-15T15:41:31.934Z'
     protocol_name: PITT BHI
     user_email: 
   - id: 254
     name: Withdrew
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.462Z'
-    updated_at: '2020-08-26T17:11:38.462Z'
+    updated_at: '2020-09-15T15:41:31.922Z'
     protocol_name: PITT BHI
     user_email: 
   - id: 253
     name: Enrolled
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.452Z'
-    updated_at: '2020-08-26T17:11:38.452Z'
+    updated_at: '2020-09-15T15:41:31.908Z'
     protocol_name: PITT BHI
     user_email: 
   - id: 252
     name: Inquiry
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.445Z'
-    updated_at: '2020-08-26T17:11:38.445Z'
+    updated_at: '2020-09-15T15:41:31.896Z'
     protocol_name: PITT BHI
     user_email: 
   - id: 251
     name: Bounced
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.426Z'
-    updated_at: '2020-08-26T17:11:38.426Z'
+    updated_at: '2020-09-15T15:41:31.877Z'
     protocol_name: PITT BHI
     user_email: 
   - id: 250
     name: Opt Out
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.411Z'
-    updated_at: '2020-08-26T17:11:38.411Z'
+    updated_at: '2020-09-15T15:41:31.857Z'
     protocol_name: PITT BHI
     user_email: 
   - id: 249
     name: Opt In
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.392Z'
-    updated_at: '2020-08-26T17:11:38.392Z'
+    updated_at: '2020-09-15T15:41:31.834Z'
     protocol_name: PITT BHI
     user_email: 
   - id: 248
     name: Complete
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.374Z'
-    updated_at: '2020-08-26T17:11:38.374Z'
+    updated_at: '2020-09-15T15:41:31.812Z'
     protocol_name: PITT BHI
     user_email: 
   - id: 247
     name: Sent
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.357Z'
-    updated_at: '2020-08-26T17:11:38.357Z'
+    updated_at: '2020-09-15T15:41:31.792Z'
     protocol_name: PITT BHI
     user_email: 
   - id: 246
     name: Transferred for Screening
     disabled: false
     protocol_id: 110
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:38.323Z'
-    updated_at: '2020-08-26T17:11:38.323Z'
+    updated_at: '2020-09-15T15:41:31.765Z'
     protocol_name: PITT BHI
     user_email: 
   associated_protocol_events:
   - id: 1022
     name: Complete
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:39.685Z'
-    updated_at: '2020-08-26T17:11:39.685Z'
+    updated_at: '2020-09-15T15:41:32.445Z'
     disabled: false
     sub_process_id: 288
     milestone: ''
@@ -5377,9 +5480,9 @@ app_type:
     user_email: 
   - id: 1023
     name: Complete
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:39.708Z'
-    updated_at: '2020-08-26T17:11:39.708Z'
+    updated_at: '2020-09-15T15:41:32.472Z'
     disabled: false
     sub_process_id: 275
     milestone: ''
@@ -5389,9 +5492,9 @@ app_type:
     user_email: 
   - id: 1024
     name: Complete
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:39.731Z'
-    updated_at: '2020-08-26T17:11:39.731Z'
+    updated_at: '2020-09-15T15:41:32.496Z'
     disabled: false
     sub_process_id: 252
     milestone: ''
@@ -5401,9 +5504,9 @@ app_type:
     user_email: 
   - id: 1032
     name: Email
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:40.286Z'
-    updated_at: '2020-08-26T17:11:40.286Z'
+    updated_at: '2020-09-15T15:41:32.517Z'
     disabled: false
     sub_process_id: 268
     milestone: ''
@@ -5413,9 +5516,9 @@ app_type:
     user_email: 
   - id: 1033
     name: Email - Bounced
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:40.308Z'
-    updated_at: '2020-08-26T17:11:40.308Z'
+    updated_at: '2020-09-15T15:41:32.530Z'
     disabled: false
     sub_process_id: 268
     milestone: ''
@@ -5425,9 +5528,9 @@ app_type:
     user_email: 
   - id: 1034
     name: Email from Player
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:40.382Z'
-    updated_at: '2020-08-26T17:11:40.382Z'
+    updated_at: '2020-09-15T15:41:32.558Z'
     disabled: false
     sub_process_id: 288
     milestone: ''
@@ -5437,9 +5540,9 @@ app_type:
     user_email: 
   - id: 1035
     name: Email from Player
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:40.409Z'
-    updated_at: '2020-08-26T17:11:40.409Z'
+    updated_at: '2020-09-15T15:41:32.587Z'
     disabled: false
     sub_process_id: 275
     milestone: ''
@@ -5449,9 +5552,9 @@ app_type:
     user_email: 
   - id: 1036
     name: Email from Player
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:40.436Z'
-    updated_at: '2020-08-26T17:11:40.436Z'
+    updated_at: '2020-09-15T15:41:32.616Z'
     disabled: false
     sub_process_id: 252
     milestone: ''
@@ -5461,9 +5564,9 @@ app_type:
     user_email: 
   - id: 1037
     name: Email from Staff
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:40.522Z'
-    updated_at: '2020-08-26T17:11:40.522Z'
+    updated_at: '2020-09-15T15:41:32.645Z'
     disabled: false
     sub_process_id: 288
     milestone: ''
@@ -5473,9 +5576,9 @@ app_type:
     user_email: 
   - id: 1038
     name: Email from Staff
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:40.552Z'
-    updated_at: '2020-08-26T17:11:40.552Z'
+    updated_at: '2020-09-15T15:41:32.675Z'
     disabled: false
     sub_process_id: 275
     milestone: ''
@@ -5485,9 +5588,9 @@ app_type:
     user_email: 
   - id: 1039
     name: Email from Staff
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:40.579Z'
-    updated_at: '2020-08-26T17:11:40.579Z'
+    updated_at: '2020-09-15T15:41:32.703Z'
     disabled: false
     sub_process_id: 252
     milestone: ''
@@ -5497,9 +5600,9 @@ app_type:
     user_email: 
   - id: 1043
     name: Phone from Player
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:40.828Z'
-    updated_at: '2020-08-26T17:11:40.828Z'
+    updated_at: '2020-09-15T15:41:32.732Z'
     disabled: false
     sub_process_id: 288
     milestone: ''
@@ -5509,9 +5612,9 @@ app_type:
     user_email: 
   - id: 1044
     name: Phone from Player
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:40.852Z'
-    updated_at: '2020-08-26T17:11:40.852Z'
+    updated_at: '2020-09-15T15:41:32.760Z'
     disabled: false
     sub_process_id: 275
     milestone: ''
@@ -5521,9 +5624,9 @@ app_type:
     user_email: 
   - id: 1045
     name: Phone from Player
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:40.878Z'
-    updated_at: '2020-08-26T17:11:40.878Z'
+    updated_at: '2020-09-15T15:41:32.788Z'
     disabled: false
     sub_process_id: 252
     milestone: ''
@@ -5533,9 +5636,9 @@ app_type:
     user_email: 
   - id: 1046
     name: Phone from Staff
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:40.988Z'
-    updated_at: '2020-08-26T17:11:40.988Z'
+    updated_at: '2020-09-15T15:41:32.817Z'
     disabled: false
     sub_process_id: 288
     milestone: ''
@@ -5545,9 +5648,9 @@ app_type:
     user_email: 
   - id: 1047
     name: Phone from Staff
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:41.022Z'
-    updated_at: '2020-08-26T17:11:41.022Z'
+    updated_at: '2020-09-15T15:41:32.845Z'
     disabled: false
     sub_process_id: 275
     milestone: ''
@@ -5557,9 +5660,9 @@ app_type:
     user_email: 
   - id: 1048
     name: Phone from Staff
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:41.053Z'
-    updated_at: '2020-08-26T17:11:41.053Z'
+    updated_at: '2020-09-15T15:41:32.888Z'
     disabled: false
     sub_process_id: 252
     milestone: ''
@@ -5569,9 +5672,9 @@ app_type:
     user_email: 
   - id: 1050
     name: Recruitment Email
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:41.138Z'
-    updated_at: '2020-08-26T17:11:41.138Z'
+    updated_at: '2020-09-15T15:41:32.906Z'
     disabled: false
     sub_process_id: 281
     milestone: ''
@@ -5581,9 +5684,9 @@ app_type:
     user_email: 
   - id: 1051
     name: Recruitment Email
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:41.151Z'
-    updated_at: '2020-08-26T17:11:41.151Z'
+    updated_at: '2020-09-15T15:41:32.924Z'
     disabled: false
     sub_process_id: 280
     milestone: ''
@@ -5593,9 +5696,9 @@ app_type:
     user_email: 
   - id: 1052
     name: Recruitment Email
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:41.167Z'
-    updated_at: '2020-08-26T17:11:41.167Z'
+    updated_at: '2020-09-15T15:41:32.942Z'
     disabled: false
     sub_process_id: 247
     milestone: ''
@@ -5605,9 +5708,9 @@ app_type:
     user_email: 
   - id: 1056
     name: Text
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:41.523Z'
-    updated_at: '2020-08-26T17:11:41.523Z'
+    updated_at: '2020-09-15T15:41:32.955Z'
     disabled: false
     sub_process_id: 268
     milestone: ''
@@ -5617,9 +5720,9 @@ app_type:
     user_email: 
   - id: 1057
     name: Text - Bounced
-    admin_id: 1
+    admin_id: 2
     created_at: '2020-08-26T17:11:41.544Z'
-    updated_at: '2020-08-26T17:11:41.544Z'
+    updated_at: '2020-09-15T15:41:32.968Z'
     disabled: false
     sub_process_id: 268
     milestone: ''

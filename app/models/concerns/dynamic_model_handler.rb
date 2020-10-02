@@ -61,7 +61,7 @@ module DynamicModelHandler
     end
 
     def no_master_association
-      !foreign_key_name
+      foreign_key_name.blank?
     end
 
     def default_options

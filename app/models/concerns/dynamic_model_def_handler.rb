@@ -3,12 +3,10 @@
 module DynamicModelDefHandler
   extend ActiveSupport::Concern
 
-  DefaultMigrationSchema = Settings::DefaultMigrationSchema
-
   included do
     attr_accessor :table_comments
 
-    after_save :generate_model
+    after_save :generate_model, if: -> { ready? }
     after_save :check_implementation_class
     after_save :force_option_config_parse
     after_save :generate_migration, if: -> { !disabled }
@@ -181,12 +179,16 @@ module DynamicModelDefHandler
   end
 
   def ready?
-    cn = ActiveRecord::Base.connection
-    cn.table_exists?(table_name) || cn.view_exists?(table_name)
+    !disabled && table_ready?
+  end
+
+  def table_ready?
+    Admin::MigrationGenerator.tables_and_views
+                             .select { |t| t['table_name'] == table_name }
+                             .present?
   rescue StandardError => e
     puts e
     @extra_error = e
-
     false
   end
 
@@ -239,6 +241,10 @@ module DynamicModelDefHandler
 
   def implementation_class
     full_implementation_class_name.ns_constantize
+  end
+
+  def implementation_no_master_association
+    defined?(foreign_key_name) && foreign_key_name.blank?
   end
 
   def update_tracker_events
@@ -300,30 +306,28 @@ module DynamicModelDefHandler
   def check_implementation_class
     return unless !disabled && errors.empty?
 
-    unless !disabled? && ready?
-
-      version = DateTime.now.to_i.to_s(36)
-      gs = generator_script(version)
-      fn = write_db_migration(gs, version)
+    unless ready?
+      gs = generator_script(migration_version)
+      fn = migration_generator.write_db_migration(gs, table_name, migration_version)
       run_migration
     end
 
-    unless !disabled? && ready?
+    # unless ready?
 
-      err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created."
-      if Rails.env.development?
-        err += "
-        Wrote migration to: #{fn}
-        Review it, then run migration with:
-        MIG_PATH=#{db_migration_schema} FPHS_LOAD_APP_TYPES= bundle exec rails db:migrate
+    #   err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created."
+    #   if Rails.env.development?
+    #     err += "
+    #     Wrote migration to: #{fn}
+    #     Review it, then run migration with:
+    #     MIG_PATH=#{db_migration_schema} FPHS_LOAD_APP_TYPES= bundle exec rails db:migrate
 
-        IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
-        "
-      end
+    #     IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
+    #     "
+    #   end
 
-      err += "(extra error info: #{@extra_error})" if @extra_error
-      raise FphsException, err
-    end
+    #   err += "(extra error info: #{@extra_error})" if @extra_error
+    #   raise FphsException, err
+    # end
 
     begin
       res = implementation_class_defined?
@@ -441,6 +445,7 @@ module DynamicModelDefHandler
           self.fields = %i[#{migration_fields_array.join(' ')}]
           self.table_comment = '#{table_comments[:table]}'
           self.fields_comments = #{(table_comments[:fields] || {}).to_json}
+          self.no_master_association = #{implementation_no_master_association}
     SETATRRIBS
   end
 
@@ -449,56 +454,29 @@ module DynamicModelDefHandler
 
     return unless migration_update_fields
 
-    version = DateTime.now.to_i.to_s(36)
-    gs = generator_script(version, 'update')
-    write_db_migration gs, version, mode: 'update'
+    gs = generator_script(migration_version, 'update')
+    fn = migration_generator.write_db_migration gs, table_name, migration_version, mode: 'update'
+    @do_migration = fn
   end
 
-  # A DB migration schema is either the schema of the currrent app,
-  # or is based on the category of the dynamic model, activity log or external ID
   def db_migration_schema
     current_user_app_type = current_admin.matching_user_app_type
     dsn = current_user_app_type&.default_schema_name
     return dsn if dsn
 
     res = category.split('-').first if category.present?
-    res || DefaultMigrationSchema
-  end
-
-  def db_migration_dirname
-    "db/app_migrations/#{db_migration_schema}"
-  end
-
-  # Write a schema-specific migration only if we are in a development mode
-  def write_db_migration(mig_text, version, mode: 'create')
-    return unless Rails.env.development?
-
-    dirname = db_migration_dirname
-    cname_us = "#{mode}_#{table_name}_#{version}"
-    fn = "#{dirname}/#{Time.new.to_s(:number)}_#{cname_us}.rb"
-    FileUtils.mkdir_p dirname
-    File.write(fn, mig_text)
-    # Cheat way to ensure multiple migrations can not have the same timestamp during app type loads
-    sleep 1.2
-    @do_migration = fn
-    fn
+    res || Settings::DefaultMigrationSchema
   end
 
   def run_migration
-    return unless Rails.env.development? && db_migration_schema != 'ml_app'
+    migration_generator.run_migration
+  end
 
-    # Outside the current transaction
-    Thread.new do
-      ActiveRecord::Base.connection_pool.with_connection do
-        ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
-        pid = spawn('bin/rake db:schema:dump')
-        Process.detach pid
-      end
-    end.join
+  def migration_version
+    migration_generator.migration_version
+  end
 
-    true
-  rescue StandardError => e
-    FileUtils.rm @do_migration
-    raise e
+  def migration_generator
+    @migration_generator ||= Admin::MigrationGenerator.new(db_migration_schema)
   end
 end

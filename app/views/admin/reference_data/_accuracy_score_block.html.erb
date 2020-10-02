@@ -1,0 +1,23 @@
+<div class="ref-data-accuracy-score">
+  <p><a class="glyphicon glyphicon-info-sign" href="#as-help" class="collapsed" data-toggle="collapse"></a></p>
+  <div class="help-block collapse" id="as-help">
+    <p>
+      Use an accuracy score lookup directly against the <strong>rank</strong> field of the <strong>player_infos</strong> table only. For example:
+    </p>
+    <p><code>select * from player_infos where rank in (12,11) </code></p>
+    <p>When using the attributes definer to create a search form, select the <strong>type</strong> 'accuracy score'. A list of selections will automatically be generated in a drop down or multiple selection field, based on the selection for <strong>single or multiple values</strong>.</p>
+    <p>Reference the user selection in SQL using the name of the field, prefixed with a colon. For example, when the attribute <strong>name</strong> <code>one_of_these_ranks</code> is entered, use:</p>
+    <p><code>
+        select * from player_infos where rank in (:one_of_these_ranks)
+      </code></p>
+
+  </div>
+  <ul id="as-list" style="overflow: auto; background-color: white;">
+
+    <% Classification::AccuracyScore.all.each do |p| %>
+    <li id="as-<%=p.value%>">
+      <span href="#ifblock-<%=p.value%>" data-toggle="collapse" class="collapsed" style="color: <%= p.disabled ? '#aaa' : 'auto' %>"><%=p.value %> - <%=p.name%></span>
+    </li>
+    <% end %>
+  </ul>
+</div>

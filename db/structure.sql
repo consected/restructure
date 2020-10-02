@@ -23,6 +23,13 @@ CREATE SCHEMA data_requests;
 
 
 --
+-- Name: environments; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA environments;
+
+
+--
 -- Name: femfl; Type: SCHEMA; Schema: -; Owner: -
 --
 
@@ -328,6 +335,33 @@ CREATE FUNCTION bulk_msg.log_zeus_bulk_message_update() RETURNS trigger
                   RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_zeus_bulk_messages_update(); Type: FUNCTION; Schema: bulk_msg; Owner: -
+--
+
+CREATE FUNCTION bulk_msg.log_zeus_bulk_messages_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO zeus_bulk_message_history (
+    master_id,
+    name, notes, channel, message, send_date, send_time, status,
+    user_id,
+    created_at,
+    updated_at,
+    zeus_bulk_message_id)
+  SELECT
+    NEW.master_id,
+    NEW.name, NEW.notes, NEW.channel, NEW.message, NEW.send_date, NEW.send_time, NEW.status,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -797,6 +831,87 @@ $$;
 
 
 --
+-- Name: log_env_environments_update(); Type: FUNCTION; Schema: environments; Owner: -
+--
+
+CREATE FUNCTION environments.log_env_environments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO env_environment_history (
+    master_id,
+    name, description,
+    user_id,
+    created_at,
+    updated_at,
+    env_environment_id)
+  SELECT
+    NEW.master_id,
+    NEW.name, NEW.description,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_env_hosting_accounts_update(); Type: FUNCTION; Schema: environments; Owner: -
+--
+
+CREATE FUNCTION environments.log_env_hosting_accounts_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO env_hosting_account_history (
+    
+    name, provider, account_number, login_url, primary_admin, description, created_by_user_id,
+    user_id,
+    created_at,
+    updated_at,
+    env_hosting_account_id)
+  SELECT
+    
+    NEW.name, NEW.provider, NEW.account_number, NEW.login_url, NEW.primary_admin, NEW.description, NEW.created_by_user_id,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_env_servers_update(); Type: FUNCTION; Schema: environments; Owner: -
+--
+
+CREATE FUNCTION environments.log_env_servers_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO env_server_history (
+    master_id,
+    name, server_type, hosting_account_id, hosting_category, server_hosting_name, server_primary_admin, description,
+    user_id,
+    created_at,
+    updated_at,
+    env_server_id)
+  SELECT
+    NEW.master_id,
+    NEW.name, NEW.server_type, NEW.hosting_account_id, NEW.hosting_category, NEW.server_hosting_name, NEW.server_primary_admin, NEW.description,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: femfl_subjects_rc_update(); Type: FUNCTION; Schema: femfl; Owner: -
 --
 
@@ -1056,6 +1171,33 @@ BEGIN
   SELECT
     NEW.master_id,
     NEW.first_name, NEW.last_name, NEW.middle_name, NEW.nick_name, NEW.birth_date, NEW.source, NEW.rank,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_related_subjects_update(); Type: FUNCTION; Schema: femfl; Owner: -
+--
+
+CREATE FUNCTION femfl.log_related_subjects_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO related_subject_history (
+    master_id,
+    contact_master_id, rec_type, data, first_name, last_name, select_relationship, rank,
+    user_id,
+    created_at,
+    updated_at,
+    related_subject_id)
+  SELECT
+    NEW.master_id,
+    NEW.contact_master_id, NEW.rec_type, NEW.data, NEW.first_name, NEW.last_name, NEW.select_relationship, NEW.rank,
     NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
@@ -3715,6 +3857,60 @@ CREATE FUNCTION ipa_ops.log_ipa_appointment_update() RETURNS trigger
 
 
 --
+-- Name: log_ipa_appointments_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_appointments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_appointment_history (
+    master_id,
+    covid19_test_date, covid19_test_time, visit_start_date, visit_end_date, select_schedule, select_status, notes,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_appointment_id)
+  SELECT
+    NEW.master_id,
+    NEW.covid19_test_date, NEW.covid19_test_time, NEW.visit_start_date, NEW.visit_end_date, NEW.select_schedule, NEW.select_status, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_ipa_covid_prescreenings_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_covid_prescreenings_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_covid_prescreening_history (
+    master_id,
+    foreign_travel_yes_no, covid_tested_yes_no, select_test_result, test_date, test_location_notes, covid_contact_yes_no_dont_know, contact_date, household_isolation_yes_no, fever_yes_no, tag_select_symptoms, notes,
+    user_id,
+    created_at,
+    updated_at,
+    ipa_covid_prescreening_id)
+  SELECT
+    NEW.master_id,
+    NEW.foreign_travel_yes_no, NEW.covid_tested_yes_no, NEW.select_test_result, NEW.test_date, NEW.test_location_notes, NEW.covid_contact_yes_no_dont_know, NEW.contact_date, NEW.household_isolation_yes_no, NEW.fever_yes_no, NEW.tag_select_symptoms, NEW.notes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_ipa_exit_interview_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
@@ -4948,14 +5144,14 @@ CREATE FUNCTION ipa_ops.log_ipa_screenings_update() RETURNS trigger
 BEGIN
   INSERT INTO ipa_screening_history (
     master_id,
-    eligible_for_study_blank_yes_no, requires_study_partner_blank_yes_no, notes, good_time_to_speak_blank_yes_no, callback_date, callback_time, still_interested_blank_yes_no, ineligible_notes, eligible_notes, not_interested_notes, contact_in_future_yes_no,
+    form_version, eligible_for_study_blank_yes_no, requires_study_partner_blank_yes_no, notes, good_time_to_speak_blank_yes_no, callback_date, callback_time, still_interested_blank_yes_no, ineligible_notes, eligible_notes, not_interested_notes, contact_in_future_yes_no,
     user_id,
     created_at,
     updated_at,
     ipa_screening_id)
   SELECT
     NEW.master_id,
-    NEW.eligible_for_study_blank_yes_no, NEW.requires_study_partner_blank_yes_no, NEW.notes, NEW.good_time_to_speak_blank_yes_no, NEW.callback_date, NEW.callback_time, NEW.still_interested_blank_yes_no, NEW.ineligible_notes, NEW.eligible_notes, NEW.not_interested_notes, NEW.contact_in_future_yes_no,
+    NEW.form_version, NEW.eligible_for_study_blank_yes_no, NEW.requires_study_partner_blank_yes_no, NEW.notes, NEW.good_time_to_speak_blank_yes_no, NEW.callback_date, NEW.callback_time, NEW.still_interested_blank_yes_no, NEW.ineligible_notes, NEW.eligible_notes, NEW.not_interested_notes, NEW.contact_in_future_yes_no,
     NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
@@ -9921,38 +10117,6 @@ CREATE FUNCTION ml_app.log_ipa_adverse_event_update() RETURNS trigger
 
 
 --
--- Name: log_ipa_appointment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
---
-
-CREATE FUNCTION ml_app.log_ipa_appointment_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-              BEGIN
-                  INSERT INTO ipa_appointment_history
-                  (
-                      master_id,
-                      visit_start_date,
-                      select_navigator,
-                      user_id,
-                      created_at,
-                      updated_at,
-                      ipa_appointment_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.visit_start_date,
-                      NEW.select_navigator,
-                      NEW.user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
-
-
---
 -- Name: log_ipa_assignment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -10707,56 +10871,6 @@ CREATE FUNCTION ml_app.log_ipa_ps_tms_test_update() RETURNS trigger
                       NEW.dietary_restrictions_details,
                       NEW.anything_else_blank_yes_no,
                       NEW.anything_else_details,
-                      NEW.user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
-
-
---
--- Name: log_ipa_screening_update(); Type: FUNCTION; Schema: ml_app; Owner: -
---
-
-CREATE FUNCTION ml_app.log_ipa_screening_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-              BEGIN
-                  INSERT INTO ipa_screening_history
-                  (
-                      master_id,
-                      eligible_for_study_blank_yes_no,
-                      requires_study_partner_blank_yes_no,
-                      notes,
-                      good_time_to_speak_blank_yes_no,
-                      callback_date,
-                      callback_time,
-                      still_interested_blank_yes_no,
-                      not_interested_notes,
-                      ineligible_notes,
-                      eligible_notes,
-                      contact_in_future_yes_no,
-                      user_id,
-                      created_at,
-                      updated_at,
-                      ipa_screening_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.eligible_for_study_blank_yes_no,
-                      NEW.requires_study_partner_blank_yes_no,
-                      NEW.notes,
-                      NEW.good_time_to_speak_blank_yes_no,
-                      NEW.callback_date,
-                      NEW.callback_time,
-                      NEW.still_interested_blank_yes_no,
-                      NEW.not_interested_notes,
-                      NEW.ineligible_notes,
-                      NEW.eligible_notes,
-                      NEW.contact_in_future_yes_no,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -20194,8 +20308,6 @@ CREATE TABLE bulk_msg.zeus_bulk_message_history (
     send_date date,
     send_time time without time zone,
     status character varying,
-    cancel character varying,
-    ready character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
@@ -20392,8 +20504,6 @@ CREATE TABLE bulk_msg.zeus_bulk_messages (
     send_date date,
     send_time time without time zone,
     status character varying,
-    cancel character varying,
-    ready character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -21260,6 +21370,231 @@ ALTER SEQUENCE data_requests.q2_rc_codebook_id_seq OWNED BY data_requests.q2_rc_
 
 
 --
+-- Name: env_environment_history; Type: TABLE; Schema: environments; Owner: -
+--
+
+CREATE TABLE environments.env_environment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    name character varying,
+    description character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    env_environment_id bigint
+);
+
+
+--
+-- Name: env_environment_history_id_seq; Type: SEQUENCE; Schema: environments; Owner: -
+--
+
+CREATE SEQUENCE environments.env_environment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: env_environment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: environments; Owner: -
+--
+
+ALTER SEQUENCE environments.env_environment_history_id_seq OWNED BY environments.env_environment_history.id;
+
+
+--
+-- Name: env_environments; Type: TABLE; Schema: environments; Owner: -
+--
+
+CREATE TABLE environments.env_environments (
+    id bigint NOT NULL,
+    master_id bigint,
+    name character varying,
+    description character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: env_environments_id_seq; Type: SEQUENCE; Schema: environments; Owner: -
+--
+
+CREATE SEQUENCE environments.env_environments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: env_environments_id_seq; Type: SEQUENCE OWNED BY; Schema: environments; Owner: -
+--
+
+ALTER SEQUENCE environments.env_environments_id_seq OWNED BY environments.env_environments.id;
+
+
+--
+-- Name: env_hosting_account_history; Type: TABLE; Schema: environments; Owner: -
+--
+
+CREATE TABLE environments.env_hosting_account_history (
+    id bigint NOT NULL,
+    name character varying,
+    provider character varying,
+    account_number integer,
+    login_url character varying,
+    primary_admin character varying,
+    description character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    env_hosting_account_id bigint
+);
+
+
+--
+-- Name: env_hosting_account_history_id_seq; Type: SEQUENCE; Schema: environments; Owner: -
+--
+
+CREATE SEQUENCE environments.env_hosting_account_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: env_hosting_account_history_id_seq; Type: SEQUENCE OWNED BY; Schema: environments; Owner: -
+--
+
+ALTER SEQUENCE environments.env_hosting_account_history_id_seq OWNED BY environments.env_hosting_account_history.id;
+
+
+--
+-- Name: env_hosting_accounts; Type: TABLE; Schema: environments; Owner: -
+--
+
+CREATE TABLE environments.env_hosting_accounts (
+    id bigint NOT NULL,
+    name character varying,
+    provider character varying,
+    account_number integer,
+    login_url character varying,
+    primary_admin character varying,
+    description character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: env_hosting_accounts_id_seq; Type: SEQUENCE; Schema: environments; Owner: -
+--
+
+CREATE SEQUENCE environments.env_hosting_accounts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: env_hosting_accounts_id_seq; Type: SEQUENCE OWNED BY; Schema: environments; Owner: -
+--
+
+ALTER SEQUENCE environments.env_hosting_accounts_id_seq OWNED BY environments.env_hosting_accounts.id;
+
+
+--
+-- Name: env_server_history; Type: TABLE; Schema: environments; Owner: -
+--
+
+CREATE TABLE environments.env_server_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    name character varying,
+    server_type character varying,
+    hosting_category character varying,
+    server_hosting_name character varying,
+    server_primary_admin character varying,
+    description character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    env_server_id bigint,
+    hosting_account_id bigint
+);
+
+
+--
+-- Name: env_server_history_id_seq; Type: SEQUENCE; Schema: environments; Owner: -
+--
+
+CREATE SEQUENCE environments.env_server_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: env_server_history_id_seq; Type: SEQUENCE OWNED BY; Schema: environments; Owner: -
+--
+
+ALTER SEQUENCE environments.env_server_history_id_seq OWNED BY environments.env_server_history.id;
+
+
+--
+-- Name: env_servers; Type: TABLE; Schema: environments; Owner: -
+--
+
+CREATE TABLE environments.env_servers (
+    id bigint NOT NULL,
+    master_id bigint,
+    name character varying,
+    server_type character varying,
+    hosting_category character varying,
+    server_hosting_name character varying,
+    server_primary_admin character varying,
+    description character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    hosting_account_id bigint
+);
+
+
+--
+-- Name: env_servers_id_seq; Type: SEQUENCE; Schema: environments; Owner: -
+--
+
+CREATE SEQUENCE environments.env_servers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: env_servers_id_seq; Type: SEQUENCE OWNED BY; Schema: environments; Owner: -
+--
+
+ALTER SEQUENCE environments.env_servers_id_seq OWNED BY environments.env_servers.id;
+
+
+--
 -- Name: activity_log_femfl_assignment_femfl_comm_history; Type: TABLE; Schema: femfl; Owner: -
 --
 
@@ -21726,6 +22061,85 @@ CREATE SEQUENCE femfl.rc_femfl_cif_id_seq
 --
 
 ALTER SEQUENCE femfl.rc_femfl_cif_id_seq OWNED BY femfl.rc_femfl_cif.id;
+
+
+--
+-- Name: related_subject_history; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.related_subject_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    contact_master_id bigint,
+    rec_type character varying,
+    data character varying,
+    first_name character varying,
+    last_name character varying,
+    select_relationship character varying,
+    rank integer,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    related_subject_id bigint
+);
+
+
+--
+-- Name: related_subject_history_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.related_subject_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: related_subject_history_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.related_subject_history_id_seq OWNED BY femfl.related_subject_history.id;
+
+
+--
+-- Name: related_subjects; Type: TABLE; Schema: femfl; Owner: -
+--
+
+CREATE TABLE femfl.related_subjects (
+    id bigint NOT NULL,
+    master_id bigint,
+    contact_master_id bigint,
+    rec_type character varying,
+    data character varying,
+    first_name character varying,
+    last_name character varying,
+    select_relationship character varying,
+    rank integer,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: related_subjects_id_seq; Type: SEQUENCE; Schema: femfl; Owner: -
+--
+
+CREATE SEQUENCE femfl.related_subjects_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: related_subjects_id_seq; Type: SEQUENCE OWNED BY; Schema: femfl; Owner: -
+--
+
+ALTER SEQUENCE femfl.related_subjects_id_seq OWNED BY femfl.related_subjects.id;
 
 
 --
@@ -26122,7 +26536,9 @@ CREATE TABLE ipa_ops.ipa_appointment_history (
     visit_end_date date,
     select_status character varying,
     notes character varying,
-    select_schedule character varying
+    select_schedule character varying,
+    covid19_test_date date,
+    covid19_test_time time without time zone
 );
 
 
@@ -26159,7 +26575,9 @@ CREATE TABLE ipa_ops.ipa_appointments (
     visit_end_date date,
     select_status character varying,
     notes character varying,
-    select_schedule character varying
+    select_schedule character varying,
+    covid19_test_date date,
+    covid19_test_time time without time zone
 );
 
 
@@ -26320,6 +26738,93 @@ CREATE SEQUENCE ipa_ops.ipa_consent_mailings_id_seq
 --
 
 ALTER SEQUENCE ipa_ops.ipa_consent_mailings_id_seq OWNED BY ipa_ops.ipa_consent_mailings.id;
+
+
+--
+-- Name: ipa_covid_prescreening_history; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.ipa_covid_prescreening_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    foreign_travel_yes_no character varying,
+    covid_tested_yes_no character varying,
+    select_test_result character varying,
+    test_date date,
+    test_location_notes character varying,
+    covid_contact_yes_no_dont_know character varying,
+    contact_date date,
+    household_isolation_yes_no character varying,
+    fever_yes_no character varying,
+    tag_select_symptoms character varying[],
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ipa_covid_prescreening_id bigint
+);
+
+
+--
+-- Name: ipa_covid_prescreening_history_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
+--
+
+CREATE SEQUENCE ipa_ops.ipa_covid_prescreening_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_covid_prescreening_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ipa_ops; Owner: -
+--
+
+ALTER SEQUENCE ipa_ops.ipa_covid_prescreening_history_id_seq OWNED BY ipa_ops.ipa_covid_prescreening_history.id;
+
+
+--
+-- Name: ipa_covid_prescreenings; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.ipa_covid_prescreenings (
+    id bigint NOT NULL,
+    master_id bigint,
+    foreign_travel_yes_no character varying,
+    covid_tested_yes_no character varying,
+    select_test_result character varying,
+    test_date date,
+    test_location_notes character varying,
+    covid_contact_yes_no_dont_know character varying,
+    contact_date date,
+    household_isolation_yes_no character varying,
+    fever_yes_no character varying,
+    tag_select_symptoms character varying[],
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ipa_covid_prescreenings_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
+--
+
+CREATE SEQUENCE ipa_ops.ipa_covid_prescreenings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_covid_prescreenings_id_seq; Type: SEQUENCE OWNED BY; Schema: ipa_ops; Owner: -
+--
+
+ALTER SEQUENCE ipa_ops.ipa_covid_prescreenings_id_seq OWNED BY ipa_ops.ipa_covid_prescreenings.id;
 
 
 --
@@ -27552,6 +28057,99 @@ ALTER SEQUENCE ipa_ops.ipa_mednav_provider_reports_id_seq OWNED BY ipa_ops.ipa_m
 
 
 --
+-- Name: ipa_ps_initial_screenings; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.ipa_ps_initial_screenings (
+    id integer NOT NULL,
+    master_id integer,
+    select_is_good_time_to_speak character varying,
+    any_questions_blank_yes_no character varying,
+    follow_up_date date,
+    follow_up_time time without time zone,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    notes character varying,
+    looked_at_website_yes_no character varying,
+    select_still_interested character varying,
+    form_version character varying,
+    same_hotel_yes_no character varying,
+    embedded_report_ipa__ipa_appointments character varying,
+    select_schedule character varying,
+    select_may_i_begin character varying
+);
+
+
+--
+-- Name: ipa_screenings; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.ipa_screenings (
+    id integer NOT NULL,
+    master_id integer,
+    eligible_for_study_blank_yes_no character varying,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    good_time_to_speak_blank_yes_no character varying,
+    callback_date date,
+    callback_time time without time zone,
+    still_interested_blank_yes_no character varying,
+    not_interested_notes character varying,
+    ineligible_notes character varying,
+    eligible_notes character varying,
+    requires_study_partner_blank_yes_no character varying,
+    contact_in_future_yes_no character varying,
+    form_version character varying
+);
+
+
+--
+-- Name: ipa_participant_exits; Type: VIEW; Schema: ipa_ops; Owner: -
+--
+
+CREATE VIEW ipa_ops.ipa_participant_exits AS
+ SELECT dt2.master_id,
+    dt2.ipa_id,
+    dt2.status,
+    dt2."when"
+   FROM ( SELECT DISTINCT dt.master_id,
+            ipa.ipa_id,
+                CASE
+                    WHEN ((dt.extra_log_type)::text = 'completed'::text) THEN 'completed'::character varying
+                    WHEN ((dt.extra_log_type)::text = 'withdraw'::text) THEN 'withdrawn'::character varying
+                    WHEN (((dt.ps_interested1)::text = 'not interested'::text) OR ((dt.ps_interested2)::text = 'not interested'::text) OR ((dt.ps_still_interested)::text = 'no'::text)) THEN 'not interested during phone screening'::character varying
+                    WHEN (((dt.extra_log_type)::text = 'perform_screening_follow_up'::text) AND ((dt.eligible_for_study_blank_yes_no)::text = 'no'::text)) THEN 'ineligible'::character varying
+                    WHEN (((dt.extra_log_type)::text = 'perform_screening_follow_up'::text) AND ((dt.follow_up_still_interested)::text = 'no'::text)) THEN 'not interested during screening follow-up'::character varying
+                    WHEN ((dt.extra_log_type)::text = 'schedule_screening'::text) THEN 'in process'::character varying
+                    WHEN ((dt.extra_log_type)::text = 'exit_opt_out'::text) THEN 'opted out'::character varying
+                    WHEN ((dt.extra_log_type)::text = 'exit_opt_out_covid19'::text) THEN 'exit (no COVID-19 test)'::character varying
+                    WHEN ((dt.extra_log_type)::text = 'exit_l2fu'::text) THEN 'lost to follow-up (before scheduling)'::character varying
+                    WHEN ((dt.extra_log_type)::text = 'on_hold'::text) THEN 'on hold'::character varying
+                    ELSE dt.extra_log_type
+                END AS status,
+            dt.created_at AS "when"
+           FROM (( SELECT al.master_id,
+                    al.created_at,
+                    al.extra_log_type,
+                    ipa_screenings.eligible_for_study_blank_yes_no,
+                    ipa_screenings.still_interested_blank_yes_no AS follow_up_still_interested,
+                    ipa_ps_initial_screenings.select_is_good_time_to_speak AS ps_interested1,
+                    ipa_ps_initial_screenings.select_may_i_begin AS ps_interested2,
+                    ipa_ps_initial_screenings.select_still_interested AS ps_still_interested,
+                    rank() OVER (PARTITION BY al.master_id ORDER BY al.created_at DESC) AS r
+                   FROM ((ipa_ops.activity_log_ipa_assignments al
+                     LEFT JOIN ipa_ops.ipa_screenings ON ((al.master_id = ipa_screenings.master_id)))
+                     LEFT JOIN ipa_ops.ipa_ps_initial_screenings ON ((al.master_id = ipa_ps_initial_screenings.master_id)))
+                  WHERE (((ipa_ps_initial_screenings.select_is_good_time_to_speak)::text = 'not interested'::text) OR ((ipa_ps_initial_screenings.select_may_i_begin)::text = 'not interested'::text) OR ((ipa_ps_initial_screenings.select_still_interested)::text = 'no'::text) OR (((al.extra_log_type)::text = 'perform_screening_follow_up'::text) AND (((ipa_screenings.eligible_for_study_blank_yes_no)::text = 'no'::text) OR ((ipa_screenings.still_interested_blank_yes_no)::text = 'no'::text))) OR ((al.extra_log_type)::text = ANY ((ARRAY['completed'::character varying, 'exit_opt_out'::character varying, 'exit_l2fu'::character varying, 'exit_opt_out_covid19'::character varying, 'on_hold'::character varying])::text[])) OR ((al.extra_log_type)::text = 'withdraw'::text) OR ((al.extra_log_type)::text = 'schedule_screening'::text))) dt
+             JOIN ipa_ops.ipa_assignments ipa ON ((dt.master_id = ipa.master_id)))
+          WHERE (dt.r = 1)) dt2
+  ORDER BY dt2.status, dt2."when" DESC;
+
+
+--
 -- Name: ipa_payment_history; Type: TABLE; Schema: ipa_ops; Owner: -
 --
 
@@ -28256,31 +28854,6 @@ ALTER SEQUENCE ipa_ops.ipa_ps_initial_screening_history_id_seq OWNED BY ipa_ops.
 
 
 --
--- Name: ipa_ps_initial_screenings; Type: TABLE; Schema: ipa_ops; Owner: -
---
-
-CREATE TABLE ipa_ops.ipa_ps_initial_screenings (
-    id integer NOT NULL,
-    master_id integer,
-    select_is_good_time_to_speak character varying,
-    any_questions_blank_yes_no character varying,
-    follow_up_date date,
-    follow_up_time time without time zone,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    notes character varying,
-    looked_at_website_yes_no character varying,
-    select_still_interested character varying,
-    form_version character varying,
-    same_hotel_yes_no character varying,
-    embedded_report_ipa__ipa_appointments character varying,
-    select_schedule character varying,
-    select_may_i_begin character varying
-);
-
-
---
 -- Name: ipa_ps_initial_screenings_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
 --
 
@@ -28900,7 +29473,8 @@ CREATE TABLE ipa_ops.ipa_screening_history (
     ineligible_notes character varying,
     eligible_notes character varying,
     requires_study_partner_blank_yes_no character varying,
-    contact_in_future_yes_no character varying
+    contact_in_future_yes_no character varying,
+    form_version character varying
 );
 
 
@@ -28921,30 +29495,6 @@ CREATE SEQUENCE ipa_ops.ipa_screening_history_id_seq
 --
 
 ALTER SEQUENCE ipa_ops.ipa_screening_history_id_seq OWNED BY ipa_ops.ipa_screening_history.id;
-
-
---
--- Name: ipa_screenings; Type: TABLE; Schema: ipa_ops; Owner: -
---
-
-CREATE TABLE ipa_ops.ipa_screenings (
-    id integer NOT NULL,
-    master_id integer,
-    eligible_for_study_blank_yes_no character varying,
-    notes character varying,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    good_time_to_speak_blank_yes_no character varying,
-    callback_date date,
-    callback_time time without time zone,
-    still_interested_blank_yes_no character varying,
-    not_interested_notes character varying,
-    ineligible_notes character varying,
-    eligible_notes character varying,
-    requires_study_partner_blank_yes_no character varying,
-    contact_in_future_yes_no character varying
-);
 
 
 --
@@ -33692,6 +34242,13 @@ CREATE TABLE q2.rc_links (
 
 
 --
+-- Name: TABLE rc_links; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON TABLE q2.rc_links IS 'Q2 REDCap survey URLs, tied back to *masters* records';
+
+
+--
 -- Name: q2_rc_links; Type: VIEW; Schema: ml_app; Owner: -
 --
 
@@ -36768,6 +37325,13 @@ CREATE TABLE q2.q2_datadic (
 
 
 --
+-- Name: TABLE q2_datadic; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON TABLE q2.q2_datadic IS 'Q2 Data Dictionary';
+
+
+--
 -- Name: datadic_id_seq; Type: SEQUENCE; Schema: q2; Owner: -
 --
 
@@ -36784,6 +37348,4968 @@ CREATE SEQUENCE q2.datadic_id_seq
 --
 
 ALTER SEQUENCE q2.datadic_id_seq OWNED BY q2.q2_datadic.id;
+
+
+--
+-- Name: q2_data; Type: TABLE; Schema: q2; Owner: -
+--
+
+CREATE TABLE q2.q2_data (
+    id integer NOT NULL,
+    record_id integer,
+    redcap_survey_identifier integer,
+    q2_timestamp timestamp without time zone,
+    dob date,
+    current_weight numeric,
+    domestic_status integer,
+    living_situation integer,
+    current_employment integer,
+    student_looking integer,
+    current_fbjob integer,
+    current_fbjob_oth text,
+    job_industry text,
+    job_title integer,
+    job_title_entry text,
+    smoke integer,
+    smoketime___pnfl integer,
+    smoketime___dnfl integer,
+    smoketime___anfl integer,
+    smoke_start numeric,
+    smoke_stop numeric,
+    smoke_curr integer,
+    smoke_totyrs numeric,
+    smoke_prenfl integer,
+    smoke_nfl integer,
+    smoke_postnfl integer,
+    edu_player integer,
+    edu_mother integer,
+    edu_father integer,
+    occ_mother integer,
+    occ_mother_exp text,
+    occ_father integer,
+    occ_father_exp text,
+    yrsplayed_prehs numeric,
+    playhsfb___no integer,
+    hsposition1 integer,
+    hsposition2 integer,
+    yrsplayed_hs integer,
+    collposition1 integer,
+    collposition2 integer,
+    yrsplayed_coll integer,
+    college_div integer,
+    collpreprac integer,
+    collpreprac_pads integer,
+    collregprac integer,
+    collregprac_pads integer,
+    collsnap_ol integer,
+    collsnap_wr integer,
+    collsnap_dl integer,
+    collsnap_te integer,
+    collsnap_lb integer,
+    collsnap_qb integer,
+    collsnap_db integer,
+    collsnap_kick integer,
+    collsnap_rb integer,
+    collsnap_special integer,
+    nflpreprac integer,
+    nflpreprac_pads integer,
+    nflregprac integer,
+    nflregprac_pads integer,
+    prosnap_ol integer,
+    prosnap_wr integer,
+    prosnap_dl integer,
+    prosnap_te integer,
+    prosnap_lb integer,
+    prosnap_qb integer,
+    prosnap_db integer,
+    prosnap_kick integer,
+    prosnap_rb integer,
+    prosnap_special integer,
+    gmsplyd_career numeric,
+    gmsplyd_season integer,
+    prsqd integer,
+    prsqd_seasons numeric,
+    othleague integer,
+    othleague_seasons integer,
+    othleaguenm___afl integer,
+    othleaguenm___cfl integer,
+    othleaguenm___efl integer,
+    othleaguenm___ufl integer,
+    othleaguenm___wfl integer,
+    othleaguenm___xfl integer,
+    othleaguenm___oth integer,
+    othleague_exp text,
+    nonnfl_seasons numeric,
+    prsqd_nonnfl integer,
+    prsqd_nonnfl_seasons numeric,
+    firstpro_age numeric,
+    finalpro_age numeric,
+    leftfb___age integer,
+    leftfb___cut integer,
+    leftfb___fbinj integer,
+    leftfb___inj integer,
+    leftfb___retire integer,
+    postfb_hlthprac integer,
+    postfb_degree integer,
+    postfb_charity integer,
+    postfb_fbjob integer,
+    postfb_job integer,
+    postfbjob_occ integer,
+    postfbjob_occexp text,
+    postfbex_walk integer,
+    postfbex_jog integer,
+    postfbex_run integer,
+    postfbex_other integer,
+    postfbex_lowint integer,
+    postfbex_wttrain integer,
+    postfbex_endsprt integer,
+    postfbex_reclg integer,
+    pastyrex_walk integer,
+    pastyrex_jog integer,
+    pastyrex_run integer,
+    pastyrex_oth integer,
+    pastyrex_lowint integer,
+    pastyrex_wttrain integer,
+    pastyrex_endsprt integer,
+    pastyrex_reclg integer,
+    ex150min integer,
+    ex150min_exp integer,
+    ex150min_oth text,
+    demog___complete integer,
+    demog_date timestamp without time zone,
+    postfb_wt2yr integer,
+    postfb_wt2yrdelta integer,
+    postfb_wt5yr integer,
+    postfb_wt5yrdelta integer,
+    cardiac_rehab integer,
+    cvtest_ecg integer,
+    cvtest_ecg_exp text,
+    cvtest_echo integer,
+    cvtest_echo_exp text,
+    cvtest_cpxt integer,
+    cvtest_cpxt_exp text,
+    cvtest_cvmri integer,
+    cvtest_cvmri_exp text,
+    cvtest_corct integer,
+    cvtest_corct_exp text,
+    cvtest_cvcath integer,
+    cvtest_cvcath_exp text,
+    cvdx_mi integer,
+    cvdx_stroke integer,
+    cvdx_tia integer,
+    cvmedrec_highbp integer,
+    cvmedrec_hrtfail integer,
+    cvmedrec_afib integer,
+    cvmedrec_otharrhyth integer,
+    cvmedrec_highchol integer,
+    cvmedrec_diabetes integer,
+    cvsurg_bypass integer,
+    cvsurg_ablation integer,
+    cvsurg_carotidart integer,
+    cvmed_chol integer,
+    cvmed_othchol integer,
+    cvmed_novchol integer,
+    cvmed_bldthin integer,
+    cvmed_anticoag integer,
+    cvmed_arrhyth integer,
+    cvmed_digoxin integer,
+    cvmed_furosemide integer,
+    cvmed_thiazide integer,
+    cvmed_calciumblk integer,
+    cvmed_antihyp integer,
+    dbmed_metformin integer,
+    dbmed_glimeperide integer,
+    dbmed_insulin integer,
+    dbmed_other integer,
+    cardiac___complete integer,
+    cardiac_date timestamp without time zone,
+    ad8_1 integer,
+    ad8_2 integer,
+    ad8_3 integer,
+    ad8_4 integer,
+    ad8_5 integer,
+    ad8_6 integer,
+    ad8_7 integer,
+    ad8_8 integer,
+    nqcog64q2 integer,
+    nqcog65q2 integer,
+    nqcog66q2 integer,
+    nqcog68q2 integer,
+    nqcog72q2 integer,
+    nqcog75q2 integer,
+    nqcog77q2 integer,
+    nqcog80q2 integer,
+    nqper02 integer,
+    nqper05 integer,
+    nqper06 integer,
+    nqper07 integer,
+    nqper11 integer,
+    nqper12 integer,
+    nqper17 integer,
+    nqper19 integer,
+    phq1 integer,
+    phq2 integer,
+    phq3 integer,
+    phq4 integer,
+    phq5 integer,
+    phq6 integer,
+    phq7 integer,
+    phq8 integer,
+    phq9 integer,
+    gad7_1 integer,
+    gad7_2 integer,
+    gad7_3 integer,
+    gad7_4 integer,
+    gad7_5 integer,
+    gad7_6 integer,
+    gad7_7 integer,
+    lotr1 integer,
+    lotr3 integer,
+    lotr4 integer,
+    lotr7 integer,
+    lotr9 integer,
+    lotr10 integer,
+    stpbng_snore integer,
+    stpbng_tired integer,
+    stpbng_obser integer,
+    stpbng_bp integer,
+    stpbng_neck integer,
+    cpapuse integer,
+    cpapuse_days integer,
+    ncmedrec_hdache integer,
+    ncmedrec_anx integer,
+    ncmedrec_dep integer,
+    ncmedrec_memloss integer,
+    ncmedrec_add integer,
+    ncdx_alz integer,
+    ncdx_cte integer,
+    ncdx_vascdem integer,
+    ncdx_othdem integer,
+    ncdx_als integer,
+    ncdx_parkins integer,
+    ncdx_ms integer,
+    ncmed_ssri integer,
+    ncmed_tricydep integer,
+    ncmed_othdep integer,
+    ncmed_slpaid integer,
+    neurocog___complete integer,
+    neurocog_date timestamp without time zone,
+    bpi1 integer,
+    bpi2___head integer,
+    bpi2___neck integer,
+    bpi2___shoul integer,
+    bpi2___chest integer,
+    bpi2___arm integer,
+    bpi2___hand integer,
+    bpi2___uback integer,
+    bpi2___lbak integer,
+    bpi2___hip integer,
+    bpi2___leg integer,
+    bpi2___knee integer,
+    bpi2___ankle integer,
+    bpi2___foot integer,
+    bpi2___oth integer,
+    bpi2_othexp text,
+    bpi2most integer,
+    bpi2most_othexp text,
+    bpi3 integer,
+    bpi4 integer,
+    bpi5 integer,
+    bpi6 integer,
+    bpi7___none integer,
+    bpi7___otc integer,
+    bpi7___prmed integer,
+    bpi7___mass integer,
+    bpi7___pt integer,
+    bpi7___acup integer,
+    bpi7___marij integer,
+    bpi7___intpm integer,
+    bpi7___oth integer,
+    bpi7_othexp text,
+    bpi8 integer,
+    bpi9a integer,
+    bpi9b integer,
+    bpi9c integer,
+    bpi9d integer,
+    bpi9e integer,
+    bpi9f integer,
+    bpi9g integer,
+    bpi9h integer,
+    pnmedfb_acetamin integer,
+    pnmedfb_aspirin integer,
+    pnmedfb_ibuprof integer,
+    pnmedfb_othantiinf integer,
+    pnmedfb_oralster integer,
+    pnmedfb_opioid integer,
+    pnmed5yr_acetamin integer,
+    pnmed5yr_aspirin integer,
+    pnmed5yr_ibuprof integer,
+    pnmed5yr_antiinf integer,
+    pnmed5yr_oralster integer,
+    pnmed5yr_opioid integer,
+    pnmed_acetamin integer,
+    pnmed_acetamin_days integer,
+    pnmed_acetamin_tabs integer,
+    pnmed_acetamin_dose integer,
+    pnmed_aspirin integer,
+    pnmed_aspirin_days integer,
+    pnmed_aspirin_tabs integer,
+    pnmed_aspirin_dose integer,
+    pnmed_ibuprof integer,
+    pnmed_ibuprof_days integer,
+    pnmed_ibuprof_tabs integer,
+    pnmed_ibuprof_dose integer,
+    pnmed_antiinf integer,
+    pnmed_antiinf_days integer,
+    pnmed_antiinf_tabs integer,
+    pnmed_antiinf_dose integer,
+    pnmed_oralster integer,
+    pnmed_oralster_days integer,
+    pnmed_oralster_tabs integer,
+    pnmed_oralster_dose integer,
+    pnmed_opioid integer,
+    pnmed_opioid_days integer,
+    pnmed_opioid_tab integer,
+    pnmed_opioid_dose integer,
+    pnsurg_nckspin integer,
+    pnsurg_back integer,
+    pnsurg_hip integer,
+    pnsurg_knee integer,
+    pain___complete integer,
+    pain_date timestamp without time zone,
+    wealth integer,
+    wealth_emerg___1 integer,
+    wealth_emerg___2 integer,
+    wealth_emerg___3 integer,
+    wealth_emerg___4 integer,
+    wealth_emerg___5 integer,
+    wealth_emerg___6 integer,
+    wealth_emerg___7 integer,
+    wealth_emerg___8 integer,
+    wealth_emerg___9 integer,
+    wealth_emerg_oth text,
+    ladder_wealth integer,
+    ladder_comm integer,
+    household_number integer,
+    hcutil_pcp integer,
+    hcutil_pcp_exp integer,
+    hcutil_pcp_oth text,
+    hcutil_othprov integer,
+    selfrpt_cte integer,
+    otdx_arthritis integer,
+    otdx_slpapnea integer,
+    otdx_prostcanc integer,
+    otdx_basalcanc integer,
+    otdx_squamcanc integer,
+    otdx_melanom integer,
+    otdx_lymphom integer,
+    otdx_othcanc integer,
+    otdx_renalfail integer,
+    otdx_alcdep integer,
+    otdx_livcirrhosis integer,
+    otdx_livfail integer,
+    otmedrec_pncond integer,
+    otmedrec_livprob integer,
+    otmedrec_lowtest integer,
+    otmedrec_ed integer,
+    massage integer,
+    acupuncture integer,
+    chiropractic integer,
+    yoga integer,
+    taichi integer,
+    meditation integer,
+    othaltmed integer,
+    othaltmed_exp text,
+    famhxmoth___na integer,
+    famhxmoth___lung integer,
+    famhxmoth___colrec integer,
+    famhxmoth___diab integer,
+    famhxmoth___mela integer,
+    famhxmoth___hypert integer,
+    famhxmoth___dem integer,
+    famhxmoth___alc integer,
+    famhxfsib___na integer,
+    famhxfsib___lung integer,
+    famhxfsib___colrec integer,
+    famhxfsib___diab integer,
+    famhxfsib___mela integer,
+    famhxfsib___hypert integer,
+    famhxfsib___dem integer,
+    famhxfsib___alc integer,
+    femsib_number integer,
+    famhxfath___na integer,
+    famhxfath___lung integer,
+    famhxfath___colrec integer,
+    famhxfath___prost integer,
+    famhxfath___diab integer,
+    famhxfath___mela integer,
+    famhxfath___hypert integer,
+    famhxfath___dem integer,
+    famhxfath___alc integer,
+    famhxmsib___na integer,
+    famhxmsib___lung integer,
+    famhxmsib___colrec integer,
+    famhxmsib___prost integer,
+    famhxmsib___diab integer,
+    famhxmsib___mela integer,
+    famhxmsib___hypert integer,
+    famhxmsib___dem integer,
+    famhxmsib___alc integer,
+    sib_number integer,
+    sib1age numeric,
+    sib1ht_feet numeric,
+    sib1ht_inch numeric,
+    sib1sport___none integer,
+    sib1sport___hsfb integer,
+    sib1sport___colfb integer,
+    sib1sport___oth integer,
+    sib1sport_oth text,
+    sib2age numeric,
+    sib2ht_feet numeric,
+    sib2ht_inch numeric,
+    sib2sport___none integer,
+    sib2sport___hsfb integer,
+    sib2sport___colfb integer,
+    sib2sport___oth integer,
+    sib2sport_oth text,
+    sib3age numeric,
+    sib3ht_feet numeric,
+    sib3ht_inch numeric,
+    sib3sport___none integer,
+    sib3sport___hsfb integer,
+    sib3sport___colfb integer,
+    sib3sport___oth integer,
+    sib3sport_oth text,
+    sib4age numeric,
+    sib4ht_feet numeric,
+    sib4ht_inch numeric,
+    sib4sport___none integer,
+    sib4sport___hsfb integer,
+    sib4sport___colfb integer,
+    sib4sport___oth integer,
+    sib4sportoth text,
+    sib5age numeric,
+    sib5ht_feet numeric,
+    sib5ht_inch numeric,
+    sib5sport___none integer,
+    sib5sport___hsfb integer,
+    sib5sport___colfb integer,
+    sib5sport___oth integer,
+    sib5sport_oth text,
+    pedcaff___noans integer,
+    pedcaff___no integer,
+    pedcaff___fb integer,
+    pedcaff___cur integer,
+    pededrink___noans integer,
+    pededrink___no integer,
+    pededrink___fb integer,
+    pededrink___cur integer,
+    pedcreat___noans integer,
+    pedcreat___no integer,
+    pedcreat___fb integer,
+    pedcreat___cur integer,
+    pedsteroid___noans integer,
+    pedsteroid___no integer,
+    pedsteroid___fb integer,
+    pedsteroid___cur integer,
+    pedgh___noans integer,
+    pedgh___no integer,
+    pedgh___fb integer,
+    pedgh___cur integer,
+    pedephed___noans integer,
+    pedephed___no integer,
+    pedephed___fb integer,
+    pedephed___cur integer,
+    pedbetahy___noans integer,
+    pedbetahy___no integer,
+    pedbetahy___fb integer,
+    pedbetahy___cur integer,
+    pednoncaf___noans integer,
+    pednoncaf___no integer,
+    pednoncaf___fb integer,
+    pednoncaf___cur integer,
+    pedrcell___noans integer,
+    pedrcell___no integer,
+    pedrcell___fb integer,
+    pedrcell___cur integer,
+    pedinos___noans integer,
+    pedinos___no integer,
+    pedinos___fb integer,
+    pedinos___cur integer,
+    alcohol_days integer,
+    alcohol_drinks integer,
+    marijuana integer,
+    marijuana_start numeric,
+    marijuana_stop numeric,
+    marijuana_totyrs numeric,
+    marijtime___pnfl integer,
+    marijtime___dnfl integer,
+    marijtime___anfl integer,
+    marijreas___fun integer,
+    marijreas___relx integer,
+    marijreas___pain integer,
+    marijreas___anx integer,
+    marijreas___dep integer,
+    marijreas___oth integer,
+    marijreas_exp text,
+    born_address text,
+    born_city text,
+    born_state integer,
+    born_zip numeric,
+    twelveyrs_address text,
+    twelveyrs_city text,
+    twelveyrs_state integer,
+    twelveyrs_zip numeric,
+    infertility integer,
+    infert_age numeric,
+    infert_hcp integer,
+    infertreas___fem integer,
+    infertreas___mal integer,
+    infertreas___unex integer,
+    infertreas___oth integer,
+    infertreas_oth text,
+    actout_dreams integer,
+    smell_problem integer,
+    taste_problem integer,
+    bowel_move integer,
+    laxative_use integer,
+    workplace_harass integer,
+    coach_discrim integer,
+    coach_discrimstr integer,
+    player_discrim integer,
+    player_discrimstr integer,
+    job_discrim integer,
+    job_discrimstr integer,
+    ace1 integer,
+    ace2 integer,
+    ace3 integer,
+    ace4 integer,
+    ace5 integer,
+    ace6 integer,
+    ace7 integer,
+    ace8 integer,
+    ace9 integer,
+    ace10 integer,
+    foodins_worry integer,
+    foodins_ranout integer,
+    q2help integer,
+    othealth___complete integer,
+    othealth_date timestamp without time zone,
+    q2_complete integer
+);
+
+
+--
+-- Name: TABLE q2_data; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON TABLE q2.q2_data IS 'Questionnaire 2 data from REDCap';
+
+
+--
+-- Name: COLUMN q2_data.record_id; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.record_id IS 'Hidden on survey;
+Sequential ID assinged by REDCap ';
+
+
+--
+-- Name: COLUMN q2_data.redcap_survey_identifier; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.redcap_survey_identifier IS 'Hidden on survey; 
+FPHS assigned study identification number';
+
+
+--
+-- Name: COLUMN q2_data.q2_timestamp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.q2_timestamp IS 'Hidden on survey:
+Date and time full Q2 survey was completed';
+
+
+--
+-- Name: COLUMN q2_data.dob; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.dob IS 'Date of birth:';
+
+
+--
+-- Name: COLUMN q2_data.current_weight; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.current_weight IS 'What is your current weight?';
+
+
+--
+-- Name: COLUMN q2_data.domestic_status; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.domestic_status IS 'What is your current marital status?';
+
+
+--
+-- Name: COLUMN q2_data.living_situation; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.living_situation IS 'How would you describe your current living situation?';
+
+
+--
+-- Name: COLUMN q2_data.current_employment; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.current_employment IS 'Are you currently employed?';
+
+
+--
+-- Name: COLUMN q2_data.student_looking; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.student_looking IS 'If you are unemployed, are you currently a student or looking for work?';
+
+
+--
+-- Name: COLUMN q2_data.current_fbjob; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.current_fbjob IS 'If you work in football, please provide additional information:';
+
+
+--
+-- Name: COLUMN q2_data.current_fbjob_oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.current_fbjob_oth IS 'If Other, please specify:';
+
+
+--
+-- Name: COLUMN q2_data.job_industry; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.job_industry IS 'Specify your employment industry. (If you are retired, specify the last industry in which you were employed.)';
+
+
+--
+-- Name: COLUMN q2_data.job_title; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.job_title IS 'Select the option that best represents your job title. 
+(If you are retired, indicate the title of your last job)';
+
+
+--
+-- Name: COLUMN q2_data.job_title_entry; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.job_title_entry IS 'Enter your job title:
+(If you are retired, enter the title of your last job)';
+
+
+--
+-- Name: COLUMN q2_data.smoke; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.smoke IS 'Have you ever smoked cigarettes?_x000D_
+(Smoked at least 100 cigarettes in your lifetime. Do not include pipe and cigars)';
+
+
+--
+-- Name: COLUMN q2_data.smoketime___pnfl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.smoketime___pnfl IS 'Please indicate the time-frames during which you smoked cigarettes?_x000D_
+(Please select all that apply)
+[Before playing in the NFL]';
+
+
+--
+-- Name: COLUMN q2_data.smoketime___dnfl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.smoketime___dnfl IS 'Please indicate the time-frames during which you smoked cigarettes?_x000D_
+(Please select all that apply)
+[While playing in the NFL]';
+
+
+--
+-- Name: COLUMN q2_data.smoketime___anfl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.smoketime___anfl IS 'Please indicate the time-frames during which you smoked cigarettes?_x000D_
+(Please select all that apply)
+[After playing in the NFL]';
+
+
+--
+-- Name: COLUMN q2_data.smoke_start; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.smoke_start IS 'How old were you when you started smoking?
+';
+
+
+--
+-- Name: COLUMN q2_data.smoke_stop; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.smoke_stop IS 'How old were you when you stopped smoking?';
+
+
+--
+-- Name: COLUMN q2_data.smoke_curr; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.smoke_curr IS 'On average, how many cigarettes do you currently smoke per day?';
+
+
+--
+-- Name: COLUMN q2_data.smoke_totyrs; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.smoke_totyrs IS 'How many years, in total, have you smoked? (if you quit more than once, estimate the total years you considered yourself an active smoker)';
+
+
+--
+-- Name: COLUMN q2_data.smoke_prenfl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.smoke_prenfl IS 'How many cigarettes did you smoke per day, on average, before playing in the NFL?';
+
+
+--
+-- Name: COLUMN q2_data.smoke_nfl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.smoke_nfl IS 'How many cigarettes did you smoke per day, on average, while playing in the NFL?';
+
+
+--
+-- Name: COLUMN q2_data.smoke_postnfl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.smoke_postnfl IS 'How many cigarettes have you smoked per day, on average, since leaving the NFL? 
+(If you have quit smoking, please provide the average number of cigarettes 
+smoked per day while you considered yourself an active (...)';
+
+
+--
+-- Name: COLUMN q2_data.edu_player; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.edu_player IS 'Please provide the highest level of education attained by you, your mother, and your father:
+[You (respondent)]';
+
+
+--
+-- Name: COLUMN q2_data.edu_mother; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.edu_mother IS 'Please provide the highest level of education attained by you, your mother, and your father:
+[Mother]';
+
+
+--
+-- Name: COLUMN q2_data.edu_father; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.edu_father IS 'Please provide the highest level of education attained by you, your mother, and your father:
+[Father]';
+
+
+--
+-- Name: COLUMN q2_data.occ_mother; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.occ_mother IS 'What kind of work did your parents do when you were a child?
+[Mother]';
+
+
+--
+-- Name: COLUMN q2_data.occ_mother_exp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.occ_mother_exp IS 'What kind of work did your parents do when you were a child?
+Please explain:
+[Mother occupation if Other]';
+
+
+--
+-- Name: COLUMN q2_data.occ_father; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.occ_father IS 'What kind of work did your parents do when you were a child?
+[Father]';
+
+
+--
+-- Name: COLUMN q2_data.occ_father_exp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.occ_father_exp IS 'What kind of work did your parents do when you were a child?
+Please explain:
+[Father occupation if Other]';
+
+
+--
+-- Name: COLUMN q2_data.yrsplayed_prehs; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.yrsplayed_prehs IS 'How many years did you play football before starting high school?';
+
+
+--
+-- Name: COLUMN q2_data.playhsfb___no; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.playhsfb___no IS 'I did not play high school football:
+(Check this box if you did not play organized football during high school)';
+
+
+--
+-- Name: COLUMN q2_data.hsposition1; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.hsposition1 IS 'Please indicate the main position(s) you played during high school football
+Primary position #1:';
+
+
+--
+-- Name: COLUMN q2_data.hsposition2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.hsposition2 IS 'Please indicate the main position(s) you played during high school football
+Primary position #2:';
+
+
+--
+-- Name: COLUMN q2_data.yrsplayed_hs; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.yrsplayed_hs IS 'How many years did you play football during high school?';
+
+
+--
+-- Name: COLUMN q2_data.collposition1; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collposition1 IS 'Please indicate the main positions you played during college football
+Primary position #1:';
+
+
+--
+-- Name: COLUMN q2_data.collposition2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collposition2 IS 'Please indicate the main positions you played during college football
+Primary position #2:';
+
+
+--
+-- Name: COLUMN q2_data.yrsplayed_coll; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.yrsplayed_coll IS 'How many years did you play football during college before going pro?';
+
+
+--
+-- Name: COLUMN q2_data.college_div; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.college_div IS 'If you played after the college division system was created, which division did you play in?';
+
+
+--
+-- Name: COLUMN q2_data.collpreprac; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collpreprac IS 'College Playing History: Training Camp and Regular Season Practice
+During your college football career, on average, how often did you practice per week during pre-season?';
+
+
+--
+-- Name: COLUMN q2_data.collpreprac_pads; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collpreprac_pads IS 'College Playing History: Training Camp and Regular Season Practice
+During your college football career, on average, how many practices a week did you wear full pads or shoulder pads during pre-season?';
+
+
+--
+-- Name: COLUMN q2_data.collregprac; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collregprac IS 'College Playing History: Training Camp and Regular Season Practice
+During your college football career, on average, how often did you practice per week during the regular season?';
+
+
+--
+-- Name: COLUMN q2_data.collregprac_pads; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collregprac_pads IS 'College Playing History: Training Camp and Regular Season Practice
+During your college football career, on average, how many practices a week did you wear full pads or shoulder pads during the regular seaso (...)';
+
+
+--
+-- Name: COLUMN q2_data.collsnap_ol; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collsnap_ol IS 'During your college football career, on average, how many snaps did you play per game for the following positions?
+[Offensive line]';
+
+
+--
+-- Name: COLUMN q2_data.collsnap_wr; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collsnap_wr IS 'During your college football career, on average, how many snaps did you play per game for the following positions?
+[Wide receiver]';
+
+
+--
+-- Name: COLUMN q2_data.collsnap_dl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collsnap_dl IS 'During your college football career, on average, how many snaps did you play per game for the following positions?
+[Defensive line]';
+
+
+--
+-- Name: COLUMN q2_data.collsnap_te; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collsnap_te IS 'During your college football career, on average, how many snaps did you play per game for the following positions?
+[Tight end]';
+
+
+--
+-- Name: COLUMN q2_data.collsnap_lb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collsnap_lb IS 'During your college football career, on average, how many snaps did you play per game for the following positions?
+[Linebacker]';
+
+
+--
+-- Name: COLUMN q2_data.collsnap_qb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collsnap_qb IS 'During your college football career, on average, how many snaps did you play per game for the following positions?
+[Quarterback]';
+
+
+--
+-- Name: COLUMN q2_data.collsnap_db; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collsnap_db IS 'During your college football career, on average, how many snaps did you play per game for the following positions?
+[Defensive back]';
+
+
+--
+-- Name: COLUMN q2_data.collsnap_kick; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collsnap_kick IS 'During your college football career, on average, how many snaps did you play per game for the following positions?
+[Kicker/punter]';
+
+
+--
+-- Name: COLUMN q2_data.collsnap_rb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collsnap_rb IS 'During your college football career, on average, how many snaps did you play per game for the following positions?
+[Running back]';
+
+
+--
+-- Name: COLUMN q2_data.collsnap_special; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.collsnap_special IS 'During your college football career, on average, how many snaps did you play per game on special teams?  If you are unsure, please take your best guess.
+[Special teams]';
+
+
+--
+-- Name: COLUMN q2_data.nflpreprac; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nflpreprac IS 'NFL Playing History: Pre-Season and Regular Season Practice
+Over your NFL career, on average, how often did you practice per week during pre-season?';
+
+
+--
+-- Name: COLUMN q2_data.nflpreprac_pads; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nflpreprac_pads IS 'NFL Playing History: Pre-Season and Regular Season Practice
+Over your NFL career, on average, how many practices a week did you wear full pads or shoulder pads during pre-season?';
+
+
+--
+-- Name: COLUMN q2_data.nflregprac; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nflregprac IS 'NFL Playing History: Pre-Season and Regular Season Practice
+Over your NFL career, on average, how often did you practice per week during the regular season?';
+
+
+--
+-- Name: COLUMN q2_data.nflregprac_pads; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nflregprac_pads IS 'NFL Playing History: Pre-Season and Regular Season Practice
+Over your NFL career, on average, how many practices a week did you wear full pads or shoulder pads during the regular season?';
+
+
+--
+-- Name: COLUMN q2_data.prosnap_ol; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prosnap_ol IS 'Over your whole professional football career, on average, how many snaps did you play per game for the following positions? 
+[Offensive line]';
+
+
+--
+-- Name: COLUMN q2_data.prosnap_wr; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prosnap_wr IS 'Over your whole professional football career, on average, how many snaps did you play per game for the following positions? 
+[Wide receiver]';
+
+
+--
+-- Name: COLUMN q2_data.prosnap_dl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prosnap_dl IS 'Over your whole professional football career, on average, how many snaps did you play per game for the following positions? 
+[Defensive line]';
+
+
+--
+-- Name: COLUMN q2_data.prosnap_te; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prosnap_te IS 'Over your whole professional football career, on average, how many snaps did you play per game for the following positions? 
+[Tight end]';
+
+
+--
+-- Name: COLUMN q2_data.prosnap_lb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prosnap_lb IS 'Over your whole professional football career, on average, how many snaps did you play per game for the following positions? 
+[Linebacker]';
+
+
+--
+-- Name: COLUMN q2_data.prosnap_qb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prosnap_qb IS 'Over your whole professional football career, on average, how many snaps did you play per game for the following positions? 
+[Quarterback]';
+
+
+--
+-- Name: COLUMN q2_data.prosnap_db; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prosnap_db IS 'Over your whole professional football career, on average, how many snaps did you play per game for the following positions? 
+[Defensive back]';
+
+
+--
+-- Name: COLUMN q2_data.prosnap_kick; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prosnap_kick IS 'Over your whole professional football career, on average, how many snaps did you play per game for the following positions? 
+[Kicker/punter]';
+
+
+--
+-- Name: COLUMN q2_data.prosnap_rb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prosnap_rb IS 'Over your whole professional football career, on average, how many snaps did you play per game for the following positions? 
+[Running back]';
+
+
+--
+-- Name: COLUMN q2_data.prosnap_special; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prosnap_special IS 'Over your whole professional football career, on average, how many snaps did you play per game on special teams? If you are unsure, please take your best guess.
+[Special teams]';
+
+
+--
+-- Name: COLUMN q2_data.gmsplyd_career; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.gmsplyd_career IS 'Over your whole professional football career, approximately how many games were you on an active roster?';
+
+
+--
+-- Name: COLUMN q2_data.gmsplyd_season; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.gmsplyd_season IS 'Over your whole professional football career, on average, how many games were you on an active roster per season?';
+
+
+--
+-- Name: COLUMN q2_data.prsqd; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prsqd IS 'Did you ever spend time on a practice squad for an NFL team?';
+
+
+--
+-- Name: COLUMN q2_data.prsqd_seasons; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prsqd_seasons IS 'Number of seasons:
+[Spent on a practice squad for an NFL team]';
+
+
+--
+-- Name: COLUMN q2_data.othleague; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othleague IS 'Did you play any seasons for a professional team that was not in the NFL? (CFL, EFL, etc.)_x000D_';
+
+
+--
+-- Name: COLUMN q2_data.othleague_seasons; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othleague_seasons IS 'How many seasons did you play for a professional team not in the NFL? (CFL, EFL, etc.)';
+
+
+--
+-- Name: COLUMN q2_data.othleaguenm___afl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othleaguenm___afl IS 'Indicate the professional, non-NFL, league(s) for which you have played. Please mark all that apply:
+[Arena Football League (AFL)]';
+
+
+--
+-- Name: COLUMN q2_data.othleaguenm___cfl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othleaguenm___cfl IS 'Indicate the professional, non-NFL, league(s) for which you have played. Please mark all that apply:
+[Canadian Football League (CFL)]';
+
+
+--
+-- Name: COLUMN q2_data.othleaguenm___efl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othleaguenm___efl IS 'Indicate the professional, non-NFL, league(s) for which you have played. Please mark all that apply:
+[European Football League (EFL)]';
+
+
+--
+-- Name: COLUMN q2_data.othleaguenm___ufl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othleaguenm___ufl IS 'Indicate the professional, non-NFL, league(s) for which you have played. Please mark all that apply:
+[United Football League (UFL)]';
+
+
+--
+-- Name: COLUMN q2_data.othleaguenm___wfl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othleaguenm___wfl IS 'Indicate the professional, non-NFL, league(s) for which you have played. Please mark all that apply:
+[World Football League (WFL)]';
+
+
+--
+-- Name: COLUMN q2_data.othleaguenm___xfl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othleaguenm___xfl IS 'Indicate the professional, non-NFL, league(s) for which you have played. Please mark all that apply:
+[XFL]';
+
+
+--
+-- Name: COLUMN q2_data.othleaguenm___oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othleaguenm___oth IS 'Indicate the professional, non-NFL, league(s) for which you have played. Please mark all that apply:
+[Other]';
+
+
+--
+-- Name: COLUMN q2_data.othleague_exp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othleague_exp IS 'If Other, please explain:';
+
+
+--
+-- Name: COLUMN q2_data.nonnfl_seasons; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nonnfl_seasons IS 'How many seasons did you collectively play that were not in the NFL?';
+
+
+--
+-- Name: COLUMN q2_data.prsqd_nonnfl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prsqd_nonnfl IS 'Did you ever spend time on a practice squad for another professional non-NFL Team?';
+
+
+--
+-- Name: COLUMN q2_data.prsqd_nonnfl_seasons; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.prsqd_nonnfl_seasons IS 'Non-NFL Practice Squad:
+[Seasons spent on practice squad for another professional non-NFL team]';
+
+
+--
+-- Name: COLUMN q2_data.firstpro_age; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.firstpro_age IS 'How old were you when you played your first professional football game (NFL, CFL, EFL, etc.)?';
+
+
+--
+-- Name: COLUMN q2_data.finalpro_age; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.finalpro_age IS 'How old were you when you played your final professional football game (NFL, CFL, EFL, etc.)?';
+
+
+--
+-- Name: COLUMN q2_data.leftfb___age; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.leftfb___age IS 'Please indicate the main reason(s) why you stopped playing professional football? Select all that apply.
+[Age]';
+
+
+--
+-- Name: COLUMN q2_data.leftfb___cut; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.leftfb___cut IS 'Please indicate the main reason(s) why you stopped playing professional football? Select all that apply.
+[Cut]';
+
+
+--
+-- Name: COLUMN q2_data.leftfb___fbinj; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.leftfb___fbinj IS 'Please indicate the main reason(s) why you stopped playing professional football? Select all that apply.
+[Injury or health problem related to football]';
+
+
+--
+-- Name: COLUMN q2_data.leftfb___inj; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.leftfb___inj IS 'Please indicate the main reason(s) why you stopped playing professional football? Select all that apply.
+[Injury or health problem not related to football]';
+
+
+--
+-- Name: COLUMN q2_data.leftfb___retire; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.leftfb___retire IS 'Please indicate the main reason(s) why you stopped playing professional football? Select all that apply.
+[Personal decision (retired)]';
+
+
+--
+-- Name: COLUMN q2_data.postfb_hlthprac; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfb_hlthprac IS 'How soon after you stopped playing professional football did you...
+...First see a healthcare practitioner?';
+
+
+--
+-- Name: COLUMN q2_data.postfb_degree; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfb_degree IS 'How soon after you stopped playing professional football did you...
+...Go back to school to complete a degree or obtain an advanced degree?';
+
+
+--
+-- Name: COLUMN q2_data.postfb_charity; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfb_charity IS 'How soon after you stopped playing professional football did you...
+... Begin participating in volunteer or charity work?';
+
+
+--
+-- Name: COLUMN q2_data.postfb_fbjob; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfb_fbjob IS 'How soon after you stopped playing professional football did you...
+... Become employed in a football related activity?(e.g. coach, scout, administration, media, television, reporting etc.)';
+
+
+--
+-- Name: COLUMN q2_data.postfb_job; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfb_job IS 'How soon after you stopped playing professional football did you...
+... Become employed in a non-football related activity?';
+
+
+--
+-- Name: COLUMN q2_data.postfbjob_occ; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfbjob_occ IS 'What was your first job after leaving football?_x000D_
+Please provide the job title:';
+
+
+--
+-- Name: COLUMN q2_data.postfbjob_occexp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfbjob_occexp IS 'Please explain:
+[If post-football job is Other]';
+
+
+--
+-- Name: COLUMN q2_data.postfbex_walk; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfbex_walk IS 'In the first 12 months after you no longer considered yourself a potentially active player, what was the average number of hours spent each week on the activities below?
+[Walking for exercise or walking to wor (...)';
+
+
+--
+-- Name: COLUMN q2_data.postfbex_jog; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfbex_jog IS 'In the first 12 months after you no longer considered yourself a potentially active player, what was the average number of hours spent each week on the activities below?
+[Jogging(slower than 10min/mile)]';
+
+
+--
+-- Name: COLUMN q2_data.postfbex_run; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfbex_run IS 'In the first 12 months after you no longer considered yourself a potentially active player, what was the average number of hours spent each week on the activities below?
+[Running(10min/mile or faster)]';
+
+
+--
+-- Name: COLUMN q2_data.postfbex_other; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfbex_other IS 'In the first 12 months after you no longer considered yourself a potentially active player, what was the average number of hours spent each week on the activities below?
+[Other aerobic exercise(e.g. bicycling (...)';
+
+
+--
+-- Name: COLUMN q2_data.postfbex_lowint; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfbex_lowint IS 'In the first 12 months after you no longer considered yourself a potentially active player, what was the average number of hours spent each week on the activities below?
+[Low intensity exercise(e.g. yoga, pi (...)';
+
+
+--
+-- Name: COLUMN q2_data.postfbex_wttrain; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfbex_wttrain IS 'In the first 12 months after you no longer considered yourself a potentially active player, what was the average number of hours spent each week on the activities below?
+[Weight training(e.g. lifting free w (...)';
+
+
+--
+-- Name: COLUMN q2_data.postfbex_endsprt; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfbex_endsprt IS 'In the first 12 months after you no longer considered yourself a potentially active player, what was the average number of hours spent each week on the activities below?
+[Competitive endurance sports(e.g. m (...)';
+
+
+--
+-- Name: COLUMN q2_data.postfbex_reclg; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfbex_reclg IS 'In the first 12 months after you no longer considered yourself a potentially active player, what was the average number of hours spent each week on the activities below?
+[Recreational team leagues(e.g. soccer (...)';
+
+
+--
+-- Name: COLUMN q2_data.pastyrex_walk; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pastyrex_walk IS 'For the past year, what was the average number of hours spent each week on each activity below?
+[Walking for exercise or walking to work]';
+
+
+--
+-- Name: COLUMN q2_data.pastyrex_jog; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pastyrex_jog IS 'For the past year, what was the average number of hours spent each week on each activity below?
+[Jogging(slower than 10min/mile)]';
+
+
+--
+-- Name: COLUMN q2_data.pastyrex_run; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pastyrex_run IS 'For the past year, what was the average number of hours spent each week on each activity below?
+[Running(10min/mile or faster)]';
+
+
+--
+-- Name: COLUMN q2_data.pastyrex_oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pastyrex_oth IS 'For the past year, what was the average number of hours spent each week on each activity below?
+[Other aerobic exercise (e.g. bicycling, stationary bike, elliptical machine, stairmaster)]';
+
+
+--
+-- Name: COLUMN q2_data.pastyrex_lowint; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pastyrex_lowint IS 'For the past year, what was the average number of hours spent each week on each activity below?
+[Low intensity exercise (e.g. yoga, pilates, stretching)]';
+
+
+--
+-- Name: COLUMN q2_data.pastyrex_wttrain; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pastyrex_wttrain IS 'For the past year, what was the average number of hours spent each week on each activity below?
+[Weight training (e.g. lifting free weights, using weight machines)]';
+
+
+--
+-- Name: COLUMN q2_data.pastyrex_endsprt; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pastyrex_endsprt IS 'For the past year, what was the average number of hours spent each week on each activity below?
+[Competitive endurance sports (e.g. marathon, triathlon)]';
+
+
+--
+-- Name: COLUMN q2_data.pastyrex_reclg; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pastyrex_reclg IS 'For the past year, what was the average number of hours spent each week on each activity below?
+[Recreational team leagues(e.g. soccer, basketball, flag football, volleyball)]';
+
+
+--
+-- Name: COLUMN q2_data.ex150min; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ex150min IS 'Do you do 2.5 hours or more of moderate intensity aerobic activity per week? 
+(e.g. brisk walking, jogging, cycling, etc.).';
+
+
+--
+-- Name: COLUMN q2_data.ex150min_exp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ex150min_exp IS 'Please select the reason that best explains why you do not do at least 2.5 hours of  moderate intensity aerobic activity per week:';
+
+
+--
+-- Name: COLUMN q2_data.ex150min_oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ex150min_oth IS 'If other, please explain:
+[Other reason for not performing at least 2.5 hours of moderate intensity aerobic activity/week]';
+
+
+--
+-- Name: COLUMN q2_data.demog___complete; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.demog___complete IS 'Have you completed all questions that you intend to answer on this page? 
+Once you have advanced to the next section, you will not be able to return.';
+
+
+--
+-- Name: COLUMN q2_data.demog_date; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.demog_date IS 'Hidden on survey,
+Date and time that the domain of Q2 survey was completed';
+
+
+--
+-- Name: COLUMN q2_data.postfb_wt2yr; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfb_wt2yr IS 'Had you gained or lost weight:
+2 years after leaving professional football play?';
+
+
+--
+-- Name: COLUMN q2_data.postfb_wt2yrdelta; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfb_wt2yrdelta IS 'Had you gained or lost weight:
+2 years after leaving professional football play?
+[Change in weight] - pounds';
+
+
+--
+-- Name: COLUMN q2_data.postfb_wt5yr; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfb_wt5yr IS 'Had you gained or lost weight:
+5 years after leaving professional football play?';
+
+
+--
+-- Name: COLUMN q2_data.postfb_wt5yrdelta; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.postfb_wt5yrdelta IS 'Had you gained or lost weight:
+5 years after leaving professional football play?
+[Change in weight] - pounds';
+
+
+--
+-- Name: COLUMN q2_data.cardiac_rehab; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cardiac_rehab IS 'In the last 4 years or since filling out the First Health and Wellness Questionnaire (Q1)...
+Have you participated in cardiac rehabtherapy based on a health care providers recommendation?';
+
+
+--
+-- Name: COLUMN q2_data.cvtest_ecg; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvtest_ecg IS 'In the last 4 years or since filling out Q1, have you had any of the following cardiovascular tests?
+12 lead ECG (electrocardiogram)';
+
+
+--
+-- Name: COLUMN q2_data.cvtest_ecg_exp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvtest_ecg_exp IS 'In the last 4 years or since filling out Q1, have you had any of the following cardiovascular tests?
+12 lead ECG (electrocardiogram)
+Please specify the diagnosis, if known:';
+
+
+--
+-- Name: COLUMN q2_data.cvtest_echo; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvtest_echo IS 'In the last 4 years or since filling out Q1, have you had any of the following cardiovascular tests?
+Heart ultrasound (echocardiogram)';
+
+
+--
+-- Name: COLUMN q2_data.cvtest_echo_exp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvtest_echo_exp IS 'In the last 4 years or since filling out Q1, have you had any of the following cardiovascular tests?
+Heart ultrasound (echocardiogram)
+Please specify the diagnosis, if known:';
+
+
+--
+-- Name: COLUMN q2_data.cvtest_cpxt; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvtest_cpxt IS 'In the last 4 years or since filling out Q1, have you had any of the following cardiovascular tests?
+Exercise stress test';
+
+
+--
+-- Name: COLUMN q2_data.cvtest_cpxt_exp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvtest_cpxt_exp IS 'In the last 4 years or since filling out Q1, have you had any of the following cardiovascular tests?
+Exercise stress test
+Please specify the diagnosis, if known:';
+
+
+--
+-- Name: COLUMN q2_data.cvtest_cvmri; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvtest_cvmri IS 'In the last 4 years or since filling out Q1, have you had any of the following cardiovascular tests?
+Cardiac MRI';
+
+
+--
+-- Name: COLUMN q2_data.cvtest_cvmri_exp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvtest_cvmri_exp IS 'In the last 4 years or since filling out Q1, have you had any of the following cardiovascular tests?
+Cardiac MRI
+Please specify the diagnosis, if known:';
+
+
+--
+-- Name: COLUMN q2_data.cvtest_corct; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvtest_corct IS 'In the last 4 years or since filling out Q1, have you had any of the following cardiovascular tests?
+Coronary artery CT scan';
+
+
+--
+-- Name: COLUMN q2_data.cvtest_corct_exp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvtest_corct_exp IS 'In the last 4 years or since filling out Q1, have you had any of the following cardiovascular tests?
+Coronary artery CT scan
+Please specify the diagnosis, if known:';
+
+
+--
+-- Name: COLUMN q2_data.cvtest_cvcath; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvtest_cvcath IS 'In the last 4 years or since filling out Q1, have you had any of the following cardiovascular tests?
+Cardiac catheterization (coronary angiogram)';
+
+
+--
+-- Name: COLUMN q2_data.cvtest_cvcath_exp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvtest_cvcath_exp IS 'In the last 4 years or since filling out Q1, have you had any of the following cardiovascular tests?
+Cardiac catheterization (coronary angiogram)
+Please specify the diagnosis, if known:';
+
+
+--
+-- Name: COLUMN q2_data.cvdx_mi; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvdx_mi IS 'Since January 1, 2015 has a healthcare provider told you that you have had any of the following?
+Heart attack';
+
+
+--
+-- Name: COLUMN q2_data.cvdx_stroke; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvdx_stroke IS 'Since January 1, 2015 has a healthcare provider told you that you have had any of the following?
+Stroke (CVA)';
+
+
+--
+-- Name: COLUMN q2_data.cvdx_tia; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvdx_tia IS 'Since January 1, 2015 has a healthcare provider told you that you have had any of the following?
+TIA (Transient ischemicattack/mini-stroke)';
+
+
+--
+-- Name: COLUMN q2_data.cvmedrec_highbp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmedrec_highbp IS 'Since January 1, 2015 has a healthcare provider recommended or prescribed medicine for any of the following conditions?
+High blood pressure';
+
+
+--
+-- Name: COLUMN q2_data.cvmedrec_hrtfail; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmedrec_hrtfail IS 'Since January 1, 2015 has a healthcare provider recommended or prescribed medicine for any of the following conditions?
+Heart failure';
+
+
+--
+-- Name: COLUMN q2_data.cvmedrec_afib; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmedrec_afib IS 'Since January 1, 2015 has a healthcare provider recommended or prescribed medicine for any of the following conditions?
+Atrial fibrillation';
+
+
+--
+-- Name: COLUMN q2_data.cvmedrec_otharrhyth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmedrec_otharrhyth IS 'Since January 1, 2015 has a healthcare provider recommended or prescribed medicine for any of the following conditions?
+Other arrhythmias (e.g. SVT)';
+
+
+--
+-- Name: COLUMN q2_data.cvmedrec_highchol; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmedrec_highchol IS 'Since January 1, 2015 has a healthcare provider recommended or prescribed medicine for any of the following conditions?
+High cholesterol';
+
+
+--
+-- Name: COLUMN q2_data.cvmedrec_diabetes; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmedrec_diabetes IS 'Since January 1, 2015 has a healthcare provider recommended or prescribed medicine for any of the following conditions?
+Diabetes or high blood sugar';
+
+
+--
+-- Name: COLUMN q2_data.cvsurg_bypass; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvsurg_bypass IS 'Since January 1, 2015 have you had any of the following surgical procedures?
+Heart bypass, angioplasty, or stent placement';
+
+
+--
+-- Name: COLUMN q2_data.cvsurg_ablation; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvsurg_ablation IS 'Since January 1, 2015 have you had any of the following surgical procedures?
+Ablation for atrial fibrillation';
+
+
+--
+-- Name: COLUMN q2_data.cvsurg_carotidart; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvsurg_carotidart IS 'Since January 1, 2015 have you had any of the following surgical procedures?
+Carotid artery surgery';
+
+
+--
+-- Name: COLUMN q2_data.cvmed_chol; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmed_chol IS 'Are you currently taking any of the following medications?
+Cardiovascular Medications
+Statin cholesterol lowering drugs[e.g. Mervacor (lovastatin), Pravachol (pravastatin), Xocor (simvastatin), Lipitor]';
+
+
+--
+-- Name: COLUMN q2_data.cvmed_othchol; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmed_othchol IS 'Are you currently taking any of the following medications?
+Cardiovascular Medications
+Other cholesterol-lowering drugs[e.g. Niaspan, Slo-Niacin (niacin), Lopid (gemfibrozil), Tricor (fenofibrate), Questran (c (...)';
+
+
+--
+-- Name: COLUMN q2_data.cvmed_novchol; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmed_novchol IS 'Are you currently taking any of the following medications?
+Cardiovascular Medications
+Novel cholesterol lowering drugs(PCSK-9 inhibitors) [e.g. Repatha (evolocumab), Praluent (alirocumab)]';
+
+
+--
+-- Name: COLUMN q2_data.cvmed_bldthin; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmed_bldthin IS 'Are you currently taking any of the following medications?
+Cardiovascular Medications
+Non-aspirin blood thinners [e.g. Coumadin (warfarin)]';
+
+
+--
+-- Name: COLUMN q2_data.cvmed_anticoag; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmed_anticoag IS 'Are you currently taking any of the following medications?
+Cardiovascular Medications
+Novel oral anti-coagulant [e.g. Eliquis (apixaban), Pradaxa(dabigatran), Xarelto (rivaroxaban)]';
+
+
+--
+-- Name: COLUMN q2_data.cvmed_arrhyth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmed_arrhyth IS 'Are you currently taking any of the following medications?
+Cardiovascular Medications
+Anti-arrhythmia drugs foratrial fibrillation [e.g. beta blockers (Sectral, Tenormin), sotalol (Betapace, Sotylize, Sorine) (...)';
+
+
+--
+-- Name: COLUMN q2_data.cvmed_digoxin; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmed_digoxin IS 'Are you currently taking any of the following medications?
+Cardiovascular Medications
+Digoxin [e.g. Lenoxin]';
+
+
+--
+-- Name: COLUMN q2_data.cvmed_furosemide; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmed_furosemide IS 'Are you currently taking any of the following medications?
+Cardiovascular Medications
+Furosemide-like diuretic drug[e.g. Lasix, Bumex]';
+
+
+--
+-- Name: COLUMN q2_data.cvmed_thiazide; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmed_thiazide IS 'Are you currently taking any of the following medications?
+Cardiovascular Medications
+Thiazide diuretic[e.g. HCTZ, Microzide]';
+
+
+--
+-- Name: COLUMN q2_data.cvmed_calciumblk; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmed_calciumblk IS 'Are you currently taking any of the following medications?
+Cardiovascular Medications
+Calcium blocker[e.g. Calan (verapamil), Procardia(nifedipine), Cardizem (diltiazem)]';
+
+
+--
+-- Name: COLUMN q2_data.cvmed_antihyp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cvmed_antihyp IS 'Are you currently taking any of the following medications?
+Cardiovascular Medications
+Other antihypertensive[e.g. Vasotec (enalapril), Capoten (captopril)]';
+
+
+--
+-- Name: COLUMN q2_data.dbmed_metformin; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.dbmed_metformin IS 'Are you currently taking any of the following medications?
+Diabetes Medications
+Metformin [e.g.  Glumetza, Glucophage, Fortamet]';
+
+
+--
+-- Name: COLUMN q2_data.dbmed_glimeperide; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.dbmed_glimeperide IS 'Are you currently taking any of the following medications?
+Diabetes Medications
+Glimeperide';
+
+
+--
+-- Name: COLUMN q2_data.dbmed_insulin; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.dbmed_insulin IS 'Are you currently taking any of the following medications?
+Diabetes Medications
+Insulin';
+
+
+--
+-- Name: COLUMN q2_data.dbmed_other; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.dbmed_other IS 'Are you currently taking any of the following medications?
+Diabetes Medications
+Other diabetes medication';
+
+
+--
+-- Name: COLUMN q2_data.cardiac___complete; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cardiac___complete IS 'Have you completed all questions that you intend to answer on this page? 
+Once you have advanced to the next section, you will not be able to return.';
+
+
+--
+-- Name: COLUMN q2_data.cardiac_date; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cardiac_date IS 'Hidden on survey;
+Date and time that the domain of Q2 survey was completed';
+
+
+--
+-- Name: COLUMN q2_data.ad8_1; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ad8_1 IS 'Over the last several years, have you experienced worsening thinking and memory problems? Remember,
+ Yes, a change indicates that there has been a change for the worse in the last several years caused by cognitive (t (...)';
+
+
+--
+-- Name: COLUMN q2_data.ad8_2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ad8_2 IS 'Over the last several years, have you experienced worsening thinking and memory problems? 
+Remember, Yes, a change indicates that there has been a change for the worse in the last several years caused by cognitive (t (...)';
+
+
+--
+-- Name: COLUMN q2_data.ad8_3; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ad8_3 IS 'Over the last several years, have you experienced worsening thinking and memory problems? Remember, 
+Yes, a change indicates that there has been a change for the worse in the last several years caused by cognitive (t (...)';
+
+
+--
+-- Name: COLUMN q2_data.ad8_4; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ad8_4 IS 'Over the last several years, have you experienced worsening thinking and memory problems? Remember, 
+Yes, a change indicates that there has been a change for the worse in the last several years caused by cognitive (t (...)';
+
+
+--
+-- Name: COLUMN q2_data.ad8_5; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ad8_5 IS 'Over the last several years, have you experienced worsening thinking and memory problems? Remember, 
+Yes, a change indicates that there has been a change for the worse in the last several years caused by cognitive (t (...)';
+
+
+--
+-- Name: COLUMN q2_data.ad8_6; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ad8_6 IS 'Over the last several years, have you experienced worsening thinking and memory problems? Remember, 
+Yes, a change indicates that there has been a change for the worse in the last several years caused by cognitive (t (...)';
+
+
+--
+-- Name: COLUMN q2_data.ad8_7; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ad8_7 IS 'Over the last several years, have you experienced worsening thinking and memory problems? Remember, 
+Yes, a change indicates that there has been a change for the worse in the last several years caused by cognitive (t (...)';
+
+
+--
+-- Name: COLUMN q2_data.ad8_8; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ad8_8 IS 'Over the last several years, have you experienced worsening thinking and memory problems? Remember, 
+Yes, a change indicates that there has been a change for the worse in the last several years caused by cognitive (t (...)';
+
+
+--
+-- Name: COLUMN q2_data.nqcog64q2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqcog64q2 IS 'Please mark the response below which best describes your thinking, memory, and concentration. 
+In the past 7 days... 
+I had to read something several times to understand it.';
+
+
+--
+-- Name: COLUMN q2_data.nqcog65q2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqcog65q2 IS 'Please mark the response below which best describes your thinking, memory, and concentration. In the past 7 days... 
+I had trouble keeping track of what I was doing if I was interrupted.';
+
+
+--
+-- Name: COLUMN q2_data.nqcog66q2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqcog66q2 IS 'Please mark the response below which best describes your thinking, memory, and concentration. In the past 7 days... 
+I had difficulty doing more than one thing at a time.';
+
+
+--
+-- Name: COLUMN q2_data.nqcog68q2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqcog68q2 IS 'Please mark the response below which best describes your thinking, memory, and concentration. In the past 7 days... 
+I had trouble remembering new information, like phone numbers or simple instructions.';
+
+
+--
+-- Name: COLUMN q2_data.nqcog72q2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqcog72q2 IS 'Please mark the response below which best describes your thinking, memory, and concentration. In the past 7 days... 
+I had trouble thinking clearly.';
+
+
+--
+-- Name: COLUMN q2_data.nqcog75q2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqcog75q2 IS 'Please mark the response below which best describes your thinking, memory, and concentration. In the past 7 days... 
+My thinking was slow.';
+
+
+--
+-- Name: COLUMN q2_data.nqcog77q2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqcog77q2 IS 'Please mark the response below which best describes your thinking, memory, and concentration. In the past 7 days... 
+I had to work really hard to pay attention or I would make a mistake.';
+
+
+--
+-- Name: COLUMN q2_data.nqcog80q2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqcog80q2 IS 'Please mark the response below which best describes your thinking, memory, and concentration. In the past 7 days... 
+I had trouble concentrating.';
+
+
+--
+-- Name: COLUMN q2_data.nqper02; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqper02 IS 'In the past 7 days... 
+I had trouble controlling my temper.';
+
+
+--
+-- Name: COLUMN q2_data.nqper05; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqper05 IS 'In the past 7 days... 
+It was hard to control my behavior.';
+
+
+--
+-- Name: COLUMN q2_data.nqper06; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqper06 IS 'In the past 7 days... 
+I said or did things without thinking.';
+
+
+--
+-- Name: COLUMN q2_data.nqper07; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqper07 IS 'In the past 7 days... 
+I got impatient with other people.';
+
+
+--
+-- Name: COLUMN q2_data.nqper11; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqper11 IS 'In the past 7 days... 
+I was irritable around other people.';
+
+
+--
+-- Name: COLUMN q2_data.nqper12; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqper12 IS 'In the past 7 days... 
+I was bothered by little things.';
+
+
+--
+-- Name: COLUMN q2_data.nqper17; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqper17 IS 'In the past 7 days... 
+I became easily upset.';
+
+
+--
+-- Name: COLUMN q2_data.nqper19; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.nqper19 IS 'In the past 7 days... 
+I was in conflict with others.';
+
+
+--
+-- Name: COLUMN q2_data.phq1; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.phq1 IS 'Over the last 2 weeks, how often have you been bothered by any of the following problems?
+Little interest or pleasure in doing things.';
+
+
+--
+-- Name: COLUMN q2_data.phq2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.phq2 IS 'Over the last 2 weeks, how often have you been bothered by any of the following problems?
+Feeling down, depressed, or hopeless.';
+
+
+--
+-- Name: COLUMN q2_data.phq3; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.phq3 IS 'Over the last 2 weeks, how often have you been bothered by any of the following problems?
+Trouble falling or staying asleep, or sleeping too much.';
+
+
+--
+-- Name: COLUMN q2_data.phq4; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.phq4 IS 'Over the last 2 weeks, how often have you been bothered by any of the following problems?
+Feeling tired or having little energy.';
+
+
+--
+-- Name: COLUMN q2_data.phq5; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.phq5 IS 'Over the last 2 weeks, how often have you been bothered by any of the following problems?
+Poor appetite or overeating.';
+
+
+--
+-- Name: COLUMN q2_data.phq6; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.phq6 IS 'Over the last 2 weeks, how often have you been bothered by any of the following problems?
+Feeling bad about yourself - or that you are a failure or have let yourself or your family down.';
+
+
+--
+-- Name: COLUMN q2_data.phq7; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.phq7 IS 'Over the last 2 weeks, how often have you been bothered by any of the following problems?
+Trouble concentrating on things, such as reading the newspaper or watching television.';
+
+
+--
+-- Name: COLUMN q2_data.phq8; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.phq8 IS 'Over the last 2 weeks, how often have you been bothered by any of the following problems?
+Moving or speaking so slowly that other people could have noticed. Or the opposite - being so fidgety or restless that you have  (...)';
+
+
+--
+-- Name: COLUMN q2_data.phq9; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.phq9 IS 'Over the last 2 weeks, how often have you been bothered by any of the following problems?
+Thoughts that you would be better off dead or of hurting yourself.
+(Please know that this survey is not a way to get help if yo (...)';
+
+
+--
+-- Name: COLUMN q2_data.gad7_1; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.gad7_1 IS 'Over the last 2 weeks, how often have you been bothered by the following problems? 
+Feeling nervous, anxious or on edge.';
+
+
+--
+-- Name: COLUMN q2_data.gad7_2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.gad7_2 IS 'Over the last 2 weeks, how often have you been bothered by the following problems? 
+Not being able to stop or control worrying.';
+
+
+--
+-- Name: COLUMN q2_data.gad7_3; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.gad7_3 IS 'Over the last 2 weeks, how often have you been bothered by the following problems? 
+Worrying too much about different things.';
+
+
+--
+-- Name: COLUMN q2_data.gad7_4; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.gad7_4 IS 'Over the last 2 weeks, how often have you been bothered by the following problems? 
+Trouble relaxing.';
+
+
+--
+-- Name: COLUMN q2_data.gad7_5; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.gad7_5 IS 'Over the last 2 weeks, how often have you been bothered by the following problems? 
+Being so restless that it is hard to sit still.';
+
+
+--
+-- Name: COLUMN q2_data.gad7_6; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.gad7_6 IS 'Over the last 2 weeks, how often have you been bothered by the following problems? 
+Becoming easily annoyed or irritable.';
+
+
+--
+-- Name: COLUMN q2_data.gad7_7; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.gad7_7 IS 'Over the last 2 weeks, how often have you been bothered by the following problems? 
+Feeling afraid as if something awful might happen.';
+
+
+--
+-- Name: COLUMN q2_data.lotr1; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.lotr1 IS 'For the next 7 questions, please be as honest and accurate as you can throughout.
+ Try not to let your response to one statement influence your responses to other statements. There are no correct or incorrect answe (...)';
+
+
+--
+-- Name: COLUMN q2_data.lotr3; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.lotr3 IS 'For the next 7 questions, please be as honest and accurate as you can throughout. 
+Try not to let your response to one statement influence your responses to other statements. There are no correct or incorrect answe (...)';
+
+
+--
+-- Name: COLUMN q2_data.lotr4; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.lotr4 IS 'For the next 7 questions, please be as honest and accurate as you can throughout. 
+Try not to let your response to one statement influence your responses to other statements. There are no correct or incorrect answe (...)';
+
+
+--
+-- Name: COLUMN q2_data.lotr7; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.lotr7 IS 'For the next 7 questions, please be as honest and accurate as you can throughout. 
+Try not to let your response to one statement influence your responses to other statements. There are no correct or incorrect answe (...)';
+
+
+--
+-- Name: COLUMN q2_data.lotr9; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.lotr9 IS 'For the next 7 questions, please be as honest and accurate as you can throughout. 
+Try not to let your response to one statement influence your responses to other statements. There are no correct or incorrect answe (...)';
+
+
+--
+-- Name: COLUMN q2_data.lotr10; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.lotr10 IS 'For the next 7 questions, please be as honest and accurate as you can throughout. 
+Try not to let your response to one statement influence your responses to other statements. There are no correct or incorrect answ (...)';
+
+
+--
+-- Name: COLUMN q2_data.stpbng_snore; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.stpbng_snore IS 'To the best of your knowledge... 
+Do you SNORE loudly (loud enough to be heard through closed doors or your bed-partner elbows you for snoring at night)?';
+
+
+--
+-- Name: COLUMN q2_data.stpbng_tired; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.stpbng_tired IS 'To the best of your knowledge... 
+Do you often feel TIRED, fatigued, or sleepy during the daytime? (such as falling asleep during driving or talking to someone)?';
+
+
+--
+-- Name: COLUMN q2_data.stpbng_obser; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.stpbng_obser IS 'To the best of your knowledge... 
+Has anyone observed you stop breathing or choking/gasping during your sleep?';
+
+
+--
+-- Name: COLUMN q2_data.stpbng_bp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.stpbng_bp IS 'To the best of your knowledge... 
+Do you have or are you being treated for high blood pressure?';
+
+
+--
+-- Name: COLUMN q2_data.stpbng_neck; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.stpbng_neck IS 'To the best of your knowledge... 
+What is your neck circumference (your collarsize when buying a dress shirt)?';
+
+
+--
+-- Name: COLUMN q2_data.cpapuse; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cpapuse IS 'Do you currently use a CPAP device for sleep apnea?';
+
+
+--
+-- Name: COLUMN q2_data.cpapuse_days; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.cpapuse_days IS 'About how many days per week do you use your CPAP device?';
+
+
+--
+-- Name: COLUMN q2_data.ncmedrec_hdache; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncmedrec_hdache IS 'Since January 1, 2015 has a medical provider recommended or prescribed medicine for any of the following conditions?
+Headaches';
+
+
+--
+-- Name: COLUMN q2_data.ncmedrec_anx; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncmedrec_anx IS 'Since January 1, 2015 has a medical provider recommended or prescribed medicine for any of the following conditions?
+Anxiety';
+
+
+--
+-- Name: COLUMN q2_data.ncmedrec_dep; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncmedrec_dep IS 'Since January 1, 2015 has a medical provider recommended or prescribed medicine for any of the following conditions?
+Depression';
+
+
+--
+-- Name: COLUMN q2_data.ncmedrec_memloss; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncmedrec_memloss IS 'Since January 1, 2015 has a medical provider recommended or prescribed medicine for any of the following conditions?
+Memory loss';
+
+
+--
+-- Name: COLUMN q2_data.ncmedrec_add; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncmedrec_add IS 'Since January 1, 2015 has a medical provider recommended or prescribed medicine for any of the following conditions?
+ADD/ADHD';
+
+
+--
+-- Name: COLUMN q2_data.ncdx_alz; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncdx_alz IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Alzheimers disease';
+
+
+--
+-- Name: COLUMN q2_data.ncdx_cte; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncdx_cte IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Chronic traumatic encephalopathy (CTE)';
+
+
+--
+-- Name: COLUMN q2_data.ncdx_vascdem; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncdx_vascdem IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Vascular dementia';
+
+
+--
+-- Name: COLUMN q2_data.ncdx_othdem; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncdx_othdem IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Other dementia';
+
+
+--
+-- Name: COLUMN q2_data.ncdx_als; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncdx_als IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Amyotrophic lateral sclerosis(ALS, Lou Gehrigs disease)';
+
+
+--
+-- Name: COLUMN q2_data.ncdx_parkins; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncdx_parkins IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Parkinsons disease';
+
+
+--
+-- Name: COLUMN q2_data.ncdx_ms; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncdx_ms IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Multiple sclerosis (MS)';
+
+
+--
+-- Name: COLUMN q2_data.ncmed_ssri; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncmed_ssri IS 'Are you currently using any of the following medications?
+Prozac, Zoloft, Paxil, Celexa';
+
+
+--
+-- Name: COLUMN q2_data.ncmed_tricydep; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncmed_tricydep IS 'Are you currently using any of the following medications?
+Tricyclic antidepressant [e.g. Elavil, Sinequan]';
+
+
+--
+-- Name: COLUMN q2_data.ncmed_othdep; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncmed_othdep IS 'Are you currently using any of the following medications?
+Other antidepressant [e.g. Nardil, Marplan]';
+
+
+--
+-- Name: COLUMN q2_data.ncmed_slpaid; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ncmed_slpaid IS 'Are you currently using any of the following medications?
+Sleep aid';
+
+
+--
+-- Name: COLUMN q2_data.neurocog___complete; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.neurocog___complete IS 'Have you completed all questions that you intend to answer on this page? 
+Once you have advanced to the next section, you will not be able to return.';
+
+
+--
+-- Name: COLUMN q2_data.neurocog_date; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.neurocog_date IS 'Hidden on survey,
+Date and time that the Neurocognitive Health domain of Q2 survey was completed';
+
+
+--
+-- Name: COLUMN q2_data.bpi1; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi1 IS 'Throughout our lives, most of us have had pain from time to time (such as minor headaches, sprains, and toothaches).
+Have you had pain other than these everyday kinds of pain today?';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___head; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___head IS 'Please indicate the areas where you feel pain. (Select all that apply)Head';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___neck; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___neck IS 'Please indicate the areas where you feel pain. (Select all that apply)Neck';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___shoul; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___shoul IS 'Please indicate the areas where you feel pain. (Select all that apply) Shoulder';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___chest; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___chest IS 'Please indicate the areas where you feel pain. (Select all that apply) Chest';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___arm; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___arm IS 'Please indicate the areas where you feel pain. (Select all that apply) Arm';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___hand; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___hand IS 'Please indicate the areas where you feel pain. (Select all that apply) Hand';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___uback; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___uback IS 'Please indicate the areas where you feel pain. (Select all that apply) Upper back';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___lbak; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___lbak IS 'Please indicate the areas where you feel pain. (Select all that apply) Lower back';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___hip; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___hip IS 'Please indicate the areas where you feel pain. (Select all that apply) Hip';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___leg; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___leg IS 'Please indicate the areas where you feel pain. (Select all that apply) Leg';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___knee; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___knee IS 'Please indicate the areas where you feel pain. (Select all that apply) Knee';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___ankle; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___ankle IS 'Please indicate the areas where you feel pain. (Select all that apply)
+Ankle';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___foot; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___foot IS 'Please indicate the areas where you feel pain. (Select all that apply) Foot';
+
+
+--
+-- Name: COLUMN q2_data.bpi2___oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2___oth IS 'Please indicate the areas where you feel pain. (Select all that apply) Other';
+
+
+--
+-- Name: COLUMN q2_data.bpi2_othexp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2_othexp IS 'Please indicate the areas where you feel pain. (Select all that apply)
+If you selected Other, please explain:';
+
+
+--
+-- Name: COLUMN q2_data.bpi2most; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2most IS 'Please indicate the area where you feel the most pain.';
+
+
+--
+-- Name: COLUMN q2_data.bpi2most_othexp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi2most_othexp IS 'Please indicate the area where you feel the most pain.
+If you selected Other, please explain:';
+
+
+--
+-- Name: COLUMN q2_data.bpi3; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi3 IS 'Please rate your pain by marking the box beside the number that best describes your pain at its worst in the last 24 hours.';
+
+
+--
+-- Name: COLUMN q2_data.bpi4; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi4 IS 'Please rate your pain by marking the box beside the number that best describes your pain at its least in the last 24 hours.';
+
+
+--
+-- Name: COLUMN q2_data.bpi5; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi5 IS 'Please rate your pain by marking the box beside the number that best describes your pain on the average.';
+
+
+--
+-- Name: COLUMN q2_data.bpi6; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi6 IS 'Please rate your pain by marking the box beside the number that tells how much pain you have right now.';
+
+
+--
+-- Name: COLUMN q2_data.bpi7___none; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi7___none IS 'What treatments or medications are you receiving for your pain? (Please select all that apply)
+None';
+
+
+--
+-- Name: COLUMN q2_data.bpi7___otc; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi7___otc IS 'What treatments or medications are you receiving for your pain? (Please select all that apply)
+Over the counter medication';
+
+
+--
+-- Name: COLUMN q2_data.bpi7___prmed; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi7___prmed IS 'What treatments or medications are you receiving for your pain? (Please select all that apply) Prescribed medication';
+
+
+--
+-- Name: COLUMN q2_data.bpi7___mass; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi7___mass IS 'What treatments or medications are you receiving for your pain? (Please select all that apply) Massage/acupressure';
+
+
+--
+-- Name: COLUMN q2_data.bpi7___pt; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi7___pt IS 'What treatments or medications are you receiving for your pain? (Please select all that apply) Physical therapy';
+
+
+--
+-- Name: COLUMN q2_data.bpi7___acup; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi7___acup IS 'What treatments or medications are you receiving for your pain? (Please select all that apply) Acupuncture';
+
+
+--
+-- Name: COLUMN q2_data.bpi7___marij; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi7___marij IS 'What treatments or medications are you receiving for your pain? (Please select all that apply) Marijuana or medical marijuana';
+
+
+--
+-- Name: COLUMN q2_data.bpi7___intpm; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi7___intpm IS 'What treatments or medications are you receiving for your pain? (Please select all that apply) Interventional pain management (nerve blocks, joint injections or radiotherapy)';
+
+
+--
+-- Name: COLUMN q2_data.bpi7___oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi7___oth IS 'What treatments or medications are you receiving for your pain? (Please select all that apply)
+Other';
+
+
+--
+-- Name: COLUMN q2_data.bpi7_othexp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi7_othexp IS 'What treatments or medications are you receiving for your pain? (Please select all that apply)
+If you selected Other, please explain:';
+
+
+--
+-- Name: COLUMN q2_data.bpi8; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi8 IS 'In the last 24 hours, how much relief have pain treatments or medications provided? Please mark the box below the percentage that most shows how much relief you have received.';
+
+
+--
+-- Name: COLUMN q2_data.bpi9a; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi9a IS 'Mark the box beside the number that describes how, during the past 24 hours, pain has interfered with your:
+General activity';
+
+
+--
+-- Name: COLUMN q2_data.bpi9b; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi9b IS 'Mark the box beside the number that describes how, during the past 24 hours, pain has interfered with your:
+Mood';
+
+
+--
+-- Name: COLUMN q2_data.bpi9c; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi9c IS 'Mark the box beside the number that describes how, during the past 24 hours, pain has interfered with your:
+Walking ability';
+
+
+--
+-- Name: COLUMN q2_data.bpi9d; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi9d IS 'Mark the box beside the number that describes how, during the past 24 hours, pain has interfered with your:
+Normal work (includes both work outside the home and housework)';
+
+
+--
+-- Name: COLUMN q2_data.bpi9e; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi9e IS 'Mark the box beside the number that describes how, during the past 24 hours, pain has interfered with your:
+Relations with other people';
+
+
+--
+-- Name: COLUMN q2_data.bpi9f; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi9f IS 'Mark the box beside the number that describes how, during the past 24 hours, pain has interfered with your:
+Sleep';
+
+
+--
+-- Name: COLUMN q2_data.bpi9g; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi9g IS 'Mark the box beside the number that describes how, during the past 24 hours, pain has interfered with your:
+Enjoyment of life';
+
+
+--
+-- Name: COLUMN q2_data.bpi9h; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bpi9h IS 'Mark the box beside the number that describes how, during the past 24 hours, pain has interfered with your:
+Exercise for health and wellness';
+
+
+--
+-- Name: COLUMN q2_data.pnmedfb_acetamin; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmedfb_acetamin IS 'During and after professional play, did you regularly use any of the following pain relief medications?
+During active professional play
+Acetaminophen[e.g. Tylenol]';
+
+
+--
+-- Name: COLUMN q2_data.pnmedfb_aspirin; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmedfb_aspirin IS 'During and after professional play, did you regularly use any of the following pain relief medications?
+During active professional play
+Aspirin or aspirin containing products[e.g. Excedrin Migraine, Alka-Se (...)';
+
+
+--
+-- Name: COLUMN q2_data.pnmedfb_ibuprof; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmedfb_ibuprof IS 'During and after professional play, did you regularly use any of the following pain relief medications?
+During active professional play
+Ibuprofen [e.g. Motrin, Advil]';
+
+
+--
+-- Name: COLUMN q2_data.pnmedfb_othantiinf; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmedfb_othantiinf IS 'During and after professional play, did you regularly use any of the following pain relief medications?
+During active professional play
+Other anti-inflammatory analgesics[e.g. Aleve, Naprosyn, Relafen,Fr (...)';
+
+
+--
+-- Name: COLUMN q2_data.pnmedfb_oralster; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmedfb_oralster IS 'During and after professional play, did you regularly use any of the following pain relief medications?
+During active professional play
+Steroid taken orally[e.g. Prednisone, Medrol]';
+
+
+--
+-- Name: COLUMN q2_data.pnmedfb_opioid; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmedfb_opioid IS 'During and after professional play, did you regularly use any of the following pain relief medications?
+During active professional play
+Opioid-based pain medication [e.g. Percocet, Vicodin]';
+
+
+--
+-- Name: COLUMN q2_data.pnmed5yr_acetamin; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed5yr_acetamin IS 'During and after professional play, did you regularly use any of the following pain relief medications?
+Within 5 years after active professional play
+Acetaminophen[e.g. Tylenol]';
+
+
+--
+-- Name: COLUMN q2_data.pnmed5yr_aspirin; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed5yr_aspirin IS 'During and after professional play, did you regularly use any of the following pain relief medications?
+Within 5 years after active professional play
+Aspirin or aspirin containing products[e.g. Excedrin Mi (...)';
+
+
+--
+-- Name: COLUMN q2_data.pnmed5yr_ibuprof; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed5yr_ibuprof IS 'During and after professional play, did you regularly use any of the following pain relief medications?
+Within 5 years after active professional play
+Ibuprofen [e.g. Motrin, Advil]';
+
+
+--
+-- Name: COLUMN q2_data.pnmed5yr_antiinf; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed5yr_antiinf IS 'During and after professional play, did you regularly use any of the following pain relief medications?
+Within 5 years after active professional play
+Other anti-inflammatory analgesics[e.g. Aleve, Naprosyn (...)';
+
+
+--
+-- Name: COLUMN q2_data.pnmed5yr_oralster; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed5yr_oralster IS 'During and after professional play, did you regularly use any of the following pain relief medications?
+Within 5 years after active professional play
+Steroid taken orally[e.g. Prednisone, Medrol]';
+
+
+--
+-- Name: COLUMN q2_data.pnmed5yr_opioid; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed5yr_opioid IS 'During and after professional play, did you regularly use any of the following pain relief medications?
+Within 5 years after active professional play
+Opioid-based pain medication [e.g. Percocet, Vicodin]';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_acetamin; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_acetamin IS 'Are you currently taking any of the following pain relief medications?
+Acetaminophen [e.g. Tylenol]';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_acetamin_days; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_acetamin_days IS 'Acetaminophen [e.g. Tylenol]
+Days per week';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_acetamin_tabs; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_acetamin_tabs IS 'Acetaminophen [e.g. Tylenol]
+Tablets per day';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_acetamin_dose; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_acetamin_dose IS 'Acetaminophen [e.g. Tylenol]
+Usual dose per tab';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_aspirin; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_aspirin IS 'Are you currently taking any of the following pain relief medications?
+Aspirin or aspirin containing products[e.g. Excedrin Migraine, Alka-Seltzer with aspirin]';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_aspirin_days; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_aspirin_days IS 'Aspirin or aspirin containing products[e.g. Excedrin Migraine, Alka-Seltzer with aspirin]
+Days per week';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_aspirin_tabs; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_aspirin_tabs IS 'Aspirin or aspirin containing products[e.g. Excedrin Migraine, Alka-Seltzer with aspirin]
+Tablets per day';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_aspirin_dose; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_aspirin_dose IS 'Aspirin or aspirin containing products[e.g. Excedrin Migraine, Alka-Seltzer with aspirin]
+Usual dose per tab ';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_ibuprof; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_ibuprof IS 'Are you currently taking any of the following pain relief medications?
+Ibuprofen [e.g. Motrin, Advil]';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_ibuprof_days; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_ibuprof_days IS 'Ibuprofen [e.g. Motrin, Advil]
+Days per week';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_ibuprof_tabs; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_ibuprof_tabs IS 'Ibuprofen [e.g. Motrin, Advil]
+Tablets per day';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_ibuprof_dose; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_ibuprof_dose IS 'Ibuprofen [e.g. Motrin, Advil]
+Usual dose per tab';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_antiinf; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_antiinf IS 'Are you currently taking any of the following pain relief medications?
+Other anti-inflammatory analgesics[e.g. Aleve, Naprosyn, Relafen, Ketoprofen, Anaprox]';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_antiinf_days; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_antiinf_days IS 'Other anti-inflammatory analgesics[e.g. Aleve, Naprosyn, Relafen, Ketoprofen, Anaprox]
+Days per week';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_antiinf_tabs; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_antiinf_tabs IS 'Other anti-inflammatory analgesics[e.g. Aleve, Naprosyn, Relafen, Ketoprofen, Anaprox]
+Tablets per day';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_antiinf_dose; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_antiinf_dose IS 'Other anti-inflammatory analgesics[e.g. Aleve, Naprosyn, Relafen, Ketoprofen, Anaprox]
+Usual dose per tab';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_oralster; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_oralster IS 'Are you currently taking any of the following pain relief medications?
+Steroid taken orally [e.g. Prednisone, Medrol]';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_oralster_days; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_oralster_days IS 'Steroid taken orally [e.g. Prednisone, Medrol]
+Days per week';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_oralster_tabs; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_oralster_tabs IS 'Steroid taken orally [e.g. Prednisone, Medrol]
+Tablets per day';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_oralster_dose; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_oralster_dose IS 'Steroid taken orally [e.g. Prednisone, Medrol]
+Usual dose per tab';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_opioid; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_opioid IS 'Are you currently taking any of the following pain relief medications?
+Opioid-based pain medication [e.g. Percocet, Vicodin]';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_opioid_days; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_opioid_days IS 'Opioid-based pain medication [e.g. Percocet, Vicodin]
+Days per week';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_opioid_tab; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_opioid_tab IS 'Opioid-based pain medication [e.g. Percocet, Vicodin]
+Tablets per days';
+
+
+--
+-- Name: COLUMN q2_data.pnmed_opioid_dose; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnmed_opioid_dose IS 'Opioid-based pain medication [e.g. Percocet, Vicodin]
+Usual dose per tab';
+
+
+--
+-- Name: COLUMN q2_data.pnsurg_nckspin; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnsurg_nckspin IS 'Since January 1, 2015, have you had any of the following surgical procedures?
+Neck/spine surgery';
+
+
+--
+-- Name: COLUMN q2_data.pnsurg_back; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnsurg_back IS 'Since January 1, 2015, have you had any of the following surgical procedures?
+Back (lumbar) surgery';
+
+
+--
+-- Name: COLUMN q2_data.pnsurg_hip; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnsurg_hip IS 'Since January 1, 2015, have you had any of the following surgical procedures?
+Hip replacement';
+
+
+--
+-- Name: COLUMN q2_data.pnsurg_knee; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pnsurg_knee IS 'Since January 1, 2015, have you had any of the following surgical procedures?
+Knee replacement';
+
+
+--
+-- Name: COLUMN q2_data.pain_date; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pain_date IS 'Hidden on survey;
+Date and time that the Pain domain of Q2 survey was completed';
+
+
+--
+-- Name: COLUMN q2_data.wealth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.wealth IS 'What is your approximate household net worth? _x000D_
+[the value of all the assets of people in your household(like housing, cars, stock, retirement funds, and businessownership) minus any debt or loans you and house (...)';
+
+
+--
+-- Name: COLUMN q2_data.wealth_emerg___1; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.wealth_emerg___1 IS 'Suppose that you have an emergency expense that costs $400...
+Based on your current financial situation, how would you pay for this expense? If you would use more than one method to cover this expense, plea (...)';
+
+
+--
+-- Name: COLUMN q2_data.wealth_emerg___2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.wealth_emerg___2 IS 'Suppose that you have an emergency expense that costs $400...
+Based on your current financial situation, how would you pay for this expense? If you would use more than one method to cover this expense, plea (...)';
+
+
+--
+-- Name: COLUMN q2_data.wealth_emerg___3; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.wealth_emerg___3 IS 'Suppose that you have an emergency expense that costs $400...
+Based on your current financial situation, how would you pay for this expense? If you would use more than one method to cover this expense, plea (...)';
+
+
+--
+-- Name: COLUMN q2_data.wealth_emerg___4; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.wealth_emerg___4 IS 'Suppose that you have an emergency expense that costs $400...
+Based on your current financial situation, how would you pay for this expense? If you would use more than one method to cover this expense, plea (...)';
+
+
+--
+-- Name: COLUMN q2_data.wealth_emerg___5; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.wealth_emerg___5 IS 'Suppose that you have an emergency expense that costs $400...
+Based on your current financial situation, how would you pay for this expense? If you would use more than one method to cover this expense, plea (...)';
+
+
+--
+-- Name: COLUMN q2_data.wealth_emerg___6; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.wealth_emerg___6 IS 'Suppose that you have an emergency expense that costs $400...
+Based on your current financial situation, how would you pay for this expense? If you would use more than one method to cover this expense, plea (...)';
+
+
+--
+-- Name: COLUMN q2_data.wealth_emerg___7; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.wealth_emerg___7 IS 'Suppose that you have an emergency expense that costs $400...
+Based on your current financial situation, how would you pay for this expense? If you would use more than one method to cover this expense, plea (...)';
+
+
+--
+-- Name: COLUMN q2_data.wealth_emerg___8; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.wealth_emerg___8 IS 'Suppose that you have an emergency expense that costs $400...
+Based on your current financial situation, how would you pay for this expense? If you would use more than one method to cover this expense, plea (...)';
+
+
+--
+-- Name: COLUMN q2_data.wealth_emerg___9; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.wealth_emerg___9 IS 'Suppose that you have an emergency expense that costs $400...
+Based on your current financial situation, how would you pay for this expense? If you would use more than one method to cover this expense, plea (...)';
+
+
+--
+-- Name: COLUMN q2_data.wealth_emerg_oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.wealth_emerg_oth IS 'Suppose that you have an emergency expense that costs $400...
+Based on your current financial situation, how would you pay for this expense? If you would use more than one method to cover this expense, plea (...)';
+
+
+--
+-- Name: COLUMN q2_data.ladder_wealth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ladder_wealth IS 'The following questions relate to how you feel about your standing in US society and in your community.
+A) Think of this ladder as representing where people stand in the United States.
+At the top of the lad (...)';
+
+
+--
+-- Name: COLUMN q2_data.ladder_comm; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ladder_comm IS 'The following questions relate to how you feel about your standing in US society and in your community.
+B)  Now think of this ladder as representing where people stand in their communities. People define commu (...)';
+
+
+--
+-- Name: COLUMN q2_data.household_number; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.household_number IS 'How many people are in your household?';
+
+
+--
+-- Name: COLUMN q2_data.hcutil_pcp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.hcutil_pcp IS 'Have you seen you seen your primary care physician (PCP) in the past 3 years?';
+
+
+--
+-- Name: COLUMN q2_data.hcutil_pcp_exp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.hcutil_pcp_exp IS 'Have you seen you seen your primary care  physician (PCP) in the past 3 years?
+If not, why?';
+
+
+--
+-- Name: COLUMN q2_data.hcutil_pcp_oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.hcutil_pcp_oth IS 'Have you seen you seen your primary care  physician (PCP) in the past 3 years?
+If not, why?
+If Other, please explain:';
+
+
+--
+-- Name: COLUMN q2_data.hcutil_othprov; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.hcutil_othprov IS 'Have you seen a physician or healthcare provider other than your PCP in the past 3 years?
+(e.g. physical therapist, cardiologist, endocrinologist, etc.)';
+
+
+--
+-- Name: COLUMN q2_data.selfrpt_cte; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.selfrpt_cte IS 'Do you believe you have Chronic Traumatic Encephalopathy (CTE)?';
+
+
+--
+-- Name: COLUMN q2_data.otdx_arthritis; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otdx_arthritis IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Arthritis (e.g. osteoarthritis)';
+
+
+--
+-- Name: COLUMN q2_data.otdx_slpapnea; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otdx_slpapnea IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Sleep apnea';
+
+
+--
+-- Name: COLUMN q2_data.otdx_prostcanc; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otdx_prostcanc IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Prostate cancer';
+
+
+--
+-- Name: COLUMN q2_data.otdx_basalcanc; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otdx_basalcanc IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Basal cell skin cancer';
+
+
+--
+-- Name: COLUMN q2_data.otdx_squamcanc; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otdx_squamcanc IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Squamous cell skin cancer';
+
+
+--
+-- Name: COLUMN q2_data.otdx_melanom; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otdx_melanom IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Melanoma';
+
+
+--
+-- Name: COLUMN q2_data.otdx_lymphom; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otdx_lymphom IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Lymphoma';
+
+
+--
+-- Name: COLUMN q2_data.otdx_othcanc; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otdx_othcanc IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Other cancer';
+
+
+--
+-- Name: COLUMN q2_data.otdx_renalfail; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otdx_renalfail IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Chronic renal failure';
+
+
+--
+-- Name: COLUMN q2_data.otdx_alcdep; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otdx_alcdep IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Alcohol dependence problem';
+
+
+--
+-- Name: COLUMN q2_data.otdx_livcirrhosis; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otdx_livcirrhosis IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Liver cirrhosis';
+
+
+--
+-- Name: COLUMN q2_data.otdx_livfail; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otdx_livfail IS 'Since January 1, 2015, has a healthcare provider told you that you have had any of the following diagnoses or health outcomes?
+Liver failure';
+
+
+--
+-- Name: COLUMN q2_data.otmedrec_pncond; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otmedrec_pncond IS 'Since January 1, 2015, has a medical provider recommended or prescribed medicine for any of the following conditions?
+Pain related condition';
+
+
+--
+-- Name: COLUMN q2_data.otmedrec_livprob; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otmedrec_livprob IS 'Since January 1, 2015, has a medical provider recommended or prescribed medicine for any of the following conditions?
+Liver problem';
+
+
+--
+-- Name: COLUMN q2_data.otmedrec_lowtest; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otmedrec_lowtest IS 'Since January 1, 2015, has a medical provider recommended or prescribed medicine for any of the following conditions?
+Low testosterone';
+
+
+--
+-- Name: COLUMN q2_data.otmedrec_ed; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.otmedrec_ed IS 'Since January 1, 2015, has a medical provider recommended or prescribed medicine for any of the following conditions?
+Erectile dysfunction (E.D.)';
+
+
+--
+-- Name: COLUMN q2_data.massage; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.massage IS 'Are you currently using any other health practices?
+Massage';
+
+
+--
+-- Name: COLUMN q2_data.acupuncture; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.acupuncture IS 'Are you currently using any other health practices?
+Acupuncture';
+
+
+--
+-- Name: COLUMN q2_data.chiropractic; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.chiropractic IS 'Are you currently using any other health practices?
+Chiropractic treatment';
+
+
+--
+-- Name: COLUMN q2_data.yoga; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.yoga IS 'Are you currently using any other health practices?
+Yoga';
+
+
+--
+-- Name: COLUMN q2_data.taichi; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.taichi IS 'Are you currently using any other health practices?
+Tai chi';
+
+
+--
+-- Name: COLUMN q2_data.meditation; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.meditation IS 'Are you currently using any other health practices?
+Meditation';
+
+
+--
+-- Name: COLUMN q2_data.othaltmed; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othaltmed IS 'Are you currently using any other health practices?
+Other alternative medication';
+
+
+--
+-- Name: COLUMN q2_data.othaltmed_exp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othaltmed_exp IS 'Are you currently using any other health practices?
+Other alternative medication
+Please specify:';
+
+
+--
+-- Name: COLUMN q2_data.famhxmoth___na; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmoth___na IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Mother
+Not applicable';
+
+
+--
+-- Name: COLUMN q2_data.famhxmoth___lung; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmoth___lung IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Mother
+Lung Cancer';
+
+
+--
+-- Name: COLUMN q2_data.famhxmoth___colrec; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmoth___colrec IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Mother
+Colon or rectal cancer';
+
+
+--
+-- Name: COLUMN q2_data.famhxmoth___diab; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmoth___diab IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Mother
+Diabetes';
+
+
+--
+-- Name: COLUMN q2_data.famhxmoth___mela; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmoth___mela IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Mother
+Melanoma';
+
+
+--
+-- Name: COLUMN q2_data.famhxmoth___hypert; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmoth___hypert IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Mother
+Hypertension';
+
+
+--
+-- Name: COLUMN q2_data.famhxmoth___dem; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmoth___dem IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Mother
+Dementia before age 70';
+
+
+--
+-- Name: COLUMN q2_data.famhxmoth___alc; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmoth___alc IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Mother
+Alcohol problem';
+
+
+--
+-- Name: COLUMN q2_data.famhxfsib___na; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfsib___na IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Female Sibling
+Not applicable';
+
+
+--
+-- Name: COLUMN q2_data.famhxfsib___lung; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfsib___lung IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Female Sibling
+Lung Cancer';
+
+
+--
+-- Name: COLUMN q2_data.famhxfsib___colrec; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfsib___colrec IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Female Sibling
+Colon or rectal cancer';
+
+
+--
+-- Name: COLUMN q2_data.famhxfsib___diab; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfsib___diab IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Female Sibling
+Diabetes';
+
+
+--
+-- Name: COLUMN q2_data.famhxfsib___mela; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfsib___mela IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Female Sibling
+Melanoma';
+
+
+--
+-- Name: COLUMN q2_data.famhxfsib___hypert; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfsib___hypert IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Female Sibling
+Hypertension';
+
+
+--
+-- Name: COLUMN q2_data.famhxfsib___dem; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfsib___dem IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Female Sibling
+Dementia before age 70';
+
+
+--
+-- Name: COLUMN q2_data.famhxfsib___alc; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfsib___alc IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Female Sibling
+Alcohol problem';
+
+
+--
+-- Name: COLUMN q2_data.femsib_number; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.femsib_number IS 'How many full female siblings do you have?';
+
+
+--
+-- Name: COLUMN q2_data.famhxfath___na; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfath___na IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Father
+Not applicable';
+
+
+--
+-- Name: COLUMN q2_data.famhxfath___lung; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfath___lung IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Father
+Lung Cancer';
+
+
+--
+-- Name: COLUMN q2_data.famhxfath___colrec; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfath___colrec IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Father
+Colon or rectal cancer';
+
+
+--
+-- Name: COLUMN q2_data.famhxfath___prost; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfath___prost IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Father
+Prostate cancer';
+
+
+--
+-- Name: COLUMN q2_data.famhxfath___diab; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfath___diab IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Father
+Diabetes';
+
+
+--
+-- Name: COLUMN q2_data.famhxfath___mela; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfath___mela IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Father
+Melanoma';
+
+
+--
+-- Name: COLUMN q2_data.famhxfath___hypert; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfath___hypert IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Father
+Hypertension';
+
+
+--
+-- Name: COLUMN q2_data.famhxfath___dem; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfath___dem IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Father
+Dementia before age 70';
+
+
+--
+-- Name: COLUMN q2_data.famhxfath___alc; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxfath___alc IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Father
+Alcohol problem';
+
+
+--
+-- Name: COLUMN q2_data.famhxmsib___na; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmsib___na IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Male Sibling
+Not applicable';
+
+
+--
+-- Name: COLUMN q2_data.famhxmsib___lung; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmsib___lung IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Male Sibling
+Lung Cancer';
+
+
+--
+-- Name: COLUMN q2_data.famhxmsib___colrec; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmsib___colrec IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Male Sibling
+Colon or rectal cancer';
+
+
+--
+-- Name: COLUMN q2_data.famhxmsib___prost; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmsib___prost IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Male Sibling
+Prostate cancer';
+
+
+--
+-- Name: COLUMN q2_data.famhxmsib___diab; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmsib___diab IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Male Sibling
+Diabetes';
+
+
+--
+-- Name: COLUMN q2_data.famhxmsib___mela; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmsib___mela IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Male Sibling
+Melanoma';
+
+
+--
+-- Name: COLUMN q2_data.famhxmsib___hypert; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmsib___hypert IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Male Sibling
+Hypertension';
+
+
+--
+-- Name: COLUMN q2_data.famhxmsib___dem; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmsib___dem IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Male Sibling
+Dementia before age 70';
+
+
+--
+-- Name: COLUMN q2_data.famhxmsib___alc; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.famhxmsib___alc IS 'Did your parents or siblings have any of the following diagnoses or health outcomes? Please select all that apply.
+Male Sibling
+Alcohol problem';
+
+
+--
+-- Name: COLUMN q2_data.sib_number; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib_number IS 'How many full male siblings do you have?';
+
+
+--
+-- Name: COLUMN q2_data.sib1age; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib1age IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 1:
+Current age:';
+
+
+--
+-- Name: COLUMN q2_data.sib1ht_feet; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib1ht_feet IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 1:
+Height (feet):';
+
+
+--
+-- Name: COLUMN q2_data.sib1ht_inch; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib1ht_inch IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 1:
+Height (inches):';
+
+
+--
+-- Name: COLUMN q2_data.sib1sport___none; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib1sport___none IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 1:
+Did not play (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib1sport___hsfb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib1sport___hsfb IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 1:
+Played H.S.  (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib1sport___colfb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib1sport___colfb IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 1:
+Played coll (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib1sport___oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib1sport___oth IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 1:
+Other';
+
+
+--
+-- Name: COLUMN q2_data.sib1sport_oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib1sport_oth IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 1:
+Other
+Please sp (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib2age; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib2age IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 2:
+Current age:';
+
+
+--
+-- Name: COLUMN q2_data.sib2ht_feet; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib2ht_feet IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 2:
+Height (feet):';
+
+
+--
+-- Name: COLUMN q2_data.sib2ht_inch; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib2ht_inch IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 2:
+Height (inches):';
+
+
+--
+-- Name: COLUMN q2_data.sib2sport___none; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib2sport___none IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 2:
+Did not play (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib2sport___hsfb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib2sport___hsfb IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 2:
+Played H.S.  (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib2sport___colfb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib2sport___colfb IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 2:
+Played coll (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib2sport___oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib2sport___oth IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 2:
+Other';
+
+
+--
+-- Name: COLUMN q2_data.sib2sport_oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib2sport_oth IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 2:
+Other
+Please sp (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib3age; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib3age IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 2:
+Current age:';
+
+
+--
+-- Name: COLUMN q2_data.sib3ht_feet; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib3ht_feet IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 2:
+Height (feet):';
+
+
+--
+-- Name: COLUMN q2_data.sib3ht_inch; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib3ht_inch IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 2:
+Height (inches):';
+
+
+--
+-- Name: COLUMN q2_data.sib3sport___none; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib3sport___none IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 3:
+Did not play (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib3sport___hsfb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib3sport___hsfb IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 3:
+Played H.S.  (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib3sport___colfb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib3sport___colfb IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 3:
+Played coll (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib3sport___oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib3sport___oth IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 3:
+Other';
+
+
+--
+-- Name: COLUMN q2_data.sib3sport_oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib3sport_oth IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 3:
+Other
+Please sp (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib4age; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib4age IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 4:
+Current age:';
+
+
+--
+-- Name: COLUMN q2_data.sib4ht_feet; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib4ht_feet IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 4:
+Height (feet):';
+
+
+--
+-- Name: COLUMN q2_data.sib4ht_inch; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib4ht_inch IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 4:
+Height (inches):';
+
+
+--
+-- Name: COLUMN q2_data.sib4sport___none; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib4sport___none IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 4:
+Did not play (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib4sport___hsfb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib4sport___hsfb IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 4:
+Played H.S.  (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib4sport___colfb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib4sport___colfb IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 4:
+Played coll (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib4sport___oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib4sport___oth IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 4:
+Other';
+
+
+--
+-- Name: COLUMN q2_data.sib4sportoth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib4sportoth IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 4:
+Other
+Please spe (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib5age; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib5age IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 5:
+Current age:';
+
+
+--
+-- Name: COLUMN q2_data.sib5ht_feet; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib5ht_feet IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 5:
+Height (feet):';
+
+
+--
+-- Name: COLUMN q2_data.sib5ht_inch; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib5ht_inch IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 5:
+Height (inches): (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib5sport___none; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib5sport___none IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 5:
+Did not play (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib5sport___hsfb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib5sport___hsfb IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 5:
+Played H.S.  (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib5sport___colfb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib5sport___colfb IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 5:
+Played coll (...)';
+
+
+--
+-- Name: COLUMN q2_data.sib5sport___oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib5sport___oth IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 5:
+Other';
+
+
+--
+-- Name: COLUMN q2_data.sib5sport_oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.sib5sport_oth IS 'Please list the birth order of all your full male siblings. Provide their age, height, and indicate if they played football in high school, college, or other sports in college.
+Male Sibling 5:
+Other
+Please sp (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedcaff___noans; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedcaff___noans IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? Select all choices that apply.
+*All information disclosed in this survey is confidential and will be used sol (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedcaff___no; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedcaff___no IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used solely (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedcaff___fb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedcaff___fb IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance?
+ Select all choices that apply.*All information disclosed in this survey is confidential and will be used solely (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedcaff___cur; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedcaff___cur IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance?
+ Select all choices that apply.*All information disclosed in this survey is confidential and will be used solel (...)';
+
+
+--
+-- Name: COLUMN q2_data.pededrink___noans; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pededrink___noans IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used s (...)';
+
+
+--
+-- Name: COLUMN q2_data.pededrink___no; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pededrink___no IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used sole (...)';
+
+
+--
+-- Name: COLUMN q2_data.pededrink___fb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pededrink___fb IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used sole (...)';
+
+
+--
+-- Name: COLUMN q2_data.pededrink___cur; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pededrink___cur IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+elect all choices that apply.*All information disclosed in this survey is confidential and will be used sol (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedcreat___noans; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedcreat___noans IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used so (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedcreat___no; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedcreat___no IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used solel (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedcreat___fb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedcreat___fb IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used solel (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedcreat___cur; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedcreat___cur IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used sole (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedsteroid___noans; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedsteroid___noans IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used  (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedsteroid___no; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedsteroid___no IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used sol (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedsteroid___fb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedsteroid___fb IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used sol (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedsteroid___cur; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedsteroid___cur IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used so (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedgh___noans; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedgh___noans IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used solel (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedgh___no; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedgh___no IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used solely f (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedgh___fb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedgh___fb IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used solely f (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedgh___cur; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedgh___cur IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used solely  (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedephed___noans; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedephed___noans IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used so (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedephed___no; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedephed___no IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used solel (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedephed___fb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedephed___fb IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used solel (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedephed___cur; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedephed___cur IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used sole (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedbetahy___noans; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedbetahy___noans IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used s (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedbetahy___no; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedbetahy___no IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used sole (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedbetahy___fb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedbetahy___fb IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used sole (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedbetahy___cur; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedbetahy___cur IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used sol (...)';
+
+
+--
+-- Name: COLUMN q2_data.pednoncaf___noans; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pednoncaf___noans IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used s (...)';
+
+
+--
+-- Name: COLUMN q2_data.pednoncaf___no; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pednoncaf___no IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used sole (...)';
+
+
+--
+-- Name: COLUMN q2_data.pednoncaf___fb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pednoncaf___fb IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used sole (...)';
+
+
+--
+-- Name: COLUMN q2_data.pednoncaf___cur; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pednoncaf___cur IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used sol (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedrcell___noans; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedrcell___noans IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used so (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedrcell___no; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedrcell___no IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used solel (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedrcell___fb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedrcell___fb IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used solel (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedrcell___cur; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedrcell___cur IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used sole (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedinos___noans; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedinos___noans IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance?
+ Select all choices that apply.*All information disclosed in this survey is confidential and will be used sol (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedinos___no; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedinos___no IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance?
+ Select all choices that apply.*All information disclosed in this survey is confidential and will be used solely (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedinos___fb; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedinos___fb IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used solely (...)';
+
+
+--
+-- Name: COLUMN q2_data.pedinos___cur; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.pedinos___cur IS 'Have you ever tried or used any of the following in an attempt to improve your sports performance? 
+Select all choices that apply.*All information disclosed in this survey is confidential and will be used solel (...)';
+
+
+--
+-- Name: COLUMN q2_data.alcohol_days; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.alcohol_days IS 'In a typical week, how many days do you drink a beverage containing alcohol?';
+
+
+--
+-- Name: COLUMN q2_data.alcohol_drinks; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.alcohol_drinks IS 'On a typical day that you drink, how many alcoholic beverages do you usually have?';
+
+
+--
+-- Name: COLUMN q2_data.marijuana; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijuana IS 'Do you smoke or ingest marijuana?';
+
+
+--
+-- Name: COLUMN q2_data.marijuana_start; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijuana_start IS 'How old were you when you started smoking marijuana?';
+
+
+--
+-- Name: COLUMN q2_data.marijuana_stop; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijuana_stop IS 'How old were you when you stopped smoking marijuana?';
+
+
+--
+-- Name: COLUMN q2_data.marijuana_totyrs; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijuana_totyrs IS 'How many years, in total, have you smoked marijuana?(if you quit more than once, estimate the total years you considered yourself an active smoker)';
+
+
+--
+-- Name: COLUMN q2_data.marijtime___pnfl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijtime___pnfl IS 'Please indicate the time-frames during which you smoked marijuana (select all that apply):
+Before playing in the NFL';
+
+
+--
+-- Name: COLUMN q2_data.marijtime___dnfl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijtime___dnfl IS 'Please indicate the time-frames during which you smoked marijuana (select all that apply):
+While playing in the NFL';
+
+
+--
+-- Name: COLUMN q2_data.marijtime___anfl; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijtime___anfl IS 'Please indicate the time-frames during which you smoked marijuana (select all that apply):
+After playing in the NFL';
+
+
+--
+-- Name: COLUMN q2_data.marijreas___fun; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijreas___fun IS 'Please indicate the reasons why you use, or have previously used, marijuana (select all that apply):
+Fun';
+
+
+--
+-- Name: COLUMN q2_data.marijreas___relx; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijreas___relx IS 'Please indicate the reasons why you use, or have previously used, marijuana (select all that apply):
+Relaxation';
+
+
+--
+-- Name: COLUMN q2_data.marijreas___pain; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijreas___pain IS 'Please indicate the reasons why you use, or have previously used, marijuana (select all that apply):
+Pain';
+
+
+--
+-- Name: COLUMN q2_data.marijreas___anx; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijreas___anx IS 'Please indicate the reasons why you use, or have previously used, marijuana (select all that apply):
+Anxiety';
+
+
+--
+-- Name: COLUMN q2_data.marijreas___dep; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijreas___dep IS 'Please indicate the reasons why you use, or have previously used, marijuana (select all that apply):
+Depression';
+
+
+--
+-- Name: COLUMN q2_data.marijreas___oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijreas___oth IS 'Please indicate the reasons why you use, or have previously used, marijuana (select all that apply):
+Other';
+
+
+--
+-- Name: COLUMN q2_data.marijreas_exp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.marijreas_exp IS 'Please indicate the reasons why you use, or have previously used, marijuana (select all that apply):
+If Other reason, please explain:';
+
+
+--
+-- Name: COLUMN q2_data.born_address; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.born_address IS 'Indicate where you have lived for the time-frames listed. Please fill in as much as you can remember.
+Born:
+Address:';
+
+
+--
+-- Name: COLUMN q2_data.born_city; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.born_city IS 'Indicate where you have lived for the time-frames listed. Please fill in as much as you can remember.
+Born:
+City:';
+
+
+--
+-- Name: COLUMN q2_data.born_state; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.born_state IS 'Indicate where you have lived for the time-frames listed. Please fill in as much as you can remember.
+Born:
+State:';
+
+
+--
+-- Name: COLUMN q2_data.born_zip; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.born_zip IS 'Indicate where you have lived for the time-frames listed. Please fill in as much as you can remember.
+Born:
+Zip code (if known)';
+
+
+--
+-- Name: COLUMN q2_data.twelveyrs_address; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.twelveyrs_address IS 'Indicate where you have lived for the time-frames listed. Please fill in as much as you can remember.
+At 12 years of age:
+Address:';
+
+
+--
+-- Name: COLUMN q2_data.twelveyrs_city; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.twelveyrs_city IS 'Indicate where you have lived for the time-frames listed. Please fill in as much as you can remember.
+At 12 years of age:
+City:';
+
+
+--
+-- Name: COLUMN q2_data.twelveyrs_state; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.twelveyrs_state IS 'Indicate where you have lived for the time-frames listed. Please fill in as much as you can remember.
+At 12 years of age:
+State:';
+
+
+--
+-- Name: COLUMN q2_data.twelveyrs_zip; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.twelveyrs_zip IS 'Indicate where you have lived for the time-frames listed. Please fill in as much as you can remember.
+At 12 years of age:
+Zip code (if known)';
+
+
+--
+-- Name: COLUMN q2_data.infertility; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.infertility IS 'Please answer the following questions to the best of your knowledge:
+Have you and a female spouse or partner ever tried to become pregnant for 12 consecutive months without becoming pregnant (even if she ultimat (...)';
+
+
+--
+-- Name: COLUMN q2_data.infert_age; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.infert_age IS 'Have you and a female spouse or partner evertried to become pregnant for 12 consecutivemonths without becoming pregnant (even if she ultimately became pregnant)?
+How old were you when this first happened?';
+
+
+--
+-- Name: COLUMN q2_data.infert_hcp; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.infert_hcp IS 'Have you and a female spouse or partner evertried to become pregnant for 12 consecutivemonths without becoming pregnant (even if she ultimately became pregnant)?
+Did you seek help from a healthcare provider?';
+
+
+--
+-- Name: COLUMN q2_data.infertreas___fem; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.infertreas___fem IS 'Have you and a female spouse or partner ever tried to become pregnant for 12 consecutivemonths without becoming pregnant (even if she ultimately became pregnant)?
+Did he or she find a reason why you and you (...)';
+
+
+--
+-- Name: COLUMN q2_data.infertreas___mal; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.infertreas___mal IS 'Have you and a female spouse or partner ever tried to become pregnant for 12 consecutivemonths without becoming pregnant (even if she ultimately became pregnant)?
+Did he or she find a reason why you and you (...)';
+
+
+--
+-- Name: COLUMN q2_data.infertreas___unex; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.infertreas___unex IS 'Have you and a female spouse or partner ever tried to become pregnant for 12 consecutivemonths without becoming pregnant (even if she ultimately became pregnant)?
+Did he or she find a reason why you and yo (...)';
+
+
+--
+-- Name: COLUMN q2_data.infertreas___oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.infertreas___oth IS 'Have you and a female spouse or partner ever tried to become pregnant for 12 consecutivemonths without becoming pregnant (even if she ultimately became pregnant)?
+Did he or she find a reason why you and you (...)';
+
+
+--
+-- Name: COLUMN q2_data.infertreas_oth; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.infertreas_oth IS 'Have you and a female spouse or partner ever tried to become pregnant for 12 consecutivemonths without becoming pregnant (even if she ultimately became pregnant)?
+Did he or she find a reason why you and yourf (...)';
+
+
+--
+-- Name: COLUMN q2_data.actout_dreams; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.actout_dreams IS 'Has your spouse [or sleep partner] told you that you appear to act out your dreams while sleeping [punched or flailed arms in the air, shouted, screamed], which has occurred at least three times?';
+
+
+--
+-- Name: COLUMN q2_data.smell_problem; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.smell_problem IS 'Have you had any problems with your sense of smell, such as not being able to smell things or things not smelling the way they are supposed to for at least three months?';
+
+
+--
+-- Name: COLUMN q2_data.taste_problem; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.taste_problem IS 'Have you had any problems with your sense of taste, such as not being able to taste salt or sugar or with tastes in the mouth that shouldnt be there, like bitter, salty, sour, or sweet tastes for at least thr (...)';
+
+
+--
+-- Name: COLUMN q2_data.bowel_move; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.bowel_move IS 'How frequently do you have a bowel movement?';
+
+
+--
+-- Name: COLUMN q2_data.laxative_use; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.laxative_use IS 'How often do you use a laxative? (Such as softeners, bulking agents, fiber supplements, or suppositories)';
+
+
+--
+-- Name: COLUMN q2_data.workplace_harass; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.workplace_harass IS 'Bullying or harassment is a problem in some workplaces. While you were in the NFL...
+Was there a period of time when you frequently experienced any of the following from teammates, coaches or trainers: soci (...)';
+
+
+--
+-- Name: COLUMN q2_data.coach_discrim; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.coach_discrim IS 'Bullying or harassment is a problem in some workplaces. While you were in the NFL...
+How many times were you treated unfairly by COACHES OR TRAINERS because of your race or ethnicity?';
+
+
+--
+-- Name: COLUMN q2_data.coach_discrimstr; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.coach_discrimstr IS 'Bullying or harassment is a problem in some workplaces. While you were in the NFL...
+How many times were you treated unfairly by COACHES OR TRAINERS because of yourrace or ethnicity?
+How stressful was this  (...)';
+
+
+--
+-- Name: COLUMN q2_data.player_discrim; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.player_discrim IS 'Bullying or harassment is a problem in some workplaces. While you were in the NFL...
+How many times were you treated unfairly by OTHER PLAYERS because of your race or ethnicity?';
+
+
+--
+-- Name: COLUMN q2_data.player_discrimstr; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.player_discrimstr IS 'Bullying or harassment is a problem in some workplaces. While you were in the NFL...
+How many times were you treated unfairly by OTHER PLAYERS because of your race orethnicity?
+How stressful was this for y (...)';
+
+
+--
+-- Name: COLUMN q2_data.job_discrim; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.job_discrim IS 'After your playing years...
+How many times were you treated unfairly in being hired for a job or promoted because of your race or ethnicity?';
+
+
+--
+-- Name: COLUMN q2_data.job_discrimstr; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.job_discrimstr IS 'After your playing years…
+How many times were you treated unfairly in being hired for a job or promoted because of your race or ethnicity?
+How stressful was this for you?';
+
+
+--
+-- Name: COLUMN q2_data.ace1; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ace1 IS 'Things that happen in childhood sometimes affect our health as adults. While you were growing up, during your first 18 years of life:
+Did a parent or other adult in the household often or very often..._x000D_
+_x000D_
+S (...)';
+
+
+--
+-- Name: COLUMN q2_data.ace2; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ace2 IS 'Things that happen in childhood sometimes affect our health as adults. While you were growing up, during your first 18 years of life:
+Did a parent or other adult in the household often or very often..._x000D_
+_x000D_
+P (...)';
+
+
+--
+-- Name: COLUMN q2_data.ace3; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ace3 IS 'Things that happen in childhood sometimes affect our health as adults. While you were growing up, during your first 18 years of life:
+Did an adult or person at least 5 years older than you ever..._x000D_
+_x000D_
+Touch  (...)';
+
+
+--
+-- Name: COLUMN q2_data.ace4; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ace4 IS 'Things that happen in childhood sometimes affect our health as adults. While you were growing up, during your first 18 years of life:
+Did you often or very often feel that..._x000D_
+_x000D_
+No one in your family loved  (...)';
+
+
+--
+-- Name: COLUMN q2_data.ace5; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ace5 IS 'Things that happen in childhood sometimes affect our health as adults. While you were growing up, during your first 18 years of life:
+Did you often or very often feel that..._x000D_
+_x000D_
+You didnt have enough to ea (...)';
+
+
+--
+-- Name: COLUMN q2_data.ace6; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ace6 IS 'Things that happen in childhood sometimes affect our health as adults. While you were growing up, during your first 18 years of life:
+Were your parents ever separated or divorced?';
+
+
+--
+-- Name: COLUMN q2_data.ace7; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ace7 IS 'Things that happen in childhood sometimes affect our health as adults. While you were growing up, during your first 18 years of life:
+Was your mother or stepmother:_x000D_
+Often or very often pushed, grabbed, slapped, (...)';
+
+
+--
+-- Name: COLUMN q2_data.ace8; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ace8 IS 'Things that happen in childhood sometimes affect our health as adults. While you were growing up, during your first 18 years of life:
+Did you live with anyone who was a problem drinker or alcoholic, or who used street  (...)';
+
+
+--
+-- Name: COLUMN q2_data.ace9; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ace9 IS 'Things that happen in childhood sometimes affect our health as adults. While you were growing up, during your first 18 years of life:
+Was a household member depressed or mentally ill, or did a household member attempt  (...)';
+
+
+--
+-- Name: COLUMN q2_data.ace10; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.ace10 IS 'Things that happen in childhood sometimes affect our health as adults. While you were growing up, during your first 18 years of life:
+Did a household member go to prison?';
+
+
+--
+-- Name: COLUMN q2_data.foodins_worry; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.foodins_worry IS 'As a child growing up...
+I worried whether our food would run out before we got money to buy more';
+
+
+--
+-- Name: COLUMN q2_data.foodins_ranout; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.foodins_ranout IS 'As a child growing up...
+The food my family bought just didnt last and we didnt have money to get more';
+
+
+--
+-- Name: COLUMN q2_data.q2help; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.q2help IS 'Did someone help you fill out the questionnaire?';
+
+
+--
+-- Name: COLUMN q2_data.othealth___complete; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othealth___complete IS 'Have you completed all questions that you intend to answer on this page? 
+Once you have advanced to the next section, you will not be able to return.
+Other Health Domain';
+
+
+--
+-- Name: COLUMN q2_data.othealth_date; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.othealth_date IS 'Hidden on survey;
+Date and time that Other Health domain of Q2 survey was completed';
+
+
+--
+-- Name: COLUMN q2_data.q2_complete; Type: COMMENT; Schema: q2; Owner: -
+--
+
+COMMENT ON COLUMN q2.q2_data.q2_complete IS 'Hidden on survey;
+Completion status of the full Q2 survey';
+
+
+--
+-- Name: q2_data_id_seq; Type: SEQUENCE; Schema: q2; Owner: -
+--
+
+CREATE SEQUENCE q2.q2_data_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: q2_data_id_seq; Type: SEQUENCE OWNED BY; Schema: q2; Owner: -
+--
+
+ALTER SEQUENCE q2.q2_data_id_seq OWNED BY q2.q2_data.id;
 
 
 --
@@ -43794,6 +49320,48 @@ ALTER TABLE ONLY data_requests.q2_rc_codebook ALTER COLUMN id SET DEFAULT nextva
 
 
 --
+-- Name: id; Type: DEFAULT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environment_history ALTER COLUMN id SET DEFAULT nextval('environments.env_environment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environments ALTER COLUMN id SET DEFAULT nextval('environments.env_environments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_hosting_account_history ALTER COLUMN id SET DEFAULT nextval('environments.env_hosting_account_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_hosting_accounts ALTER COLUMN id SET DEFAULT nextval('environments.env_hosting_accounts_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_server_history ALTER COLUMN id SET DEFAULT nextval('environments.env_server_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_servers ALTER COLUMN id SET DEFAULT nextval('environments.env_servers_id_seq'::regclass);
+
+
+--
 -- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
 --
 
@@ -43868,6 +49436,20 @@ ALTER TABLE ONLY femfl.femfl_subjects ALTER COLUMN id SET DEFAULT nextval('femfl
 --
 
 ALTER TABLE ONLY femfl.rc_femfl_cif ALTER COLUMN id SET DEFAULT nextval('femfl.rc_femfl_cif_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.related_subject_history ALTER COLUMN id SET DEFAULT nextval('femfl.related_subject_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.related_subjects ALTER COLUMN id SET DEFAULT nextval('femfl.related_subjects_id_seq'::regclass);
 
 
 --
@@ -44631,6 +50213,20 @@ ALTER TABLE ONLY ipa_ops.ipa_consent_mailing_history ALTER COLUMN id SET DEFAULT
 --
 
 ALTER TABLE ONLY ipa_ops.ipa_consent_mailings ALTER COLUMN id SET DEFAULT nextval('ipa_ops.ipa_consent_mailings_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_covid_prescreening_history ALTER COLUMN id SET DEFAULT nextval('ipa_ops.ipa_covid_prescreening_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_covid_prescreenings ALTER COLUMN id SET DEFAULT nextval('ipa_ops.ipa_covid_prescreenings_id_seq'::regclass);
 
 
 --
@@ -46303,6 +51899,13 @@ ALTER TABLE ONLY q1.rc_links ALTER COLUMN id SET DEFAULT nextval('q1.rc_links_id
 -- Name: id; Type: DEFAULT; Schema: q2; Owner: -
 --
 
+ALTER TABLE ONLY q2.q2_data ALTER COLUMN id SET DEFAULT nextval('q2.q2_data_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: q2; Owner: -
+--
+
 ALTER TABLE ONLY q2.q2_datadic ALTER COLUMN id SET DEFAULT nextval('q2.datadic_id_seq'::regclass);
 
 
@@ -47655,6 +53258,54 @@ ALTER TABLE ONLY data_requests.q2_rc_codebook
 
 
 --
+-- Name: env_environment_history_pkey; Type: CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environment_history
+    ADD CONSTRAINT env_environment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: env_environments_pkey; Type: CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environments
+    ADD CONSTRAINT env_environments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: env_hosting_account_history_pkey; Type: CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_hosting_account_history
+    ADD CONSTRAINT env_hosting_account_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: env_hosting_accounts_pkey; Type: CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_hosting_accounts
+    ADD CONSTRAINT env_hosting_accounts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: env_server_history_pkey; Type: CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_server_history
+    ADD CONSTRAINT env_server_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: env_servers_pkey; Type: CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_servers
+    ADD CONSTRAINT env_servers_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: activity_log_femfl_assignment_femfl_comm_history_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
 --
 
@@ -47732,6 +53383,22 @@ ALTER TABLE ONLY femfl.femfl_subject_history
 
 ALTER TABLE ONLY femfl.femfl_subjects
     ADD CONSTRAINT femfl_subjects_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: related_subject_history_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.related_subject_history
+    ADD CONSTRAINT related_subject_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: related_subjects_pkey; Type: CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.related_subjects
+    ADD CONSTRAINT related_subjects_pkey PRIMARY KEY (id);
 
 
 --
@@ -48612,6 +54279,22 @@ ALTER TABLE ONLY ipa_ops.ipa_consent_mailing_history
 
 ALTER TABLE ONLY ipa_ops.ipa_consent_mailings
     ADD CONSTRAINT ipa_consent_mailings_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_covid_prescreening_history_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_covid_prescreening_history
+    ADD CONSTRAINT ipa_covid_prescreening_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_covid_prescreenings_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_covid_prescreenings
+    ADD CONSTRAINT ipa_covid_prescreenings_pkey PRIMARY KEY (id);
 
 
 --
@@ -49647,6 +55330,14 @@ ALTER TABLE ONLY ml_app.manage_users
 
 
 --
+-- Name: masters_msid; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.masters
+    ADD CONSTRAINT masters_msid UNIQUE (msid);
+
+
+--
 -- Name: masters_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -50516,6 +56207,14 @@ ALTER TABLE ONLY q1.q1_datadic
 
 ALTER TABLE ONLY q2.q2_datadic
     ADD CONSTRAINT datadic_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: q2_data_pkey; Type: CONSTRAINT; Schema: q2; Owner: -
+--
+
+ALTER TABLE ONLY q2.q2_data
+    ADD CONSTRAINT q2_data_pkey PRIMARY KEY (id);
 
 
 --
@@ -52362,6 +58061,132 @@ CREATE INDEX index_data_requests_selected_attribs_on_user_id ON data_requests.da
 
 
 --
+-- Name: 304c86bf_history_master_id; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "304c86bf_history_master_id" ON environments.env_server_history USING btree (master_id);
+
+
+--
+-- Name: 304c86bf_id_idx; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "304c86bf_id_idx" ON environments.env_server_history USING btree (env_server_id);
+
+
+--
+-- Name: 304c86bf_user_idx; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "304c86bf_user_idx" ON environments.env_server_history USING btree (user_id);
+
+
+--
+-- Name: 3cea3c1a_history_master_id; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "3cea3c1a_history_master_id" ON environments.env_environment_history USING btree (master_id);
+
+
+--
+-- Name: 3cea3c1a_id_idx; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "3cea3c1a_id_idx" ON environments.env_environment_history USING btree (env_environment_id);
+
+
+--
+-- Name: 3cea3c1a_user_idx; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "3cea3c1a_user_idx" ON environments.env_environment_history USING btree (user_id);
+
+
+--
+-- Name: d2093078_id_idx; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX d2093078_id_idx ON environments.env_hosting_account_history USING btree (env_hosting_account_id);
+
+
+--
+-- Name: d2093078_ref_cb_user_idx; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX d2093078_ref_cb_user_idx ON environments.env_hosting_accounts USING btree (created_by_user_id);
+
+
+--
+-- Name: d2093078_ref_cb_user_idx_hist; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX d2093078_ref_cb_user_idx_hist ON environments.env_hosting_account_history USING btree (created_by_user_id);
+
+
+--
+-- Name: d2093078_user_idx; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX d2093078_user_idx ON environments.env_hosting_account_history USING btree (user_id);
+
+
+--
+-- Name: index_environments.env_environments_on_master_id; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "index_environments.env_environments_on_master_id" ON environments.env_environments USING btree (master_id);
+
+
+--
+-- Name: index_environments.env_environments_on_user_id; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "index_environments.env_environments_on_user_id" ON environments.env_environments USING btree (user_id);
+
+
+--
+-- Name: index_environments.env_hosting_accounts_on_user_id; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "index_environments.env_hosting_accounts_on_user_id" ON environments.env_hosting_accounts USING btree (user_id);
+
+
+--
+-- Name: index_environments.env_servers_on_master_id; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "index_environments.env_servers_on_master_id" ON environments.env_servers USING btree (master_id);
+
+
+--
+-- Name: index_environments.env_servers_on_user_id; Type: INDEX; Schema: environments; Owner: -
+--
+
+CREATE INDEX "index_environments.env_servers_on_user_id" ON environments.env_servers USING btree (user_id);
+
+
+--
+-- Name: 36795ebf_history_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "36795ebf_history_master_id" ON femfl.related_subject_history USING btree (master_id);
+
+
+--
+-- Name: 36795ebf_id_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "36795ebf_id_idx" ON femfl.related_subject_history USING btree (related_subject_id);
+
+
+--
+-- Name: 36795ebf_user_idx; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "36795ebf_user_idx" ON femfl.related_subject_history USING btree (user_id);
+
+
+--
 -- Name: activity_log_femfl_assignment_femfl_comm_id_h_idx; Type: INDEX; Schema: femfl; Owner: -
 --
 
@@ -52562,6 +58387,20 @@ CREATE INDEX "index_femfl.femfl_subjects_on_master_id" ON femfl.femfl_subjects U
 --
 
 CREATE INDEX "index_femfl.femfl_subjects_on_user_id" ON femfl.femfl_subjects USING btree (user_id);
+
+
+--
+-- Name: index_femfl.related_subjects_on_master_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.related_subjects_on_master_id" ON femfl.related_subjects USING btree (master_id);
+
+
+--
+-- Name: index_femfl.related_subjects_on_user_id; Type: INDEX; Schema: femfl; Owner: -
+--
+
+CREATE INDEX "index_femfl.related_subjects_on_user_id" ON femfl.related_subjects USING btree (user_id);
 
 
 --
@@ -53944,6 +59783,27 @@ CREATE INDEX "8d569f72_ref_cb_user_idx_hist" ON ipa_ops.activity_log_ipa_assignm
 
 
 --
+-- Name: be198d9e_history_master_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX be198d9e_history_master_id ON ipa_ops.ipa_covid_prescreening_history USING btree (master_id);
+
+
+--
+-- Name: be198d9e_id_idx; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX be198d9e_id_idx ON ipa_ops.ipa_covid_prescreening_history USING btree (ipa_covid_prescreening_id);
+
+
+--
+-- Name: be198d9e_user_idx; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX be198d9e_user_idx ON ipa_ops.ipa_covid_prescreening_history USING btree (user_id);
+
+
+--
 -- Name: be7e93a6_history_master_id; Type: INDEX; Schema: ipa_ops; Owner: -
 --
 
@@ -55187,6 +61047,20 @@ CREATE INDEX index_ipa_mednav_provider_reports_on_master_id ON ipa_ops.ipa_medna
 --
 
 CREATE INDEX index_ipa_mednav_provider_reports_on_user_id ON ipa_ops.ipa_mednav_provider_reports USING btree (user_id);
+
+
+--
+-- Name: index_ipa_ops.ipa_covid_prescreenings_on_master_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "index_ipa_ops.ipa_covid_prescreenings_on_master_id" ON ipa_ops.ipa_covid_prescreenings USING btree (master_id);
+
+
+--
+-- Name: index_ipa_ops.ipa_covid_prescreenings_on_user_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "index_ipa_ops.ipa_covid_prescreenings_on_user_id" ON ipa_ops.ipa_covid_prescreenings USING btree (user_id);
 
 
 --
@@ -61735,6 +67609,20 @@ CREATE TRIGGER activity_log_zeus_bulk_message_history_update AFTER UPDATE ON bul
 
 
 --
+-- Name: log_zeus_bulk_message_history_insert; Type: TRIGGER; Schema: bulk_msg; Owner: -
+--
+
+CREATE TRIGGER log_zeus_bulk_message_history_insert AFTER INSERT ON bulk_msg.zeus_bulk_messages FOR EACH ROW EXECUTE PROCEDURE bulk_msg.log_zeus_bulk_messages_update();
+
+
+--
+-- Name: log_zeus_bulk_message_history_update; Type: TRIGGER; Schema: bulk_msg; Owner: -
+--
+
+CREATE TRIGGER log_zeus_bulk_message_history_update AFTER UPDATE ON bulk_msg.zeus_bulk_messages FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE bulk_msg.log_zeus_bulk_messages_update();
+
+
+--
 -- Name: player_contact_phone_info_history_insert; Type: TRIGGER; Schema: bulk_msg; Owner: -
 --
 
@@ -61973,6 +67861,48 @@ CREATE TRIGGER log_data_requests_selected_attrib_history_update AFTER UPDATE ON 
 
 
 --
+-- Name: log_env_environment_history_insert; Type: TRIGGER; Schema: environments; Owner: -
+--
+
+CREATE TRIGGER log_env_environment_history_insert AFTER INSERT ON environments.env_environments FOR EACH ROW EXECUTE PROCEDURE environments.log_env_environments_update();
+
+
+--
+-- Name: log_env_environment_history_update; Type: TRIGGER; Schema: environments; Owner: -
+--
+
+CREATE TRIGGER log_env_environment_history_update AFTER UPDATE ON environments.env_environments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE environments.log_env_environments_update();
+
+
+--
+-- Name: log_env_hosting_account_history_insert; Type: TRIGGER; Schema: environments; Owner: -
+--
+
+CREATE TRIGGER log_env_hosting_account_history_insert AFTER INSERT ON environments.env_hosting_accounts FOR EACH ROW EXECUTE PROCEDURE environments.log_env_hosting_accounts_update();
+
+
+--
+-- Name: log_env_hosting_account_history_update; Type: TRIGGER; Schema: environments; Owner: -
+--
+
+CREATE TRIGGER log_env_hosting_account_history_update AFTER UPDATE ON environments.env_hosting_accounts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE environments.log_env_hosting_accounts_update();
+
+
+--
+-- Name: log_env_server_history_insert; Type: TRIGGER; Schema: environments; Owner: -
+--
+
+CREATE TRIGGER log_env_server_history_insert AFTER INSERT ON environments.env_servers FOR EACH ROW EXECUTE PROCEDURE environments.log_env_servers_update();
+
+
+--
+-- Name: log_env_server_history_update; Type: TRIGGER; Schema: environments; Owner: -
+--
+
+CREATE TRIGGER log_env_server_history_update AFTER UPDATE ON environments.env_servers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE environments.log_env_servers_update();
+
+
+--
 -- Name: femfl_subject_rc_insert; Type: TRIGGER; Schema: femfl; Owner: -
 --
 
@@ -62047,6 +67977,20 @@ CREATE TRIGGER log_femfl_subject_history_insert AFTER INSERT ON femfl.femfl_subj
 --
 
 CREATE TRIGGER log_femfl_subject_history_update AFTER UPDATE ON femfl.femfl_subjects FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE femfl.log_femfl_subjects_update();
+
+
+--
+-- Name: log_related_subject_history_insert; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_related_subject_history_insert AFTER INSERT ON femfl.related_subjects FOR EACH ROW EXECUTE PROCEDURE femfl.log_related_subjects_update();
+
+
+--
+-- Name: log_related_subject_history_update; Type: TRIGGER; Schema: femfl; Owner: -
+--
+
+CREATE TRIGGER log_related_subject_history_update AFTER UPDATE ON femfl.related_subjects FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE femfl.log_related_subjects_update();
 
 
 --
@@ -62722,20 +68666,6 @@ CREATE TRIGGER ipa_adverse_event_history_update AFTER UPDATE ON ipa_ops.ipa_adve
 
 
 --
--- Name: ipa_appointment_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER ipa_appointment_history_insert AFTER INSERT ON ipa_ops.ipa_appointments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_ipa_appointment_update();
-
-
---
--- Name: ipa_appointment_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER ipa_appointment_history_update AFTER UPDATE ON ipa_ops.ipa_appointments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ipa_appointment_update();
-
-
---
 -- Name: ipa_assignment_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
 --
 
@@ -63135,20 +69065,6 @@ CREATE TRIGGER ipa_reimbursement_req_history_update AFTER UPDATE ON ipa_ops.ipa_
 
 
 --
--- Name: ipa_screening_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER ipa_screening_history_insert AFTER INSERT ON ipa_ops.ipa_screenings FOR EACH ROW EXECUTE PROCEDURE ml_app.log_ipa_screening_update();
-
-
---
--- Name: ipa_screening_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER ipa_screening_history_update AFTER UPDATE ON ipa_ops.ipa_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ipa_screening_update();
-
-
---
 -- Name: ipa_special_consideration_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
 --
 
@@ -63272,6 +69188,34 @@ CREATE TRIGGER log_activity_log_ipa_assignment_navigation_history_insert AFTER I
 --
 
 CREATE TRIGGER log_activity_log_ipa_assignment_navigation_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_navigations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_navigations_update();
+
+
+--
+-- Name: log_ipa_appointment_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_appointment_history_insert AFTER INSERT ON ipa_ops.ipa_appointments FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_appointments_update();
+
+
+--
+-- Name: log_ipa_appointment_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_appointment_history_update AFTER UPDATE ON ipa_ops.ipa_appointments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_appointments_update();
+
+
+--
+-- Name: log_ipa_covid_prescreening_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_covid_prescreening_history_insert AFTER INSERT ON ipa_ops.ipa_covid_prescreenings FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_covid_prescreenings_update();
+
+
+--
+-- Name: log_ipa_covid_prescreening_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_covid_prescreening_history_update AFTER UPDATE ON ipa_ops.ipa_covid_prescreenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_covid_prescreenings_update();
 
 
 --
@@ -66583,6 +72527,126 @@ ALTER TABLE ONLY data_requests.data_request_messages
 
 
 --
+-- Name: fk_rails_1fb2da4985; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environment_history
+    ADD CONSTRAINT fk_rails_1fb2da4985 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_36c4a018b2; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environment_history
+    ADD CONSTRAINT fk_rails_36c4a018b2 FOREIGN KEY (env_environment_id) REFERENCES environments.env_environments(id);
+
+
+--
+-- Name: fk_rails_38c991c487; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_hosting_account_history
+    ADD CONSTRAINT fk_rails_38c991c487 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_5ca22929e0; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_server_history
+    ADD CONSTRAINT fk_rails_5ca22929e0 FOREIGN KEY (env_server_id) REFERENCES environments.env_servers(id);
+
+
+--
+-- Name: fk_rails_73ac6d2c1d; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_server_history
+    ADD CONSTRAINT fk_rails_73ac6d2c1d FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_867efc6b21; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_hosting_account_history
+    ADD CONSTRAINT fk_rails_867efc6b21 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_9c080ad476; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environments
+    ADD CONSTRAINT fk_rails_9c080ad476 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_a84f8b2039; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_hosting_accounts
+    ADD CONSTRAINT fk_rails_a84f8b2039 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_b3708f84a4; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_servers
+    ADD CONSTRAINT fk_rails_b3708f84a4 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_be1cd2eb62; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_server_history
+    ADD CONSTRAINT fk_rails_be1cd2eb62 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_d8f88289f3; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environments
+    ADD CONSTRAINT fk_rails_d8f88289f3 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_dea77071c9; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_hosting_accounts
+    ADD CONSTRAINT fk_rails_dea77071c9 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_f99d49f0ad; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_hosting_account_history
+    ADD CONSTRAINT fk_rails_f99d49f0ad FOREIGN KEY (env_hosting_account_id) REFERENCES environments.env_hosting_accounts(id);
+
+
+--
+-- Name: fk_rails_fb30afe9c0; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_servers
+    ADD CONSTRAINT fk_rails_fb30afe9c0 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_fb8c6fbc1e; Type: FK CONSTRAINT; Schema: environments; Owner: -
+--
+
+ALTER TABLE ONLY environments.env_environment_history
+    ADD CONSTRAINT fk_rails_fb8c6fbc1e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_069dad0bca; Type: FK CONSTRAINT; Schema: femfl; Owner: -
 --
 
@@ -66647,6 +72711,14 @@ ALTER TABLE ONLY femfl.femfl_assignment_history
 
 
 --
+-- Name: fk_rails_46ebd80762; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.related_subjects
+    ADD CONSTRAINT fk_rails_46ebd80762 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_4e70686814; Type: FK CONSTRAINT; Schema: femfl; Owner: -
 --
 
@@ -66679,6 +72751,14 @@ ALTER TABLE ONLY femfl.femfl_assignments
 
 
 --
+-- Name: fk_rails_61f1051e9e; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.related_subject_history
+    ADD CONSTRAINT fk_rails_61f1051e9e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_6609a61f67; Type: FK CONSTRAINT; Schema: femfl; Owner: -
 --
 
@@ -66700,6 +72780,14 @@ ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comm_history
 
 ALTER TABLE ONLY femfl.test9_number_history
     ADD CONSTRAINT fk_rails_698976c6e3 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_7167365ef0; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.related_subjects
+    ADD CONSTRAINT fk_rails_7167365ef0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -66823,6 +72911,14 @@ ALTER TABLE ONLY femfl.activity_log_femfl_assignment_femfl_comms
 
 
 --
+-- Name: fk_rails_e539b2122f; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.related_subject_history
+    ADD CONSTRAINT fk_rails_e539b2122f FOREIGN KEY (related_subject_id) REFERENCES femfl.related_subjects(id);
+
+
+--
 -- Name: fk_rails_e7bc04e4c0; Type: FK CONSTRAINT; Schema: femfl; Owner: -
 --
 
@@ -66836,6 +72932,14 @@ ALTER TABLE ONLY femfl.femfl_subject_history
 
 ALTER TABLE ONLY femfl.femfl_subject_history
     ADD CONSTRAINT fk_rails_ee53b66c4d FOREIGN KEY (femfl_subject_id) REFERENCES femfl.femfl_subjects(id);
+
+
+--
+-- Name: fk_rails_ee54a2c5bf; Type: FK CONSTRAINT; Schema: femfl; Owner: -
+--
+
+ALTER TABLE ONLY femfl.related_subject_history
+    ADD CONSTRAINT fk_rails_ee54a2c5bf FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
@@ -70287,11 +76391,27 @@ ALTER TABLE ONLY ipa_ops.mrn_numbers
 
 
 --
+-- Name: fk_rails_1e6877fc1d; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_covid_prescreening_history
+    ADD CONSTRAINT fk_rails_1e6877fc1d FOREIGN KEY (ipa_covid_prescreening_id) REFERENCES ipa_ops.ipa_covid_prescreenings(id);
+
+
+--
 -- Name: fk_rails_227b927588; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
 ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_discussion_history
     ADD CONSTRAINT fk_rails_227b927588 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_34ab825c9b; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_covid_prescreenings
+    ADD CONSTRAINT fk_rails_34ab825c9b FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -70823,6 +76943,22 @@ ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_discussions
 
 
 --
+-- Name: fk_rails_8575a9c9b0; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_covid_prescreening_history
+    ADD CONSTRAINT fk_rails_8575a9c9b0 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_96883b3420; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_covid_prescreening_history
+    ADD CONSTRAINT fk_rails_96883b3420 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_ad31933eb0; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -70844,6 +76980,14 @@ ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closing_history
 
 ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closing_history
     ADD CONSTRAINT fk_rails_d50c71622c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_d9f9849e78; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_covid_prescreenings
+    ADD CONSTRAINT fk_rails_d9f9849e78 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
@@ -73732,6 +79876,14 @@ ALTER TABLE ONLY pitt_bhi.pitt_bhi_secure_note_history
 
 ALTER TABLE ONLY pitt_bhi.activity_log_pitt_bhi_assignment_discussion_history
     ADD CONSTRAINT fk_rails_f9b5460b7d FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: q2_data_msid; Type: FK CONSTRAINT; Schema: q2; Owner: -
+--
+
+ALTER TABLE ONLY q2.q2_data
+    ADD CONSTRAINT q2_data_msid FOREIGN KEY (redcap_survey_identifier) REFERENCES ml_app.masters(msid);
 
 
 --
@@ -77122,7 +83274,7 @@ ALTER TABLE ONLY tbs.tbs_withdrawal_history
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests,femfl,pitt_bhi,q1,q2;
+SET search_path TO ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests,femfl,pitt_bhi,q1,q2,environments,ref_data;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20150602181200'),
@@ -77480,6 +83632,20 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200914101207'),
 ('20200914101758'),
 ('20200914102206'),
-('20200914102627');
+('20200914102627'),
+('20200914143300'),
+('20200914163633'),
+('20200914163936'),
+('20200917113300'),
+('20200921110750'),
+('20200921172540'),
+('20200921173450'),
+('20200921184247'),
+('20200921184426'),
+('20200921185531'),
+('20200923103106'),
+('20200929163440'),
+('20200929165700'),
+('20201001120642');
 
 

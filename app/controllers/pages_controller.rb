@@ -25,6 +25,12 @@ class PagesController < ApplicationController
     end
   end
 
+  def reference_data
+    return not_authorized unless current_admin || current_user.can?(:view_data_reference)
+
+    render 'admin/reference_data/index'
+  end
+
   private
 
   def no_action_log

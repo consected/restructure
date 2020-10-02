@@ -3,7 +3,7 @@
 class ModelReference < ActiveRecord::Base
   belongs_to :user
 
-  scope :active, -> { where 'disabled is null or disabled = false' }
+  scope :active, -> { where 'model_references.disabled is null or model_references.disabled = false' }
 
   validates :from_record_master_id, presence: true
   # Validations on from_record can not be enforced, since we want to allow reference from master only

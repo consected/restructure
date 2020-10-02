@@ -400,7 +400,9 @@ module HandlesUserBase
   end
 
   def no_user_validation
-    (creatable_without_user && !persisted?) || validating? || self.class.no_master_association
+    (creatable_without_user && !persisted?) ||
+      validating? ||
+      (self.class.no_master_association && !respond_to?(:current_user))
   end
 
   def force_write_user

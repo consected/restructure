@@ -18,7 +18,7 @@ export FILESTORE_CONFIG_SKIP=true
 
 if [ "$TEMP_ENV" == 'athena-production' ]; then
   TEMP_DBNAME=fphs
-  DB_SEARCH_PATH='ml_app'
+  DB_SEARCH_PATH='ipa_ops,ml_app'
   TEMP_HOSTNAME='fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
@@ -42,7 +42,7 @@ fi
 
 if [ "$TEMP_ENV" == 'athena-demo' ]; then
   TEMP_DBNAME=ebdb
-  DB_SEARCH_PATH='ml_app,data_requests, ipa_ops,q1,q2'
+  DB_SEARCH_PATH='ml_app,data_requests,ipa_ops,q1,q2'
   TEMP_HOSTNAME='fphs-aws-db-dev01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
@@ -90,6 +90,10 @@ FPHS_POSTGRESQL_HOSTNAME=$TEMP_HOSTNAME \
 export PGPASSWORD="$TEMP_DB_PW"
 
 psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < fphs-sql/grant_roles_access_to_ml_app.sql
+
+if [ -f "fphs-sql/grant_roles_access_to_${MIG_PATH}.sql" ]; then
+  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < fphs-sql/grant_roles_access_to_${MIG_PATH}.sql
+fi
 
 if [ "$TEMP_ENV" == 'filestore-production' ]; then
   psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < fphs-sql/grant_roles_access_to_filestore.sql

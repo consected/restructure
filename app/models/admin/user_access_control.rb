@@ -42,6 +42,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
       print
       download_files view_files_as_image view_files_as_html send_files_to_trash move_files user_file_actions
       view_dashboards
+      view_data_reference
     ]
   end
 

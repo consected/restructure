@@ -5,6 +5,11 @@ btn = !click_to_search && !@embedded_report ? "btn btn-default btn-sm pull-right
 
         <div>
             <%= form_tag report_path(@report.id), method: :get, class: 'form-formatted search_report', id: "report_query_form", data: {result_target: "##{@results_target}", preprocessor: 'reports_result'}, remote: true do %>
+            <% if @report.uses_table_subs? %>
+            <%= hidden_field_tag :table_name, params[:table_name]%>
+            <%= hidden_field_tag :schema_name, params[:schema_name]%>
+            <%= hidden_field_tag :table_fields, params[:table_fields]%>
+            <% end %>
             <% if @report.filter_previous_clause? && @report_page && @report.filtering_list%>
             <div class="row">
                 <div class="form-group">

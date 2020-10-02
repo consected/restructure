@@ -62,7 +62,7 @@ table.import-grid,
 table.table.report-table {
   th,
   thead th.tablesorter-header {
-    padding: 6px 8px 0 8px;
+    padding: 6px 8px 10px 8px;
     border: 1px solid silver;
     background-color: #eee;
     vertical-align: top;
@@ -288,4 +288,14 @@ table.table.report-table {
   pre.shrinkable-block.expandable {
     max-width: 1300px;
   }
+}
+
+.tablesorter-header-inner:hover {
+  max-height: none;
+  overflow: initial;
+}
+.tablesorter-header-inner {
+  max-height: 180px;
+  overflow: hidden;
+  margin-bottom: 10px;
 }
