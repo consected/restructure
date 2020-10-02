@@ -14,7 +14,8 @@ module ActiveRecord
 
       def schema=(new_schema)
         unless Admin::MigrationGenerator.current_search_paths.include?(new_schema)
-          raise FphsException, "Current search_path does not include the schema (#{new_schema}) for the migration"
+          raise FphsException, "Current search_path does not include the schema (#{new_schema}) for the migration. " \
+                               "#{Admin::MigrationGenerator.current_search_paths}"
         end
 
         @schema = new_schema
@@ -400,7 +401,6 @@ module ActiveRecord
           end
 
           if a.start_with?('tag_select')
-            byebug
             fopts ||= {}
             fopts[:array] = true
           end
