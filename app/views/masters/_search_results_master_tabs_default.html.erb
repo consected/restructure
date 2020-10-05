@@ -51,7 +51,7 @@
         initial_show = (default_panels.length == 0 && app_config_text(:show_activity_log_panel) == a.item_type_name) || a.item_type_name.in?(default_panels)
       %>
       <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
-        <a id="tab-activity-log-<%= a.item_type_name %>" href="/masters/{{id}}/activity_log/<%= a.item_type_name.pluralize %>"  data-panel-tab="activity_log__<%=a.item_type_name.pluralize%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="<%= a.model_data_template_name %>-main-result-template"><%= a.name.downcase %></a>
+        <a id="tab-activity-log-<%= a.item_type_name %>" href="/masters/{{id}}/activity_log/<%= a.item_type_name.pluralize %>"  data-panel-tab="activity_log__<%=a.item_type_name.pluralize%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="<%= a.model_association_name.to_s.hyphenate %>-main-result-template"><%= a.name.downcase %></a>
       </li>
       <% end %>
     <% end %>

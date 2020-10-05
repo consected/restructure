@@ -12,10 +12,10 @@
     end
   end
 
-  template_file = "_#{m.model_def_name}_search_results_template.html.erb"
+  template_file = "_#{m.implementation_model_name}_search_results_template.html.erb"
 
   if File.exist?("#{Rails.root.join 'app', 'views', 'activity_logs', template_file}")
-    template_name = "activity_logs/#{m.model_def_name}_search_results_template"
+    template_name = "activity_logs/#{m.implementation_model_name}_search_results_template"
     %>
     <%= render partial: template_name, locals: {
           caption: m.name,

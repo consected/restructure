@@ -158,7 +158,7 @@ module SetupHelper
                   'follow_up_when, notes, protocol_id, set_related_player_contact_rank',
       blank_log_field_list: 'select_who, called_when, select_next_step, follow_up_when, notes, protocol_id'
     )
-    unless res.is_active_model_configuration?
+    unless res.active_model_configuration?
       # If this was a new item, set an admin. Also set disabled nil, since this forces regeneration of the model
       res.update!(current_admin: auto_admin) unless res.admin
 

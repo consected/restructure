@@ -101,7 +101,7 @@ class Classification::GeneralSelection < ActiveRecord::Base
 
     implementation_classes = get_implementation_classes
     # Check the definition is ready to use and prepare it for use
-    implementation_classes.select! { |ic| ic.definition.ready? }
+    implementation_classes.select! { |ic| ic.definition.ready_to_generate? }
 
     implementation_classes = implementation_classes.select { |ic| ic.new.item_type == item_type } if item_type
     implementation_classes.each do |itc|

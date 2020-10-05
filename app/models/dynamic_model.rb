@@ -57,9 +57,9 @@ class DynamicModel < ActiveRecord::Base
     res = (fl || [])
     res.uniq
 
-    if res.empty? && model_def
+    if res.empty? && model_class
       begin
-        res = model_def.attribute_names - StandardFields
+        res = model_class.attribute_names - StandardFields
       rescue StandardError => e
         puts "Failed to get all_implementation_fields for reason: #{e.inspect} \n#{e.backtrace.join("\n")}"
         raise e unless ignore_errors
@@ -302,7 +302,7 @@ class DynamicModel < ActiveRecord::Base
     do_create_or_update = if mode == 'create'
                             'create_dynamic_model_tables'
                           else
-                            migration_update_fields
+                            migration_generator.migration_update_fields
                           end
 
     <<~CONTENT
@@ -311,7 +311,7 @@ class DynamicModel < ActiveRecord::Base
         include ActiveRecord::Migration::AppGenerator
 
         def change
-          #{migration_set_attribs}
+          #{migration_generator.migration_set_attribs}
 
           #{do_create_or_update}
           create_dynamic_model_trigger

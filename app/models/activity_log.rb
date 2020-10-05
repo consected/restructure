@@ -337,7 +337,7 @@ class ActivityLog < ActiveRecord::Base
       Rails.application.routes.draw do
         resources :masters, only: %i[show index new create] do
           m.each do |pg|
-            mn = pg.model_def_name.to_s.pluralize.to_sym
+            mn = pg.implementation_model_name.pluralize.to_sym
             Rails.logger.info "Setting up routes for #{mn}"
 
             ic = pg.item_type.pluralize
@@ -358,9 +358,9 @@ class ActivityLog < ActiveRecord::Base
             patch "activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
             # used by item flags to generate appropriate URLs
             begin
-              get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show", as: "activity_log_#{pg.model_def_name}"
+              get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show", as: "activity_log_#{pg.implementation_model_name}"
             rescue StandardError
-              Rails.logger.warn "Skipped creating route activity_log__#{mn}/:id since activity_log_#{pg.model_def_name} already exists?"
+              Rails.logger.warn "Skipped creating route activity_log__#{mn}/:id since activity_log_#{pg.implementation_model_name} already exists?"
             end
           end
         end
@@ -538,7 +538,7 @@ class ActivityLog < ActiveRecord::Base
     do_create_or_update = if mode == 'create'
                             'create_activity_log_tables'
                           else
-                            migration_update_fields
+                            migration_generator.migration_update_fields
                           end
 
     <<~CONTENT
@@ -548,7 +548,7 @@ class ActivityLog < ActiveRecord::Base
 
         def change
           self.belongs_to_model = '#{item_type}'
-          #{migration_set_attribs}
+          #{migration_generator.migration_set_attribs}
 
           #{do_create_or_update}
           create_activity_log_trigger

@@ -271,7 +271,7 @@ class ExternalIdentifier < ActiveRecord::Base
     do_create_or_update = if mode == 'create'
                             "create_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
                           else
-                            migration_update_fields
+                            migration_generator.migration_update_fields
                           end
 
     <<~CONTENT
@@ -280,7 +280,7 @@ class ExternalIdentifier < ActiveRecord::Base
         include ActiveRecord::Migration::AppGenerator
 
         def change
-          #{migration_set_attribs}
+          #{migration_generator.migration_set_attribs}
 
           #{do_create_or_update}
           create_external_identifier_trigger :#{external_id_attribute}

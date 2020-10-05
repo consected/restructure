@@ -155,7 +155,7 @@
     implementation_classes = ActivityLog.implementation_classes
 
     # Check the definition is ready to use and prepare it for use
-    implementation_classes.reject! {|ic| !ic.definition.ready?}
+    implementation_classes.reject! {|ic| !ic.definition.ready_to_generate?}
     implementation_classes.each do |itc|
 
       next unless itc.allows_user_access_to?(current_user, :access)
@@ -175,10 +175,10 @@
 
   <%
   implementation_classes = DynamicModel.implementation_classes
-  implementation_classes.reject! {|ic| !ic.definition.ready?}
+  implementation_classes.reject! {|ic| !ic.definition.ready_to_generate?}
   cnames = []
   implementation_classes.each do |itc|
-    full_name = "dynamic_model__#{itc.definition.model_def_name.to_s}"
+    full_name = "dynamic_model__#{itc.definition.implementation_model_name}"
     if current_user.has_access_to?(:access, :table, full_name.pluralize)
       ito = itc.new
       cnames.push("general_selections-item_type+#{ito.item_type}");
@@ -241,7 +241,7 @@
 
       <% ActivityLog.enabled.each do |a| %>
         <% if view?[a.full_item_types_name.to_sym] %>
-        <div id="<%= a.full_item_types_name.hyphenate %>-{{id}}" class="activity-logs-generic-block <%= a.full_item_types_name.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= a.full_item_types_name %>" data-template="<%= a.model_data_template_name %>-main-result-template"  >
+        <div id="<%= a.full_item_types_name.hyphenate %>-{{id}}" class="activity-logs-generic-block <%= a.full_item_types_name.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= a.full_item_types_name %>" data-template="<%= a.model_association_name.to_s.hyphenate %>-main-result-template"  >
             <div id="<%= a.full_item_types_name.hyphenate %>-inner-{{id}}" class="activity-logs-inner-block"></div>
         </div>
         <% end %>

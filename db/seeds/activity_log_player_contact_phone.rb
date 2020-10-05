@@ -14,7 +14,7 @@ module Seeds
                                               field_list: 'data, select_call_direction, select_who, called_when, select_result, select_next_step, follow_up_when, notes, protocol_id, set_related_player_contact_rank',
                                               blank_log_field_list: 'select_who, called_when, select_next_step, follow_up_when, notes, protocol_id')
 
-      unless res.is_active_model_configuration?
+      unless res.active_model_configuration?
         Trackers.setup
         GeneralSelections.setup
 

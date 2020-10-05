@@ -6,14 +6,12 @@ module DynamicModelDefHandler
   included do
     attr_accessor :table_comments
 
-    after_save :generate_model, if: -> { ready? }
+    after_save :generate_model, if: -> { ready_to_generate? }
     after_save :check_implementation_class
     after_save :force_option_config_parse
     after_save :generate_migration, if: -> { !disabled }
     after_save :run_migration, if: -> { @do_migration }
 
-    # Reload the routes based on specific controller actions, to allow app type uploads to work faster
-    # after_save :reload_routes
     after_save :add_master_association, if: -> { @regenerate }
     after_save :add_user_access_controls, if: -> { @regenerate }
 
@@ -27,32 +25,36 @@ module DynamicModelDefHandler
       nil
     end
 
-    # This is intentionally a class variable, to capture the model names for all dynamic models
+    # A list of model names for models that have been generated and are ready to be used
     def model_names
       @model_names ||= []
     end
 
-    def model_names=(m)
-      @model_names = m
-    end
-
+    # A list of model names for models that have been generated and are ready to be used
     def model_name_strings
       model_names.map(&:to_s)
     end
 
+    # A list of models that have been generated and are ready to be used
     def models
       @models ||= {}
     end
 
+    # If necessary, ensure other dynamic implementations have been loaded before we attempt to create this one
     def preload
       nil
     end
 
+    # Get the list of model defintions based on them being available in
+    # the active app types.
+    # This means that we drop out configurations for app types that are disabled
+    # or are not included in the OnlyLoadAppTypes setting.
+    # This is typically used to improve load times and ensure we only generate
+    # templates for models that will actually be used.
     def active_model_configurations
       olat = Admin::AppType.active_app_types
 
       if olat && !olat.empty?
-        dma = []
         qs = []
         olat.each do |app_type|
           # Compare against string class names, to avoid autoload errors
@@ -72,16 +74,20 @@ module DynamicModelDefHandler
       dma
     end
 
+    #
+    # Run through the configurations to implement them and make them available for use
+    # Since ActivityLog types actually preload DynamicModel and ExternalIdentifier types
+    # typically this is only called as ``::ActivityLog.define_models`
     def define_models
       preload
 
       begin
         dma = active_model_configurations
 
-        logger.info "Generating models #{name} #{active.length}"
+        logger.info "Generating models #{name} #{dma.length}"
 
         dma.each do |dm|
-          res = dm.generate_model
+          dm.generate_model
           # Force the admin for cases that this is run outside of the admin console
           # It is expected that this is mostly when originally seeding the database
           dm.current_admin ||= dm.admin
@@ -90,7 +96,6 @@ module DynamicModelDefHandler
         end
       rescue Exception => e
         Rails.logger.warn "Failed to generate models. Hopefully this is only during a migration. #{e.inspect}"
-        puts "Failed to generate models. Hopefully this is only during a migration. #{e.inspect}"
       end
     end
 
@@ -104,7 +109,7 @@ module DynamicModelDefHandler
     def enable_active_configurations
       # to ensure that the db migrations can run, check for the existence of the admin table
       # before attempting to use it. Otherwise Rake tasks fail.
-      if ActiveRecord::Base.connection.table_exists? table_name
+      if Admin::MigrationGenerator.table_exists? table_name
         active_model_configurations.each do |dm|
           klass = if dm.is_a? ExternalIdentifier
                     Object
@@ -112,7 +117,7 @@ module DynamicModelDefHandler
                     dm.class.name.constantize
                   end
 
-          if !dm.disabled && dm.ready? && dm.implementation_class_defined?(klass, fail_without_exception: true)
+          if dm.ready_to_generate? && dm.implementation_class_defined?(klass, fail_without_exception: true)
             dm.add_master_association
           else
             puts "Failed to enable #{dm} #{dm.id}"
@@ -125,10 +130,14 @@ module DynamicModelDefHandler
     end
   end
 
-  def is_active_model_configuration?
+  def active_model_configuration?
     self.class.active_model_configurations.include? self
   end
 
+  #
+  # Simple test to see if the controller associated with the implementation model is defined
+  # @param [Module | Class] parent_class is the parent for the controller, to handle namespacing issues
+  # @return [Boolean]
   def implementation_controller_defined?(parent_class = Module)
     return false unless full_implementation_controller_name
 
@@ -140,6 +149,14 @@ module DynamicModelDefHandler
     false
   end
 
+  # Is the implementation class for this configuration defined so that it
+  # can be instantiated?
+  # @param [Module | Class] parent_class
+  # @param [Hash] opt options
+  # @option opt [String] :class_name is an alternative class name within the
+  #   parent class to test. This can be used to avoid namespacing issues
+  # @option opt [Boolean] :fail_without_exception if true we return a Boolean rather than raising an exception
+  # @return [Boolean] true if the class is defined, and false or a raised exception depending on the options
   def implementation_class_defined?(parent_class = Module, opt = {})
     icn = opt[:class_name] || full_implementation_class_name
     return false unless icn
@@ -156,16 +173,16 @@ module DynamicModelDefHandler
       klass.new
     rescue Exception => e
       err = "Failed to instantiate the class #{icn} in parent #{parent_class}: #{e}"
-      if opt[:fail_without_exception]
-        # By default, return false if an error occurred attempting the initialization.
-        # In certain cases (for example, checking if a class exists so it can be removed), returning true if the
-        # class is defined regardless of whether it can be initialized makes most sense. Provide an option to support this.
-        opt[:fail_without_exception_newable_result]
-      else
-        raise FphsException, err
-      end
+      logger.warn err
+      raise FphsException, err unless opt[:fail_without_exception]
+
+      # By default, return false if an error occurred attempting the initialization.
+      # In certain cases (for example, checking if a class exists so it can be removed), returning true if the
+      # class is defined regardless of whether it can be initialized makes most sense. Provide an option to support this.
+      opt[:fail_without_exception_newable_result]
     end
-  rescue NameError
+  rescue NameError => e
+    logger.warn e
     false
   end
 
@@ -178,41 +195,39 @@ module DynamicModelDefHandler
     got_class if got_class&.to_s&.start_with?(self.class.implementation_prefix)
   end
 
-  def ready?
+  # Is the definition ready for a class to be defined?
+  # Is it enabled and does it have an underlying table?
+  def ready_to_generate?
     !disabled && table_ready?
   end
 
+  #
+  # Check if the underlying database table exists
+  # @return [boolean]
   def table_ready?
-    Admin::MigrationGenerator.tables_and_views
-                             .select { |t| t['table_name'] == table_name }
-                             .present?
+    Admin::MigrationGenerator.table_exists?(table_name)
   rescue StandardError => e
-    puts e
     @extra_error = e
     false
   end
 
   # This needs to be overridden in each provider to allow consistency of calculating model names for implementations
+  # Non-namespaced model definition name
   def implementation_model_name
     nil
   end
 
+  # Non-namespaced model definition name
   def model_class_name
     implementation_model_name.ns_camelize
   end
 
-  def model_def_name
-    implementation_model_name.to_sym
+  # Return the model class for this definition
+  def model_class
+    self.class.models[implementation_model_name]
   end
 
-  def model_def
-    self.class.models[model_def_name]
-  end
-
-  def model_data_template_name
-    model_association_name.to_s.hyphenate
-  end
-
+  # The name of the association within the Master class
   def model_association_name
     full_implementation_class_name.pluralize.ns_underscore.to_sym
   end
@@ -231,48 +246,60 @@ module DynamicModelDefHandler
     full_item_type_name.pluralize
   end
 
+  # Absolute namespaced class name for the model
   def full_implementation_class_name
     full_item_type_name.ns_camelize
   end
 
+  # Absolute namespaced class name for the matching controller
   def full_implementation_controller_name
     "#{model_class_name.pluralize}Controller"
   end
 
+  # The model class that can be instantiated
   def implementation_class
     full_implementation_class_name.ns_constantize
   end
 
+  # Allow definitions to not be associated with a master record,
+  # but only if we allow a foreign key name to be specified and it isn't
+  # In reality, only DynamicModel classes can do this
   def implementation_no_master_association
     defined?(foreign_key_name) && foreign_key_name.blank?
   end
 
+  # Tracker events are required for each dynamic class. It is the
+  # responsibility of the individual definition classes to handle this
   def update_tracker_events
     raise 'DynamicModel configuration implementation must define update_tracker_events'
   end
 
+  # After a regeneration, certain other cleanups may be required
   def other_regenerate_actions
     Rails.logger.info 'Refreshing item types'
     Classification::GeneralSelection.item_types refresh: true
   end
 
+  # A list of model names and definitions is stored in the class so we can
+  # quickly see what dynamic classes are available elsewhere
+  # Add an item to this list
   def add_model_to_list(m)
-    tn = model_def_name
+    tn = implementation_model_name
     self.class.models[tn] = m
     logger.info "Added new model #{tn}"
     self.class.model_names << tn unless self.class.model_names.include? tn
   end
 
+  # Remove an item from the list of available dynamic classes
   def remove_model_from_list
-    tn = model_def_name
+    tn = implementation_model_name
     logger.info "Removed disabled model #{tn}"
     self.class.models.delete(tn)
-    self.class.model_names -= [tn]
+    self.class.model_names.delete(tn)
   end
 
   def remove_assoc_class(in_class_name)
     # Dump the old association
-
     assoc_ext_name = "#{in_class_name}#{model_class_name.pluralize}AssociationExtension"
     Object.send(:remove_const, assoc_ext_name) if implementation_class_defined?(Object)
   rescue StandardError => e
@@ -280,55 +307,64 @@ module DynamicModelDefHandler
     # puts "Failed to remove #{assoc_ext_name} : #{e}"
   end
 
-  def reload_routes
-    self.class.routes_reload
-  end
-
+  #
+  # Create a user access control for the item with a template role, to
+  # ensure that it is correctly exported from an app type, even
+  # if no real end users or roles have been applied to it
+  # The underlying call will update an existing user access control if it
+  # already exists.
+  # This is called by an after_save trigger, and may also be used in specs directly
+  # when the force named argument is typically used
+  # @param [boolean] force the action to happen even
+  #    if the item is not ready or is disabled
+  # @param [Admin::AppType] app_type to add the user access control to
+  # @return [Admin::UserAccessControl] the created or updated user access control
   def add_user_access_controls(force: false, app_type: nil)
-    if !persisted? || saved_change_to_disabled? || force
-      begin
-        if ready? || disabled? || force
-          app_type ||= admin.matching_user_app_type
-          # Admin::UserAccessControl.create_control_for_all_apps admin, :table, model_association_name, disabled: disabled
-          Admin::UserAccessControl.create_template_control admin, app_type, :table, model_association_name, disabled: disabled
-        end
-      rescue StandardError => e
-        raise FphsException, "A failure occurred creating user access control for all apps with: #{model_association_name}.\n#{e}"
+    return unless !persisted? || saved_change_to_disabled? || force
+
+    begin
+      if ready_to_generate? || disabled? || force
+        app_type ||= admin.matching_user_app_type
+        Admin::UserAccessControl.create_template_control admin,
+                                                         app_type,
+                                                         :table,
+                                                         model_association_name,
+                                                         disabled: disabled
       end
+    rescue StandardError => e
+      raise FphsException, "A failure occurred creating user access control for app with: #{model_association_name}." \
+                           "\n#{e}"
     end
   end
 
+  #
+  # Get the field_list (or an alternative attribute string) as a
+  # cleaned up array of strings
+  # The string is a space or comma separated list
+  # @param [String] for_attrib string from an alternative attribute
+  # @return [Array] strings representing the list of fields
   def field_list_array(for_attrib: nil)
     for_attrib ||= field_list
     for_attrib.split(/[,\s]+/).map(&:strip).compact if for_attrib
   end
 
+  #
+  # Check if the implementation class has been correctly defined
+  # This checks that the underlying database table has been created.
+  # If the table is not available, (and we are in the development environment)
+  # a migration for the appropriate schema will be written (and run)
+  # @return [<Type>] <description>
   def check_implementation_class
     return unless !disabled && errors.empty?
 
-    unless ready?
+    # Check the table exists. If not, generate a migration and create it if in development
+    unless ready_to_generate? || !Rails.env.development?
       gs = generator_script(migration_version)
-      fn = migration_generator.write_db_migration(gs, table_name, migration_version)
+      migration_generator.write_db_migration(gs, table_name, migration_version)
       run_migration
     end
 
-    # unless ready?
-
-    #   err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created."
-    #   if Rails.env.development?
-    #     err += "
-    #     Wrote migration to: #{fn}
-    #     Review it, then run migration with:
-    #     MIG_PATH=#{db_migration_schema} FPHS_LOAD_APP_TYPES= bundle exec rails db:migrate
-
-    #     IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
-    #     "
-    #   end
-
-    #   err += "(extra error info: #{@extra_error})" if @extra_error
-    #   raise FphsException, err
-    # end
-
+    # Check the implementation class is actually defined and can be instantiated
     begin
       res = implementation_class_defined?
     rescue StandardError => e
@@ -338,8 +374,11 @@ module DynamicModelDefHandler
       # Force exit of callbacks
       raise FphsException, err
     end
+
+    # For some reason the underlying table exists but the class doesn't. Inform the admin
     unless res
-      err = "The implementation of #{model_class_name} was not completed although the DB table #{table_name} has been created."
+      err = "The implementation of #{model_class_name} was not completed although " \
+            "the DB table #{table_name} has been created."
       logger.warn err
       errors.add :name, err
       # Force exit of callbacks
@@ -347,118 +386,26 @@ module DynamicModelDefHandler
     end
   end
 
+  # If we have forced a regeneration of classes, for example if a new DB table
+  # has been created, restart the server.
+  # This is called from an after_commit trigger
   def restart_server
     AppControl.restart_server
   end
 
-  # Standard columns are used by migrations
-  def standard_columns
-    pset = %w[id created_at updated_at contactid user_id master_id
-              extra_log_type admin_id]
-    pset += ["#{table_name.singularize}_table_id", "#{table_name.singularize}_id"]
-    pset
-  end
-
-  def table_comment_changes
-    begin
-      comment = ActiveRecord::Base.connection.table_comment(table_name)
-    rescue StandardError
-      nil
-    end
-    new_comment = table_comments[:table]
-    return unless comment != new_comment
-
-    new_comment
-  end
-
-  def fields_comments_changes
-    begin
-      cols = ActiveRecord::Base.connection.columns(table_name)
-    rescue StandardError
-      return
-    end
-
-    fields_comments = table_comments[:fields] || {}
-    new_comments = {}
-
-    fields_comments.each do |k, v|
-      col = cols.select { |c| c.name == k.to_s }.first
-      new_comments[k] = v if col && col.comment != v
-    end
-
-    new_comments
-  end
-
-  def field_changes
-    begin
-      cols = ActiveRecord::Base.connection.columns(table_name)
-      old_colnames = cols.map(&:name) - standard_columns
-    rescue StandardError
-      return
-    end
-
-    fields = migration_fields_array
-    new_colnames = fields.map(&:to_s) - standard_columns
-
-    added = new_colnames - old_colnames
-    removed = old_colnames - new_colnames
-    if respond_to? :item_type
-      belongs_to_model_id = "#{item_type}_id"
-      removed -= [belongs_to_model_id]
-    end
-
-    [added, removed, old_colnames]
-  end
-
-  def migration_update_fields
-    added, removed, prev_fields = field_changes
-
-    if table_comments
-      new_table_comment = table_comment_changes
-      new_fields_comments = fields_comments_changes
-    end
-
-    return unless added.present? || removed.present? || new_table_comment || new_fields_comments.present?
-
-    new_fields_comments ||= {}
-
-    <<~ARCONTENT
-      self.prev_fields = %i[#{prev_fields.join(' ')}]
-          \# added: #{added}
-          \# removed: #{removed}
-          #{new_table_comment ? "\# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
-          #{new_fields_comments.present? ? "\# new fields comments: #{new_fields_comments.keys}" : ''}
-          update_fields
-    ARCONTENT
-  end
-
-  def migration_fields_array
-    fields = all_implementation_fields(ignore_errors: false)
-    fields.reject { |f| f.index(/^embedded_report_|^placeholder_/) }
-  end
-
-  def migration_set_attribs
-    table_comments = self.table_comments || {}
-    <<~SETATRRIBS
-      self.schema = '#{db_migration_schema}'
-          self.table_name = '#{table_name}'
-          self.fields = %i[#{migration_fields_array.join(' ')}]
-          self.table_comment = '#{table_comments[:table]}'
-          self.fields_comments = #{(table_comments[:fields] || {}).to_json}
-          self.no_master_association = #{implementation_no_master_association}
-    SETATRRIBS
-  end
-
   def generate_migration
-    return unless ready?
+    return unless ready_to_generate?
 
-    return unless migration_update_fields
+    return unless migration_generator.migration_update_fields
 
     gs = generator_script(migration_version, 'update')
     fn = migration_generator.write_db_migration gs, table_name, migration_version, mode: 'update'
     @do_migration = fn
   end
 
+  # Going forward we want the schema to be set explicitly.
+  # For now, attempt to guess what it should be if it is not set
+  # in the app type configuration
   def db_migration_schema
     current_user_app_type = current_admin.matching_user_app_type
     dsn = current_user_app_type&.default_schema_name
@@ -477,6 +424,13 @@ module DynamicModelDefHandler
   end
 
   def migration_generator
-    @migration_generator ||= Admin::MigrationGenerator.new(db_migration_schema)
+    @migration_generator ||=
+      Admin::MigrationGenerator.new(
+        db_migration_schema,
+        table_name,
+        all_implementation_fields(ignore_errors: false),
+        table_comments,
+        implementation_no_master_association
+      )
   end
 end

@@ -228,7 +228,7 @@ class Admin::AppType < Admin::AdminBase
 
         if i
           el = i
-          new_vals['disabled'] = true if i.respond_to?(:ready?) && !i.ready?
+          new_vals['disabled'] = true if i.respond_to?(:ready_to_generate?) && !i.ready_to_generate?
           el = nil unless el.changed?
           i.update! new_vals
         else

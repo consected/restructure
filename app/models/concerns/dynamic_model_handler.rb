@@ -88,6 +88,25 @@ module DynamicModelHandler
     end
   end
 
+  def definition_default_options
+    self.class.definition.default_options
+  end
+
+  # Use the view_options.data_attribute configuration option if it has been set,
+  # otherwise use the data attribute from the table (if it has been set)
+  def data
+    dopt = definition_default_options
+    return unless dopt&.view_options
+
+    da = dopt.view_options[:data_attribute]
+
+    if da
+      self.class.format_data_attribute da, self
+    elsif attribute_names.include?('data')
+      attributes['data']
+    end
+  end
+
   def model_data_type
     :dynamic_model
   end
