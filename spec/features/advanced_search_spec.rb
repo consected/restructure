@@ -67,7 +67,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     # wait a while!
     sleep 1
     expect(page).to have_css '#master_results_block', text: ''
-    expect(page).to have_css '#search_count', text: /[0-9]+/, wait: 10
+    expect(page).to have_css '#search_count', text: /[0-9]+/
 
     page.all(:css, '.master-expander .player-info-header .player-names').each do |el|
       expect(el.text).to match(/#{@full_player_info.first_name.capitalize}.*/)
@@ -114,7 +114,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
 
     have_css '.master-expander'
 
-    expect(page).to have_css '#search_count', text: /[0-9]+/, wait: 10
+    expect(page).to have_css '#search_count', text: /[0-9]+/
 
     me = page.all(:css, '.master-expander')
 

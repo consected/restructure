@@ -89,7 +89,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     end
 
     # Wait for the new tracker form to show
-    expect(page).to have_css('#new_tracker'), wait: 10
+    expect(page).to have_css('#new_tracker')
   end
 
   it 'should create a new tracker item' do
