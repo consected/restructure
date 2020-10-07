@@ -233,11 +233,6 @@ module ExternalIdHandler
     end
   end
 
-  # resource_name used by user access controls
-  def resource_name
-    self.class.definition.resource_name
-  end
-
   def model_data_type
     :external_identifier
   end
@@ -282,7 +277,13 @@ module ExternalIdHandler
     send("#{self.class.external_id_attribute}_changed?")
   end
 
-  def check_status
+  # Override standard operation for previous operation flags
+  # External identifiers can exists as records that are not considered fully created
+  # until they have been assigned to a master record. The standard mechanism that checks for
+  # a created record does not achieve the desired effect.
+  # was_created can be true even if the actual record was not just created:
+  # If it was just assigned a master_id, then was_created is set to true
+  def set_previous_action_flags
     @was_created = saved_change_to_id? || just_assigned ? 'created' : false
     @was_updated = saved_change_to_updated_at? ? 'updated' : false
   end

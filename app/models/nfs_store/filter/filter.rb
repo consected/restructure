@@ -51,7 +51,7 @@ module NfsStore
       # @return [Array] list of full activity_log__type and container resource names
       def self.resource_names
         # Get only the names that have an extra log type config with a reference to a container
-        names = ActivityLog.extra_log_type_resource_names { |e| e&.references && e.references[:nfs_store__manage__container] }
+        names = ActivityLog.all_option_configs_resource_names { |e| e&.references && e.references[:nfs_store__manage__container] }
         (names + [NfsStore::Manage::Container.resource_name]).uniq
       end
 
@@ -134,7 +134,7 @@ module NfsStore
       def self.generate_filters_for(activity_log_resource_name, user: nil)
         if activity_log_resource_name.start_with? 'activity_log__'
           res_class = ActivityLog.activity_log_class_from_type(activity_log_resource_name)
-          extra_log_types = res_class.definition.extra_log_type_configs.map(&:name)
+          extra_log_types = res_class.definition.option_configs_names
         else
           raise FphsException, 'Generate Filters requires a resource name starting with activity_log'
         end

@@ -139,14 +139,14 @@ EOF
 
     @aldef.current_admin = @admin
     @aldef.save!
-    @aldef.extra_log_type_configs(force: true)
-    ActivityLog::PlayerContactPhone.definition.extra_log_type_configs(force: true)
+    @aldef.option_configs(force: true)
+    ActivityLog::PlayerContactPhone.definition.option_configs(force: true)
 
     finalize_al_setup
   end
 
   def finalize_al_setup
-    @resource_name = ActivityLog::PlayerContactPhone.extra_log_type_config_for(:step_1).resource_name
+    @resource_name = ActivityLog::PlayerContactPhone.definition.option_type_config_for(:step_1).resource_name
 
     setup_access 'activity_log__player_contact_phones', user: @user
     setup_access @resource_name, resource_type: :activity_log_type, user: @user
@@ -167,7 +167,7 @@ EOF
     mrs.update_all from_record_master_id: @trash_master.id, from_record_id: nil
 
     setup_container_and_al
-    # names = ActivityLog::PlayerContactPhone.definition.extra_log_type_configs.map(&:name)
+    # names = ActivityLog::PlayerContactPhone.definition.option_configs.map(&:name)
     # expect(names).to include :step_1
 
     # al = ActivityLog::PlayerContactPhone.new(
@@ -196,7 +196,7 @@ EOF
   end
 
   def setup_container_and_al
-    names = ActivityLog::PlayerContactPhone.definition.extra_log_type_configs.map(&:name)
+    names = ActivityLog::PlayerContactPhone.definition.option_configs.map(&:name)
     expect(names).to include :step_1
 
     # unless @activity_log&.extra_log_type == :step_1 &&

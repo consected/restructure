@@ -93,7 +93,7 @@ class ModelReference < ActiveRecord::Base
   #           :to_record_label=>"Tech Contacts", :no_master_association=>false}
   def find_config
     begin
-      mr = from_record&.extra_log_type_config&.references
+      mr = from_record&.option_type_config&.references
 
       if mr && to_record
         m = mr[to_record_result_key.to_sym]
@@ -393,8 +393,8 @@ class ModelReference < ActiveRecord::Base
 
     c = find_config || {}
     if from_record && c.is_a?(Hash)
-      pd = from_record.extra_log_type_config.calc_reference_prevent_disable_if c, to_record
-      ane = from_record.extra_log_type_config.calc_reference_allow_disable_if_not_editable_if c, to_record
+      pd = from_record.option_type_config.calc_reference_prevent_disable_if c, to_record
+      ane = from_record.option_type_config.calc_reference_allow_disable_if_not_editable_if c, to_record
     else
       pd = false
       ane = false

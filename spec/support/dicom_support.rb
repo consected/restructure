@@ -154,8 +154,8 @@ EOF
 
     @aldef.current_admin = @admin
     @aldef.save!
-    @aldef.extra_log_type_configs(force: true)
-    ActivityLog::PlayerContactPhone.definition.extra_log_type_configs(force: true)
+    @aldef.option_configs(force: true)
+    ActivityLog::PlayerContactPhone.definition.option_configs(force: true)
 
     finalize_al_setup
   end

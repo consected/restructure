@@ -5,11 +5,11 @@
 
   shown_embedded = false
 
-  if !embedded && @extra_log_type_config && @extra_log_type_config.references
+  if !embedded && @option_type_config && @option_type_config.references
     # Get the creatable references and work out what we can show based on the items that can be created
     # only_creatables = object_instance.creatable_model_references only_creatables: true
     ocmr = object_instance.creatable_model_references
-    creatable_references = @extra_log_type_config.references.select {|ref_key| ocmr[ref_key] && ocmr[ref_key].length > 0 }
+    creatable_references = @option_type_config.references.select {|ref_key| ocmr[ref_key] && ocmr[ref_key].length > 0 }
     creatable_count = creatable_references.length
 
     if action_name.in?( ['new', 'edit']) && !@embedded_item
@@ -80,7 +80,7 @@
           <div id="<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id %>-<%= model_reference.to_record_id%>" class="model-reference-result" data-result-target-for-child="#<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id%>-<%= model_reference.to_record_id %>, #<%= model_reference.to_record_type_us.ns_hyphenate%>-<%= model_reference.to_record_master_id%>-<%= object_instance.id%>-<%= model_reference.to_record_id%>"  data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" data-subscription="<%= model_reference.to_record_short_type_us.ns_hyphenate%>-edit-form-<%= model_reference.to_record_master_id%>-<%= model_reference.to_record_id%>" data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" data-form-container="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" >
             <%
               if @embedded_item && !shown_embedded
-                r = @extra_log_type_config.model_reference_config(model_reference)
+                r = @option_type_config.model_reference_config(model_reference)
                 view_as_edit = r && r.first && r.first.last[:view_as] && r.first.last[:view_as][:edit]
                 dis = view_as_edit  == 'readonly'
                 no_show = (view_as_edit == 'hide') && action_name == 'edit'

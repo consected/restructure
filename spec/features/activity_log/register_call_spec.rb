@@ -30,7 +30,7 @@ describe 'Register an incoming call', driver: :app_firefox_driver do
     setup_access :player_contacts, user: @user
 
     expect(@user.has_access_to?(:access, :table, :player_contacts)).to be_truthy
-    expect(ActivityLog.model_names).to include :player_contact_phone
+    expect(ActivityLog.model_names).to include 'player_contact_phone'
   end
 
   before :example do

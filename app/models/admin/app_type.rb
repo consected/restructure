@@ -362,7 +362,7 @@ class Admin::AppType < Admin::AdminBase
   def associated_message_templates
     ms = []
     associated_activity_logs.all.each do |a|
-      a.extra_log_type_configs.each do |c|
+      a.option_configs.each do |c|
         c.dialog_before.each do |_d, v|
           res = Admin::MessageTemplate.active.where(name: v[:name], message_type: 'dialog', template_type: 'content').first
           ms << res

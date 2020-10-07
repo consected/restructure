@@ -45,6 +45,24 @@ module DynamicModelDefHandler
       nil
     end
 
+    #
+    # Class that implements options for this dynamic type.
+    # Inherits from ExtraOptions.
+    # Must be overridden by specific dynamic type classes
+    # @return [ExtraOptions]
+    def options_provider
+      nil
+    end
+
+    #
+    # Should the options provider allow empty / nil options to be defined.
+    # If true, it will set up an empty configuration instance to use by default
+    # Otherwise, the option config type will return nil if not defined
+    # @return [Boolean]
+    def allow_empty_options
+      true
+    end
+
     # Get the list of model defintions based on them being available in
     # the active app types.
     # This means that we drop out configurations for app types that are disabled
@@ -106,9 +124,16 @@ module DynamicModelDefHandler
       Rails.application.routes_reloader.reload!
     end
 
+    # Enable active configurations for the dynamic type
+    # This checks that underlying tables are available, the implementation
+    # class is defined, and then it adds associations to Master
+    # Both log an put any errors to stdout, since this may run in a migration
+    # and a log alone won't be visible to the end user
+    # To ensure that the db migrations can run,
+    # check for the existence of the appropriate admin table
+    # before attempting to do anything. Otherwise Rake tasks fail and
+    # the admin table can't be generated, preventing setup of the app.
     def enable_active_configurations
-      # to ensure that the db migrations can run, check for the existence of the admin table
-      # before attempting to use it. Otherwise Rake tasks fail.
       if Admin::MigrationGenerator.table_exists? table_name
         active_model_configurations.each do |dm|
           klass = if dm.is_a? ExternalIdentifier
@@ -120,18 +145,117 @@ module DynamicModelDefHandler
           if dm.ready_to_generate? && dm.implementation_class_defined?(klass, fail_without_exception: true)
             dm.add_master_association
           else
-            puts "Failed to enable #{dm} #{dm.id}"
-            Rails.logger.warn "Failed to enable #{dm} #{dm.id}"
+            msg = "Failed to enable #{dm} #{dm.id} #{dm.resource_name}. Table ready? #{dm.table_or_view_ready?}"
+            puts msg
+            Rails.logger.warn msg
           end
         end
       else
-        puts "Table doesn't exist yet: #{table_name}"
+        msg = "Table doesn't exist yet: #{table_name}"
+        puts msg
+        Rails.logger.warn msg
+      end
+    end
+
+    # Get all the resource names for options configs in all active dynamic definitions
+    # Used by user access control definitions and filestore filters
+    # @param [Proc] an optional block may be passed to allow filtering based
+    #   on values in the option config for each entry
+    #   for example:
+    #      all_option_configs_resource_names {|e| e && e.references && e.references[:nfs_store__manage__container]}
+    # @return [Array] array of string names
+    def all_option_configs_resource_names(&block)
+      res = []
+
+      @all_option_configs_resource_names ||= active_model_configurations.map(&:option_configs)
+
+      @all_option_configs_resource_names.each do |a|
+        elts = if block_given?
+                 a.select(&block)
+               else
+                 a
+               end
+        res += elts.map(&:resource_name)
+      end
+
+      res
+    end
+
+    def reset_all_option_configs_resource_names!
+      @all_option_configs_resource_names = nil
+    end
+
+    # The list of defined and usable activity log implementation classes
+    def implementation_classes
+      @implementation_classes = active_model_configurations.map(&:implementation_class)
+    end
+
+    # List of item types that can be used to define Classification::GeneralSelection drop downs
+    # This does not represent the actual item types that are valid for selection
+    # when defining a new definition record, which
+    # is in fact provided by self.use_with_class_names
+    def item_types(refresh: false)
+      cname = "#{name}.item_types"
+      Rails.cache.delete(cname) if refresh
+
+      Rails.cache.fetch(cname) do
+        list = []
+        implementation_classes.each do |imp_class|
+          list += imp_class.attribute_names
+                           .select { |a| Classification::GeneralSelection.use_with_attribute?(a) }
+                           .map { |a| "#{imp_class.model_name.to_s.ns_underscore.pluralize}_#{a}".to_sym }
+        end
+
+        list
       end
     end
   end
 
   def active_model_configuration?
     self.class.active_model_configurations.include? self
+  end
+
+  def default_options
+    option_type_config_for :default
+  end
+
+  def option_configs(force: false, raise_bad_configs: false)
+    return if disabled?
+
+    @option_configs = nil if force
+    @option_configs ||= self.class.options_provider.parse_config(self)
+    self.class.options_provider.raise_bad_configs @option_configs if raise_bad_configs
+    @option_configs
+  end
+
+  def option_configs_names
+    option_configs.map(&:name)
+  end
+
+  def option_type_config_for(name, result_if_empty: nil)
+    return unless option_configs
+
+    res = option_configs.find { |s| s.name == name.to_s.underscore.to_sym }
+
+    if !res && self.class.allow_empty_options
+      res = if result_if_empty == :first_config
+              option_configs.first
+            else
+              self.class.options_provider.new(:default, {}, self)
+            end
+
+    end
+    res
+  end
+
+  def option_configs_valid?
+    self.class.options_provider.configs_valid?(self)
+  end
+
+  def force_option_config_parse
+    return if disabled?
+
+    option_configs force: true, raise_bad_configs: true
   end
 
   #
@@ -198,14 +322,14 @@ module DynamicModelDefHandler
   # Is the definition ready for a class to be defined?
   # Is it enabled and does it have an underlying table?
   def ready_to_generate?
-    !disabled && table_ready?
+    !disabled && table_or_view_ready?
   end
 
   #
   # Check if the underlying database table exists
   # @return [boolean]
-  def table_ready?
-    Admin::MigrationGenerator.table_exists?(table_name)
+  def table_or_view_ready?
+    Admin::MigrationGenerator.table_or_view_exists?(table_name)
   rescue StandardError => e
     @extra_error = e
     false

@@ -161,8 +161,8 @@
       next unless itc.allows_user_access_to?(current_user, :access)
       cnames = []
       ito = itc.new
-      if itc.respond_to?(:extra_log_type_configs)
-        cnames = itc.extra_log_type_configs.map {|k|  "general_selections-item_type+#{ito.item_type}-extra_log_type+#{k.name}" }
+      if itc.respond_to?(:option_configs)
+        cnames = itc.option_configs.map {|k|  "general_selections-item_type+#{ito.item_type}-extra_log_type+#{k.name}" }
       else
         cnames = ["general_selections-item_type+#{ito.item_type}"]
       end

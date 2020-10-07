@@ -47,6 +47,11 @@ class Report < ActiveRecord::Base
     end
   end
 
+  # Attribute containing options to be parsed by ExtraOptions
+  def self.option_configs_attr
+    :sql
+  end
+
   # Get reports that the user has access to in its current app
   # @param [User] user
   # @return [ActiveRecord::Relation] reports

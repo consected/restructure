@@ -35,6 +35,16 @@ class ActivityLog < ActiveRecord::Base
     'Activity'
   end
 
+  # Class that implements options functionality
+  def self.options_provider
+    ExtraLogType
+  end
+
+  # Don't allow empty extra log types.
+  def self.allow_empty_options
+    false
+  end
+
   def human_name
     name
   end
@@ -66,58 +76,8 @@ class ActivityLog < ActiveRecord::Base
     enabled.where(item_type: item_type).all.map(&:rec_type)
   end
 
-  def self.reset_extra_log_type_resource_names!
-    @extra_log_type_resource_names = nil
-  end
-
-  # Get all the resource names for extra log types in all active activity log definitions
-  # Used by user access control definitions and filestore filters
-  # @param [Proc] an optional block may be passed to allow filtering based on values in the extra log type config for each entry
-  # => for example: extra_log_type_resource_names {|e| e && e.references && e.references[:nfs_store__manage__container]}
-  # @return [Array] array of string names
-  def self.extra_log_type_resource_names(&block)
-    res = []
-
-    @extra_log_type_resource_names ||= active_model_configurations.map(&:extra_log_type_configs)
-
-    @extra_log_type_resource_names.each do |a|
-      elts = if block_given?
-               a.select(&block)
-             else
-               a
-             end
-      res += elts.map(&:resource_name)
-    end
-
-    res
-  end
-
   def blank_log_enabled?
     !blank_log_field_list.blank?
-  end
-
-  def extra_log_type_configs(force: false)
-    @extra_log_type_configs = nil if force
-    @extra_log_type_configs ||= ExtraLogType.parse_config(self)
-  end
-
-  def extra_log_type_valid?
-    ExtraLogType.parse_config(self)
-    true
-  rescue StandardError
-    false
-  end
-
-  def force_option_config_parse
-    return if disabled?
-
-    res = extra_log_type_configs force: true
-
-    # Check if any of the configs were bad
-    bad_configs = res.select { |c| c.bad_ref_items.present? }
-    raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?
-
-    res
   end
 
   # return the activity log implementation class that corresponds to
@@ -152,10 +112,11 @@ class ActivityLog < ActiveRecord::Base
     # al_cn = al_cn.camelize
     begin
       # Make sure we get this through checking the model names to avoid security weakness of using model attribute directly
-      fc_model_name = model_names.select { |c| c == al_cn.to_sym }.first
+      fc_model_name = model_names.select { |c| c == al_cn }.first
       fc = ::ActivityLog.const_get(fc_model_name.to_s.camelize)
       implementation_class = fc
     rescue StandardError => e
+      byebug
       logger.warn "Failed to get constant #{al_cn} / #{fc_model_name} => \n#{e.backtrace[0..10].join("\n")}"
     end
     raise "Failed to get #{al_cn} " unless implementation_class
@@ -233,36 +194,15 @@ class ActivityLog < ActiveRecord::Base
     false
   end
 
-  # the list of defined activity log implementation classes
-  def self.implementation_classes
-    @implementation_classes = active_model_configurations.map { |a| "ActivityLog::#{a.item_type_name.classify}".constantize }
-  end
-
   # The selection of possible class names that activity logs could be used with
   # This list is the full list of possible items, and only those configured and read by #works_with are actually available
   # for activity logging
   def self.use_with_class_names
-    (DynamicModel.model_names + ExternalIdentifier.model_names + Master::PrimaryAssociations).map { |m| m.to_s.singularize }
-  end
-
-  # List of item types that can be used to define Classification::GeneralSelection drop downs
-  # This does not represent the actual item types that are valid for selection when defining a new admin activity log record, which
-  # is in fact provided by self.use_with_class_names
-  def self.item_types(refresh: false)
-    Rails.cache.delete('ActivityLog.item_types') if refresh
-
-    Rails.cache.fetch('ActivityLog.item_types') do
-      list = []
-
-      implementation_classes.each do |c|
-        cn = c.attribute_names.select { |a| a.start_with?('select_') || a.start_with?('multi_select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
-        cn.each do |a|
-          list << "#{c.model_name.to_s.ns_underscore}_#{a}".to_sym
-        end
-      end
-
-      list
-    end
+    (
+      DynamicModel.model_names +
+      ExternalIdentifier.model_names +
+      Master::PrimaryAssociations
+    ).map { |m| m.to_s.singularize }
   end
 
   # Open an activity log instance for a user, given a string activity log type and ID
@@ -292,6 +232,7 @@ class ActivityLog < ActiveRecord::Base
     al_class
   end
 
+  # Set up an association to this class on the Master
   def add_master_association(&association_block)
     return if disabled || !errors.empty?
 
@@ -302,8 +243,14 @@ class ActivityLog < ActiveRecord::Base
       logger.debug "Associated master: has_many #{model_association_name} with class_name: #{full_implementation_class_name}"
       awa = action_when_attribute.to_sym
       awa = :created_at if awa == :alt_order
-      Master.has_many model_association_name, -> { order(awa => :desc, id: :desc) }, inverse_of: :master, class_name: full_implementation_class_name, &association_block
-      # Unlike external_id handlers (Scantron, etc) there is no need to update the master's nested attributes this model's symbol
+      Master.has_many model_association_name,
+                      -> { order(awa => :desc, id: :desc) },
+                      inverse_of: :master,
+                      class_name: full_implementation_class_name,
+                      &association_block
+
+      # Unlike external_id handlers (Scantron, etc) there is no need to update the
+      # master's nested attributes this model's symbol
       # since there is no link to advanced search
       add_parent_item_association
     rescue FphsException => e
@@ -594,7 +541,7 @@ class ActivityLog < ActiveRecord::Base
     end
 
     # Always performed
-    self.class.reset_extra_log_type_resource_names!
+    self.class.reset_all_option_configs_resource_names!
 
     true
   end

@@ -23,28 +23,9 @@ class DynamicModel < ActiveRecord::Base
     "dynamic_model__#{table_name}"
   end
 
-  # List of item types that can be used to define Classification::GeneralSelection drop downs
-  # This does not represent the actual item types that are valid for selection when defining a new dynamic model record
-  def self.item_types(refresh: false)
-    Rails.cache.delete('DynamicModel.item_types') if refresh
-
-    Rails.cache.fetch('DynamicModel.item_types') do
-      list = []
-
-      implementation_classes.each do |c|
-        cn = c.attribute_names.select { |a| a.start_with?('select_') || a.start_with?('multi_select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
-        cn.each do |a|
-          list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
-        end
-      end
-
-      list
-    end
-  end
-
-  # the list of defined activity log implementation classes
-  def self.implementation_classes
-    @implementation_classes = active_model_configurations.map { |a| "DynamicModel::#{a.model_class_name.classify}".constantize }
+  # Class that implements options functionality
+  def self.options_provider
+    DynamicModelOptions
   end
 
   def implementation_model_name
@@ -80,10 +61,10 @@ class DynamicModel < ActiveRecord::Base
     :vertical
   end
 
+  # Set up an association to this class on the Master if there is a foreign_key_name set
+  # If there is no foreign_key_name set, then this is not attached to a master record
   def add_master_association
-    # Now forcibly set the Master association if there is a foreign_key_name set
-    # If there is no foreign_key_name set, then this is not attached to a master record
-    return if foreign_key_name.blank?
+    return if disabled || foreign_key_name.blank?
 
     man = model_association_name
     Master.has_many man, inverse_of: :master,
@@ -101,34 +82,6 @@ class DynamicModel < ActiveRecord::Base
 
   def self.categories
     active.select(:category).distinct(:category).unscope(:order).map { |s| s.category || 'default' }
-  end
-
-  def option_configs(force: false)
-    @option_configs = nil if force
-    @option_configs ||= DynamicModelOptions.parse_config(self)
-  end
-
-  def option_configs_valid?
-    DynamicModelOptions.parse_config(self)
-    true
-  rescue StandardError => e
-    logger.info "Checking option configs valid failed silently: #{e}"
-    false
-  end
-
-  def option_config_for(name)
-    return unless option_configs
-
-    option_configs.select { |s| s.name == name }.first
-  end
-
-  def default_options
-    res = option_config_for :default
-    res || DynamicModelOptions.new(:default, {}, self)
-  end
-
-  def force_option_config_parse
-    option_configs force: true
   end
 
   def update_tracker_events

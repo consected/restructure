@@ -121,6 +121,10 @@ class Admin::MigrationGenerator
     connection.table_exists?(table_name)
   end
 
+  def self.table_or_view_exists?(table_name)
+    connection.table_exists?(table_name) || connection.view_exists?(table_name)
+  end
+
   def initialize(db_migration_schema, table_name, all_implementation_fields, table_comments, no_master_association)
     self.db_migration_schema = db_migration_schema
     self.table_name = table_name

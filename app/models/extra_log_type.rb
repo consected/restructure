@@ -7,8 +7,12 @@
 class ExtraLogType < ExtraOptions
   ValidSaveTriggers = %i[notify create_reference create_master update_reference create_filestore_container].freeze
 
+  def self.option_configs_attr
+    :extra_log_types
+  end
+
   def self.add_key_attributes
-    %i[references label save_trigger e_sign nfs_store]
+    %i[references save_trigger e_sign nfs_store]
   end
 
   attr_accessor(*key_attributes)
@@ -16,7 +20,6 @@ class ExtraLogType < ExtraOptions
 
   def self.attr_defs
     res = {
-      label: 'button label',
       references: {
         model_name: {
           label: 'button label',
@@ -95,8 +98,6 @@ class ExtraLogType < ExtraOptions
     end
 
     init_caption_before
-
-    self.label ||= name.to_s.humanize
 
     clean_references_def
     clean_e_sign_def
@@ -225,12 +226,19 @@ class ExtraLogType < ExtraOptions
     end
   end
 
-  def self.fields_for_all_in(activity_log)
-    activity_log.extra_log_type_configs.reject { |e| e.name.in?(%i[primary blank_log]) }.map(&:fields).reduce([], &:+).uniq
+  def self.fields_for_all_in(al_def)
+    al_def.option_configs.reject { |e| e.name.in?(%i[primary blank_log]) }.map(&:fields).reduce([], &:+).uniq
   rescue StandardError => e
     raise FphsException,
           "\nFailed to use the extra log options. It is likely that the 'fields:' attribute of one of the extra entries "\
           "(not primary or blank) is missing or not formatted as expected, or an @library inclusion has an error. #{e}"
+  end
+
+  # Check if any of the configs were bad
+  # This should be extended to provide additional checks when options are saved
+  def self.raise_bad_configs option_configs
+    bad_configs = option_configs.select { |c| c.bad_ref_items.present? }
+    raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?
   end
 
   def calc_save_action_if(obj)
@@ -331,10 +339,6 @@ class ExtraLogType < ExtraOptions
 
   class << self
     protected
-
-    def options_text(activity_log)
-      activity_log.extra_log_types
-    end
 
     def set_defaults(activity_log, all_options = {})
       # Add primary and blank items if they don't exist

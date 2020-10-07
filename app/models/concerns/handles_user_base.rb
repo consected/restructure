@@ -165,10 +165,6 @@ module HandlesUserBase
     @validating = v
   end
 
-  def validating?
-    @validating
-  end
-
   # Provide a modified human name for an instance
   def human_name
     if respond_to?(:rec_type) && rec_type
@@ -178,12 +174,16 @@ module HandlesUserBase
     end
   end
 
+  # Default to allow generalization
   def option_type; end
 
+  # Default to allow generalization
   def option_type_config; end
 
+  # Default to allow generalization
   def creatables; end
 
+  # Default to allow generalization
   def save_action; end
 
   def master_user
@@ -457,23 +457,25 @@ module HandlesUserBase
   # define a class method no_downcase_attributes returning an array of attribute names
   def downcase_attributes
     ea = ''
-    if self.class.respond_to? :no_downcase_attributes
-      self.class.no_downcase_attributes.each do |e|
-        ea += "(#{e})?"
-      end
+    attr_list = []
+
+    if self.class.respond_to?(:no_downcase_attributes) && self.class.no_downcase_attributes
+      attr_list += self.class.no_downcase_attributes
     end
 
-    if respond_to? :no_downcase_attributes
-      no_downcase_attributes.each do |e|
-        ea += "(#{e})?"
-      end
+    attr_list += no_downcase_attributes if respond_to?(:no_downcase_attributes) && no_downcase_attributes
+
+    attr_list.each do |e|
+      ea += "(#{e})?"
     end
 
     ignore = /(item_type)?(notes)?(description)?(message)?(.+_notes)?(.+_description)?(.+_details)?(e_signed_document)?#{ea}/
 
-    attributes.select { |k, _v| k.to_sym.in? self.class.permitted_params }.reject { |k, _v| k && k.match(ignore)[0].present? }.each do |k, v|
-      send("#{k}=".to_sym, v.downcase) if attributes[k].is_a? String
-    end
+    attributes.select { |k, _v| k.to_sym.in? self.class.permitted_params }
+              .reject { |k, _v| k && k.match(ignore)[0].present? }
+              .each do |k, v|
+                send("#{k}=".to_sym, v.downcase) if attributes[k].is_a? String
+              end
     true
   end
 

@@ -19,7 +19,10 @@ class Classification::GeneralSelection < ActiveRecord::Base
   validate :not_duplicated
 
   def self.item_types(refresh: false)
-    Rails.cache.delete('Classification::GeneralSelection.item_types') if refresh
+    if refresh
+      Rails.cache.delete('Classification::GeneralSelection.item_types')
+      @implementation_classes = nil
+    end
     Rails.cache.fetch('Classification::GeneralSelection.item_types') do
       BasicItemTypes +
         Report.item_types(refresh: refresh) +
@@ -73,9 +76,23 @@ class Classification::GeneralSelection < ActiveRecord::Base
     item_types.include?("#{prefix_name(record)}_#{field_name}".to_sym)
   end
 
-  def self.get_implementation_classes
+  def self.implementation_classes
     # For each of the implementation classes that can provide form_options.edit_as.alt_options configurations
     @implementation_classes ||= ActivityLog.implementation_classes + DynamicModel.implementation_classes
+  end
+
+  #
+  # Check if an attribute can have general selection entries added
+  # This is based on the attribute names
+  # @param [String] attr is the attribute name
+  # @return [Boolean]
+  def self.use_with_attribute? attr
+    !attr.in?(%w[disabled user_id created_at updated_at]) && (
+      attr.start_with?('select_') ||
+      attr.start_with?('multi_select_') ||
+      attr.end_with?('_selection') ||
+      attr.in?(%w[source rec_type rank])
+    )
   end
 
   # Get the general selection configurations and override them with the form_options.edit_as.alt_options
@@ -99,12 +116,12 @@ class Classification::GeneralSelection < ActiveRecord::Base
     res = selector_collection(conditions)
     res = res.to_ary
 
-    implementation_classes = get_implementation_classes
+    impl_classes = implementation_classes
     # Check the definition is ready to use and prepare it for use
-    implementation_classes.select! { |ic| ic.definition.ready_to_generate? }
+    impl_classes.select! { |ic| ic.definition.ready_to_generate? }
 
-    implementation_classes = implementation_classes.select { |ic| ic.new.item_type == item_type } if item_type
-    implementation_classes.each do |itc|
+    impl_classes = impl_classes.select { |ic| ic.new.item_type == item_type } if item_type
+    impl_classes.each do |itc|
       ito = itc.new
 
       # If an extra log type was specified, use it, since the overrides may be different than the defaults

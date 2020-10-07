@@ -28,6 +28,11 @@ class ExternalIdentifier < ActiveRecord::Base
     e.implementation_class
   end
 
+  # Class that implements options functionality
+  def self.options_provider
+    ExternalIdentifierOptions
+  end
+
   def resource_name
     name
   end
@@ -38,30 +43,6 @@ class ExternalIdentifier < ActiveRecord::Base
 
   def implementation_model_name
     name.ns_underscore.singularize
-  end
-
-  # List of item types that can be used to define Classification::GeneralSelection drop downs
-  # This does not represent the actual item types that are valid for selection when defining a new external identifier model record
-  def self.item_types(refresh: false)
-    Rails.cache.delete('ExternalIdentifier.item_types') if refresh
-
-    Rails.cache.fetch('ExternalIdentifier.item_types') do
-      list = []
-
-      implementation_classes.each do |c|
-        cn = c.attribute_names.select { |a| a.start_with?('select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
-        cn.each do |a|
-          list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
-        end
-      end
-
-      list
-    end
-  end
-
-  # the list of defined activity log implementation classes
-  def self.implementation_classes
-    @implementation_classes = active_model_configurations.map { |a| a.model_class_name.classify.to_s.constantize }
   end
 
   def self.routes_load
@@ -102,6 +83,7 @@ class ExternalIdentifier < ActiveRecord::Base
     "#{name.humanize.titleize} #{rep_type}"
   end
 
+  # Set up an association to this class on the Master
   def add_master_association
     logger.debug "Add master association for #{self}"
 
@@ -164,7 +146,7 @@ class ExternalIdentifier < ActiveRecord::Base
         end
 
         # Main implementation class
-        a_new_class = Class.new(UserBase) do
+        a_new_class = Class.new(ExternalIdentifierBase) do
           def self.definition=(d)
             @definition = d
             # Force the table_name, since it doesn't include external_identifer_ as a prefix, which is the Rails convention for namespaced models
@@ -327,10 +309,6 @@ class ExternalIdentifier < ActiveRecord::Base
     errors.add :name, 'must be unique' if !disabled && !res.empty?
     res = self.class.active.where(external_id_attribute: external_id_attribute.downcase).where.not(id: id)
     errors.add :external_id_attribute, 'must be unique' if !disabled && !res.empty?
-  end
-
-  def force_option_config_parse
-    # Does nothing, but is triggered on save
   end
 
   def generate_usage_reports

@@ -3,9 +3,13 @@
 class ExtraOptions
   # include CalcActions
 
+  def self.option_configs_attr
+    :options
+  end
+
   def self.base_key_attributes
     %i[
-      name config_obj caption_before show_if resource_name save_action view_options
+      name label config_obj caption_before show_if resource_name save_action view_options
       field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
       filestore labels fields button_label
     ]
@@ -44,6 +48,7 @@ class ExtraOptions
   def self.attr_defs
     attr_for_conditions_marker = 'ref: ** conditions reference **'
     {
+      label: 'button label',
       fields: %w[field_name_1 field_name_2],
       button_label: 'add record button label',
       caption_before: {
@@ -221,6 +226,8 @@ class ExtraOptions
     rescue NoMethodError
       raise FphsException, "Prevented a bad configuration of #{self.class.name} in #{config_obj.class.name} (#{config_obj.respond_to?(:human_name) ? config_obj.human_name : config_obj.id}). #{k} is not recognized as a valid attribute."
     end
+
+    self.label ||= name.to_s.humanize
     self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
     self.caption_before ||= {}
     self.caption_before = self.caption_before.symbolize_keys
@@ -353,6 +360,14 @@ class ExtraOptions
     configs
   end
 
+  def self.configs_valid?(config_obj)
+    parse_config(config_obj)
+    true
+  rescue StandardError => e
+    Rails.logger.info "Checking option configs valid failed silently: #{e}"
+    false
+  end
+
   def calc_creatable_if(obj)
     Rails.logger.debug "Checking calc_creatable_if on #{obj} with #{self.creatable_if}"
     ca = ConditionalActions.new self.creatable_if, obj
@@ -424,12 +439,15 @@ class ExtraOptions
     Admin::ConfigLibrary.make_substitutions! c, format
   end
 
+  #
+  # Get the definition's stored option config text from its appropriate attribute
+  # Return nil if there is option_configs_attr is nil
+  # @param [Class] config_obj definition item that includes DynamicModelDefHandler
+  # @return [String | nil]
   def self.options_text(config_obj)
-    if config_obj.is_a?(Report)
-      config_obj.sql.dup
-    else
-      config_obj.options.dup
-    end
+    return unless option_configs_attr
+
+    config_obj.send(option_configs_attr).dup
   end
 
   def self.set_defaults(config_obj, all_options = {}); end

@@ -55,11 +55,11 @@ EOF
   it 'saves data into an activity log record' do
     al = @activity_log
 
-    c1 = al.extra_log_type_configs.first
+    c1 = al.option_configs.first
     expect(c1.label).to eq 'Step 1'
     expect(c1.fields).to eq %w[select_call_direction select_who]
 
-    c2 = al.extra_log_type_configs[1]
+    c2 = al.option_configs[1]
     expect(c2.label).to eq 'Step 2'
     expect(c2.fields).to eq %w[select_call_direction extra_text]
 
@@ -70,7 +70,7 @@ EOF
   it 'prevents user from accessing specific activity log extra log types' do
     al = @activity_log
 
-    resource_name = al.extra_log_type_configs.first.resource_name
+    resource_name = al.option_configs.first.resource_name
 
     res = Admin::UserAccessControl.active.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: resource_name
     res.first&.update!(current_admin: @admin, disabled: true)
@@ -86,7 +86,7 @@ EOF
   it 'allows a user only to see the presence of an iten, not its content' do
     al = @activity_log
 
-    resource_name = ActivityLog::PlayerContactPhone.extra_log_type_config_for(:primary).resource_name
+    resource_name = ActivityLog::PlayerContactPhone.definition.option_type_config_for(:primary).resource_name
 
     setup_access resource_name, resource_type: :activity_log_type, access: :create, user: @user
 

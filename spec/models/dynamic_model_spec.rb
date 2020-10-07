@@ -11,6 +11,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
   include ModelSupport
   include PlayerContactSupport
   include BulkMsgSupport
+  include DynamicModelSupport
 
   before :example do
     # Seeds.setup
@@ -63,23 +64,9 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
   end
 
   it "saves the current user's user_id if the created_by_user_id field is present" do
-    unless ActivityLog.connection.table_exists? 'test_created_by_recs'
-      sql = TableGenerators.dynamic_models_table('test_created_by_recs', :create_do, 'test1', 'test2', 'created_by_user_id')
-    end
+    generate_test_dynamic_model
 
-    setup_access :masters, user: @user
-    master = Master.create! current_user: @user
-    master.current_user = @user
-
-    dm = DynamicModel.create! current_admin: @admin, name: 'test created by', table_name: 'test_created_by_recs', primary_key_name: :id, foreign_key_name: :master_id, category: :test
-
-    expect(dm).to be_a ::DynamicModel
-
-    setup_access :dynamic_model__test_created_by_recs, user: @user
-    setup_access :dynamic_model__test_created_by_recs, user: @user0
-
-    rec = master.dynamic_model__test_created_by_recs.create! test1: 'abc'
-
+    rec = @master.dynamic_model__test_created_by_recs.create! test1: 'abc'
     expect(rec).to be_a DynamicModel::TestCreatedByRec
 
     rec = DynamicModel::TestCreatedByRec.find rec.id
@@ -97,5 +84,43 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
 
     expect(rec).to respond_to :created_by_user_name
     expect(rec.created_by_user_name).to eq @user.email
+  end
+
+  it 'gets the correct version of extra options based on creation date of the instance' do
+    created_at = {}
+    dms = {}
+    eos = {}
+
+    dmdef = generate_test_dynamic_model
+    eos[:v1] = nil
+
+    expect(dmdef.created_at).to be_a Time
+
+    dms[:v1] = @master.dynamic_model__test_created_by_recs.create! test1: 'abc'
+    expect(dms[:v1]).to be_a DynamicModel::TestCreatedByRec
+
+    expect(dms[:v1].definition.options).to eq eos[:v1]
+
+    eos[:v2] = <<~END_DEF
+      caption_before:
+        all_fields: show before all fields
+        test2: has a caption before test2
+    END_DEF
+
+    dmdef.update!(extra_options: eos[:v2], current_admin: @admin)
+    created_at[:v2] = dmdef.created_at
+
+    eos[:v3] = <<~END_DEF
+      caption_before:
+        test2: has a caption before test2
+        submit: new caption before submit
+      labels:
+        test1: test1 label
+    END_DEF
+
+    dmdef.update!(extra_options: eos[:v3], current_admin: @admin)
+    created_at[:v3] = dmdef.created_at
+
+    expect(DynamicModel::TestCreatedByRec.definition.options_text).to eq eos[:v3]
   end
 end
