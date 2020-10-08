@@ -25,7 +25,7 @@ class DynamicModel < ActiveRecord::Base
 
   # Class that implements options functionality
   def self.options_provider
-    DynamicModelOptions
+    OptionConfigs::DynamicModelOptions
   end
 
   def implementation_model_name

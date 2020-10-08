@@ -64,6 +64,8 @@ module DynamicModelHandler
       foreign_key_name.blank?
     end
 
+    # At this time dynamic models only use one config definition, under the 'default' key
+    # Simplify access to the default options configuration
     def default_options
       @default_options = definition.default_options
     end

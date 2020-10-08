@@ -1,5 +1,5 @@
 # Handle option type configurations for a dynamic class implementation
-module HandlesOptionConfig
+module DynamicImplementationHandler
   extend ActiveSupport::Concern
 
   # resource_name used as a universal identifier
@@ -11,16 +11,30 @@ module HandlesOptionConfig
   # For a dynamic model this is just the 'default'
   # For an activity log this is the config matching the extra_log_type
   def option_type_config
-    res = self.class.definition.option_type_config_for option_type,
-                                                       result_if_empty: :first_config
+    res = versioned_definition.option_type_config_for option_type,
+                                                      result_if_empty: :first_config
     logger.warn "No extra log type configuration exists for #{option_type} in #{self.class.name}" unless res
     res
   end
 
-  def no_downcase_attributes
-    return unless option_type_config
+  #
+  # Returns the options text version specific to this instance
+  # based on its creation date.
+  # @return [String] options text
+  def options_text
+    versioned_definition.options_text
+  end
 
-    fo = option_type_config.field_options
+  #
+  # Get the definition record version from history, based on the created_at
+  # timestamp of the current instance
+  # @return [ActiveRecord::Base] dynamic class definition record
+  def versioned_definition
+    @versioned_definition ||= self.class.definition.versioned_defintion(created_at) || self.class.definition
+  end
+
+  def no_downcase_attributes
+    fo = option_type_config&.field_options || {}
     fo&.filter { |_k, v| v[:no_downcase] }&.keys
   end
 

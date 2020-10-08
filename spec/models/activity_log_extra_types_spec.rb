@@ -64,7 +64,7 @@ EOF
     expect(c2.fields).to eq %w[select_call_direction extra_text]
 
     # Additional field for extra_log_type is expected to be added to the configuration by default
-    expect(ExtraLogType.fields_for_all_in(al)).to eq %w[select_call_direction select_who extra_text]
+    expect(OptionConfigs::ActivityLogOptions.fields_for_all_in(al)).to eq %w[select_call_direction select_who extra_text]
   end
 
   it 'prevents user from accessing specific activity log extra log types' do

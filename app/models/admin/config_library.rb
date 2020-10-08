@@ -77,7 +77,7 @@ class Admin::ConfigLibrary < Admin::AdminBase
     l = self.class.active.where(name: name, category: category, format: self.format).first
     if l && l.id != id
       errors.add :name, "and format must be unique. Name: #{name}, category: #{category}, format: #{self.format}"
-      end
+    end
   end
 
   def refresh_dependencies
@@ -86,12 +86,17 @@ class Admin::ConfigLibrary < Admin::AdminBase
     ms = []
 
     ActivityLog.active.each do |a|
-      cl = ExtraLogType.config_libraries a
+      cl = OptionConfigs::ActivityLogOptions.config_libraries a
       ms << a if cl.include? self
     end
 
     DynamicModel.active.each do |a|
-      cl = ExtraOptions.config_libraries a
+      cl = OptionConfigs::DynamicModelOptions.config_libraries a
+      ms << a if cl.include? self
+    end
+
+    ExternalIdentifier.active.each do |a|
+      cl = OptionConfigs::ExternalIdentifierOptions.config_libraries a
       ms << a if cl.include? self
     end
 

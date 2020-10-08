@@ -5,5 +5,5 @@ class DynamicModelBase < UserBase
   include RankHandler
   include Formatter::Formatters
   include LimitedAccessControl
-  include HandlesOptionConfig
+  include DynamicImplementationHandler
 end

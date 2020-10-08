@@ -399,15 +399,19 @@ class Admin::AppType < Admin::AdminBase
     ms = []
 
     associated_activity_logs.all.each do |a|
-      ms += ExtraLogType.config_libraries a
+      ms += OptionConfigs::ActivityLogOptions.config_libraries a
     end
 
     associated_dynamic_models.all.each do |a|
-      ms += ExtraOptions.config_libraries a
+      ms += OptionConfigs::DynamicModelOptions.config_libraries a
+    end
+
+    associated_external_identifiers.all.each do |a|
+      ms += OptionConfigs::ExternalIdentifierOptions.config_libraries a
     end
 
     associated_reports.all.each do |a|
-      ms += ExtraOptions.config_libraries a
+      ms += OptionConfigs::OptionConfigs::ReportOptions.config_libraries a
     end
 
     ms.sort { |a, b| a.id <=> b.id }.uniq

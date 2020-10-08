@@ -30,7 +30,12 @@ class ExternalIdentifier < ActiveRecord::Base
 
   # Class that implements options functionality
   def self.options_provider
-    ExternalIdentifierOptions
+    OptionConfigs::ExternalIdentifierOptions
+  end
+
+  # No option configs
+  def self.option_configs_attr
+    nil
   end
 
   def resource_name

@@ -233,7 +233,7 @@ module Messaging
         # Once the notifications have been sent, fire the on_complete triggers
         if for_item
           for_item.current_user = for_item.user
-          ExtraLogType.calc_save_triggers for_item, on_complete_config
+          OptionConfigs::ActivityLogOptions.calc_save_triggers for_item, on_complete_config
         end
 
         logger.info "Handled item #{id}"

@@ -37,7 +37,7 @@ class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
         vals = {}
 
         # We calculate the conditional if inside each item, rather than relying
-        # on the outer processing in ExtraLogType#calc_save_trigger_if
+        # on the outer processing in ActivityLogOptions#calc_save_trigger_if
         if config[:if]
           ca = ConditionalActions.new config[:if], @item
           next unless ca.calc_action_if

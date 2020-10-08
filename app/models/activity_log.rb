@@ -37,12 +37,17 @@ class ActivityLog < ActiveRecord::Base
 
   # Class that implements options functionality
   def self.options_provider
-    ExtraLogType
+    OptionConfigs::ActivityLogOptions
   end
 
   # Don't allow empty extra log types.
   def self.allow_empty_options
     false
+  end
+
+  # Attribute holding option configs text
+  def self.option_configs_attr
+    :extra_log_types
   end
 
   def human_name
@@ -116,7 +121,6 @@ class ActivityLog < ActiveRecord::Base
       fc = ::ActivityLog.const_get(fc_model_name.to_s.camelize)
       implementation_class = fc
     rescue StandardError => e
-      byebug
       logger.warn "Failed to get constant #{al_cn} / #{fc_model_name} => \n#{e.backtrace[0..10].join("\n")}"
     end
     raise "Failed to get #{al_cn} " unless implementation_class
@@ -147,7 +151,7 @@ class ActivityLog < ActiveRecord::Base
   # Get a complete list of all fields required to generate a table.
   # The individual field lists may overlap or be distinct. This gets us a usable list
   def all_implementation_fields(ignore_errors: true)
-    res = (view_attribute_list || []) + (view_blank_log_attribute_list || []) + ExtraLogType.fields_for_all_in(self)
+    res = (view_attribute_list || []) + (view_blank_log_attribute_list || []) + OptionConfigs::ActivityLogOptions.fields_for_all_in(self)
     res.uniq
   rescue FphsException => e
     raise e unless ignore_errors

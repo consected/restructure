@@ -47,7 +47,12 @@ class Report < ActiveRecord::Base
     end
   end
 
-  # Attribute containing options to be parsed by ExtraOptions
+  # Class that implements options functionality
+  def self.options_provider
+    OptionConfigs::ReportOptions
+  end
+
+  # Attribute containing options to be parsed by the options provider
   def self.option_configs_attr
     :sql
   end

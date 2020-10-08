@@ -5,16 +5,35 @@ class Admin::MigrationGenerator
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
                 :table_comments, :no_master_association
 
+  #
+  # Simply return the current connection
   def self.connection
     ActiveRecord::Base.connection
   end
 
+  #
+  # Get the app's schema search path and make it into a simple array
+  # @return [Array]
+  def self.current_search_paths
+    connection.schema_search_path.split(',').map(&:strip)
+  end
+
+  #
+  # Get the current database name for the connection
+  # @return [String]
+  def self.current_database
+    connection.current_database
+  end
+
+  #
+  # Get the current schema search_path, then quote each item and comma separate them for use in a query
+  # @return [String]
   def self.quoted_schemas
     @quoted_schemas ||= current_search_paths.map { |s| "'#{s}'" }.join(',')
   end
 
   # Get the current list of table and views with the schema they belong to
-  #
+  # This is limited to the current transaction visibility
   # @return [Array(Hash {schema_name, table_name})] array of schema_name and table_name hashes for each table
   def self.tables_and_views
     @tables_and_views ||=
@@ -30,6 +49,7 @@ class Admin::MigrationGenerator
       END_SQL
   end
 
+  # Reset the memoized tables and views value
   def self.tables_and_views_reset!
     @tables_and_views = nil
   end
@@ -40,14 +60,6 @@ class Admin::MigrationGenerator
     tn << table_name
     tn = tn.join('.')
     connection.table_comment(tn)
-  end
-
-  def self.current_search_paths
-    connection.schema_search_path.split(',')
-  end
-
-  def self.current_database
-    connection.current_database
   end
 
   def self.column_comments
@@ -117,12 +129,41 @@ class Admin::MigrationGenerator
     end
   end
 
+  #
+  # Check the database for the table existing
+  # This is potentially more current than #tables_and_views, which might be limited by the
+  # current transaction or cached result
+  # @param [String] table_name
+  # @return [Boolean]
   def self.table_exists?(table_name)
     connection.table_exists?(table_name)
   end
 
+  #
+  # Check the database for the table or view existing
+  # This is potentially more current than #tables_and_views, which might be limited by the
+  # current transaction or cached result
+  # @param [String] table_name
+  # @return [Boolean]
   def self.table_or_view_exists?(table_name)
     connection.table_exists?(table_name) || connection.view_exists?(table_name)
+  end
+
+  #
+  # Generate the table name for the history table based on the current table name
+  # @param [String] table_name
+  # @return [String]
+  def self.history_table_name_for table_name
+    "#{table_name.singularize}_history"
+  end
+
+  #
+  # Generate the field name used as a foreign key back onto the this table
+  # based on the table name
+  # @param [String] table_name
+  # @return [String]
+  def self.history_table_id_attr_for table_name
+    "#{table_name.singularize}_id"
   end
 
   def initialize(db_migration_schema, table_name, all_implementation_fields, table_comments, no_master_association)
