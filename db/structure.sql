@@ -3479,58 +3479,6 @@ CREATE FUNCTION ipa_ops.log_app_type_update() RETURNS trigger
 
 
 --
--- Name: log_dynamic_model_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
---
-
-CREATE FUNCTION ipa_ops.log_dynamic_model_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-            BEGIN
-                INSERT INTO dynamic_model_history
-                (
-                    name,
-                    table_name,
-                    schema_name,
-                    primary_key_name,
-                    foreign_key_name,
-                    description,
-                    position,
-                    category,
-                    table_key_name,
-                    field_list,
-                    result_order,
-                    options,
-                    admin_id,
-                    disabled,
-                    created_at,
-                    updated_at,
-                    dynamic_model_id
-                    )
-                SELECT
-                    NEW.name,
-                    NEW.table_name,
-                    NEW.schema_name,
-                    NEW.primary_key_name,
-                    NEW.foreign_key_name,
-                    NEW.description,
-                    NEW.position,
-                    NEW.category,
-                    NEW.table_key_name,
-                    NEW.field_list,
-                    NEW.result_order,
-                    NEW.options,
-                    NEW.admin_id,
-                    NEW.disabled,
-                    NEW.created_at,
-                    NEW.updated_at,
-                    NEW.id
-                ;
-                RETURN NEW;
-            END;
-        $$;
-
-
---
 -- Name: log_emergency_contact_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
@@ -9668,49 +9616,49 @@ CREATE FUNCTION ml_app.log_config_library_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_dynamic_model_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-        BEGIN
-            INSERT INTO dynamic_model_history
-            (
-                    dynamic_model_id,
-                    name,                    
-                    table_name, 
-                    schema_name,
-                    primary_key_name,
-                    foreign_key_name,
-                    description,
-                    admin_id,
-                    disabled,                    
-                    created_at,
-                    updated_at,
-                    position,
-                    category,
-                    table_key_name,
-                    field_list,
-                    result_order
-                    
-                    
-                )                 
-            SELECT                 
-                NEW.id,
-                                    NEW.name,    
-                    NEW.table_name, 
-                    NEW.schema_name,
-                    NEW.primary_key_name,
-                    NEW.foreign_key_name,
-                    NEW.description,
-                    NEW.admin_id,
-                    NEW.disabled,
-                    NEW.created_at,
-                    NEW.updated_at,
-                    NEW.position,
-                    NEW.category,
-                    NEW.table_key_name,
-                    NEW.field_list,
-                    NEW.result_order
-            ;
-            RETURN NEW;
-        END;
-    $$;
+                      BEGIN
+                          INSERT INTO dynamic_model_history
+                          (
+                              name,
+                              table_name,
+                              schema_name,
+                              primary_key_name,
+                              foreign_key_name,
+                              description,
+                              position,
+                              category,
+                              table_key_name,
+                              field_list,
+                              result_order,
+                              options,
+                              admin_id,
+                              disabled,
+                              created_at,
+                              updated_at,
+                              dynamic_model_id
+                              )
+                          SELECT
+                              NEW.name,
+                              NEW.table_name,
+                              NEW.schema_name,
+                              NEW.primary_key_name,
+                              NEW.foreign_key_name,
+                              NEW.description,
+                              NEW.position,
+                              NEW.category,
+                              NEW.table_key_name,
+                              NEW.field_list,
+                              NEW.result_order,
+                              NEW.options,
+                              NEW.admin_id,
+                              NEW.disabled,
+                              NEW.created_at,
+                              NEW.updated_at,
+                              NEW.id
+                          ;
+                          RETURN NEW;
+                      END;
+                  $$;
 
 
 --
@@ -31381,7 +31329,8 @@ CREATE TABLE ml_app.activity_log_player_contact_emails (
     disabled boolean,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    set_related_player_contact_rank character varying
+    set_related_player_contact_rank character varying,
+    extra_log_type character varying
 );
 
 

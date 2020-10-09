@@ -21,6 +21,8 @@ module DynamicModelSupport
     @master.current_user = @user
 
     dm = DynamicModel.create! current_admin: @admin, name: 'test created by', table_name: 'test_created_by_recs', primary_key_name: :id, foreign_key_name: :master_id, category: :test
+    dm.current_admin = @admin
+    dm.update_tracker_events
 
     expect(dm).to be_a ::DynamicModel
 

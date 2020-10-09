@@ -7,7 +7,7 @@ module ActiveRecord
 
       included do
         attr_accessor :fields, :new_fields, :field_defs, :prev_fields,
-                      :field_opts, :owner,
+                      :field_opts, :owner, :history_table_id_attr
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
                       :table_comment, :fields_comments, :mode, :no_master_association
       end
@@ -27,7 +27,8 @@ module ActiveRecord
 
       def table_name=(tname)
         @table_name = tname
-        self.history_table_name = "#{@table_name.singularize}_history"
+        self.history_table_name = Admin::MigrationGenerator.history_table_name_for tname
+        self.history_table_id_attr = Admin::MigrationGenerator.history_table_id_attr_for tname 
       end
 
       def table_name
@@ -325,7 +326,7 @@ module ActiveRecord
       def standard_columns
         pset = %w[id created_at updated_at contactid user_id master_id
                   extra_log_type admin_id tracker_history_id]
-        pset += ["#{table_name.singularize}_table_id", "#{table_name.singularize}_id"]
+        pset += ["#{table_name.singularize}_table_id", "#{history_table_id_attr}"]
         pset
       end
 
@@ -465,7 +466,7 @@ module ActiveRecord
               user_id,
               created_at,
               updated_at,
-              #{table_name.singularize}_id)
+              #{history_table_id_attr})
             SELECT
               NEW.master_id,
               NEW.#{base_name_id},
@@ -520,7 +521,7 @@ module ActiveRecord
               user_id,
               created_at,
               updated_at,
-              #{table_name.singularize}_id)
+              #{history_table_id_attr})
             SELECT
               #{no_master_association ? '' : 'NEW.master_id,'}
               #{"#{new_fields.join(', ')}," if fields.present?}

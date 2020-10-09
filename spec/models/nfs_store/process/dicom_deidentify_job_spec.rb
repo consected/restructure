@@ -55,10 +55,14 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     setup_container_and_al
     setup_default_filters
 
-    # setup_nfs_store clean_files: false
-    # setup_deidentifier
-    # setup_container_and_al
-    # setup_default_filters
+    ul = @uploaded_files.first
+    pi = ul.stored_file.container.parent_item
+    pi.force_save!
+    pi.update! created_at: Time.now, updated_at: Time.now
+    expect(@container.parent_item.options_text).to eq pi.options_text
+    # expect(@container.parent_item.versioned_definition.updated_at).to eq pi.current_definition.updated_at
+    expect(@container.parent_item.options_text).to eq @activity_log.current_definition.options_text
+    expect(@container.parent_item.options_text).to eq @aldef.extra_log_types
   end
 
   it '#overwrite_metadata' do
@@ -78,7 +82,8 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
     orig_file_metadata = dcm.to_hash
 
     # Get the deidentify config from the activity log
-    configs = NfsStore::Process::ProcessHandler.new(sf).pipeline_job_config(:dicom_deidentify)
+    ph = NfsStore::Process::ProcessHandler.new(sf)
+    configs = ph.pipeline_job_config(:dicom_deidentify)
 
     config = configs.first
     NfsStore::Dicom::DeidentifyHandler.deidentify_file sf, config

@@ -167,32 +167,7 @@ EOF
     mrs.update_all from_record_master_id: @trash_master.id, from_record_id: nil
 
     setup_container_and_al
-    # names = ActivityLog::PlayerContactPhone.definition.option_configs.map(&:name)
-    # expect(names).to include :step_1
-
-    # al = ActivityLog::PlayerContactPhone.new(
-    #   select_call_direction: 'from player',
-    #   select_who: 'user',
-    #   extra_log_type: :step_1,
-    #   player_contact: @player_contact,
-    #   master: @player_contact.master
-    # )
-
-    # al.save!
-    # expect(al).to be_a ActivityLog::PlayerContactPhone
-    # expect(al.extra_log_type).to eq :step_1
-    # expect(al.model_references.length).to eq 1
-    # @activity_log = al
-    # @container = @activity_log.model_references.first.to_record
-
-    # expect(@container).not_to be nil
-
-    # @container.master.current_user ||= @user
-    # @container.save!
-
-    # @container.parent_item = @activity_log
-    # expect(@container.parent_item.resource_name).to eq 'activity_log__player_contact_phone__step_1'
-    # @container
+    
   end
 
   def setup_container_and_al

@@ -4,7 +4,8 @@ module DynamicModelDefHandler
   extend ActiveSupport::Concern
 
   included do
-    attr_accessor :table_comments
+    attr_accessor :table_comments, # comments from definition to be applied to DB table
+                  :def_version # definition version = corresponging id of record in definition history table
 
     after_save :generate_model, if: -> { ready_to_generate? }
     after_save :check_implementation_class
@@ -21,8 +22,27 @@ module DynamicModelDefHandler
   end
 
   class_methods do
+    # The history table table name matching this definition
+    def history_table_name
+      Admin::MigrationGenerator.history_table_name_for table_name
+    end
+
+    # The field that relates the history table for this definition back to the
+    # current record in the primary table
+    def history_id_attr
+      Admin::MigrationGenerator.history_table_id_attr_for table_name
+    end
+
+    # Attribute holding option configs text
+    # This is the default and may be overridden in definition classes
+    def option_configs_attr
+      :options
+    end
+
+    # String naming the namespace prefix for the implementation
+    # Must be overriden
     def implementation_prefix
-      nil
+      raise FphsException, "implementation_prefix not overridden for class: #{name}"
     end
 
     # A list of model names for models that have been generated and are ready to be used
@@ -117,6 +137,7 @@ module DynamicModelDefHandler
       end
     end
 
+    # Reload routes when a definition is regenerated
     def routes_reload
       return unless @regenerate
 
@@ -181,6 +202,8 @@ module DynamicModelDefHandler
       res
     end
 
+    # Force the memoized version of #all_option_configs_resource_names to be reset so it
+    # will be regenerated next time
     def reset_all_option_configs_resource_names!
       @all_option_configs_resource_names = nil
     end
@@ -211,14 +234,35 @@ module DynamicModelDefHandler
     end
   end
 
+  # Return result based on the current
+  # list of model defintions based on them being available in
+  # the active app types.
   def active_model_configuration?
     self.class.active_model_configurations.include? self
   end
 
+  # At this time dynamic models only use one config definition, under the 'default' key
+  # Simplify access to the default options configuration
   def default_options
     option_type_config_for :default
   end
 
+  #
+  # Get the definition's stored option config text from its appropriate attribute
+  # Return nil if there is option_configs_attr is nil
+  # @return [String | nil]
+  def options_text
+    return unless self.class.option_configs_attr
+
+    send(self.class.option_configs_attr).dup
+  end
+
+  #
+  # Parse option configs
+  # @param [Boolean] force forces the memoized version to be updated
+  # @param [<Type>] raise_bad_configs ensures bad configurations are checked and
+  #    exceptions raised to halt execution
+  # @return [Array] configurations
   def option_configs(force: false, raise_bad_configs: false)
     return if disabled?
 
@@ -228,11 +272,23 @@ module DynamicModelDefHandler
     @option_configs
   end
 
+  #
+  # Array of option config names (strings)
+  # @return [Array]
   def option_configs_names
     option_configs.map(&:name)
   end
 
-  def option_type_config_for(name, result_if_empty: nil)
+  #
+  # The option config for a specific named type
+  # @param [Symbol] name to match
+  # @param [Symbol] result_if_empty optionally selects the result to return if there is no matching name
+  #    The options are:
+  #      - :default - the default if not specified, generates an empty configuration with the name :default
+  #      - :first_config - get the first item in the option_configs array
+  #      - generates an empty configuration with the name specified in result_if_empty
+  # @return [Class] options provider instance
+  def option_type_config_for(name, result_if_empty: :default)
     return unless option_configs
 
     res = option_configs.find { |s| s.name == name.to_s.underscore.to_sym }
@@ -241,21 +297,60 @@ module DynamicModelDefHandler
       res = if result_if_empty == :first_config
               option_configs.first
             else
-              self.class.options_provider.new(:default, {}, self)
+              self.class.options_provider.new(result_if_empty, {}, self)
             end
 
     end
     res
   end
 
+  #
+  # Validate that the option configs parse correctly
+  # @return [Boolean]
   def option_configs_valid?
     self.class.options_provider.configs_valid?(self)
   end
 
+  #
+  # Simply parse option configs, forcing the memoized version to be updated
+  # @return [Array] parsed configs
   def force_option_config_parse
     return if disabled?
 
     option_configs force: true, raise_bad_configs: true
+  end
+
+  #
+  # Get the definition record version from history, current
+  # at the time of the current_at argument
+  # If the current_at timestamp is nil then the implementation has probably not be persisted
+  # and the current version of the definition is returned (self)
+  # @param [Time | nil] current_at
+  # @return [ActiveRecord::Base] defintion record
+  def versioned_definition(current_at)
+    return self unless current_at
+
+    # Add a second, to avoid rounding issues between Rails and DB
+    current_at += 1.second
+
+    res = Admin::MigrationGenerator.connection.execute <<~END_SQL
+      select * from #{self.class.history_table_name} 
+      where #{self.class.history_id_attr} = #{id}
+      and coalesce(updated_at, created_at) < '#{current_at.iso8601(4)}' 
+      order by updated_at desc NULLS LAST
+      limit 1
+    END_SQL
+
+    res = res.first
+    return unless res
+
+    res.delete 'admin_id'
+    res.delete(self.class.history_id_attr)
+    res['def_version'] = res['id']
+    res['id'] = id
+
+    # Instantiate (but don't save) this version as usable ActiveRecord object
+    self.class.new res.to_h
   end
 
   #
@@ -310,6 +405,9 @@ module DynamicModelDefHandler
     false
   end
 
+  #
+  # Decide whether to regenerate a model based on it not existing already in the namespace
+  # @return [Class | nil] truthy result unless the model exists in the namespace
   def prevent_regenerate_model
     got_class = begin
                   full_implementation_class_name.constantize
@@ -477,14 +575,13 @@ module DynamicModelDefHandler
   # This checks that the underlying database table has been created.
   # If the table is not available, (and we are in the development environment)
   # a migration for the appropriate schema will be written (and run)
-  # @return [<Type>] <description>
   def check_implementation_class
     return unless !disabled && errors.empty?
 
     # Check the table exists. If not, generate a migration and create it if in development
     unless ready_to_generate? || !Rails.env.development?
-      gs = generator_script(migration_version)
-      migration_generator.write_db_migration(gs, table_name, migration_version)
+      gs = generator_script(migration_generator.migration_version)
+      migration_generator.write_db_migration(gs, table_name, migration_generator.migration_version)
       run_migration
     end
 
@@ -517,14 +614,20 @@ module DynamicModelDefHandler
     AppControl.restart_server
   end
 
+  # Generate a migration triggered after_save.
   def generate_migration
     return unless ready_to_generate?
 
     return unless migration_generator.migration_update_fields
 
-    gs = generator_script(migration_version, 'update')
-    fn = migration_generator.write_db_migration gs, table_name, migration_version, mode: 'update'
+    gs = generator_script(migration_generator.migration_version, 'update')
+    fn = migration_generator.write_db_migration gs, table_name, migration_generator.migration_version, mode: 'update'
     @do_migration = fn
+  end
+
+  # Run a generated migration triggered after_save
+  def run_migration
+    migration_generator.run_migration
   end
 
   # Going forward we want the schema to be set explicitly.
@@ -539,14 +642,8 @@ module DynamicModelDefHandler
     res || Settings::DefaultMigrationSchema
   end
 
-  def run_migration
-    migration_generator.run_migration
-  end
-
-  def migration_version
-    migration_generator.migration_version
-  end
-
+  # Set up and memoize a migration generator to be used for all DB and migration
+  # related actions
   def migration_generator
     @migration_generator ||=
       Admin::MigrationGenerator.new(

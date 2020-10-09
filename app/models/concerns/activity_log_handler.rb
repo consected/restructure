@@ -281,7 +281,7 @@ module ActivityLogHandler
   # List of activity log types that can be created or not, based on user access controls and creatable_if rules
   def creatables
     current_user = master.current_user
-    def_class = self.class.definition
+    def_class = current_definition
     res = {}
 
     # Make a creatable actions, based on standard user access controls and extra log type creatable_if rules

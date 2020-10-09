@@ -3,9 +3,7 @@
 require 'rails_helper'
 require './db/table_generators/dynamic_models_table.rb'
 
-# Use the activity log player contact phone activity log implementation,
-# since it includes the works_with concern
-
+# Dynamic model implementation description using both imported apps and direct configurations
 RSpec.describe 'Dynamic Model implementation', type: :model do
   include MasterSupport
   include ModelSupport
@@ -84,43 +82,5 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
 
     expect(rec).to respond_to :created_by_user_name
     expect(rec.created_by_user_name).to eq @user.email
-  end
-
-  it 'gets the correct version of extra options based on creation date of the instance' do
-    created_at = {}
-    dms = {}
-    eos = {}
-
-    dmdef = generate_test_dynamic_model
-    eos[:v1] = nil
-
-    expect(dmdef.created_at).to be_a Time
-
-    dms[:v1] = @master.dynamic_model__test_created_by_recs.create! test1: 'abc'
-    expect(dms[:v1]).to be_a DynamicModel::TestCreatedByRec
-
-    expect(dms[:v1].definition.options).to eq eos[:v1]
-
-    eos[:v2] = <<~END_DEF
-      caption_before:
-        all_fields: show before all fields
-        test2: has a caption before test2
-    END_DEF
-
-    dmdef.update!(extra_options: eos[:v2], current_admin: @admin)
-    created_at[:v2] = dmdef.created_at
-
-    eos[:v3] = <<~END_DEF
-      caption_before:
-        test2: has a caption before test2
-        submit: new caption before submit
-      labels:
-        test1: test1 label
-    END_DEF
-
-    dmdef.update!(extra_options: eos[:v3], current_admin: @admin)
-    created_at[:v3] = dmdef.created_at
-
-    expect(DynamicModel::TestCreatedByRec.definition.options_text).to eq eos[:v3]
   end
 end

@@ -2,9 +2,15 @@
 module DynamicImplementationHandler
   extend ActiveSupport::Concern
 
+  included do
+    # Ensure that memoized versioned definition is cleared on creation, or if we
+    # force an updated of the created_at timestamp to make it use a later definition
+    before_save :reset_versioned_definition!, if: -> { !persisted? || created_at_changed? }
+  end
+
   # resource_name used as a universal identifier
   def resource_name
-    self.class.definition.resource_name
+    current_definition.resource_name
   end
 
   # Option type configuration for the current instance
@@ -26,11 +32,30 @@ module DynamicImplementationHandler
   end
 
   #
+  # Return the current definition
+  def current_definition
+    self.class.definition
+  end
+
+  #
   # Get the definition record version from history, based on the created_at
   # timestamp of the current instance
+  # If the versioned definition does not have a version number, and the current instance (self)
+  # has an id (it is persisted), then we force a reload of the versioned definition to ensure
+  # it doesn't reflect the wrong item.
   # @return [ActiveRecord::Base] dynamic class definition record
   def versioned_definition
-    @versioned_definition ||= self.class.definition.versioned_defintion(created_at) || self.class.definition
+    return @versioned_definition unless @versioned_definition.nil? ||
+                                        @versioned_definition.def_version.nil? && id
+
+    @versioned_definition = self.class.definition.versioned_definition(created_at) || current_definition
+  end
+
+  #
+  # Allow the versioned definition to be reloaded the next time it is requested
+  # Called from an after_create trigger
+  def reset_versioned_definition!
+    @versioned_definition = nil
   end
 
   def no_downcase_attributes
