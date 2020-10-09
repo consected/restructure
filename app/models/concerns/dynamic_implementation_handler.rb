@@ -6,6 +6,7 @@ module DynamicImplementationHandler
     # Ensure that memoized versioned definition is cleared on creation, or if we
     # force an updated of the created_at timestamp to make it use a later definition
     before_save :reset_versioned_definition!, if: -> { !persisted? || created_at_changed? }
+    after_commit :reset_access_evaluations!
   end
 
   # resource_name used as a universal identifier
@@ -160,5 +161,13 @@ module DynamicImplementationHandler
     end
 
     res
+  end
+
+  # If access has changed since an initial check, reset the cached results
+  def reset_access_evaluations!
+    @can_access = nil
+    @can_create = nil
+    @can_add_reference = nil
+    @can_edit = nil
   end
 end

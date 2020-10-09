@@ -40,10 +40,10 @@ RSpec.describe 'Activity Log implementation', type: :model do
     expect do
       al.save
     end.to raise_error FphsException
-    
+
     setup_access resource_name, resource_type: :activity_log_type, access: :create, user: @user
     # The access has changed, reset the cached results
-    al.reset_access
+    al.reset_access_evaluations!
 
     let_user_create_player_contacts
 
