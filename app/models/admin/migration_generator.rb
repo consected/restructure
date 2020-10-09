@@ -274,7 +274,7 @@ class Admin::MigrationGenerator
           self.fields = %i[#{migration_fields_array.join(' ')}]
           self.table_comment = '#{table_comments[:table]}'
           self.fields_comments = #{(table_comments[:fields] || {}).to_json}
-          self.no_master_association = #{no_master_association}
+          self.no_master_association = #{!!no_master_association}
     SETATRRIBS
   end
 
