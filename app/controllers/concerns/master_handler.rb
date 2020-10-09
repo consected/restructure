@@ -293,11 +293,13 @@ module MasterHandler
     return if @set_from_reference_id
 
     set_item if defined? set_item
-    build_with = begin
-                       secure_params
-                 rescue StandardError
-                   nil
-                     end
+    build_with = nil
+
+    begin
+      build_with = secure_params
+    rescue StandardError => e
+      logger.warn("set_instance_from_build: #{e}")
+    end
     set_object_instance @master_objects.build(build_with)
 
     object_instance.item_id = @item_id if @item && object_instance.respond_to?(:item_id) && !object_instance.item_id

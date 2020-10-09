@@ -155,7 +155,14 @@ module ExternalIdHandler
         return obj
       end
 
-      assign_next_available_id owner
+      item = assign_next_available_id owner
+
+      # Merge in the attributes
+      att.each do |k, v|
+        item.send("#{k}=", v) unless k == external_id_attribute.to_sym
+      end
+
+      item
     end
 
     def assign_next_available_id(master)
