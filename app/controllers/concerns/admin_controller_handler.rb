@@ -102,6 +102,10 @@ module AdminControllerHandler
     permitted_params + [:admin_id] - [:disabled]
   end
 
+  def admin_link_params
+    []
+  end
+
   def index_partial
     view = 'index'
     return view unless view_folder
@@ -230,8 +234,6 @@ module AdminControllerHandler
   def objects_instance
     instance_variable_get("@#{objects_name}")
   end
-
-  private
 
   def no_action_log
     true

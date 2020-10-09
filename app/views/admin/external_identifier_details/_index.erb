@@ -1,5 +1,7 @@
 <div class="container">
-  <h2><%=@external_identifier.name.humanize %> </h2>
+  <h2><%=@external_identifier.name.humanize %>
+  <%=link_to "External Identifier Configs", admin_external_identifiers_path, class: 'btn btn-default pull-right'%>
+  </h2>
   <h3>Status</h3>
   <p>Assigned IDs: <span><%=@assigned_count%></span></p>
   <% if @external_identifier.pregenerate_ids %>

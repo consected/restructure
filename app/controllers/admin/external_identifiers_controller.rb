@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Admin::ExternalIdentifiersController < AdminController
-  helper_method :permitted_params, :objects_instance, :human_name
+  helper_method :permitted_params, :objects_instance, :human_name, :admin_links
   after_action :routes_reload, only: %i[update create]
 
   protected
@@ -16,5 +16,11 @@ class Admin::ExternalIdentifiersController < AdminController
 
   def permitted_params
     @permitted_params = %i[id name label external_id_attribute category alphanumeric external_id_view_formatter external_id_edit_pattern prevent_edit pregenerate_ids min_id max_id extra_fields disabled]
+  end
+
+  def admin_links id=nil
+    [
+      ['details', "/admin/external_identifier_details/#{id}"]
+    ]
   end
 end
