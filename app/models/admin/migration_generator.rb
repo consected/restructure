@@ -222,6 +222,7 @@ class Admin::MigrationGenerator
     begin
       cols = ActiveRecord::Base.connection.columns(table_name)
       old_colnames = cols.map(&:name) - standard_columns
+      old_colnames = old_colnames.reject { |f| f.index(/^embedded_report_|^placeholder_/) }
     rescue StandardError
       return
     end
