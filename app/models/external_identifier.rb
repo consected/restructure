@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class ExternalIdentifier < ActiveRecord::Base
-  include DynamicModelDefHandler
+  include Dynamic::VersionHandler
+  include Dynamic::MigrationHandler
+  include Dynamic::DefHandler
   include AdminHandler
 
   DefaultRange = (1..9_999_999_999).freeze
@@ -151,7 +153,7 @@ class ExternalIdentifier < ActiveRecord::Base
         end
 
         # Main implementation class
-        a_new_class = Class.new(ExternalIdentifierBase) do
+        a_new_class = Class.new(Dynamic::ExternalIdentifierBase) do
           def self.definition=(d)
             @definition = d
             # Force the table_name, since it doesn't include external_identifer_ as a prefix, which is the Rails convention for namespaced models

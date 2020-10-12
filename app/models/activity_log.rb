@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class ActivityLog < ActiveRecord::Base
-  include DynamicModelDefHandler
+  include Dynamic::VersionHandler
+  include Dynamic::MigrationHandler
+  include Dynamic::DefHandler
   include AdminHandler
   include SelectorCache
 
@@ -213,7 +215,7 @@ class ActivityLog < ActiveRecord::Base
   # Verifies that the user has access to this activity log item
   # @param activity_log_type [String] type string that can be converted to a namespaced camelized class name
   # @param id [Integer] id for the activity log implementation instance
-  # @return [ActivityLogBase]
+  # @return [Dynamic::ActivityLogBase]
   def self.open_activity_log(activity_log_type, id, current_user)
     al_class = activity_log_class_from_type activity_log_type
     activity_log = al_class.find(id)
@@ -405,7 +407,7 @@ class ActivityLog < ActiveRecord::Base
         end
 
         # Main implementation class
-        a_new_class = Class.new(ActivityLogBase) do
+        a_new_class = Class.new(Dynamic::ActivityLogBase) do
           class << self
             attr_accessor :definition
           end

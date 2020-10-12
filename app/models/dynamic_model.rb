@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class DynamicModel < ActiveRecord::Base
-  include DynamicModelDefHandler
+  include Dynamic::VersionHandler
+  include Dynamic::MigrationHandler
+  include Dynamic::DefHandler
   include AdminHandler
 
   StandardFields = %w[id created_at updated_at contactid user_id master_id].freeze
@@ -113,10 +115,11 @@ class DynamicModel < ActiveRecord::Base
         end
 
         # Main implementation class
-        a_new_class = Class.new(DynamicModelBase) do
+        a_new_class = Class.new(Dynamic::DynamicModelBase) do
           def self.definition=(d)
             @definition = d
-            # Force the table_name, since it doesn't include dynamic_model_ as a prefix, which is the Rails convention for namespaced models
+            # Force the table_name, since it doesn't include dynamic_model_ as a prefix,
+            # which is the Rails convention for namespaced models
             self.table_name = d.table_name
           end
 
