@@ -3,7 +3,6 @@
 require "#{::Rails.root}/spec/support/seeds"
 require './db/table_generators/external_identifiers_table.rb'
 
-
 $STARTED_AT = DateTime.now.to_i
 
 module SetupHelper
@@ -42,7 +41,8 @@ module SetupHelper
 
     # Bulk
     # Setup the triggers, functions, etc
-    sql_files = %w[bulk/create_zeus_bulk_messages_table.sql bulk/dup_check_recipients.sql
+    sql_files = %w[test/drop_schema.sql test/create_schema.sql
+                   bulk/create_zeus_bulk_messages_table.sql bulk/dup_check_recipients.sql
                    bulk/create_zeus_bulk_message_recipients_table.sql bulk/create_al_bulk_messages.sql
                    bulk/create_zeus_bulk_message_statuses.sql bulk/setup_master.sql bulk/create_zeus_short_links.sql
                    bulk/create_player_contact_phone_infos.sql
@@ -100,7 +100,10 @@ module SetupHelper
     Rails.logger.info 'Setting up al player contact emails'
     return if ActivityLog.connection.table_exists? 'activity_log_player_contact_emails'
 
-    TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true, 'emailed_when')
+    TableGenerators.activity_logs_table('activity_log_player_contact_emails', 'player_contacts', true,
+                                        'data', 'select_email_direction', 'select_who',
+                                        'emailed_when', 'select_result', 'select_next_step', 'follow_up_when',
+                                        'protocol_id', 'notes', 'set_related_player_contact_rank')
     Rails.cache.clear
   end
 

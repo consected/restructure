@@ -4,7 +4,6 @@ module Dynamic
     self.abstract_class = true
 
     include RankHandler
-    include Formatter::Formatters
     include LimitedAccessControl
     include Dynamic::ImplementationHandler
   end

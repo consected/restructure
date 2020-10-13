@@ -4,7 +4,6 @@ class Report < ActiveRecord::Base
   include AdminHandler
   include SelectorCache
   include OptionsHandler
-  include Dynamic::DefHandler
 
   after_initialize :init_vars
   before_validation :downcase_item_type

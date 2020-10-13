@@ -357,7 +357,7 @@ class Master < ActiveRecord::Base
     html = false
     return unless prefix.present?
 
-    prefix = Admin::MessageTemplate.substitute prefix, data: self, tag_subs: nil, ignore_missing: true
+    prefix = Formatter::Substitution.substitute prefix, data: self, tag_subs: nil, ignore_missing: true
     prefix = CGI.escapeHTML prefix
     while prefix.include? '**'
       prefix = prefix.sub('**', '<b>')

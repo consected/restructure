@@ -40,7 +40,7 @@ module RecTypeHandler
     # Uses a naming convention that allows it to be called by a child model, such as activity log,
     # without an instantiated model, to format phone numbers.
     def format_data(value, rec_type = nil, options = nil)
-      formatter_do(rec_type, value, options)
+      Formatter::Formatters.formatter_do(rec_type, value, options)
     end
   end
 
@@ -49,14 +49,14 @@ module RecTypeHandler
   # formatting due to the condition is_phone? being false.
   # To cover this, we also override the rec_type attribute to call this.
   def data=(value)
-    format_method = self.class.formatter_for(rec_type)
+    format_method = Formatter::Formatters.formatter_for(rec_type)
     if format_method
-      res = self.class.formatter_do(rec_type, value)
+      res = Formatter::Formatters.formatter_do(rec_type, value)
 
       if res
         value = res
       else
-        errors.add rec_type, "cannot be formatted. #{self.class.formatter_error_message(rec_type, value)}"
+        errors.add rec_type, "cannot be formatted. #{Formatter::Formatters.formatter_error_message(rec_type, value)}"
         self.mark_invalid = true
       end
     end
@@ -66,7 +66,7 @@ module RecTypeHandler
 
   # When a new rec_type is set, force the data to be formatted appropriately
   def rec_type=(new_rec_type)
-    self.class.formatter_do(new_rec_type, data)
+    Formatter::Formatters.formatter_do(new_rec_type, data)
     super(new_rec_type)
   end
 
@@ -86,15 +86,15 @@ module RecTypeHandler
   def valid_data_format?
     return '' if data.blank?
 
-    format_method = self.class.formatter_for(rec_type)
+    format_method = Formatter::Formatters.formatter_for(rec_type)
     if format_method
-      res = self.class.formatter_do(rec_type, data)
+      res = Formatter::Formatters.formatter_do(rec_type, data)
 
       if res
         self.data = res
       else
         if errors.empty?
-          errors.add rec_type, "cannot be formatted. #{self.class.formatter_error_message(rec_type, data)}"
+          errors.add rec_type, "cannot be formatted. #{Formatter::Formatters.formatter_error_message(rec_type, data)}"
         end
         self.mark_invalid = true
       end

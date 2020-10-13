@@ -158,11 +158,11 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       @content_template_text = calc_field_or_return(@content_template_text) if @content_template_text.is_a? Hash
 
       if @subject
-        @subject = Admin::MessageTemplate.substitute(@subject, data: @item, tag_subs: nil, ignore_missing: true)
+        @subject = Formatter::Substitution.substitute(@subject, data: @item, tag_subs: nil, ignore_missing: true)
       end
 
       @extra_substitutions&.each do |k, v|
-        @extra_substitutions[k] = Admin::MessageTemplate.substitute(v, data: @item, tag_subs: nil, ignore_missing: true)
+        @extra_substitutions[k] = Formatter::Substitution.substitute(v, data: @item, tag_subs: nil, ignore_missing: true)
       end
 
       setup_data = {

@@ -75,7 +75,7 @@ module Messaging
       if data.blank?
         raise FphsException, 'Data is blank and item_type / item_id does not return an item' unless item
 
-        data = Admin::MessageTemplate.setup_data item, for_item
+        data = Formatter::Substitution.setup_data item, for_item
         data[:_subject] = subject
         data[:extra_substitutions] = extra_substitutions_data
 
