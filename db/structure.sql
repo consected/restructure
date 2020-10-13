@@ -3178,6 +3178,37 @@ $$;
 
 
 --
+-- Name: log_activity_log_ipa_assignment_adverse_events_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_adverse_events_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_ipa_assignment_adverse_event_history (
+    master_id,
+    ipa_assignment_id,
+    select_who, done_when, notes,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_ipa_assignment_adverse_event_id)
+  SELECT
+    NEW.master_id,
+    NEW.ipa_assignment_id,
+    NEW.select_who, NEW.done_when, NEW.notes,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_activity_log_ipa_assignment_discussions_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
@@ -3209,107 +3240,65 @@ $$;
 
 
 --
--- Name: log_activity_log_ipa_assignment_inex_checklist_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+-- Name: log_activity_log_ipa_assignment_inex_checklists_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
-CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_inex_checklist_update() RETURNS trigger
+CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_inex_checklists_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-                    BEGIN
-                        INSERT INTO activity_log_ipa_assignment_inex_checklist_history
-                        (
-                            master_id,
-                            ipa_assignment_id,
-                            prev_activity_type,
-                            select_subject_eligibility,
-                            signed_no_yes,
-                            notes,
-                            contact_role,
-                            e_signed_document,
-                            e_signed_how,
-                            e_signed_at,
-                            e_signed_by,
-                            e_signed_code,
-                            e_signed_status,
-                            extra_log_type,
-                            user_id,
-                            created_at,
-                            updated_at,
-                            activity_log_ipa_assignment_inex_checklist_id
-                            )
-                        SELECT
-                            NEW.master_id,
-                            NEW.ipa_assignment_id,
-                            NEW.prev_activity_type,
-                            NEW.select_subject_eligibility,
-                            NEW.signed_no_yes,
-                            NEW.notes,
-                            NEW.contact_role,
-                            NEW.e_signed_document,
-                            NEW.e_signed_how,
-                            NEW.e_signed_at,
-                            NEW.e_signed_by,
-                            NEW.e_signed_code,
-                            NEW.e_signed_status,
-                            NEW.extra_log_type,
-                            NEW.user_id,
-                            NEW.created_at,
-                            NEW.updated_at,
-                            NEW.id
-                        ;
-                        RETURN NEW;
-                    END;
-                $$;
+BEGIN
+  INSERT INTO activity_log_ipa_assignment_inex_checklist_history (
+    master_id,
+    ipa_assignment_id,
+    signed_no_yes, e_signed_document, e_signed_status, e_signed_how, e_signed_at, e_signed_by, e_signed_code, select_subject_eligibility, notes, contact_role, prev_activity_type,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_ipa_assignment_inex_checklist_id)
+  SELECT
+    NEW.master_id,
+    NEW.ipa_assignment_id,
+    NEW.signed_no_yes, NEW.e_signed_document, NEW.e_signed_status, NEW.e_signed_how, NEW.e_signed_at, NEW.e_signed_by, NEW.e_signed_code, NEW.select_subject_eligibility, NEW.notes, NEW.contact_role, NEW.prev_activity_type,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
--- Name: log_activity_log_ipa_assignment_med_nav_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+-- Name: log_activity_log_ipa_assignment_med_navs_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
-CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_med_nav_update() RETURNS trigger
+CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_med_navs_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-              BEGIN
-                  INSERT INTO activity_log_ipa_assignment_med_nav_history
-                  (
-                      master_id,
-                      ipa_assignment_id,
-                      select_activity,
-                      activity_date,
-                      select_contact,
-                      select_direction,
-                      select_result,
-                      select_next_step,
-                      follow_up_when,
-                      follow_up_time,
-                      notes,
-                      extra_log_type,
-                      user_id,
-                      created_at,
-                      updated_at,
-                      activity_log_ipa_assignment_med_nav_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.ipa_assignment_id,
-                      NEW.select_activity,
-                      NEW.activity_date,
-                      NEW.select_contact,
-                      NEW.select_direction,
-                      NEW.select_result,
-                      NEW.select_next_step,
-                      NEW.follow_up_when,
-                      NEW.follow_up_time,
-                      NEW.notes,
-                      NEW.extra_log_type,
-                      NEW.user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
+BEGIN
+  INSERT INTO activity_log_ipa_assignment_med_nav_history (
+    master_id,
+    ipa_assignment_id,
+    activity_date, select_direction, select_contact, select_result, select_next_step, follow_up_when, follow_up_time, select_activity, notes,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_ipa_assignment_med_nav_id)
+  SELECT
+    NEW.master_id,
+    NEW.ipa_assignment_id,
+    NEW.activity_date, NEW.select_direction, NEW.select_contact, NEW.select_result, NEW.select_next_step, NEW.follow_up_when, NEW.follow_up_time, NEW.select_activity, NEW.notes,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -3344,37 +3333,96 @@ $$;
 
 
 --
--- Name: log_activity_log_ipa_assignment_summary_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+-- Name: log_activity_log_ipa_assignment_phone_screens_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
-CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_summary_update() RETURNS trigger
+CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_phone_screens_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-              BEGIN
-                  INSERT INTO activity_log_ipa_assignment_summary_history
-                  (
-                      master_id,
-                      ipa_assignment_id,
-                      notes,
-                      extra_log_type,
-                      user_id,
-                      created_at,
-                      updated_at,
-                      activity_log_ipa_assignment_summary_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.ipa_assignment_id,
-                      NEW.notes,
-                      NEW.extra_log_type,
-                      NEW.user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
+BEGIN
+  INSERT INTO activity_log_ipa_assignment_phone_screen_history (
+    master_id,
+    ipa_assignment_id,
+    callback_required, callback_date, callback_time, notes,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_ipa_assignment_phone_screen_id)
+  SELECT
+    NEW.master_id,
+    NEW.ipa_assignment_id,
+    NEW.callback_required, NEW.callback_date, NEW.callback_time, NEW.notes,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_activity_log_ipa_assignment_protocol_deviations_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_protocol_deviations_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_ipa_assignment_protocol_deviation_history (
+    master_id,
+    ipa_assignment_id,
+    select_who, done_when, notes,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_ipa_assignment_protocol_deviation_id)
+  SELECT
+    NEW.master_id,
+    NEW.ipa_assignment_id,
+    NEW.select_who, NEW.done_when, NEW.notes,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_activity_log_ipa_assignment_summaries_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_summaries_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_ipa_assignment_summary_history (
+    master_id,
+    ipa_assignment_id,
+    notes,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_ipa_assignment_summary_id)
+  SELECT
+    NEW.master_id,
+    NEW.ipa_assignment_id,
+    NEW.notes,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -4765,14 +4813,14 @@ CREATE FUNCTION ipa_ops.log_ipa_ps_initial_screenings_update() RETURNS trigger
 BEGIN
   INSERT INTO ipa_ps_initial_screening_history (
     master_id,
-    form_version, select_is_good_time_to_speak, looked_at_website_yes_no, select_may_i_begin, any_questions_blank_yes_no, same_hotel_yes_no, select_schedule, select_still_interested, follow_up_date, follow_up_time, notes,
+    form_version, select_is_good_time_to_speak, looked_at_website_yes_no, select_may_i_begin, travelling_to_boston_notes, covid19_concerns_yes_no, covid19_concerns_notes, any_questions_blank_yes_no, same_hotel_yes_no, select_schedule, select_still_interested, follow_up_date, follow_up_time, notes,
     user_id,
     created_at,
     updated_at,
     ipa_ps_initial_screening_id)
   SELECT
     NEW.master_id,
-    NEW.form_version, NEW.select_is_good_time_to_speak, NEW.looked_at_website_yes_no, NEW.select_may_i_begin, NEW.any_questions_blank_yes_no, NEW.same_hotel_yes_no, NEW.select_schedule, NEW.select_still_interested, NEW.follow_up_date, NEW.follow_up_time, NEW.notes,
+    NEW.form_version, NEW.select_is_good_time_to_speak, NEW.looked_at_website_yes_no, NEW.select_may_i_begin, NEW.travelling_to_boston_notes, NEW.covid19_concerns_yes_no, NEW.covid19_concerns_notes, NEW.any_questions_blank_yes_no, NEW.same_hotel_yes_no, NEW.select_schedule, NEW.select_still_interested, NEW.follow_up_date, NEW.follow_up_time, NEW.notes,
     NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
@@ -5031,6 +5079,35 @@ CREATE FUNCTION ipa_ops.log_ipa_reimbursement_req_update() RETURNS trigger
                   RETURN NEW;
               END;
           $$;
+
+
+--
+-- Name: log_ipa_samples_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_samples_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO ipa_sample_history (
+    master_id,
+    ipa_sample_ext_id, select_test_type,
+    user_id,
+    admin_id,
+    created_at,
+    updated_at,
+    ipa_sample_table_id)
+  SELECT
+    NEW.master_id,
+    NEW.ipa_sample_ext_id, NEW.select_test_type,
+    NEW.user_id,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -20246,16 +20323,18 @@ ALTER SEQUENCE bulk_msg.player_contact_phone_infos_id_seq OWNED BY bulk_msg.play
 -- Name: zeus_bulk_message_history; Type: TABLE; Schema: bulk_msg; Owner: -
 --
 
-CREATE TABLE bulk_msg.zeus_bulk_message_history (
+CREATE TABLE zeus_bulk_message_history (
     id integer NOT NULL,
     master_id integer,
-    name character varying,
-    notes character varying,
-    channel character varying,
-    message character varying,
+    name varchar,
+    notes varchar,
+    channel varchar,
+    message varchar,
     send_date date,
     send_time time without time zone,
-    status character varying,
+    status varchar,
+    cancel varchar,
+    ready varchar,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
@@ -20454,7 +20533,8 @@ CREATE TABLE bulk_msg.zeus_bulk_messages (
     status character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    cancel character varying
 );
 
 
@@ -24874,7 +24954,10 @@ CREATE TABLE ipa_ops.activity_log_ipa_assignment_adverse_event_history (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    activity_log_ipa_assignment_adverse_event_id integer
+    activity_log_ipa_assignment_adverse_event_id integer,
+    select_who character varying,
+    done_when date,
+    notes character varying
 );
 
 
@@ -25029,7 +25112,6 @@ CREATE TABLE ipa_ops.activity_log_ipa_assignment_history (
     follow_up_when date,
     follow_up_time time without time zone,
     notes character varying,
-    protocol_id bigint,
     select_record_from_addresses character varying,
     extra_log_type character varying,
     user_id integer,
@@ -25333,8 +25415,6 @@ CREATE TABLE ipa_ops.activity_log_ipa_assignment_navigation_history (
     completion_time time without time zone,
     participant_feedback_notes character varying,
     other_navigator_notes character varying,
-    add_protocol_deviation_record_no_yes character varying,
-    add_adverse_event_record_no_yes character varying,
     select_event_type character varying,
     other_event_type character varying,
     extra_log_type character varying,
@@ -25596,7 +25676,10 @@ CREATE TABLE ipa_ops.activity_log_ipa_assignment_protocol_deviation_history (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    activity_log_ipa_assignment_protocol_deviation_id integer
+    activity_log_ipa_assignment_protocol_deviation_id integer,
+    select_who character varying,
+    done_when date,
+    notes character varying
 );
 
 
@@ -28025,7 +28108,10 @@ CREATE TABLE ipa_ops.ipa_ps_initial_screenings (
     same_hotel_yes_no character varying,
     embedded_report_ipa__ipa_appointments character varying,
     select_schedule character varying,
-    select_may_i_begin character varying
+    select_may_i_begin character varying,
+    travelling_to_boston_notes character varying,
+    covid19_concerns_yes_no character varying,
+    covid19_concerns_notes character varying
 );
 
 
@@ -28778,7 +28864,10 @@ CREATE TABLE ipa_ops.ipa_ps_initial_screening_history (
     select_still_interested character varying,
     form_version character varying,
     same_hotel_yes_no character varying,
-    select_schedule character varying
+    select_schedule character varying,
+    travelling_to_boston_notes character varying,
+    covid19_concerns_yes_no character varying,
+    covid19_concerns_notes character varying
 );
 
 
@@ -29398,6 +29487,77 @@ CREATE SEQUENCE ipa_ops.ipa_reimbursement_reqs_id_seq
 --
 
 ALTER SEQUENCE ipa_ops.ipa_reimbursement_reqs_id_seq OWNED BY ipa_ops.ipa_reimbursement_reqs.id;
+
+
+--
+-- Name: ipa_sample_history; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.ipa_sample_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    ipa_sample_ext_id bigint,
+    select_test_type character varying,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ipa_sample_table_id bigint
+);
+
+
+--
+-- Name: ipa_sample_history_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
+--
+
+CREATE SEQUENCE ipa_ops.ipa_sample_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_sample_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ipa_ops; Owner: -
+--
+
+ALTER SEQUENCE ipa_ops.ipa_sample_history_id_seq OWNED BY ipa_ops.ipa_sample_history.id;
+
+
+--
+-- Name: ipa_samples; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.ipa_samples (
+    id bigint NOT NULL,
+    master_id bigint,
+    ipa_sample_ext_id bigint,
+    select_test_type character varying,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ipa_samples_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
+--
+
+CREATE SEQUENCE ipa_ops.ipa_samples_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_samples_id_seq; Type: SEQUENCE OWNED BY; Schema: ipa_ops; Owner: -
+--
+
+ALTER SEQUENCE ipa_ops.ipa_samples_id_seq OWNED BY ipa_ops.ipa_samples.id;
 
 
 --
@@ -31306,51 +31466,6 @@ CREATE SEQUENCE ml_app.activity_log_new_tests_id_seq
 --
 
 ALTER SEQUENCE ml_app.activity_log_new_tests_id_seq OWNED BY ml_app.activity_log_new_tests.id;
-
-
---
--- Name: activity_log_player_contact_emails; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.activity_log_player_contact_emails (
-    id integer NOT NULL,
-    data character varying,
-    select_email_direction character varying,
-    select_who character varying,
-    emailed_when date,
-    select_result character varying,
-    select_next_step character varying,
-    follow_up_when date,
-    protocol_id integer,
-    notes character varying,
-    user_id integer,
-    player_contact_id integer,
-    master_id integer,
-    disabled boolean,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    set_related_player_contact_rank character varying,
-    extra_log_type character varying
-);
-
-
---
--- Name: activity_log_player_contact_emails_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
---
-
-CREATE SEQUENCE ml_app.activity_log_player_contact_emails_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: activity_log_player_contact_emails_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
---
-
-ALTER SEQUENCE ml_app.activity_log_player_contact_emails_id_seq OWNED BY ml_app.activity_log_player_contact_emails.id;
 
 
 --
@@ -50553,6 +50668,20 @@ ALTER TABLE ONLY ipa_ops.ipa_reimbursement_reqs ALTER COLUMN id SET DEFAULT next
 -- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
 --
 
+ALTER TABLE ONLY ipa_ops.ipa_sample_history ALTER COLUMN id SET DEFAULT nextval('ipa_ops.ipa_sample_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_samples ALTER COLUMN id SET DEFAULT nextval('ipa_ops.ipa_samples_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
+--
+
 ALTER TABLE ONLY ipa_ops.ipa_screening_history ALTER COLUMN id SET DEFAULT nextval('ipa_ops.ipa_screening_history_id_seq'::regclass);
 
 
@@ -50785,13 +50914,6 @@ ALTER TABLE ONLY ml_app.activity_log_new_test_history ALTER COLUMN id SET DEFAUL
 --
 
 ALTER TABLE ONLY ml_app.activity_log_new_tests ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_new_tests_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ml_app.activity_log_player_contact_emails ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_player_contact_emails_id_seq'::regclass);
 
 
 --
@@ -54671,6 +54793,22 @@ ALTER TABLE ONLY ipa_ops.ipa_reimbursement_reqs
 
 
 --
+-- Name: ipa_sample_history_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_sample_history
+    ADD CONSTRAINT ipa_sample_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_samples_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_samples
+    ADD CONSTRAINT ipa_samples_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: ipa_screening_history_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -54940,14 +55078,6 @@ ALTER TABLE ONLY ml_app.activity_log_new_test_history
 
 ALTER TABLE ONLY ml_app.activity_log_new_tests
     ADD CONSTRAINT activity_log_new_tests_pkey PRIMARY KEY (id);
-
-
---
--- Name: activity_log_player_contact_emails_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ml_app.activity_log_player_contact_emails
-    ADD CONSTRAINT activity_log_player_contact_emails_pkey PRIMARY KEY (id);
 
 
 --
@@ -61027,6 +61157,48 @@ CREATE INDEX "index_ipa_ops.ipa_ps_covid_closings_on_user_id" ON ipa_ops.ipa_ps_
 
 
 --
+-- Name: index_ipa_ops.ipa_sample_history_on_admin_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "index_ipa_ops.ipa_sample_history_on_admin_id" ON ipa_ops.ipa_sample_history USING btree (admin_id);
+
+
+--
+-- Name: index_ipa_ops.ipa_sample_history_on_master_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "index_ipa_ops.ipa_sample_history_on_master_id" ON ipa_ops.ipa_sample_history USING btree (master_id);
+
+
+--
+-- Name: index_ipa_ops.ipa_sample_history_on_user_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "index_ipa_ops.ipa_sample_history_on_user_id" ON ipa_ops.ipa_sample_history USING btree (user_id);
+
+
+--
+-- Name: index_ipa_ops.ipa_samples_on_admin_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "index_ipa_ops.ipa_samples_on_admin_id" ON ipa_ops.ipa_samples USING btree (admin_id);
+
+
+--
+-- Name: index_ipa_ops.ipa_samples_on_master_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "index_ipa_ops.ipa_samples_on_master_id" ON ipa_ops.ipa_samples USING btree (master_id);
+
+
+--
+-- Name: index_ipa_ops.ipa_samples_on_user_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "index_ipa_ops.ipa_samples_on_user_id" ON ipa_ops.ipa_samples USING btree (user_id);
+
+
+--
 -- Name: index_ipa_payment_history_on_ipa_payment_id; Type: INDEX; Schema: ipa_ops; Owner: -
 --
 
@@ -61902,6 +62074,13 @@ CREATE INDEX index_users_contact_infos_on_user_id ON ipa_ops.users_contact_infos
 
 
 --
+-- Name: ipa_sample_id_idx; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX ipa_sample_id_idx ON ipa_ops.ipa_sample_history USING btree (ipa_sample_table_id);
+
+
+--
 -- Name: delayed_jobs_priority; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -62067,34 +62246,6 @@ CREATE INDEX index_activity_log_new_tests_on_new_test_id ON ml_app.activity_log_
 --
 
 CREATE INDEX index_activity_log_new_tests_on_user_id ON ml_app.activity_log_new_tests USING btree (user_id);
-
-
---
--- Name: index_activity_log_player_contact_emails_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE INDEX index_activity_log_player_contact_emails_on_master_id ON ml_app.activity_log_player_contact_emails USING btree (master_id);
-
-
---
--- Name: index_activity_log_player_contact_emails_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE INDEX index_activity_log_player_contact_emails_on_player_contact_id ON ml_app.activity_log_player_contact_emails USING btree (player_contact_id);
-
-
---
--- Name: index_activity_log_player_contact_emails_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE INDEX index_activity_log_player_contact_emails_on_protocol_id ON ml_app.activity_log_player_contact_emails USING btree (protocol_id);
-
-
---
--- Name: index_activity_log_player_contact_emails_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE INDEX index_activity_log_player_contact_emails_on_user_id ON ml_app.activity_log_player_contact_emails USING btree (user_id);
 
 
 --
@@ -68447,34 +68598,6 @@ CREATE TRIGGER activity_log_ipa_assignment_adverse_event_history_update AFTER UP
 
 
 --
--- Name: activity_log_ipa_assignment_inex_checklist_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER activity_log_ipa_assignment_inex_checklist_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_inex_checklists FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_inex_checklist_update();
-
-
---
--- Name: activity_log_ipa_assignment_inex_checklist_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER activity_log_ipa_assignment_inex_checklist_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_inex_checklists FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_inex_checklist_update();
-
-
---
--- Name: activity_log_ipa_assignment_med_nav_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER activity_log_ipa_assignment_med_nav_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_med_navs FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_med_nav_update();
-
-
---
--- Name: activity_log_ipa_assignment_med_nav_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER activity_log_ipa_assignment_med_nav_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_med_navs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_med_nav_update();
-
-
---
 -- Name: activity_log_ipa_assignment_minor_deviation_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
 --
 
@@ -68542,20 +68665,6 @@ CREATE TRIGGER activity_log_ipa_assignment_protocol_deviation_history_insert AFT
 --
 
 CREATE TRIGGER activity_log_ipa_assignment_protocol_deviation_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_protocol_deviations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_ipa_assignment_protocol_deviation_update();
-
-
---
--- Name: activity_log_ipa_assignment_summary_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER activity_log_ipa_assignment_summary_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_summaries FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_summary_update();
-
-
---
--- Name: activity_log_ipa_assignment_summary_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
---
-
-CREATE TRIGGER activity_log_ipa_assignment_summary_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_summaries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_summary_update();
 
 
 --
@@ -69098,6 +69207,20 @@ CREATE TRIGGER ipa_withdrawal_history_update AFTER UPDATE ON ipa_ops.ipa_withdra
 
 
 --
+-- Name: log_activity_log_ipa_assignment_adverse_event_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_adverse_event_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_adverse_events FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_adverse_events_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_adverse_event_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_adverse_event_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_adverse_events FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_adverse_events_update();
+
+
+--
 -- Name: log_activity_log_ipa_assignment_discussion_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
 --
 
@@ -69126,6 +69249,34 @@ CREATE TRIGGER log_activity_log_ipa_assignment_history_update AFTER UPDATE ON ip
 
 
 --
+-- Name: log_activity_log_ipa_assignment_inex_checklist_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_inex_checklist_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_inex_checklists FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_inex_checklists_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_inex_checklist_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_inex_checklist_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_inex_checklists FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_inex_checklists_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_med_nav_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_med_nav_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_med_navs FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_med_navs_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_med_nav_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_med_nav_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_med_navs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_med_navs_update();
+
+
+--
 -- Name: log_activity_log_ipa_assignment_navigation_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
 --
 
@@ -69137,6 +69288,48 @@ CREATE TRIGGER log_activity_log_ipa_assignment_navigation_history_insert AFTER I
 --
 
 CREATE TRIGGER log_activity_log_ipa_assignment_navigation_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_navigations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_navigations_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_phone_screen_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_phone_screen_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_phone_screens FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_phone_screens_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_phone_screen_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_phone_screen_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_phone_screens FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_phone_screens_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_protocol_deviation_history_inse; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_protocol_deviation_history_inse AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_protocol_deviations FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_protocol_deviations_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_protocol_deviation_history_upda; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_protocol_deviation_history_upda AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_protocol_deviations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_protocol_deviations_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_summary_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_summary_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_summaries FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_summaries_update();
+
+
+--
+-- Name: log_activity_log_ipa_assignment_summary_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_assignment_summary_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_assignment_summaries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_assignment_summaries_update();
 
 
 --
@@ -69263,6 +69456,20 @@ CREATE TRIGGER log_ipa_ps_tms_test_history_insert AFTER INSERT ON ipa_ops.ipa_ps
 --
 
 CREATE TRIGGER log_ipa_ps_tms_test_history_update AFTER UPDATE ON ipa_ops.ipa_ps_tms_tests FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_ps_tms_tests_update();
+
+
+--
+-- Name: log_ipa_sample_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_sample_history_insert AFTER INSERT ON ipa_ops.ipa_samples FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_samples_update();
+
+
+--
+-- Name: log_ipa_sample_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_ipa_sample_history_update AFTER UPDATE ON ipa_ops.ipa_samples FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_samples_update();
 
 
 --
@@ -76340,6 +76547,14 @@ ALTER TABLE ONLY ipa_ops.mrn_numbers
 
 
 --
+-- Name: fk_rails_1d72f78cf1; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_samples
+    ADD CONSTRAINT fk_rails_1d72f78cf1 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_1e6877fc1d; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -76353,6 +76568,14 @@ ALTER TABLE ONLY ipa_ops.ipa_covid_prescreening_history
 
 ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_discussion_history
     ADD CONSTRAINT fk_rails_227b927588 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_306079df88; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_samples
+    ADD CONSTRAINT fk_rails_306079df88 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
@@ -76788,6 +77011,14 @@ ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closings
 
 
 --
+-- Name: fk_rails_714fec4731; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_sample_history
+    ADD CONSTRAINT fk_rails_714fec4731 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_7808f5fdb3; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -76892,6 +77123,14 @@ ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_discussions
 
 
 --
+-- Name: fk_rails_7d42d4eed2; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_samples
+    ADD CONSTRAINT fk_rails_7d42d4eed2 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
 -- Name: fk_rails_8575a9c9b0; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -76916,6 +77155,14 @@ ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closings
 
 
 --
+-- Name: fk_rails_b59d3f463a; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_sample_history
+    ADD CONSTRAINT fk_rails_b59d3f463a FOREIGN KEY (ipa_sample_table_id) REFERENCES ipa_ops.ipa_samples(id);
+
+
+--
 -- Name: fk_rails_c0d43447fc; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -76924,11 +77171,27 @@ ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closing_history
 
 
 --
+-- Name: fk_rails_d14bcce4e4; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_sample_history
+    ADD CONSTRAINT fk_rails_d14bcce4e4 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_d50c71622c; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
 ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closing_history
     ADD CONSTRAINT fk_rails_d50c71622c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_d94e74f420; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_sample_history
+    ADD CONSTRAINT fk_rails_d94e74f420 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
@@ -83595,6 +83858,26 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200923103106'),
 ('20200929163440'),
 ('20200929165700'),
-('20201001120642');
+('20201001120642'),
+('20201009113544'),
+('20201009113546'),
+('20201009113547'),
+('20201009113548'),
+('20201009113549'),
+('20201009113551'),
+('20201009113552'),
+('20201009113553'),
+('20201009113555'),
+('20201009113556'),
+('20201009123016'),
+('20201009152535'),
+('20201009165247'),
+('20201009170614'),
+('20201009170927'),
+('20201009171251'),
+('20201009171508'),
+('20201009172107'),
+('20201009172508'),
+('20201009172744');
 
 
