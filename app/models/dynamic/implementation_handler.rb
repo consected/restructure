@@ -4,7 +4,6 @@ module Dynamic
     extend ActiveSupport::Concern
 
     included do
-      attr_accessor :data
       # Ensure that memoized versioned definition is cleared on creation, or if we
       # force an updated of the created_at timestamp to make it use a later definition
       before_save :reset_versioned_definition!, if: -> { !persisted? || created_at_changed? }

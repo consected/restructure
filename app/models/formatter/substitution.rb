@@ -144,7 +144,7 @@ module Formatter
         data = item.attributes.dup
         data[:original_item] = item
         data[:alt_item] = alt_item
-        data['data'] = item.data if item.respond_to? :data
+        data['data'] ||= item.data if item.respond_to? :data
 
         if item.respond_to?(:master)
           master = item.master
