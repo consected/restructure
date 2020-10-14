@@ -15,7 +15,6 @@ module Dynamic
 
     # Check the table exists. If not, generate a migration and create it if in development
     def generate_create_migration
-      byebug
       return if table_or_view_ready? || !Rails.env.development?
 
       gs = generator_script(migration_generator.migration_version)

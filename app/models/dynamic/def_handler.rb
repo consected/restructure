@@ -5,7 +5,7 @@ module Dynamic
     extend ActiveSupport::Concern
 
     included do
-      after_save :generate_model, if: -> { byebug; ready_to_generate? }
+      after_save :generate_model, if: -> { ready_to_generate? }
       after_save :check_implementation_class
       after_save :force_option_config_parse
 

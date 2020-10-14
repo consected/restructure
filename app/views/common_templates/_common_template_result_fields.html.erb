@@ -169,7 +169,7 @@
       {{> field_label labels=(concat 'labels_' ../key) }} <strong>{{pretty_string ../this_value return_string="true" capitalize="true"}}</strong>
       {{else}}
       <div class="text-center">
-        <a data-toggle="scrollto-result" data-target="#{{hyphenate ../name}}-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="{{log '../edit button ref'}}{{run_template ../edit_button_href}}" data-remote="true" data-result-target="">Review and Sign</a>
+        <a data-toggle="scrollto-result" data-target="#{{hyphenate ../name}}-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="{{run_template ../edit_button_href}}" data-remote="true" data-result-target="">Review and Sign</a>
       </div>
       {{/is}}
       {{/with}}
@@ -227,8 +227,6 @@
 
 {{#if template_config.item_list.length}}
 {{#filter result_data (join template_config.item_list ',') }}
-  {{log vdef_version }}
-  {{log ../vdef_version }}
   {{#with (fpa_state_item 'template_config' (underscore ../name) ../vdef_version)}}
   {{> common_template_result_field this_value=../this key=@key name=../../name template_config=this result_data=../../result_data}}
   {{/with}}

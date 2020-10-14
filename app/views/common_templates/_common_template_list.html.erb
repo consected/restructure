@@ -27,7 +27,7 @@
       <div class="col-md-8 new-block{{#is name '!==' full_name }} new-block new-after{{/is}} hidden-if-empty" id="{{hyphenate name}}-{{../master_id}}-" data-subscription="{{hyphenate name}}-edit-form-{{../master_id}}-">{{#unless (pluralize full_name)}}
         <ul class="list-group">
           <li class="list-group-item is-heading">
-            <h4>No {{log 'no template caption'}}{{run_template caption}} records</h4>
+            <h4>No {{run_template caption}} records</h4>
           </li>
         </ul>
       {{/unless}}</div>
@@ -44,7 +44,7 @@
         {{#unless (pluralize full_name)}}
         <ul class="list-group">
           <li class="list-group-item is-heading">
-            <h4>No {{log 'no template caption'}}{{run_template caption}} records</h4>
+            <h4>No {{run_template caption}} records</h4>
           </li>
         </ul>
         {{/unless}}
@@ -63,7 +63,7 @@
            data-subscription="{{hyphenate name}}-edit-form-{{../master_id}}-">{{#unless (pluralize full_name)}}
         <ul class="list-group">
           <li class="list-group-item is-heading">
-            <h4>No {{log 'no template caption'}}{{run_template caption}} records</h4>
+            <h4>No {{run_template caption}} records</h4>
           </li>
         </ul>
       {{/unless}}</div>

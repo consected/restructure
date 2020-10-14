@@ -297,11 +297,9 @@
 </script>
 
 <script id="<%=name.pluralize.hyphenate%>-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-{{log 'list'}}{{log vdef_version}}{{log (fpa_state_item 'template_config' (underscore '<%=name%>') vdef_version)}}{{log (underscore '<%=name%>')}}{{log name}}
   {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v')}}
 </script>
 
 <script id="<%=name.pluralize.hyphenate%>-compact-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-{{log 'list2'}}{{log vdef_version}}
   {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore name) 'v') compact=true prevent_create=true }}
 </script>

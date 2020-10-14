@@ -240,7 +240,6 @@
             {{#if extra_log_type}}
             <% all_option_configs.each do |c| %>
               {{#is extra_log_type '===' '<%=c.name%>'}}
-                {{log 'vdefal'}} {{log name}} {{log vdef_version}}
                 {{> common_template_result name='<%= full_name %>_<%=c.name%>' result_data=this _created=@index}}
               {{/is}}
             <% end %>

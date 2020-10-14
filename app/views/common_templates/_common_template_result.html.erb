@@ -1,7 +1,7 @@
 <script id="custom_block_attrs_html" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#each custom_block_attrs}}{{hyphenate @key}}={{{template this}}} {{/each}}</script>
 
-<script id="show_result_caption" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{log '../caption'}}{{{run_template ../caption}}}{{/with}}</script>
-<script id="result_extra_class" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{log '../extra_class'}}{{run_template ../extra_class}}{{/with}}</script>
+<script id="show_result_caption" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{{run_template ../caption}}}{{/with}}</script>
+<script id="result_extra_class" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{run_template ../extra_class}}{{/with}}</script>
 
 
 <script id="result_item_block" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -42,7 +42,6 @@
 </script>
 
 <script id="common_template_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{log 'vdef1'}} {{log name}} {{log vdef_version}}
   {{# with (fpa_state_item 'template_config' (underscore name) vdef_version )}}
     {{> common_template_result_inner result_data=../result_data name=../name template_config=this _created=../_created vdef_version=../vdef_version}}
   {{/with}}
@@ -51,8 +50,6 @@
 </script>
 
 <script id="common_template_result_inner-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{log 'vdef4'}} {{log name}} {{log vdef_version}}
-
   {{#was _created}}
   {{#is name '!==' full_name }}<div id="{{ hyphenate name }}-{{result_data.master_id}}-{{result_data.id}}" {{{ data_sort_str }}}> {{/is}}
 
@@ -80,7 +77,6 @@
         {{#with result_data}}{{>edit_item_button resource=../name  edit_button_href=../edit_button_href}}{{/with}}
         <h4 class="list-group-item-heading">{{>show_result_caption result_data=result_data}}</h4>
       </li>
-      {{log 'vdef2'}} {{log name}} {{log vdef_version}}
       {{#with (fpa_state_item 'caption_before' (underscore name) vdef_version 'all_fields' )}}
         <li class="list-group-item caption-before results-caption-before {{ hyphenate full_name }}-all_fields all-fields-caption">{{{this.show_caption}}}</li>
       {{/with}}
@@ -137,7 +133,6 @@
       {{> common_template_result_fields result_data=result_data name=name template_config=(fpa_state_item 'template_config' (underscore name) vdef_version)}}
       {{/if}}
     {{/if}}
-    {{log 'vdef3'}} {{log name}} {{log vdef_version}}
     {{#with (fpa_state_item 'caption_before' (underscore name) vdef_version 'metadata' )}}
     <div class="results-caption-before {{ hyphenate full_name }}-metadata">
       <div class="panel panel-default panel-body">

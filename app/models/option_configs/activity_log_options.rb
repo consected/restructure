@@ -354,9 +354,7 @@ module OptionConfigs
       curr_name = @config_obj.name
 
       item_type = 'item'
-      if @config_obj.implementation_class.respond_to? :parent_type
-        item_type = @config_obj.implementation_class.parent_type
-      end
+      item_type = @config_obj.item_type.to_sym if @config_obj.item_type
 
       cb = {
         protocol_id: {
