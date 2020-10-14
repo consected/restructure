@@ -1,7 +1,7 @@
 <% default_panels = app_config_items(:open_panels) %>
 
 <script id="master_tabs" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <ul class="nav nav-pills default-master-tabs details-tabs <%= app_config_set(:hide_player_tabs) ? 'hidden' : '' %> hide-player-tabs-<%= app_config_set(:hide_player_tabs)%>">
+  <ul class="nav nav-pills default-master-tabs details-tabs <%= hide_player_tabs? ? 'hidden' : '' %> hide-player-tabs-<%= hide_player_tabs?%>">
 
     <% unless app_config_set(:hide_tracker_panel) %>
     <li role="presentation" class="default-tracker-tab <%= (default_panels.length == 0 ||  'trackers'.in?(default_panels)) ? '{{#is trackers_length}}on-open-click{{/is}}' : '' %>">

@@ -60,6 +60,13 @@ module Dynamic
       @versioned_definition = nil
     end
 
+    #
+    # The version number of the versioned definition matching this instance
+    # @return [Integer] version number (id of matching history table entry)
+    def def_version
+      versioned_definition.def_version
+    end
+
     def no_downcase_attributes
       fo = option_type_config&.field_options || {}
       fo&.filter { |_k, v| v[:no_downcase] }&.keys

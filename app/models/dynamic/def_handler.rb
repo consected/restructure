@@ -5,7 +5,7 @@ module Dynamic
     extend ActiveSupport::Concern
 
     included do
-      after_save :generate_model, if: -> { ready_to_generate? }
+      after_save :generate_model, if: -> { byebug; ready_to_generate? }
       after_save :check_implementation_class
       after_save :force_option_config_parse
 
@@ -211,7 +211,11 @@ module Dynamic
           implementation_classes.each do |imp_class|
             list += imp_class.attribute_names
                              .select { |a| Classification::GeneralSelection.use_with_attribute?(a) }
-                             .map { |a| "#{imp_class.model_name.to_s.ns_underscore.pluralize}_#{a}".to_sym }
+                             .map do |a|
+              mn = imp_class.model_name.to_s.ns_underscore
+              mn = mn.pluralize unless imp_class.respond_to?(:is_activity_log)
+              "#{mn}_#{a}".to_sym
+            end
           end
 
           list
@@ -238,7 +242,7 @@ module Dynamic
     # @param [String | Symbol] alt_option_config_attr - specify an alternative attribute
     #   containing the options config. Used when multiple options are available within a single model.
     # @return [String | nil]
-    def options_text(alt_option_config_attr=nil)
+    def options_text(alt_option_config_attr = nil)
       alt_option_config_attr ||= self.class.option_configs_attr
       return unless alt_option_config_attr
 
@@ -546,8 +550,8 @@ module Dynamic
 
       # For some reason the underlying table exists but the class doesn't. Inform the admin
       unless res
-        err = "The implementation of #{model_class_name} was not completed although " \
-              "the DB table #{table_name} has been created."
+        err = "The implementation of #{model_class_name} was not completed." \
+              "The DB table #{table_name} has #{table_or_view_ready? ? '' : 'NOT '}been created"
         logger.warn err
         errors.add :name, err
         # Force exit of callbacks

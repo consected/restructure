@@ -1,0 +1,14 @@
+<%= render partial: 'activity_logs/common_search_results_template_item',
+                 locals: {
+                   def_record: object_instance.versioned_definition,
+                   option_type_config: object_instance.option_type_config
+                 } %>
+<% if @embedded_item
+      view_type = @embedded_item.model_data_type.to_s.pluralize
+%>
+    <%= render partial: "#{view_type}/common_search_results_template_item",
+               locals: {
+                 def_record: @embedded_item.versioned_definition,
+                 option_type_config: @embedded_item.option_type_config
+               } %>
+<% end %>

@@ -16,7 +16,7 @@
           {{#is to_record_options_config.view_as.show '!==' 'not_embedded'}}
             {{#with ../embedded_item}}
               <% mr_name = ModelReference.record_type_to_ns_table_name references&.first&.first %>
-              {{> common_template_result_fields result_data=this name='<%=mr_name%>' template_config=(fpa_state_item 'template_config' '<%=mr_name.underscore%>')}}
+              {{> common_template_result_fields result_data=this name='<%=mr_name%>' template_config=(fpa_state_item 'template_config' '<%=mr_name.underscore%>' vdef_version)}}
             {{/with}}
           {{/is}}
         {{/is}}

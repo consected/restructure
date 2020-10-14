@@ -260,13 +260,14 @@ class Master < ActiveRecord::Base
 
         included_tables[tname] = {
           order: Master::PlayerInfoRankOrderClause,
-          methods: %i[user_name accuracy_score_name rank_name source_name]
+          methods: %i[user_name accuracy_score_name rank_name source_name def_version vdef_version]
         }
       end
 
       tname = :pro_infos
       if current_user.has_access_to? :access, :table, tname
         included_tables[tname] = {
+          methods: %i[def_version vdef_version]
         }
       end
 
@@ -280,7 +281,9 @@ class Master < ActiveRecord::Base
                                    include: {
                                      item_flags: { include: [:item_flag_name], methods: %i[method_id item_type_us] }
                                    },
-                                   methods: %i[user_name accuracy_score_name rank_name source_name tracker_history_id tracker_histories] }
+                                   methods: %i[user_name accuracy_score_name
+                                               rank_name source_name tracker_history_id
+                                               tracker_histories def_version vdef_version] }
       end
 
       tname = :pro_infos
@@ -288,7 +291,8 @@ class Master < ActiveRecord::Base
         included_tables[tname] = {
           include: {
             item_flags: { include: [:item_flag_name], methods: %i[method_id item_type_us] }
-          }
+          },
+          methods: %i[def_version vdef_version]
         }
       end
 
@@ -296,7 +300,7 @@ class Master < ActiveRecord::Base
       if current_user.has_access_to? :access, :table, tname
         included_tables[tname] = {
           order: { rank: :desc },
-          methods: %i[user_name rank_name source_name tracker_history_id tracker_histories],
+          methods: %i[user_name rank_name source_name tracker_history_id tracker_histories def_version vdef_version],
           include: {
             item_flags: { include: [:item_flag_name], methods: %i[method_id item_type_us] }
           }
@@ -307,7 +311,8 @@ class Master < ActiveRecord::Base
       if current_user.has_access_to? :access, :table, tname
         included_tables[tname] = {
           order: { rank: :desc },
-          methods: %i[user_name rank_name state_name country_name source_name tracker_history_id tracker_histories],
+          methods: %i[user_name rank_name state_name country_name
+                      source_name tracker_history_id tracker_histories def_version vdef_version],
           include: {
             item_flags: { include: [:item_flag_name], methods: %i[method_id item_type_us] }
           }
@@ -317,7 +322,10 @@ class Master < ActiveRecord::Base
       tname = :tracker_histories
       if current_user.has_access_to? :access, :table, tname
         included_tables[:latest_tracker_history] = {
-          methods: %i[protocol_name protocol_position sub_process_name event_name user_name record_type_us record_type record_id event_description event_milestone]
+          methods: %i[protocol_name protocol_position sub_process_name
+                      event_name user_name record_type_us record_type
+                      record_id event_description event_milestone
+                      def_version vdef_version]
         }
 
         extras[:methods] << :tracker_completions

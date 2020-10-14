@@ -11,7 +11,7 @@ class DynamicModel < ActiveRecord::Base
   default_scope -> { order disabled: :asc, category: :asc, position: :asc, updated_at: :desc }
 
   validate :table_name_ok
-  after_save :set_empty_field_list
+  before_save :set_empty_field_list
 
   attr_accessor :editable
 
@@ -240,6 +240,7 @@ class DynamicModel < ActiveRecord::Base
             namespace :dynamic_model do
               resources pg_name, except: [:destroy]
             end
+            get "#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
           end
 
         else
@@ -248,6 +249,7 @@ class DynamicModel < ActiveRecord::Base
           namespace :dynamic_model do
             resources pg_name, except: [:destroy]
           end
+          get "#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
         end
       end
     end
@@ -284,9 +286,15 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
+  #
+  # before_save trigger forces the field list to be set, based on database fields
+  # @return [String] - space separated field list
   def set_empty_field_list
-    fl = implementation_class.attribute_names - StandardFields
-    self.field_list = fl.join(' ') if field_list.blank?
+    self.field_list = default_field_list_array.join(' ') if field_list.blank?
+  end
+
+  def default_field_list_array
+    implementation_class.attribute_names - StandardFields
   end
 end
 

@@ -65,12 +65,14 @@ class User < ActiveRecord::Base
   end
 
   def timeout_in
+    return @timeout_in if @timeout_in
+
     ust = Admin::AppConfiguration.value_for(:user_session_timeout)
-    if ust.blank?
-      Settings::UserTimeout
-    else
-      ust.to_i.minutes
-    end
+    @timeout_in = if ust.blank?
+                    Settings::UserTimeout
+                  else
+                    ust.to_i.minutes
+                  end
   end
 
   # Standard Devise callback to allow accounts to be disabled
@@ -109,7 +111,7 @@ class User < ActiveRecord::Base
     app_type_id.in? accessible_app_type_ids
   end
 
-  # App Types (ids) this user can access. 
+  # App Types (ids) this user can access.
   # This is *cached*, so is preferable to use in most cases
   # @return [Array]
   def accessible_app_type_ids

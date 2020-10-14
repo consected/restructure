@@ -15,7 +15,8 @@ module Dynamic
 
     # Check the table exists. If not, generate a migration and create it if in development
     def generate_create_migration
-      return unless ready_to_generate? && Rails.env.development?
+      byebug
+      return if table_or_view_ready? || !Rails.env.development?
 
       gs = generator_script(migration_generator.migration_version)
       migration_generator.write_db_migration(gs, table_name, migration_generator.migration_version)
@@ -24,8 +25,9 @@ module Dynamic
 
     # Generate a migration triggered after_save.
     def generate_migration
-      return unless ready_to_generate? && Rails.env.development?
+      return if table_or_view_ready? || !Rails.env.development?
 
+      # Return if there is nothing to update
       return unless migration_generator.migration_update_fields
 
       gs = generator_script(migration_generator.migration_version, 'update')

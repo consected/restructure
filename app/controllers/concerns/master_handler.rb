@@ -8,10 +8,10 @@ module MasterHandler
   included do
     before_action :init_vars_master_handler
 
-    before_action :set_me_and_master, only: %i[index new edit create update destroy]
+    before_action :set_me_and_master, only: %i[index new edit create update destroy template_config]
     before_action :set_implementation_class
     before_action :set_fields_from_params, only: [:edit]
-    before_action :set_instance_from_id, only: [:show]
+    before_action :set_instance_from_id, only: %i[show template_config]
     before_action :set_instance_from_reference_id, only: [:create]
     before_action :set_instance_from_build, only: %i[new create]
     before_action :set_ref_item_for_new, only: [:new]

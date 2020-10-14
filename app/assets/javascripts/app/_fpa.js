@@ -3,7 +3,12 @@ _fpa = {
   templates: {},
   partials: {},
   app: {},
-  state: {},
+  state: {
+    caption_before: {},
+    dialog_before: {},
+    template_config: {}
+  },
+
   view_handlers: {},
   version: '0',
   remote_request: null,

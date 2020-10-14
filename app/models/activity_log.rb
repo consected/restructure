@@ -301,6 +301,7 @@ class ActivityLog < ActiveRecord::Base
             get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
             patch "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
             put "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+            get "#{ic}/:item_id/activity_log/#{mn}/:id/template_config", to: "activity_log/#{mn}#template_config"
 
             # used by links to get to activity logs without having to use parent item (such as a player contact with phone logs)
             get "activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
@@ -309,6 +310,8 @@ class ActivityLog < ActiveRecord::Base
             get "activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
             post "activity_log/#{mn}", to: "activity_log/#{mn}#create"
             patch "activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+            get "activity_log/#{mn}/:id/template_config", to: "activity_log/#{mn}#template_config"
+
             # used by item flags to generate appropriate URLs
             begin
               get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show", as: "activity_log_#{pg.implementation_model_name}"
