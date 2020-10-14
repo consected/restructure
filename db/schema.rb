@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_09_172744) do
+ActiveRecord::Schema.define(version: 2020_10_14_172505) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -931,6 +931,62 @@ ActiveRecord::Schema.define(version: 2020_10_09_172744) do
     t.index ["user_id"], name: "index_activity_log_ipa_assignments_on_user_id"
   end
 
+  create_table "activity_log_ipa_sample_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "ipa_sample_id"
+    t.date "action_date"
+    t.time "action_time"
+    t.string "select_user_with_role_sample_registration"
+    t.string "notes"
+    t.string "select_transport_method"
+    t.string "recipient"
+    t.string "received_by"
+    t.string "select_storage_location"
+    t.string "requester"
+    t.string "reason"
+    t.date "request_date"
+    t.time "request_time"
+    t.string "select_user_with_role_sample_auth_withdraw"
+    t.string "select_issue_type"
+    t.string "duration"
+    t.string "extra_log_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "activity_log_ipa_sample_id"
+    t.index ["activity_log_ipa_sample_id"], name: "78d1cc5a_b_id_h_idx"
+    t.index ["ipa_sample_id"], name: "78d1cc5a_id_h_idx"
+    t.index ["master_id"], name: "78d1cc5a_master_id_h_idx"
+    t.index ["user_id"], name: "78d1cc5a_user_id_h_idx"
+  end
+
+  create_table "activity_log_ipa_samples", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "ipa_sample_id"
+    t.date "action_date"
+    t.time "action_time"
+    t.string "select_user_with_role_sample_registration"
+    t.string "notes"
+    t.string "select_transport_method"
+    t.string "recipient"
+    t.string "received_by"
+    t.string "select_storage_location"
+    t.string "requester"
+    t.string "reason"
+    t.date "request_date"
+    t.time "request_time"
+    t.string "select_user_with_role_sample_auth_withdraw"
+    t.string "select_issue_type"
+    t.string "duration"
+    t.string "extra_log_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ipa_sample_id"], name: "78d1cc5a_id_idx"
+    t.index ["master_id"], name: "78d1cc5a_master_id_idx"
+    t.index ["user_id"], name: "78d1cc5a_user_id_idx"
+  end
+
   create_table "activity_log_ipa_survey_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "ipa_survey_id"
@@ -1148,29 +1204,6 @@ ActiveRecord::Schema.define(version: 2020_10_09_172744) do
     t.index ["master_id"], name: "al_pitt_bhi_assignment_master_id_idx"
     t.index ["pitt_bhi_assignment_id"], name: "al_pitt_bhi_assignment_id_idx"
     t.index ["user_id"], name: "al_pitt_bhi_assignment_user_id_idx"
-  end
-
-  create_table "activity_log_player_contact_emails", id: :serial, force: :cascade do |t|
-    t.string "data"
-    t.string "select_email_direction"
-    t.string "select_who"
-    t.date "emailed_when"
-    t.string "select_result"
-    t.string "select_next_step"
-    t.date "follow_up_when"
-    t.integer "protocol_id"
-    t.string "notes"
-    t.integer "user_id"
-    t.integer "player_contact_id"
-    t.integer "master_id"
-    t.boolean "disabled"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "set_related_player_contact_rank"
-    t.index ["master_id"], name: "index_activity_log_player_contact_emails_on_master_id"
-    t.index ["player_contact_id"], name: "index_activity_log_player_contact_emails_on_player_contact_id"
-    t.index ["protocol_id"], name: "index_activity_log_player_contact_emails_on_protocol_id"
-    t.index ["user_id"], name: "index_activity_log_player_contact_emails_on_user_id"
   end
 
   create_table "activity_log_player_contact_phone_history", id: :serial, force: :cascade do |t|
@@ -11734,6 +11767,7 @@ ActiveRecord::Schema.define(version: 2020_10_09_172744) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "zeus_bulk_message_id"
+    t.string "cancel"
     t.index ["master_id"], name: "index_zeus_bulk_message_history_on_master_id"
     t.index ["user_id"], name: "index_zeus_bulk_message_history_on_user_id"
     t.index ["zeus_bulk_message_id"], name: "index_zeus_bulk_message_history_on_zeus_bulk_message_id"
@@ -11819,6 +11853,7 @@ ActiveRecord::Schema.define(version: 2020_10_09_172744) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "cancel"
     t.index ["master_id"], name: "index_zeus_bulk_messages_on_master_id"
     t.index ["user_id"], name: "index_zeus_bulk_messages_on_user_id"
   end
@@ -12030,6 +12065,13 @@ ActiveRecord::Schema.define(version: 2020_10_09_172744) do
   add_foreign_key "activity_log_ipa_assignments", "ipa_assignments"
   add_foreign_key "activity_log_ipa_assignments", "masters"
   add_foreign_key "activity_log_ipa_assignments", "users"
+  add_foreign_key "activity_log_ipa_sample_history", "activity_log_ipa_samples"
+  add_foreign_key "activity_log_ipa_sample_history", "ipa_samples"
+  add_foreign_key "activity_log_ipa_sample_history", "masters"
+  add_foreign_key "activity_log_ipa_sample_history", "users"
+  add_foreign_key "activity_log_ipa_samples", "ipa_samples"
+  add_foreign_key "activity_log_ipa_samples", "masters"
+  add_foreign_key "activity_log_ipa_samples", "users"
   add_foreign_key "activity_log_ipa_survey_history", "activity_log_ipa_surveys", name: "fk_activity_log_ipa_survey_history_activity_log_ipa_surveys"
   add_foreign_key "activity_log_ipa_survey_history", "ipa_surveys", name: "fk_activity_log_ipa_survey_history_ipa_survey_id"
   add_foreign_key "activity_log_ipa_survey_history", "masters", name: "fk_activity_log_ipa_survey_history_masters"

@@ -3457,6 +3457,37 @@ $$;
 
 
 --
+-- Name: log_activity_log_ipa_samples_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_activity_log_ipa_samples_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_ipa_sample_history (
+    master_id,
+    ipa_sample_id,
+    action_date, action_time, select_user_with_role_sample_registration, notes, select_transport_method, recipient, received_by, select_storage_location, requester, reason, request_date, request_time, select_user_with_role_sample_auth_withdraw, select_issue_type, duration,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_ipa_sample_id)
+  SELECT
+    NEW.master_id,
+    NEW.ipa_sample_id,
+    NEW.action_date, NEW.action_time, NEW.select_user_with_role_sample_registration, NEW.notes, NEW.select_transport_method, NEW.recipient, NEW.received_by, NEW.select_storage_location, NEW.requester, NEW.reason, NEW.request_date, NEW.request_time, NEW.select_user_with_role_sample_auth_withdraw, NEW.select_issue_type, NEW.duration,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: log_app_configuration_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
 --
 
@@ -20323,22 +20354,21 @@ ALTER SEQUENCE bulk_msg.player_contact_phone_infos_id_seq OWNED BY bulk_msg.play
 -- Name: zeus_bulk_message_history; Type: TABLE; Schema: bulk_msg; Owner: -
 --
 
-CREATE TABLE zeus_bulk_message_history (
+CREATE TABLE bulk_msg.zeus_bulk_message_history (
     id integer NOT NULL,
     master_id integer,
-    name varchar,
-    notes varchar,
-    channel varchar,
-    message varchar,
+    name character varying,
+    notes character varying,
+    channel character varying,
+    message character varying,
     send_date date,
     send_time time without time zone,
-    status varchar,
-    cancel varchar,
-    ready varchar,
+    status character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    zeus_bulk_message_id integer
+    zeus_bulk_message_id integer,
+    cancel character varying
 );
 
 
@@ -25853,6 +25883,105 @@ CREATE SEQUENCE ipa_ops.activity_log_ipa_assignments_id_seq
 --
 
 ALTER SEQUENCE ipa_ops.activity_log_ipa_assignments_id_seq OWNED BY ipa_ops.activity_log_ipa_assignments.id;
+
+
+--
+-- Name: activity_log_ipa_sample_history; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.activity_log_ipa_sample_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    ipa_sample_id bigint,
+    action_date date,
+    action_time time without time zone,
+    select_user_with_role_sample_registration character varying,
+    notes character varying,
+    select_transport_method character varying,
+    recipient character varying,
+    received_by character varying,
+    select_storage_location character varying,
+    requester character varying,
+    reason character varying,
+    request_date date,
+    request_time time without time zone,
+    select_user_with_role_sample_auth_withdraw character varying,
+    select_issue_type character varying,
+    duration character varying,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_ipa_sample_id bigint
+);
+
+
+--
+-- Name: activity_log_ipa_sample_history_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
+--
+
+CREATE SEQUENCE ipa_ops.activity_log_ipa_sample_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ipa_sample_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ipa_ops; Owner: -
+--
+
+ALTER SEQUENCE ipa_ops.activity_log_ipa_sample_history_id_seq OWNED BY ipa_ops.activity_log_ipa_sample_history.id;
+
+
+--
+-- Name: activity_log_ipa_samples; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.activity_log_ipa_samples (
+    id bigint NOT NULL,
+    master_id bigint,
+    ipa_sample_id bigint,
+    action_date date,
+    action_time time without time zone,
+    select_user_with_role_sample_registration character varying,
+    notes character varying,
+    select_transport_method character varying,
+    recipient character varying,
+    received_by character varying,
+    select_storage_location character varying,
+    requester character varying,
+    reason character varying,
+    request_date date,
+    request_time time without time zone,
+    select_user_with_role_sample_auth_withdraw character varying,
+    select_issue_type character varying,
+    duration character varying,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_ipa_samples_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
+--
+
+CREATE SEQUENCE ipa_ops.activity_log_ipa_samples_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ipa_samples_id_seq; Type: SEQUENCE OWNED BY; Schema: ipa_ops; Owner: -
+--
+
+ALTER SEQUENCE ipa_ops.activity_log_ipa_samples_id_seq OWNED BY ipa_ops.activity_log_ipa_samples.id;
 
 
 --
@@ -50164,6 +50293,20 @@ ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignments ALTER COLUMN id SET DEFAUL
 -- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
 --
 
+ALTER TABLE ONLY ipa_ops.activity_log_ipa_sample_history ALTER COLUMN id SET DEFAULT nextval('ipa_ops.activity_log_ipa_sample_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.activity_log_ipa_samples ALTER COLUMN id SET DEFAULT nextval('ipa_ops.activity_log_ipa_samples_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
+--
+
 ALTER TABLE ONLY ipa_ops.activity_log_ipa_survey_history ALTER COLUMN id SET DEFAULT nextval('ipa_ops.activity_log_ipa_survey_history_id_seq'::regclass);
 
 
@@ -54206,6 +54349,22 @@ ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_summary_history
 
 ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignments
     ADD CONSTRAINT activity_log_ipa_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_ipa_sample_history_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.activity_log_ipa_sample_history
+    ADD CONSTRAINT activity_log_ipa_sample_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_ipa_samples_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.activity_log_ipa_samples
+    ADD CONSTRAINT activity_log_ipa_samples_pkey PRIMARY KEY (id);
 
 
 --
@@ -59845,6 +60004,55 @@ CREATE INDEX index_ipa_file_creator_history_on_user_id ON ipa_files.ipa_file_cre
 --
 
 CREATE INDEX index_ipa_file_creators_on_user_id ON ipa_files.ipa_file_creators USING btree (user_id);
+
+
+--
+-- Name: 78d1cc5a_b_id_h_idx; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "78d1cc5a_b_id_h_idx" ON ipa_ops.activity_log_ipa_sample_history USING btree (activity_log_ipa_sample_id);
+
+
+--
+-- Name: 78d1cc5a_id_h_idx; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "78d1cc5a_id_h_idx" ON ipa_ops.activity_log_ipa_sample_history USING btree (ipa_sample_id);
+
+
+--
+-- Name: 78d1cc5a_id_idx; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "78d1cc5a_id_idx" ON ipa_ops.activity_log_ipa_samples USING btree (ipa_sample_id);
+
+
+--
+-- Name: 78d1cc5a_master_id_h_idx; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "78d1cc5a_master_id_h_idx" ON ipa_ops.activity_log_ipa_sample_history USING btree (master_id);
+
+
+--
+-- Name: 78d1cc5a_master_id_idx; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "78d1cc5a_master_id_idx" ON ipa_ops.activity_log_ipa_samples USING btree (master_id);
+
+
+--
+-- Name: 78d1cc5a_user_id_h_idx; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "78d1cc5a_user_id_h_idx" ON ipa_ops.activity_log_ipa_sample_history USING btree (user_id);
+
+
+--
+-- Name: 78d1cc5a_user_id_idx; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX "78d1cc5a_user_id_idx" ON ipa_ops.activity_log_ipa_samples USING btree (user_id);
 
 
 --
@@ -69333,6 +69541,20 @@ CREATE TRIGGER log_activity_log_ipa_assignment_summary_history_update AFTER UPDA
 
 
 --
+-- Name: log_activity_log_ipa_sample_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_sample_history_insert AFTER INSERT ON ipa_ops.activity_log_ipa_samples FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_samples_update();
+
+
+--
+-- Name: log_activity_log_ipa_sample_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_ipa_sample_history_update AFTER UPDATE ON ipa_ops.activity_log_ipa_samples FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_activity_log_ipa_samples_update();
+
+
+--
 -- Name: log_ipa_appointment_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
 --
 
@@ -76571,6 +76793,14 @@ ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_discussion_history
 
 
 --
+-- Name: fk_rails_275940e510; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.activity_log_ipa_sample_history
+    ADD CONSTRAINT fk_rails_275940e510 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_306079df88; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -76592,6 +76822,14 @@ ALTER TABLE ONLY ipa_ops.ipa_covid_prescreenings
 
 ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_discussions
     ADD CONSTRAINT fk_rails_41d2a60bd1 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_444560c665; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.activity_log_ipa_samples
+    ADD CONSTRAINT fk_rails_444560c665 FOREIGN KEY (ipa_sample_id) REFERENCES ipa_ops.ipa_samples(id);
 
 
 --
@@ -77123,6 +77361,14 @@ ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_discussions
 
 
 --
+-- Name: fk_rails_7a86b38498; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.activity_log_ipa_samples
+    ADD CONSTRAINT fk_rails_7a86b38498 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_7d42d4eed2; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -77163,11 +77409,27 @@ ALTER TABLE ONLY ipa_ops.ipa_sample_history
 
 
 --
+-- Name: fk_rails_bc0c3663e4; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.activity_log_ipa_sample_history
+    ADD CONSTRAINT fk_rails_bc0c3663e4 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_c0d43447fc; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
 ALTER TABLE ONLY ipa_ops.ipa_ps_covid_closing_history
     ADD CONSTRAINT fk_rails_c0d43447fc FOREIGN KEY (ipa_ps_covid_closing_id) REFERENCES ipa_ops.ipa_ps_covid_closings(id);
+
+
+--
+-- Name: fk_rails_c0f1f2e9c5; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.activity_log_ipa_sample_history
+    ADD CONSTRAINT fk_rails_c0f1f2e9c5 FOREIGN KEY (activity_log_ipa_sample_id) REFERENCES ipa_ops.activity_log_ipa_samples(id);
 
 
 --
@@ -77208,6 +77470,22 @@ ALTER TABLE ONLY ipa_ops.ipa_covid_prescreenings
 
 ALTER TABLE ONLY ipa_ops.nfs_store_trash_actions
     ADD CONSTRAINT fk_rails_de41d50f67 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_e34bc2fb64; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.activity_log_ipa_samples
+    ADD CONSTRAINT fk_rails_e34bc2fb64 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_ed36d53005; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.activity_log_ipa_sample_history
+    ADD CONSTRAINT fk_rails_ed36d53005 FOREIGN KEY (ipa_sample_id) REFERENCES ipa_ops.ipa_samples(id);
 
 
 --
@@ -83878,6 +84156,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20201009171508'),
 ('20201009172107'),
 ('20201009172508'),
-('20201009172744');
+('20201009172744'),
+('20201014172505');
 
 
