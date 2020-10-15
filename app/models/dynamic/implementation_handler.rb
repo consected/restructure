@@ -21,7 +21,11 @@ module Dynamic
     def option_type_config
       res = versioned_definition.option_type_config_for option_type,
                                                         result_if_empty: :first_config
-      logger.warn "No extra log type configuration exists for #{option_type} in #{self.class.name}" unless res
+      unless res || (option_type.blank? || option_type == :blank)
+        logger.warn "No extra log type configuration exists for #{option_type || 'primary'} in #{self.class.name}"
+        res = current_definition.option_type_config_for option_type,
+                                                        result_if_empty: :first_config
+      end
       res
     end
 

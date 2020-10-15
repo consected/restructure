@@ -352,7 +352,7 @@ class ModelReference < ActiveRecord::Base
   attr_writer :to_record
 
   def to_record_options_config
-    return unless from_record&.respond_to?(:option_type_config)
+    return unless from_record&.respond_to?(:option_type_config) && from_record&.option_type_config
 
     res = from_record.option_type_config.model_reference_config self
     return unless res
@@ -392,7 +392,7 @@ class ModelReference < ActiveRecord::Base
     return @can_disable unless @can_disable.nil?
 
     c = find_config || {}
-    if from_record && c.is_a?(Hash)
+    if from_record && c.is_a?(Hash) && from_record.respond_to?(:option_type_config) && from_record.option_type_config
       pd = from_record.option_type_config.calc_reference_prevent_disable_if c, to_record
       ane = from_record.option_type_config.calc_reference_allow_disable_if_not_editable_if c, to_record
     else
