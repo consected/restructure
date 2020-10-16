@@ -272,6 +272,14 @@
 </script>
 
 
+<% 
+  # Do not reload the unversioned Handlebars templates if we are loading a previous definition version
+  # since the app will have loaded all of the unversioned templates originally
+  
+  unless def_version 
+%>
+
+
 <%= render partial: 'common_templates/references_results', locals: { 
       name: name.underscore, 
       full_name: full_name, 
@@ -290,6 +298,7 @@
       item_flags_after: item_flags_after 
     } %>
 
+
 <script id="<%=name.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with <%=with_data || full_name%>}}
     {{> common_template_result name='<%=name%>' result_data=this}}
@@ -303,3 +312,5 @@
 <script id="<%=name.pluralize.hyphenate%>-compact-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore name) 'v') compact=true prevent_create=true }}
 </script>
+
+<% end %>

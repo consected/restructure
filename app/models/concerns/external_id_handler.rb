@@ -238,6 +238,12 @@ module ExternalIdHandler
     end
   end
 
+  #
+  # No versioning of templates at this time
+  def def_version
+    nil
+  end
+
   def initialize attr = {}
     super
     return unless master_id

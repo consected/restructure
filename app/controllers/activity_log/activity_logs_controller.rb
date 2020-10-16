@@ -10,14 +10,17 @@ class ActivityLog::ActivityLogsController < UserBaseController
   # Not called for new or edit, since these are call elsewhere
   before_action :set_item, only: %i[index create update destroy]
   # before_action :handle_extra_log_type, only: [:edit, :new]
-  before_action :handle_embedded_item, only: %i[show edit new create update template_config]
-  # before_action :handle_embedded_items, only: [:index]
+  before_action :handle_embedded_item, only: %i[show edit new create update]
   after_action :check_authentication_still_valid
 
   attr_accessor :embedded_item
 
   def template_config
-    render partial: 'activity_logs/common_search_results_template_pair'
+    @instance_list.each do |oi|
+      handle_embedded_item oi
+    end
+
+    render partial: 'activity_logs/common_search_results_template_set'
   end
 
   private
@@ -38,12 +41,10 @@ class ActivityLog::ActivityLogsController < UserBaseController
     end
   end
 
-  # def handle_embedded_items
-  #   @master_objects.each {|o| handle_embedded_item o}
-  # end
-
   def handle_embedded_item(use_object = nil)
     oi = use_object || object_instance
+    return unless oi
+
     oi.current_user = current_user
     oi.action_name = action_name
     @embedded_item = oi.embedded_item

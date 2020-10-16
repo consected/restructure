@@ -3,7 +3,7 @@
 module MasterHandler
   extend ActiveSupport::Concern
 
-  UseMasterParam = %w[new create index].freeze
+  UseMasterParam = %w[new create index template_config].freeze
 
   included do
     before_action :init_vars_master_handler
@@ -11,7 +11,8 @@ module MasterHandler
     before_action :set_me_and_master, only: %i[index new edit create update destroy template_config]
     before_action :set_implementation_class
     before_action :set_fields_from_params, only: [:edit]
-    before_action :set_instance_from_id, only: %i[show template_config]
+    before_action :set_instance_from_id, only: %i[show]
+    before_action :set_instance_list_from_id, only: %i[template_config]
     before_action :set_instance_from_reference_id, only: [:create]
     before_action :set_instance_from_build, only: %i[new create]
     before_action :set_ref_item_for_new, only: [:new]
@@ -275,6 +276,12 @@ module MasterHandler
     set_object_instance primary_model.find(params[:id])
     object_instance.master.current_user = current_user if object_instance.respond_to?(:master) && object_instance.master
     @id = object_instance.id
+  end
+
+  def set_instance_list_from_id
+    @id_list = params[:id].split(',')
+    @instance_list = primary_model.where(id: @id_list)
+    @master.current_user = current_user
   end
 
   def set_instance_from_reference_id

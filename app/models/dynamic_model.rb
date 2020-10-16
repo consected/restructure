@@ -240,7 +240,7 @@ class DynamicModel < ActiveRecord::Base
             namespace :dynamic_model do
               resources pg_name, except: [:destroy]
             end
-            get "#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
+            get "dynamic_model/#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
           end
 
         else
@@ -249,7 +249,7 @@ class DynamicModel < ActiveRecord::Base
           namespace :dynamic_model do
             resources pg_name, except: [:destroy]
           end
-          get "#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
+          get "dynamic_model/#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
         end
       end
     end

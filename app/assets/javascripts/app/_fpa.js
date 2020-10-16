@@ -6,7 +6,9 @@ _fpa = {
   state: {
     caption_before: {},
     dialog_before: {},
-    template_config: {}
+    template_config: {},
+    background_loading: {},
+    template_config_versions: {}
   },
 
   view_handlers: {},
@@ -57,7 +59,8 @@ _fpa = {
   },
   compile_templates: function () {
     $('body').addClass('status-compiling');
-    $('script.handlebars-partial').each(function () {
+    $('script.handlebars-partial').not('.compiled').each(function () {
+      $(this).addClass('compiled');
       var id = $(this).attr('id');
 
       id = id.replace('-partial', '');
@@ -66,7 +69,8 @@ _fpa = {
       _fpa.partials[id] = fnTemplate;
     });
 
-    $('script.handlebars-template').each(function () {
+    $('script.handlebars-template').not('.compiled').each(function () {
+      $(this).addClass('compiled');
       var id = $(this).attr('id');
       var source = $(this).html();
       _fpa.templates[id] = Handlebars.compile(source);
@@ -119,17 +123,34 @@ _fpa = {
   // replace functionality within preprocessors
   view_template: function (block, template_name, data, options) {
 
-    var process_block = block;
 
     // Prevent an attempt to render the template in a block that has already been rendered in this request
     if (block.hasClass('view-template-created') || block.parent().hasClass('view-template-created')) return;
-
-    if (!template_name) console.log("no template_name provided");
 
     _fpa.ajax_working(block);
     if (!options || !options.position) {
       block.html('');
     }
+    if (!options) options = {};
+
+    // Special handling for handlebars handling of certain codes.
+    // Can most likely be removed
+    // if (data.code) {
+    //   data._code_flag = {};
+    //   data._code_flag[data.code] = true;
+    // }
+
+    _fpa.prepare_template(block, template_name, data, options);
+    _fpa.do_preprocessors(template_name, block, data);
+    _fpa.form_utils.get_general_selections(data);
+    _fpa.prepare_template_configs(data).then(function () {
+      _fpa.render_template(block, template_name, data, options);
+    });
+  },
+
+  prepare_template: function (block, template_name, data, options) {
+
+    if (!template_name) console.log("no template_name provided");
 
     // Pull the template from the pre-compiled templates
     var template = _fpa.templates[template_name];
@@ -137,18 +158,74 @@ _fpa = {
     if (!template)
       console.log("template for " + template_name + " was not found");
 
-    if (!options) options = {};
+    options.template = template;
+  },
 
-    // Special handling for handlebars handling of certain codes.
-    // Can most likely be removed
-    if (data.code) {
-      data._code_flag = {};
-      data._code_flag[data.code] = true;
-    }
+  // A function that provides a promise.
+  // Allow background loading of versioned definition template configs
+  // that have not already been downloaded.
+  // The promise is only resolved when the download has completed.
+  prepare_template_configs: function (data) {
+    return new Promise(function (resolve, reject) {
+      var data_type = data.multiple_results;
 
-    _fpa.do_preprocessors(template_name, block, data);
+      if (!data_type) {
+        for (var k in data) {
+          data_type = k;
+          break;
+        }
+        var data_array = [data[data_type]];
+        var url_data_type = data_type.split('__').join('/').pluralize();
+      } else {
+        var data_array = data[data_type];
+        var url_data_type = data_type.split('__').join('/');
+      }
 
-    _fpa.form_utils.get_general_selections(data);
+      var list_data_items = [];
+      var list_data_item_state_ids = [];
+
+      for (var k in data_array) {
+        if (!data_array.hasOwnProperty(k)) continue;
+
+        var data_item = data_array[k];
+        if (!data_item) break;
+        if (!data_item.def_version) continue;
+
+        var did = url_data_type + '/' + data_item.vdef_version;
+        if (_fpa.state.template_config_versions[did]) continue;
+
+        _fpa.state.template_config_versions[did] = true;
+        list_data_item_state_ids.push(did);
+        list_data_items.push(data_item.id);
+      }
+      if (list_data_items.length == 0) {
+        console.log('no template configs to get')
+        resolve();
+        return;
+      }
+
+      var url = "/masters/" + data.master_id + "/" + url_data_type + "/" + list_data_items.join(',') + "/template_config";
+      $.ajax(url, {
+        success: function (data) {
+          var temploc = $('#master-main-template').first();
+          var res = temploc.after(data);
+          _fpa.compile_templates();
+          resolve();
+        },
+        error: function (data) {
+          for (var k in list_data_item_state_ids) {
+            _fpa.state.template_config_versions[did] = false;
+          }
+          resolve();
+        }
+      });
+    });
+  },
+
+  render_template: function (block, template_name, data, options) {
+
+    var template = options.template;
+    var process_block = block;
 
     // Render the result using the template and data
     var html = template(data);
