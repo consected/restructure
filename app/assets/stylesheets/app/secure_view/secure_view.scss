@@ -1,0 +1,102 @@
+.secure-view {
+
+  position: fixed;
+  height: 100vh;
+  overflow: hidden;
+  width: 100vw;
+  background-color: rgb(51, 51, 51);
+  top: 0;
+  left: 0;
+  display: block;
+  z-index: 200;
+
+  .secure-view-control-panel {
+    padding: 8px 16px;
+    background-color: #eee;
+    line-height: 1.5em;
+    position: absolute;
+    width: 100%;
+    height: 47px;
+    z-index: 200;
+
+
+    .sv-control-block {
+      display: inline-block;
+      margin-right: 24px;
+    }
+
+    .secure-view-close {
+      float: right;
+      margin-right: 10px;
+    }
+
+    .secure-view-file-name {
+      font-weight: bold;
+      text-overflow: ellipsis;
+      max-width: 20%;
+      white-space: nowrap;
+      overflow: hidden;
+      vertical-align: middle;
+    }
+  }
+
+
+  .secure-view-pages-container {
+
+    position: absolute;
+    height: 100%;
+    top: 0;
+    width: 100%;
+    padding-top: 50px;
+    text-align: center;
+    padding-bottom: 6px;
+
+    .sv-full-page-message {
+      position: relative;
+      top: 40%;
+      height: auto;
+      width: auto;
+      text-align: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    #secure-view-pages {
+      position: relative;
+      top: 0;
+      height: 100%;
+
+      &.sv-pages-as-png {
+        overflow: auto;
+        display: inline-block;
+      }
+
+      &.sv-pages-as-html {
+        overflow: hidden;
+        display: block;
+      }
+
+    }
+
+    .secure-view-page {
+      pointer-events: none;
+    }
+
+    .secure-view-page-iframe {
+      position: relative;
+      top: 0;
+      height: 100%;
+      width: 100%;
+      background-color: white;
+      overflow: hidden;
+    }
+  }
+
+  input#secure-view-current-page {
+    width: 3em;
+    text-align: right;
+    padding-right: 0.25em;
+    display: inline-block;
+  }
+
+}

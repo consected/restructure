@@ -1,0 +1,306 @@
+<%
+  # A common template for rendering edit forms.
+  # Automatically matches field templates in the edit_fields directory
+  # To add a new field matcher it is unlikely that this file needs to be edited,
+  # instead adding a file to edit_fields will typically suffice.
+
+  # This template can return the results of a Rails form_for or fields_for block
+  # dependent on whether the field set is embedded inside an outer form or not.
+
+  # An embedded form does not return a <form> tag, and also excludes some decoration and duplicate submit buttons.
+
+
+  unless defined? embedded
+    embedded = nil
+  end
+
+  unless defined? disabled_form
+    disabled_form = nil
+  end
+
+  form_object_instance = object_instance
+  if embedded
+    form_object_instance = @embedded_item
+  end
+  @form_object_instance = form_object_instance
+  option_type_config = form_object_instance.option_type_config
+
+
+  unless defined? view_options
+    d = option_type_config
+    view_options = d.view_options if d
+    # view_options = {}
+  end
+  view_options ||= {}
+  view_handlers = (view_options[:view_handlers] || [])
+  view_handlers = view_handlers.map{|v| "#{v}_edit"}.join(" ")
+
+
+  # If this object form is embedded in an outer form (an activity log), then use fields_for rather than form_for
+
+  if embedded
+    form_block = [:fields_for, :embedded_item, form_object_instance, {data: { view_handlers: view_handlers }}]
+    form_block_object = form_embed
+  else
+    edit_form_hash_val = edit_form_hash.dup || {}
+    edit_form_hash_val[:html] ||= {}
+    edit_form_hash_val[:html]["data-view-handlers"] = view_handlers if view_handlers.present?
+    
+    form_block = [:form_for, [form_object_instance.belongs_directly_to, form_object_instance], edit_form_hash_val]
+    form_block_object = self
+  end
+
+
+  form_object_item_type_us = form_object_instance.item_type_us
+
+  unless defined? caption
+    if embedded
+      caption = form_object_instance.human_name
+    else
+      caption = nil
+    end
+  end
+
+  unless defined? caption_before
+    if embedded
+      d = option_type_config
+      caption_before = d.caption_before if d
+    else
+      caption_before = {}
+    end
+  end
+  caption_before ||= {}
+
+  unless defined? dialog_before
+    if embedded
+      d = option_type_config
+      dialog_before = d.dialog_before if d
+    else
+      dialog_before = {}
+    end
+  end
+  dialog_before ||= {}
+
+  unless defined? labels
+    if embedded
+      d = option_type_config
+      labels = d.labels if d
+    else
+      labels = {}
+    end
+  end
+  labels ||= {}
+
+  if caption.blank?
+    # if object_instance.respond_to?(:human_name) && object_instance.human_name.present?
+      caption = object_instance.human_name
+  end
+
+  caption.scan(/\{\{.+\}\}/).each do |c|
+    caption.sub!(c, '')
+  end
+
+  unless defined? save_action
+    d = option_type_config
+    save_action = d.save_action if d
+    save_action ||= { label: 'Save' }
+  end
+
+  save_label = save_action[:label] || 'Save'
+
+  show_cancel = view_options[:show_cancel] if view_options
+
+
+  unless defined? item_list
+    if form_object_instance.class.respond_to? :readonly_params
+      readonly_params = form_object_instance.class.readonly_params
+    else
+      readonly_params = []
+    end
+    item_list = form_object_instance.class.permitted_params - [:id, :master_id, :item_id, item_type_id] - readonly_params
+  end
+
+  item_list = item_list - [:tracker_history_id]
+
+  unless defined? item_flags_after
+    item_flags_after = nil
+  end
+
+  @has_source = false
+
+  select_desc = {}
+
+%>
+<% unless embedded %>
+<div class="data-results">
+  <div data-result="<%= edit_form_id %>">
+<% end %>
+    <div class="">
+      <% if selectable_model_reference %>
+      <%
+        edit_form_hash_for_ref = edit_form_hash.dup
+        edit_form_hash_for_ref[:html] ||= {}
+        edit_form_hash_for_ref[:html].merge! id: 'new_select_reference', class: 'new_select_reference form-inline'
+      %>
+        <%= form_for [form_object_instance.belongs_directly_to, form_object_instance], edit_form_hash_for_ref do |form|%>
+          <%= model_reference_fields form %>
+
+          <% if caption_before[:select_reference] %>
+            <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-select_reference select-reference-caption">
+              <%= show_caption_before :select_reference, caption_before %>
+            </li>
+          <% end %>
+          <li class="list-group-item edit-select-ref-container">
+            <%= label_tag :ref_to_record_id,  "Select #{caption}" %>
+            <%= select_tag :ref_to_record_id, options_from_collection_for_select(@master_objects, :id, :data), include_blank: '(add new)', class: 'select-ref-to-record'  %>
+          </li>
+
+          <li class="list-group-item submit-action-container hidden">
+            <%= form.submit class: "btn btn-primary", value: "Save" %>
+          </li>
+        <% end %>
+      <% end %>
+
+
+
+      <%= form_block_object.send(*form_block) do |form|%>
+      <% form_embed = form if @embedded_item && !embedded %>
+      <% if @option_type_config && !embedded %>
+        <%= form.hidden_field :extra_log_type, value: @extra_log_type_name, data: {attr_name: 'option_type', option_type: 'extra_log_type', object_name: form_object_item_type_us} %>
+      <% else %>
+        <%= hidden_field_tag :option_type, nil, data: {attr_name: 'option_type', option_type: 'embedded', object_name: form_object_item_type_us} %>
+      <% end %>
+      <%= model_reference_fields form %>
+
+      <% if disabled_form %><fieldset disabled class="readonly-edit-fieldset"><% end %>
+      <ul class="list-group" data-item-id="<%= form_object_instance.id %>">
+        <li class="list-group-item edit-form-header">
+          <% unless embedded %><%= inline_cancel_button %><% end %>
+          <h4 class="list-group-item-heading"><%=caption%></h4>
+          <%
+             rfl = object_instance.referenced_from.length
+             if rfl > 1
+          %>
+            <p class="edit-object-with-multiple-references">
+              This record is used by <%= rfl %> items. Editing it will affect all items. <%= inline_cancel_button(nil, "Cancel") %> if this is not what you want to do.
+            </p>
+          <% end %>
+          <%= render partial: 'common_templates/item_flags_block', locals: {f: form} unless item_flags_after || item_flags_array.length == 0 %>
+        </li>
+
+        <% if dialog_before[:all_fields] %>
+          <li class="list-group-item dialog-before <%=form_object_item_type_us.hyphenate%>-all_fields all-fields-dialog">
+            <%= show_dialog_before :all_fields, form_object_instance, dialog_before %>
+          </li>
+        <% end %>
+
+        <% if caption_before[:all_fields] %>
+          <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-all_fields all-fields-caption"><%= show_caption_before :all_fields, caption_before %></li>
+        <% end %>
+
+
+        <% unless embedded %>
+          <% if view_options[:show_embedded_at_top]  %>
+          <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
+          <% end %>
+        <% end %>
+
+
+        <% item_list.each do |field_name| %>
+          <%
+            field_name = field_name.to_s
+            field_name_sym = field_name.to_sym
+
+            if field_name.start_with?('placeholder_')
+              column_type = :placeholder
+            elsif field_name.start_with?('embedded_report_')
+              column_type = :embedded_report
+            else
+              col = form_object_instance.class.columns_hash[field_name]
+              raise FphsException.new "Column #{field_name} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}" unless col
+              column_type = col.type
+            end
+            local_vars = {locals: {
+              form: form,
+              field_name_sym: field_name_sym,
+              field_name: field_name,
+              column_type: column_type,
+              general_selection_name: general_selection_prefix_name(form_object_instance),
+              form_object_instance: form_object_instance,
+              form_object_item_type_us: form_object_item_type_us,
+              caption_before: caption_before,
+              dialog_before: dialog_before,
+              labels: labels
+              }
+            }
+            local_vars[:locals][:locals] = local_vars[:locals]
+
+            showed_caption_before = nil
+          %>
+
+          <% if dialog_before[field_name_sym]
+              showed_caption_before = true
+              showed_caption_before_kl = dialog_before[field_name_sym][:keep_label] ? 'showed-caption-before-keep-label' : 'showed-caption-before'
+             %>
+            <li class="list-group-item dialog-before <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
+              <%= show_dialog_before field_name_sym, form_object_instance, dialog_before %>
+            </li>
+          <% elsif caption_before[field_name_sym]
+              showed_caption_before = true
+              showed_caption_before_kl = caption_before[field_name_sym][:keep_label] ? 'caption-before-keep-label' : ''
+          %>
+            <li class="list-group-item caption-before <%= showed_caption_before_kl %> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-caption-before' : ''%>">
+              <%= show_caption_before field_name_sym, caption_before %>
+            </li>
+          <% end %>
+
+          <li class="list-group-item edit-field-container <%= showed_caption_before ? 'showed-caption-before' : ''%> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-field-item' : ''%>">
+            <%= render local_vars.merge(partial: 'common_templates/edit_form_field') %>
+          </li>
+
+          <%  if item_flags_after == field_name_sym && item_flags_array.length > 0 %>
+          <li class="list-group-item item-flag-container <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
+            <%= render partial: 'common_templates/item_flags_block', locals: {f: f} %>
+          </li>
+          <% end %>
+
+        <% end # item_list.each %>
+
+        <% unless embedded %>
+          <% unless view_options[:show_embedded_at_top]  %>
+          <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
+          <% end %>
+
+          <% if dialog_before[:submit]
+          %>
+            <li class="list-group-item dialog-before <%=form_object_item_type_us.hyphenate%>-submit">
+              <%= show_dialog_before :submit, form_object_instance, dialog_before %>
+            </li>
+          <% elsif caption_before[:submit]
+          %>
+            <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-submit">
+              <%= show_caption_before :submit, caption_before %>
+            </li>
+          <% end %>
+          <li class="list-group-item submit-action-container">
+            <%= form.submit class: "btn btn-primary", value: save_label %>
+            <% if show_cancel %><%= inline_cancel_button('btn btn-danger pull-right', "Cancel") %><% end %>
+          </li>
+        <% end %>
+      </ul>
+      <% if disabled_form %></fieldset><% end %>
+      <% end %>
+
+    </div>
+      <% if @has_source %>
+        <%= render partial: 'general_selections/definitions_block', locals: {item_type: general_selection_source_name(form_object_instance), value: form_object_instance.source} %>
+      <% end %>
+
+      <% select_desc.each do |k,v| %>
+        <%= render partial: 'general_selections/definitions_block', locals: {item_type: k, value: v} %>
+      <% end %>
+
+<% unless embedded %>
+  </div>
+</div>
+<% end %>

@@ -1,0 +1,69 @@
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">
+<h1>General Selections</h1>
+
+<p>
+    <%= show_filters %>
+</p>
+
+
+<div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
+
+<table class="table tablesorter admin-list">
+  <thead>
+    <tr>
+      <th class="no-sort"></th>
+      <th>Name</th>
+      <th>Value</th>
+      <th>Item type</th>
+      <th>Disabled</th>
+      <th>Create</th>
+      <th>Lock</th>
+      <th>Edit - if set</th>
+      <th>Edit - always</th>
+      <th>Admin</th>
+
+    </tr>
+  </thead>
+
+  <tbody>
+    <% objects_instance.each do |list_item| %>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+        <td class="edit-btn-cell"><%= admin_edit_btn list_item.id%> &nbsp; <%= admin_edit_btn list_item.id, copy: list_item%>  </td>
+        <td style="white-space: nowrap;"><%= list_item.name %></td>
+        <td><%= list_item.value %></td>
+        <td><%= list_item.item_type %></td>
+
+        <td><%= list_item.disabled ? 'disabled' : ''%></td>
+        <td><%= list_item.create_with ? 'create' : ''%></td>
+        <td><%= list_item.lock ? 'lock' : ''%></td>
+        <td><%= list_item.edit_if_set ? 'edit (if set)' : ''%></td>
+        <td><%= list_item.edit_always ? 'edit (always)' : ''%></td>
+        <td><%= list_item.admin_name %></td>
+      </tr>
+      <% unless list_item.description.blank? %>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%> protocol-event-description">
+          <td colspan="2"></td>
+          <td colspan="8">
+            <pre><%= list_item.description %></pre>
+          </td>
+
+      </tr>
+      <% end %>
+
+    <% end %>
+  </tbody>
+</table>
+
+<h4>Flag definitions:</h4>
+<dl><dt>Disabled</dt><dd>Can not be selected for edit, create or search by end users.</dd></dl>
+<dl><dt>Create</dt><dd>Shown in list during creation of a new item.</dd></dl>
+<dl><dt>Lock</dt><dd>Prevents change when editing an item if this value was previously set. Can be used alone to ensure that bulk loaded items can be edited correctly but this field can't be changed.</dd></dl>
+<dl><dt>Edit - if set</dt><dd>When editing, show this value in the list if the value already set. Otherwise it will not appear. This allows for old data to be enhanced if possible, while not necessitating a change. This also ensures that users can not edit an item to use this value if it was not already being used.</dd></dl>
+<dl><dt>Edit - always</dt><dd>When editing, always show this value in the list.</dd></dl>
+
+<br>
+
+<%=  render partial: 'admin_handler/index_actions'  %>
+  </div>
+</div>

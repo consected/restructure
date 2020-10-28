@@ -1,0 +1,10 @@
+Description:
+    Generate handler code for External ID management, much like Scantrons.
+
+
+Example:
+    rails generate external_id_handler ExternalName
+
+    This will create:
+        models/external_name.rb
+        controllers/external_names_controller.rb

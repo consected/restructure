@@ -1,0 +1,42 @@
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">
+<h1>Configurations</h1>
+<p>
+  <%= show_filters %>
+</p>
+<div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
+
+<table class="table tablesorter admin-list">
+  <thead>
+    <tr>
+      <th class="no-sort"></th>
+      <th>App Type</th>
+      <th>Name</th>
+      <th>Value</th>
+      <th>Role Override</th>
+      <th>User Override</th>
+      <th>Disabled</th>
+      <th>Last Admin Update</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% objects_instance.each do |list_item| %>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+        <td><%= admin_edit_btn list_item.id%> </td>
+        <td><%= list_item.app_type.name %></td>
+        <td><%= list_item.name %></td>
+        <td><%= list_item.value %></td>
+        <td><%= list_item.role_name %></td>
+        <td><%= list_item.user.email if list_item.user %></td>
+        <td><%= list_item.disabled ? 'disabled' : ''%></td>
+
+        <td><%= list_item.admin_name %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%=  render partial: 'admin_handler/index_actions'  %>
+  </div>
+</div>

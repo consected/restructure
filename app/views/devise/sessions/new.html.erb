@@ -1,0 +1,37 @@
+<div class="login-block center-block well" style="max-width: 400px">
+  <h2>
+    Log in <% if resource_name == :admin %><b>as Administrator</b><% elsif params[:redirect_from_secure] == 'true' && resource_name == :user %><b>as User</b><% end %>
+  </h2>
+
+  <% if Settings::LoginMessage %><div class="well login-message"><%= Settings::LoginMessage.html_safe %></div><% end %>
+
+  <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+    <div class="form-group-non">
+      <%= f.label :email %><br />
+      <%= f.email_field :email, autocomplete: "username", autofocus: true, class: 'form-control', required: true %>
+    </div>
+
+    <div class="form-group-non">
+      <%= f.label :password %><br />
+      <%= f.password_field :password, autocomplete: "current-password", class: 'form-control', required: true %>
+    </div>
+
+    <% unless Settings::TwoFactorAuthDisabled %>
+    <div class="form-group-non">
+      <%= f.label :otp_attempt, 'Two-Factor Authentication Code' %><br />
+      <%= f.text_field :otp_attempt, autocomplete: "off", inputmode: "numeric", minlength: "6", maxlength: "6", class: 'form-control', value: '', pattern: "\\d{6}" %>
+    </div>
+    <% end %>
+    <%= hidden_field_tag :secure_entry, params[:secure_entry] if request.path.start_with?('/admins/sign_in') %>
+
+
+    <div class="" style="margin: 0.8em 0;">
+        <%= f.submit "Log in", class: 'btn btn-primary' %>
+    </div>
+
+  <% end %>
+  <p class="forgot-password"><%=link_to "Forgotten password or trouble logging in?", Settings::LoginIssuesUrl, target: "_blank" %></p>
+  <p><br/></p>
+  <p class="version-info">FPHS database app. Version <%=Application.version%></p>
+
+</div>

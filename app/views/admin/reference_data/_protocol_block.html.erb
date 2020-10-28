@@ -1,0 +1,42 @@
+<div class="ref-data-protocol-events">
+      <p><a class="glyphicon glyphicon-info-sign" href="#p-help" class="collapsed" data-toggle="collapse"></a></p>
+      <div class="help-block collapse" id="p-help">
+        <p>
+        Protocol: ml_app.protocols<br/> 
+        Status: ml_app.sub_processes<br/> 
+        Method: ml_app.protocol_events
+        </p>
+        <p>
+          Use a protocol, status or method lookup directly against a master record. For example, to find a player who has ever had a status of 144 or 24:
+        </p>
+        <p><code>
+            select distinct pi.* from player_infos pi inner join tracker_history th on th.master_id = pi.master_id<br />
+            where sub_process in (144, 24);
+          </code></p>
+        <p>Since each status (sub_process) for a tracker / tracker history record belongs to a specific protocol, there is no need to explicitly state the protocol_id for simple matches.</p>
+        <p>Similarly, since each method (protocol_event) for a tracker / tracker history record belongs to a specific sub_process and subsequently protocol, there is no need to explicitly state the protocol_id or sub_process_id for simple matches.</p>
+        <p>When using the attributes definer to create a search form, select the <strong>type</strong> as 'tracker protocol', 'tracker status (sub process) or 'tracker method (protocol event)'. The appropriate set of selections (tracker methods for example) will be automatically presented in a drop down or multiple selection field, based on the selection for <strong>single or multiple values</strong>.</p>
+        <p>Reference the user selection in SQL using the name of the field, prefixed with a colon. For example, when the attribute <strong>name</strong> <code>must_have_protocol</code> is entered, use:</p>
+        <p><code>
+            select * from tracker_history where protocol_id in (:must_have_protocol)
+          </code></p>
+
+      </div>
+      <ul id="protocols-list" style="overflow: auto; background-color: white;">
+        <% Classification::Protocol.all.sort.each do |p| %>
+        <li id="protocol-<%=p.id%>">
+          <a href="#pblock-<%=p.id%>" data-toggle="collapse" class="collapsed" style="color: <%= p.disabled ? '#aaa' : 'auto' %>"><%=p.id%> - <%= p.name %></a>
+        </li>
+        <ul id="pblock-<%=p.id%>" class="collapse">
+          <% p.sub_processes.all.each do |sp| %>
+          <li style="color: <%= p.disabled || sp.disabled ? '#aaa' : 'auto' %>" data-protocol-id="<%=p.id%>" id="sub_process-<%=sp.id%>"><%=sp.id%> - <%= sp.name %></li>
+          <ul>
+            <% sp.protocol_events.all.each do |pe| %>
+            <li style="color: <%= p.disabled || sp.disabled || pe.disabled ? '#aaa' : 'auto' %>" data-sub-process-id="<%=sp.id%>" id="protocol_event-<%=sp.id%>"><%=pe.id%> - <%= pe.name %></li>
+            <% end %>
+          </ul>
+          <% end %>
+        </ul>
+        <% end %>
+      </ul>
+</div>

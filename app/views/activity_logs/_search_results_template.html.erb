@@ -1,0 +1,3 @@
+<% ActivityLog.active_model_configurations.each do |m| %>
+<%= render partial: 'activity_logs/search_results_template_item', locals: { def_record: m } %>
+<% end%>

@@ -1,0 +1,41 @@
+<div class="data-results">
+  <div data-result="admin-edit-form-"  class="admin-edit-form">
+<%= form_for(object_instance, url: [:admin_manage, object_instance], class: "inline-form", remote: true) do |f| %>
+  <%= render partial: 'admin_handler/form_errors' %>
+  <div class="form-group">
+    <%= f.label :email %>
+    <%=f.email_field :email, required: true%>
+  </div>
+  <div class="form-group">
+    <%= f.label :first_name %>
+    <%=f.text_field :first_name, required: true%>
+  </div>
+  <div class="form-group">
+    <%= f.label :last_name %>
+    <%=f.text_field :last_name, required: true%>
+  </div>
+  <div class="form-group">
+    <%= f.check_box :disabled %>
+    <%= f.label :disable %>
+  </div>
+  <% if object_instance.id %>
+  <div class="form-group">
+    <%= check_box_tag :gen_new_pw%>
+    <%= label_tag :gen_new_pw, 'Generate new password' %>
+  </div>
+  <div class="form-group">
+    <%= check_box_tag :reset_two_factor_auth%>
+    <%= label_tag :reset_two_factor_auth, 'Reset two factor auth' %>
+  </div>
+  <div class="form-group">
+    <%= f.check_box :do_not_email%>
+    <%= label_tag :do_not_email, 'Do not email' %>
+  </div>
+  <%end%>
+  <div class="form-group">
+    <%= hidden_filter_fields %>
+    <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
+  </div>
+<% end %>
+  </div>
+</div>

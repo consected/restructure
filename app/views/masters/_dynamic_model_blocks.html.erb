@@ -1,0 +1,45 @@
+<%
+unless defined? panel
+  panel = nil
+end
+
+unless defined?(force_load)
+  force_load
+end
+
+unless defined? orientation
+  orientation = nil
+end
+
+category_models.each do |m|
+
+  if viewable  [m.resource_name.to_sym]
+    po = panel&.view_options&.orientation
+
+    orientation ||= po == 'horizontal' || (DynamicModel.orientation(category) == :horizontal) ? 'horizontal' : po
+
+    if orientation.in?(['columns'])
+%>
+      <div class="col-md-6 common-template-list dynamic-model-list category-<%=category%> orientation-<%=orientation%> sublist-column" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+
+<%
+    elsif orientation && orientation != 'none'
+%>
+      <div class="row common-template-list dynamic-model-list resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+    <% else %>
+    <div class="<%= layout_item_block_sizes[:regular] %> orientation-<%=orientation%> sublist-column">
+      {{>sublist_controls sub_list="<%=m.full_item_types_name%>" order='asc'}}
+      <div class="dynamic-container do-not-resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+    </div>
+<%
+    end
+    if force_load
+      # Force the new dynamic models to load in the details panel, which they wouldn't do otherwise
+%>
+    <div class="on-open-click hidden">
+      <a href="<% if m.foreign_key_name.present? %>/masters/{{id}}<% end %>/dynamic_model/<%=m.implementation_model_name.pluralize%>" data-result-target="#<%=m.full_item_types_name%>-{{id}}-" data-template="<%=m.implementation_model_name.hyphenate.pluralize%>-list-template" data-remote="true"  data-open-priority="<%= force_load == true ? 1000 : force_load %>"><%=m.name%></a>
+    </div>
+<%  end
+  end
+end
+%>

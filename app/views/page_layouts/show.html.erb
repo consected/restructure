@@ -1,0 +1,34 @@
+<%
+container = @page_layout.container
+rows = container.rows || []
+@outer_block_id = "standalone-page-container-#{SecureRandom.hex}"
+
+outer = "##{@outer_block_id}"
+if @page_layout.view_css.classes
+  res = @page_layout.view_css.classes.map {|c, v|
+    styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
+    "#{outer} .#{c} \{  #{styles.join(' ')}\}"
+  }
+end
+if @page_layout.view_css.selectors
+  res ||= []
+  res += @page_layout.view_css.selectors.map {|c, v|
+    styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
+    "#{outer} #{c} \{  #{styles.join(' ')}\}"
+  }
+end
+if res
+  res = res.join("\n")
+%>
+<style>
+<%= res.html_safe %>
+</style>
+<% end %>
+
+<div id="standalone-page">
+  <div class="standalone-page-container container-fluid" id="<%=@outer_block_id%>" data-page-layout-id="<%=@page_layout.id%>">
+    <div class="sp-main">
+      <%= render partial: 'show_row', locals: {rows: rows, container: container} %>
+    </div>
+  </div>
+</div>

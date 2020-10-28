@@ -1,0 +1,95 @@
+<%
+  unless defined? embedded
+    embedded = false
+  end
+
+  shown_embedded = false
+
+  if !embedded && @option_type_config && @option_type_config.references
+    # Get the creatable references and work out what we can show based on the items that can be created
+    # only_creatables = object_instance.creatable_model_references only_creatables: true
+    ocmr = object_instance.creatable_model_references
+    creatable_references = @option_type_config.references.select {|ref_key| ocmr[ref_key] && ocmr[ref_key].length > 0 }
+    creatable_count = creatable_references.length
+
+    if action_name.in?( ['new', 'edit']) && !@embedded_item
+      # In new or edit mode we only list the items that can be created after saving. The _reference_actions partial
+      # is responsible for the display of the list. The following line shows the caption that explains the list to the user
+%>
+    <li class="list-group-item is-full-width save-the-form-ref-message">
+      <b>Save the form to be able to <%= creatable_count == 0 ? "view" : "create" %>:</b>
+    </li>
+    <% end %>
+
+    <%
+      # For each of the creatable references, show the appropriate actions (either the static list, or the items that can be edited)
+    if @embedded_item && action_name == 'new'
+
+      creatable_references.each do |ref_key, refitem|
+          refitem.each do |ref_type, ref_config|
+          shown_embedded = true
+          %>
+          <%= render partial: 'common_templates/reference_actions',  locals: {name: "#{object_instance.class.name.ns_underscore}", ref_type: ref_type, caption: ref_config[:to_record_label], block_id: "#{object_instance.class.name.ns_underscore.hyphenate}-#{ref_type}", id: object_instance.id, master_id: object_instance.master_id, form_embed: form_embed, ref_config: ref_config} %>
+          <%
+          break
+        end
+        break
+      end
+
+    elsif !@embedded_item #&& action_name = 'new'
+
+      creatable_references.each do |ref_key, refitem|
+        refitem.each do |ref_type, ref_config| %>
+        <%= render partial: 'common_templates/reference_actions',  locals: {name: "#{object_instance.class.name.ns_underscore}", ref_type: ref_type, caption: ref_config[:to_record_label], block_id: "#{object_instance.class.name.ns_underscore.hyphenate}-#{ref_type}", id: object_instance.id, master_id: object_instance.master_id, form_embed: form_embed, ref_config: ref_config} %>
+    <%  end
+      end
+    end %>
+
+    <%
+      # For each of the references that have been created, viewable or not, show the appropriate section
+      object_instance.model_references.each do |model_reference|
+
+       unless @embedded_item
+         # if there a no creatable items left to create and we are currently in the new or edit form
+         if action_name.in?(['new', 'edit']) && creatable_count == 0
+     %>
+          <li class="list-group-item <%= object_instance.class.name.ns_hyphenate%>-model-references in-item-model-references is-full-width ref-new-edit ref-no-creatables">
+            <span class="small">
+              <%
+                # if this reference is viewable then view it
+                if model_reference.to_record_viewable
+                  unless action_name.in? ['new', 'edit']
+                    # Do we ever get here?
+               %>
+                  <a id="" href="/masters/<%= model_reference.to_record_master_id %>/<%= model_reference.to_record_type_us.ns_pathify.pluralize %>/<%= model_reference.to_record_id %>" data-template="<%= model_reference.to_record_short_type_us.hyphenate %>-result-template" data-result-target-force="true" data-result-target="#<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id %>-<%= model_reference.to_record_id %>" data-remote="true" class="glyphicon glyphicon-triangle-bottom view-item"></a>
+                <% end %>
+                <i><%= model_reference.to_record_label %></i>
+                <% unless action_name.in?(['new', 'edit']) %><%= model_reference.to_record_data %><% end %>
+              <% else %>
+                <span class="glyphicon glyphicon-ban-circle"></span>
+                <i><%= model_reference.to_record_label %></i>
+              <% end %>
+            </span>
+          </li>
+    <%
+         end
+       end # unless @embedded_item
+       if model_reference.to_record_viewable
+     %>
+        <div class="model-reference-result <%= @embedded_item ? 'embedded-item' : 'not-embedded-item' %> is-in-edit-form" >
+          <div id="<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id %>-<%= model_reference.to_record_id%>" class="model-reference-result" data-result-target-for-child="#<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id%>-<%= model_reference.to_record_id %>, #<%= model_reference.to_record_type_us.ns_hyphenate%>-<%= model_reference.to_record_master_id%>-<%= object_instance.id%>-<%= model_reference.to_record_id%>"  data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" data-subscription="<%= model_reference.to_record_short_type_us.ns_hyphenate%>-edit-form-<%= model_reference.to_record_master_id%>-<%= model_reference.to_record_id%>" data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" data-form-container="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" >
+            <%
+              if @embedded_item && !shown_embedded
+                r = @option_type_config.model_reference_config(model_reference)
+                view_as_edit = r && r.first && r.first.last[:view_as] && r.first.last[:view_as][:edit]
+                dis = view_as_edit  == 'readonly'
+                no_show = (view_as_edit == 'hide') && action_name == 'edit'
+                shown_embedded = true
+            %>
+              <%= render partial: 'common_templates/edit_form', locals: {embedded: true, form_embed: form_embed, disabled_form: dis  } unless no_show %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>

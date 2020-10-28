@@ -1,0 +1,19 @@
+<div class="data-results">
+  <div data-result="<%= flag_edit_form_id %>">
+    <div class="">
+
+      <%=form_for(:item_flag, flag_edit_form_hash ) do |f|%>
+        <div class=" item-flags_item_flag_id">
+
+            <%= collection_select(:item_flag, :item_flag_name_id, item_flags_array, :id, :name, {selected: flags_selected}, multiple: true) %>
+        </div>
+
+        <div class="form-group">
+            <%= flag_inline_cancel_button %>
+          <%= f.submit class: "btn btn-primary" %>
+        </div>
+      </ul>
+      <% end %>
+    </div>
+  </div>
+</div>

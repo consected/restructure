@@ -1,0 +1,23 @@
+.user-app-list {
+  p {
+    margin-bottom: 0px;
+  }
+
+  span {
+    border: 1px solid #d6d6d6;
+    border-radius: 3px;
+    padding: 0 3px;
+    margin: 1px 2px;
+    display: inline-block;
+    color: #585858;
+    background: whitesmoke;
+  }
+}
+
+.edit_admin_page_layout .form-group[data-out-attr-name="description"] {
+  display: block;
+}
+
+td.edit-btn-cell {
+  min-width: 80px;
+}

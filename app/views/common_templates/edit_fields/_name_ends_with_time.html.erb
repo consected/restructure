@@ -1,0 +1,8 @@
+<%= form.label field_name_sym, label_for(field_name_sym, labels) %>
+<%
+  val = form_object_instance.attributes[field_name]
+  if val.present? && val.is_a?(Time)
+    val = val.strftime('%l:%M%P')
+  end
+%>
+<%= form.text_field field_name_sym, value: val, data: {attr_name: field_name_sym, object_name: form_object_item_type_us}, class: "time-entry" %>

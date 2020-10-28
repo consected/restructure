@@ -1,0 +1,7 @@
+<div class="item-flags-block">
+  <%= f.fields_for :item_flags, @item_flag, child_index: 0 do |f_flag| %>
+    <div class="item-flags_item_flag_id">
+        <%= collection_select(:item_flag, :item_flag_name_id, item_flags_array, :id, :name, {selected: flags_selected(object_instance)}, multiple: true) %>
+    </div>
+  <% end %>
+</div>

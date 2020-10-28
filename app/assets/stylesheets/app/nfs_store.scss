@@ -1,0 +1,122 @@
+.upload-dropzone {
+  min-height: 100px;
+  padding-top: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-bottom: 0px;
+  // border: 0 !important;
+  margin: -3px;
+}
+
+.browse-container {
+  border: 1px solid rgb(221, 221, 221);
+}
+
+.common-template-item .browse-container {
+  border: none;
+}
+
+.browse-controls {
+  background: rgb(243, 243, 243);
+  padding: 6px 4px;
+  margin-top: -10px;
+}
+
+.container-heading-block {
+  border-bottom: 1px solid rgb(221, 221, 221);
+  padding-top: 1px;
+}
+
+.container-browser {
+  border: 0;
+  max-height: 40vh;
+  border-bottom: 1px solid rgb(221, 221, 221);
+}
+
+.container-heading-block {
+  background: rgb(243, 243, 243);
+  padding-left: 16px;
+  h4 {
+    font-size: 16px;
+  }
+  .container-id-label {
+    display: none;
+  }
+  a.refresh-container-list {
+    position: relative;
+    margin-top: -26px;
+    float: right;
+    margin-right: 6px;
+  }
+}
+
+.file-block.well {
+  margin: 8px 16px;
+
+  .progress,
+  .file-name {
+    float: none;
+    width: auto;
+  }
+  .progress {
+    margin-top: 6px;
+  }
+
+  .close:hover {
+    cursor: pointer;
+  }
+}
+
+li.list-group-item.filestore-classification-stored-file-full-title strong {
+  text-transform: capitalize;
+}
+
+.container-entry .browse-entry-classifications {
+  span {
+    margin-left: 0em;
+  }
+
+  .bem-classification-attrs > span {
+    display: inline-block;
+    margin-left: 1em;
+  }
+
+  .bem-class-title {
+    text-transform: capitalize;
+  }
+
+  .item-flags-block {
+    margin-top: 0px;
+    display: inline-block;
+
+    .chosen-container-multi .chosen-choices {
+      background: none;
+      border: 0;
+
+      li.search-field {
+        display: none;
+      }
+    }
+
+    div.chosen-container.chosen-disabled li.search-choice {
+      background: rgb(243, 243, 243);
+      margin: 0;
+      padding: 2px;
+
+      > span {
+        margin-left: 2px;
+      }
+    }
+  }
+}
+
+#nfs_store_manage_stored_file_title,
+#nfs_store_manage_archived_file_title {
+  width: 98.7%;
+}
+
+.download-actions .dropdown-menu {
+  a[disabled] {
+    color: gray;
+  }
+}

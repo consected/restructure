@@ -1,0 +1,7 @@
+<% DynamicModel.active_model_configurations.each do |m| %>
+  <%= render partial: 'dynamic_models/common_search_results_template_item', 
+             locals: { 
+               def_record: m,
+               option_type_config: m.default_options
+              } %>
+<% end %>
