@@ -68,6 +68,7 @@
        {{#each extra_data_attribs}}data-{{hyphenate this}}={{lookup ../result_data this}}{{/each}} 
        data-human-name="{{>show_result_caption result_data=result_data}}"
        data-view-handlers="{{join template_config.view_options.view_handlers ' '}}"
+       data-def-version="{{def_version}}"
        >
   {{/was}}
   {{#caption_before_substitutions result_data }}

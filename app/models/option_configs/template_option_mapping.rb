@@ -1,11 +1,14 @@
+# frozen_string_literal: true
+
 module OptionConfigs
   #
   # Map options to a format consumable by view templates
   # This is a stopgap until dynamic model and activity log definitions
   # are fully aligned
   class TemplateOptionMapping
-    def self.dynamic_model_mapping def_record, option_type_config, current_user
-      field_list = def_record.field_list_array.present? ? def_record.field_list_array : def_record.default_field_list_array
+    def self.dynamic_model_mapping(def_record, option_type_config, current_user)
+      dfla = def_record.field_list_array
+      field_list = dfla.present? ? dfla : def_record.default_field_list_array
 
       item_list = field_list.dup
 
@@ -44,7 +47,7 @@ module OptionConfigs
       }
     end
 
-    def self.activity_log_mapping def_record, option_type_config, current_user
+    def self.activity_log_mapping(def_record, option_type_config, current_user)
       view_options = option_type_config.view_options || {}
 
       if def_record.hide_item_list_panel
@@ -77,7 +80,11 @@ module OptionConfigs
         button_label: option_type_config.button_label,
         prevent_edit: !(current_user.has_access_to? :edit, :table, def_record.full_item_type_name.pluralize),
         prevent_create: !(current_user.has_access_to? :create, :table, def_record.full_item_type_name.pluralize),
-        only_see_presence: current_user.has_access_to?(:see_presence, :activity_log_type, option_type_config.resource_name),
+        only_see_presence: current_user.has_access_to?(
+          :see_presence,
+          :activity_log_type,
+          option_type_config.resource_name
+        ),
         extra_class: "alt-width #{cwc} #{view_options[:extra_class]}",
         item_list: option_type_config.fields,
         data_sort: [:desc, data_action_when],
@@ -87,7 +94,8 @@ module OptionConfigs
         implementation_class_name: def_record.item_type_name,
         item_blocks: { def_record.item_type.to_sym => def_record.implementation_class.parent_data_names },
         show_created_at: true,
-        edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{def_record.item_type.pluralize}/{{item_id}}/{{/if}}activity_log/#{def_record.item_type_name.pluralize}/{{id}}/edit",
+        edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{def_record.item_type.pluralize}/"\
+                          "{{item_id}}/{{/if}}activity_log/#{def_record.item_type_name.pluralize}/{{id}}/edit",
         caption_before: option_type_config.caption_before,
         dialog_before: option_type_config.dialog_before,
         item_flags_after: 'notes',
@@ -101,7 +109,7 @@ module OptionConfigs
       }
     end
 
-    def self.activity_log_all_configs_mapping def_record, current_user
+    def self.activity_log_all_configs_mapping(def_record, current_user)
       {
         def_record: def_record,
         def_version: def_record.def_version,

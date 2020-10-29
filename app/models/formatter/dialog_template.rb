@@ -14,7 +14,9 @@ module Formatter
       mt = Admin::MessageTemplate.active.dialog_templates.where(name: name).first
       raise FphsException.new "Dialog template '#{name}' not found" unless mt
 
-      versioned_mt = mt.versioned(item.created_at)
+      # Get the versioned message template, or use the
+      # current one if there is no corresponding version
+      versioned_mt = mt.versioned(item.created_at) || mt
 
       all_content = versioned_mt.template.dup
       all_content = Formatter::Substitution.text_to_html(all_content)

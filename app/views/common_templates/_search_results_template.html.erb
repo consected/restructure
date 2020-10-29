@@ -4,6 +4,8 @@
    def_version = nil
   end
 
+  vdef_version = "v#{def_version}"
+
   unless defined? caption
     caption = nil
   end
@@ -214,7 +216,7 @@
   end
 %>
 
-<script>
+<script id="fpa_state_config--<%=name.underscore%>--v<%=def_version%>">
 
   _fpa.state.caption_before.<%=name.underscore%> = _fpa.state.caption_before.<%=name.underscore%> || {};
   _fpa.state.caption_before.<%=name.underscore%>.v<%=def_version%> = <%= caption_before.to_json.html_safe %>;
@@ -224,7 +226,7 @@
   _fpa.state.template_config.<%=name.underscore%> = _fpa.state.template_config.<%=name.underscore%> || {};
   _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>  = {
     def_version: <%= def_version || 'null' %>,
-    vdef_version: 'v<%= def_version %>',
+    vdef_version: '<%= vdef_version %>',
     name: '<%=name%>',
     full_name: '<%=full_name%>',
     caption: Handlebars.compile('<%=caption%>'),
@@ -266,8 +268,12 @@
     user_file_actions: <%= user_file_actions.to_json&.html_safe %>
   }
 
-  <% if full_name.to_s.end_with?('_primary') %>_fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = <% end %>
-    _fpa.show_if.forms['<%=full_name%>'] = <%= show_if.to_json.html_safe %>;
+  _fpa.show_if.forms['<%=full_name%>'] = _fpa.show_if.forms['<%=full_name%>'] || {};
+  <% if full_name.to_s.end_with?('_primary') %>
+  _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] || {};
+  _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'].<%=vdef_version%> = 
+  <% end %>
+  _fpa.show_if.forms['<%=full_name%>'].<%=vdef_version%> = <%= show_if.to_json.html_safe %>;
 
 </script>
 
