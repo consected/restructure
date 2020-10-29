@@ -16,15 +16,19 @@ _fpa.show_if.methods = {
 
     var item_key = data.item_type;
     var form_key = data.full_option_type;
+    var def_version = block.attr('data-def-version');
+    var vdef_version = 'v';
+    if (def_version) vdef_version += def_version;
+
     if (!form_key && data.option_type && data.option_type != 'default') form_key = item_key + '_' + data.option_type;
     if (!form_key) form_key = item_key;
     if (!item_key) return;
 
-    var obj = _fpa.show_if.forms[form_key];
-    if (obj) {
-      for (var show_field in obj) {
-        if (obj.hasOwnProperty(show_field)) {
-          _fpa.show_if.methods.show_item(block, data, item_key, show_field, form_key);
+    if (_fpa.show_if.forms[form_key] && _fpa.show_if.forms[form_key][vdef_version]) {
+      var form_obj = _fpa.show_if.forms[form_key][vdef_version];
+      for (var show_field in form_obj) {
+        if (form_obj.hasOwnProperty(show_field)) {
+          _fpa.show_if.methods.show_item(block, data, item_key, show_field, form_key, form_obj);
         }
       }
     }
@@ -46,12 +50,10 @@ _fpa.show_if.methods = {
 
   },
 
-  show_item: function (block, data, form_name, field_name, form_key) {
+  show_item: function (block, data, form_name, field_name, form_key, form_obj) {
 
-    var obj = _fpa.show_if.forms[form_key];
-
-    if (obj) {
-      var field_def_init = obj[field_name];
+    if (form_obj) {
+      var field_def_init = form_obj[field_name];
 
       var cond_success = _fpa.show_if.methods.calc_conditions(field_def_init, data);
 
@@ -112,7 +114,6 @@ _fpa.show_if.methods = {
       // If the definition is a hash and it has a condition type specified, use the key
       // as the condition type, and the inner value as the condition definition
       if (cond_def_init.hasOwnProperty(cond_type) && typeof (cond_def_init[cond_type]) == 'object' && !Array.isArray(cond_def_init[cond_type])) {
-        // console.log(cond_type)
         for (var ci in cond_types) {
           var cv = cond_types[ci];
           if (cond_type.indexOf(cv) === 0) {
