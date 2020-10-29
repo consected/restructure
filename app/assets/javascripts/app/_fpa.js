@@ -183,7 +183,10 @@ _fpa = {
       var list_data_items = [];
       var list_data_item_state_ids = [];
 
-      if (_fpa.non_versioned_template_types.indexOf(data_type)) continue;
+      if (_fpa.non_versioned_template_types.indexOf(data_type)) {
+        resolve();
+        return;
+      };
 
       for (var k in data_array) {
         if (!data_array.hasOwnProperty(k)) continue;
