@@ -75,7 +75,7 @@ module Messaging
       if data.blank?
         raise FphsException, 'Data is blank and item_type / item_id does not return an item' unless item
 
-        data = Admin::MessageTemplate.setup_data item, for_item
+        data = Formatter::Substitution.setup_data item, for_item
         data[:_subject] = subject
         data[:extra_substitutions] = extra_substitutions_data
 
@@ -233,7 +233,7 @@ module Messaging
         # Once the notifications have been sent, fire the on_complete triggers
         if for_item
           for_item.current_user = for_item.user
-          ExtraLogType.calc_save_triggers for_item, on_complete_config
+          OptionConfigs::ActivityLogOptions.calc_save_triggers for_item, on_complete_config
         end
 
         logger.info "Handled item #{id}"

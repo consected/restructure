@@ -67,3 +67,5 @@ bin/parallel_spinach
 bin/rails
 bin/rake
 bin/rspec
+
+.vscode

@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class ActivityLog < ActiveRecord::Base
-  include DynamicModelDefHandler
+  include Dynamic::VersionHandler
+  include Dynamic::MigrationHandler
+  include Dynamic::DefHandler
   include AdminHandler
   include SelectorCache
 
@@ -35,6 +37,21 @@ class ActivityLog < ActiveRecord::Base
     'Activity'
   end
 
+  # Class that implements options functionality
+  def self.options_provider
+    OptionConfigs::ActivityLogOptions
+  end
+
+  # Don't allow empty extra log types.
+  def self.allow_empty_options
+    false
+  end
+
+  # Attribute holding option configs text
+  def self.option_configs_attr
+    :extra_log_types
+  end
+
   def human_name
     name
   end
@@ -66,58 +83,8 @@ class ActivityLog < ActiveRecord::Base
     enabled.where(item_type: item_type).all.map(&:rec_type)
   end
 
-  def self.reset_extra_log_type_resource_names!
-    @extra_log_type_resource_names = nil
-  end
-
-  # Get all the resource names for extra log types in all active activity log definitions
-  # Used by user access control definitions and filestore filters
-  # @param [Proc] an optional block may be passed to allow filtering based on values in the extra log type config for each entry
-  # => for example: extra_log_type_resource_names {|e| e && e.references && e.references[:nfs_store__manage__container]}
-  # @return [Array] array of string names
-  def self.extra_log_type_resource_names(&block)
-    res = []
-
-    @extra_log_type_resource_names ||= active_model_configurations.map(&:extra_log_type_configs)
-
-    @extra_log_type_resource_names.each do |a|
-      elts = if block_given?
-               a.select(&block)
-             else
-               a
-             end
-      res += elts.map(&:resource_name)
-    end
-
-    res
-  end
-
   def blank_log_enabled?
     !blank_log_field_list.blank?
-  end
-
-  def extra_log_type_configs(force: false)
-    @extra_log_type_configs = nil if force
-    @extra_log_type_configs ||= ExtraLogType.parse_config(self)
-  end
-
-  def extra_log_type_valid?
-    ExtraLogType.parse_config(self)
-    true
-  rescue StandardError
-    false
-  end
-
-  def force_option_config_parse
-    return if disabled?
-
-    res = extra_log_type_configs force: true
-
-    # Check if any of the configs were bad
-    bad_configs = res.select { |c| c.bad_ref_items.present? }
-    raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?
-
-    res
   end
 
   # return the activity log implementation class that corresponds to
@@ -152,7 +119,7 @@ class ActivityLog < ActiveRecord::Base
     # al_cn = al_cn.camelize
     begin
       # Make sure we get this through checking the model names to avoid security weakness of using model attribute directly
-      fc_model_name = model_names.select { |c| c == al_cn.to_sym }.first
+      fc_model_name = model_names.select { |c| c == al_cn }.first
       fc = ::ActivityLog.const_get(fc_model_name.to_s.camelize)
       implementation_class = fc
     rescue StandardError => e
@@ -186,7 +153,7 @@ class ActivityLog < ActiveRecord::Base
   # Get a complete list of all fields required to generate a table.
   # The individual field lists may overlap or be distinct. This gets us a usable list
   def all_implementation_fields(ignore_errors: true)
-    res = (view_attribute_list || []) + (view_blank_log_attribute_list || []) + ExtraLogType.fields_for_all_in(self)
+    res = (view_attribute_list || []) + (view_blank_log_attribute_list || []) + OptionConfigs::ActivityLogOptions.fields_for_all_in(self)
     res.uniq
   rescue FphsException => e
     raise e unless ignore_errors
@@ -233,43 +200,22 @@ class ActivityLog < ActiveRecord::Base
     false
   end
 
-  # the list of defined activity log implementation classes
-  def self.implementation_classes
-    @implementation_classes = active_model_configurations.map { |a| "ActivityLog::#{a.item_type_name.classify}".constantize }
-  end
-
   # The selection of possible class names that activity logs could be used with
   # This list is the full list of possible items, and only those configured and read by #works_with are actually available
   # for activity logging
   def self.use_with_class_names
-    (DynamicModel.model_names + ExternalIdentifier.model_names + Master::PrimaryAssociations).map { |m| m.to_s.singularize }
-  end
-
-  # List of item types that can be used to define Classification::GeneralSelection drop downs
-  # This does not represent the actual item types that are valid for selection when defining a new admin activity log record, which
-  # is in fact provided by self.use_with_class_names
-  def self.item_types(refresh: false)
-    Rails.cache.delete('ActivityLog.item_types') if refresh
-
-    Rails.cache.fetch('ActivityLog.item_types') do
-      list = []
-
-      implementation_classes.each do |c|
-        cn = c.attribute_names.select { |a| a.start_with?('select_') || a.start_with?('multi_select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
-        cn.each do |a|
-          list << "#{c.model_name.to_s.ns_underscore}_#{a}".to_sym
-        end
-      end
-
-      list
-    end
+    (
+      DynamicModel.model_names +
+      ExternalIdentifier.model_names +
+      Master::PrimaryAssociations
+    ).map { |m| m.to_s.singularize }
   end
 
   # Open an activity log instance for a user, given a string activity log type and ID
   # Verifies that the user has access to this activity log item
   # @param activity_log_type [String] type string that can be converted to a namespaced camelized class name
   # @param id [Integer] id for the activity log implementation instance
-  # @return [ActivityLogBase]
+  # @return [Dynamic::ActivityLogBase]
   def self.open_activity_log(activity_log_type, id, current_user)
     al_class = activity_log_class_from_type activity_log_type
     activity_log = al_class.find(id)
@@ -292,6 +238,7 @@ class ActivityLog < ActiveRecord::Base
     al_class
   end
 
+  # Set up an association to this class on the Master
   def add_master_association(&association_block)
     return if disabled || !errors.empty?
 
@@ -302,8 +249,14 @@ class ActivityLog < ActiveRecord::Base
       logger.debug "Associated master: has_many #{model_association_name} with class_name: #{full_implementation_class_name}"
       awa = action_when_attribute.to_sym
       awa = :created_at if awa == :alt_order
-      Master.has_many model_association_name, -> { order(awa => :desc, id: :desc) }, inverse_of: :master, class_name: full_implementation_class_name, &association_block
-      # Unlike external_id handlers (Scantron, etc) there is no need to update the master's nested attributes this model's symbol
+      Master.has_many model_association_name,
+                      -> { order(awa => :desc, id: :desc) },
+                      inverse_of: :master,
+                      class_name: full_implementation_class_name,
+                      &association_block
+
+      # Unlike external_id handlers (Scantron, etc) there is no need to update the
+      # master's nested attributes this model's symbol
       # since there is no link to advanced search
       add_parent_item_association
     rescue FphsException => e
@@ -337,7 +290,7 @@ class ActivityLog < ActiveRecord::Base
       Rails.application.routes.draw do
         resources :masters, only: %i[show index new create] do
           m.each do |pg|
-            mn = pg.model_def_name.to_s.pluralize.to_sym
+            mn = pg.implementation_model_name.pluralize.to_sym
             Rails.logger.info "Setting up routes for #{mn}"
 
             ic = pg.item_type.pluralize
@@ -348,6 +301,7 @@ class ActivityLog < ActiveRecord::Base
             get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
             patch "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
             put "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+            get "#{ic}/:item_id/activity_log/#{mn}/:id/template_config", to: "activity_log/#{mn}#template_config"
 
             # used by links to get to activity logs without having to use parent item (such as a player contact with phone logs)
             get "activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
@@ -356,11 +310,13 @@ class ActivityLog < ActiveRecord::Base
             get "activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
             post "activity_log/#{mn}", to: "activity_log/#{mn}#create"
             patch "activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+            get "activity_log/#{mn}/:id/template_config", to: "activity_log/#{mn}#template_config"
+
             # used by item flags to generate appropriate URLs
             begin
-              get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show", as: "activity_log_#{pg.model_def_name}"
+              get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show", as: "activity_log_#{pg.implementation_model_name}"
             rescue StandardError
-              Rails.logger.warn "Skipped creating route activity_log__#{mn}/:id since activity_log_#{pg.model_def_name} already exists?"
+              Rails.logger.warn "Skipped creating route activity_log__#{mn}/:id since activity_log_#{pg.implementation_model_name} already exists?"
             end
           end
         end
@@ -454,7 +410,7 @@ class ActivityLog < ActiveRecord::Base
         end
 
         # Main implementation class
-        a_new_class = Class.new(ActivityLogBase) do
+        a_new_class = Class.new(Dynamic::ActivityLogBase) do
           class << self
             attr_accessor :definition
           end
@@ -538,7 +494,7 @@ class ActivityLog < ActiveRecord::Base
     do_create_or_update = if mode == 'create'
                             'create_activity_log_tables'
                           else
-                            migration_update_fields
+                            migration_generator.migration_update_fields
                           end
 
     <<~CONTENT
@@ -548,7 +504,7 @@ class ActivityLog < ActiveRecord::Base
 
         def change
           self.belongs_to_model = '#{item_type}'
-          #{migration_set_attribs}
+          #{migration_generator.migration_set_attribs}
 
           #{do_create_or_update}
           create_activity_log_trigger
@@ -594,7 +550,7 @@ class ActivityLog < ActiveRecord::Base
     end
 
     # Always performed
-    self.class.reset_extra_log_type_resource_names!
+    self.class.reset_all_option_configs_resource_names!
 
     true
   end

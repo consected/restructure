@@ -43,13 +43,17 @@ module NfsStore
       # @return [nil | String] set to a sub path string such as 'holder123' or 'parentdir/holder123'
       def parent_sub_dir
         upsd = Filesystem.use_parent_sub_dir
-        if upsd
-          setting = Admin::AppConfiguration.find_default_app_config(app_type_id, 'filestore directory id')
-          if setting
-            return "#{setting.value.hyphenate}-#{master.send(setting.value)}"
-          else
-            return "master-#{master_id}"
+        return unless upsd
+
+        setting = Admin::AppConfiguration.find_default_app_config(app_type_id, 'filestore directory id')
+        if setting
+          unless setting.value.in?(Master.alternative_id_fields.map(&:to_s))
+            raise FsException, 'An id name ending with "_id" is expected for "filestore directory id"'
           end
+
+          "#{setting.value.hyphenate}-#{master.send(setting.value)}"
+        else
+          "master-#{master_id}"
         end
       end
 

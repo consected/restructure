@@ -6,6 +6,7 @@
   col_classes = {}
   col_tags = {}
   col_hide = {}
+  show_as = {}
 
   if @report.column_options
     @report.column_options.classes&.each do |k,v|
@@ -19,7 +20,13 @@
     @report.column_options.hide&.each do |k,v|
       col_hide[k] = v
     end
+
+    @report.column_options.show_as&.each do |k,v|
+      show_as[k] = v
+    end
+
   end
+
 
   show_col_comments = @report.view_options&.show_column_comments
   if show_col_comments
@@ -27,6 +34,11 @@
     sn = @report.data_ref_schema_name
 
     tab_col_comments = Admin::MigrationGenerator.column_comments
+  end
+
+  if tn
+    corr_data_dic = @report.view_options&.corresponding_data_dic || tn&.sub("_data", '')
+    data_dic = Admin::MigrationGenerator.data_dic(corr_data_dic, nil_if_empty: true)
   end
 
 %>
@@ -51,6 +63,22 @@
               comment = comment['column_comment'] if comment
             end
             
+            if data_dic
+              comm_attrib = data_dic.find{|dd| dd['variable_name'] == col}
+            end
+
+            comm_attrib_txt = nil
+            if comm_attrib
+              comm_attrib = comm_attrib.dup 
+              domain = comm_attrib['domain']
+              fa = comm_attrib['field_attributes']
+              fn = comm_attrib['field_note']
+              
+              fa = fa.split(' | ').join("<br/>") +'<br/>' if fa.present?
+              fn = "(#{fn})" if fn.present?
+              
+              comm_attrib_txt = "<div><span class=\"domain\">#{domain}</span><br/><span>#{fa}</span>#{fn}</div>"
+            end
         %>
           <th title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="<%=col%>" class="table-header <%= col_classes[@results.fields[i]] %> <%=comment.present? ? 'has-comment' : 'no-comment' %>">
             <p class="table-header-col-type"><%=@report.view_options.humanize_column_names ? col.humanize : col%></p>
@@ -58,10 +86,15 @@
             <% unless @report.view_options.hide_table_names %>
             <p class="small report-table-name" title="<%=result_tables[i] %>"><%=result_tables[i] %></p>
             <% end %>
+            <% end %>
             <% if show_col_comments %>
-            <p class="report-column-comment"><%=result_tables[i] %>
+            <p class="report-column-comment">
             <%= comment %>
             </p>
+            <% if comm_attrib_txt %>
+            <div class="report-column-comment report-column-attribs">
+              <%= comm_attrib_txt.html_safe %>            
+            </div>
             <% end %>
             <% end %>
           </th>
@@ -95,6 +128,11 @@
                 got_nl = (l >= 1)
                 col = col.to_json if col.is_a?(Hash)
                 col_tag ||= 'pre' if got_nl
+
+                if show_as[col_name] == 'url'
+                  col_url_parts = col.scan(/^\[([\w\s\d]+)\]\((.+)\)$/)
+                  col = link_to(col_url_parts.first&.first, col_url_parts&.first&.last, target: '_blank')
+                end
                 
             %><% if got_nl || col_tag%><<%=col_tag%> class="<% if l > 4%>expandable<% end %>"><% end %><%= col %><% if got_nl%></<%=col_tag%>><% end %></td>
           <%  
@@ -115,12 +153,12 @@
           <% end %>
         </td>
         <% end %>
-         <% i = 0 %>
+        <% i = 0 %>
 
-         <% @results.fields.each do |field| %>
-         <td data-col-type="<%=field %>" data-col-table="<%=result_tables[i] %>" class="report-el-was-from-new report-el <%= field == 'id' ? 'report-el-object-id' : '' %>"></td>
-         <%  i += 1 %>
-         <% end %>
+        <% @results.fields.each do |field| %>
+          <td data-col-type="<%=field %>" data-col-table="<%=result_tables[i] %>" class="report-el-was-from-new report-el <%= field == 'id' ? 'report-el-object-id' : '' %>"></td>
+          <%  i += 1 %>
+        <% end %>
 
         </tr>
       </tr>

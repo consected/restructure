@@ -33,13 +33,14 @@ RSpec.describe 'Alternative ID implementation', type: :model do
     expect(PlayerContact.new).to respond_to 'scantron_id='
 
     att = valid_attribs.dup
-
+    # Specify an alternative ID instead of a master_id
     att[:scantron_id] = @sid
+    expect(att.keys).not_to include :master
+    expect(att.keys).not_to include 'master'
 
     pc = PlayerContact.new att
 
     expect(pc.master).to eq @master
-
     pc.master.current_user = @user
 
     expect(pc.save).to be true

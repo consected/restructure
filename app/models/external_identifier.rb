@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class ExternalIdentifier < ActiveRecord::Base
-  include DynamicModelDefHandler
+  include Dynamic::VersionHandler
+  include Dynamic::MigrationHandler
+  include Dynamic::DefHandler
   include AdminHandler
 
   DefaultRange = (1..9_999_999_999).freeze
@@ -28,6 +30,16 @@ class ExternalIdentifier < ActiveRecord::Base
     e.implementation_class
   end
 
+  # Class that implements options functionality
+  def self.options_provider
+    OptionConfigs::ExternalIdentifierOptions
+  end
+
+  # No option configs
+  def self.option_configs_attr
+    nil
+  end
+
   def resource_name
     name
   end
@@ -40,30 +52,6 @@ class ExternalIdentifier < ActiveRecord::Base
     name.ns_underscore.singularize
   end
 
-  # List of item types that can be used to define Classification::GeneralSelection drop downs
-  # This does not represent the actual item types that are valid for selection when defining a new external identifier model record
-  def self.item_types(refresh: false)
-    Rails.cache.delete('ExternalIdentifier.item_types') if refresh
-
-    Rails.cache.fetch('ExternalIdentifier.item_types') do
-      list = []
-
-      implementation_classes.each do |c|
-        cn = c.attribute_names.select { |a| a.start_with?('select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
-        cn.each do |a|
-          list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
-        end
-      end
-
-      list
-    end
-  end
-
-  # the list of defined activity log implementation classes
-  def self.implementation_classes
-    @implementation_classes = active_model_configurations.map { |a| a.model_class_name.classify.to_s.constantize }
-  end
-
   def self.routes_load
     mn = nil
     begin
@@ -74,8 +62,11 @@ class ExternalIdentifier < ActiveRecord::Base
         resources :masters, only: %i[show index new create] do
           m.each do |pg|
             mn = pg
+            pg_name = mn.model_association_name
+
             Rails.logger.info "Setting up routes for #{mn}"
-            resources pg.model_association_name, except: [:destroy]
+            resources pg_name, except: [:destroy]
+            get "#{pg_name}/:id/template_config", to: "#{pg_name}#template_config"
           end
         end
       end
@@ -102,6 +93,7 @@ class ExternalIdentifier < ActiveRecord::Base
     "#{name.humanize.titleize} #{rep_type}"
   end
 
+  # Set up an association to this class on the Master
   def add_master_association
     logger.debug "Add master association for #{self}"
 
@@ -137,7 +129,9 @@ class ExternalIdentifier < ActiveRecord::Base
     else
       Master.has_many model_association_name.to_sym, inverse_of: :master
     end
-    # Now update the master's nested attributes this model's symbol
+
+    # To facilitate the simple and advanced searches on master records
+    # update the master's nested attributes for this model's symbol
     Master.add_nested_attribute model_association_name.to_sym
 
     Master.add_alternative_id_method external_id_attribute
@@ -164,7 +158,7 @@ class ExternalIdentifier < ActiveRecord::Base
         end
 
         # Main implementation class
-        a_new_class = Class.new(UserBase) do
+        a_new_class = Class.new(Dynamic::ExternalIdentifierBase) do
           def self.definition=(d)
             @definition = d
             # Force the table_name, since it doesn't include external_identifer_ as a prefix, which is the Rails convention for namespaced models
@@ -271,7 +265,7 @@ class ExternalIdentifier < ActiveRecord::Base
     do_create_or_update = if mode == 'create'
                             "create_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
                           else
-                            migration_update_fields
+                            migration_generator.migration_update_fields
                           end
 
     <<~CONTENT
@@ -280,7 +274,7 @@ class ExternalIdentifier < ActiveRecord::Base
         include ActiveRecord::Migration::AppGenerator
 
         def change
-          #{migration_set_attribs}
+          #{migration_generator.migration_set_attribs}
 
           #{do_create_or_update}
           create_external_identifier_trigger :#{external_id_attribute}
@@ -327,10 +321,6 @@ class ExternalIdentifier < ActiveRecord::Base
     errors.add :name, 'must be unique' if !disabled && !res.empty?
     res = self.class.active.where(external_id_attribute: external_id_attribute.downcase).where.not(id: id)
     errors.add :external_id_attribute, 'must be unique' if !disabled && !res.empty?
-  end
-
-  def force_option_config_parse
-    # Does nothing, but is triggered on save
   end
 
   def generate_usage_reports

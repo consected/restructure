@@ -6,10 +6,10 @@
   box-shadow: 0 3px 4px 1px #e9e9e9;
 }
 
-.report-results-outer .report-results-block {
-  // background: rgb(255, 255, 255);
-  // border: 1px solid rgb(219, 219, 219);
-}
+// .report-results-outer .report-results-block {
+//   // background: rgb(255, 255, 255);
+//   // border: 1px solid rgb(219, 219, 219);
+// }
 
 .back-to-search-form-btn,
 .show-results-btn {
@@ -206,15 +206,49 @@ textarea.admin-clean-sql {
   white-space: pre;
 }
 
+.ref-table-col-item {
+  .column-fk {
+    color: gray;
+    font-size: 90%;
+  }
+
+  .ref-table-column-name {
+    color: gray;
+    font-size: 90%;
+  }
+}
+
 .glyphicon {
   font-family: "Glyphicons Halflings" !important;
 }
 
-p.report-column-comment {
+.report-column-comment {
   font-weight: normal;
-  font-size: 94%;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+}
+
+.report-column-attribs {
+  .domain {
+    font-weight: bold;
+    font-style: italic;
+  }
 }
 
 th.has-comment {
-  min-width: 150px;
+  min-width: 185px;
+}
+
+.admin-report-info-block .tab-content {
+  background-color: white;
+  padding: 1em;
+  border: 1px solid rgb(221, 221, 221);
+  border-top: 0;
+}
+
+.reference_data .tab-content {
+  background-color: white;
+  padding: 1em;
+  border: 1px solid rgb(221, 221, 221);
+  border-top: 0;
 }

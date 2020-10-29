@@ -30,7 +30,7 @@ module FieldDefaults
       elsif default == 'current_user_role_names'
         res = obj.current_user.user_roles.active.pluck(:role_name)
       elsif default.include? '{{'
-        res = Admin::MessageTemplate.substitute(default, data: obj, tag_subs: nil)
+        res = Formatter::Substitution.substitute(default, data: obj, tag_subs: nil)
       end
     elsif default.is_a? Hash
       ca = ConditionalActions.new default, obj

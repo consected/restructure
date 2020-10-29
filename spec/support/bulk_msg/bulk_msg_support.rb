@@ -7,8 +7,8 @@ module BulkMsgSupport
 
   def self.import_bulk_msg_app
     # Setup the triggers, functions, etc
-    config_dir = Rails.root.join('db', 'app_configs')
-    config_fn = 'bulk-msg_config.yaml'
+    config_dir = Rails.root.join('docs', 'config_tests')
+    config_fn = 'bulk-msg_test_config.yaml'
     SetupHelper.setup_app_from_import 'bulk-msg', config_dir, config_fn
   end
 

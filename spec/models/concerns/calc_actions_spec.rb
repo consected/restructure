@@ -1451,6 +1451,16 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     # We have two references
     expect(@alnor.model_references.count).to eq 3 # two addresses and one activity log
 
+    zcount = @alnor.model_references.select do |mr|
+      mr.to_record.zip&.in?([a2.zip, 'x']) if mr.to_record.respond_to? :zip
+    end .length
+    expect(zcount).to be > 0
+
+    zcount = @alnor.model_references.select do |mr|
+      mr.to_record.extra_log_type == 'xxx' if mr.to_record.respond_to? :extra_log_type
+    end .length
+    expect(zcount).to eq 0
+
     # Since neither match extra_log_type xxx, not_all results in true
     res = ConditionalActions.new conf, @alnor
     expect(res.calc_action_if).to be true
@@ -2074,6 +2084,7 @@ RSpec.describe 'Calculate conditional actions', type: :model do
   it 'finds parent_references' do
     new_al0 = create_item
     new_al0.extra_log_type = 'blank'
+    expect(new_al0.class.definition.option_type_config_for('blank')).not_to be nil
     new_al0.force_save!
     new_al0.save!
 

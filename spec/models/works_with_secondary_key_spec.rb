@@ -22,15 +22,11 @@ RSpec.describe 'Works With handler', type: :model do
     # Initially, it has not been given the actual reference to the player contact item, or a master ID, so it fails
     # Later, we match with the secondary key (phone number), at which point the assignment should work
     data = @player_contact.data
-
     al = ActivityLog::PlayerContactPhone.new(select_call_direction: 'from player', select_who: 'user', data: data)
+    expect(data).not_to be_blank
+    expect(al.data).not_to be_blank
 
-    begin
-      res = al.save
-    rescue FphsException
-    end
-    expect(res).to be nil
-
+    expect { al.save }.to raise_error FphsException
     al.match_with_parent_secondary_key current_user: @user
     expect(al.save).to be true
   end

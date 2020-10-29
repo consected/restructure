@@ -10,7 +10,7 @@ module ExternalIdHandler
   end
 
   included do
-    attr_accessor :create_count, :just_assigned, :assign_all, :assign_all_request
+    attr_accessor :create_count, :just_assigned, :assign_all, :assign_all_request, :existing_item_updated
     after_initialize :init_vars_external_id_handler
 
     before_validation :during_create_master
@@ -155,7 +155,14 @@ module ExternalIdHandler
         return obj
       end
 
-      assign_next_available_id owner
+      item = assign_next_available_id owner
+
+      # Merge in the attributes
+      att.each do |k, v|
+        item.send("#{k}=", v) unless k == external_id_attribute.to_sym
+      end
+
+      item
     end
 
     def assign_next_available_id(master)
@@ -178,8 +185,6 @@ module ExternalIdHandler
       raise 'Only admins can perform this function' unless admin&.enabled? && allow_to_generate_ids?
 
       res = []
-      errors = []
-
       raise FphsException, 'No master records without an assignment' if masters_without_assignment.count == 0
 
       begin
@@ -233,9 +238,77 @@ module ExternalIdHandler
     end
   end
 
-  # resource_name used by user access controls
-  def resource_name
-    self.class.definition.resource_name
+  #
+  # No versioning of templates at this time
+  def def_version
+    nil
+  end
+
+  def initialize attr = {}
+    super
+    return unless master_id
+
+    assign_generated_or_random_id
+  end
+
+  #
+  # Override the #update method to ensure that embedded objects
+  # that have not yet been persisted, but are updated with new attributes
+  # are assigned an appropriate external ID if set for
+  # pregenerated IDs or random IDs
+  # @param [Hash] attr - attributes to be updated
+  # @return [Boolean] result from super
+  def update attr
+    unless persisted? || external_id
+      attr.delete self.class.external_id_attribute
+      assign_generated_or_random_id
+    end
+
+    if existing_item_updated
+      existing_item_updated.update attr
+      self.updated_at = existing_item_updated.updated_at
+      self.id = existing_item_updated.id
+    else
+      super
+    end
+  end
+
+  def assign_generated_or_random_id
+    if self.class.allow_to_generate_ids?
+      assign_with_next_generated_id
+    elsif self.class.prevent_edit?
+      assign_with_random_id
+    end
+  end
+
+  def assign_with_random_id
+    self[self.class.external_id_attribute.to_sym] = self.class.generate_random_id
+    self.just_assigned = true
+  end
+
+  def assign_with_next_generated_id
+    return unless master_id && self.class.allow_to_generate_ids?
+
+    c_user = current_user
+    external_id_attribute = self.class.external_id_attribute.to_sym
+
+    if attributes[external_id_attribute].present?
+      # Fail if there is an attempt to set the value manually
+      errors.add external_id_attribute, 'is assigned automatically and can not be assigned manually'
+      return
+    end
+
+    next_item = self.class.assign_next_available_id master
+
+    # Merge in the attributes from the existing item, to make the new instance represent the original
+    attributes.each do |k, v|
+      next_item.send("#{k}=", v) unless v.blank? || k.in?(['user_id', 'master_id'])
+    end
+
+    next_item.current_user = c_user
+    self.existing_item_updated = next_item
+
+    next_item.attributes
   end
 
   def model_data_type
@@ -282,7 +355,13 @@ module ExternalIdHandler
     send("#{self.class.external_id_attribute}_changed?")
   end
 
-  def check_status
+  # Override standard operation for previous operation flags
+  # External identifiers can exists as records that are not considered fully created
+  # until they have been assigned to a master record. The standard mechanism that checks for
+  # a created record does not achieve the desired effect.
+  # was_created can be true even if the actual record was not just created:
+  # If it was just assigned a master_id, then was_created is set to true
+  def set_previous_action_flags
     @was_created = saved_change_to_id? || just_assigned ? 'created' : false
     @was_updated = saved_change_to_updated_at? ? 'updated' : false
   end
@@ -295,15 +374,16 @@ module ExternalIdHandler
     instance_var_init :admin_set
   end
 
-  # A special case to handle the creation of instances during the creation of a master (under the app configuration :create_master_with)
-  # Since we don't want this to fail due to a validation error with a blank external ID, force the ID to the min value
+  # A special case to handle the creation of instances during the creation
+  # of a master (under the app configuration :create_master_with)
+  # Since we don't want this to fail due to a validation error with
+  # a blank external ID, force the ID to the min value
   # if the external ID is not already set
   def during_create_master
-    if creating_master
-      return unless external_id.blank?
+    return unless creating_master
+    return unless external_id.blank?
 
-      self.external_id = self.class.external_id_range.min
-    end
+    self.external_id = self.class.external_id_range.min
   end
 
   def external_id_tests
@@ -321,16 +401,14 @@ module ExternalIdHandler
       errors.add :master_id, "must be set when adding #{self.class.external_id_attribute}"
     end
 
-    if external_id_changed? || !persisted?
+    return unless external_id_changed? || !persisted?
 
-      s = self.class.find_by_external_id(external_id)
-      if s
-        errors.add self.class.external_id_attribute, 'already exists in this master record' if s.master_id == master_id
-        if s.master_id != master_id
-          errors.add self.class.external_id_attribute, "already exists in another master record (master ID: #{s.master_id})"
-        end
-      end
+    s = self.class.find_by_external_id(external_id)
+    return unless s
 
-    end
+    errors.add self.class.external_id_attribute, 'already exists in this master record' if s.master_id == master_id
+    return if s.master_id == master_id || s.id == id
+
+    errors.add self.class.external_id_attribute, "already exists in another master record (master ID: #{s.master_id})"
   end
 end

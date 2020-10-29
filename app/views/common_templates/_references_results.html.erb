@@ -8,7 +8,12 @@
 <script id="activity_log_<%=name%>_references"  type="text/x-handlebars-template" class="hidden handlebars-partial references_def_block">
 <%
   first_ref_def = references&.first&.last&.first&.last
-  if first_ref_def %>
+  if first_ref_def 
+    # There is at least one reference definition
+    # At run time, run through the model references twice, first handling an embedded item
+    # then each of the remaining (unhidden) items
+
+%>
   {{#each model_references}}
     {{#is ../embedded_item.id '===' to_record_id}}
       {{#is ../embedded_item.item_type '===' '<%= first_ref_def[:to_model_name_us] %>'}}
@@ -16,7 +21,7 @@
           {{#is to_record_options_config.view_as.show '!==' 'not_embedded'}}
             {{#with ../embedded_item}}
               <% mr_name = ModelReference.record_type_to_ns_table_name references&.first&.first %>
-              {{> common_template_result_fields result_data=this name='<%=mr_name%>' template_config=(fpa_state_item 'template_config' '<%=mr_name.underscore%>')}}
+              {{> common_template_result_fields result_data=this name='<%=mr_name%>' template_config=(fpa_state_item 'template_config' '<%=mr_name.underscore%>' vdef_version)}}
             {{/with}}
           {{/is}}
         {{/is}}
@@ -24,21 +29,18 @@
     {{/is}}
   {{/each}}
 
-  {{#if model_references}}
-    {{#each model_references}}
-
-      {{#is to_record_options_config.view_as.show '!==' 'hide'}}
-        {{#is to_record_options_config.view_as.show '===' 'not_embedded'}}
+  {{#each model_references}}
+    {{#is to_record_options_config.view_as.show '!==' 'hide'}}
+      {{#is to_record_options_config.view_as.show '===' 'not_embedded'}}
+        {{>activity_log_common_template_references_list_item name='<%=name%>'}}
+      {{else is to_record_options_config.view_as.show '===' 'filestore'}}
+      {{else}}
+        {{#is ../embedded_item.id '!==' to_record_id}}
           {{>activity_log_common_template_references_list_item name='<%=name%>'}}
-        {{else is to_record_options_config.view_as.show '===' 'filestore'}}
-        {{else}}
-          {{#is ../embedded_item.id '!==' to_record_id}}
-            {{>activity_log_common_template_references_list_item name='<%=name%>'}}
-          {{/is}}
         {{/is}}
       {{/is}}
-    {{/each}}
-  {{/if}}
+    {{/is}}
+  {{/each}}
   <% end %>
 
   <% references&.each do |ref_key, refitem|

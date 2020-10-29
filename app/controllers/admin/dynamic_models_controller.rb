@@ -17,8 +17,8 @@ class Admin::DynamicModelsController < AdminController
     @show_again_on_save = true
     @show_extra_help_info = {}
     @show_extra_help_info[:title] = 'Options'
-    example = ExtraOptions.top_level_defs
-    example = example.merge('default' => DynamicModelOptions.attr_defs.deep_stringify_keys)
+    example = OptionConfigs::DynamicModelOptions.top_level_defs
+    example = example.merge('default' => OptionConfigs::DynamicModelOptions.attr_defs.deep_stringify_keys)
 
     @show_extra_help_info[:text] = example.to_yaml
   end

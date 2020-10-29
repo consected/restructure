@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
+# Supporting functionality for the Simple and Advanced Search forms
+# Although not ideal to just push this into a Concern, it does allow
+# the Master model data functionality to remain obvious
 module MasterSearchHandler
-  # Move the main supporting functionality for the Simple and Advanced Search forms here, allowing the Master model data functionality to remain obvious
-
   extend ActiveSupport::Concern
 
   included do
@@ -109,14 +110,6 @@ module MasterSearchHandler
       @master_nested_attrib << attrib
 
       Master.accepts_nested_attributes_for(*@master_nested_attrib)
-    end
-
-    # provide methods that allow easy access to alternative_id values
-    # such as alternative_id_bhs_id
-    def add_alternative_id_method(name)
-      define_method name.to_sym do
-        alternative_id_value name
-      end
     end
 
     # Build a Master search using the Master and nested attributes passed in

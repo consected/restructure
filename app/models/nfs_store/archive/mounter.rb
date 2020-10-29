@@ -106,7 +106,8 @@ module NfsStore
       end
 
       def extract_in_progress?
-        File.exist?(processing_archive_flag_path) && (Time.now - File.mtime(processing_archive_flag_path)) < ProcessingRetryTime
+        File.exist?(processing_archive_flag_path) &&
+          (Time.now - File.mtime(processing_archive_flag_path)) < ProcessingRetryTime
       end
 
       def extract_in_progress!
@@ -122,7 +123,8 @@ module NfsStore
       end
 
       def index_in_progress?
-        File.exist?(processing_index_flag_path) && (Time.now - File.mtime(processing_index_flag_path)) < ProcessingRetryTime
+        File.exist?(processing_index_flag_path) &&
+          (Time.now - File.mtime(processing_index_flag_path)) < ProcessingRetryTime
       end
 
       def index_in_progress!
@@ -163,7 +165,8 @@ module NfsStore
 
         unless pn.exist?
           unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
-            raise FsException::Filesystem, "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}"
+            raise FsException::Filesystem,
+                  "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}"
           end
 
           dir = File.join(Manage::Filesystem.temp_directory, "__filestore__#{SecureRandom.hex}")
@@ -228,13 +231,13 @@ module NfsStore
         index_completed! if res
       end
 
-      def self.move_to_new_path(f, to_path)
-        from_path = f.path
+      def self.move_to_new_path(file, to_path)
+        from_path = file.path
 
         # If this is the base archive folder, we must ensure the new name reflects this
         to_path = "#{to_path}#{ArchiveMountSuffix}" if path_is_archive?(from_path) && !path_is_archive?(arch_to_path)
 
-        res = f.move_to to_path
+        file.move_to to_path
       end
 
       private
@@ -273,9 +276,10 @@ module NfsStore
               begin
                 # Don't use regex - it breaks with special characters
                 archived_file_path = pn.dirname.to_s.sub("#{@mounted_path}/", '').sub(@mounted_path.to_s, '')
+                afval = stored_file.path ? File.join(stored_file.path, @archive_file) : @archive_file
                 af = NfsStore::Manage::ArchivedFile.new container: container,
                                                         path: archived_file_path,
-                                                        archive_file: stored_file.path ? File.join(stored_file.path, @archive_file) : @archive_file,
+                                                        archive_file: afval,
                                                         file_name: pn.basename,
                                                         nfs_store_stored_file_id: stored_file.id
 
@@ -287,7 +291,6 @@ module NfsStore
                 af.no_access_check = true
                 af.analyze_file!
                 all_afs << af
-                af = nil
               rescue StandardError => e
                 failures += 1
                 Rails.logger.warn "Failure (#{failures}) during extract_archived_files. #{e}\n#{e.backtrace.join("\n")}"
@@ -297,7 +300,8 @@ module NfsStore
             iterations += 1
             next unless Time.now - start_time > ExtractionTimeout
 
-            Rails.logger.warn "Timeout in extract_archived_files after #{iterations} iterations, with #{failures} failures."
+            Rails.logger.warn "Timeout in extract_archived_files after #{iterations} iterations, " \
+                              "with #{failures} failures."
             result = false
             raise ActiveRecord::Rollback
           end

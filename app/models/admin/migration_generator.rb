@@ -2,42 +2,64 @@ class Admin::MigrationGenerator
   DefaultSchemaOwner = Settings::DefaultSchemaOwner
   DefaultMigrationSchema = Settings::DefaultMigrationSchema
 
-  attr_accessor :db_migration_schema
+  attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
+                :table_comments, :no_master_association
 
+  #
+  # Simply return the current connection
   def self.connection
     ActiveRecord::Base.connection
   end
 
+  #
+  # Get the app's schema search path and make it into a simple array
+  # @return [Array]
+  def self.current_search_paths
+    connection.schema_search_path.split(',').map(&:strip)
+  end
+
+  #
+  # Get the current database name for the connection
+  # @return [String]
+  def self.current_database
+    connection.current_database
+  end
+
+  #
+  # Get the current schema search_path, then quote each item and comma separate them for use in a query
+  # @return [String]
   def self.quoted_schemas
     @quoted_schemas ||= current_search_paths.map { |s| "'#{s}'" }.join(',')
   end
 
   # Get the current list of table and views with the schema they belong to
-  #
+  # This is limited to the current transaction visibility
   # @return [Array(Hash {schema_name, table_name})] array of schema_name and table_name hashes for each table
   def self.tables_and_views
-    connection.execute <<~END_SQL
-      select table_schema "schema_name", table_name from information_schema.tables 
-      where table_schema IN (#{quoted_schemas})
-      and table_catalog = '#{current_database}'
-      UNION 
-      select table_schema "schema_name", table_name from information_schema.views
-      where table_schema IN (#{quoted_schemas})
-      and table_catalog = '#{current_database}'
-      order by "schema_name", table_name
-    END_SQL
+    @tables_and_views ||=
+      connection.execute <<~END_SQL
+        select table_schema "schema_name", table_name from information_schema.tables 
+        where table_schema IN (#{quoted_schemas})
+        and table_catalog = '#{current_database}'
+        UNION 
+        select table_schema "schema_name", table_name from information_schema.views
+        where table_schema IN (#{quoted_schemas})
+        and table_catalog = '#{current_database}'
+        order by "schema_name", table_name
+      END_SQL
   end
 
-  def self.table_comment(table_name)
-    connection.table_comment(table_name)
+  # Reset the memoized tables and views value
+  def self.tables_and_views_reset!
+    @tables_and_views = nil
   end
 
-  def self.current_search_paths
-    connection.schema_search_path.split(',')
-  end
-
-  def self.current_database
-    connection.current_database
+  def self.table_comment(table_name, schema_name = nil)
+    tn = []
+    tn << schema_name if schema_name
+    tn << table_name
+    tn = tn.join('.')
+    connection.table_comment(tn)
   end
 
   def self.column_comments
@@ -66,14 +88,195 @@ class Admin::MigrationGenerator
     end
   end
 
-  def initialize(db_migration_schema)
+  #
+  # Returns a list of foreign key definitions
+  # @return [Array (Hash {constraint_name, source_schema, source_table, source_column, target_schema, target_table, target_column})]
+  def self.foreign_keys
+    Rails.cache.fetch("db_foreign_keys-#{Application.version}") do
+      res = connection.execute <<~END_SQL
+
+        SELECT
+          o.conname AS constraint_name,
+          (SELECT nspname FROM pg_namespace WHERE oid=m.relnamespace) AS source_schema,
+          m.relname AS source_table,
+          (SELECT a.attname FROM pg_attribute a WHERE a.attrelid = m.oid AND a.attnum = o.conkey[1] AND a.attisdropped = false) AS source_column,
+          (SELECT nspname FROM pg_namespace WHERE oid=f.relnamespace) AS target_schema,
+          f.relname AS target_table,
+          (SELECT a.attname FROM pg_attribute a WHERE a.attrelid = f.oid AND a.attnum = o.confkey[1] AND a.attisdropped = false) AS target_column
+        FROM
+          pg_constraint o LEFT JOIN pg_class f ON f.oid = o.confrelid LEFT JOIN pg_class m ON m.oid = o.conrelid
+        WHERE
+          o.contype = 'f' AND o.conrelid IN (SELECT oid FROM pg_class c WHERE c.relkind = 'r');
+      END_SQL
+
+      res.to_a
+    end
+  end
+
+  def self.data_dic(dd, nil_if_empty: false)
+    ddtab = tables_and_views.find { |tn| tn['table_name'] == "#{dd}_datadic" }
+    return unless ddtab
+
+    ddtab = ddtab['table_name']
+
+    Rails.cache.fetch("db_data_dic-#{dd}-#{Application.version}") do
+      res = connection.execute <<~END_SQL
+        SELECT * FROM #{ddtab};
+      END_SQL
+      res = res.to_a
+      res = nil if nil_if_empty && res.blank?
+      res
+    end
+  end
+
+  #
+  # Check the database for the table existing
+  # This is potentially more current than #tables_and_views, which might be limited by the
+  # current transaction or cached result
+  # @param [String] table_name
+  # @return [Boolean]
+  def self.table_exists?(table_name)
+    connection.table_exists?(table_name)
+  end
+
+  #
+  # Check the database for the table or view existing
+  # This is potentially more current than #tables_and_views, which might be limited by the
+  # current transaction or cached result
+  # @param [String] table_name
+  # @return [Boolean]
+  def self.table_or_view_exists?(table_name)
+    connection.table_exists?(table_name) || connection.view_exists?(table_name)
+  end
+
+  #
+  # Generate the table name for the history table based on the current table name
+  # @param [String] table_name
+  # @return [String]
+  def self.history_table_name_for table_name
+    "#{table_name.singularize}_history"
+  end
+
+  #
+  # Generate the field name used as a foreign key back onto the this table
+  # based on the table name
+  # @param [String] table_name
+  # @return [String]
+  def self.history_table_id_attr_for table_name
+    "#{table_name.singularize}_id"
+  end
+
+  def initialize(db_migration_schema, table_name, all_implementation_fields, table_comments, no_master_association)
     self.db_migration_schema = db_migration_schema
+    self.table_name = table_name
+    self.all_implementation_fields = all_implementation_fields
+    self.table_comments = table_comments
+    self.no_master_association = no_master_association
     super()
   end
 
   def add_schema
     mig_text = schema_generator_script(db_migration_schema, 'create')
     write_db_migration mig_text, "#{db_migration_schema}_schema"
+  end
+
+  # Standard columns are used by migrations
+  def standard_columns
+    pset = %w[id created_at updated_at contactid user_id master_id
+              extra_log_type admin_id]
+    pset += ["#{table_name.singularize}_table_id", "#{table_name.singularize}_id"]
+    pset
+  end
+
+  def table_comment_changes
+    begin
+      comment = ActiveRecord::Base.connection.table_comment(table_name)
+    rescue StandardError
+      nil
+    end
+    new_comment = table_comments[:table]
+    return unless comment != new_comment
+
+    new_comment
+  end
+
+  def fields_comments_changes
+    begin
+      cols = ActiveRecord::Base.connection.columns(table_name)
+    rescue StandardError
+      return
+    end
+
+    fields_comments = table_comments[:fields] || {}
+    new_comments = {}
+
+    fields_comments.each do |k, v|
+      col = cols.select { |c| c.name == k.to_s }.first
+      new_comments[k] = v if col && col.comment != v
+    end
+
+    new_comments
+  end
+
+  def field_changes
+    begin
+      cols = ActiveRecord::Base.connection.columns(table_name)
+      old_colnames = cols.map(&:name) - standard_columns
+      old_colnames = old_colnames.reject { |f| f.index(/^embedded_report_|^placeholder_/) }
+    rescue StandardError
+      return
+    end
+
+    fields = migration_fields_array
+    new_colnames = fields.map(&:to_s) - standard_columns
+
+    added = new_colnames - old_colnames
+    removed = old_colnames - new_colnames
+    if respond_to? :item_type
+      belongs_to_model_id = "#{item_type}_id"
+      removed -= [belongs_to_model_id]
+    end
+
+    [added, removed, old_colnames]
+  end
+
+  def migration_update_fields
+    added, removed, prev_fields = field_changes
+
+    if table_comments
+      new_table_comment = table_comment_changes
+      new_fields_comments = fields_comments_changes
+    end
+
+    return unless added.present? || removed.present? || new_table_comment || new_fields_comments.present?
+
+    new_fields_comments ||= {}
+
+    <<~ARCONTENT
+      self.prev_fields = %i[#{prev_fields.join(' ')}]
+          \# added: #{added}
+          \# removed: #{removed}
+          #{new_table_comment ? "\# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
+          #{new_fields_comments.present? ? "\# new fields comments: #{new_fields_comments.keys}" : ''}
+          update_fields
+    ARCONTENT
+  end
+
+  def migration_fields_array
+    fields = all_implementation_fields
+    fields.reject { |f| f.index(/^embedded_report_|^placeholder_/) }
+  end
+
+  def migration_set_attribs
+    table_comments = self.table_comments || {}
+    <<~SETATRRIBS
+      self.schema = '#{db_migration_schema}'
+          self.table_name = '#{table_name}'
+          self.fields = %i[#{migration_fields_array.join(' ')}]
+          self.table_comment = '#{table_comments[:table]}'
+          self.fields_comments = #{(table_comments[:fields] || {}).to_json}
+          self.no_master_association = #{!!no_master_association}
+    SETATRRIBS
   end
 
   # Write a schema-specific migration only if we are in a development mode
@@ -112,6 +315,8 @@ class Admin::MigrationGenerator
         Process.detach pid
       end
     end.join
+
+    self.class.tables_and_views_reset!
 
     true
   rescue StandardError => e

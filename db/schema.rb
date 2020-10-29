@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_09_24_125350) do
+ActiveRecord::Schema.define(version: 2020_10_14_172505) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -63,23 +63,19 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
 
   create_table "activity_log_bhs_assignments", id: :serial, force: :cascade do |t|
     t.integer "master_id"
-    t.integer "bhs_assignment_id"
     t.string "select_record_from_player_contact_phones"
     t.string "return_call_availability_notes"
     t.string "questions_from_call_notes"
     t.string "results_link"
     t.string "select_result"
-    t.string "completed_q1_no_yes"
-    t.string "completed_teamstudy_no_yes"
-    t.string "previous_contact_with_team_no_yes"
-    t.string "previous_contact_with_team_notes"
     t.string "extra_log_type"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "notes"
+    t.string "pi_notes_from_return_call"
+    t.bigint "bhs_assignment_id"
     t.string "pi_return_call_notes"
-    t.index ["bhs_assignment_id"], name: "index_activity_log_bhs_assignments_on_bhs_assignment_id"
+    t.index ["bhs_assignment_id"], name: "index_ml_app.activity_log_bhs_assignments_on_bhs_assignment_id"
     t.index ["master_id"], name: "index_activity_log_bhs_assignments_on_master_id"
     t.index ["user_id"], name: "index_activity_log_bhs_assignments_on_user_id"
   end
@@ -88,15 +84,16 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "master_id"
     t.integer "data_request_assignment_id"
     t.date "follow_up_date"
-    t.string "next_step"
-    t.string "status"
+    t.time "follow_up_time"
     t.string "notes"
     t.string "extra_log_type"
     t.integer "user_id"
-    t.integer "created_by_user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "activity_log_data_request_assignment_id"
+    t.integer "created_by_user_id"
+    t.string "next_step"
+    t.string "status"
     t.index ["activity_log_data_request_assignment_id"], name: "index_al_data_request_assignment_history_on_activity_log_data_r"
     t.index ["data_request_assignment_id"], name: "index_al_data_request_assignment_history_on_data_request_assign"
     t.index ["master_id"], name: "index_al_data_request_assignment_history_on_master_id"
@@ -106,14 +103,14 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "activity_log_data_request_assignments", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.date "follow_up_date"
-    t.string "next_step"
-    t.string "status"
     t.string "notes"
     t.string "extra_log_type"
     t.integer "user_id"
-    t.integer "created_by_user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "created_by_user_id"
+    t.string "next_step"
+    t.string "status"
     t.bigint "data_request_assignment_id"
     t.index ["data_request_assignment_id"], name: "36bd4ead_bt_id_idx"
     t.index ["master_id"], name: "index_activity_log_data_request_assignments_on_master_id"
@@ -152,6 +149,280 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["user_id"], name: "index_activity_log_ext_assignments_on_user_id"
   end
 
+  create_table "activity_log_femfl_assignment_femfl_comm_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "femfl_assignment_id"
+    t.string "select_activity"
+    t.date "activity_date"
+    t.string "select_record_from_dynamic_model__femfl_contacts"
+    t.string "select_record_from_dynamic_model__femfl_addresses"
+    t.string "select_direction"
+    t.string "select_who"
+    t.string "select_result"
+    t.string "select_next_step"
+    t.date "follow_up_when"
+    t.time "follow_up_time"
+    t.string "notes"
+    t.bigint "protocol_id"
+    t.string "extra_log_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "activity_log_femfl_assignment_femfl_comm_id"
+    t.index ["activity_log_femfl_assignment_femfl_comm_id"], name: "activity_log_femfl_assignment_femfl_comm_id_h_idx"
+    t.index ["femfl_assignment_id"], name: "al_femfl_assignment_id_h_idx"
+    t.index ["master_id"], name: "al_femfl_assignment_master_id_h_idx"
+    t.index ["user_id"], name: "al_femfl_assignment_user_id_h_idx"
+  end
+
+  create_table "activity_log_femfl_assignment_femfl_comms", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "femfl_assignment_id"
+    t.string "select_activity"
+    t.date "activity_date"
+    t.string "select_record_from_dynamic_model__femfl_contacts"
+    t.string "select_record_from_dynamic_model__femfl_addresses"
+    t.string "select_direction"
+    t.string "select_who"
+    t.string "select_result"
+    t.string "select_next_step"
+    t.date "follow_up_when"
+    t.time "follow_up_time"
+    t.string "notes"
+    t.bigint "protocol_id"
+    t.string "extra_log_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["femfl_assignment_id"], name: "al_femfl_assignment_id_idx"
+    t.index ["master_id"], name: "al_femfl_assignment_master_id_idx"
+    t.index ["user_id"], name: "al_femfl_assignment_user_id_idx"
+  end
+
+  create_table "activity_log_grit_assignment_adverse_event_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "grit_assignment_id"
+    t.string "extra_log_type"
+    t.string "select_who"
+    t.date "done_when"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "activity_log_grit_assignment_adverse_event_id"
+    t.index ["activity_log_grit_assignment_adverse_event_id"], name: "index_al_grit_assignment_adverse_event_history_on_activity_log_"
+    t.index ["grit_assignment_id"], name: "index_al_grit_assignment_adverse_event_history_on_grit_assignme"
+    t.index ["master_id"], name: "index_al_grit_assignment_adverse_event_history_on_master_id"
+    t.index ["user_id"], name: "index_al_grit_assignment_adverse_event_history_on_user_id"
+  end
+
+  create_table "activity_log_grit_assignment_adverse_events", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "grit_assignment_id"
+    t.string "extra_log_type"
+    t.string "select_who"
+    t.date "done_when"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["grit_assignment_id"], name: "index_activity_log_grit_assignment_adverse_events_on_grit_assig"
+    t.index ["master_id"], name: "index_activity_log_grit_assignment_adverse_events_on_master_id"
+    t.index ["user_id"], name: "index_activity_log_grit_assignment_adverse_events_on_user_id"
+  end
+
+  create_table "activity_log_grit_assignment_discussion_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "grit_assignment_id"
+    t.string "tag_select_contact_role", array: true
+    t.string "notes"
+    t.string "prev_activity_type"
+    t.string "extra_log_type"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "activity_log_grit_assignment_discussion_id"
+    t.index ["activity_log_grit_assignment_discussion_id"], name: "index_al_grit_assignment_discussion_history_on_activity_log_gri"
+    t.index ["grit_assignment_id"], name: "index_al_grit_assignment_discussion_history_on_grit_assignment_"
+    t.index ["master_id"], name: "index_al_grit_assignment_discussion_history_on_master_id"
+    t.index ["user_id"], name: "index_al_grit_assignment_discussion_history_on_user_id"
+  end
+
+  create_table "activity_log_grit_assignment_discussions", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "grit_assignment_id"
+    t.string "tag_select_contact_role", array: true
+    t.string "notes"
+    t.string "prev_activity_type"
+    t.string "extra_log_type"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["grit_assignment_id"], name: "index_activity_log_grit_assignment_discussions_on_grit_assignme"
+    t.index ["master_id"], name: "index_activity_log_grit_assignment_discussions_on_master_id"
+    t.index ["user_id"], name: "index_activity_log_grit_assignment_discussions_on_user_id"
+  end
+
+  create_table "activity_log_grit_assignment_followup_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "grit_assignment_id"
+    t.string "select_activity"
+    t.date "activity_date"
+    t.string "select_contact"
+    t.string "select_direction"
+    t.string "select_result"
+    t.string "select_next_step"
+    t.date "follow_up_when"
+    t.time "follow_up_time"
+    t.string "notes"
+    t.string "extra_log_type"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "activity_log_grit_assignment_followup_id"
+    t.index ["activity_log_grit_assignment_followup_id"], name: "index_al_grit_assignment_followup_history_on_activity_log_grit_"
+    t.index ["grit_assignment_id"], name: "index_al_grit_assignment_followup_history_on_grit_assignment_fo"
+    t.index ["master_id"], name: "index_al_grit_assignment_followup_history_on_master_id"
+    t.index ["user_id"], name: "index_al_grit_assignment_followup_history_on_user_id"
+  end
+
+  create_table "activity_log_grit_assignment_followups", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "grit_assignment_id"
+    t.string "select_activity"
+    t.date "activity_date"
+    t.string "select_contact"
+    t.string "select_direction"
+    t.string "select_result"
+    t.string "select_next_step"
+    t.date "follow_up_when"
+    t.time "follow_up_time"
+    t.string "notes"
+    t.string "extra_log_type"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["grit_assignment_id"], name: "index_activity_log_grit_assignment_followups_on_grit_assignment"
+    t.index ["master_id"], name: "index_activity_log_grit_assignment_followups_on_master_id"
+    t.index ["user_id"], name: "index_activity_log_grit_assignment_followups_on_user_id"
+  end
+
+  create_table "activity_log_grit_assignment_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "grit_assignment_id"
+    t.string "select_activity"
+    t.date "activity_date"
+    t.string "select_record_from_player_contacts"
+    t.string "select_direction"
+    t.string "select_who"
+    t.string "select_result"
+    t.string "select_next_step"
+    t.date "follow_up_when"
+    t.time "follow_up_time"
+    t.string "notes"
+    t.bigint "protocol_id"
+    t.string "select_record_from_addresses"
+    t.string "extra_log_type"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "activity_log_grit_assignment_id"
+    t.index ["activity_log_grit_assignment_id"], name: "index_activity_log_grit_assignment_history_on_activity_log_grit"
+    t.index ["grit_assignment_id"], name: "index_activity_log_grit_assignment_history_on_grit_assignment_i"
+    t.index ["master_id"], name: "index_activity_log_grit_assignment_history_on_master_id"
+    t.index ["user_id"], name: "index_activity_log_grit_assignment_history_on_user_id"
+  end
+
+  create_table "activity_log_grit_assignment_phone_screen_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "grit_assignment_id"
+    t.string "callback_required"
+    t.date "callback_date"
+    t.time "callback_time"
+    t.string "notes"
+    t.string "extra_log_type"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "activity_log_grit_assignment_phone_screen_id"
+    t.index ["activity_log_grit_assignment_phone_screen_id"], name: "index_activity_log_grit_assignment_phone_screen_history_on_acti"
+    t.index ["grit_assignment_id"], name: "index_activity_log_grit_assignment_phone_screen_history_on_grit"
+    t.index ["master_id"], name: "index_activity_log_grit_assignment_phone_screen_history_on_mast"
+    t.index ["user_id"], name: "index_activity_log_grit_assignment_phone_screen_history_on_user"
+  end
+
+  create_table "activity_log_grit_assignment_phone_screens", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "grit_assignment_id"
+    t.string "callback_required"
+    t.date "callback_date"
+    t.time "callback_time"
+    t.string "notes"
+    t.string "extra_log_type"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["grit_assignment_id"], name: "index_activity_log_grit_assignment_phone_screens_on_grit_assign"
+    t.index ["master_id"], name: "index_activity_log_grit_assignment_phone_screens_on_master_id"
+    t.index ["user_id"], name: "index_activity_log_grit_assignment_phone_screens_on_user_id"
+  end
+
+  create_table "activity_log_grit_assignment_protocol_deviation_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "grit_assignment_id"
+    t.string "extra_log_type"
+    t.string "select_who"
+    t.date "done_when"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "activity_log_grit_assignment_protocol_deviation_id"
+    t.index ["activity_log_grit_assignment_protocol_deviation_id"], name: "index_al_grit_assignment_protocol_deviation_history_on_activity"
+    t.index ["grit_assignment_id"], name: "index_al_grit_assignment_protocol_deviation_history_on_grit_ass"
+    t.index ["master_id"], name: "index_al_grit_assignment_protocol_deviation_history_on_master_i"
+    t.index ["user_id"], name: "index_al_grit_assignment_protocol_deviation_history_on_user_id"
+  end
+
+  create_table "activity_log_grit_assignment_protocol_deviations", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "grit_assignment_id"
+    t.string "extra_log_type"
+    t.string "select_who"
+    t.date "done_when"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["grit_assignment_id"], name: "index_activity_log_grit_assignment_protocol_deviations_on_grit_"
+    t.index ["master_id"], name: "index_activity_log_grit_assignment_protocol_deviations_on_maste"
+    t.index ["user_id"], name: "index_activity_log_grit_assignment_protocol_deviations_on_user_"
+  end
+
+  create_table "activity_log_grit_assignments", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "grit_assignment_id"
+    t.string "select_activity"
+    t.date "activity_date"
+    t.string "select_record_from_player_contacts"
+    t.string "select_direction"
+    t.string "select_who"
+    t.string "select_result"
+    t.string "select_next_step"
+    t.date "follow_up_when"
+    t.time "follow_up_time"
+    t.string "notes"
+    t.bigint "protocol_id"
+    t.string "select_record_from_addresses"
+    t.string "extra_log_type"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["grit_assignment_id"], name: "index_activity_log_grit_assignments_on_grit_assignment_id"
+    t.index ["master_id"], name: "index_activity_log_grit_assignments_on_master_id"
+    t.index ["user_id"], name: "index_activity_log_grit_assignments_on_user_id"
+  end
+
   create_table "activity_log_history", id: :serial, force: :cascade do |t|
     t.integer "activity_log_id"
     t.string "name"
@@ -182,6 +453,9 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "activity_log_ipa_assignment_adverse_event_id"
+    t.string "select_who"
+    t.date "done_when"
+    t.string "notes"
     t.index ["activity_log_ipa_assignment_adverse_event_id"], name: "index_al_ipa_assignment_adverse_event_history_on_activity_log_i"
     t.index ["ipa_assignment_id"], name: "index_al_ipa_assignment_adverse_event_history_on_ipa_assignment"
     t.index ["master_id"], name: "index_al_ipa_assignment_adverse_event_history_on_master_id"
@@ -203,6 +477,42 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["user_id"], name: "index_activity_log_ipa_assignment_adverse_events_on_user_id"
   end
 
+  create_table "activity_log_ipa_assignment_discussion_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "ipa_assignment_id"
+    t.string "tag_select_contact_role", array: true
+    t.string "notes"
+    t.string "prev_activity_type"
+    t.string "extra_log_type"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "activity_log_ipa_assignment_discussion_id"
+    t.bigint "created_by_user_id"
+    t.index ["activity_log_ipa_assignment_discussion_id"], name: "index_al_ipa_assignment_discussion_history_on_activity_log_ipa_"
+    t.index ["created_by_user_id"], name: "8d569f72_ref_cb_user_idx_hist"
+    t.index ["ipa_assignment_id"], name: "index_al_ipa_assignment_discussion_history_on_ipa_assignment_di"
+    t.index ["master_id"], name: "index_al_ipa_assignment_discussion_history_on_master_id"
+    t.index ["user_id"], name: "index_al_ipa_assignment_discussion_history_on_user_id"
+  end
+
+  create_table "activity_log_ipa_assignment_discussions", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "ipa_assignment_id"
+    t.string "tag_select_contact_role", array: true
+    t.string "notes"
+    t.string "prev_activity_type"
+    t.string "extra_log_type"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "created_by_user_id"
+    t.index ["created_by_user_id"], name: "8d569f72_ref_cb_user_idx"
+    t.index ["ipa_assignment_id"], name: "index_activity_log_ipa_assignment_discussions_on_ipa_assignment"
+    t.index ["master_id"], name: "index_activity_log_ipa_assignment_discussions_on_master_id"
+    t.index ["user_id"], name: "index_activity_log_ipa_assignment_discussions_on_user_id"
+  end
+
   create_table "activity_log_ipa_assignment_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "ipa_assignment_id"
@@ -216,7 +526,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.date "follow_up_when"
     t.time "follow_up_time"
     t.string "notes"
-    t.bigint "protocol_id"
     t.string "select_record_from_addresses"
     t.string "extra_log_type"
     t.integer "user_id"
@@ -370,8 +679,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.time "completion_time"
     t.string "participant_feedback_notes"
     t.string "other_navigator_notes"
-    t.string "add_protocol_deviation_record_no_yes"
-    t.string "add_adverse_event_record_no_yes"
     t.string "select_event_type"
     t.string "other_event_type"
     t.string "extra_log_type"
@@ -400,8 +707,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.time "completion_time"
     t.string "participant_feedback_notes"
     t.string "other_navigator_notes"
-    t.string "add_protocol_deviation_record_no_yes"
-    t.string "add_adverse_event_record_no_yes"
     t.string "select_event_type"
     t.string "other_event_type"
     t.string "extra_log_type"
@@ -507,6 +812,9 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "activity_log_ipa_assignment_protocol_deviation_id"
+    t.string "select_who"
+    t.date "done_when"
+    t.string "notes"
     t.index ["activity_log_ipa_assignment_protocol_deviation_id"], name: "index_al_ipa_assignment_protocol_deviation_history_on_activity_"
     t.index ["ipa_assignment_id"], name: "index_al_ipa_assignment_protocol_deviation_history_on_ipa_assig"
     t.index ["master_id"], name: "index_al_ipa_assignment_protocol_deviation_history_on_master_id"
@@ -541,6 +849,10 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "activity_log_ipa_assignment_session_filestore_id"
+    t.string "select_notify_role_name"
+    t.string "select_type"
+    t.string "select_status"
+    t.string "select_confirm_status"
     t.index ["activity_log_ipa_assignment_session_filestore_id"], name: "index_al_ipa_assignment_session_filestore_history_on_activity_l"
     t.index ["ipa_assignment_id"], name: "index_al_ipa_assignment_session_filestore_history_on_ipa_assign"
     t.index ["master_id"], name: "index_al_ipa_assignment_session_filestore_history_on_master_id"
@@ -561,6 +873,8 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "updated_at", null: false
     t.string "select_status"
     t.string "select_confirm_status"
+    t.string "select_notify_role_name"
+    t.string "select_type"
     t.index ["ipa_assignment_id"], name: "index_activity_log_ipa_assignment_session_filestores_on_ipa_ass"
     t.index ["master_id"], name: "index_activity_log_ipa_assignment_session_filestores_on_master_"
     t.index ["user_id"], name: "index_activity_log_ipa_assignment_session_filestores_on_user_id"
@@ -607,7 +921,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.date "follow_up_when"
     t.time "follow_up_time"
     t.string "notes"
-    t.bigint "protocol_id"
     t.string "select_record_from_addresses"
     t.string "extra_log_type"
     t.integer "user_id"
@@ -616,6 +929,62 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["ipa_assignment_id"], name: "index_activity_log_ipa_assignments_on_ipa_assignment_id"
     t.index ["master_id"], name: "index_activity_log_ipa_assignments_on_master_id"
     t.index ["user_id"], name: "index_activity_log_ipa_assignments_on_user_id"
+  end
+
+  create_table "activity_log_ipa_sample_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "ipa_sample_id"
+    t.date "action_date"
+    t.time "action_time"
+    t.string "select_user_with_role_sample_registration"
+    t.string "notes"
+    t.string "select_transport_method"
+    t.string "recipient"
+    t.string "received_by"
+    t.string "select_storage_location"
+    t.string "requester"
+    t.string "reason"
+    t.date "request_date"
+    t.time "request_time"
+    t.string "select_user_with_role_sample_auth_withdraw"
+    t.string "select_issue_type"
+    t.string "duration"
+    t.string "extra_log_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "activity_log_ipa_sample_id"
+    t.index ["activity_log_ipa_sample_id"], name: "78d1cc5a_b_id_h_idx"
+    t.index ["ipa_sample_id"], name: "78d1cc5a_id_h_idx"
+    t.index ["master_id"], name: "78d1cc5a_master_id_h_idx"
+    t.index ["user_id"], name: "78d1cc5a_user_id_h_idx"
+  end
+
+  create_table "activity_log_ipa_samples", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "ipa_sample_id"
+    t.date "action_date"
+    t.time "action_time"
+    t.string "select_user_with_role_sample_registration"
+    t.string "notes"
+    t.string "select_transport_method"
+    t.string "recipient"
+    t.string "received_by"
+    t.string "select_storage_location"
+    t.string "requester"
+    t.string "reason"
+    t.date "request_date"
+    t.time "request_time"
+    t.string "select_user_with_role_sample_auth_withdraw"
+    t.string "select_issue_type"
+    t.string "duration"
+    t.string "extra_log_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ipa_sample_id"], name: "78d1cc5a_id_idx"
+    t.index ["master_id"], name: "78d1cc5a_master_id_idx"
+    t.index ["user_id"], name: "78d1cc5a_user_id_idx"
   end
 
   create_table "activity_log_ipa_survey_history", id: :serial, force: :cascade do |t|
@@ -731,27 +1100,110 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["user_id"], name: "index_activity_log_persnet_assignments_on_user_id"
   end
 
-  create_table "activity_log_player_contact_emails", id: :serial, force: :cascade do |t|
-    t.string "data"
-    t.string "select_email_direction"
-    t.string "select_who"
-    t.date "emailed_when"
-    t.string "select_result"
-    t.string "select_next_step"
-    t.date "follow_up_when"
-    t.integer "protocol_id"
+  create_table "activity_log_pitt_bhi_assignment_discussion_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "pitt_bhi_assignment_id"
     t.string "notes"
-    t.integer "user_id"
-    t.integer "player_contact_id"
-    t.integer "master_id"
-    t.boolean "disabled"
+    t.string "tag_select_contact_role", array: true
+    t.string "prev_activity_type"
+    t.string "extra_log_type"
+    t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "set_related_player_contact_rank"
-    t.index ["master_id"], name: "index_activity_log_player_contact_emails_on_master_id"
-    t.index ["player_contact_id"], name: "index_activity_log_player_contact_emails_on_player_contact_id"
-    t.index ["protocol_id"], name: "index_activity_log_player_contact_emails_on_protocol_id"
-    t.index ["user_id"], name: "index_activity_log_player_contact_emails_on_user_id"
+    t.bigint "activity_log_pitt_bhi_assignment_discussion_id"
+    t.index ["activity_log_pitt_bhi_assignment_discussion_id"], name: "2455c589_b_id_h_idx"
+    t.index ["master_id"], name: "2455c589_master_id_h_idx"
+    t.index ["pitt_bhi_assignment_id"], name: "2455c589_id_h_idx"
+    t.index ["user_id"], name: "2455c589_user_id_h_idx"
+  end
+
+  create_table "activity_log_pitt_bhi_assignment_discussions", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "pitt_bhi_assignment_id"
+    t.string "notes"
+    t.string "tag_select_contact_role", array: true
+    t.string "prev_activity_type"
+    t.string "extra_log_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "2455c589_master_id_idx"
+    t.index ["pitt_bhi_assignment_id"], name: "2455c589_id_idx"
+    t.index ["user_id"], name: "2455c589_user_id_idx"
+  end
+
+  create_table "activity_log_pitt_bhi_assignment_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "pitt_bhi_assignment_id"
+    t.string "select_who"
+    t.string "select_record_from_player_contacts"
+    t.date "follow_up_when"
+    t.time "follow_up_time"
+    t.string "notes"
+    t.date "activity_date"
+    t.string "select_activity"
+    t.string "select_record_from_addresses"
+    t.string "select_direction"
+    t.string "select_result"
+    t.string "select_next_step"
+    t.string "extra_log_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "activity_log_pitt_bhi_assignment_id"
+    t.index ["activity_log_pitt_bhi_assignment_id"], name: "activity_log_pitt_bhi_assignment_id_h_idx"
+    t.index ["master_id"], name: "al_pitt_bhi_assignment_master_id_h_idx"
+    t.index ["pitt_bhi_assignment_id"], name: "al_pitt_bhi_assignment_id_h_idx"
+    t.index ["user_id"], name: "al_pitt_bhi_assignment_user_id_h_idx"
+  end
+
+  create_table "activity_log_pitt_bhi_assignment_phone_screen_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "pitt_bhi_assignment_id"
+    t.string "extra_log_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "activity_log_pitt_bhi_assignment_phone_screen_id"
+    t.index ["activity_log_pitt_bhi_assignment_phone_screen_id"], name: "5h1r4d_id_h_idx"
+    t.index ["master_id"], name: "e0brzq_master_id_h_idx"
+    t.index ["pitt_bhi_assignment_id"], name: "cgv8p7_id_h_idx"
+    t.index ["user_id"], name: "97fdth_user_id_h_idx"
+  end
+
+  create_table "activity_log_pitt_bhi_assignment_phone_screens", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "pitt_bhi_assignment_id"
+    t.string "extra_log_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "a3i2cl_master_id_idx"
+    t.index ["pitt_bhi_assignment_id"], name: "cio0cq_id_idx"
+    t.index ["user_id"], name: "fr0v7t_user_id_idx"
+  end
+
+  create_table "activity_log_pitt_bhi_assignments", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "pitt_bhi_assignment_id"
+    t.string "select_who"
+    t.string "select_record_from_player_contacts"
+    t.date "follow_up_when"
+    t.time "follow_up_time"
+    t.string "notes"
+    t.date "activity_date"
+    t.string "select_activity"
+    t.string "select_record_from_addresses"
+    t.string "select_direction"
+    t.string "select_result"
+    t.string "select_next_step"
+    t.string "extra_log_type"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "al_pitt_bhi_assignment_master_id_idx"
+    t.index ["pitt_bhi_assignment_id"], name: "al_pitt_bhi_assignment_id_idx"
+    t.index ["user_id"], name: "al_pitt_bhi_assignment_user_id_idx"
   end
 
   create_table "activity_log_player_contact_phone_history", id: :serial, force: :cascade do |t|
@@ -778,9 +1230,9 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["user_id"], name: "index_activity_log_player_contact_phone_history_on_user_id"
   end
 
-  create_table "activity_log_player_contact_phones", id: :serial, force: :cascade do |t|
-    t.string "data"
-    t.string "select_call_direction"
+  create_table "activity_log_player_contact_phones", id: :serial, comment: "Phone Log process for Zeus", force: :cascade do |t|
+    t.string "data", comment: "Phone number related to this activity"
+    t.string "select_call_direction", comment: "Was this call received by staff or to subject"
     t.string "select_who"
     t.date "called_when"
     t.string "select_result"
@@ -789,15 +1241,13 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "protocol_id"
     t.string "notes"
     t.integer "user_id"
-    t.integer "player_contact_id"
     t.integer "master_id"
-    t.boolean "disabled"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "set_related_player_contact_rank"
     t.string "extra_log_type"
+    t.integer "player_contact_id"
     t.index ["master_id"], name: "index_activity_log_player_contact_phones_on_master_id"
-    t.index ["player_contact_id"], name: "index_activity_log_player_contact_phones_on_player_contact_id"
     t.index ["protocol_id"], name: "index_activity_log_player_contact_phones_on_protocol_id"
     t.index ["user_id"], name: "index_activity_log_player_contact_phones_on_user_id"
   end
@@ -869,7 +1319,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "activity_log_sleep_assignment_discussion_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "sleep_assignment_id"
-    t.string "tag_select_contact_role"
+    t.string "tag_select_contact_role", array: true
     t.string "notes"
     t.string "prev_activity_type"
     t.string "extra_log_type"
@@ -911,13 +1361,13 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.date "follow_up_when"
     t.time "follow_up_time"
     t.string "notes"
-    t.bigint "protocol_id"
     t.string "select_record_from_addresses"
     t.string "extra_log_type"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "activity_log_sleep_assignment_id"
+    t.bigint "protocol_id"
     t.index ["activity_log_sleep_assignment_id"], name: "index_activity_log_sleep_assignment_history_on_activity_log_sle"
     t.index ["master_id"], name: "index_activity_log_sleep_assignment_history_on_master_id"
     t.index ["sleep_assignment_id"], name: "index_activity_log_sleep_assignment_history_on_sleep_assignment"
@@ -927,9 +1377,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "activity_log_sleep_assignment_inex_checklist_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "sleep_assignment_id"
-    t.string "prev_activity_type"
-    t.string "contact_role"
-    t.string "select_subject_eligibility"
     t.string "signed_no_yes"
     t.string "notes"
     t.string "e_signed_document"
@@ -943,6 +1390,9 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "activity_log_sleep_assignment_inex_checklist_id"
+    t.string "select_subject_eligibility"
+    t.string "contact_role"
+    t.string "prev_activity_type"
     t.index ["activity_log_sleep_assignment_inex_checklist_id"], name: "index_activity_log_sleep_assignment_inex_checklist_history_on_a"
     t.index ["master_id"], name: "index_activity_log_sleep_assignment_inex_checklist_history_on_m"
     t.index ["sleep_assignment_id"], name: "index_activity_log_sleep_assignment_inex_checklist_history_on_s"
@@ -952,9 +1402,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "activity_log_sleep_assignment_inex_checklists", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "sleep_assignment_id"
-    t.string "prev_activity_type"
-    t.string "contact_role"
-    t.string "select_subject_eligibility"
     t.string "signed_no_yes"
     t.string "notes"
     t.string "e_signed_document"
@@ -967,6 +1414,9 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "select_subject_eligibility"
+    t.string "contact_role"
+    t.string "prev_activity_type"
     t.index ["master_id"], name: "index_activity_log_sleep_assignment_inex_checklists_on_master_i"
     t.index ["sleep_assignment_id"], name: "index_activity_log_sleep_assignment_inex_checklists_on_sleep_as"
     t.index ["user_id"], name: "index_activity_log_sleep_assignment_inex_checklists_on_user_id"
@@ -1045,15 +1495,15 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "activity_log_sleep_assignment_phone_screen_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "sleep_assignment_id"
-    t.string "callback_required"
-    t.date "callback_date"
-    t.time "callback_time"
-    t.string "notes"
     t.string "extra_log_type"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "activity_log_sleep_assignment_phone_screen_id"
+    t.string "notes"
+    t.time "callback_time"
+    t.date "callback_date"
+    t.string "callback_required"
     t.index ["activity_log_sleep_assignment_phone_screen_id"], name: "index_activity_log_sleep_assignment_phone_screen_history_on_act"
     t.index ["master_id"], name: "index_activity_log_sleep_assignment_phone_screen_history_on_mas"
     t.index ["sleep_assignment_id"], name: "index_activity_log_sleep_assignment_phone_screen_history_on_sle"
@@ -1063,14 +1513,14 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "activity_log_sleep_assignment_phone_screens", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "sleep_assignment_id"
-    t.string "callback_required"
-    t.date "callback_date"
-    t.time "callback_time"
-    t.string "notes"
     t.string "extra_log_type"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "notes"
+    t.time "callback_time"
+    t.date "callback_date"
+    t.string "callback_required"
     t.index ["master_id"], name: "index_activity_log_sleep_assignment_phone_screens_on_master_id"
     t.index ["sleep_assignment_id"], name: "index_activity_log_sleep_assignment_phone_screens_on_sleep_assi"
     t.index ["user_id"], name: "index_activity_log_sleep_assignment_phone_screens_on_user_id"
@@ -1121,12 +1571,12 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.date "follow_up_when"
     t.time "follow_up_time"
     t.string "notes"
-    t.bigint "protocol_id"
     t.string "select_record_from_addresses"
     t.string "extra_log_type"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "protocol_id"
     t.index ["master_id"], name: "index_activity_log_sleep_assignments_on_master_id"
     t.index ["sleep_assignment_id"], name: "index_activity_log_sleep_assignments_on_sleep_assignment_id"
     t.index ["user_id"], name: "index_activity_log_sleep_assignments_on_user_id"
@@ -1910,7 +2360,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "data_request_attrib_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "data_source"
-    t.string "requested_attribs", array: true
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -1923,7 +2372,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "data_request_attribs", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "data_source"
-    t.string "requested_attribs", array: true
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -1934,10 +2382,11 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "data_request_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "project_title"
+    t.string "concept_sheet_approved_yes_no"
+    t.string "concept_sheet_approved_by"
     t.string "full_name"
     t.string "title"
     t.string "institution"
-    t.string "other_institution"
     t.string "others_handling_data"
     t.string "pm_contact"
     t.string "other_pm_contact"
@@ -1946,16 +2395,17 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "terms_of_use_yes_no"
     t.date "data_start_date"
     t.date "data_end_date"
-    t.string "fphs_analyst_yes_no"
-    t.string "fphs_server_yes_no"
-    t.string "fphs_server_tools_notes"
-    t.string "off_fphs_server_reason_notes"
-    t.string "status"
     t.integer "user_id"
-    t.integer "created_by_user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "data_request_id"
+    t.string "other_institution"
+    t.integer "created_by_user_id"
+    t.string "fphs_analyst_yes_no"
+    t.string "fphs_server_yes_no"
+    t.string "fphs_server_tools_notes"
+    t.string "status"
+    t.string "off_fphs_server_reason_notes"
     t.string "select_purpose"
     t.string "other_purpose"
     t.string "research_question_notes"
@@ -2011,6 +2461,54 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["user_id"], name: "index_data_request_message_history_on_user_id"
   end
 
+  create_table "data_request_message_to_requester_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "message_notes"
+    t.integer "created_by_user_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_request_message_to_requester_id"
+    t.index ["data_request_message_to_requester_id"], name: "index_data_request_message_to_requester_history_on_data_request"
+    t.index ["master_id"], name: "index_data_request_message_to_requester_history_on_master_id"
+    t.index ["user_id"], name: "index_data_request_message_to_requester_history_on_user_id"
+  end
+
+  create_table "data_request_message_to_requesters", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "message_notes"
+    t.integer "created_by_user_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_data_request_message_to_requesters_on_master_id"
+    t.index ["user_id"], name: "index_data_request_message_to_requesters_on_user_id"
+  end
+
+  create_table "data_request_message_to_reviewer_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "message_notes"
+    t.integer "created_by_user_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "data_request_message_to_reviewer_id"
+    t.index ["data_request_message_to_reviewer_id"], name: "index_data_request_message_to_reviewer_history_on_data_request_"
+    t.index ["master_id"], name: "index_data_request_message_to_reviewer_history_on_master_id"
+    t.index ["user_id"], name: "index_data_request_message_to_reviewer_history_on_user_id"
+  end
+
+  create_table "data_request_message_to_reviewers", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "message_notes"
+    t.integer "created_by_user_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_data_request_message_to_reviewers_on_master_id"
+    t.index ["user_id"], name: "index_data_request_message_to_reviewers_on_user_id"
+  end
+
   create_table "data_request_messages", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "message_notes"
@@ -2028,7 +2526,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "full_name"
     t.string "title"
     t.string "institution"
-    t.string "other_institution"
     t.string "others_handling_data"
     t.string "pm_contact"
     t.string "other_pm_contact"
@@ -2037,15 +2534,16 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "terms_of_use_yes_no"
     t.date "data_start_date"
     t.date "data_end_date"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "other_institution"
+    t.integer "created_by_user_id"
     t.string "fphs_analyst_yes_no"
     t.string "fphs_server_yes_no"
     t.string "fphs_server_tools_notes"
-    t.string "off_fphs_server_reason_notes"
     t.string "status"
-    t.integer "user_id"
-    t.integer "created_by_user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.string "off_fphs_server_reason_notes"
     t.string "select_purpose"
     t.string "other_purpose"
     t.string "research_question_notes"
@@ -2056,7 +2554,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "data_requests_selected_attrib_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "record_id"
-    t.string "record_type"
     t.integer "data_request_id"
     t.string "data"
     t.string "variable_name"
@@ -2065,6 +2562,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "data_requests_selected_attrib_id"
+    t.string "record_type"
     t.index ["data_requests_selected_attrib_id"], name: "index_data_requests_selected_attrib_history_on_data_requests_se"
     t.index ["master_id"], name: "index_data_requests_selected_attrib_history_on_master_id"
     t.index ["user_id"], name: "index_data_requests_selected_attrib_history_on_user_id"
@@ -2073,7 +2571,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "data_requests_selected_attribs", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "record_id"
-    t.string "record_type"
     t.integer "data_request_id"
     t.string "data"
     t.string "variable_name"
@@ -2081,6 +2578,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "record_type"
     t.index ["master_id"], name: "index_data_requests_selected_attribs_on_master_id"
     t.index ["user_id"], name: "index_data_requests_selected_attribs_on_user_id"
   end
@@ -2229,6 +2727,96 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["user_id"], name: "index_emergency_contacts_on_user_id"
   end
 
+  create_table "env_environment_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "name"
+    t.string "description"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "env_environment_id"
+    t.index ["env_environment_id"], name: "3cea3c1a_id_idx"
+    t.index ["master_id"], name: "3cea3c1a_history_master_id"
+    t.index ["user_id"], name: "3cea3c1a_user_idx"
+  end
+
+  create_table "env_environments", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "name"
+    t.string "description"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_environments.env_environments_on_master_id"
+    t.index ["user_id"], name: "index_environments.env_environments_on_user_id"
+  end
+
+  create_table "env_hosting_account_history", force: :cascade do |t|
+    t.string "name"
+    t.string "provider"
+    t.integer "account_number"
+    t.string "login_url"
+    t.string "primary_admin"
+    t.string "description"
+    t.bigint "created_by_user_id"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "env_hosting_account_id"
+    t.index ["created_by_user_id"], name: "d2093078_ref_cb_user_idx_hist"
+    t.index ["env_hosting_account_id"], name: "d2093078_id_idx"
+    t.index ["user_id"], name: "d2093078_user_idx"
+  end
+
+  create_table "env_hosting_accounts", force: :cascade do |t|
+    t.string "name"
+    t.string "provider"
+    t.integer "account_number"
+    t.string "login_url"
+    t.string "primary_admin"
+    t.string "description"
+    t.bigint "created_by_user_id"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_user_id"], name: "d2093078_ref_cb_user_idx"
+    t.index ["user_id"], name: "index_environments.env_hosting_accounts_on_user_id"
+  end
+
+  create_table "env_server_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "name"
+    t.string "server_type"
+    t.string "hosting_category"
+    t.string "server_hosting_name"
+    t.string "server_primary_admin"
+    t.string "description"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "env_server_id"
+    t.bigint "hosting_account_id"
+    t.index ["env_server_id"], name: "304c86bf_id_idx"
+    t.index ["master_id"], name: "304c86bf_history_master_id"
+    t.index ["user_id"], name: "304c86bf_user_idx"
+  end
+
+  create_table "env_servers", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "name"
+    t.string "server_type"
+    t.string "hosting_category"
+    t.string "server_hosting_name"
+    t.string "server_primary_admin"
+    t.string "description"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "hosting_account_id"
+    t.index ["master_id"], name: "index_environments.env_servers_on_master_id"
+    t.index ["user_id"], name: "index_environments.env_servers_on_user_id"
+  end
+
   create_table "exception_logs", id: :serial, force: :cascade do |t|
     t.string "message"
     t.string "main"
@@ -2352,6 +2940,138 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["admin_id"], name: "index_external_links_on_admin_id"
   end
 
+  create_table "femfl_address_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "street"
+    t.string "street2"
+    t.string "street3"
+    t.string "city"
+    t.string "state"
+    t.string "zip"
+    t.string "source"
+    t.integer "rank"
+    t.string "rec_type"
+    t.string "country"
+    t.string "postal_code"
+    t.string "region"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "femfl_address_id"
+    t.index ["femfl_address_id"], name: "femfl_address_id_idx"
+    t.index ["master_id"], name: "index_femfl.femfl_address_history_on_master_id"
+    t.index ["user_id"], name: "index_femfl.femfl_address_history_on_user_id"
+  end
+
+  create_table "femfl_addresses", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "street"
+    t.string "street2"
+    t.string "street3"
+    t.string "city"
+    t.string "state"
+    t.string "zip"
+    t.string "source"
+    t.integer "rank"
+    t.string "rec_type"
+    t.string "country"
+    t.string "postal_code"
+    t.string "region"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_femfl.femfl_addresses_on_master_id"
+    t.index ["user_id"], name: "index_femfl.femfl_addresses_on_user_id"
+  end
+
+  create_table "femfl_assignment_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "femfl_id"
+    t.bigint "user_id"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "femfl_assignment_table_id_id"
+    t.index ["admin_id"], name: "index_femfl.femfl_assignment_history_on_admin_id"
+    t.index ["femfl_assignment_table_id_id"], name: "femfl_assignment_id_idx"
+    t.index ["master_id"], name: "index_femfl.femfl_assignment_history_on_master_id"
+    t.index ["user_id"], name: "index_femfl.femfl_assignment_history_on_user_id"
+  end
+
+  create_table "femfl_assignments", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "femfl_id"
+    t.bigint "user_id"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_femfl.femfl_assignments_on_admin_id"
+    t.index ["master_id"], name: "index_femfl.femfl_assignments_on_master_id"
+    t.index ["user_id"], name: "index_femfl.femfl_assignments_on_user_id"
+  end
+
+  create_table "femfl_contact_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "rec_type"
+    t.string "data"
+    t.integer "rank"
+    t.string "source"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "femfl_contact_id"
+    t.index ["femfl_contact_id"], name: "femfl_contact_id_idx"
+    t.index ["master_id"], name: "index_femfl.femfl_contact_history_on_master_id"
+    t.index ["user_id"], name: "index_femfl.femfl_contact_history_on_user_id"
+  end
+
+  create_table "femfl_contacts", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "rec_type"
+    t.string "data"
+    t.integer "rank"
+    t.string "source"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_femfl.femfl_contacts_on_master_id"
+    t.index ["user_id"], name: "index_femfl.femfl_contacts_on_user_id"
+  end
+
+  create_table "femfl_subject_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "first_name"
+    t.string "last_name"
+    t.string "middle_name"
+    t.string "nick_name"
+    t.date "birth_date"
+    t.integer "rank"
+    t.string "source"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "femfl_subject_id"
+    t.index ["femfl_subject_id"], name: "femfl_subject_id_idx"
+    t.index ["master_id"], name: "index_femfl.femfl_subject_history_on_master_id"
+    t.index ["user_id"], name: "index_femfl.femfl_subject_history_on_user_id"
+  end
+
+  create_table "femfl_subjects", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "first_name"
+    t.string "last_name"
+    t.string "middle_name"
+    t.string "nick_name"
+    t.date "birth_date"
+    t.string "source"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "rank"
+    t.index ["master_id"], name: "index_femfl.femfl_subjects_on_master_id"
+    t.index ["user_id"], name: "index_femfl.femfl_subjects_on_user_id"
+  end
+
   create_table "general_selection_history", id: :serial, force: :cascade do |t|
     t.string "name"
     t.string "value"
@@ -2385,6 +3105,814 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "description"
     t.boolean "lock"
     t.index ["admin_id"], name: "index_general_selections_on_admin_id"
+  end
+
+  create_table "grit_access_msm_staff_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_access_msm_staff_id"
+    t.index ["grit_access_msm_staff_id"], name: "index_grit_access_msm_staff_history_on_grit_access_msm_staff_id"
+    t.index ["master_id"], name: "index_grit_access_msm_staff_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_access_msm_staff_history_on_user_id"
+  end
+
+  create_table "grit_access_msm_staffs", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_access_msm_staffs_on_master_id"
+    t.index ["user_id"], name: "index_grit_access_msm_staffs_on_user_id"
+  end
+
+  create_table "grit_access_pi_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_access_pi_id"
+    t.index ["grit_access_pi_id"], name: "index_grit_access_pi_history_on_grit_access_pi_id"
+    t.index ["master_id"], name: "index_grit_access_pi_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_access_pi_history_on_user_id"
+  end
+
+  create_table "grit_access_pis", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_access_pis_on_master_id"
+    t.index ["user_id"], name: "index_grit_access_pis_on_user_id"
+  end
+
+  create_table "grit_adverse_event_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "select_problem_type"
+    t.date "event_occurred_when"
+    t.date "event_discovered_when"
+    t.string "select_severity"
+    t.string "select_location"
+    t.string "select_expectedness"
+    t.string "select_relatedness"
+    t.string "event_description"
+    t.string "corrective_action_description"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_adverse_event_id"
+    t.index ["grit_adverse_event_id"], name: "index_grit_adverse_event_history_on_grit_adverse_event_id"
+    t.index ["master_id"], name: "index_grit_adverse_event_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_adverse_event_history_on_user_id"
+  end
+
+  create_table "grit_adverse_events", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "select_problem_type"
+    t.date "event_occurred_when"
+    t.date "event_discovered_when"
+    t.string "select_severity"
+    t.string "select_location"
+    t.string "select_expectedness"
+    t.string "select_relatedness"
+    t.string "event_description"
+    t.string "corrective_action_description"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_adverse_events_on_master_id"
+    t.index ["user_id"], name: "index_grit_adverse_events_on_user_id"
+  end
+
+  create_table "grit_appointment_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.date "visit_start_date"
+    t.date "visit_end_date"
+    t.string "interventionist"
+    t.string "select_status"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_appointment_id"
+    t.index ["grit_appointment_id"], name: "index_grit_appointment_history_on_grit_appointment_id"
+    t.index ["master_id"], name: "index_grit_appointment_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_appointment_history_on_user_id"
+  end
+
+  create_table "grit_appointments", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.date "visit_start_date"
+    t.date "visit_end_date"
+    t.string "interventionist"
+    t.string "select_status"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_appointments_on_master_id"
+    t.index ["user_id"], name: "index_grit_appointments_on_user_id"
+  end
+
+  create_table "grit_assignment_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.bigint "grit_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_assignment_table_id"
+    t.index ["admin_id"], name: "index_grit_assignment_history_on_admin_id"
+    t.index ["admin_id"], name: "index_grit_assignment_history_on_admin_id"
+    t.index ["grit_assignment_table_id"], name: "index_grit_assignment_history_on_grit_assignment_table_id"
+    t.index ["grit_assignment_table_id"], name: "index_grit_assignment_history_on_grit_assignment_table_id"
+    t.index ["master_id"], name: "index_grit_assignment_history_on_master_id"
+    t.index ["master_id"], name: "index_grit_assignment_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_assignment_history_on_user_id"
+    t.index ["user_id"], name: "index_grit_assignment_history_on_user_id"
+  end
+
+  create_table "grit_assignment_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.bigint "grit_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_assignment_table_id"
+    t.index ["admin_id"], name: "index_grit_assignment_history_on_admin_id"
+    t.index ["admin_id"], name: "index_grit_assignment_history_on_admin_id"
+    t.index ["grit_assignment_table_id"], name: "index_grit_assignment_history_on_grit_assignment_table_id"
+    t.index ["grit_assignment_table_id"], name: "index_grit_assignment_history_on_grit_assignment_table_id"
+    t.index ["master_id"], name: "index_grit_assignment_history_on_master_id"
+    t.index ["master_id"], name: "index_grit_assignment_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_assignment_history_on_user_id"
+    t.index ["user_id"], name: "index_grit_assignment_history_on_user_id"
+  end
+
+  create_table "grit_assignments", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.bigint "grit_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_grit_assignments_on_admin_id"
+    t.index ["admin_id"], name: "index_grit_assignments_on_admin_id"
+    t.index ["master_id"], name: "index_grit_assignments_on_master_id"
+    t.index ["master_id"], name: "index_grit_assignments_on_master_id"
+    t.index ["user_id"], name: "index_grit_assignments_on_user_id"
+    t.index ["user_id"], name: "index_grit_assignments_on_user_id"
+  end
+
+  create_table "grit_assignments", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.bigint "grit_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_grit_assignments_on_admin_id"
+    t.index ["admin_id"], name: "index_grit_assignments_on_admin_id"
+    t.index ["master_id"], name: "index_grit_assignments_on_master_id"
+    t.index ["master_id"], name: "index_grit_assignments_on_master_id"
+    t.index ["user_id"], name: "index_grit_assignments_on_user_id"
+    t.index ["user_id"], name: "index_grit_assignments_on_user_id"
+  end
+
+  create_table "grit_consent_mailing_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "select_record_from_player_contact_email"
+    t.string "select_record_from_addresses"
+    t.date "sent_when"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_consent_mailing_id"
+    t.index ["grit_consent_mailing_id"], name: "index_grit_consent_mailing_history_on_grit_consent_mailing_id"
+    t.index ["master_id"], name: "index_grit_consent_mailing_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_consent_mailing_history_on_user_id"
+  end
+
+  create_table "grit_consent_mailings", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "select_record_from_player_contact_email"
+    t.string "select_record_from_addresses"
+    t.date "sent_when"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_consent_mailings_on_master_id"
+    t.index ["user_id"], name: "index_grit_consent_mailings_on_user_id"
+  end
+
+  create_table "grit_msm_post_testing_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "session_type"
+    t.date "session_date"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_msm_post_testing_id"
+    t.index ["grit_msm_post_testing_id"], name: "index_grit_msm_post_testing_history_on_grit_msm_post_testing_id"
+    t.index ["master_id"], name: "index_grit_msm_post_testing_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_msm_post_testing_history_on_user_id"
+  end
+
+  create_table "grit_msm_post_testings", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "session_type"
+    t.date "session_date"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_msm_post_testings_on_master_id"
+    t.index ["user_id"], name: "index_grit_msm_post_testings_on_user_id"
+  end
+
+  create_table "grit_msm_screening_detail_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.date "screening_date"
+    t.string "select_status"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_msm_screening_detail_id"
+    t.index ["grit_msm_screening_detail_id"], name: "index_grit_msm_screening_detail_history_on_grit_msm_screening_d"
+    t.index ["master_id"], name: "index_grit_msm_screening_detail_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_msm_screening_detail_history_on_user_id"
+  end
+
+  create_table "grit_msm_screening_details", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.date "screening_date"
+    t.string "select_status"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_msm_screening_details_on_master_id"
+    t.index ["user_id"], name: "index_grit_msm_screening_details_on_user_id"
+  end
+
+  create_table "grit_pi_followup_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "pre_call_notes"
+    t.string "call_notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_pi_followup_id"
+    t.index ["grit_pi_followup_id"], name: "index_grit_pi_followup_history_on_grit_pi_followup_id"
+    t.index ["master_id"], name: "index_grit_pi_followup_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_pi_followup_history_on_user_id"
+  end
+
+  create_table "grit_pi_followups", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "pre_call_notes"
+    t.string "call_notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_pi_followups_on_master_id"
+    t.index ["user_id"], name: "index_grit_pi_followups_on_user_id"
+  end
+
+  create_table "grit_protocol_deviation_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.date "deviation_occurred_when"
+    t.date "deviation_discovered_when"
+    t.string "select_severity"
+    t.string "deviation_description"
+    t.string "corrective_action_description"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_protocol_deviation_id"
+    t.index ["grit_protocol_deviation_id"], name: "index_grit_protocol_deviation_history_on_grit_protocol_deviatio"
+    t.index ["master_id"], name: "index_grit_protocol_deviation_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_protocol_deviation_history_on_user_id"
+  end
+
+  create_table "grit_protocol_deviations", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.date "deviation_occurred_when"
+    t.date "deviation_discovered_when"
+    t.string "select_severity"
+    t.string "deviation_description"
+    t.string "corrective_action_description"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_protocol_deviations_on_master_id"
+    t.index ["user_id"], name: "index_grit_protocol_deviations_on_user_id"
+  end
+
+  create_table "grit_protocol_exception_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.date "exception_date"
+    t.string "exception_description"
+    t.string "risks_and_benefits_notes"
+    t.string "informed_consent_notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_protocol_exception_id"
+    t.index ["grit_protocol_exception_id"], name: "index_grit_protocol_exception_history_on_grit_protocol_exceptio"
+    t.index ["master_id"], name: "index_grit_protocol_exception_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_protocol_exception_history_on_user_id"
+  end
+
+  create_table "grit_protocol_exceptions", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.date "exception_date"
+    t.string "exception_description"
+    t.string "risks_and_benefits_notes"
+    t.string "informed_consent_notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_protocol_exceptions_on_master_id"
+    t.index ["user_id"], name: "index_grit_protocol_exceptions_on_user_id"
+  end
+
+  create_table "grit_ps_audit_c_question_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "alcohol_frequency"
+    t.string "daily_alcohol"
+    t.string "six_or_more_frequency"
+    t.string "total_score"
+    t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_ps_audit_c_question_id"
+    t.index ["grit_ps_audit_c_question_id"], name: "index_grit_ps_audit_c_question_history_on_grit_ps_audit_c_quest"
+    t.index ["master_id"], name: "index_grit_ps_audit_c_question_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_audit_c_question_history_on_user_id"
+  end
+
+  create_table "grit_ps_audit_c_questions", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "alcohol_frequency"
+    t.string "daily_alcohol"
+    t.string "six_or_more_frequency"
+    t.string "total_score"
+    t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_ps_audit_c_questions_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_audit_c_questions_on_user_id"
+  end
+
+  create_table "grit_ps_basic_response_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "reliable_internet_yes_no"
+    t.string "placeholder_digital_no"
+    t.string "cbt_yes_no"
+    t.string "cbt_how_long_ago"
+    t.string "cbt_notes"
+    t.string "grit_times_yes_no"
+    t.string "grit_times_notes"
+    t.string "work_night_shifts_yes_no"
+    t.integer "number_times_per_week_work_night_shifts"
+    t.string "narcolepsy_diagnosis_yes_no_dont_know"
+    t.string "narcolepsy_diagnosis_notes"
+    t.string "antiseizure_meds_yes_no"
+    t.string "seizure_in_ten_years_yes_no"
+    t.string "major_psychiatric_disorder_yes_no"
+    t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_ps_basic_response_id"
+    t.index ["grit_ps_basic_response_id"], name: "index_grit_ps_basic_response_history_on_grit_ps_basic_response_"
+    t.index ["master_id"], name: "index_grit_ps_basic_response_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_basic_response_history_on_user_id"
+  end
+
+  create_table "grit_ps_basic_responses", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "reliable_internet_yes_no"
+    t.string "placeholder_digital_no"
+    t.string "cbt_yes_no"
+    t.string "cbt_how_long_ago"
+    t.string "cbt_notes"
+    t.string "grit_times_yes_no"
+    t.string "grit_times_notes"
+    t.string "work_night_shifts_yes_no"
+    t.integer "number_times_per_week_work_night_shifts"
+    t.string "narcolepsy_diagnosis_yes_no_dont_know"
+    t.string "narcolepsy_diagnosis_notes"
+    t.string "antiseizure_meds_yes_no"
+    t.string "seizure_in_ten_years_yes_no"
+    t.string "major_psychiatric_disorder_yes_no"
+    t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_ps_basic_responses_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_basic_responses_on_user_id"
+  end
+
+  create_table "grit_ps_eligibility_followup_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "outcome"
+    t.string "interested_yes_no"
+    t.string "not_interested_notes"
+    t.string "consent_to_pass_info_to_msm_yes_no"
+    t.string "consent_to_pass_info_to_msm_2_yes_no"
+    t.string "contact_info_notes"
+    t.string "any_questions_yes_no"
+    t.string "contact_pi_yes_no"
+    t.string "additional_questions_yes_no"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_ps_eligibility_followup_id"
+    t.index ["grit_ps_eligibility_followup_id"], name: "index_grit_ps_eligibility_followup_history_on_grit_ps_eligibili"
+    t.index ["master_id"], name: "index_grit_ps_eligibility_followup_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_eligibility_followup_history_on_user_id"
+  end
+
+  create_table "grit_ps_eligibility_followups", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "outcome"
+    t.string "interested_yes_no"
+    t.string "not_interested_notes"
+    t.string "consent_to_pass_info_to_msm_yes_no"
+    t.string "consent_to_pass_info_to_msm_2_yes_no"
+    t.string "contact_info_notes"
+    t.string "any_questions_yes_no"
+    t.string "contact_pi_yes_no"
+    t.string "additional_questions_yes_no"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_ps_eligibility_followups_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_eligibility_followups_on_user_id"
+  end
+
+  create_table "grit_ps_eligible_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "notes"
+    t.string "interested_yes_no"
+    t.string "not_interested_notes"
+    t.string "consent_to_pass_info_to_msm_yes_no"
+    t.string "consent_to_pass_info_to_msm_2_yes_no"
+    t.string "contact_info_notes"
+    t.string "more_questions_yes_no"
+    t.string "more_questions_notes"
+    t.string "select_still_interested"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_ps_eligible_id"
+    t.index ["grit_ps_eligible_id"], name: "index_grit_ps_eligible_history_on_grit_ps_eligible_id"
+    t.index ["master_id"], name: "index_grit_ps_eligible_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_eligible_history_on_user_id"
+  end
+
+  create_table "grit_ps_eligibles", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "notes"
+    t.string "interested_yes_no"
+    t.string "not_interested_notes"
+    t.string "consent_to_pass_info_to_msm_yes_no"
+    t.string "consent_to_pass_info_to_msm_2_yes_no"
+    t.string "contact_info_notes"
+    t.string "more_questions_yes_no"
+    t.string "more_questions_notes"
+    t.string "select_still_interested"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_ps_eligibles_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_eligibles_on_user_id"
+  end
+
+  create_table "grit_ps_initial_screening_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "select_is_good_time_to_speak"
+    t.string "looked_at_website_yes_no"
+    t.string "select_may_i_begin"
+    t.string "any_questions_blank_yes_no"
+    t.string "question_notes"
+    t.string "select_still_interested"
+    t.date "follow_up_date"
+    t.time "follow_up_time"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_ps_initial_screening_id"
+    t.string "more_questions_yes_no"
+    t.string "more_questions_notes"
+    t.string "still_interested_2_yes_no"
+    t.index ["grit_ps_initial_screening_id"], name: "index_grit_ps_initial_screening_history_on_grit_ps_initial_scre"
+    t.index ["master_id"], name: "index_grit_ps_initial_screening_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_initial_screening_history_on_user_id"
+  end
+
+  create_table "grit_ps_initial_screenings", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "select_is_good_time_to_speak"
+    t.string "looked_at_website_yes_no"
+    t.string "select_may_i_begin"
+    t.string "any_questions_blank_yes_no"
+    t.string "question_notes"
+    t.string "select_still_interested"
+    t.date "follow_up_date"
+    t.time "follow_up_time"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "more_questions_yes_no"
+    t.string "more_questions_notes"
+    t.string "still_interested_2_yes_no"
+    t.index ["master_id"], name: "index_grit_ps_initial_screenings_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_initial_screenings_on_user_id"
+  end
+
+  create_table "grit_ps_non_eligible_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "any_questions_yes_no"
+    t.string "placeholder_any_questions_no"
+    t.string "contact_pi_yes_no"
+    t.string "additional_questions_yes_no"
+    t.string "placeholder_additional_questions_no"
+    t.string "placeholder_additional_questions_yes"
+    t.string "consent_to_pass_info_to_msm_yes_no"
+    t.string "consent_to_pass_info_to_msm_2_yes_no"
+    t.string "placeholder_consent_to_pass_info_2_no"
+    t.string "contact_info_notes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_ps_non_eligible_id"
+    t.index ["grit_ps_non_eligible_id"], name: "index_grit_ps_non_eligible_history_on_grit_ps_non_eligible_id"
+    t.index ["master_id"], name: "index_grit_ps_non_eligible_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_non_eligible_history_on_user_id"
+  end
+
+  create_table "grit_ps_non_eligibles", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "any_questions_yes_no"
+    t.string "placeholder_any_questions_no"
+    t.string "contact_pi_yes_no"
+    t.string "additional_questions_yes_no"
+    t.string "placeholder_additional_questions_no"
+    t.string "placeholder_additional_questions_yes"
+    t.string "consent_to_pass_info_to_msm_yes_no"
+    t.string "consent_to_pass_info_to_msm_2_yes_no"
+    t.string "placeholder_consent_to_pass_info_2_no"
+    t.string "contact_info_notes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_ps_non_eligibles_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_non_eligibles_on_user_id"
+  end
+
+  create_table "grit_ps_pain_question_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "select_pain_interfere"
+    t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_ps_pain_question_id"
+    t.index ["grit_ps_pain_question_id"], name: "index_grit_ps_pain_question_history_on_grit_ps_pain_question_id"
+    t.index ["master_id"], name: "index_grit_ps_pain_question_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_pain_question_history_on_user_id"
+  end
+
+  create_table "grit_ps_pain_questions", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "select_pain_interfere"
+    t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_ps_pain_questions_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_pain_questions_on_user_id"
+  end
+
+  create_table "grit_ps_participation_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "commit_to_attend_yes_no"
+    t.string "small_group_yes_no"
+    t.string "any_questions_yes_no"
+    t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_ps_participation_id"
+    t.index ["grit_ps_participation_id"], name: "index_grit_ps_participation_history_on_grit_ps_participation_id"
+    t.index ["master_id"], name: "index_grit_ps_participation_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_participation_history_on_user_id"
+  end
+
+  create_table "grit_ps_participations", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "commit_to_attend_yes_no"
+    t.string "small_group_yes_no"
+    t.string "any_questions_yes_no"
+    t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_ps_participations_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_participations_on_user_id"
+  end
+
+  create_table "grit_ps_possibly_eligible_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "any_questions_yes_no"
+    t.string "consent_to_pass_info_to_msm_yes_no"
+    t.string "consent_to_pass_info_to_msm_2_yes_no"
+    t.string "contact_info_notes"
+    t.date "follow_up_date"
+    t.time "follow_up_time"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_ps_possibly_eligible_id"
+    t.index ["grit_ps_possibly_eligible_id"], name: "index_grit_ps_possibly_eligible_history_on_grit_ps_possibly_eli"
+    t.index ["master_id"], name: "index_grit_ps_possibly_eligible_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_possibly_eligible_history_on_user_id"
+  end
+
+  create_table "grit_ps_possibly_eligibles", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "any_questions_yes_no"
+    t.string "consent_to_pass_info_to_msm_yes_no"
+    t.string "consent_to_pass_info_to_msm_2_yes_no"
+    t.string "contact_info_notes"
+    t.date "follow_up_date"
+    t.time "follow_up_time"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_ps_possibly_eligibles_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_possibly_eligibles_on_user_id"
+  end
+
+  create_table "grit_ps_screener_response_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "outcome"
+    t.string "comm_clearly_in_english_yes_no"
+    t.string "give_informed_consent_yes_no_dont_know"
+    t.string "give_informed_consent_notes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_ps_screener_response_id"
+    t.index ["grit_ps_screener_response_id"], name: "index_grit_ps_screener_response_history_on_grit_ps_screener_res"
+    t.index ["master_id"], name: "index_grit_ps_screener_response_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_screener_response_history_on_user_id"
+  end
+
+  create_table "grit_ps_screener_responses", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "outcome"
+    t.string "comm_clearly_in_english_yes_no"
+    t.string "give_informed_consent_yes_no_dont_know"
+    t.string "give_informed_consent_notes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_ps_screener_responses_on_master_id"
+    t.index ["user_id"], name: "index_grit_ps_screener_responses_on_user_id"
+  end
+
+  create_table "grit_screening_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "eligible_for_study_blank_yes_no"
+    t.string "requires_study_partner_blank_yes_no"
+    t.string "notes"
+    t.string "good_time_to_speak_blank_yes_no"
+    t.date "callback_date"
+    t.string "callback_time"
+    t.string "still_interested_blank_yes_no"
+    t.string "not_interested_notes"
+    t.string "contact_in_future_yes_no"
+    t.string "ineligible_notes"
+    t.string "eligible_notes"
+    t.string "consent_performed_yes_no"
+    t.string "did_subject_consent_yes_no"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_screening_id"
+    t.index ["grit_screening_id"], name: "index_grit_screening_history_on_grit_screening_id"
+    t.index ["master_id"], name: "index_grit_screening_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_screening_history_on_user_id"
+  end
+
+  create_table "grit_screenings", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "eligible_for_study_blank_yes_no"
+    t.string "requires_study_partner_blank_yes_no"
+    t.string "notes"
+    t.string "good_time_to_speak_blank_yes_no"
+    t.date "callback_date"
+    t.string "callback_time"
+    t.string "still_interested_blank_yes_no"
+    t.string "not_interested_notes"
+    t.string "contact_in_future_yes_no"
+    t.string "ineligible_notes"
+    t.string "eligible_notes"
+    t.string "consent_performed_yes_no"
+    t.string "did_subject_consent_yes_no"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_screenings_on_master_id"
+    t.index ["user_id"], name: "index_grit_screenings_on_user_id"
+  end
+
+  create_table "grit_secure_note_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_secure_note_id"
+    t.index ["grit_secure_note_id"], name: "index_grit_secure_note_history_on_grit_secure_note_id"
+    t.index ["master_id"], name: "index_grit_secure_note_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_secure_note_history_on_user_id"
+  end
+
+  create_table "grit_secure_notes", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_secure_notes_on_master_id"
+    t.index ["user_id"], name: "index_grit_secure_notes_on_user_id"
+  end
+
+  create_table "grit_withdrawal_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "select_subject_withdrew_reason"
+    t.string "select_investigator_terminated"
+    t.string "lost_to_follow_up_no_yes"
+    t.string "no_longer_participating_no_yes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "grit_withdrawal_id"
+    t.index ["grit_withdrawal_id"], name: "index_grit_withdrawal_history_on_grit_withdrawal_id"
+    t.index ["master_id"], name: "index_grit_withdrawal_history_on_master_id"
+    t.index ["user_id"], name: "index_grit_withdrawal_history_on_user_id"
+  end
+
+  create_table "grit_withdrawals", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "select_subject_withdrew_reason"
+    t.string "select_investigator_terminated"
+    t.string "lost_to_follow_up_no_yes"
+    t.string "no_longer_participating_no_yes"
+    t.string "notes"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_grit_withdrawals_on_master_id"
+    t.index ["user_id"], name: "index_grit_withdrawals_on_user_id"
   end
 
   create_table "imports", id: :serial, force: :cascade do |t|
@@ -2630,6 +4158,9 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.date "visit_end_date"
     t.string "select_status"
     t.string "notes"
+    t.string "select_schedule"
+    t.date "covid19_test_date"
+    t.time "covid19_test_time"
     t.index ["ipa_appointment_id"], name: "index_ipa_appointment_history_on_ipa_appointment_id"
     t.index ["master_id"], name: "index_ipa_appointment_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_appointment_history_on_user_id"
@@ -2644,6 +4175,9 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.date "visit_end_date"
     t.string "select_status"
     t.string "notes"
+    t.string "select_schedule"
+    t.date "covid19_test_date"
+    t.time "covid19_test_time"
     t.index ["master_id"], name: "index_ipa_appointments_on_master_id"
     t.index ["user_id"], name: "index_ipa_appointments_on_user_id"
     t.index ["visit_start_date"], name: "ipa_appointments_visit_start_date_key", unique: true
@@ -2701,20 +4235,66 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["user_id"], name: "index_ipa_consent_mailings_on_user_id"
   end
 
-  create_table "ipa_datadic", force: :cascade do |t|
+  create_table "ipa_covid_prescreening_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "foreign_travel_yes_no"
+    t.string "covid_tested_yes_no"
+    t.string "select_test_result"
+    t.date "test_date"
+    t.string "test_location_notes"
+    t.string "covid_contact_yes_no_dont_know"
+    t.date "contact_date"
+    t.string "household_isolation_yes_no"
+    t.string "fever_yes_no"
+    t.string "tag_select_symptoms", array: true
+    t.string "notes"
     t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_ref_data.ipa_datadic_on_user_id"
+    t.bigint "ipa_covid_prescreening_id"
+    t.index ["ipa_covid_prescreening_id"], name: "be198d9e_id_idx"
+    t.index ["master_id"], name: "be198d9e_history_master_id"
+    t.index ["user_id"], name: "be198d9e_user_idx"
   end
 
-  create_table "ipa_datadic_history", force: :cascade do |t|
+  create_table "ipa_covid_prescreenings", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "foreign_travel_yes_no"
+    t.string "covid_tested_yes_no"
+    t.string "select_test_result"
+    t.date "test_date"
+    t.string "test_location_notes"
+    t.string "covid_contact_yes_no_dont_know"
+    t.date "contact_date"
+    t.string "household_isolation_yes_no"
+    t.string "fever_yes_no"
+    t.string "tag_select_symptoms", array: true
+    t.string "notes"
     t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "ipa_datadic_id"
-    t.index ["ipa_datadic_id"], name: "9b09ee89_id_idx"
-    t.index ["user_id"], name: "9b09ee89_user_idx"
+    t.index ["master_id"], name: "index_ipa_ops.ipa_covid_prescreenings_on_master_id"
+    t.index ["user_id"], name: "index_ipa_ops.ipa_covid_prescreenings_on_user_id"
+  end
+
+  create_table "ipa_datadic", id: :integer, default: -> { "nextval('ipaops_datadic_id_seq'::regclass)" }, force: :cascade do |t|
+    t.string "variable_name", null: false
+    t.text "domain"
+    t.text "field_type_rc"
+    t.text "field_type_sa"
+    t.text "field_label"
+    t.text "field_attributes"
+    t.text "field_note"
+    t.text "text_valid_type"
+    t.text "text_valid_min"
+    t.text "text_valid_max"
+    t.text "required_field"
+    t.text "field_attr_array", array: true
+    t.text "source"
+    t.text "form_name"
+    t.text "owner"
+    t.text "classification"
+    t.text "display"
   end
 
   create_table "ipa_exit_interview_history", id: :serial, force: :cascade do |t|
@@ -3137,6 +4717,12 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "metal_implants_blank_yes_no_dont_know"
     t.string "metal_implants_details"
     t.string "metal_implants_mri_approval_details"
+    t.string "radiation_details"
+    t.string "radiation_blank_yes_no"
+    t.string "form_version"
+    t.integer "number_of_nights_sleep_apnea_device"
+    t.string "sleep_apnea_travel_with_device_yes_no"
+    t.string "select_radiation_type"
     t.index ["ipa_medical_detail_id"], name: "index_ipa_medical_detail_history_on_ipa_medical_detail_id"
     t.index ["master_id"], name: "index_ipa_medical_detail_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_medical_detail_history_on_user_id"
@@ -3187,6 +4773,12 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "metal_implants_blank_yes_no_dont_know"
     t.string "metal_implants_details"
     t.string "metal_implants_mri_approval_details"
+    t.string "radiation_details"
+    t.string "radiation_blank_yes_no"
+    t.string "form_version"
+    t.integer "number_of_nights_sleep_apnea_device"
+    t.string "sleep_apnea_travel_with_device_yes_no"
+    t.string "select_radiation_type"
     t.index ["master_id"], name: "index_ipa_medical_details_on_master_id"
     t.index ["user_id"], name: "index_ipa_medical_details_on_user_id"
   end
@@ -3551,12 +5143,34 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["user_id"], name: "index_ipa_ps_comp_reviews_on_user_id"
   end
 
+  create_table "ipa_ps_covid_closing_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "contact_later_yes_no"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "ipa_ps_covid_closing_id"
+    t.index ["ipa_ps_covid_closing_id"], name: "be7e93a6_id_idx"
+    t.index ["master_id"], name: "be7e93a6_history_master_id"
+    t.index ["user_id"], name: "be7e93a6_user_idx"
+  end
+
+  create_table "ipa_ps_covid_closings", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "contact_later_yes_no"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_ipa_ops.ipa_ps_covid_closings_on_master_id"
+    t.index ["user_id"], name: "index_ipa_ops.ipa_ps_covid_closings_on_user_id"
+  end
+
   create_table "ipa_ps_football_experience_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "age"
     t.string "played_in_nfl_blank_yes_no"
-    t.string "played_before_nfl_blank_yes_no"
-    t.string "football_experience_notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -3570,8 +5184,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "master_id"
     t.integer "age"
     t.string "played_in_nfl_blank_yes_no"
-    t.string "played_before_nfl_blank_yes_no"
-    t.string "football_experience_notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -3725,6 +5337,12 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "ipa_ps_initial_screening_id"
     t.string "looked_at_website_yes_no"
     t.string "select_still_interested"
+    t.string "form_version"
+    t.string "same_hotel_yes_no"
+    t.string "select_schedule"
+    t.string "travelling_to_boston_notes"
+    t.string "covid19_concerns_yes_no"
+    t.string "covid19_concerns_notes"
     t.index ["ipa_ps_initial_screening_id"], name: "index_ipa_ps_initial_screening_history_on_ipa_ps_initial_screen"
     t.index ["master_id"], name: "index_ipa_ps_initial_screening_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_initial_screening_history_on_user_id"
@@ -3733,7 +5351,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "ipa_ps_initial_screenings", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "select_is_good_time_to_speak"
-    t.string "select_may_i_begin"
     t.string "any_questions_blank_yes_no"
     t.date "follow_up_date"
     t.time "follow_up_time"
@@ -3743,6 +5360,14 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "notes"
     t.string "looked_at_website_yes_no"
     t.string "select_still_interested"
+    t.string "form_version"
+    t.string "same_hotel_yes_no"
+    t.string "embedded_report_ipa__ipa_appointments"
+    t.string "select_schedule"
+    t.string "select_may_i_begin"
+    t.string "travelling_to_boston_notes"
+    t.string "covid19_concerns_yes_no"
+    t.string "covid19_concerns_notes"
     t.index ["master_id"], name: "index_ipa_ps_initial_screenings_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_initial_screenings_on_user_id"
   end
@@ -3763,6 +5388,8 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "past_mri_details"
     t.string "radiation_blank_yes_no"
     t.string "radiation_details"
+    t.string "form_version"
+    t.string "select_radiation_type"
     t.index ["ipa_ps_mri_id"], name: "index_ipa_ps_mri_history_on_ipa_ps_mri_id"
     t.index ["master_id"], name: "index_ipa_ps_mri_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_mri_history_on_user_id"
@@ -3783,6 +5410,8 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "past_mri_details"
     t.string "radiation_blank_yes_no"
     t.string "radiation_details"
+    t.string "form_version"
+    t.string "select_radiation_type"
     t.index ["master_id"], name: "index_ipa_ps_mris_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_mris_on_user_id"
   end
@@ -3832,6 +5461,10 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "ipa_ps_sleep_id"
+    t.string "form_version"
+    t.integer "number_of_nights_sleep_apnea_device"
+    t.string "sleep_apnea_travel_with_device_yes_no"
+    t.string "sleep_apnea_bring_device_yes_no"
     t.index ["ipa_ps_sleep_id"], name: "index_ipa_ps_sleep_history_on_ipa_ps_sleep_id"
     t.index ["master_id"], name: "index_ipa_ps_sleep_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_sleep_history_on_user_id"
@@ -3847,6 +5480,10 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "form_version"
+    t.integer "number_of_nights_sleep_apnea_device"
+    t.string "sleep_apnea_travel_with_device_yes_no"
+    t.string "sleep_apnea_bring_device_yes_no"
     t.index ["master_id"], name: "index_ipa_ps_sleeps_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_sleeps_on_user_id"
   end
@@ -3927,6 +5564,15 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "fainting_details"
     t.string "hairstyle_scalp_blank_yes_no_dont_know"
     t.string "hairstyle_scalp_details"
+    t.string "form_version"
+    t.string "tobacco_smoker_blank_yes_no"
+    t.string "tobacco_smoker_details"
+    t.string "healthcare_anxiety_blank_yes_no"
+    t.string "healthcare_anxiety_details"
+    t.string "covid19_test_consent_yes_no"
+    t.string "covid19_concerns_yes_no"
+    t.string "covid19_concerns_notes"
+    t.string "wear_mask_yes_no"
     t.index ["ipa_ps_tms_test_id"], name: "index_ipa_ps_tms_test_history_on_ipa_ps_tms_test_id"
     t.index ["master_id"], name: "index_ipa_ps_tms_test_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_tms_test_history_on_user_id"
@@ -3967,6 +5613,15 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "fainting_details"
     t.string "hairstyle_scalp_blank_yes_no_dont_know"
     t.string "hairstyle_scalp_details"
+    t.string "form_version"
+    t.string "tobacco_smoker_blank_yes_no"
+    t.string "tobacco_smoker_details"
+    t.string "healthcare_anxiety_blank_yes_no"
+    t.string "healthcare_anxiety_details"
+    t.string "covid19_test_consent_yes_no"
+    t.string "covid19_concerns_yes_no"
+    t.string "covid19_concerns_notes"
+    t.string "wear_mask_yes_no"
     t.index ["master_id"], name: "index_ipa_ps_tms_tests_on_master_id"
     t.index ["user_id"], name: "index_ipa_ps_tms_tests_on_user_id"
   end
@@ -4006,6 +5661,34 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["user_id"], name: "index_ipa_reimbursement_reqs_on_user_id"
   end
 
+  create_table "ipa_sample_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "ipa_sample_ext_id"
+    t.string "select_test_type"
+    t.bigint "user_id"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "ipa_sample_table_id"
+    t.index ["admin_id"], name: "index_ipa_ops.ipa_sample_history_on_admin_id"
+    t.index ["ipa_sample_table_id"], name: "ipa_sample_id_idx"
+    t.index ["master_id"], name: "index_ipa_ops.ipa_sample_history_on_master_id"
+    t.index ["user_id"], name: "index_ipa_ops.ipa_sample_history_on_user_id"
+  end
+
+  create_table "ipa_samples", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "ipa_sample_ext_id"
+    t.string "select_test_type"
+    t.bigint "user_id"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_ipa_ops.ipa_samples_on_admin_id"
+    t.index ["master_id"], name: "index_ipa_ops.ipa_samples_on_master_id"
+    t.index ["user_id"], name: "index_ipa_ops.ipa_samples_on_user_id"
+  end
+
   create_table "ipa_screening_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "eligible_for_study_blank_yes_no"
@@ -4023,6 +5706,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "eligible_notes"
     t.string "requires_study_partner_blank_yes_no"
     t.string "contact_in_future_yes_no"
+    t.string "form_version"
     t.index ["ipa_screening_id"], name: "index_ipa_screening_history_on_ipa_screening_id"
     t.index ["master_id"], name: "index_ipa_screening_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_screening_history_on_user_id"
@@ -4042,9 +5726,9 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "not_interested_notes"
     t.string "ineligible_notes"
     t.string "eligible_notes"
-    t.string "eligible_with_partner_notes"
     t.string "requires_study_partner_blank_yes_no"
     t.string "contact_in_future_yes_no"
+    t.string "form_version"
     t.index ["master_id"], name: "index_ipa_screenings_on_master_id"
     t.index ["user_id"], name: "index_ipa_screenings_on_user_id"
   end
@@ -4063,6 +5747,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "updated_at", null: false
     t.integer "ipa_special_consideration_id"
     t.string "mmse_details"
+    t.string "same_hotel_yes_no"
     t.index ["ipa_special_consideration_id"], name: "index_ipa_special_consideration_history_on_ipa_special_consider"
     t.index ["master_id"], name: "index_ipa_special_consideration_history_on_master_id"
     t.index ["user_id"], name: "index_ipa_special_consideration_history_on_user_id"
@@ -4081,6 +5766,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "mmse_details"
+    t.string "same_hotel_yes_no"
     t.index ["master_id"], name: "index_ipa_special_considerations_on_master_id"
     t.index ["user_id"], name: "index_ipa_special_considerations_on_user_id"
   end
@@ -4140,7 +5826,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "select_survey_type"
     t.date "sent_date"
     t.date "completed_date"
-    t.date "send_next_survey_when"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -4301,6 +5986,11 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "marketo_ids", id: false, force: :cascade do |t|
+    t.serial "id", null: false
+    t.string "email"
+  end
+
   create_table "masters", id: :serial, force: :cascade do |t|
     t.integer "msid"
     t.integer "pro_id"
@@ -4311,6 +6001,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "user_id"
     t.integer "contact_id"
     t.index ["msid"], name: "index_masters_on_msid"
+    t.index ["msid"], name: "masters_msid", unique: true
     t.index ["pro_id"], name: "index_masters_on_proid"
     t.index ["pro_info_id"], name: "index_masters_on_pro_info_id"
     t.index ["user_id"], name: "index_masters_on_user_id"
@@ -4474,12 +6165,16 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
     t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
     t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
+    t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
+    t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
     t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
     t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
     t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
     t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
     t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
     t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
+    t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
+    t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
     t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
     t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
     t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
@@ -4497,12 +6192,16 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
     t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
     t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
+    t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
+    t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
     t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
     t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
     t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
     t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
     t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
     t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
+    t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
+    t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
     t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
     t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
     t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
@@ -4520,12 +6219,43 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
     t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
     t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
+    t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
+    t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
     t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
     t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
     t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
     t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
     t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
     t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
+    t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
+    t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
+    t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
+    t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
+    t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
+  end
+
+  create_table "mrn_number_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "mrn_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "mrn_number_table_id"
+    t.string "select_organization"
+    t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
+    t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
+    t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
+    t.index ["admin_id"], name: "index_mrn_number_history_on_admin_id"
+    t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
+    t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
+    t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
+    t.index ["master_id"], name: "index_mrn_number_history_on_master_id"
+    t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
+    t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
+    t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
+    t.index ["mrn_number_table_id"], name: "index_mrn_number_history_on_mrn_number_table_id"
+    t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
     t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
     t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
     t.index ["user_id"], name: "index_mrn_number_history_on_user_id"
@@ -4542,9 +6272,12 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
     t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
     t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
+    t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
     t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
     t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
     t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
+    t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
+    t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
     t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
     t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
     t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
@@ -4561,9 +6294,12 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
     t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
     t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
+    t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
     t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
     t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
     t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
+    t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
+    t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
     t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
     t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
     t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
@@ -4580,12 +6316,63 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
     t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
     t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
+    t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
+    t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
     t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
     t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
     t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
     t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
     t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
     t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
+    t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
+  end
+
+  create_table "mrn_numbers", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "mrn_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "select_organization"
+    t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
+    t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
+    t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
+    t.index ["admin_id"], name: "index_mrn_numbers_on_admin_id"
+    t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
+    t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
+    t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
+    t.index ["master_id"], name: "index_mrn_numbers_on_master_id"
+    t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
+    t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
+    t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
+    t.index ["user_id"], name: "index_mrn_numbers_on_user_id"
+  end
+
+  create_table "msm_grit_id_number_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "msm_grit_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "msm_grit_id_number_table_id"
+    t.index ["admin_id"], name: "index_msm_grit_id_number_history_on_admin_id"
+    t.index ["master_id"], name: "index_msm_grit_id_number_history_on_master_id"
+    t.index ["msm_grit_id_number_table_id"], name: "index_msm_grit_id_number_history_on_msm_grit_id_number_table_id"
+    t.index ["user_id"], name: "index_msm_grit_id_number_history_on_user_id"
+  end
+
+  create_table "msm_grit_id_numbers", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.string "msm_grit_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_msm_grit_id_numbers_on_admin_id"
+    t.index ["master_id"], name: "index_msm_grit_id_numbers_on_master_id"
+    t.index ["user_id"], name: "index_msm_grit_id_numbers_on_user_id"
   end
 
   create_table "new_test_history", id: :serial, force: :cascade do |t|
@@ -4959,6 +6746,405 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["user_id"], name: "index_persnet_assignments_on_user_id"
   end
 
+  create_table "pitt_bhi_access_pi_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pitt_bhi_access_pi_id"
+    t.index ["master_id"], name: "6bfd97eb_history_master_id"
+    t.index ["pitt_bhi_access_pi_id"], name: "6bfd97eb_id_idx"
+    t.index ["user_id"], name: "6bfd97eb_user_idx"
+  end
+
+  create_table "pitt_bhi_access_pis", comment: "A record referencing a master record indicates PITT BHI PI has access to this participant", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_access_pis_on_master_id"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_access_pis_on_user_id"
+  end
+
+  create_table "pitt_bhi_access_pitt_staff_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pitt_bhi_access_pitt_staff_id"
+    t.index ["master_id"], name: "362cdefc_history_master_id"
+    t.index ["pitt_bhi_access_pitt_staff_id"], name: "362cdefc_id_idx"
+    t.index ["user_id"], name: "362cdefc_user_idx"
+  end
+
+  create_table "pitt_bhi_access_pitt_staffs", comment: "A record referencing a master record indicates PITT BHI staff have access to this participant", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_access_pitt_staffs_on_master_id"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_access_pitt_staffs_on_user_id"
+  end
+
+  create_table "pitt_bhi_appointment_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.date "visit_start_date"
+    t.date "visit_end_date"
+    t.string "select_status"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pitt_bhi_appointment_id"
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_appointment_history_on_master_id"
+    t.index ["pitt_bhi_appointment_id"], name: "pitt_bhi_appointment_id_idx"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_appointment_history_on_user_id"
+  end
+
+  create_table "pitt_bhi_appointments", comment: "PITT BHI study participation dates and status", force: :cascade do |t|
+    t.bigint "master_id"
+    t.date "visit_start_date"
+    t.date "visit_end_date"
+    t.string "select_status"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_appointments_on_master_id"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_appointments_on_user_id"
+  end
+
+  create_table "pitt_bhi_assignment_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "pitt_bhi_id"
+    t.bigint "user_id"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pitt_bhi_assignment_table_id"
+    t.index ["admin_id"], name: "index_pitt_bhi.pitt_bhi_assignment_history_on_admin_id"
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_assignment_history_on_master_id"
+    t.index ["pitt_bhi_assignment_table_id"], name: "pitt_bhi_assignment_id_idx"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_assignment_history_on_user_id"
+  end
+
+  create_table "pitt_bhi_assignments", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "pitt_bhi_id"
+    t.bigint "user_id"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_pitt_bhi.pitt_bhi_assignments_on_admin_id"
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_assignments_on_master_id"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_assignments_on_user_id"
+  end
+
+  create_table "pitt_bhi_ps_eligibility_followup_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "outcome"
+    t.string "any_questions_yes_no"
+    t.string "notes"
+    t.string "interested_yes_no"
+    t.string "not_interested_notes"
+    t.string "contact_pi_yes_no"
+    t.string "additional_questions_yes_no"
+    t.string "consent_to_pass_info_to_msm_yes_no"
+    t.string "consent_to_pass_info_to_msm_2_yes_no"
+    t.string "contact_info_notes"
+    t.string "more_questions_yes_no"
+    t.string "more_questions_notes"
+    t.string "select_still_interested"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pitt_bhi_ps_eligibility_followup_id"
+    t.index ["master_id"], name: "271fb131_history_master_id"
+    t.index ["pitt_bhi_ps_eligibility_followup_id"], name: "271fb131_id_idx"
+    t.index ["user_id"], name: "271fb131_user_idx"
+  end
+
+  create_table "pitt_bhi_ps_eligibility_followups", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "outcome"
+    t.string "any_questions_yes_no"
+    t.string "notes"
+    t.string "interested_yes_no"
+    t.string "not_interested_notes"
+    t.string "contact_pi_yes_no"
+    t.string "additional_questions_yes_no"
+    t.string "consent_to_pass_info_to_msm_yes_no"
+    t.string "consent_to_pass_info_to_msm_2_yes_no"
+    t.string "contact_info_notes"
+    t.string "more_questions_yes_no"
+    t.string "more_questions_notes"
+    t.string "select_still_interested"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_ps_eligibility_followups_on_master_id"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_ps_eligibility_followups_on_user_id"
+  end
+
+  create_table "pitt_bhi_ps_eligible_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "contact_info_notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pitt_bhi_ps_eligible_id"
+    t.string "consent_to_pass_info_to_pitt_yes_no"
+    t.string "consent_to_pass_info_to_pitt_2_yes_no"
+    t.string "not_interested_notes"
+    t.index ["master_id"], name: "pitt_bhi_ps_eligible_h_m_id"
+    t.index ["pitt_bhi_ps_eligible_id"], name: "pitt_bhi_ps_eligible_id_idx"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_ps_eligible_history_on_user_id"
+  end
+
+  create_table "pitt_bhi_ps_eligibles", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "contact_info_notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "consent_to_pass_info_to_pitt_yes_no"
+    t.string "consent_to_pass_info_to_pitt_2_yes_no"
+    t.string "not_interested_notes"
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_ps_eligibles_on_master_id"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_ps_eligibles_on_user_id"
+  end
+
+  create_table "pitt_bhi_ps_initial_screening_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "select_is_good_time_to_speak"
+    t.string "any_questions_blank_yes_no"
+    t.string "question_notes"
+    t.string "select_still_interested"
+    t.date "follow_up_date"
+    t.time "follow_up_time"
+    t.string "more_questions_yes_no"
+    t.string "more_questions_notes"
+    t.string "still_interested_2_yes_no"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pitt_bhi_ps_initial_screening_id"
+    t.index ["master_id"], name: "pitt_bhi_ps_initial_screening_h_m_id"
+    t.index ["pitt_bhi_ps_initial_screening_id"], name: "pitt_bhi_ps_initial_screening_id_idx"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_ps_initial_screening_history_on_user_id"
+  end
+
+  create_table "pitt_bhi_ps_initial_screenings", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "select_is_good_time_to_speak"
+    t.string "question_notes"
+    t.string "select_still_interested"
+    t.date "follow_up_date"
+    t.time "follow_up_time"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_ps_initial_screenings_on_master_id"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_ps_initial_screenings_on_user_id"
+  end
+
+  create_table "pitt_bhi_ps_non_eligible_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pitt_bhi_ps_non_eligible_id"
+    t.index ["master_id"], name: "pitt_bhi_ps_non_eligible_h_m_id"
+    t.index ["pitt_bhi_ps_non_eligible_id"], name: "pitt_bhi_ps_non_eligible_id_idx"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_ps_non_eligible_history_on_user_id"
+  end
+
+  create_table "pitt_bhi_ps_non_eligibles", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_ps_non_eligibles_on_master_id"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_ps_non_eligibles_on_user_id"
+  end
+
+  create_table "pitt_bhi_ps_screener_response_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "comm_clearly_in_english_yes_no"
+    t.string "give_informed_consent_yes_no_dont_know"
+    t.string "give_informed_consent_notes"
+    t.string "outcome"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pitt_bhi_ps_screener_response_id"
+    t.index ["master_id"], name: "31f4f0d0_history_master_id"
+    t.index ["pitt_bhi_ps_screener_response_id"], name: "31f4f0d0_id_idx"
+    t.index ["user_id"], name: "31f4f0d0_user_idx"
+  end
+
+  create_table "pitt_bhi_ps_screener_responses", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "comm_clearly_in_english_yes_no"
+    t.string "give_informed_consent_yes_no_dont_know"
+    t.string "give_informed_consent_notes"
+    t.string "outcome"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_ps_screener_responses_on_master_id"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_ps_screener_responses_on_user_id"
+  end
+
+  create_table "pitt_bhi_ps_suitability_question_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.date "birth_date"
+    t.string "eligible_pension_yes_no"
+    t.string "any_questions_yes_no"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pitt_bhi_ps_suitability_question_id"
+    t.integer "age"
+    t.index ["master_id"], name: "history_master_id"
+    t.index ["pitt_bhi_ps_suitability_question_id"], name: "id_idx"
+    t.index ["user_id"], name: "user_idx"
+  end
+
+  create_table "pitt_bhi_ps_suitability_questions", comment: "Suitability assessment form for BHI phone screening, recording responses from subject\n", force: :cascade do |t|
+    t.bigint "master_id"
+    t.date "birth_date", comment: "Date of birth"
+    t.string "eligible_pension_yes_no", comment: "Eligible for a pension from the NFL\n(At least 3 seasons with 3 games per season)\n"
+    t.string "notes", comment: "Question and notes recorded by interviewer"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "age", comment: "Calculated age at the time the response was saved"
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_ps_suitability_questions_on_master_id"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_ps_suitability_questions_on_user_id"
+  end
+
+  create_table "pitt_bhi_screening_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "eligible_for_study_blank_yes_no"
+    t.string "good_time_to_speak_blank_yes_no"
+    t.string "still_interested_blank_yes_no"
+    t.date "callback_date"
+    t.time "callback_time"
+    t.string "consent_performed_yes_no"
+    t.string "did_subject_consent_yes_no"
+    t.string "ineligible_notes"
+    t.string "eligible_notes"
+    t.string "not_interested_notes"
+    t.string "contact_in_future_yes_no"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pitt_bhi_screening_id"
+    t.index ["master_id"], name: "pitt_bhi_screening_h_m_id"
+    t.index ["pitt_bhi_screening_id"], name: "pitt_bhi_screening_id_idx"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_screening_history_on_user_id"
+  end
+
+  create_table "pitt_bhi_screenings", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "eligible_for_study_blank_yes_no"
+    t.string "good_time_to_speak_blank_yes_no"
+    t.string "still_interested_blank_yes_no"
+    t.date "callback_date"
+    t.time "callback_time"
+    t.string "consent_performed_yes_no"
+    t.string "did_subject_consent_yes_no"
+    t.string "ineligible_notes"
+    t.string "eligible_notes"
+    t.string "not_interested_notes"
+    t.string "contact_in_future_yes_no"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_screenings_on_master_id"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_screenings_on_user_id"
+  end
+
+  create_table "pitt_bhi_secure_note_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pitt_bhi_secure_note_id"
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_secure_note_history_on_master_id"
+    t.index ["pitt_bhi_secure_note_id"], name: "pitt_bhi_secure_note_id_idx"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_secure_note_history_on_user_id"
+  end
+
+  create_table "pitt_bhi_secure_notes", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_secure_notes_on_master_id"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_secure_notes_on_user_id"
+  end
+
+  create_table "pitt_bhi_withdrawal_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "select_subject_withdrew_reason"
+    t.string "select_investigator_terminated"
+    t.string "lost_to_follow_up_no_yes"
+    t.string "no_longer_participating_no_yes"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pitt_bhi_withdrawal_id"
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_withdrawal_history_on_master_id"
+    t.index ["pitt_bhi_withdrawal_id"], name: "pitt_bhi_withdrawal_id_idx"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_withdrawal_history_on_user_id"
+  end
+
+  create_table "pitt_bhi_withdrawals", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "select_subject_withdrew_reason"
+    t.string "select_investigator_terminated"
+    t.string "lost_to_follow_up_no_yes"
+    t.string "no_longer_participating_no_yes"
+    t.string "notes"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_pitt_bhi.pitt_bhi_withdrawals_on_master_id"
+    t.index ["user_id"], name: "index_pitt_bhi.pitt_bhi_withdrawals_on_user_id"
+  end
+
+  create_table "player_career_data", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_player_career_data_on_master_id"
+    t.index ["user_id"], name: "index_player_career_data_on_user_id"
+  end
+
+  create_table "player_career_data_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "player_career_data_id"
+    t.index ["master_id"], name: "index_player_career_data_history_on_master_id"
+    t.index ["player_career_data_id"], name: "index_player_career_data_history_on_player_career_data_id"
+    t.index ["user_id"], name: "index_player_career_data_history_on_user_id"
+  end
+
   create_table "player_contact_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "rec_type"
@@ -4995,6 +7181,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "player_contact_phone_info_id"
+    t.datetime "opted_out_at"
     t.index ["master_id"], name: "index_player_contact_phone_info_history_on_master_id"
     t.index ["player_contact_phone_info_id"], name: "index_player_contact_phone_info_history_on_player_contact_phone"
     t.index ["user_id"], name: "index_player_contact_phone_info_history_on_user_id"
@@ -5020,6 +7207,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "opted_out_at"
     t.index ["master_id"], name: "index_player_contact_phone_infos_on_master_id"
     t.index ["user_id"], name: "index_player_contact_phone_infos_on_user_id"
   end
@@ -5064,9 +7252,9 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["user_id"], name: "index_player_info_history_on_user_id"
   end
 
-  create_table "player_infos", id: :serial, force: :cascade do |t|
+  create_table "player_infos", id: :serial, comment: "Player biographical information", force: :cascade do |t|
     t.integer "master_id"
-    t.string "first_name"
+    t.string "first_name", comment: "First Name"
     t.string "last_name"
     t.string "middle_name"
     t.string "nick_name"
@@ -5087,6 +7275,23 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "other_type"
     t.index ["master_id"], name: "index_player_infos_on_master_id"
     t.index ["user_id"], name: "index_player_infos_on_user_id"
+  end
+
+  create_table "player_severance", id: false, force: :cascade do |t|
+    t.integer "contactid"
+    t.date "payoutdate"
+    t.string "infochangestatus", limit: 255
+  end
+
+  create_table "player_transactions", id: false, force: :cascade do |t|
+    t.integer "contactid"
+    t.date "transactiondate"
+    t.string "transactiontype", limit: 255
+    t.string "transactionstatus", limit: 255
+    t.string "transactionsubstatus", limit: 255
+    t.string "transactionhistoricalteamname", limit: 255
+    t.string "transactioncurrentteamname", limit: 255
+    t.string "infochangestatus", limit: 255
   end
 
   create_table "pro_infos", id: :serial, force: :cascade do |t|
@@ -5159,25 +7364,28 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["app_type_id"], name: "index_protocols_on_app_type_id"
   end
 
-  create_table "q1_datadic", force: :cascade do |t|
-    t.bigint "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_ref_data.q1_datadic_on_user_id"
+  create_table "q1_datadic", id: :integer, default: -> { "nextval('q1datadic_id_seq'::regclass)" }, force: :cascade do |t|
+    t.string "variable_name"
+    t.text "domain"
+    t.text "field_type_rc"
+    t.text "field_type_sa"
+    t.text "field_label"
+    t.text "field_attributes"
+    t.text "field_note"
+    t.text "text_valid_type"
+    t.text "text_valid_min"
+    t.text "text_valid_max"
+    t.text "required_field"
+    t.text "field_attr_array", array: true
+    t.text "source"
+    t.text "owner"
+    t.text "classification"
+    t.text "display"
   end
 
-  create_table "q1_datadic_history", force: :cascade do |t|
-    t.bigint "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "q1_datadic_id"
-    t.index ["q1_datadic_id"], name: "bb694a89_id_idx"
-    t.index ["user_id"], name: "bb694a89_user_idx"
-  end
-
-  create_table "q2_data", id: :serial, force: :cascade do |t|
+  create_table "q2_data", id: :serial, comment: "Questionnaire 2 data from REDCap", force: :cascade do |t|
     t.integer "record_id", comment: "Hidden on survey;\nSequential ID assinged by REDCap "
-    t.decimal "redcap_survey_identifier", comment: "Hidden on survey; \nFPHS assigned study identification number"
+    t.integer "redcap_survey_identifier", comment: "Hidden on survey; \nFPHS assigned study identification number"
     t.datetime "q2_timestamp", comment: "Hidden on survey:\nDate and time full Q2 survey was completed"
     t.date "dob", comment: "Date of birth:"
     t.decimal "current_weight", comment: "What is your current weight?"
@@ -5718,7 +7926,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "q2_complete", comment: "Hidden on survey;\nCompletion status of the full Q2 survey"
   end
 
-  create_table "q2_datadic", id: :serial, force: :cascade do |t|
+  create_table "q2_datadic", id: :integer, default: -> { "nextval('datadic_id_seq'::regclass)" }, comment: "Q2 Data Dictionary", force: :cascade do |t|
     t.string "variable_name", null: false
     t.text "domain"
     t.text "field_type_rc"
@@ -5735,9 +7943,15 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.text "owner"
     t.text "classification"
     t.text "display"
-    t.boolean "disabled"
-    t.date "created_at"
-    t.date "updated_at"
+  end
+
+  create_table "q2_rc_codebook", id: :serial, force: :cascade do |t|
+    t.string "variable_name", null: false
+    t.text "q2_domain"
+    t.text "field_label"
+    t.text "field_attributes"
+    t.text "notes"
+    t.text "field_attr_array", array: true
   end
 
   create_table "rc_cis", id: :serial, force: :cascade do |t|
@@ -5766,6 +7980,60 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "user_id"
+  end
+
+  create_table "rc_femfl_cif", id: false, force: :cascade do |t|
+    t.serial "id", null: false
+    t.integer "master_id"
+    t.decimal "record_id"
+    t.text "redcap_survey_identifier"
+    t.datetime "femfl_contact_info_timestamp"
+    t.text "first_name"
+    t.text "last_name"
+    t.text "email"
+    t.text "cell_number"
+    t.text "other_phone_number"
+    t.decimal "hear_about___1"
+    t.decimal "hear_about___10"
+    t.decimal "hear_about___11"
+    t.decimal "hear_about___12"
+    t.decimal "hear_about___2"
+    t.decimal "hear_about___3"
+    t.decimal "hear_about___4"
+    t.decimal "hear_about___5"
+    t.decimal "hear_about___6"
+    t.decimal "hear_about___7"
+    t.decimal "hear_about___8"
+    t.decimal "hear_about___9"
+    t.text "hear_about_wives_group"
+    t.text "hear_about_event"
+    t.text "hear_about_other"
+    t.decimal "relationship_to_player___1"
+    t.decimal "relationship_to_player___2"
+    t.decimal "relationship_to_player___3"
+    t.decimal "relationship_to_player___4"
+    t.decimal "relationship_to_player___5"
+    t.decimal "relationship_to_player___6"
+    t.decimal "relationship_to_player___7"
+    t.decimal "relationship_to_player___8"
+    t.decimal "relationship_to_player___9"
+    t.decimal "relationship_to_player___10"
+    t.decimal "relationship_to_player___11"
+    t.text "relationship_other"
+    t.text "comments"
+    t.decimal "femfl_contact_info_complete"
+  end
+
+  create_table "rc_links", id: false, force: :cascade do |t|
+    t.serial "id", null: false
+    t.integer "master_id"
+    t.string "link"
+  end
+
+  create_table "rc_links", id: false, force: :cascade do |t|
+    t.serial "id", null: false
+    t.integer "master_id"
+    t.string "link"
   end
 
   create_table "rc_stage", id: false, force: :cascade do |t|
@@ -5989,6 +8257,40 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.boolean "added_tracker"
   end
 
+  create_table "related_subject_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "contact_master_id"
+    t.string "rec_type"
+    t.string "data"
+    t.string "first_name"
+    t.string "last_name"
+    t.string "select_relationship"
+    t.integer "rank"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "related_subject_id"
+    t.index ["master_id"], name: "36795ebf_history_master_id"
+    t.index ["related_subject_id"], name: "36795ebf_id_idx"
+    t.index ["user_id"], name: "36795ebf_user_idx"
+  end
+
+  create_table "related_subjects", force: :cascade do |t|
+    t.bigint "master_id"
+    t.bigint "contact_master_id"
+    t.string "rec_type"
+    t.string "data"
+    t.string "first_name"
+    t.string "last_name"
+    t.string "select_relationship"
+    t.integer "rank"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_femfl.related_subjects_on_master_id"
+    t.index ["user_id"], name: "index_femfl.related_subjects_on_user_id"
+  end
+
   create_table "report_history", id: :serial, force: :cascade do |t|
     t.string "name"
     t.string "description"
@@ -6036,7 +8338,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
 
   create_table "sage_assignments", id: :serial, force: :cascade do |t|
     t.string "sage_id", limit: 10
-    t.string "assigned_by"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -6283,6 +8584,32 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["user_id"], name: "index_scantron_history_on_user_id"
   end
 
+  create_table "scantron_q2_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.bigint "q2_scantron_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "scantron_q2_table_id"
+    t.index ["admin_id"], name: "index_scantron_q2_history_on_admin_id"
+    t.index ["master_id"], name: "index_scantron_q2_history_on_master_id"
+    t.index ["scantron_q2_table_id"], name: "index_scantron_q2_history_on_scantron_q2_table_id"
+    t.index ["user_id"], name: "index_scantron_q2_history_on_user_id"
+  end
+
+  create_table "scantron_q2s", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.bigint "q2_scantron_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_scantron_q2s_on_admin_id"
+    t.index ["master_id"], name: "index_scantron_q2s_on_master_id"
+    t.index ["user_id"], name: "index_scantron_q2s_on_user_id"
+  end
+
   create_table "scantron_series_two_history", id: :serial, force: :cascade do |t|
     t.integer "scantron_series_two_id"
     t.integer "master_id"
@@ -6313,6 +8640,68 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "updated_at", null: false
     t.index ["master_id"], name: "index_scantrons_on_master_id"
     t.index ["user_id"], name: "index_scantrons_on_user_id"
+  end
+
+  create_table "sleep_access_bwh_staff_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "sleep_access_bwh_staff_id"
+    t.index ["master_id"], name: "index_sleep_access_bwh_staff_history_on_master_id"
+    t.index ["sleep_access_bwh_staff_id"], name: "index_sleep_access_bwh_staff_history_on_sleep_access_bwh_staff_"
+    t.index ["user_id"], name: "index_sleep_access_bwh_staff_history_on_user_id"
+  end
+
+  create_table "sleep_access_bwh_staffs", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_sleep_access_bwh_staffs_on_master_id"
+    t.index ["user_id"], name: "index_sleep_access_bwh_staffs_on_user_id"
+  end
+
+  create_table "sleep_access_interventionist_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.bigint "assign_access_to_user_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "sleep_access_interventionist_id"
+    t.index ["master_id"], name: "index_sleep_access_interventionist_history_on_master_id"
+    t.index ["sleep_access_interventionist_id"], name: "index_sleep_access_interventionist_history_on_sleep_access_inte"
+    t.index ["user_id"], name: "index_sleep_access_interventionist_history_on_user_id"
+  end
+
+  create_table "sleep_access_interventionists", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.bigint "assign_access_to_user_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_sleep_access_interventionists_on_master_id"
+    t.index ["user_id"], name: "index_sleep_access_interventionists_on_user_id"
+  end
+
+  create_table "sleep_access_pi_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "sleep_access_pi_id"
+    t.index ["master_id"], name: "index_sleep_access_pi_history_on_master_id"
+    t.index ["sleep_access_pi_id"], name: "index_sleep_access_pi_history_on_sleep_access_pi_id"
+    t.index ["user_id"], name: "index_sleep_access_pi_history_on_user_id"
+  end
+
+  create_table "sleep_access_pis", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_sleep_access_pis_on_master_id"
+    t.index ["user_id"], name: "index_sleep_access_pis_on_user_id"
   end
 
   create_table "sleep_adverse_event_history", id: :serial, force: :cascade do |t|
@@ -6381,7 +8770,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "updated_at", null: false
     t.index ["master_id"], name: "index_sleep_appointments_on_master_id"
     t.index ["user_id"], name: "index_sleep_appointments_on_user_id"
-    t.index ["visit_start_date"], name: "sleep_appointments_visit_start_date_key", unique: true
   end
 
   create_table "sleep_assignment_history", id: :serial, force: :cascade do |t|
@@ -6393,8 +8781,30 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "updated_at", null: false
     t.integer "sleep_assignment_table_id"
     t.index ["admin_id"], name: "index_sleep_assignment_history_on_admin_id"
+    t.index ["admin_id"], name: "index_sleep_assignment_history_on_admin_id"
+    t.index ["master_id"], name: "index_sleep_assignment_history_on_master_id"
     t.index ["master_id"], name: "index_sleep_assignment_history_on_master_id"
     t.index ["sleep_assignment_table_id"], name: "index_sleep_assignment_history_on_sleep_assignment_table_id"
+    t.index ["sleep_assignment_table_id"], name: "index_sleep_assignment_history_on_sleep_assignment_table_id"
+    t.index ["user_id"], name: "index_sleep_assignment_history_on_user_id"
+    t.index ["user_id"], name: "index_sleep_assignment_history_on_user_id"
+  end
+
+  create_table "sleep_assignment_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.bigint "sleep_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "sleep_assignment_table_id"
+    t.index ["admin_id"], name: "index_sleep_assignment_history_on_admin_id"
+    t.index ["admin_id"], name: "index_sleep_assignment_history_on_admin_id"
+    t.index ["master_id"], name: "index_sleep_assignment_history_on_master_id"
+    t.index ["master_id"], name: "index_sleep_assignment_history_on_master_id"
+    t.index ["sleep_assignment_table_id"], name: "index_sleep_assignment_history_on_sleep_assignment_table_id"
+    t.index ["sleep_assignment_table_id"], name: "index_sleep_assignment_history_on_sleep_assignment_table_id"
+    t.index ["user_id"], name: "index_sleep_assignment_history_on_user_id"
     t.index ["user_id"], name: "index_sleep_assignment_history_on_user_id"
   end
 
@@ -6406,7 +8816,25 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["admin_id"], name: "index_sleep_assignments_on_admin_id"
+    t.index ["admin_id"], name: "index_sleep_assignments_on_admin_id"
     t.index ["master_id"], name: "index_sleep_assignments_on_master_id"
+    t.index ["master_id"], name: "index_sleep_assignments_on_master_id"
+    t.index ["user_id"], name: "index_sleep_assignments_on_user_id"
+    t.index ["user_id"], name: "index_sleep_assignments_on_user_id"
+  end
+
+  create_table "sleep_assignments", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.bigint "sleep_id"
+    t.integer "user_id"
+    t.integer "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_sleep_assignments_on_admin_id"
+    t.index ["admin_id"], name: "index_sleep_assignments_on_admin_id"
+    t.index ["master_id"], name: "index_sleep_assignments_on_master_id"
+    t.index ["master_id"], name: "index_sleep_assignments_on_master_id"
+    t.index ["user_id"], name: "index_sleep_assignments_on_user_id"
     t.index ["user_id"], name: "index_sleep_assignments_on_user_id"
   end
 
@@ -6452,6 +8880,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "trust_assessment_info_yes_no"
     t.string "help_finding_pcp_yes_no"
     t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -6478,6 +8907,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "trust_assessment_info_yes_no"
     t.string "help_finding_pcp_yes_no"
     t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -6488,47 +8918,47 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
 
   create_table "sleep_incidental_finding_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
-    t.boolean "anthropometrics_check"
-    t.date "anthropometrics_date"
-    t.string "anthropometrics_notes"
-    t.boolean "lab_results_check"
-    t.date "lab_results_date"
-    t.string "lab_results_notes"
-    t.boolean "dexa_check"
-    t.date "dexa_date"
-    t.string "dexa_notes"
-    t.boolean "brain_mri_check"
-    t.date "brain_mri_date"
-    t.string "brain_mri_notes"
-    t.boolean "neuro_psych_check"
-    t.date "neuro_psych_date"
-    t.string "neuro_psych_notes"
-    t.boolean "sensory_testing_check"
-    t.date "sensory_testing_date"
-    t.string "sensory_testing_notes"
-    t.boolean "liver_mri_check"
-    t.date "liver_mri_date"
-    t.string "liver_mri_notes"
-    t.boolean "physical_function_check"
-    t.date "physical_function_date"
-    t.string "physical_function_notes"
-    t.boolean "eeg_check"
-    t.date "eeg_date"
-    t.string "eeg_notes"
-    t.boolean "sleep_check"
-    t.date "sleep_date"
-    t.string "sleep_notes"
-    t.boolean "cardiac_check"
-    t.date "cardiac_date"
-    t.string "cardiac_notes"
-    t.boolean "xray_check"
-    t.date "xray_date"
-    t.string "xray_notes"
     t.string "other_notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_incidental_finding_id"
+    t.string "xray_notes"
+    t.date "xray_date"
+    t.boolean "xray_check"
+    t.string "cardiac_notes"
+    t.date "cardiac_date"
+    t.boolean "cardiac_check"
+    t.string "sleep_notes"
+    t.date "sleep_date"
+    t.boolean "sleep_check"
+    t.string "eeg_notes"
+    t.date "eeg_date"
+    t.boolean "eeg_check"
+    t.string "physical_function_notes"
+    t.date "physical_function_date"
+    t.boolean "physical_function_check"
+    t.string "liver_mri_notes"
+    t.date "liver_mri_date"
+    t.boolean "liver_mri_check"
+    t.string "sensory_testing_notes"
+    t.date "sensory_testing_date"
+    t.boolean "sensory_testing_check"
+    t.string "neuro_psych_notes"
+    t.date "neuro_psych_date"
+    t.boolean "neuro_psych_check"
+    t.string "brain_mri_notes"
+    t.date "brain_mri_date"
+    t.boolean "brain_mri_check"
+    t.string "dexa_notes"
+    t.date "dexa_date"
+    t.boolean "dexa_check"
+    t.string "lab_results_notes"
+    t.date "lab_results_date"
+    t.boolean "lab_results_check"
+    t.string "anthropometrics_notes"
+    t.date "anthropometrics_date"
+    t.boolean "anthropometrics_check"
     t.index ["master_id"], name: "index_sleep_incidental_finding_history_on_master_id"
     t.index ["sleep_incidental_finding_id"], name: "index_sleep_incidental_finding_history_on_sleep_incidental_find"
     t.index ["user_id"], name: "index_sleep_incidental_finding_history_on_user_id"
@@ -6536,46 +8966,46 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
 
   create_table "sleep_incidental_findings", id: :serial, force: :cascade do |t|
     t.integer "master_id"
-    t.boolean "anthropometrics_check"
-    t.date "anthropometrics_date"
-    t.string "anthropometrics_notes"
-    t.boolean "lab_results_check"
-    t.date "lab_results_date"
-    t.string "lab_results_notes"
-    t.boolean "dexa_check"
-    t.date "dexa_date"
-    t.string "dexa_notes"
-    t.boolean "brain_mri_check"
-    t.date "brain_mri_date"
-    t.string "brain_mri_notes"
-    t.boolean "neuro_psych_check"
-    t.date "neuro_psych_date"
-    t.string "neuro_psych_notes"
-    t.boolean "sensory_testing_check"
-    t.date "sensory_testing_date"
-    t.string "sensory_testing_notes"
-    t.boolean "liver_mri_check"
-    t.date "liver_mri_date"
-    t.string "liver_mri_notes"
-    t.boolean "physical_function_check"
-    t.date "physical_function_date"
-    t.string "physical_function_notes"
-    t.boolean "eeg_check"
-    t.date "eeg_date"
-    t.string "eeg_notes"
-    t.boolean "sleep_check"
-    t.date "sleep_date"
-    t.string "sleep_notes"
-    t.boolean "cardiac_check"
-    t.date "cardiac_date"
-    t.string "cardiac_notes"
-    t.boolean "xray_check"
-    t.date "xray_date"
-    t.string "xray_notes"
     t.string "other_notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "xray_notes"
+    t.date "xray_date"
+    t.boolean "xray_check"
+    t.string "cardiac_notes"
+    t.date "cardiac_date"
+    t.boolean "cardiac_check"
+    t.string "sleep_notes"
+    t.date "sleep_date"
+    t.boolean "sleep_check"
+    t.string "eeg_notes"
+    t.date "eeg_date"
+    t.boolean "eeg_check"
+    t.string "physical_function_notes"
+    t.date "physical_function_date"
+    t.boolean "physical_function_check"
+    t.string "liver_mri_notes"
+    t.date "liver_mri_date"
+    t.boolean "liver_mri_check"
+    t.string "sensory_testing_notes"
+    t.date "sensory_testing_date"
+    t.boolean "sensory_testing_check"
+    t.string "neuro_psych_notes"
+    t.date "neuro_psych_date"
+    t.boolean "neuro_psych_check"
+    t.string "brain_mri_notes"
+    t.date "brain_mri_date"
+    t.boolean "brain_mri_check"
+    t.string "dexa_notes"
+    t.date "dexa_date"
+    t.boolean "dexa_check"
+    t.string "lab_results_notes"
+    t.date "lab_results_date"
+    t.boolean "lab_results_check"
+    t.string "anthropometrics_notes"
+    t.date "anthropometrics_date"
+    t.boolean "anthropometrics_check"
     t.index ["master_id"], name: "index_sleep_incidental_findings_on_master_id"
     t.index ["user_id"], name: "index_sleep_incidental_findings_on_user_id"
   end
@@ -6611,6 +9041,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_inex_checklist_id"
+    t.string "conditions_yes_no"
     t.index ["master_id"], name: "index_sleep_inex_checklist_history_on_master_id"
     t.index ["sleep_inex_checklist_id"], name: "index_sleep_inex_checklist_history_on_sleep_inex_checklist_id"
     t.index ["user_id"], name: "index_sleep_inex_checklist_history_on_user_id"
@@ -6646,6 +9077,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "conditions_yes_no"
     t.index ["master_id"], name: "index_sleep_inex_checklists_on_master_id"
     t.index ["user_id"], name: "index_sleep_inex_checklists_on_user_id"
   end
@@ -6664,6 +9096,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "trust_assessment_info_yes_no"
     t.string "help_finding_pcp_yes_no"
     t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -6688,6 +9121,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "trust_assessment_info_yes_no"
     t.string "help_finding_pcp_yes_no"
     t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -6982,7 +9416,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "master_id"
     t.string "select_is_good_time_to_speak"
     t.string "any_questions_blank_yes_no"
-    t.string "select_still_interested"
+    t.string "question_notes"
     t.date "follow_up_date"
     t.string "follow_up_time"
     t.string "notes"
@@ -6990,6 +9424,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_ps2_initial_screening_id"
+    t.string "select_still_interested"
     t.index ["master_id"], name: "index_sleep_ps2_initial_screening_history_on_master_id"
     t.index ["sleep_ps2_initial_screening_id"], name: "index_sleep_ps2_initial_screening_history_on_sleep_ps2_initial_"
     t.index ["user_id"], name: "index_sleep_ps2_initial_screening_history_on_user_id"
@@ -6999,13 +9434,14 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "master_id"
     t.string "select_is_good_time_to_speak"
     t.string "any_questions_blank_yes_no"
-    t.string "select_still_interested"
+    t.string "question_notes"
     t.date "follow_up_date"
     t.string "follow_up_time"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "select_still_interested"
     t.index ["master_id"], name: "index_sleep_ps2_initial_screenings_on_master_id"
     t.index ["user_id"], name: "index_sleep_ps2_initial_screenings_on_user_id"
   end
@@ -7085,6 +9521,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "six_or_more_frequency"
     t.string "total_score"
     t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -7102,6 +9539,7 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "six_or_more_frequency"
     t.string "total_score"
     t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
@@ -7113,7 +9551,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "sleep_ps_basic_response_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "reliable_internet_yes_no"
-    t.string "placeholder_digital_no"
     t.string "cbt_yes_no"
     t.string "cbt_how_long_ago"
     t.string "cbt_notes"
@@ -7127,11 +9564,14 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "seizure_in_ten_years_yes_no"
     t.string "major_psychiatric_disorder_yes_no"
     t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_ps_basic_response_id"
+    t.string "conditions_yes_no"
+    t.string "conditions_notes"
     t.index ["master_id"], name: "index_sleep_ps_basic_response_history_on_master_id"
     t.index ["sleep_ps_basic_response_id"], name: "index_sleep_ps_basic_response_history_on_sleep_ps_basic_respons"
     t.index ["user_id"], name: "index_sleep_ps_basic_response_history_on_user_id"
@@ -7140,7 +9580,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "sleep_ps_basic_responses", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "reliable_internet_yes_no"
-    t.string "placeholder_digital_no"
     t.string "cbt_yes_no"
     t.string "cbt_how_long_ago"
     t.string "cbt_notes"
@@ -7154,12 +9593,47 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "seizure_in_ten_years_yes_no"
     t.string "major_psychiatric_disorder_yes_no"
     t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "conditions_yes_no"
+    t.string "conditions_notes"
     t.index ["master_id"], name: "index_sleep_ps_basic_responses_on_master_id"
     t.index ["user_id"], name: "index_sleep_ps_basic_responses_on_user_id"
+  end
+
+  create_table "sleep_ps_dast2_mod_question_history", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "number_days_negative_feeling"
+    t.integer "number_days_drug_usage"
+    t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
+    t.string "notes"
+    t.string "audit_c_eligible_yes_no"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "sleep_ps_dast2_mod_question_id"
+    t.index ["master_id"], name: "index_sleep_ps_dast2_mod_question_history_on_master_id"
+    t.index ["sleep_ps_dast2_mod_question_id"], name: "index_sleep_ps_dast2_mod_question_history_on_sleep_ps_dast2_mod"
+    t.index ["user_id"], name: "index_sleep_ps_dast2_mod_question_history_on_user_id"
+  end
+
+  create_table "sleep_ps_dast2_mod_questions", id: :serial, force: :cascade do |t|
+    t.integer "master_id"
+    t.integer "number_days_negative_feeling"
+    t.integer "number_days_drug_usage"
+    t.string "possibly_eligible_yes_no"
+    t.string "possibly_eligible_reason_notes"
+    t.string "notes"
+    t.string "audit_c_eligible_yes_no"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["master_id"], name: "index_sleep_ps_dast2_mod_questions_on_master_id"
+    t.index ["user_id"], name: "index_sleep_ps_dast2_mod_questions_on_user_id"
   end
 
   create_table "sleep_ps_eligibility_followup_history", id: :serial, force: :cascade do |t|
@@ -7208,7 +9682,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "not_interested_notes"
     t.string "consent_to_pass_info_to_bwh_yes_no"
     t.string "consent_to_pass_info_to_bwh_2_yes_no"
-    t.string "placeholder_consent_to_pass_info_2_no"
     t.string "contact_info_notes"
     t.string "notes"
     t.integer "user_id"
@@ -7226,7 +9699,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "not_interested_notes"
     t.string "consent_to_pass_info_to_bwh_yes_no"
     t.string "consent_to_pass_info_to_bwh_2_yes_no"
-    t.string "placeholder_consent_to_pass_info_2_no"
     t.string "contact_info_notes"
     t.string "notes"
     t.integer "user_id"
@@ -7239,9 +9711,8 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "sleep_ps_initial_screening_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "select_is_good_time_to_speak"
-    t.string "looked_at_website_yes_no"
-    t.string "select_may_i_begin"
     t.string "any_questions_blank_yes_no"
+    t.string "question_notes"
     t.string "select_still_interested"
     t.date "follow_up_date"
     t.time "follow_up_time"
@@ -7250,6 +9721,8 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_ps_initial_screening_id"
+    t.string "select_may_i_begin"
+    t.string "looked_at_website_yes_no"
     t.index ["master_id"], name: "index_sleep_ps_initial_screening_history_on_master_id"
     t.index ["sleep_ps_initial_screening_id"], name: "index_sleep_ps_initial_screening_history_on_sleep_ps_initial_sc"
     t.index ["user_id"], name: "index_sleep_ps_initial_screening_history_on_user_id"
@@ -7258,9 +9731,8 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "sleep_ps_initial_screenings", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "select_is_good_time_to_speak"
-    t.string "looked_at_website_yes_no"
-    t.string "select_may_i_begin"
     t.string "any_questions_blank_yes_no"
+    t.string "question_notes"
     t.string "select_still_interested"
     t.date "follow_up_date"
     t.time "follow_up_time"
@@ -7268,6 +9740,8 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "select_may_i_begin"
+    t.string "looked_at_website_yes_no"
     t.index ["master_id"], name: "index_sleep_ps_initial_screenings_on_master_id"
     t.index ["user_id"], name: "index_sleep_ps_initial_screenings_on_user_id"
   end
@@ -7275,14 +9749,10 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "sleep_ps_non_eligible_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "any_questions_yes_no"
-    t.string "placeholder_any_questions_no"
     t.string "contact_pi_yes_no"
     t.string "additional_questions_yes_no"
-    t.string "placeholder_additional_questions_no"
-    t.string "placeholder_additional_questions_yes"
     t.string "consent_to_pass_info_to_bwh_yes_no"
     t.string "consent_to_pass_info_to_bwh_2_yes_no"
-    t.string "placeholder_consent_to_pass_info_2_no"
     t.string "contact_info_notes"
     t.string "notes"
     t.integer "user_id"
@@ -7297,14 +9767,10 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "sleep_ps_non_eligibles", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "any_questions_yes_no"
-    t.string "placeholder_any_questions_no"
     t.string "contact_pi_yes_no"
     t.string "additional_questions_yes_no"
-    t.string "placeholder_additional_questions_no"
-    t.string "placeholder_additional_questions_yes"
     t.string "consent_to_pass_info_to_bwh_yes_no"
     t.string "consent_to_pass_info_to_bwh_2_yes_no"
-    t.string "placeholder_consent_to_pass_info_2_no"
     t.string "contact_info_notes"
     t.string "notes"
     t.integer "user_id"
@@ -7320,13 +9786,13 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "consent_to_pass_info_to_bwh_yes_no"
     t.string "consent_to_pass_info_to_bwh_2_yes_no"
     t.string "contact_info_notes"
-    t.date "follow_up_date"
-    t.time "follow_up_time"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_ps_possibly_eligible_id"
+    t.time "follow_up_time"
+    t.date "follow_up_date"
     t.index ["master_id"], name: "index_sleep_ps_possibly_eligible_history_on_master_id"
     t.index ["sleep_ps_possibly_eligible_id"], name: "index_sleep_ps_possibly_eligible_history_on_sleep_ps_possibly_e"
     t.index ["user_id"], name: "index_sleep_ps_possibly_eligible_history_on_user_id"
@@ -7338,12 +9804,12 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "consent_to_pass_info_to_bwh_yes_no"
     t.string "consent_to_pass_info_to_bwh_2_yes_no"
     t.string "contact_info_notes"
-    t.date "follow_up_date"
-    t.time "follow_up_time"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.time "follow_up_time"
+    t.date "follow_up_date"
     t.index ["master_id"], name: "index_sleep_ps_possibly_eligibles_on_master_id"
     t.index ["user_id"], name: "index_sleep_ps_possibly_eligibles_on_user_id"
   end
@@ -7383,12 +9849,12 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "diagnosed_yes_no"
     t.string "use_treatment_yes_no"
     t.string "severity"
-    t.string "possibly_eligible_yes_no"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_ps_sleep_apnea_response_id"
+    t.string "possibly_eligible_yes_no"
     t.index ["master_id"], name: "index_sleep_ps_sleep_apnea_response_history_on_master_id"
     t.index ["sleep_ps_sleep_apnea_response_id"], name: "index_sleep_ps_sleep_apnea_response_history_on_sleep_ps_sleep_a"
     t.index ["user_id"], name: "index_sleep_ps_sleep_apnea_response_history_on_user_id"
@@ -7399,11 +9865,11 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "diagnosed_yes_no"
     t.string "use_treatment_yes_no"
     t.string "severity"
-    t.string "possibly_eligible_yes_no"
     t.string "notes"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "possibly_eligible_yes_no"
     t.index ["master_id"], name: "index_sleep_ps_sleep_apnea_responses_on_master_id"
     t.index ["user_id"], name: "index_sleep_ps_sleep_apnea_responses_on_user_id"
   end
@@ -7437,8 +9903,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "sleep_screening_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "eligible_for_study_blank_yes_no"
-    t.string "requires_study_partner_blank_yes_no"
-    t.string "notes"
     t.string "good_time_to_speak_blank_yes_no"
     t.date "callback_date"
     t.string "callback_time"
@@ -7447,10 +9911,14 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "contact_in_future_yes_no"
     t.string "ineligible_notes"
     t.string "eligible_notes"
+    t.string "consent_performed_yes_no"
+    t.string "did_subject_consent_yes_no"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sleep_screening_id"
+    t.string "notes"
+    t.string "requires_study_partner_blank_yes_no"
     t.index ["master_id"], name: "index_sleep_screening_history_on_master_id"
     t.index ["sleep_screening_id"], name: "index_sleep_screening_history_on_sleep_screening_id"
     t.index ["user_id"], name: "index_sleep_screening_history_on_user_id"
@@ -7459,8 +9927,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   create_table "sleep_screenings", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.string "eligible_for_study_blank_yes_no"
-    t.string "requires_study_partner_blank_yes_no"
-    t.string "notes"
     t.string "good_time_to_speak_blank_yes_no"
     t.date "callback_date"
     t.string "callback_time"
@@ -7469,9 +9935,13 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.string "contact_in_future_yes_no"
     t.string "ineligible_notes"
     t.string "eligible_notes"
+    t.string "consent_performed_yes_no"
+    t.string "did_subject_consent_yes_no"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "notes"
+    t.string "requires_study_partner_blank_yes_no"
     t.index ["master_id"], name: "index_sleep_screenings_on_master_id"
     t.index ["user_id"], name: "index_sleep_screenings_on_user_id"
   end
@@ -8913,6 +11383,32 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.index ["user_id"], name: "index_test2s_on_user_id"
   end
 
+  create_table "test9_number_history", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "test9_id"
+    t.bigint "user_id"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "test9_number_table_id_id"
+    t.index ["admin_id"], name: "index_femfl.test9_number_history_on_admin_id"
+    t.index ["master_id"], name: "index_femfl.test9_number_history_on_master_id"
+    t.index ["test9_number_table_id_id"], name: "test9_number_id_idx"
+    t.index ["user_id"], name: "index_femfl.test9_number_history_on_user_id"
+  end
+
+  create_table "test9_numbers", force: :cascade do |t|
+    t.bigint "master_id"
+    t.string "test9_id"
+    t.bigint "user_id"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_femfl.test9_numbers_on_admin_id"
+    t.index ["master_id"], name: "index_femfl.test9_numbers_on_master_id"
+    t.index ["user_id"], name: "index_femfl.test9_numbers_on_user_id"
+  end
+
   create_table "test_2_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.bigint "test_2ext_id"
@@ -9238,6 +11734,23 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.integer "admin_id"
     t.boolean "disabled"
     t.index ["admin_id"], name: "index_users_contact_infos_on_admin_id"
+    t.index ["admin_id"], name: "index_users_contact_infos_on_admin_id"
+    t.index ["user_id"], name: "index_users_contact_infos_on_user_id"
+    t.index ["user_id"], name: "index_users_contact_infos_on_user_id"
+  end
+
+  create_table "users_contact_infos", id: :serial, force: :cascade do |t|
+    t.integer "user_id"
+    t.string "sms_number"
+    t.string "phone_number"
+    t.string "alt_email"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "admin_id"
+    t.boolean "disabled"
+    t.index ["admin_id"], name: "index_users_contact_infos_on_admin_id"
+    t.index ["admin_id"], name: "index_users_contact_infos_on_admin_id"
+    t.index ["user_id"], name: "index_users_contact_infos_on_user_id"
     t.index ["user_id"], name: "index_users_contact_infos_on_user_id"
   end
 
@@ -9250,12 +11763,11 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.date "send_date"
     t.time "send_time"
     t.string "status"
-    t.string "cancel"
-    t.string "ready"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "zeus_bulk_message_id"
+    t.string "cancel"
     t.index ["master_id"], name: "index_zeus_bulk_message_history_on_master_id"
     t.index ["user_id"], name: "index_zeus_bulk_message_history_on_user_id"
     t.index ["zeus_bulk_message_id"], name: "index_zeus_bulk_message_history_on_zeus_bulk_message_id"
@@ -9338,11 +11850,10 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
     t.date "send_date"
     t.time "send_time"
     t.string "status"
-    t.string "cancel"
-    t.string "ready"
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "cancel"
     t.index ["master_id"], name: "index_zeus_bulk_messages_on_master_id"
     t.index ["user_id"], name: "index_zeus_bulk_messages_on_user_id"
   end
@@ -9401,7 +11912,6 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "activity_log_bhs_assignment_history", "bhs_assignments", name: "fk_activity_log_bhs_assignment_history_bhs_assignment_id"
   add_foreign_key "activity_log_bhs_assignment_history", "masters", name: "fk_activity_log_bhs_assignment_history_masters"
   add_foreign_key "activity_log_bhs_assignment_history", "users", name: "fk_activity_log_bhs_assignment_history_users"
-  add_foreign_key "activity_log_bhs_assignments", "bhs_assignments"
   add_foreign_key "activity_log_bhs_assignments", "masters"
   add_foreign_key "activity_log_bhs_assignments", "users"
   add_foreign_key "activity_log_data_request_assignment_history", "activity_log_data_request_assignments", name: "fk_activity_log_data_request_assignment_history_activity_log_da"
@@ -9419,6 +11929,55 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "activity_log_ext_assignments", "ext_assignments"
   add_foreign_key "activity_log_ext_assignments", "masters"
   add_foreign_key "activity_log_ext_assignments", "users"
+  add_foreign_key "activity_log_femfl_assignment_femfl_comm_history", "activity_log_femfl_assignment_femfl_comms"
+  add_foreign_key "activity_log_femfl_assignment_femfl_comm_history", "femfl_assignments"
+  add_foreign_key "activity_log_femfl_assignment_femfl_comm_history", "masters"
+  add_foreign_key "activity_log_femfl_assignment_femfl_comm_history", "users"
+  add_foreign_key "activity_log_femfl_assignment_femfl_comms", "femfl_assignments"
+  add_foreign_key "activity_log_femfl_assignment_femfl_comms", "masters"
+  add_foreign_key "activity_log_femfl_assignment_femfl_comms", "users"
+  add_foreign_key "activity_log_grit_assignment_adverse_event_history", "activity_log_grit_assignment_adverse_events", name: "fk_activity_log_grit_assignment_adverse_event_history_activity_"
+  add_foreign_key "activity_log_grit_assignment_adverse_event_history", "grit.grit_assignments", column: "grit_assignment_id", name: "fk_activity_log_grit_assignment_adverse_event_history_grit_assi"
+  add_foreign_key "activity_log_grit_assignment_adverse_event_history", "masters", name: "fk_activity_log_grit_assignment_adverse_event_history_masters"
+  add_foreign_key "activity_log_grit_assignment_adverse_event_history", "users", name: "fk_activity_log_grit_assignment_adverse_event_history_users"
+  add_foreign_key "activity_log_grit_assignment_adverse_events", "grit.grit_assignments", column: "grit_assignment_id"
+  add_foreign_key "activity_log_grit_assignment_adverse_events", "masters"
+  add_foreign_key "activity_log_grit_assignment_adverse_events", "users"
+  add_foreign_key "activity_log_grit_assignment_discussion_history", "activity_log_grit_assignment_discussions", name: "fk_activity_log_grit_assignment_discussion_history_activity_log"
+  add_foreign_key "activity_log_grit_assignment_discussion_history", "grit.grit_assignments", column: "grit_assignment_id", name: "fk_activity_log_grit_assignment_discussion_history_grit_assignm"
+  add_foreign_key "activity_log_grit_assignment_discussion_history", "masters", name: "fk_activity_log_grit_assignment_discussion_history_masters"
+  add_foreign_key "activity_log_grit_assignment_discussion_history", "users", name: "fk_activity_log_grit_assignment_discussion_history_users"
+  add_foreign_key "activity_log_grit_assignment_discussions", "grit.grit_assignments", column: "grit_assignment_id"
+  add_foreign_key "activity_log_grit_assignment_discussions", "masters"
+  add_foreign_key "activity_log_grit_assignment_discussions", "users"
+  add_foreign_key "activity_log_grit_assignment_followup_history", "activity_log_grit_assignment_followups", name: "fk_activity_log_grit_assignment_followup_history_activity_log_g"
+  add_foreign_key "activity_log_grit_assignment_followup_history", "grit.grit_assignments", column: "grit_assignment_id", name: "fk_activity_log_grit_assignment_followup_history_grit_assignmen"
+  add_foreign_key "activity_log_grit_assignment_followup_history", "masters", name: "fk_activity_log_grit_assignment_followup_history_masters"
+  add_foreign_key "activity_log_grit_assignment_followup_history", "users", name: "fk_activity_log_grit_assignment_followup_history_users"
+  add_foreign_key "activity_log_grit_assignment_followups", "grit.grit_assignments", column: "grit_assignment_id"
+  add_foreign_key "activity_log_grit_assignment_followups", "masters"
+  add_foreign_key "activity_log_grit_assignment_followups", "users"
+  add_foreign_key "activity_log_grit_assignment_history", "activity_log_grit_assignments", name: "fk_activity_log_grit_assignment_history_activity_log_grit_assig"
+  add_foreign_key "activity_log_grit_assignment_history", "grit.grit_assignments", column: "grit_assignment_id", name: "fk_activity_log_grit_assignment_history_grit_assignment_id"
+  add_foreign_key "activity_log_grit_assignment_history", "masters", name: "fk_activity_log_grit_assignment_history_masters"
+  add_foreign_key "activity_log_grit_assignment_history", "users", name: "fk_activity_log_grit_assignment_history_users"
+  add_foreign_key "activity_log_grit_assignment_phone_screen_history", "activity_log_grit_assignment_phone_screens", name: "fk_activity_log_grit_assignment_phone_screen_history_activity_l"
+  add_foreign_key "activity_log_grit_assignment_phone_screen_history", "grit.grit_assignments", column: "grit_assignment_id", name: "fk_activity_log_grit_assignment_phone_screen_history_grit_assig"
+  add_foreign_key "activity_log_grit_assignment_phone_screen_history", "masters", name: "fk_activity_log_grit_assignment_phone_screen_history_masters"
+  add_foreign_key "activity_log_grit_assignment_phone_screen_history", "users", name: "fk_activity_log_grit_assignment_phone_screen_history_users"
+  add_foreign_key "activity_log_grit_assignment_phone_screens", "grit.grit_assignments", column: "grit_assignment_id"
+  add_foreign_key "activity_log_grit_assignment_phone_screens", "masters"
+  add_foreign_key "activity_log_grit_assignment_phone_screens", "users"
+  add_foreign_key "activity_log_grit_assignment_protocol_deviation_history", "activity_log_grit_assignment_protocol_deviations", name: "fk_activity_log_grit_assignment_protocol_deviation_history_acti"
+  add_foreign_key "activity_log_grit_assignment_protocol_deviation_history", "grit.grit_assignments", column: "grit_assignment_id", name: "fk_activity_log_grit_assignment_protocol_deviation_history_grit"
+  add_foreign_key "activity_log_grit_assignment_protocol_deviation_history", "masters", name: "fk_activity_log_grit_assignment_protocol_deviation_history_mast"
+  add_foreign_key "activity_log_grit_assignment_protocol_deviation_history", "users", name: "fk_activity_log_grit_assignment_protocol_deviation_history_user"
+  add_foreign_key "activity_log_grit_assignment_protocol_deviations", "grit.grit_assignments", column: "grit_assignment_id"
+  add_foreign_key "activity_log_grit_assignment_protocol_deviations", "masters"
+  add_foreign_key "activity_log_grit_assignment_protocol_deviations", "users"
+  add_foreign_key "activity_log_grit_assignments", "grit.grit_assignments", column: "grit_assignment_id"
+  add_foreign_key "activity_log_grit_assignments", "masters"
+  add_foreign_key "activity_log_grit_assignments", "users"
   add_foreign_key "activity_log_history", "activity_logs"
   add_foreign_key "activity_log_ipa_assignment_adverse_event_history", "activity_log_ipa_assignment_adverse_events", name: "fk_activity_log_ipa_assignment_adverse_event_history_activity_l"
   add_foreign_key "activity_log_ipa_assignment_adverse_event_history", "ipa_assignments", name: "fk_activity_log_ipa_assignment_adverse_event_history_ipa_assign"
@@ -9427,6 +11986,15 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "activity_log_ipa_assignment_adverse_events", "ipa_assignments"
   add_foreign_key "activity_log_ipa_assignment_adverse_events", "masters"
   add_foreign_key "activity_log_ipa_assignment_adverse_events", "users"
+  add_foreign_key "activity_log_ipa_assignment_discussion_history", "activity_log_ipa_assignment_discussions", name: "fk_activity_log_ipa_assignment_discussion_history_activity_log_"
+  add_foreign_key "activity_log_ipa_assignment_discussion_history", "ipa_assignments", name: "fk_activity_log_ipa_assignment_discussion_history_ipa_assignmen"
+  add_foreign_key "activity_log_ipa_assignment_discussion_history", "masters", name: "fk_activity_log_ipa_assignment_discussion_history_masters"
+  add_foreign_key "activity_log_ipa_assignment_discussion_history", "users", column: "created_by_user_id"
+  add_foreign_key "activity_log_ipa_assignment_discussion_history", "users", name: "fk_activity_log_ipa_assignment_discussion_history_users"
+  add_foreign_key "activity_log_ipa_assignment_discussions", "ipa_assignments"
+  add_foreign_key "activity_log_ipa_assignment_discussions", "masters"
+  add_foreign_key "activity_log_ipa_assignment_discussions", "users"
+  add_foreign_key "activity_log_ipa_assignment_discussions", "users", column: "created_by_user_id"
   add_foreign_key "activity_log_ipa_assignment_history", "activity_log_ipa_assignments", name: "fk_activity_log_ipa_assignment_history_activity_log_ipa_assignm"
   add_foreign_key "activity_log_ipa_assignment_history", "ipa_assignments", name: "fk_activity_log_ipa_assignment_history_ipa_assignment_id"
   add_foreign_key "activity_log_ipa_assignment_history", "masters", name: "fk_activity_log_ipa_assignment_history_masters"
@@ -9497,6 +12065,13 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "activity_log_ipa_assignments", "ipa_assignments"
   add_foreign_key "activity_log_ipa_assignments", "masters"
   add_foreign_key "activity_log_ipa_assignments", "users"
+  add_foreign_key "activity_log_ipa_sample_history", "activity_log_ipa_samples"
+  add_foreign_key "activity_log_ipa_sample_history", "ipa_samples"
+  add_foreign_key "activity_log_ipa_sample_history", "masters"
+  add_foreign_key "activity_log_ipa_sample_history", "users"
+  add_foreign_key "activity_log_ipa_samples", "ipa_samples"
+  add_foreign_key "activity_log_ipa_samples", "masters"
+  add_foreign_key "activity_log_ipa_samples", "users"
   add_foreign_key "activity_log_ipa_survey_history", "activity_log_ipa_surveys", name: "fk_activity_log_ipa_survey_history_activity_log_ipa_surveys"
   add_foreign_key "activity_log_ipa_survey_history", "ipa_surveys", name: "fk_activity_log_ipa_survey_history_ipa_survey_id"
   add_foreign_key "activity_log_ipa_survey_history", "masters", name: "fk_activity_log_ipa_survey_history_masters"
@@ -9518,6 +12093,27 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "activity_log_persnet_assignments", "masters"
   add_foreign_key "activity_log_persnet_assignments", "persnet_assignments"
   add_foreign_key "activity_log_persnet_assignments", "users"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussion_history", "activity_log_pitt_bhi_assignment_discussions"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussion_history", "masters"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussion_history", "pitt_bhi_assignments"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussion_history", "users"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussions", "masters"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussions", "pitt_bhi_assignments"
+  add_foreign_key "activity_log_pitt_bhi_assignment_discussions", "users"
+  add_foreign_key "activity_log_pitt_bhi_assignment_history", "activity_log_pitt_bhi_assignments"
+  add_foreign_key "activity_log_pitt_bhi_assignment_history", "masters"
+  add_foreign_key "activity_log_pitt_bhi_assignment_history", "pitt_bhi_assignments"
+  add_foreign_key "activity_log_pitt_bhi_assignment_history", "users"
+  add_foreign_key "activity_log_pitt_bhi_assignment_phone_screen_history", "activity_log_pitt_bhi_assignment_phone_screens"
+  add_foreign_key "activity_log_pitt_bhi_assignment_phone_screen_history", "masters"
+  add_foreign_key "activity_log_pitt_bhi_assignment_phone_screen_history", "pitt_bhi_assignments"
+  add_foreign_key "activity_log_pitt_bhi_assignment_phone_screen_history", "users"
+  add_foreign_key "activity_log_pitt_bhi_assignment_phone_screens", "masters"
+  add_foreign_key "activity_log_pitt_bhi_assignment_phone_screens", "pitt_bhi_assignments"
+  add_foreign_key "activity_log_pitt_bhi_assignment_phone_screens", "users"
+  add_foreign_key "activity_log_pitt_bhi_assignments", "masters"
+  add_foreign_key "activity_log_pitt_bhi_assignments", "pitt_bhi_assignments"
+  add_foreign_key "activity_log_pitt_bhi_assignments", "users"
   add_foreign_key "activity_log_player_contact_phone_history", "activity_log_player_contact_phones", name: "fk_activity_log_player_contact_phone_history_activity_log_playe"
   add_foreign_key "activity_log_player_contact_phone_history", "masters", name: "fk_activity_log_player_contact_phone_history_masters"
   add_foreign_key "activity_log_player_contact_phone_history", "player_contacts", name: "fk_activity_log_player_contact_phone_history_player_contact_pho"
@@ -9531,59 +12127,59 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "activity_log_player_infos", "users"
   add_foreign_key "activity_log_sleep_assignment_adverse_event_history", "activity_log_sleep_assignment_adverse_events", name: "fk_activity_log_sleep_assignment_adverse_event_history_activity"
   add_foreign_key "activity_log_sleep_assignment_adverse_event_history", "masters", name: "fk_activity_log_sleep_assignment_adverse_event_history_masters"
-  add_foreign_key "activity_log_sleep_assignment_adverse_event_history", "sleep_assignments", name: "fk_activity_log_sleep_assignment_adverse_event_history_sleep_as"
+  add_foreign_key "activity_log_sleep_assignment_adverse_event_history", "sleep.sleep_assignments", column: "sleep_assignment_id", name: "fk_activity_log_sleep_assignment_adverse_event_history_sleep_as"
   add_foreign_key "activity_log_sleep_assignment_adverse_event_history", "users", name: "fk_activity_log_sleep_assignment_adverse_event_history_users"
   add_foreign_key "activity_log_sleep_assignment_adverse_events", "masters"
-  add_foreign_key "activity_log_sleep_assignment_adverse_events", "sleep_assignments"
+  add_foreign_key "activity_log_sleep_assignment_adverse_events", "sleep.sleep_assignments", column: "sleep_assignment_id"
   add_foreign_key "activity_log_sleep_assignment_adverse_events", "users"
   add_foreign_key "activity_log_sleep_assignment_discussion_history", "activity_log_sleep_assignment_discussions", name: "fk_activity_log_sleep_assignment_discussion_history_activity_lo"
   add_foreign_key "activity_log_sleep_assignment_discussion_history", "masters", name: "fk_activity_log_sleep_assignment_discussion_history_masters"
-  add_foreign_key "activity_log_sleep_assignment_discussion_history", "sleep_assignments", name: "fk_activity_log_sleep_assignment_discussion_history_sleep_assig"
+  add_foreign_key "activity_log_sleep_assignment_discussion_history", "sleep.sleep_assignments", column: "sleep_assignment_id", name: "fk_activity_log_sleep_assignment_discussion_history_sleep_assig"
   add_foreign_key "activity_log_sleep_assignment_discussion_history", "users", name: "fk_activity_log_sleep_assignment_discussion_history_users"
   add_foreign_key "activity_log_sleep_assignment_discussions", "masters"
-  add_foreign_key "activity_log_sleep_assignment_discussions", "sleep_assignments"
+  add_foreign_key "activity_log_sleep_assignment_discussions", "sleep.sleep_assignments", column: "sleep_assignment_id"
   add_foreign_key "activity_log_sleep_assignment_discussions", "users"
   add_foreign_key "activity_log_sleep_assignment_history", "activity_log_sleep_assignments", name: "fk_activity_log_sleep_assignment_history_activity_log_sleep_ass"
   add_foreign_key "activity_log_sleep_assignment_history", "masters", name: "fk_activity_log_sleep_assignment_history_masters"
-  add_foreign_key "activity_log_sleep_assignment_history", "sleep_assignments", name: "fk_activity_log_sleep_assignment_history_sleep_assignment_id"
+  add_foreign_key "activity_log_sleep_assignment_history", "sleep.sleep_assignments", column: "sleep_assignment_id", name: "fk_activity_log_sleep_assignment_history_sleep_assignment_id"
   add_foreign_key "activity_log_sleep_assignment_history", "users", name: "fk_activity_log_sleep_assignment_history_users"
   add_foreign_key "activity_log_sleep_assignment_inex_checklist_history", "activity_log_sleep_assignment_inex_checklists", name: "fk_activity_log_sleep_assignment_inex_checklist_history_activit"
   add_foreign_key "activity_log_sleep_assignment_inex_checklist_history", "masters", name: "fk_activity_log_sleep_assignment_inex_checklist_history_masters"
-  add_foreign_key "activity_log_sleep_assignment_inex_checklist_history", "sleep_assignments", name: "fk_activity_log_sleep_assignment_inex_checklist_history_sleep_a"
+  add_foreign_key "activity_log_sleep_assignment_inex_checklist_history", "sleep.sleep_assignments", column: "sleep_assignment_id", name: "fk_activity_log_sleep_assignment_inex_checklist_history_sleep_a"
   add_foreign_key "activity_log_sleep_assignment_inex_checklist_history", "users", name: "fk_activity_log_sleep_assignment_inex_checklist_history_users"
   add_foreign_key "activity_log_sleep_assignment_inex_checklists", "masters"
-  add_foreign_key "activity_log_sleep_assignment_inex_checklists", "sleep_assignments"
+  add_foreign_key "activity_log_sleep_assignment_inex_checklists", "sleep.sleep_assignments", column: "sleep_assignment_id"
   add_foreign_key "activity_log_sleep_assignment_inex_checklists", "users"
   add_foreign_key "activity_log_sleep_assignment_med_nav_history", "activity_log_sleep_assignment_med_navs", name: "fk_activity_log_sleep_assignment_med_nav_history_activity_log_s"
   add_foreign_key "activity_log_sleep_assignment_med_nav_history", "masters", name: "fk_activity_log_sleep_assignment_med_nav_history_masters"
-  add_foreign_key "activity_log_sleep_assignment_med_nav_history", "sleep_assignments", name: "fk_activity_log_sleep_assignment_med_nav_history_sleep_assignme"
+  add_foreign_key "activity_log_sleep_assignment_med_nav_history", "sleep.sleep_assignments", column: "sleep_assignment_id", name: "fk_activity_log_sleep_assignment_med_nav_history_sleep_assignme"
   add_foreign_key "activity_log_sleep_assignment_med_nav_history", "users", name: "fk_activity_log_sleep_assignment_med_nav_history_users"
   add_foreign_key "activity_log_sleep_assignment_med_navs", "masters"
-  add_foreign_key "activity_log_sleep_assignment_med_navs", "sleep_assignments"
+  add_foreign_key "activity_log_sleep_assignment_med_navs", "sleep.sleep_assignments", column: "sleep_assignment_id"
   add_foreign_key "activity_log_sleep_assignment_med_navs", "users"
   add_foreign_key "activity_log_sleep_assignment_phone_screen2_history", "activity_log_sleep_assignment_phone_screen2s", name: "fk_activity_log_sleep_assignment_phone_screen2_history_activity"
   add_foreign_key "activity_log_sleep_assignment_phone_screen2_history", "masters", name: "fk_activity_log_sleep_assignment_phone_screen2_history_masters"
-  add_foreign_key "activity_log_sleep_assignment_phone_screen2_history", "sleep_assignments", name: "fk_activity_log_sleep_assignment_phone_screen2_history_sleep_as"
+  add_foreign_key "activity_log_sleep_assignment_phone_screen2_history", "sleep.sleep_assignments", column: "sleep_assignment_id", name: "fk_activity_log_sleep_assignment_phone_screen2_history_sleep_as"
   add_foreign_key "activity_log_sleep_assignment_phone_screen2_history", "users", name: "fk_activity_log_sleep_assignment_phone_screen2_history_users"
   add_foreign_key "activity_log_sleep_assignment_phone_screen2s", "masters"
-  add_foreign_key "activity_log_sleep_assignment_phone_screen2s", "sleep_assignments"
+  add_foreign_key "activity_log_sleep_assignment_phone_screen2s", "sleep.sleep_assignments", column: "sleep_assignment_id"
   add_foreign_key "activity_log_sleep_assignment_phone_screen2s", "users"
   add_foreign_key "activity_log_sleep_assignment_phone_screen_history", "activity_log_sleep_assignment_phone_screens", name: "fk_activity_log_sleep_assignment_phone_screen_history_activity_"
   add_foreign_key "activity_log_sleep_assignment_phone_screen_history", "masters", name: "fk_activity_log_sleep_assignment_phone_screen_history_masters"
-  add_foreign_key "activity_log_sleep_assignment_phone_screen_history", "sleep_assignments", name: "fk_activity_log_sleep_assignment_phone_screen_history_sleep_ass"
+  add_foreign_key "activity_log_sleep_assignment_phone_screen_history", "sleep.sleep_assignments", column: "sleep_assignment_id", name: "fk_activity_log_sleep_assignment_phone_screen_history_sleep_ass"
   add_foreign_key "activity_log_sleep_assignment_phone_screen_history", "users", name: "fk_activity_log_sleep_assignment_phone_screen_history_users"
   add_foreign_key "activity_log_sleep_assignment_phone_screens", "masters"
-  add_foreign_key "activity_log_sleep_assignment_phone_screens", "sleep_assignments"
+  add_foreign_key "activity_log_sleep_assignment_phone_screens", "sleep.sleep_assignments", column: "sleep_assignment_id"
   add_foreign_key "activity_log_sleep_assignment_phone_screens", "users"
   add_foreign_key "activity_log_sleep_assignment_protocol_deviation_history", "activity_log_sleep_assignment_protocol_deviations", name: "fk_activity_log_sleep_assignment_protocol_deviation_history_act"
   add_foreign_key "activity_log_sleep_assignment_protocol_deviation_history", "masters", name: "fk_activity_log_sleep_assignment_protocol_deviation_history_mas"
-  add_foreign_key "activity_log_sleep_assignment_protocol_deviation_history", "sleep_assignments", name: "fk_activity_log_sleep_assignment_protocol_deviation_history_sle"
+  add_foreign_key "activity_log_sleep_assignment_protocol_deviation_history", "sleep.sleep_assignments", column: "sleep_assignment_id", name: "fk_activity_log_sleep_assignment_protocol_deviation_history_sle"
   add_foreign_key "activity_log_sleep_assignment_protocol_deviation_history", "users", name: "fk_activity_log_sleep_assignment_protocol_deviation_history_use"
   add_foreign_key "activity_log_sleep_assignment_protocol_deviations", "masters"
-  add_foreign_key "activity_log_sleep_assignment_protocol_deviations", "sleep_assignments"
+  add_foreign_key "activity_log_sleep_assignment_protocol_deviations", "sleep.sleep_assignments", column: "sleep_assignment_id"
   add_foreign_key "activity_log_sleep_assignment_protocol_deviations", "users"
   add_foreign_key "activity_log_sleep_assignments", "masters"
-  add_foreign_key "activity_log_sleep_assignments", "sleep_assignments"
+  add_foreign_key "activity_log_sleep_assignments", "sleep.sleep_assignments", column: "sleep_assignment_id"
   add_foreign_key "activity_log_sleep_assignments", "users"
   add_foreign_key "activity_log_tbs_assignment_adverse_event_history", "activity_log_tbs_assignment_adverse_events", name: "fk_activity_log_tbs_assignment_adverse_event_history_activity_l"
   add_foreign_key "activity_log_tbs_assignment_adverse_event_history", "masters", name: "fk_activity_log_tbs_assignment_adverse_event_history_masters"
@@ -9703,6 +12299,20 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "data_request_message_history", "masters", name: "fk_data_request_message_history_masters"
   add_foreign_key "data_request_message_history", "users", column: "created_by_user_id", name: "fk_data_request_message_history_cb_users"
   add_foreign_key "data_request_message_history", "users", name: "fk_data_request_message_history_users"
+  add_foreign_key "data_request_message_to_requester_history", "data_request_message_to_requesters", name: "fk_data_request_message_to_requester_history_data_request_messa"
+  add_foreign_key "data_request_message_to_requester_history", "masters", name: "fk_data_request_message_to_requester_history_masters"
+  add_foreign_key "data_request_message_to_requester_history", "users", column: "created_by_user_id", name: "fk_data_request_message_to_requester_history_cb_users"
+  add_foreign_key "data_request_message_to_requester_history", "users", name: "fk_data_request_message_to_requester_history_users"
+  add_foreign_key "data_request_message_to_requesters", "masters"
+  add_foreign_key "data_request_message_to_requesters", "users"
+  add_foreign_key "data_request_message_to_requesters", "users", column: "created_by_user_id", name: "fk_rails_982635401e0"
+  add_foreign_key "data_request_message_to_reviewer_history", "data_request_message_to_reviewers", name: "fk_data_request_message_to_reviewer_history_data_request_messag"
+  add_foreign_key "data_request_message_to_reviewer_history", "masters", name: "fk_data_request_message_to_reviewer_history_masters"
+  add_foreign_key "data_request_message_to_reviewer_history", "users", column: "created_by_user_id", name: "fk_data_request_message_to_reviewer_history_cb_users"
+  add_foreign_key "data_request_message_to_reviewer_history", "users", name: "fk_data_request_message_to_reviewer_history_users"
+  add_foreign_key "data_request_message_to_reviewers", "masters"
+  add_foreign_key "data_request_message_to_reviewers", "users"
+  add_foreign_key "data_request_message_to_reviewers", "users", column: "created_by_user_id", name: "fk_rails_982635401e0"
   add_foreign_key "data_request_messages", "masters"
   add_foreign_key "data_request_messages", "users"
   add_foreign_key "data_request_messages", "users", column: "created_by_user_id", name: "fk_rails_982635401e0"
@@ -9736,6 +12346,21 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "emergency_contacts", "masters"
   add_foreign_key "emergency_contacts", "users"
   add_foreign_key "emergency_contacts", "users"
+  add_foreign_key "env_environment_history", "env_environments"
+  add_foreign_key "env_environment_history", "masters"
+  add_foreign_key "env_environment_history", "users"
+  add_foreign_key "env_environments", "masters"
+  add_foreign_key "env_environments", "users"
+  add_foreign_key "env_hosting_account_history", "env_hosting_accounts"
+  add_foreign_key "env_hosting_account_history", "users"
+  add_foreign_key "env_hosting_account_history", "users", column: "created_by_user_id"
+  add_foreign_key "env_hosting_accounts", "users"
+  add_foreign_key "env_hosting_accounts", "users", column: "created_by_user_id"
+  add_foreign_key "env_server_history", "env_servers"
+  add_foreign_key "env_server_history", "masters"
+  add_foreign_key "env_server_history", "users"
+  add_foreign_key "env_servers", "masters"
+  add_foreign_key "env_servers", "users"
   add_foreign_key "exception_logs", "admins"
   add_foreign_key "exception_logs", "users"
   add_foreign_key "ext_assignment_history", "ext_assignments", column: "ext_assignment_table_id", name: "fk_ext_assignment_history_ext_assignments"
@@ -9754,8 +12379,173 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "external_identifiers", "admins"
   add_foreign_key "external_link_history", "external_links", name: "fk_external_link_history_external_links"
   add_foreign_key "external_links", "admins"
+  add_foreign_key "femfl_address_history", "femfl_addresses"
+  add_foreign_key "femfl_address_history", "masters"
+  add_foreign_key "femfl_address_history", "users"
+  add_foreign_key "femfl_addresses", "masters"
+  add_foreign_key "femfl_addresses", "users"
+  add_foreign_key "femfl_assignment_history", "admins"
+  add_foreign_key "femfl_assignment_history", "femfl_assignments", column: "femfl_assignment_table_id_id"
+  add_foreign_key "femfl_assignment_history", "masters"
+  add_foreign_key "femfl_assignment_history", "users"
+  add_foreign_key "femfl_assignments", "admins"
+  add_foreign_key "femfl_assignments", "masters"
+  add_foreign_key "femfl_assignments", "users"
+  add_foreign_key "femfl_contact_history", "femfl_contacts"
+  add_foreign_key "femfl_contact_history", "masters"
+  add_foreign_key "femfl_contact_history", "users"
+  add_foreign_key "femfl_contacts", "masters"
+  add_foreign_key "femfl_contacts", "users"
+  add_foreign_key "femfl_subject_history", "femfl_subjects"
+  add_foreign_key "femfl_subject_history", "masters"
+  add_foreign_key "femfl_subject_history", "users"
+  add_foreign_key "femfl_subjects", "masters"
+  add_foreign_key "femfl_subjects", "users"
   add_foreign_key "general_selection_history", "general_selections", name: "fk_general_selection_history_general_selections"
   add_foreign_key "general_selections", "admins"
+  add_foreign_key "grit_access_msm_staff_history", "grit_access_msm_staffs", name: "fk_grit_access_msm_staff_history_grit_access_msm_staffs"
+  add_foreign_key "grit_access_msm_staff_history", "masters", name: "fk_grit_access_msm_staff_history_masters"
+  add_foreign_key "grit_access_msm_staff_history", "users", name: "fk_grit_access_msm_staff_history_users"
+  add_foreign_key "grit_access_msm_staffs", "masters"
+  add_foreign_key "grit_access_msm_staffs", "users"
+  add_foreign_key "grit_access_pi_history", "grit_access_pis", name: "fk_grit_access_pi_history_grit_access_pis"
+  add_foreign_key "grit_access_pi_history", "masters", name: "fk_grit_access_pi_history_masters"
+  add_foreign_key "grit_access_pi_history", "users", name: "fk_grit_access_pi_history_users"
+  add_foreign_key "grit_access_pis", "masters"
+  add_foreign_key "grit_access_pis", "users"
+  add_foreign_key "grit_adverse_event_history", "grit_adverse_events", name: "fk_grit_adverse_event_history_grit_adverse_events"
+  add_foreign_key "grit_adverse_event_history", "masters", name: "fk_grit_adverse_event_history_masters"
+  add_foreign_key "grit_adverse_event_history", "users", name: "fk_grit_adverse_event_history_users"
+  add_foreign_key "grit_adverse_events", "masters"
+  add_foreign_key "grit_adverse_events", "users"
+  add_foreign_key "grit_appointment_history", "grit_appointments", name: "fk_grit_appointment_history_grit_appointments"
+  add_foreign_key "grit_appointment_history", "masters", name: "fk_grit_appointment_history_masters"
+  add_foreign_key "grit_appointment_history", "users", name: "fk_grit_appointment_history_users"
+  add_foreign_key "grit_appointments", "masters"
+  add_foreign_key "grit_appointments", "users"
+  add_foreign_key "grit_assignment_history", "admins", name: "fk_grit_assignment_history_admins"
+  add_foreign_key "grit_assignment_history", "admins", name: "fk_grit_assignment_history_admins"
+  add_foreign_key "grit_assignment_history", "grit.grit_assignments", column: "grit_assignment_table_id", name: "fk_grit_assignment_history_grit_assignments"
+  add_foreign_key "grit_assignment_history", "grit_assignments", column: "grit_assignment_table_id", name: "fk_grit_assignment_history_grit_assignments"
+  add_foreign_key "grit_assignment_history", "masters", name: "fk_grit_assignment_history_masters"
+  add_foreign_key "grit_assignment_history", "masters", name: "fk_grit_assignment_history_masters"
+  add_foreign_key "grit_assignment_history", "users", name: "fk_grit_assignment_history_users"
+  add_foreign_key "grit_assignment_history", "users", name: "fk_grit_assignment_history_users"
+  add_foreign_key "grit_assignment_history", "admins", name: "fk_grit_assignment_history_admins"
+  add_foreign_key "grit_assignment_history", "admins", name: "fk_grit_assignment_history_admins"
+  add_foreign_key "grit_assignment_history", "grit.grit_assignments", column: "grit_assignment_table_id", name: "fk_grit_assignment_history_grit_assignments"
+  add_foreign_key "grit_assignment_history", "grit_assignments", column: "grit_assignment_table_id", name: "fk_grit_assignment_history_grit_assignments"
+  add_foreign_key "grit_assignment_history", "masters", name: "fk_grit_assignment_history_masters"
+  add_foreign_key "grit_assignment_history", "masters", name: "fk_grit_assignment_history_masters"
+  add_foreign_key "grit_assignment_history", "users", name: "fk_grit_assignment_history_users"
+  add_foreign_key "grit_assignment_history", "users", name: "fk_grit_assignment_history_users"
+  add_foreign_key "grit_assignments", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "grit_assignments", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "grit_assignments", "masters"
+  add_foreign_key "grit_assignments", "masters"
+  add_foreign_key "grit_assignments", "users"
+  add_foreign_key "grit_assignments", "users"
+  add_foreign_key "grit_assignments", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "grit_assignments", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "grit_assignments", "masters"
+  add_foreign_key "grit_assignments", "masters"
+  add_foreign_key "grit_assignments", "users"
+  add_foreign_key "grit_assignments", "users"
+  add_foreign_key "grit_consent_mailing_history", "grit_consent_mailings", name: "fk_grit_consent_mailing_history_grit_consent_mailings"
+  add_foreign_key "grit_consent_mailing_history", "masters", name: "fk_grit_consent_mailing_history_masters"
+  add_foreign_key "grit_consent_mailing_history", "users", name: "fk_grit_consent_mailing_history_users"
+  add_foreign_key "grit_consent_mailings", "masters"
+  add_foreign_key "grit_consent_mailings", "users"
+  add_foreign_key "grit_msm_post_testing_history", "grit_msm_post_testings", name: "fk_grit_msm_post_testing_history_grit_msm_post_testings"
+  add_foreign_key "grit_msm_post_testing_history", "masters", name: "fk_grit_msm_post_testing_history_masters"
+  add_foreign_key "grit_msm_post_testing_history", "users", name: "fk_grit_msm_post_testing_history_users"
+  add_foreign_key "grit_msm_post_testings", "masters"
+  add_foreign_key "grit_msm_post_testings", "users"
+  add_foreign_key "grit_msm_screening_detail_history", "grit_msm_screening_details", name: "fk_grit_msm_screening_detail_history_grit_msm_screening_details"
+  add_foreign_key "grit_msm_screening_detail_history", "masters", name: "fk_grit_msm_screening_detail_history_masters"
+  add_foreign_key "grit_msm_screening_detail_history", "users", name: "fk_grit_msm_screening_detail_history_users"
+  add_foreign_key "grit_msm_screening_details", "masters"
+  add_foreign_key "grit_msm_screening_details", "users"
+  add_foreign_key "grit_pi_followup_history", "grit_pi_followups", name: "fk_grit_pi_followup_history_grit_pi_followups"
+  add_foreign_key "grit_pi_followup_history", "masters", name: "fk_grit_pi_followup_history_masters"
+  add_foreign_key "grit_pi_followup_history", "users", name: "fk_grit_pi_followup_history_users"
+  add_foreign_key "grit_pi_followups", "masters"
+  add_foreign_key "grit_pi_followups", "users"
+  add_foreign_key "grit_protocol_deviation_history", "grit_protocol_deviations", name: "fk_grit_protocol_deviation_history_grit_protocol_deviations"
+  add_foreign_key "grit_protocol_deviation_history", "masters", name: "fk_grit_protocol_deviation_history_masters"
+  add_foreign_key "grit_protocol_deviation_history", "users", name: "fk_grit_protocol_deviation_history_users"
+  add_foreign_key "grit_protocol_deviations", "masters"
+  add_foreign_key "grit_protocol_deviations", "users"
+  add_foreign_key "grit_protocol_exception_history", "grit_protocol_exceptions", name: "fk_grit_protocol_exception_history_grit_protocol_exceptions"
+  add_foreign_key "grit_protocol_exception_history", "masters", name: "fk_grit_protocol_exception_history_masters"
+  add_foreign_key "grit_protocol_exception_history", "users", name: "fk_grit_protocol_exception_history_users"
+  add_foreign_key "grit_protocol_exceptions", "masters"
+  add_foreign_key "grit_protocol_exceptions", "users"
+  add_foreign_key "grit_ps_audit_c_question_history", "grit_ps_audit_c_questions", name: "fk_grit_ps_audit_c_question_history_grit_ps_audit_c_questions"
+  add_foreign_key "grit_ps_audit_c_question_history", "masters", name: "fk_grit_ps_audit_c_question_history_masters"
+  add_foreign_key "grit_ps_audit_c_question_history", "users", name: "fk_grit_ps_audit_c_question_history_users"
+  add_foreign_key "grit_ps_audit_c_questions", "masters"
+  add_foreign_key "grit_ps_audit_c_questions", "users"
+  add_foreign_key "grit_ps_basic_response_history", "grit_ps_basic_responses", name: "fk_grit_ps_basic_response_history_grit_ps_basic_responses"
+  add_foreign_key "grit_ps_basic_response_history", "masters", name: "fk_grit_ps_basic_response_history_masters"
+  add_foreign_key "grit_ps_basic_response_history", "users", name: "fk_grit_ps_basic_response_history_users"
+  add_foreign_key "grit_ps_basic_responses", "masters"
+  add_foreign_key "grit_ps_basic_responses", "users"
+  add_foreign_key "grit_ps_eligibility_followup_history", "grit_ps_eligibility_followups", name: "fk_grit_ps_eligibility_followup_history_grit_ps_eligibility_fol"
+  add_foreign_key "grit_ps_eligibility_followup_history", "masters", name: "fk_grit_ps_eligibility_followup_history_masters"
+  add_foreign_key "grit_ps_eligibility_followup_history", "users", name: "fk_grit_ps_eligibility_followup_history_users"
+  add_foreign_key "grit_ps_eligibility_followups", "masters"
+  add_foreign_key "grit_ps_eligibility_followups", "users"
+  add_foreign_key "grit_ps_eligible_history", "grit_ps_eligibles", name: "fk_grit_ps_eligible_history_grit_ps_eligibles"
+  add_foreign_key "grit_ps_eligible_history", "masters", name: "fk_grit_ps_eligible_history_masters"
+  add_foreign_key "grit_ps_eligible_history", "users", name: "fk_grit_ps_eligible_history_users"
+  add_foreign_key "grit_ps_eligibles", "masters"
+  add_foreign_key "grit_ps_eligibles", "users"
+  add_foreign_key "grit_ps_initial_screening_history", "grit_ps_initial_screenings", name: "fk_grit_ps_initial_screening_history_grit_ps_initial_screenings"
+  add_foreign_key "grit_ps_initial_screening_history", "masters", name: "fk_grit_ps_initial_screening_history_masters"
+  add_foreign_key "grit_ps_initial_screening_history", "users", name: "fk_grit_ps_initial_screening_history_users"
+  add_foreign_key "grit_ps_initial_screenings", "masters"
+  add_foreign_key "grit_ps_initial_screenings", "users"
+  add_foreign_key "grit_ps_non_eligible_history", "grit_ps_non_eligibles", name: "fk_grit_ps_non_eligible_history_grit_ps_non_eligibles"
+  add_foreign_key "grit_ps_non_eligible_history", "masters", name: "fk_grit_ps_non_eligible_history_masters"
+  add_foreign_key "grit_ps_non_eligible_history", "users", name: "fk_grit_ps_non_eligible_history_users"
+  add_foreign_key "grit_ps_non_eligibles", "masters"
+  add_foreign_key "grit_ps_non_eligibles", "users"
+  add_foreign_key "grit_ps_pain_question_history", "grit_ps_pain_questions", name: "fk_grit_ps_pain_question_history_grit_ps_pain_questions"
+  add_foreign_key "grit_ps_pain_question_history", "masters", name: "fk_grit_ps_pain_question_history_masters"
+  add_foreign_key "grit_ps_pain_question_history", "users", name: "fk_grit_ps_pain_question_history_users"
+  add_foreign_key "grit_ps_pain_questions", "masters"
+  add_foreign_key "grit_ps_pain_questions", "users"
+  add_foreign_key "grit_ps_participation_history", "grit_ps_participations", name: "fk_grit_ps_participation_history_grit_ps_participations"
+  add_foreign_key "grit_ps_participation_history", "masters", name: "fk_grit_ps_participation_history_masters"
+  add_foreign_key "grit_ps_participation_history", "users", name: "fk_grit_ps_participation_history_users"
+  add_foreign_key "grit_ps_participations", "masters"
+  add_foreign_key "grit_ps_participations", "users"
+  add_foreign_key "grit_ps_possibly_eligible_history", "grit_ps_possibly_eligibles", name: "fk_grit_ps_possibly_eligible_history_grit_ps_possibly_eligibles"
+  add_foreign_key "grit_ps_possibly_eligible_history", "masters", name: "fk_grit_ps_possibly_eligible_history_masters"
+  add_foreign_key "grit_ps_possibly_eligible_history", "users", name: "fk_grit_ps_possibly_eligible_history_users"
+  add_foreign_key "grit_ps_possibly_eligibles", "masters"
+  add_foreign_key "grit_ps_possibly_eligibles", "users"
+  add_foreign_key "grit_ps_screener_response_history", "grit_ps_screener_responses", name: "fk_grit_ps_screener_response_history_grit_ps_screener_responses"
+  add_foreign_key "grit_ps_screener_response_history", "masters", name: "fk_grit_ps_screener_response_history_masters"
+  add_foreign_key "grit_ps_screener_response_history", "users", name: "fk_grit_ps_screener_response_history_users"
+  add_foreign_key "grit_ps_screener_responses", "masters"
+  add_foreign_key "grit_ps_screener_responses", "users"
+  add_foreign_key "grit_screening_history", "grit_screenings", name: "fk_grit_screening_history_grit_screenings"
+  add_foreign_key "grit_screening_history", "masters", name: "fk_grit_screening_history_masters"
+  add_foreign_key "grit_screening_history", "users", name: "fk_grit_screening_history_users"
+  add_foreign_key "grit_screenings", "masters"
+  add_foreign_key "grit_screenings", "users"
+  add_foreign_key "grit_secure_note_history", "grit_secure_notes", name: "fk_grit_secure_note_history_grit_secure_notes"
+  add_foreign_key "grit_secure_note_history", "masters", name: "fk_grit_secure_note_history_masters"
+  add_foreign_key "grit_secure_note_history", "users", name: "fk_grit_secure_note_history_users"
+  add_foreign_key "grit_secure_notes", "masters"
+  add_foreign_key "grit_secure_notes", "users"
+  add_foreign_key "grit_withdrawal_history", "grit_withdrawals", name: "fk_grit_withdrawal_history_grit_withdrawals"
+  add_foreign_key "grit_withdrawal_history", "masters", name: "fk_grit_withdrawal_history_masters"
+  add_foreign_key "grit_withdrawal_history", "users", name: "fk_grit_withdrawal_history_users"
+  add_foreign_key "grit_withdrawals", "masters"
+  add_foreign_key "grit_withdrawals", "users"
   add_foreign_key "imports", "users"
   add_foreign_key "ipa_adl_informant_screener_history", "ipa_adl_informant_screeners", name: "fk_ipa_adl_informant_screener_history_ipa_adl_informant_screene"
   add_foreign_key "ipa_adl_informant_screener_history", "masters", name: "fk_ipa_adl_informant_screener_history_masters"
@@ -9784,9 +12574,11 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "ipa_consent_mailing_history", "users", name: "fk_ipa_consent_mailing_history_users"
   add_foreign_key "ipa_consent_mailings", "masters"
   add_foreign_key "ipa_consent_mailings", "users"
-  add_foreign_key "ipa_datadic", "users"
-  add_foreign_key "ipa_datadic_history", "ipa_datadic"
-  add_foreign_key "ipa_datadic_history", "users"
+  add_foreign_key "ipa_covid_prescreening_history", "ipa_covid_prescreenings"
+  add_foreign_key "ipa_covid_prescreening_history", "masters"
+  add_foreign_key "ipa_covid_prescreening_history", "users"
+  add_foreign_key "ipa_covid_prescreenings", "masters"
+  add_foreign_key "ipa_covid_prescreenings", "users"
   add_foreign_key "ipa_exit_interview_history", "ipa_exit_interviews", name: "fk_ipa_exit_interview_history_ipa_exit_interviews"
   add_foreign_key "ipa_exit_interview_history", "masters", name: "fk_ipa_exit_interview_history_masters"
   add_foreign_key "ipa_exit_interview_history", "users", name: "fk_ipa_exit_interview_history_users"
@@ -9865,6 +12657,11 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "ipa_ps_comp_review_history", "users", name: "fk_ipa_ps_comp_review_history_users"
   add_foreign_key "ipa_ps_comp_reviews", "masters"
   add_foreign_key "ipa_ps_comp_reviews", "users"
+  add_foreign_key "ipa_ps_covid_closing_history", "ipa_ps_covid_closings"
+  add_foreign_key "ipa_ps_covid_closing_history", "masters"
+  add_foreign_key "ipa_ps_covid_closing_history", "users"
+  add_foreign_key "ipa_ps_covid_closings", "masters"
+  add_foreign_key "ipa_ps_covid_closings", "users"
   add_foreign_key "ipa_ps_football_experience_history", "ipa_ps_football_experiences", name: "fk_ipa_ps_football_experience_history_ipa_ps_football_experienc"
   add_foreign_key "ipa_ps_football_experience_history", "masters", name: "fk_ipa_ps_football_experience_history_masters"
   add_foreign_key "ipa_ps_football_experience_history", "users", name: "fk_ipa_ps_football_experience_history_users"
@@ -9915,6 +12712,13 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "ipa_reimbursement_req_history", "users", name: "fk_ipa_reimbursement_req_history_users"
   add_foreign_key "ipa_reimbursement_reqs", "masters"
   add_foreign_key "ipa_reimbursement_reqs", "users"
+  add_foreign_key "ipa_sample_history", "admins"
+  add_foreign_key "ipa_sample_history", "ipa_samples", column: "ipa_sample_table_id"
+  add_foreign_key "ipa_sample_history", "masters"
+  add_foreign_key "ipa_sample_history", "users"
+  add_foreign_key "ipa_samples", "admins"
+  add_foreign_key "ipa_samples", "masters"
+  add_foreign_key "ipa_samples", "users"
   add_foreign_key "ipa_screening_history", "ipa_screenings", name: "fk_ipa_screening_history_ipa_screenings"
   add_foreign_key "ipa_screening_history", "masters", name: "fk_ipa_screening_history_masters"
   add_foreign_key "ipa_screening_history", "users", name: "fk_ipa_screening_history_users"
@@ -9966,6 +12770,9 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
   add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
   add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
+  add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
+  add_foreign_key "mrn_number_history", "grit.mrn_numbers", column: "mrn_number_table_id", name: "fk_mrn_number_history_mrn_numbers"
+  add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
   add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
   add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
   add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
@@ -9975,21 +12782,13 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
   add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
   add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
-  add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
-  add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
-  add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
-  add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
-  add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
-  add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
-  add_foreign_key "mrn_number_history", "mrn_numbers", column: "mrn_number_table_id", name: "fk_mrn_number_history_mrn_numbers"
-  add_foreign_key "mrn_number_history", "sleep.mrn_numbers", column: "mrn_number_table_id", name: "fk_mrn_number_history_mrn_numbers"
-  add_foreign_key "mrn_number_history", "tbs.mrn_numbers", column: "mrn_number_table_id", name: "fk_mrn_number_history_mrn_numbers"
-  add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
-  add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
   add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
   add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
   add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
   add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
+  add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
+  add_foreign_key "mrn_number_history", "grit.mrn_numbers", column: "mrn_number_table_id", name: "fk_mrn_number_history_mrn_numbers"
+  add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
   add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
   add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
   add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
@@ -9999,33 +12798,94 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
   add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
   add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
+  add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
+  add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
+  add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
+  add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
+  add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
+  add_foreign_key "mrn_number_history", "grit.mrn_numbers", column: "mrn_number_table_id", name: "fk_mrn_number_history_mrn_numbers"
+  add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
+  add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
+  add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
+  add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
+  add_foreign_key "mrn_number_history", "mrn_numbers", column: "mrn_number_table_id", name: "fk_mrn_number_history_mrn_numbers"
+  add_foreign_key "mrn_number_history", "sleep.mrn_numbers", column: "mrn_number_table_id", name: "fk_mrn_number_history_mrn_numbers"
+  add_foreign_key "mrn_number_history", "tbs.mrn_numbers", column: "mrn_number_table_id", name: "fk_mrn_number_history_mrn_numbers"
+  add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
+  add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
+  add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
+  add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
+  add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
+  add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
+  add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
+  add_foreign_key "mrn_number_history", "admins", name: "fk_mrn_number_history_admins"
+  add_foreign_key "mrn_number_history", "grit.mrn_numbers", column: "mrn_number_table_id", name: "fk_mrn_number_history_mrn_numbers"
+  add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
+  add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
+  add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
+  add_foreign_key "mrn_number_history", "masters", name: "fk_mrn_number_history_masters"
+  add_foreign_key "mrn_number_history", "mrn_numbers", column: "mrn_number_table_id", name: "fk_mrn_number_history_mrn_numbers"
+  add_foreign_key "mrn_number_history", "sleep.mrn_numbers", column: "mrn_number_table_id", name: "fk_mrn_number_history_mrn_numbers"
+  add_foreign_key "mrn_number_history", "tbs.mrn_numbers", column: "mrn_number_table_id", name: "fk_mrn_number_history_mrn_numbers"
+  add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
+  add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
+  add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
+  add_foreign_key "mrn_number_history", "users", name: "fk_mrn_number_history_users"
+  add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
   add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
   add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
   add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
   add_foreign_key "mrn_numbers", "masters"
   add_foreign_key "mrn_numbers", "masters"
   add_foreign_key "mrn_numbers", "masters"
+  add_foreign_key "mrn_numbers", "masters"
+  add_foreign_key "mrn_numbers", "users"
   add_foreign_key "mrn_numbers", "users"
   add_foreign_key "mrn_numbers", "users"
   add_foreign_key "mrn_numbers", "users"
   add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
   add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
   add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
   add_foreign_key "mrn_numbers", "masters"
   add_foreign_key "mrn_numbers", "masters"
   add_foreign_key "mrn_numbers", "masters"
+  add_foreign_key "mrn_numbers", "masters"
+  add_foreign_key "mrn_numbers", "users"
   add_foreign_key "mrn_numbers", "users"
   add_foreign_key "mrn_numbers", "users"
   add_foreign_key "mrn_numbers", "users"
   add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
   add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
   add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "mrn_numbers", "masters"
   add_foreign_key "mrn_numbers", "masters"
   add_foreign_key "mrn_numbers", "masters"
   add_foreign_key "mrn_numbers", "masters"
   add_foreign_key "mrn_numbers", "users"
   add_foreign_key "mrn_numbers", "users"
   add_foreign_key "mrn_numbers", "users"
+  add_foreign_key "mrn_numbers", "users"
+  add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "mrn_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "mrn_numbers", "masters"
+  add_foreign_key "mrn_numbers", "masters"
+  add_foreign_key "mrn_numbers", "masters"
+  add_foreign_key "mrn_numbers", "masters"
+  add_foreign_key "mrn_numbers", "users"
+  add_foreign_key "mrn_numbers", "users"
+  add_foreign_key "mrn_numbers", "users"
+  add_foreign_key "mrn_numbers", "users"
+  add_foreign_key "msm_grit_id_number_history", "admins", name: "fk_msm_grit_id_number_history_admins"
+  add_foreign_key "msm_grit_id_number_history", "masters", name: "fk_msm_grit_id_number_history_masters"
+  add_foreign_key "msm_grit_id_number_history", "msm_grit_id_numbers", column: "msm_grit_id_number_table_id", name: "fk_msm_grit_id_number_history_msm_grit_id_numbers"
+  add_foreign_key "msm_grit_id_number_history", "users", name: "fk_msm_grit_id_number_history_users"
+  add_foreign_key "msm_grit_id_numbers", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "msm_grit_id_numbers", "masters"
+  add_foreign_key "msm_grit_id_numbers", "users"
   add_foreign_key "new_test_history", "admins", name: "fk_new_test_history_admins"
   add_foreign_key "new_test_history", "masters", name: "fk_new_test_history_masters"
   add_foreign_key "new_test_history", "new_tests", column: "new_test_table_id", name: "fk_new_test_history_new_tests"
@@ -10099,6 +12959,78 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "persnet_assignments", "admins", name: "fk_rails_1a7e2b01e0admin"
   add_foreign_key "persnet_assignments", "masters"
   add_foreign_key "persnet_assignments", "users"
+  add_foreign_key "pitt_bhi_access_pi_history", "masters"
+  add_foreign_key "pitt_bhi_access_pi_history", "pitt_bhi_access_pis"
+  add_foreign_key "pitt_bhi_access_pi_history", "users"
+  add_foreign_key "pitt_bhi_access_pis", "masters"
+  add_foreign_key "pitt_bhi_access_pis", "users"
+  add_foreign_key "pitt_bhi_access_pitt_staff_history", "masters"
+  add_foreign_key "pitt_bhi_access_pitt_staff_history", "pitt_bhi_access_pitt_staffs"
+  add_foreign_key "pitt_bhi_access_pitt_staff_history", "users"
+  add_foreign_key "pitt_bhi_access_pitt_staffs", "masters"
+  add_foreign_key "pitt_bhi_access_pitt_staffs", "users"
+  add_foreign_key "pitt_bhi_appointment_history", "masters"
+  add_foreign_key "pitt_bhi_appointment_history", "pitt_bhi_appointments"
+  add_foreign_key "pitt_bhi_appointment_history", "users"
+  add_foreign_key "pitt_bhi_appointments", "masters"
+  add_foreign_key "pitt_bhi_appointments", "users"
+  add_foreign_key "pitt_bhi_assignment_history", "admins"
+  add_foreign_key "pitt_bhi_assignment_history", "masters"
+  add_foreign_key "pitt_bhi_assignment_history", "pitt_bhi_assignments", column: "pitt_bhi_assignment_table_id"
+  add_foreign_key "pitt_bhi_assignment_history", "users"
+  add_foreign_key "pitt_bhi_assignments", "admins"
+  add_foreign_key "pitt_bhi_assignments", "masters"
+  add_foreign_key "pitt_bhi_assignments", "users"
+  add_foreign_key "pitt_bhi_ps_eligibility_followup_history", "masters"
+  add_foreign_key "pitt_bhi_ps_eligibility_followup_history", "pitt_bhi_ps_eligibility_followups"
+  add_foreign_key "pitt_bhi_ps_eligibility_followup_history", "users"
+  add_foreign_key "pitt_bhi_ps_eligibility_followups", "masters"
+  add_foreign_key "pitt_bhi_ps_eligibility_followups", "users"
+  add_foreign_key "pitt_bhi_ps_eligible_history", "masters"
+  add_foreign_key "pitt_bhi_ps_eligible_history", "pitt_bhi_ps_eligibles"
+  add_foreign_key "pitt_bhi_ps_eligible_history", "users"
+  add_foreign_key "pitt_bhi_ps_eligibles", "masters"
+  add_foreign_key "pitt_bhi_ps_eligibles", "users"
+  add_foreign_key "pitt_bhi_ps_initial_screening_history", "masters"
+  add_foreign_key "pitt_bhi_ps_initial_screening_history", "pitt_bhi_ps_initial_screenings"
+  add_foreign_key "pitt_bhi_ps_initial_screening_history", "users"
+  add_foreign_key "pitt_bhi_ps_initial_screenings", "masters"
+  add_foreign_key "pitt_bhi_ps_initial_screenings", "users"
+  add_foreign_key "pitt_bhi_ps_non_eligible_history", "masters"
+  add_foreign_key "pitt_bhi_ps_non_eligible_history", "pitt_bhi_ps_non_eligibles"
+  add_foreign_key "pitt_bhi_ps_non_eligible_history", "users"
+  add_foreign_key "pitt_bhi_ps_non_eligibles", "masters"
+  add_foreign_key "pitt_bhi_ps_non_eligibles", "users"
+  add_foreign_key "pitt_bhi_ps_screener_response_history", "masters"
+  add_foreign_key "pitt_bhi_ps_screener_response_history", "pitt_bhi_ps_screener_responses"
+  add_foreign_key "pitt_bhi_ps_screener_response_history", "users"
+  add_foreign_key "pitt_bhi_ps_screener_responses", "masters"
+  add_foreign_key "pitt_bhi_ps_screener_responses", "users"
+  add_foreign_key "pitt_bhi_ps_suitability_question_history", "masters"
+  add_foreign_key "pitt_bhi_ps_suitability_question_history", "pitt_bhi_ps_suitability_questions"
+  add_foreign_key "pitt_bhi_ps_suitability_question_history", "users"
+  add_foreign_key "pitt_bhi_ps_suitability_questions", "masters"
+  add_foreign_key "pitt_bhi_ps_suitability_questions", "users"
+  add_foreign_key "pitt_bhi_screening_history", "masters"
+  add_foreign_key "pitt_bhi_screening_history", "pitt_bhi_screenings"
+  add_foreign_key "pitt_bhi_screening_history", "users"
+  add_foreign_key "pitt_bhi_screenings", "masters"
+  add_foreign_key "pitt_bhi_screenings", "users"
+  add_foreign_key "pitt_bhi_secure_note_history", "masters"
+  add_foreign_key "pitt_bhi_secure_note_history", "pitt_bhi_secure_notes"
+  add_foreign_key "pitt_bhi_secure_note_history", "users"
+  add_foreign_key "pitt_bhi_secure_notes", "masters"
+  add_foreign_key "pitt_bhi_secure_notes", "users"
+  add_foreign_key "pitt_bhi_withdrawal_history", "masters"
+  add_foreign_key "pitt_bhi_withdrawal_history", "pitt_bhi_withdrawals"
+  add_foreign_key "pitt_bhi_withdrawal_history", "users"
+  add_foreign_key "pitt_bhi_withdrawals", "masters"
+  add_foreign_key "pitt_bhi_withdrawals", "users"
+  add_foreign_key "player_career_data", "masters"
+  add_foreign_key "player_career_data", "users"
+  add_foreign_key "player_career_data_history", "masters", name: "fk_player_career_data_history_masters"
+  add_foreign_key "player_career_data_history", "player_career_data", column: "player_career_data_id", name: "fk_player_career_data_history_player_career_data"
+  add_foreign_key "player_career_data_history", "users", name: "fk_player_career_data_history_users"
   add_foreign_key "player_contact_history", "masters", name: "fk_player_contact_history_masters"
   add_foreign_key "player_contact_history", "player_contacts", name: "fk_player_contact_history_player_contacts"
   add_foreign_key "player_contact_history", "users", name: "fk_player_contact_history_users"
@@ -10122,10 +13054,14 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "protocol_history", "protocols", name: "fk_protocol_history_protocols"
   add_foreign_key "protocols", "admins"
   add_foreign_key "protocols", "app_types"
-  add_foreign_key "q1_datadic", "users"
-  add_foreign_key "q1_datadic_history", "q1_datadic"
-  add_foreign_key "q1_datadic_history", "users"
+  add_foreign_key "q2_data", "masters", column: "redcap_survey_identifier", primary_key: "msid", name: "q2_data_msid"
   add_foreign_key "rc_cis", "masters", name: "rc_cis_master_id_fkey"
+  add_foreign_key "rc_femfl_cif", "masters"
+  add_foreign_key "related_subject_history", "masters"
+  add_foreign_key "related_subject_history", "related_subjects"
+  add_foreign_key "related_subject_history", "users"
+  add_foreign_key "related_subjects", "masters"
+  add_foreign_key "related_subjects", "users"
   add_foreign_key "report_history", "reports", name: "fk_report_history_reports"
   add_foreign_key "reports", "admins"
   add_foreign_key "sage_assignments", "admins"
@@ -10134,8 +13070,30 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "scantron_history", "masters", name: "fk_scantron_history_masters"
   add_foreign_key "scantron_history", "scantrons", column: "scantron_table_id", name: "fk_scantron_history_scantrons"
   add_foreign_key "scantron_history", "users", name: "fk_scantron_history_users"
+  add_foreign_key "scantron_q2_history", "admins", name: "fk_scantron_q2_history_admins"
+  add_foreign_key "scantron_q2_history", "masters", name: "fk_scantron_q2_history_masters"
+  add_foreign_key "scantron_q2_history", "scantron_q2s", column: "scantron_q2_table_id", name: "fk_scantron_q2_history_scantron_q2s"
+  add_foreign_key "scantron_q2_history", "users", name: "fk_scantron_q2_history_users"
+  add_foreign_key "scantron_q2s", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "scantron_q2s", "masters"
+  add_foreign_key "scantron_q2s", "users"
   add_foreign_key "scantrons", "masters"
   add_foreign_key "scantrons", "users"
+  add_foreign_key "sleep_access_bwh_staff_history", "masters", name: "fk_sleep_access_bwh_staff_history_masters"
+  add_foreign_key "sleep_access_bwh_staff_history", "sleep_access_bwh_staffs", name: "fk_sleep_access_bwh_staff_history_sleep_access_bwh_staffs"
+  add_foreign_key "sleep_access_bwh_staff_history", "users", name: "fk_sleep_access_bwh_staff_history_users"
+  add_foreign_key "sleep_access_bwh_staffs", "masters"
+  add_foreign_key "sleep_access_bwh_staffs", "users"
+  add_foreign_key "sleep_access_interventionist_history", "masters", name: "fk_sleep_access_interventionist_history_masters"
+  add_foreign_key "sleep_access_interventionist_history", "sleep_access_interventionists", name: "fk_sleep_access_interventionist_history_sleep_access_interventi"
+  add_foreign_key "sleep_access_interventionist_history", "users", name: "fk_sleep_access_interventionist_history_users"
+  add_foreign_key "sleep_access_interventionists", "masters"
+  add_foreign_key "sleep_access_interventionists", "users"
+  add_foreign_key "sleep_access_pi_history", "masters", name: "fk_sleep_access_pi_history_masters"
+  add_foreign_key "sleep_access_pi_history", "sleep_access_pis", name: "fk_sleep_access_pi_history_sleep_access_pis"
+  add_foreign_key "sleep_access_pi_history", "users", name: "fk_sleep_access_pi_history_users"
+  add_foreign_key "sleep_access_pis", "masters"
+  add_foreign_key "sleep_access_pis", "users"
   add_foreign_key "sleep_adverse_event_history", "masters", name: "fk_sleep_adverse_event_history_masters"
   add_foreign_key "sleep_adverse_event_history", "sleep_adverse_events", name: "fk_sleep_adverse_event_history_sleep_adverse_events"
   add_foreign_key "sleep_adverse_event_history", "users", name: "fk_sleep_adverse_event_history_users"
@@ -10147,11 +13105,32 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "sleep_appointments", "masters"
   add_foreign_key "sleep_appointments", "users"
   add_foreign_key "sleep_assignment_history", "admins", name: "fk_sleep_assignment_history_admins"
+  add_foreign_key "sleep_assignment_history", "admins", name: "fk_sleep_assignment_history_admins"
   add_foreign_key "sleep_assignment_history", "masters", name: "fk_sleep_assignment_history_masters"
+  add_foreign_key "sleep_assignment_history", "masters", name: "fk_sleep_assignment_history_masters"
+  add_foreign_key "sleep_assignment_history", "sleep.sleep_assignments", column: "sleep_assignment_table_id", name: "fk_sleep_assignment_history_sleep_assignments"
   add_foreign_key "sleep_assignment_history", "sleep_assignments", column: "sleep_assignment_table_id", name: "fk_sleep_assignment_history_sleep_assignments"
   add_foreign_key "sleep_assignment_history", "users", name: "fk_sleep_assignment_history_users"
+  add_foreign_key "sleep_assignment_history", "users", name: "fk_sleep_assignment_history_users"
+  add_foreign_key "sleep_assignment_history", "admins", name: "fk_sleep_assignment_history_admins"
+  add_foreign_key "sleep_assignment_history", "admins", name: "fk_sleep_assignment_history_admins"
+  add_foreign_key "sleep_assignment_history", "masters", name: "fk_sleep_assignment_history_masters"
+  add_foreign_key "sleep_assignment_history", "masters", name: "fk_sleep_assignment_history_masters"
+  add_foreign_key "sleep_assignment_history", "sleep.sleep_assignments", column: "sleep_assignment_table_id", name: "fk_sleep_assignment_history_sleep_assignments"
+  add_foreign_key "sleep_assignment_history", "sleep_assignments", column: "sleep_assignment_table_id", name: "fk_sleep_assignment_history_sleep_assignments"
+  add_foreign_key "sleep_assignment_history", "users", name: "fk_sleep_assignment_history_users"
+  add_foreign_key "sleep_assignment_history", "users", name: "fk_sleep_assignment_history_users"
+  add_foreign_key "sleep_assignments", "admins", name: "fk_rails_1a7e2b01e0admin"
   add_foreign_key "sleep_assignments", "admins", name: "fk_rails_1a7e2b01e0admin"
   add_foreign_key "sleep_assignments", "masters"
+  add_foreign_key "sleep_assignments", "masters"
+  add_foreign_key "sleep_assignments", "users"
+  add_foreign_key "sleep_assignments", "users"
+  add_foreign_key "sleep_assignments", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "sleep_assignments", "admins", name: "fk_rails_1a7e2b01e0admin"
+  add_foreign_key "sleep_assignments", "masters"
+  add_foreign_key "sleep_assignments", "masters"
+  add_foreign_key "sleep_assignments", "users"
   add_foreign_key "sleep_assignments", "users"
   add_foreign_key "sleep_consent_mailing_history", "masters", name: "fk_sleep_consent_mailing_history_masters"
   add_foreign_key "sleep_consent_mailing_history", "sleep_consent_mailings", name: "fk_sleep_consent_mailing_history_sleep_consent_mailings"
@@ -10238,6 +13217,11 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "sleep_ps_basic_response_history", "users", name: "fk_sleep_ps_basic_response_history_users"
   add_foreign_key "sleep_ps_basic_responses", "masters"
   add_foreign_key "sleep_ps_basic_responses", "users"
+  add_foreign_key "sleep_ps_dast2_mod_question_history", "masters", name: "fk_sleep_ps_dast2_mod_question_history_masters"
+  add_foreign_key "sleep_ps_dast2_mod_question_history", "sleep_ps_dast2_mod_questions", name: "fk_sleep_ps_dast2_mod_question_history_sleep_ps_dast2_mod_quest"
+  add_foreign_key "sleep_ps_dast2_mod_question_history", "users", name: "fk_sleep_ps_dast2_mod_question_history_users"
+  add_foreign_key "sleep_ps_dast2_mod_questions", "masters"
+  add_foreign_key "sleep_ps_dast2_mod_questions", "users"
   add_foreign_key "sleep_ps_eligibility_followup_history", "masters", name: "fk_sleep_ps_eligibility_followup_history_masters"
   add_foreign_key "sleep_ps_eligibility_followup_history", "sleep_ps_eligibility_followups", name: "fk_sleep_ps_eligibility_followup_history_sleep_ps_eligibility_f"
   add_foreign_key "sleep_ps_eligibility_followup_history", "users", name: "fk_sleep_ps_eligibility_followup_history_users"
@@ -10425,6 +13409,13 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "test2s", "admins", name: "fk_rails_1a7e2b01e0admin"
   add_foreign_key "test2s", "masters"
   add_foreign_key "test2s", "users"
+  add_foreign_key "test9_number_history", "admins"
+  add_foreign_key "test9_number_history", "masters"
+  add_foreign_key "test9_number_history", "test9_numbers", column: "test9_number_table_id_id"
+  add_foreign_key "test9_number_history", "users"
+  add_foreign_key "test9_numbers", "admins"
+  add_foreign_key "test9_numbers", "masters"
+  add_foreign_key "test9_numbers", "users"
   add_foreign_key "test_2_history", "admins", name: "fk_test_2_history_admins"
   add_foreign_key "test_2_history", "masters", name: "fk_test_2_history_masters"
   add_foreign_key "test_2_history", "test_2s", column: "test_2_table_id", name: "fk_test_2_history_test_2s"
@@ -10481,6 +13472,12 @@ ActiveRecord::Schema.define(version: 2020_09_24_125350) do
   add_foreign_key "users", "admins"
   add_foreign_key "users", "app_types"
   add_foreign_key "users_contact_infos", "admins"
+  add_foreign_key "users_contact_infos", "admins"
+  add_foreign_key "users_contact_infos", "users"
+  add_foreign_key "users_contact_infos", "users"
+  add_foreign_key "users_contact_infos", "admins"
+  add_foreign_key "users_contact_infos", "admins"
+  add_foreign_key "users_contact_infos", "users"
   add_foreign_key "users_contact_infos", "users"
   add_foreign_key "zeus_bulk_message_history", "masters", name: "fk_zeus_bulk_message_history_masters"
   add_foreign_key "zeus_bulk_message_history", "users", name: "fk_zeus_bulk_message_history_users"

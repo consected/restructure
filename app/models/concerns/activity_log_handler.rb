@@ -31,9 +31,6 @@ module ActivityLogHandler
 
     after_save :sync_tracker
 
-    after_save :check_status
-    after_save :track_record_update
-
     # Ensure that referenced items have also saved
     after_commit :handle_save_triggers
 
@@ -122,21 +119,6 @@ module ActivityLogHandler
       Classification::ItemFlagName.enabled_for? name.ns_underscore, user
     end
 
-    def extra_log_type_config_names
-      definition.extra_log_type_configs.map(&:name)
-    end
-
-    def extra_log_type_configs
-      definition.extra_log_type_configs
-    end
-
-    # Select the extra log type configuration by name, or use the first item if nothing matches
-    # The default allows viewing of data in the case that a configuration has changed and removed an item
-    # that an extra_log_type field value still refers to
-    def extra_log_type_config_for(name)
-      extra_log_type_configs.select { |s| s.name == name.to_s.underscore.to_sym }.first || extra_log_type_configs.first
-    end
-
     def human_name_for(extra_log_type)
       extra_log_type.to_s.humanize
     end
@@ -220,51 +202,16 @@ module ActivityLogHandler
     end
   end
 
-  # Provide a default human message identifying a record
-  # If the extra log type config for an activity includes
-  #
-  #   view_options:
-  #     data_attribute: some text {{substitution}}
-  #
-  # or
-  #   view_options:
-  #     data_attribute: attrib_name
-  #
-  # then appropriate substitutions will be made
-  #
-  # If a list is provided to data_attribute, such as
-  #
-  # - attr1
-  # - ": "
-  # - attr2
-  #
-  # then the attribute names that can be substituted will be and the
-  # result of all items will be joined into a single string
-  #
-  # If no data_attribute configuration is provided then the first of the following is used:
-  # - if there is a data attribute, use its value
-  # - if a label is specified in the config, use it
-  # - otherwise the extra_log_type value is humanized and used
-  #
-  def data
-    da = extra_log_type_config.view_options[:data_attribute] if extra_log_type_config&.view_options
-
-    if da
-      self.class.format_data_attribute da, self
-    else
-      n = if attribute_names.include? 'data'
-            attributes['data']
-          else
-            extra_log_type_config.label || extra_log_type.to_s.humanize
-          end
-      n.to_s
-    end
-  end
-
   def no_master_association
     false
   end
 
+  #
+  # Override the standard extra_log_type attribute to handle
+  # primary and blank activity log types.
+  # Since this form of activity log definition is not recommended
+  # this override should eventually be deprecated
+  # @return [Symbol] extra log type name
   def extra_log_type
     elt = super()
     if elt.blank?
@@ -278,21 +225,8 @@ module ActivityLogHandler
     extra_log_type
   end
 
-  def option_type_config
-    extra_log_type_config
-  end
-
   def extra_log_type_config
-    elt = extra_log_type
-
-    res = self.class.extra_log_type_config_for elt
-    logger.warn "No extra log type configuration exists for #{elt} in #{self.class.name}" unless res
-    res
-  end
-
-  def no_downcase_attributes
-    fo = extra_log_type_config.field_options
-    fo&.filter { |_k, v| v[:no_downcase] }&.keys
+    option_type_config
   end
 
   # default record updates tracking is not performed, since we sync tracker separately
@@ -347,11 +281,11 @@ module ActivityLogHandler
   # List of activity log types that can be created or not, based on user access controls and creatable_if rules
   def creatables
     current_user = master.current_user
-    implementation_class = self.class
+    def_class = current_definition
     res = {}
 
     # Make a creatable actions, based on standard user access controls and extra log type creatable_if rules
-    implementation_class.extra_log_type_configs.each do |c|
+    def_class.option_configs.each do |c|
       result = current_user.has_access_to?(:create, :activity_log_type, c.resource_name) && c.calc_creatable_if(self)
       res[c.name] = result ? c.resource_name : nil
     end
@@ -717,77 +651,37 @@ module ActivityLogHandler
     @allow_tracker_sync = true if !persisted? || (respond_to?(:protocol_id) && protocol_id_changed?)
   end
 
-  def track_record_update
-    # Don't do this if we have the configuration set to avoid tracking, or
-    # if the record was not created or updated
-    return if no_track || !(@was_updated || @was_created)
-
-    @update_action = true
-    Tracker.track_record_update self
-  end
-
   def can_edit?
     return @can_edit unless @can_edit.nil?
 
     @can_edit = false
+    resname = extra_log_type_config.resource_name
 
     # First, check if the user can actually access this type of activity log to edit it
-    res = master.current_user.has_access_to? :edit, :activity_log_type, extra_log_type_config.resource_name
+    res = master.current_user.has_access_to? :edit, :activity_log_type, resname
     unless res
-      Rails.logger.info "Can not edit activity_log_type #{extra_log_type_config.resource_name} due to lack of access"
+      Rails.logger.info "Can not edit activity_log_type #{resname} due to lack of access"
       return
     end
 
     # either use the editable_if configuration if there is one,
     # or only allow the latest item to be used otherwise
-    eltc = extra_log_type_config
+    res = calc_can :edit
+    if res == false
+      Rails.logger.info "Can not edit activity_log_type #{resname} due to editable_if calculation"
+      return
 
-    if eltc.editable_if.is_a?(Hash) && eltc.editable_if.first
-
-      # Generate an old version of the object prior to changes
-      # We use dup rather than clone to ensure that updates made to the attributes do not
-      # overwrite the current instance
-      old_obj = dup
-      changes.each do |k, v|
-        old_obj.send("#{k}=", v.first) if k.to_s != 'user_id'
-      end
-
-      # Set the id, since dup doesn't do this and we may need it
-      old_obj.id = id
-
-      # Ensure the duplicate old_obj references the real master, ensuring current user can
-      # be referenced correctly in conditional calculations
-      old_obj.master = master
-
-      res = eltc.calc_editable_if(old_obj)
-      unless res
-        Rails.logger.info "Can not edit activity_log_type #{extra_log_type_config.resource_name} due to editable_if calculation"
-        return
-      end
-    else
+    elsif res.nil?
       @latest_item ||= master.send(self.class.assoc_inverse).unscope(:order).order(id: :desc).limit(1).first
       res = (user_id == master.current_user.id && @latest_item.id == id)
       unless res
-        Rails.logger.info "Can not edit activity_log_type #{extra_log_type_config.resource_name} since it has been overridden by a later item"
+        Rails.logger.info "Can not edit activity_log_type #{resname} since it has been overridden by a later item"
         return
       end
     end
 
     # Finally continue with the standard checks if none of the previous have failed
     @can_edit = super()
-  end
-
-  # @return [Boolean | nil] returns true or false based on the result of a conditional calculation,
-  #    or nil if there is no `add_reference_if` configuration
-  def can_add_reference?
-    return @can_add_reference unless @can_add_reference.nil?
-
-    @can_add_reference = false
-    eltc = extra_log_type_config
-    if eltc.add_reference_if.is_a?(Hash) && eltc.add_reference_if.first
-      res = eltc.calc_add_reference_if(self)
-      @can_add_reference = !!res
-    end
   end
 
   def can_create?
@@ -814,14 +708,6 @@ module ActivityLogHandler
     end
 
     @can_access = !!(res && super())
-  end
-
-  # If access has changed since an initial check, reset the cached results
-  def reset_access
-    @can_access = nil
-    @can_create = nil
-    @can_add_reference = nil
-    @can_edit = nil
   end
 
   # Extend the standard access check with a check on the extra_log_type resource

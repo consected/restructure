@@ -1,5 +1,11 @@
 <%
 
+  unless defined? def_version
+   def_version = nil
+  end
+
+  vdef_version = "v#{def_version}"
+
   unless defined? caption
     caption = nil
   end
@@ -210,15 +216,17 @@
   end
 %>
 
-<script>
-  _fpa.state.caption_before = _fpa.state.caption_before || {};
-  _fpa.state.dialog_before = _fpa.state.dialog_before || {};
+<script id="fpa_state_config--<%=name.underscore%>--v<%=def_version%>">
 
-  _fpa.state.caption_before.<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
-  _fpa.state.labels_<%=name.underscore%> = <%= labels.to_json.html_safe %>;
+  _fpa.state.caption_before.<%=name.underscore%> = _fpa.state.caption_before.<%=name.underscore%> || {};
+  _fpa.state.caption_before.<%=name.underscore%>.v<%=def_version%> = <%= caption_before.to_json.html_safe %>;
+  _fpa.state.labels_<%=name.underscore%> = _fpa.state.labels_<%=name.underscore%> || {};
+  _fpa.state.labels_<%=name.underscore%>.v<%=def_version%> = <%= labels.to_json.html_safe %>;
 
-  _fpa.state.template_config = _fpa.state.template_config || {};
-  _fpa.state.template_config.<%=name.underscore%>  = {
+  _fpa.state.template_config.<%=name.underscore%> = _fpa.state.template_config.<%=name.underscore%> || {};
+  _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>  = {
+    def_version: <%= def_version || 'null' %>,
+    vdef_version: '<%= vdef_version %>',
     name: '<%=name%>',
     full_name: '<%=full_name%>',
     caption: Handlebars.compile('<%=caption%>'),
@@ -260,10 +268,22 @@
     user_file_actions: <%= user_file_actions.to_json&.html_safe %>
   }
 
-  <% if full_name.to_s.end_with?('_primary') %>_fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = <% end %>
-    _fpa.show_if.forms['<%=full_name%>'] = <%= show_if.to_json.html_safe %>;
+  _fpa.show_if.forms['<%=full_name%>'] = _fpa.show_if.forms['<%=full_name%>'] || {};
+  <% if full_name.to_s.end_with?('_primary') %>
+  _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] || {};
+  _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'].<%=vdef_version%> = 
+  <% end %>
+  _fpa.show_if.forms['<%=full_name%>'].<%=vdef_version%> = <%= show_if.to_json.html_safe %>;
 
 </script>
+
+
+<% 
+  # Do not reload the unversioned Handlebars templates if we are loading a previous definition version
+  # since the app will have loaded all of the unversioned templates originally
+  
+  unless def_version 
+%>
 
 
 <%= render partial: 'common_templates/references_results', locals: { 
@@ -284,6 +304,7 @@
       item_flags_after: item_flags_after 
     } %>
 
+
 <script id="<%=name.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with <%=with_data || full_name%>}}
     {{> common_template_result name='<%=name%>' result_data=this}}
@@ -291,9 +312,11 @@
 </script>
 
 <script id="<%=name.pluralize.hyphenate%>-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore '<%=name%>'))}}
+  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v')}}
 </script>
 
 <script id="<%=name.pluralize.hyphenate%>-compact-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore name)) compact=true prevent_create=true }}
+  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore name) 'v') compact=true prevent_create=true }}
 </script>
+
+<% end %>

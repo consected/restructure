@@ -4355,6 +4355,110 @@ app_type:
     created_at: '2020-09-14T12:54:59.331Z'
     updated_at: '2020-09-14T12:54:59.331Z'
     user_email: 
+  - id: 2647
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__on_hold
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: tracker
+    created_at: '2020-09-29T15:34:50.543Z'
+    updated_at: '2020-09-29T15:34:50.543Z'
+    user_email: 
+  - id: 2648
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_covid_prescreenings
+    options: 
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: _app_
+    created_at: '2020-09-29T15:57:10.835Z'
+    updated_at: '2020-09-29T15:57:10.835Z'
+    user_email: 
+  - id: 2649
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__previsit_covid_screening
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: tracker
+    created_at: '2020-09-29T17:28:47.720Z'
+    updated_at: '2020-09-29T17:28:47.720Z'
+    user_email: 
+  - id: 2650
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__previsit_covid_screening
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: user - mednav
+    created_at: '2020-09-29T17:29:34.937Z'
+    updated_at: '2020-09-29T17:29:34.937Z'
+    user_email: 
+  - id: 2651
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_covid_prescreenings
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: tracker
+    created_at: '2020-09-29T17:30:08.133Z'
+    updated_at: '2020-09-29T17:30:08.133Z'
+    user_email: 
+  - id: 2652
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_covid_prescreenings
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: user - mednav
+    created_at: '2020-09-29T17:30:26.056Z'
+    updated_at: '2020-09-29T17:30:26.056Z'
+    user_email: 
+  - id: 2661
+    user_id: 
+    resource_type: table
+    resource_name: ipa_samples
+    options: 
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: _app_
+    created_at: '2020-10-09T11:30:21.771Z'
+    updated_at: '2020-10-09T11:30:21.771Z'
+    user_email: 
+  - id: 2662
+    user_id: 
+    resource_type: table
+    resource_name: ipa_samples
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: user - sample admin
+    created_at: '2020-10-09T11:33:06.894Z'
+    updated_at: '2020-10-09T11:33:06.894Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 47
     name: Protocol Deviations & Exceptions
@@ -5329,7 +5433,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2018-05-31T14:56:43.064Z'
-    updated_at: '2020-09-11T16:01:22.749Z'
+    updated_at: '2020-09-29T17:28:14.884Z'
     action_when_attribute: activity_date
     field_list: ''
     blank_log_field_list: ''
@@ -5411,14 +5515,18 @@ app_type:
       \         panel_tab: activity-log--ipa-assignments\r\n          item_id: \"{{id}}\"\r\n
       \         \r\n        \r\n      - type: sms\r\n        role: sms - ipa tracker
       new participant\r\n        layout_template: standard sms layout\r\n        content_template:
-      ipa sms notification\r\n        subject: New IPA Participant\r\n\r\n\r\ncontact_info:\r\n
-      \ label: Emergency Contacts\r\n  fields:\r\n\r\n  caption_before:\r\n    all_fields:
-      One or more emergency contacts should be added.\r\n    submit: When multiple
-      have been added do not edit the block directly.\r\n    metadata: Expand items
-      in the list above to view and allow editing. To remove an item, edit it and
-      select rank '0 - Not Used'.\r\n  references:\r\n\r\n    dynamic_model__emergency_contact:\r\n
-      \     from: master\r\n      add: many\r\n      prevent_disable: true\r\n\r\n
-      \ creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
+      ipa sms notification\r\n        subject: New IPA Participant\r\n\r\n\r\nprevisit_covid_screening:\r\n
+      \ label: Pre-Visit COVID Screening\r\n  references:\r\n\r\n    dynamic_model__ipa_covid_prescreening:\r\n
+      \     from: master\r\n      add: one_to_this\r\n      prevent_disable: true\r\n
+      \ \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
+      \       extra_log_type: appointment\r\n\r\n\r\ncontact_info:\r\n  label: Emergency
+      Contacts\r\n  fields:\r\n\r\n  caption_before:\r\n    all_fields: One or more
+      emergency contacts should be added.\r\n    submit: When multiple have been added
+      do not edit the block directly.\r\n    metadata: Expand items in the list above
+      to view and allow editing. To remove an item, edit it and select rank '0 - Not
+      Used'.\r\n  references:\r\n\r\n    dynamic_model__emergency_contact:\r\n      from:
+      master\r\n      add: many\r\n      prevent_disable: true\r\n\r\n  creatable_if:\r\n
+      \   <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
       \       extra_log_type: appointment\r\n\r\n\r\nmrn:\r\n  label: MRN\r\n  fields:\r\n\r\n
       \ references:\r\n    mrn_number:\r\n      from: master\r\n      add: many\r\n
       \     prevent_disable: true\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
@@ -5445,7 +5553,15 @@ app_type:
       many\r\n      limit: 2\r\n    ipa_reimbursement_reqs:\r\n      label: Reimbursement
       Request\r\n      from: master\r\n      add: many\r\n\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n
-      \       extra_log_type: screening_follow_up\r\n\r\n###################################\r\nexit_l2fu:\r\n
+      \       extra_log_type: screening_follow_up\r\n\r\n\r\n###################################\r\non_hold:\r\n
+      \ label: On Hold\r\n###################################\r\n\r\n  fields:\r\n
+      \   - follow_up_when\r\n    - notes\r\n    \r\n  caption_before:\r\n    all_fields:
+      |\r\n      The subject's participation is on hold until the *follow up date*
+      set.\r\n      \r\n      Use the *General Communications* activity to record
+      future communications with \r\n      the subject.\r\n      \r\n    follow_up_when:
+      Follow up date\r\n    notes: Reason for the *on hold* status and any notes to
+      assist with the future follow up\r\n      \r\n\r\n  creatable_if:\r\n    <<:
+      *enabled_if\r\n    #not_any_exit: *any_exit_or_complete\r\n\r\n\r\n\r\n###################################\r\nexit_l2fu:\r\n
       \ label: Lost to Follow Up\r\n###################################\r\n\r\n  fields:\r\n\r\n
       \ caption_before:\r\n    all_fields: |\r\n      The subject was lost to follow
       up before being scheduled for an appointment.\r\n\r\n      A staff member typically
@@ -6101,14 +6217,14 @@ app_type:
   - id: 181
     name: Emergency Contact
     table_name: emergency_contacts
-    schema_name: 
+    schema_name: ''
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
     admin_id: 21
     disabled: false
     created_at: '2018-05-31T14:52:11.628Z'
-    updated_at: '2020-09-11T12:57:05.643Z'
+    updated_at: '2020-10-01T11:04:33.589Z'
     position: 
     category: details
     table_key_name: ''
@@ -7034,105 +7150,87 @@ app_type:
       Are you currently taking any medications including over the counter medications?\r\n
       \   current_meds_details: <i>IF YES</i> can you please list them.\r\n  "
     user_email: 
-  - id: 663
-    name: No COVID-19 Test
-    table_name: ipa_ps_covid_closings
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2020-09-11T15:54:48.773Z'
-    updated_at: '2020-09-14T13:01:56.543Z'
-    position: 
-    category: ipa-phone-screen
-    table_key_name: ''
-    field_list: contact_later_yes_no placeholder_contact_later_yes placeholder_contact_later_no
-      notes
-    result_order: ''
-    options: "default:\r\n\r\n  caption_before:\r\n     contact_later_yes_no: |\r\n
-      \      Thank you for letting us know. This does not mean you cannot participate
-      in our study at a future date – you may be able to participate at a later date
-      when we no longer ask participants to complete COVID-19 testing. Would contacting
-      you at a later date about participation be OK with you?\r\n     \r\n     placeholder_contact_later_yes:
-      |\r\n       Thank you. We will contact you at a later date about participating.
-      Please contact us in the meantime with any questions. \r\n     \r\n     placeholder_contact_later_no:
-      |\r\n       OK. We will not add you to this list. If you have any questions,
-      or change your mind and want to participate, please contact us at any time.
-      Thank you for your time and understanding today.\r\n     \r\n     notes: Additional
-      notes\r\n       \r\n  show_if:\r\n    placeholder_contact_later_yes:\r\n      contact_later_yes_no:
-      'yes'\r\n     \r\n    placeholder_contact_later_no:\r\n      contact_later_yes_no:
-      'no'"
-    user_email: 
   - id: 183
     name: IPA Initial Screening
     table_name: ipa_ps_initial_screenings
-    schema_name: 
+    schema_name: ''
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
     admin_id: 21
     disabled: false
     created_at: '2018-05-31T14:52:12.427Z'
-    updated_at: '2020-09-14T09:26:27.879Z'
+    updated_at: '2020-10-09T16:38:30.652Z'
     position: 
     category: ipa-phone-screen
     table_key_name: ''
     field_list: form_version, placeholder_ps_intro_v1,placeholder_ps_intro_v2,placeholder_ps_intro_v3,select_is_good_time_to_speak,
       placeholder_looked_at_website_orig,placeholder_looked_at_website_v3,looked_at_website_yes_no,
-      select_may_i_begin, placeholder_ps_overview_v1,placeholder_ps_overview_v2,placeholder_ps_overview_v3,any_questions_blank_yes_no,
+      select_may_i_begin, placeholder_ps_overview_v1,placeholder_ps_overview_v2,placeholder_ps_overview_v3,placeholder_ps_overview_v4,travelling_to_boston_notes,covid19_concerns_yes_no,covid19_concerns_notes,placeholder_post_covid_qs,any_questions_blank_yes_no,
       placeholder_ps_details_v1,placeholder_ps_details_v2,placeholder_ps_details_v3,same_hotel_yes_no,placeholder_select_schedule,
-      embedded_report_ipa__ipa_appointments, select_schedule, placeholder_ps_details_sched_a_v2,placeholder_ps_details_sched_a_v3,placeholder_ps_details_sched_b_v2,placeholder_ps_details_sched_b_v3,select_still_interested,
+      embedded_report_ipa__ipa_appointments, select_schedule, placeholder_ps_details_sched_a_v2,placeholder_ps_details_sched_a_v3,placeholder_ps_details_sched_a_v4,placeholder_ps_details_sched_b_v2,placeholder_ps_details_sched_b_v3,placeholder_ps_details_sched_b_v4,select_still_interested,
       placeholder_complete_intro,follow_up_date,follow_up_time,placeholder_not_interested,notes
     result_order: ''
-    options: "default:\r\n\r\n  field_options:\r\n    form_version:\r\n      value:
-      v3\r\n    select_schedule:\r\n      edit_as:\r\n        alt_options:\r\n          A:
-      a\r\n          B: b\r\n\r\n  dialog_before:\r\n    \r\n  \r\n    placeholder_ps_intro_v1:\r\n
-      \     name: ipa ps intro\r\n\r\n    placeholder_ps_intro_v2:\r\n      name:
-      ipa ps intro v2\r\n      \r\n    placeholder_ps_intro_v3:\r\n      name: ipa
-      ps intro v3\r\n      \r\n    placeholder_looked_at_website_orig: \r\n      name:
-      ipa ps looked at website orig     \r\n\r\n    placeholder_looked_at_website_v3:
-      \r\n      name: ipa ps looked at website v3 \r\n\r\n\r\n    placeholder_ps_overview_v1:
-      \r\n      name: ipa ps intro overview\r\n      label: show script\r\n      \r\n
+    options: "_definitions:\r\n\r\n  _show_if_not_v1: &show_if_not_v1\r\n    form_version:\r\n
+      \     - v2\r\n      - v3\r\n      - v4\r\n\r\n  _show_v3: &show_v3\r\n    form_version:
+      v3\r\n\r\n  _show_v3_and_v4: &show_v3_and_v4\r\n    form_version: \r\n      -
+      v3\r\n      - v4\r\n\r\n  _show_v4: &show_v4\r\n    form_version: v4\r\n\r\ndefault:\r\n\r\n
+      \ field_options:\r\n    form_version:\r\n      value: v4\r\n    select_schedule:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          A: a\r\n          B: b\r\n\r\n
+      \ dialog_before:\r\n    \r\n  \r\n    placeholder_ps_intro_v1:\r\n      name:
+      ipa ps intro\r\n\r\n    placeholder_ps_intro_v2:\r\n      name: ipa ps intro
+      v2\r\n      \r\n    placeholder_ps_intro_v3:\r\n      name: ipa ps intro v3\r\n
+      \     \r\n    placeholder_looked_at_website_orig: \r\n      name: ipa ps looked
+      at website orig     \r\n\r\n    placeholder_looked_at_website_v3: \r\n      name:
+      ipa ps looked at website v3 \r\n\r\n\r\n    placeholder_ps_overview_v1: \r\n
+      \     name: ipa ps intro overview\r\n      label: show script\r\n      \r\n
       \   placeholder_ps_overview_v2: \r\n      name: ipa ps intro overview v2\r\n
       \     label: show script\r\n\r\n    placeholder_ps_overview_v3: \r\n      name:
-      ipa ps intro overview v3\r\n      label: show script\r\n\r\n      \r\n    placeholder_ps_details_v1:
-      \r\n      name: ipa ps intro details\r\n      label: show script\r\n\r\n    placeholder_ps_details_v2:
-      \r\n      name: ipa ps intro details v2\r\n      label: show script\r\n\r\n
-      \   placeholder_ps_details_v3: \r\n      name: ipa ps intro details v3\r\n      label:
-      show script\r\n\r\n    placeholder_ps_details_sched_a_v2: \r\n      name: ipa
-      ps intro details sched a v2\r\n      label: show script\r\n      \r\n    placeholder_ps_details_sched_a_v3:
+      ipa ps intro overview v3\r\n      label: show script\r\n\r\n    placeholder_ps_overview_v4:
+      \r\n      name: ipa ps intro overview v4\r\n      label: show script\r\n\r\n
+      \     \r\n    placeholder_ps_details_v1: \r\n      name: ipa ps intro details\r\n
+      \     label: show script\r\n\r\n    placeholder_ps_details_v2: \r\n      name:
+      ipa ps intro details v2\r\n      label: show script\r\n\r\n    placeholder_ps_details_v3:
+      \r\n      name: ipa ps intro details v3\r\n      label: show script\r\n\r\n
+      \   placeholder_ps_details_sched_a_v2: \r\n      name: ipa ps intro details
+      sched a v2\r\n      label: show script\r\n      \r\n    placeholder_ps_details_sched_a_v3:
       \r\n      name: ipa ps intro details sched a v3\r\n      label: show script\r\n\r\n
-      \   placeholder_ps_details_sched_b_v2: \r\n      name: ipa ps intro details
-      sched b v2\r\n      label: show script\r\n\r\n    placeholder_ps_details_sched_b_v3:
-      \r\n      name: ipa ps intro details sched b v3\r\n      label: show script\r\n\r\n\r\n
+      \   placeholder_ps_details_sched_a_v4: \r\n      name: ipa ps intro details
+      sched a v4\r\n      label: show script\r\n\r\n    placeholder_ps_details_sched_b_v2:
+      \r\n      name: ipa ps intro details sched b v2\r\n      label: show script\r\n\r\n
+      \   placeholder_ps_details_sched_b_v3: \r\n      name: ipa ps intro details
+      sched b v3\r\n      label: show script\r\n\r\n    placeholder_ps_details_sched_b_v4:
+      \r\n      name: ipa ps intro details sched b v4\r\n      label: show script\r\n\r\n\r\n
       \   placeholder_complete_intro: \r\n      name: ipa ps intro complete intro\r\n
       \     label: show script\r\n\r\n  show_if:\r\n  \r\n    form_version:\r\n      never:
       true\r\n      \r\n    select_may_i_begin:\r\n      never: true\r\n      \r\n
-      \   select_schedule: &show_if_not_v1\r\n      form_version:\r\n        - v2\r\n
-      \       - v3\r\n          \r\n    placeholder_ps_intro_v1: &show_v1\r\n      not_all:
-      *show_if_not_v1\r\n    \r\n    placeholder_ps_intro_v2: &show_v2\r\n      form_version:
-      v2\r\n\r\n    placeholder_ps_intro_v3: &show_v3\r\n      form_version: v3\r\n\r\n
-      \   placeholder_looked_at_website_orig:\r\n      not_any: *show_v3\r\n      select_is_good_time_to_speak:
-      \"yes\"\r\n      \r\n    placeholder_looked_at_website_v3:\r\n      <<: *show_v3\r\n
-      \     select_is_good_time_to_speak: \"yes\"\r\n\r\n    looked_at_website_yes_no:\r\n
-      \     select_is_good_time_to_speak: \"yes\"\r\n\r\n    _show_overview: &show_overview\r\n
-      \     looked_at_website_yes_no: \r\n        - 'yes'\r\n        - 'no'\r\n\r\n
-      \   placeholder_ps_overview_v1: \r\n      <<: *show_overview    \r\n      <<:
-      *show_v1\r\n    \r\n    placeholder_ps_overview_v2: \r\n      <<: *show_overview
-      \   \r\n      <<: *show_v2\r\n\r\n    placeholder_ps_overview_v3: \r\n      <<:
-      *show_overview    \r\n      <<: *show_v3\r\n\r\n    any_questions_blank_yes_no:\r\n
-      \     looked_at_website_yes_no: \r\n        - \"yes\"\r\n        - \"no\"\r\n\r\n
-      \   placeholder_ps_details_v1:\r\n      <<: *show_v1\r\n      <<: *show_overview
-      \   \r\n      any_questions_blank_yes_no: \r\n        - \"yes\"\r\n        -
-      \"no\"\r\n    \r\n    placeholder_ps_details_v2:\r\n      <<: *show_v2\r\n      <<:
-      *show_overview    \r\n      any_questions_blank_yes_no: \r\n        - \"yes\"\r\n
-      \       - \"no\"\r\n\r\n    placeholder_ps_details_v3:\r\n      <<: *show_v3\r\n
-      \     <<: *show_overview    \r\n      any_questions_blank_yes_no: \r\n        -
-      \"yes\"\r\n        - \"no\"\r\n\r\n    same_hotel_yes_no:\r\n      <<: *show_overview
-      \   \r\n      <<: *show_if_not_v1\r\n      any_questions_blank_yes_no: \r\n
-      \       - \"yes\"\r\n        - \"no\"\r\n\r\n    placeholder_select_schedule:
+      \   select_schedule: *show_if_not_v1\r\n          \r\n    placeholder_ps_intro_v1:
+      &show_v1\r\n      not_all: *show_if_not_v1\r\n    \r\n    placeholder_ps_intro_v2:
+      &show_v2\r\n      form_version: v2\r\n\r\n    placeholder_ps_intro_v3:\r\n      <<:
+      *show_v3_and_v4\r\n\r\n    placeholder_looked_at_website_orig:\r\n      not_any:
+      *show_v3_and_v4\r\n      select_is_good_time_to_speak: \"yes\"\r\n      \r\n
+      \   placeholder_looked_at_website_v3:\r\n      <<: *show_v3_and_v4\r\n      select_is_good_time_to_speak:
+      \"yes\"\r\n\r\n    looked_at_website_yes_no:\r\n      select_is_good_time_to_speak:
+      \"yes\"\r\n\r\n    _show_overview: &show_overview\r\n      looked_at_website_yes_no:
+      \r\n        - 'yes'\r\n        - 'no'\r\n\r\n    placeholder_ps_overview_v1:
+      \r\n      <<: *show_overview    \r\n      <<: *show_v1\r\n    \r\n    placeholder_ps_overview_v2:
+      \r\n      <<: *show_overview    \r\n      <<: *show_v2\r\n\r\n    placeholder_ps_overview_v3:
+      \r\n      <<: *show_overview    \r\n      <<: *show_v3\r\n\r\n    placeholder_ps_overview_v4:
+      \r\n      <<: *show_overview    \r\n      <<: *show_v4\r\n\r\n    travelling_to_boston_notes:\r\n
+      \     <<: *show_overview    \r\n      <<: *show_v4\r\n    \r\n    covid19_concerns_yes_no:\r\n
+      \     <<: *show_overview    \r\n      <<: *show_v4\r\n\r\n    covid19_concerns_notes:
+      \r\n      <<: *show_overview    \r\n      <<: *show_v4\r\n      covid19_concerns_yes_no:
+      'yes'\r\n\r\n    placeholder_post_covid_qs:\r\n      <<: *show_overview    \r\n
+      \     <<: *show_v4\r\n    \r\n\r\n    any_questions_blank_yes_no:\r\n      looked_at_website_yes_no:
+      \r\n        - \"yes\"\r\n        - \"no\"\r\n\r\n    placeholder_ps_details_v1:\r\n
+      \     <<: *show_v1\r\n      <<: *show_overview    \r\n      any_questions_blank_yes_no:
+      \r\n        - \"yes\"\r\n        - \"no\"\r\n    \r\n    placeholder_ps_details_v2:\r\n
+      \     <<: *show_v2\r\n      <<: *show_overview    \r\n      any_questions_blank_yes_no:
+      \r\n        - \"yes\"\r\n        - \"no\"\r\n\r\n    placeholder_ps_details_v3:\r\n
+      \     <<: *show_v3_and_v4\r\n      <<: *show_overview    \r\n      any_questions_blank_yes_no:
+      \r\n        - \"yes\"\r\n        - \"no\"\r\n\r\n    same_hotel_yes_no:\r\n
+      \     <<: *show_overview    \r\n      <<: *show_if_not_v1\r\n      any_questions_blank_yes_no:
+      \r\n        - \"yes\"\r\n        - \"no\"\r\n\r\n    placeholder_select_schedule:
       &show_select_schedule\r\n      <<: *show_if_not_v1    \r\n      same_hotel_yes_no:\r\n
       \       - 'yes'\r\n        - 'no'\r\n    \r\n    embedded_report_ipa__ipa_appointments:
       *show_select_schedule\r\n\r\n    select_schedule: *show_select_schedule\r\n\r\n
@@ -7144,12 +7242,16 @@ app_type:
       *show_v3\r\n      select_schedule: a\r\n      same_hotel_yes_no: \r\n        -
       'yes'\r\n        - 'no'\r\n\r\n    placeholder_ps_details_sched_b_v3:\r\n      <<:
       *show_overview    \r\n      <<: *show_v3\r\n      select_schedule: b\r\n      same_hotel_yes_no:
-      \r\n        - 'yes'\r\n        - 'no'\r\n\r\n    select_still_interested:\r\n
-      \     select_schedule:\r\n        - a\r\n        - b\r\n      any_questions_blank_yes_no:
-      \r\n        - \"yes\"\r\n        - \"no\"        \r\n\r\n    placeholder_complete_intro:\r\n
-      \     any:\r\n        select_still_interested:\r\n          - \"yes\"\r\n\r\n
-      \   follow_up_date:\r\n      any:\r\n        select_is_good_time_to_speak: \r\n
-      \         - not appropriate time\r\n          - left voicemail\r\n        select_still_interested:
+      \r\n        - 'yes'\r\n        - 'no'\r\n\r\n\r\n    placeholder_ps_details_sched_a_v4:\r\n
+      \     <<: *show_v4\r\n      select_schedule: a\r\n      same_hotel_yes_no: \r\n
+      \       - 'yes'\r\n        - 'no'\r\n\r\n    placeholder_ps_details_sched_b_v4:\r\n
+      \     <<: *show_overview    \r\n      <<: *show_v4\r\n      select_schedule:
+      b\r\n      same_hotel_yes_no: \r\n        - 'yes'\r\n        - 'no'\r\n\r\n
+      \   select_still_interested:\r\n      select_schedule:\r\n        - a\r\n        -
+      b\r\n      any_questions_blank_yes_no: \r\n        - \"yes\"\r\n        - \"no\"
+      \       \r\n\r\n    placeholder_complete_intro:\r\n      any:\r\n        select_still_interested:\r\n
+      \         - \"yes\"\r\n\r\n    follow_up_date:\r\n      any:\r\n        select_is_good_time_to_speak:
+      \r\n          - not appropriate time\r\n          - left voicemail\r\n        select_still_interested:
       yes - call back\r\n\r\n    follow_up_time:\r\n      any:\r\n        select_is_good_time_to_speak:\r\n
       \         - not appropriate time\r\n          - left voicemail        \r\n        select_still_interested:
       yes - call back\r\n        \r\n    placeholder_not_interested:\r\n      any:\r\n
@@ -7161,21 +7263,31 @@ app_type:
       Enter a follow up date and time if the subject wishes for a call back before
       continuing with the screening, or you left a voicemail. \r\n    follow_up_time:
       Follow up time\r\n    placeholder_not_interested: Thank and end call\r\n    notes:
-      Notes, questions or other information for follow up\r\n    \r\n\r\n#    contact_details_notes:
-      Contact details notes for gift card. After completing the call, ensure contact
-      details recorded here are transferred to the subject's address record."
+      Notes, questions or other information for follow up\r\n\r\n    travelling_to_boston_notes:
+      |\r\n      How do you feel about travelling about to Boston at this time? \r\n
+      \     \r\n    covid19_concerns_yes_no: |\r\n      Regarding COVID-19 safety,
+      do you have any concerns about yourself or any family members/members of your
+      social circle?\r\n\r\n    covid19_concerns_notes: Please tell me what concerns
+      you.\r\n\r\n    placeholder_post_covid_qs: |\r\n      I am going to go over
+      the study in some more detail. As I go over the study, \r\n      I will also
+      give you specific details of what to expect in regards to \r\n      COVID-19
+      safety precautions. If you have any questions while I explain the \r\n      study
+      please stop me and ask.  \r\n      \r\n      Do you have any questions so far?\r\n
+      \   \r\n\r\n#    contact_details_notes: Contact details notes for gift card.
+      After completing the call, ensure contact details recorded here are transferred
+      to the subject's address record."
     user_email: 
   - id: 185
     name: IPA TMS
     table_name: ipa_ps_tms_tests
-    schema_name: 
+    schema_name: ''
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
     admin_id: 21
     disabled: false
     created_at: '2018-05-31T14:52:13.299Z'
-    updated_at: '2020-09-11T15:36:08.723Z'
+    updated_at: '2020-10-09T16:26:05.469Z'
     position: 
     category: ipa-phone-screen
     table_key_name: ''
@@ -7203,11 +7315,13 @@ app_type:
       current_meds_details, other_chronic_problems_blank_yes_no_dont_know, other_chronic_problems_details,
       hospital_visits_blank_yes_no_dont_know, hospital_visits_details, dietary_restrictions_blank_yes_no_dont_know,
       dietary_restrictions_details, anything_else_blank_yes_no, anything_else_details\r\ndefault:\r\n
-      \ field_options:\r\n    form_version:\r\n      value: v3\r\n\r\n  show_if:\r\n
+      \ field_options:\r\n    form_version:\r\n      value: v4\r\n\r\n  show_if:\r\n
       \   form_version:\r\n      never: true\r\n\r\n    _show_if_not_v1: &show_if_not_v1\r\n
-      \     form_version:\r\n        - v2\r\n        - v3\r\n        \r\n    _show_v1:
-      &show_v1\r\n      not_any: *show_if_not_v1\r\n\r\n    _show_v3: &show_v3\r\n
-      \     form_version: v3\r\n\r\n    past_tms_details:\r\n      past_tms_blank_yes_no_dont_know:
+      \     form_version:\r\n        - v2\r\n        - v3\r\n        - v4\r\n        \r\n
+      \   _show_v1: &show_v1\r\n      not_any: *show_if_not_v1\r\n\r\n    _show_covid:
+      &show_covid\r\n      form_version: \r\n        - v3\r\n        - v4\r\n\r\n
+      \   _show_v3: &show_v3\r\n      form_version: v3\r\n\r\n    _show_v4: &show_v4\r\n
+      \     form_version: v4\r\n\r\n    past_tms_details:\r\n      past_tms_blank_yes_no_dont_know:
       \"yes\"\r\n    convulsion_or_seizure_details:\r\n      convulsion_or_seizure_blank_yes_no_dont_know:
       'yes'\r\n    epilepsy_details:\r\n      epilepsy_blank_yes_no_dont_know: 'yes'\r\n
       \   fainting_details:\r\n      fainting_blank_yes_no_dont_know: 'yes'\r\n    metal_details:\r\n
@@ -7226,19 +7340,19 @@ app_type:
       \     tobacco_smoker_blank_yes_no: 'yes'\r\n    \r\n    healthcare_anxiety_blank_yes_no:
       *show_if_not_v1\r\n    healthcare_anxiety_details:\r\n      <<: *show_if_not_v1\r\n
       \     healthcare_anxiety_blank_yes_no: 'yes'\r\n\r\n    covid19_test_consent_yes_no:
-      *show_v3\r\n    \r\n    covid19_concerns_yes_no: \r\n      <<: *show_v3\r\n
+      *show_covid\r\n    \r\n    covid19_concerns_yes_no: \r\n      <<: *show_v3\r\n
       \     covid19_test_consent_yes_no: 'yes'\r\n\r\n    covid19_concerns_notes:
       \r\n      <<: *show_v3\r\n      covid19_test_consent_yes_no: 'yes'\r\n      covid19_concerns_yes_no:
-      'yes'\r\n    \r\n    wear_mask_yes_no:\r\n      <<: *show_v3\r\n      covid19_test_consent_yes_no:
-      'yes'\r\n    \r\n    placeholder_no_wear_mask:\r\n      <<: *show_v3\r\n      covid19_test_consent_yes_no:
-      'yes'\r\n      wear_mask_yes_no: 'no'\r\n\r\n    anything_else_blank_yes_no:\r\n
-      \     <<: *show_v3\r\n      covid19_test_consent_yes_no: 'yes'\r\n    \r\n    anything_else_details:\r\n
-      \     <<: *show_v3\r\n      covid19_test_consent_yes_no: 'yes'\r\n    \r\n\r\n
-      \ caption_before:\r\n    all_fields: I am now going to ask you some questions
-      to see if it is safe for you to undergo one of the tests previously mentioned
-      – TMS or transcranial magnetic stimulation. May I continue?\r\n    past_tms_blank_yes_no_dont_know:
-      Did you ever undergo TMS in the past?\r\n    past_tms_details: <i>IF YES</i>
-      , were there any problems?\r\n    convulsion_or_seizure_blank_yes_no_dont_know:
+      'yes'\r\n    \r\n    wear_mask_yes_no:\r\n      <<: *show_covid\r\n      covid19_test_consent_yes_no:
+      'yes'\r\n    \r\n    placeholder_no_wear_mask:\r\n      <<: *show_covid\r\n
+      \     covid19_test_consent_yes_no: 'yes'\r\n      wear_mask_yes_no: 'no'\r\n\r\n
+      \   anything_else_blank_yes_no:\r\n      <<: *show_covid\r\n      covid19_test_consent_yes_no:
+      'yes'\r\n    \r\n    anything_else_details:\r\n      <<: *show_covid\r\n      covid19_test_consent_yes_no:
+      'yes'\r\n    \r\n\r\n  caption_before:\r\n    all_fields: I am now going to
+      ask you some questions to see if it is safe for you to undergo one of the tests
+      previously mentioned – TMS or transcranial magnetic stimulation. May I continue?\r\n
+      \   past_tms_blank_yes_no_dont_know: Did you ever undergo TMS in the past?\r\n
+      \   past_tms_details: <i>IF YES</i> , were there any problems?\r\n    convulsion_or_seizure_blank_yes_no_dont_know:
       Have you ever had a convulsion or a seizure?\r\n    convulsion_or_seizure_details:
       <i>IF YES</i>, how long ago, did you go to the hospital, were you put on medication,
       was it determined why?\r\n    epilepsy_blank_yes_no_dont_know: Do you or a family
@@ -7295,6 +7409,37 @@ app_type:
       discussing with the study doctor, we will call you to confirm this.\r\n\r\n\r\n
       \   anything_else_blank_yes_no: Is there anything else that you want to tell
       me about?\r\n    anything_else_details: <i>IF YES</i> Please tell me\r\n"
+    user_email: 
+  - id: 663
+    name: No COVID-19 Test
+    table_name: ipa_ps_covid_closings
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-11T15:54:48.773Z'
+    updated_at: '2020-09-14T13:01:56.543Z'
+    position: 
+    category: ipa-phone-screen
+    table_key_name: ''
+    field_list: contact_later_yes_no placeholder_contact_later_yes placeholder_contact_later_no
+      notes
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before:\r\n     contact_later_yes_no: |\r\n
+      \      Thank you for letting us know. This does not mean you cannot participate
+      in our study at a future date – you may be able to participate at a later date
+      when we no longer ask participants to complete COVID-19 testing. Would contacting
+      you at a later date about participation be OK with you?\r\n     \r\n     placeholder_contact_later_yes:
+      |\r\n       Thank you. We will contact you at a later date about participating.
+      Please contact us in the meantime with any questions. \r\n     \r\n     placeholder_contact_later_no:
+      |\r\n       OK. We will not add you to this list. If you have any questions,
+      or change your mind and want to participate, please contact us at any time.
+      Thank you for your time and understanding today.\r\n     \r\n     notes: Additional
+      notes\r\n       \r\n  show_if:\r\n    placeholder_contact_later_yes:\r\n      contact_later_yes_no:
+      'yes'\r\n     \r\n    placeholder_contact_later_no:\r\n      contact_later_yes_no:
+      'no'"
     user_email: 
   - id: 184
     name: T-MoCA
@@ -7954,6 +8099,50 @@ app_type:
     options: "default:\r\n  fields:\r\n    - select_survey_type\r\n    - sent_date\r\n
       \   - completed_date\r\n#    - send_next_survey_when\r\n    - notes"
     user_email: 
+  - id: 673
+    name: Pre-Arrival COVID-19 Screening
+    table_name: ipa_covid_prescreenings
+    schema_name: ipa_ops
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:57:10.622Z'
+    updated_at: '2020-09-29T17:48:15.729Z'
+    position: 
+    category: ipa-records
+    table_key_name: ''
+    field_list: foreign_travel_yes_no covid_tested_yes_no select_test_result test_date
+      test_location_notes covid_contact_yes_no_dont_know contact_date household_isolation_yes_no
+      fever_yes_no tag_select_symptoms notes
+    result_order: created_at
+    options: "default:\r\n\r\n  field_options:\r\n    tag_select_symptoms:\r\n      edit_as:\r\n
+      \       alt_options:\r\n          Fever (100.4 deg F or feeling feverish): fever\r\n
+      \         Cough: cough\r\n          Shortness of breath: shortness of breath\r\n
+      \         Muscle aches: muscle aches\r\n          Runny nose / nasal congestion:
+      runny nose / nasal congestion\r\n          Sore throat: sore throat\r\n          Loss
+      of smell or taste: loss of smell or taste\r\n          Rash: rash\r\n    select_test_result:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          - negative\r\n          -
+      positive\r\n          - pending\r\n          - \"don't know\"\r\n  \r\n  \r\n
+      \ show_if:\r\n    select_test_result:\r\n      covid_tested_yes_no: 'yes'\r\n
+      \   test_date:\r\n      covid_tested_yes_no: 'yes'\r\n    test_location_notes:
+      \r\n      covid_tested_yes_no: 'yes'\r\n    contact_date:\r\n      covid_contact_yes_no_dont_know:
+      'yes'\r\n\r\n  caption_before: \r\n    all_fields: |\r\n      Use this tool
+      72 hours prior to participant arrival. If participant \r\n      answers **YES**
+      to any of these questions connect them to the \r\n      medical Navigation Nurse.\r\n\r\n
+      \   foreign_travel_yes_no: Have you travelled outside the U.S. in the last 30
+      days?\r\n    covid_tested_yes_no: Have you been tested for COVID-19 outside
+      of Partners?\r\n    select_test_result: What was the result of your test?\r\n
+      \   test_date: What was the date of your test?\r\n    test_location_notes: Where
+      did you get your test?\r\n    covid_contact_yes_no_dont_know: |\r\n      Have
+      you had contact with anyone with a confirmed or \r\n      suspected case COVID-19?\r\n
+      \   contact_date: What was the most recent contact date?\r\n    household_isolation_yes_no:
+      Are you or a household member currently on home isolation or quarantined?\r\n
+      \   fever_yes_no: Have you had a fever or felt feverish in the past 24 hours?\r\n
+      \   tag_select_symptoms: Do you have any of the following NEW symptoms?\r\n
+      \   notes: Additional notes"
+    user_email: 
   - id: 200
     name: IPA Withdrawal
     table_name: ipa_withdrawals
@@ -8037,6 +8226,24 @@ app_type:
     updated_at: '2020-09-11T12:57:07.635Z'
     alphanumeric: false
     extra_fields: ''
+    category: ipa
+    user_email: 
+  - id: 60
+    name: ipa_samples
+    label: IPA Sample ID
+    external_id_attribute: ipa_sample_ext_id
+    external_id_view_formatter: ''
+    external_id_edit_pattern: ''
+    prevent_edit: true
+    pregenerate_ids: true
+    min_id: 100000
+    max_id: 999999
+    admin_id: 21
+    disabled: false
+    created_at: '2020-10-09T11:30:21.690Z'
+    updated_at: '2020-10-09T11:30:21.690Z'
+    alphanumeric: false
+    extra_fields: select_test_type
     category: ipa
     user_email: 
   associated_reports:
@@ -8297,8 +8504,8 @@ app_type:
       \   multiple: single\r\n    default: general-follow-up\r\n    selections: &selections\r\n
       \     general communication - follow-up: general-follow-up\r\n      general
       communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n
-      \     phone screen complete: phone-screen-complete\r\n      inclusion/exclusion
-      phone screen finalized (ready for sign-off): inex-phone-screen-finalized\r\n
+      \     phone screen complete: phone-screen-complete\r\n      on hold: on_hold\r\n
+      \     inclusion/exclusion phone screen finalized (ready for sign-off): inex-phone-screen-finalized\r\n
       \     inclusion/exclusion phone screen sign-off (PI): inex-phone-screen-so-pi\r\n
       \     inclusion/exclusion phone screen sign-off (MedNav): inex-phone-screen-so-mednav\r\n
       \     inclusion/exclusion phone screen sign-off (Staff): inex-phone-screen-so-staff\r\n
@@ -8316,13 +8523,13 @@ app_type:
       completed\r\n\r\n\r\nactivity_outstanding: \r\n  config_selector: \r\n    label:
       Activity outstanding (optional)\r\n    all: true\r\n    multiple: single\r\n
       \   default: general-completed\r\n    selections:\r\n      <<: *selections\r\n\r\ncompleted_or_withdrawn:
-      \r\n  config_selector: \r\n    all: true\r\n    multiple: single\r\n    default:
-      in_study\r\n    selections: \r\n      in study: in_study\r\n      completed,
-      exited or withdrawn: not_in_study"
+      \r\n  config_selector: \r\n    label: In process, on hold, or exited\r\n    all:
+      true\r\n    multiple: single\r\n    default: in_study\r\n    selections: \r\n
+      \     in study: in_study\r\n      completed, exited or withdrawn: not_in_study"
     admin_id: 21
     disabled: false
     created_at: '2018-06-04T17:22:35.951Z'
-    updated_at: '2020-09-14T13:57:34.825Z'
+    updated_at: '2020-09-29T15:34:45.306Z'
     report_type: search
     auto: false
     searchable: true
@@ -8574,17 +8781,18 @@ app_type:
       <= :to_date)\r\nAND ((:type) IS NULL or extra_log_type in (:type))\r\nAND ((:confirmed)
       IS NULL or select_status in (:confirmed))\r\nAND ((:station) IS NULL or select_station
       in (:station))\r\nAND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)\r\n;\r\n\r\n\r\ncreate
-      temp table appointments\r\nas select\r\nvisit_start_date,\r\ncoalesce(select_schedule,
-      '') select_schedule,\r\nap.master_id,\r\nipa.ipa_id,\r\npi.first_name,\r\npi.last_name,\r\nmax(ap.id)
+      temp table appointments\r\nas select\r\nvisit_start_date,\r\ncovid19_test_date,
+      covid19_test_time,\r\ncoalesce(select_schedule, '') select_schedule,\r\nap.master_id,\r\nipa.ipa_id,\r\npi.first_name,\r\npi.last_name,\r\nmax(ap.id)
       appointment_id\r\nfrom ipa_appointments ap\r\ninner join activity_log_ipa_assignments
       al\r\non al.master_id = ap.master_id\r\n\r\ninner join player_infos pi\r\non
       ap.master_id = pi.master_id\r\n\r\ninner join ipa_assignments ipa\r\non ipa.master_id
       = al.master_id\r\n\r\n\r\nwhere\r\n  visit_start_date IS NOT NULL\r\n  AND (:from_date
       IS NULL or visit_start_date >= :from_date)\r\n  AND (:to_date IS NULL or visit_start_date
       <= :to_date)\r\n  AND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)\r\nGROUP BY\r\nap.master_id,
-      visit_start_date, pi.first_name, pi.last_name, ipa.ipa_id, select_schedule\r\n;\r\n\r\ncreate
-      temp table scheduled_calls\r\nas select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n
-      \ dt.master_id,\r\n  ipa.ipa_id,\r\n  p.first_name,\r\n  p.last_name,\r\n  dt.extra_log_type,\r\n
+      visit_start_date, covid19_test_date, covid19_test_time, pi.first_name, pi.last_name,
+      ipa.ipa_id, select_schedule\r\n;\r\n\r\ncreate temp table scheduled_calls\r\nas
+      select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n  dt.master_id,\r\n
+      \ ipa.ipa_id,\r\n  p.first_name,\r\n  p.last_name,\r\n  dt.extra_log_type,\r\n
       \ dt.select_who\r\nfrom\r\n  (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n
       \     a.select_who,\r\n      a.follow_up_when,\r\n      a.follow_up_time,\r\n
       \     a.notes,\r\n      rank()\r\n    OVER (\r\n      PARTITION BY a.master_id,
@@ -8601,12 +8809,18 @@ app_type:
       || 'T' || al.completion_time::varchar \"end\",\r\n  ipa_id || ': ' || al.select_station
       || ' ' || al.select_event_type || ' ' || al.other_event_type \"title\",\r\n
       \ array['report-cal-nav-event'] \"classNames\",\r\n  '/masters/' || master_id
-      \"url\"\r\nFROM nav_events al\r\n\r\nUNION\r\n\r\n\r\nSELECT\r\n  true ,\r\n
-      \ visit_start_date::varchar || 'T' || '00:00:00' ,\r\n  null ,\r\n  ipa_id ||
-      ': ' || 'appointment start ' ||\r\n  CASE WHEN select_schedule <> '' THEN '(Group
-      ' || upper(select_schedule) || ')'\r\n  ELSE ''\r\n  END\r\n  ,\r\n  array['report-cal-start-event']
-      \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n
-      \ false,\r\n  follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n
+      \"url\"\r\nFROM nav_events al\r\n\r\nUNION\r\n\r\n\r\nSELECT\r\n  false ,\r\n
+      \ covid19_test_date::varchar || 'T' || covid19_test_time::varchar ,\r\n  null
+      ,\r\n  ipa_id || ': ' || 'COVID-19 test ' ||\r\n  CASE WHEN select_schedule
+      <> '' THEN '(Group ' || upper(select_schedule) || ')'\r\n  ELSE ''\r\n  END\r\n
+      \ ,\r\n  array['report-cal-covidtest-event'] \"classNames\",\r\n  '/masters/'
+      || master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n
+      \ true ,\r\n  visit_start_date::varchar || 'T' || '00:00:00' ,\r\n  null ,\r\n
+      \ ipa_id || ': ' || 'appointment start ' ||\r\n  CASE WHEN select_schedule <>
+      '' THEN '(Group ' || upper(select_schedule) || ')'\r\n  ELSE ''\r\n  END\r\n
+      \ ,\r\n  array['report-cal-start-event'] \"classNames\",\r\n  '/masters/' ||
+      master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n
+      \ follow_up_when::varchar || 'T' || coalesce(follow_up_time, '14:00:00')::varchar,\r\n
       \ NULL,\r\n  ipa_id || ': ' || '(call) ' || replace(extra_log_type, '_', ' '),\r\n
       \ array['report-cal-call-event'] \"classNames\",\r\n  '/masters/' || master_id
       \"url\"\r\nFROM scheduled_calls\r\n\r\n\r\n;\r\n"
@@ -8626,7 +8840,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2019-06-20T13:49:41.435Z'
-    updated_at: '2020-09-11T12:57:10.523Z'
+    updated_at: '2020-09-29T15:34:45.350Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -8639,8 +8853,9 @@ app_type:
     options: "view_options:\r\n  view_as: calendar\r\n  search_button_label: calendar\r\n\r\ncomponent:\r\n
       \ options:\r\n#    height: 200\r\n\r\nview_css:\r\n  classes:\r\n    report-cal-start-event:\r\n
       \     background-color: red\r\n      border-color: red\r\n      text-align:
-      center\r\n    report-cal-call-event:\r\n      background-color: '#080'\r\n      border-color:
-      gray\r\n    "
+      center\r\n    report-cal-covidtest-event:\r\n      background-color: rgb(0,102,255)\r\n
+      \     border-color: rgb(0,102,255)\r\n      text-align: center\r\n    report-cal-call-event:\r\n
+      \     background-color: '#080'\r\n      border-color: gray\r\n    "
     user_email: 
   - id: 259
     name: Search IPA Subject
@@ -9687,28 +9902,25 @@ app_type:
     description: 'All subjects that have joined or exited the study: in process (phone
       screening scheduled), completed, withdrawn, ineligible, not interested (during
       phone screen or follow-up)'
-    sql: "SELECT * from ipa_ops.ipa_participant_exits\r\nWHERE status IN(:select_status)\r\nORDER
-      BY status, \"when\" desc\r\n;\r\n"
+    sql: "SELECT * from ipa_ops.ipa_participant_exits\r\nWHERE (:select_status) IS
+      NULL OR status IN(:select_status)\r\nORDER BY status, \"when\" desc\r\n;\r\n"
     search_attrs: "\r\nselect_status: \r\n  config_selector:\r\n    label: Select
       / de-select statuses to report  \r\n    all: true\r\n    multiple: multiple\r\n
-      \   default: \r\n      - ineligible\r\n      - completed\r\n      - withdrawn\r\n
-      \     - in process\r\n      - not interested during phone screening\r\n      -
-      not interested during screening follow-up\r\n      - opted out\r\n      - 'exit
-      (no COVID-19 test)'\r\n      - 'lost to follow-up (before scheduling)'\r\n    selections:
-      \r\n      ineligible: ineligible\r\n      completed: completed\r\n      withdrawn:
-      withdrawn\r\n      in process: in process\r\n      not interested during phone
-      screening: not interested during phone screening\r\n      not interested during
-      screening follow-up: not interested during screening follow-up\r\n      opted
-      out: opted out\r\n      'exit (no COVID-19 test)': 'exit (no COVID-19 test)'\r\n
-      \     'lost to follow-up (before scheduling)': 'lost to follow-up (before scheduling)'\r\n
+      \   default: \r\n      - on hold\r\n    selections: \r\n      ineligible: ineligible\r\n
+      \     completed: completed\r\n      withdrawn: withdrawn\r\n      in process:
+      in process\r\n      not interested during phone screening: not interested during
+      phone screening\r\n      not interested during screening follow-up: not interested
+      during screening follow-up\r\n      on hold: on hold\r\n      opted out: opted
+      out\r\n      'exit (no COVID-19 test)': 'exit (no COVID-19 test)'\r\n      'lost
+      to follow-up (before scheduling)': 'lost to follow-up (before scheduling)'\r\n
       \     "
     admin_id: 21
     disabled: false
     created_at: '2020-03-09T17:54:55.195Z'
-    updated_at: '2020-09-14T13:46:41.403Z'
-    report_type: regular_report
+    updated_at: '2020-09-29T15:34:45.403Z'
+    report_type: search
     auto: false
-    searchable: false
+    searchable: true
     position: 2
     edit_model: ''
     edit_field_names: ''
@@ -10958,9 +11170,9 @@ app_type:
     value: exit survey
     item_type: dynamic_model__ipa_surveys_select_survey_type
     created_at: '2018-05-29T13:24:49.900Z'
-    updated_at: '2018-05-29T13:24:49.900Z'
+    updated_at: '2020-09-29T15:34:44.155Z'
     disabled: false
-    admin_id: 2
+    admin_id: 21
     create_with: true
     edit_if_set: false
     edit_always: false
@@ -10973,9 +11185,9 @@ app_type:
     value: follow up survey
     item_type: dynamic_model__ipa_surveys_select_survey_type
     created_at: '2018-05-29T13:24:49.905Z'
-    updated_at: '2018-05-29T13:24:49.905Z'
+    updated_at: '2020-09-29T15:34:44.166Z'
     disabled: false
-    admin_id: 2
+    admin_id: 21
     create_with: true
     edit_if_set: false
     edit_always: false
@@ -14767,6 +14979,21 @@ app_type:
     description: ''
     lock: false
     user_email: 
+  - id: 879
+    name: Telomere Length
+    value: telomere length
+    item_type: ipa_samples_select_test_type
+    created_at: '2020-10-09T11:38:34.675Z'
+    updated_at: '2020-10-09T11:38:34.675Z'
+    disabled: false
+    admin_id: 21
+    create_with: true
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
   page_layouts:
   - id: 1
     app_type_id: 3
@@ -15162,172 +15389,172 @@ app_type:
     app_type_id: 3
     role_name: tracker
     user_id: 69
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:13:11.061Z'
-    updated_at: '2018-09-05T15:13:11.061Z'
+    updated_at: '2020-09-29T15:34:45.631Z'
     user_email: ipa_rec@fphs2.harvard.edu
   - id: 17
     app_type_id: 3
     role_name: staff - inex
     user_id: 69
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:13:45.231Z'
-    updated_at: '2018-09-05T15:13:45.231Z'
+    updated_at: '2020-09-29T15:34:45.640Z'
     user_email: ipa_rec@fphs2.harvard.edu
   - id: 18
     app_type_id: 3
     role_name: phone screener
     user_id: 69
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:14:16.417Z'
-    updated_at: '2018-09-05T15:14:16.417Z'
+    updated_at: '2020-09-29T15:34:45.649Z'
     user_email: ipa_rec@fphs2.harvard.edu
   - id: 19
     app_type_id: 3
     role_name: user - inex
     user_id: 69
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:15:17.282Z'
-    updated_at: '2018-09-05T15:15:17.282Z'
+    updated_at: '2020-09-29T15:34:45.659Z'
     user_email: ipa_rec@fphs2.harvard.edu
   - id: 20
     app_type_id: 3
     role_name: user - inex
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:15:37.294Z'
-    updated_at: '2018-09-05T15:15:37.294Z'
+    updated_at: '2020-09-29T15:34:45.668Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 21
     app_type_id: 3
     role_name: user - navigation
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:16:00.242Z'
-    updated_at: '2018-09-05T15:16:00.242Z'
+    updated_at: '2020-09-29T15:34:45.678Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 22
     app_type_id: 3
     role_name: user - adverse event
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:16:20.916Z'
-    updated_at: '2018-09-05T15:16:20.916Z'
+    updated_at: '2020-09-29T15:34:45.687Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 23
     app_type_id: 3
     role_name: user - protocol deviation
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:16:37.271Z'
-    updated_at: '2018-09-05T15:16:37.271Z'
+    updated_at: '2020-09-29T15:34:45.696Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 24
     app_type_id: 3
     role_name: user - inex
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:17:29.639Z'
-    updated_at: '2018-09-05T15:17:29.639Z'
+    updated_at: '2020-09-29T15:34:45.705Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 25
     app_type_id: 3
     role_name: pi
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:17:39.760Z'
-    updated_at: '2018-09-05T15:17:39.760Z'
+    updated_at: '2020-09-29T15:34:45.714Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 26
     app_type_id: 3
     role_name: user - adverse event
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:18:08.930Z'
-    updated_at: '2018-09-05T15:18:08.930Z'
+    updated_at: '2020-09-29T15:34:45.723Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 27
     app_type_id: 3
     role_name: user - protocol deviation
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:18:22.206Z'
-    updated_at: '2018-09-05T15:18:22.206Z'
+    updated_at: '2020-09-29T15:34:45.732Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 28
     app_type_id: 3
     role_name: clinical research coordinator
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:19:04.541Z'
-    updated_at: '2018-09-05T15:19:04.541Z'
+    updated_at: '2020-09-29T15:34:45.740Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 29
     app_type_id: 3
     role_name: user - adverse event
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:19:23.726Z'
-    updated_at: '2018-09-05T15:19:23.726Z'
+    updated_at: '2020-09-29T15:34:45.750Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 30
     app_type_id: 3
     role_name: user - protocol deviation
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:19:42.849Z'
-    updated_at: '2018-09-05T15:19:42.849Z'
+    updated_at: '2020-09-29T15:34:45.759Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 31
     app_type_id: 3
     role_name: phone screener
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-05T15:20:28.906Z'
-    updated_at: '2018-09-05T15:20:28.906Z'
+    updated_at: '2020-09-29T15:34:45.768Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 32
     app_type_id: 3
     role_name: staff - inex
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-06T10:52:54.164Z'
-    updated_at: '2018-09-06T10:52:54.164Z'
+    updated_at: '2020-09-29T15:34:45.776Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 33
     app_type_id: 3
     role_name: user - inex
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-06T10:53:16.566Z'
-    updated_at: '2018-09-06T10:53:16.566Z'
+    updated_at: '2020-09-29T15:34:45.786Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 34
     app_type_id: 3
     role_name: irb reporting
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-07T12:49:29.844Z'
-    updated_at: '2019-01-15T16:31:52.103Z'
+    updated_at: '2020-09-29T15:34:45.795Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 35
     app_type_id: 3
@@ -15414,19 +15641,19 @@ app_type:
     app_type_id: 3
     role_name: phone screener
     user_id: 2
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-11T16:12:32.658Z'
-    updated_at: '2018-09-11T16:12:32.658Z'
+    updated_at: '2020-09-29T15:34:45.829Z'
     user_email: james_drummey@hms.harvard.edu
   - id: 47
     app_type_id: 3
     role_name: staff - inex
     user_id: 2
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-11T16:12:46.167Z'
-    updated_at: '2018-09-11T16:12:46.167Z'
+    updated_at: '2020-09-29T15:34:45.838Z'
     user_email: james_drummey@hms.harvard.edu
   - id: 48
     app_type_id: 3
@@ -15450,10 +15677,10 @@ app_type:
     app_type_id: 3
     role_name: user - navigation
     user_id: 2
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-11T16:13:20.613Z'
-    updated_at: '2018-09-11T16:13:26.796Z'
+    updated_at: '2020-09-29T15:34:45.863Z'
     user_email: james_drummey@hms.harvard.edu
   - id: 51
     app_type_id: 3
@@ -15513,28 +15740,28 @@ app_type:
     app_type_id: 3
     role_name: email - adverse event review
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-26T14:55:49.332Z'
-    updated_at: '2019-01-08T13:41:27.295Z'
+    updated_at: '2020-09-29T15:34:45.901Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 64
     app_type_id: 3
     role_name: email - adverse event pi
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-26T14:57:10.953Z'
-    updated_at: '2019-01-08T13:41:09.460Z'
+    updated_at: '2020-09-29T15:34:45.910Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 65
     app_type_id: 3
     role_name: email - adverse event irb report
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-26T14:58:39.421Z'
-    updated_at: '2019-01-08T13:45:00.312Z'
+    updated_at: '2020-09-29T15:34:45.922Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 66
     app_type_id: 3
@@ -15549,55 +15776,55 @@ app_type:
     app_type_id: 3
     role_name: nfs_store group 600
     user_id: 69
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-27T11:29:45.764Z'
-    updated_at: '2018-09-27T11:29:45.764Z'
+    updated_at: '2020-09-29T15:34:45.946Z'
     user_email: ipa_rec@fphs2.harvard.edu
   - id: 68
     app_type_id: 3
     role_name: nfs_store group 600
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-27T11:29:57.833Z'
-    updated_at: '2018-09-27T11:29:57.833Z'
+    updated_at: '2020-09-29T15:34:45.958Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 69
     app_type_id: 3
     role_name: nfs_store group 600
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-27T11:30:07.136Z'
-    updated_at: '2018-09-27T11:30:07.136Z'
+    updated_at: '2020-09-29T15:34:45.971Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 70
     app_type_id: 3
     role_name: nfs_store group 600
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-09-27T11:30:16.444Z'
-    updated_at: '2018-09-27T11:30:16.444Z'
+    updated_at: '2020-09-29T15:34:45.984Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 71
     app_type_id: 3
     role_name: email - protocol deviation review
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-10-11T17:34:37.290Z'
-    updated_at: '2018-10-11T17:34:37.290Z'
+    updated_at: '2020-09-29T15:34:45.996Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 72
     app_type_id: 3
     role_name: email - protocol deviation pi
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-10-11T19:06:40.167Z'
-    updated_at: '2018-10-11T19:06:40.167Z'
+    updated_at: '2020-09-29T15:34:46.005Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 73
     app_type_id: 3
@@ -15630,37 +15857,37 @@ app_type:
     app_type_id: 3
     role_name: baseline creator - inex
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-11-26T14:44:33.441Z'
-    updated_at: '2019-01-04T17:13:32.736Z'
+    updated_at: '2020-09-29T15:34:46.037Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 77
     app_type_id: 3
     role_name: reviewer - inex
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-11-26T14:46:40.840Z'
-    updated_at: '2018-11-26T14:46:40.840Z'
+    updated_at: '2020-09-29T15:34:46.048Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 78
     app_type_id: 3
     role_name: nfs_store group 600
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-11-26T14:47:03.708Z'
-    updated_at: '2018-11-26T14:49:29.213Z'
+    updated_at: '2020-09-29T15:34:46.059Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 79
     app_type_id: 3
     role_name: user - inex
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2018-11-26T14:47:36.179Z'
-    updated_at: '2018-11-26T14:49:33.283Z'
+    updated_at: '2020-09-29T15:34:46.068Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 80
     app_type_id: 3
@@ -15675,64 +15902,64 @@ app_type:
     app_type_id: 3
     role_name: email - inex reviewer
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-04T14:54:14.196Z'
-    updated_at: '2019-01-04T14:54:14.196Z'
+    updated_at: '2020-09-29T15:34:46.086Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 82
     app_type_id: 3
     role_name: email - inex tms
     user_id: 77
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-04T14:57:00.326Z'
-    updated_at: '2019-01-07T19:02:33.420Z'
+    updated_at: '2020-09-29T15:34:46.096Z'
     user_email: ipa_tms@fphs2.harvard.edu
   - id: 83
     app_type_id: 3
     role_name: reviewer - tms
     user_id: 77
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-04T15:05:07.850Z'
-    updated_at: '2019-01-04T15:05:07.850Z'
+    updated_at: '2020-09-29T15:34:46.105Z'
     user_email: ipa_tms@fphs2.harvard.edu
   - id: 84
     app_type_id: 3
     role_name: baseline creator - inex
     user_id: 71
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-08T12:38:24.408Z'
-    updated_at: '2019-01-08T12:38:24.408Z'
+    updated_at: '2020-09-29T15:34:46.115Z'
     user_email: ipa_nav@fphs2.harvard.edu
   - id: 85
     app_type_id: 3
     role_name: email - adverse event irb report
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-08T13:45:20.594Z'
-    updated_at: '2019-01-08T13:45:20.594Z'
+    updated_at: '2020-09-29T15:34:46.124Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 86
     app_type_id: 3
     role_name: email - ipa tracker new participant
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-08T13:57:34.645Z'
-    updated_at: '2019-01-08T13:57:34.645Z'
+    updated_at: '2020-09-29T15:34:46.134Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 87
     app_type_id: 3
     role_name: email - ipa tracker new participant
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-08T13:57:42.588Z'
-    updated_at: '2019-01-08T13:57:42.588Z'
+    updated_at: '2020-09-29T15:34:46.143Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 88
     app_type_id: 3
@@ -15747,118 +15974,118 @@ app_type:
     app_type_id: 3
     role_name: sms - inex reviewer
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-08T15:31:15.854Z'
-    updated_at: '2019-01-08T15:31:15.854Z'
+    updated_at: '2020-09-29T15:34:46.204Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 90
     app_type_id: 3
     role_name: sms - inex pi
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T13:18:48.782Z'
-    updated_at: '2019-01-15T13:20:21.218Z'
+    updated_at: '2020-09-29T15:34:46.216Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 91
     app_type_id: 3
     role_name: sms - ipa tracker new participant
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:10:18.776Z'
-    updated_at: '2019-01-15T15:10:18.776Z'
+    updated_at: '2020-09-29T15:34:46.228Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 92
     app_type_id: 3
     role_name: sms - ipa tracker new participant
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:10:28.834Z'
-    updated_at: '2019-01-15T15:10:28.834Z'
+    updated_at: '2020-09-29T15:34:46.239Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 93
     app_type_id: 3
     role_name: sms - adverse event review
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:20:45.115Z'
-    updated_at: '2019-01-15T15:20:45.115Z'
+    updated_at: '2020-09-29T15:34:46.252Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 94
     app_type_id: 3
     role_name: sms - adverse event pi
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:32:27.728Z'
-    updated_at: '2019-01-15T15:32:27.728Z'
+    updated_at: '2020-09-29T15:34:46.262Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 95
     app_type_id: 3
     role_name: sms - adverse event irb report
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:32:50.075Z'
-    updated_at: '2019-01-15T15:32:50.075Z'
+    updated_at: '2020-09-29T15:34:46.271Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 96
     app_type_id: 3
     role_name: sms - protocol deviation review
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:38:01.520Z'
-    updated_at: '2019-01-15T15:38:01.520Z'
+    updated_at: '2020-09-29T15:34:46.281Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 97
     app_type_id: 3
     role_name: sms - protocol deviation pi
     user_id: 70
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:38:17.738Z'
-    updated_at: '2019-01-15T15:38:17.738Z'
+    updated_at: '2020-09-29T15:34:46.291Z'
     user_email: ipa_pi@fphs2.harvard.edu
   - id: 98
     app_type_id: 3
     role_name: sms - protocol deviation irb report
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T15:47:47.280Z'
-    updated_at: '2019-01-15T15:47:47.280Z'
+    updated_at: '2020-09-29T15:34:46.302Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 99
     app_type_id: 3
     role_name: reviewer - adverse event
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T16:35:02.675Z'
-    updated_at: '2019-01-15T16:35:02.675Z'
+    updated_at: '2020-09-29T15:34:46.313Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 100
     app_type_id: 3
     role_name: reviewer - protocol deviation
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-01-15T16:35:23.632Z'
-    updated_at: '2019-01-15T16:35:23.632Z'
+    updated_at: '2020-09-29T15:34:46.323Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 101
     app_type_id: 3
     role_name: user - navigation
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-03-15T09:01:17.834Z'
-    updated_at: '2019-03-15T09:01:17.834Z'
+    updated_at: '2020-09-29T15:34:46.334Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 102
     app_type_id: 3
@@ -15927,10 +16154,10 @@ app_type:
     app_type_id: 3
     role_name: user - participant details
     user_id: 69
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-03-19T18:01:16.702Z'
-    updated_at: '2019-03-19T18:01:16.702Z'
+    updated_at: '2020-09-29T15:34:46.413Z'
     user_email: ipa_rec@fphs2.harvard.edu
   - id: 110
     app_type_id: 3
@@ -15945,19 +16172,19 @@ app_type:
     app_type_id: 3
     role_name: email - inex crc
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-04-04T07:55:24.359Z'
-    updated_at: '2019-04-04T07:55:24.359Z'
+    updated_at: '2020-09-29T15:34:46.434Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 112
     app_type_id: 3
     role_name: sms - inex crc
     user_id: 72
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-04-04T07:55:35.206Z'
-    updated_at: '2019-04-04T07:55:35.206Z'
+    updated_at: '2020-09-29T15:34:46.446Z'
     user_email: ipa_crc@fphs2.harvard.edu
   - id: 113
     app_type_id: 3
@@ -15981,19 +16208,19 @@ app_type:
     app_type_id: 3
     role_name: user - mednav
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-05-08T13:50:46.710Z'
-    updated_at: '2019-05-08T13:50:46.710Z'
+    updated_at: '2020-09-29T15:34:46.479Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 118
     app_type_id: 3
     role_name: user - participant details
     user_id: 76
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2019-05-08T13:54:52.043Z'
-    updated_at: '2019-05-08T13:54:52.043Z'
+    updated_at: '2020-09-29T15:34:46.488Z'
     user_email: ipa_mednav@fphs2.harvard.edu
   - id: 120
     app_type_id: 3
@@ -16431,19 +16658,19 @@ app_type:
     app_type_id: 3
     role_name: pi!
     user_id: 84
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.388Z'
-    updated_at: '2020-01-29T11:53:44.388Z'
+    updated_at: '2020-09-29T15:34:45.558Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 769
     app_type_id: 3
     role_name: pi!
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.395Z'
-    updated_at: '2020-01-29T11:53:44.395Z'
+    updated_at: '2020-09-29T15:34:47.463Z'
     user_email: template@template
   - id: 770
     app_type_id: 3
@@ -16566,10 +16793,10 @@ app_type:
     app_type_id: 3
     role_name: email - adverse event pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.690Z'
-    updated_at: '2020-01-29T11:53:44.690Z'
+    updated_at: '2020-09-29T15:34:47.472Z'
     user_email: template@template
   - id: 784
     app_type_id: 3
@@ -16584,19 +16811,19 @@ app_type:
     app_type_id: 3
     role_name: email - inex pi
     user_id: 84
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.713Z'
-    updated_at: '2020-01-29T11:53:44.713Z'
+    updated_at: '2020-09-29T15:34:45.934Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 786
     app_type_id: 3
     role_name: email - inex pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.717Z'
-    updated_at: '2020-01-29T11:53:44.717Z'
+    updated_at: '2020-09-29T15:34:47.482Z'
     user_email: template@template
   - id: 787
     app_type_id: 3
@@ -16611,10 +16838,10 @@ app_type:
     app_type_id: 3
     role_name: email - protocol deviation pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.762Z'
-    updated_at: '2020-01-29T11:53:44.762Z'
+    updated_at: '2020-09-29T15:34:47.492Z'
     user_email: template@template
   - id: 789
     app_type_id: 3
@@ -16665,10 +16892,10 @@ app_type:
     app_type_id: 3
     role_name: reviewer - tms
     user_id: 84
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.824Z'
-    updated_at: '2020-01-29T11:53:44.824Z'
+    updated_at: '2020-09-29T15:34:46.078Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 795
     app_type_id: 3
@@ -16683,10 +16910,10 @@ app_type:
     app_type_id: 3
     role_name: email - inex tms
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.863Z'
-    updated_at: '2020-01-29T11:53:44.863Z'
+    updated_at: '2020-09-29T15:34:47.511Z'
     user_email: template@template
   - id: 797
     app_type_id: 3
@@ -16701,37 +16928,37 @@ app_type:
     app_type_id: 3
     role_name: sms - inex reviewer
     user_id: 84
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.909Z'
-    updated_at: '2020-01-29T11:53:44.909Z'
+    updated_at: '2020-09-29T15:34:46.193Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 799
     app_type_id: 3
     role_name: sms - inex reviewer
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.913Z'
-    updated_at: '2020-01-29T11:53:44.913Z'
+    updated_at: '2020-09-29T15:34:47.521Z'
     user_email: template@template
   - id: 800
     app_type_id: 3
     role_name: sms - inex pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.930Z'
-    updated_at: '2020-01-29T11:53:44.930Z'
+    updated_at: '2020-09-29T15:34:47.532Z'
     user_email: template@template
   - id: 801
     app_type_id: 3
     role_name: sms - ipa tracker new participant
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.943Z'
-    updated_at: '2020-01-29T11:53:44.943Z'
+    updated_at: '2020-09-29T15:34:47.541Z'
     user_email: template@template
   - id: 802
     app_type_id: 3
@@ -16746,10 +16973,10 @@ app_type:
     app_type_id: 3
     role_name: sms - adverse event pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:44.972Z'
-    updated_at: '2020-01-29T11:53:44.972Z'
+    updated_at: '2020-09-29T15:34:47.552Z'
     user_email: template@template
   - id: 804
     app_type_id: 3
@@ -16773,10 +17000,10 @@ app_type:
     app_type_id: 3
     role_name: sms - protocol deviation pi
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:45.006Z'
-    updated_at: '2020-01-29T11:53:45.006Z'
+    updated_at: '2020-09-29T15:34:47.563Z'
     user_email: template@template
   - id: 807
     app_type_id: 3
@@ -16836,10 +17063,10 @@ app_type:
     app_type_id: 3
     role_name: pi
     user_id: 84
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:45.078Z'
-    updated_at: '2020-01-29T11:53:45.078Z'
+    updated_at: '2020-09-29T15:34:46.363Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 814
     app_type_id: 3
@@ -16899,19 +17126,19 @@ app_type:
     app_type_id: 3
     role_name: email - inex crc
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:45.141Z'
-    updated_at: '2020-01-29T11:53:45.141Z'
+    updated_at: '2020-09-29T15:34:47.574Z'
     user_email: template@template
   - id: 821
     app_type_id: 3
     role_name: sms - inex crc
     user_id: 82
-    admin_id: 2
+    admin_id: 21
     disabled: false
     created_at: '2020-01-29T11:53:45.156Z'
-    updated_at: '2020-01-29T11:53:45.156Z'
+    updated_at: '2020-09-29T15:34:47.584Z'
     user_email: template@template
   - id: 822
     app_type_id: 3
@@ -17462,6 +17689,105 @@ app_type:
     created_at: '2020-09-11T13:06:06.551Z'
     updated_at: '2020-09-11T13:06:06.551Z'
     user_email: 
+  - id: 1050
+    app_type_id: 3
+    role_name: sms - navigator
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.039Z'
+    updated_at: '2020-09-29T15:34:47.039Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1051
+    app_type_id: 3
+    role_name: email - navigator
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.064Z'
+    updated_at: '2020-09-29T15:34:47.064Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1052
+    app_type_id: 3
+    role_name: email - crc
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.086Z'
+    updated_at: '2020-09-29T15:34:47.086Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1053
+    app_type_id: 3
+    role_name: sms - crc
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.106Z'
+    updated_at: '2020-09-29T15:34:47.106Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1054
+    app_type_id: 3
+    role_name: sms - mednav
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.127Z'
+    updated_at: '2020-09-29T15:34:47.127Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1055
+    app_type_id: 3
+    role_name: email - mednav
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.143Z'
+    updated_at: '2020-09-29T15:34:47.143Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1056
+    app_type_id: 3
+    role_name: email - tms
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.161Z'
+    updated_at: '2020-09-29T15:34:47.161Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1057
+    app_type_id: 3
+    role_name: sms - tms
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.178Z'
+    updated_at: '2020-09-29T15:34:47.178Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1058
+    app_type_id: 3
+    role_name: user - mrn
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-29T15:34:47.688Z'
+    updated_at: '2020-09-29T15:34:47.688Z'
+    user_email: template@template
+  - id: 1059
+    app_type_id: 3
+    role_name: user - sample admin
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2020-10-09T11:31:39.860Z'
+    updated_at: '2020-10-09T11:31:49.973Z'
+    user_email: phil_ayres@test.com
+  - id: 1061
+    app_type_id: 3
+    role_name: user - sample admin
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2020-10-09T11:31:49.983Z'
+    updated_at: '2020-10-09T11:31:49.983Z'
+    user_email: template@template
   associated_message_templates:
   - id: 4
     name: ipa ps intro
@@ -18575,6 +18901,305 @@ app_type:
     disabled: false
     created_at: '2020-09-14T15:28:18.443Z'
     updated_at: '2020-09-14T15:28:18.443Z'
+    category: ipa
+    user_email: 
+  - id: 85
+    name: ipa ps intro details sched a v4
+    message_type: dialog
+    template_type: content
+    template: "### Day 0\r\n\r\n\r\nOur team will coordinate your arrival to Boston
+      to arrive the day before the study begins.  You staying in a local hotel. When
+      you arrive you will check in with the hotel staff and they will provide you
+      with a study backpack.  Inside the bag you will find masks, hand sanitizer,
+      antiviral wipes, scrubs and study resources.  We provide these for you to use
+      throughout your time in Boston.\r\n\r\n### Day 1\r\n\r\n\r\nOur study navigator
+      will meet you at the hotel on the morning of Day 1. Prior to meeting you, our
+      staff will call you to ask you COVID-19 screening questions (this will occur
+      every morning).  We will then accompany you to Mass General Hospital (MGH) where
+      you will review the consent form with a study physician and study staff member.
+      \ Any specific questions you have will be answered then.  You will then go through
+      a DEXA scan, which is similar to an x-ray but looks at bone density. Next, you
+      will have your blood drawn, collect a saliva sample (used to look at cellular
+      stress) and go through a general assessment of your health similar to a physical
+      at a doctor’s appointment.  You will have to fast prior to this blood draw.
+      In the afternoon, you will go through two PET scans, a sense of smell test and
+      a test of your sensory responses.  Throughout the hospital there will be a limit
+      to the amount of personnel allowed in a room, therefore our study team member
+      may have to wait for you in a separate room.  You may be asked COVID-19 screening
+      questions before each test.  The day will end around 6pm.\r\n\r\n- **Consent
+      review:** The first day will start with a review of the consent. You will meet
+      with a study coordinator and the study physician in order to review the study
+      assessments and the consent form. During this time, you will be able to ask
+      any questions or voice any concerns you may have.\r\n- **DEXA:** Once you have
+      agreed to participate, you will undergo a DEXA scan. A DEXA scan is similar
+      to an x-ray, but it is a scan that looks at bone density and body composition.
+      \r\n- **OGTT:** You will then get your blood drawn. Please note that will ask
+      that you do not eat for at least 8 hours prior to this blood draw – we will
+      be sure to remind you when you arrive. You will have breakfast following the
+      blood draw.\r\n- Collect a saliva sample – we will walk you through completing
+      this.\r\n- During the rest of the first day you will: \r\n  \r\n    - Undergo
+      an **assessment of your health** such as a review of your medical history, medications,
+      and a brief physical exam that includes body composition measures (e.g. height,
+      weight, waist size…)\r\n    - Fill out some **questionnaires** about your health
+      \   \r\n    - **PET** (Positron Emission Tomography) with **CT** (Computed Tomography)
+      – PET/CT scans take pictures of what is going on inside the body using special
+      dyes with radiation that “light up” inside the body to make a picture. The scanner
+      is shaped like a big ring and you will be positioned on your back on the scanner
+      table. The table may move forward and backward as part of the testing the procedures.
+      You will complete two different PET scans. \r\n    - **Sense of smell testing**
+      (olfactory)– This brief test consists of breathing different odors from a small
+      handheld odor delivery device and being asked questions about your familiarity,
+      memory and ability to name each odor.\r\n    - **Sensory testing** – An assessment
+      that consists of tests to measure your sensory responses – for example, having
+      pressure applied to different parts of your body or putting you hand in ice
+      water – you will be asked to report when these sensations are uncomfortable.
+      \r\n\r\n\r\n### Day 2\r\n\r\nOnce again, our study navigator will call you to
+      ask you COVID-19 screening questions prior to meeting you at the hotel on the
+      second full study day.  After meeting you at the hotel, our staff will travel
+      with you to another hospital using a ride share app (Uber or Lyft) that we can
+      call.  At some points in this study you will have to travel by ride share.  In
+      this event, we encourage you to use the cleaning supplies provided as you see
+      fit in the car ride. You will begin the morning with neuropsychological testing.
+      \ After this, you will have an MRI of your brain and your liver.  In the afternoon,
+      you will travel to a different hospital to do physical functioning testing.
+      \ After physical functioning, you will go through our TMS and EEG assessment.
+      \ TMS is noninvasive and uses magnetic fields to measure connectivity in the
+      brain. After the TMS, you will return to the hotel to eat dinner, shower and
+      change before the sleep study.  A sleep tech will set you up for the sleep assessment
+      in your hotel room.  You will sleep with various sensors on your body to analyze
+      your sleeping patterns. You will return the equipment to us in the morning.\r\n\r\n-
+      **Neuropsychological testing** – An assessment that consists of tests that evaluate
+      your mood, memory and how you think, learn and solve problems. This will be
+      conducted with a trained neuropsychologist.\r\n- **MRI** (Magnetic resonance
+      imaging) _of your brain and liver_ – This is a scan that takes pictures of your
+      brain and liver using a large magnet and radio signals.\r\n- **Physical function
+      testing** – Testing that consists of a series of tests such as lifting weights,
+      a timed walking test, walking upstairs carrying weights, walking while doing
+      another task (simple math), and testing your balance. These assessments will
+      be administered and overseen by a trained exercise physiologist.\r\n- **TMS**
+      (Transcranial Magnetic Stimulation) and **EEG** (Electroencephalogram)  – The
+      TMS will measure brain plasticity. Brain plasticity is the ability of the brain
+      to change and learn through experience. TMS is a noninvasive way of stimulating
+      the brain. TMS uses a magnetic field to cause activity in the brain. The magnetic
+      field is produced by a coil that is held next to your scalp. In this study,
+      we will use TMS to create activity in your brain and will measure your brain’s
+      response to the activity. This is how we measure brain plasticity. During the
+      TMS assessment, you will have a series of electrodes (small round discs) will
+      be placed on your head and your brain waves will be measured while you sit quietly
+      and then while you complete a few simple tasks on a computer. \r\n- **Sleep
+      study** – During the second night, you will have a sleep study in your hotel
+      room.  This will include having sensors placed on your body to monitor your
+      movement, heart rate, breathing and brain waves while you sleep. A trained technician
+      will assist you in placing various sensors on your body, but they will leave
+      you for the night. Additionally, you will be asked to complete several questionnaires
+      on your sleep habits.\r\n\r\n\r\n\r\n### Day 3\r\n\r\nOn the third and final
+      study day, you will begin with a cardiac testing and then X-rays.  After you
+      have completed all of the assessments, we will be returning some preliminary
+      results from your testing.  Our medical navigation nurse and study doctor will
+      meet with you and discuss some of the results.  Additional results will be reported
+      to you in the coming weeks and that process will be explained to you at that
+      time. We will be giving you another COVID-19 test to complete after your visit.
+      \ Our medical navigation nurse will guide you through this process.\r\n\r\n-
+      **Cardiac testing** – This testing consists of activities such as having pictures
+      taken of your heart (ultrasound), assessment of your resting metabolic rate
+      which will include you having to wear light headgear with a breathing tube,
+      and a bicycle exercise test.\r\n- **X-rays** – You will undergo an X-ray exam,
+      where you will be asked several questions, prepped and asked to stand in the
+      equipment for the duration of the scan. \r\n- **Results Return** – At the end
+      of your last day we are going to go over some of the results that we collected
+      so that you have something to take away\r\n\r\n\r\n\r\nA few risks associated
+      with this study include: \r\n\r\n\r\n- Skin irritation, redness, or bruising
+      \ (e.g. from blood draw, IV….)\r\n- Disruption of sleep or fatigue, emotional
+      distress (e.g. due to sleep study, neuropsych testing)\r\n- Radiation exposure
+      from the PET/CT, x-ray and DEXA scans \r\n- Muscle soreness, lightheadedness,
+      nausea or fainting (e.g. during physical assessments and cardiac exercise testing)\r\n\r\n\r\n\r\nAre
+      you still interested in hearing more about the study or do you have any questions
+      at this time?\r\n\r\n---\r\n\r\nWould you be willing to perform a brief cognitive
+      task and answer questions about your health and medical history to find out
+      if you might qualify for the study?  This should take about 30 minutes and you
+      will receive a $20 gift card for your time.  Do you have time now to continue?\r\n"
+    admin_id: 21
+    disabled: false
+    created_at: '2020-10-09T14:27:28.042Z'
+    updated_at: '2020-10-09T14:27:57.158Z'
+    category: ipa
+    user_email: 
+  - id: 86
+    name: ipa ps intro details sched b v4
+    message_type: dialog
+    template_type: content
+    template: "### Day 0\r\n\r\n\r\nOur team will coordinate your arrival to Boston
+      to arrive the day before the study begins.  You will check into a local hotel.
+      \ When you arrive you will check in with the hotel staff and they will provide
+      you with a study backpack.  Inside the bag you will find masks, hand sanitizer,
+      antiviral wipes, scrubs and study resources.  We provide these for you to use
+      throughout your time in Boston.\r\n\r\n### Day 1\r\n\r\n\r\nOur study navigator
+      will meet you at the hotel on the morning of Day 1. Prior to meeting you, our
+      staff will call you to ask you COVID-19 screening questions (this will occur
+      every morning).  We will then accompany you to  to MGH where you will review
+      the consent form with a study physician and study staff member.  Any specific
+      questions you have will be answered then.  You will then go through a DEXA scan,
+      which is similar to an x-ray but looks at bone density. Next, you will have
+      your blood drawn, collect a saliva sample (used to look at cellular stress)
+      and go through a general assessment of your health similar to a physical at
+      a doctor’s appointment.  You will have to fast prior to this blood draw.  You
+      will then eat lunch and travel to Charlestown Navy Yard for a MRI of your brain
+      and liver. After meeting you at the hotel, our staff will travel with you to
+      another hospital using a ride share app (Uber or Lyft) that our team can call.
+      This MRI will take about an hour to complete.  After the MRI, you will travel
+      back to MGH for a quick, full body X-ray. Throughout the hospital there will
+      be a limit to the amount of personnel allowed in a room, therefore our study
+      team member may have to wait for you in a separate room.  You may be asked COVID-19
+      screening questions before each test. The day will end around 3pm.\r\n\r\n\r\n-
+      **Consent review:** The first day will start with a review of the consent. You
+      will meet with a study coordinator and the study physician in order to review
+      the study assessments and the consent form. During this time, you will be able
+      to ask any questions or voice any concerns you may have.\r\n- **DEXA:** Once
+      you have agreed to participate, you will undergo a DEXA scan. A DEXA scan is
+      similar to an x-ray, but it is a scan that looks at bone density and body composition.
+      \r\n- Collect a saliva sample – we will walk you through completing this.\r\n-
+      **OGTT:** You will then get your blood drawn. Please note that will ask that
+      you do not eat for at least 8 hours prior to this blood draw – we will be sure
+      to remind you when you arrive. You will have breakfast following the blood draw.\r\n-
+      During the rest of the morning you will: \r\n  \r\n    - Undergo an **assessment
+      of your health** such as a review of your medical history, medications, and
+      a brief physical exam that includes body composition measures (e.g. height,
+      weight, waist size…)\r\n    - Fill out some **questionnaires** about your health
+      \   \r\n- During the rest of the day you wil undergo:\r\n    - **MRI** (Magnetic
+      resonance imaging) _of your brain and liver_ – This is a scan that takes pictures
+      of your brain and liver using a large magnet and radio signals.\r\n    - **X-rays**
+      – You will undergo an X-ray exam, where you will be asked several questions,
+      prepped and asked to stand in the equipment for the duration of the scan. \r\n\r\n\r\n###
+      Day 2\r\n\r\nOnce again, our study navigator will call you to ask you COVID-19
+      screening questions prior to meeting you at the hotel on the second full study
+      day. You will begin the second day with cardiac testing at MGH.  You will then
+      travel to Charlestown Navy Yard for Neuropsychological Testing.  This will take
+      about 2.5 hours to complete.  After the neuropsychological testing you will
+      have lunch and travel back to MGH for two PET scans.  In between the PET scans
+      you will complete two assessments, a sense of smell test and a test of your
+      sensory responses.  After your PET scans you will return to the hotel to eat
+      dinner, shower and change before the sleep study.  A sleep tech will set you
+      up for the sleep assessment in your hotel room.  You will sleep with various
+      sensors on your body to analyze your sleeping patterns. You will return the
+      equipment to us in the morning.\r\n\r\n- **Cardiac testing** – This testing
+      consists of activities such as having pictures taken of your heart (ultrasound),
+      assessment of your resting metabolic rate which will include you having to wear
+      light headgear with a breathing tube, and a bicycle exercise test.\r\n- **Neuropsychological
+      testing** – An assessment that consists of tests that evaluate your mood, memory
+      and how you think, learn and solve problems. This will be conducted with a trained
+      neuropsychologist.\r\n- **PET** (Positron Emission Tomography) with **CT** (Computed
+      Tomography) – PET/CT scans take pictures of what is going on inside the body
+      using special dyes with radiation that “light up” inside the body to make a
+      picture. The scanner is shaped like a big ring and you will be positioned on
+      your back on the scanner table. The table may move forward and backward as part
+      of the testing the procedures. You will complete two different PET scans. \r\n-
+      **Sense of smell testing** (olfactory)– This brief test consists of breathing
+      different odors from a small handheld odor delivery device and being asked questions
+      about your familiarity, memory and ability to name each odor.\r\n- **Sensory
+      testing** – An assessment that consists of tests to measure your sensory responses
+      – for example, having pressure applied to different parts of your body or putting
+      you hand in ice water – you will be asked to report when these sensations are
+      uncomfortable. \r\n- **Sleep study** – During the second night, you will have
+      a sleep study in your hotel room.  This will include having sensors placed on
+      your body to monitor your movement, heart rate, breathing and brain waves while
+      you sleep. A trained technician will assist you in placing various sensors on
+      your body, but they will leave you for the night. Additionally, you will be
+      asked to complete several questionnaires on your sleep habits.\r\n\r\n\r\n\r\n###
+      Day 3\r\n\r\nOn the third and final day you will travel to a different hospital
+      and begin with the TMS and EEG assessment using a ride share app (Uber or Lyft)
+      that our team can call.  TMS is noninvasive and uses magnetic fields to measure
+      connectivity in the brain.  You will then have a break for lunch and some down
+      time.  In the afternoon you will complete the physical function testing.  After
+      you have completed all of the assessments, we will be returning some preliminary
+      results from your testing.  Our medical navigation nurse and study doctor will
+      meet with you and discuss some of the results.  Additional results will be reported
+      to you in the coming weeks and that process will be explained to you at that
+      time.  The day will end around 6pm.  We will be giving you another COVID-19
+      test to complete after your visit.  Our medical navigation nurse will guide
+      you through this process.\r\n\r\n- **TMS** (Transcranial Magnetic Stimulation)
+      and **EEG** (Electroencephalogram)  – The TMS will measure brain plasticity.
+      Brain plasticity is the ability of the brain to change and learn through experience.
+      TMS is a noninvasive way of stimulating the brain. TMS uses a magnetic field
+      to cause activity in the brain. The magnetic field is produced by a coil that
+      is held next to your scalp. In this study, we will use TMS to create activity
+      in your brain and will measure your brain’s response to the activity. This is
+      how we measure brain plasticity. During the TMS assessment, you will have a
+      series of electrodes (small round discs) will be placed on your head and your
+      brain waves will be measured while you sit quietly and then while you complete
+      a few simple tasks on a computer. \r\n- **Physical function testing** – Testing
+      that consists of a series of tests such as lifting weights, a timed walking
+      test, walking upstairs carrying weights, walking while doing another task (simple
+      math), and testing your balance. These assessments will be administered and
+      overseen by a trained exercise physiologist.\r\n- **Results Return** – At the
+      end of your last day we are going to go over some of the results that we collected
+      so that you have something to take away\r\n\r\n\r\n\r\nA few risks associated
+      with this study include: \r\n\r\n\r\n- Skin irritation, redness, or bruising
+      \ (e.g. from blood draw, IV….)\r\n- Disruption of sleep or fatigue, emotional
+      distress (e.g. due to sleep study, neuropsych testing)\r\n- Radiation exposure
+      from the PET/CT, x-ray and DEXA scans \r\n- Muscle soreness, lightheadedness,
+      nausea or fainting (e.g. during physical assessments and cardiac exercise testing)\r\n\r\n\r\n\r\nAre
+      you still interested in hearing more about the study or do you have any questions
+      at this time?\r\n\r\n---\r\n\r\nWould you be willing to perform a brief cognitive
+      task and answer questions about your health and medical history to find out
+      if you might qualify for the study?  This should take about 30 minutes and you
+      will receive a $20 gift card for your time.  Do you have time now to continue?\r\n"
+    admin_id: 21
+    disabled: false
+    created_at: '2020-10-09T14:29:10.802Z'
+    updated_at: '2020-10-09T14:29:10.802Z'
+    category: ipa
+    user_email: 
+  - id: 87
+    name: ipa ps intro overview v4
+    message_type: dialog
+    template_type: content
+    template: "As you may know, The Football Players Health Study is a research initiative
+      dedicated to understanding the current health and well-being of former NFL players.
+      The research study that I want to talk to you about today is an In-Person study
+      that focuses on four areas of player health that have been identified by former
+      players such as yourself, as critical areas to be studied  – heart function,
+      neurocognitive health (e.g. memory/thinking/problem solving and brain imaging),
+      pain and physical function, and sleep. \r\n\r\nThe purpose of this study is
+      to obtain in-person measurements of these health conditions in former players.
+      We hope that this will help us better understand the relationship of a professional
+      football career to overall health. \r\n\r\nParticipation will involve a 3 day
+      study visit in Boston that includes assessments of the four areas. You will
+      be compensated up to $1800 for participanting. All nights will be spent in a
+      local hotel. The visits will take place at various Harvard-affiliated institutions.
+      Throughout the study, a team of study navigators help to guide you through all
+      of the visits. All transportation, meal and lodging costs will be covered by
+      the Study. Meals will be covered in the form of meal vouchers through the hospitals
+      and reimbursements.  You will have the option of charging dinner to the hotel
+      room or saving your dinner receipt for reimbursement.  The reimbursement and
+      study payment checks will come in the mail 3-4 weeks after your visit.\r\n\r\nBy
+      participating, you will be helping us better understand player health. Additionally,
+      you will also have the opportunity to learn more about yourself as we will be
+      providing results from some of the assessments at the end of the study. At your
+      request, these can be shared with a health care provider for further guidance
+      and interpretation. \r\n\r\nFor your safety and for the safety of our study
+      staff, we ask that you take a COVID-19 test approximately 4 days before travelling
+      to Boston and when you return home after your visit. This is a saliva test that
+      we will mail to you. Our medical navigation nurse will call you to walk you
+      through completing the test. We will also work with you to help arrange shipping
+      the test once completed. We will be paying for the test and related-shipping
+      costs. We ask that you take necessary precautions to minimize your risk for
+      COVID-19 after your test and before coming to Boston.\r\n\r\nOur study navigators
+      and study staff will also be acting in accordance with COVID-19 guidelines set
+      by our institution and our study facilities. Our study navigators will also
+      undergo COVID-19 testing on a weekly basis. Any navigators that test positive
+      will not be allowed to navigate during your visit.  Other study staff that won’t
+      be getting COVID testing will be following strict COVID guidlindes for intereacting
+      with participants in the study facilities (i.e. wearing masks, attestation,
+      face shields, frequent hand washing).\r\n\r\nWe will receive the results to
+      your COVID-19 test before you travel to Boston. We will contact you when the
+      results are available to discuss next steps. Our navigators will also have their
+      test results by that day. In the event that you test positive for COVID-19 we
+      will cancel your visit and can help you with next steps as needed. We may also
+      cancel your visit if our study navigators test positive for COVID-19. \r\n"
+    admin_id: 21
+    disabled: false
+    created_at: '2020-10-09T16:17:57.003Z'
+    updated_at: '2020-10-09T16:17:57.003Z'
     category: ipa
     user_email: 
   associated_config_libraries:

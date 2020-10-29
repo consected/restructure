@@ -100,7 +100,7 @@ class Admin::AppType < Admin::AdminBase
       app_type = Admin::AppType.where(name: a_conf['name']).first || Admin::AppType.create!(a_conf)
 
       # set the app type to allow automatic migrations to work
-      current_admin.matching_user_app_type = app_type
+      admin.matching_user_app_type = app_type
 
       res = results['app_type']
 
@@ -140,7 +140,7 @@ class Admin::AppType < Admin::AdminBase
       new_id = app_type.id
 
       # Reset the app type to allow the actual value to be used
-      current_admin.matching_user_app_type = nil
+      admin.matching_user_app_type = nil
     end
 
     app_type = find(new_id)
@@ -200,7 +200,7 @@ class Admin::AppType < Admin::AdminBase
           user = self.class.user_from_email ac['user_email']
           if user == :unknown && ac['user_email'].end_with?('@template')
             User.create(email: ac['user_email'], first_name: 'template', last_name: 'template', current_admin: admin)
-            end
+          end
           cond[:user] = user
         end
         unless user == :unknown
@@ -228,7 +228,7 @@ class Admin::AppType < Admin::AdminBase
 
         if i
           el = i
-          new_vals['disabled'] = true if i.respond_to?(:ready?) && !i.ready?
+          new_vals['disabled'] = true if i.respond_to?(:ready_to_generate?) && !i.ready_to_generate?
           el = nil unless el.changed?
           i.update! new_vals
         else
@@ -252,8 +252,8 @@ class Admin::AppType < Admin::AdminBase
 
   def clean_user_access_controls(id_list)
     # Invalid user access control ID list, so we can disable them
-    vuc = valid_user_access_controls.pluck(:id)
-    # inv =
+    # vuc = valid_user_access_controls.pluck(:id)
+
     inv = user_access_controls.active.pluck(:id) - id_list #- vuc
 
     inv.each do |i|
@@ -362,7 +362,7 @@ class Admin::AppType < Admin::AdminBase
   def associated_message_templates
     ms = []
     associated_activity_logs.all.each do |a|
-      a.extra_log_type_configs.each do |c|
+      a.option_configs.each do |c|
         c.dialog_before.each do |_d, v|
           res = Admin::MessageTemplate.active.where(name: v[:name], message_type: 'dialog', template_type: 'content').first
           ms << res
@@ -399,15 +399,19 @@ class Admin::AppType < Admin::AdminBase
     ms = []
 
     associated_activity_logs.all.each do |a|
-      ms += ExtraLogType.config_libraries a
+      ms += OptionConfigs::ActivityLogOptions.config_libraries a
     end
 
     associated_dynamic_models.all.each do |a|
-      ms += ExtraOptions.config_libraries a
+      ms += OptionConfigs::DynamicModelOptions.config_libraries a
+    end
+
+    associated_external_identifiers.all.each do |a|
+      ms += OptionConfigs::ExternalIdentifierOptions.config_libraries a
     end
 
     associated_reports.all.each do |a|
-      ms += ExtraOptions.config_libraries a
+      ms += OptionConfigs::ReportOptions.config_libraries a
     end
 
     ms.sort { |a, b| a.id <=> b.id }.uniq

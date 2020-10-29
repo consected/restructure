@@ -144,8 +144,10 @@ module AppExceptionHandler
         render plain: msg, status: code, content_type: 'text/plain'
       end
       # special handling for CSV failures as they open new windows
-      flash[:danger] = msg[0..2000]
-      type.csv { redirect_to child_error_reporter_path }
+      type.csv do
+        flash[:danger] = msg[0..2000]
+        redirect_to child_error_reporter_path
+      end
     end
     true
   end

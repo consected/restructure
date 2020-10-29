@@ -3,6 +3,10 @@
 class ExternalIdentifier::ExternalIdentifierController < UserBaseController
   include MasterHandler
 
+  def template_config
+    render plain: ''
+  end
+
   protected
 
   # By default the external id edit form is handled through a common template.

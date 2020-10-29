@@ -1,7 +1,7 @@
 <% default_panels = app_config_items(:open_panels) %>
 
 <script id="master_tabs" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <ul class="nav nav-pills default-master-tabs details-tabs <%= app_config_set(:hide_player_tabs) ? 'hidden' : '' %> hide-player-tabs-<%= app_config_set(:hide_player_tabs)%>">
+  <ul class="nav nav-pills default-master-tabs details-tabs <%= hide_player_tabs? ? 'hidden' : '' %> hide-player-tabs-<%= hide_player_tabs?%>">
 
     <% unless app_config_set(:hide_tracker_panel) %>
     <li role="presentation" class="default-tracker-tab <%= (default_panels.length == 0 ||  'trackers'.in?(default_panels)) ? '{{#is trackers_length}}on-open-click{{/is}}' : '' %>">
@@ -51,7 +51,7 @@
         initial_show = (default_panels.length == 0 && app_config_text(:show_activity_log_panel) == a.item_type_name) || a.item_type_name.in?(default_panels)
       %>
       <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
-        <a id="tab-activity-log-<%= a.item_type_name %>" href="/masters/{{id}}/activity_log/<%= a.item_type_name.pluralize %>"  data-panel-tab="activity_log__<%=a.item_type_name.pluralize%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="<%= a.model_data_template_name %>-main-result-template"><%= a.name.downcase %></a>
+        <a id="tab-activity-log-<%= a.item_type_name %>" href="/masters/{{id}}/activity_log/<%= a.item_type_name.pluralize %>"  data-panel-tab="activity_log__<%=a.item_type_name.pluralize%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="<%= a.model_association_name.to_s.hyphenate %>-main-result-template"><%= a.name.downcase %></a>
       </li>
       <% end %>
     <% end %>

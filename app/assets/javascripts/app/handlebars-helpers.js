@@ -322,7 +322,7 @@
 
 
 
-  Handlebars.registerHelper('fpa_state_item', function (name, key, sub_key, sub_key2) {
+  Handlebars.registerHelper('fpa_state_item', function (name, key, sub_key, sub_key2, sub_key3) {
     var res = _fpa.state[name];
     if (res && key && !key.hash)
       res = res[key];
@@ -330,6 +330,8 @@
       res = res[sub_key];
     if (res && sub_key2 && !sub_key2.hash)
       res = res[sub_key2];
+    if (res && sub_key3 && !sub_key3.hash)
+      res = res[sub_key3];
     return res;
   });
 
@@ -502,7 +504,14 @@
     return Handlebars.compile(source);
   });
 
-  Handlebars.registerHelper('run_template', function (template) {
+  Handlebars.registerHelper('run_template', function (template, context) {
+    if (!template) {
+      console.log("Template to be run is null.");
+      console.log(this);
+      console.log(context);
+      return;
+    }
+
     return template(this);
   });
 

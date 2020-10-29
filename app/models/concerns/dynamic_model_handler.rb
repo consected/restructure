@@ -64,6 +64,8 @@ module DynamicModelHandler
       foreign_key_name.blank?
     end
 
+    # At this time dynamic models only use one config definition, under the 'default' key
+    # Simplify access to the default options configuration
     def default_options
       @default_options = definition.default_options
     end
@@ -92,22 +94,9 @@ module DynamicModelHandler
     :dynamic_model
   end
 
+  # The dynamic model option type is always 'default'
   def option_type
     'default'
-  end
-
-  # resource_name used by user access controls
-  def resource_name
-    self.class.definition.resource_name
-  end
-
-  def option_type_config
-    self.class.default_options
-  end
-
-  def no_downcase_attributes
-    fo = option_type_config.field_options
-    fo&.filter { |_k, v| v[:no_downcase] }&.keys
   end
 
   def master_id
@@ -169,50 +158,5 @@ module DynamicModelHandler
 
     # Finally continue with the standard checks if none of the previous have failed
     @can_access = !!super()
-  end
-
-  # Calculate the can rules for the required type, based on user access controls and showable_if rules
-  # @param type [Symbol] either :access or :edit for showable_if or editable_if
-  def calc_can(type)
-    # either use the editable_if configuration if there is one
-    dopt = definition_default_options
-
-    if type == :edit
-      doptif = dopt.editable_if
-    elsif type == :access
-      doptif = dopt.showable_if
-    end
-
-    if doptif.is_a?(Hash) && doptif.first
-      # Generate an old version of the object prior to changes
-      old_obj = dup
-      changes.each do |k, v|
-        old_obj.send("#{k}=", v.first) if k.to_s != 'user_id'
-      end
-
-      # Ensure the duplicate old_obj references the real master, ensuring current user can
-      # be referenced correctly in conditional calculations
-      old_obj.master = master
-
-      if type == :edit
-        res = !!dopt.calc_editable_if(old_obj)
-      elsif type == :access
-        res = !!dopt.calc_showable_if(old_obj)
-      end
-    end
-
-    res
-  end
-
-  # Force the ability to add references even if can_edit? for the parent record returns false
-  def can_add_reference?
-    return @can_add_reference unless @can_add_reference.nil?
-
-    @can_add_reference = false
-    dopt = definition_default_options
-    return unless dopt.add_reference_if.is_a?(Hash) && dopt.add_reference_if.first
-
-    res = dopt.calc_add_reference_if(self)
-    @can_add_reference = !!res
   end
 end

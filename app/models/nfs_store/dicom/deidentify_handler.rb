@@ -26,7 +26,7 @@ module NfsStore
         set_tags = config[:set_tags]
         # Handle substitutions of new values
         set_tags.each_key do |k|
-          v = Admin::MessageTemplate.substitute(set_tags[k], data: container_file, tag_subs: nil)
+          v = Formatter::Substitution.substitute(set_tags[k], data: container_file, tag_subs: nil)
           set_tags[k] = v
         end
         delete_tags = config[:delete_tags]
@@ -35,7 +35,7 @@ module NfsStore
         dh = DeidentifyHandler.new(file_path: full_path)
         new_tmp_image_path = dh.anonymize_with(set_tags: set_tags, delete_tags: delete_tags)
 
-        new_path = Admin::MessageTemplate.substitute(config[:new_path], data: container_file, tag_subs: nil)
+        new_path = Formatter::Substitution.substitute(config[:new_path], data: container_file, tag_subs: nil)
         new_path = new_path.sub(NfsStore::Archive::Mounter::ArchiveMountSuffix, '') if new_path.present?
         if new_path
           attrs = container_file.attributes

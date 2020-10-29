@@ -67,7 +67,6 @@ _fpa.postprocessors_admin = {
           var ls = l.split('/', 2);
           var last = ls.length - 1;
           var first = 0;
-          console.log('got:' + ls[last])
           $(this).attr('label', ls[last]);
           $(this).attr('data-group-num', ls[first]);
         }
