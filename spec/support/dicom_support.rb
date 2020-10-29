@@ -20,6 +20,13 @@ module DicomSupport
     @uploaded_files
   end
 
+  def upload_test_zip_file
+    f = 'dicoms.zip'
+    @uploaded_files = []
+    file_content = File.read(dicom_file_path(f))
+    @uploaded_files << upload_file(f, file_content)
+  end
+
   def setup_deidentifier
     @al_name = AlFilterTestName
 
@@ -89,6 +96,10 @@ module DicomSupport
                       '0010,0010': '{{master_id}}'
                       '0010,0020': '{{player_contacts.data}}'
               - dicom_metadata:
+          - name: Re-Run Pipeline
+            id: rerun_pipeline
+            pipeline:
+              - rerun_all:
 
         pipeline:
           - mount_archive:
