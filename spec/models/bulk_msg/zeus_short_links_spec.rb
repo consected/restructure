@@ -62,8 +62,8 @@ RSpec.describe 'DynamicModel::ZeusShortLink', type: :model do
 
     alt = @master.player_contacts.create! data: '(123)123-1234 alt', rec_type: :phone, rank: 5
 
-    data = Admin::MessageTemplate.setup_data(@player_contact, alt)
-    res = Admin::MessageTemplate.substitute txt, data: data, tag_subs: nil
+    data = Formatter::Substitution.setup_data(@player_contact, alt)
+    res = Formatter::Substitution.substitute txt, data: data, tag_subs: nil
 
     sl = DynamicModel::ZeusShortLink.last
     expect(sl).to be_a DynamicModel::ZeusShortLink
@@ -101,8 +101,8 @@ RSpec.describe 'DynamicModel::ZeusShortLink', type: :model do
 
     t = Benchmark.realtime do
       masters.each do |master|
-        data = Admin::MessageTemplate.setup_data(master.player_contacts[0], master.player_contacts[1])
-        res = Admin::MessageTemplate.substitute txt.dup, data: data, tag_subs: nil
+        data = Formatter::Substitution.setup_data(master.player_contacts[0], master.player_contacts[1])
+        res = Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
 
         sl = DynamicModel::ZeusShortLink.first
         expect(sl).to be_a DynamicModel::ZeusShortLink

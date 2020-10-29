@@ -411,7 +411,7 @@ class Admin::AppType < Admin::AdminBase
     end
 
     associated_reports.all.each do |a|
-      ms += OptionConfigs::OptionConfigs::ReportOptions.config_libraries a
+      ms += OptionConfigs::ReportOptions.config_libraries a
     end
 
     ms.sort { |a, b| a.id <=> b.id }.uniq

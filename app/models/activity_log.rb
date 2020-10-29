@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class ActivityLog < ActiveRecord::Base
-  include DynamicModelDefHandler
+  include Dynamic::VersionHandler
+  include Dynamic::MigrationHandler
+  include Dynamic::DefHandler
   include AdminHandler
   include SelectorCache
 
@@ -213,7 +215,7 @@ class ActivityLog < ActiveRecord::Base
   # Verifies that the user has access to this activity log item
   # @param activity_log_type [String] type string that can be converted to a namespaced camelized class name
   # @param id [Integer] id for the activity log implementation instance
-  # @return [ActivityLogBase]
+  # @return [Dynamic::ActivityLogBase]
   def self.open_activity_log(activity_log_type, id, current_user)
     al_class = activity_log_class_from_type activity_log_type
     activity_log = al_class.find(id)
@@ -299,6 +301,7 @@ class ActivityLog < ActiveRecord::Base
             get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
             patch "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
             put "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+            get "#{ic}/:item_id/activity_log/#{mn}/:id/template_config", to: "activity_log/#{mn}#template_config"
 
             # used by links to get to activity logs without having to use parent item (such as a player contact with phone logs)
             get "activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
@@ -307,6 +310,8 @@ class ActivityLog < ActiveRecord::Base
             get "activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
             post "activity_log/#{mn}", to: "activity_log/#{mn}#create"
             patch "activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+            get "activity_log/#{mn}/:id/template_config", to: "activity_log/#{mn}#template_config"
+
             # used by item flags to generate appropriate URLs
             begin
               get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show", as: "activity_log_#{pg.implementation_model_name}"
@@ -405,7 +410,7 @@ class ActivityLog < ActiveRecord::Base
         end
 
         # Main implementation class
-        a_new_class = Class.new(ActivityLogBase) do
+        a_new_class = Class.new(Dynamic::ActivityLogBase) do
           class << self
             attr_accessor :definition
           end

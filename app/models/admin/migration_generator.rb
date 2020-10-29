@@ -222,6 +222,7 @@ class Admin::MigrationGenerator
     begin
       cols = ActiveRecord::Base.connection.columns(table_name)
       old_colnames = cols.map(&:name) - standard_columns
+      old_colnames = old_colnames.reject { |f| f.index(/^embedded_report_|^placeholder_/) }
     rescue StandardError
       return
     end
@@ -274,7 +275,7 @@ class Admin::MigrationGenerator
           self.fields = %i[#{migration_fields_array.join(' ')}]
           self.table_comment = '#{table_comments[:table]}'
           self.fields_comments = #{(table_comments[:fields] || {}).to_json}
-          self.no_master_association = #{no_master_association}
+          self.no_master_association = #{!!no_master_association}
     SETATRRIBS
   end
 

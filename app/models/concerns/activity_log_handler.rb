@@ -281,7 +281,7 @@ module ActivityLogHandler
   # List of activity log types that can be created or not, based on user access controls and creatable_if rules
   def creatables
     current_user = master.current_user
-    def_class = self.class.definition
+    def_class = current_definition
     res = {}
 
     # Make a creatable actions, based on standard user access controls and extra log type creatable_if rules
@@ -708,14 +708,6 @@ module ActivityLogHandler
     end
 
     @can_access = !!(res && super())
-  end
-
-  # If access has changed since an initial check, reset the cached results
-  def reset_access
-    @can_access = nil
-    @can_create = nil
-    @can_add_reference = nil
-    @can_edit = nil
   end
 
   # Extend the standard access check with a check on the extra_log_type resource

@@ -1,0 +1,6 @@
+<%
+  mapped_vars = OptionConfigs::TemplateOptionMapping.dynamic_model_mapping(def_record, option_type_config, current_user)
+%>
+<%= render partial: 'common_templates/search_results_template', 
+           locals: mapped_vars if current_user.has_access_to?(:access, :table, def_record.resource_name) %>
+

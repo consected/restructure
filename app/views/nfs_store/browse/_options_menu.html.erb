@@ -4,7 +4,7 @@
     <li><a href="#" id="container-browse-trash-<%=container_id%>" class="container-browse-trash-submit" data-target-browser="#container-browser-<%=container_id%>" data-can-send-to-trash="<%=can_send_to_trash%>">Send to trash</a></li>
     <li><a href="#" id="container-browse-move-files-<%=container_id%>" class="container-browse-move-files" data-target-browser="#container-browser-<%=container_id%>" data-can-move-files="<%=can_move_files%>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Move Files</a></li>
     <li><a href="#" id="container-browse-rename-file-<%=container_id%>" class="container-browse-rename-file" data-target-browser="#container-browser-<%=container_id%>" data-can-rename-file="<%=can_move_files%>">Rename file</a></li>
-    {{#each (fpa_state_item 'template_config' name 'user_file_actions')}}
+    {{#each (fpa_state_item 'template_config' name  vdef_version 'user_file_actions')}}
     <li><a href="#" 
            id="container-browse-trigger-file-action-{{id}}-<%=container_id%>" 
            class="container-browse-trigger-file-action" 

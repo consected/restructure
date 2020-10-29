@@ -186,6 +186,9 @@ module HandlesUserBase
   # Default to allow generalization
   def save_action; end
 
+  # Default to allow generalization
+  def def_version; end
+
   def master_user
     return current_user if self.class.no_master_association
 

@@ -1,4 +1,8 @@
 <%
+  unless defined? def_version
+    def_version = nil
+  end
+
   main_log_full_name = "#{full_name}_primary"
   item_type_name_hyphenated = item_type_name.hyphenate
   full_name_hyphenated = full_name.hyphenate
@@ -23,11 +27,14 @@
 
   main_log_caption = main_log_label
   main_log_caption = al_name if main_log_caption == 'Add Log'
+
+  current_definition = implementation_class.definition
 %>
 
 <% if current_user.has_access_to?(:access, :table, full_name.pluralize) %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
+    def_version: def_version,
     name: main_log_full_name,
     model_data_type: :activity_log,
     item_class_name: full_name,
@@ -58,6 +65,7 @@
   } %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
+    def_version: def_version,
     name: blank_log_full_name,
     model_data_type: :activity_log,
     item_class_name: full_name,
@@ -87,51 +95,11 @@
     extra_data_attribs: [:extra_log_type]
   } %>
 
-<% option_configs.each do |c|
-
-    view_options = c.view_options
-    cwc = col_width_classes
-    cwc = 'e-sign-doc col-md-24 col-lg-12' if c.e_sign
-    cwc = view_options[:alt_width_classes] if view_options && view_options[:alt_width_classes]
-
-    header_caption = view_options[:header_caption] || c.label
-    extra_class = view_options[:extra_class]
-
+<% option_configs.each do |option_type_config|
+    mapped_vars = OptionConfigs::TemplateOptionMapping.activity_log_mapping(def_record, option_type_config, current_user)
 %>
-
-  <%= render partial: 'common_templates/search_results_template', locals: {
-      caption: header_caption,
-      name: "#{full_name}_#{c.name}",
-      model_data_type: :activity_log,
-      item_class_name: full_name,
-      button_label: c.button_label,
-      prevent_edit: prevent_edit,
-      prevent_create: prevent_create,
-      only_see_presence: current_user.has_access_to?(:see_presence, :activity_log_type, c.resource_name),
-      extra_class: "alt-width #{cwc} #{extra_class}",
-      item_list: c.fields,
-      data_sort: [:desc, data_action_when],
-      subsort_id: true,
-      # custom_block_attrs: {data_action_when => "{{timestamp #{action_when_attribute}}}"},
-      custom_activity_log: :none,
-      implementation_class: implementation_class,
-      implementation_class_name: implementation_class_name,
-      item_blocks: {item_type.to_sym => implementation_class.parent_data_names},
-      show_created_at: true,
-      edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{item_type.pluralize}/{{item_id}}/{{/if}}activity_log/#{item_type_name.pluralize}/{{id}}/edit",
-      caption_before: c.caption_before,
-      dialog_before: c.dialog_before,
-      item_flags_after: 'notes',
-      item_flags_readonly: true,
-      extra_type: c.name,
-      references: c.references,
-      show_if: c.show_if,
-      view_options: c.view_options,
-      extra_data_attribs: [:extra_log_type],
-      extra_options_config: c
-    } %>
-
-  <% end %>
+  <%= render partial: 'common_templates/search_results_template', locals: mapped_vars %>
+<% end %>
 
 
 <script id="sub_list_<%=item_type_name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -161,7 +129,7 @@
 
 
 <script id="activity_logs_<%=item_type_name%>_actions-partial" type="text/x-handlebars-template" class="hidden handlebars-partial handlebars-template">
-  <% unless prevent_create  || !current_user.has_access_to?(:create, :activity_log_type, implementation_class.definition.option_type_config_for(:primary).resource_name)%>
+  <% unless prevent_create  || !current_user.has_access_to?(:create, :activity_log_type, current_definition.option_type_config_for(:primary).resource_name)%>
   <span id="activity-log-{{master_id}}-initial-action" class="" >
     <span class="activity-log--<%=item_type_name_hyphenated%>-actions">
       <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{item_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-extra-log-type="primary" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-primary-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= main_log_label %></a>
@@ -175,7 +143,7 @@
   <div id="<%=item_type_hyphenated%>-activity-logs-<%=item_type_name_hyphenated%>-type-{{item_id}}" class="panel panel-default activity-logs-item-block activity-logs-<%=item_type_name_hyphenated%>-type-block <%= hide_item_list_panel ? 'hidden-item-list-panel' : 'shown-item-list-panel' %>" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
 
     <div class="is-heading activity-logs-header">
-    <% unless app_config_set(:hide_player_tabs) %>
+    <% unless hide_player_tabs? %>
       <a data-target="#activity-log--<%=item_type_name_hyphenated.pluralize%>-{{master_id}}" data-toggle="collapse" class="show-entity pull-right glyphicon glyphicon-remove-sign no-scroll-on-collapse" title="close panel"></a>
     <% end %>
       <h4 class="list-group-item-heading al-label-<%=item_type_name_hyphenated%>-item"><%=al_name%></h4>
@@ -184,7 +152,7 @@
       <p class="text-center action-buttons">
         {{#each <%=item_type.pluralize%>}}
         <%
-        eltc = implementation_class.definition.option_type_config_for(:primary)
+        eltc = current_definition.option_type_config_for(:primary)
         if current_user.has_access_to?(:create, :activity_log_type, eltc.resource_name)
         %>
           <% if rec_type.blank? %>
@@ -197,7 +165,7 @@
         <% end %>
         {{/each}}
         <%
-        eltc = implementation_class.definition.option_type_config_for(:blank_log)
+        eltc = current_definition.option_type_config_for(:blank_log)
         if current_user.has_access_to?(:create, :activity_log_type, eltc.resource_name)
         %>
         <a href="/masters/{{master_id}}/activity_log/<%=item_type_name.pluralize%>/new?extra_type=blank-log" data-remote="true" class="btn btn-sm btn-primary add-item-button <%= eltc.view_options[:hide_unless_creatable] ? 'hide-unless-creatable' : '' %>"  data-extra-log-type="blank_log" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= blank_log_label %></a>
@@ -242,7 +210,7 @@
           <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/new<%= rec_type.blank? ? '' : "?#{item_type}[rec_type]=#{rec_type}"  %>" data-remote="true" class="btn btn-sm btn-default add-item-button" data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log--<%=item_type_name_hyphenated%>-edit-form-{{master_id}}-" aria-label="add <%=item_type.humanize%> record"><span class="glyphicon glyphicon-plus"></span> <%= item_type.humanize%> record</a>
           <% end %>
           <% unless prevent_create %>
-          <% if current_user.has_access_to?(:create, :activity_log_type, implementation_class.definition.option_type_config_for(:blank_log).resource_name) %>
+          <% if current_user.has_access_to?(:create, :activity_log_type, current_definition.option_type_config_for(:blank_log).resource_name) %>
           <a href="/masters/{{master_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= blank_log_label %></a>
           <% end %>
             <% option_configs.each do |c|

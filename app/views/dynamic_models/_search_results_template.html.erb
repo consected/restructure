@@ -1,55 +1,7 @@
-<% DynamicModel.active_model_configurations.each do |m|
-  l = []
-  full_name = "dynamic_model__#{m.implementation_model_name}"
-  field_list = m.field_list
-  if field_list.blank?
-    raise FphsException, "No model definition for #{full_name}" unless m.model_class
-    field_list = m.model_class.attribute_names - ['id', 'created_at', 'updated_at', 'contactid', 'user_id', 'master_id']
-    field_list  << 'tracker_history_id' if current_user.has_access_to? :edit, :table, full_name.pluralize
-  else
-    field_list = m.field_list_array
-  end
-
-  item_list = field_list.dup
-
-  if item_list - %w(country state) != item_list
-    # Is an address model
-    item_list[item_list.index('country')] = 'country_name' if item_list.include? 'country'
-    item_list[item_list.index('state')] = 'state_name' if item_list.include? 'state'
-  end
-
-
-  if m.model_class.attribute_names.include? 'rank'
-    data_sort = [:desc, "data-rank"]
-  end
-  default_options = m.default_options
-  view_options = default_options.view_options
-  header_caption = view_options[:header_caption] || m.name
-  extra_class = view_options[:extra_class]
-  extra_data_attribs = [:rec_type] if field_list.include?('rec_type')
-  button_label = default_options.button_label
-
-  res_name = m.resource_name
-  current_user_access = current_user.has_access_to?(:access, :table, res_name)
-%>
-<%= render partial: 'common_templates/search_results_template', locals: {
-      caption: header_caption,
-      button_label: button_label,
-      name: m.implementation_model_name,
-      full_name: full_name,
-      model_data_type: :dynamic_model,
-      prevent_edit: !(current_user.has_access_to? :edit, :table, m.full_item_type_name.pluralize),
-      prevent_create: !(current_user.has_access_to? :create, :table, m.full_item_type_name.pluralize),
-      item_list: item_list,
-      caption_before: default_options.caption_before,
-      dialog_before: default_options.dialog_before,
-      labels: default_options.labels,
-      show_if: default_options.show_if,
-      data_sort: data_sort,
-      category: m.category,
-      view_options: view_options,
-      extra_class: extra_class,
-      extra_data_attribs: extra_data_attribs,
-      extra_options_config: default_options
-    } if current_user_access %>
+<% DynamicModel.active_model_configurations.each do |m| %>
+  <%= render partial: 'dynamic_models/common_search_results_template_item', 
+             locals: { 
+               def_record: m,
+               option_type_config: m.default_options
+              } %>
 <% end %>

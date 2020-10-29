@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class ExternalIdentifier < ActiveRecord::Base
-  include DynamicModelDefHandler
+  include Dynamic::VersionHandler
+  include Dynamic::MigrationHandler
+  include Dynamic::DefHandler
   include AdminHandler
 
   DefaultRange = (1..9_999_999_999).freeze
@@ -60,8 +62,11 @@ class ExternalIdentifier < ActiveRecord::Base
         resources :masters, only: %i[show index new create] do
           m.each do |pg|
             mn = pg
+            pg_name = mn.model_association_name
+
             Rails.logger.info "Setting up routes for #{mn}"
-            resources pg.model_association_name, except: [:destroy]
+            resources pg_name, except: [:destroy]
+            get "#{pg_name}/:id/template_config", to: "#{pg_name}#template_config"
           end
         end
       end
@@ -124,7 +129,9 @@ class ExternalIdentifier < ActiveRecord::Base
     else
       Master.has_many model_association_name.to_sym, inverse_of: :master
     end
-    # Now update the master's nested attributes this model's symbol
+
+    # To facilitate the simple and advanced searches on master records
+    # update the master's nested attributes for this model's symbol
     Master.add_nested_attribute model_association_name.to_sym
 
     Master.add_alternative_id_method external_id_attribute
@@ -151,7 +158,7 @@ class ExternalIdentifier < ActiveRecord::Base
         end
 
         # Main implementation class
-        a_new_class = Class.new(ExternalIdentifierBase) do
+        a_new_class = Class.new(Dynamic::ExternalIdentifierBase) do
           def self.definition=(d)
             @definition = d
             # Force the table_name, since it doesn't include external_identifer_ as a prefix, which is the Rails convention for namespaced models

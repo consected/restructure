@@ -14,9 +14,9 @@
       col_url = col['url']
 
       if @master
-        col_label = Admin::MessageTemplate.substitute(col_label, data: @master, tag_subs: nil)
-        col_header = Admin::MessageTemplate.substitute(col_header, data: @master, tag_subs: nil)
-        col_footer = Admin::MessageTemplate.substitute(col_footer, data: @master, tag_subs: nil)
+        col_label = Formatter::Substitution.substitute(col_label, data: @master, tag_subs: nil)
+        col_header = Formatter::Substitution.substitute(col_header, data: @master, tag_subs: nil)
+        col_footer = Formatter::Substitution.substitute(col_footer, data: @master, tag_subs: nil)
       end
 
       unless col_url

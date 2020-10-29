@@ -36,6 +36,12 @@
       <% end %>
     <% end %>
     <% end %>
+
+    <% if admin_links.present? %>
+    <td>
+      <% admin_links(list_item.id).each do |al| %><%= link_to *al %> <% end %>
+    </td>
+    <% end %>
   </tr>
   <% if found_options %>
     <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">

@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class DynamicModel < ActiveRecord::Base
-  include DynamicModelDefHandler
+  include Dynamic::VersionHandler
+  include Dynamic::MigrationHandler
+  include Dynamic::DefHandler
   include AdminHandler
 
   StandardFields = %w[id created_at updated_at contactid user_id master_id].freeze
@@ -9,7 +11,7 @@ class DynamicModel < ActiveRecord::Base
   default_scope -> { order disabled: :asc, category: :asc, position: :asc, updated_at: :desc }
 
   validate :table_name_ok
-  after_save :set_empty_field_list
+  before_save :set_empty_field_list
 
   attr_accessor :editable
 
@@ -113,10 +115,11 @@ class DynamicModel < ActiveRecord::Base
         end
 
         # Main implementation class
-        a_new_class = Class.new(DynamicModelBase) do
+        a_new_class = Class.new(Dynamic::DynamicModelBase) do
           def self.definition=(d)
             @definition = d
-            # Force the table_name, since it doesn't include dynamic_model_ as a prefix, which is the Rails convention for namespaced models
+            # Force the table_name, since it doesn't include dynamic_model_ as a prefix,
+            # which is the Rails convention for namespaced models
             self.table_name = d.table_name
           end
 
@@ -237,6 +240,7 @@ class DynamicModel < ActiveRecord::Base
             namespace :dynamic_model do
               resources pg_name, except: [:destroy]
             end
+            get "dynamic_model/#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
           end
 
         else
@@ -245,6 +249,7 @@ class DynamicModel < ActiveRecord::Base
           namespace :dynamic_model do
             resources pg_name, except: [:destroy]
           end
+          get "dynamic_model/#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
         end
       end
     end
@@ -281,9 +286,18 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
+  #
+  # before_save trigger forces the field list to be set, based on database fields
+  # @return [String] - space separated field list
   def set_empty_field_list
-    fl = implementation_class.attribute_names - StandardFields
-    self.field_list = fl.join(' ') if field_list.blank?
+    self.field_list = default_field_list_array.join(' ') if field_list.blank?
+  end
+
+  def default_field_list_array
+    implementation_class.attribute_names - StandardFields
+  rescue StandardError => e
+    logger.warn "Failed to get the default_field_list_array, probably because the class is not available.\n#{e}"
+    []
   end
 end
 

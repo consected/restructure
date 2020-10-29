@@ -8,7 +8,9 @@ module AdminControllerHandler
     before_action :authenticate_admin!
     before_action :set_instance_from_id, only: %i[edit update destroy]
 
-    helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance, :objects_instance, :human_name, :no_edit, :primary_model, :view_path, :extra_field_attributes
+    helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance,
+                  :objects_instance, :human_name, :no_edit, :primary_model,
+                  :view_path, :extra_field_attributes, :admin_links
   end
 
   def index
@@ -100,6 +102,10 @@ module AdminControllerHandler
 
   def index_params
     permitted_params + [:admin_id] - [:disabled]
+  end
+
+  def admin_link_params
+    []
   end
 
   def index_partial
@@ -231,9 +237,18 @@ module AdminControllerHandler
     instance_variable_get("@#{objects_name}")
   end
 
-  private
-
   def no_action_log
     true
+  end
+
+  #
+  # Overridable method in individual admin controllers, to allow admin links to appear in admin lists
+  # @param [Integer] _id - the id of the record
+  # @return [Array {Array}] - returns an array of settings for each type of admin link
+  #   Each item is an array representing the arguments passed to the #link_to method
+  #   For example:
+  #     [ ['details', admin_external_id_details_path(id) ], ... ]
+  def admin_links _id=nil
+    nil
   end
 end

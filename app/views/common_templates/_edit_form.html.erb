@@ -23,9 +23,11 @@
     form_object_instance = @embedded_item
   end
   @form_object_instance = form_object_instance
+  option_type_config = form_object_instance.option_type_config
+
 
   unless defined? view_options
-    d = form_object_instance.class.default_options
+    d = option_type_config
     view_options = d.view_options if d
     # view_options = {}
   end
@@ -61,7 +63,7 @@
 
   unless defined? caption_before
     if embedded
-      d = form_object_instance.class.default_options
+      d = option_type_config
       caption_before = d.caption_before if d
     else
       caption_before = {}
@@ -71,7 +73,7 @@
 
   unless defined? dialog_before
     if embedded
-      d = form_object_instance.class.default_options
+      d = option_type_config
       dialog_before = d.dialog_before if d
     else
       dialog_before = {}
@@ -81,7 +83,7 @@
 
   unless defined? labels
     if embedded
-      d = form_object_instance.class.default_options
+      d = option_type_config
       labels = d.labels if d
     else
       labels = {}
@@ -99,7 +101,7 @@
   end
 
   unless defined? save_action
-    d = form_object_instance.class.default_options
+    d = option_type_config
     save_action = d.save_action if d
     save_action ||= { label: 'Save' }
   end

@@ -3,15 +3,15 @@
 <script id="common_template_result_field" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
   {{#is key 'in' caption_before_keys}}
-  {{#if (fpa_state_item 'dialog_before' (underscore name) key)}}
-    {{{fpa_state_item 'dialog_before' (underscore name) key}}}
-  {{else if (fpa_state_item 'caption_before' (underscore name) key 'show_caption')}}
-  <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}">
-    {{{fpa_state_item 'caption_before' (underscore name) key 'show_caption'}}}
+  {{#if (fpa_state_item 'dialog_before' (underscore name) vdef_version key)}}
+    {{{fpa_state_item 'dialog_before' (underscore name) vdef_version key}}}
+  {{else if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'show_caption')}}
+  <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}">
+    {{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'show_caption'}}}
   </li>
-  {{else if (fpa_state_item 'caption_before' (underscore name) key 'caption')}}
-  <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}">
-    {{{fpa_state_item 'caption_before' (underscore name) key 'caption'}}}
+  {{else if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption')}}
+  <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}">
+    {{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption'}}}
   </li>
   {{/if}}
   {{/is}}
@@ -206,7 +206,7 @@
       </li>
   {{else is this_value '===' null}}
   {{else}}
-    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (fpa_state_item 'template_config' (underscore name) 'field_options' key 'no_downcase') }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (fpa_state_item 'template_config' (underscore name) 'field_options' vdef_version key 'no_downcase') }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{/is}}
   {{#if show_item_type_flags_after}}
   {{#is key item_flags_after}}
@@ -222,13 +222,12 @@
 
 <script id="common_template_result_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
 {{#is 'all_fields' 'in' template_config.caption_before_keys}}
-  <li class="list-group-item caption-before results-caption-before {{hyphenate full_name}}-all_fields all-fields-caption">{{{fpa_state_item 'caption_before' (underscore name) 'all_fields' 'show_caption'}}}</li>
+  <li class="list-group-item caption-before results-caption-before {{hyphenate full_name}}-all_fields all-fields-caption">{{{fpa_state_item 'caption_before' (underscore name) vdef_version 'all_fields' 'show_caption'}}}</li>
 {{/is}}
 
 {{#if template_config.item_list.length}}
 {{#filter result_data (join template_config.item_list ',') }}
-
-  {{#with (fpa_state_item 'template_config' (underscore ../name))}}
+  {{#with (fpa_state_item 'template_config' (underscore ../name) ../vdef_version)}}
   {{> common_template_result_field this_value=../this key=@key name=../../name template_config=this result_data=../../result_data}}
   {{/with}}
 

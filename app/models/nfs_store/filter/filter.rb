@@ -73,7 +73,7 @@ module NfsStore
       end
 
       def self.filter_for(filter, item)
-        Admin::MessageTemplate.substitute filter, data: item, tag_subs: nil
+        Formatter::Substitution.substitute filter, data: item, tag_subs: nil
       end
 
       # Evaluate a query directly in the database to produce a filtered set of records
