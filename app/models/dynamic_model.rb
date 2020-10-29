@@ -295,6 +295,9 @@ class DynamicModel < ActiveRecord::Base
 
   def default_field_list_array
     implementation_class.attribute_names - StandardFields
+  rescue StandardError => e
+    logger.warn "Failed to get the default_field_list_array, probably because the class is not available.\n#{e}"
+    []
   end
 end
 
