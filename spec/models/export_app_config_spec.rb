@@ -84,7 +84,7 @@ RSpec.describe 'Export an app configuration', type: :model do
     als = ActivityLog.active.where(name: 'BHS Tracker')
     als.where('id <> ?', als.first&.id).update_all(disabled: true) if als.count != 1
 
-    config_dir = Rails.root.join('docs', 'config_tests')
+    config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_tests')
     config_fn = 'bhs_app_type_test_config.json'
     SetupHelper.setup_app_from_import app_name, config_dir, config_fn
 

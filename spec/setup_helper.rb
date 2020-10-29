@@ -36,7 +36,7 @@ module SetupHelper
     # Export App
     sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql
                    6-grant_roles_access_to_ml_app.sql create_adders_table.sql]
-    sql_source_dir = Rails.root.join('docs', 'config_tests')
+    sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_tests')
     SetupHelper.setup_app_db sql_source_dir, sql_files
 
     # Bulk
@@ -196,7 +196,7 @@ module SetupHelper
   def self.setup_test_app
     app_name = "bhs_model_#{rand(100_000_000)}"
 
-    config_dir = Rails.root.join('docs', 'config_tests')
+    config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_tests')
     config_fn = 'bhs_app_type_test_config.json'
     SetupHelper.setup_app_from_import app_name, config_dir, config_fn
 
