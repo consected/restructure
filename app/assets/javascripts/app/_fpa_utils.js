@@ -25,7 +25,6 @@ _fpa.utils.jump_to_linked_item = function (target, offset, options) {
     var dic = target.replace('#', '').replace('-' + dm + '-' + dii, '').replace(/-/g, '_');
 
     h = $('[data-item-class="' + dic + '"][data-sub-id="' + dii + '"]');
-    console.log(h);
   }
 
   if (!h || h.length == 0)
@@ -462,8 +461,6 @@ _fpa.utils.pretty_print = function (stre, options_hash) {
 };
 
 _fpa.utils.calc_field = function (field_name_sym, form_object_item_type_us) {
-
-  console.log('calc_field');
 
   var cwdef = _fpa.calculate_with[field_name_sym];
 
