@@ -153,7 +153,7 @@ class Admin::MigrationGenerator
   # Generate the table name for the history table based on the current table name
   # @param [String] table_name
   # @return [String]
-  def self.history_table_name_for table_name
+  def self.history_table_name_for(table_name)
     "#{table_name.singularize}_history"
   end
 
@@ -162,11 +162,11 @@ class Admin::MigrationGenerator
   # based on the table name
   # @param [String] table_name
   # @return [String]
-  def self.history_table_id_attr_for table_name
+  def self.history_table_id_attr_for(table_name)
     "#{table_name.singularize}_id"
   end
 
-  def initialize(db_migration_schema, table_name, all_implementation_fields, table_comments, no_master_association)
+  def initialize(db_migration_schema, table_name = nil, all_implementation_fields = nil, table_comments = nil, no_master_association = nil)
     self.db_migration_schema = db_migration_schema
     self.table_name = table_name
     self.all_implementation_fields = all_implementation_fields

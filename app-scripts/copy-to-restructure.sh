@@ -9,12 +9,15 @@ DEST="$1"
 
 cd $(dirname $0)/..
 
-bundle exec rake assets:clobber
+if [ -d public/assets ]; then
+  bundle exec rake assets:clobber
+fi
 
 for FROM in app bin config db/migrate db/seeds db/table_generators db/app_migrations/data_requests app-scripts/supporting \
-            lib public/fonts public/app_specific/data_requests script spec vendor/assets; do
+            lib public/fonts public/app_specific/data_requests script spec \
+            vendor/assets/images vendor/assets/javascripts vendor/assets/stylesheets; do
   mkdir -p ${DEST}/${FROM}
-  cp -u -r ${FROM} ${DEST}
+  rsync -av ${FROM}/ ${DEST}/${FROM}/
 done
 
 mkdir -p ${DEST}/docs
@@ -30,7 +33,7 @@ for FROM in \
             public/.gitignore public/*.html public/favicon.* public/robots.txt \
             public/app_specific/app_data_requests.css \
             .gitignore .rspec_parallel .rubocop.yml .ruby-version .solargraph.yml config.ru \
-            Gemfile* Rakefile version.txt; do
+            Gemfile* Rakefile version.txt vendor/assets/config.json; do
   cp -u ${FROM} ${DEST}/${FROM}
 done
 

@@ -14,4 +14,4 @@ sudo -u postgres psql -d $DBNAME -c "GRANT ALL ON ALL TABLES IN SCHEMA $SCHEMA_N
 sudo -u postgres psql -d $DBNAME -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA $SCHEMA_NAME TO $DBOWNER;"
 psql -d $DBNAME < ../db/v6-dump.sql
 
-bundle exec rake db:migrate
+FPHS_POSTGRESQL_DATABASE=$DBNAME bundle exec rake db:migrate
