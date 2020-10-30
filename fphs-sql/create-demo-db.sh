@@ -12,4 +12,6 @@ sudo -u postgres psql -d $DBNAME -c "alter user fphsetl login; alter user fphset
 sudo -u postgres psql -d $DBNAME -c "GRANT ALL ON SCHEMA $SCHEMA_NAME TO $DBOWNER;"
 sudo -u postgres psql -d $DBNAME -c "GRANT ALL ON ALL TABLES IN SCHEMA $SCHEMA_NAME TO $DBOWNER;"
 sudo -u postgres psql -d $DBNAME -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA $SCHEMA_NAME TO $DBOWNER;"
-psql -d $DBNAME < ../db/dumps/development-data/v6-dump.sql
+psql -d $DBNAME < ../db/v6-dump.sql
+
+FPHS_POSTGRESQL_DATABASE=$DBNAME bundle exec rake db:migrate
