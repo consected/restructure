@@ -36,7 +36,7 @@ module OptionConfigs
             view_as: {
               edit: 'hide|readonly|not_embedded|select_or_add',
               show: 'hide|readonly|see_presence|filestore',
-              new: 'outside_this|not_embedded|select_or_add'
+              new: 'outside_this|not_embedded|select_or_add|activity_selector'
             },
             prevent_disable: 'true|false (default = false) OR reference',
             allow_disable_if_not_editable: 'true|false (default = false) OR reference',
