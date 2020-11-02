@@ -1,5 +1,9 @@
 <%
 
+  unless defined? def_record
+    def_record = nil
+  end
+
   unless defined? def_version
    def_version = nil
   end
@@ -301,7 +305,8 @@
       hide_rank_badge: hide_rank_badge, 
       edit_button_href: edit_button_href, 
       show_item_type_flags_after: show_item_type_flags_after, 
-      item_flags_after: item_flags_after 
+      item_flags_after: item_flags_after, 
+      def_record: def_record
     } %>
 
 

@@ -48,11 +48,43 @@
       
       refitem.each do |ref_type, ref_config| 
         next unless ref_type && ref_config
+      
+        rct = ref_config[:type_config]
+        if rct&.keys&.first == :activity_selector
+          rct.first.last.each do |elt, label|
+            al_refkey = "#{ref_type}_#{elt}"
+            al_reftype = ref_key
+            elt_ref_config = ref_config.merge({
+              label: label,
+              to_record_label: label,
+              add_with: {
+                extra_log_type: elt.to_s
+              },
+              filter_by: {
+                extra_log_type: '__return_nothing__'
+              }
+            })
       %>
+      {{#if creatable_model_references.<%= al_refkey %> }}
+        {{#if creatable_model_references.<%= al_refkey %>.<%= al_reftype %> }}
+          {{#if creatable_model_references.<%= al_refkey %>.<%= al_reftype %>.ref_type }}
+      <%= render partial: 'common_templates/reference_actions',  locals: {name: "activity_log/#{implementation_class_name}", ref_type: ref_type, caption: label, block_id: "#{name.hyphenate}-#{ref_type}", ref_config: elt_ref_config, caption_before: caption_before} %>
+          {{/if}}
+        {{/if}}
+      {{/if}}
+      <%
+          end
+      %>
+      
+      
+      <%  else 
+      %>
+
+      <%  end
+      %>
+
       {{#if creatable_model_references.<%= ref_key %> }}
-
         {{#if creatable_model_references.<%= ref_key %>.<%= ref_type %> }}
-
           {{#if creatable_model_references.<%= ref_key %>.<%= ref_type %>.ref_type }}
 
       <%= render partial: 'common_templates/reference_actions',  locals: {name: "activity_log/#{implementation_class_name}", ref_type: ref_type, caption: ref_config[:to_record_label], block_id: "#{name.hyphenate}-#{ref_type}", ref_config: ref_config, caption_before: caption_before} %>

@@ -141,7 +141,34 @@ module ActivityLogHandler
 
     def permitted_params
       fts = fields_to_sync.map(&:to_sym)
-      attribute_names.map(&:to_sym) - [:disabled, :user_id, :created_at, :updated_at, "#{parent_type}_id".to_sym, parent_type, :tracker_id] + [:item_id] - fts
+      attribute_names.map(&:to_sym) -
+        [:disabled, :user_id, :created_at, :updated_at, "#{parent_type}_id".to_sym, parent_type, :tracker_id] +
+        [:item_id] -
+        fts
+    end
+
+    # Hash of activity log types that can be created or not, based on user access controls and
+    # creatable_if rules (if a current activity is specified)
+    # Each key is listed and has value nil if not creatable, or the resource name of the type if creatable
+    # For example:
+    #   {:register=>"activity_log__ipa_sample__register", :transport=>nil, :receive=>nil }
+    # indicates that the 'register' activity is creatable, but 'transport' and 'receive' are not
+    # @params [User|nil] current_user - the user to check creatable items against
+    # @params [ActivityLog|nil] def_record - the definition record for the activity log (default: current definition)
+    # @params [UserBase|nil] current_activity - optionally, an activity log implementation instance to
+    #   calculate data related creatable
+    # @return [Hash]
+    def creatables current_user, def_record: nil, current_activity: nil
+      def_record ||= definition
+      res = {}
+
+      def_record.option_configs.each do |c|
+        result = current_user.has_access_to?(:create, :activity_log_type, c.resource_name)
+        result &&= c.calc_creatable_if(current_activity) if current_activity
+        res[c.name] = result ? c.resource_name : nil
+      end
+
+      res
     end
   end
 
@@ -278,19 +305,8 @@ module ActivityLogHandler
     extra_log_type_config.calc_save_action_if self
   end
 
-  # List of activity log types that can be created or not, based on user access controls and creatable_if rules
   def creatables
-    current_user = master.current_user
-    def_class = current_definition
-    res = {}
-
-    # Make a creatable actions, based on standard user access controls and extra log type creatable_if rules
-    def_class.option_configs.each do |c|
-      result = current_user.has_access_to?(:create, :activity_log_type, c.resource_name) && c.calc_creatable_if(self)
-      res[c.name] = result ? c.resource_name : nil
-    end
-
-    res
+    self.class.creatables master.current_user, def_record: current_definition, current_activity: self
   end
 
   def reset_model_references
@@ -357,15 +373,21 @@ module ActivityLogHandler
     @model_references[mr_key] = res
   end
 
+  #
+  # List model reference configurations that are creatable by the current user
+  # By default will return all reference configurations, where the entry for the reference
+  # has a value of an empty hash if not creatable, or a hash containing a configuration
+  # describing how the creation can be performed.
+  # The result is memoized (against the only_creatables value) for performance.
+  #
+  # @param [Boolean] only_creatables - will return only the creatable model references if true
+  # @return [Hash] <description>
   def creatable_model_references(only_creatables: false)
     # Check for a memoized result
+    @creatable_model_references ||= {}
     memokey = "only_creatables_#{only_creatables}"
-    if @creatable_model_references
-      memores = @creatable_model_references[memokey]
-      return memores if memores
-    else
-      @creatable_model_references = {}
-    end
+    memores = @creatable_model_references[memokey]
+    return memores if memores
 
     cre_res = {}
     return cre_res unless extra_log_type_config&.references
@@ -381,66 +403,91 @@ module ActivityLogHandler
         ci_res = extra_log_type_config.calc_reference_creatable_if ref_config, self
         fb = ref_config[:filter_by]
 
-        if ci_res
-          a = ref_config[:add]
-          without_reference = (ref_config[:without_reference] == true)
-          if a == 'many'
-            l = ref_config[:limit]
-            under_limit = true
+        next unless ci_res
 
-            if l&.is_a?(Integer)
-              under_limit = (ModelReference.find_references(master,
-                                                            to_record_type: ref_type,
-                                                            filter_by: fb,
-                                                            active: true,
-                                                            without_reference: without_reference).length < l)
-            end
+        a = ref_config[:add]
+        without_reference = (ref_config[:without_reference] == true)
+        if a == 'many'
+          l = ref_config[:limit]
+          under_limit = true
 
-            ires = a if under_limit
-          elsif a == 'one_to_master'
-            if ModelReference.find_references(master,
-                                              to_record_type: ref_type,
-                                              filter_by: fb,
-                                              active: true,
-                                              without_reference: without_reference).empty?
-              ires = a
-            end
-          elsif a == 'one_to_this'
-            if ModelReference.find_references(self,
-                                              to_record_type: ref_type,
-                                              filter_by: fb,
-                                              active: true,
-                                              without_reference: without_reference).empty?
-              ires = a
-            end
-          elsif a.present?
-            raise FphsException, "Unknown add type for creatable_model_references: #{a}"
+          if l&.is_a?(Integer)
+            under_limit = (ModelReference.find_references(master,
+                                                          to_record_type: ref_type,
+                                                          filter_by: fb,
+                                                          active: true,
+                                                          without_reference: without_reference).length < l)
           end
 
-          if ires
-            # Check if the user has access to create the item
+          ires = a if under_limit
+        elsif a == 'one_to_master'
+          if ModelReference.find_references(master,
+                                            to_record_type: ref_type,
+                                            filter_by: fb,
+                                            active: true,
+                                            without_reference: without_reference).empty?
+            ires = a
+          end
+        elsif a == 'one_to_this'
+          if ModelReference.find_references(self,
+                                            to_record_type: ref_type,
+                                            filter_by: fb,
+                                            active: true,
+                                            without_reference: without_reference).empty?
+            ires = a
+          end
+        elsif a.present?
+          raise FphsException, "Unknown add type for creatable_model_references: #{a}"
+        end
 
-            mrc = ModelReference.to_record_class_for_type(ref_type)
-            raise FphsException, "Reference type is invalid: #{ref_type}" if mrc.nil?
+        if ires
+          # Check if the user has access to create the item
 
-            if mrc.parent == ActivityLog
-              elt = ref_config[:add_with] && ref_config[:add_with][:extra_log_type]
-              o = mrc.new(extra_log_type: elt, master: master)
+          mrc = ModelReference.to_record_class_for_type(ref_type)
+          raise FphsException, "Reference type is invalid: #{ref_type}" if mrc.nil?
+
+          rct = ref_config[:type_config]
+
+          if rct&.keys&.first == :activity_selector
+            rct_conf = rct.first.last
+            creatables.compact.each do |elt, resname|
+              next unless elt.in? rct_conf.keys
+
+              # The user can create this type if a resname is set
+              label = rct_conf[elt]
+
+              elt_ref_config = ref_config.merge({
+                                                  label: label,
+                                                  to_record_label: label,
+                                                  add_with: {
+                                                    extra_log_type: elt.to_s
+                                                  },
+                                                  filter_by: {
+                                                    extra_log_type: '__return_nothing__'
+                                                  }
+                                                })
+              res = { ref_type: resname, many: ires, ref_config: elt_ref_config }
+              cre_res["#{ref_type}_#{elt}"] = { ref_type => res }
+            end
+            # All items have been added. Prevent the default activity log item being tested below.
+            next
+
+          elsif mrc.parent == ActivityLog
+            elt = ref_config[:add_with] && ref_config[:add_with][:extra_log_type]
+            ref_obj = mrc.new(extra_log_type: elt, master: master)
+          else
+            attrs = {}
+
+            if mrc.no_master_association
+              attrs[:current_user] = master_user
             else
-              attrs = {}
-
-              if mrc.no_master_association
-                attrs[:current_user] = master_user
-              else
-                attrs[:master] = master
-              end
-              o = mrc.new attrs
+              attrs[:master] = master
             end
-
-            i = o.allows_current_user_access_to? :create
-            res = { ref_type: ref_type, many: ires, ref_config: ref_config } if ires && i
-
+            ref_obj = mrc.new attrs
           end
+
+          user_can_create = ref_obj&.allows_current_user_access_to? :create
+          res = { ref_type: ref_type, many: ires, ref_config: ref_config } if user_can_create
 
         end
 
