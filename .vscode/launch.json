@@ -10,8 +10,8 @@
             "request": "launch",
             "cwd": "${workspaceRoot}",
             "useBundler": true,
-            "pathToBundler": "/home/phil/.rbenv/shims/bundler",
-            "pathToRDebugIDE": "/home/phil/.rbenv/shims",
+            "pathToBundler": "~/.rbenv/shims/bundler",
+            "pathToRDebugIDE": "~/.rbenv/shims",
             "debuggerPort": "1235",
             "program": "bin/rails",
             "args": [
@@ -32,8 +32,8 @@
             "request": "launch",
             "cwd": "${workspaceRoot}",
             "useBundler": true,
-            "pathToBundler": "/home/phil/.rbenv/shims/bundler",
-            "pathToRDebugIDE": "/home/phil/.rbenv/shims",
+            "pathToBundler": "~/.rbenv/shims/bundler",
+            "pathToRDebugIDE": "~/.rbenv/shims",
             "debuggerPort": "1235",
             "program": "bin/rspec",
             "args": [
@@ -50,8 +50,8 @@
             "request": "launch",
             "cwd": "${workspaceRoot}",
             "useBundler": true,
-            "pathToBundler": "/home/phil/.rbenv/shims/bundler",
-            "pathToRDebugIDE": "/home/phil/.rbenv/shims",
+            "pathToBundler": "~/.rbenv/shims/bundler",
+            "pathToRDebugIDE": "~/.rbenv/shims",
             "debuggerPort": "1235",
             "program": "bin/rspec",
             "args": [
