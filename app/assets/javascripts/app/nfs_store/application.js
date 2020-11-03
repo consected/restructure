@@ -10,8 +10,4 @@
 // Read Sprockets README (https://github.com/rails/sprockets#sprockets-directives) for details
 // about supported directives.
 
-//= require ./jquery_fileupload/vendor/jquery.ui.widget.js
-//= require ./jquery_fileupload/jquery.iframe-transport.js
-//= require ./jquery_fileupload/jquery.fileupload.js
-
 //= require_tree .

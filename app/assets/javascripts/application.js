@@ -13,24 +13,39 @@
 //= require jquery3
 //= require jquery_ujs
 //= require bootstrap
-//= require typeahead
-//= require jquery.timepicker
-//= require chosen.jquery
-//= require handlebars-v4.0.10
-//= require jquery-tablesorter
-//= require jquery-scrollto-min
-//= require textarea-autogrow
 //= require app/nfs_store/application
 //= require app/secure_view/secure_view
-//= require app/jquery-mask/jquery-mask
-//= require app/bootstrap-wysiwyg/bootstrap-wysiwyg
-//= require app/bootstrap-wysiwyg/jquery-hotkeys
-//= require app/woofmark/megamark
-//= require app/woofmark/domador
-//= require fullcalendar/core/main
-//= require fullcalendar/interaction/main
-//= require fullcalendar/daygrid/main
-//= require fullcalendar/timegrid/main
-//= require moment.min.js
-//= require chart.min.js
+
+// YARN installed packages
+// Distribution files referenced directly to allow asset pipeline to handle compilation and loading
+//= require handlebars/dist/handlebars
+//= require bootstrap-datepicker/dist/js/bootstrap-datepicker
+//= require chart.js/dist/Chart
+//= require bootstrap-wysiwyg/src/bootstrap-wysiwyg
+//= require jquery.hotkeys/jquery.hotkeys
+// Note: moment is required with the min file to avoid the need to transcompile
+//= require moment/min/moment-with-locales.min
+//= require typeahead.js/dist/typeahead.bundle.js
+//= require jquery-timepicker/jquery.timepicker
+//= require textarea-autogrow/textarea-autogrow
+//= require megamark/dist/megamark
+//= require domador/dist/domador
+//= require jquery.scrollto/jquery.scrollTo
+//= require chosen-js/chosen.jquery
+//= require tablesorter/dist/js/jquery.tablesorter
+//= require jquery-mask-plugin/dist/jquery.mask
+// Note FullCalendar is frozen at 4.2.0 to avoid needing to transcompile
+//= require @fullcalendar/core/main
+//= require @fullcalendar/interaction/main
+//= require @fullcalendar/daygrid/main
+//= require @fullcalendar/timegrid/main
+// nfs_store dependencies - blueimp-file-upload frozen at 9.27 pending testing of later versions
+//= require blueimp-file-upload/js/vendor/jquery.ui.widget.js
+//= require blueimp-file-upload/js/jquery.iframe-transport.js
+//= require blueimp-file-upload/js/jquery.fileupload.js
+// For nfs_store MD5 support
+//= require spark-md5/spark-md5
+
+
+
 //= require_tree ./app

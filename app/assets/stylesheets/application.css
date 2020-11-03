@@ -11,16 +11,25 @@
  * file per style scope.
  *
  *= require app_vars
+ * Note: Bootstrap is compiled using the vendor/bootstrap-config.json file
+ * The version distributed here is therefore not the 'default' bootstrap
  *= require bootstrap
  *= require bootstrap-theme
- *= require jquery.timepicker
- *= require chosen
- *= require chart.min
  *= require app/nfs_store/application
  *= require app/secure_view/secure_view
- *= require fullcalendar/core/main
- *= require fullcalendar/daygrid/main
- *= require fullcalendar/timegrid/main
+ *
+ * YARN distributed components
+ *= require bootstrap-datepicker/dist/css/bootstrap-datepicker3
+ *= require chart.js/dist/Chart
+ *= require chosen-js/chosen
+ *= require jquery-timepicker/jquery.timepicker
+ *= require @fullcalendar/core/main
+ *= require @fullcalendar/daygrid/main
+ *= require @fullcalendar/timegrid/main
+ *
+ * For nfs_store dependencies
+ *= require blueimp-file-upload/css/jquery.fileupload
+ *
  *= require_tree ./app
  *= require_self
  */

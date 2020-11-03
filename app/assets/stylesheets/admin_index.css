@@ -10,12 +10,12 @@
  * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
  * file per style scope.
  *
- *= require codemirror
- *= require codemirror-lint
- *= require codemirror-foldgutter.css
- *= require codemirror-dialog.css
- *= require codemirror-matchesonscrollbar
- *= require codemirror-simplescrollbars
+ *= require codemirror/lib/codemirror
+ *= require codemirror/addon/lint/lint
+ *= require codemirror/addon/fold/foldgutter
+ *= require codemirror/addon/dialog/dialog
+ *= require codemirror/addon/search/matchesonscrollbar
+ *= require codemirror/addon/scroll/simplescrollbars
  *= require admin/z_admin_overrides
  *= require_self
  */

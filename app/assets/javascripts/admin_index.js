@@ -10,22 +10,35 @@
 // Read Sprockets README (https://github.com/rails/sprockets#sprockets-directives) for details
 // about supported directives.
 //
-//= require codemirror
-//= require codemirror-lint
-//= require codemirror-yaml
-//= require codemirror-yaml-lint
-//= require codemirror-sql
-//= require codemirror-markdown-fold
-//= require codemirror-comment
-//= require codemirror-foldcode
-//= require codemirror-foldgutter
-//= require codemirror-indent-fold
-//= require codemirror-xml
-//= require codemirror-css
-//= require codemirror-javascript
-//= require codemirror-htmlembedded
-//= require codemirror-htmlmixed
-//= require codemirror-dialog
-//= require js-yaml
-//= require_tree ../../../vendor/assets/javascripts/codemirror
+//
+// YARN installed components
+//= require codemirror/lib/codemirror
+//= require codemirror/addon/lint/lint
+//= require codemirror/addon/lint/yaml-lint
+//= require codemirror/addon/fold/markdown-fold
+//= require codemirror/addon/fold/foldcode
+//= require codemirror/addon/fold/foldgutter
+//= require codemirror/addon/fold/indent-fold
+//= require codemirror/addon/comment/comment
+//= require codemirror/addon/dialog/dialog
+
+//= require codemirror/addon/scroll/annotatescrollbar
+//= require codemirror/addon/scroll/simplescrollbars
+//= require codemirror/addon/search/jump-to-line
+//= require codemirror/addon/search/matchesonscrollbar
+//= require codemirror/addon/search/match-highlighter
+//= require codemirror/addon/search/search
+//= require codemirror/addon/search/searchcursor
+
+//= require codemirror/mode/yaml/yaml
+//= require codemirror/mode/sql/sql
+//= require codemirror/mode/xml/xml
+//= require codemirror/mode/css/css
+//= require codemirror/mode/javascript/javascript
+//= require codemirror/mode/htmlembedded/htmlembedded
+//= require codemirror/mode/htmlmixed/htmlmixed
+//   For codemirror:
+//= require js-yaml/dist/js-yaml 
+//
+// All other required codemirror components
 //= require_tree ./admin
