@@ -3,6 +3,10 @@
 class DynamicModel::DynamicModelsController < UserBaseController
   include MasterHandler
 
+  def template_config
+    render partial: 'dynamic_models/common_search_results_template_set'
+  end
+
   def destroy
     not_authorized
   end
@@ -29,7 +33,7 @@ class DynamicModel::DynamicModelsController < UserBaseController
     return @master_objects if @master_objects.is_a? Array
 
     pk = @implementation_class.primary_key
-    @filtered_ids = @master_objects.select { |i| i.definition_default_options&.calc_showable_if(i) }.map { |o| o.attributes[pk] }
+    @filtered_ids = @master_objects.select { |i| i.class.definition.default_options&.calc_showable_if(i) }.map { |o| o.attributes[pk] }
     @master_objects = @master_objects.where(pk => @filtered_ids)
     limit_results
   end

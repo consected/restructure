@@ -117,8 +117,8 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
 
     begin
-      ModelReference.create_with @al, @al1
-      ModelReference.create_with @al, @al2
+      ModelReference.create_with @al, @al1, force_create: true
+      ModelReference.create_with @al, @al2, force_create: true
     rescue ActiveRecord::RecordInvalid => e
       puts e
     end
@@ -160,8 +160,9 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expected_name = @al2.select_who
     master = @al2.master
     id = @al2.id
-    ca = Admin::MessageTemplate.formatter_do(@al2.created_at.class, @al2.created_at, current_user: @al2.user)
+    ca = Formatter::Formatters.formatter_do(@al2.created_at.class, @al2.created_at, current_user: @al2.user)
     rrid = @al.id
+    expect(@al2.referring_record&.id).to eq rrid
     expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id} in id #{id}. This is a name: #{expected_name}.</p><p>Extra text at #{ca} for #{rrid}</p></div></body></html>"
 
     expect(res).to eq expected_text
@@ -388,7 +389,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
     raise "Activity Log #{AlNameGenTest2} not set up" if al.nil?
 
-    al.extra_log_types = <<~EOF
+    al.extra_log_types = <<~END_DEF
       step_1:
         label: Step 1
         fields:
@@ -416,7 +417,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
           - select_call_direction
           - extra_text
 
-    EOF
+    END_DEF
 
     al.current_admin = @admin
     al.save!

@@ -3,15 +3,16 @@
 module MasterHandler
   extend ActiveSupport::Concern
 
-  UseMasterParam = %w[new create index].freeze
+  UseMasterParam = %w[new create index template_config].freeze
 
   included do
     before_action :init_vars_master_handler
 
-    before_action :set_me_and_master, only: %i[index new edit create update destroy]
+    before_action :set_me_and_master, only: %i[index new edit create update destroy template_config]
     before_action :set_implementation_class
     before_action :set_fields_from_params, only: [:edit]
-    before_action :set_instance_from_id, only: [:show]
+    before_action :set_instance_from_id, only: %i[show]
+    before_action :set_instance_list_from_id, only: %i[template_config]
     before_action :set_instance_from_reference_id, only: [:create]
     before_action :set_instance_from_build, only: %i[new create]
     before_action :set_ref_item_for_new, only: [:new]
@@ -277,6 +278,12 @@ module MasterHandler
     @id = object_instance.id
   end
 
+  def set_instance_list_from_id
+    @id_list = params[:id].split(',')
+    @instance_list = primary_model.where(id: @id_list)
+    @master.current_user = current_user
+  end
+
   def set_instance_from_reference_id
     return if canceled? || params[:ref_to_record_id].blank?
 
@@ -293,11 +300,13 @@ module MasterHandler
     return if @set_from_reference_id
 
     set_item if defined? set_item
-    build_with = begin
-                       secure_params
-                 rescue StandardError
-                   nil
-                     end
+    build_with = nil
+
+    begin
+      build_with = secure_params
+    rescue StandardError => e
+      logger.warn("set_instance_from_build: #{e}")
+    end
     set_object_instance @master_objects.build(build_with)
 
     object_instance.item_id = @item_id if @item && object_instance.respond_to?(:item_id) && !object_instance.item_id

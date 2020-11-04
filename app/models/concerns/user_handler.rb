@@ -39,7 +39,7 @@ module UserHandler
     validate :source_correct
     validate :rank_correct
 
-    after_save :check_status
+    after_save :set_previous_action_flags
     after_save :track_record_update
   end
 
@@ -211,5 +211,23 @@ module UserHandler
       return false
     end
     true
+  end
+
+  #
+  # Previous action flags allow easy identification of the action that has just been completed
+  # was_created, was_updated or was_disabled
+  def set_previous_action_flags
+    @was_created = respond_to?(:id) && saved_change_to_id? ? 'created' : false
+
+    # If an embedded_item is present and it was updated, allow that to set @was_updated.
+    # Just changing the updated_at attribute on self (with #touch) is not registered as a change.
+    @was_updated = if respond_to?(:updated_at) &&
+                      (saved_change_to_updated_at? || embedded_item&.saved_change_to_updated_at?)
+                     'updated'
+                   else
+                     false
+                   end
+
+    @was_disabled = respond_to?(:disabled) && saved_change_to_disabled? && disabled ? 'disabled' : false
   end
 end

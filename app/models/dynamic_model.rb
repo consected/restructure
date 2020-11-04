@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class DynamicModel < ActiveRecord::Base
-  include DynamicModelDefHandler
+  include Dynamic::VersionHandler
+  include Dynamic::MigrationHandler
+  include Dynamic::DefHandler
   include AdminHandler
 
   StandardFields = %w[id created_at updated_at contactid user_id master_id].freeze
@@ -9,7 +11,7 @@ class DynamicModel < ActiveRecord::Base
   default_scope -> { order disabled: :asc, category: :asc, position: :asc, updated_at: :desc }
 
   validate :table_name_ok
-  after_save :set_empty_field_list
+  before_save :set_empty_field_list
 
   attr_accessor :editable
 
@@ -23,28 +25,9 @@ class DynamicModel < ActiveRecord::Base
     "dynamic_model__#{table_name}"
   end
 
-  # List of item types that can be used to define Classification::GeneralSelection drop downs
-  # This does not represent the actual item types that are valid for selection when defining a new dynamic model record
-  def self.item_types(refresh: false)
-    Rails.cache.delete('DynamicModel.item_types') if refresh
-
-    Rails.cache.fetch('DynamicModel.item_types') do
-      list = []
-
-      implementation_classes.each do |c|
-        cn = c.attribute_names.select { |a| a.start_with?('select_') || a.start_with?('multi_select_') || a.end_with?('_selection') || a.in?(%w[source rec_type rank]) }.map(&:to_sym) - %i[disabled user_id created_at updated_at]
-        cn.each do |a|
-          list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
-        end
-      end
-
-      list
-    end
-  end
-
-  # the list of defined activity log implementation classes
-  def self.implementation_classes
-    @implementation_classes = active_model_configurations.map { |a| "DynamicModel::#{a.model_class_name.classify}".constantize }
+  # Class that implements options functionality
+  def self.options_provider
+    OptionConfigs::DynamicModelOptions
   end
 
   def implementation_model_name
@@ -57,9 +40,9 @@ class DynamicModel < ActiveRecord::Base
     res = (fl || [])
     res.uniq
 
-    if res.empty? && model_def
+    if res.empty? && model_class
       begin
-        res = model_def.attribute_names - StandardFields
+        res = model_class.attribute_names - StandardFields
       rescue StandardError => e
         puts "Failed to get all_implementation_fields for reason: #{e.inspect} \n#{e.backtrace.join("\n")}"
         raise e unless ignore_errors
@@ -80,10 +63,10 @@ class DynamicModel < ActiveRecord::Base
     :vertical
   end
 
+  # Set up an association to this class on the Master if there is a foreign_key_name set
+  # If there is no foreign_key_name set, then this is not attached to a master record
   def add_master_association
-    # Now forcibly set the Master association if there is a foreign_key_name set
-    # If there is no foreign_key_name set, then this is not attached to a master record
-    return if foreign_key_name.blank?
+    return if disabled || foreign_key_name.blank?
 
     man = model_association_name
     Master.has_many man, inverse_of: :master,
@@ -101,34 +84,6 @@ class DynamicModel < ActiveRecord::Base
 
   def self.categories
     active.select(:category).distinct(:category).unscope(:order).map { |s| s.category || 'default' }
-  end
-
-  def option_configs(force: false)
-    @option_configs = nil if force
-    @option_configs ||= DynamicModelOptions.parse_config(self)
-  end
-
-  def option_configs_valid?
-    DynamicModelOptions.parse_config(self)
-    true
-  rescue StandardError => e
-    logger.info "Checking option configs valid failed silently: #{e}"
-    false
-  end
-
-  def option_config_for(name)
-    return unless option_configs
-
-    option_configs.select { |s| s.name == name }.first
-  end
-
-  def default_options
-    res = option_config_for :default
-    res || DynamicModelOptions.new(:default, {}, self)
-  end
-
-  def force_option_config_parse
-    option_configs force: true
   end
 
   def update_tracker_events
@@ -160,10 +115,11 @@ class DynamicModel < ActiveRecord::Base
         end
 
         # Main implementation class
-        a_new_class = Class.new(DynamicModelBase) do
+        a_new_class = Class.new(Dynamic::DynamicModelBase) do
           def self.definition=(d)
             @definition = d
-            # Force the table_name, since it doesn't include dynamic_model_ as a prefix, which is the Rails convention for namespaced models
+            # Force the table_name, since it doesn't include dynamic_model_ as a prefix,
+            # which is the Rails convention for namespaced models
             self.table_name = d.table_name
           end
 
@@ -284,6 +240,7 @@ class DynamicModel < ActiveRecord::Base
             namespace :dynamic_model do
               resources pg_name, except: [:destroy]
             end
+            get "dynamic_model/#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
           end
 
         else
@@ -292,6 +249,7 @@ class DynamicModel < ActiveRecord::Base
           namespace :dynamic_model do
             resources pg_name, except: [:destroy]
           end
+          get "dynamic_model/#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
         end
       end
     end
@@ -302,7 +260,7 @@ class DynamicModel < ActiveRecord::Base
     do_create_or_update = if mode == 'create'
                             'create_dynamic_model_tables'
                           else
-                            migration_update_fields
+                            migration_generator.migration_update_fields
                           end
 
     <<~CONTENT
@@ -311,7 +269,7 @@ class DynamicModel < ActiveRecord::Base
         include ActiveRecord::Migration::AppGenerator
 
         def change
-          #{migration_set_attribs}
+          #{migration_generator.migration_set_attribs}
 
           #{do_create_or_update}
           create_dynamic_model_trigger
@@ -328,9 +286,18 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
+  #
+  # before_save trigger forces the field list to be set, based on database fields
+  # @return [String] - space separated field list
   def set_empty_field_list
-    fl = implementation_class.attribute_names - StandardFields
-    self.field_list = fl.join(' ') if field_list.blank?
+    self.field_list = default_field_list_array.join(' ') if field_list.blank?
+  end
+
+  def default_field_list_array
+    implementation_class.attribute_names - StandardFields
+  rescue StandardError => e
+    logger.warn "Failed to get the default_field_list_array, probably because the class is not available.\n#{e}"
+    []
   end
 end
 

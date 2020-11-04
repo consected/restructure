@@ -119,7 +119,6 @@ _fpa.form_utils = {
       }
 
       window.setTimeout(function () {
-        // console.log(item);
         item.click();
       }, p);
     });
@@ -870,7 +869,6 @@ _fpa.form_utils = {
           var ls = l.split('/', 2);
           var last = ls.length - 1;
           var first = 0;
-          // console.log('got:'+ ls[last])
           $(this).attr('label', ls[last]);
           $(this).attr('data-group-num', ls[first]);
         }
@@ -1154,7 +1152,6 @@ _fpa.form_utils = {
       var v = el.val();
       if (v && v !== '') {
         var res = el.masked(v);
-        // console.log(res);
         el.val(res);
       }
     }).addClass('is-masked');
@@ -1222,7 +1219,6 @@ _fpa.form_utils = {
       // Automatically format the date on / being entered by hand,
       // making it easy to type 9/7/1963 and get 09/07/1963
       $(this).on('keyup', function (e) {
-        console.log('hit');
         var key = e.which;
 
         if (key == 191) {
@@ -1328,7 +1324,6 @@ _fpa.form_utils = {
         return 0;
 
       }).insertAfter($sort_marker);
-      // console.log('sorted!');
     }
 
   },

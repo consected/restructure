@@ -153,7 +153,7 @@ RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
     expect(mids).not_to eq new_mids
 
     ev = res[:events].first
-    expect(ev[:message_id]).to match /[a-z0-9]+-[a-z0-9]+-[a-z0-9]+-[a-z0-9]+/
+    expect(ev[:message_id]).to match(/[a-z0-9]+-[a-z0-9]+-[a-z0-9]+-[a-z0-9]+/)
     expect(ev[:timestamp]).to be_a Integer
 
     # Ensure nothing is returned

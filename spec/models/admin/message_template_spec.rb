@@ -181,7 +181,7 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     Admin::MessageTemplate.create! name: 'test email content 2', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
     res = layout.generate content_template_name: 'test email content 2', data: @activity_log
-    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id} for #{dateformatted} by #{@player_info.user_email}. This is a name: #{@player_info.first_name.titleize} and #{pn} and #{pn_ref1} and #{pc3.data}.</p></div></body></html>"
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id} for #{dateformatted} by #{@player_info.user_email}. This is a name: #{@player_info.first_name.titleize} and #{pn} and #{pn_ref1} and #{@player_contact.data}.</p></div></body></html>"
 
     expect(res).to eq expected_text
   end
@@ -206,13 +206,13 @@ RSpec.describe Admin::MessageTemplate, type: :model do
 
     t = Benchmark.realtime do
       masters.each do |master|
-        data = Admin::MessageTemplate.setup_data(master.player_contacts[0], master.player_contacts[1])
-        res = Admin::MessageTemplate.substitute txt.dup, data: data, tag_subs: nil
+        data = Formatter::Substitution.setup_data(master.player_contacts[0], master.player_contacts[1])
+        res = Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
       end
     end
 
     puts "It took #{t} seconds to create #{test_times} templates"
 
-    expect(t).to be < 2
+    expect(t).to be < 3
   end
 end

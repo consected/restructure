@@ -25,8 +25,8 @@
 
 <script id="field_label" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <small>
-    {{#if (fpa_state_item labels @key )}}
-      {{fpa_state_item labels @key }}
+    {{#if (fpa_state_item labels vdef_version @key )}}
+      {{fpa_state_item labels vdef_version @key }}
     {{else if force_default}}
       {{force_default}}
     {{else}}

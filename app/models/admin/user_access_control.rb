@@ -111,7 +111,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
     elsif resource_type == :report
       Report.active.map(&:alt_resource_name) + Report.active.map(&:name) + ['_all_reports_']
     elsif resource_type == :activity_log_type
-      ActivityLog.extra_log_type_resource_names
+      ActivityLog.all_option_configs_resource_names
     else
       []
     end

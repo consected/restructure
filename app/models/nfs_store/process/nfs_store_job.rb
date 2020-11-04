@@ -2,8 +2,7 @@
 
 module NfsStore
   module Process
-    # Background job for handling Dicom deidentification according to
-    # activity log / nfs_store configurations
+    # Superclass for jobs to inherit from
     class NfsStoreJob < ApplicationJob
       attr_writer :job
 

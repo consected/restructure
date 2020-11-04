@@ -16,7 +16,7 @@ ENV['FPHS_USE_LOGGER'] = 'TRUE'
 
 res = `aws sts get-caller-identity | grep "756598248234"`
 if res == ''
-  puts "AWS MFA is needed. Run\n  fphs-scripts/aws_mfa_set.rb"
+  puts "AWS MFA is needed. Run\n  app-scripts/aws_mfa_set.rb"
   exit
 end
 
@@ -31,7 +31,7 @@ require 'browser_helper'
 require 'setup_helper'
 include BrowserHelper
 
-setup_browser
+setup_browser unless ENV['SKIP_BROWSER_SETUP']
 
 include Warden::Test::Helpers
 Warden.test_mode!
@@ -49,10 +49,10 @@ require "#{::Rails.root}/db/seeds.rb"
 Seeds.setup
 raise 'Scantron not defined by seeds' unless defined?(Scantron) && defined?(ScantronsController)
 
-res = `#{::Rails.root}/fphs-scripts/setup-dev-filestore.sh`
+res = `#{::Rails.root}/app-scripts/setup-dev-filestore.sh`
 if res != "mountpoint OK\n"
   puts res
-  puts 'Run fphs-scripts/setup-dev-filestore.sh and try again'
+  puts 'Run app-scripts/setup-dev-filestore.sh and try again'
   exit
 end
 
@@ -70,7 +70,7 @@ Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 # SetupHelper.setup_byebug
 SetupHelper.validate_db_setup
 
-SetupHelper.setup_app_dbs
+SetupHelper.setup_app_dbs unless ENV['SKIP_DB_SETUP']
 
 # Checks for pending migrations before tests are run.
 # If you are not using ActiveRecord, you can remove this line.
@@ -82,19 +82,20 @@ RSpec.configure do |config|
 
     SetupHelper.clear_delayed_job
 
-    # Seeds.setup
-    Seeds::ActivityLogPlayerContactPhone.setup
-    SetupHelper.setup_al_player_contact_emails
-    SetupHelper.setup_ext_identifier
-    SetupHelper.setup_test_app
+    unless ENV['SKIP_APP_SETUP']
+      Seeds::ActivityLogPlayerContactPhone.setup
+      SetupHelper.setup_al_player_contact_emails
+      SetupHelper.setup_ext_identifier
+      SetupHelper.setup_test_app
 
-    als = ActivityLog.active.where(item_type: 'zeus_bulk_message')
-    als.each do |a|
-      a.update! current_admin: a.admin, disabled: true if a.enabled?
+      als = ActivityLog.active.where(item_type: 'zeus_bulk_message')
+      als.each do |a|
+        a.update! current_admin: a.admin, disabled: true if a.enabled?
+      end
     end
 
     Rails.application.load_tasks
-    Rake::Task['assets:precompile'].invoke
+    Rake::Task['assets:precompile'].invoke unless ENV['SKIP_ASSETS']
   end
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_path = "#{::Rails.root}/spec/fixtures"

@@ -16,21 +16,6 @@ module GeneralDataConcerns
     raise 'can not set user_id=' if attribute_names.include?('master_id')
   end
 
-  def check_status
-    @was_created = respond_to?(:id) && saved_change_to_id? ? 'created' : false
-
-    # If an embedded_item is present and it was updated, allow that to set @was_updated.
-    # Just changing the updated_at attribute on self (with #touch) is not registered as a change.
-    @was_updated = if respond_to?(:updated_at) &&
-                      (saved_change_to_updated_at? || embedded_item&.saved_change_to_updated_at?)
-                     'updated'
-                   else
-                     false
-                   end
-
-    @was_disabled = respond_to?(:disabled) && saved_change_to_disabled? && disabled ? 'disabled' : false
-  end
-
   def _created
     @was_created
   end
@@ -129,6 +114,15 @@ module GeneralDataConcerns
     user&.user_preference&.attributes
   end
 
+  #
+  # Return a definition version string prefixed with a v
+  # If not version definition is provided (the version is current)
+  # or the templates don't use a version definition, just return 'v'
+  # @return [String]
+  def vdef_version
+    "v#{def_version}"
+  end
+
   def as_json(extras = {})
     self.current_user ||= extras[:current_user] if extras[:current_user] # if self.class.no_master_association
     if allows_current_user_access_to?(:access)
@@ -182,6 +176,9 @@ module GeneralDataConcerns
       if self.class.respond_to?(:uses_item_flags?) && self.class.uses_item_flags?(master_user)
         extras[:include][:item_flags] = { include: [:item_flag_name], methods: %i[method_id item_type_us] }
       end
+
+      extras[:methods] << :def_version
+      extras[:methods] << :vdef_version
 
     elsif allows_current_user_access_to?(:see_presence_or_access)
 

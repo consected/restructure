@@ -28,9 +28,7 @@ module ApplicationHelper
   end
 
   def common_inline_cancel_button(class_extras = nil, link_text = nil)
-    unless object_instance.class.no_master_association
-      path_pref = "/masters/#{object_instance.master_id}"
-    end
+    path_pref = "/masters/#{object_instance.master_id}" unless object_instance.class.no_master_association
 
     cancel_href = if object_instance.id
                     "#{path_pref}/#{controller_name}/#{object_instance.id}"
@@ -77,12 +75,22 @@ module ApplicationHelper
       ".html_safe
   end
 
+  #
+  # Show a templated dialog script within an edit form
+  # The template used will correspond with the created_date of
+  # the instance. During creation therefore, the current dialog template
+  # will be used. Future edits will show the dialog text that was shown
+  # when the instance was created, even if the template has subsequently changed
+  # @param [Symbol] key - symbol name of the dialog
+  # @param [ActiveRecord::Base] object_instance - the instance underlying the form
+  # @param [Hash] dialogs - option configs section specifying dialog_before
+  # @return [String] resulting text after generation
   def show_dialog_before(key, object_instance, dialogs)
     return unless dialogs && dialogs[key]
 
     dname = dialogs[key][:name]
     dlabel = dialogs[key][:label]
-    dmsg = DialogTemplate.generate_message(dname, object_instance)
+    dmsg = Formatter::DialogTemplate.generate_message(dname, object_instance)
     id = "dialog-#{dname}-#{dlabel}".gsub(' ', '-')
     if strip_tags(dmsg).length <= 100 || dlabel.blank?
       "<div class='in-form-dialog collapse' id='#{id}'>#{dmsg}</div><div class='dialog-btn-container'><p>#{dmsg}</p></div>".html_safe
@@ -95,11 +103,9 @@ module ApplicationHelper
     return unless captions && captions[key]
 
     caption = captions[key]
-    if caption.is_a?(Hash)
-      caption = caption["#{mode}_caption".to_sym] || caption[:caption] || ''
-    end
+    caption = caption["#{mode}_caption".to_sym] || caption[:caption] || '' if caption.is_a?(Hash)
     if @form_object_instance
-      caption = Admin::MessageTemplate.substitute(caption, data: @form_object_instance, tag_subs: 'em class="all_caps"')
+      caption = Formatter::Substitution.substitute(caption, data: @form_object_instance, tag_subs: 'em class="all_caps"')
     end
     caption.html_safe
   end
@@ -124,6 +130,10 @@ module ApplicationHelper
     }
   end
 
+  def hide_player_tabs?
+    @hide_player_tabs ||= app_config_set(:hide_player_tabs)
+  end
+
   def partial_cache_key(partial)
     u = current_user || current_admin
     apptype = u&.app_type_id if u.is_a? User
@@ -143,4 +153,4 @@ module ApplicationHelper
   def markdown_to_html(md)
     Kramdown::Document.new(md).to_html.html_safe if md
   end
-  end
+end

@@ -31,6 +31,7 @@ config/initializers/secret_token.rb
 ## Environment normalization:
 /.bundle
 /vendor/bundle
+/node_modules
 
 # these should all be checked in to normalize the environment:
 # Gemfile.lock, .ruby-version, .ruby-gemset
@@ -67,3 +68,5 @@ bin/parallel_spinach
 bin/rails
 bin/rake
 bin/rspec
+
+.vscode

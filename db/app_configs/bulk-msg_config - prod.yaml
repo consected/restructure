@@ -1663,6 +1663,18 @@ app_type:
     protocol_name: Updates
     sub_process_name: record updates
     user_email: 
+  - id: 326
+    name: created femfl subject
+    admin_id: 1
+    created_at: '2020-08-20T08:27:02.261Z'
+    updated_at: '2020-08-20T08:27:02.261Z'
+    disabled: false
+    sub_process_id: 52
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: flag updates
+    user_email: 
   - id: 245
     name: created grit assignment
     admin_id: 1
@@ -2154,6 +2166,18 @@ app_type:
     description: 
     protocol_name: Updates
     sub_process_name: record updates
+    user_email: 
+  - id: 327
+    name: updated femfl subject
+    admin_id: 1
+    created_at: '2020-08-20T08:27:02.284Z'
+    updated_at: '2020-08-20T08:27:02.284Z'
+    disabled: false
+    sub_process_id: 52
+    milestone: 
+    description: 
+    protocol_name: Updates
+    sub_process_name: flag updates
     user_email: 
   - id: 246
     name: updated grit assignment

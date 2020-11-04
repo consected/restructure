@@ -54,17 +54,14 @@ window.setTimeout(function() {
 
   for(var i = 0; i < json.length; i++) {
     var row = json[i];
-    console.log(row);
     var col_label = null;
 
     var col_iter = 0;
     var row_iter = 0;
     for(col_label in row) {
       if(row.hasOwnProperty(col_label)) {
-        console.log(col_label);
         var colval = row[col_label];
         if (col_label == opts.label_with_column) {
-          console.log('add data labels for ' + col_label);
           data_labels.push(colval);
         }
         else {
@@ -92,8 +89,6 @@ window.setTimeout(function() {
   var ctx = $block.find('canvas');
 
   var myPieChart = new Chart(ctx, opts);
-
-  console.log(myPieChart);
 
   }, 100);
 

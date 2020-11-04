@@ -60,16 +60,30 @@ _fpa.set_definition = function (name, callback) {
 
   };
 
-  try {
-    var res = _fpa.cache(name);
-    if (!res)
+  var wait = 1;
+  if (_fpa.state.background_loading[name] == 'loading') {
+    var wait = 2000;
+    // console.log('delaying repeated request for ' + name);
+  }
+
+  _fpa.state.background_loading[name] = 'loading';
+
+  window.setTimeout(function () {
+
+    try {
+      var res = _fpa.cache(name);
+      if (!res)
+        get_def(name);
+      else
+        if (callback) callback();
+    }
+    catch (e) {
       get_def(name);
-    else
-      if (callback) callback();
-  }
-  catch (e) {
-    get_def(name);
-  }
+    }
+    _fpa.state.background_loading[name] = 'loaded';
+
+  }, wait);
+
 
 };
 
@@ -156,7 +170,7 @@ _fpa.set_cache = function (name, val) {
   else {
     _fpa.local_storage[name] = val;
   }
-  console.log("storing cache item: " + name);
+  // console.log("storing cache item: " + name);
 
 };
 

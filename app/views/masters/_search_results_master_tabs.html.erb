@@ -1,6 +1,6 @@
 
 <script id="master_tabs" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <ul class="nav nav-pills details-tabs <%= app_config_set(:hide_player_tabs) ? 'hidden' : '' %> hide-player-tabs-<%= app_config_set(:hide_player_tabs)%>">
+  <ul class="nav nav-pills details-tabs <%= hide_player_tabs? ? 'hidden' : '' %> hide-player-tabs-<%= hide_player_tabs?%>">
 
   <%
     drop_down = nil

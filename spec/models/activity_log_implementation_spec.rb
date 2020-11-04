@@ -30,7 +30,7 @@ RSpec.describe 'Activity Log implementation', type: :model do
     al = @player_contact.activity_log__player_contact_phones.build(select_call_direction: 'from player', select_who: 'user')
     expect(al.master_user).to eq user
     expect(master.activity_log__player_contact_phones).not_to be nil
-    expect(al.class.definition).not_to be nil
+    expect(al.current_definition).not_to be nil
 
     expect(al.player_contact).to eq @player_contact
 
@@ -40,10 +40,10 @@ RSpec.describe 'Activity Log implementation', type: :model do
     expect do
       al.save
     end.to raise_error FphsException
-    
+
     setup_access resource_name, resource_type: :activity_log_type, access: :create, user: @user
     # The access has changed, reset the cached results
-    al.reset_access
+    al.reset_access_evaluations!
 
     let_user_create_player_contacts
 
