@@ -317,8 +317,8 @@ class Report < ActiveRecord::Base
         end
         clean_sql = ActiveRecord::Base.send(:sanitize_sql_for_conditions, [sql, @search_attr_values])
       rescue StandardError => e
-        logger.info "Unabled to sanitize sql: #{e.inspect}.\n#{e.backtrace.join("\n")}"
-        raise Report::BadSearchCriteria
+        logger.info "Failed to sanitize sql: #{e.inspect}.\n#{e.backtrace.join("\n")}"
+        raise Report::BadSearchCriteria, "Failed to sanitize sql. #{e}"
       end
       @clean_sql = clean_sql
       begin
@@ -328,8 +328,8 @@ class Report < ActiveRecord::Base
         res = pg.execute(clean_sql)
         res.type_map = @type_map
       rescue StandardError => e
-        logger.info "Unabled to run sql: #{e.inspect}.\n#{clean_sql}"
-        raise FphsException, "Unabled to run sql: #{e.inspect}"
+        logger.info "Failed to run sql: #{e.inspect}.\n#{clean_sql}"
+        raise FphsException, "Failed to run sql. #{e}"
       end
       raise ActiveRecord::Rollback
     end
