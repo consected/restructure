@@ -37,18 +37,21 @@ git push origin --all
 
 git checkout develop
 
-cd ../install-playbook/ansible
-build_box=true vagrant up --provision
-TESTVER=$(cat build_version.txt)
+cd ../restructure-build
+./build.sh
+
+if [ ! -s shared/build_version.txt ]; then
+  echo "shared/build_version.txt in $(pwd) was not set. The build was not successful"
+  exit 1
+fi
+
+TESTVER=$(cat shared/build_version.txt)
 
 if [ "${TESTVER}" == "${CURRVER}" ]; then
   echo "Build failed"
   echo "${TESTVER} == ${CURRVER}"
   exit 1
 fi
-
-sed -i -E "s/git_version: .+/git_version: ${TESTVER}/g" package_vars.yml
-setup_assets=true vagrant up --provision
 
 cd ${CURRDIR}
 echo ${TESTVER} > version.txt
