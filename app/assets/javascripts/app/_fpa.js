@@ -243,7 +243,11 @@ _fpa = {
     var process_block = block;
 
     // Render the result using the template and data
-    var html = template(data);
+    try {
+      var html = template(data);
+    } catch (err) {
+      console.log("template function not defined for " + template_name);
+    }
     html = $(html).addClass('view-template-created');
 
     var new_block = block;

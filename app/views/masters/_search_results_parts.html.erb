@@ -100,7 +100,7 @@
     <% if first && id_list.length > 1 %>
     <a href="#" class="switch_id glyphicon glyphicon-random" title="switch to alternative ID"></a>
     <% end %>
-    <span class="<%= first && id_list.length > 1 ? '' : 'alt_id' %> <%=i%>" <% unless first %> style="display: none"<% end %> title="<%= i.humanize %>">{{#if <%= i %>}}{{<%= i %>}}{{else}}no&nbsp;<%= i.humanize %>{{/if}}</span>
+    <span class="alt-id-item <%= first && id_list.length > 1 ? '' : 'alt_id' %> <%=i%>" <% unless first %> style="display: none"<% end %> title="<%= i.humanize %>">{{#if <%= i %>}}{{<%= i %>}}{{else}}no&nbsp;<%= i.humanize %>{{/if}}</span>
   <%
     first = false
   end

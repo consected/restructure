@@ -108,7 +108,7 @@
     <ul class="list-group" data-item-id="{{id}}" data-item-rank="{{rank}}">
       <li class="list-group-item sub-list-data">
         <i class="glyphicon glyphicon-phone"></i>
-        <a data-on-click-call="activity_logs.selected_parent" data-on-click-show="activity_logs_<%=item_type_name%>_actions-partial@#activity-log-{{master_id}}-initial-action" data-master-id="{{master_id}}" data-item-id="{{id}}" data-item-data="{{data}}" data-rec-type="{{rec_type}}">{{pretty_string data return_string="true" capitalize="true"}}</a>
+        <a data-on-click-call="activity_logs.selected_parent" data-on-click-show="activity_logs_<%=item_type_name%>_actions_block@#activity-log-{{master_id}}-initial-action" data-master-id="{{master_id}}" data-item-id="{{id}}" data-item-data="{{data}}" data-rec-type="{{rec_type}}">{{pretty_string data return_string="true" capitalize="true"}}</a>
         <a data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log-<%=item_type_name_hyphenated%>-sub-list-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-activity-log-<%=item_type_name_hyphenated%> pull-right glyphicon glyphicon-edit small" href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{id}}/edit" data-remote="true" data-<%=item_type_hyphenated%>-id="{{id}}" data-result-target=""></a>
         <span class="pull-right label label-info general-rank-{{rank}} <%=item_type_hyphenated%>-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
       </li>
@@ -126,11 +126,14 @@
   {{/with}}
 </script>
 
-
+<script id="activity_logs_<%=item_type_name%>_actions_block" type="text/x-handlebars-template" class="hidden handlebars-template">
+{{log this}}
+  {{> activity_logs_<%=item_type_name%>_actions item_id=item_id}}
+</script>
 
 <script id="activity_logs_<%=item_type_name%>_actions-partial" type="text/x-handlebars-template" class="hidden handlebars-partial handlebars-template">
   <% unless prevent_create  || !current_user.has_access_to?(:create, :activity_log_type, current_definition.option_type_config_for(:primary).resource_name)%>
-  <span id="activity-log-{{master_id}}-initial-action" class="" >
+  <span id="activity-log-{{master_id}}-initial-action" class="al-initial-action-container" >
     <span class="activity-log--<%=item_type_name_hyphenated%>-actions">
       <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{item_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-extra-log-type="primary" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-primary-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= main_log_label %></a>
     </span>
