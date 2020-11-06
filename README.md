@@ -4,6 +4,14 @@ Rails App for FPHS (Zeus)
 The **Zeus** App provides CRM and activity tracking functionality for the
 Football Players Health Study (FPHS) team.
 
+
+### Development
+
+To get started, add an entry to your own git repo to avoid assets being committed during development.
+
+    echo 'public/assets' >> .git/info/exclude
+
+
 ### Build and Test
 
 Build and testing is handled by a Docker container at [restructure-build](https://github.com/consected/restructure-build)
