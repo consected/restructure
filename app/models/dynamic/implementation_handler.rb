@@ -54,6 +54,8 @@ module Dynamic
       return @versioned_definition unless @versioned_definition.nil? ||
                                           @versioned_definition.def_version.nil? && id
 
+      return current_definition unless respond_to? :created_at
+
       @versioned_definition = self.class.definition.versioned(created_at) || current_definition
     end
 

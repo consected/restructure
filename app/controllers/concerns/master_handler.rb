@@ -284,6 +284,10 @@ module MasterHandler
     @master.current_user = current_user
   end
 
+  #
+  # If an instance id is specified using a ref_to_record_id param
+  # use it to set the object instance and set up the current user
+  # @return [Integer] - the id of the object instance
   def set_instance_from_reference_id
     return if canceled? || params[:ref_to_record_id].blank?
 
