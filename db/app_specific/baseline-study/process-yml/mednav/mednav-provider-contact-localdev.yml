@@ -1,8 +1,0 @@
-# Fields: provider_name,provider_call_notes,other_notes
-default:
-
-  caption_before:
-    all_fields: Relevant assessments
-    provider_name: Provider name
-    provider_call_notes: Notes
-    other_notes: Other notes
