@@ -7,6 +7,7 @@ app_type:
   admin_id: 4
   created_at: 
   updated_at: 
+  default_schema_name: ipa_ops
   app_configurations:
   - id: 81
     name: hide tracker panel
@@ -195,7 +196,7 @@ app_type:
     created_at: '2019-09-12T10:18:51.590Z'
     updated_at: '2019-09-12T10:22:23.678Z'
     user_email: 
-  user_access_controls:
+  valid_user_access_controls:
   - id: 86
     user_id: 
     resource_type: table
@@ -469,19 +470,6 @@ app_type:
     created_at: 
     updated_at: '2019-04-09T08:30:10.629Z'
     user_email: 
-  - id: 131
-    user_id: 
-    resource_type: table
-    resource_name: file_storage__resources
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 2
-    app_type_id: 7
-    role_name: ''
-    created_at: 
-    updated_at: 
-    user_email: 
   - id: 132
     user_id: 
     resource_type: table
@@ -547,19 +535,6 @@ app_type:
     created_at: 
     updated_at: '2019-04-09T08:30:10.659Z'
     user_email: 
-  - id: 137
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_session_filestore__session
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: user - ipa files
-    created_at: 
-    updated_at: '2019-04-09T08:49:36.007Z'
-    user_email: 
   - id: 138
     user_id: 
     resource_type: table
@@ -611,19 +586,6 @@ app_type:
     role_name: user - ipa files
     created_at: 
     updated_at: '2019-04-09T08:30:10.683Z'
-    user_email: 
-  - id: 142
-    user_id: 
-    resource_type: table
-    resource_name: activity_log__ipa_assignment_session_filestores
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: ''
-    created_at: 
-    updated_at: '2019-04-09T08:53:53.361Z'
     user_email: 
   - id: 143
     user_id: 
@@ -690,32 +652,6 @@ app_type:
     created_at: 
     updated_at: '2019-04-09T08:30:10.710Z'
     user_email: 
-  - id: 148
-    user_id: 
-    resource_type: table
-    resource_name: activity_log__ipa_assignment_mri_files
-    options: ''
-    access: create
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: user - ipa files
-    created_at: 
-    updated_at: '2019-04-09T08:55:46.688Z'
-    user_email: 
-  - id: 149
-    user_id: 
-    resource_type: table
-    resource_name: activity_log__ipa_assignment_mri_files
-    options: ''
-    access: create
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: user - ipa files
-    created_at: 
-    updated_at: '2019-04-09T08:55:11.912Z'
-    user_email: 
   - id: 150
     user_id: 
     resource_type: table
@@ -755,84 +691,6 @@ app_type:
     created_at: 
     updated_at: '2019-04-05T15:58:43.168Z'
     user_email: 
-  - id: 153
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_mri_file__brain_mri
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: ''
-    created_at: 
-    updated_at: '2019-04-09T08:48:05.448Z'
-    user_email: 
-  - id: 154
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_mri_file__liver_mri
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: ''
-    created_at: 
-    updated_at: '2019-04-09T08:48:14.477Z'
-    user_email: 
-  - id: 155
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_mri_file__electrophysiology
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: ''
-    created_at: 
-    updated_at: '2019-04-09T08:48:10.720Z'
-    user_email: 
-  - id: 156
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_mri_file__spectroscopy
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: ''
-    created_at: 
-    updated_at: '2019-04-09T08:48:18.285Z'
-    user_email: 
-  - id: 157
-    user_id: 
-    resource_type: table
-    resource_name: activity_log__ipa_assignment_mri_files
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: ''
-    created_at: 
-    updated_at: '2019-04-09T10:16:40.349Z'
-    user_email: 
-  - id: 158
-    user_id: 
-    resource_type: report
-    resource_name: IPA File Creators
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: user - ipa files
-    created_at: 
-    updated_at: '2019-04-09T08:51:16.783Z'
-    user_email: 
   - id: 159
     user_id: 
     resource_type: table
@@ -845,19 +703,6 @@ app_type:
     role_name: user - ipa files
     created_at: 
     updated_at: '2019-04-09T08:30:10.766Z'
-    user_email: 
-  - id: 163
-    user_id: 
-    resource_type: table
-    resource_name: activity_log__ipa_assignment_mri_files
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: ''
-    created_at: 
-    updated_at: '2019-04-09T10:16:53.742Z'
     user_email: 
   - id: 173
     user_id: 
@@ -1080,58 +925,6 @@ app_type:
     created_at: '2019-01-23T19:28:43.825Z'
     updated_at: '2019-04-09T08:30:10.813Z'
     user_email: 
-  - id: 190
-    user_id: 1
-    resource_type: general
-    resource_name: create_master
-    options: ''
-    access: read
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: ''
-    created_at: '2019-01-23T19:28:43.836Z'
-    updated_at: '2019-05-14T16:06:46.967Z'
-    user_email: phil_ayres@hms.harvard.edu
-  - id: 191
-    user_id: 1
-    resource_type: table
-    resource_name: player_infos
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: ''
-    created_at: '2019-01-23T19:28:43.849Z'
-    updated_at: '2019-05-14T16:06:02.781Z'
-    user_email: phil_ayres@hms.harvard.edu
-  - id: 192
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_session_filestore__brain_behavior_qs
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: user - brain-behavior files
-    created_at: '2019-01-23T19:28:43.858Z'
-    updated_at: '2019-04-09T08:49:05.098Z'
-    user_email: 
-  - id: 193
-    user_id: 1
-    resource_type: general
-    resource_name: print
-    options: ''
-    access: read
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: ''
-    created_at: '2019-01-23T19:28:43.867Z'
-    updated_at: '2019-05-14T16:06:36.369Z'
-    user_email: phil_ayres@hms.harvard.edu
   - id: 194
     user_id: 
     resource_type: activity_log_type
@@ -1209,19 +1002,6 @@ app_type:
     role_name: filtered - all sessions - reports
     created_at: '2019-01-23T19:28:43.904Z'
     updated_at: '2019-04-09T08:30:10.877Z'
-    user_email: 
-  - id: 200
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_session_filestore__brain_behavior_qs
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: filtered - all sessions - reports
-    created_at: '2019-01-23T19:28:43.910Z'
-    updated_at: '2019-04-09T08:49:00.614Z'
     user_email: 
   - id: 201
     user_id: 
@@ -1353,19 +1133,6 @@ app_type:
     created_at: '2019-01-24T16:29:19.087Z'
     updated_at: '2019-05-14T16:04:55.377Z'
     user_email: 
-  - id: 211
-    user_id: 1
-    resource_type: general
-    resource_name: app_type
-    options: ''
-    access: read
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: ''
-    created_at: '2019-04-05T15:51:11.935Z'
-    updated_at: '2019-04-05T15:58:01.629Z'
-    user_email: phil_ayres@hms.harvard.edu
   - id: 212
     user_id: 
     resource_type: report
@@ -1430,19 +1197,6 @@ app_type:
     role_name: admin - ipa files
     created_at: '2019-04-05T15:58:44.085Z'
     updated_at: '2019-04-09T08:30:10.820Z'
-    user_email: 
-  - id: 217
-    user_id: 
-    resource_type: report
-    resource_name: Search IPA Subject
-    options: ''
-    access: read
-    disabled: true
-    admin_id: 4
-    app_type_id: 7
-    role_name: user - participant details
-    created_at: '2019-04-05T15:58:44.186Z'
-    updated_at: '2019-05-14T16:05:03.267Z'
     user_email: 
   - id: 218
     user_id: 
@@ -1652,19 +1406,6 @@ app_type:
     created_at: '2019-04-16T13:36:05.510Z'
     updated_at: '2019-04-16T13:36:05.510Z'
     user_email: 
-  - id: 234
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_session_filestore__mri
-    options: ''
-    access: read
-    disabled: true
-    admin_id: 6
-    app_type_id: 7
-    role_name: ''
-    created_at: '2019-04-16T20:26:11.485Z'
-    updated_at: '2019-04-16T20:40:44.413Z'
-    user_email: 
   - id: 235
     user_id: 
     resource_type: activity_log_type
@@ -1690,19 +1431,6 @@ app_type:
     role_name: user - mri files - spectroscopy
     created_at: '2019-04-16T20:42:07.382Z'
     updated_at: '2019-04-16T20:42:07.382Z'
-    user_email: 
-  - id: 237
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_session_filestore__mri
-    options: ''
-    access: create
-    disabled: true
-    admin_id: 6
-    app_type_id: 7
-    role_name: user - mri files - report
-    created_at: '2019-04-16T21:28:57.901Z'
-    updated_at: '2019-04-16T21:29:16.029Z'
     user_email: 
   - id: 238
     user_id: 
@@ -1742,19 +1470,6 @@ app_type:
     role_name: admin - ipa files
     created_at: '2019-04-17T07:32:51.693Z'
     updated_at: '2019-04-17T07:32:51.693Z'
-    user_email: 
-  - id: 241
-    user_id: 
-    resource_type: general
-    resource_name: view_reports
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 4
-    app_type_id: 7
-    role_name: admin - ipa files
-    created_at: '2019-04-17T07:33:22.196Z'
-    updated_at: '2019-04-17T07:33:22.196Z'
     user_email: 
   - id: 242
     user_id: 
@@ -1820,19 +1535,6 @@ app_type:
     role_name: user - mri files - zip test
     created_at: '2019-04-17T20:18:27.169Z'
     updated_at: '2019-04-17T20:18:27.169Z'
-    user_email: 
-  - id: 247
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_session_filestore__tms_eeg
-    options: ''
-    access: read
-    disabled: true
-    admin_id: 5
-    app_type_id: 7
-    role_name: user - medical navigation - reports only
-    created_at: '2019-04-17T20:43:14.771Z'
-    updated_at: '2019-04-17T20:44:30.138Z'
     user_email: 
   - id: 248
     user_id: 
@@ -2159,7 +1861,163 @@ app_type:
     created_at: '2019-10-11T13:29:16.891Z'
     updated_at: '2019-10-11T13:30:05.443Z'
     user_email: 
-  associated_activity_logs:
+  - id: 273
+    user_id: 
+    resource_type: general
+    resource_name: user_file_actions
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 7
+    role_name: reidentify mri
+    created_at: '2020-04-06T11:32:50.398Z'
+    updated_at: '2020-04-07T16:25:54.661Z'
+    user_email: 
+  - id: 274
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__archived_files
+    options: ''
+    access: update
+    disabled: false
+    admin_id: 4
+    app_type_id: 7
+    role_name: reidentify mri
+    created_at: '2020-04-09T07:51:20.072Z'
+    updated_at: '2020-04-09T07:51:20.072Z'
+    user_email: 
+  - id: 275
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__containers
+    options: ''
+    access: update
+    disabled: false
+    admin_id: 4
+    app_type_id: 7
+    role_name: reidentify mri
+    created_at: '2020-04-09T07:51:32.147Z'
+    updated_at: '2020-04-09T07:51:32.147Z'
+    user_email: 
+  - id: 276
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__stored_files
+    options: ''
+    access: update
+    disabled: false
+    admin_id: 4
+    app_type_id: 7
+    role_name: reidentify mri
+    created_at: '2020-04-09T07:51:45.846Z'
+    updated_at: '2020-04-09T07:51:45.846Z'
+    user_email: 
+  - id: 277
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_session_filestore__mri
+    options: ''
+    access: update
+    disabled: false
+    admin_id: 4
+    app_type_id: 7
+    role_name: reidentify mri
+    created_at: '2020-04-09T07:52:23.909Z'
+    updated_at: '2020-04-09T07:52:23.909Z'
+    user_email: 
+  - id: 278
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__ipa_assignment_session_filestores
+    options: ''
+    access: update
+    disabled: false
+    admin_id: 4
+    app_type_id: 7
+    role_name: reidentify mri
+    created_at: '2020-04-09T07:52:57.277Z'
+    updated_at: '2020-04-09T07:52:57.277Z'
+    user_email: 
+  - id: 279
+    user_id: 
+    resource_type: report
+    resource_name: PET - MRI data request_07072020
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 6
+    app_type_id: 7
+    role_name: admin - ipa files
+    created_at: '2020-07-07T19:28:52.575Z'
+    updated_at: '2020-07-07T19:28:52.575Z'
+    user_email: 
+  - id: 280
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_session_filestore__mri
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 6
+    app_type_id: 7
+    role_name: user - pet mri request
+    created_at: '2020-07-09T17:49:35.614Z'
+    updated_at: '2020-07-09T17:49:35.614Z'
+    user_email: 
+  - id: 281
+    user_id: 
+    resource_type: report
+    resource_name: Cardiac - Applanation Tonometry
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 6
+    app_type_id: 7
+    role_name: admin - ipa files
+    created_at: '2020-07-10T19:17:00.190Z'
+    updated_at: '2020-07-10T19:17:00.190Z'
+    user_email: 
+  - id: 282
+    user_id: 
+    resource_type: report
+    resource_name: Cardiac - Applanation Tonometry
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 6
+    app_type_id: 7
+    role_name: user - app tonometry report
+    created_at: '2020-08-25T14:58:49.538Z'
+    updated_at: '2020-08-25T14:58:49.538Z'
+    user_email: 
+  - id: 283
+    user_id: 
+    resource_type: report
+    resource_name: Baseline Reports - Nursing & Nutrition
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 6
+    app_type_id: 7
+    role_name: admin - ipa files
+    created_at: '2020-09-22T14:48:46.875Z'
+    updated_at: '2020-09-22T14:48:46.875Z'
+    user_email: 
+  - id: 284
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_session_filestore__mri
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 7
+    role_name: unfiltered - mri files
+    created_at: '2020-10-28T17:33:35.170Z'
+    updated_at: '2020-10-28T17:33:35.170Z'
+    user_email: 
+  valid_associated_activity_logs:
   - id: 3
     name: IPA Session Filestore
     item_type: ipa_assignment
@@ -2167,7 +2025,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2018-10-12T15:48:04.017Z'
-    updated_at: '2019-07-18T07:53:31.789Z'
+    updated_at: '2020-04-08T13:12:41.598Z'
     action_when_attribute: alt_order
     field_list: select_type, notes, session_date, session_time
     blank_log_field_list: ''
@@ -2179,27 +2037,28 @@ app_type:
       \   select_confirm_status:\r\n      edit_as:\r\n        alt_options:\r\n          confirmed:
       confirmed\r\n\r\n  fields:\r\n#    - session_date\r\n#    - session_time\r\n
       \   - select_status\r\n    - select_confirm_status\r\n    - select_notify_role_name\r\n
-      \   - notes\r\n\r\n  caption_before:\r\n#    session_date:\r\n#      keep_label:
-      true\r\n#      caption: Date and time of the assessment session related to these
-      files\r\n    select_status: |\r\n      Select the status of the container.\r\n
-      \     <b>open</b> - container is open and files can be added\r\n      <b>closed</b>
-      - container is closed and made read-only\r\n      <b>delete</b> - mark container
-      for deletion, allowing a new container of this type to be created to replace
-      it\r\n    select_confirm_status: |\r\n      Confirm that the container is to
-      be closed or marked for deletion.\r\n      After saving, the container will
-      be locked and additional changes will be prevented.\r\n    notes: Description
+      \   - notes\r\n\r\n  caption_before: &caption_before\r\n#    session_date:\r\n#
+      \     keep_label: true\r\n#      caption: Date and time of the assessment session
+      related to these files\r\n    select_status: |\r\n      Select the status of
+      the container.\r\n      <b>open</b> - container is open and files can be added\r\n
+      \     <b>closed</b> - container is closed and made read-only\r\n      <b>delete</b>
+      - mark container for deletion, allowing a new container of this type to be created
+      to replace it\r\n    select_confirm_status: |\r\n      Confirm that the container
+      is to be closed or marked for deletion.\r\n      After saving, the container
+      will be locked and additional changes will be prevented.\r\n    notes: Description
       and Notes\r\n\r\n    select_notify_role_name: To notify users of this container
-      when an upload has completed, select <i>Notify</i>\r\n\r\n  show_if:\r\n    select_confirm_status:\r\n
-      \     select_status:\r\n        - closed\r\n        - delete\r\n\r\n  valid_if:\r\n
-      \   on_save:\r\n      any:\r\n        this:\r\n          select_status: open\r\n
-      \         select_confirm_status: confirmed\r\n\r\n  editable_if:\r\n    any:\r\n
-      \     user:\r\n        role_name: admin - ipa files\r\n\r\n      this:\r\n        not_all:\r\n
-      \         this:\r\n            select_status:\r\n              - closed\r\n
-      \             - delete\r\n\r\n  showable_if:\r\n    not_all:\r\n      this:\r\n
-      \       select_status: delete\r\n\r\n  save_trigger:\r\n    on_create:\r\n      create_filestore_container:\r\n
-      \       name: session files\r\n        label: Session Files\r\n        create_with_role:
-      nfs_store group 600\r\n\r\n\r\n    on_upload:\r\n      notify:\r\n#      - type:
-      email\r\n#        users:\r\n#          this:\r\n#            user_id: return_value\r\n#
+      when an upload has completed, select <i>Notify</i>\r\n    \r\n    session_date:
+      Session Date\r\n\r\n  show_if: &show_if\r\n    select_confirm_status:\r\n      select_status:\r\n
+      \       - closed\r\n        - delete\r\n\r\n  valid_if:\r\n    on_save:\r\n
+      \     any:\r\n        this:\r\n          select_status: open\r\n          select_confirm_status:
+      confirmed\r\n\r\n  editable_if:\r\n    any:\r\n      user:\r\n        role_name:
+      admin - ipa files\r\n\r\n      this:\r\n        not_all:\r\n          this:\r\n
+      \           select_status:\r\n              - closed\r\n              - delete\r\n\r\n
+      \ showable_if:\r\n    not_all:\r\n      this:\r\n        select_status: delete\r\n\r\n
+      \ save_trigger:\r\n    on_create:\r\n      create_filestore_container:\r\n        name:
+      session files\r\n        label: Session Files\r\n        create_with_role: nfs_store
+      group 600\r\n\r\n\r\n    on_upload:\r\n      notify:\r\n#      - type: email\r\n#
+      \       users:\r\n#          this:\r\n#            user_id: return_value\r\n#
       \       layout_template: ipa notification layout\r\n#        content_template:
       ipa message content\r\n#        subject: File Upload Complete\r\n      - type:
       email\r\n        role:\r\n          parent:\r\n            select_notify_role_name:
@@ -2235,10 +2094,33 @@ app_type:
       open\r\n          - closed\r\n\r\n  field_options:\r\n    <<: *field_options\r\n
       \   select_notify_role_name:\r\n      edit_as:\r\n        alt_options:\r\n          Notify:
       email - brain / behavior\r\n\r\n\r\nmri:\r\n  label: MRI / Liver MR\r\n\r\n
-      \ creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n
+      \ fields:\r\n    - select_status\r\n    - select_confirm_status\r\n    - select_notify_role_name\r\n
+      \   - session_date\r\n    - notes\r\n    - placeholder_dicom_intro\r\n    -
+      placeholder_dicom\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n
       \       extra_log_type: mri\r\n        select_status:\r\n          - open\r\n
       \         - closed\r\n\r\n  field_options:\r\n    <<: *field_options\r\n    select_notify_role_name:\r\n
-      \     edit_as:\r\n        alt_options:\r\n          Notify: email - mri\r\n\r\n\r\nphysical_function:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          Notify: email - mri\r\n\r\n
+      \ show_if: \r\n    <<: *show_if\r\n    placeholder_dicom_intro:\r\n      current_user_roles:
+      reidentify mri\r\n    placeholder_dicom:\r\n      current_user_roles: reidentify
+      mri\r\n\r\n  nfs_store:\r\n    user_file_actions:\r\n      - name: Reidentify\r\n
+      \       pipeline:\r\n          - dicom_deidentify:\r\n            - new_path:
+      reidentified/{{path}}\r\n              file_filters:\r\n                - '.*_MPRAGE_RMS_0.*'\r\n
+      \               - '.*_TOF_0.*'\r\n                - '.*_TOF_MIP_SAG_0.*'\r\n
+      \               - '.*_TOF_MIP_COR_0.*'\r\n                - '.*_DTI_ADC_0.*'\r\n
+      \               - '.*_DTI_TRACEW_0.*'\r\n                - '.*_DTI_FA_0.*'\r\n
+      \               - '.*_DTI_COLFA_0.*'\r\n                - '.*_RELCBF_0.*'\r\n
+      \               - '.*_MAG_IMAGES_0.*'\r\n                - '.*_PHA_IMAGES_0.*'\r\n
+      \               - '.*_MIP_IMAGES_SW_0.*'\r\n                - '.*_SWI_IMAGES_0.*'\r\n
+      \               - '.*_FLAIR_0.*'\r\n              recursive: true              \r\n
+      \             #/{{archive_file::ignore_missing}}\r\n              set_tags:
+      &mri_set_tags\r\n                '0010,0010': '{{player_infos.first_name::initial}}{{player_infos.last_name::initial}}'\r\n
+      \               '0010,0020': '{{player_infos.first_name::initial}}{{player_infos.last_name::initial}}'\r\n
+      \               '0008,0020': '{{parent_item.session_date::dicom_date}}'\r\n\r\n
+      \ caption_before:\r\n    <<: *caption_before\r\n    placeholder_dicom_intro:
+      |\r\n      **DICOM Tag Replacements**\r\n    placeholder_dicom: |\r\n      '0010,0010':
+      '{{player_infos.first_name::initial}}{{player_infos.last_name::initial}}'\r\n
+      \     \r\n      '0010,0020': '{{player_infos.first_name::initial}}{{player_infos.last_name::initial}}'\r\n
+      \     \r\n      '0008,0020': '{{session_date::dicom_date}}'\r\n    \r\n      \r\n\r\n\r\nphysical_function:\r\n
       \ label: Physical Function\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n
       \       extra_log_type: physical_function\r\n        select_status:\r\n          -
       open\r\n          - closed\r\n\r\n  field_options:\r\n    <<: *field_options\r\n
@@ -2273,7 +2155,7 @@ app_type:
     main_log_name: ''
     process_name: session_filestore
     table_name: activity_log_ipa_assignment_session_filestores
-    category: 
+    category: ''
     user_email: 
   associated_dynamic_models:
   - id: 11
@@ -2312,212 +2194,9 @@ app_type:
     updated_at: '2019-01-23T19:28:41.733Z'
     alphanumeric: false
     extra_fields: ''
+    category: ipa
     user_email: 
-  associated_reports:
-  - id: 5
-    name: Search IPA Subject
-    description: "Search subjects by name, phone, email or ID.\r\nLeave the search
-      field empty to see all subjects."
-    sql: "select distinct m.id master_id, \r\npi.first_name, pi.middle_name, pi.last_name,
-      pi.nick_name,\r\na.street, a.street2, a.city, a.state, a.zip, \r\npc.data, pc.rec_type\r\nfrom
-      masters m\r\ninner join player_infos pi\r\non pi.master_id = m.id \r\ninner
-      join ipa_assignments b\r\non m.id = b.master_id\r\nleft join addresses a\r\non
-      m.id = a.master_id\r\nleft join player_contacts pc\r\non pc.master_id = m.id\r\nwhere
-      \r\n(:name is null \r\nor pi.first_name ~* :name\r\nor pi.last_name ~* :name\r\nor
-      pi.middle_name ~* :name\r\nor pi.nick_name ~* :name\r\nor( \r\n    pi.first_name
-      ~* coalesce(split_part(:name, ' ', 1),'none')\r\n    AND pi.last_name ~* coalesce(split_part(:name,
-      ' ', 2),'none')\r\n  )\r\n) OR\r\n(\r\nlength(:name) > 5 AND\r\nregexp_replace(pc.data,
-      '\\W+', '', 'g') ~* regexp_replace(:name, '\\W+', '', 'g')\r\n) OR\r\n(\r\nb.ipa_id::varchar
-      = :name\r\n)\r\n"
-    search_attrs: "name: \r\n  text: \r\n    all: true\r\n    multiple: single\r\n"
-    admin_id: 1
-    disabled: false
-    created_at: '2018-10-12T15:48:04.561Z'
-    updated_at: '2019-09-05T11:24:54.916Z'
-    report_type: search
-    auto: false
-    searchable: true
-    position: 2
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: search
-    short_name: search_ipa_subject
-    options: 
-    user_email: 
-  - id: 6
-    name: IPA File Creators
-    description: ''
-    sql: select id, first_name, last_name, email, staff_id_no, role, organization,
-      department, user_id from ipa_file_creators;
-    search_attrs: ''
-    admin_id: 1
-    disabled: false
-    created_at: '2018-10-12T15:48:04.566Z'
-    updated_at: '2019-09-05T11:24:56.491Z'
-    report_type: regular_report
-    auto: false
-    searchable: false
-    position: 
-    edit_model: ipa_file_creators
-    edit_field_names: first_name last_name email staff_id_no role organization department
-      user_id
-    selection_fields: ''
-    item_type: ipa-files
-    short_name: ipa_file_creators
-    options: 
-    user_email: 
-  - id: 12
-    name: File Report
-    description: Enter one or more IPA IDs to view associated files (only those you
-      have access to). Select one or more files with the checkboxes in the final column
-      and click the Download button to download a zip file containing all the selected
-      files.
-    sql: "\r\nselect \r\nal.master_id,\r\nipa.ipa_id,\r\nal.extra_log_type \"session
-      type\",\r\nal.select_status,\r\nfilestore_report_file_path(nfs_store_stored_files::nfs_store_stored_files,
-      nfs_store_archived_files::nfs_store_archived_files) \"file path\", \r\nfilestore_report_perform_action(c.id,
-      'activity_log__ipa_assignment_session_filestore', al.id, nfs_store_stored_files::nfs_store_stored_files,
-      nfs_store_archived_files::nfs_store_archived_files) \"perform action: view file\",\r\nfilestore_report_select_fields(c.id,
-      'activity_log__ipa_assignment_session_filestore', al.id, nfs_store_stored_files.id,
-      nfs_store_archived_files.id) \"select items: download files\"\r\n\r\nfrom activity_log_ipa_assignment_session_filestores
-      al\r\n\r\ninner join ipa_assignments ipa\r\non al.master_id = ipa.master_id\r\n\r\ninner
-      join model_references mr\r\non mr.from_record_type = 'ActivityLog::IpaAssignmentSessionFilestore'\r\nand
-      al.master_id = mr.from_record_master_id\r\nand al.id = mr.from_record_id\r\n\r\ninner
-      join nfs_store_containers c\r\non mr.to_record_type = 'NfsStore::Manage::Container'\r\nand
-      c.master_id = mr.to_record_master_id\r\nand c.id = mr.to_record_id\r\n\r\ninner
-      join nfs_store_stored_files\r\non c.id = nfs_store_stored_files.nfs_store_container_id\r\n\r\nleft
-      join nfs_store_archived_files\r\non nfs_store_stored_files.id = nfs_store_archived_files.nfs_store_stored_file_id\r\n\r\nwhere
-      ipa.ipa_id in (:ipa_ids) AND al.select_status IN ('open', 'closed')\r\n\r\n\r\nAND
-      :file_filtering_conditions_for_activity_log__ipa_assignment_session_filestore\r\n\r\n\r\norder
-      by \r\n  ipa_id, \"session type\", \"file path\", \"perform action: view file\"
-      \ \r\n;\r\n"
-    search_attrs: "\r\n\r\nipa_ids: \r\n  number: \r\n    all: true\r\n    multiple:
-      multiple\r\n    label: IPA IDs\r\n    disabled: false"
-    admin_id: 4
-    disabled: false
-    created_at: '2019-01-23T19:28:42.865Z'
-    updated_at: '2019-09-12T10:24:20.494Z'
-    report_type: regular_report
-    auto: false
-    searchable: false
-    position: 
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa-files
-    short_name: file_report
-    options: ''
-    user_email: 
-  - id: 14
-    name: IPA ID Search
-    description: Search for IPA subject by IPA ID.
-    sql: select * from ipa_assignments where ipa_id = :ipa_id
-    search_attrs: "\r\nipa_id:\r\n  number:\r\n    all: true\r\n    multiple: single\r\n"
-    admin_id: 1
-    disabled: false
-    created_at: '2019-04-05T15:58:42.506Z'
-    updated_at: '2019-09-05T11:24:54.643Z'
-    report_type: search
-    auto: false
-    searchable: true
-    position: 1
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: external id search
-    short_name: ipa_id_search
-    options: 
-    user_email: 
-  - id: 15
-    name: IPA Find Container
-    description: Get a single Container ID for a subject. Used by IPA script-based
-      uploads.
-    sql: "select \r\n\r\n  mr.to_record_id \"container_id\",\r\n  al.id \"activity_log_id\",\r\n
-      \ 'activity_log__ipa_assignment_session_filestore' \"activity_log_type\"\r\n--
-      \ , \r\n--  al.extra_log_type \"session_type\", \r\n--  al.session_date, \r\n--
-      \ al.session_time, \r\n--  al.select_status, \r\n--  ipa.ipa_id \r\nfrom activity_log_ipa_assignment_session_filestores
-      al\r\ninner join ipa_assignments ipa \r\n  on \r\n    al.master_id = ipa.master_id\r\ninner
-      join model_references mr\r\n  on \r\n    from_record_type = 'ActivityLog::IpaAssignmentSessionFilestore'\r\n
-      \   and from_record_id = al.id\r\n    and from_record_master_id = al.master_id\r\n
-      \   and to_record_type = 'NfsStore::Manage::Container'\r\n    and to_record_master_id
-      = al.master_id\r\nwhere \r\n  ipa_id = :ipa_id\r\n  and extra_log_type = :session_type\r\n
-      \ ;\r\n  "
-    search_attrs: "\r\nipa_id:\r\n  number:\r\n    all: true\r\n    multiple: single\r\n\r\n\r\nsession_type:
-      \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false"
-    admin_id: 1
-    disabled: false
-    created_at: '2019-04-05T15:58:42.526Z'
-    updated_at: '2019-09-05T11:24:55.844Z'
-    report_type: regular_report
-    auto: false
-    searchable: false
-    position: 
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa-files-api
-    short_name: ipa_find_container
-    options: 
-    user_email: 
-  - id: 18
-    name: Uploads
-    description: "View individual file upload actions.\r\n\r\nEnter a date range to
-      limit the number of results, and / or an IPA ID."
-    sql: "select \r\n  up.id,\r\n  al.master_id,\r\n  ipa_id,\r\n  al.extra_log_type
-      \"session type\",\r\n  up.path,\r\n  up.file_name,\r\n  up.content_type,\r\n
-      \ up.file_size,\r\n  case when up.completed then 'yes' end \"completed\",\r\n
-      \ ' ' || up.created_at::varchar \"created\",\r\n  u.email \"user\"\r\n  \r\nfrom
-      nfs_store_uploads up\r\ninner join users u\r\non u.id = up.user_id\r\n\r\n\r\n\r\ninner
-      join nfs_store_containers c\r\non c.id = up.nfs_store_container_id\r\n\r\ninner
-      join model_references mr\r\non mr.to_record_type = 'NfsStore::Manage::Container'\r\nand
-      mr.from_record_type = 'ActivityLog::IpaAssignmentSessionFilestore'\r\nand c.master_id
-      = mr.to_record_master_id\r\nand c.id = mr.to_record_id\r\n\r\ninner join activity_log_ipa_assignment_session_filestores
-      al\r\non al.master_id = mr.from_record_master_id\r\nand al.id = mr.from_record_id\r\n\r\n\r\ninner
-      join ipa_assignments ipa\r\non al.master_id = ipa.master_id\r\n\r\nwhere \r\n
-      \ (:from is null or up.created_at >= :from )\r\n  and (:to is null or up.created_at
-      <= :to)\r\n  and (:ipa_id is null or ipa_id = :ipa_id)\r\norder by id desc\r\n;"
-    search_attrs: "\r\n\r\nfrom: \r\n  date: \r\n    all: true\r\n    multiple: single\r\n
-      \   default: now\r\n\r\nto: \r\n  date: \r\n    all: true\r\n    multiple: single\r\n\r\nipa_id:
-      \r\n  number: \r\n    all: true\r\n    multiple: single\r\n    label: IPA ID\r\n
-      \   disabled: false"
-    admin_id: 1
-    disabled: false
-    created_at: '2019-05-04T23:22:57.397Z'
-    updated_at: '2019-09-05T11:24:57.424Z'
-    report_type: regular_report
-    auto: false
-    searchable: false
-    position: 
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: z-admin
-    short_name: uploads
-    options: 
-    user_email: 
-  - id: 21
-    name: Edit Container
-    description: ''
-    sql: "select al.id, al.extra_log_type, al.select_status, al.select_confirm_status\r\nfrom
-      activity_log_ipa_assignment_session_filestores al\r\ninner join ipa_assignments
-      ipa\r\non ipa.master_id = al.master_id\r\nwhere ipa_id = :ipa_id"
-    search_attrs: "\r\n\r\nipa_id: \r\n  number: \r\n    all: true\r\n    multiple:
-      single\r\n    disabled: false"
-    admin_id: 1
-    disabled: false
-    created_at: '2019-07-24T16:43:41.489Z'
-    updated_at: '2019-09-05T11:24:57.609Z'
-    report_type: regular_report
-    auto: false
-    searchable: false
-    position: 
-    edit_model: activity_log_ipa_assignment_session_filestores
-    edit_field_names: extra_log_type select_status select_confirm_status
-    selection_fields: select_status select_confirm_status
-    item_type: z-admin
-    short_name: edit_container
-    options: 
-    user_email: 
+  associated_reports: []
   associated_general_selections:
   - id: 12
     name: nflpa
@@ -3074,12 +2753,12 @@ app_type:
     user_email: phil_ayres@hms.harvard.edu
   - id: 266
     app_type_id: 7
-    role_name: admin - ipa files
+    role_name: admin - ipa files!
     user_id: 1
     admin_id: 4
     disabled: false
     created_at: '2019-04-05T15:58:42.676Z'
-    updated_at: '2019-05-29T14:23:06.930Z'
+    updated_at: '2020-04-09T07:53:15.812Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 267
     app_type_id: 7
@@ -6438,6 +6117,366 @@ app_type:
     created_at: '2020-03-31T19:17:28.359Z'
     updated_at: '2020-03-31T19:17:28.359Z'
     user_email: heather_digregorio@hms.harvard.edu
+  - id: 1518
+    app_type_id: 7
+    role_name: reidentify mri
+    user_id: 1
+    admin_id: 4
+    disabled: false
+    created_at: '2020-04-07T16:23:18.123Z'
+    updated_at: '2020-04-07T16:23:18.123Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1519
+    app_type_id: 7
+    role_name: reidentify mri
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-04-07T16:23:18.156Z'
+    updated_at: '2020-04-07T16:23:18.156Z'
+    user_email: template@template
+  - id: 1520
+    app_type_id: 7
+    role_name: reidentify mri
+    user_id: 35
+    admin_id: 4
+    disabled: false
+    created_at: '2020-04-07T16:23:26.162Z'
+    updated_at: '2020-04-07T16:23:26.162Z'
+    user_email: dean_marengi@hms.harvard.edu
+  - id: 1521
+    app_type_id: 7
+    role_name: reidentify mri
+    user_id: 72
+    admin_id: 4
+    disabled: false
+    created_at: '2020-04-07T16:25:03.210Z'
+    updated_at: '2020-04-07T16:25:03.210Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 1522
+    app_type_id: 7
+    role_name: reidentify mri
+    user_id: 14
+    admin_id: 4
+    disabled: false
+    created_at: '2020-04-07T16:25:20.838Z'
+    updated_at: '2020-04-07T16:25:20.838Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 1523
+    app_type_id: 7
+    role_name: unfiltered - mri files
+    user_id: 72
+    admin_id: 6
+    disabled: false
+    created_at: '2020-04-08T20:42:35.292Z'
+    updated_at: '2020-04-08T20:42:35.292Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 1524
+    app_type_id: 7
+    role_name: admin - ipa files!
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2020-04-09T07:53:15.826Z'
+    updated_at: '2020-04-09T07:53:15.826Z'
+    user_email: template@template
+  - id: 1525
+    app_type_id: 7
+    role_name: nfs_store group 600
+    user_id: 96
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-06T19:16:53.730Z'
+    updated_at: '2020-05-06T19:16:53.730Z'
+    user_email: skirkman@bidmc.harvard.edu
+  - id: 1526
+    app_type_id: 7
+    role_name: user - ipa files
+    user_id: 96
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-06T19:17:11.126Z'
+    updated_at: '2020-05-06T19:17:11.126Z'
+    user_email: skirkman@bidmc.harvard.edu
+  - id: 1527
+    app_type_id: 7
+    role_name: user - tms eeg files - site staff
+    user_id: 96
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-06T19:17:30.686Z'
+    updated_at: '2020-05-06T19:17:30.686Z'
+    user_email: skirkman@bidmc.harvard.edu
+  - id: 1528
+    app_type_id: 7
+    role_name: user - tms eeg files - site staff
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-06T19:17:30.694Z'
+    updated_at: '2020-05-06T19:17:30.694Z'
+    user_email: template@template
+  - id: 1529
+    app_type_id: 7
+    role_name: allow uploads
+    user_id: 96
+    admin_id: 5
+    disabled: false
+    created_at: '2020-05-06T19:17:44.291Z'
+    updated_at: '2020-05-06T19:17:44.291Z'
+    user_email: skirkman@bidmc.harvard.edu
+  - id: 1631
+    app_type_id: 7
+    role_name: user - all mri files - no report
+    user_id: 100
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-06T17:00:43.533Z'
+    updated_at: '2020-07-06T17:00:56.944Z'
+    user_email: akulpanowski@mgh.harvard.edu
+  - id: 1632
+    app_type_id: 7
+    role_name: user - all mri files - no report
+    user_id: 71
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-06T17:00:43.615Z'
+    updated_at: '2020-07-06T17:00:43.615Z'
+    user_email: template@template
+  - id: 1633
+    app_type_id: 7
+    role_name: nfs_store group 600
+    user_id: 100
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-06T17:01:17.487Z'
+    updated_at: '2020-07-06T17:01:17.487Z'
+    user_email: akulpanowski@mgh.harvard.edu
+  - id: 1634
+    app_type_id: 7
+    role_name: user - mri files allow upload
+    user_id: 100
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-06T17:01:43.056Z'
+    updated_at: '2020-07-06T17:01:43.056Z'
+    user_email: akulpanowski@mgh.harvard.edu
+  - id: 1635
+    app_type_id: 7
+    role_name: user - mri files allow upload
+    user_id: 71
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-06T17:01:43.065Z'
+    updated_at: '2020-07-06T17:01:43.065Z'
+    user_email: template@template
+  - id: 1636
+    app_type_id: 7
+    role_name: user - ipa files
+    user_id: 100
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-06T17:02:13.873Z'
+    updated_at: '2020-07-06T17:02:13.873Z'
+    user_email: akulpanowski@mgh.harvard.edu
+  - id: 1637
+    app_type_id: 7
+    role_name: allow uploads
+    user_id: 100
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-06T17:02:50.657Z'
+    updated_at: '2020-07-06T17:02:50.657Z'
+    user_email: akulpanowski@mgh.harvard.edu
+  - id: 1638
+    app_type_id: 7
+    role_name: user - ad hoc file reports
+    user_id: 
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-07T19:31:43.503Z'
+    updated_at: '2020-07-09T17:13:43.274Z'
+    user_email: 
+  - id: 1639
+    app_type_id: 7
+    role_name: user - ad hoc file reports
+    user_id: 71
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-07T19:31:43.543Z'
+    updated_at: '2020-07-07T19:31:43.543Z'
+    user_email: template@template
+  - id: 1640
+    app_type_id: 7
+    role_name: nfs_store group 600
+    user_id: 101
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-09T17:35:47.851Z'
+    updated_at: '2020-07-09T17:35:47.851Z'
+    user_email: damarengi@mgh.harvard.edu
+  - id: 1641
+    app_type_id: 7
+    role_name: user - ipa files
+    user_id: 101
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-09T17:36:02.848Z'
+    updated_at: '2020-07-09T17:36:47.380Z'
+    user_email: damarengi@mgh.harvard.edu
+  - id: 1642
+    app_type_id: 7
+    role_name: user - pet mri request
+    user_id: 101
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-09T17:38:05.054Z'
+    updated_at: '2020-07-09T17:51:20.287Z'
+    user_email: damarengi@mgh.harvard.edu
+  - id: 1643
+    app_type_id: 7
+    role_name: user - pet request
+    user_id: 71
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-09T17:38:05.063Z'
+    updated_at: '2020-07-09T17:38:05.063Z'
+    user_email: template@template
+  - id: 1644
+    app_type_id: 7
+    role_name: user - pet mri request
+    user_id: 71
+    admin_id: 6
+    disabled: false
+    created_at: '2020-07-09T17:39:33.544Z'
+    updated_at: '2020-07-09T17:39:33.544Z'
+    user_email: template@template
+  - id: 1688
+    app_type_id: 7
+    role_name: user - app tonometry report
+    user_id: 95
+    admin_id: 6
+    disabled: false
+    created_at: '2020-08-25T14:57:50.778Z'
+    updated_at: '2020-08-25T14:57:50.778Z'
+    user_email: heather_digregorio@hms.harvard.edu
+  - id: 1689
+    app_type_id: 7
+    role_name: user - app tonometry report
+    user_id: 71
+    admin_id: 6
+    disabled: false
+    created_at: '2020-08-25T14:57:50.794Z'
+    updated_at: '2020-08-25T14:57:50.794Z'
+    user_email: template@template
+  - id: 1690
+    app_type_id: 7
+    role_name: user - reports
+    user_id: 95
+    admin_id: 6
+    disabled: false
+    created_at: '2020-08-25T15:25:45.515Z'
+    updated_at: '2020-08-25T15:25:45.515Z'
+    user_email: heather_digregorio@hms.harvard.edu
+  - id: 1691
+    app_type_id: 7
+    role_name: user - reports
+    user_id: 71
+    admin_id: 6
+    disabled: false
+    created_at: '2020-08-25T15:25:45.529Z'
+    updated_at: '2020-08-25T15:25:45.529Z'
+    user_email: template@template
+  - id: 1692
+    app_type_id: 7
+    role_name: user - ipa files
+    user_id: 108
+    admin_id: 6
+    disabled: false
+    created_at: '2020-08-25T16:13:03.161Z'
+    updated_at: '2020-08-25T16:13:03.161Z'
+    user_email: egiardino@bwh.harvard.edu
+  - id: 1693
+    app_type_id: 7
+    role_name: user - physical function files
+    user_id: 108
+    admin_id: 6
+    disabled: false
+    created_at: '2020-08-25T16:13:27.858Z'
+    updated_at: '2020-08-25T16:13:27.858Z'
+    user_email: egiardino@bwh.harvard.edu
+  - id: 1694
+    app_type_id: 7
+    role_name: nfs_store group 600
+    user_id: 108
+    admin_id: 6
+    disabled: false
+    created_at: '2020-08-25T16:13:45.156Z'
+    updated_at: '2020-08-25T16:13:45.156Z'
+    user_email: egiardino@bwh.harvard.edu
+  - id: 1695
+    app_type_id: 7
+    role_name: allow uploads
+    user_id: 108
+    admin_id: 6
+    disabled: false
+    created_at: '2020-08-25T16:14:45.666Z'
+    updated_at: '2020-08-25T16:14:45.666Z'
+    user_email: egiardino@bwh.harvard.edu
+  - id: 1780
+    app_type_id: 7
+    role_name: user - ipa files
+    user_id: 117
+    admin_id: 8
+    disabled: false
+    created_at: '2020-10-26T18:51:21.454Z'
+    updated_at: '2020-10-26T18:51:21.454Z'
+    user_email: cvanatta@mgh.harvard.edu
+  - id: 1781
+    app_type_id: 7
+    role_name: nfs_store group 600
+    user_id: 117
+    admin_id: 8
+    disabled: false
+    created_at: '2020-10-26T18:51:21.485Z'
+    updated_at: '2020-10-26T18:51:21.485Z'
+    user_email: cvanatta@mgh.harvard.edu
+  - id: 1782
+    app_type_id: 7
+    role_name: allow uploads
+    user_id: 117
+    admin_id: 8
+    disabled: false
+    created_at: '2020-10-26T18:51:21.497Z'
+    updated_at: '2020-10-26T18:51:21.497Z'
+    user_email: cvanatta@mgh.harvard.edu
+  - id: 1783
+    app_type_id: 7
+    role_name: user - cardiac files - no echo
+    user_id: 117
+    admin_id: 8
+    disabled: false
+    created_at: '2020-10-26T18:51:21.508Z'
+    updated_at: '2020-10-26T18:51:21.508Z'
+    user_email: cvanatta@mgh.harvard.edu
+  - id: 1784
+    app_type_id: 7
+    role_name: user - cardiac files - no echo
+    user_id: 71
+    admin_id: 8
+    disabled: false
+    created_at: '2020-10-26T18:51:21.518Z'
+    updated_at: '2020-10-26T18:51:21.518Z'
+    user_email: template@template
+  - id: 1787
+    app_type_id: 7
+    role_name: user - xray files
+    user_id: 95
+    admin_id: 8
+    disabled: false
+    created_at: '2020-11-03T16:45:09.560Z'
+    updated_at: '2020-11-03T16:45:09.560Z'
+    user_email: heather_digregorio@hms.harvard.edu
   associated_message_templates:
   - id: 2
     name: ipa message content
@@ -6468,9 +6507,661 @@ app_type:
     category: 
     user_email: 
   associated_config_libraries: []
-  associated_protocols: []
-  associated_sub_processes: []
-  associated_protocol_events: []
+  protocols: []
+  associated_protocols:
+  - id: 2
+    name: GRIT
+    created_at: '2020-09-11T08:49:27.066Z'
+    updated_at: '2020-09-11T08:49:27.066Z'
+    disabled: false
+    admin_id: 4
+    position: -15
+    app_type_id: 
+    user_email: 
+  - id: 3
+    name: Sleep Study Phase 2
+    created_at: '2020-09-11T08:49:27.077Z'
+    updated_at: '2020-09-11T08:49:27.077Z'
+    disabled: false
+    admin_id: 4
+    position: 12
+    app_type_id: 
+    user_email: 
+  - id: 4
+    name: PITT BHI
+    created_at: '2020-09-11T08:49:27.081Z'
+    updated_at: '2020-09-11T08:49:27.081Z'
+    disabled: false
+    admin_id: 4
+    position: 12
+    app_type_id: 
+    user_email: 
+  associated_sub_processes:
+  - id: 43
+    name: Transferred for Screening
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.368Z'
+    updated_at: '2020-09-11T08:49:27.368Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 42
+    name: Sent
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.362Z'
+    updated_at: '2020-09-11T08:49:27.362Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 41
+    name: Complete
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.354Z'
+    updated_at: '2020-09-11T08:49:27.354Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 40
+    name: Opt In
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.331Z'
+    updated_at: '2020-09-11T08:49:27.331Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 39
+    name: Opt Out
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.324Z'
+    updated_at: '2020-09-11T08:49:27.324Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 38
+    name: Bounced
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.317Z'
+    updated_at: '2020-09-11T08:49:27.317Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 37
+    name: Inquiry
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.310Z'
+    updated_at: '2020-09-11T08:49:27.310Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 36
+    name: Enrolled
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.302Z'
+    updated_at: '2020-09-11T08:49:27.302Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 35
+    name: Withdrew
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.295Z'
+    updated_at: '2020-09-11T08:49:27.295Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 34
+    name: Lost to Follow Up, Not Enrolled
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.288Z'
+    updated_at: '2020-09-11T08:49:27.288Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 33
+    name: Ineligible
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.280Z'
+    updated_at: '2020-09-11T08:49:27.280Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 32
+    name: Eligible
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.273Z'
+    updated_at: '2020-09-11T08:49:27.273Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 31
+    name: Contacted
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.265Z'
+    updated_at: '2020-09-11T08:49:27.265Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 30
+    name: Screened
+    disabled: false
+    protocol_id: 4
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.258Z'
+    updated_at: '2020-09-11T08:49:27.258Z'
+    protocol_name: PITT BHI
+    user_email: 
+  - id: 29
+    name: Screened
+    disabled: false
+    protocol_id: 2
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.250Z'
+    updated_at: '2020-09-11T08:49:27.250Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 28
+    name: Contacted
+    disabled: false
+    protocol_id: 2
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.241Z'
+    updated_at: '2020-09-11T08:49:27.241Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 27
+    name: Eligible
+    disabled: false
+    protocol_id: 2
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.233Z'
+    updated_at: '2020-09-11T08:49:27.233Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 26
+    name: Ineligible
+    disabled: false
+    protocol_id: 2
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.227Z'
+    updated_at: '2020-09-11T08:49:27.227Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 25
+    name: Lost to Follow Up, Not Enrolled
+    disabled: false
+    protocol_id: 3
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.221Z'
+    updated_at: '2020-09-11T08:49:27.221Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 24
+    name: Contacted
+    disabled: false
+    protocol_id: 3
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.215Z'
+    updated_at: '2020-09-11T08:49:27.215Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 23
+    name: Ineligible
+    disabled: false
+    protocol_id: 3
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.210Z'
+    updated_at: '2020-09-11T08:49:27.210Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 22
+    name: Eligible
+    disabled: false
+    protocol_id: 3
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.205Z'
+    updated_at: '2020-09-11T08:49:27.205Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 21
+    name: Screened
+    disabled: false
+    protocol_id: 3
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.200Z'
+    updated_at: '2020-09-11T08:49:27.200Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 20
+    name: Lost to Follow Up, Not Enrolled
+    disabled: false
+    protocol_id: 2
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.195Z'
+    updated_at: '2020-09-11T08:49:27.195Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 19
+    name: Withdrew
+    disabled: false
+    protocol_id: 2
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.190Z'
+    updated_at: '2020-09-11T08:49:27.190Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 18
+    name: Enrolled
+    disabled: false
+    protocol_id: 2
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.184Z'
+    updated_at: '2020-09-11T08:49:27.184Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 17
+    name: Inquiry
+    disabled: false
+    protocol_id: 2
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.175Z'
+    updated_at: '2020-09-11T08:49:27.175Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 16
+    name: Bounced
+    disabled: false
+    protocol_id: 2
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.168Z'
+    updated_at: '2020-09-11T08:49:27.168Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 15
+    name: Opt Out
+    disabled: false
+    protocol_id: 2
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.162Z'
+    updated_at: '2020-09-11T08:49:27.162Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 14
+    name: Opt In
+    disabled: false
+    protocol_id: 2
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.156Z'
+    updated_at: '2020-09-11T08:49:27.156Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 13
+    name: Complete
+    disabled: false
+    protocol_id: 2
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.149Z'
+    updated_at: '2020-09-11T08:49:27.149Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 12
+    name: Sent
+    disabled: false
+    protocol_id: 2
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.142Z'
+    updated_at: '2020-09-11T08:49:27.142Z'
+    protocol_name: GRIT
+    user_email: 
+  - id: 11
+    name: Sent
+    disabled: false
+    protocol_id: 3
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.135Z'
+    updated_at: '2020-09-11T08:49:27.135Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 10
+    name: Withdrew
+    disabled: false
+    protocol_id: 3
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.130Z'
+    updated_at: '2020-09-11T08:49:27.130Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 9
+    name: Enrolled
+    disabled: false
+    protocol_id: 3
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.125Z'
+    updated_at: '2020-09-11T08:49:27.125Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 8
+    name: Complete
+    disabled: false
+    protocol_id: 3
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.120Z'
+    updated_at: '2020-09-11T08:49:27.120Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 7
+    name: Opt Out
+    disabled: false
+    protocol_id: 3
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.114Z'
+    updated_at: '2020-09-11T08:49:27.114Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 6
+    name: Opt In
+    disabled: false
+    protocol_id: 3
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.109Z'
+    updated_at: '2020-09-11T08:49:27.109Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 5
+    name: Bounced
+    disabled: false
+    protocol_id: 3
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.104Z'
+    updated_at: '2020-09-11T08:49:27.104Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  - id: 4
+    name: Inquiry
+    disabled: false
+    protocol_id: 3
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.087Z'
+    updated_at: '2020-09-11T08:49:27.087Z'
+    protocol_name: Sleep Study Phase 2
+    user_email: 
+  associated_protocol_events:
+  - id: 331
+    name: Complete
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.376Z'
+    updated_at: '2020-09-11T08:49:27.376Z'
+    disabled: false
+    sub_process_id: 4
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 332
+    name: Complete
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.387Z'
+    updated_at: '2020-09-11T08:49:27.387Z'
+    disabled: false
+    sub_process_id: 17
+    milestone: ''
+    description: ''
+    protocol_name: GRIT
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 333
+    name: Complete
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.399Z'
+    updated_at: '2020-09-11T08:49:27.399Z'
+    disabled: false
+    sub_process_id: 37
+    milestone: ''
+    description: ''
+    protocol_name: PITT BHI
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 334
+    name: Email
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.406Z'
+    updated_at: '2020-09-11T08:49:27.406Z'
+    disabled: false
+    sub_process_id: 24
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Contacted
+    user_email: 
+  - id: 335
+    name: Email - Bounced
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.413Z'
+    updated_at: '2020-09-11T08:49:27.413Z'
+    disabled: false
+    sub_process_id: 24
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Contacted
+    user_email: 
+  - id: 336
+    name: Email from Player
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.420Z'
+    updated_at: '2020-09-11T08:49:27.420Z'
+    disabled: false
+    sub_process_id: 4
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 337
+    name: Email from Player
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.430Z'
+    updated_at: '2020-09-11T08:49:27.430Z'
+    disabled: false
+    sub_process_id: 17
+    milestone: ''
+    description: ''
+    protocol_name: GRIT
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 338
+    name: Email from Player
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.441Z'
+    updated_at: '2020-09-11T08:49:27.441Z'
+    disabled: false
+    sub_process_id: 37
+    milestone: ''
+    description: ''
+    protocol_name: PITT BHI
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 339
+    name: Email from Staff
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.448Z'
+    updated_at: '2020-09-11T08:49:27.448Z'
+    disabled: false
+    sub_process_id: 4
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 340
+    name: Email from Staff
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.457Z'
+    updated_at: '2020-09-11T08:49:27.457Z'
+    disabled: false
+    sub_process_id: 17
+    milestone: ''
+    description: ''
+    protocol_name: GRIT
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 341
+    name: Email from Staff
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.469Z'
+    updated_at: '2020-09-11T08:49:27.469Z'
+    disabled: false
+    sub_process_id: 37
+    milestone: ''
+    description: ''
+    protocol_name: PITT BHI
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 342
+    name: Phone from Player
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.476Z'
+    updated_at: '2020-09-11T08:49:27.476Z'
+    disabled: false
+    sub_process_id: 4
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 343
+    name: Phone from Player
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.485Z'
+    updated_at: '2020-09-11T08:49:27.485Z'
+    disabled: false
+    sub_process_id: 17
+    milestone: ''
+    description: ''
+    protocol_name: GRIT
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 344
+    name: Phone from Player
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.496Z'
+    updated_at: '2020-09-11T08:49:27.496Z'
+    disabled: false
+    sub_process_id: 37
+    milestone: ''
+    description: ''
+    protocol_name: PITT BHI
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 345
+    name: Phone from Staff
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.503Z'
+    updated_at: '2020-09-11T08:49:27.503Z'
+    disabled: false
+    sub_process_id: 4
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 346
+    name: Phone from Staff
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.512Z'
+    updated_at: '2020-09-11T08:49:27.512Z'
+    disabled: false
+    sub_process_id: 17
+    milestone: ''
+    description: ''
+    protocol_name: GRIT
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 347
+    name: Phone from Staff
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.524Z'
+    updated_at: '2020-09-11T08:49:27.524Z'
+    disabled: false
+    sub_process_id: 37
+    milestone: ''
+    description: ''
+    protocol_name: PITT BHI
+    sub_process_name: Inquiry
+    user_email: 
+  - id: 348
+    name: Recruitment Email
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.531Z'
+    updated_at: '2020-09-11T08:49:27.531Z'
+    disabled: false
+    sub_process_id: 11
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Sent
+    user_email: 
+  - id: 349
+    name: Recruitment Email
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.541Z'
+    updated_at: '2020-09-11T08:49:27.541Z'
+    disabled: false
+    sub_process_id: 12
+    milestone: ''
+    description: ''
+    protocol_name: GRIT
+    sub_process_name: Sent
+    user_email: 
+  - id: 350
+    name: Recruitment Email
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.553Z'
+    updated_at: '2020-09-11T08:49:27.553Z'
+    disabled: false
+    sub_process_id: 42
+    milestone: ''
+    description: ''
+    protocol_name: PITT BHI
+    sub_process_name: Sent
+    user_email: 
+  - id: 351
+    name: Text
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.560Z'
+    updated_at: '2020-09-11T08:49:27.560Z'
+    disabled: false
+    sub_process_id: 24
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Contacted
+    user_email: 
+  - id: 352
+    name: Text - Bounced
+    admin_id: 4
+    created_at: '2020-09-11T08:49:27.567Z'
+    updated_at: '2020-09-11T08:49:27.567Z'
+    disabled: false
+    sub_process_id: 24
+    milestone: ''
+    description: ''
+    protocol_name: Sleep Study Phase 2
+    sub_process_name: Contacted
+    user_email: 
   nfs_store_filters:
   - id: 10
     app_type_id: 7
@@ -7425,12 +8116,12 @@ app_type:
     role_name: user - tms eeg files - site staff
     user_id: 
     resource_name: activity_log__ipa_assignment_session_filestore__tms_eeg
-    filter: "(^/.*raw.*)|(^/.*eoec.*)|(^/.*eprime.*)|(^/.*tmseegsourcedoc.*)|(^/.*sp_raw.*)|(^/.*oth_raw.*)"
+    filter: "(^/.*raw.*)|(^/.*eoec.*)|(^/.*eprime.*)|(^/.*tmseegsourcedoc.*)|(^/.*sp_raw.*)|(^/.*oth_raw.*)|(^/.*eegreport.*)"
     description: ''
     disabled: false
     admin_id: 5
     created_at: '2019-04-30T18:04:29.272Z'
-    updated_at: '2019-04-30T18:04:29.272Z'
+    updated_at: '2020-05-12T19:55:27.416Z'
     user_email: 
   - id: 90
     app_type_id: 7
@@ -7479,5 +8170,29 @@ app_type:
     admin_id: 5
     created_at: '2019-10-02T18:42:04.518Z'
     updated_at: '2019-10-02T18:42:04.518Z'
+    user_email: 
+  - id: 94
+    app_type_id: 7
+    role_name: reidentify mri
+    user_id: 
+    resource_name: activity_log__ipa_assignment_session_filestore__mri
+    filter: "^/reidentified/.*"
+    description: ''
+    disabled: false
+    admin_id: 4
+    created_at: '2020-04-06T11:51:25.199Z'
+    updated_at: '2020-04-08T12:01:30.233Z'
+    user_email: 
+  - id: 95
+    app_type_id: 7
+    role_name: user - pet mri request
+    user_id: 
+    resource_name: activity_log__ipa_assignment_session_filestore__mri
+    filter: "(^/.*_SWI.*)|(^/.*_MAG.*)|(^/.*_FLAIR.*)"
+    description: ''
+    disabled: false
+    admin_id: 6
+    created_at: '2020-07-09T17:41:07.331Z'
+    updated_at: '2020-07-09T17:47:00.448Z'
     user_email: 
   user_email: 
