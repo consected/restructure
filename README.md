@@ -4,13 +4,23 @@ Rails App for FPHS (Zeus)
 The **Zeus** App provides CRM and activity tracking functionality for the
 Football Players Health Study (FPHS) team.
 
-### Build, Test and Deployment
+### Build and Test
 
-Build, test and deployment is by Ansible, with full details here:
+Build and testing is handled by a Docker container at [restructure-build](https://github.com/consected/restructure-build)
+
+Place **restructure-build** in the same parent directory as this project. Then you can easily run a build with:
+
+    app-scripts/release_and_build.sh
+
+
+### Deployment
+
+Deployment is by Ansible, with full details here:
 https://github.com/hmsrc/ansible-playbooks-fphs-webapp
 
 The same Ansible roles can be used to create a self-contained Vagrant server for
 development, avoiding the need to get all the prerequisites satisfied locally.
+
 
 ### Multiple Repos
 
