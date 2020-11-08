@@ -3,13 +3,13 @@ begin;
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.17
--- Dumped by pg_dump version 9.6.17
+-- Dumped from database version 10.14
+-- Dumped by pg_dump version 10.14
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
+SET client_encoding = 'SQL_ASCII';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
@@ -427,6 +427,24 @@ CREATE FUNCTION ml_app.filestore_report_file_path(sf ml_app.nfs_store_stored_fil
       return CASE WHEN af.id IS NOT NULL THEN
         coalesce(sf.path, '') || '/' || sf.file_name || '/' || af.path
         ELSE sf.path
+      END;
+
+	END;
+$$;
+
+
+--
+-- Name: filestore_report_full_file_path(ml_app.nfs_store_stored_files, ml_app.nfs_store_archived_files); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.filestore_report_full_file_path(sf ml_app.nfs_store_stored_files, af ml_app.nfs_store_archived_files) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+
+      return CASE WHEN af.id IS NOT NULL THEN
+        coalesce(sf.path, '') || '/' || sf.file_name || '/' || af.path || '/' || af.file_name
+        ELSE coalesce(sf.path, '') || '/' || sf.file_name
       END;
 
 	END;
@@ -3071,7 +3089,8 @@ CREATE TABLE ml_app.app_types (
     disabled boolean,
     admin_id integer,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    default_schema_name character varying
 );
 
 
@@ -3092,6 +3111,18 @@ CREATE SEQUENCE ml_app.app_types_id_seq
 --
 
 ALTER SEQUENCE ml_app.app_types_id_seq OWNED BY ml_app.app_types.id;
+
+
+--
+-- Name: ar_internal_metadata; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ar_internal_metadata (
+    key character varying NOT NULL,
+    value character varying,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
 
 
 --
@@ -3493,7 +3524,8 @@ CREATE TABLE ml_app.external_identifiers (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     alphanumeric boolean,
-    extra_fields character varying
+    extra_fields character varying,
+    category character varying
 );
 
 
@@ -4992,7 +5024,8 @@ CREATE TABLE ml_app.protocols (
     updated_at timestamp without time zone NOT NULL,
     disabled boolean,
     admin_id integer,
-    "position" integer
+    "position" integer,
+    app_type_id bigint
 );
 
 
@@ -6612,6 +6645,14 @@ ALTER TABLE ONLY ml_app.app_types
 
 
 --
+-- Name: ar_internal_metadata ar_internal_metadata_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ar_internal_metadata
+    ADD CONSTRAINT ar_internal_metadata_pkey PRIMARY KEY (key);
+
+
+--
 -- Name: college_history college_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -7951,6 +7992,13 @@ CREATE INDEX index_protocol_history_on_protocol_id ON ml_app.protocol_history US
 --
 
 CREATE INDEX index_protocols_on_admin_id ON ml_app.protocols USING btree (admin_id);
+
+
+--
+-- Name: index_protocols_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_protocols_on_app_type_id ON ml_app.protocols USING btree (app_type_id);
 
 
 --
@@ -9711,6 +9759,14 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 ALTER TABLE ONLY ml_app.sage_assignments
     ADD CONSTRAINT fk_rails_971255ec2c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: protocols fk_rails_990daa5f76; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.protocols
+    ADD CONSTRAINT fk_rails_990daa5f76 FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
 
 
 --
