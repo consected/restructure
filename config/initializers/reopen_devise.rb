@@ -1,9 +1,16 @@
 # frozen_string_literal: true
 
-SecureAdminEntry = ENV['FPHS_SECURE_ADMIN_ENTRY'] || 'iuwqeryljksdajfghsdfj2382346ywdkjhf'
+# During initialization, reopen various Devise classes to enforce specific features, without
+# having to make changes directly to Devise code.
+
+# Admins usually need to have logged in as a user to gain access to the admin panel login page.
+# Prevent curious browsers and bots guessing URL to get at the admin login page.
+# Preferably set a random string shared with a limited number of users, allowing login
+# without previously having logged in as a user, using a URL like:
+# server.dns/admins/sign_in?secure_entry=access-admin
+SecureAdminEntry = ENV['FPHS_SECURE_ADMIN_ENTRY'] || 'access-admin'
 
 Rails.application.config.to_prepare do
-  # Avoid URL guessing to get at the admin login page
   DeviseController.send('before_action',
                         lambda {
                           if request.path.start_with?('/admins/sign_in') &&
@@ -43,11 +50,13 @@ Rails.application.config.to_prepare do
 
   DeviseController.send(:define_method, :show_otp) do
     redirect_to('/') && return unless signed_in?
+
     @resource = resource_name == :user ? current_user : current_admin
 
     unless @resource && !@resource.two_factor_auth_disabled && @resource.otp_secret.present? && !@resource.otp_required_for_login
       redirect_to('/') && return
     end
+
     @resource_name = @resource.class.name.downcase
     # A secret was previously generated, and the user has not yet confirmed it (so it is not set as "required for login")
     # Continue with the action
