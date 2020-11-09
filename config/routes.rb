@@ -30,6 +30,7 @@ Rails.application.routes.draw do
     resources :general_selections, except: %i[show destroy]
     resources :item_flag_names, except: %i[show destroy]
     resources :manage_users, except: %i[show destroy]
+    resources :manage_admins, except: %i[show destroy]
     resources :accuracy_scores, except: %i[show destroy]
     resources :activity_logs, except: %i[show destroy]
     resources :app_configurations, except: %i[show destroy]
