@@ -9,7 +9,7 @@ module ESignImportConfig
 
   def self.import_config
     # Setup the triggers, functions, etc
-    config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_tests')
+    config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_files')
     config_fn = 'test esign_config.json'
     SetupHelper.setup_app_from_import 'test esign', config_dir, config_fn
   end

@@ -23,20 +23,20 @@ module SetupHelper
     # ESign setup
     # Setup the triggers, functions, etc
     sql_files = %w[create_al_table.sql create_ipa_inex_checklist_table.sql]
-    sql_source_dir = Rails.root.join('db', 'app_specific', 'test_esign')
+    sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'test_esign_sql')
     SetupHelper.setup_app_db sql_source_dir, sql_files
 
     # ExportApp
     sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql
                    3-add_notification_triggers.sql 4-add_testmybrain_trigger.sql 5-create_sync_subject_data_aws_db.sql
                    6-grant_roles_access_to_ml_app.sql]
-    sql_source_dir = Rails.root.join('db', 'app_specific', 'bhs', 'aws-db')
+    sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'bhs_sql')
     SetupHelper.setup_app_db sql_source_dir, sql_files
 
     # Export App
     sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql
                    6-grant_roles_access_to_ml_app.sql create_adders_table.sql]
-    sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_tests')
+    sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_tests_sql')
     SetupHelper.setup_app_db sql_source_dir, sql_files
 
     # Bulk
@@ -47,7 +47,7 @@ module SetupHelper
                    bulk/create_zeus_bulk_message_statuses.sql bulk/setup_master.sql bulk/create_zeus_short_links.sql
                    bulk/create_player_contact_phone_infos.sql
                    bulk/create_zeus_short_link_clicks.sql 0-scripts/z_grant_roles.sql]
-    sql_source_dir = Rails.root.join('db', 'app_specific', 'bulk-msg', 'aws-db')
+    sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'bulk_msg_sql')
     SetupHelper.setup_app_db sql_source_dir, sql_files
   end
 
@@ -196,7 +196,7 @@ module SetupHelper
   def self.setup_test_app
     app_name = "bhs_model_#{rand(100_000_000)}"
 
-    config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_tests')
+    config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_files')
     config_fn = 'bhs_app_type_test_config.json'
     SetupHelper.setup_app_from_import app_name, config_dir, config_fn
 

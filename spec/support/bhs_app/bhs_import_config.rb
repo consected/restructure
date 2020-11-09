@@ -14,7 +14,7 @@ module BhsImportConfig
   end
 
   def self.import_config
-    config_dir = Rails.root.join('db', 'app_configs')
+    config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_files')
     config_fn = 'bhs_config.json'
     app, = SetupHelper.setup_app_from_import bhs_app_name, config_dir, config_fn
     # app = SetupHelper.setup_test_app
