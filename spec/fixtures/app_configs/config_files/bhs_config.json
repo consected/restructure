@@ -154,7 +154,7 @@
         "admin_id": 4,
         "user_id": 1,
         "app_type_id": 2,
-        "user_email": "phil_ayres@hms.harvard.edu"
+        "user_email": "pa@test.email"
       },
       {
         "id": 16,
@@ -204,7 +204,7 @@
         "admin_id": 4,
         "user_id": 2,
         "app_type_id": 2,
-        "user_email": "james_drummey@hms.harvard.edu"
+        "user_email": "jd@test.email"
       },
       {
         "id": 21,
@@ -214,7 +214,7 @@
         "admin_id": 4,
         "user_id": 3,
         "app_type_id": 2,
-        "user_email": "sarah_cohan@hms.harvard.edu"
+        "user_email": "sc@test.email"
       }
     ],
     "user_access_controls": [
@@ -411,7 +411,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "james_drummey@hms.harvard.edu"
+        "user_email": "jd@test.email"
       },
       {
         "id": 34,
@@ -424,7 +424,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "phil_ayres@hms.harvard.edu"
+        "user_email": "pa@test.email"
       },
       {
         "id": 35,
@@ -528,7 +528,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "phil_ayres@hms.harvard.edu"
+        "user_email": "pa@test.email"
       },
       {
         "id": 43,
@@ -541,7 +541,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "phil_ayres@hms.harvard.edu"
+        "user_email": "pa@test.email"
       },
       {
         "id": 44,
@@ -554,7 +554,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "phil_ayres@hms.harvard.edu"
+        "user_email": "pa@test.email"
       },
       {
         "id": 45,
@@ -567,7 +567,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "phil_ayres@hms.harvard.edu"
+        "user_email": "pa@test.email"
       },
       {
         "id": 46,
@@ -593,7 +593,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "phil_ayres@hms.harvard.edu"
+        "user_email": "pa@test.email"
       },
       {
         "id": 48,
@@ -632,7 +632,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "phil_ayres@hms.harvard.edu"
+        "user_email": "pa@test.email"
       },
       {
         "id": 51,
@@ -645,7 +645,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "phil_ayres@hms.harvard.edu"
+        "user_email": "pa@test.email"
       },
       {
         "id": 54,
@@ -697,7 +697,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "sarah_cohan@hms.harvard.edu"
+        "user_email": "sc@test.email"
       },
       {
         "id": 58,
@@ -710,7 +710,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "sarah_cohan@hms.harvard.edu"
+        "user_email": "sc@test.email"
       },
       {
         "id": 59,
@@ -723,7 +723,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "sarah_cohan@hms.harvard.edu"
+        "user_email": "sc@test.email"
       },
       {
         "id": 60,
@@ -736,7 +736,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "sarah_cohan@hms.harvard.edu"
+        "user_email": "sc@test.email"
       },
       {
         "id": 61,
@@ -749,7 +749,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "sarah_cohan@hms.harvard.edu"
+        "user_email": "sc@test.email"
       },
       {
         "id": 62,
@@ -762,7 +762,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "sarah_cohan@hms.harvard.edu"
+        "user_email": "sc@test.email"
       },
       {
         "id": 63,
@@ -814,7 +814,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "james_drummey@hms.harvard.edu"
+        "user_email": "jd@test.email"
       },
       {
         "id": 67,
@@ -827,7 +827,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "james_drummey@hms.harvard.edu"
+        "user_email": "jd@test.email"
       },
       {
         "id": 68,
@@ -840,7 +840,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "james_drummey@hms.harvard.edu"
+        "user_email": "jd@test.email"
       },
       {
         "id": 69,
@@ -853,7 +853,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "james_drummey@hms.harvard.edu"
+        "user_email": "jd@test.email"
       },
       {
         "id": 70,
@@ -866,7 +866,7 @@
         "admin_id": 4,
         "app_type_id": 2,
         "role_name": null,
-        "user_email": "james_drummey@hms.harvard.edu"
+        "user_email": "jd@test.email"
       }
     ],
     "associated_activity_logs": [
@@ -891,9 +891,7 @@
         "user_email": null
       }
     ],
-    "associated_dynamic_models": [
-
-    ],
+    "associated_dynamic_models": [],
     "associated_external_identifiers": [
       {
         "id": 3,
@@ -1686,9 +1684,7 @@
         "user_email": null
       }
     ],
-    "page_layouts": [
-
-    ],
+    "page_layouts": [],
     "user_roles": [
       {
         "id": 1,
@@ -1699,7 +1695,7 @@
         "disabled": true,
         "created_at": "2018-05-29T18:35:58.033Z",
         "updated_at": "2018-06-28T09:42:03.213Z",
-        "user_email": "phil_ayres@hms.harvard.edu"
+        "user_email": "pa@test.email"
       },
       {
         "id": 2,
@@ -1710,7 +1706,7 @@
         "disabled": true,
         "created_at": "2018-05-29T18:36:06.233Z",
         "updated_at": "2018-05-30T11:20:05.922Z",
-        "user_email": "phil_ayres@hms.harvard.edu"
+        "user_email": "pa@test.email"
       },
       {
         "id": 3,
@@ -1743,7 +1739,7 @@
         "disabled": false,
         "created_at": "2018-05-30T10:13:52.828Z",
         "updated_at": "2018-06-28T09:42:25.652Z",
-        "user_email": "sarah_cohan@hms.harvard.edu"
+        "user_email": "sc@test.email"
       },
       {
         "id": 6,
@@ -1754,21 +1750,13 @@
         "disabled": true,
         "created_at": "2018-05-30T11:19:23.803Z",
         "updated_at": "2018-06-28T09:41:32.159Z",
-        "user_email": "james_drummey@hms.harvard.edu"
+        "user_email": "jd@test.email"
       }
     ],
-    "associated_message_templates": [
-
-    ],
-    "associated_protocols": [
-
-    ],
-    "associated_sub_processes": [
-
-    ],
-    "associated_protocol_events": [
-
-    ],
+    "associated_message_templates": [],
+    "associated_protocols": [],
+    "associated_sub_processes": [],
+    "associated_protocol_events": [],
     "user_email": null
   }
 }
