@@ -24,6 +24,7 @@ mkdir -p ${DEST}/docs
 mkdir -p ${DEST}/db/dumps/development-data
 
 for FROM in \
+  yarn.lock package.json \
   docs/filestore-setup.md \
   db/schema.rb db/seeds.rb db/structure.sql db/dumps/development-data/data-only-dump.sql \
   app-scripts/add_admin.sh app-scripts/api-get-container-id.sh app-scripts/parallel_test.sh \
