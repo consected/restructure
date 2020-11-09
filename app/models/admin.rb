@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Admin < ActiveRecord::Base
+  @admin_optional = true
+
   include AdminHandler
   include StandardAuthentication
 
@@ -15,6 +17,8 @@ class Admin < ActiveRecord::Base
   before_validation :prevent_email_change, on: :update
   before_validation :prevent_reenabling_admin, on: :update
   before_validation :prevent_not_in_setup_script, on: :create
+
+  validate :only_allow_disable
   after_save :unlock_account, on: :update
 
   scope :active, -> { where 'disabled is null or disabled = false' }
@@ -94,5 +98,12 @@ class Admin < ActiveRecord::Base
       errors.add(:admin, 'can only create admins in console')
       # throw(:abort)
     end
+  end
+
+  def only_allow_disable
+    return if in_setup_script
+    return unless disabled_changed? && !disabled
+
+    errors.add(:admin, 'can only disable outside of setup script')
   end
 end

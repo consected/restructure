@@ -13,10 +13,19 @@ module AdminHandler
     scope :active, -> { where 'disabled is null or disabled = false' }
     scope :disabled, -> { where 'disabled = true' }
 
-    before_validation :ensure_admin_set
+    before_validation :ensure_admin_set, unless: -> { self.class.admin_optional }
     before_create :setup_values
 
     scope :limited_index, -> {}
+  end
+
+  class_methods do
+    #
+    # Provide access to the @admin_optional class variable
+    # @return [Boolean]
+    def admin_optional
+      @admin_optional
+    end
   end
 
   def init_vars_admin_handler

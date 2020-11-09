@@ -62,7 +62,8 @@ describe 'user and admin authentication' do
     skip_urls = ['/admins/sign_in', '/users/sign_in', '/child_error_reporter']
 
     admin_controllers = %w[admin/accuracy_scores admin/colleges admin/general_selections admin/item_flag_names
-                           admin/manage_users admin/protocol_events admin/protocols admin/sub_processes admins
+                           admin/manage_admins admin/manage_users
+                           admin/protocol_events admin/protocols admin/sub_processes admins
                            admin/dynamic_models admin/sage_assignments admin/reports admin/external_links
                            admin/activity_logs admin/external_identifiers admin/external_identifier_details
                            admin/app_types admin/user_access_controls

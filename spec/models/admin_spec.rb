@@ -31,8 +31,13 @@ describe Admin do
     expect(@admin.active_for_authentication?).to be false
   end
 
-  it 'prevent admin changing disabled flag outside of setup' do
+  it 'prevent admin changing disabled flag outside of setup, except to disable' do
     ENV['FPHS_ADMIN_SETUP'] = 'no'
+    expect(@admin.disabled).to eq false
+    @admin.disabled = nil
+    expect(@admin.save).to be false
+    @admin.disabled = true
+    expect(@admin.save).to be true
     @admin.disabled = false
     expect(@admin.save).to be false
   end
