@@ -21,7 +21,6 @@ for FROM in app bin config db/migrate db/seeds db/table_generators db/app_migrat
 done
 
 mkdir -p ${DEST}/docs
-mkdir -p ${DEST}/fphs-sql
 mkdir -p ${DEST}/db/dumps/development-data
 
 for FROM in \
@@ -30,16 +29,13 @@ for FROM in \
   app-scripts/add_admin.sh app-scripts/api-get-container-id.sh app-scripts/parallel_test.sh \
   app-scripts/setup_filestore_app.sh app-scripts/setup-dev-filestore.sh app-scripts/upload-to-filestore.sh \
   app-scripts/upversion.rb app-scripts/validate_file_signature.sh \
-  fphs-sql/create-demo-db.sh fphs-sql/create-test-db.sh fphs-sql/drop-test-db.sh \
+  app-scripts/create-demo-db.sh app-scripts/create-test-db.sh app-scripts/drop-test-db.sh \
   public/.gitignore public/*.html public/favicon.* public/robots.txt \
   public/app_specific/app_data_requests.css \
   .gitignore .rspec_parallel .rubocop.yml .ruby-version .solargraph.yml config.ru \
   Gemfile* Rakefile version.txt vendor/assets/config.json; do
   cp -u ${FROM} ${DEST}/${FROM}
 done
-
-mv ${DEST}/fphs-sql/* ${DEST}/app-scripts
-rmdir ${DEST}/fphs-sql
 
 mkdir -p ${DEST}/log
 mkdir -p ${DEST}/tmp

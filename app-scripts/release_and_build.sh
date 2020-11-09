@@ -51,6 +51,8 @@ if [ "${TESTVER}" == "${CURRVER}" ]; then
   echo "Build failed"
   echo "${TESTVER} == ${CURRVER}"
   exit 1
+else
+  echo "Build successful"
 fi
 
 git fetch origin new-master

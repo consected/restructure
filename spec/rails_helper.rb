@@ -14,10 +14,12 @@ ENV['FPHS_USE_LOGGER'] = 'TRUE'
 # AWS_SESSION_TOKEN
 #
 
-res = `aws sts get-caller-identity | grep "756598248234"`
-if res == ''
-  puts "AWS MFA is needed. Run\n  app-scripts/aws_mfa_set.rb"
-  exit
+unless ENV['IGNORE_MFA'] == 'true'
+  res = `aws sts get-caller-identity | grep "UserId"`
+  if res == ''
+    puts "AWS MFA is needed. Run\n  app-scripts/aws_mfa_set.rb"
+    exit
+  end
 end
 
 require 'spec_helper'
