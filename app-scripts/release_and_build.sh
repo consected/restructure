@@ -53,8 +53,6 @@ if [ "${TESTVER}" == "${CURRVER}" ]; then
   exit 1
 fi
 
-cd ${CURRDIR}
-echo ${TESTVER} > version.txt
-git commit version.txt -m "Bump version"
-git push
+git fetch origin new-master
+git merge new-master
 echo "Built and setup assets: ${TESTVER}"
