@@ -79,8 +79,13 @@ class ActivityLog < ActiveRecord::Base
     res.item_type_name
   end
 
+  #
+  # Get a list of rec_types (such as [phone, email]) that an activity log of
+  # this item type is constrained to use
+  # @param [String | Symbol] item_type - an item type, such as 'player_contact'
+  # @return [Array] - array of rec_types
   def self.works_with_rec_types(item_type)
-    enabled.where(item_type: item_type).all.map(&:rec_type)
+    enabled.where(item_type: item_type).pluck(:rec_type).compact.uniq
   end
 
   def blank_log_enabled?

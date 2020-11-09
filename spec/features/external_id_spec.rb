@@ -72,6 +72,7 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
       click_on 'Save'
     end
 
+    sleep 3
     expect(page).to have_css('[data-model-data-type="external_identifier"][data-sub-item="bhs_assignment"]')
 
     h = all('h4.external-id-heading').first
