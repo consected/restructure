@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Admin < ActiveRecord::Base
+  include AdminHandler
   include StandardAuthentication
 
   # A configuration allows two factor authentication to be disabled for the app server
@@ -50,9 +51,7 @@ class Admin < ActiveRecord::Base
 
   # Set the matching user's app type forcefully, to override the current value
   # This facilitates app type importing and automatic migrations
-  def matching_user_app_type= app_type
-    @matching_user_app_type = app_type
-  end
+  attr_writer :matching_user_app_type
 
   # Simple way to ensure that this is not being run from inside Passenger
   def in_setup_script
