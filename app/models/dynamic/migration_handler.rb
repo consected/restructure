@@ -43,6 +43,8 @@ module Dynamic
     # For now, attempt to guess what it should be if it is not set
     # in the app type configuration
     def db_migration_schema
+      return schema_name if respond_to? :schema_name
+
       current_user_app_type = current_admin.matching_user_app_type
       dsn = current_user_app_type&.default_schema_name
       return dsn if dsn
