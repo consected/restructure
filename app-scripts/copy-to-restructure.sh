@@ -42,4 +42,4 @@ mkdir -p ${DEST}/tmp
 
 cd ${DEST}
 
-grep --recursive hms.harvard.edu *
+grep --recursive harvard.edu *

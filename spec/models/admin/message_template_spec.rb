@@ -189,7 +189,7 @@ RSpec.describe Admin::MessageTemplate, type: :model do
   it 'stress tests creating many' do
     test_times = 10
 
-    txt = "A short message with a generated URL https://footballplayershealth.harvard.edu/join-us/?test_id={{ids.msid}}\nThanks!"
+    txt = "A short message with a generated URL https://www.server.tld/join-us/?test_id={{ids.msid}}\nThanks!"
     last_msid = (Master.order(msid: :desc).first.msid || 123) + 1
 
     masters = []

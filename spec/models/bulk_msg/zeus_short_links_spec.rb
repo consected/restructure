@@ -38,7 +38,7 @@ RSpec.describe 'DynamicModel::ZeusShortLink', type: :model do
   end
 
   it 'adds a short link record to a master record, generating shortcode and html, and pushing the file to S3' do
-    target_url = 'https://footballplayershealth.harvard.edu/join-us/'
+    target_url = 'https://www.server.tld/join-us/'
     sl = DynamicModel::ZeusShortLink.new
     res = sl.create_link(target_url, master: @bulk_master)
 
@@ -55,7 +55,7 @@ RSpec.describe 'DynamicModel::ZeusShortLink', type: :model do
   end
 
   it 'generates a short URL in a message' do
-    txt = "A short message with a generated URL [[shortlink https://footballplayershealth.harvard.edu/join-us/?test_id={{ids.msid}}]]\nThanks!"
+    txt = "A short message with a generated URL [[shortlink https://www.server.tld/join-us/?test_id={{ids.msid}}]]\nThanks!"
     last_msid = (Master.order(msid: :desc).first.msid || 123) + 1
     @master = Master.create! current_user: @user, msid: last_msid
     @player_contact = @master.player_contacts.create! data: '(123)123-1234', rec_type: :phone, rank: 10
@@ -67,7 +67,7 @@ RSpec.describe 'DynamicModel::ZeusShortLink', type: :model do
 
     sl = DynamicModel::ZeusShortLink.last
     expect(sl).to be_a DynamicModel::ZeusShortLink
-    expect(sl.url).to eq "https://footballplayershealth.harvard.edu/join-us/?test_id=#{last_msid}"
+    expect(sl.url).to eq "https://www.server.tld/join-us/?test_id=#{last_msid}"
     expect(sl.master_id).to eq @master.id
     expect(res).to eq txt = "A short message with a generated URL #{sl.short_url}\nThanks!"
 
@@ -84,7 +84,7 @@ RSpec.describe 'DynamicModel::ZeusShortLink', type: :model do
   it 'stress tests creating many' do
     test_times = 10
 
-    txt = "A short message with a generated URL [[shortlink https://footballplayershealth.harvard.edu/join-us/?test_id={{ids.msid}}]]\nThanks!"
+    txt = "A short message with a generated URL [[shortlink https://www.server.tld/join-us/?test_id={{ids.msid}}]]\nThanks!"
     last_msid = (Master.order(msid: :desc).first.msid || 123) + 1
 
     masters = []
@@ -106,7 +106,7 @@ RSpec.describe 'DynamicModel::ZeusShortLink', type: :model do
 
         sl = DynamicModel::ZeusShortLink.first
         expect(sl).to be_a DynamicModel::ZeusShortLink
-        expect(sl.url).to eq "https://footballplayershealth.harvard.edu/join-us/?test_id=#{master.msid}"
+        expect(sl.url).to eq "https://www.server.tld/join-us/?test_id=#{master.msid}"
       end
     end
 

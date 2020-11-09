@@ -4,7 +4,7 @@ if [ -z "${container_id}" ] || [ -z "${upload_file}" ]; then
   cat << EOF
 Usage:
 upload_server="https://file-upload-dev.32vnp6pmmu.us-east-1.elasticbeanstalk.com" \\
-upload_user_email=sync_service_file_upload_client@app.fphs2.harvard.edu \\
+upload_user_email=sync_service_file_upload_client@server.tld \\
 upload_user_token=<reset password to get a new token> \\
 upload_app_type=3 \\
 upload_filename=123457_persnet.pdf \\

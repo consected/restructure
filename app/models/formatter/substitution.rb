@@ -14,7 +14,7 @@ module Formatter
     #
     # Functional directives may also be processed as square brackets
     # Example text:
-    # [[shortlink https://footballplayershealth.harvard.edu/join-us/?test_id={{ids.msid}}]]
+    # [[shortlink https://some-thing.web/join-us/?test_id={{ids.msid}}]]
     #
     # @param all_content [String] the text containing possible {{something.else}} to be substituted
     # @param in_data [Hash | UserBase] represent the substitution data with a Hash or a an object instance

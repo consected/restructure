@@ -1,11 +1,10 @@
 #!/bin/bash
 
-if [ -z "${master_id}" ]
-then
-  cat <<EOF
+if [ -z "${master_id}" ]; then
+  cat << EOF
 Usage:
-upload_server="https://appdev.fphs2.harvard.edu" \\
-upload_user_email=sync_service_file_upload_client@appdev.fphs2.harvard.edu \\
+upload_server="https://server.tld" \\
+upload_user_email=sync_service_file_upload_client@server.tld \\
 upload_user_token=<reset password to get a new token> \\
 upload_app_type=6 \\
 master_id=105190 \\
