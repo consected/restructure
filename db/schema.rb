@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_14_172505) do
+ActiveRecord::Schema.define(version: 2020_11_09_190307) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -2125,7 +2125,9 @@ ActiveRecord::Schema.define(version: 2020_10_14_172505) do
     t.boolean "otp_required_for_login"
     t.datetime "reset_password_sent_at"
     t.datetime "password_updated_at"
+    t.integer "updated_by_admin_id"
     t.index ["admin_id"], name: "index_admin_history_on_admin_id"
+    t.index ["updated_by_admin_id"], name: "index_admin_history_on_upd_admin_id"
   end
 
   create_table "admins", id: :serial, force: :cascade do |t|
@@ -2152,6 +2154,8 @@ ActiveRecord::Schema.define(version: 2020_10_14_172505) do
     t.string "first_name"
     t.string "last_name"
     t.boolean "do_not_email", default: false
+    t.bigint "admin_id"
+    t.index ["admin_id"], name: "index_admins_on_admin_id"
   end
 
   create_table "app_configuration_history", id: :serial, force: :cascade do |t|
@@ -6720,6 +6724,26 @@ ActiveRecord::Schema.define(version: 2020_10_14_172505) do
     t.index ["app_type_id"], name: "index_page_layouts_on_app_type_id"
   end
 
+  create_table "page_section_history", force: :cascade do |t|
+    t.string "title"
+    t.string "content"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "page_section_id"
+    t.index ["page_section_id"], name: "48628342_id_idx"
+    t.index ["user_id"], name: "48628342_user_idx"
+  end
+
+  create_table "page_sections", force: :cascade do |t|
+    t.string "title"
+    t.string "content"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_study_info.page_sections_on_user_id"
+  end
+
   create_table "persnet_assignment_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.bigint "persnet_id"
@@ -9980,6 +10004,26 @@ ActiveRecord::Schema.define(version: 2020_10_14_172505) do
     t.string "version"
   end
 
+  create_table "study_page_section_history", force: :cascade do |t|
+    t.string "title"
+    t.string "content"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "study_page_section_id"
+    t.index ["study_page_section_id"], name: "5865aead_id_idx"
+    t.index ["user_id"], name: "5865aead_user_idx"
+  end
+
+  create_table "study_page_sections", force: :cascade do |t|
+    t.string "title"
+    t.string "content"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_study_info.study_page_sections_on_user_id"
+  end
+
   create_table "sub_process_history", id: :serial, force: :cascade do |t|
     t.string "name"
     t.boolean "disabled"
@@ -12243,7 +12287,9 @@ ActiveRecord::Schema.define(version: 2020_10_14_172505) do
   add_foreign_key "addresses", "masters"
   add_foreign_key "addresses", "users"
   add_foreign_key "admin_action_logs", "admins"
+  add_foreign_key "admin_history", "admins", column: "updated_by_admin_id", name: "fk_admin_history_upd_admins"
   add_foreign_key "admin_history", "admins", name: "fk_admin_history_admins"
+  add_foreign_key "admins", "admins"
   add_foreign_key "app_configuration_history", "admins", name: "fk_app_configuration_history_admins"
   add_foreign_key "app_configuration_history", "app_configurations", name: "fk_app_configuration_history_app_configurations"
   add_foreign_key "app_configurations", "admins"
@@ -12952,6 +12998,9 @@ ActiveRecord::Schema.define(version: 2020_10_14_172505) do
   add_foreign_key "page_layout_history", "page_layouts", name: "fk_page_layout_history_page_layouts"
   add_foreign_key "page_layouts", "admins"
   add_foreign_key "page_layouts", "app_types"
+  add_foreign_key "page_section_history", "page_sections"
+  add_foreign_key "page_section_history", "users"
+  add_foreign_key "page_sections", "users"
   add_foreign_key "persnet_assignment_history", "admins", name: "fk_persnet_assignment_history_admins"
   add_foreign_key "persnet_assignment_history", "masters", name: "fk_persnet_assignment_history_masters"
   add_foreign_key "persnet_assignment_history", "persnet_assignments", column: "persnet_assignment_table_id", name: "fk_persnet_assignment_history_persnet_assignments"
@@ -13272,6 +13321,9 @@ ActiveRecord::Schema.define(version: 2020_10_14_172505) do
   add_foreign_key "sleep_withdrawal_history", "users", name: "fk_sleep_withdrawal_history_users"
   add_foreign_key "sleep_withdrawals", "masters"
   add_foreign_key "sleep_withdrawals", "users"
+  add_foreign_key "study_page_section_history", "study_page_sections"
+  add_foreign_key "study_page_section_history", "users"
+  add_foreign_key "study_page_sections", "users"
   add_foreign_key "sub_process_history", "sub_processes", name: "fk_sub_process_history_sub_processes"
   add_foreign_key "sub_processes", "admins"
   add_foreign_key "sub_processes", "protocols"
