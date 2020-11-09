@@ -15,9 +15,23 @@ In short this means that version numbers, visible here and on the login page of 
 app match, and have a predictable format indicating how much change from the previous
 version has occurred.
 
-The [Unreleased](#unreleased) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
+The **Unreleased** section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
+
+## Unreleased
 
 ## [7.3.151] - 2020-11-07
+
+- [Added] templates for activity logs and dynamic models are displayed using the version current at the time a record was created
+- [Added] versioned UI templates downloading based on data being retrieved
+- [Added] data dictionary, schema and classification types viewing by authorized users
+- [Added] [Filestore] option for certain users to re-run all actions (extract zip and handle metadata)
+- [Added] [Admin] allow admins to view a list of other admins and disable individual admin accounts
+- [Added] [Admin] automated database migration creation based on changes to configurations
+- [Added] [Filestore] deidentification / metadata changes within user triggered pipelines
+- [Changed] git repos for FPHS specific app configurations and Docker container for building production assets
+- [Changed] removed Javascript packages from direct inclusion in source and instead install from Yarn
+- [Changed] updated platform to Rails 5.2
+- [Fixed] bugs and usability issues
 
 
 ## [7.3.83] - 2020-01-13
