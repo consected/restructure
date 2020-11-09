@@ -30,6 +30,12 @@ The same Ansible roles can be used to create a self-contained Vagrant server for
 development, avoiding the need to get all the prerequisites satisfied locally.
 
 
+### App Configurations
+
+In addition to the core code repos, source control for [FPHS app configurations](https://github.com/hmsrc/fphs-app-configs) contains 
+the FPHS specific application and database configurations.
+
+
 ### Multiple Repos
 
 It should be noted that as of Zeus Phase 5, two Git repos are being used.
