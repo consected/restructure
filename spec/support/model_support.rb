@@ -12,7 +12,7 @@ module ModelSupport
   end
 
   def db_name
-    "fpa_test#{ENV['TEST_ENV_NUMBER']}"
+    ActiveRecord::Base.connection.current_database
   end
 
   def pick_one_from(objs)

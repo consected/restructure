@@ -12,7 +12,7 @@ module SetupHelper
   end
 
   def self.db_name
-    "fpa_test#{ENV['TEST_ENV_NUMBER']}"
+    ActiveRecord::Base.connection.current_database
   end
 
   def self.clear_delayed_job

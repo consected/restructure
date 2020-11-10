@@ -2,7 +2,7 @@
 
 module BulkMsgSupport
   def db_name
-    "fpa_test#{ENV['TEST_ENV_NUMBER']}"
+    ActiveRecord::Base.connection.current_database
   end
 
   def self.import_bulk_msg_app

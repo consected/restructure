@@ -17,7 +17,7 @@ ENV['FPHS_USE_LOGGER'] = 'TRUE'
 unless ENV['IGNORE_MFA'] == 'true'
   res = `aws sts get-caller-identity | grep "UserId"`
   if res == ''
-    puts "AWS MFA is needed. Run\n  app-scripts/aws_mfa_set.rb"
+    puts "AWS MFA is needed. Run\n  AWS_ACCT_ID=<account id> app-scripts/aws_mfa_set.rb"
     exit
   end
 end
