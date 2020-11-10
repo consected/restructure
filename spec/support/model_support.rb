@@ -12,15 +12,7 @@ module ModelSupport
   end
 
   def db_name
-<<<<<<< HEAD
-<<<<<<< HEAD
     ActiveRecord::Base.connection.current_database
-=======
-    "fpa_test#{ENV['TEST_ENV_NUMBER']}"
->>>>>>> 65d7808... Baseline code
-=======
-    ActiveRecord::Base.connection.current_database
->>>>>>> ba15603... Get db name automatically
   end
 
   def pick_one_from(objs)
