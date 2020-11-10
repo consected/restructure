@@ -57,6 +57,9 @@ fi
 
 git fetch origin
 git checkout new-master
+git pull
 git checkout develop
+git pull
 git merge new-master
+git push
 echo "Built and setup assets: ${TESTVER}"
