@@ -1,0 +1,65 @@
+<div class="container-fluid" id="master-search-advanced">
+<%
+  default_search_form = app_config_text(:default_search_form, 'Simple Search')
+  hide_searchable_reports = app_config_set(:hide_search_form_searchable_reports)
+%>
+
+
+<div class="panel-group <%= @requested_master ? 'loading-results' : '' %>" id="master-search-accordion" role="tablist" aria-multiselectable="false">
+  <div class="advanced-form-selections">
+    <% unless app_config_set(:hide_search_form_simple) %>
+    <button id="expand-simple-form" class="btn btn-primary search-selector-btn" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-simple-form" aria-expanded="true" aria-controls="master-search-simple-form">Simple Search</button>
+    <% end %>
+    <% unless app_config_set(:hide_search_form_advanced) %>
+    <button id="expand-adv-form" class="btn btn-primary collapsed search-selector-btn" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-advanced-form" aria-expanded="false" aria-controls="master-search-advanced-form">Advanced Search</button>
+    <% end %>
+    <% Report.active.searchable.for_user(current_user).each do |r|%>
+      <%  # Hide the searchable reports, except for if one of those reports is the default.
+        is_default = default_search_form == r.name.downcase || default_search_form == r.alt_resource_name
+        if !app_config_set(:hide_search_form_searchable_reports) || is_default
+          add_class = (is_default ? 'is_default_report' : 'collapsed')
+          add_class += ' prevent-list-collapse' if r.view_options.prevent_collapse_for_list
+      %>
+          <a href="<%= report_path(id: r.id, part: :form, format: :html, view_context: :search) %>" data-preprocessor="reports_form" data-parent="#master-search-accordion" data-remote="true" class="btn btn-primary prevent-on-collapse  search-selector-btn <%= add_class %> one-time-only-ajax <%=hide_searchable_reports ? 'hidden' : ''%>" type="button" data-toggle="collapse" data-result-target="#master-report-<%=r.alt_resource_name%> .searchable-report" data-target="#master-report-<%=r.alt_resource_name%>" aria-expanded="<%= is_default ? 'true' : 'false' %>" aria-controls="master-report-<%=r.alt_resource_name%>" id="expand-searchable-report-<%=r.alt_resource_name%>" ><%=r.name%></a>
+      <% end %>
+    <% end %>
+
+  </div>
+
+
+  <div class="panel panel-default">
+    <div id="master-search-simple-form" class="panel-collapse collapse <%= default_search_form == 'Simple Search' ? 'in' : '' %>" role="tabpanel">
+      <div class="panel-body searchable-report">
+        <%= render partial: 'search_form_simple' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div id="master-search-advanced-form" class="panel-collapse collapse <%= default_search_form == 'Advanced Search' ? 'in' : '' %>" role="tabpanel">
+      <div class="panel-body searchable-report">
+        <%= render partial: 'search_form_advanced' %>
+      </div>
+    </div>
+  </div>
+
+  <% Report.active.searchable.for_user(current_user).each do |r|
+      if default_search_form == r.name.downcase || default_search_form == r.alt_resource_name
+        @view_context = :search
+        @report = r
+      else
+        @report = nil
+      end
+     %>
+    <div class="panel panel-default searchable-report-panel">
+      <div id="master-report-<%=r.alt_resource_name%>" class="panel-collapse collapse <%= @report ? 'in' : '' %>" role="tabpanel">
+        <div class="panel-body searchable-report" style="<%= r.view_options.hide_criteria_panel ? 'max-height: 0; padding: 0 !important' : ''%>"  data-report-id="<%=r.id%>">
+          <%= render partial: "reports/form"  if @report%>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  </div>
+</div>
+
+<span class="" data-sub-item="search_action" data-template="search-action-template"></span>

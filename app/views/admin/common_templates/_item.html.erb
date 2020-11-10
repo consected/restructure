@@ -1,0 +1,52 @@
+<%
+  num_fields = 1
+  found_options = false
+  index_params.each do |p|
+    is_options_field = p.to_s.end_with?('options') || p.to_s.end_with?('template')
+    unless found_options
+      num_fields += 1
+      found_options = p if is_options_field
+    end
+  end
+%>
+<% if found_options %>
+<tbody class="admin-list-item <%=list_item.disabled ? 'disabled-result' : ''%> <%= list_item.persisted? ? '' : 'new-record hidden'%> <%= action_name.in?(['create', 'update']) ? 'saved-row postprocessed-scroll-here' : ''%>" id="admin-item-<%=list_item.id%>" data-result-position="<%= list_item.persisted? ? 'replace' : 'after'%>" data-preprocessor="admin_result">
+  <tr class="admin-list-item <%=list_item.disabled ? 'disabled-result' : ''%>">
+<% else %>
+  <tr class="admin-list-item <%=list_item.disabled ? 'disabled-result' : ''%> <%= list_item.persisted? ? '' : 'new-record hidden'%> <%= action_name.in?(['create', 'update']) ? 'saved-row postprocessed-scroll-here' : ''%>" id="admin-item-<%=list_item.id%>" data-result-position="<%= list_item.persisted? ? 'replace' : 'after'%>" data-preprocessor="admin_result">
+<% end %>
+    <td class="admin-field-<%=p%>"><%= admin_edit_btn list_item.id%>&nbsp;&nbsp;&nbsp;<%= admin_edit_btn list_item.id, copy: list_item%>  </td>
+    <% index_params.each do |p|
+        test_assoc = p.to_s.gsub('_id','')
+        test_assoc_ids = p.to_s.gsub('_ids','').pluralize
+
+        test_assoc_ids = nil if test_assoc_ids == p.to_s
+        test_assoc = nil if test_assoc_ids == test_assoc || test_assoc == p.to_s
+    %>
+
+    <% if test_assoc && list_item.respond_to?(test_assoc) %>
+      <td class="admin-field-<%=p%>"><%= list_item.send(test_assoc).to_s %></td>
+    <% elsif test_assoc_ids && list_item.respond_to?(test_assoc_ids) %>
+      <td class="admin-field-<%=p%>"><%= list_item.send(test_assoc_ids).map(&:to_s).join("; ") %></td>
+    <% elsif p.to_s.end_with?('_error') %>
+      <td class="admin-field-<%=p%>"><pre class="expandable"><%= list_item.send(p) %></pre></td>
+    <% else %>
+      <% unless p.to_s.end_with?('options') || p.to_s.end_with?('template') %>
+        <td class="admin-field-<%=p%>"><%= list_item.send(p) %></td>
+      <% end %>
+    <% end %>
+    <% end %>
+
+    <% if admin_links.present? %>
+    <td>
+      <% admin_links(list_item.id).each do |al| %><%= link_to *al %> <% end %>
+    </td>
+    <% end %>
+  </tr>
+  <% if found_options %>
+    <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+      <td>&nbsp;</td>
+      <td colspan="<%=num_fields%>" class="admin-field-<%=p%>"><strong><%=found_options%>:</strong> <pre style="font-size: 12px" class="shrinkable-block"><%= list_item.send(found_options) %></pre></td>
+    </tr>
+  </tbody>
+  <% end %>

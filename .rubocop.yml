@@ -1,0 +1,64 @@
+Metrics/LineLength:
+  Enabled: true
+  Max: 120
+  Include:
+    - 'app/**/*'
+    # - 'spec/**/*'
+
+Metrics/BlockLength:
+  Enabled: true
+  Max: 50
+  Include:
+    - 'app/**/*'
+    # - 'spec/**/*'
+
+Metrics/ModuleLength:
+  Enabled: true
+  Max: 250
+  Include:
+    - 'app/**/*'
+
+Metrics/MethodLength:
+  Enabled: true
+  Max: 50
+  Include:
+    - 'app/**/*'
+    # - 'spec/**/*'
+
+Metrics/ClassLength:
+  Enabled: true
+  Max: 400
+  Include:
+    - 'app/**/*'
+
+Metrics/CyclomaticComplexity:
+  Enabled: true
+  Max: 20
+  Include:
+    - 'app/**/*'
+
+Metrics/PerceivedComplexity:
+  Enabled: true
+  Max: 20
+  Include:
+    - 'app/**/*'
+
+Naming/ConstantName:
+  Enabled: false
+
+Style/DoubleNegation:
+  Enabled: false
+
+Style/WordArray:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/ParameterLists:
+  Max: 5
+  CountKeywordArgs: false
+
+
+Style/Documentation:
+  Enabled: false

@@ -1,0 +1,40 @@
+class Settings
+
+  <%=class_name%>.external_id_edit_pattern = '\\d{0,10}'
+  <%=class_name%>.external_id_range = 1..9999999999
+  
+  # Default is for 10 digit formatting xxx xxx xxxx   
+  <%=class_name%>.external_id_view_formatter='format_10_digit_external_id'
+  # To customize formatting, 
+  # * edit Handlebars.registerHelper('format_<%=singular_name%>_id') function in 
+  #      assets/javascripts/external_id_<%=plural_name%>.js
+  # * comment out the ...external_id_view_formatter... line above
+  # * uncomment the line below
+  # <%=class_name%>.external_id_view_formatter='format_<%=singular_name%>_id'
+
+  # Do not change --- first run - add the protocol / sub_process / protocol_event combos for "record update"
+  add_record_update_entries <%=class_name%>.label
+
+  
+  # Finalize the configuration of the model
+  <%=class_name%>.add_to_app_list
+  
+  # Optionally replace the previous line, to allow for random generation of items:
+  #<%=class_name%>.prevent_edit = true
+  #<%=class_name%>.add_to_app_list do
+  #  def build att=nil
+  #    <%=class_name%>.master_build_with_random_id proxy_association.owner, att
+  #  end
+  #end
+   
+  # Optionally replace the previous line, to allow for assignment of IDs from a list of pregenerated items
+  # SageAssignment uses this approach
+  #<%=class_name%>.prevent_edit = true
+  #<%=class_name%>.add_to_app_list do
+  #  def build att=nil
+  #    <%=class_name%>.master_build_with_next_id proxy_association.owner, att
+  #  end
+  #end
+  
+  
+end

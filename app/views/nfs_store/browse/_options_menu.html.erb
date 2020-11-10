@@ -1,0 +1,45 @@
+<span id="block-filestore-dd-menu--<%=container_id%>" class="dropdown">
+  <button class="btn btn-default hamburger" id="filestore-dd-menu--<%=container_id%>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class=" glyphicon glyphicon-menu-hamburger"></span></span></button>
+  <ul class="dropdown-menu" aria-labelledby="filestore-dd-menu--<%=container_id%>">
+    <li><a href="#" id="container-browse-trash-<%=container_id%>" class="container-browse-trash-submit" data-target-browser="#container-browser-<%=container_id%>" data-can-send-to-trash="<%=can_send_to_trash%>">Send to trash</a></li>
+    <li><a href="#" id="container-browse-move-files-<%=container_id%>" class="container-browse-move-files" data-target-browser="#container-browser-<%=container_id%>" data-can-move-files="<%=can_move_files%>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Move Files</a></li>
+    <li><a href="#" id="container-browse-rename-file-<%=container_id%>" class="container-browse-rename-file" data-target-browser="#container-browser-<%=container_id%>" data-can-rename-file="<%=can_move_files%>">Rename file</a></li>
+    {{#each (fpa_state_item 'template_config' name  'v' 'user_file_actions')}}
+    <li><a href="#" 
+           id="container-browse-trigger-file-action-{{id}}-<%=container_id%>" 
+           class="container-browse-trigger-file-action" 
+           data-target-browser="#container-browser-<%=container_id%>" 
+           data-trigger-file-action="{{id}}"
+           data-can-trigger-actions="<%=can_user_file_actions%>">{{name}}</a></li>
+    {{/each}}
+  </ul>
+</span>
+<div class="container-browse-action-form hidden" id="container-browse-move-files-form-<%=container_id%>">
+  <form onsubmit="return false" class="form-formatted">
+    <p>Enter an existing folder name or a new one to be created. The files will be moved here.</p>
+    <div class="browse-move-to-folders"></div>
+    <div class="form-group">
+      <input class="container-new-folder-name form-control" name="new_folder" value="" placeholder="new folder name" />
+    </div>
+    <div class="form-group">
+      <label>Selected files / sub folders under</label>
+      <p class="container-browser-move-from"></p>
+      <label>will be moved here</label>
+      <input class="container-browse-action-extra-params form-control" name="new_path" value="" />
+    </div>
+    <div class="form-group">
+      <button id="container-browse-move-files-submit-<%=container_id%>" class="btn btn-default container-browse-move-files-submit" data-target-browser="#container-browser-<%=container_id%>" data-can-move-files="<%=can_move_files%>">Move files to folder</button>
+    </div>
+  </form>
+</div>
+<div class="container-browse-action-form hidden" id="container-browse-rename-file-form-<%=container_id%>">
+  <form onsubmit="return false" class="form-formatted">
+    <p>Enter a new name for the file.</p>
+    <div class="form-group">
+      <input class="container-browse-action-extra-params form-control" name="new_name" value="" />
+    </div>
+    <div class="form-group">
+      <button id="container-browse-rename-file-submit-<%=container_id%>" class="btn btn-default container-browse-rename-file-submit" data-target-browser="#container-browser-<%=container_id%>" data-can-move-files="<%=can_move_files%>">Rename file</button>
+    </div>
+  </form>
+</div>

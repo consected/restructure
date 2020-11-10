@@ -1,0 +1,17 @@
+class <%=class_name.pluralize%>Controller < ApplicationController
+
+  include MasterHandler
+
+  protected
+    # By default the external id edit form is handled through a common template. To provide a customized form, copy the content of
+    # "common_templates/external_id_edit_form.html.erb" to views/<%=plural_name%>/_edit_form.html.erb
+    def edit_form
+      'common_templates/external_id_edit_form'
+    end
+
+  private
+
+    def secure_params
+      params.require(:<%=singular_name%>).permit(:master_id, :external_id)
+    end
+end

@@ -1,0 +1,26 @@
+<div class="row">
+    <div class="col-md-22 col-md-offset-1">          
+      <ul>
+          <% 
+            i = 0
+            @report.filtering_list.each do |f|
+          
+              sa = f[:search_params].dup
+              if f.is_a? Hash
+                sa[:no_run]='true'
+                sa[:_filter_previous_]='true' if i > 0
+              end
+              i+=1
+          %>
+          <li><%= link_to f[:name], report_path(id: f[:id], search_attrs: sa), target: 'report' %>: <%=f[:results_length] %> results
+              <ul>
+                  <% f[:search_params].each do |k,v|%>  
+                  <li><%= k%>: <%= v.is_a?(Array) ? v.join(", ") : v %> </li>
+                  <% end %>
+                
+              </ul>
+          </li>
+          <% end %>
+      </ul>
+    </div>
+</div>

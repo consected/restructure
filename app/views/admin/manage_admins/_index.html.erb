@@ -1,0 +1,46 @@
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">
+    <h1>Admins</h1>
+    <p>
+      <%= show_filters %>
+    </p>
+
+    <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below">
+      <% if @updated_with %>
+        <%= render partial: 'show'%>
+      <% end %>
+    </div>
+
+    <table class="table tablesorter admin-list">
+      <thead>
+        <tr>
+          <th class="no-sort"></th>
+          <th>Admin</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Locked</th>
+          <th>Disabled</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% @admins.each do |list_item| %>
+          <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+
+            <td><%= admin_edit_btn list_item.id%> &nbsp; <%= admin_edit_btn list_item.id, copy: list_item%> </td>
+            <td><%= list_item.email %></td>
+            <td><%= list_item.first_name %></td>
+            <td><%= list_item.last_name %></td>
+            <td><%= list_item.access_locked? ? 'locked' : ''%></td>
+            <td><%= list_item.disabled ? 'disabled' : ''%></td>
+
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <%=  render partial: 'admin_handler/index_actions'  %>
+
+
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<div class="">
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#data-dicts" aria-controls="data-dicts" role="tab" data-toggle="tab">Data Dictionaries</a></li>
+    <li role="presentation"><a href="#tables" aria-controls="tables" role="tab" data-toggle="tab">Tables</a></li>
+    <li role="presentation"><a href="#protocol_events" aria-controls="protocol_events" role="tab" data-toggle="tab">Protocol Events</a></li>
+    <li role="presentation"><a href="#selection-options" aria-controls="selection-options" role="tab" data-toggle="tab">Selection Options</a></li>
+    <li role="presentation"><a href="#flags" aria-controls="flags" role="tab" data-toggle="tab">Flags</a></li>
+    <li role="presentation"><a href="#subject-accuracy" aria-controls="subject-accuracy" role="tab" data-toggle="tab">Subject Accuracy</a></li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+
+    <div role="tabpanel" class="tab-pane active" id="data-dicts">
+      <h4>Data Dictionaries</h4>
+      <%= render partial: 'admin/reference_data/data_dic_block'%>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="tables">
+      <h4>Tables</h4>
+      <%= render partial: 'admin/reference_data/table_list_block'%>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="protocol_events">
+      <h4>Protocol / status / method </h4>
+      <%= render partial: 'admin/reference_data/protocol_block'%>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="selection-options">
+      <h4>General Selections </h4>
+      <%= render partial: 'admin/reference_data/general_selections_block'%>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="flags">
+      <h4>Item Flags</h4>
+      <%= render partial: 'admin/reference_data/item_flags_block'%>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="subject-accuracy">
+      <h4>Accuracy Score (subject rank)</h4>
+      <%= render partial: 'admin/reference_data/accuracy_score_block'%>
+    </div>
+
+  </div>
+</div>

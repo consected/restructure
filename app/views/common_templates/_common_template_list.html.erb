@@ -1,0 +1,84 @@
+<script id="common_template_list_new_button_container"  type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <div class="new-button-container">
+    <div class="text-center">
+      <a href="/masters/{{master_id}}/{{pluralize name}}/new"
+          data-toggle="scrollto-result"
+          data-target="#{{hyphenate name}}-{{../master_id}}-" 
+          data-remote="true"
+          class="btn btn-sm btn-primary add-item-button"
+      >
+        <span class="glyphicon glyphicon-plus"></span> {{add_item_label}}
+      </a>
+    </div>
+  </div>
+</script>
+
+<script id="common_template_list-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{#with template_config}}
+    {{#is orientation '===' 'horizontal' }}
+
+      {{#unless prevent_create}}
+        {{#unless view_options.only_create_as_reference}}
+          {{>common_template_list_new_button_container master_id=../master_id}}
+        {{/unless}}
+      {{/unless}}
+
+
+      <div class="col-md-8 new-block{{#is name '!==' full_name }} new-block new-after{{/is}} hidden-if-empty" id="{{hyphenate name}}-{{../master_id}}-" data-subscription="{{hyphenate name}}-edit-form-{{../master_id}}-">{{#unless (pluralize full_name)}}
+        <ul class="list-group">
+          <li class="list-group-item is-heading">
+            <h4>No {{run_template caption}} records</h4>
+          </li>
+        </ul>
+      {{/unless}}</div>
+    {{/is}}
+
+    {{#each (lookup .. (pluralize full_name))}}
+      {{> common_template_result name=../name result_data=this _created=@index compact=../compact}}
+    {{/each}}
+
+    {{#is name '!==' full_name }}<div id="{{hyphenate full_name}}-{{../master_id}}-{{../id}}"> {{/is}}
+    {{! If the orientation is vertical or blank}}
+    {{#is (or orientation 'vertical') 'vertical'}}
+      <div class="col-md-24 new-block{{#is name '!==' full_name }} new-before-parent{{/is}}" id="{{hyphenate name}}-{{../master_id}}-" data-subscription="{{hyphenate name}}-edit-form-{{../master_id}}-">
+        {{#unless (pluralize full_name)}}
+        <ul class="list-group">
+          <li class="list-group-item is-heading">
+            <h4>No {{run_template caption}} records</h4>
+          </li>
+        </ul>
+        {{/unless}}
+      </div>
+      {{#unless prevent_create}}
+        {{#unless view_options.only_create_as_reference}}
+          {{>common_template_list_new_button_container master_id=../master_id}}
+        {{/unless}}
+      {{/unless}}
+    {{/is}}
+    {{#is name '!==' full_name }}</div> {{/is}}
+    {{#is orientation '===' 'columns' }}
+
+      <div class="new-block{{#is name '!==' full_name }} new-block new-after{{/is}} hidden-if-empty" 
+           id="{{hyphenate name}}-{{../master_id}}-" 
+           data-subscription="{{hyphenate name}}-edit-form-{{../master_id}}-">{{#unless (pluralize full_name)}}
+        <ul class="list-group">
+          <li class="list-group-item is-heading">
+            <h4>No {{run_template caption}} records</h4>
+          </li>
+        </ul>
+      {{/unless}}</div>
+      
+      {{#unless prevent_create}}
+        {{#unless view_options.only_create_as_reference}}
+          {{>common_template_list_new_button_container master_id=../master_id}}
+        {{/unless}}
+      {{/unless}}
+
+    {{/is}}
+
+  {{else}}
+  <p>
+    Template Config not available for {{name}}
+  </p>
+  {{/with}}
+</script>

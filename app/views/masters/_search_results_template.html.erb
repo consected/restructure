@@ -1,0 +1,272 @@
+<%
+
+  def view?
+    return @viewables if @viewables
+    @viewables = Admin::UserAccessControl.view_tables? current_user
+    @viewables[:pro_infos] &&= !app_config_set(:hide_pro_info)
+    @viewables
+  end
+
+  # get only the viewables marked true
+  @true_views = view?.select{|k,v| v }.map(&:first)
+
+  panels = page_layout_panels
+
+  @prevent_creates = {}
+  @prevent_edits = {}
+  %i(player_infos player_contacts addresses).each do |res|
+    @prevent_creates[res] = !(current_user.has_access_to? :create, :table, res)
+    @prevent_edits[res] = !(current_user.has_access_to? :create, :table, res)
+  end
+%>
+
+
+<% # Set up the handlebars templates for the main data blocks: player_infos, pro_infos, addresses and player_contacts %>
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: 'player_info',
+    caption: 'person',
+    model_data_type: :default,
+    prevent_edit: @prevent_edits[:player_infos],
+    prevent_create: @prevent_creates[:player_infos],
+    item_list: %w(first_name last_name middle_name nick_name birth_date death_date start_year end_year college source_name notes tracker_history_id),
+    data_sort: [:desc, "data-item-id"],
+    hide_rank_badge: app_config_set(:hide_player_accuracy)
+  } if current_user.has_access_to?(:access, :table, :player_infos) %>
+
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: 'pro_info',
+    model_data_type: :default,
+    prevent_edit: true,
+    prevent_create: true,
+    item_list: %w(pro_id first_name last_name middle_name nick_name birth_date death_date start_year end_year college),
+    data_sort: [:desc, "data-item-id"],
+    exclude_metadata: true
+  } if current_user.has_access_to?(:access, :table, :pro_infos) %>
+
+
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: 'player_contact',
+    caption: '{{data}}', # substitute the rec_type attribute (capitalized) as the block caption
+    model_data_type: :default,
+    prevent_edit: @prevent_edits[:player_contacts],
+    prevent_create: @prevent_creates[:player_contacts],
+    item_list: %w(source tracker_history_id),
+    data_sort: [:desc, "data-rank"],
+    extra_class: '{{rec_type}}-type',
+    extra_data_attribs: [:rec_type],
+    view_options: { view_handlers: ['contact'] }
+  } if current_user.has_access_to?(:access, :table, :player_contacts) %>
+
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: 'address',
+    model_data_type: :default,
+    prevent_edit: @prevent_edits[:addresses],
+    prevent_create: @prevent_creates[:addresses],
+    item_list: %w(country_name,street,street2,street3,city,state_name,zip,region,postal_code,source_name,rec_type tracker_history_id),
+    data_sort: [:desc, "data-rank"],
+    # add custom markup data attribute to allow country to be processed in Javascript formatting
+    custom_block_attrs: {data_address_is_us: "{{#is country 'us'}}true{{else is country ''}}true{{else is country null}}true{{else}}false{{/is}}"},
+    view_options: { view_handlers: ['address'] }
+  } if current_user.has_access_to?(:access, :table, :addresses) %>
+
+
+
+<% # Add in all the external ID handlers (Scantron, Sage, etc)
+    external_id_types = ExternalIdentifier.active_model_configurations.map(&:implementation_class)
+    viewable_external_ids = external_id_types.select{|e| view?[e.plural_name.to_sym] }.map(&:plural_name)
+    external_id_types.each do |e|
+
+      formatter = e.external_id_view_formatter
+      pattern = e.external_id_edit_pattern
+      if formatter.blank? && !pattern.blank?
+        formatter = 'pattern_mask "' + pattern.gsub('\\', '\\\\') + '"';
+      end
+
+      field_list = e.definition.field_list_array
+
+%>
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: e.name.underscore,
+    caption: e.label,
+    model_data_type: :external_identifier,
+    prevent_edit: e.prevent_edit? || !(current_user.has_access_to? :edit, :table, e.plural_name),
+    prevent_create: e.prevent_create? || !(current_user.has_access_to? :create, :table, e.plural_name),
+    item_list: field_list,
+    external_id_options: {label: e.label, formatter: formatter, attribute: e.external_id_attribute.to_s},
+    data_sort: [:desc, "data-updated-at-ts"],
+    orientation: 'vertical',
+    add_item_label: e.label
+  } if current_user.has_access_to?(:access, :table, e.name.underscore.pluralize) %>
+<% end %>
+
+
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: 'nfs_store__manage__container',
+    caption: '{{name}}', # substitute the rec_type attribute (capitalized) as the block caption
+    model_data_type: :nfs_store_container,
+    prevent_edit: !(current_user.has_access_to? :edit, :table, :nfs_store__manage__containers),
+    prevent_create: !(current_user.has_access_to? :create, :table, :nfs_store__manage__containers),
+    item_list: %w(data),
+    data_sort: [:desc, "data-updated-at-ts"]
+  } if current_user.has_access_to?(:access, :table, :nfs_store__manage__containers) %>
+
+
+<% # Setup the tracker handlebars templates %>
+<%= render partial: 'trackers/search_results_template' if current_user.has_access_to?(:access, :table, :trackers) %>
+<%= render partial: 'tracker_histories/search_results_template' if current_user.has_access_to?(:access, :table, :tracker_histories) %>
+
+<% # Setup the handlebars templates for the external links (web links) %>
+<%= render partial: 'external_links/search_results_template' if current_user.can?(:view_external_links) %>
+
+<% # Setup the handlebars templates for the dynamic models, defined in the admin panel %>
+<%= render partial: 'dynamic_models/search_results_template' %>
+
+<% # Setup the activity logs handlebars templates %>
+<%= render partial: 'activity_logs/search_results_template' %>
+
+<% # Load partial handlebars templates used by the search results and data blocks%>
+<% if panels && panels.length > 0
+    # Tabs as defined by the page layout panels
+%>
+<%= render partial: 'masters/search_results_master_tabs', locals: {panels: panels, external_id_types: external_id_types, viewable_external_ids: viewable_external_ids} %>
+<% else
+    # Default tabs when no page layout panels are defined
+%>
+<%= render partial: 'masters/search_results_master_tabs_default', locals: {external_id_types: external_id_types, viewable_external_ids: viewable_external_ids} %>
+<% end %>
+<%= render partial: 'masters/master_panels', locals: {external_id_types: external_id_types, viewable_external_ids: viewable_external_ids} %>
+<%= render partial: 'masters/search_results_parts', locals: {external_id_types: external_id_types, viewable_external_ids: viewable_external_ids} %>
+<%= render partial: 'common_templates/common_parts' %>
+<%= render partial: 'item_flags/search_results_template' %>
+<%= render partial: 'filestore/result_templates' if current_user.has_access_to?(:access, :table, :nfs_store__manage__containers) %>
+
+<%=render partial: 'secure_view/preview' if current_user.can?(:view_files_as_html) || current_user.can?(:view_files_as_image) %>
+
+<%= render partial: 'filestore/common_template_view', locals: {} if current_user.has_access_to?(:access, :table, :nfs_store__manage__containers) %>
+<%= render partial: 'common_templates/e_signature/show_parts', locals: {} %>
+
+
+<script>
+  <%
+    all_cnames = []
+
+    # Preload all of the general selections into cache so they can be used
+    # This pulls dynamic model and activity log extra log types as separate items
+    implementation_classes = ActivityLog.implementation_classes
+
+    # Check the definition is ready to use and prepare it for use
+    implementation_classes.reject! {|ic| !ic.definition.ready_to_generate?}
+    implementation_classes.each do |itc|
+
+      next unless itc.allows_user_access_to?(current_user, :access)
+      cnames = []
+      ito = itc.new
+      if itc.respond_to?(:option_configs)
+        cnames = itc.option_configs.map {|k|  "general_selections-item_type+#{ito.item_type}-extra_log_type+#{k.name}" }
+      else
+        cnames = ["general_selections-item_type+#{ito.item_type}"]
+      end
+
+      all_cnames += cnames
+  %>
+  //_fpa.cache_definitions(<%=cnames.to_json.html_safe%>);
+
+  <% end %>
+
+  <%
+  implementation_classes = DynamicModel.implementation_classes
+  implementation_classes.reject! {|ic| !ic.definition.ready_to_generate?}
+  cnames = []
+  implementation_classes.each do |itc|
+    full_name = "dynamic_model__#{itc.definition.implementation_model_name}"
+    if current_user.has_access_to?(:access, :table, full_name.pluralize)
+      ito = itc.new
+      cnames.push("general_selections-item_type+#{ito.item_type}");
+    end
+  end
+  all_cnames += cnames
+  %>
+  //_fpa.cache_definitions(<%=cnames.to_json.html_safe%>);
+  _fpa.cache_definitions(<%=all_cnames.flatten.to_json.html_safe%>);
+</script>
+
+
+<% # Display the set of search results in the "master search" format %>
+
+<script id="search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{#if masters.length}}
+  <div class="panel-group" id="results-accordion" role="tablist" aria-multiselectable="true">
+    <div class="panel panel-default results-panel">
+
+      {{#each masters}}
+        {{>master_panel_heading num_masters=../masters.length}}
+        {{>master_main num_masters=../masters.length}}
+      {{/each}}
+
+  </div>
+  <div class="hidden" id="msid_list">{{#each masters}}{{msid}} {{/each}}</div>
+  <div class="hidden" id="master_id_list">{{#each masters}}{{id}} {{/each}}</div>
+  {{else}}
+      <h2 class="no-results-msg">No Results</h2>
+  {{/if}}
+
+
+</script>
+
+<script id="master_main_inner" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{>master_tabs}}
+  <div class="panel-body master-main-panel">
+    <%
+    if panels && panels.length > 0
+
+      panels.each do |panel|
+        initial_show = panel.view_options && panel.view_options.initial_show
+        if panel.contains && panel.contains.categories
+          panel.contains.categories.each do |cat|
+    %>
+           <%= render partial: 'masters/search_results_category_panel', locals: {panel: panel, category: cat, panel_name: panel.panel_name, panel_label: panel.panel_label, initial_show: initial_show} %>
+    <%
+          end
+        elsif panel.contains && panel.contains.resources
+    %>
+          <%= render partial: 'masters/search_results_resources_panel', locals: {panel: panel} %>
+    <%
+        end
+      end
+    %>
+    <% else # no panels defined %>
+      {{>master_external_links_panel}}
+
+      <%= render partial: 'masters/search_results_category_panel', locals: {panel: nil, category: 'trackers', panel_name: 'trackers', panel_label: 'Tracker', initial_show: true} %>
+
+      <% ActivityLog.enabled.each do |a| %>
+        <% if view?[a.full_item_types_name.to_sym] %>
+        <div id="<%= a.full_item_types_name.hyphenate %>-{{id}}" class="activity-logs-generic-block <%= a.full_item_types_name.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= a.full_item_types_name %>" data-template="<%= a.model_association_name.to_s.hyphenate %>-main-result-template"  >
+            <div id="<%= a.full_item_types_name.hyphenate %>-inner-{{id}}" class="activity-logs-inner-block"></div>
+        </div>
+        <% end %>
+      <% end %>
+
+      <%= render partial: 'masters/search_results_category_panel', locals: {panel: nil, category: 'details', panel_name: 'details', panel_label: 'Details', initial_show: true} %>
+      <%= render partial: 'masters/search_results_category_panel', locals: {panel: nil, category: 'external-ids', panel_name: 'external-ids', panel_label: 'External IDs', initial_show: false} %>
+
+      <%
+        dmc = DynamicModel.categories - ['details', 'external-ids']
+        dmc.each do |cat| %>
+        <%= render partial: 'masters/search_results_category_panel', locals: {panel: nil, category: cat, panel_name: cat, panel_label: cat.humanize.titleize, initial_show: false} %>
+      <% end %>
+    <% end %>
+  </div>
+</script>
+
+<script id="master_main" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <div id="master-{{id}}-main-container" class="panel-collapse collapse {{#is num_masters 1}}in loaded-master-main{{/is}} master-panel num-masters-{{num_masters}}" data-master-id="{{id}}" data-template="master-main-template" role="tabpanel" aria-labelledby="master-{{id}}">
+    {{>master_main_inner}}
+  </div>
+</script>
+
+<script id="master-main-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{#with master}}
+    {{>master_main_inner}}
+  {{/with}}
+</script>

@@ -1,0 +1,269 @@
+<%
+  unless defined? def_version
+    def_version = nil
+  end
+
+  main_log_full_name = "#{full_name}_primary"
+  item_type_name_hyphenated = item_type_name.hyphenate
+  full_name_hyphenated = full_name.hyphenate
+  item_type_hyphenated = item_type.hyphenate
+  blank_log_full_name_hyphenated = blank_log_full_name.hyphenate
+  if hide_item_list_panel
+    col_width = 6
+    col_width_md = 8
+  else
+    col_width = 8
+    col_width_md = 12
+  end
+  col_width_classes = "col-md-#{col_width_md} col-lg-#{col_width}"
+  data_action_when =  "data_#{action_when_attribute}".to_sym
+
+  all_option_configs = option_configs.dup
+  primary_options = option_configs.select {|e| e.name == :primary}.first
+  blank_options = option_configs.select {|e| e.name == :blank_log}.first
+
+  option_configs = option_configs.reject {|c| c.name.in? [:primary, :blank_log]}
+
+
+  main_log_caption = main_log_label
+  main_log_caption = al_name if main_log_caption == 'Add Log'
+
+  current_definition = implementation_class.definition
+%>
+
+<% if current_user.has_access_to?(:access, :table, full_name.pluralize) %>
+
+<%= render partial: 'common_templates/search_results_template', locals: {
+    def_version: def_version,
+    name: main_log_full_name,
+    model_data_type: :activity_log,
+    item_class_name: full_name,
+    caption: main_log_caption,
+    prevent_edit: prevent_edit,
+    prevent_create: prevent_create,
+    only_see_presence: current_user.has_access_to?(:see_presence, :activity_log_type, primary_options.resource_name),
+    extra_class: "alt-width #{col_width_classes}",
+    item_list: implementation_class.view_attribute_list,
+    data_sort: [:desc, data_action_when],
+    subsort_id: true,
+    # custom_block_attrs: {data_action_when => "{{timestamp #{action_when_attribute}}}"},
+    custom_activity_log: :none,
+    implementation_class_name: implementation_class_name,
+    implementation_class: implementation_class,
+    item_blocks: {item_type.to_sym => implementation_class.parent_data_names},
+    show_created_at: true,
+    edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{item_type.pluralize}/{{item_id}}/{{/if}}activity_log/#{item_type_name.pluralize}/{{id}}/edit",
+    caption_before: primary_options.caption_before,
+    dialog_before: primary_options.dialog_before,
+    item_flags_after: 'notes',
+    item_flags_readonly: true,
+    extra_type: :primary,
+    references: primary_options.references,
+    show_if: primary_options.show_if,
+    view_options: primary_options.view_options,
+    extra_data_attribs: [:extra_log_type]
+  } %>
+
+<%= render partial: 'common_templates/search_results_template', locals: {
+    def_version: def_version,
+    name: blank_log_full_name,
+    model_data_type: :activity_log,
+    item_class_name: full_name,
+    caption: blank_log_label, # substitute the rec_type attribute (capitalized) as the block caption
+    prevent_edit: prevent_edit,
+    prevent_create: prevent_create,
+    only_see_presence: current_user.has_access_to?(:see_presence, :activity_log_type, blank_options.resource_name),
+    extra_class: "alt-width #{col_width_classes}",
+    item_list: implementation_class.view_blank_log_attribute_list,
+    data_sort: [:desc, data_action_when],
+    subsort_id: true,
+    # custom_block_attrs: {data_action_when => "{{timestamp #{action_when_attribute}}}"},
+    custom_activity_log: :none,
+    implementation_class: implementation_class,
+    implementation_class_name: implementation_class_name,
+    item_blocks: {item_type.to_sym => implementation_class.parent_data_names},
+    show_created_at: true,
+    edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{item_type.pluralize}/{{item_id}}/{{/if}}activity_log/#{item_type_name.pluralize}/{{id}}/edit",
+    caption_before: blank_options.caption_before,
+    dialog_before: blank_options.dialog_before,
+    item_flags_after: 'notes',
+    item_flags_readonly: true,
+    extra_type: :blank_log,
+    references: blank_options.references,
+    show_if: blank_options.show_if,
+    view_options: blank_options.view_options,
+    extra_data_attribs: [:extra_log_type]
+  } %>
+
+<% option_configs.each do |option_type_config|
+    mapped_vars = OptionConfigs::TemplateOptionMapping.activity_log_mapping(def_record, option_type_config, current_user)
+%>
+  <%= render partial: 'common_templates/search_results_template', locals: mapped_vars %>
+<% end %>
+
+
+<script id="sub_list_<%=item_type_name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{#was _created}}<div class="panel index-{{_created}} sub-list-item activity-log--<%=item_type_name_hyphenated%>-type" id="activity-log-<%=item_type_name_hyphenated%>-sub-list-{{master_id}}-{{id}}" data-template="sub-list-<%=item_type_name_hyphenated%>-result-template" data-sub-item="<%=item_type%>" data-sub-id="{{id}}" data-sort-desc="data-item-rank" data-preprocessor="<%=item_type%>_edit_form">{{/was}}
+
+    <ul class="list-group" data-item-id="{{id}}" data-item-rank="{{rank}}">
+      <li class="list-group-item sub-list-data">
+        <i class="glyphicon glyphicon-phone"></i>
+        <a data-on-click-call="activity_logs.selected_parent" data-on-click-show="activity_logs_<%=item_type_name%>_actions_block@#activity-log-{{master_id}}-initial-action" data-master-id="{{master_id}}" data-item-id="{{id}}" data-item-data="{{data}}" data-rec-type="{{rec_type}}">{{pretty_string data return_string="true" capitalize="true"}}</a>
+        <a data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log-<%=item_type_name_hyphenated%>-sub-list-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-activity-log-<%=item_type_name_hyphenated%> pull-right glyphicon glyphicon-edit small" href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{id}}/edit" data-remote="true" data-<%=item_type_hyphenated%>-id="{{id}}" data-result-target=""></a>
+        <span class="pull-right label label-info general-rank-{{rank}} <%=item_type_hyphenated%>-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
+      </li>
+      <li class="list-group-item activity-log-actions-holder activity-log-initial-action">
+          {{> activity_logs_<%=item_type_name%>_actions item_id=id}}
+      </li>
+    </ul>
+
+  {{#was _created}}</div>{{/was}}
+</script>
+
+<script id="sub-list-<%=item_type_name_hyphenated%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{#with <%=item_type%>}}
+      {{>sub_list_<%=item_type_name%>_result}}
+  {{/with}}
+</script>
+
+<script id="activity_logs_<%=item_type_name%>_actions_block" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{> activity_logs_<%=item_type_name%>_actions item_id=item_id}}
+</script>
+
+<script id="activity_logs_<%=item_type_name%>_actions-partial" type="text/x-handlebars-template" class="hidden handlebars-partial handlebars-template">
+  <% unless prevent_create  || !current_user.has_access_to?(:create, :activity_log_type, current_definition.option_type_config_for(:primary).resource_name)%>
+  <span id="activity-log-{{master_id}}-initial-action" class="al-initial-action-container" >
+    <span class="activity-log--<%=item_type_name_hyphenated%>-actions">
+      <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{item_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-extra-log-type="primary" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-primary-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= main_log_label %></a>
+    </span>
+   </span>
+   <% end %>
+</script>
+
+
+<script id="activity-log--<%=item_type_name_hyphenated.pluralize%>-main-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  <div id="<%=item_type_hyphenated%>-activity-logs-<%=item_type_name_hyphenated%>-type-{{item_id}}" class="panel panel-default activity-logs-item-block activity-logs-<%=item_type_name_hyphenated%>-type-block <%= hide_item_list_panel ? 'hidden-item-list-panel' : 'shown-item-list-panel' %>" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
+
+    <div class="is-heading activity-logs-header">
+    <% unless hide_player_tabs? %>
+      <a data-target="#activity-log--<%=item_type_name_hyphenated.pluralize%>-{{master_id}}" data-toggle="collapse" class="show-entity pull-right glyphicon glyphicon-remove-sign no-scroll-on-collapse" title="close panel"></a>
+    <% end %>
+      <h4 class="list-group-item-heading al-label-<%=item_type_name_hyphenated%>-item"><%=al_name%></h4>
+
+      <% if hide_item_list_panel && !prevent_create%>
+      <p class="text-center action-buttons">
+        {{#each <%=item_type.pluralize%>}}
+        <%
+        eltc = current_definition.option_type_config_for(:primary)
+        if current_user.has_access_to?(:create, :activity_log_type, eltc.resource_name)
+        %>
+          <% if rec_type.blank? %>
+            <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button <%= eltc.view_options[:hide_unless_creatable] ? 'hide-unless-creatable' : '' %>"  data-extra-log-type="primary" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-primary-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= main_log_label %>{{#is <%=item_type.pluralize%>.length '>' 1}} ({{data}}){{/is}}</a>
+          <% else %>
+          {{#is rec_type '===' '<%= rec_type %>'}}
+            <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button <%= eltc.view_options[:hide_unless_creatable] ? 'hide-unless-creatable' : '' %>"  data-extra-log-type="primary" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-primary-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= main_log_label %>{{#is <%=item_type.pluralize%>.length '>' 1}} ({{data}}){{/is}}</a>
+          {{/is}}
+          <% end %>
+        <% end %>
+        {{/each}}
+        <%
+        eltc = current_definition.option_type_config_for(:blank_log)
+        if current_user.has_access_to?(:create, :activity_log_type, eltc.resource_name)
+        %>
+        <a href="/masters/{{master_id}}/activity_log/<%=item_type_name.pluralize%>/new?extra_type=blank-log" data-remote="true" class="btn btn-sm btn-primary add-item-button <%= eltc.view_options[:hide_unless_creatable] ? 'hide-unless-creatable' : '' %>"  data-extra-log-type="blank_log" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= blank_log_label %></a>
+        <% end %>
+        <% option_configs.each do |c|
+            eltc = c
+            if current_user.has_access_to? :create, :activity_log_type, c.resource_name
+        %>
+          <a href="/masters/{{master_id}}/<% if item_list.include? item_type %><%=item_type.pluralize%>/{{id}}/<% end %>activity_log/<%=item_type_name.pluralize%>/new?extra_type=<%= c.name.to_s.hyphenate %>"  data-extra-log-type="<%=c.name%>" data-remote="true" class="btn btn-sm btn-primary add-item-button <%= eltc.view_options[:hide_unless_creatable] ? 'hide-unless-creatable' : '' %>" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= c.button_label || c.label %></a>
+        <%  end
+           end %>
+      </p>
+      <% end %>
+
+    </div>
+    <div class="row">
+
+      <% unless hide_item_list_panel %>
+      <div class="col-md-5 activity-log-sub-list" data-selected-id="{{item_id}}" id="activity-log-<%=item_type_name_hyphenated.pluralize%>-sub-list-{{master_id}}-" data-sub-list="<%=item_type.pluralize%>">
+
+        {{#each <%=item_type.pluralize%>}}
+        <% if rec_type.blank? %>
+          {{>sub_list_<%=item_type_name%>_result _created=@index}}
+        <% else %>
+          {{#is rec_type '===' '<%= rec_type %>'}}
+            {{>sub_list_<%=item_type_name%>_result _created=@index}}
+          {{/is}}
+        <% end %>
+        {{/each}}
+        <div class="new-block" form-res-id="<%=item_type_hyphenated%>-{{master_id}}-" form-res-template="sub-list-<%=item_type_name_hyphenated%>-result-template" id="activity-log--<%=item_type_name_hyphenated%>-edit-form-{{master_id}}-" data-subscription="<%=item_type_hyphenated%>-edit-form-{{master_id}}-" data-preprocessor="<%=item_type%>_edit_form">
+
+        </div>
+        <br />
+        <% unless prevent_create %>
+        <p class="help-block small">
+          Select <%=item_type_name.humanize%> above to log an activity against it. Or click <b>+ <%= blank_log_label %></b> to add an activity not tied to a specific item (such as indicating that a follow up is no longer required.)
+        </p>
+        <br />
+        <% end %>
+        <p class="text-center al-create-actions">
+          <% if current_user.has_access_to?( :create, :table, item_type.pluralize) %>
+          <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/new<%= rec_type.blank? ? '' : "?#{item_type}[rec_type]=#{rec_type}"  %>" data-remote="true" class="btn btn-sm btn-default add-item-button" data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log--<%=item_type_name_hyphenated%>-edit-form-{{master_id}}-" aria-label="add <%=item_type.humanize%> record"><span class="glyphicon glyphicon-plus"></span> <%= item_type.humanize%> record</a>
+          <% end %>
+          <% unless prevent_create %>
+          <% if current_user.has_access_to?(:create, :activity_log_type, current_definition.option_type_config_for(:blank_log).resource_name) %>
+          <a href="/masters/{{master_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= blank_log_label %></a>
+          <% end %>
+            <% option_configs.each do |c|
+                if current_user.has_access_to? :create, :activity_log_type, c.resource_name
+            %>
+              <a href="/masters/{{master_id}}/<% if item_list.include? item_type %><%=item_type.pluralize%>/{{id}}/<% end %>activity_log/<%=item_type_name.pluralize%>/new?extra_type=<%= c.name.to_s.hyphenate %>" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= c.button_label || c.label %></a>
+            <%  end
+               end %>
+          <% end %>
+        </p>
+      </div>
+      <% end %>
+      <div class="col-md-<%= hide_item_list_panel ? '24' : '19' %> ">
+
+
+        <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="<%=item_type_name%>_logs">
+          {{>sublist_controls sub_list="<%=item_type_name%>_logs" sub_list_data_name="activity_log__<%=item_type_name.pluralize%>" filter_attr='extra_log_type' filter_name="human_name" filter_all=true order='asc' all_active=true layout=true}}
+          <div data-sort-desc="<%= data_action_when.hyphenate %>" <%= data_action_when.hyphenate %>="" class="new-blocks-container">
+            <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-primary-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-primary-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form">
+            </div>
+            <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-blank-log-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>
+            <% option_configs.each do |c| %>
+              <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>
+            <% end %>
+          </div>
+          {{#each <%=full_name.pluralize%>}}
+            {{#if extra_log_type}}
+            <% all_option_configs.each do |c| %>
+              {{#is extra_log_type '===' '<%=c.name%>'}}
+                {{> common_template_result name='<%= full_name %>_<%=c.name%>' result_data=this _created=@index}}
+              {{/is}}
+            <% end %>
+
+            {{/if}}
+          {{/each}}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</script>
+
+<script>
+  <%
+    eltcn = []
+    option_configs.each do |elt|
+      eltcn << {name: elt.name}
+    end
+  %>
+  _fpa.activity_logs.generate_postprocessors('<%=item_type_name%>', <%= eltcn.to_json.html_safe %>)
+</script>
+
+<% end %>

@@ -1,0 +1,188 @@
+.activity-logs-item-block {
+  padding: 0em;
+}
+
+.activity-logs-generic-block {
+  margin-top: 0.8em;
+  // margin-bottom: 1.4em;
+}
+
+.activity-logs-header,
+.activity-log-list {
+  padding: 1em;
+}
+
+.activity-logs-header {
+  box-shadow: silver 0px 2px 4px;
+  background-color: rgb(242, 242, 242);
+}
+
+.activity-logs-header {
+  .action-buttons {
+    margin-top: 0em;
+    margin-bottom: -0.4em;
+    line-height: 2.4;
+  }
+}
+
+.list-group-item:first-child,
+.tracker-chron-results thead,
+.tracker-tree-results thead,
+.activity-logs-header {
+  background-color: #eeeeee;
+}
+
+.list-group-item {
+  p:last-child {
+    margin: 0 0 0 0;
+  }
+}
+
+span.related-tracker-collapser .list-group-item:first-child {
+  background-color: white;
+}
+
+.activity-log-sub-list {
+  padding: 14px 1em;
+
+  .new-block {
+    margin-top: 12px;
+  }
+
+  .panel.selected-item .list-group {
+    border-color: #aaa;
+  }
+
+  .panel .list-group .list-group-item {
+    color: #aaa;
+  }
+  .panel .list-group .list-group-item.sub-list-data {
+    font-weight: bold;
+    color: black;
+  }
+
+  .sub-list-item {
+    box-shadow: none;
+  }
+
+  .sub-list-item .list-group {
+    box-shadow: 0 4px 4px 0px #d6d6d6;
+    border-radius: 4px;
+    border: 1px solid rgb(221, 221, 221);
+  }
+}
+
+.activity-logs-item-block {
+  &.in,
+  &.ajax-loading {
+    margin-bottom: 8px;
+  }
+}
+
+.activity-log-initial-action {
+  display: none;
+}
+.selected-item {
+  .activity-log-initial-action {
+    text-align: center;
+    display: block;
+  }
+}
+
+.activity-log-list input[type="date"],
+.activity-log-list input[type="datepicker"] {
+  max-width: 7em;
+}
+
+a.related-tracker-histories-link {
+  .caret {
+    display: none;
+  }
+
+  &.collapsed {
+    .caret {
+      display: inline-block;
+    }
+  }
+}
+
+.model-reference-result {
+  .tracker-histories-caption {
+    display: none;
+  }
+}
+
+.prevent-edit {
+  .model-reference-result {
+    .edit-entity {
+      display: none;
+    }
+  }
+}
+
+.model-reference-result,
+.model-reference-result form.form-inline,
+.model-reference-list form.form-inline {
+  min-height: 0 !important;
+}
+
+.model-reference-result .in-item-model-references {
+  display: none;
+}
+
+.al-create-actions {
+  line-height: 2.6em;
+}
+
+.model-reference-result,
+.model-edit-form {
+  .edit-form-header h4,
+  .object-results-header h4,
+  .list-group-item.record-meta {
+    display: none;
+  }
+}
+
+// Added to avoid a blank block in drop down model reference results
+.model-reference-result .object-results-header.header-for-gen-model {
+  display: none;
+}
+
+.model-reference-result .is-activity-log .list-group-item.record-meta {
+  display: block;
+}
+
+.model-reference-result.embedded-item,
+.model-edit-form.embedded-item {
+  .edit-form-header {
+    display: none;
+  }
+}
+
+.hidden-item-list-panel .sr-item-block {
+  display: none;
+}
+
+.activity-logs-generic-block {
+  .common-template-item {
+    margin-bottom: 40px;
+  }
+
+  & > .panel-default {
+    border-radius: 0;
+  }
+}
+
+.wide-block {
+  width: 75%;
+  margin-left: 12.5%;
+}
+
+.btn.btn-primary[disabled]:link,
+.btn.add-item-button[disabled]:link {
+  background-color: rgb(63, 101, 139);
+}
+
+a.view-item:hover {
+  cursor: pointer;
+}

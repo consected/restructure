@@ -1,0 +1,270 @@
+<script id="field_result_class" type="text/x-handlebars-template" class="hidden handlebars-partial">list-group-item result-field-container {{hyphenate full_name}}-{{key}} {{#is key "in" caption_before_keys_without_keep_label}}has-caption-before{{/is}} {{#is key external_id_attr}}is_external_id_item{{/is}}</script>
+
+<script id="common_template_result_field" type="text/x-handlebars-template" class="hidden handlebars-partial">
+
+  {{#is key 'in' caption_before_keys}}
+  {{#if (fpa_state_item 'dialog_before' (underscore name) vdef_version key)}}
+    {{{fpa_state_item 'dialog_before' (underscore name) vdef_version key}}}
+  {{else if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'show_caption')}}
+  <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}">
+    {{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'show_caption'}}}
+  </li>
+  {{else if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption')}}
+  <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}">
+    {{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption'}}}
+  </li>
+  {{/if}}
+  {{/is}}
+  {{#is key "notes"}}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) template_config=template_config}}
+  {{else is key "description"}}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) template_config=template_config}}
+  {{else is key "message"}}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) template_config=template_config }}
+  {{else is key 'includes' "_notes"}}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=name template_config=template_config }}
+  {{else is key 'includes' "_description"}}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=name template_config=template_config }}
+  {{else is key 'includes' "_details$"}}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=name template_config=template_config }}
+
+
+
+  {{else if (get result_data._general_selections key this_value 'name')}}
+
+    <li class="{{> field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+
+  {{else is key "data" }}
+    <li class="{{> field_result_class}}"><small>
+    {{#if result_data.rec_type}}{{result_data.rec_type}}{{else}}{{humanize key}}{{/if}}
+    </small> <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+  {{else is key 'includes' '_master_id'}}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+    <a href="/masters/{{this_value}}" target="_new" title="open link in new tab">{{this_value}}</a>
+    </span></strong></li>
+  {{else is key 'includes' '_url'}}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+    <a href="{{this_value}}" target="_new" title="open link in new tab">{{this_value}}</a>
+    </span></strong></li>
+  {{else is key 'includes' '_link'}}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+    <a href="{{this_value}}" target="_new" title="open link in new tab">{{this_value}}</a>
+    </span></strong></li>
+
+
+  {{else is key 'includes' 'embedded_report_'}}
+
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+      <a href="/reports/{{replace key 'embedded_report_' ''}}?embed=true&search_attrs[list_id]={{result_data.id}}" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="btn btn-sm btn-default glyphicon glyphicon-list" type="button" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true"></a>
+    </span></strong></li>
+  {{else is key 'includes' '_rank' }}
+    {{#if hide_rank_badge }}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="label label-default">{{this_value}}</span></strong></li>
+    {{/if}}
+  {{else is key '===' 'rank' }}
+    {{#if hide_rank_badge }}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="label label-default">{{this_value}}</span></strong></li>
+    {{/if}}
+  {{else is key "protocol_id"}}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='protocol' }} <strong>{{pretty_string result_data.protocol_name return_string="true" capitalize="true"}}</strong></li>
+  {{else is key "sub_process_id"}}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='status' }} <strong>{{pretty_string result_data.sub_process_name return_string="true" capitalize="true"}}</strong></li>
+  {{else is key "protocol_event_id"}}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='method' }} <strong>{{pretty_string result_data.protocol_event_name return_string="true" capitalize="true"}}</strong></li>
+  {{else is key "tracker_history_id"}}
+  {{#unless hide_tracker_panel}}
+    {{#if result_data.tracker_histories}}
+    <li class="list-group-item {{hyphenate full_name}}-tracker-histories-caption tracker-histories-caption is-minor-heading">
+      <a class="collapsed related-tracker-histories-link" data-toggle="collapse" href="#{{hyphenate full_name}}-tracker-histories-{{result_data.master_id}}-{{result_data.id}}" aria-expanded="false" title="Related tracker items">Related tracker items <span class="caret"></span></a>
+    </li>
+    {{/if}}
+    <span id="{{hyphenate full_name}}-tracker-histories-{{result_data.master_id}}-{{result_data.id}}" class="collapse related-tracker-collapser">
+    {{#each result_data.tracker_histories}}
+      <li class="list-group-item {{hyphenate ../full_name}}-tracker-histories in-item-tracker-histories is-full-width">
+        <span class="small">
+           <a href="/masters/{{../result_data.master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{../result_data.master_id}}-inner" data-template="tracker-chron-result-template" data-result-callback="form_utils.highlight_tracker_history_item" data-tracker-history-item="#tracker-{{../result_data.master_id}}-{{id}}" data-toggle="scrollto-target" data-target="#trackers-{{../result_data.master_id}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a>
+           {{pretty_string event_date}}
+           {{protocol_name}} / {{sub_process_name}} / {{protocol_event_name}}
+        </span>
+      </li>
+    {{/each}}
+    </span>
+    {{#if implementation_class_name }}
+    {{#unless ../prevent_edit}}
+    <div class="results-caption-before {{hyphenate full_name}}-add-linked-tracker add-linked-tracker">
+      <div class="panel panel-default panel-body">
+        <p class="add-tracker-label">Add a specific tracker status record related to this_value item:</p>
+        <p class="text-center">
+        <a href="/masters/{{result_data.master_id}}/trackers/new?record_type=activity_log/{{implementation_class_name}}&record_id={{result_data.id}}&tracker[protocol_id]={{result_data.protocol_id}}&tracker[event_date]={{result_data.called_when}}" data-toggle="scrollto-result" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{result_data.master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a>
+        </p>
+      </div>
+    </div>
+    {{/unless}}
+    {{/if}}
+  {{/unless}}
+  {{else is key 'includes' '^tag_select_' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }}
+      {{>tag_select_container field_key=key tag_selects=this_value nothing_selected_text="nothing selected"}}
+    </li>
+  {{else is key 'includes' '^select_record_from_' }}
+    <li class="{{> field_result_class}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+  {{else is key 'includes' '^select_' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+  {{else is key 'includes' '_selection$' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_selection$' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+  {{else is key 'includes' '^multi_select_' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^multi_select_' }}
+      {{#* inline "iterateMultiSelect"}}
+        {{#each multi_vals}}
+          {{#is this '!in' "0,false,no" }}
+          <span data-field-array-el-val="{{this}}">{{#if (get ../result_data._general_selections ../field_key @index 'name')}}{{get ../result_data._general_selections ../field_key @index 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</span>
+          <br/>
+          {{/is}}
+        {{/each}}
+      {{/inline}}
+      <strong>
+        {{>iterateMultiSelect field_key=key multi_vals=this_value result_data=result_data}}
+      </strong>
+  </li>
+  {{else is key 'includes' '_attribs$' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_attribs$' }}
+      {{#* inline "iterateMultiSelect"}}
+        {{#each multi_vals}}
+          {{#is this '!in' "0,false,no" }}
+          <span data-field-array-el-val="{{this}}">{{#if (get ../result_data._general_selections ../field_key @index 'name')}}{{get ../result_data._general_selections ../field_key @index 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</span>
+          <br/>
+          {{/is}}
+        {{/each}}
+      {{/inline}}
+      <strong>
+        {{>iterateMultiSelect field_key=key multi_vals=this_value result_data=result_data}}
+      </strong>
+  </li>
+  {{else is key 'includes' '_blank_yes_no_dont_know' }}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_blank_yes_no_dont_know$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+  {{else is key 'includes' '_yes_no_dont_know' }}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_yes_no_dont_know$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+  {{else is key 'includes' '_blank_yes_no' }}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_blank_yes_no$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+  {{else is key 'includes' '_yes_no' }}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_yes_no$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+  {{else is key 'includes' '_no_yes' }}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_no_yes$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+  {{else is key 'includes' '_check$' }}
+      <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_check$' }} <strong>{{#is this_value true}}<i class="glyphicon glyphicon-ok"></i>{{/is}}</strong></li>
+  {{else is key 'includes' '_time$' }}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{local_time this_value}}</strong></li>
+  {{else is key 'includes' '_notes' }}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_notes$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+  {{else is key 'includes' '_description' }}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+  {{else is key 'includes' '^fixed_' }}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^fixed_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+  {{else is key 'includes' '^placeholder_' }}
+    <li class="{{> field_result_class}} hidden placeholder-field-item">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^placeholder_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+  {{else is key 'e_signed_by'}}
+    <li class="{{> field_result_class}}">
+      {{#with result_data}}
+      {{#is e_signed_status 'signed'}}
+      {{> field_label labels=(concat 'labels_' ../key) }} <strong>{{pretty_string ../this_value return_string="true" capitalize="true"}}</strong>
+      {{else}}
+      <div class="text-center">
+        <a data-toggle="scrollto-result" data-target="#{{hyphenate ../name}}-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="{{run_template ../edit_button_href}}" data-remote="true" data-result-target="">Review and Sign</a>
+      </div>
+      {{/is}}
+      {{/with}}
+    </li>
+  {{else is key 'includes' '^e_signed_' }}
+    {{#with result_data}}
+    {{> e_signature_parts name=(pluralize ../name) value=../this_value }}
+    {{/with}}
+  {{else is this_value 'typeof' 'object'}}
+      <li class="list-group-item typeof-object-field"><p>{{humanize key}}
+        {{#is this_value.length 0}}
+        {{else is this_value.[0] 'typeof' 'string'}}
+        {{else}}
+        <a data-target="#view-object-{{result_data.master_id}}-{{result_data.id}}-{{underscore key}}" data-toggle="collapse" data-toggle-caret="true" class="glyphicon glyphicon-triangle-bottom view-object-caret"></a>
+        {{/is}}
+      </p>
+      {{#is this_value.length 0}}
+      {{else is this_value.[0] 'typeof' 'string'}}
+      <ul class="array-results">
+        {{#each this_value}}
+        <li class="array-result">{{pretty_string this return_string="true" capitalize="false"}}</li>
+        {{/each}}
+      </ul>
+      {{else}}
+      <ul class="view-object collapse" id="view-object-{{result_data.master_id}}-{{result_data.id}}-{{underscore key}}" aria-expanded="false">
+      {{#each this_value}}
+      {{#with ../template_config}}
+      {{> common_template_result_field this_value=../this key=@key name=name template_config=this result_data=../result_data show_raw_text=true}}
+      {{/with}}
+      {{/each}}
+      </ul>
+      {{/is}}
+
+      </li>
+  {{else is this_value '===' null}}
+  {{else}}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (fpa_state_item 'template_config' (underscore name) 'field_options' vdef_version key 'no_downcase') }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+  {{/is}}
+  {{#if show_item_type_flags_after}}
+  {{#is key item_flags_after}}
+    <li class="list-group-item is-full-width {{hyphenate name}}-item-flags">
+
+      {{>item_flag_container item_type=../full_name master_id=result_data.master_id id=result_data.id readonlyview=../item_flags_readonly item_flags=result_data.item_flags}}
+
+    </li>
+  {{/is}}
+  {{/if}}
+
+</script>
+
+<script id="common_template_result_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
+{{#is 'all_fields' 'in' template_config.caption_before_keys}}
+  <li class="list-group-item caption-before results-caption-before {{hyphenate full_name}}-all_fields all-fields-caption">{{{fpa_state_item 'caption_before' (underscore name) vdef_version 'all_fields' 'show_caption'}}}</li>
+{{/is}}
+
+{{#if template_config.item_list.length}}
+{{#filter result_data (join template_config.item_list ',') }}
+  {{#with (fpa_state_item 'template_config' (underscore ../name) ../vdef_version)}}
+  {{> common_template_result_field this_value=../this key=@key name=../../name template_config=this result_data=../../result_data}}
+  {{/with}}
+
+{{/filter}}
+{{/if}}
+</script>
+
+
+
+<script id="tag_select_container-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <div id="tag-selects-{{master_id}}-{{item_type}}-{{id}}" class="tag-selects-block">
+  <div class="" id="tag-select-{{master_id}}-{{item_type}}-{{id}}-" >
+  {{>tag_selects_result field_key=field_key}}
+  </div>
+  </div>
+</script>
+
+
+<script id="tag_selects_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <div class="">
+    <select multiple="true" disabled="disabled" class="form-control for-tag-select" data-nothing-selected-text="{{nothing_selected_text}}">
+    {{#each tag_selects}}
+      {{#is this 'in' "0,false,no" }}
+      {{else is @key 'typeof' 'number'}}
+        {{>tag_select_result this_value_id=this this_value_name=this result_data=../result_data field_key=../field_key}}
+      {{else}}
+        {{>tag_select_result this_value_id=@key this_value_name=this result_data=../result_data field_key=../field_key}}
+      {{/is}}
+    {{else}}
+      <span class="no-tag-selects">(nothing selected)</span>
+    {{/each}}
+    </select>
+  </div>
+</script>
+
+<script id="tag_select_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+   <option selected="true" class="tag-select" value="{{this_value_id}}">
+     {{#if (get result_data._general_selections field_key this_value_id 'name')}}{{get result_data._general_selections field_key this_value_id 'name'}}{{else}}{{pretty_string this_value_name return_string="true" capitalize="false"}}{{/if}}
+   </option>
+</script>

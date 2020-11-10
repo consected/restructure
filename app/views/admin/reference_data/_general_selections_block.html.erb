@@ -1,0 +1,30 @@
+<div class="ref-data-general-selections">
+  <p><a class="glyphicon glyphicon-info-sign" href="#gs-help" class="collapsed" data-toggle="collapse"></a></p>
+  <div class="help-block collapse" id="gs-help">
+    <p>
+      Use a general select lookup directly against a table, such as addresses, player_contacts, player_infos. For example:
+    </p>
+    <p><code>
+        select * from addresses where source = 'nflpa'
+      </code></p>
+    <p>When using the attributes definer to create a search form, select the <strong>type</strong> 'general selection', then pick an appropriate item type from the <strong>filter dropdown</strong>. The appropriate set of selections (address sources for example) will be automatically presented in a drop down or multiple selection field, based on the selection for <strong>single or multiple values</strong>.</p>
+    <p>Reference the user selection in SQL using the name of the field, prefixed with a colon. For example, when the attribute <strong>name</strong> <code>must_have_source</code> is entered, use:</p>
+    <p><code>
+        select * from addresses where source = :must_have_source
+      </code></p>
+
+  </div>
+  <ul id="gs-list" style=" overflow: auto; background-color: white;">
+
+    <% Classification::GeneralSelection.item_types.each do |p| %>
+    <li id="gs-<%=p%>">
+      <a href="#gsblock-<%=p%>" data-toggle="collapse" class="collapsed" style="color: <%= p ? '#aaa' : 'auto' %>"><%=p %></a>
+    </li>
+    <ul id="gsblock-<%=p%>" class="collapse">
+      <% Classification::GeneralSelection.where(item_type: p).each do |gs| %>
+      <li style="color: <%= gs.disabled ? '#aaa' : 'auto' %>" data-gs-item-type="<%=p%>" id="general_selection-<%=gs.id%>"><%=gs.value%> - <%= gs.name %></li>
+      <% end %>
+    </ul>
+    <% end %>
+  </ul>
+</div>
