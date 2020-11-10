@@ -17,7 +17,7 @@ for FROM in app bin config db/migrate db/seeds db/table_generators db/app_migrat
   lib public/fonts public/app_specific/data_requests script spec \
   vendor/assets/images vendor/assets/javascripts vendor/assets/stylesheets; do
   mkdir -p ${DEST}/${FROM}
-  rsync -av ${FROM}/ ${DEST}/${FROM}/
+  rsync -av --update ${FROM}/ ${DEST}/${FROM}/
 done
 
 mkdir -p ${DEST}/docs
