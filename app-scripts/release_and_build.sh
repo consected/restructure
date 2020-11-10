@@ -55,6 +55,8 @@ else
   echo "Build successful"
 fi
 
-git fetch origin new-master
+git fetch origin
+git checkout new-master
+git checkout develop
 git merge new-master
 echo "Built and setup assets: ${TESTVER}"
