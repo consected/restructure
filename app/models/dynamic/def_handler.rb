@@ -440,6 +440,10 @@ module Dynamic
     # The model class that can be instantiated
     def implementation_class
       full_implementation_class_name.ns_constantize
+    rescue StandardError => e
+      msg = "Failed to get the implementation_class for #{full_implementation_class_name}: #{e}"
+      Rails.logger.warn msg
+      raise e, msg
     end
 
     # Allow definitions to not be associated with a master record,

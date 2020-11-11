@@ -119,6 +119,7 @@ _fpa.form_utils = {
       }
 
       window.setTimeout(function () {
+        item.trigger('click.rails');
         item.click();
       }, p);
     });
