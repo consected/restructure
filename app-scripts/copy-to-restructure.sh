@@ -34,7 +34,7 @@ for FROM in \
   public/.gitignore public/*.html public/favicon.* public/robots.txt \
   public/app_specific/app_data_requests.css \
   .gitignore .rspec_parallel .rubocop.yml .ruby-version .solargraph.yml config.ru \
-  Gemfile* Rakefile version.txt vendor/assets/config.json; do
+  Gemfile* Rakefile vendor/assets/config.json; do
   cp -u ${FROM} ${DEST}/${FROM}
 done
 
