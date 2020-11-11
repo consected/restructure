@@ -28,6 +28,7 @@ for FROM in \
   docs/filestore-setup.md \
   db/schema.rb db/seeds.rb db/structure.sql db/dumps/development-data/data-only-dump.sql \
   app-scripts/add_admin.sh app-scripts/api-get-container-id.sh app-scripts/parallel_test.sh \
+  app-scripts/release_and_build.sh \
   app-scripts/setup_filestore_app.sh app-scripts/setup-dev-filestore.sh app-scripts/upload-to-filestore.sh \
   app-scripts/upversion.rb app-scripts/validate_file_signature.sh \
   app-scripts/create-demo-db.sh app-scripts/create-test-db.sh app-scripts/drop-test-db.sh \
