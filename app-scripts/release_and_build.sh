@@ -55,6 +55,7 @@ else
   echo "Build successful"
 fi
 
+cd ${CURRDIR}
 git fetch origin
 git checkout new-master
 git pull
