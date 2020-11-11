@@ -18,6 +18,7 @@ version has occurred.
 The **Unreleased** section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
 ## Unreleased
+## [7.3.163] - 2020-11-11
 ## [7.3.162] - 2020-11-11
 ## [7.3.161] - 2020-11-11
 ## [7.3.160] - 2020-11-10
