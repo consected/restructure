@@ -140,10 +140,16 @@ module MasterHandler
   end
 
   def edit_form_extras
-    cb = object_instance.class.default_options.caption_before if object_instance.class.default_options
+    dopt = object_instance.class.default_options
+    if dopt
+      cb = dopt.caption_before
+      l = dopt.labels
+    end
+
     {
       caption: object_instance.human_name,
-      caption_before: cb
+      caption_before: cb,
+      labels: l
     }
   end
 

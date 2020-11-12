@@ -72,6 +72,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
       extras_caption_before = @option_type_config.caption_before
       sa = @option_type_config.save_action
       vo = @option_type_config.view_options || {}
+      l = @option_type_config.labels || {}
     end
     if @item
       caption ||= @item.data
@@ -95,6 +96,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
     {
       caption: caption,
       caption_before: cb,
+      labels: l,
       view_options: vo,
       item_list: item_list,
       item_flags_after: :notes,
@@ -259,7 +261,13 @@ class ActivityLog::ActivityLogsController < UserBaseController
     end
 
     @extra_log_type_name = etp
-    @option_type_config = @implementation_class.definition.option_type_config_for(etp)
+    # Get the options that were current when the form was originally created, or the current
+    # options if this is a new instance
+    @option_type_config = if object_instance.persisted?
+                            object_instance.option_type_config
+                          else
+                            @implementation_class.definition.option_type_config_for(etp)
+                          end
     object_instance.extra_log_type = @extra_log_type_name unless object_instance.persisted?
   end
 
