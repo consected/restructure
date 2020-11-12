@@ -56,6 +56,14 @@ class Settings
   SearchResultsLimit = ENV['FPHS_RESULT_LIMIT']
 
   olat = ENV['FPHS_LOAD_APP_TYPES']
+  prev_olat = Rails.cache.read('Settings::FPHS_LOAD_APP_TYPES')
+  # Check if the environment variable requested different app types in dev.
+  # If so, clean the cache to avoid unexpected errors
+  if Rails.env.development? && olat != prev_olat
+    Rails.cache.clear
+    Rails.cache.write('Settings::FPHS_LOAD_APP_TYPES', olat)
+  end
+
   olat = if olat.blank?
            nil
          else
