@@ -7,9 +7,7 @@
     "admin_id": 15,
     "created_at": "2019-02-12T09:12:10.514Z",
     "updated_at": "2019-02-12T09:12:10.514Z",
-    "app_configurations": [
-
-    ],
+    "app_configurations": [],
     "user_access_controls": [
       {
         "id": 2135,
@@ -189,21 +187,6 @@
         "role_name": null,
         "created_at": "2019-02-12T09:12:10.664Z",
         "updated_at": "2019-02-12T09:12:10.664Z",
-        "user_email": null
-      },
-      {
-        "id": 2147,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__ipa_recruitment_ranks",
-        "options": null,
-        "access": null,
-        "disabled": true,
-        "admin_id": 15,
-        "app_type_id": 30,
-        "role_name": null,
-        "created_at": "2019-02-12T09:12:10.674Z",
-        "updated_at": "2019-02-12T09:12:10.674Z",
         "user_email": null
       },
       {
@@ -1167,21 +1150,6 @@
         "user_email": null
       },
       {
-        "id": 2212,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__ipa_recruitments",
-        "options": null,
-        "access": null,
-        "disabled": true,
-        "admin_id": 15,
-        "app_type_id": 30,
-        "role_name": null,
-        "created_at": "2019-02-12T09:12:11.360Z",
-        "updated_at": "2019-02-12T09:12:11.360Z",
-        "user_email": null
-      },
-      {
         "id": 2213,
         "user_id": null,
         "resource_type": "table",
@@ -1361,12 +1329,8 @@
         "user_email": null
       }
     ],
-    "associated_external_identifiers": [
-
-    ],
-    "associated_reports": [
-
-    ],
+    "associated_external_identifiers": [],
+    "associated_reports": [],
     "associated_general_selections": [
       {
         "id": 29,
@@ -1692,9 +1656,7 @@
         "user_email": null
       }
     ],
-    "page_layouts": [
-
-    ],
+    "page_layouts": [],
     "user_roles": [
       {
         "id": 46,
@@ -1719,21 +1681,11 @@
         "user_email": "phil_ayres@test.com"
       }
     ],
-    "associated_message_templates": [
-
-    ],
-    "associated_protocols": [
-
-    ],
-    "associated_sub_processes": [
-
-    ],
-    "associated_protocol_events": [
-
-    ],
-    "nfs_store_filters": [
-
-    ],
+    "associated_message_templates": [],
+    "associated_protocols": [],
+    "associated_sub_processes": [],
+    "associated_protocol_events": [],
+    "nfs_store_filters": [],
     "user_email": null
   }
 }
