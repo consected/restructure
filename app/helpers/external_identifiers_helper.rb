@@ -1,0 +1,2 @@
+module ExternalIdentifiersHelper
+end

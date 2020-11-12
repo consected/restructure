@@ -1,0 +1,23 @@
+.import-action-container{
+  margin: 30px 30px 0 30px;
+}
+
+
+.import-form-actions {
+  margin: 12px 30px;
+}
+
+
+.bottom-tab {
+  background-color: #E6E6E6;
+  padding: 8px;
+  color: #333;
+
+  &.show-blank-rows {
+    display: none;
+  }
+
+  &.hide-blank-rows {
+    display: inline-block;
+  }
+}

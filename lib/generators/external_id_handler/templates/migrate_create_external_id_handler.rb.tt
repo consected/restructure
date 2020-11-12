@@ -1,0 +1,67 @@
+class Create<%=class_name.pluralize%> < ActiveRecord::Migration
+
+  def change
+    reversible do |dir|
+      dir.up do
+
+
+        create_table :<%=plural_name%> do |t|
+          t.references :master, index: true, foreign_key: true
+          t.integer :external_id, limit: 8
+          t.references :user, index: true, foreign_key: true
+          t.timestamps null: false      
+        end
+
+        create_table :<%=singular_name%>_history do |t|
+          t.references :<%=singular_name%>, index: true, foreign_key: true
+          t.references :master, index: true, foreign_key: true
+          t.integer :external_id, limit: 8
+          t.references :user, index: true, foreign_key: true
+          t.timestamps null: false      
+        end
+
+        execute <<EOF
+
+CREATE FUNCTION log_<%=singular_name%>_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO <%=singular_name%>_history
+            (
+                    <%=singular_name%>_id,                    
+                    external_id,
+                    user_id,
+                    created_at,
+                    updated_at
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.external_id,
+                NEW.user_id,
+                NEW.created_at,
+                NEW.updated_at 
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+CREATE TRIGGER <%=singular_name%>_history_insert AFTER INSERT ON <%=plural_name%> FOR EACH ROW EXECUTE PROCEDURE log_<%=singular_name%>_update();
+CREATE TRIGGER <%=singular_name%>_history_update AFTER UPDATE ON <%=plural_name%> FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_<%=singular_name%>_update();
+
+EOF
+
+      end
+      
+      dir.down do
+          drop_table :<%=singular_name%>_history           
+          drop_table :<%=plural_name%> 
+          
+          execute <<EOF
+
+              DROP FUNCTION IF EXISTS log_<%=singular_name%>_update() CASCADE;
+EOF
+      end
+    end
+
+  end
+end

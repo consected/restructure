@@ -1,0 +1,263 @@
+<div class="collapse in" id="master-search-advanced-form">
+<%
+# Note the use of
+#   child_index: 0
+# on every fields_for helper call, to ensure that separated blocks referencing the same model are
+# not treated as separate objects
+# When a fields_for helper is used for the same symbol multiple times within a form
+# (typically to allow for presentation of fields from the same model across separated blocks)
+# the params return something like "model_atts" => {"0"=>{...}, "1"=>{...}, "2"=>{...}}
+# The child_index ensure they are merged down into "model_atts" => {"0"=>{..., ..., ...}}
+
+# note that the authenticity token fields are explicitly added to this form to allow it to work in both "remote" ajax mode and for regular
+# page post, enabling CSV download and JSON data modes to work
+
+%>
+<%= form_for @master, method: :post, url: '/masters/', include_id: false, remote: true, html: {id: 'advanced_search_master', class: 'search_master form-formatted'} do |f_main| %>
+    <%= tag(:input, :type => "hidden", :name => request_forgery_protection_token.to_s, :value => form_authenticity_token) %>
+  <div class="row">
+
+    <%= f_main.fields_for :player_infos, child_index: 0 do |f| %>
+      <div class="form-group col-sm-2">
+        <%= f.label :first_name, 'data-add-icon' => 'info-sign', title: 'search for first names starting with this value' %>
+        <%= f.text_field :first_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :middle, 'data-add-icon' => 'info-sign', title: 'search for middle names starting with this value' %>
+        <%= f.text_field :middle_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= f.label :last_name %>
+        <%= f.text_field :last_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :nick_name, 'data-add-icon' => 'info-sign', title: 'search for nick names starting with this value' %>
+        <%= f.text_field :nick_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= f.label :birth_date %>
+        <%= f.date_field :birth_date, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= f.label :death_date %>
+        <%= f.date_field :death_date, class: 'form-control'  %>
+      </div>
+
+      <div class="form-group col-sm-3">
+        <%= f.label :college %>
+        <%= f.text_field :college, class: 'form-control advanced-college-input typeahead', 'data-next-field' => '#master_player_infos_attributes_0_start_year'  %>
+      </div>
+
+      <div class="form-group col-sm-2">
+        <%= f.label :start_year %>
+        <%= f.number_field :start_year, in: Settings::StartYearRange, class: 'form-control year_field', pattern: Settings::YearFieldPattern   %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :end_year %>
+        <%= f.number_field :end_year, in: Settings::EndYearRange, class: 'form-control year_field', pattern: Settings::YearFieldPattern  %>
+      </div>
+    <% end %>
+
+      <div class="col-sm-2 text-right">
+          <br/>
+          <p style="font-size: 18px;">
+            <a href="#" class="clear-fields glyphicon glyphicon-erase" title="clear fields"></a>
+          </p>
+
+      </div>
+  </div>
+
+  <div class="row" id="pro-info-search" >
+    <%= f_main.fields_for :pro_infos, child_index: 0 do |f| %>
+      <div class="form-group col-sm-2">
+        <%= f.label :first_name, 'data-add-icon' => 'info-sign', title: 'search for first names starting with this value' %>
+        <%= f.text_field :first_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :middle, 'data-add-icon' => 'info-sign', title: 'search for middle names starting with this value' %>
+        <%= f.text_field :middle_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= f.label :last_name %>
+        <%= f.text_field :last_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :nick_name, 'data-add-icon' => 'info-sign', title: 'search for nick names starting with this value' %>
+        <%= f.text_field :nick_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= f.label :birth_date %>
+        <%= f.date_field :birth_date, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= f.label :death_date %>
+        <%= f.date_field :death_date, class: 'form-control'  %>
+      </div>
+
+      <div class="form-group col-sm-3">
+        <%= f.label :college %>
+        <%= f.text_field :college, class: 'form-control advanced-college-input typeahead', 'data-next-field' => '#master_pro_infos_attributes_0_start_year'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :start_year %>
+        <%= f.number_field :start_year, in: Settings::StartYearRange, class: 'form-control after-college-input year_field', pattern: Settings::YearFieldPattern   %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :end_year %>
+        <%= f.number_field :end_year, in: Settings::EndYearRange, class: 'form-control year_field', pattern: Settings::YearFieldPattern  %>
+      </div>
+
+    <% end %>
+  </div>
+
+  <div class="row">
+    <%= f_main.fields_for :addresses, child_index: 0 do |f| %>
+      <div class="form-group col-sm-2">
+        <%= f.label :street_address, 'data-add-icon' => 'info-sign', title: 'search for street address starting with this value' %>
+        <%= f.text_field :street, class: 'form-control' %>
+      </div>
+
+      <div class="form-group col-sm-2">
+        <%= f.label :city %>
+        <%= f.text_field :city, class: 'form-control' %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :state %>
+        <%= f.collection_select :state, state_hash, :first, :last, {include_blank: '-select-'}, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :zip , 'data-add-icon' => 'info-sign', title: 'search for 5 digit zip'%>
+        <%= f.text_field :zip, zip_field_props(class: 'form-control') %>
+      </div>
+    <% end %>
+
+    <%= f_main.fields_for :player_contacts, child_index: 0 do |f| %>
+      <div class="form-group col-sm-3">
+          <%= f.label :phone_or_email, 'data-add-icon' => 'info-sign', title: 'search for phone or email starting with this value (ignores non-alphanumeric characters)' %>
+          <%= f.text_field :data, class: 'form-control' %>
+      </div>
+    <% end %>
+
+    <%= f_main.fields_for :player_infos, child_index: 0 do |f| %>
+      <div class="form-group col-sm-3">
+        <%= f.label :rank %>
+        <%= f.select :rank, player_info_rank_array_pair, {include_blank: "-select-"}, class: 'form-control' %>
+      </div>
+    <% end %>
+
+    <%= f_main.fields_for :scantrons, child_index: 0 do |f| %>
+      <div class="form-group col-sm-2">
+        <% if defined? Scantron %>
+        <%= f.label :scantron_id %>
+        <%= f.number_field :scantron_id, class: 'form-control', in: Scantron.external_id_range,  pattern: Scantron.external_id_edit_pattern %>
+        <% end %>
+      </div>
+    <% end %>
+    <%= f_main.fields_for :player_infos, child_index: 0 do |f| %>
+      <div class="form-group col-sm-6 ">
+        <%= f.label :notes, 'data-add-icon' => 'info-sign', title: 'search for notes containing word or phrase' %>
+        <%= f.text_field :notes, class: 'form-control' %>
+      </div>
+
+    <% end %>
+    </div>
+
+    <div class="row">
+    <%= f_main.fields_for :trackers, child_index: 0 do |f| %>
+      <div class="form-group col-sm-3  tracker-search-field">
+        <%= f.label "Protocol / Category" %>
+        <%= f.select :protocol_id, protocol_array_without_updates, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_sub_process_id, #master_not_trackers_attributes_0_sub_process_id, #master_tracker_histories_attributes_0_sub_process_id, #master_not_tracker_histories_attributes_0_sub_process_id", class: 'form-control'}%>
+      </div>
+      <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
+          <%= f.label 'has current status + method', class: 'nowrap', 'data-add-icon' => 'info-sign', title: 'The status + method is the current tracker item in the selected protocol' %>
+          <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_protocol_event_id", class: 'form-control'} %>
+      </div>
+      <div class="form-group col-sm-3 tracker-event tracker-search-field">
+          <%= f.label 'has method', style: "visibility: hidden;"%>
+          <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+      </div>
+
+    <% end %>
+    <%= f_main.fields_for :tracker_histories, child_index: 0 do |f| %>
+      <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
+          <%= f.label 'current or previous status + method', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method appears at any time in the tracker item in the selected protocol' %>
+          <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_tracker_histories_attributes_0_protocol_event_id", class: 'form-control'} %>
+      </div>
+      <div class="form-group col-sm-3 tracker-event tracker-search-field tracker-right">
+          <%= f.label 'had method', style: "visibility: hidden;"%>
+          <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+      </div>
+    <% end %>
+    <%= f_main.fields_for :player_infos, child_index: 0 do |f| %>
+
+      <div class="form-group col-sm-2">
+        <%= f.label :older_than, 'data-add-icon' => 'info-sign', title: 'based on player info date of birth' %>
+        <%= f.number_field :older_than, in: Settings::AgeRange, class: 'form-control', pattern: Settings::AgePattern  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :younger_than, 'data-add-icon' => 'info-sign', title: 'based on player info date of birth' %>
+        <%= f.number_field :younger_than, in: Settings::AgeRange, class: 'form-control', pattern: Settings::AgePattern  %>
+      </div>
+    <% end %>
+    <%= f_main.fields_for :pro_infos, child_index: 0 do |f| %>
+      <div class="form-group col-sm-2">
+        <%= f.label 'Career years >', 'data-add-icon' => 'info-sign', title: 'based on pro info start and end years'%>
+        <%= f.number_field :more_than_career_years, in: Settings::CareerYearsRange, class: 'form-control', pattern: Settings::AgePattern   %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label 'Career years <', 'data-add-icon' => 'info-sign', title: 'based on pro info start and end years'%>
+        <%= f.number_field :less_than_career_years, in: Settings::CareerYearsRange, class: 'form-control', pattern: Settings::AgePattern   %>
+      </div>
+    <% end %>
+
+    </div>
+    <div class="row">
+        <div class="form-group col-sm-3 tracker-not-info tracker-search-field">
+        </div>
+    <%= f_main.fields_for :not_trackers, child_index: 0 do |f| %>
+      <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
+          <%= f.label 'Not current status + method ', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method is not the current tracker item in the selected protocol' %>
+          <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_not_trackers_attributes_0_protocol_event_id", "data-only-for" => "#master_not_trackers_attributes_0_protocol_event_id", class: 'form-control'} %>
+      </div>
+      <div class="form-group col-sm-3 tracker-event tracker-search-field tsf-current-event-not">
+          <%= f.label 'not method', style: "visibility: hidden;"%>
+          <%= f.select :protocol_event_id, protocol_events_array_with_class(add_empty: '(search all)'), {include_blank: "-select-"}, class: 'form-control' %>
+      </div>
+
+    <% end %>
+    <%= f_main.fields_for :not_tracker_histories, child_index: 0 do |f| %>
+      <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
+          <%= f.label 'Never had status + method ', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method never appeared in the tracker item in the selected protocol' %>
+          <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_not_tracker_histories_attributes_0_protocol_event_id", "data-only-for" => "#master_not_tracker_histories_attributes_0_protocol_event_id", class: 'form-control'} %>
+      </div>
+      <div class="form-group col-sm-3 tracker-event tracker-search-field tracker-right tsf-any-event-not">
+          <%= f.label 'never method', style: "visibility: hidden;"%>
+          <%= f.select :protocol_event_id, protocol_events_array_with_class(add_empty: '(search all)'), {include_blank: "-select-"}, class: 'form-control' %>
+      </div>
+    <% end %>
+
+      <div class="form-group col-sm-2 col-sm-offset-1 text-right">
+        <%= label :player_info, "Player Tags" %>
+      </div>
+
+      <div class="form-group col-sm-3">
+        <%= collection_select("master[player_infos_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:player_info), :id, :name, {}, multiple: true) %>
+      </div>
+
+    </div>
+
+  <div class="form-group form-actions clearfix">
+    <%= f_main.submit :search, class: "btn btn-default btn-sm pull-right auto-submitter" %>
+    <%= f_main.submit "CSV", name: :format, value: "csv", class: "btn btn-default pull-right btn-sm " if current_user.can? :export_csv%>
+    <%= f_main.submit "JSON", name: :format, value: "json", class: "btn btn-default btn-sm  target_new_window pull-right" if current_user.can? :export_json%>
+
+    <span id="search_count" class="search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>
+  </div>
+<% end %>
+</div>
+
+<script>
+  _fpa.set_definition('colleges', function(){
+    _fpa.form_utils.setup_typeahead('input.advanced-college-input', 'colleges', "colleges");
+  });
+</script>

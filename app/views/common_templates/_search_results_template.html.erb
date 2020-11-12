@@ -1,0 +1,327 @@
+<%
+
+  unless defined? def_record
+    def_record = nil
+  end
+
+  unless defined? def_version
+   def_version = nil
+  end
+
+  vdef_version = "v#{def_version}"
+
+  unless defined? caption
+    caption = nil
+  end
+
+  unless defined? button_label
+    button_label = nil
+  end
+
+  unless defined? model_data_type
+    model_data_type = nil
+  end
+
+
+  unless defined? category
+    category = nil
+  end
+
+  unless defined? caption_before
+    caption_before = {}
+  end
+
+  unless defined? dialog_before
+    dialog_before = {}
+  end
+
+  unless defined? labels
+    labels = {}
+  end
+
+  unless defined? show_if
+    show_if = {}
+  end
+
+  unless defined? external_id_options
+    external_id_options = nil
+  end
+
+
+  unless defined? item_flags_after
+    item_flags_after = nil
+  end
+
+  unless caption && caption.include?('{{')
+    caption = (caption || name)
+    if caption.include?('_') || caption.downcase == caption
+      caption = caption.humanize.titleize
+    end
+  end
+
+  unless defined?(data_sort) && data_sort
+    data_sort_str = nil
+    data_sort_attr = 'none'
+  else
+    data_sort_str = "data-sort-#{data_sort.first}='#{data_sort.last.to_s.hyphenate}'".html_safe
+    data_sort_attr = "#{data_sort.last.to_s.hyphenate.sub('data-','')}"
+  end
+
+  unless defined? subsort_id
+    subsort_id = false
+  end
+
+  unless defined? custom_block_attrs
+    custom_block_attrs = {}
+  end
+
+  unless defined? extra_class
+    extra_class = ''
+  end
+
+  unless defined? full_name
+    full_name = name
+  end
+
+  unless defined? item_class_name
+    item_class_name = full_name
+  end
+
+  unless defined? custom_activity_log
+    # check whether the activity log broadly works with this type of item
+    custom_activity_log = ActivityLog.works_with(name) || :none
+  end
+
+  unless defined? references
+    references = nil
+  end
+
+  unless defined? show_created_at
+    show_created_at = false
+  end
+
+  unless defined? edit_button_href
+    edit_button_href = "{{#if master_id}}/masters/{{master_id}}{{/if}}/#{name.pluralize}/{{this.id}}/edit"
+  end
+
+  # with_data provides an alternatively named set of data for a template to use, rather than just the name
+  # this is useful when providing multiple templates that should use the same set of data on a single page
+  unless defined? with_data
+    with_data = nil
+  end
+
+  unless defined? prevent_create
+    prevent_create = nil
+  end
+
+  unless defined? prevent_edit
+    prevent_edit = nil
+  end
+
+  unless defined? implementation_class
+    implementation_class = nil
+  else
+    is_activity_log_class = (implementation_class && implementation_class.parent == ActivityLog) ? 'is-activity-log' : ''
+  end
+
+  unless defined? implementation_class_name
+    implementation_class_name = nil
+  end
+
+
+  unless defined? item_flags_readonly
+    item_flags_readonly = false
+  end
+
+  unless defined? hide_rank_badge
+    hide_rank_badge = false
+  end
+
+  unless defined? only_see_presence
+    only_see_presence = false
+  end
+
+  unless defined? item_blocks
+    item_blocks = {}
+  end
+
+  unless defined? exclude_metadata
+    exclude_metadata = nil
+  end
+
+  unless defined? view_options
+    view_options = {}
+  end
+
+  unless defined? extra_data_attribs
+    extra_data_attribs = []
+  end
+
+  unless defined? extra_options_config
+    extra_options_config = nil
+  end
+
+  field_options = extra_options_config&.field_options || {}
+  if extra_options_config.respond_to?(:nfs_store) && extra_options_config&.nfs_store
+    user_file_actions = extra_options_config&.nfs_store[:user_file_actions] 
+  end
+  user_file_actions ||= []
+  item_list = [] if only_see_presence
+  al_full_name = "activity_log__#{full_name.underscore}"
+  show_item_type_flags = Classification::ItemFlagName.enabled_for?(item_class_name, current_user)
+
+  if category
+    res = page_layout_panel(category: category)
+    add_item_label = button_label || caption.singularize
+    if res
+      orientation = res.view_options&.orientation || 'vertical'
+      add_item_label =  res.view_options&.add_item_label || add_item_label
+    end
+
+  end
+
+  caption_before_keys = caption_before.keys.join(',')
+  caption_before_keys_without_keep_label = caption_before.select {|k,v| v && !v[:keep_label]}.keys.map(&:to_s).join(',')
+  external_id_options ||= {}
+  external_id_attr = external_id_options && external_id_options[:attribute]
+  hide_tracker_panel = app_config_set(:hide_tracker_panel)
+  show_item_type_flags_after = show_item_type_flags && item_flags_after
+  show_item_type_flags_before = show_item_type_flags && !item_flags_after
+
+  item_list = item_list.is_a?(Array) ? item_list.join(',') : item_list
+  item_list = item_list.gsub(/,\s*,/, ',')
+
+  formatted_item_blocks = {}
+  item_blocks.each do |item_name_sym, item_attrs|
+    ia = item_attrs.is_a?(Array) ? item_attrs.join(',') : item_attrs
+    ia ||= ""
+    formatted_item_blocks[item_name_sym] = ia
+  end
+
+  unless custom_activity_log == :none
+
+    # get a list of rec_types that an activity log of this type is constrained to use
+    # create a button for all item type / rec type combos
+    # the handlebars templates will select the appropriate button based on the rec type of an
+    # individual item
+    works_with_rec_types_array = ActivityLog.works_with_rec_types(name)
+    works_with_rec_types = works_with_rec_types_array.join(',') || ''
+    activity_log_template_name = custom_activity_log ? name.hyphenate : 'generic'
+    works_with_rec_types_array << '' if works_with_rec_types_array.length == 0
+
+    # Work out if the user has access to the activity log, and therefore
+    # should we show the link (for example at the top of a player_contact phone item)
+    supports_activity_log = true
+    (works_with_rec_types_array||[]).each do |r|
+      supports_activity_log &&= !!current_user.has_access_to?(:access, :table, [al_full_name, r].join('_').pluralize)
+    end
+
+
+  end
+%>
+
+<script id="fpa_state_config--<%=name.underscore%>--v<%=def_version%>">
+
+  _fpa.state.caption_before.<%=name.underscore%> = _fpa.state.caption_before.<%=name.underscore%> || {};
+  _fpa.state.caption_before.<%=name.underscore%>.v<%=def_version%> = <%= caption_before.to_json.html_safe %>;
+  _fpa.state.labels_<%=name.underscore%> = _fpa.state.labels_<%=name.underscore%> || {};
+  _fpa.state.labels_<%=name.underscore%>.v<%=def_version%> = <%= labels.to_json.html_safe %>;
+
+  _fpa.state.template_config.<%=name.underscore%> = _fpa.state.template_config.<%=name.underscore%> || {};
+  _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>  = {
+    def_version: <%= def_version || 'null' %>,
+    vdef_version: '<%= vdef_version %>',
+    name: '<%=name%>',
+    full_name: '<%=full_name%>',
+    caption: Handlebars.compile('<%=caption%>'),
+    button_label: Handlebars.compile('<%=button_label || caption%>'),
+    item_class_name: '<%=item_class_name%>',
+    item_list: '<%=item_list%>',
+    hide_rank_badge: <%=!!hide_rank_badge%>,
+    hide_tracker_panel: <%=!!hide_tracker_panel%>,
+    implementation_class_name: '<%=implementation_class_name%>',
+    prevent_edit: <%= !!prevent_edit %>,
+    prevent_create: <%= !!prevent_create %>,
+    edit_button_href: Handlebars.compile('<%=edit_button_href%>'),
+    show_item_type_flags_after: <%=!!show_item_type_flags_after%>,
+    show_item_type_flags_before: <%=!!show_item_type_flags_before%>,
+    item_flags_after: '<%=item_flags_after%>',
+    item_flags_readonly: <%=!!item_flags_readonly%>,
+    caption_before_keys: '<%=caption_before_keys%>',
+    caption_before_keys_without_keep_label: '<%=caption_before_keys_without_keep_label%>',
+    external_id_attr: '<%=external_id_attr%>',
+    external_id_options: <%=external_id_options.to_json.html_safe%>,
+    subsort_id: <%=subsort_id%>,
+    data_sort_attr: '<%=data_sort_attr%>',
+    data_sort_str: "<%=data_sort_str%>",
+    custom_activity_log: '<%=custom_activity_log%>',
+    works_with_rec_types: '<%=works_with_rec_types%>',
+    model_data_type: '<%=model_data_type%>',
+    item_blocks: <%=formatted_item_blocks.to_json.html_safe%>,
+    extra_class: Handlebars.compile('<%=extra_class%>'),
+    is_activity_log_class: '<%=is_activity_log_class%>',
+    custom_block_attrs: <%=custom_block_attrs.to_json.html_safe%>,
+    exclude_metadata: <%=!!exclude_metadata%>,
+    show_created_at: <%=!!show_created_at%>,
+    orientation: '<%=orientation%>',
+    view_options: <%=view_options.to_json.html_safe%>,
+    add_item_label: '<%=add_item_label%>',
+    supports_activity_log: <%=!!supports_activity_log%>,
+    extra_data_attribs: <%= extra_data_attribs.to_json.html_safe %>,
+    field_options: <%= field_options.to_json&.html_safe %>,
+    user_file_actions: <%= user_file_actions.to_json&.html_safe %>
+  }
+
+  _fpa.show_if.forms['<%=full_name%>'] = _fpa.show_if.forms['<%=full_name%>'] || {};
+  <% if full_name.to_s.end_with?('_primary') %>
+  _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] || {};
+  _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'].<%=vdef_version%> = 
+  <% end %>
+  _fpa.show_if.forms['<%=full_name%>'].<%=vdef_version%> = <%= show_if.to_json.html_safe %>;
+
+</script>
+
+
+<% 
+  # Do not reload the unversioned Handlebars templates if we are loading a previous definition version
+  # since the app will have loaded all of the unversioned templates originally
+  
+  unless def_version 
+%>
+
+
+<%= render partial: 'common_templates/references_results', locals: { 
+      name: name.underscore, 
+      full_name: full_name, 
+      references: references, 
+      item_list: item_list, 
+      implementation_class_name: implementation_class_name, 
+      caption_before: caption_before, 
+      external_id_attr: external_id_attr, 
+      caption_before_keys_without_keep_label: caption_before_keys_without_keep_label, 
+      caption_before_keys: caption_before_keys, 
+      item_flags_readonly: item_flags_readonly, 
+      hide_tracker_panel: hide_tracker_panel, 
+      hide_rank_badge: hide_rank_badge, 
+      edit_button_href: edit_button_href, 
+      show_item_type_flags_after: show_item_type_flags_after, 
+      item_flags_after: item_flags_after, 
+      def_record: def_record
+    } %>
+
+
+<script id="<%=name.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{#with <%=with_data || full_name%>}}
+    {{> common_template_result name='<%=name%>' result_data=this}}
+  {{/with}}
+</script>
+
+<script id="<%=name.pluralize.hyphenate%>-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore '<%=name%>') 'v')}}
+</script>
+
+<script id="<%=name.pluralize.hyphenate%>-compact-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore name) 'v') compact=true prevent_create=true }}
+</script>
+
+<% end %>

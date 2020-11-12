@@ -1,0 +1,64 @@
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">
+<h1>Activity Log Configurations</h1>
+
+<p>
+  <%= show_filters %>
+</p>
+<div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below">
+  <% if @updated_with %>
+    <%= render partial: 'form'%>
+  <% end %>
+</div>
+
+<table class="table tablesorter admin-list">
+  <thead>
+    <tr>
+      <th class="no-sort"></th>
+      <th>Name</th>
+      <th>Category</th>
+      <th>Item Type</th>
+      <th>Record Type</th>
+      <th>Process Name</th>
+      <th>Table Name</th>
+      <th>Action When Attribute</th>
+      <th>Field List</th>
+      <th>Main Log Name</th>
+      <th>Blank Log Field List</th>
+      <th>Blank Log Name</th>
+      <th>Hide Item List Panel</th>
+      <th>Disabled</th>
+      <th>Admin</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @activity_logs.each do |list_item| %>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%> <%=list_item.option_configs_valid? ? '' : 'failed-parse'%>">
+        <td><%= admin_edit_btn list_item.id%>&nbsp;&nbsp;&nbsp;<%= admin_edit_btn list_item.id, copy: list_item%> </td>
+        <td><%= list_item.name %></td>
+        <td><%= list_item.category %></td>
+        <td><%= list_item.item_type %></td>
+        <td><%= list_item.rec_type %></td>
+        <td><%= list_item.process_name %></td>
+        <td><%= list_item.table_name %></td>
+        <td><%= list_item.action_when_attribute %></td>
+        <td><%= list_item.field_list %></td>
+        <td><%= list_item.main_log_name %></td>
+        <td><%= list_item.blank_log_field_list %></td>
+        <td><%= list_item.blank_log_name %></td>
+        <td><%= list_item.hide_item_list_panel ? 'hidden' : 'shown' %></td>
+        <td><%= list_item.disabled ? 'disabled' : ''%></td>
+        <td><%= list_item.admin_name %></td>
+      </tr>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+        <td>&nbsp;</td>
+        <td colspan="5"><strong>Extra log types:</strong> <pre style="font-size: 12px" class="shrinkable-block"><%= list_item.extra_log_types %></pre></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%=  render partial: 'admin_handler/index_actions'  %>
+  </div>
+</div>

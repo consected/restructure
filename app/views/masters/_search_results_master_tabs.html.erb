@@ -1,0 +1,71 @@
+
+<script id="master_tabs" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <ul class="nav nav-pills details-tabs <%= hide_player_tabs? ? 'hidden' : '' %> hide-player-tabs-<%= hide_player_tabs?%>">
+
+  <%
+    drop_down = nil
+    prev_drop_down = nil
+    tab_panels = panels.sort {|p, q| (p.tab && p.tab.parent) <=> (p.tab && p.tab.parent) }
+    tab_panels.each do |panel|
+
+      if panel.contains&.resources
+        next if view?.stringify_keys.slice(*panel.contains&.resources).select{|k,v| v}.length == 0
+      end
+
+      drop_down = panel.tab && panel.tab.parent
+      if prev_drop_down && drop_down != prev_drop_down
+        prev_drop_down = false
+      %>
+        </ul>
+      </li>
+      <%
+      end
+
+      if drop_down && drop_down != prev_drop_down
+        dd_label = drop_down.humanize.underscore
+        dd_name = drop_down.hyphenate
+        prev_drop_down = drop_down
+        %>
+        <li role="presentation" class="dropdown">
+          <a href="#" class="dropdown-toggle" id="dm-tag-drop-<%=dd_name%>" data-toggle="dropdown" aria-controls="dm-tag-drop-contents-<%=dd_name%>" aria-expanded="false"><span class="caret"></span> <%= dd_label%></a>
+          <ul class="dropdown-menu" aria-labelledby="dm-tag-drop-<%=dd_name%>" id="dm-tag-drop-contents-<%=dd_name%>">
+      <% end %>
+    <%= render partial: 'masters/search_results_master_tabs_item', locals: {panel: panel} %>
+  <%
+    end #each
+
+    if drop_down
+    %>
+      </ul>
+    </li>
+    <% end
+
+    extra_tabs = page_layout_panel layout_name: :nav, panel_name: 'master-tabs'
+    if extra_tabs
+      nav = extra_tabs.nav
+      emtab_label = nav.label
+    %>
+    <li role="presentation" class="dropdown">
+      <a href="#" class="dropdown-toggle" id="extra-master-tab-drop" data-toggle="dropdown" aria-controls="extra-master-tab-drop-contents" aria-expanded="false"><span class="caret"></span> <%= emtab_label %></a>
+      <ul class="dropdown-menu extra-master-tab-dropdown-menu" aria-labelledby="extra-master-tab-drop" id="extra-master-tab-drop-contents">
+    <%
+    end
+
+    if nav&.links
+    nav.links&.each do |tab|
+    %>
+    <li role="presentation" class="extra-master-tab">
+      <a href="<%= tab['url'] %>" class="exta-master-tab-link"><%=tab['label']%></a>
+    </li>
+    <%
+    end
+    end
+
+    if extra_tabs
+    %>
+    </ul>
+    </li>
+    <% end %>
+
+  </ul>
+</script>

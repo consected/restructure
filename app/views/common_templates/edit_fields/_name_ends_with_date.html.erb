@@ -1,0 +1,3 @@
+<% options = field_options_for(form_object_instance, field_name_sym) %>
+<%= form.label field_name_sym, label_for(field_name_sym, labels) %>
+<%= form.date_field field_name_sym, options.merge({ data: {attr_name: field_name_sym, object_name: form_object_item_type_us}})  %>

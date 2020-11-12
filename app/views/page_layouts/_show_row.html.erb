@@ -1,0 +1,80 @@
+<% rows.each do |row|
+    row_classes = row['classes']
+    cols = row['cols'] || []
+    row_styles = (row['styles'] || {}).map {|k,v| "#{k}: #{v};"}.join(' ');
+%>
+<div class="standalone-page-row row <%=row_classes%>" style="<%= row_styles %>">
+  <% cols.each do |col|
+      col_label = col['label'] || ''
+      col_header = col['header'] || ''
+      col_footer = col['footer'] || ''
+      col_classes = col['classes']
+      col_id = col['id']
+      col_block_id = "sp-col-#{col_id || col_label.id_underscore}"
+      col_url = col['url']
+
+      if @master
+        col_label = Formatter::Substitution.substitute(col_label, data: @master, tag_subs: nil)
+        col_header = Formatter::Substitution.substitute(col_header, data: @master, tag_subs: nil)
+        col_footer = Formatter::Substitution.substitute(col_footer, data: @master, tag_subs: nil)
+      end
+
+      unless col_url
+        inner_rows = col['rows']
+        if inner_rows
+          report = nil
+          resource = nil
+          result_type = nil
+        else
+          report = col['report']
+          resource_def = col['resource']
+          if report
+            result_type = 'report'
+            report_id = report['id']
+            report_defaults = (report['defaults'] || {}).symbolize_keys
+            report_params = {}
+            report_params[:search_attrs] = report_defaults
+            report_params[:search_attrs][:_report_id_] = report_id
+            report_params[:part] = 'results'
+            report_params[:embed] = 'true'
+            report_params[:commit] = 'table'
+            report_params[:id] = report_id
+            col_url = report_path(report_params).html_safe
+          elsif resource_def
+            result_type = 'resource'
+            resource = resource_def['name']
+            resource = resource.pluralize
+            limit = resource_def['limit']
+            col_url = "/masters/#{@master_id}/#{resource.gsub('__', '/')}?limit=#{limit}"
+          end
+        end
+      end
+  %>
+    <% if inner_rows %>
+    <div class="standalone-page-col-with-rows <%=col_classes%>" id="<%=col_block_id%>">
+      <div class="sp-col-inner-with-rows">
+        <div class="inner-rows">
+          <%= render partial: 'show_row', locals: {rows: inner_rows, container: container} %>
+        </div>
+      </div>
+    </div>
+    <% else %>
+    <div class="standalone-page-col <%=col_classes%> ajax-running" id="<%=col_block_id%>" data-url="<%=col_url%>">
+      <div class="sp-col-inner">
+        <h2 class="sp-col-label"><%=col_label%></h2>
+        <div class="sp-col-header"><%= markdown_to_html(col_header) if col_header.present?%></div>
+        <div class="result-target result-target-<%=result_type%>">
+          <% if resource %>
+            <div id="<%= resource.hyphenate %>-<%=@master_id%>" class="no-table-results standalone-panel-generic-block <%= resource.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="<%=@master_id%>" data-sub-item="<%= resource %>" data-template="<%= resource.hyphenate %>-main-result-template"  >
+              <div id="<%= resource.hyphenate %>-inner-<%=@master_id%>" class="standalone-panel-inner-block">
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="sp-col-footer"><%= markdown_to_html(col_footer) if col_footer.present?%></div>
+      </div>
+    </div>
+    <% end %>
+  <% end %>
+</div>
+<% end %>

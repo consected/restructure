@@ -1,0 +1,28 @@
+<div class="ref-data-item-flags">
+  <p><a class="glyphicon glyphicon-info-sign" href="#if-help" class="collapsed" data-toggle="collapse"></a></p>
+  <div class="help-block collapse" id="if-help">
+    <p>
+      Join with appropriate table using item_id and item_type. For example joining with the player_infos table: <br />
+    </p>
+    <p><code> item_flag_name_id = 2 AND
+        <br />item_flags.item_id = player_infos.id AND item_flags.item_type = 'PlayerInfo'</code></p>
+    <p>When using the attributes definer to create a search form, select the <strong>type</strong> 'item flag name'. A list of item flags will automatically be generated in a drop down or multiple selection field, based on the selection for <strong>single or multiple values</strong>.</p>
+    <p>Reference the user selection in SQL using the name of the field, prefixed with a colon. For example, when the attribute <strong>name</strong> <code>must_have_flag</code> is entered, use:</p>
+    <p><code>
+        select * from player_infos where item_flags.item_id = player_infos.id AND item_flags.item_type = 'PlayerInfo' and item_flag_name_id = :must_have_flag
+      </code></p>
+  </div>
+  <ul id="if-list" style="overflow: auto; background-color: white;">
+
+    <% Classification::ItemFlagName.item_types.each do |p| %>
+    <li id="gs-<%=p%>">
+      <a href="#ifblock-<%=p%>" data-toggle="collapse" class="collapsed" style="color: <%= p ? '#aaa' : 'auto' %>"><%=p %></a>
+    </li>
+    <ul id="ifblock-<%=p%>" class="collapse">
+      <% Classification::ItemFlagName.where(item_type: p).each do |i| %>
+      <li style="color: <%= i.disabled ? '#aaa' : 'auto' %>" data-if-item-type="<%=p%>" id="general_selection-<%=i.id%>"><%=i.id%> - <%=i.name%></li>
+      <% end %>
+    </ul>
+    <% end %>
+  </ul>
+</div>

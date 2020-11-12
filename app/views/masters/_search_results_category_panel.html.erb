@@ -1,0 +1,20 @@
+<% special_categories = ['details', 'trackers', 'external-ids', 'external-links'] %>
+<% unless category == 'trackers' %>
+  <div id="<%=panel_name%>-{{id}}" class="panel panel-default section-panel page-layout-panel contains-categories collapse <%=panel_name%>-block format-block-on-expand">
+    <div class="is-header default-header section-panel-header">
+      <% unless hide_player_tabs? %>
+        <a href="#<%=panel_name%>-{{id}}" data-toggle="collapse" class="dropup scroll-to-master pull-right glyphicon glyphicon-remove-sign show-entity" title="close panel"></a>
+      <% end %>
+      <h4 class="list-group-item-heading"><%=panel_label%></h4>
+    </div>
+
+  <% if category.in? special_categories %>
+    {{>master_<%= category.underscore %>_panel}}
+  <% else %>
+    <%= render partial: 'masters/search_results_dynamic_model_category', locals: {category: category, panel: panel} %>
+  <% end %>
+
+  </div>
+<% else %>
+  {{>master_trackers_panel}}
+<% end %>
