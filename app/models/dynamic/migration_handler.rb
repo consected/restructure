@@ -7,6 +7,8 @@ module Dynamic
     included do
       attr_accessor :table_comments # comments from definition to be applied to DB table
 
+      before_validation :init_schema_name
+
       after_create :generate_create_migration, if: -> { !disabled }
 
       after_save :generate_migration, if: -> { !disabled }
@@ -68,6 +70,16 @@ module Dynamic
           table_comments,
           implementation_no_master_association
         )
+    end
+
+    #
+    # If a schema_name has not been set, initialize it with the default for the current application
+    # or the default for server
+    # @return [String] new schema_name
+    def init_schema_name
+      return if disabled?
+
+      self.schema_name = db_migration_schema
     end
   end
 end
