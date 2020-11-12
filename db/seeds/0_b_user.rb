@@ -9,7 +9,7 @@ module Seeds
     def self.setup
       log "In #{self}.setup"
 
-      if User.active.first
+      if User.active.where(email: Settings::TemplateUserEmail).first
         log "Did not run #{self}.setup"
       else
         u = User.where(email: Settings::TemplateUserEmail).first

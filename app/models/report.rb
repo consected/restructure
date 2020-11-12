@@ -477,6 +477,13 @@ class Report < ActiveRecord::Base
     m_field
   end
 
+  #
+  # Returns the options text version specific to this report
+  # @return [String] options text
+  def options_text
+    options
+  end
+
   def as_json(options = {})
     self.item_type = item_type.downcase if item_type
     self.short_name ||= gen_short_name

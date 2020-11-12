@@ -115,6 +115,10 @@ class Admin::AppType < Admin::AdminBase
 
       res['app_configurations'] = app_type.import_config_sub_items app_type_config, 'app_configurations', ['name', 'role_name']
 
+      # Make two passes at loading general selections, the first time rejecting dynamic items that may not yet be defined
+      reject_items = Proc.new {|k, v| k == :item_type && v.index(/^(activity_log__|dynamic_model__|external_identifier__)/)}
+      res['associated_general_selections'] = app_type.import_config_sub_items app_type_config, 'associated_general_selections', ['item_type', 'value'], reject: reject_items
+
       res['associated_config_libraries'] = app_type.import_config_sub_items app_type_config, 'associated_config_libraries', ['name', 'category', 'format']
       res['associated_dynamic_models'] = app_type.import_config_sub_items app_type_config, 'associated_dynamic_models', ['table_name'], create_disabled: force_disable
       res['associated_external_identifiers'] = app_type.import_config_sub_items app_type_config, 'associated_external_identifiers', ['name'], create_disabled: force_disable
@@ -165,6 +169,9 @@ class Admin::AppType < Admin::AdminBase
     name = name.gsub(/^valid_/, '')
 
     not_directly_associated = true if name.starts_with? 'associated_'
+
+    # Ensure a clean cache to reload previous items
+    Rails.cache.clear
 
     if not_directly_associated
       begin
