@@ -1,12 +1,12 @@
 #!/bin/bash
 
 if [ -z "$1" ]; then
-  echo "Usage: app-scripts/copy-to-restructure.sh <DESTINATION FOLDER>"
-  echo "For example: app-scripts/copy-to-restructure.sh ../../restructure/restructure/"
+  echo "Usage: app-scripts/copy-restructure-to-zeus.sh <SOURCE FOLDER>"
+  echo "For example: app-scripts/copy-restructure-to-zeus.sh ../../restructure/restructure/"
   exit 1
 fi
 
-DEST="$1"
+SRC="$1"
 EXCLUDE='database.yml'
 
 cd $(dirname $0)/..
@@ -18,12 +18,9 @@ fi
 for FROM in app bin config db/migrate db/seeds db/table_generators db/app_migrations/data_requests app-scripts/supporting \
   lib public/fonts public/app_specific/data_requests script spec \
   vendor/assets/images vendor/assets/javascripts vendor/assets/stylesheets; do
-  mkdir -p ${DEST}/${FROM}
-  rsync -av --update --exclude="${EXCLUDE}" ${FROM}/ ${DEST}/${FROM}/
-done
 
-mkdir -p ${DEST}/docs
-mkdir -p ${DEST}/db/dumps/development-data
+  rsync -av --update --exclude="${EXCLUDE}" ${SRC}/${FROM}/ ${FROM}/
+done
 
 for FROM in \
   yarn.lock package.json \
@@ -38,12 +35,5 @@ for FROM in \
   public/app_specific/app_data_requests.css \
   .gitignore .rspec_parallel .rubocop.yml .ruby-version .solargraph.yml config.ru \
   Gemfile* Rakefile vendor/assets/config.json; do
-  cp -u ${FROM} ${DEST}/${FROM}
+  cp -u ${SRC}/${FROM} ${FROM}
 done
-
-mkdir -p ${DEST}/log
-mkdir -p ${DEST}/tmp
-
-cd ${DEST}
-
-grep --recursive harvard.edu *
