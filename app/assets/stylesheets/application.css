@@ -1,0 +1,35 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or any plugin's vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any styles
+ * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
+ * file per style scope.
+ *
+ *= require app_vars
+ * Note: Bootstrap is compiled using the vendor/bootstrap-config.json file
+ * The version distributed here is therefore not the 'default' bootstrap
+ *= require bootstrap
+ *= require bootstrap-theme
+ *= require app/nfs_store/application
+ *= require app/secure_view/secure_view
+ *
+ * YARN distributed components
+ *= require bootstrap-datepicker/dist/css/bootstrap-datepicker3
+ *= require chart.js/dist/Chart
+ *= require chosen-js/chosen
+ *= require jquery-timepicker/jquery.timepicker
+ *= require @fullcalendar/core/main
+ *= require @fullcalendar/daygrid/main
+ *= require @fullcalendar/timegrid/main
+ *
+ * For nfs_store dependencies
+ *= require blueimp-file-upload/css/jquery.fileupload
+ *
+ *= require_tree ./app
+ *= require_self
+ */

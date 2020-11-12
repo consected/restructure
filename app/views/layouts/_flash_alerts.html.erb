@@ -1,0 +1,28 @@
+<div class="flash new-block" data-sub-item="message" data-template="flash_template">
+  <% flash.each do |key, value|
+      key = 'warning' if key == 'alert'
+      key = 'danger' if key == 'error'
+      f_class = 'alert-info'
+      f_class = "alert-#{key.to_s}" unless key == 'notice'
+
+      # we allow certain messages to be hidden to avoid user distraction
+      # This should only happen in non test environments, since many tests are built to look
+      # for these flash messages to be sure that correct actions have been completed
+      f_class << " invisible" if !Rails.env.test? && Application.hide_messages.include?(value)
+
+      if value.respond_to? :split
+        value = value.split("\n")
+      else
+        value = [value]
+      end
+  %>
+  <div class="alert <%= f_class %>" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <% value.each do |v| %>
+      <p><%= v %></p>
+    <%end%>
+  </div>
+  <% flash.discard(key) %>
+  <% end %>
+  <% flash.clear %>
+</div>

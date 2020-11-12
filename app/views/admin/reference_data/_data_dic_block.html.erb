@@ -1,0 +1,29 @@
+<div class="ref-data-data-dic">
+      <%
+        @no_create = true
+        @no_masters = true
+        @embedded_report = true
+
+        pm = @all_reports_for_user = Report.enabled.for_user(current_user)
+        pm = pm.where(item_type: 'data-requests').where("short_name LIKE '%_dictionary'")
+
+        @reports = pm.order auto: :desc, report_type: :asc, position: :asc
+        @reports = @reports.reject { |r| r.list_options.hide_in_list }
+      
+      %>
+      <%= render partial: 'reports/index', 
+                  locals: {
+                    simple_view: true,
+                    link_extras: {
+                      data: {
+                        remote: "true", 
+                        preprocessor: "embedded_report",
+                        parent: "primary-modal",
+                        result_target: "#modal_results_block",
+                        target: "#modal_results_block",
+                        target_force: "true"
+                      }
+                    }
+                  }
+      %>
+</div>

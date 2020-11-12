@@ -1,0 +1,45 @@
+<%
+  file_name = download.file_name
+
+  is_processing = false
+  is_processing_arch = false
+
+  if file_name.index /\.__processing-archive__$/
+    file_name = file_name.sub(/\.__processing-archive__$/, '')
+    is_processing_arch = true
+
+  elsif file_name.index /\.__processing-index__$/
+      file_name = file_name.sub(/\.__processing-index__$/, '')
+      is_processing_index = true
+
+  elsif file_name.index /\.__processing__$/
+    file_name = file_name.sub(/\.__processing__$/, '')
+    is_processing = true
+  end
+%>
+<li class="container-entry" id="container-entry-<%=@container.id%>-<%= download.id %>-<%= download.class.retrieval_type%>" data-retrieval-type="<%= download.class.retrieval_type%>" data-download-id="<%= download.id %>">
+  <% if download.id %>
+  <%= form.check_box :selected_items, {multiple: true, title: "select item for download", class: "ff"}, {id: download.id, retrieval_type: download.class.retrieval_type}.to_json, nil %>
+  <% else %>
+  <span class="file-entry-not-downloadable">&nbsp;&nbsp;</span>
+  <% end %>
+  <% if download.id %>
+    <%=link_to file_name, nfs_store_download_path(@container.id, download_id: download.id, retrieval_type: download.class.retrieval_type, activity_log_id: @activity_log.id, activity_log_type: @activity_log.class.to_s.ns_underscore), class: "browse-filename", disabled: !@container.can_download?, title: (!@container.can_download? ? "not authorized to download" : nil) %>
+    <span class="browse-entry-meta">
+      <span class="bem-mime-type"><%= download.mime_type_text %></span>
+      <span class="bem-mime-type"><%= ((download.file_size.to_f / 1_000_000 * 10).to_i.to_f / 10)   %> MB</span>
+      <span class="bem-mod-date" data-format-date-local="<%= download.file_updated_at ? 'true' : ''%>"><%= download.file_updated_at || '(no date)'%></span>
+    </span>
+    <span class="browse-entry-classifications">
+      <%= render partial: 'browse_list_classification', locals: { download: download } %>
+    </span>
+  <% else %>
+    <span class="browse-filename missing-db-entry"><%= file_name %>
+      <% if is_processing %> <span class="file-processing-tag">(processing upload...)</span><% end %>
+      <% if is_processing_arch %> <span class="file-processing-tag">(processing archive...)</span><% end %>
+      <% if is_processing_index %> <span class="file-processing-tag">(processing index...)</span><% end %>
+    </span>
+    <span class="browse-entry-meta missing-db-entry"></span>
+    <span class="browse-entry-classifications missing-db-entry"></span>
+  <% end %>
+</li>

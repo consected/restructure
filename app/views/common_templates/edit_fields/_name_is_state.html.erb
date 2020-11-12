@@ -1,0 +1,5 @@
+<%
+  form_object_instance.state.upcase! if form_object_instance.state
+%>
+<%= form.label field_name_sym, label_for(field_name_sym, labels) %>
+<%= form.collection_select :state, state_hash, :first, :last, {include_blank: '-select-'}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}  %>

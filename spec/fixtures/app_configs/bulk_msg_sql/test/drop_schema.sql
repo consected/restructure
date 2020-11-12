@@ -1,0 +1,1 @@
+drop schema bulk_msg cascade;

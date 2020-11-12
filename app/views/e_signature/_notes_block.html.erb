@@ -1,0 +1,15 @@
+<%
+key_sym = key.to_sym
+
+  if caption_before.has_key? key_sym
+    label = nil
+  end
+%>
+<% if label %>
+<li class="e-sign-group-item caption-before notes-block-label"><%= label %></li>
+<% end %>
+<li class="e-sign-group-item result-notes-container notes-block <% unless value.present? %>notes-empty<% end %>">
+  <div class="notes-text">
+  <%= pretty_string value, return_string: true %>
+  </div>
+</li>

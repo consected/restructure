@@ -1,0 +1,33 @@
+class <%=class_name%> < UserBase
+
+  include UserHandler
+  include ExternalIdHandler
+
+  validates :external_id, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: external_id_range.min, less_than_or_equal_to: external_id_range.max }
+  validate :external_id_tests
+
+  default_scope -> {order id: :desc}
+
+  after_save :return_all
+
+  protected
+
+    def return_all
+      self.multiple_results = self.master.<%=plural_name%>.all if self.master && @prevent_edit
+    end
+
+    def external_id_tests
+
+      if external_id_changed? || !persisted?
+
+        s = <%=class_name%>.find_by_external_id(self.external_id)
+        if s
+          errors.add :external_id, "already exists in this master record" if s.master_id == self.master_id
+          errors.add :external_id, "already exists in another master record (#{s.master.msid ? "MSID: #{s.master.msid}" : "master ID: #{s.master_id}"})" if s.master_id != self.master_id
+        end
+
+      end
+
+    end
+
+end

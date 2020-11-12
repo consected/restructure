@@ -1,0 +1,10 @@
+<div id="<%=item_type%>-definitions-<%=@id%>" class="hidden">
+    <dl>
+  <% general_selection(item_type, value: value, return_all: true).each do |g| %>
+
+      <dt><%=g[0]%> </dt>
+      <dd><%=g[6]%></dd>
+      <%if g[5]%><p>(this value is locked and can not be changed)</p><%end%>
+  <% end %>
+    </dl>
+</div>  

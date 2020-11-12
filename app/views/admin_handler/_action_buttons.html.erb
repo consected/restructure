@@ -1,0 +1,36 @@
+<%= link_to 'logout', destroy_admin_session_path, method: :delete, class: 'btn btn-danger' %>
+<%
+  no_create = no_edit rescue nil
+%>
+<% unless controller_name == 'pages' %>
+  <%= link_to "admin menu", "/", class: "btn btn-warning" %>
+
+  <%if @sub_processes || @protocol_events%>
+    <%= link_to "protocols", admin_protocols_path, class: "btn btn-warning" %>
+  <%end%>
+
+  <%if @protocol_events && @protocol%>
+    <%= link_to "processes", admin_protocol_sub_processes_path(@protocol), class: "btn btn-warning" %>
+  <%end%>
+
+  <%if @protocols %>
+    <%= link_to "events for all protocols", admin_protocol_events_path(all: true), class: "btn btn-warning" %>
+  <%end%>
+
+  <%if @report %>
+    <%= link_to "reports", admin_reports_path(all: true), class: "btn btn-warning" %>
+  <%end%>
+  <% if @reports
+       no_create = @no_create
+     end
+  %>
+
+  <%if @sage_assignment || @sage_assignments %>
+    <%= link_to "Sage IDs", admin_sage_assignments_path, class: "btn btn-warning" %>
+    <% no_create = true %>
+  <%end%>
+
+  <%unless no_create%>
+  <%= link_to "<span class=\"glyphicon glyphicon-plus\"></span> #{controller_name.singularize.humanize}".html_safe, url_for(action: :new, filter: filter_params_permitted), remote: true, class: "btn btn-primary add-item-button" if action_name.in? ['index', 'create'] rescue nil%>
+  <%end%>
+<%end%>

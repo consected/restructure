@@ -1,0 +1,23 @@
+<div class="row">
+
+  <div class="panel panel-default panel-body col-sm-20 col-sm-offset-2">
+    <h3>Copy Roles from One User to Another</h3>
+
+    <%= form_tag admin_user_roles_copy_user_roles_path, action: :post do %>
+    <%= label_tag :from_user_id %>
+    <%= select_tag :from_user_id, active_user_options, include_blank: true %>
+
+    <%= label_tag :to_user_id %>
+    <%= select_tag :to_user_id, active_user_options, include_blank: true %>
+
+    <%= label_tag :app_type_id %>
+    <%= select_tag :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item(use_current_user: true)) %>
+
+    <div class="form-group">
+      <%= hidden_filter_fields %>
+      <%= submit_tag :save, class: "btn btn-primary" %> <%= admin_edit_cancel %>
+    </div>
+
+    <% end %>
+  </div>
+</div>

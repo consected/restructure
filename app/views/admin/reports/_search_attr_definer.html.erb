@@ -1,0 +1,104 @@
+<div class="row" id="search_attr_definer">
+  <div class="col-sm-24" style="text-align: left;">
+    <%= f.label :add_attribute %>
+      <table>
+          <tr>
+              <td>name</td><td><input id="search_attrs_name" /></td>
+          </tr><tr>
+              <td>label(optional)</td><td><input id="search_attrs_label" /></td>
+          </tr><tr>
+              <td>type</td><td>
+                  <select id="search_attrs_type">
+                      <option value="number">number</option>
+                      <option value="text">text</option>
+                      <option value="date">date</option>
+                      <option value="address_state">address state</option>
+                      <option value="accuracy_score">accuracy score</option>
+                      <option value="general_selection">general selection</option>
+                      <option value="config_selector">config selector</option>
+                      <option value="protocol">tracker protocol</option>
+                      <option value="sub_process">tracker status (sub_process)</option>
+                      <option value="protocol_event">tracker method (protocol_event)</option>
+                      <option value="item_flag_name">item flag name</option>
+                      <option value="user">user name</option>
+                  </select>
+              </td>
+            </tr><tr>
+              <td>filter dropdown</td><td>
+                  <select id="search_attrs_filter">
+                      <option value="all">all</option>
+
+                      <% Classification::GeneralSelection.item_types.dup.each do |i|%>
+                        <option value="item_type: <%=i%>">item_type: <%=i%></option>
+                      <% end %>
+
+                  </select>
+              </td>
+            </tr><tr>
+              <td>prevent disabled entries</td><td>
+                  <input type="checkbox" id="search_no_disabled"/>
+              </td>
+            </tr><tr>
+              <td>hide field</td><td>
+                  <input type="checkbox" id="search_hidden_field"/>
+              </td>
+            </tr><tr>
+              <td>single or multiple values</td><td>
+                <select id="search_attrs_multi">
+                      <option value="single">single</option>
+                      <option value="multiple">multiple (in)</option>
+                      <option value="multiple-regex">multiple (regex)</option>
+                  </select>
+              </td>
+            </tr><tr>
+              <td>config selections</td>
+              <td>
+                <div style="width: 97.5%; height: 240px;">
+                  <textarea id="search_attrs_config_selections" class="code-editor code-editor-yml" data-code-editor-type="yaml"></textarea>
+                </div>
+                <p class="help-block">add one line per option:</p>
+                <pre class="help-block">
+label 1: value 1
+label 2: value 2</pre>
+                <p class="help-block">A label is shown in the dropdown and the corresponding value is used in the query.</p>
+              </td>
+            </tr><tr>
+              <td>conditions</td>
+              <td>
+                <div style="width: 97.5%; height: 240px;">
+                  <textarea id="search_attrs_conditions" class="code-editor code-editor-yml" data-code-editor-type="yaml"></textarea>
+                </div>
+                <p class="help-block">add one line per option:</p>
+                <pre class="help-block">
+field (equals): value 1
+field2 (any of):
+  - val1
+  - val2</pre>
+                <p class="help-block">Conditions will be applied to the search for the list of selections.</p>
+              </td>
+            </tr><tr>
+              <td>default</td>
+              <td><textarea id="search_attrs_default"></textarea>
+                <p class="help-block">Set the default value of an attribute to be searched. If the query is run automatically then the default value will be used.</p>
+                <p class="help-block">Enter literal values; 'current_user' for the current user; 'now' for today; or calculate a date with (+/-)n days|day |weeks|week |months|month |years|year. For example: -5 days, -1 year, +5 months, +2 weeks.</p>
+                <p class="help-block">For multiple values, enter each value on a new line.</p>
+
+              </td>
+            </tr>
+            <tr><td></td><td>
+              <p><a id="search_attrs_add" class="btn btn-default">Add Attribute</a></p>
+            </td></tr>
+      </table>
+
+    <div id="search_attr_instruction">(reference in SQL with <strong id="search_attr_ex"></strong>)</div>
+  </div>
+  <div class="row" id="search_attr_definer2">
+    <div class="col-sm-24" style="text-align: left;">
+      <%= f.label :search_attributes%>
+      <div style="width: 97.5%; height: 240px;">
+        <%= f.text_area  :search_attrs,  style: "width: 99%; height: 340px; font-family: monospace;", class: "code-editor code-editor-yml", data: {code_editor_type: "yaml"}%>
+      </div>
+    </div>
+  </div>
+
+</div>

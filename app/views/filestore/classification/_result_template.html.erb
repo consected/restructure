@@ -1,0 +1,20 @@
+<script id="filestore-classification-<%=name.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{#with nfs_store__manage__<%=name%>}}
+    <span class="bem-class-flags">
+      <% if Classification::ItemFlagName.enabled_for?(full_name, current_user) %>
+      {{>item_flag_container item_type="<%=full_name%>" readonlyview=true}}
+      <% end %>
+    </span>
+    <span class="bem-class-title">
+      {{#if title}}{{title}}{{else}}(no title){{/if}}
+    </span>
+    <span class="bem-class-file-metadata">
+      {{#if file_metadata}}<i class="glyphicon glyphicon-list" title="has metadata extracted from the file content"></i>{{else}}<i class="empty-glyphicon"></i>{{/if}}
+    </span>
+  {{/with}}
+</script>
+
+
+<script id="filestore-classification-<%=name.hyphenate%>-empty-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  <div class="container-classifications is-empty"></div>
+</script>
