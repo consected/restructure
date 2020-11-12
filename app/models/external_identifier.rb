@@ -35,11 +35,6 @@ class ExternalIdentifier < ActiveRecord::Base
     OptionConfigs::ExternalIdentifierOptions
   end
 
-  # No option configs
-  def self.option_configs_attr
-    nil
-  end
-
   def resource_name
     name
   end
@@ -288,7 +283,7 @@ class ExternalIdentifier < ActiveRecord::Base
   end
 
   def all_implementation_fields(ignore_errors: true)
-    field_list.split(' ')
+    field_list_array
   rescue StandardError => e
     msg = "all_implementation_fields for external identifier #{id} failed. #{e}"
     Rails.logger.warn msg

@@ -26,7 +26,7 @@ module Dynamic
 
     # Generate a migration triggered after_save.
     def generate_migration
-      return if table_or_view_ready? || !Rails.env.development?
+      return if @ran_migration || !Rails.env.development?
 
       # Return if there is nothing to update
       return unless migration_generator.migration_update_fields
@@ -38,6 +38,7 @@ module Dynamic
 
     # Run a generated migration triggered after_save
     def run_migration
+      @ran_migration = true
       migration_generator.run_migration
     end
 

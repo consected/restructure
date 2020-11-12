@@ -6,6 +6,51 @@ module OptionConfigs
   # This is a stopgap until dynamic model and activity log definitions
   # are fully aligned
   class TemplateOptionMapping
+    def self.external_identifier_mapping(def_record, option_type_config, current_user)
+      external_id_type = def_record.implementation_class
+
+      formatter = external_id_type.external_id_view_formatter
+      pattern = external_id_type.external_id_edit_pattern
+      formatter = 'pattern_mask "' + pattern.gsub('\\', '\\\\') + '"' if formatter.blank? && !pattern.blank?
+
+      field_list = def_record.field_list_array
+      view_options = option_type_config.view_options
+
+      plural_name = external_id_type.plural_name
+
+      {
+        def_record: def_record,
+        def_version: def_record.def_version,
+        caption: view_options[:header_caption] || external_id_type.label,
+        button_label: option_type_config.button_label || external_id_type.label,
+        name: external_id_type.name.underscore,
+        full_name: external_id_type.name.underscore,
+        model_data_type: :external_identifier,
+        prevent_edit: external_id_type.prevent_edit? ||
+          !(current_user.has_access_to? :edit, :table, plural_name),
+        prevent_create: external_id_type.prevent_create? ||
+          !(current_user.has_access_to? :create, :table, plural_name),
+        item_list: field_list,
+        caption_before: option_type_config.caption_before,
+        dialog_before: option_type_config.dialog_before,
+        labels: option_type_config.labels,
+        show_if: option_type_config.show_if,
+        data_sort: [:desc, 'data-updated-at-ts'],
+        category: def_record.category,
+        view_options: view_options,
+        extra_class: view_options[:extra_class],
+        extra_data_attribs: field_list.include?('rec_type') ? [:rec_type] : nil,
+        extra_options_config: option_type_config,
+        external_id_options: {
+          label: external_id_type.label,
+          formatter: formatter,
+          attribute: external_id_type.external_id_attribute.to_s
+        },
+        orientation: 'vertical',
+        add_item_label: external_id_type.label
+      }
+    end
+
     def self.dynamic_model_mapping(def_record, option_type_config, current_user)
       dfla = def_record.field_list_array
       field_list = dfla.present? ? dfla : def_record.default_field_list_array
@@ -98,6 +143,7 @@ module OptionConfigs
                           "{{item_id}}/{{/if}}activity_log/#{def_record.item_type_name.pluralize}/{{id}}/edit",
         caption_before: option_type_config.caption_before,
         dialog_before: option_type_config.dialog_before,
+        labels: option_type_config.labels,
         item_flags_after: 'notes',
         item_flags_readonly: true,
         extra_type: option_type_config.name,

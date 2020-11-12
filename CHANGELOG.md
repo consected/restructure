@@ -19,6 +19,8 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Added] External identifiers now use option configurations to apply dynamic definitions to fields and forms
+
 
 ## [7.3.167] - 2020-11-12
 
