@@ -15,7 +15,9 @@ class Admin::ExternalIdentifiersController < AdminController
   end
 
   def permitted_params
-    @permitted_params = %i[id name label external_id_attribute category alphanumeric external_id_view_formatter external_id_edit_pattern prevent_edit pregenerate_ids min_id max_id extra_fields disabled]
+    @permitted_params = %i[id name label external_id_attribute category alphanumeric 
+                            external_id_view_formatter external_id_edit_pattern prevent_edit
+                            pregenerate_ids min_id max_id extra_fields disabled schema_name]
   end
 
   def admin_links id=nil

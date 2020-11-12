@@ -978,51 +978,53 @@ CREATE FUNCTION ml_app.log_activity_log_player_contact_phone_update() RETURNS tr
 CREATE FUNCTION ml_app.log_activity_log_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-              BEGIN
-                  INSERT INTO activity_log_history
-                  (
-                      name,
-                      activity_log_id,
-                      admin_id,
-                      created_at,
-                      updated_at,
-                      item_type,
-                      rec_type,
-                      disabled,
-                      action_when_attribute,
-                      field_list,
-                      blank_log_field_list,
-                      blank_log_name,
-                      extra_log_types,
-                      hide_item_list_panel,
-                      main_log_name,
-                      process_name,
-                      table_name,
-                      category
-                      )
-                  SELECT
-                      NEW.name,
-                      NEW.id,
-                      NEW.admin_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.item_type,
-                      NEW.rec_type,
-                      NEW.disabled,
-                      NEW.action_when_attribute,
-                      NEW.field_list,
-                      NEW.blank_log_field_list,
-                      NEW.blank_log_name,
-                      NEW.extra_log_types,
-                      NEW.hide_item_list_panel,
-                      NEW.main_log_name,
-                      NEW.process_name,
-                      NEW.table_name,
-                      NEW.category
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
+        BEGIN
+            INSERT INTO activity_log_history
+            (
+                name,
+                activity_log_id,
+                admin_id,
+                created_at,
+                updated_at,
+                item_type,
+                rec_type,
+                disabled,
+                action_when_attribute,
+                field_list,
+                blank_log_field_list,
+                blank_log_name,
+                extra_log_types,
+                hide_item_list_panel,
+                main_log_name,
+                process_name,
+                table_name,
+                category,
+                schema_name
+                )
+            SELECT
+                NEW.name,
+                NEW.id,
+                NEW.admin_id,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.item_type,
+                NEW.rec_type,
+                NEW.disabled,
+                NEW.action_when_attribute,
+                NEW.field_list,
+                NEW.blank_log_field_list,
+                NEW.blank_log_name,
+                NEW.extra_log_types,
+                NEW.hide_item_list_panel,
+                NEW.main_log_name,
+                NEW.process_name,
+                NEW.table_name,
+                NEW.category,
+                NEW.schema_name
+            ;
+            RETURN NEW;
+        END;
+    $$;
 
 
 --
@@ -1108,7 +1110,8 @@ CREATE FUNCTION ml_app.log_admin_update() RETURNS trigger
         consumed_timestep,
         otp_required_for_login,
         reset_password_sent_at,
-        password_updated_at
+        password_updated_at,
+        updated_by_admin_id
 
       )
       SELECT
@@ -1132,7 +1135,8 @@ CREATE FUNCTION ml_app.log_admin_update() RETURNS trigger
         NEW.consumed_timestep,
         NEW.otp_required_for_login,
         NEW.reset_password_sent_at,
-        NEW.password_updated_at
+        NEW.password_updated_at,
+        NEW.admin_id
         ;
         RETURN NEW;
     END;
@@ -1338,47 +1342,49 @@ CREATE FUNCTION ml_app.log_dynamic_model_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_external_identifier_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-        BEGIN
-            INSERT INTO external_identifier_history
-            (
-                name,
-                label,
-                external_id_attribute,
-                external_id_view_formatter,
-                external_id_edit_pattern,
-                prevent_edit,
-                pregenerate_ids,
-                min_id,
-                max_id,
-                alphanumeric,
-                extra_fields,
-                admin_id,
-                disabled,
-                created_at,
-                updated_at,
-                external_identifier_id
-                )
-            SELECT
-                NEW.name,
-                NEW.label,
-                NEW.external_id_attribute,
-                NEW.external_id_view_formatter,
-                NEW.external_id_edit_pattern,
-                NEW.prevent_edit,
-                NEW.pregenerate_ids,
-                NEW.min_id,
-                NEW.max_id,
-                NEW.alphanumeric,
-                NEW.extra_fields,
-                NEW.admin_id,
-                NEW.disabled,
-                NEW.created_at,
-                NEW.updated_at,
-                NEW.id
-            ;
-            RETURN NEW;
-        END;
-    $$;
+      BEGIN
+          INSERT INTO external_identifier_history
+          (
+              name,
+              label,
+              external_id_attribute,
+              external_id_view_formatter,
+              external_id_edit_pattern,
+              prevent_edit,
+              pregenerate_ids,
+              min_id,
+              max_id,
+              alphanumeric,
+              extra_fields,
+              admin_id,
+              disabled,
+              created_at,
+              updated_at,
+              external_identifier_id,
+              schema_name
+              )
+          SELECT
+              NEW.name,
+              NEW.label,
+              NEW.external_id_attribute,
+              NEW.external_id_view_formatter,
+              NEW.external_id_edit_pattern,
+              NEW.prevent_edit,
+              NEW.pregenerate_ids,
+              NEW.min_id,
+              NEW.max_id,
+              NEW.alphanumeric,
+              NEW.extra_fields,
+              NEW.admin_id,
+              NEW.disabled,
+              NEW.created_at,
+              NEW.updated_at,
+              NEW.id,
+              NEW.schema_name
+          ;
+          RETURN NEW;
+      END;
+  $$;
 
 
 --
@@ -2576,7 +2582,8 @@ CREATE TABLE ml_app.activity_log_history (
     main_log_name character varying,
     process_name character varying,
     table_name character varying,
-    category character varying
+    category character varying,
+    schema_name character varying
 );
 
 
@@ -2711,7 +2718,8 @@ CREATE TABLE ml_app.activity_logs (
     main_log_name character varying,
     process_name character varying,
     table_name character varying,
-    category character varying
+    category character varying,
+    schema_name character varying
 );
 
 
@@ -2886,7 +2894,8 @@ CREATE TABLE ml_app.admin_history (
     consumed_timestep integer,
     otp_required_for_login boolean,
     reset_password_sent_at timestamp without time zone,
-    password_updated_at timestamp without time zone
+    password_updated_at timestamp without time zone,
+    updated_by_admin_id integer
 );
 
 
@@ -2937,7 +2946,8 @@ CREATE TABLE ml_app.admins (
     password_updated_at timestamp without time zone,
     first_name character varying,
     last_name character varying,
-    do_not_email boolean DEFAULT false
+    do_not_email boolean DEFAULT false,
+    admin_id bigint
 );
 
 
@@ -3473,7 +3483,8 @@ CREATE TABLE ml_app.external_identifier_history (
     updated_at timestamp without time zone NOT NULL,
     external_identifier_id integer,
     extra_fields character varying,
-    alphanumeric boolean
+    alphanumeric boolean,
+    schema_name character varying
 );
 
 
@@ -3517,7 +3528,8 @@ CREATE TABLE ml_app.external_identifiers (
     updated_at timestamp without time zone NOT NULL,
     alphanumeric boolean,
     extra_fields character varying,
-    category character varying
+    category character varying,
+    schema_name character varying
 );
 
 
@@ -7378,6 +7390,20 @@ CREATE INDEX index_admin_history_on_admin_id ON ml_app.admin_history USING btree
 
 
 --
+-- Name: index_admin_history_on_upd_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_admin_history_on_upd_admin_id ON ml_app.admin_history USING btree (updated_by_admin_id);
+
+
+--
+-- Name: index_admins_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_admins_on_admin_id ON ml_app.admins USING btree (admin_id);
+
+
+--
 -- Name: index_app_configuration_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -8962,6 +8988,14 @@ ALTER TABLE ONLY ml_app.admin_history
 
 
 --
+-- Name: admin_history fk_admin_history_upd_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.admin_history
+    ADD CONSTRAINT fk_admin_history_upd_admins FOREIGN KEY (updated_by_admin_id) REFERENCES ml_app.admins(id);
+
+
+--
 -- Name: app_configuration_history fk_app_configuration_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -9866,6 +9900,14 @@ ALTER TABLE ONLY ml_app.nfs_store_uploads
 
 
 --
+-- Name: admins fk_rails_c05d151591; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.admins
+    ADD CONSTRAINT fk_rails_c05d151591 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
 -- Name: nfs_store_move_actions fk_rails_c1ea9a5fd9; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -9911,14 +9953,6 @@ ALTER TABLE ONLY ml_app.exception_logs
 
 ALTER TABLE ONLY ml_app.user_action_logs
     ADD CONSTRAINT fk_rails_c94bae872a FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
-
-
---
--- Name: masters fk_rails_c9d7977c0c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ml_app.masters
-    ADD CONSTRAINT fk_rails_c9d7977c0c FOREIGN KEY (pro_info_id) REFERENCES ml_app.pro_infos(id);
 
 
 --
@@ -10461,6 +10495,15 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200727081305'),
 ('20200727081306'),
 ('20200727122116'),
-('20200727122117');
+('20200727122117'),
+('20200731121100'),
+('20200731121144'),
+('20201109114833'),
+('20201111160935'),
+('20201111161035'),
+('20201111164800'),
+('20201111165107'),
+('20201111165109'),
+('20201111165110');
 
 

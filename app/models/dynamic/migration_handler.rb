@@ -43,14 +43,18 @@ module Dynamic
     # For now, attempt to guess what it should be if it is not set
     # in the app type configuration
     def db_migration_schema
-      return schema_name if respond_to? :schema_name
+      return schema_name if respond_to?(:schema_name) && schema_name.present?
 
       current_user_app_type = current_admin.matching_user_app_type
       dsn = current_user_app_type&.default_schema_name
       return dsn if dsn
 
       res = category.split('-').first if category.present?
-      res || Settings::DefaultMigrationSchema
+      res ||= Settings::DefaultMigrationSchema
+      return res if res.present?
+
+      # Default to the first in the search path if nothing else works
+      Admin::MigrationGenerator.current_search_paths.first
     end
 
     # Set up and memoize a migration generator to be used for all DB and migration

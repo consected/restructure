@@ -27,6 +27,6 @@ class Admin::ActivityLogsController < AdminController
 
   def permitted_params
     %i[name item_type rec_type process_name category action_when_attribute field_list blank_log_field_list
-       disabled blank log_name hide_item_list_panel extra_log_types main_log_name]
+       disabled blank log_name hide_item_list_panel extra_log_types main_log_name schema_name]
   end
 end
