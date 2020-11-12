@@ -1,9 +1,9 @@
 BASEDIR=$0
 
-function setup {
+function setup() {
 
-  DBNAME=fpa_test${DBNUM}
-  DBOWNER=`whoami`
+  DBNAME=restr_test${DBNUM}
+  DBOWNER=$(whoami)
 
   cd $(dirname ${BASEDIR})
 
@@ -12,27 +12,22 @@ function setup {
   psql -d $DBNAME -c "create schema if not exists bulk_msg;"
 }
 
-if [ ! -z $1 ]
-then
+if [ ! -z $1 ]; then
   PARALLEL=$1
 fi
 
-if [ -z ${PARALLEL} ]
-then
+if [ -z ${PARALLEL} ]; then
   echo "Single setup"
   setup
 else
   echo "Setup ${PARALLEL} databases"
-  for i in $(seq 1 ${PARALLEL})
-  do
-    if [ ${i} == 1 ]
-    then
+  for i in $(seq 1 ${PARALLEL}); do
+    if [ ${i} == 1 ]; then
       DBNUM=''
     else
       DBNUM=${i}
     fi
-    if [ "${i}" == "${PARALLEL}" ]
-    then
+    if [ "${i}" == "${PARALLEL}" ]; then
       setup
     else
       setup &
