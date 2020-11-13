@@ -161,9 +161,9 @@ module ActiveRecord
         end
       end
 
-      def create_external_identifier_trigger(id_field)
+      def create_external_identifier_trigger(_id_field)
         self.fields ||= []
-        self.fields.unshift id_field
+        # self.fields.unshift id_field
         self.fields = fields.uniq
         setup_fields(fields & col_names(:sym))
 
