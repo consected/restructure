@@ -43,6 +43,10 @@ class ExternalIdentifier < ActiveRecord::Base
     name
   end
 
+  def table_name_before_last_save
+    name_before_last_save
+  end
+
   def implementation_model_name
     name.ns_underscore.singularize
   end
