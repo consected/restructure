@@ -17,7 +17,9 @@ module Dynamic
 
     # Check the table exists. If not, generate a migration and create it if in development
     def generate_create_migration
-      return if table_or_view_ready? || !Rails.env.development?
+      return if @ran_migration || table_or_view_ready? || !Rails.env.development?
+
+      raise FphsException, "Use a plural table name: #{table_name}" if table_name.singularize == table_name
 
       gs = generator_script(migration_generator.migration_version)
       migration_generator.write_db_migration(gs, table_name, migration_generator.migration_version)
@@ -26,10 +28,14 @@ module Dynamic
 
     # Generate a migration triggered after_save.
     def generate_migration
+      @do_migration = nil
       return if @ran_migration || !Rails.env.development?
 
+      # Force re-parsing of the option configs, to ensure comments are correctly handled
+      option_configs(force: true)
+
       # Return if there is nothing to update
-      return unless migration_generator.migration_update_fields
+      return unless migration_generator.migration_update_table || saved_change_to_table_name?
 
       gs = generator_script(migration_generator.migration_version, 'update')
       fn = migration_generator.write_db_migration gs, table_name, migration_generator.migration_version, mode: 'update'
@@ -69,7 +75,8 @@ module Dynamic
           table_name,
           all_implementation_fields(ignore_errors: false),
           table_comments,
-          implementation_no_master_association
+          implementation_no_master_association,
+          table_name_before_last_save
         )
     end
 

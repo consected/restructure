@@ -260,7 +260,7 @@ class DynamicModel < ActiveRecord::Base
     do_create_or_update = if mode == 'create'
                             'create_dynamic_model_tables'
                           else
-                            migration_generator.migration_update_fields
+                            migration_generator.migration_update_table
                           end
 
     <<~CONTENT

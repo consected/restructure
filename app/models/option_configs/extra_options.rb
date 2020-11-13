@@ -29,7 +29,7 @@ module OptionConfigs
 
     def self.top_level_defs
       {
-        '_' => '#@library category name',
+        '_' => '# @library category name',
         '_comments' => {
           'table' => 'describe the table',
           'fields' => {
@@ -317,8 +317,6 @@ module OptionConfigs
       self.filestore = self.filestore.symbolize_keys
 
       self.fields ||= []
-
-      self
     end
 
     #
@@ -329,43 +327,95 @@ module OptionConfigs
       config_text = config_obj.options_text
 
       configs = []
-      begin
-        if config_text.present?
-          config_text = include_libraries(config_text)
-          begin
-            res = YAML.safe_load(config_text, [], [], true)
-          rescue Psych::SyntaxError => e
-            linei = 0
-            errtext = config_text.split(/\n/).map { |l| "#{linei += 1}: #{l}" }.join("\n")
-            Rails.logger.warn e
-            Rails.logger.warn errtext
-            raise e
-          end
-        else
-          res = {}
+
+      if config_text.present?
+        config_text = include_libraries(config_text)
+        begin
+          res = YAML.safe_load(config_text, [], [], true)
+        rescue Psych::SyntaxError => e
+          linei = 0
+          errtext = config_text.split(/\n/).map { |l| "#{linei += 1}: #{l}" }.join("\n")
+          Rails.logger.warn e
+          Rails.logger.warn errtext
+          raise e
         end
-        res.deep_symbolize_keys!
+      else
+        res = {}
+      end
+      res.deep_symbolize_keys!
 
-        set_defaults config_obj, res
+      set_defaults config_obj, res
 
-        opt_default = res.delete(:_default)
+      opt_default = res.delete(:_default)
 
-        config_obj.table_comments = res.delete(:_comments)
+      config_obj.table_comments = res.delete(:_comments)
+      # Only run through additional processing of comments if the
+      # configuration was just saved
+      handle_table_comments config_obj, res if config_obj.saved_changes?
 
-        res.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
+      res.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
 
-        res.each do |name, value|
-          # If defined, use the optional _default entry as the basis for all individual options,
-          # allowing for a definable set of default values
+      res.each do |name, value|
+        # If defined, use the optional _default entry as the basis for all individual options,
+        # allowing for a definable set of default values
 
-          value = opt_default.merge(value) if opt_default
+        value = opt_default.merge(value) if opt_default
 
-          i = new name, value, config_obj
-          configs << i
-        end
+        i = new name, value, config_obj
+        configs << i
       end
 
       configs
+    end
+
+    #
+    # Parse _comments for table and fields. Supplement missing field comments
+    # with default option type config caption_before and labels.
+    # Save the result back to the *config_obj.table_comments* attribute
+    # @param [ActiveRecord::Base] config_obj - dynamic definition record
+    # @param [Hash] res - comments hash results to update
+    # @return [Hash] - comments hash
+    def self.handle_table_comments(config_obj, res)
+      # Clean up the incoming _comments entry, to avoid it impacting later configurations
+      tc = config_obj.table_comments || {}
+
+      default = res[:default]
+      return unless default
+
+      # Get a hash of field comments to update
+      fs = tc[:fields] || {}
+
+      ls = default[:labels] || {}
+      cb = default[:caption_before] || {}
+
+      cb.each do |k, v|
+        next if fs[k].present?
+
+        if v.is_a? Hash
+          # Get the most appropriate caption
+          caption = v[:caption] || v[:show_caption] || v[:edit_caption]
+          # If keep_label is set append the label or field name converted to a label
+          caption += "\n#{ls[k] || k.to_s.humanize}" if v[:keep_label]
+        elsif v.is_a? String
+          caption = v
+        end
+
+        # Add the calculated caption back into the comments fields
+        fs[k] = caption
+      end
+
+      # For any field labels that have been defined, use it if the comment
+      # has not already been set explicitly or by a previous caption.
+      ls.each do |k, v|
+        next if fs[k].present?
+
+        fs[k] = v
+      end
+
+      return unless fs.present?
+
+      config_obj.table_comments ||= {}
+      config_obj.table_comments[:fields] = fs
     end
 
     def self.configs_valid?(config_obj)
