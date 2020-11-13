@@ -161,7 +161,7 @@ module MasterHandler
     res = {}
 
     if object_instance
-      c = object_instance.creatables
+      c = object_instance.creatables(include_references: false)
       sa = object_instance.save_action
     end
     res[:creatables] = c if c

@@ -157,7 +157,13 @@ class ActivityLog::ActivityLogsController < UserBaseController
   def extend_result
     item_id = @item.id if @item
 
-    creatables = @master_objects.build.creatables
+    options = if action_name == 'index'
+                { include_references: false }
+              else
+                {}
+              end
+
+    creatables = @master_objects.build.creatables(**options)
 
     extras = {
       al_type: al_type,

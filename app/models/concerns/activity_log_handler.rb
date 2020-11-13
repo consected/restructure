@@ -147,8 +147,10 @@ module ActivityLogHandler
         fts
     end
 
-    # Hash of activity log types that can be created or not, based on user access controls and
-    # creatable_if rules (if a current activity is specified)
+    # Hash of activity log types that can be created or not, based on
+    # -
+    # - user access controls
+    # - creatable_if rules (if a current activity is specified)
     # Each key is listed and has value nil if not creatable, or the resource name of the type if creatable
     # For example:
     #   {:register=>"activity_log__ipa_sample__register", :transport=>nil, :receive=>nil }
@@ -158,13 +160,14 @@ module ActivityLogHandler
     # @params [UserBase|nil] current_activity - optionally, an activity log implementation instance to
     #   calculate data related creatable
     # @return [Hash]
-    def creatables current_user, def_record: nil, current_activity: nil
+    def creatables(current_user, def_record: nil, current_activity: nil, include_references: true)
       def_record ||= definition
       res = {}
 
       def_record.option_configs.each do |c|
         result = current_user.has_access_to?(:create, :activity_log_type, c.resource_name)
         result &&= c.calc_creatable_if(current_activity) if current_activity
+        result &&= !(c.view_options && c.view_options[:only_create_as_reference]) unless include_references
         res[c.name] = result ? c.resource_name : nil
       end
 
@@ -305,8 +308,11 @@ module ActivityLogHandler
     extra_log_type_config.calc_save_action_if self
   end
 
-  def creatables
-    self.class.creatables master.current_user, def_record: current_definition, current_activity: self
+  def creatables(include_references: true)
+    self.class.creatables master.current_user,
+                          def_record: current_definition,
+                          current_activity: self,
+                          include_references: include_references
   end
 
   def reset_model_references

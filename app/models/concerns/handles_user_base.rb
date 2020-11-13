@@ -181,7 +181,7 @@ module HandlesUserBase
   def option_type_config; end
 
   # Default to allow generalization
-  def creatables; end
+  def creatables(include_references: nil); end
 
   # Default to allow generalization
   def save_action; end
