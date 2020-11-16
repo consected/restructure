@@ -1,7 +1,6 @@
 module Formatter
   module TimeWithZone
-
-    def self.format data, options=nil, current_user: nil, iso: nil, utc: nil, show_timezone: nil
+    def self.format(data, _options = nil, current_user: nil, iso: nil, utc: nil, show_timezone: nil)
       unless data.blank?
 
         if current_user
@@ -15,23 +14,24 @@ module Formatter
 
           use_tz = current_timezone
           tz = ActiveSupport::TimeZone.new(use_tz)
-          raise FphsException.new "Unrecognized timezone '#{use_tz}'" unless tz
+          raise FphsException, "Unrecognized timezone '#{use_tz}'" unless tz
+
           data = tz.parse(data.to_s)
           res = data.strftime(df).gsub('  ', ' ')
         else
           res = data.strftime(df).gsub(' ', ' ')
         end
 
+        # Just want the time portion
+        res = res.split(' ').last
+
         return res
       end
       nil
     end
 
-    def self.format_error_message data=nil
-      "Check email address is a valid format."
+    def self.format_error_message(_data = nil)
+      'Check email address is a valid format.'
     end
-
-
-
   end
 end

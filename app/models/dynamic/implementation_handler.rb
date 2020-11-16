@@ -108,9 +108,13 @@ module Dynamic
       dopt = option_type_config
       return unless dopt&.view_options
 
+      # Prevent recursion in the creation of the data attribute with substitution
+      return if @processing_data
+
       da = dopt.view_options[:data_attribute]
 
       if da
+        @processing_data = true
         Formatter::Formatters.format_data_attribute da, self
       else
         n = if attribute_names.include? 'data'

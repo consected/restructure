@@ -20,7 +20,7 @@ module Formatter
     # @param in_data [Hash | UserBase] represent the substitution data with a Hash or a an object instance
     # @param tag_subs [String] for example 'span class="someclass"'
     # @return [String] resulting text after substitution
-    def self.substitute(all_content, data: {}, tag_subs:, ignore_missing: false)
+    def self.substitute(all_content, data: {}, tag_subs: nil, ignore_missing: false)
       return unless all_content
 
       all_content = all_content.dup
