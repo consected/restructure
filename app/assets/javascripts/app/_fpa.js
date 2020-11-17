@@ -171,16 +171,21 @@ _fpa = {
       if (!data_type) {
         var data_for_data_type;
         for (var k in data) {
-          if (k.indexOf('_') != 0) {
+          if (k == 'masters' || k.indexOf('_') != 0) {
             data_type = k;
             break;
           }
         }
 
-        data_for_data_type = data[data_type]
+        data_for_data_type = data[data_type];
 
         // Model references have an item type attribute
-        var item_type = data_for_data_type.item_type || data_type;
+        if (data_for_data_type) {
+          var item_type = data_for_data_type.item_type || data_type;
+        }
+        else {
+          var item_type = data_type;
+        }
 
         var data_array = [data_for_data_type];
         var url_data_type = item_type.split('__').join('/').pluralize();
