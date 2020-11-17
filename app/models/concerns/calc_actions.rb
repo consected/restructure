@@ -429,7 +429,8 @@ module CalcActions
       end
 
       #### If we have a non-query table specified
-      if table == :this || table == :parent || table == :referring_record || table == :top_referring_record || (table == :user && field_name != :role_name)
+      if table.in?(%i[this parent referring_record top_referring_record]) ||
+         (table == :user && field_name != :role_name)
 
         # Pick the instance we are referring to
         if table == :this
@@ -487,11 +488,11 @@ module CalcActions
 
             else
               #### Something was wrong in the definition
-              raise FphsException, <<~EOF
+              raise FphsException, <<~ERROR_MSG
                 calc_non_query_condition field is not a selection type or :validate hash. Ensure you have an all, any, not_any, not_all before all nested expressions.
 
                 #{@condition_config.to_yaml}
-              EOF
+              ERROR_MSG
             end
 
           else
@@ -542,6 +543,18 @@ module CalcActions
     res
   end
 
+  #
+  # Get an attribute from an instance, and ensure that a blank is
+  # converted to nil if the type is not a string
+  # @param [UserBase] from_instance
+  # @param [String|Symbol] attr_name
+  # @return [Object] resulting value
+  def attribute_from_instance(from_instance, attr_name)
+    val = from_instance.attributes[attr_name.to_s]
+    val = nil if val.blank? && from_instance.type_for_attribute(attr_name).type != :string
+    val
+  end
+
   # Generate the query conditions to allow
   # values to be matched from another referenced record (or this)
   # Each type of reference is related to the current instance and pulls
@@ -569,7 +582,7 @@ module CalcActions
 
     if val_item_key == :this && !val_item_value.is_a?(Hash)
       # Get a literal value from 'this' to be compared
-      val = @current_instance.attributes[val_item_value]
+      val = attribute_from_instance(@current_instance, val_item_value)
 
     elsif val_item_key == :parent && !val_item_value.is_a?(Hash)
       # Get a literal value from the current instance's parent to be compared
@@ -577,7 +590,7 @@ module CalcActions
       from_instance = @current_instance.parent_item
       raise FphsException, 'No parent record found for condition' unless from_instance
 
-      val = from_instance.attributes[val_item_value]
+      val = attribute_from_instance(from_instance, val_item_value)
 
     elsif val_item_key == :referring_record && !val_item_value.is_a?(Hash)
       # Get a literal value from the current instance's referring_record.
@@ -588,7 +601,7 @@ module CalcActions
       # This is often an activity_log record referring to the current activity_log
       # If no referring record exists, the result is nil
       from_instance = @current_instance.referring_record
-      val = from_instance && from_instance.attributes[val_item_value]
+      val = from_instance && attribute_from_instance(from_instance, val_item_value)
 
     elsif val_item_key == :top_referring_record && !val_item_value.is_a?(Hash)
       # Get a literal value from the current instance's top_referring_record.
@@ -599,7 +612,7 @@ module CalcActions
       # This is often an activity_log record referring to the current activity_log
       # If no referring record exists, the result is nil
       from_instance = @current_instance.top_referring_record
-      val = from_instance && from_instance.attributes[val_item_value]
+      val = from_instance && attribute_from_instance(from_instance, val_item_value)
 
     elsif val_item_key.in? %i[this_references parent_references parent_or_this_references]
       # Get possible values from records referenced by this instance, or this instance's referring record (parent)
@@ -885,7 +898,7 @@ module CalcActions
 
   # Create a dynamic value if the condition's value matches certain strings
   def dynamic_value(val, type = nil)
-    FieldDefaults.calculate_default(current_instance, val, type)
+    FieldDefaults.calculate_default(current_instance, val, type, allow_nil: true)
   end
 
   # Calculate the sub conditions for this level if it contains any of the selection types
@@ -894,9 +907,15 @@ module CalcActions
   # @return [true | false] return the result of the evaluated conditions
   def calc_nested_query_conditions(return_first_false: true)
     res = return_first_false
-
-    # The query didn't return a result - therefore the condition evaluates to false
-    return false if @condition_scope.empty?
+    begin
+      # The query didn't return a result - therefore the condition evaluates to false
+      # We rescue it here, since this is a common point for a poor SQL definition to fail
+      return false if @condition_scope.empty?
+    rescue StandardError => e
+      Rails.logger.error "#{e}\n#{@condition_scope.to_sql}"
+      byebug
+      raise e
+    end
 
     # Combine sub condition results if they are specified
     # This sends the current @condition_scope as the basis for evaluation.
@@ -912,7 +931,7 @@ module CalcActions
 
       if return_first_false
         res &&= res_a
-        return unless res
+        return nil unless res
       else
         res ||= res_a
       end
