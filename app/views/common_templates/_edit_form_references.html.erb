@@ -29,7 +29,15 @@
           refitem.each do |ref_type, ref_config|
           shown_embedded = true
           %>
-          <%= render partial: 'common_templates/reference_actions',  locals: {name: "#{object_instance.class.name.ns_underscore}", ref_type: ref_type, caption: ref_config[:to_record_label], block_id: "#{object_instance.class.name.ns_underscore.hyphenate}-#{ref_type}", id: object_instance.id, master_id: object_instance.master_id, form_embed: form_embed, ref_config: ref_config} %>
+          <%= render partial: 'common_templates/reference_actions',  locals: {
+                name: "#{object_instance.class.name.ns_underscore}", 
+                ref_type: ref_type, 
+                caption: ref_config[:to_record_label], 
+                block_id: "#{object_instance.class.name.ns_underscore.hyphenate}-#{ref_type}", 
+                id: object_instance.id, 
+                master_id: object_instance.master_id, 
+                form_embed: form_embed, 
+                ref_config: ref_config} %>
           <%
           break
         end
@@ -40,7 +48,15 @@
 
       creatable_references.each do |ref_key, refitem|
         refitem.each do |ref_type, ref_config| %>
-        <%= render partial: 'common_templates/reference_actions',  locals: {name: "#{object_instance.class.name.ns_underscore}", ref_type: ref_type, caption: ref_config[:to_record_label], block_id: "#{object_instance.class.name.ns_underscore.hyphenate}-#{ref_type}", id: object_instance.id, master_id: object_instance.master_id, form_embed: form_embed, ref_config: ref_config} %>
+        <%= render partial: 'common_templates/reference_actions',  locals: {
+              name: "#{object_instance.class.name.ns_underscore}", 
+              ref_type: ref_type, 
+              caption: ref_config[:to_record_label], 
+              block_id: "#{object_instance.class.name.ns_underscore.hyphenate}-#{ref_type}", 
+              id: object_instance.id, 
+              master_id: object_instance.master_id, 
+              form_embed: form_embed, 
+              ref_config: ref_config} %>
     <%  end
       end
     end %>
