@@ -98,7 +98,12 @@ class User < ActiveRecord::Base
   # Preferred mechanism for checking access controls for a user
   # Note: with_options usage is vague and should be avoided
   def has_access_to?(perform, resource_type, named, with_options = nil, alt_app_type_id: nil)
-    Admin::UserAccessControl.access_for? self, perform, resource_type, named, with_options, alt_app_type_id: alt_app_type_id
+    @has_access_to ||= {}
+    key = "#{perform}-#{resource_type}-#{named}-#{with_options}-#{alt_app_type_id}"
+    return @has_access_to[key] if @has_access_to.key?(key)
+
+    @has_access_to[key] =
+      Admin::UserAccessControl.access_for? self, perform, resource_type, named, with_options, alt_app_type_id: alt_app_type_id
   end
 
   def to_s
@@ -126,7 +131,7 @@ class User < ActiveRecord::Base
 
   # The full list of active role names for the current app_type
   def role_names
-    user_roles.active.pluck(:role_name)
+    @role_names ||= user_roles.active.pluck(:role_name)
   end
 
   protected

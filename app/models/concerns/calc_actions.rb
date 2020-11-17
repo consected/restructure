@@ -525,7 +525,7 @@ module CalcActions
         user = @current_instance.master.current_user
         expected_val = [expected_val] unless expected_val.is_a? Array
 
-        role_names = user.user_roles.active.pluck(:role_name)
+        role_names = user.role_names
         @this_val = role_names if expected_value_requests_return? :value, expected_val
         role_res = false
         expected_val.each do |e|

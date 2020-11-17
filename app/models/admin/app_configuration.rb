@@ -12,6 +12,7 @@ class Admin::AppConfiguration < Admin::AdminBase
   before_validation :humanize_name
   validates :name, presence: true
   validate :valid_entry
+  after_save :clear_memo!
 
   # Special notes:
   # hide and show items should enter true, false or blank (equivalent to false)
@@ -38,10 +39,18 @@ class Admin::AppConfiguration < Admin::AdminBase
   # If a user is set, use it to override the default value with either the username or role names
   # Otherwise just return the default value if no user is set
   # user attribute can be a User or an id
+  #
+  # This memoizes in the class, to avoid repetitive DB calls, so requires a #clear_memo! after config changes.
   def self.value_for(name, user = nil)
-    name = sym_to_name(name) if name.is_a? Symbol
-    res = where(name: name)
-    res.scope_user_and_role(user).first&.value
+    name = sym_to_name(name)
+
+    @value_for ||= {}
+    key = value_for_memo_key(name, user)
+
+    return @value_for[key] if @value_for.key?(key)
+
+    @value_for[key] =
+      where(name: name).scope_user_and_role(user).first&.value
   end
 
   # Get an array of comma separated values from an app config value
@@ -59,10 +68,6 @@ class Admin::AppConfiguration < Admin::AdminBase
       results[name_sym] = value_for(name, user)
     end
     results
-  end
-
-  def self.sym_to_name(config_name)
-    config_name.to_s.humanize.downcase
   end
 
   def self.find_app_config_for_user(user, app_type, config_name)
@@ -107,22 +112,49 @@ class Admin::AppConfiguration < Admin::AdminBase
     res&.with_admin(admin)&.disable!
   end
 
+  def self.sym_to_name(config_name)
+    return config_name unless config_name.is_a? Symbol
+
+    config_name.to_s.humanize.downcase
+  end
+
+  #
+  # A memoization key for value_for cache
+  # Memoization is keyed as "#{current_user.id}-#{current_user.app_type_id}-#{item}" to ensure a
+  # user app type change is appropriately recognized
+  # @param [Symbol] name
+  # @param [User] user
+  # @return [String]
+  def self.value_for_memo_key(name, user)
+    "#{user&.id}-#{user&.app_type_id}-#{name}"
+  end
+
+  #
+  # Clear the value_for memo. Called as an after_save callback
+  def self.clear_memo!
+    @value_for = {}
+  end
+
   private
 
   def humanize_name
     self.name = self.class.sym_to_name(name) if name.present?
   end
 
+  # Validation of the name, role and user to check for existence
   def valid_entry
-    unless disabled
+    return if disabled
 
-      cond = { name: name, user: user, role_name: role_name, app_type: app_type }
-      res = self.class.active.where(cond).first
-      raise FphsException, "Invalid configuration name: #{name}" unless name.in? self.class.configurations
-      if res && ((persisted? && res.id != id) || !persisted?)
-        raise FphsException, "This item already exists (#{name} user: #{user_id} role_name: #{role_name} app_type: #{app_type_id})"
-        end
-
+    cond = { name: name, user: user, role_name: role_name, app_type: app_type }
+    res = self.class.active.where(cond).first
+    raise FphsException, "Invalid configuration name: #{name}" unless name.in? self.class.configurations
+    if res && ((persisted? && res.id != id) || !persisted?)
+      raise FphsException, "This item already exists (#{name} user: #{user_id} role_name: #{role_name} app_type: #{app_type_id})"
     end
+  end
+
+  # Clear the value_for memo.
+  def clear_memo!
+    self.class.clear_memo!
   end
 end

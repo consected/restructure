@@ -148,7 +148,7 @@ class Master < ActiveRecord::Base
 
   def self.each_create_master_with_item(user)
     # Create each of the items listed in the configuration item :create_master_with (comma separated)
-    create_master_with = Admin::AppConfiguration.value_for :create_master_with, user
+    create_master_with = Admin::AppConfiguration.value_for(:create_master_with, user)
     create_master_with&.split(',')&.each do |cw|
       cw = cw.strip.pluralize
       unless get_all_associations.include? cw
