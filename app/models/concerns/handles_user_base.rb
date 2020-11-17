@@ -244,7 +244,7 @@ module HandlesUserBase
                 end
     raise FphsException, 'no master_user in allows_current_user_access_to?' unless curr_user
 
-    res = self.class.allows_user_access_to? curr_user, perform, with_options = nil
+    res = self.class.allows_user_access_to? curr_user, perform
     return false unless res
 
     if self.class.no_master_association
