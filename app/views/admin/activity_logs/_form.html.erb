@@ -55,6 +55,16 @@
     <%= f.check_box :disabled %>
   </div>
   <div>
+    <div class="activity-list-section">
+      <%= f.label :activities %>
+      <ul class="activity-list">
+      <% object_instance.option_configs_names.each do |name| %>
+        <li><%=name%></li>
+      <% end %>
+      </ul>
+      <div id="activity-list-detail" class="activity-list-detail"></div>
+    <div>
+
     <div class="form-group">
       <%= f.label :extra_log_types %><br>
       <div style="width: 800px; height: 80vh;">
