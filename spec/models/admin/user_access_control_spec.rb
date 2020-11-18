@@ -130,7 +130,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     res.current_admin = @admin
     res.save!
 
-    res = @user.has_access_to? :access, :table, :player_infos
+    res = @user.has_access_to? :access, :table, :player_infos, force_reset: true
     expect(res).to be_falsey
 
     res = PlayerInfo.allows_user_access_to? @user, :access

@@ -181,7 +181,7 @@ module HandlesUserBase
   def option_type_config; end
 
   # Default to allow generalization
-  def creatables; end
+  def creatables(include_references: nil); end
 
   # Default to allow generalization
   def save_action; end
@@ -244,7 +244,7 @@ module HandlesUserBase
                 end
     raise FphsException, 'no master_user in allows_current_user_access_to?' unless curr_user
 
-    res = self.class.allows_user_access_to? curr_user, perform, with_options = nil
+    res = self.class.allows_user_access_to? curr_user, perform
     return false unless res
 
     if self.class.no_master_association

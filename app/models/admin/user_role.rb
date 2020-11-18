@@ -18,6 +18,8 @@ class Admin::UserRole < ActiveRecord::Base
   # to the user's current app type
   scope :user_app_type, ->(user) { where user_roles: { app_type_id: user.app_type_id } }
 
+  cattr_accessor :latest_update
+
   # Get a resultset of active roles for the user.
   # @param user [User] if the app_type attribute is set in the user, and is not set in conditions
   #                    then the user app_type will be used
@@ -145,6 +147,8 @@ class Admin::UserRole < ActiveRecord::Base
 
   def invalidate_cache
     logger.info "User Role added or updated (#{self.class.name}). Invalidating cache."
+    self.class.latest_update = updated_at || created_at
+
     # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
     Rails.cache.clear
   end

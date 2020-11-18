@@ -18,6 +18,10 @@
     @prevent_creates[res] = !(current_user.has_access_to? :create, :table, res)
     @prevent_edits[res] = !(current_user.has_access_to? :create, :table, res)
   end
+
+  external_id_types = ExternalIdentifier.active_model_configurations.map(&:implementation_class)
+  viewable_external_ids = external_id_types.select{|e| view?[e.plural_name.to_sym] }.map(&:plural_name)
+
 %>
 
 
@@ -69,36 +73,8 @@
     view_options: { view_handlers: ['address'] }
   } if current_user.has_access_to?(:access, :table, :addresses) %>
 
-
-
-<% # Add in all the external ID handlers (Scantron, Sage, etc)
-    external_id_types = ExternalIdentifier.active_model_configurations.map(&:implementation_class)
-    viewable_external_ids = external_id_types.select{|e| view?[e.plural_name.to_sym] }.map(&:plural_name)
-    external_id_types.each do |e|
-
-      formatter = e.external_id_view_formatter
-      pattern = e.external_id_edit_pattern
-      if formatter.blank? && !pattern.blank?
-        formatter = 'pattern_mask "' + pattern.gsub('\\', '\\\\') + '"';
-      end
-
-      field_list = e.definition.field_list_array
-
-%>
-<%= render partial: 'common_templates/search_results_template', locals: {
-    name: e.name.underscore,
-    caption: e.label,
-    model_data_type: :external_identifier,
-    prevent_edit: e.prevent_edit? || !(current_user.has_access_to? :edit, :table, e.plural_name),
-    prevent_create: e.prevent_create? || !(current_user.has_access_to? :create, :table, e.plural_name),
-    item_list: field_list,
-    external_id_options: {label: e.label, formatter: formatter, attribute: e.external_id_attribute.to_s},
-    data_sort: [:desc, "data-updated-at-ts"],
-    orientation: 'vertical',
-    add_item_label: e.label
-  } if current_user.has_access_to?(:access, :table, e.name.underscore.pluralize) %>
-<% end %>
-
+<% # Add in all the external ID handlers (Scantron, Sage, etc) %>
+<%= render partial: 'external_identifiers/search_results_template' %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: 'nfs_store__manage__container',

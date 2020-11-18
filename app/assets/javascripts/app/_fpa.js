@@ -169,12 +169,26 @@ _fpa = {
       var data_type = data.multiple_results;
 
       if (!data_type) {
+        var data_for_data_type;
         for (var k in data) {
-          data_type = k;
-          break;
+          if (k == 'masters' || k.indexOf('_') != 0) {
+            data_type = k;
+            break;
+          }
         }
-        var data_array = [data[data_type]];
-        var url_data_type = data_type.split('__').join('/').pluralize();
+
+        data_for_data_type = data[data_type];
+
+        // Model references have an item type attribute
+        if (data_for_data_type) {
+          var item_type = data_for_data_type.item_type || data_type;
+        }
+        else {
+          var item_type = data_type;
+        }
+
+        var data_array = [data_for_data_type];
+        var url_data_type = item_type.split('__').join('/').pluralize();
       } else {
         var data_array = data[data_type];
         var url_data_type = data_type.split('__').join('/');
@@ -183,17 +197,19 @@ _fpa = {
       var list_data_items = [];
       var list_data_item_state_ids = [];
 
-      if (_fpa.non_versioned_template_types.indexOf(data_type) >= 0) {
+      if (_fpa.non_versioned_template_types.indexOf(url_data_type) >= 0) {
         resolve();
         return;
       };
+
+      var data_master_id;
 
       for (var k in data_array) {
         if (!data_array.hasOwnProperty(k)) continue;
 
         var data_item = data_array[k];
-        if (!data_item || !data_item.id || !data.master_id) continue;
-
+        if (!data_item || !data_item.id || (!data.master_id && !data_item.master_id)) continue;
+        data_master_id = data_master_id || data.master_id || data_item.master_id;
         // Prevent requesting the template for the same instance multiple times
         // We don't use the definition version here, since it is possible for different 
         // instances with the same definition version to return different results
@@ -211,7 +227,7 @@ _fpa = {
         return;
       }
 
-      var url = "/masters/" + data.master_id + "/" + url_data_type + "/" + list_data_items.join(',') + "/template_config";
+      var url = "/masters/" + data_master_id + "/" + url_data_type + "/" + list_data_items.join(',') + "/template_config";
       $.ajax(url, {
         success: function (data) {
           var temploc = $('#master-main-template').first();
@@ -246,7 +262,8 @@ _fpa = {
     try {
       var html = template(data);
     } catch (err) {
-      console.log("template function not defined for " + template_name);
+      console.log("(" + err + ") template function not defined for " + template_name);
+      console.log(err.stack);
     }
     html = $(html).addClass('view-template-created');
 

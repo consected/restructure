@@ -20,8 +20,9 @@ class User < ActiveRecord::Base
   has_many :user_access_controls, autosave: true, class_name: 'Admin::UserAccessControl'
   belongs_to :app_type, class_name: 'Admin::AppType', optional: true
   # Enforce use of app_type when getting user_roles, to prevent leakage of same named user roles across apps
-  has_many :user_roles, ->(user) { user_app_type(user) }, autosave: true, class_name: 'Admin::UserRole'
-  # has_many :user_roles, autosave: true, class_name: "Admin::UserRole"
+  has_many :user_roles,
+           ->(user) { user_app_type(user) },
+           autosave: true, class_name: 'Admin::UserRole'
 
   default_scope -> { order email: :asc }
   scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPattern) }
@@ -97,8 +98,26 @@ class User < ActiveRecord::Base
 
   # Preferred mechanism for checking access controls for a user
   # Note: with_options usage is vague and should be avoided
-  def has_access_to?(perform, resource_type, named, with_options = nil, alt_app_type_id: nil)
-    Admin::UserAccessControl.access_for? self, perform, resource_type, named, with_options, alt_app_type_id: alt_app_type_id
+  def has_access_to?(perform, resource_type, named, with_options = nil, alt_app_type_id: nil, force_reset: nil)
+    @has_access_to ||= {}
+
+    clear_has_access_to! if user_access_controls_updated?
+    clear_role_names! if user_roles_updated?
+
+    key = "#{perform}-#{resource_type}-#{named}-#{with_options}-#{alt_app_type_id || app_type_id}"
+    return @has_access_to[key] if @has_access_to.key?(key) && !force_reset
+
+    @has_access_to[key] =
+      Admin::UserAccessControl.access_for? self, perform, resource_type, named, with_options, alt_app_type_id: alt_app_type_id
+  end
+
+  def user_access_controls_updated?
+    @latest_user_access_control != Admin::UserAccessControl.latest_update
+  end
+
+  def clear_has_access_to!
+    @latest_user_access_control = Admin::UserAccessControl.latest_update
+    @has_access_to = {}
   end
 
   def to_s
@@ -126,7 +145,20 @@ class User < ActiveRecord::Base
 
   # The full list of active role names for the current app_type
   def role_names
-    user_roles.active.pluck(:role_name)
+    clear_role_names! if @latest_user_role != Admin::UserRole.latest_update
+
+    @role_names ||= user_roles.active.pluck(:role_name)
+  end
+
+  def user_roles_updated?
+    @latest_user_role != Admin::UserRole.latest_update
+  end
+
+  def clear_role_names!
+    @latest_user_role = Admin::UserRole.latest_update
+    @role_names = nil
+    # Updated roles also lead to has_access_to evaluations requiring refresh
+    clear_has_access_to!
   end
 
   protected
