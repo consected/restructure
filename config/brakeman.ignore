@@ -7,7 +7,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 21,
+      "line": 41,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"select table_schema \\\"schema_name\\\", table_name from information_schema.tables \\nwhere table_schema IN (#{quoted_schemas})\\nand table_catalog = '#{current_database}'\\nUNION \\nselect table_schema \\\"schema_name\\\", table_name from information_schema.views\\nwhere table_schema IN (#{quoted_schemas})\\nand table_catalog = '#{current_database}'\\norder by \\\"schema_name\\\", table_name\\n\")",
       "render_path": null,
@@ -118,7 +118,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 67,
+      "line": 80,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"        SELECT\\n            cols.table_schema \\\"schema_name\\\",\\n            cols.table_name,\\n            cols.column_name,\\n            pg_catalog.col_description(c.oid, cols.ordinal_position::int) AS column_comment\\n        FROM\\n            information_schema.columns cols\\n        INNER JOIN pg_catalog.pg_class c\\n        ON \\n          c.oid = ('\\\"' || cols.table_name || '\\\"')::regclass::oid\\n          AND c.relname = cols.table_name\\n\\n        WHERE\\n            cols.table_catalog = '#{current_database}' AND\\n            cols.table_schema IN (#{quoted_schemas}) AND\\n            pg_catalog.col_description(c.oid, cols.ordinal_position::int) IS NOT NULL\\n        ;\\n\")",
       "render_path": null,
@@ -128,6 +128,26 @@
         "method": "Admin::MigrationGenerator.column_comments"
       },
       "user_input": "current_database",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "6f2804d0b3a8bb174fd73cb3011786ceb01450eb74cfb6667a156244841da587",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "lib/active_record/migration/app_generator.rb",
+      "line": 191,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION #{calc_trigger_fn_name(prev_table_name)}\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ActiveRecord::Migration",
+        "method": "update_table_name"
+      },
+      "user_input": "calc_trigger_fn_name(prev_table_name)",
       "confidence": "Medium",
       "note": ""
     },
@@ -158,7 +178,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/concerns/external_id_handler.rb",
-      "line": 224,
+      "line": 229,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute((\"INSERT into #{table_name} (#{external_id_attribute}, admin_id, master_id, created_at, updated_at) VALUES \" + [\"('#{generate_random_id}', #{admin.id}, NULL, '#{DateTime.now.iso8601}', '#{DateTime.now.iso8601}')\"].join(\",\")))",
       "render_path": null,
@@ -279,7 +299,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 40,
+      "line": 41,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute((\"CREATE SCHEMA IF NOT EXISTS #{schema}\" + \" AUTHORIZATION #{owner}\"))",
       "render_path": null,
@@ -299,7 +319,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 110,
+      "line": 123,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"SELECT * FROM #{tables_and_views.find do\n (tn[\"table_name\"] == \"#{dd}_datadic\")\n end[\"table_name\"]};\\n\")",
       "render_path": null,
@@ -319,7 +339,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/concerns/external_id_handler.rb",
-      "line": 197,
+      "line": 202,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute((\"INSERT into #{table_name} (#{external_id_attribute}, admin_id, master_id, created_at, updated_at) VALUES \" + [\"('#{generate_random_id}', #{admin.id}, #{m}, '#{DateTime.now.iso8601}', '#{DateTime.now.iso8601}')\"].join(\",\")))",
       "render_path": null,
@@ -373,13 +393,33 @@
       "note": ""
     },
     {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "e9abcb1a24581414685b3d134af45c2416470ca8fb75357008c5972a631289ee",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "lib/active_record/migration/app_generator.rb",
+      "line": 195,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION #{calc_trigger_fn_name(table_name)}\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ActiveRecord::Migration",
+        "method": "update_table_name"
+      },
+      "user_input": "calc_trigger_fn_name(table_name)",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
       "warning_type": "Command Injection",
       "warning_code": 14,
       "fingerprint": "edac64dedbf192ca033ca46a9c90399f18e187becdaebbc8db59a4de3843b437",
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/models/nfs_store/archive/mounter.rb",
-      "line": 177,
+      "line": 180,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
       "code": "Kernel.system(*[\"unzip\", stored_file.retrieval_path, \"-d\", \"#{File.join(Manage::Filesystem.temp_directory, \"__filestore__#{SecureRandom.hex}\")}/zip\"])",
       "render_path": null,
@@ -393,6 +433,6 @@
       "note": ""
     }
   ],
-  "updated": "2020-10-02 11:43:49 +0100",
+  "updated": "2020-11-17 20:38:15 +0000",
   "brakeman_version": "4.10.0"
 }
