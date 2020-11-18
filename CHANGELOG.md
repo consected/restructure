@@ -19,6 +19,15 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 ## [8.0.2] - 2020-11-18
+
+- [Added] Role, user access controls and app configuration caching
+- [Added] Table comment from default label and captions as field comments
+- [Added] Option configs for external identifiers
+- [Changed] Versioned template fixes
+- [Changed] Time only substitution formatter option
+- [Changed] Activity log and dynamic model options editor info
+- [Changed] Ensure only correct creatable items appear in panel buttons
+
 ## [8.0.1] - 2020-11-12
 
 - [Added] source code for baseline release of the ReStructure project
