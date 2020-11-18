@@ -1,8 +1,9 @@
 BASEDIR=$0
+DB_BASE_NAME=${DB_BASE_NAME:=restr}
 
 function setup() {
 
-  DBNAME=restr_test${DBNUM}
+  DBNAME=${DB_BASE_NAME}_test${DBNUM}
   DBOWNER=$(whoami)
 
   cd $(dirname ${BASEDIR})

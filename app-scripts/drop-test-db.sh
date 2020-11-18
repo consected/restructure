@@ -1,6 +1,8 @@
+DB_BASE_NAME=${DB_BASE_NAME:=restr}
+
 function drop() {
 
-  DBNAME=restr_test${DBNUM}
+  DBNAME=${DB_BASE_NAME}_test${DBNUM}
   APPENV=test
   SCHEMA_NAME=ml_app
   DBOWNER=$(whoami)
