@@ -8,6 +8,6 @@ ActiveSupport.on_load(:messaging_setup) do
     self.importance = 'Transactional'
   end
 
-  self.test_sms_number = '+16177942330'
-
+  # Number from https://fakenumber.org/us/boston
+  self.test_sms_number = '+16175550118'
 end

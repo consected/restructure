@@ -2083,8 +2083,8 @@ RSpec.describe 'Calculate conditional actions', type: :model do
 
   it 'finds parent_references' do
     new_al0 = create_item
-    new_al0.extra_log_type = 'blank'
-    expect(new_al0.class.definition.option_type_config_for('blank')).not_to be nil
+    new_al0.extra_log_type = 'blank_log'
+    expect(new_al0.class.definition.option_type_config_for('blank_log')).not_to be nil
     new_al0.force_save!
     new_al0.save!
 
@@ -2108,8 +2108,6 @@ RSpec.describe 'Calculate conditional actions', type: :model do
         }
       }
     }
-    # new_al.extra_log_type_config.references = new_al0.extra_log_type_config.references
-    # new_al2.extra_log_type_config.references = new_al0.extra_log_type_config.references
 
     m = new_al0.master
     m.current_user = @user
@@ -2123,12 +2121,13 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     # Make al refer to al0 (al is the parent of al0)
     ModelReference.create_with new_al, new_al0, force_create: true
     expect(new_al0.referring_record).to eq new_al
-    expect(new_al0.extra_log_type).to eq :blank
+    expect(new_al0.extra_log_type).to eq :blank_log
     ModelReference.create_with new_al, new_al2, force_create: true
     expect(new_al2.referring_record).to eq new_al
     expect(new_al2.extra_log_type).to eq :secondary
 
-    expect(new_al.model_references.length).to eq 2
+    mls = new_al.model_references.length
+    expect(mls).to eq 2
 
     confy = <<EOF_YAML
       all:
