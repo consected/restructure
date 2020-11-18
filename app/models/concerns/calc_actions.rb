@@ -913,7 +913,6 @@ module CalcActions
       return false if @condition_scope.empty?
     rescue StandardError => e
       Rails.logger.error "#{e}\n#{@condition_scope.to_sql}"
-      byebug
       raise e
     end
 

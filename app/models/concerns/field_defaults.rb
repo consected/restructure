@@ -12,7 +12,7 @@ module FieldDefaults
   # @param [DateTime] from_when - a DateTime to use instead of now
   # @param [Boolean] allow_nil - by default, return empty string instead of nil. Set true to allow nils
   # @return [String|Number|nil] the result after substitutions
-  def self.calculate_value(obj, value, type = nil, from_when: nil, allow_nil: false)
+  def self.calculate_default(obj, value, type = nil, from_when: nil, allow_nil: false)
     value = '' if value.nil? && !allow_nil
 
     res = value

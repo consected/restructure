@@ -790,12 +790,12 @@ module ActivityLogHandler
   end
 
   def handle_save_triggers
-    extra_log_type_config.calc_save_trigger_if self
+    extra_log_type_config&.calc_save_trigger_if self
     true
   end
 
   def handle_before_save_triggers
-    extra_log_type_config.calc_save_trigger_if self, alt_on: :before_save
+    extra_log_type_config&.calc_save_trigger_if self, alt_on: :before_save
     true
   end
 
