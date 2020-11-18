@@ -213,8 +213,14 @@ Rspec tests are available. To run:
     app-scripts/create-test-db.sh
     IGNORE_MFA=true bundle exec rspec
 
-There are some tests that attempt to use an AWS account to send SMS notifications. These will eventually be mocked out, 
-but for now IGNORE_MFA=true prevents AWS multifactor authentication blocking the startup of the tests.
+There are some tests that attempt to use an AWS account to send SMS notifications. These have been mocked out, 
+although at least one should run an SMS notification as an integration test, and to allow a comparison against
+CloudWatch results. Setup your `~/.aws/config` and `~/.aws/credentials` files appropriately to allow tests to
+run against the live AWS API.
+
+On well secured AWS accounts, you may have MFA configured. Either setup your credentials file to include the appropriate
+`aws_access_key_id` and `aws_secret_access_key` for these, or alternatively don't attempt to authenticate (and accept certain tests will fail.)
+The environment variable `IGNORE_MFA=true` prevents AWS multifactor authentication blocking the startup of the tests.
 
 For faster testing, *parallel_tests* provides parallelization of Rspec, although does introduce some quirks into the testing, with false positives appearing. Better structuring of the spec tests will eventually resolve this, but in the meantime a few focused singular rspec calls will validate those that fail.
 
@@ -222,11 +228,25 @@ Assuming you have an 8 core computer, the following will create 8 test databases
 
     app-scripts/create-test-db.sh 8
 
+This will have created the database with the owner matching your current OS user. To allow easier DB authentication for tests, make entries into the `~/.pgpass` file
+to enable automatic authentication with your DB password, such as:
+
+    localhost:5432:restr_test:username:mysecretpw
+    localhost:5432:restr_test2:username:mysecretpw
+    ...
+    localhost:5432:restr_test8:username:mysecretpw
+
 Then run the parallel tests:
 
-    IGNORE_MFA=true PARALLEL_TEST_PROCESSORS=8 app--scripts/parallel_test.sh
+    IGNORE_MFA=true PARALLEL_TEST_PROCESSORS=8 app-scripts/parallel_test.sh
 
+To review failed results:
 
+    less -r tmp/failing_specs.log
+
+The easiest way to deal with migrations is to drop the test database and recreate.
+
+    app-scripts/drop-test-db.sh 8 ; app-scripts/create-test-db.sh 8
 ## Future development themes
 
 The Javascript UI is a custom reactive front end. Near the beginning of development a simple platform was developed, which is tightly bound to the operation of the backend. Although completely functional without changes (except obviously for addition of new features), a long term vision is to replace the UI with Vue.js or React running against the existing API.
