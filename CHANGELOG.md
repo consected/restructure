@@ -18,6 +18,7 @@ release will be created for any release tested in production, and may be marked 
 
 
 ## Unreleased
+## [8.0.2] - 2020-11-18
 ## [8.0.1] - 2020-11-12
 
 - [Added] source code for baseline release of the ReStructure project
