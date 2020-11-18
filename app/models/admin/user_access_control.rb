@@ -13,6 +13,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
   after_save :invalidate_cache
 
   attr_accessor :allow_bad_resource_name
+  cattr_accessor :latest_update
 
   def self.resource_types
     %i[table general limited_access report activity_log_type external_id_assignments]
@@ -309,6 +310,10 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
   def invalidate_cache
     logger.info "User Role added or updated (#{self.class.name}). Invalidating cache."
+
+    # Allows caching in other classes to reset
+    self.class.latest_update = updated_at || created_at
+
     # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
     Rails.cache.clear
   end

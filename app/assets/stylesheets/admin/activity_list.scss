@@ -1,0 +1,15 @@
+.activity-list-section {
+  padding: 0 10px;
+}
+
+ul.activity-list {
+  li {
+    padding: 3px 5px;
+    border: 1px solid silver;
+    border-radius: 3px;
+    line-height: 1em;
+    display: inline-block;
+    list-style: none;
+    background-color: white;
+  }
+}

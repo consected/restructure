@@ -36,12 +36,21 @@ module OptionConfigs
             view_as: {
               edit: 'hide|readonly|not_embedded|select_or_add',
               show: 'hide|readonly|see_presence|filestore',
-              new: 'outside_this|not_embedded|select_or_add|activity_selector'
+              new: 'outside_this|not_embedded|select_or_add|activity_selector',
+              _notes_: ['*outside_this* presents a button that triggers a form outside of this container, in the regular panel',
+                        '*not_embedded* always shows this as an "action list" item',
+                        '*activity_selector* shows actions for any creatable activity log types listed in type_config']
             },
             prevent_disable: 'true|false (default = false) OR reference',
             allow_disable_if_not_editable: 'true|false (default = false) OR reference',
             also_disable_record: 'when disabled, also disable the referenced record',
-            creatable_if: 'conditional rules'
+            creatable_if: 'conditional rules',
+            type_config: {
+              activity_selector: {
+                an_activity_name: 'Activity Label',
+                another_activity_name: 'Activity Label 2'
+              }
+            }
           }
         },
         save_trigger: {
@@ -232,7 +241,7 @@ module OptionConfigs
 
     # Check if any of the configs were bad
     # This should be extended to provide additional checks when options are saved
-    def self.raise_bad_configs option_configs
+    def self.raise_bad_configs(option_configs)
       bad_configs = option_configs.select { |c| c.bad_ref_items.present? }
       raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?
     end

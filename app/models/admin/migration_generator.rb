@@ -3,7 +3,7 @@ class Admin::MigrationGenerator
   DefaultMigrationSchema = Settings::DefaultMigrationSchema
 
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
-                :table_comments, :no_master_association
+                :table_comments, :no_master_association, :prev_table_name
 
   #
   # Simply return the current connection
@@ -166,9 +166,10 @@ class Admin::MigrationGenerator
     "#{table_name.singularize}_id"
   end
 
-  def initialize(db_migration_schema, table_name = nil, all_implementation_fields = nil, table_comments = nil, no_master_association = nil)
+  def initialize(db_migration_schema, table_name = nil, all_implementation_fields = nil, table_comments = nil, no_master_association = nil, prev_table_name = nil)
     self.db_migration_schema = db_migration_schema
     self.table_name = table_name
+    self.prev_table_name = prev_table_name
     self.all_implementation_fields = all_implementation_fields
     self.table_comments = table_comments
     self.no_master_association = no_master_association
@@ -219,6 +220,12 @@ class Admin::MigrationGenerator
   end
 
   def field_changes
+    table_name = if table_name_changed
+                   prev_table_name
+                 else
+                   self.table_name
+                 end
+
     begin
       cols = ActiveRecord::Base.connection.columns(table_name)
       old_colnames = cols.map(&:name) - standard_columns
@@ -240,7 +247,11 @@ class Admin::MigrationGenerator
     [added, removed, old_colnames]
   end
 
-  def migration_update_fields
+  def table_name_changed
+    prev_table_name && (prev_table_name != table_name)
+  end
+
+  def migration_update_table
     added, removed, prev_fields = field_changes
 
     if table_comments
@@ -248,16 +259,20 @@ class Admin::MigrationGenerator
       new_fields_comments = fields_comments_changes
     end
 
-    return unless added.present? || removed.present? || new_table_comment || new_fields_comments.present?
+    unless added.present? || removed.present? || new_table_comment || new_fields_comments.present? || table_name_changed
+      return
+    end
 
     new_fields_comments ||= {}
 
     <<~ARCONTENT
-      self.prev_fields = %i[#{prev_fields.join(' ')}]
+      #{table_name_changed ? "    self.prev_table_name = :#{prev_table_name}" : ''}
+      #{table_name_changed ? '    update_table_name' : ''}
+          self.prev_fields = %i[#{prev_fields.join(' ')}]
           \# added: #{added}
           \# removed: #{removed}
-          #{new_table_comment ? "\# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
-          #{new_fields_comments.present? ? "\# new fields comments: #{new_fields_comments.keys}" : ''}
+      #{new_table_comment ? "    \# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
+      #{new_fields_comments.present? ? "    \# new fields comments: #{new_fields_comments.keys}" : ''}
           update_fields
     ARCONTENT
   end

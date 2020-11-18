@@ -1,0 +1,14 @@
+<% 
+@instance_list.each do |oi|
+  ovd = oi.versioned_definition 
+  ovd.option_configs.each do |otc|
+%>
+<%= render partial: 'external_identifiers/common_search_results_template_item',
+                 locals: {
+                   def_record: ovd,
+                   option_type_config: otc
+                 } %>
+<% 
+  end
+end  
+%>

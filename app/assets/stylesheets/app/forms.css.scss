@@ -22,6 +22,10 @@ button {
   padding-right: 4px;
 }
 
+form .full-width input.form-control {
+  width: 100% !important;
+}
+
 .tt-menu {
   border: 1px solid silver;
   width: 100%;

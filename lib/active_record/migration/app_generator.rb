@@ -161,9 +161,9 @@ module ActiveRecord
         end
       end
 
-      def create_external_identifier_trigger(id_field)
+      def create_external_identifier_trigger(_id_field)
         self.fields ||= []
-        self.fields.unshift id_field
+        # self.fields.unshift id_field
         self.fields = fields.uniq
         setup_fields(fields & col_names(:sym))
 
@@ -175,6 +175,24 @@ module ActiveRecord
           dir.down do
             puts "-- drop function #{trigger_fn_name}"
             ActiveRecord::Base.connection.execute reverse_external_identifier_trigger_sql
+          end
+        end
+      end
+
+      def update_table_name
+        rename_table prev_table_name, table_name
+        rename_table Admin::MigrationGenerator.history_table_name_for(prev_table_name),
+                     Admin::MigrationGenerator.history_table_name_for(table_name)
+
+        # Drop the trigger, so that it can be recreated with a new name
+        reversible do |dir|
+          dir.up do
+            puts "-- drop function #{trigger_fn_name}"
+            ActiveRecord::Base.connection.execute "DROP FUNCTION #{calc_trigger_fn_name(prev_table_name)}"
+          end
+          dir.down do
+            puts "-- drop function #{trigger_fn_name}"
+            ActiveRecord::Base.connection.execute "DROP FUNCTION #{calc_trigger_fn_name(table_name)}"
           end
         end
       end
@@ -356,6 +374,10 @@ module ActiveRecord
         res
       end
 
+      def calc_trigger_fn_name(table_name)
+        "#{schema}.log_#{table_name}_update"
+      end
+
       def setup_fields(handle_fields = nil)
         self.fields_comments ||= {}
         return if field_opts && !handle_fields
@@ -364,7 +386,7 @@ module ActiveRecord
         handle_fields.reject! { |a| a.to_s.index(ignore_fields) }
         handle_fields = handle_fields.map(&:to_sym)
 
-        self.trigger_fn_name = "#{schema}.log_#{table_name}_update"
+        self.trigger_fn_name = calc_trigger_fn_name(table_name)
         self.new_fields = fields.map { |f| "NEW.#{f}" }
         self.field_defs = {}
         self.field_opts = {}
