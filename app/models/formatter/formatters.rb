@@ -27,9 +27,11 @@ module Formatter
       end
     end
 
-    def self.format_data_attribute(attr_conf, obj)
+    def self.format_data_attribute(attr_conf, obj, ignore_missing: nil)
       if attr_conf.is_a? String
-        return Formatter::Substitution.substitute attr_conf, data: obj, tag_subs: nil if attr_conf.include?('{{')
+        if attr_conf.include?('{{')
+          return Formatter::Substitution.substitute attr_conf, data: obj, tag_subs: nil, ignore_missing: ignore_missing
+        end
 
         attr_conf = [attr_conf]
       end

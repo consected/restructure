@@ -51,10 +51,10 @@ module Formatter
         tag_split = tag.split('::')
         tag_name = tag_split.first
         first_format_directive = tag_split[1]
-        ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
+        this_ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
 
         unless d&.is_a?(Hash) && (d&.key?(tag_name) || d&.key?(tag_name.to_sym)) || tag.start_with?('embedded_report_')
-          if ignore_missing
+          if ignore_missing || this_ignore_missing
             d = {}
             missing = true
           else
@@ -85,8 +85,9 @@ module Formatter
         all_content.gsub!(tag_container, tag_value)
       end
 
-      # Unless we have requested to show missing tags, check for {{tag}} left in the text, indicating something was not replaced
-      if ignore_missing != :show_tag && !all_content.scan(/{{.*}}/).empty?
+      # Unless we have requested to show missing tags, check for {{tag}} left in the text, i
+      # ndicating something was not replaced
+      if ignore_missing != :show_tag && all_content.scan(/{{.*}}/).present?
         raise FphsException, 'Not all the tags were replaced. This suggests there was an error in the markup.'
       end
 
@@ -216,6 +217,8 @@ module Formatter
       tagp = tag_and_operator.split('::')
       tag = tagp.first
 
+      current_user = data[:current_user_instance]
+
       if tag.start_with? 'embedded_report_'
         report_name = tag.sub('embedded_report_', '')
         # Find the source item to call the report with
@@ -235,7 +238,7 @@ module Formatter
       orig_val = data[tag] || data[tag.to_sym]
       res = orig_val || ''
 
-      res = Formatter::Formatters.formatter_do(res.class, res, current_user: data[:current_user_instance])
+      res = Formatter::Formatters.formatter_do(res.class, res, current_user: current_user)
 
       return if res.nil? && tagp[1] != 'ignore_missing'
 
@@ -266,6 +269,10 @@ module Formatter
             age -= 1 if Date.today < orig_val + age.years
             res = age
           end
+        elsif op == 'date'
+          res = Formatter::TimeWithZone.format(orig_val, current_user: current_user, date_only: true)
+        elsif op == 'time'
+          res = Formatter::TimeWithZone.format(orig_val, current_user: current_user, time_only: true)
         elsif op == 'dicom_datetime'
           res = orig_val.strftime('%Y%m%d%H%M%S+0000') if orig_val.respond_to? :strftime
         elsif op == 'dicom_date'

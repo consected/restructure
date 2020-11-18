@@ -115,7 +115,7 @@ module Dynamic
 
       if da
         @processing_data = true
-        Formatter::Formatters.format_data_attribute da, self
+        Formatter::Formatters.format_data_attribute da, self, ignore_missing: :show_tag
       else
         n = if attribute_names.include? 'data'
               attributes['data']
