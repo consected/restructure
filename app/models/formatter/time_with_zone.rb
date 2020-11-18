@@ -1,6 +1,6 @@
 module Formatter
   module TimeWithZone
-    def self.format(data, _options = nil, current_user: nil, iso: nil, utc: nil, show_timezone: nil)
+    def self.format(data, _options = nil, current_user: nil, iso: nil, utc: nil, show_timezone: nil, time_only: nil, date_only: nil)
       unless data.blank?
 
         if current_user
@@ -22,8 +22,12 @@ module Formatter
           res = data.strftime(df).gsub(' ', ' ')
         end
 
-        # Just want the time portion
-        res = res.split(' ').last
+        # Just want the time or date portion
+        if time_only
+          res = res.split(' ').last
+        elsif date_only
+          res = res.split(' ').first
+        end
 
         return res
       end
