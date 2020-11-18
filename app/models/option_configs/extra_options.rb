@@ -369,7 +369,9 @@ module OptionConfigs
     end
 
     #
-    # Parse _comments for table and fields. Supplement missing field comments
+    # Parse _comments for table and fields.
+    # If table comment is missing, use the item label.
+    # Supplement missing field comments
     # with default option type config caption_before and labels.
     # Save the result back to the *config_obj.table_comments* attribute
     # @param [ActiveRecord::Base] config_obj - dynamic definition record
@@ -381,6 +383,13 @@ module OptionConfigs
 
       default = res[:default]
       return unless default
+
+      # Set the table comment from the config label if it is not set
+      ts = config_obj.table_comments && config_obj.table_comments[:table]
+      if ts.blank?
+        config_obj.table_comments ||= {}
+        config_obj.table_comments[:table] = default[:label]
+      end
 
       # Get a hash of field comments to update
       fs = tc[:fields] || {}

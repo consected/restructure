@@ -269,8 +269,8 @@ class Admin::MigrationGenerator
       #{table_name_changed ? "    self.prev_table_name = :#{prev_table_name}" : ''}
       #{table_name_changed ? '    update_table_name' : ''}
           self.prev_fields = %i[#{prev_fields.join(' ')}]
-        \# added: #{added}
-        \# removed: #{removed}
+          \# added: #{added}
+          \# removed: #{removed}
       #{new_table_comment ? "    \# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
       #{new_fields_comments.present? ? "    \# new fields comments: #{new_fields_comments.keys}" : ''}
           update_fields
