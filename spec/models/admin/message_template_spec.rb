@@ -56,6 +56,7 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     # Should work with either master or a record specified as data
     res = layout.generate content_template_name: 'test email content 2', data: master
     expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id} for #{dateformatted} by #{@player_info.user_email}. This is a name: #{@player_info.first_name.titleize} and #{pn}.</p></div></body></html>"
+    puts res, expected_text unless res == expected_text
     expect(res).to eq expected_text
 
     res = layout.generate content_template_name: 'test email content 2', data: @player_info

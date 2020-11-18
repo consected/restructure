@@ -151,12 +151,11 @@ module UserSupport
       res.disabled = true
       res.current_admin = @admin
       res.save!
-      # else
     end
 
     in_app_type ||= @user.app_type
-    if in_app_type
-      Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: @user, access: :create, resource_type: :table, resource_name: resource_name
-    end
+    return unless in_app_type
+
+    Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: @user, access: :create, resource_type: :table, resource_name: resource_name
   end
 end

@@ -49,24 +49,6 @@ module SpecSetup
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, access: :create
     setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, access: :create
 
-    # # Ensure the steps can be accessed
-    # [:primary, :blank_log].each do |s|
-    #   rn = (first_al.option_configs.select{|a| a.name == s}.first).resource_name
-    #   uacs = Admin::UserAccessControl.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: rn
-    #   uac = uacs.first
-    #   if uac
-    #     # uac.access = :create
-    #     # uac.disabled = false
-    #     # uac.current_admin = @admin
-    #     # uac.save!
-    #   else
-    #     uac = Admin::UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :activity_log_type, resource_name: rn, current_admin: @admin
-    #   end
-    # end
-    #
-    #
-
-    # puts "cleanup player contacts"
 
     ActiveRecord::Base.connection.execute("
                            delete from activity_log_player_contact_phone_history;
@@ -83,13 +65,6 @@ module SpecSetup
     @test_player_infos = PlayerInfo.all[-20..-1]
     @test_player_infos.each do |p|
       m = p.master
-      # pr = Classification::Protocol.active.where(name: 'Study').first
-      # sp = pr.sub_processes.active.where(name: 'Alerts').first
-      # pe = sp.protocol_events.active.where(name: 'Level 1').first
-      #
-      # m.current_user = @user
-      # m.trackers.create!(protocol: pr, sub_process: sp, protocol_event: pe, event_date: DateTime.now)
-
       res = m.player_contacts.phone
       res = create_player_phone p.master, 2 unless res.length > 1
       res.each do |c|

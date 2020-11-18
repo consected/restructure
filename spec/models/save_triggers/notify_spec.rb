@@ -206,8 +206,10 @@ RSpec.describe SaveTriggers::Notify, type: :model do
   end
 
   it 'generates an sms notification with phone numbers' do
-    phones = ['(617)794-2330', '+16177942331', '6177942332', '+44(020) 671 2532']
-    clean_phones = ['+16177942330', '+16177942331', '+16177942332', '+440206712532']
+    # Numbers from https://fakenumber.org/us/boston
+
+    phones = ['(617)555-2330', '+16175550104', '6175550165', '+44(020) 671 2532']
+    clean_phones = ['+16175550118', '+16175550104', '+16175550165', '+440206712532']
 
     t = 'This is some content in a text template.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}'
     config = {
