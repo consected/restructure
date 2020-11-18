@@ -28,7 +28,7 @@ mkdir -p ${DEST}/db/dumps/development-data
 for FROM in \
   yarn.lock package.json \
   docs/filestore-setup.md \
-  db/schema.rb db/seeds.rb db/structure.sql db/dumps/development-data/data-only-dump.sql db/demo-data.sql \
+  db/schema.rb db/seeds.rb db/dumps/development-data/data-only-dump.sql db/demo-data.zip \
   app-scripts/add_admin.sh app-scripts/api-get-container-id.sh app-scripts/parallel_test.sh \
   app-scripts/release_and_build.sh \
   app-scripts/setup_filestore_app.sh app-scripts/setup-dev-filestore.sh app-scripts/upload-to-filestore.sh \
@@ -40,6 +40,8 @@ for FROM in \
   Gemfile* Rakefile vendor/assets/config.json; do
   cp -u ${FROM} ${DEST}/${FROM}
 done
+
+# Removed db/structure.sql
 
 mkdir -p ${DEST}/log
 mkdir -p ${DEST}/tmp
