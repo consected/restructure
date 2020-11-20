@@ -43,12 +43,14 @@
   {{/each}}
   <% end %>
 
-  <% references&.each do |ref_key, refitem|
+<%  # Iterate all the references, setting up the creatable items' actions
+    references&.each do |ref_key, refitem|
       next unless ref_key && refitem
       
       refitem.each do |ref_type, ref_config| 
         next unless ref_type && ref_config
       
+        # Handle activity_selector type references
         rct = ref_config[:type_config]
         if rct&.keys&.first == :activity_selector
           rct.first.last.each do |elt, label|
@@ -64,7 +66,7 @@
                 extra_log_type: '__return_nothing__'
               }
             })
-      %>
+%>
       {{#if creatable_model_references.<%= al_refkey %> }}
         {{#if creatable_model_references.<%= al_refkey %>.<%= al_reftype %> }}
           {{#if creatable_model_references.<%= al_refkey %>.<%= al_reftype %>.ref_type }}
@@ -79,16 +81,12 @@
           {{/if}}
         {{/if}}
       {{/if}}
-      <%
+<%
           end
-      %>
-      
-      
-      <%  else 
-      %>
-
-      <%  end
-      %>
+          # Done handling activity_selector type references
+        else 
+          # Now handle the regular creatable model references
+%>
 
       {{#if creatable_model_references.<%= ref_key %> }}
         {{#if creatable_model_references.<%= ref_key %>.<%= ref_type %> }}
@@ -105,9 +103,13 @@
           {{/if}}
         {{/if}}
       {{/if}}
+    <%  end
+    %>
 
-  <%    end
-      end %>
+<%    end
+    end 
+    # Done iterating references
+%>
 
   {{#if model_references}}
     {{#each model_references}}
