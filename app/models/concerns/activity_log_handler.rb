@@ -883,7 +883,14 @@ module ActivityLogHandler
                     rescue StandardError
                       nil
                     end
-      @embedded_item = oi.build_model_reference [always_embed_creatable.to_sym, cmrs[always_embed_creatable.to_sym]]
+      embed_cmrs = cmrs[always_embed_creatable.to_sym]
+      unless embed_cmrs
+        raise FphsException,
+              'Creatable reference not found for always_embed_creatable_reference named ' \
+              "#{always_embed_creatable}" \
+              "#{always_embed_creatable != always_embed_creatable.singularize ? ' Try singular version' : ''}"
+      end
+      @embedded_item = oi.build_model_reference [always_embed_creatable.to_sym, embed_cmrs]
       if @embedded_item.class.parent == ActivityLog || cmr_view_as && cmr_view_as[:new].in?(not_embedded_options)
         @embedded_item = nil
       end
