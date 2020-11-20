@@ -259,7 +259,7 @@ module Dynamic
       return if disabled?
 
       @option_configs = nil if force
-      @option_configs ||= self.class.options_provider.parse_config(self)
+      @option_configs ||= self.class.options_provider.parse_config(self, force)
       self.class.options_provider.raise_bad_configs @option_configs if raise_bad_configs
       @option_configs
     end
@@ -567,7 +567,7 @@ module Dynamic
     # has been created, restart the server.
     # This is called from an after_commit trigger
     def restart_server
-      AppControl.restart_server
+      AppControl.restart_server if Rails.env.production?
     end
   end
 end

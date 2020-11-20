@@ -3,7 +3,7 @@ class Admin::MigrationGenerator
   DefaultMigrationSchema = Settings::DefaultMigrationSchema
 
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
-                :table_comments, :no_master_association, :prev_table_name
+                :table_comments, :no_master_association, :prev_table_name, :belongs_to_model
 
   #
   # Simply return the current connection
@@ -149,6 +149,17 @@ class Admin::MigrationGenerator
     connection.table_exists?(table_name) || connection.view_exists?(table_name)
   end
 
+
+  #
+  # Check the database for the view existing
+  # This is potentially more current than #tables_and_views, which might be limited by the
+  # current transaction or cached result
+  # @param [String] table_name
+  # @return [Boolean]
+  def self.view_exists?(table_name)
+    connection.view_exists?(table_name)
+  end
+
   #
   # Generate the table name for the history table based on the current table name
   # @param [String] table_name
@@ -166,13 +177,15 @@ class Admin::MigrationGenerator
     "#{table_name.singularize}_id"
   end
 
-  def initialize(db_migration_schema, table_name = nil, all_implementation_fields = nil, table_comments = nil, no_master_association = nil, prev_table_name = nil)
+  def initialize(db_migration_schema, table_name = nil, all_implementation_fields = nil, table_comments = nil,
+                 no_master_association = nil, prev_table_name = nil, belongs_to_model = nil)
     self.db_migration_schema = db_migration_schema
     self.table_name = table_name
     self.prev_table_name = prev_table_name
     self.all_implementation_fields = all_implementation_fields
     self.table_comments = table_comments
     self.no_master_association = no_master_association
+    self.belongs_to_model = belongs_to_model
     super()
   end
 
@@ -203,7 +216,11 @@ class Admin::MigrationGenerator
 
   def fields_comments_changes
     begin
-      cols = ActiveRecord::Base.connection.columns(table_name)
+      cols = if self.class.table_or_view_exists?(table_name)
+               ActiveRecord::Base.connection.columns(table_name)
+             else
+               migration_fields_array
+             end
     rescue StandardError
       return
     end
@@ -239,8 +256,8 @@ class Admin::MigrationGenerator
 
     added = new_colnames - old_colnames
     removed = old_colnames - new_colnames
-    if respond_to? :item_type
-      belongs_to_model_id = "#{item_type}_id"
+    if belongs_to_model
+      belongs_to_model_id = "#{belongs_to_model}_id"
       removed -= [belongs_to_model_id]
     end
 
@@ -283,13 +300,14 @@ class Admin::MigrationGenerator
   end
 
   def migration_set_attribs
-    table_comments = self.table_comments || {}
+    tcs = table_comments || {}
+    byebug if table_name.include?('ipa_sample') && tcs[:table].blank?
     <<~SETATRRIBS
       self.schema = '#{db_migration_schema}'
           self.table_name = '#{table_name}'
           self.fields = %i[#{migration_fields_array.join(' ')}]
-          self.table_comment = '#{table_comments[:table]}'
-          self.fields_comments = #{(table_comments[:fields] || {}).to_json}
+          self.table_comment = '#{tcs[:table]}'
+          self.fields_comments = #{(tcs[:fields] || {}).to_json}
           self.no_master_association = #{!!no_master_association}
     SETATRRIBS
   end
@@ -309,6 +327,16 @@ class Admin::MigrationGenerator
     sleep 1.2
     @do_migration = fn
     fn
+  end
+
+  # Does a previous table migration exist in the schema directory?
+  # mode='*' for create or update
+  # mode='create|update' for the appropriate type to check for
+  def previous_table_migration_exists?(name, mode = '*')
+    dirname = db_migration_dirname
+    cname_us = "#{mode}_#{name}_??????"
+    fn = "#{dirname}/*_#{cname_us}.rb"
+    Dir.glob(fn).present?
   end
 
   def db_migration_dirname

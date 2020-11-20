@@ -28,11 +28,24 @@ module Dynamic
 
     # Generate a migration triggered after_save.
     def generate_migration
-      @do_migration = nil
-      return if @ran_migration || !Rails.env.development?
+      # Re-enabling an item requires it to be created
+      if saved_change_to_disabled?
+        generate_create_migration
+        return
+      end
 
       # Force re-parsing of the option configs, to ensure comments are correctly handled
       option_configs(force: true)
+
+      # If a previous table migration is missing, also create the file but don't run it
+      # then proceed on to create the updates if required
+      unless migration_generator.previous_table_migration_exists?(table_name)
+        gs = generator_script(migration_generator.migration_version)
+        migration_generator.write_db_migration(gs, table_name, migration_generator.migration_version)
+      end
+
+      @do_migration = nil
+      return if @ran_migration || !Rails.env.development?
 
       # Return if there is nothing to update
       return unless migration_generator.migration_update_table || saved_change_to_table_name?
@@ -69,14 +82,22 @@ module Dynamic
     # Set up and memoize a migration generator to be used for all DB and migration
     # related actions
     def migration_generator
-      @migration_generator ||=
+      return @migration_generator if @migration_generator
+
+      btm = belongs_to_model if respond_to? :belongs_to_model
+
+      # Ensure option_configs have been parsed
+      option_configs
+
+      @migration_generator =
         Admin::MigrationGenerator.new(
           db_migration_schema,
           table_name,
           all_implementation_fields(ignore_errors: false),
           table_comments,
           implementation_no_master_association,
-          table_name_before_last_save
+          table_name_before_last_save,
+          btm
         )
     end
 

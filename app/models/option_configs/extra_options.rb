@@ -323,7 +323,7 @@ module OptionConfigs
     # Parse the options within a definition record, returning an array of options (subclasses of ExtraOptions)
     # @param [ActiveRecord::Base] config_obj - dynamic definition record
     # @return [Array {ExtraOptions}]
-    def self.parse_config(config_obj)
+    def self.parse_config(config_obj, force_all = nil)
       config_text = config_obj.options_text
 
       configs = []
@@ -351,7 +351,7 @@ module OptionConfigs
       config_obj.table_comments = res.delete(:_comments)
       # Only run through additional processing of comments if the
       # configuration was just saved
-      handle_table_comments config_obj, res if config_obj.saved_changes?
+      handle_table_comments config_obj, res if config_obj.saved_changes? || force_all
 
       res.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
 
@@ -379,16 +379,24 @@ module OptionConfigs
     # @return [Hash] - comments hash
     def self.handle_table_comments(config_obj, res)
       # Clean up the incoming _comments entry, to avoid it impacting later configurations
-      tc = config_obj.table_comments || {}
+      tc = config_obj.table_comments ||= {}
+
+      ts = config_obj.table_comments && config_obj.table_comments[:table]
+
+      new_tc = config_obj.name.underscore.humanize.titleize
+      if ts != new_tc
+        # Set a default table comment value
+        config_obj.table_comments[:table] = new_tc
+      end
 
       default = res[:default]
       return unless default
 
-      # Set the table comment from the config label if it is not set
-      ts = config_obj.table_comments && config_obj.table_comments[:table]
-      if ts.blank?
+      new_tc = default[:label] || config_obj.name.underscore.humanize.titleize
+      if ts != new_tc
+        # Set the table comment from the config label if it was not set
         config_obj.table_comments ||= {}
-        config_obj.table_comments[:table] = default[:label]
+        config_obj.table_comments[:table] = new_tc
       end
 
       # Get a hash of field comments to update
@@ -397,8 +405,14 @@ module OptionConfigs
       ls = default[:labels] || {}
       cb = default[:caption_before] || {}
 
+      # Get a list of the columns for the table to ensure we
+      # skip captioning fields that don't exist
+      cols = config_obj.all_implementation_fields
+      cols = cols.reject { |f| f.index(/^embedded_report_|^placeholder_/) }
+      cols = cols.map(&:to_sym)
+
       cb.each do |k, v|
-        next if fs[k].present?
+        next if fs[k]&.strip.present? || !k.in?(cols)
 
         if v.is_a? Hash
           # Get the most appropriate caption
@@ -408,6 +422,8 @@ module OptionConfigs
         elsif v.is_a? String
           caption = v
         end
+        caption = caption&.strip
+        next if caption.blank? || fs[k]&.strip == caption
 
         # Add the calculated caption back into the comments fields
         fs[k] = caption
@@ -416,7 +432,11 @@ module OptionConfigs
       # For any field labels that have been defined, use it if the comment
       # has not already been set explicitly or by a previous caption.
       ls.each do |k, v|
-        next if fs[k].present?
+        next if fs[k]&.strip.present? || !k.in?(cols)
+
+        caption = v
+        caption = caption&.strip
+        next if caption.blank? || fs[k]&.strip == caption
 
         fs[k] = v
       end

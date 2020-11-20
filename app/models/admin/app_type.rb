@@ -116,7 +116,7 @@ class Admin::AppType < Admin::AdminBase
       res['app_configurations'] = app_type.import_config_sub_items app_type_config, 'app_configurations', ['name', 'role_name']
 
       # Make two passes at loading general selections, the first time rejecting dynamic items that may not yet be defined
-      reject_items = Proc.new {|k, v| k == :item_type && v.index(/^(activity_log__|dynamic_model__|external_identifier__)/)}
+      reject_items = proc { |k, v| k == :item_type && v.index(/^(activity_log__|dynamic_model__|external_identifier__)/) }
       res['associated_general_selections'] = app_type.import_config_sub_items app_type_config, 'associated_general_selections', ['item_type', 'value'], reject: reject_items
 
       res['associated_config_libraries'] = app_type.import_config_sub_items app_type_config, 'associated_config_libraries', ['name', 'category', 'format']
@@ -442,6 +442,20 @@ class Admin::AppType < Admin::AdminBase
   end
 
   def as_json(options = {})
+    # Only export if option configs are valid
+
+    valid_associated_activity_logs.each do |a|
+      a.force_option_config_parse
+    end
+
+    associated_dynamic_models.each do |a|
+      a.force_option_config_parse
+    end
+
+    associated_external_identifiers.each do |a|
+      a.force_option_config_parse
+    end
+
     options[:root] = true
     options[:methods] ||= []
     options[:include] ||= {}

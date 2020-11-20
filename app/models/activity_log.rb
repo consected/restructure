@@ -205,6 +205,10 @@ class ActivityLog < ActiveRecord::Base
     false
   end
 
+  def belongs_to_model
+    item_type
+  end
+
   # The selection of possible class names that activity logs could be used with
   # This list is the full list of possible items, and only those configured and read by #works_with are actually available
   # for activity logging

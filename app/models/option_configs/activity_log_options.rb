@@ -243,7 +243,7 @@ module OptionConfigs
     # This should be extended to provide additional checks when options are saved
     def self.raise_bad_configs(option_configs)
       bad_configs = option_configs.select { |c| c.bad_ref_items.present? }
-      raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?
+      # raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?
     end
 
     def calc_save_action_if(obj)
