@@ -9,7 +9,8 @@ module ActiveRecord
         attr_accessor :fields, :new_fields, :field_defs, :prev_fields,
                       :field_opts, :owner, :history_table_id_attr,
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
-                      :table_comment, :fields_comments, :mode, :no_master_association
+                      :table_comment, :fields_comments, :mode, :no_master_association,
+                      :requested_action
       end
 
       def force_rollback
@@ -56,6 +57,11 @@ module ActiveRecord
 
       def rand_id
         Digest::MD5.hexdigest("#{schema}.#{table_name}")[0..7]
+      end
+
+      def create_or_update_activity_log_tables
+        requested_action = :create_or_update
+        create_activity_log_tables
       end
 
       def create_activity_log_tables
@@ -111,6 +117,11 @@ module ActiveRecord
         raise e unless force_rollback
       end
 
+      def create_or_update_dynamic_model_tables
+        requested_action = :create_or_update
+        create_dynamic_model_tables
+      end
+
       def create_dynamic_model_tables
         setup_fields
 
@@ -156,6 +167,11 @@ module ActiveRecord
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
         raise e unless force_rollback
+      end
+
+      def create_or_update_external_identifier_tables(id_field, id_field_type = :bigint)
+        requested_action = :create_or_update
+        create_external_identifier_tables(id_field, id_field_type)
       end
 
       def create_external_identifier_tables(id_field, id_field_type = :bigint)
@@ -432,8 +448,15 @@ module ActiveRecord
         res
       end
 
+      # The previous column names were either specified when initializing this
+      # instance, or if in create_or_update mode then use the current table columns
       def prev_col_names(to_type = nil)
-        res = prev_fields
+        res = if requested_action == :create_or_update
+                Admin::MigrationGenerator.table_column_names
+              else
+                prev_fields
+              end
+
         res = res.map(&:to_sym) if to_type == :sym
         res
       end

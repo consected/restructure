@@ -259,6 +259,8 @@ class DynamicModel < ActiveRecord::Base
     cname = "#{mode}_#{table_name}_#{version}".camelize
     do_create_or_update = if mode == 'create'
                             'create_dynamic_model_tables'
+                          elsif mode == 'create_or_update'
+                            'create_or_update_dynamic_model_tables'
                           else
                             migration_generator.migration_update_table
                           end

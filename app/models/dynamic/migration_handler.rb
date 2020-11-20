@@ -34,18 +34,11 @@ module Dynamic
         return
       end
 
-      # Force re-parsing of the option configs, to ensure comments are correctly handled
-      option_configs(force: true)
-
-      # If a previous table migration is missing, also create the file but don't run it
-      # then proceed on to create the updates if required
-      unless migration_generator.previous_table_migration_exists?(table_name)
-        gs = generator_script(migration_generator.migration_version)
-        migration_generator.write_db_migration(gs, table_name, migration_generator.migration_version)
-      end
-
       @do_migration = nil
       return if @ran_migration || !Rails.env.development?
+
+      # Force re-parsing of the option configs, to ensure comments are correctly handled
+      option_configs(force: true)
 
       # Return if there is nothing to update
       return unless migration_generator.migration_update_table || saved_change_to_table_name?
@@ -53,6 +46,19 @@ module Dynamic
       gs = generator_script(migration_generator.migration_version, 'update')
       fn = migration_generator.write_db_migration gs, table_name, migration_generator.migration_version, mode: 'update'
       @do_migration = fn
+    end
+
+    #
+    # Produce "create table" migration for this configuration
+    def write_create_or_update_migration(export_type = nil)
+      return unless Rails.env.development?
+
+      # Force re-parsing of the option configs, to ensure comments are correctly handled
+      option_configs(force: true)
+      mg = migration_generator(force_reset: true)
+      gs = generator_script(mg.migration_version, mode = 'create_or_update')
+
+      mg.write_db_migration(gs, table_name, mg.migration_version, mode: 'create_or_update', export_type: export_type)
     end
 
     # Run a generated migration triggered after_save
@@ -81,8 +87,8 @@ module Dynamic
 
     # Set up and memoize a migration generator to be used for all DB and migration
     # related actions
-    def migration_generator
-      return @migration_generator if @migration_generator
+    def migration_generator(force_reset: nil)
+      return @migration_generator if @migration_generator && !force_reset
 
       btm = belongs_to_model if respond_to? :belongs_to_model
 

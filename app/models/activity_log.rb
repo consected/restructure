@@ -502,6 +502,8 @@ class ActivityLog < ActiveRecord::Base
     cname = "#{mode}_#{table_name}_#{version}".camelize
     do_create_or_update = if mode == 'create'
                             'create_activity_log_tables'
+                          elsif mode == 'create_or_update'
+                            'create_or_update_activity_log_tables'
                           else
                             migration_generator.migration_update_table
                           end
@@ -514,7 +516,7 @@ class ActivityLog < ActiveRecord::Base
         def change
           self.belongs_to_model = '#{item_type}'
           #{migration_generator.migration_set_attribs}
-
+          
           #{do_create_or_update}
           create_activity_log_trigger
         end

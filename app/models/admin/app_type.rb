@@ -424,11 +424,69 @@ class Admin::AppType < Admin::AdminBase
     ms.sort { |a, b| a.id <=> b.id }.uniq
   end
 
+  #
+  # Export the configuration as json or yaml
+  # Only export if option configs are valid
   def export_config(format: :json)
+    force_validations!
+
+    export_migrations if Rails.env.development?
+
     if format == :json
       JSON.pretty_generate(JSON.parse(to_json))
     elsif format == :yaml
       YAML.dump(JSON.parse(to_json))
+    end
+  end
+
+  #
+  # Export migrations to a specific --app-export directory
+  # @return [<Type>] <description>
+  def export_migrations
+    valid_associated_activity_logs.each do |dynamic_def|
+      export_migration_and_clean_export_dir dynamic_def
+    end
+
+    associated_dynamic_models.each do |dynamic_def|
+      export_migration_and_clean_export_dir dynamic_def
+    end
+
+    associated_external_identifiers.each do |dynamic_def|
+      export_migration_and_clean_export_dir dynamic_def
+    end
+  end
+
+  #
+  # Export an individual dynamic type migration, clearing the
+  # export directory if needed
+  # @param [DynamicModel | ActivityLog | ExternalIdentifier] dynamic_def
+  # @param [String] dir_suffix
+  def export_migration_and_clean_export_dir(dynamic_def, dir_suffix = 'app-export')
+    @exported_dirnames ||= []
+
+    dir = dynamic_def.migration_generator.db_migration_dirname(dir_suffix)
+
+    unless dir.in? @exported_dirnames
+      # Clean the export directory
+      FileUtils.rm_rf dir
+      @exported_dirnames << dir
+    end
+    dynamic_def.write_create_or_update_migration dir_suffix
+  end
+
+  #
+  # Check dynamic types and raise exceptions if there are issues
+  def force_validations!
+    valid_associated_activity_logs.each do |a|
+      a.force_option_config_parse
+    end
+
+    associated_dynamic_models.each do |a|
+      a.force_option_config_parse
+    end
+
+    associated_external_identifiers.each do |a|
+      a.force_option_config_parse
     end
   end
 
@@ -442,20 +500,6 @@ class Admin::AppType < Admin::AdminBase
   end
 
   def as_json(options = {})
-    # Only export if option configs are valid
-
-    valid_associated_activity_logs.each do |a|
-      a.force_option_config_parse
-    end
-
-    associated_dynamic_models.each do |a|
-      a.force_option_config_parse
-    end
-
-    associated_external_identifiers.each do |a|
-      a.force_option_config_parse
-    end
-
     options[:root] = true
     options[:methods] ||= []
     options[:include] ||= {}

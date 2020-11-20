@@ -267,6 +267,8 @@ class ExternalIdentifier < ActiveRecord::Base
     ftype = (alphanumeric? ? 'string' : 'bigint')
     do_create_or_update = if mode == 'create'
                             "create_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
+                          elsif mode == 'create_or_update'
+                            "create_or_update_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
                           else
                             migration_generator.migration_update_table
                           end

@@ -149,7 +149,6 @@ class Admin::MigrationGenerator
     connection.table_exists?(table_name) || connection.view_exists?(table_name)
   end
 
-
   #
   # Check the database for the view existing
   # This is potentially more current than #tables_and_views, which might be limited by the
@@ -175,6 +174,14 @@ class Admin::MigrationGenerator
   # @return [String]
   def self.history_table_id_attr_for(table_name)
     "#{table_name.singularize}_id"
+  end
+
+  #
+  # Get all the column names for a specified table
+  # @param [String] table_name
+  # @return [Array{String}]
+  def self.table_column_names(table_name)
+    connection.columns(table_name).map(&:name)
   end
 
   def initialize(db_migration_schema, table_name = nil, all_implementation_fields = nil, table_comments = nil,
@@ -301,7 +308,7 @@ class Admin::MigrationGenerator
 
   def migration_set_attribs
     tcs = table_comments || {}
-    byebug if table_name.include?('ipa_sample') && tcs[:table].blank?
+    byebug if tcs[:table].blank?
     <<~SETATRRIBS
       self.schema = '#{db_migration_schema}'
           self.table_name = '#{table_name}'
@@ -313,34 +320,42 @@ class Admin::MigrationGenerator
   end
 
   # Write a schema-specific migration only if we are in a development mode
-  def write_db_migration(mig_text, name, version = nil, mode: 'create')
+  # @param [String] mig_text - the migration text to be written
+  # @param [String | Symbol] name - underscored model name
+  # @param [String] version - six character alphanumeric version
+  # @param [String] mode - "create" or "update" type of migration
+  # @param [String] export_type - optionally add a type "--export_type" suffix to the directory, "exports" for example
+  # @return [String] full file path
+  def write_db_migration(mig_text, name, version = nil, mode: 'create', export_type: nil)
     return unless Rails.env.development?
 
     version ||= migration_version
 
-    dirname = db_migration_dirname
+    dirname = db_migration_dirname export_type
     cname_us = "#{mode}_#{name}_#{version}"
-    fn = "#{dirname}/#{Time.new.to_s(:number)}_#{cname_us}.rb"
+    filepath = "#{dirname}/#{Time.new.to_s(:number)}_#{cname_us}.rb"
     FileUtils.mkdir_p dirname
-    File.write(fn, mig_text)
+    File.write(filepath, mig_text)
     # Cheat way to ensure multiple migrations can not have the same timestamp during app type loads
     sleep 1.2
-    @do_migration = fn
-    fn
+    @do_migration = filepath
+    filepath
   end
 
   # Does a previous table migration exist in the schema directory?
   # mode='*' for create or update
   # mode='create|update' for the appropriate type to check for
-  def previous_table_migration_exists?(name, mode = '*')
-    dirname = db_migration_dirname
+  def previous_table_migration_exists?(name, mode: '*', export_type: nil)
+    dirname = db_migration_dirname export_type
     cname_us = "#{mode}_#{name}_??????"
-    fn = "#{dirname}/*_#{cname_us}.rb"
-    Dir.glob(fn).present?
+    filepath = "#{dirname}/*_#{cname_us}.rb"
+    Dir.glob(filepath).present?
   end
 
-  def db_migration_dirname
-    "db/app_migrations/#{db_migration_schema}"
+  def db_migration_dirname(export_type = nil)
+    dirname = "db/app_migrations/#{db_migration_schema}"
+    dirname += "--#{export_type}" if export_type
+    dirname
   end
 
   def db_migration_failed_dirname
