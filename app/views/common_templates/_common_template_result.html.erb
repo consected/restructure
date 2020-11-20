@@ -134,11 +134,9 @@
       {{/if}}
     {{/if}}
     {{#with (fpa_state_item 'caption_before' (underscore name) vdef_version 'metadata' )}}
-    <div class="results-caption-before {{ hyphenate full_name }}-metadata">
-      <div class="panel panel-default panel-body">
-        <small>{{{this.show_caption}}}</small>
-      </div>
-    </div>
+    <li class="list-group-item caption-before results-caption-before {{ hyphenate ../full_name }}-metadata">
+        {{{this.show_caption}}}
+    </li>
     {{/with}}
 
     {{#unless exclude_metadata }}
