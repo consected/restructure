@@ -19,8 +19,13 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Added] improved migration generation and create_or_update migrations generated on app type export
 - [Added] External identifiers now use option configurations to apply dynamic definitions to fields and forms
-
+- [Added] improved DB table and field comments, automatically generated from captions and labels
+- [Added] activity_selector reference option
+- [Changed] model reference handling in views
+- [Changed] Activity Log admin edit form to provide more information about the current definition
+- [Fixed] many fixes
 
 ## [7.3.167] - 2020-11-12
 
