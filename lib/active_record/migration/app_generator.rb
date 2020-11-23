@@ -60,8 +60,13 @@ module ActiveRecord
       end
 
       def create_or_update_activity_log_tables
-        requested_action = :create_or_update
-        create_activity_log_tables
+        self.requested_action = :create_or_update
+
+        if table_exists
+          update_fields
+        else
+          create_activity_log_tables
+        end
       end
 
       def create_activity_log_tables
@@ -118,8 +123,12 @@ module ActiveRecord
       end
 
       def create_or_update_dynamic_model_tables
-        requested_action = :create_or_update
-        create_dynamic_model_tables
+        self.requested_action = :create_or_update
+        if table_exists
+          update_fields
+        else
+          create_dynamic_model_tables
+        end
       end
 
       def create_dynamic_model_tables
@@ -170,8 +179,12 @@ module ActiveRecord
       end
 
       def create_or_update_external_identifier_tables(id_field, id_field_type = :bigint)
-        requested_action = :create_or_update
-        create_external_identifier_tables(id_field, id_field_type)
+        self.requested_action = :create_or_update
+        if table_exists
+          update_fields
+        else
+          create_external_identifier_tables(id_field, id_field_type)
+        end
       end
 
       def create_external_identifier_tables(id_field, id_field_type = :bigint)
@@ -298,10 +311,10 @@ module ActiveRecord
 
         if reverting?
           puts 'Rollback'
-          puts "Adding: #{removed -= col_names}"
-          puts "Removing: #{added &= col_names}"
-          puts "Adding (history): #{removed_history -= history_col_names}" if history_table_exists
-          puts "Removing (history): #{added_history &= history_col_names}" if history_table_exists
+          puts "Adding: #{removed &= col_names}"
+          puts "Removing: #{added -= col_names}"
+          puts "Adding (history): #{removed_history &= history_col_names}" if history_table_exists
+          puts "Removing (history): #{added_history -= history_col_names}" if history_table_exists
         else
           puts 'Migrate'
           puts "Adding: #{added -= col_names}"
@@ -346,14 +359,19 @@ module ActiveRecord
           comment = fields_comments[c.to_sym]
           options[:comment] = comment if comment.present?
           fdef = field_defs[c.to_sym]
+
+          # If we are rolling back, skip this one unless the col name exists in the table
+          # or if migrating up, skip this one unless the col name does not exist in the table
+          next unless reverting? && c.in?(col_names) || !reverting? && !c.in?(col_names)
+
           if fdef == :references
             begin
-              add_reference "#{schema}.#{table_name}", c, options unless c.in? col_names
+              add_reference "#{schema}.#{table_name}", c, options
             rescue StandardError, ActiveRecord::StatementInvalid
               nil
             end
           else
-            add_column "#{schema}.#{table_name}", c, fdef, options unless c.in? col_names
+            add_column "#{schema}.#{table_name}", c, fdef, options
           end
         end
 
@@ -362,14 +380,19 @@ module ActiveRecord
           comment = fields_comments[c.to_sym]
           options[:comment] = comment if comment.present?
           fdef = field_defs[c.to_sym] || {}
+
+          # If we are rolling back, skip this one unless the col name does not exist in the table
+          # or if migrating up, skip this one unless the col name exists in the table
+          next unless reverting? && !c.in?(col_names) || !reverting? && c.in?(col_names)
+
           if fdef == :references
             begin
-              remove_reference "#{schema}.#{table_name}", c, options if c.in?(col_names)
+              remove_reference "#{schema}.#{table_name}", c, options
             rescue StandardError, ActiveRecord::StatementInvalid
               nil
             end
           else
-            remove_column "#{schema}.#{table_name}", c, fdef if c.in? col_names
+            remove_column "#{schema}.#{table_name}", c, fdef
           end
         end
 
@@ -378,15 +401,20 @@ module ActiveRecord
           comment = fields_comments[c.to_sym]
           options[:comment] = comment if comment.present?
           fdef = field_defs[c.to_sym]
+
+          # If we are rolling back, skip this one unless the col name exists in the table
+          # or if migrating up, skip this one unless the col name does not exist in the table
+          next unless reverting? && c.in?(history_col_names) || !reverting? && !c.in?(history_col_names)
+
           if fdef == :references
             options[:index][:name] += '_hist'
             begin
-              add_reference "#{schema}.#{history_table_name}", c, options unless c.in? history_col_names
+              add_reference "#{schema}.#{history_table_name}", c, options
             rescue StandardError, ActiveRecord::StatementInvalid
               nil
             end
           else
-            add_column "#{schema}.#{history_table_name}", c, fdef, options unless c.in? history_col_names
+            add_column "#{schema}.#{history_table_name}", c, fdef, options
           end
         end
 
@@ -395,6 +423,11 @@ module ActiveRecord
           comment = fields_comments[c.to_sym]
           options[:comment] = comment if comment.present?
           fdef = field_defs[c.to_sym] || {}
+
+          # If we are rolling back, skip this one unless the col name does not exist in the table
+          # or if migrating up, skip this one unless the col name exists in the table
+          next unless reverting? && !c.in?(history_col_names) || !reverting? && c.in?(history_col_names)
+
           if fdef == :references
             options[:index][:name] += '_hist'
             begin
@@ -452,12 +485,16 @@ module ActiveRecord
       # instance, or if in create_or_update mode then use the current table columns
       def prev_col_names(to_type = nil)
         res = if requested_action == :create_or_update
-                Admin::MigrationGenerator.table_column_names
+                Admin::MigrationGenerator.table_column_names table_name
               else
                 prev_fields
               end
 
-        res = res.map(&:to_sym) if to_type == :sym
+        res = if to_type == :sym
+                res.map(&:to_sym)
+              else
+                res.map(&:to_s)
+              end
         res
       end
 
@@ -516,7 +553,7 @@ module ActiveRecord
             fopts[:comment] = comment
           end
 
-          if a.start_with?('tag_select')
+          if a.start_with?('tag_select') || a.start_with?('multi_select')
             fopts ||= {}
             fopts[:array] = true
           end
