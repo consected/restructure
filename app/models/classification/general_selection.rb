@@ -90,6 +90,7 @@ class Classification::GeneralSelection < ActiveRecord::Base
     !attr.in?(%w[disabled user_id created_at updated_at]) && (
       attr.start_with?('select_') ||
       attr.start_with?('multi_select_') ||
+      attr.start_with?('tag_select_') ||
       attr.end_with?('_selection') ||
       attr.in?(%w[source rec_type rank])
     )
