@@ -22,6 +22,10 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## [7.3.168] - 2020-11-20
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 79d06bbea3ff56a319c2448575ea2aff9342912e
 - [Added] improved migration generation and create_or_update migrations generated on app type export
 - [Added] External identifiers now use option configurations to apply dynamic definitions to fields and forms
 - [Added] improved DB table and field comments, automatically generated from captions and labels
@@ -29,6 +33,8 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 - [Changed] model reference handling in views
 - [Changed] Activity Log admin edit form to provide more information about the current definition
 - [Fixed] many fixes
+=======
+>>>>>>> ee82e76eaede6294d1fff8a83a59b72017d6c4de
 
 ## [7.3.167] - 2020-11-12
 
