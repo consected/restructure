@@ -56,11 +56,16 @@ read -s -p "FPHS user password: " TEMP_DB_PW
 echo
 echo "migrate or rollback?"
 read MODE
+
 echo "Specify a migration path MIG_PATH or just hit enter"
 read MIG_PATH
 if [ "$MIG_PATH" ]; then
   export MIG_PATH
 fi
+echo
+
+echo "Specify the schema name"
+read SCHEMA_NAME
 
 echo
 
@@ -71,6 +76,14 @@ if [ "$ALLOW_DROP_COLUMNS" == 'true' ]; then
   export STEPS='STEP=1'
   echo "Will drop columns if needed."
   echo "Migration limited to 1 step. Re-run to check the next one"
+else
+  if [ "$MODE" == 'rollback' ]; then
+    echo "Rollback how many steps? (default 1)"
+    read REQSTEPS
+    if [ "${REQSTEPS}" ]; then
+      export STEPS="STEP=${REQSTEPS}"
+    fi
+  fi
 fi
 
 echo
@@ -89,18 +102,18 @@ FPHS_POSTGRESQL_HOSTNAME=$TEMP_HOSTNAME \
 
 export PGPASSWORD="$TEMP_DB_PW"
 
-psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < fphs-sql/grant_roles_access_to_ml_app.sql
+psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < ../fphs-app-configs/fphs-sql/grant_roles_access_to_ml_app.sql
 
-if [ -f "fphs-sql/grant_roles_access_to_${MIG_PATH}.sql" ]; then
-  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < fphs-sql/grant_roles_access_to_${MIG_PATH}.sql
+if [ -f "fphs-sql/grant_roles_access_to_${SCHEMA_NAME}.sql" ]; then
+  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < ../fphs-app-configs/fphs-sql/grant_roles_access_to_${SCHEMA_NAME}.sql
 fi
 
 if [ "$TEMP_ENV" == 'filestore-production' ]; then
-  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < fphs-sql/grant_roles_access_to_filestore.sql
+  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < ../fphs-app-configs/fphs-sql/grant_roles_access_to_filestore.sql
 fi
 
 if [ "$TEMP_ENV" == 'zeus-production' ]; then
-  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < fphs-sql/grant_roles_access_to_zeus.sql
+  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < ../fphs-app-configs/fphs-sql/grant_roles_access_to_zeus.sql
 fi
 
 echo "Note:"
