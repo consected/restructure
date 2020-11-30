@@ -386,7 +386,7 @@ module OptionConfigs
       new_tc = config_obj.name.underscore.humanize.titleize
       if ts != new_tc
         # Set a default table comment value
-        config_obj.table_comments[:table] = new_tc
+        config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
       end
 
       default = res[:default]
@@ -395,8 +395,7 @@ module OptionConfigs
       new_tc = default[:label] || config_obj.name.underscore.humanize.titleize
       if ts != new_tc
         # Set the table comment from the config label if it was not set
-        config_obj.table_comments ||= {}
-        config_obj.table_comments[:table] = new_tc
+        config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
       end
 
       # Get a hash of field comments to update
