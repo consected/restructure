@@ -206,7 +206,7 @@ class ExternalIdentifier < ActiveRecord::Base
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
-        res.include ExternalIdHandler
+        res.include Dynamic::ExternalIdImplementer
         res.include LimitedAccessControl
 
         # Setup the controller

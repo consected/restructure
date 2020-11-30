@@ -58,7 +58,10 @@ class ActivityLog < ActiveRecord::Base
 
   # List of record types across all item types that are valid for use
   def self.all_valid_item_and_rec_types
-    Classification::GeneralSelection.selector_collection(['item_type like ?', '%_type']).map { |i| [i.item_type.sub(/(_rec)?_type$/, '').singularize, i.value].join('_') } + use_with_class_names
+    Classification::GeneralSelection
+      .selector_collection(['item_type like ?', '%_type'])
+      .map { |i| [i.item_type.sub(/(_rec)?_type$/, '').singularize, i.value].join('_') } +
+      use_with_class_names
   end
 
   # checks if this activity log works with the specified item_type and optionally rec_type based on admin activity log record configuration
@@ -452,7 +455,7 @@ class ActivityLog < ActiveRecord::Base
         res.include TrackerHandler
         res.include WorksWithItem
         res.include UserHandler
-        res.include ActivityLogHandler
+        res.include Dynamic::ActivityLogImplementer
         ESignature::ESignatureManager.enable_e_signature_for res
         res.final_setup
 

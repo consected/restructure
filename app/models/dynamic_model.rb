@@ -158,7 +158,7 @@ class DynamicModel < ActiveRecord::Base
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
-        res.include DynamicModelHandler
+        res.include Dynamic::DynamicModelImplementer
         add_handlers(res)
 
         res.final_setup
