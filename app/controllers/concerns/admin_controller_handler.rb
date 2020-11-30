@@ -26,6 +26,14 @@ module AdminControllerHandler
       # This hash will be used to initialize a new model
       @copy_with = primary_model.find(params[:copy_with_id]).attributes.select { |k, _v| permitted_params.include? k.to_sym }
     end
+
+    # Ensure the app type is defaulted, if not copying an existing item and the primary model uses app types
+    if !@copy_with && primary_model_uses_app_type?
+      @copy_with = {
+        app_type_id: current_user.app_type_id
+      }
+    end
+
     set_object_instance primary_model.new(@copy_with) unless options[:use_current_object]
     render partial: view_path('form')
   end
@@ -248,7 +256,7 @@ module AdminControllerHandler
   #   Each item is an array representing the arguments passed to the #link_to method
   #   For example:
   #     [ ['details', admin_external_id_details_path(id) ], ... ]
-  def admin_links _id=nil
+  def admin_links(_id = nil)
     nil
   end
 end
