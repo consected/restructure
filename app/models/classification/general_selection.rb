@@ -115,7 +115,6 @@ class Classification::GeneralSelection < ActiveRecord::Base
 
     # Get the underlying general selection data and make it into an array of results
     res = selector_collection(conditions)
-    res = res.to_ary
 
     impl_classes = implementation_classes
     # Check the definition is ready to use and prepare it for use

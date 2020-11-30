@@ -38,7 +38,6 @@ module SelectorCache
     end
 
     def collection_cache_key
-      logger.debug "Getting #{self} collection cache key"
       "#{self}_collection"
     end
 
@@ -109,7 +108,7 @@ module SelectorCache
       ckey = "#{collection_cache_key}#{conditions}"
 
       Rails.cache.fetch(ckey) do
-        enabled.where(conditions)
+        enabled.where(conditions).to_a
       end
     end
 

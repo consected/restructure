@@ -73,7 +73,10 @@ module AlternativeIds
     # @param [String] field_name
     # @return [ExternalIdentifier | nil]
     def external_id_definition(attr_name)
-      ExternalIdentifier.active.where(external_id_attribute: attr_name).first
+      return @external_id_definition[attr_name] if @external_id_definition&.key?(attr_name)
+
+      @external_id_definition ||= {}
+      @external_id_definition[attr_name] = ExternalIdentifier.active.where(external_id_attribute: attr_name).first
     end
 
     #
