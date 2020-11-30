@@ -334,6 +334,7 @@ class Master < ActiveRecord::Base
     extras.merge!(include: included_tables)
 
     extras[:methods] << :header_prefix
+    extras[:methods] << :header_title
     extras[:methods] << :trackers_length
 
     res = Admin::AppConfiguration.values_for(:show_ids_in_master_result, current_user)
@@ -360,20 +361,33 @@ class Master < ActiveRecord::Base
     res
   end
 
-  def header_prefix
-    prefix = Admin::AppConfiguration.value_for(:master_header_prefix, current_user)
+  #
+  # Calculate the substitutions for a master header prefix or title
+  # @param [<Type>] prefix <description>
+  # @return [<Type>] <description>
+  def header_substitutions(template)
     html = false
-    return unless prefix.present?
+    return unless template.present?
 
-    prefix = Formatter::Substitution.substitute prefix, data: self, tag_subs: nil, ignore_missing: true
-    prefix = CGI.escapeHTML prefix
-    while prefix.include? '**'
-      prefix = prefix.sub('**', '<b>')
-      prefix = prefix.sub('**', '</b>')
+    template = Formatter::Substitution.substitute template, data: self, tag_subs: nil, ignore_missing: true
+    template = CGI.escapeHTML template
+    while template.include? '**'
+      template = template.sub('**', '<b>')
+      template = template.sub('**', '</b>')
       html = true
     end
-    prefix.html_safe if html
-    prefix
+    template.html_safe if html
+    template
+  end
+
+  def header_prefix
+    template = Admin::AppConfiguration.value_for(:master_header_prefix, current_user)
+    header_substitutions template
+  end
+
+  def header_title
+    template = Admin::AppConfiguration.value_for(:master_header_title, current_user)
+    header_substitutions template
   end
 
   # Validate that the external identifier restrictions do not prevent access to this item
