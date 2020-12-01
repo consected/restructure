@@ -72,7 +72,7 @@ RSpec.describe 'SageAssignment', type: :model do
 
       expect do
         @master.sage_assignments.build sage_id: ''
-      end.to raise_error(::ExternalIdImplementer::NoUnassignedAvailable, 'No available IDs for assignment')
+      end.to raise_error(Dynamic::ExternalIdImplementer::NoUnassignedAvailable, 'No available IDs for assignment')
     end
   end
 
