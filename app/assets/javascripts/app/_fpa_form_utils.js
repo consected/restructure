@@ -1764,6 +1764,20 @@ _fpa.form_utils = {
     }
   },
 
+  // If all children are not visible, add a class that allows this block to be hidden or styled
+  hide_empty_blocks: function (block) {
+    block.find('.hide-if-children-invisible').each(function () {
+      if ($(this).find(':visible').length == 0) {
+        $(this).addClass('all-children-invisible');
+        $(this).removeClass('some-children-visible');
+      }
+      else {
+        $(this).removeClass('all-children-invisible');
+        $(this).addClass('some-children-visible');
+      }
+    });
+  },
+
   // Run through all the general formatters for a new block to show nicely
   format_block: function (block) {
 
@@ -1797,6 +1811,7 @@ _fpa.form_utils = {
     _fpa.form_utils.setup_contact_field_mask(block);
     _fpa.form_utils.setup_filestore(block);
     _fpa.form_utils.setup_e_signature(block);
+    _fpa.form_utils.hide_empty_blocks(block);
     // Not currently used or tested.
     // _fpa.form_utils.setup_form_filtered_select(block);
 
