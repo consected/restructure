@@ -40,6 +40,6 @@
 		<a class="btn btn-default btn-sm" data-edit="indent" title="Indent (Tab)"><i class="glyphicon glyphicon-indent-left"></i></a>
 	</div>
 </div>
-<div id="<%=edid%>" class="custom-editor"><%= Kramdown::Document.new(form_object_instance.attributes[field_name] || '').to_html.html_safe %></div>
+<div id="<%=edid%>" class="custom-editor"><%= Kramdown::Document.new(form_object_instance.attributes[field_name_sym.to_s] || '').to_html.html_safe %></div>
 </div>
 <% end %>
