@@ -19,6 +19,7 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Changed] bugfixes in editable report forms and model reference edit buttons
 
 ## [7.3.168] - 2020-11-20
 
