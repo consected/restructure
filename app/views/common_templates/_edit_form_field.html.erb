@@ -1,5 +1,7 @@
 <%
-  locals[:embedded] = embedded
+  if defined? embedded
+    locals[:embedded] = embedded
+  end
   local_vars = locals
   local_vars[:locals][:locals] = local_vars[:locals]
   # Get the list of filenames for templates, making them into the matchers we wish to use.
