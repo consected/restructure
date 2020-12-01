@@ -369,8 +369,10 @@ class Admin::MigrationGenerator
     Thread.new do
       ActiveRecord::Base.connection_pool.with_connection do
         ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
-        pid = spawn('bin/rake db:structure:dump')
-        Process.detach pid
+        # Don't dump until a build, otherwise differences in individual development environments
+        # force unnecessary and confusing commits
+        # pid = spawn('bin/rake db:structure:dump')
+        # Process.detach pid
       end
     end.join
 
