@@ -272,6 +272,11 @@
     user_file_actions: <%= user_file_actions.to_json&.html_safe %>
   }
 
+<% unless full_name.underscore.to_s == name.underscore.to_s %>
+  _fpa.state.template_config.<%=full_name.underscore%> = _fpa.state.template_config.<%=full_name.underscore%> || {};
+  _fpa.state.template_config.<%=full_name.underscore%>.v<%=def_version%> = _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>;
+<% end %>
+
   _fpa.show_if.forms['<%=full_name%>'] = _fpa.show_if.forms['<%=full_name%>'] || {};
   <% if full_name.to_s.end_with?('_primary') %>
   _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] || {};
