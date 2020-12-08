@@ -529,9 +529,11 @@ _fpa.form_utils = {
         var master_id = block.parents('.master-panel').first().attr('data-master-id');
       }
 
-      var master = _fpa.state.masters[master_id];
+      var master = _fpa.state.masters && _fpa.state.masters[master_id];
       if (master) {
+        var id = new_data.id;
         new_data = Object.assign(new_data, master);
+        new_data.id = id;
       }
 
       res.forEach(function (el) {
@@ -589,7 +591,7 @@ _fpa.form_utils = {
           got = _fpa.form_utils.format_substitution(got, formatters, tag_name);
         }
 
-        if (!no_html_tag) {
+        if (no_html_tag == false) {
           got = '<em class="all_caps">' + got + '</em>';
         }
 

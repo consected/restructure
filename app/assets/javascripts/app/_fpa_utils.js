@@ -224,6 +224,10 @@ String.prototype.hyphenate = function () {
   return this.replace(/_/g, '-');
 };
 
+String.prototype.id_hyphenate = function () {
+  return this.replace(/[^a-zA-Z0-9\-]/g, '-').toLowerCase();
+};
+
 
 String.prototype.pathify = function () {
   return this.replace(/__/g, '/');

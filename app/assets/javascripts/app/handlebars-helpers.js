@@ -463,6 +463,12 @@
     return str.hyphenate();
   });
 
+  Handlebars.registerHelper('id_hyphenate', function (str) {
+    if (!str) return;
+    return str.id_hyphenate();
+  });
+
+
   Handlebars.registerHelper('pathify', function (str) {
     if (!str) return;
     return str.pathify();
