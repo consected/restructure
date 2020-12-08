@@ -62,3 +62,6 @@ Metrics/ParameterLists:
 
 Style/Documentation:
   Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false
