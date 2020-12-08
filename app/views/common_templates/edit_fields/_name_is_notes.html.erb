@@ -1,45 +1,31 @@
 <%
+  # Default format, set in the app configurations
   def_format = app_config_text(:notes_field_format)
+  # field_options set in dynamic option configs
   fopt = field_options_for(form_object_instance, field_name_sym)
+  
+  # Import forms force plain text notes
   unless @plain_notes
     editor_format = fopt[:format] || def_format
-    if editor_format.present?
-      extra_class = "edit-as-custom edit-as-#{editor_format}"
-      edid = "custom-editor-#{form_object_instance.class.name.ns_hyphenate}-#{field_name_sym}-#{form_object_instance.id}"
-    end
+    editor_id = "custom-editor-#{form_object_instance.class.name.ns_hyphenate}-#{field_name_sym}-#{form_object_instance.id}"
   end
 
   lf = label_for(field_name_sym, labels)
 %>
-<% if lf.present? %>
-<%= form.label field_name_sym, lf %>
-<% end %>
-<% if editor_format == 'markdown'
-# editor_id = "custom-editor-#{form_object_instance.model_name}-#{form_object_instance.id}-#{field_name_sym}"
-%>
-<div class="custom-editor-container <%=extra_class%>">
-<% end %>
-<%= form.text_area field_name_sym, class: "form-control text-notes #{edid ? 'hidden' : ''}", data: {attr_name: field_name_sym, object_name: form_object_item_type_us}  %>
+<% if lf.present? %><%= form.label field_name_sym, lf %><% end %>
+
 <% if editor_format == 'markdown' %>
-<div class="btn-toolbar" data-role="editor-toolbar" data-target="#<%=edid%>">
-  <div class="btn-group">
-    <a class="btn btn-default btn-sm" data-edit="formatBlock <p>" title="Paragraph" style="font-weight: normal"><span style="font-size: 12px;">p</span></a>
-    <a class="btn btn-default btn-sm" data-edit="formatBlock <h1>" title="Heading 1" style="font-weight: bold">h1</a>
-    <a class="btn btn-default btn-sm" data-edit="formatBlock <h2>" title="Heading 2" style="font-weight: bold;"><span style="font-size: 14px;">h2</span> </a>
-  </div>
-  <div class="btn-group">
-		<a class="btn btn-default btn-sm" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="glyphicon glyphicon-bold"></i></a>
-		<a class="btn btn-default btn-sm" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="glyphicon glyphicon-italic"></i></a>
-		<a class="btn btn-default btn-sm" data-edit="strikethrough" title="Strikethrough" style="text-decoration: line-through;">S</a>
-		<a class="btn btn-default btn-sm" data-edit="underline" title="Underline (Ctrl/Cmd+U)"><i class="glyphicon glyphicon-text-color"></i></a>
-	</div>
-  <div class="btn-group">
-		<a class="btn btn-default btn-sm" data-edit="insertunorderedlist" title="Bullet list"><i class="glyphicon glyphicon-list"></i></a>
-		<a class="btn btn-default btn-sm" data-edit="insertorderedlist" title="Number list"><i class="glyphicon glyphicon-list-alt"></i></a>
-		<a class="btn btn-default btn-sm" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="glyphicon glyphicon-indent-right"></i></a>
-		<a class="btn btn-default btn-sm" data-edit="indent" title="Indent (Tab)"><i class="glyphicon glyphicon-indent-left"></i></a>
-	</div>
-</div>
-<div id="<%=edid%>" class="custom-editor"><%= Kramdown::Document.new(form_object_instance.attributes[field_name_sym.to_s] || '').to_html.html_safe %></div>
-</div>
+  <%= render partial: 'common_templates/markdown_editor/show_editor', locals: { editor_format: editor_format, 
+                                                                                editor_id: editor_id,
+                                                                                form: form,
+                                                                                field_options: fopt,
+                                                                                form_object_instance: form_object_instance, 
+                                                                                field_name_sym: field_name_sym,
+                                                                                form_object_item_type_us: form_object_item_type_us } %>
+<% else # plain text %>
+  <%= form.text_area field_name_sym, class: "form-control text-notes", 
+                                     data: {
+                                       attr_name: field_name_sym, 
+                                       object_name: form_object_item_type_us
+                                       } %>  
 <% end %>
