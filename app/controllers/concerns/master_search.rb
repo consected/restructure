@@ -8,8 +8,8 @@ module MasterSearch
   # Run a query to get a response for a set of masters.
   # Several different search types can be handled
   # - MSID:
-  #   Search a single or list of items by master id, MSID or pro_id,
-  #   typically from the URL or nav bar search form
+  #   Search a single or list of items by master id, MSID, pro_id,
+  #   or another external ID, typically from the URL or nav bar search form
   # - SIMPLE:
   #   A simple Zeus search form
   # - REPORT:
@@ -67,20 +67,17 @@ module MasterSearch
   private
 
   def run_for_master_attribute
-    if !params[:master][:msid].blank?
-      msid = params[:master][:msid].to_s
-      if msid.index(/[,| ]/)
-        msid = msid.split(/[,| ]/)
-        @sort_by_ids = msid.map(&:to_i).uniq
+    pext = params[:master][:external_id]
+    if pext && pext[:id].present?
+      ext_id = pext[:id].to_s
+      if ext_id.index(/[,| ]/)
+        ext_id = ext_id.split(/[,| ]/)
+        @sort_by_ids = ext_id.map(&:to_i).uniq
       end
-      @masters = Master.where msid: msid
-    elsif !params[:master][:pro_id].blank?
-      proid = params[:master][:pro_id].to_s
-      if proid.index(/[,| ]/)
-        proid = proid.split(/[,| ]/)
-        @sort_by_ids = pro_id.map(&:to_i).uniq
-      end
-      @masters = Master.where pro_id: proid
+      ext_field = pext[:field]
+      m = Master.find_with_alternative_id(ext_field, ext_id) if ext_field && ext_id
+      mids = [m]
+      @masters = Master.where(id: mids)
     elsif !params[:master][:id].blank?
       id = params[:master][:id].to_s
       if id.index(/[,| ]/)

@@ -180,7 +180,9 @@
       {{/each}}
 
   </div>
-  <div class="hidden" id="msid_list">{{#each masters}}{{msid}} {{/each}}</div>
+  {{#each (fpa_state_item 'crosswalk_attrs')}}
+  <div class="hidden" id="{{this}}_list">{{#each ../masters}}{{lookup this ../this }} {{/each}}</div>
+  {{/each}}
   <div class="hidden" id="master_id_list">{{#each masters}}{{id}} {{/each}}</div>
   {{else}}
       <h2 class="no-results-msg">No Results</h2>

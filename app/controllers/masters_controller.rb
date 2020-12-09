@@ -6,6 +6,7 @@ class MastersController < UserBaseController
   before_action :authorized?, only: %i[new create]
 
   include MasterSearch
+  include Fphs::PlayerActionHandler
 
   ResultsLimit = Master.results_limit
 
@@ -24,12 +25,26 @@ class MastersController < UserBaseController
   end
 
   def show
-    if params[:type] == 'msid' && params[:id]
-      @master = Master.find_by_msid(params[:id])
+    req_type = params[:type]
+
+    if req_type&.to_sym&.in?(Master.crosswalk_attrs) && params[:id]
+      # The requested type is a master crosswalk attribute.
+      # Find the master and retrieve the value
+      @master = Master.send("find_by_#{req_type}", params[:id])
       return not_found unless @master
 
-      @msid = @master.msid
+      @ext_id = @master.attributes[req_type]
+      @ext_field = req_type
+    elsif req_type&.to_sym&.in?(Master.alternative_id_fields) && params[:id]
+      # The requested type is a master crosswalk attribute.
+      # Find the master and retrieve the value
+      @master = Master.find_with_alternative_id(req_type, params[:id])
+      return not_found unless @master
+
+      @ext_id = params[:id]
+      @ext_field = req_type
     elsif params[:id]
+      # Not a crosswalk, so the id is a Master id
       @master = Master.find(params[:id])
       return not_found unless @master
 
@@ -44,33 +59,39 @@ class MastersController < UserBaseController
     end
   end
 
+  #
+  # Search action for search forms and structured URL query strings
+  # params[:external_id] - we have an external_id parameter, use this to search
+  # params[:nav_q_id] - if not an external_id instead search by master id
+  # params[:req_format] - determines the result format. 'reg' for UI, alternatively 'csv' or 'json'
+  # If the method build_associations_for_searches is available, use this to setup appropriate
+  # associations to support the search.
   def search
-    @msid ||= params[:nav_q]
-    @master_pro_id ||= params[:nav_q_pro_id]
-    @master_id ||= params[:nav_q_id] unless app_config_text(:prevent_reload_master_list, nil)
+    pext = params[:external_id]
+    if pext
+      @ext_field ||= pext[:field]
+      named_id = pext.to_unsafe_h.select { |_k, v| v.present? }.first
 
-    @requested_master = @master_id || @master_pro_id || @msid
+      if @ext_field.present?
+        @ext_id ||= pext[:id]
+      elsif named_id
+        @ext_field = named_id.first
+        @ext_id ||= named_id.last
+      end
 
+      @requested_master = Master.find_with_alternative_id(@ext_field, @ext_id) if @ext_field && @ext_id
+    else
+      @master_id ||= params[:nav_q_id] unless app_config_text(:prevent_reload_master_list, nil)
+      @requested_master = @master_id
+    end
+
+    # What format is being requested. If nothing is specified, 'reg' indicates a UI search result
     @master_req_format = params[:req_format] || 'reg'
 
     @master = Master.new
 
-    # Advanced search fields
-    @master.pro_infos.build
-    @master.player_infos.build
-    @master.addresses.build
-    @master.player_contacts.build
-    @master.trackers.build
-    @master.tracker_histories.build
-    @master.scantrons.build if defined? Scantron
-    # @master.sage_assignments.build
-
-    # NOT conditions
-    @master.not_trackers.build
-    @master.not_tracker_histories.build
-
-    # Simple search fields
-    @master.general_infos.build
+    # Build supporting search associations if the method is available
+    build_associations_for_searches if respond_to? :build_associations_for_searches
 
     render :search
   end
@@ -95,7 +116,7 @@ class MastersController < UserBaseController
     end
 
     if @master&.id
-      redirect_to master_path(@master.id), notice: "Created Master Record with MSID #{@master.id}"
+      redirect_to master_path(@master.id), notice: "Created Master Record with ID #{@master.id}"
     else
       redirect_to new_master_url, notice: "Error creating Master Record: #{Application.record_error_message @master}"
     end

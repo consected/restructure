@@ -17,28 +17,21 @@ _fpa.loaded.default = function () {
   _fpa.timed_flash_fadeout();
   _fpa.form_utils.format_block();
 
-
-  $('#nav_q').on('keypress', function () {
-    $('#nav_q_pro_id').val('');
-    $('#nav_q_id').val('');
-  }).on('change', function () {
-    var v = $(this).val();
-    if (v && v != '')
-      $('form.navbar-form').submit();
-  });
-
-  $('#nav_q_pro_id').on('keypress', function () {
-    $('#nav_q').val('');
-    $('#nav_q_id').val('');
-  }).on('change', function () {
-    var v = $(this).val();
-    if (v && v != '')
-      $('form.navbar-form').submit();
-  });
+  // Setup handler for each crosswalk attr search field in the nav bar
+  for (var i in _fpa.state.crosswalk_attrs) {
+    var field = _fpa.state.crosswalk_attrs[i];
+    $('#external_id_' + field).on('keypress', function () {
+      $('.nav-external-id-search').not('#' + $(this).prop('id')).val('');
+      $('#nav_q_id').val('');
+    }).on('change', function () {
+      var v = $(this).val();
+      if (v && v != '')
+        $('form.navbar-form').submit();
+    });
+  }
 
   $('#nav_q_id').on('keypress', function () {
-    $('#nav_q').val('');
-    $('#nav_q_pro_id').val('');
+    $('.nav-external-id-search').val('');
   }).on('change', function () {
     var v = $(this).val();
     if (v && v != '')

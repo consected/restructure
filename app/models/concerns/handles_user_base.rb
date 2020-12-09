@@ -7,7 +7,7 @@ module HandlesUserBase
     belongs_to :user
 
     # If this model should be associated with a master, check it
-    before_validation :check_master, unless: :allows_nil_master?
+    before_validation :check_crosswalk, unless: :allows_nil_master?
 
     # Ensure the user id is saved
     before_validation :force_write_user
@@ -384,17 +384,35 @@ module HandlesUserBase
 
   protected
 
-  def check_master
+  #
+  # Validate crosswalk attributes supplied do not attempt to duplicate
+  # any existing ids in other Master records, or provide crosswalk ids
+  # and master ids that don't match.
+  # This is skipped if this model is configured to not have a master association
+  # Only crosswalk IDs are checked in this way
+  def check_crosswalk
     return if self.class.no_master_association
 
-    msid = nil if msid.blank? && !msid.nil?
-    if msid && !master_id
-      m = Master.where(msid: msid).first
-      raise 'MSID set, but it does not match a master record' unless m
+    Master.crosswalk_attrs.each do |attr|
+      ext_id_val = send(attr)
+      ext_id_val = nil if ext_id_val.blank?
 
-      self.master_id = m.id
-    elsif msid && master_id && master.msid != msid
-      raise 'MSID and master_id set, but they do not correspond to the same record'
+      # An external id has been provided,
+      # so lookup the master with the external id
+      found_master = Master.find_with_alternative_id(attr, ext_id_val) if ext_id_val
+
+      if ext_id_val && !master_id
+        # An external id has been provided, and a master id has not,
+        # so use the looked up the master
+        raise "#{attr} set, but it does not match a master record" unless found_master
+
+        self.master_id = found_master.id
+      elsif ext_id_val && master_id && found_master&.id != master_id
+        # An external id has been provided, and so has a master_id
+        # but the master record found for the external id does not match
+        # the master_id
+        raise "#{attr} and master_id set, but they do not correspond to the same record"
+      end
     end
 
     return unless respond_to?(:master) && !(master_id && master) && !validating?

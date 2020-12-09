@@ -292,24 +292,33 @@ _fpa.postprocessors = {
 
     }).addClass('attached-me-click');
 
-    var msid_list = $("#msid_list").html();
+    var ext_id_list = null;
+    var ext_id_field = null;
+    for (var i in _fpa.state.crosswalk_attrs) {
+      var field = _fpa.state.crosswalk_attrs[i];
+      ext_id_list = $("#" + field + "_list").html();
+      if (!ext_id_list) continue;
+      ext_id_list = ext_id_list.replace(/ /g, '')
+      ext_id_field = field;
+      if (ext_id_list) break;
+      ext_id_list = null;
+      ext_id_field = null;
+    }
+
     var master_id_list = $("#master_id_list").html();
 
     if (master_id_list && master_id_list.replace(/ /g, '').length > 1) {
-      document.title = 'FPHS results';
+      document.title = _fpa.env_name + ' results';
       window.history.pushState({ "html": "/masters/search?utf8=✓&nav_q_id=" + master_id_list, "pageTitle": document.title }, "", "/masters/search?utf8=✓&nav_q_id=" + master_id_list);
     }
-    else if (msid_list && msid_list.replace(/ /g, '').length > 1) {
-      document.title = 'FPHS results';
-      window.history.pushState({ "html": "/masters/search?utf8=✓&nav_q=" + msid_list, "pageTitle": document.title }, "", "/masters/search?utf8=✓&nav_q=" + msid_list);
+    else if (ext_id_field && ext_id_list && ext_id_list.length > 1) {
+      document.title = _fpa.env_name + ' results';
+      window.history.pushState({ "html": "/masters/search?utf8=✓&external_id[" + ext_id_field + "]=" + ext_id_list, "pageTitle": document.title }, "", "/masters/search?utf8=✓&external_id[" + ext_id_field + "]=" + ext_id_list);
     }
     else {
-      document.title = 'FPHS results';
+      document.title = _fpa.env_name + ' results';
       window.history.pushState({ "html": "/masters/search", "pageTitle": document.title }, "", "/masters/search");
     }
-
-
-
   },
 
   show_external_links: function (block, data) {
