@@ -135,7 +135,7 @@ class ExternalIdentifier < ActiveRecord::Base
 
     # To facilitate the simple and advanced searches on master records
     # update the master's nested attributes for this model's symbol
-    Master.add_nested_attribute model_association_name.to_sym
+    self.class.add_nested_attribute model_association_name.to_sym
 
     Master.add_alternative_id_method external_id_attribute
   end
