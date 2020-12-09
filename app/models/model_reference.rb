@@ -130,8 +130,11 @@ class ModelReference < ActiveRecord::Base
   # These can be further limited by a filter_by condition on the to_record,
   # allowing for specific records to be selected from the master (such as a specific 'type' of referenced record)
   # The param active == true returns only results that are not disabled
+  # order_by forces ordering against fields in the target (ro_record) records
   def self.find_references(from_item_or_master, to_record_type: nil, filter_by: nil,
-                           without_reference: false, ref_order: nil, active: nil)
+                           without_reference: false, ref_order: nil, active: nil,
+                           order_by: nil)
+
     ref_order ||= default_ref_order
 
     if to_record_type
@@ -164,13 +167,16 @@ class ModelReference < ActiveRecord::Base
       cond[:to_record_type] = to_record_type if to_record_type
 
       mr = ModelReference
-      if filter_by
-        item_name = to_record_type.ns_underscore
-        tn = ModelReference.record_type_to_table_name(item_name.pluralize)
+      if filter_by || order_by
+        item_name = to_record_type.ns_underscore.pluralize
+        tn = ModelReference.record_type_to_table_name(item_name)
         ij = "INNER JOIN #{tn} ON model_references.to_record_id = #{tn}.id"
-        cond.merge! tn => filter_by
         mr = mr.joins(ij)
       end
+
+      cond.merge! tn => filter_by if filter_by
+      ref_order = order_by if order_by
+
       res = mr.where(cond).order(ref_order)
       res = res.active if active
 

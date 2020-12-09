@@ -24,7 +24,7 @@
 </script>
 
 <script id="field_label" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <small>
+  <small class="ctlabel">
     {{#if (fpa_state_item labels vdef_version @key )}}
       {{fpa_state_item labels vdef_version @key }}
     {{else if force_default}}
@@ -43,7 +43,7 @@
 </script>
 
 <script id="search_results_notes_block" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <li class="list-group-item result-notes-container {{full_name_hyphenated}}-{{key}} notes-block {{#unless value}}notes-empty{{/unless}}">
+  <li class="list-group-item result-notes-container {{full_name_hyphenated}}-{{key}} notes-block {{#unless value}}notes-empty{{/unless}}" data-field-name="{{key}}">
     {{#if label}}
     <small class="notes-block-label">{{> field_label labels=(concat 'labels_' (underscore name)) }}</small>
     {{/if}}

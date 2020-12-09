@@ -1,22 +1,45 @@
 <%
 container = @page_layout.container
 rows = container.rows || []
+
+# Set a unique id for the container block
 @outer_block_id = "standalone-page-container-#{SecureRandom.hex}"
 
 outer = "##{@outer_block_id}"
+
+# Generate CSS for the block from the YAML, matching class names
+# For example -
+#
+# view_css:
+#   classes:
+#     class-name:
+#       display: block
+#       margin-right: 20px
 if @page_layout.view_css.classes
   res = @page_layout.view_css.classes.map {|c, v|
     styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
     "#{outer} .#{c} \{  #{styles.join(' ')}\}"
   }
 end
+
+# Generate CSS for the block from the YAML, matching CSS selectors
+# For example -
+#
+# view_css:
+#   selectors:
+#     "#an-id .some-class":
+#       display: block
+#       margin-right: 20px
 if @page_layout.view_css.selectors
   res ||= []
   res += @page_layout.view_css.selectors.map {|c, v|
+    cs = c.split(',').map{|c1| "#{outer} #{c1}"}.join(", ")
     styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
-    "#{outer} #{c} \{  #{styles.join(' ')}\}"
+    "#{cs} \{  #{styles.join(' ')}\}"
   }
 end
+
+# Put the result straight into a <style> block
 if res
   res = res.join("\n")
 %>

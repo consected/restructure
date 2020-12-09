@@ -37,7 +37,11 @@ module Dynamic
 
       attr_writer :alt_order
       attr_accessor :action_name
-      # after_commit :check_for_notification_records, on: :create
+
+      # a list of embedded items (full data for each model reference)
+      # is available, if the #populate_embedded_items method is called
+      # otherwise it is nil
+      attr_accessor :embedded_items
     end
 
     class_methods do
@@ -325,10 +329,19 @@ module Dynamic
     # independent of the entries in the model_references table. If you do not get back the results
     # you expect, check the references definition to ensure it includes the appropriate
     # add_with and filter_by entries.
-    def model_references(reference_type: :references, active_only: false, ref_order: nil)
-      mr_key = { reference_type: reference_type, active_only: active_only, ref_order: ref_order }
+    # @param [Symbol] reference_type either :references or :e_sign to filter by the specific reference type
+    # @param [Boolean] active_only only return active reference records, or those that have also been disabled
+    # @param [Hash] ref_order forces the user of a {field: direction} on all references returned, ordering against
+    #   the field values in the model_references table (not the target)
+    # @param [Boolean] use_options_order_by - use the order_by settings for each reference configuration to order
+    #   based on field values in the records pointed to
+    def model_references(reference_type: :references, active_only: false, ref_order: nil, use_options_order_by: false)
+      mr_key = { reference_type: reference_type, active_only: active_only,
+                 ref_order: ref_order, use_options_order_by: use_options_order_by }
       @model_references ||= {}
       return @model_references[mr_key] unless @model_references[mr_key].nil?
+
+      use_options_order_by ||= @config_order_model_references
 
       res = []
       if reference_type == :references
@@ -344,27 +357,33 @@ module Dynamic
         refitem.each do |ref_type, ref_config|
           f = ref_config[:from]
           without_reference = (ref_config[:without_reference] == true)
+
+          order_by = ref_config[:order_by] if use_options_order_by
+
           got = if f == 'this'
                   ModelReference.find_references self,
                                                  to_record_type: ref_type,
                                                  filter_by: ref_config[:filter_by],
                                                  without_reference: without_reference,
                                                  ref_order: ref_order,
-                                                 active: active_only
+                                                 active: active_only,
+                                                 order_by: order_by
                 elsif f == 'master'
                   ModelReference.find_references master,
                                                  to_record_type: ref_type,
                                                  filter_by: ref_config[:filter_by],
                                                  without_reference: without_reference,
                                                  ref_order: ref_order,
-                                                 active: active_only
+                                                 active: active_only,
+                                                 order_by: order_by
                 elsif f == 'any'
                   ModelReference.find_references master,
                                                  to_record_type: ref_type,
                                                  filter_by: ref_config[:filter_by],
                                                  without_reference: true,
                                                  ref_order: ref_order,
-                                                 active: active_only
+                                                 active: active_only,
+                                                 order_by: order_by
                 else
                   Rails.logger.warn "Find references attempted without known :from key: #{f}"
                   if Rails.env.development?
@@ -947,6 +966,17 @@ module Dynamic
       res = @embedded_item
       @embedded_item ||= :nil
       res
+    end
+
+    #
+    # Populate a list of embedded items, a full record for
+    # each active model reference
+    # @return [Array{UserBase}]
+    def populate_embedded_items
+      @embedded_items = []
+      model_references(active_only: true).each do |mr|
+        @embedded_items << mr.to_record
+      end
     end
   end
 end

@@ -140,6 +140,26 @@
    <% end %>
 </script>
 
+<%
+  # Template for page layout resource results. A plain list without activity log controls.
+%>
+<script id="activity-log--<%=item_type_name_hyphenated.pluralize%>-page-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  <div id="<%=item_type_hyphenated%>-activity-logs-<%=item_type_name_hyphenated%>-type-{{item_id}}" class="panel panel-default activity-logs-item-block activity-logs-<%=item_type_name_hyphenated%>-type-block <%= hide_item_list_panel ? 'hidden-item-list-panel' : 'shown-item-list-panel' %>" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
+    <div class="col-md-24">
+        <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="<%=item_type_name%>_logs">          
+          {{#each <%=full_name.pluralize%>}}
+            {{#if extra_log_type}}
+            <% all_option_configs.each do |c| %>
+              {{#is extra_log_type '===' '<%=c.name%>'}}
+                {{> common_page_template_result name='<%= full_name %>_<%=c.name%>' result_data=this _created=@index}}
+              {{/is}}
+            <% end %>
+            {{/if}}
+          {{/each}}
+        </div>
+      </div>  
+  </div>
+</script>
 
 <script id="activity-log--<%=item_type_name_hyphenated.pluralize%>-main-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   <div id="<%=item_type_hyphenated%>-activity-logs-<%=item_type_name_hyphenated%>-type-{{item_id}}" class="panel panel-default activity-logs-item-block activity-logs-<%=item_type_name_hyphenated%>-type-block <%= hide_item_list_panel ? 'hidden-item-list-panel' : 'shown-item-list-panel' %>" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">

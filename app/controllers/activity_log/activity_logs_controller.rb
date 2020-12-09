@@ -55,7 +55,9 @@ class ActivityLog::ActivityLogsController < UserBaseController
       set_embedded_item_optional_params
     elsif action_name == 'create'
       begin
-        ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(embedded_item_permitted_params)
+        ei_secure_params = params[al_type.singularize.to_sym]
+                           .require(:embedded_item)
+                           .permit(embedded_item_permitted_params)
         @embedded_item.update ei_secure_params
         oi.updated_at = @embedded_item.updated_at
       rescue ActionController::ParameterMissing
@@ -76,7 +78,9 @@ class ActivityLog::ActivityLogsController < UserBaseController
     end
     if @item
       caption ||= @item.data
-      item_list ||= @implementation_class.view_attribute_list - @implementation_class.fields_to_sync.map(&:to_s) - ['tracker_history_id']
+      item_list ||= @implementation_class.view_attribute_list -
+                    @implementation_class.fields_to_sync.map(&:to_s) -
+                    ['tracker_history_id']
     else
       caption ||= 'log item'
       item_list ||= @implementation_class.view_blank_log_attribute_list - ['tracker_history_id']
@@ -126,11 +130,16 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
   # Get associated items for the activity log list, based on the @item_type, which is specified in the request route
   # as /masters/1/item_type/2/activity_log_self/3
-  # If the left-hand item list panel for activity logs is hidden, don't return everything, just get the items that are in the filtered objects as embedded items
+  # If the left-hand item list panel for activity logs is hidden, don't return everything, just
+  # get the items that are in the filtered objects as embedded items
   # Otherwise get all items for this master
   def items
     if @implementation_class.definition.hide_item_list_panel
-      @master_objects.select { |o| o.respond_to?(:embedded_item) && ModelReference.record_type_to_ns_table_name(o.embedded_item, pluralize: true) == @item_type }.map(&:embedded_item)
+      mos = @master_objects.select do |o|
+        o.respond_to?(:embedded_item) &&
+          ModelReference.record_type_to_ns_table_name(o.embedded_item, pluralize: true) == @item_type
+      end
+      mos.map(&:embedded_item)
     elsif @master.respond_to? @item_type
       @master.send(@item_type)
     elsif @master.respond_to? "dynamic_model__#{@item_type}"
@@ -138,20 +147,32 @@ class ActivityLog::ActivityLogsController < UserBaseController
     end
   end
 
+  # Remove items that are not showable, based on showable_if in the extra log type config
+  # This is a soft filtering of items, rather than a secure approach to avoiding them being seen,
+  # since we are using showable_if only to filter in the activity log list, but continue to show the
+  # items as an embedded log item.
+  # Be sure to check that the item responds to this, since it is possible for the items
+  # being retrieved to be the underlying parent items that activity log records belong to
+  # For example, in a phone log, the log records belong to player contacts, and these are retrieved
+  # through the activity log controller
   def filter_records
-    # Remove items that are not showable, based on showable_if in the extra log type config
-    # This is a soft filtering of items, rather than a secure approach to avoiding them being seen,
-    # since we are using showable_if only to filter in the activity log list, but continue to show the
-    # items as an embedded log item.
-    # Be sure to check that the item responds to this, since it is possible for the items
-    # being retrieved to be the underlying parent items that activity log records belong to
-    # For example, in a phone log, the log records belong to player contacts, and these are retrieved
-    # through the activity log controller
     return @master_objects if @master_objects.is_a? Array
 
     @filtered_ids = @master_objects.select { |i| i.option_type_config&.calc_showable_if(i) }.map(&:id)
     @master_objects = @master_objects.where(id: @filtered_ids)
+    filter_requested_ids
     limit_results
+    embed_all_references
+  end
+
+  # Tell each object in the index results to populate embedded items for each model reference
+  def embed_all_references
+    return @master_objects unless params[:embed_all_references] == 'true' && @master_objects.present?
+
+    @master_objects.each do |mo|
+      mo.populate_embedded_items if mo.respond_to?(:populate_embedded_items)
+    end
+    @master_objects
   end
 
   def extend_result
@@ -279,18 +300,18 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
   def check_editable?
     handle_extra_log_type if action_name == 'edit'
-    unless object_instance.allows_current_user_access_to? :edit
-      not_editable
-      nil
-    end
+    return if object_instance.allows_current_user_access_to? :edit
+
+    not_editable
+    nil
   end
 
   def check_creatable?
     handle_extra_log_type if action_name == 'new'
-    unless object_instance.allows_current_user_access_to? :create
-      not_creatable
-      nil
-    end
+    return if object_instance.allows_current_user_access_to? :create
+
+    not_creatable
+    nil
   end
 
   def check_authentication_still_valid

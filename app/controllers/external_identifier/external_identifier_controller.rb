@@ -26,4 +26,14 @@ class ExternalIdentifier::ExternalIdentifierController < UserBaseController
     res[implementation_class.external_id_attribute.to_sym] = nil if implementation_class.allow_to_generate_ids?
     res
   end
+
+  # Remove items that are not showable, based on showable_if in the options config
+  def filter_records
+    return @master_objects if @master_objects.is_a? Array
+
+    @filtered_ids = @master_objects.select { |i| i.option_type_config&.calc_showable_if(i) }.map(&:id)
+    @master_objects = @master_objects.where(id: @filtered_ids)
+    filter_requested_ids
+    limit_results
+  end
 end
