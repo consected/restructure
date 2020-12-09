@@ -268,10 +268,11 @@ class ActivityLog < ActiveRecord::Base
                       &association_block
 
       # Unlike external_id handlers (Scantron, etc) there is no need to update the
-      # master's nested attributes this model's symbol
+      # master's nested attributes for this model's symbol
       # since there is no link to advanced search
       add_parent_item_association
-    rescue FphsException => e
+    rescue StandardError => e
+      puts e
       logger.debug e
     end
   end
@@ -281,15 +282,21 @@ class ActivityLog < ActiveRecord::Base
     # Ensure the master is set on the activity log when building through the association block
     # build method being called
     # puts "Adding implementation class association: #{implementation_class.parent_class}.has_many #{self.model_association_name.to_sym} #{self.full_implementation_class_name}"
+    impl_parent_class = implementation_class.parent_class
 
-    remove_assoc_class "#{implementation_class.parent_class}ActivityLog" if item_type_exists
+    remove_assoc_class "#{impl_parent_class}ActivityLog" if item_type_exists
     #    has_many :activity_logs, as: :item, inverse_of: :item ????
-    implementation_class.parent_class.has_many model_association_name.to_sym, class_name: full_implementation_class_name do
+    impl_parent_class.has_many model_association_name.to_sym, class_name: full_implementation_class_name do
       def build(att = nil)
         att[:master] = proxy_association.owner.master
         super(att)
       end
     end
+  rescue StandardError => e
+    # Catch the errors to avoid an issue preventing the system from starting up
+    puts e
+    # puts e.backtrace.join("\n")
+    logger.error e
   end
 
   # set up a route for each available activity log definition
