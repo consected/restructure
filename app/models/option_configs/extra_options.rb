@@ -84,6 +84,7 @@ module OptionConfigs
           only_create_as_reference: 'prevent creation as a standalone item, only embedded / referenced within another',
           view_handlers: 'name of handler for UI and models (options include: address, contact, subject)',
           header_caption: 'header caption to use - can include {{substition}}',
+          alt_width_classes: 'html classes (space separated) to replace standard col-* classes',
           extra_class: 'html classes (space separated) to add to block'
         },
         filestore: {
@@ -122,6 +123,11 @@ module OptionConfigs
             pattern: 'provide a mask for a text field',
             value: 'default value | now() | today()',
             no_downcase: 'true to prevent downcasing of the attribute when stored to the database',
+            format: 'plain | markdown - for free text editor fields such as notes and description',
+            config: {
+              _comment: 'additional configurations for editor fields',
+              toolbar_type: 'advanced - adds in additional editor toolbar controls'
+            },
             edit_as: {
               field_type: 'alternative field name to use for selection of edit field',
               alt_options: 'optional specification of options for a select_ type field to use instead of general selection specified list. {Label: value, ...} or [Label,...]. For the latter the Label is downcased automatically to generate the value'
