@@ -54,11 +54,19 @@ class SaveTriggers::UpdateThis < SaveTriggers::SaveTriggersBase
           vals[fn] = res
         end
 
+        # Retain the flags so that the #update! doesn't change
+        # what we need to report through the API
+        res = @item
+        created = res._created
+        updated = res._updated
+        disabled = res._disabled
         @item.transaction do
-          res = @item
           res.force_save! if config[:force_not_editable_save]
           res.update! vals.merge(current_user: @item.user)
         end
+        res._created = created
+        res._updated = updated
+        res._disabled = disabled
       end
     end
   end
