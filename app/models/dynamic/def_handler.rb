@@ -118,7 +118,10 @@ module Dynamic
             dm.update_tracker_events
           end
         rescue Exception => e
-          Rails.logger.warn "Failed to generate models. Hopefully this is only during a migration. #{e.inspect}"
+          msg = "Failed to generate models. Hopefully this is only during a migration. \n***** #{e.inspect}"
+          puts msg
+          puts e.backtrace.join("\n")
+          Rails.logger.warn msg
         end
       end
 
@@ -220,6 +223,13 @@ module Dynamic
 
           list
         end
+      end
+
+      # Allow new models to be added to the nested attributes dynamically by models as they are configured
+      def add_nested_attribute(attrib)
+        @master_nested_attrib ||= Master::MasterNestedAttribs.dup
+        @master_nested_attrib << attrib
+        Master.accepts_nested_attributes_for(*@master_nested_attrib)
       end
     end
 
@@ -567,7 +577,7 @@ module Dynamic
     # has been created, restart the server.
     # This is called from an after_commit trigger
     def restart_server
-      AppControl.restart_server if Rails.env.production?
+      AppControl.restart_server # if Rails.env.production?
     end
   end
 end

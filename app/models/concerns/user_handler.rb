@@ -150,8 +150,11 @@ module UserHandler
     master unless self.class.no_master_association
   end
 
-  def is_admin?
-    master.is_admin? if respond_to?(:master) && master
+  #
+  # Check if the associated master has a current admin set for administrative tasks
+  # @return [Boolean]
+  def current_admin?
+    master.current_admin? if respond_to?(:master) && master
   end
 
   # A fallback data attribute to act as the human identifier for an item

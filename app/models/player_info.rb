@@ -52,10 +52,12 @@ class PlayerInfo < UserBase
     Classification::College.create_if_new college, user unless college.blank?
   end
 
+  # Validation method to prevent a user changing the source attribute after it has already been set
+  # If the current_admin has been set on the associated master this validation is skipped
   def prevent_user_changes
-    if source_changed? && !source_was.nil? && !is_admin?
-      errors.add :source, 'can not be updated by a user after a record has been created. Contact an administrator to change this field.'
-      # throw(:abort)
-    end
+    return unless source_changed? && !source_was.nil? && !current_admin?
+
+    errors.add :source, 'can not be updated by a user after a record has been created. ' \
+                        'Contact an administrator to change this field.'
   end
 end

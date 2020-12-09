@@ -1,5 +1,5 @@
 <%
-  subject_data_type = app_config_text(:header_subject_data_type, 'player_infos')
+  subject_data_type = app_config_text(:header_subject_data_type, Settings::DefaultSubjectInfoTableName)
   no_subject_details_label = app_config_text(:header_no_subject_details_label, '(no subject details)')
   no_subject_details_label = '' if no_subject_details_label == 'none'
 %>
@@ -82,7 +82,7 @@
           <% if view?[:pro_infos] %>
           <div class="{{#if header_prefix}}col-md-8{{else}}col-md-9{{/if}} col-md-offset-1 pro-info-header">
           {{#with pro_infos.[0]}}
-            {{>pro_info_summary_result}}
+            {{>secondary_info_summary_result}}
           {{/with}}
           </div>
           <% end %>
@@ -116,7 +116,7 @@
 <% end %>
 </script>
 
-<script id="pro_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<script id="secondary_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
         <strong class="pro-names">
                   {{capitalize first_name}}
                   <span class="middle-name">{{capitalize middle_name}}</span>

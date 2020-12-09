@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Concerns the functionality to support models that work with underlying items,
 # such as ItemFlag and the various dynamically generated activity log implementations.
 # Generally handles standard naming and user tasks.
@@ -13,6 +15,13 @@ module WorksWithItem
   class_methods do
     def parent_class
       parent_type.to_s.camelize.constantize
+    rescue StandardError => e
+      msg = "Failed to constantize the parent class #{parent_type} in WorksWithItem #{self}\n#{e}"
+      puts msg
+      puts e
+      # puts e.backtrace.join("\n")
+      Rails.logger.error msg
+      raise e
     end
 
     def parent_secondary_key
@@ -21,7 +30,12 @@ module WorksWithItem
 
     # The selection of possible class names that generically could be used with
     def use_with_class_names
-      (DynamicModel.model_names + ExternalIdentifier.model_names + ActivityLog.model_names + Master::PrimaryAssociations).map { |m| m.to_s.singularize}
+      (
+        DynamicModel.model_names +
+        ExternalIdentifier.model_names +
+        ActivityLog.model_names +
+        Master::PrimaryAssociations
+      ).map { |m| m.to_s.singularize }
     end
   end
 
@@ -64,7 +78,7 @@ module WorksWithItem
   # for saving the result. If not, it is the caller's responsibility to set the current user in master subsequently.
   # Return: the parent item if a match was made, nil if the value was blank
   # Raise an exception if the secondary key was not found, or was a duplicate
-  def match_with_parent_secondary_key options={}
+  def match_with_parent_secondary_key(options = {})
     value = matching_secondary_key_value
     return if value.blank?
     # Do we work with parent type? And does the parent_type association return nothing?
@@ -87,9 +101,9 @@ module WorksWithItem
       # if there is already an item set and we have matched with an item with a different master we have a problem
       # otherwise if there is already a master set and the matched item belongs to a different master we have a problem
       if item_id && matched_item_id != item_id
-        raise FphsException.new "Value for #{secondary_key} = \"#{value}\" belongs to a different #{parent_class.human_name} than the value already set"
+        raise FphsException, "Value for #{secondary_key} = \"#{value}\" belongs to a different #{parent_class.human_name} than the value already set"
       elsif respond_to?(:master) && master_id && matched_item.master_id != master_id
-        raise FphsException.new "Value for #{secondary_key} = \"#{value}\" belongs to a #{parent_class.human_name} within a different master record than the value already set"
+        raise FphsException, "Value for #{secondary_key} = \"#{value}\" belongs to a #{parent_class.human_name} within a different master record than the value already set"
       end
 
       # We can match. So find the underlying item and set the real foreign key appropriately
@@ -97,16 +111,13 @@ module WorksWithItem
       self.master = item.master if respond_to?(:master) && !master
       item.master.current_user = options[:current_user] if options[:current_user]
       self.mark_invalid = false
-      return item
+      item
     elsif unique.nil?
       logger.debug "#{secondary_key} for matching was not found: #{value}"
-      raise FphsException.new "Value for #{secondary_key} could not be found in #{parent_class.human_name}: #{value}"
+      raise FphsException, "Value for #{secondary_key} could not be found in #{parent_class.human_name}: #{value}"
     else
       logger.debug "#{secondary_key} for matching is not unique: #{value}"
-      raise FphsException.new "Value for #{secondary_key} = \"#{value}\" has been found in more than one #{parent_class.human_name} record. Update one of these records before continuing."
+      raise FphsException, "Value for #{secondary_key} = \"#{value}\" has been found in more than one #{parent_class.human_name} record. Update one of these records before continuing."
     end
-
-    self.mark_invalid = false
-    nil
   end
 end

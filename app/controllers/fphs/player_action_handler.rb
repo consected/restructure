@@ -13,7 +13,7 @@ module Fphs
       @master.player_contacts.build
       @master.trackers.build
       @master.tracker_histories.build
-      @master.scantrons.build if defined? Scantron
+      @master.scantrons.build if @master.respond_to? :scantrons
 
       # NOT conditions
       @master.not_trackers.build

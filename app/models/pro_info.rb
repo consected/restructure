@@ -2,6 +2,7 @@
 
 class ProInfo < UserBase
   include UserHandler
+  include ViewHandlers::SecondaryInfo
 
   before_update :prevent_save
 

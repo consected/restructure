@@ -1,8 +1,17 @@
 <%
   external_id_types = ExternalIdentifier.active_model_configurations.map(&:implementation_class)
-  subject_data_type = app_config_text(:header_subject_data_type, 'player_infos')
+  subject_data_type = app_config_text(:header_subject_data_type, Settings::DefaultSubjectInfoTableName)
+  secondary_data_type = app_config_text(:header_secondary_data_type, Settings::DefaultSecondaryInfoTableName)
   no_subject_details_label = app_config_text(:header_no_subject_details_label, '(no subject details)')
   no_subject_details_label = '' if no_subject_details_label == 'none'
+
+  def view?
+    return @viewables if @viewables
+    @viewables = Admin::UserAccessControl.view_tables? current_user
+    @viewables[:pro_infos] &&= !app_config_set(:hide_pro_info)
+    @viewables
+  end
+
 %>
 
 <script id="modal-pi-search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">
@@ -28,8 +37,8 @@
                 <% end %>
               </div>
               <div class="col-md-9 col-md-offset-1 pro-info-header">
-              {{#with pro_infos.[0]}}
-                {{>pro_info_summary_result}}
+              {{#with <%=secondary_data_type%>.[0]}}
+                {{>secondary_info_summary_result}}
               {{/with}}
               </div>
             </a>

@@ -22,7 +22,8 @@ class Admin::AppConfiguration < Admin::AdminBase
     [
       'create master with', 'completion sub processes',
       'default search form', 'default report tab', 'file browser default view', 'header no subject details label',
-      'header subject data type', 'hide navbar search', 'hide player accuracy',
+      'header subject data type', 'header secondary data type',
+      'hide navbar search', 'hide player accuracy',
       'hide player tabs', 'hide pro info', 'hide search form advanced', 'hide search form searchable reports',
       'hide search form simple', 'hide tracker panel', 'heading create master record label', 'filestore directory id',
       'logo filename',
