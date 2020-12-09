@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Formatter
   class Substitution
     HtmlRegEx = /<(p ?.*|br ?.*|div ?.*|ul ?.*|hr ?.*)>/.freeze
@@ -300,6 +302,10 @@ module Formatter
         elsif op == 'plaintext'
           res = ActionController::Base.helpers.sanitize(res)
           res = res.gsub("\n", '<br>').html_safe
+        elsif op == 'strip'
+          res = res.strip
+        elsif op == 'split_lines'
+          res = res.split("\n")
         elsif op == 'markup'
           res = Kramdown::Document.new(res).to_html.html_safe
         elsif op == 'ignore_missing'
