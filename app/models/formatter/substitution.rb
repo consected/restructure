@@ -87,8 +87,8 @@ module Formatter
         all_content.gsub!(tag_container, tag_value)
       end
 
-      # Unless we have requested to show missing tags, check for {{tag}} left in the text, i
-      # ndicating something was not replaced
+      # Unless we have requested to show missing tags, check for {{tag}} left in the text,
+      # indicating something was not replaced
       if ignore_missing != :show_tag && all_content.scan(/{{.*}}/).present?
         raise FphsException, 'Not all the tags were replaced. This suggests there was an error in the markup.'
       end

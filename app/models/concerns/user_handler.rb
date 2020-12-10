@@ -89,8 +89,8 @@ module UserHandler
     end
 
     # A secondary key is a field that can be used to uniquely identify a record. It is not a formal key,
-    # and can not be guaranteed to provide uniqueness, but for certain data situations (such as imports)
-    # it may be considered to be sufficient.
+    # and can not be guaranteed to provide uniqueness, but for certain data situations
+    # (such as imports and page layout lookups on a 'slug') it may be considered to be sufficient.
     # To facilitate matching code, the method secondary_key_unique? checks this fact.
     # Overriding methods will return a symbol representing the field name
     # @return [Symbol | nil]
@@ -135,6 +135,14 @@ module UserHandler
       raise "Secondary key field '#{secondary_key}' returns multiple values for '#{value}'" if res.length > 1
 
       res.first
+    end
+
+    # Find all items by the secondary key value, checking that the secondary key field is set
+    # A ActiveRecord scope is returned that may have a count of 0, 1 or many
+    def find_all_by_secondary_key(value)
+      raise 'No secondary_key field defined' unless secondary_key
+
+      where(secondary_key => value)
     end
   end
 
