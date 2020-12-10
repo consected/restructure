@@ -57,7 +57,14 @@
 
             limit = resource_def['limit']
             embed_all_references = 'true' if resource_def['embed_all_references']
-            filters = "filter[resource_id]=#{@resource_id}" if @resource_id && @resource_id.positive?
+
+            resource_id = resource_def['id'] || @resource_id
+            secondary_key = resource_def['secondary_key'] || @secondary_key
+            if resource_id && resource_id.positive?
+              filters = "filter[resource_id]=#{resource_id}" 
+            elsif secondary_key
+              filters = "filter[secondary_key]=#{secondary_key}" 
+            end
 
             param_parts = [
               "limit=#{limit}",

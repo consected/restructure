@@ -4,8 +4,8 @@
 class PageLayoutsController < ApplicationController
   before_action :authenticate_user_or_admin!
   before_action :authorized?
-  before_action :set_page_layout, only: [:show]
-  before_action :set_page_filters, only: [:show]
+  before_action :set_page_layout, only: %i[show show_content]
+  before_action :set_page_filters, only: %i[show]
   attr_accessor :object_instance, :objects_instance
 
   def index
@@ -16,7 +16,11 @@ class PageLayoutsController < ApplicationController
     render :show
   end
 
-  def show_content; end
+  def show_content
+    params[:filters] = params
+    set_page_filters
+    render :show
+  end
 
   private
 
@@ -41,6 +45,8 @@ class PageLayoutsController < ApplicationController
 
     return not_found unless @page_layout
 
+    @view_options = @page_layout.view_options
+
     self.object_instance = @page_layout
     #####################################
     # @todo handle users access controls
@@ -50,18 +56,31 @@ class PageLayoutsController < ApplicationController
   #
   # Filter results to appear in a page, using URL params like:
   # /page_layouts/page?filters[master_id]=105634
+  # or the special /content routes
+  # If the page layout configuration includes { view_options: { find_with: ext_id_name }}
+  # /content/page/external-information/cohort-background-information
+  # otherwise:
+  # /content/page/ext-id-name/external-information/cohort-background-information
   def set_page_filters
     @filters = params[:filters]
+    return unless @filters
 
-    master_id = @filters[:master_id] if @filters
-    return unless master_id
+    master_filter = {}
+    master_filter[:id] = @filters[:master_id]
 
-    @master = Master.find(master_id)
+    master_filter[:type] = @view_options&.find_with || @filters[:master_type]&.hyphenate
+
+    @master = Master.find_with master_filter
+    return unless @master
+
     @master_id = @master.id
     @master.current_user = current_user
     return not_authorized unless @master.allows_user_access
 
     rid = @filters[:resource_id].to_i
-    @resource_id = rid if rid > 0
+    return @resource_id = rid if rid > 0
+
+    secondary_key = @filters[:secondary_key]
+    return @secondary_key = secondary_key if secondary_key.present?
   end
 end

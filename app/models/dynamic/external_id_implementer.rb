@@ -33,6 +33,13 @@ module Dynamic
     end
 
     class_methods do
+      #
+      # The secondary_key to use for lookups of records using #find_by_secondary_key
+      # @return [String] field name
+      def secondary_key
+        definition.secondary_key
+      end
+
       def is_external_identifier?
         true
       end

@@ -15,6 +15,8 @@ module Dynamic
       after_commit :update_tracker_events, if: -> { @regenerate }
       after_commit :restart_server, if: -> { @regenerate }
       after_commit :other_regenerate_actions
+
+      attr_accessor :configurations
     end
 
     class_methods do
@@ -231,6 +233,15 @@ module Dynamic
         @master_nested_attrib << attrib
         Master.accepts_nested_attributes_for(*@master_nested_attrib)
       end
+    end
+
+    def secondary_key
+      return @secondary_key if @secondary_key_set
+
+      @secondary_key_set = true
+      # Parse option configs if necessary
+      option_configs
+      @secondary_key = configurations && configurations[:secondary_key]
     end
 
     # Return result based on the current

@@ -37,6 +37,9 @@ module OptionConfigs
             'field2' => '...'
           }
         },
+        '_configurations' => {
+          secondary_key: 'field name to use as a secondary key to lookup items'
+        },
         '_definitions' => {
           'reusable_key' => '&anchor resusable objects for substitution in definitions'
         }
@@ -231,6 +234,10 @@ module OptionConfigs
       @orig_config = config
 
       @config_obj = config_obj
+
+      # Protect against invalid configurations preventing server startup
+      config = {} unless config.respond_to? :each
+
       config.each do |k, v|
         send("#{k}=", v)
       rescue NoMethodError
@@ -354,7 +361,9 @@ module OptionConfigs
 
       opt_default = res.delete(:_default)
 
+      config_obj.configurations = res.delete(:_configurations)
       config_obj.table_comments = res.delete(:_comments)
+
       # Only run through additional processing of comments if the
       # configuration was just saved
       handle_table_comments config_obj, res if config_obj.saved_changes? || force_all
