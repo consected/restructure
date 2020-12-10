@@ -163,6 +163,29 @@ class Master < ActiveRecord::Base
     (id || '').to_s
   end
 
+  #
+  # Find a Master with an id, crosswalk attribute or alternative id
+  # @param [Hash] params
+  # @options params [String] :type - a crosswalk attribute or external id field name
+  # @options params [String] :id - the id value to match against
+  # @return [Master|nil] the resulting Master or nil if not found
+  def self.find_with(params)
+    req_type = params[:type]
+
+    if req_type&.to_sym&.in?(crosswalk_attrs) && params[:id]
+      # The requested type is a master crosswalk attribute.
+      # Find the master and retrieve the value
+      Master.send("find_by_#{req_type}", params[:id])
+    elsif req_type&.to_sym&.in?(Master.alternative_id_fields) && params[:id]
+      # The requested type is a master crosswalk attribute.
+      # Find the master and retrieve the value
+      Master.find_with_alternative_id(req_type, params[:id])
+    elsif params[:id]
+      # Not a crosswalk, so the id is a Master id
+      Master.find_by_id(params[:id])
+    end
+  end
+
   # Handle limited access controls in master queries
   # Scope results with inner joins on external identifier or dynamic model tables if they are in the user access control conditions
   def self.limited_access_scope(user)

@@ -25,32 +25,23 @@ class MastersController < UserBaseController
   end
 
   def show
-    req_type = params[:type]
+    @master = Master.find_with params
+    return not_found unless @master
 
+    req_type = params[:type]
     if req_type&.to_sym&.in?(Master.crosswalk_attrs) && params[:id]
       # The requested type is a master crosswalk attribute.
-      # Find the master and retrieve the value
-      @master = Master.send("find_by_#{req_type}", params[:id])
-      return not_found unless @master
-
       @ext_id = @master.attributes[req_type]
       @ext_field = req_type
     elsif req_type&.to_sym&.in?(Master.alternative_id_fields) && params[:id]
       # The requested type is a master crosswalk attribute.
-      # Find the master and retrieve the value
-      @master = Master.find_with_alternative_id(req_type, params[:id])
-      return not_found unless @master
-
       @ext_id = params[:id]
       @ext_field = req_type
     elsif params[:id]
       # Not a crosswalk, so the id is a Master id
-      @master = Master.find(params[:id])
-      return not_found unless @master
-
       @master_id = @master.id
-      @master.current_user = current_user
     end
+    @master.current_user ||= current_user
 
     # Allow return of a simple JSON master
     respond_to do |format|
