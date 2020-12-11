@@ -25,7 +25,7 @@ class MastersController < UserBaseController
   end
 
   def show
-    @master = Master.find_with params
+    @master = Master.find_with params, access_by: current_user
     return not_found unless @master
 
     req_type = params[:type]
