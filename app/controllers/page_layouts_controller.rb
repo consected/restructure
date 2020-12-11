@@ -70,7 +70,7 @@ class PageLayoutsController < ApplicationController
 
     master_filter[:type] = @view_options&.find_with || @filters[:master_type]&.hyphenate
 
-    @master = Master.find_with master_filter
+    @master = Master.find_with master_filter, access_by: current_user
     return unless @master
 
     @master_id = @master.id
