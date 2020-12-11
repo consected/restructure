@@ -79,7 +79,7 @@ module Dynamic
     # @return [Array{Symbol}]
     def no_downcase_attributes
       fo = option_type_config&.field_options || {}
-      res = fo&.filter { |_k, v| v[:no_downcase] || v[:edit_as] && v[:edit_as][:field_type].include?('notes') }
+      res = fo&.filter { |_k, v| v[:no_downcase] || v[:edit_as] && v[:edit_as][:field_type]&.include?('notes') }
 
       res&.keys
     end
