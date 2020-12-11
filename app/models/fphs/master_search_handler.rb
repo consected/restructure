@@ -317,12 +317,7 @@ module Fphs
         end
       end
 
-      #
-      # Attributes (typically crosswalk attributes) that can not be changed by users
-      # Overrides the default in Master
-      def readonly_attrs
-        %i[pro_id msid pro_info_id]
-      end
+
     end
   end
 end

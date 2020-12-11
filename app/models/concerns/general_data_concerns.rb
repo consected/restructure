@@ -135,6 +135,13 @@ module GeneralDataConcerns
     "v#{def_version}"
   end
 
+  #
+  # Returns a simple hash alternative ids accessible by the current user
+  # @return [Hash]
+  def ids
+    master.alternative_ids
+  end
+
   def as_json(extras = {})
     self.current_user ||= extras[:current_user] if extras[:current_user] # if self.class.no_master_association
     if allows_current_user_access_to?(:access)
@@ -193,6 +200,8 @@ module GeneralDataConcerns
 
       extras[:methods] << :def_version
       extras[:methods] << :vdef_version
+
+      extras[:methods] << :ids if respond_to? :master
 
     elsif allows_current_user_access_to?(:see_presence_or_access)
 

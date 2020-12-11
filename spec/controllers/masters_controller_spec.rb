@@ -73,7 +73,7 @@ RSpec.describe MastersController, type: :controller do
       m = create_master
       create_master
 
-      get :index, params: { mode: 'MSID', master: { msid: m.msid }, format: :json }
+      get :index, params: { external_id: { msid: m.msid }, format: :json }
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
       expect(jres['count']['count']).to eq 1
@@ -93,7 +93,7 @@ RSpec.describe MastersController, type: :controller do
       m = create_master
       create_master
 
-      get :index, params: { mode: 'MSID', master: { pro_id: m.pro_id }, format: :json }
+      get :index, params: { external_id: { pro_id: m.pro_id }, format: :json }
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
       expect(jres['count']['count']).to eq 1

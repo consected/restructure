@@ -29,11 +29,11 @@ class MastersController < UserBaseController
     return not_found unless @master
 
     req_type = params[:type]
-    if req_type&.to_sym&.in?(Master.crosswalk_attrs) && params[:id]
+    if req_type && Master.crosswalk_attr?(req_type) && params[:id]
       # The requested type is a master crosswalk attribute.
       @ext_id = @master.attributes[req_type]
       @ext_field = req_type
-    elsif req_type&.to_sym&.in?(Master.alternative_id_fields) && params[:id]
+    elsif req_type && Master.alternative_id?(req_type) && params[:id]
       # The requested type is a master crosswalk attribute.
       @ext_id = params[:id]
       @ext_field = req_type
@@ -70,7 +70,7 @@ class MastersController < UserBaseController
         @ext_id ||= named_id.last
       end
 
-      @requested_master = Master.find_with_alternative_id(@ext_field, @ext_id) if @ext_field && @ext_id
+      @requested_master = Master.find_with_alternative_id(@ext_field, @ext_id, current_user) if @ext_field && @ext_id
     else
       @master_id ||= params[:nav_q_id] unless app_config_text(:prevent_reload_master_list, nil)
       @requested_master = @master_id
