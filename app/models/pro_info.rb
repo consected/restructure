@@ -13,6 +13,10 @@ class ProInfo < UserBase
     "#{first_name} #{last_name}"
   end
 
+  def self.prevent_crosswalk_check
+    %i[pro_info_id pro_id]
+  end
+
   protected
 
   def prevent_save

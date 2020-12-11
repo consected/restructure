@@ -9,97 +9,214 @@ module AlternativeIds
   extend ActiveSupport::Concern
 
   included do
-    @stored_external_id_matching_fields = nil
+    @external_id_matching_fields = nil
   end
 
   class_methods do
+    #
     # Crosswalk attributes are those attributes on the masters table that can be
-    # used as an alternative way to directly identify a master record
+    # used as an alternative way to directly identify a master record (rather than primary key *id*)
     # We assume that any field that is not a 'standard' field can be used as
     # a crosswalk identifier.
-    def crosswalk_attrs
+    # @param [Boolean | nil] access_by - optional (and ignored), but consistent with others and may be use in the future
+    # @return [Array{Symbol}]
+    def crosswalk_attrs(access_by: nil)
       attribute_names.map(&:to_sym) - %i[id master_id user_id created_at updated_at rank]
     end
 
+    #
     # Does the attr_name correspond to a crosswalk attribute on the masters table?
-    def crosswalk_attr?(attr_name)
+    # If *access_by* is nil, no access controls are applied
+    # NOTE: access_by is specified for consistency with other methods, but is not currently used.
+    # It may be used to enforce access to specific attributes in the future.
+    # @param [String | Symbol] attr_name
+    # @param [User | nil] access_by - current user making the request.
+    # @return [Boolean]
+    def crosswalk_attr?(attr_name, access_by: nil)
       attr_name = attr_name.to_sym
-      crosswalk_attrs.include?(attr_name)
+      crosswalk_attrs(access_by: access_by).include?(attr_name)
     end
 
+    #
     # Get (and memoize) the list of external identifier ID attributes (as symbols)
-    def external_id_matching_fields
-      # Cache the result, because it speeds up template use of ids hugely
-      return @stored_external_id_matching_fields if @stored_external_id_matching_fields
+    # Filter the results based on user access controls if access_by is supplied.
+    # @param [User | nil] access_by - the current user making the request or nil to ignore access controls
+    # @return [Array{Symbol}] array of symbols representing the id field names
+    def external_id_matching_fields(access_by: nil)
+      results =
+        @external_id_matching_fields ||= ExternalIdentifier
+                                         .active_model_configurations
+                                         .pluck(:external_id_attribute, :name)
 
-      @stored_external_id_matching_fields = ExternalIdentifier.active_model_configurations.map { |f| f.external_id_attribute.to_sym }
+      if access_by
+        key = access_by_key(access_by)
+        if @external_id_matching_fields_access_by&.key?(key)
+          results = @external_id_matching_fields_access_by[key]
+        else
+          @external_id_matching_fields_access_by ||= {}
+          results = @external_id_matching_fields
+                    .select { |e| access_by.has_access_to?(:access, :table, e.last) }
+
+          @external_id_matching_fields_access_by[key] = results
+        end
+      end
+
+      results.map { |a| a.first.to_sym }
     end
 
     # Force a reset of the external fields, allowing new definitions to appear
     def reset_external_id_matching_fields!
-      @stored_external_id_matching_fields = nil
+      @external_id_matching_fields = nil
+      @external_id_matching_fields_access_by = nil
     end
 
     # Generate an instance method that allow easy access to alternative_id values
     # such as #scantron_id
-    #
     def add_alternative_id_method(attr_name)
       define_method attr_name.to_sym do
         alternative_id_value attr_name
       end
     end
 
+    #
     # Does the attribute name correspond to an external id?
-    def external_id?(attr_name)
+    # If *access_by* is nil, no access controls are applied
+    # @param [String | Symbol] attr_name
+    # @param [User | nil] access_by - current user making the request.
+    # @return [Boolean]
+    def external_id?(attr_name, access_by: nil)
       attr_name = attr_name.to_sym
-      external_id_matching_fields.include? attr_name
+      external_id_matching_fields(access_by: access_by).include? attr_name
     end
 
     # All alternative ID field names (as symbols)
-    # @return [Array]
-    def alternative_id_fields
-      crosswalk_attrs + external_id_matching_fields
+    # @param [User] access_by - (optional) user making the request to apply access controls
+    # @return [Array{Symbol}]
+    def alternative_id_fields(access_by: nil)
+      crosswalk_attrs(access_by: access_by) + external_id_matching_fields(access_by: access_by)
     end
 
+    #
     # Does the attr_name correspond to an alternative ID field?
-    def alternative_id?(attr_name)
+    # If *access_by* is nil, no access controls are applied
+    # @param [String | Symbol] attr_name
+    # @param [User | nil] access_by - current user making the request.
+    # @return [Boolean]
+    def alternative_id?(attr_name, access_by: nil)
       attr_name = attr_name.to_sym
-      alternative_id_fields.include?(attr_name)
+      alternative_id_fields(access_by: access_by).include?(attr_name)
     end
 
     #
     # Get the ExternalIdentifer definition for the named external_id_attribute
     # Returns nil if not matched
-    # @param [String] field_name
+    # @param [String | Symbol] field_name
     # @return [ExternalIdentifier | nil]
-    def external_id_definition(attr_name)
-      return @external_id_definition[attr_name] if @external_id_definition&.key?(attr_name)
+    def external_id_definition(attr_name, access_by: nil)
+      attr_name = attr_name.to_sym
+      unless @external_id_definition
+        recs = ExternalIdentifier
+               .active
 
-      @external_id_definition ||= {}
-      @external_id_definition[attr_name] = ExternalIdentifier.active.where(external_id_attribute: attr_name).first
+        @external_id_definition = {}
+        recs.each do |e|
+          @external_id_definition[e.external_id_attribute.to_sym] = e
+        end
+      end
+
+      result = @external_id_definition[attr_name]
+
+      if access_by
+        key = access_by_key(access_by)
+        if @external_id_definition_access_by&.key?(key)
+          user_results = @external_id_definition_access_by[key]
+        else
+          @external_id_definition_access_by ||= {}
+          user_results = @external_id_definition.filter { |_k, v| access_by.has_access_to?(:access, :table, v.name) }
+          @external_id_definition_access_by[key] = user_results
+        end
+        result = user_results[attr_name]
+      end
+
+      result
     end
 
     #
     # Find a master record using a named alternative ID and its value
     # @param [String | Symbol] field_name named alternative ID to match
     # @param [String | Integer] value to match
+    # @param [User | Symbol] current_user controls access to external identifiers or :no_user to
+    #   state that no user access control enforcement is required
     # @return [Master | nil] matched master record or nil if unmatched
-    def find_with_alternative_id(field_name, value)
+    def find_with_alternative_id(field_name, value, current_user)
       return if value.blank?
 
-      field_name = field_name.to_sym
-      # Start by attempting to match on a field in the master record
-      unless alternative_id_fields.include?(field_name)
-        raise "Can not match on this field. It is not an accepted alterative ID field. #{field_name}"
+      unless current_user.is_a?(User) || current_user == :no_user
+        raise FphsException, 'find_with_alternative_id requires a current_user'
       end
-      return where(field_name => value).first if attribute_names.include?(field_name.to_s)
 
-      # No master record field was found. So try an external ID instead
-      if external_id_matching_fields.include?(field_name.to_sym)
-        ei = ExternalIdentifier.class_for(field_name).find_by_external_id(value)
-        ei&.master
-      else
+      current_user = nil if current_user == :no_user
+
+      field_name = field_name.to_sym
+
+      unless alternative_id?(field_name, access_by: current_user)
+        raise FphsException, "Can not match on this field (#{field_name}). " \
+          'It is not an accepted alterative ID field for this user.'
+      end
+
+      # Start by attempting to match on a field in the master record
+      return where(field_name => value).first if crosswalk_attr?(field_name)
+
+      # No crosswalk field was found. Try an external ID instead
+      unless external_id?(field_name, access_by: current_user)
         raise FphsException, 'The field specified is not valid for external identifier matching'
+      end
+
+      ei = ExternalIdentifier.class_for(field_name).find_by_external_id(value)
+      ei&.master
+    end
+
+    #
+    # Memoization key for the access_by user
+    # @param [User] access_by
+    # @return [String]
+    def access_by_key(access_by)
+      "#{access_by.id}--#{access_by.app_type_id}"
+    end
+
+    #
+    # add the alternative_id_fields from the master as attributes, so we can use them for matching
+    # @param [UserBase] in_class - the class to define the methods in
+    def setup_resource_alternative_id_fields(in_class)
+      # Check Master is ready to accept alternative id fields
+      # since it may not be during loading
+      if Master.respond_to? :alternative_id_fields
+        alternative_id_fields.each do |f|
+          #
+          # Writer method like field_name_id=
+          in_class.define_method :"#{f}=" do |value|
+            if attribute_names.include? f.to_s
+              write_attribute(f, value)
+            else
+              instance_variable_set("@#{f}", value)
+              return master if master
+
+              self.master = Master.find_with_alternative_id(f, value, :no_user)
+            end
+          end
+
+          #
+          # Reader method like field_name_id
+          in_class.define_method :"#{f}" do
+            if attribute_names.include? f.to_s
+              read_attribute(f)
+            else
+              instance_variable_get("@#{f}")
+            end
+          end
+        end
+      else
+        puts 'Master does not respond to alternative_id_fields. Hopefully this is just during seeding'
       end
     end
   end
@@ -115,24 +232,22 @@ module AlternativeIds
   def alternative_id_value(field_name)
     field_name = field_name.to_sym
     # Start by attempting to match on a field in the master record
-    unless self.class.alternative_id_fields.include?(field_name)
+    unless self.class.alternative_id?(field_name, access_by: current_user)
       raise "Can not match on this field. It is not an accepted alterative ID field. #{field_name}"
     end
 
-    return attributes[field_name.to_s] if self.class.crosswalk_attrs.include?(field_name)
+    return attributes[field_name.to_s] if self.class.crosswalk_attr?(field_name, access_by: current_user)
 
-    eid = self.class.external_id_definition(field_name)
-    raise(FphsException, "External ID definition is not active for #{field_name}") unless eid
+    ext_id = self.class.external_id_definition(field_name, access_by: current_user)
+    raise(FphsException, "External ID definition is not active for #{field_name}") unless ext_id
 
-    assoc_name = eid.model_association_name
+    return unless self.class.external_id?(field_name, access_by: current_user)
 
-    return unless self.class.external_id_matching_fields.include?(field_name.to_sym)
-
+    assoc_name = ext_id.model_association_name
     # Ensure the first item is used, since adding new IDs could lead to spurious results
-    m = send(assoc_name).order(id: :asc).first
-    return unless m
+    m = send(assoc_name).reorder('').order(id: :asc).first
 
-    m.external_id
+    m&.external_id
   end
 
   #
@@ -140,7 +255,7 @@ module AlternativeIds
   # @return [Hash] a hash with symbol keys
   def alternative_ids
     res = {}
-    self.class.alternative_id_fields.each { |f| res[f] = alternative_id_value(f) }
+    self.class.alternative_id_fields(access_by: current_user).each { |f| res[f] = alternative_id_value(f) }
     res
   end
 end

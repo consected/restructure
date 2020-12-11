@@ -75,7 +75,7 @@ module MasterSearch
         @sort_by_ids = ext_id.map(&:to_i).uniq
       end
       ext_field = pext[:field]
-      m = Master.find_with_alternative_id(ext_field, ext_id) if ext_field && ext_id
+      m = Master.find_with_alternative_id(ext_field, ext_id, current_user) if ext_field && ext_id
       mids = [m]
       @masters = Master.where(id: mids)
     elsif !params[:master][:id].blank?

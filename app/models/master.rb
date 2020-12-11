@@ -15,15 +15,15 @@ class Master < ActiveRecord::Base
   TrackerHistoryEventOrderClause = Arel.sql 'event_date DESC NULLS last, tracker_history.updated_at DESC NULLS last '
   SubjectInfoRankOrderClause = Arel.sql 'rank desc nulls last '
 
-  def self.subject_info_rank_order_clause
-    SubjectInfoRankOrderClause
-  end
-
   #
   # Attributes (typically crosswalk attributes) that can not be changed by users
-  # Overridden by specific implementations
+  # Overrides the default in Master
   def self.readonly_attrs
-    []
+    %i[pro_id msid pro_info_id]
+  end
+
+  def self.subject_info_rank_order_clause
+    SubjectInfoRankOrderClause
   end
 
   #
@@ -166,20 +166,21 @@ class Master < ActiveRecord::Base
   #
   # Find a Master with an id, crosswalk attribute or alternative id
   # @param [Hash] params
-  # @options params [String] :type - a crosswalk attribute or external id field name
-  # @options params [String] :id - the id value to match against
+  #   @options params [String] :type - a crosswalk attribute or external id field name
+  #   @options params [String] :id - the id value to match against
+  # @param [Boolean | nil] access_by - specify the current user making the request
   # @return [Master|nil] the resulting Master or nil if not found
-  def self.find_with(params)
+  def self.find_with(params, access_by: nil)
     req_type = params[:type]
 
-    if req_type&.to_sym&.in?(crosswalk_attrs) && params[:id]
+    if req_type && crosswalk_attr?(req_type, access_by: access_by) && params[:id]
       # The requested type is a master crosswalk attribute.
       # Find the master and retrieve the value
       Master.send("find_by_#{req_type}", params[:id])
-    elsif req_type&.to_sym&.in?(Master.alternative_id_fields) && params[:id]
+    elsif req_type && alternative_id?(req_type, access_by: access_by) && params[:id]
       # The requested type is a master crosswalk attribute.
       # Find the master and retrieve the value
-      Master.find_with_alternative_id(req_type, params[:id])
+      Master.find_with_alternative_id(req_type, params[:id], access_by)
     elsif params[:id]
       # Not a crosswalk, so the id is a Master id
       Master.find_by_id(params[:id])
@@ -275,7 +276,7 @@ class Master < ActiveRecord::Base
   def self.each_create_master_with_item(user)
     create_master_with = Admin::AppConfiguration.values_for(:create_master_with, user)
     create_master_with&.each do |cw|
-      cw = cw.strip.pluralize
+      cw = cw.to_s.strip.pluralize
       unless get_all_associations.include? cw
         raise FphsException, "create master with configuration includes a non-existent model association (#{cw})"
       end
@@ -645,7 +646,7 @@ class Master < ActiveRecord::Base
   # The current_user must be set using a persisted, active User
   def set_user
     cu = @current_user
-    raise "Attempting to set user with non user: #{cu}" unless cu.is_a?(User) && cu.persisted? && cu.disabled
+    raise "Attempting to set user with non user: #{cu}" unless cu.is_a?(User) && cu.persisted? && !cu.disabled
 
     write_attribute :user_id, cu.id
   end
