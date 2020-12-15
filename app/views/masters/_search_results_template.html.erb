@@ -78,6 +78,7 @@
 
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: 'nfs_store__manage__container',
+    resource_name: 'nfs_store__manage__containers',
     caption: '{{name}}', # substitute the rec_type attribute (capitalized) as the block caption
     model_data_type: :nfs_store_container,
     prevent_edit: !(current_user.has_access_to? :edit, :table, :nfs_store__manage__containers),

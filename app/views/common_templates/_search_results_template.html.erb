@@ -1,5 +1,9 @@
 <%
 
+  unless defined? resource_name
+    resource_name = nil
+  end
+
   unless defined? def_record
     def_record = nil
   end
@@ -275,6 +279,11 @@
 <% unless full_name.underscore.to_s == name.underscore.to_s %>
   _fpa.state.template_config.<%=full_name.underscore%> = _fpa.state.template_config.<%=full_name.underscore%> || {};
   _fpa.state.template_config.<%=full_name.underscore%>.v<%=def_version%> = _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>;
+<% end %>
+
+<% if resource_name && resource_name != name.underscore.to_s && resource_name != full_name.underscore.to_s %>
+  _fpa.state.template_config.<%=resource_name%> = _fpa.state.template_config.<%=resource_name.underscore%> || {};
+  _fpa.state.template_config.<%=resource_name%>.v<%=def_version%> = _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>;
 <% end %>
 
   _fpa.show_if.forms['<%=full_name%>'] = _fpa.show_if.forms['<%=full_name%>'] || {};

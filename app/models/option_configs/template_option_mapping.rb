@@ -25,6 +25,8 @@ module OptionConfigs
         button_label: option_type_config.button_label || external_id_type.label,
         name: external_id_type.name.underscore,
         full_name: external_id_type.name.underscore,
+        resource_name: def_record.resource_name,
+
         model_data_type: :external_identifier,
         prevent_edit: external_id_type.prevent_edit? ||
           !(current_user.has_access_to? :edit, :table, plural_name),
@@ -75,6 +77,8 @@ module OptionConfigs
         button_label: default_options.button_label,
         name: def_record.implementation_model_name,
         full_name: "dynamic_model__#{def_record.implementation_model_name}",
+        resource_name: def_record.resource_name,
+
         model_data_type: :dynamic_model,
         prevent_edit: !(current_user.has_access_to? :edit, :table, def_record.full_item_type_name.pluralize),
         prevent_create: !(current_user.has_access_to? :create, :table, def_record.full_item_type_name.pluralize),
@@ -120,8 +124,11 @@ module OptionConfigs
         def_version: def_record.def_version,
         caption: view_options[:header_caption] || option_type_config.label,
         name: "#{full_name}_#{option_type_config.name}",
+        full_name: "#{full_name}_#{option_type_config.name}",
         model_data_type: :activity_log,
         item_class_name: full_name,
+        resource_name: "#{full_name}__#{option_type_config.name}",
+
         button_label: option_type_config.button_label,
         prevent_edit: !(current_user.has_access_to? :edit, :table, def_record.full_item_type_name.pluralize),
         prevent_create: !(current_user.has_access_to? :create, :table, def_record.full_item_type_name.pluralize),

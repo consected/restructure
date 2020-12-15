@@ -499,8 +499,8 @@ fieldset.readonly-edit-fieldset {
   }
 
   h1 {
-    font-size: 22px;
     margin-top: 10px;
+    font-size: 22px;
   }
 
   h2 {
@@ -508,11 +508,26 @@ fieldset.readonly-edit-fieldset {
     font-size: 18px;
   }
 
+  h3 {
+    margin-top: 6px;
+    font-size: 16px;
+  }
+
+  h4 {
+    margin-top: 5px;
+    font-size: 14px;
+  }
+
   blockquote {
     padding: 0 0 10px 25px;
     margin: 0 0 20px;
     font-size: 14px;
     border-left: none;
+  }
+
+  th,
+  td {
+    padding: 0.2em 0.6em;
   }
 }
 
