@@ -1,0 +1,15 @@
+<div id="user-access-controls-embedded">
+  <h4>User Access Controls for Activities</h4>
+  <div class="admin-result-index" id="embedded-al-uac-embedded">
+    <%= link_to "Load", admin_user_access_controls_path(
+                          filter: { resource_name: "#{object_instance.full_item_type_name}__%" }, 
+                          view_as: 'simple-embedded', readonly: true), 
+                          'data-remote': true,
+                          'data-target-force': true,
+                          'data-target': '#embedded-al-uac-embedded'
+                          %>
+  </div>
+  <p>
+    <%= link_to "View all", admin_user_access_controls_path() %>
+  </p>
+</div>

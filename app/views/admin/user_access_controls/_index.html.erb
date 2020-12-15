@@ -1,9 +1,11 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">
+<% unless view_embedded? %>  
 <h1>User Access Controls</h1>
 <p>
   <%= show_filters %>
 </p>
+<% end %>
 <%
   @app_type_names = {}
   Admin::AppType.all.each do |a|
@@ -24,14 +26,13 @@
 <table class="table tablesorter admin-list">
   <thead>
     <tr>
-      <th class="no-sort"></th>
-      <th>App Type</th>
-      <th>User Override</th>
-      <th>Role Override</th>
+      <% unless view_embedded? %><th class="no-sort"></th><% end %>
+      <% unless hide_app_type? %><th>App Type</th><% end %>
+      <th>User</th>
+      <th>Role</th>
       <th>Access</th>
       <th>Resource Type</th>
       <th>Resource Name</th>
-      <th>Options</th>
     </tr>
   </thead>
 

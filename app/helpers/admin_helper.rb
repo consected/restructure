@@ -65,30 +65,29 @@ module AdminHelper
   end
 
   def show_filters
+    return if view_embedded?
+    return unless respond_to?(:filters) && filters
+
+    these_filters = filters.dup
+
+    filters_on_multiple = false
     res = ''
 
-    if respond_to?(:filters) && filters
-      these_filters = filters.dup
-
-      filters_on_multiple = false
-      res = ''
-
-      if filters_on.is_a? Symbol
-        fo = [filters_on]
-      else
-        fo = filters_on
-        filters_on_multiple = true
-      end
-
-      these_filters = { filters_on => these_filters } if these_filters.is_a? Array
-
-      if current_admin
-        these_filters[:disabled] = ['disabled', 'enabled']
-        fo << :disabled
-      end
-
-      res += render(partial: 'admin_handler/filters', locals: { fo: fo, filters_on_multiple: filters_on_multiple, these_filters: these_filters })
+    if filters_on.is_a? Symbol
+      fo = [filters_on]
+    else
+      fo = filters_on
+      filters_on_multiple = true
     end
+
+    these_filters = { filters_on => these_filters } if these_filters.is_a? Array
+
+    if current_admin
+      these_filters[:disabled] = ['disabled', 'enabled']
+      fo << :disabled
+    end
+
+    res += render(partial: 'admin_handler/filters', locals: { fo: fo, filters_on_multiple: filters_on_multiple, these_filters: these_filters })
 
     res.html_safe
   end
