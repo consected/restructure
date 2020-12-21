@@ -83,6 +83,10 @@
     extra_class = ''
   end
 
+  unless defined? template_class
+    template_class = ''
+  end
+
   unless defined? full_name
     full_name = name
   end
@@ -263,6 +267,7 @@
     model_data_type: '<%=model_data_type%>',
     item_blocks: <%=formatted_item_blocks.to_json.html_safe%>,
     extra_class: Handlebars.compile('<%=extra_class%>'),
+    template_class: '<%= template_class %>',
     is_activity_log_class: '<%=is_activity_log_class%>',
     custom_block_attrs: <%=custom_block_attrs.to_json.html_safe%>,
     exclude_metadata: <%=!!exclude_metadata%>,

@@ -1,7 +1,7 @@
 <script id="custom_block_attrs_html" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#each custom_block_attrs}}{{hyphenate @key}}={{{template this}}} {{/each}}</script>
 
 <script id="show_result_caption" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{{run_template ../caption}}}{{/with}}</script>
-<script id="result_extra_class" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{run_template ../extra_class}}{{/with}}</script>
+<script id="result_extra_class" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{../template_class}} {{run_template ../extra_class}}{{/with}}</script>
 
 
 <script id="result_item_block" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -68,6 +68,8 @@
        data-view-handlers="{{join template_config.view_options.view_handlers ' '}}"
        data-def-version="{{def_version}}"
        >
+  {{else}}
+  <span class="common-template-item-inner index-{{_created}} inner-{{hyphenate name}}-item {{../extra_class}} inner-{{is_activity_log_class}}" >
   {{/was}}
   {{#caption_before_substitutions result_data }}
   <ul class="list-group {{#if prevent_edit }}prevent-edit{{else}}allow-edit{{/if}} {{is_activity_log_class}}" data-item-id="{{result_data.id}}" data-item-rank="{{result_data.rank}}" data-{{data_sort_attr}}="{{lookup result_data (underscore data_sort_attr)}}{{#if subsort_id }}--{{pad_start result_data.id 10 '0'}}{{/if}}" {{> custom_block_attrs_html }} >
@@ -147,6 +149,8 @@
   {{#was _created}}
   </div>
   {{#is name '!==' full_name }}</div> {{/is}}
+  {{else}}
+  </span>
   {{/was}}
 </script>
 

@@ -135,7 +135,7 @@
 <div class="data-results">
   <div data-result="<%= edit_form_id %>">
 <% end %>
-    <div class="">
+    <div class="<%= view_options[:extra_class] %>">
       <% if selectable_model_reference %>
       <%
         edit_form_hash_for_ref = edit_form_hash.dup
@@ -255,8 +255,9 @@
             </li>
           <% end %>
 
-          <li class="list-group-item edit-field-container <%= showed_caption_before ? 'showed-caption-before' : ''%> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-field-item' : ''%>">
-            <%= render local_vars.merge(partial: 'common_templates/edit_form_field') %>
+          <% rendered_field = render local_vars.merge(partial: 'common_templates/edit_form_field') %>
+          <li class="list-group-item edit-field-container <%= @matched_name %> <%= showed_caption_before ? 'showed-caption-before' : ''%> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-field-item' : ''%>">
+            <%= rendered_field %>
           </li>
 
           <%  if item_flags_after == field_name_sym && item_flags_array.length > 0 %>

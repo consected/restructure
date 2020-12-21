@@ -65,15 +65,16 @@ class Admin::PageLayout < ActiveRecord::Base
 
   # Add a navigation (top menu bar) item as either a link or a list of resources (reports typically)
   # links: array of links
-  #  label: visible lable
-  #  url: URL for the nav item
-  #  resource_type: the resource type to use to assess user access to this nav item
-  #  resource_name: the resource name to use to assess user access to this nav item
+  #    - label: visible label
+  #      url: URL for the nav item
+  #      resource_type: the resource type to use to assess user access to this nav item
+  #      resource_name: the resource name to use to assess user access to this nav item
   # resources: (unknown)
   # label: (unknown)
   configure :nav, with: %i[links resources label]
 
   # A standalone page container defining rows that define the contents of the page
+  # container:
   #   rows: an array of row definitions
   #     classes: string of space separated class names to add directly to each standard-page-row div
   #     styles: maps key: value to standard styles
@@ -104,6 +105,7 @@ class Admin::PageLayout < ActiveRecord::Base
 
   # Define CSS to be applied to this panel or page block
   # All definitions are prefixed with the block id, to ensure they don't leak to other parts of the page
+  # view_css:
   #   classes:
   #     class-name:
   #       display: block

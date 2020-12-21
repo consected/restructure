@@ -551,6 +551,23 @@ fieldset.readonly-edit-fieldset {
   background-color: rgb(243, 243, 243);
 }
 
+.flex-captions ul.list-group {
+  display: flex;
+  flex-wrap: wrap;
+
+  .result-notes-container,
+  .edit_notes_field,
+  .browse-container {
+    width: 100%;
+  }
+
+  .object-results-header,
+  .edit-form-header,
+  .is-full-width {
+    width: 100%;
+  }
+}
+
 @media only screen and (min-width: 1180px) {
   form.search_master label {
     font-weight: bold;

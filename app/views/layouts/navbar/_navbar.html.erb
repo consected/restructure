@@ -15,7 +15,9 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
         <% if current_user && @app_type_switches.length > 1 %>
-        <li><span class="select"><%= select_tag :use_app_type, options_for_select( @app_type_switches, selected: current_user.app_type_id), id: 'use_app_type_select', data: {app_type_id: current_user.app_type_id}, class: 'has-value attached-has-value form-control input-sm ff' %></span></li>
+        <li>
+          <%= render partial: 'layouts/navbar/app_selector' %>
+        </li>
         <% end %>
 
         <%
@@ -35,21 +37,9 @@
         end
         %>
       </ul>
-      <% if current_user && !app_config_set(:hide_navbar_search) && current_user.app_type_id 
-            pext = params[:external_id] || {}
-      %>
-        <%= form_tag msid_search_path, method: :get,  class: "navbar-form navbar-left", role: "search" do %>
-          <div class="form-group">
-            <%= text_field_tag 'external_id[msid]', pext[:pro_id], class: "form-control nav-external-id-search", placeholder: "MSID Search" %>
-            <%= text_field_tag 'external_id[pro_id]', pext[:pro_id], class: "form-control nav-external-id-search", placeholder: "Pro ID Search" %>
-            <%= text_field_tag :nav_q_id, params[:nav_q_id], class: "form-control nav-master-id-search", placeholder: "Master ID" %>
-          </div>
-          <%= button_tag '<span class="glyphicon glyphicon-search"></span>'.html_safe, class:"btn btn-default"  %>
-          <%= submit_tag "CSV", name: :req_format, value: "csv", class: "btn btn-default"  if current_user.can?(:export_csv)%>
-          <%= submit_tag "JSON", name: :req_format, value: "json", class: "btn btn-default target_new_window" if current_user.can?(:export_json) %>
 
-        <% end %>
-      <% end %>
+      <%= render partial: 'layouts/navbar/search' %>
+
       <ul class="nav navbar-nav navbar-right">
       <% @secondary_navs.each do |nav| %>
         <%

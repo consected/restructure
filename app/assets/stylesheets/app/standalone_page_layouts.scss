@@ -30,6 +30,7 @@ div.reset-row,
       height: auto;
       width: auto;
       float: none;
+      overflow: hidden;
     }
   }
   div,
@@ -159,20 +160,6 @@ div.reset-row,
     h3,
     h4 {
       margin-bottom: 0.67em;
-    }
-  }
-
-  ul.container-icons-items {
-    .container-icons-entry {
-      flex-direction: row;
-      width: 260px;
-      padding: 6px;
-      text-align: center;
-      font-size: 90%;
-
-      img {
-        border: 1px solid silver;
-      }
     }
   }
 

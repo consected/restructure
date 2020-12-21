@@ -1,0 +1,51 @@
+.admin-buttons-block {
+  margin: 8px;
+}
+
+.admin-details-section {
+  padding: 0 10px;
+
+  .admin-field-list {
+    font-family: monospace;
+  }
+}
+
+.admin-main-options-block {
+  display: flex;
+  flex-direction: row;
+}
+
+.admin-options-editor-block {
+  height: 80vh;
+  width: 50%;
+  margin: 6px;
+}
+
+.admin-options-ref-block {
+  height: 80vh;
+  width: 50%;
+  margin: 6px;
+}
+
+.admin-options-ref-textarea-block {
+  width: 95%;
+
+  height: 60vh;
+  background-color: #f1f1f1;
+
+  textarea {
+    height: 60vh;
+  }
+
+  .CodeMirror {
+    height: 100%;
+    background-color: #f1f1f1;
+  }
+}
+
+.admin-options-ref-block .tab-content {
+  background-color: white;
+  padding: 1em;
+  border: 1px solid rgb(221, 221, 221);
+  border-top: 0;
+}

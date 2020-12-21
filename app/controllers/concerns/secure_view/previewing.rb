@@ -18,9 +18,9 @@ module SecureView
       raise GeneralException, 'No path for setup_previewer' unless path
 
       if secure_view_preview_as == 'png'
-        @secure_view_previewer = SecureView::PDFPreviewer.new path: path.to_s
+        @secure_view_previewer = SecureView::ImagePreviewer.new path: path.to_s
       elsif secure_view_preview_as == 'icon'
-        @secure_view_previewer = SecureView::PDFPreviewer.new path: path.to_s, view_type: :icon
+        @secure_view_previewer = SecureView::ImagePreviewer.new path: path.to_s, view_type: :icon
       elsif secure_view_preview_as == 'html'
         @secure_view_previewer = SecureView::HTMLPreviewer.new path: path.to_s
       end

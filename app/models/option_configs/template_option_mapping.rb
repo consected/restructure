@@ -41,6 +41,7 @@ module OptionConfigs
         category: def_record.category,
         view_options: view_options,
         extra_class: view_options[:extra_class],
+        template_class: nil,
         extra_data_attribs: field_list.include?('rec_type') ? [:rec_type] : nil,
         extra_options_config: option_type_config,
         external_id_options: {
@@ -91,6 +92,7 @@ module OptionConfigs
         category: def_record.category,
         view_options: view_options,
         extra_class: view_options[:extra_class],
+        template_class: nil,
         extra_data_attribs: field_list.include?('rec_type') ? [:rec_type] : nil,
         extra_options_config: default_options
       }
@@ -137,7 +139,8 @@ module OptionConfigs
           :activity_log_type,
           option_type_config.resource_name
         ),
-        extra_class: "alt-width #{cwc} #{view_options[:extra_class]}",
+        template_class: "alt-width #{cwc}",
+        extra_class: view_options[:extra_class],
         item_list: option_type_config.fields,
         data_sort: [:desc, data_action_when],
         subsort_id: true,
@@ -183,7 +186,8 @@ module OptionConfigs
         blank_log_full_name: "#{def_record.full_item_type_name}_blank_log",
         blank_log_label: (def_record.blank_log_name.blank? ? 'General Log' : def_record.blank_log_name),
         main_log_label: (def_record.main_log_name.blank? ? 'Add Log' : def_record.main_log_name),
-        hide_item_list_panel: !!def_record.hide_item_list_panel
+        hide_item_list_panel: !!def_record.hide_item_list_panel,
+        template_class: nil
       }
     end
   end

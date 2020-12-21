@@ -72,6 +72,8 @@ Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 # SetupHelper.setup_byebug
 SetupHelper.validate_db_setup
 
+# The DB setup can be forced to skip with an env variable
+# It will automatically skip if a specific table is already in place
 SetupHelper.setup_app_dbs unless ENV['SKIP_DB_SETUP']
 
 # Checks for pending migrations before tests are run.
@@ -84,6 +86,7 @@ RSpec.configure do |config|
 
     SetupHelper.clear_delayed_job
 
+    # Skip app setups with an env variable
     unless ENV['SKIP_APP_SETUP']
       Seeds::ActivityLogPlayerContactPhone.setup
       SetupHelper.setup_al_player_contact_emails

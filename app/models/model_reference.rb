@@ -113,6 +113,13 @@ class ModelReference < ActiveRecord::Base
     self.class.find_creatable_config_for from_record, to_record
   end
 
+  #
+  # Lookup items referenced from the current item or master,
+  # optionally filtering by a record type. After finding the references
+  # each of the 'to records' are instantiated and returned in an array
+  # @param [UserBase | Master] from_item_or_master
+  # @param [String|nil] record_type (optional) fully qualified class name for to record type
+  # @return [Array{UserBase}] instantiated items
   def self.find_referenced_items(from_item_or_master, record_type: nil)
     mrs = find_references from_item_or_master, to_record_type: record_type
     res = []

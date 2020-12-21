@@ -2,7 +2,7 @@
 
 module Messaging
   class JobReview < Delayed::Job
-    scope :limited_index, -> { limit 10 }
+    scope :limited_index, -> { limit 100 }
 
     attr_accessor :disabled, :admin_id
 

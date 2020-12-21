@@ -2,11 +2,70 @@
   .container-icons-folder-items {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+
+    &.collapse {
+      display: none;
+    }
+    &.collapse.in,
+    &.collapsing {
+      display: flex;
+      padding-left: 10px;
+    }
+
+    .container-icons-entry {
+      flex-direction: row;
+      width: 260px;
+      padding: 6px;
+      text-align: center;
+      font-size: 90%;
+
+      a.browse-icon {
+        width: 92px;
+        height: 92px;
+        border: 1px solid silver;
+        background-color: rgb(214, 214, 214);
+        display: inline-block;
+      }
+
+      .browse-icon-img {
+        width: 90px;
+        height: 90px;
+        opacity: 0;
+
+        &.broken-image {
+          opacity: 0;
+        }
+        &.loaded-image {
+          opacity: 1;
+          transition: ease-in 600ms;
+        }
+      }
+    }
+  }
+
+  .container-icons-folder {
+    width: 100% !important;
+    display: block;
+    position: relative;
+    float: none;
+    clear: both;
+
+    .folder-icon {
+      font-size: 60px;
+    }
+
+    .cif-inner {
+      width: 260px;
+      text-align: center;
+      display: block;
+    }
   }
 
   input[type="checkbox"] {
     cursor: pointer;
     vertical-align: top;
+    display: none;
   }
 
   input.container-new-folder-name {
@@ -191,9 +250,4 @@
     font-size: 12px;
     list-style: none;
   }
-}
-
-.browse-icon-img {
-  width: 90px;
-  height: 90px;
 }
