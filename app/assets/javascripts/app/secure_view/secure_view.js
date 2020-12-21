@@ -50,8 +50,10 @@ var SecureView = function () {
   this.setup_links = function (block, link_selector, options) {
     var _this = this;
 
+    var done_cname = 'sv-added-setup-links' + (options.link_type || '');
+
     if (block && link_selector) {
-      $(block).not('.sv-added-setup-links').on('click', link_selector, function(ev){
+      $(block).not('.' + done_cname).on('click', link_selector, function (ev) {
         options = options || {};
 
         options.page_path = $(this).attr('href');
@@ -71,9 +73,9 @@ var SecureView = function () {
         $('.sv-selected').removeClass('sv-selected');
         $(this).parent().addClass("sv-selected");
 
-        _this.setup (options.set_preview_as, options);
+        _this.setup(options.set_preview_as, options);
         ev.preventDefault();
-      }).addClass('sv-added-setup-links');
+      }).addClass(done_cname);
     }
   }
 
@@ -140,10 +142,10 @@ var SecureView = function () {
       this.preview_as = 'png';
     }
 
-    $('.secure-view-preview-as-selector[data-preview-as="'+this.preview_as+'"]').addClass('focus');
+    $('.secure-view-preview-as-selector[data-preview-as="' + this.preview_as + '"]').addClass('focus');
     this.$secure_view.attr('data-preview-as', this.preview_as);
 
-    if(!this.page_count) {
+    if (!this.page_count) {
       this.get_info(this.show_first_page);
     }
     else {
@@ -152,7 +154,7 @@ var SecureView = function () {
 
     this.set_controls();
 
-    this.$preview_as_selector.not('.sv-added-click-ev').on('click', function(ev){
+    this.$preview_as_selector.not('.sv-added-click-ev').on('click', function (ev) {
       _this.preview_as = $(this).attr('data-preview-as');
       _this.$preview_as_selector.removeClass('focus');
       $(this).addClass('focus');
@@ -161,14 +163,14 @@ var SecureView = function () {
       ev.preventDefault();
     }).addClass('sv-added-click-ev');
 
-    this.$zoom_factor_selector.not('.sv-added-click-ev').on('click', function(ev) {
+    this.$zoom_factor_selector.not('.sv-added-click-ev').on('click', function (ev) {
 
-      _this.$preview_item.css({transition: 'all 0.7s'});
+      _this.$preview_item.css({ transition: 'all 0.7s' });
       _this.set_zoom_for_selector($(this));
 
       // Reset the zoom transition on current page after zoom has completed
       window.setTimeout(function () {
-        _this.$preview_item.css({transition: ''});
+        _this.$preview_item.css({ transition: '' });
       }, 1000);
 
       // Run all pages that are not current to zoom in the background, avoiding jarring appearance on next show
@@ -180,17 +182,17 @@ var SecureView = function () {
     }).addClass('sv-added-click-ev');
 
 
-    $('#preview-next-page').not('.sv-added-click-ev').on('click', function(ev){
+    $('#preview-next-page').not('.sv-added-click-ev').on('click', function (ev) {
       _this.show_next_page();
       ev.preventDefault();
     }).addClass('sv-added-click-ev');
 
-    $('#preview-prev-page').not('.sv-added-click-ev').on('click', function(ev){
+    $('#preview-prev-page').not('.sv-added-click-ev').on('click', function (ev) {
       _this.show_prev_page();
       ev.preventDefault();
     }).addClass('sv-added-click-ev');
 
-    $('#secure-view-current-page').not('.sv-added-keyup-ev').on('keyup', function(ev) {
+    $('#secure-view-current-page').not('.sv-added-keyup-ev').on('keyup', function (ev) {
       var inval = $(this).val();
 
       if (inval == '') return;
@@ -204,7 +206,7 @@ var SecureView = function () {
       }
     }).addClass('sv-added-keyup-ev');
 
-    $('.sv-close').not('.sv-added-click-ev').on('click', function(ev) {
+    $('.sv-close').not('.sv-added-click-ev').on('click', function (ev) {
       _this.close();
     }).addClass('sv-added-click-ev');
 
@@ -323,7 +325,7 @@ var SecureView = function () {
     }
     url += $.param(params);
 
-    $.ajax({url:  url}).done(function (data) {
+    $.ajax({ url: url }).done(function (data) {
       _this.page_count = data.page_count;
       _this.current_zoom = data.default_zoom;
       _this.can_preview = data.can_preview;
@@ -331,7 +333,7 @@ var SecureView = function () {
       $('#secure-view-page-count').html(_this.page_count);
 
       if (callback) {
-        callback ();
+        callback();
       }
     }).fail(function (jqXHR, textStatus, errorThrown) {
       _this.clean_page();
@@ -372,16 +374,16 @@ var SecureView = function () {
       if (_this.current_zoom == 'fit') {
         _this.current_zoom = 100;
       }
-      _this.$pages_block.css({overflow: 'hidden'});
-      $('#sv-preview-item-html-1')[0].contentWindow.document.body.style.zoom=""+_this.current_zoom+"%";
+      _this.$pages_block.css({ overflow: 'hidden' });
+      $('#sv-preview-item-html-1')[0].contentWindow.document.body.style.zoom = "" + _this.current_zoom + "%";
     }
     else {
 
       if (_this.current_zoom == 'fit') {
-        _this.$pages_block.css({overflow: 'hidden'});
+        _this.$pages_block.css({ overflow: 'hidden' });
       }
       else {
-        _this.$pages_block.css({overflow: 'auto'});
+        _this.$pages_block.css({ overflow: 'auto' });
       }
 
       $items.each(function () {
@@ -393,7 +395,7 @@ var SecureView = function () {
           var iw = $item.width();
           var cw = _this.$pages.parent().width();
 
-          if(ch == 0 || ih == 0 || cw == 0 || iw == 0) {
+          if (ch == 0 || ih == 0 || cw == 0 || iw == 0) {
             return;
           }
 
@@ -421,7 +423,7 @@ var SecureView = function () {
 
 
     $('.secure-view-zoom-factor-selector').removeClass('focus');
-    $('.secure-view-zoom-factor-selector[data-zoom-factor="'+_this.current_zoom+'"]').addClass('focus');
+    $('.secure-view-zoom-factor-selector[data-zoom-factor="' + _this.current_zoom + '"]').addClass('focus');
   };
 
   this.set_zoom_for_selector = function ($el) {
@@ -464,7 +466,7 @@ var SecureView = function () {
     if (page + 3 <= _this.page_count)
       _this.get_page(page + 3);
     if (page - 1 >= 1)
-      _this.get_page(page -1);
+      _this.get_page(page - 1);
 
   };
 
@@ -489,7 +491,7 @@ var SecureView = function () {
 
   this.show_prev_page = function () {
     var page = _this.current_page - 1;
-    if (page < 1)  return;
+    if (page < 1) return;
     _this.show_page(page);
   };
 
@@ -500,11 +502,11 @@ var SecureView = function () {
 
   this.got_page = function (page) {
     var page_id = _this.page_id(page);
-    return $('#'+page_id).length;
+    return $('#' + page_id).length;
   };
 
   _this.page_id = function (page) {
-    return 'sv-preview-item-'+_this.preview_as+'-'+page;
+    return 'sv-preview-item-' + _this.preview_as + '-' + page;
   }
 
   _this.get_page = function (page) {
@@ -534,10 +536,10 @@ var SecureView = function () {
     url += $.param(params);
 
     if (_this.preview_as == 'png') {
-      var $preview_item = $('<img id="'+page_id+'" src="'+url+'" class="secure-view-page" data-secure-view-page="'+page+'" style="display: none; width: 1px;" draggable="false" />');
+      var $preview_item = $('<img id="' + page_id + '" src="' + url + '" class="secure-view-page" data-secure-view-page="' + page + '" style="display: none; width: 1px;" draggable="false" />');
     }
     else if (_this.preview_as == 'html') {
-      var $preview_item = $('<iframe id="'+page_id+'" src="'+url+'" class="secure-view-page-iframe" data-secure-view-page="'+page+'" style="display: none;" ></iframe>');
+      var $preview_item = $('<iframe id="' + page_id + '" src="' + url + '" class="secure-view-page-iframe" data-secure-view-page="' + page + '" style="display: none;" ></iframe>');
     }
     else {
       console.log('preview_as not set');

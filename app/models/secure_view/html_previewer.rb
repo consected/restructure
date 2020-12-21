@@ -3,18 +3,18 @@
 #    libreoffice --headless --convert-to html '~/Downloads/mr_scans_full.xlsx'
 
 module SecureView
-  class HTMLPreviewer < Previewer
+  class HTMLPreviewer < BasePreviewer
     def self.file_type
       :html
     end
 
-    def initialize options={}
+    def initialize(options = {})
       super
       office_docs_to :html unless html?
     end
 
-    # Return the page preview as a PNG format file
-    def preview _page
+    # Return the page preview as HTML format file
+    def preview(_page)
       File.open(path) do |output|
         res = { io: output, type: :html, filename: "#{output.path}.html", disposition: 'inline' }
         yield res

@@ -11,66 +11,24 @@ module NavHandler
     admin_view = current_admin && is_a?(AdminController)
 
     @primary_navs = []
-    @secondary_navs = []
     @app_type_switches = nil
 
-    @app_type_switches = current_user.accessible_app_types.map { |m| [m.label, m.id] } if current_user
-    admin_sub = []
-    if current_admin
-
-      admin_sub << { label: 'manage', url: '/', route: '#root' }
-
-      admin_sub << { label: 'password', url: '/admins/edit', extras: { 'data-do-action' => 'admin-change-password' } }
-      admin_sub << { label: 'logout_admin', url: '/admins/sign_out', extras: { method: :delete, 'data-do-action' => 'admin-logout' } }
-
-    elsif current_user
-      if Admin.active.where(email: current_user.email).first
-        admin_sub << { label: 'Admin Login', url: '/admins/sign_in', route: 'admins#sign_in' }
-      end
-    end
-
-    if current_user
-      user_sub = []
-      user_sub << { label: 'password', url: '/users/edit', extras: { 'data-do-action' => 'user-change-password' } }
-      user_sub << { label: 'logout', url: '/users/sign_out', extras: { method: :delete, 'data-do-action' => 'user-logout' } }
-    end
-    if current_user || current_admin
-      unless admin_sub.empty?
-        @secondary_navs << { label: '<span class="glyphicon glyphicon-wrench" title="administrator"></span>', url: '#', sub: admin_sub, extras: { 'data-do-action' => 'show-admin-options' } }
-      end
-      @secondary_navs << { label: '<span class="glyphicon glyphicon-user" title="user"></span>', url: '#', sub: user_sub, extras: { title: current_email, 'data-do-action' => 'show-user-options' } }
-    end
+    setup_secondary_navs
 
     if current_user
       unless app_config_text(:menu_research_label) == 'none'
         @primary_navs << { label: app_config_text(:menu_research_label, 'Research'), url: '/masters/', route: 'masters#index' }
       end
+
       if current_user.can? :create_master
         @primary_navs << { label: app_config_text(:menu_create_master_record_label, 'Create Master'), url: '/masters/new', route: 'masters#new' }
       end
 
-      nav_conf = page_layout_panel layout_name: :nav, panel_name: :all
-
-      if nav_conf&.nav&.links
-        nav_conf.nav.links.each do |l|
-          next unless l.is_a? Hash
-
-          l = l.symbolize_keys
-          if l[:resource_type]
-            rt = l[:resource_type].to_sym
-            rn = l[:resource_name]
-            next unless current_user.has_access_to? :access, rt, rn
-          end
-          url = l[:url]
-          label = l[:label]
-          @primary_navs << { label: label, url: url }
-        end
-
-      end
+      setup_page_layout_navs
     end
 
     if current_user || admin_view
-      if (admin_view || current_user&.can?(:view_dashboards)) && current_user&.app_type_id && Admin::PageLayout.app_standalone_layouts(current_user.app_type_id).count > 0
+      if (admin_view || current_user&.can?(:view_dashboards)) && standalone_layouts?
         @primary_navs << { label: 'Dashboards', url: '/page_layouts', route: 'page_layouts#index' }
       end
       if admin_view || current_user.can?(:view_reports)
@@ -85,8 +43,87 @@ module NavHandler
 
     end
 
+    highlight_current_action
+
     @navbar_ready = true
-    res = @primary_navs.select { |n| n[:route] == "#{controller_name}##{action_name}" }
-    res.first[:active] = true if res&.first
+  end
+
+  def setup_secondary_navs
+    @secondary_navs = []
+
+    admin_sub = []
+    user_sub = []
+
+    setup_admin_sub_nav(admin_sub)
+    setup_user_sub_nav(user_sub)
+
+    return unless current_user || current_admin
+
+    unless admin_sub.empty?
+      @secondary_navs << {
+        label: '<span class="glyphicon glyphicon-wrench" title="administrator"></span>',
+        url: '#',
+        sub: admin_sub,
+        extras: { 'data-do-action' => 'show-admin-options' }
+      }
+    end
+
+    @secondary_navs << {
+      label: '<span class="glyphicon glyphicon-user" title="user"></span>',
+      url: '#',
+      sub: user_sub,
+      extras: { title: current_email, 'data-do-action' => 'show-user-options' }
+    }
+  end
+
+  def setup_page_layout_navs
+    nav_conf = page_layout_panel layout_name: :nav, panel_name: %i[all page]
+
+    if nav_conf&.nav&.links
+      nav_conf.nav.links.each do |l|
+        next unless l.is_a? Hash
+
+        l = l.symbolize_keys
+        if l[:resource_type]
+          rt = l[:resource_type].to_sym
+          rn = l[:resource_name]
+          next unless current_user.has_access_to? :access, rt, rn
+        end
+        url = l[:url]
+        label = l[:label]
+        @primary_navs << { label: label, url: url }
+      end
+
+    end
+  end
+
+  def setup_admin_sub_nav(admin_sub)
+    if current_admin
+      admin_sub << { label: 'manage', url: '/', route: '#root' }
+      admin_sub << { label: 'password', url: '/admins/edit', extras: { 'data-do-action' => 'admin-change-password' } }
+      admin_sub << { label: 'logout_admin', url: '/admins/sign_out', extras: { method: :delete, 'data-do-action' => 'admin-logout' } }
+    elsif current_user && Admin.for_user(current_user)
+      admin_sub << { label: 'Admin Login', url: '/admins/sign_in', route: 'admins#sign_in' }
+    end
+  end
+
+  def setup_user_sub_nav(user_sub)
+    return unless current_user
+
+    @app_type_switches = current_user.accessible_app_types.map { |m| [m.label, m.id] }
+
+    user_sub << { label: 'password', url: '/users/edit', extras: { 'data-do-action' => 'user-change-password' } }
+    user_sub << { label: 'logout', url: '/users/sign_out', extras: { method: :delete, 'data-do-action' => 'user-logout' } }
+  end
+
+  def standalone_layouts?
+    current_user&.app_type_id && Admin::PageLayout.app_standalone_layouts(current_user.app_type_id).count > 0
+  end
+
+  def highlight_current_action
+    res = @primary_navs.find { |n| n[:route] == "#{controller_name}##{action_name}" }
+    return unless res
+
+    res[:active] = true
   end
 end

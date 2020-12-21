@@ -1,7 +1,6 @@
 module NfsStore
   module Manage
     class ArchivedFile < ContainerFile
-
       self.table_name = 'nfs_store_archived_files'
 
       include HandlesContainerFile
@@ -11,7 +10,10 @@ module NfsStore
       # Analyze the file to complete its ArchivedFile attributes
       def analyze_file!
         rp = archive_retrieval_path
-        raise FsException::Action.new "Retrieval path is not set when analyzing file '#{path}' '#{file_name}'. Does gid #{self.current_gid} have permissions for this app / container?" unless rp
+        unless rp
+          raise FsException::Action, "Retrieval path is not set when analyzing file '#{path}' '#{file_name}'. Does gid #{current_gid} have permissions for this app / container?"
+        end
+
         self.skip_file_uniqueness = true # Just rely on the database, to avoid slow queries by Rails
         super(rp)
       end
@@ -21,11 +23,11 @@ module NfsStore
       # @param archive_path [String] the relative path (from the container) to the archive if it is not in the root
       # @param archive_file_name [String] the file name of the archive file
       # @return [Boolean] true if the archive has been extracted leading to at least one entry in the database
-      def self.extracted? container=nil, archive_path=nil, archive_file_name=nil, stored_file: nil
+      def self.extracted?(container = nil, archive_path = nil, archive_file_name = nil, stored_file: nil)
         if stored_file
           !!stored_file.archived_files.first
         elsif !(container || archive_path || archive_file_name)
-          raise FsException::Archive.new("Can't check if a file is extracted with no parameters")
+          raise FsException::Archive, "Can't check if a file is extracted with no parameters"
         else
           archive_file_parts = []
           archive_file_parts << archive_path if archive_path
@@ -38,14 +40,15 @@ module NfsStore
       # Name of the mounted archive, which is the directory name of the mount point
       # @return [String] the mount point name
       def archive_mount_name
-        NfsStore::Archive::Mounter.archive_mount_name self.archive_file
+        NfsStore::Archive::Mounter.archive_mount_name archive_file
       end
 
       # Full retrieval path for the specific archive file within the mounted archive
       # @return [String] full path
       def archive_retrieval_path
-        raise FsException::Container.new 'No current role name set' unless self.current_role_name
-        path_for role_name: self.current_role_name
+        raise FsException::Container, 'No current role name set' unless current_role_name
+
+        path_for role_name: current_role_name
       end
 
       # File path relative to the container, returning results based on multiple options
@@ -53,7 +56,7 @@ module NfsStore
       # @param final_slash [Boolean] default (falsey) the final slash is not included on a directory path, otherwise (true) the final slash is included
       # @param use_archive_file_name [Boolean] default (falsey) the archive mount name is used, otherwise (true) the original archive file name is used instead
       # @param leading_dot [Boolean] default (falsey) do not include a leading dot, otherwise (true) the leading dot is included in the path
-      def container_path no_filename: nil, final_slash: nil, use_archive_file_name: nil, leading_dot: nil
+      def container_path(no_filename: nil, final_slash: nil, use_archive_file_name: nil, leading_dot: nil)
         parts = []
         parts << '.' if leading_dot
         if use_archive_file_name && archive_file.present?
@@ -64,10 +67,41 @@ module NfsStore
         parts << path unless path.blank?
         parts << file_name unless no_filename
         res = File.join parts
-        res = res + '/' if final_slash && res.length > 0
+        res += '/' if final_slash && res.length > 0
         res
       end
 
+      # It is possible that repeated or overlapping background processes lead to double entries in the archive_files
+      # table. Remove these by associating the earlier duplicates with a "duplicates-<timestamp>" archive file.
+      # @param [String] archive_file - the name of the archive file within which to remove duplicate entries
+      def self.remove_duplicates(archive_file)
+        remove_dups = <<~END_SQL
+          UPDATE nfs_store_archived_files
+          SET file_name = $1
+          WHERE 
+          archive_file = $2 AND
+          id NOT IN (
+            SELECT id FROM
+            (
+              SELECT MAX(t.id) id
+                  , t.file_hash
+                  , t.file_name
+              FROM nfs_store_archived_files t
+              WHERE archive_file = $3
+              GROUP BY file_hash, file_name
+            ) t
+          );
+        END_SQL
+
+        bind_type = ActiveRecord::Type::String.new
+        binds = [
+          ActiveRecord::Relation::QueryAttribute.new('file_name', "duplicates-#{DateTime.now.to_f}", bind_type),
+          ActiveRecord::Relation::QueryAttribute.new('archive_file', archive_file, bind_type),
+          ActiveRecord::Relation::QueryAttribute.new('t.archive_file', archive_file, bind_type)
+        ]
+
+        connection.exec_query(remove_dups, 'SQL', binds)
+      end
     end
   end
 end

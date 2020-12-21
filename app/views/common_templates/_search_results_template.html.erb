@@ -1,5 +1,9 @@
 <%
 
+  unless defined? resource_name
+    resource_name = nil
+  end
+
   unless defined? def_record
     def_record = nil
   end
@@ -77,6 +81,10 @@
 
   unless defined? extra_class
     extra_class = ''
+  end
+
+  unless defined? template_class
+    template_class = ''
   end
 
   unless defined? full_name
@@ -259,6 +267,7 @@
     model_data_type: '<%=model_data_type%>',
     item_blocks: <%=formatted_item_blocks.to_json.html_safe%>,
     extra_class: Handlebars.compile('<%=extra_class%>'),
+    template_class: '<%= template_class %>',
     is_activity_log_class: '<%=is_activity_log_class%>',
     custom_block_attrs: <%=custom_block_attrs.to_json.html_safe%>,
     exclude_metadata: <%=!!exclude_metadata%>,
@@ -275,6 +284,11 @@
 <% unless full_name.underscore.to_s == name.underscore.to_s %>
   _fpa.state.template_config.<%=full_name.underscore%> = _fpa.state.template_config.<%=full_name.underscore%> || {};
   _fpa.state.template_config.<%=full_name.underscore%>.v<%=def_version%> = _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>;
+<% end %>
+
+<% if resource_name && resource_name != name.underscore.to_s && resource_name != full_name.underscore.to_s %>
+  _fpa.state.template_config.<%=resource_name%> = _fpa.state.template_config.<%=resource_name.underscore%> || {};
+  _fpa.state.template_config.<%=resource_name%>.v<%=def_version%> = _fpa.state.template_config.<%=name.underscore%>.v<%=def_version%>;
 <% end %>
 
   _fpa.show_if.forms['<%=full_name%>'] = _fpa.show_if.forms['<%=full_name%>'] || {};

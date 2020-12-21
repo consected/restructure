@@ -1,4 +1,6 @@
 <%
+  @matched_name = nil
+
   if defined? embedded
     locals[:embedded] = embedded
   end
@@ -133,4 +135,5 @@
 
   end
 
+  @matched_name ||= match_name
 %>

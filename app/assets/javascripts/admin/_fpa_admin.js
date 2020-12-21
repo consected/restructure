@@ -4,13 +4,28 @@ _fpa.admin = {
 
     if (!block) block = $('.admin-result-index');
 
+
+
+    setTimeout(function () {
+      var blocks = $('.shrinkable-block')
+      _fpa.utils.make_readable_notes_expandable(blocks, 100);
+
+      $(document).on('change', '#config', function () {
+        var ext = $('#config').val().split('.').pop();
+        $('input[name="upload_format"]').prop('checked', false);
+        $('input[name="upload_format"][value="' + ext + '"]').prop('checked', true);
+      })
+
+    }, 10);
+
+
   },
 
-  setup_yaml_viewer: function(block) {
+  setup_yaml_viewer: function (block) {
 
     var code_el = block.get(0);
     var mode = block.attr('data-code-editor-type');
-    if(!mode) mode = 'yaml';
+    if (!mode) mode = 'yaml';
 
     var cm = CodeMirror.fromTextArea(code_el, {
       lineNumbers: true,

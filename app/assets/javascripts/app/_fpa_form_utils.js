@@ -1526,7 +1526,7 @@ _fpa.form_utils = {
         var $eddiv = $(this).find('div.custom-editor');
         var edid = $eddiv.attr('id');
         var $edtools = $(this).find('.btn-toolbar[data-target="#' + edid + '"]');
-        var editor = $eddiv.wysiwyg({ dragAndDropImages: false });
+        var editor = $eddiv.wysiwyg({ dragAndDropImages: true });
 
         $edtools.hide();
         $eddiv.on('focus', function () {
@@ -1541,8 +1541,28 @@ _fpa.form_utils = {
             if ($eddiv.data('editor-changed')) {
               // Only if there has been a change
               $eddiv.data('editor-changed', null);
+
+              // Add a header if necessary
+              if (editor.find('thead').length === 0) {
+                var first_row = editor.find('tr').first();
+                var headers = first_row.find('td');
+                var thead_html = $('<thead><tr></tr></thead>')
+                var thead_tr = thead_html.find('tr');
+                headers.each(function () {
+                  var th = "<th>" + $(this).html() + "</th>";
+                  thead_tr.append(th);
+                });
+
+                first_row.remove()
+
+                editor.find('table').prepend(thead_html)
+              }
+
               var html = editor.cleanHtml();
               var txt = domador(html);
+              // Clean the text to remove
+              // any number of hash or asterisk symbols followed by 
+              // one or more spaces
               var cleantext = txt.replace(/(^|\n)(#|\*)+ *\n/g, '');
               $edta.val(cleantext);
             }
@@ -1589,10 +1609,11 @@ _fpa.form_utils = {
 
         var fn = $(this).html();
 
+        _fpa.secure_view.setup_links($(this), 'a.browse-icon', { allow_actions: acts, set_preview_as: spa, attr_for_filename: 'title', link_type: 'icon' });
         _fpa.secure_view.setup_links($(this), 'a.browse-filename', { allow_actions: acts, set_preview_as: spa });
       }
       if (usv == null || usv == '' || usv == 'false') {
-        $(this).find('a.browse-filename').on('click', function (ev) {
+        $(this).find('a.browse-filename, a.browse-icon').on('click', function (ev) {
           ev.preventDefault();
         });
       }

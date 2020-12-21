@@ -20,6 +20,8 @@ module SetupHelper
   end
 
   def self.setup_app_dbs
+    return if ActiveRecord::Base.connection.table_exists?('bhs_assignments')
+
     # ESign setup
     # Setup the triggers, functions, etc
     sql_files = %w[create_al_table.sql create_ipa_inex_checklist_table.sql]

@@ -3,7 +3,8 @@
 # View a page layout as a standalone dashboard or page
 class PageLayoutsController < ApplicationController
   before_action :authenticate_user_or_admin!
-  before_action :authorized?
+  before_action :index_authorized?, only: %i[index]
+  before_action :show_authorized?, only: %i[show show_content]
   before_action :set_page_layout, only: %i[show show_content]
   before_action :set_page_filters, only: %i[show]
   attr_accessor :object_instance, :objects_instance
@@ -24,8 +25,12 @@ class PageLayoutsController < ApplicationController
 
   private
 
-  def authorized?
-    return not_authorized unless current_user.can? :view_dashboards
+  def index_authorized?
+    return not_authorized unless current_user.can?(:view_dashboards)
+  end
+
+  def show_authorized?
+    return not_authorized unless current_user.can?(:view_dashboards) || current_user.can?(:view_pages)
   end
 
   def active_layouts

@@ -13,12 +13,12 @@
     action: '<%= action_name %>'
   };
   </script>
-  <%= render partial: "layouts/setup_app" if current_email %>
+  <%= render partial: "layouts/setup_app" if current_user %>
   <%= csrf_meta_tags %>
   <link rel="shortcut icon" type="image/png" href="/favicon.png">
 </head>
 <body <%= body_classes %> id="body-top">
-    <%= render partial: 'layouts/navbar' if @navbar_ready%>
+    <%= render partial: 'layouts/navbar/navbar' if @navbar_ready%>
     <%= render partial: 'layouts/flash_alerts' %>
     <%= render partial: 'admin_handler/status_bar' %>
 <%= yield %>

@@ -128,6 +128,7 @@ _fpa.postprocessors_admin = {
         ehi.addClass('code-extra-help-info-formatted-in-tab')
       }
     })
+    _fpa.form_utils.on_open_click(block);
 
   },
 

@@ -4,7 +4,7 @@ class ReportsController < UserBaseController
   include MasterSearch
   before_action :init_vars
   before_action :authenticate_user_or_admin!
-  before_action :authorized?, only: [:index]
+  before_action :index_authorized?, only: [:index]
   before_action :set_report, only: [:show]
   before_action :set_editable_instance_from_id, only: %i[edit update new create]
   before_action :set_instance_from_build, only: %i[new create]
@@ -64,7 +64,7 @@ class ReportsController < UserBaseController
       no_run = !search_attrs[:no_run].blank?
     end
 
-    unless @report.searchable || authorized?
+    unless @report.searchable || show_authorized?
       @no_masters = true
       return
     end
@@ -117,7 +117,7 @@ class ReportsController < UserBaseController
         return
       end
 
-      return unless authorized? == true
+      return unless show_authorized? == true
 
       respond_to do |format|
         format.html do
@@ -149,7 +149,7 @@ class ReportsController < UserBaseController
 
       @master_ids = @results.map { |r| r['master_id'] } if @results
     elsif params[:get_filter_previous]
-      return unless authorized? == true
+      return unless show_authorized? == true
 
       @no_masters = true
       render partial: 'filter_on'
@@ -163,7 +163,7 @@ class ReportsController < UserBaseController
             if params[:part] == 'form'
               render partial: 'form'
             else
-              return unless authorized? == true
+              return unless show_authorized? == true
 
               @report_criteria = true
 
@@ -343,7 +343,14 @@ class ReportsController < UserBaseController
     @results&.clear
   end
 
-  def authorized?
+  def show_authorized?
+    return true if current_admin
+    return true if current_user.can? :view_report_not_list
+
+    not_authorized
+  end
+
+  def index_authorized?
     return true if current_admin
     return true if current_user.can? :view_reports
 

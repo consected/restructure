@@ -367,35 +367,23 @@ module Dynamic
 
           order_by = ref_config[:order_by] if use_options_order_by
 
+          pass_options = {
+            to_record_type: ref_type,
+            filter_by: ref_config[:filter_by],
+            without_reference: without_reference,
+            ref_order: ref_order,
+            active: active_only,
+            order_by: order_by
+          }
+
           got = if f == 'this'
-                  ModelReference.find_references self,
-                                                 to_record_type: ref_type,
-                                                 filter_by: ref_config[:filter_by],
-                                                 without_reference: without_reference,
-                                                 ref_order: ref_order,
-                                                 active: active_only,
-                                                 order_by: order_by
-                elsif f == 'master'
-                  ModelReference.find_references master,
-                                                 to_record_type: ref_type,
-                                                 filter_by: ref_config[:filter_by],
-                                                 without_reference: without_reference,
-                                                 ref_order: ref_order,
-                                                 active: active_only,
-                                                 order_by: order_by
-                elsif f == 'any'
-                  ModelReference.find_references master,
-                                                 to_record_type: ref_type,
-                                                 filter_by: ref_config[:filter_by],
-                                                 without_reference: true,
-                                                 ref_order: ref_order,
-                                                 active: active_only,
-                                                 order_by: order_by
+                  ModelReference.find_references self, **pass_options
+                elsif f&.in?(['master', 'any'])
+                  ModelReference.find_references master, **pass_options
                 else
-                  Rails.logger.warn "Find references attempted without known :from key: #{f}"
-                  if Rails.env.development?
-                    raise FphsException, "Find references attempted without known :from key: #{f}"
-                  end
+                  msg = "Find references attempted without known :from key: #{f}"
+                  Rails.logger.warn msg
+                  raise FphsException, msg if Rails.env.development?
 
                   nil
                 end

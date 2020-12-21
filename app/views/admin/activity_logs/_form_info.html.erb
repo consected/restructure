@@ -4,6 +4,7 @@
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab">Details</a></li>
     <li role="presentation"><a href="#options-ref" aria-controls="options-ref" role="tab" data-toggle="tab">Options Reference</a></li>
+    <li role="presentation"><a href="#user-access-controls" aria-controls="user-access-controls" role="tab" data-toggle="tab">User Access Controls</a></li>
   </ul>
 
   <!-- Tab panes -->
@@ -18,5 +19,8 @@
       <%= render partial: 'admin/activity_logs/options_ref'%>
     </div>
 
+    <div role="tabpanel" class="tab-pane  on-open-click" id="user-access-controls">
+    <%= render partial: 'admin/activity_logs/uac_panel' %>
+    </div>
   </div>
 </div>

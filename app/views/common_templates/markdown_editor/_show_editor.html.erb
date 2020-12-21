@@ -12,6 +12,10 @@
     <a class="btn btn-default btn-sm" data-edit="formatBlock <p>" title="Paragraph" style="font-weight: normal"><span style="font-size: 12px;">p</span></a>
     <a class="btn btn-default btn-sm" data-edit="formatBlock <h1>" title="Heading 1" style="font-weight: bold">h1</a>
     <a class="btn btn-default btn-sm" data-edit="formatBlock <h2>" title="Heading 2" style="font-weight: bold;"><span style="font-size: 14px;">h2</span> </a>
+		<% if config[:toolbar_type] == 'advanced' %>
+		<a class="btn btn-default btn-sm" data-edit="formatBlock <h3>" title="Heading 3" style="font-weight: bold;"><span style="font-size: 12px;">h3</span> </a>
+		<a class="btn btn-default btn-sm" data-edit="formatBlock <h4>" title="Heading 4" style="font-weight: bold;"><span style="font-size: 10px;">h4</span> </a>
+		<% end %>
   </div>
   <div class="btn-group">
 		<a class="btn btn-default btn-sm" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="glyphicon glyphicon-bold"></i></a>
@@ -38,12 +42,13 @@
 " title="Code block"><i class="glyphicon glyphicon-console"></i></a> %>
 		<a class="btn btn-default btn-sm" 
 		   data-edit="inserthtml 
-<table><thead>
-<tr><th>header1</th><th>header2</th></tr>
+<table class='table'><thead>
+<tr><th>header</th><th>header</th><th>header</th><th>header</th></tr>
 </thead>
 <tbody>
-<tr><td>item1</td><td>item2</td></tr>
-<tr><td>item3</td><td>item4</td></tr>
+<tr><td>x</td><td>x</td><td>x</td><td>x</td></tr>
+<tr><td>x</td><td>x</td><td>x</td><td>x</td></tr>
+<tr><td>x</td><td>x</td><td>x</td><td>x</td></tr>
 </tbody></table>" 
 			 title="Table"><i class="glyphicon glyphicon-th-large"></i></a>
 	</div>

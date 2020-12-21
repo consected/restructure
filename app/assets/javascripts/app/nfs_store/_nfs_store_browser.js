@@ -265,6 +265,12 @@ _nfs_store.fs_browser = function ($outer) {
   var container_id = get_container_id($outer);
   var $browser = get_$browser();
 
+  $outer.find('img').on('error', function () {
+    $(this).addClass('broken-image')
+  }).on('load', function () {
+    $(this).addClass('loaded-image')
+  });
+
   $outer.on('change', '.container-browser .container-entry input[type="checkbox"]', function () {
     entry_checked($(this));
   }).on('change', '.container-browser .container-folder input[type="checkbox"]', function () {

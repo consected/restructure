@@ -10,7 +10,7 @@ module AdminControllerHandler
 
     helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance,
                   :objects_instance, :human_name, :no_edit, :primary_model,
-                  :view_path, :extra_field_attributes, :admin_links
+                  :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?
   end
 
   def index
@@ -140,7 +140,7 @@ module AdminControllerHandler
   def response_to_index
     respond_to do |format|
       format.html do
-        if @updated_with
+        if @updated_with || view_embedded?
           render partial: index_partial
         else
           render view_path('index')
@@ -174,8 +174,14 @@ module AdminControllerHandler
     object_name.humanize
   end
 
+  #
+  # Make index lists appear without edit buttons
+  # By default, (although the method may be overridden for certain controllers),
+  # edit is allowed. For certain embedded displays it makes sense not to,
+  # so the param readonly=true allows the requester to control this.
+  # @return [Boolean]
   def no_edit
-    false
+    false || params[:readonly] == 'true'
   end
 
   def default_index_order
@@ -258,5 +264,21 @@ module AdminControllerHandler
   #     [ ['details', admin_external_id_details_path(id) ], ... ]
   def admin_links(_id = nil)
     nil
+  end
+
+  #
+  # Allow admin tables to be embedded in other pages by passing the param
+  # view_as=embedded or view_as=simple-embedded
+  # This returns a partial index, and hides the filter buttons
+  # @return [Boolean]
+  def view_embedded?
+    params[:view_as]&.in? ['embedded', 'simple-embedded']
+  end
+
+  #
+  # Allow admin tables to be viewed without the app type column by passing the param view_as=simple-embedded
+  # @return [Boolean]
+  def hide_app_type?
+    params[:view_as] == 'simple-embedded'
   end
 end

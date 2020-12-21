@@ -716,7 +716,7 @@ module CalcActions
 
       val = if att == 'role_name'
               # The value to match against is an array of the user's role names
-              user.user_roles.active.pluck(:role_name)
+              user.role_names
             else
               # The value to match against is the value of the specified attribute
               user.attributes[att]
@@ -771,6 +771,9 @@ module CalcActions
 
         # Extend the SQL and conditions
         vc = ValidExtraConditionsArrays.find { |c| c == condition_type }
+
+        raise FphsException, 'Use a value: key with a condition:' unless val.key?(:value)
+
         vv = dynamic_value(val[:value])
 
         negate = (val[:not] ? 'NOT' : '')
