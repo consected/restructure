@@ -343,18 +343,28 @@ class ReportsController < UserBaseController
     @results&.clear
   end
 
+  #
+  # Allow users to view a report if they have user access control
+  # read / general / view_reports or view_report_not_list
+  # @return [true | nil] <description>
   def show_authorized?
     return true if current_admin
-    return true if current_user.can? :view_report_not_list
+    return true if current_user.can?(:view_report_not_list) || current_user.can?(:view_reports)
 
     not_authorized
+    throw(:abort)
   end
 
+  #
+  # Allow users to see index of reports if they have user access control
+  # read / general / view_reports
+  # @return [true | nil] <description>
   def index_authorized?
     return true if current_admin
-    return true if current_user.can? :view_reports
+    return true if current_user.can?(:view_reports)
 
     not_authorized
+    throw(:abort)
   end
 
   def index_path(p)

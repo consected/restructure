@@ -25,12 +25,23 @@ class PageLayoutsController < ApplicationController
 
   private
 
+  #
+  # Only show the list of standalone layouts if the user can view dashboards
+  # allowing them to see the list of available dashboards
   def index_authorized?
-    return not_authorized unless current_user.can?(:view_dashboards)
+    return true if current_user.can?(:view_dashboards)
+
+    not_authorized
+    throw(:abort)
   end
 
+  #
+  # A user can view a standalone layout if they can view dashboards or view pages
   def show_authorized?
-    return not_authorized unless current_user.can?(:view_dashboards) || current_user.can?(:view_pages)
+    return true if current_user.can?(:view_dashboards) || current_user.can?(:view_pages)
+
+    not_authorized
+    throw(:abort)
   end
 
   def active_layouts
