@@ -92,4 +92,7 @@ class Settings
   DefaultSecondaryInfoTableName = 'pro_infos'
   DefaultContactInfoTableName = 'player_contacts'
   DefaultAddressInfoTableName = 'addresses'
+
+  # Scripted job scripts are only run from a predefined directory
+  ScriptedJobDirectory = Rails.root.join('scripted_job_scripts')
 end

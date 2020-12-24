@@ -79,7 +79,7 @@ module Utilities
           # puts "result length #{cmd}: #{res&.length}"
         end
       rescue Timeout::Error
-        Process.kill 9, stdinout.pid
+        ::Process.kill 9, stdinout.pid
         Rails.logger.warn "Process popen timed out: #{cmd}"
       end
 
