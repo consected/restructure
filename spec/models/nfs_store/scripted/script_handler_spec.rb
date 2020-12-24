@@ -194,7 +194,7 @@ RSpec.describe NfsStore::Scripted::ScriptHandler, type: :model do
 
     # Try a file in a different path
     cf = c.stored_files[1]
-    new_path = '/test_path'
+    new_path = 'test_path'
     cf.move_to new_path
     sh = NfsStore::Scripted::ScriptHandler.new(config)
 
