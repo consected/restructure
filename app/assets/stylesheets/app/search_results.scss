@@ -645,10 +645,6 @@ ul.view-object {
   .list-group-item:first-child {
     background-color: inherit;
   }
-
-  .view-object-caret {
-    // display: none;
-  }
 }
 
 strong {
@@ -701,10 +697,6 @@ div.external-links {
     display: inline-block;
     margin-left: 2em;
   }
-}
-
-div.sage-assignment-item {
-  // opacity: 0.6;
 }
 
 div[data-sub-list="sage_assignments"] .sage-assignment-item:nth-of-type(1) {
@@ -957,7 +949,7 @@ li.list-group-item.is_external_id_item {
 
 .common-template-item {
   .list-group-item.tracker-histories-caption.is-minor-heading {
-    display: inline-block;
+    display: block;
     width: 16px;
     background: none;
     height: 30px;
