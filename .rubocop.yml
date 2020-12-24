@@ -65,3 +65,7 @@ Style/Documentation:
 
 Style/NumericPredicate:
   Enabled: false
+
+Style/SpecialGlobalVars:
+  Enabled: false
+  
