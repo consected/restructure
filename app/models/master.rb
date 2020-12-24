@@ -166,8 +166,8 @@ class Master < ActiveRecord::Base
   #
   # Find a Master with an id, crosswalk attribute or alternative id
   # @param [Hash] params
-  #   @options params [String] :type - a crosswalk attribute or external id field name
-  #   @options params [String] :id - the id value to match against
+  #   @option params [String] :type - a crosswalk attribute or external id field name
+  #   @option params [String] :id - the id value to match against
   # @param [Boolean | nil] access_by - specify the current user making the request
   # @return [Master|nil] the resulting Master or nil if not found
   def self.find_with(params, access_by: nil)

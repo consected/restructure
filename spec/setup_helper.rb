@@ -16,11 +16,15 @@ module SetupHelper
   end
 
   def self.clear_delayed_job
+    puts 'Clear delayed_job'
+
     Delayed::Job.delete_all
   end
 
   def self.setup_app_dbs
     return if ActiveRecord::Base.connection.table_exists?('bhs_assignments')
+
+    puts 'Setup app DBs'
 
     # ESign setup
     # Setup the triggers, functions, etc
@@ -54,6 +58,8 @@ module SetupHelper
   end
 
   def self.validate_db_setup
+    puts 'DB validation'
+
     # Ensure we are set up for this test
     res = File.read("#{ENV['HOME']}/.pgpass").include? db_name
     raise ".pgpass does not contain entry for database #{db_name}" unless res
@@ -186,13 +192,13 @@ module SetupHelper
     res
   end
 
-  def self.setup_ext_identifier(r = 'test7', implementation_table_name: nil, implementation_attr_name: nil)
-    Rails.logger.info "Setting up external identifier #{r}"
-    @implementation_table_name = implementation_table_name || "test_external_#{r}_identifiers"
-    @implementation_attr_name = implementation_attr_name || "test_#{r}_id"
-    unless ActiveRecord::Base.connection.table_exists? @implementation_table_name
-      TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
-    end
+  def self.setup_ext_identifier(name = 'test7', implementation_table_name: nil, implementation_attr_name: nil)
+    Rails.logger.info "Setting up external identifier #{name}"
+    @implementation_table_name = implementation_table_name || "test_external_#{name}_identifiers"
+    @implementation_attr_name = implementation_attr_name || "test_#{name}_id"
+    return if ActiveRecord::Base.connection.table_exists? @implementation_table_name
+
+    TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
   end
 
   def self.setup_test_app

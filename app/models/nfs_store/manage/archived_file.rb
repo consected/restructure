@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module NfsStore
   module Manage
     class ArchivedFile < ContainerFile
@@ -11,7 +13,8 @@ module NfsStore
       def analyze_file!
         rp = archive_retrieval_path
         unless rp
-          raise FsException::Action, "Retrieval path is not set when analyzing file '#{path}' '#{file_name}'. Does gid #{current_gid} have permissions for this app / container?"
+          raise FsException::Action, "Retrieval path is not set when analyzing file '#{path}' '#{file_name}'." \
+                                     "Does gid #{current_gid} have permissions for this app / container?"
         end
 
         self.skip_file_uniqueness = true # Just rely on the database, to avoid slow queries by Rails
@@ -53,9 +56,12 @@ module NfsStore
 
       # File path relative to the container, returning results based on multiple options
       # @param no_filename [Boolean] default (falsey) the filename is returned, otherwise (true) it is not
-      # @param final_slash [Boolean] default (falsey) the final slash is not included on a directory path, otherwise (true) the final slash is included
-      # @param use_archive_file_name [Boolean] default (falsey) the archive mount name is used, otherwise (true) the original archive file name is used instead
-      # @param leading_dot [Boolean] default (falsey) do not include a leading dot, otherwise (true) the leading dot is included in the path
+      # @param final_slash [Boolean] default (falsey) the final slash is not included on a directory path,
+      #     otherwise (true) the final slash is included
+      # @param use_archive_file_name [Boolean] default (falsey) the archive mount name is used,
+      #     otherwise (true) the original archive file name is used instead
+      # @param leading_dot [Boolean] default (falsey) do not include a leading dot,
+      #     otherwise (true) the leading dot is included in the path
       def container_path(no_filename: nil, final_slash: nil, use_archive_file_name: nil, leading_dot: nil)
         parts = []
         parts << '.' if leading_dot
@@ -67,7 +73,7 @@ module NfsStore
         parts << path unless path.blank?
         parts << file_name unless no_filename
         res = File.join parts
-        res += '/' if final_slash && res.length > 0
+        res += '/' if final_slash && res.present?
         res
       end
 

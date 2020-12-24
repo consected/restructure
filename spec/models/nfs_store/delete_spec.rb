@@ -135,11 +135,11 @@ RSpec.describe 'Delete stored files', type: :model do
     af.move_to_trash!
 
     non_trash_af = @container.archived_files
-    expect(non_trash_af.count).to eq (count_afs - 1)
+    expect(non_trash_af.count).to eq(count_afs - 1)
   end
 
   it 'delete a stored file from a container and allows new upload' do
-    u = upload_file 'test-name-7.txt'
+    upload_file 'test-name-7.txt'
     upload_file 'test-name-8.txt'
     upload_file 'test-name-9.txt'
 
