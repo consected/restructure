@@ -90,6 +90,7 @@ class Classification::GeneralSelection < ActiveRecord::Base
     !attr.in?(%w[disabled user_id created_at updated_at]) && (
       attr.start_with?('select_') ||
       attr.start_with?('multi_select_') ||
+      attr.start_with?('tag_select_') ||
       attr.end_with?('_selection') ||
       attr.in?(%w[source rec_type rank])
     )
@@ -114,7 +115,6 @@ class Classification::GeneralSelection < ActiveRecord::Base
 
     # Get the underlying general selection data and make it into an array of results
     res = selector_collection(conditions)
-    res = res.to_ary
 
     impl_classes = implementation_classes
     # Check the definition is ready to use and prepare it for use

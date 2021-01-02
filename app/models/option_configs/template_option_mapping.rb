@@ -25,6 +25,8 @@ module OptionConfigs
         button_label: option_type_config.button_label || external_id_type.label,
         name: external_id_type.name.underscore,
         full_name: external_id_type.name.underscore,
+        resource_name: def_record.resource_name,
+
         model_data_type: :external_identifier,
         prevent_edit: external_id_type.prevent_edit? ||
           !(current_user.has_access_to? :edit, :table, plural_name),
@@ -39,6 +41,7 @@ module OptionConfigs
         category: def_record.category,
         view_options: view_options,
         extra_class: view_options[:extra_class],
+        template_class: nil,
         extra_data_attribs: field_list.include?('rec_type') ? [:rec_type] : nil,
         extra_options_config: option_type_config,
         external_id_options: {
@@ -75,6 +78,8 @@ module OptionConfigs
         button_label: default_options.button_label,
         name: def_record.implementation_model_name,
         full_name: "dynamic_model__#{def_record.implementation_model_name}",
+        resource_name: def_record.resource_name,
+
         model_data_type: :dynamic_model,
         prevent_edit: !(current_user.has_access_to? :edit, :table, def_record.full_item_type_name.pluralize),
         prevent_create: !(current_user.has_access_to? :create, :table, def_record.full_item_type_name.pluralize),
@@ -87,6 +92,7 @@ module OptionConfigs
         category: def_record.category,
         view_options: view_options,
         extra_class: view_options[:extra_class],
+        template_class: nil,
         extra_data_attribs: field_list.include?('rec_type') ? [:rec_type] : nil,
         extra_options_config: default_options
       }
@@ -120,8 +126,11 @@ module OptionConfigs
         def_version: def_record.def_version,
         caption: view_options[:header_caption] || option_type_config.label,
         name: "#{full_name}_#{option_type_config.name}",
+        full_name: "#{full_name}_#{option_type_config.name}",
         model_data_type: :activity_log,
         item_class_name: full_name,
+        resource_name: "#{full_name}__#{option_type_config.name}",
+
         button_label: option_type_config.button_label,
         prevent_edit: !(current_user.has_access_to? :edit, :table, def_record.full_item_type_name.pluralize),
         prevent_create: !(current_user.has_access_to? :create, :table, def_record.full_item_type_name.pluralize),
@@ -130,7 +139,8 @@ module OptionConfigs
           :activity_log_type,
           option_type_config.resource_name
         ),
-        extra_class: "alt-width #{cwc} #{view_options[:extra_class]}",
+        template_class: "alt-width #{cwc}",
+        extra_class: view_options[:extra_class],
         item_list: option_type_config.fields,
         data_sort: [:desc, data_action_when],
         subsort_id: true,
@@ -176,7 +186,8 @@ module OptionConfigs
         blank_log_full_name: "#{def_record.full_item_type_name}_blank_log",
         blank_log_label: (def_record.blank_log_name.blank? ? 'General Log' : def_record.blank_log_name),
         main_log_label: (def_record.main_log_name.blank? ? 'Add Log' : def_record.main_log_name),
-        hide_item_list_panel: !!def_record.hide_item_list_panel
+        hide_item_list_panel: !!def_record.hide_item_list_panel,
+        template_class: nil
       }
     end
   end

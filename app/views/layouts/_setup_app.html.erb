@@ -3,11 +3,14 @@
   _fpa.version = '<%=Application.version%>-<%=Application.server_cache_version%>';
   _fpa.status.session = new _fpa.session(<%= current_user ? current_user.timeout_in :  "null" %>);
   _fpa.current_locale = 'en';
+  _fpa.env_name = '<%=Settings::EnvironmentName%>';
 
   _fpa.layout = {item_blocks: <%= layout_item_block_sizes.to_json.html_safe %> };
   <% if current_user %>
   _fpa.state.app_configs = <%= Admin::AppConfiguration.all_for(current_user).to_json.html_safe %>;
   _fpa.state.current_user_roles = <%= current_user.app_type ? current_user.role_names.to_json.html_safe : [] %>;
+  _fpa.state.crosswalk_attrs = <%= Master.crosswalk_attrs.to_json.html_safe %>;
+  _fpa.state.alternative_id_fields = <%= Master.alternative_id_fields.to_json.html_safe %>;
   <% end %>
   _fpa.loaded.preload();
 

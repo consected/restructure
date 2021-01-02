@@ -73,9 +73,15 @@ module Dynamic
       versioned_definition.def_version
     end
 
+    #
+    # List field names that explicitly state *no_downcase: true* or
+    # edit_as: field_type: includes the string 'notes'
+    # @return [Array{Symbol}]
     def no_downcase_attributes
       fo = option_type_config&.field_options || {}
-      fo&.filter { |_k, v| v[:no_downcase] }&.keys
+      res = fo&.filter { |_k, v| v[:no_downcase] || v[:edit_as] && v[:edit_as][:field_type]&.include?('notes') }
+
+      res&.keys
     end
 
     # Provide a default human message identifying a record

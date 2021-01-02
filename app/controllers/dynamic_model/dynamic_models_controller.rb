@@ -35,6 +35,7 @@ class DynamicModel::DynamicModelsController < UserBaseController
     pk = @implementation_class.primary_key
     @filtered_ids = @master_objects.select { |i| i.class.definition.default_options&.calc_showable_if(i) }.map { |o| o.attributes[pk] }
     @master_objects = @master_objects.where(pk => @filtered_ids)
+    filter_requested_ids
     limit_results
   end
 end

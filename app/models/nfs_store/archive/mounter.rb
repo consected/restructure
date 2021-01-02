@@ -307,6 +307,11 @@ module NfsStore
           end
 
           result = NfsStore::Manage::ArchivedFile.import(all_afs, validate: false) && result
+
+          # It is possible that repeated or overlapping background processes lead to double entries in the archive_files
+          # table. To fix this it is fastest to complete the import, then remove the duplicates.
+
+          NfsStore::Manage::ArchivedFile.remove_duplicates @archive_file
         end
 
         result

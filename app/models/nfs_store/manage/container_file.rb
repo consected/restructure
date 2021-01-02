@@ -30,7 +30,9 @@ module NfsStore
       end
 
       def self.permitted_params
-        super - %i[id file_hash file_name content_type file_size path file_updated_at nfs_store_container_id nfs_store_stored_file_id archive_file last_process_name_run]
+        super - %i[id file_hash file_name content_type file_size path file_updated_at
+                   nfs_store_container_id nfs_store_stored_file_id archive_file
+                   last_process_name_run]
       end
 
       def self.readonly_params
@@ -93,12 +95,13 @@ module NfsStore
       # @param [String] new_tmp_image_path is the path to the file to move to the final storage
       # @param [Container] container
       # @param [Hash] attrs full set of attributes. Unnecessary items will be overwritten.
-      # @options attrs [String] path
-      # @options attrs [String] file_name
-      # @options attrs [String] content_type
-      # @options attrs [String] archived_file_path (optional) for archived files
-      # @options attrs [Boolean] do_not_postprocess (optional) true to prevent background processing pipeline from running
-      # @return [ContainerFile] new container_file
+      # @option attrs [String] path
+      # @option attrs [String] file_name
+      # @option attrs [String] content_type - (optional) will be detected automatically if not set
+      # @option attrs [String] archived_file_path - (optional) for archived files
+      # @option attrs [Boolean] do_not_postprocess - (optional) true to prevent
+      #     background processing pipeline from running
+      # @return [NfsStore::Manage::ContainerFile] new container_file
       #
       def self.store_new_file(new_tmp_image_path, container, attrs)
         container_file = new(attrs)

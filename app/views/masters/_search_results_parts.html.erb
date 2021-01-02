@@ -1,5 +1,5 @@
 <%
-  subject_data_type = app_config_text(:header_subject_data_type, 'player_infos')
+  subject_data_type = app_config_text(:header_subject_data_type, Settings::DefaultSubjectInfoTableName)
   no_subject_details_label = app_config_text(:header_no_subject_details_label, '(no subject details)')
   no_subject_details_label = '' if no_subject_details_label == 'none'
 %>
@@ -24,6 +24,9 @@
   <span class="master-header-prefix">{{{header_prefix}}}</span>
 </script>
 
+<script id="master_header_title-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <span class="master-header-title">{{{header_title}}}</span>
+</script>
 
 <script id="subject_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <strong class="player-names">
@@ -62,20 +65,24 @@
           </div>
           {{/if}}
           <div class="{{#if header_prefix}}col-md-9 col-lg-9{{else}}col-md-11 col-lg-11{{/if}} player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="<%=subject_data_type.singularize%>" data-template="subject-info-summary-result-template">
-            <% if view?[subject_data_type.to_sym] %>
-            {{#with <%=subject_data_type%>.[0]}}
-              {{>subject_info_summary_result}}
+            {{#if header_title}}
+              <strong class="fixed-header-title-subject-info">{{>master_header_title}}</strong>
             {{else}}
-            <strong class="no-player-info no-subject-info"><%= no_subject_details_label %></strong>
-            {{/with}}
-            <% else %>
-            <strong class="no-player-info no-subject-info-access"><%= no_subject_details_label %></strong>
-            <% end %>
+              <% if view?[subject_data_type.to_sym] %>
+              {{#with <%=subject_data_type%>.[0]}}
+                {{>subject_info_summary_result}}
+              {{else}}
+              <strong class="no-player-info no-subject-info"><%= no_subject_details_label %></strong>
+              {{/with}}
+              <% else %>
+              <strong class="no-player-info no-subject-info-access"><%= no_subject_details_label %></strong>
+              <% end %>
+          {{/if}}
           </div>
           <% if view?[:pro_infos] %>
           <div class="{{#if header_prefix}}col-md-8{{else}}col-md-9{{/if}} col-md-offset-1 pro-info-header">
           {{#with pro_infos.[0]}}
-            {{>pro_info_summary_result}}
+            {{>secondary_info_summary_result}}
           {{/with}}
           </div>
           <% end %>
@@ -109,7 +116,7 @@
 <% end %>
 </script>
 
-<script id="pro_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<script id="secondary_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
         <strong class="pro-names">
                   {{capitalize first_name}}
                   <span class="middle-name">{{capitalize middle_name}}</span>

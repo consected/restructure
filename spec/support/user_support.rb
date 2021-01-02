@@ -4,12 +4,12 @@ module UserSupport
   UserPrefix = 'g-ttuser-'
   UserDomain = 'testing.com'
 
-  def create_user(r = nil, extra = '', opt = {})
-    r ||= Time.new.to_f.to_s
-    good_email = gen_username("#{r}-#{extra}-")
+  def create_user(part = nil, extra = '', opt = {})
+    part ||= Time.new.to_f.to_s
+    good_email = gen_username("#{part}-#{extra}-")
 
     admin, = create_admin
-    user = User.create! email: good_email, current_admin: admin, first_name: "fn#{r}", last_name: "ln#{r}"
+    user = User.create! email: good_email, current_admin: admin, first_name: "fn#{part}", last_name: "ln#{part}"
 
     # Save a new password, as required to handle temp passwords
     user = User.find(user.id)
@@ -42,13 +42,13 @@ module UserSupport
     [user, good_password]
   end
 
-  def self.create_admin(r = nil)
+  def self.create_admin(part = nil)
     a = Admin.order(id: :desc).first
-    unless r
-      r = 1
-      r = a.id + 1 if a
+    unless part
+      part = 1
+      part = a.id + 1 if a
     end
-    good_admin_email = "e-testadmin-tester#{r}@testing.com"
+    good_admin_email = "e-testadmin-tester#{part}@testing.com"
 
     admin = Admin.create! email: good_admin_email
 
@@ -65,8 +65,8 @@ module UserSupport
     [admin, good_admin_password]
   end
 
-  def create_admin(r = nil)
-    admin, good_admin_password = UserSupport.create_admin(r)
+  def create_admin(part = nil)
+    admin, good_admin_password = UserSupport.create_admin(part)
     @admin = admin
     [admin, good_admin_password]
   end
@@ -77,8 +77,8 @@ module UserSupport
     Admin::UserRole.create! current_admin: @admin, app_type: app_type, role_name: role_name, user: user
   end
 
-  def gen_username(r)
-    "#{UserPrefix}#{r}@#{UserDomain}"
+  def gen_username(part)
+    "#{UserPrefix}#{part}@#{UserDomain}"
   end
 
   def enable_user_app_access(app_name, user = nil)
@@ -113,7 +113,7 @@ module UserSupport
     end
 
     uac
-  rescue StandardError => e
+  rescue StandardError
     Rails.logger.debug "Failed to create access for #{resource_name}"
   end
 

@@ -1,7 +1,7 @@
 <%
 # Allow a 'data' selection to be made from a dynamic model table that is not tied to this master
 
-role_name = field_name.sub('multi_select_users_with_role_', '').gsub('_', ' ')
+role_name = field_name.sub('tag_select_users_with_role_', '').gsub('_', ' ')
 
 users = Admin::UserRole.active.where(app_type: current_user.app_type, role_name: role_name).users.not_template
 

@@ -37,6 +37,9 @@ module OptionConfigs
             'field2' => '...'
           }
         },
+        '_configurations' => {
+          secondary_key: 'field name to use as a secondary key to lookup items'
+        },
         '_definitions' => {
           'reusable_key' => '&anchor resusable objects for substitution in definitions'
         }
@@ -84,6 +87,7 @@ module OptionConfigs
           only_create_as_reference: 'prevent creation as a standalone item, only embedded / referenced within another',
           view_handlers: 'name of handler for UI and models (options include: address, contact, subject)',
           header_caption: 'header caption to use - can include {{substition}}',
+          alt_width_classes: 'html classes (space separated) to replace standard col-* classes',
           extra_class: 'html classes (space separated) to add to block'
         },
         filestore: {
@@ -122,6 +126,11 @@ module OptionConfigs
             pattern: 'provide a mask for a text field',
             value: 'default value | now() | today()',
             no_downcase: 'true to prevent downcasing of the attribute when stored to the database',
+            format: 'plain | markdown - for free text editor fields such as notes and description',
+            config: {
+              _comment: 'additional configurations for editor fields',
+              toolbar_type: 'advanced - adds in additional editor toolbar controls'
+            },
             edit_as: {
               field_type: 'alternative field name to use for selection of edit field',
               alt_options: 'optional specification of options for a select_ type field to use instead of general selection specified list. {Label: value, ...} or [Label,...]. For the latter the Label is downcased automatically to generate the value'
@@ -225,6 +234,10 @@ module OptionConfigs
       @orig_config = config
 
       @config_obj = config_obj
+
+      # Protect against invalid configurations preventing server startup
+      config = {} unless config.respond_to? :each
+
       config.each do |k, v|
         send("#{k}=", v)
       rescue NoMethodError
@@ -323,7 +336,7 @@ module OptionConfigs
     # Parse the options within a definition record, returning an array of options (subclasses of ExtraOptions)
     # @param [ActiveRecord::Base] config_obj - dynamic definition record
     # @return [Array {ExtraOptions}]
-    def self.parse_config(config_obj)
+    def self.parse_config(config_obj, force_all = nil)
       config_text = config_obj.options_text
 
       configs = []
@@ -348,10 +361,12 @@ module OptionConfigs
 
       opt_default = res.delete(:_default)
 
+      config_obj.configurations = res.delete(:_configurations)
       config_obj.table_comments = res.delete(:_comments)
+
       # Only run through additional processing of comments if the
       # configuration was just saved
-      handle_table_comments config_obj, res if config_obj.saved_changes?
+      handle_table_comments config_obj, res if config_obj.saved_changes? || force_all
 
       res.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
 
@@ -379,16 +394,23 @@ module OptionConfigs
     # @return [Hash] - comments hash
     def self.handle_table_comments(config_obj, res)
       # Clean up the incoming _comments entry, to avoid it impacting later configurations
-      tc = config_obj.table_comments || {}
+      tc = config_obj.table_comments ||= {}
+
+      ts = config_obj.table_comments && config_obj.table_comments[:table]
+
+      new_tc = config_obj.name.underscore.humanize.titleize
+      if ts != new_tc
+        # Set a default table comment value
+        config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
+      end
 
       default = res[:default]
       return unless default
 
-      # Set the table comment from the config label if it is not set
-      ts = config_obj.table_comments && config_obj.table_comments[:table]
-      if ts.blank?
-        config_obj.table_comments ||= {}
-        config_obj.table_comments[:table] = default[:label]
+      new_tc = default[:label] || config_obj.name.underscore.humanize.titleize
+      if ts != new_tc
+        # Set the table comment from the config label if it was not set
+        config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
       end
 
       # Get a hash of field comments to update
@@ -397,8 +419,14 @@ module OptionConfigs
       ls = default[:labels] || {}
       cb = default[:caption_before] || {}
 
+      # Get a list of the columns for the table to ensure we
+      # skip captioning fields that don't exist
+      cols = config_obj.all_implementation_fields
+      cols = cols.reject { |f| f.index(/^embedded_report_|^placeholder_/) }
+      cols = cols.map(&:to_sym)
+
       cb.each do |k, v|
-        next if fs[k].present?
+        next if fs[k]&.strip.present? || !k.in?(cols)
 
         if v.is_a? Hash
           # Get the most appropriate caption
@@ -408,6 +436,8 @@ module OptionConfigs
         elsif v.is_a? String
           caption = v
         end
+        caption = caption&.strip
+        next if caption.blank? || fs[k]&.strip == caption
 
         # Add the calculated caption back into the comments fields
         fs[k] = caption
@@ -416,7 +446,11 @@ module OptionConfigs
       # For any field labels that have been defined, use it if the comment
       # has not already been set explicitly or by a previous caption.
       ls.each do |k, v|
-        next if fs[k].present?
+        next if fs[k]&.strip.present? || !k.in?(cols)
+
+        caption = v
+        caption = caption&.strip
+        next if caption.blank? || fs[k]&.strip == caption
 
         fs[k] = v
       end

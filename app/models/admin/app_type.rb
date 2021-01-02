@@ -116,7 +116,7 @@ class Admin::AppType < Admin::AdminBase
       res['app_configurations'] = app_type.import_config_sub_items app_type_config, 'app_configurations', ['name', 'role_name']
 
       # Make two passes at loading general selections, the first time rejecting dynamic items that may not yet be defined
-      reject_items = Proc.new {|k, v| k == :item_type && v.index(/^(activity_log__|dynamic_model__|external_identifier__)/)}
+      reject_items = proc { |k, v| k == :item_type && v.index(/^(activity_log__|dynamic_model__|external_identifier__)/) }
       res['associated_general_selections'] = app_type.import_config_sub_items app_type_config, 'associated_general_selections', ['item_type', 'value'], reject: reject_items
 
       res['associated_config_libraries'] = app_type.import_config_sub_items app_type_config, 'associated_config_libraries', ['name', 'category', 'format']
@@ -308,7 +308,7 @@ class Admin::AppType < Admin::AdminBase
          (rec_type is NULL OR rec_type = '') AND (process_name IS NULL OR process_name = '') AND item_type in (?)
       OR (process_name IS NULL OR process_name = '') AND (item_type || '_' || rec_type) in (?)
       OR (rec_type IS NULL OR rec_type = '') AND (item_type || '_' || process_name) in (?)
-      ", names, names, names).order(id: :asc)
+      ", names, names, names).reorder('').order(id: :asc)
   end
 
   def associated_dynamic_models(valid_resources_only: true)
@@ -322,13 +322,13 @@ class Admin::AppType < Admin::AdminBase
                 .select { |a| a.access && a.resource_name.start_with?('dynamic_model__') }
                 .map { |n| n.resource_name.sub('dynamic_model__', '') }.uniq
 
-    DynamicModel.active.where(table_name: names).order(id: :asc)
+    DynamicModel.active.where(table_name: names).reorder('').order(id: :asc)
   end
 
   def associated_external_identifiers
     eids = ExternalIdentifier.active.map(&:name)
     names = user_access_controls.valid_resources.where(resource_type: :table).select { |a| a.access && a.resource_name.in?(eids) }.map(&:resource_name).uniq
-    ExternalIdentifier.active.where(name: names).order(id: :asc)
+    ExternalIdentifier.active.where(name: names).reorder('').order(id: :asc)
   end
 
   def associated_reports
@@ -424,11 +424,69 @@ class Admin::AppType < Admin::AdminBase
     ms.sort { |a, b| a.id <=> b.id }.uniq
   end
 
+  #
+  # Export the configuration as json or yaml
+  # Only export if option configs are valid
   def export_config(format: :json)
+    force_validations!
+
+    export_migrations if Rails.env.development?
+
     if format == :json
       JSON.pretty_generate(JSON.parse(to_json))
     elsif format == :yaml
       YAML.dump(JSON.parse(to_json))
+    end
+  end
+
+  #
+  # Export migrations to a specific --app-export directory
+  # @return [<Type>] <description>
+  def export_migrations
+    valid_associated_activity_logs.each do |dynamic_def|
+      export_migration_and_clean_export_dir dynamic_def
+    end
+
+    associated_dynamic_models.each do |dynamic_def|
+      export_migration_and_clean_export_dir dynamic_def
+    end
+
+    associated_external_identifiers.each do |dynamic_def|
+      export_migration_and_clean_export_dir dynamic_def
+    end
+  end
+
+  #
+  # Export an individual dynamic type migration, clearing the
+  # export directory if needed
+  # @param [DynamicModel | ActivityLog | ExternalIdentifier] dynamic_def
+  # @param [String] dir_suffix
+  def export_migration_and_clean_export_dir(dynamic_def, dir_suffix = 'app-export')
+    @exported_dirnames ||= []
+
+    dir = dynamic_def.migration_generator.db_migration_dirname(dir_suffix)
+
+    unless dir.in? @exported_dirnames
+      # Clean the export directory
+      FileUtils.rm_rf dir
+      @exported_dirnames << dir
+    end
+    dynamic_def.write_create_or_update_migration dir_suffix
+  end
+
+  #
+  # Check dynamic types and raise exceptions if there are issues
+  def force_validations!
+    valid_associated_activity_logs.each do |a|
+      a.force_option_config_parse
+    end
+
+    associated_dynamic_models.each do |a|
+      a.force_option_config_parse
+    end
+
+    associated_external_identifiers.each do |a|
+      a.force_option_config_parse
     end
   end
 

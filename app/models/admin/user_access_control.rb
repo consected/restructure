@@ -39,10 +39,11 @@ class Admin::UserAccessControl < ActiveRecord::Base
   def self.general_resource_names
     %w[
       app_type create_master
-      export_csv export_json view_reports view_external_links edit_report_data create_report_data import_csv
+      export_csv export_json view_reports view_report_not_list view_external_links
+      edit_report_data create_report_data import_csv
       print
       download_files view_files_as_image view_files_as_html send_files_to_trash move_files user_file_actions
-      view_dashboards
+      view_dashboards view_pages
       view_data_reference
     ]
   end

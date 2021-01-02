@@ -28,6 +28,18 @@ module GeneralDataConcerns
     @was_disabled
   end
 
+  def _created=(val)
+    @was_created = val
+  end
+
+  def _updated=(val)
+    @was_updated = val
+  end
+
+  def _disabled=(val)
+    @was_disabled = val
+  end
+
   def multiple_results
     @multiple_results ||= []
   end
@@ -123,6 +135,13 @@ module GeneralDataConcerns
     "v#{def_version}"
   end
 
+  #
+  # Returns a simple hash alternative ids accessible by the current user
+  # @return [Hash]
+  def ids
+    master.alternative_ids
+  end
+
   def as_json(extras = {})
     self.current_user ||= extras[:current_user] if extras[:current_user] # if self.class.no_master_association
     if allows_current_user_access_to?(:access)
@@ -132,6 +151,8 @@ module GeneralDataConcerns
       extras[:methods] << :item_id if respond_to? :item_id
       extras[:methods] << :item_type if respond_to? :item_type
       extras[:methods] << :full_item_type if respond_to? :full_item_type
+      extras[:methods] << :resource_name if respond_to? :resource_name
+
       extras[:methods] << :updated_at_ts if respond_to? :updated_at
       extras[:methods] << :created_at_ts if respond_to? :created_at
       extras[:methods] << :data if respond_to? :data
@@ -160,10 +181,12 @@ module GeneralDataConcerns
 
       extras[:methods] << :model_data_type if respond_to? :model_data_type
 
+      @config_order_model_references = true
       extras[:methods] << :model_references if respond_to? :model_references
       extras[:methods] << :creatable_model_references if respond_to? :creatable_model_references
       extras[:methods] << :referenced_from if respond_to? :referenced_from
       extras[:methods] << :embedded_item if respond_to? :embedded_item
+      extras[:methods] << :embedded_items if respond_to? :embedded_items
 
       # extras[:methods] << :creatables if respond_to? :creatables
       extras[:methods] << :prevent_edit if respond_to? :prevent_edit
@@ -180,6 +203,8 @@ module GeneralDataConcerns
       extras[:methods] << :def_version
       extras[:methods] << :vdef_version
 
+      extras[:methods] << :ids if respond_to? :master
+
     elsif allows_current_user_access_to?(:see_presence_or_access)
 
       extras[:include] ||= {}
@@ -189,6 +214,7 @@ module GeneralDataConcerns
       extras[:methods] << :item_id if respond_to? :item_id
       extras[:methods] << :item_type if respond_to? :item_type
       extras[:methods] << :full_item_type if respond_to? :full_item_type
+      extras[:methods] << :resource_name if respond_to? :resource_name
       extras[:methods] << :updated_at_ts if respond_to? :updated_at
       extras[:methods] << :created_at_ts if respond_to? :created_at
       extras[:methods] << :user_name if respond_to? :user_name

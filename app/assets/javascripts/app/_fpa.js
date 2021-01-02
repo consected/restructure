@@ -568,8 +568,19 @@ _fpa = {
         // If no data-sub-item or data-sub-list is specified that matches a key in the reponse data, then we really have no other option but to position the result
         // where requested.
         // Finally if the results are 'multiple_results' but there was no original_item specified, then this a pure index. If there is a target, use it.
-        if (t && (t_abs_force || t_force || dataitem === null || dataitem['_created'] || dataitem['_merged'] || $('[data-sub-item="' + item_key + '"], [data-sub-list="' + item_key + '"] [data-sub-item]').length === 0 || $(this).parents('[data-result-target-for-child]').length > 0))
+        if (
+          t && (
+            t_abs_force ||
+            t_force ||
+            dataitem === null ||
+            dataitem['_created'] ||
+            dataitem['_merged'] ||
+            $('[data-sub-item="' + item_key + '"], [data-sub-list="' + item_key + '"] [data-sub-item]').length === 0 ||
+            $(this).parents('[data-result-target-for-child]').length > 0
+          )
+        ) {
           use_target = true;
+        }
 
         var options = {};
         if (use_target) {
@@ -580,9 +591,11 @@ _fpa = {
           // if(!t_abs_force) {
           var pt = $(this).parents('[data-result-target-for-child]').first();
           if (pt.length == 1) {
-            t = pt.attr('data-result-target-for-child');
-
-            base_block = $(this).parents('[data-template]');
+            drtc = pt.attr('data-result-target-for-child');
+            if (drtc) {
+              t = drtc;
+              base_block = $(this).parents('[data-template]');
+            }
           }
           // }
           // A specific target was specified an is being used.

@@ -1,14 +1,10 @@
 module SecureView
   module Config
+    mattr_accessor :pdftoppm_path, :pdfinfo_path, :libreoffice_path, :dcmj2pnm_path, :netpbm_path,
+                   :tempdir, :resolution
 
-    # class << self
-      mattr_accessor :tempdir, :pdftoppm_path, :pdfinfo_path, :libreoffice_path, :dcmj2pnm_path, :resolution
-    # end
-
-
-    def self.setup block
+    def self.setup(block)
       block.call self
     end
-
   end
 end

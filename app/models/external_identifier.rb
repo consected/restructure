@@ -47,6 +47,10 @@ class ExternalIdentifier < ActiveRecord::Base
     name_before_last_save
   end
 
+  def saved_change_to_table_name?
+    saved_change_to_name?
+  end
+
   def implementation_model_name
     name.ns_underscore.singularize
   end
@@ -131,7 +135,7 @@ class ExternalIdentifier < ActiveRecord::Base
 
     # To facilitate the simple and advanced searches on master records
     # update the master's nested attributes for this model's symbol
-    Master.add_nested_attribute model_association_name.to_sym
+    self.class.add_nested_attribute model_association_name.to_sym
 
     Master.add_alternative_id_method external_id_attribute
   end
@@ -202,7 +206,7 @@ class ExternalIdentifier < ActiveRecord::Base
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
-        res.include ExternalIdHandler
+        res.include Dynamic::ExternalIdImplementer
         res.include LimitedAccessControl
 
         # Setup the controller
@@ -263,6 +267,8 @@ class ExternalIdentifier < ActiveRecord::Base
     ftype = (alphanumeric? ? 'string' : 'bigint')
     do_create_or_update = if mode == 'create'
                             "create_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
+                          elsif mode == 'create_or_update'
+                            "create_or_update_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
                           else
                             migration_generator.migration_update_table
                           end

@@ -1,0 +1,253 @@
+.container-icons-items {
+  .container-icons-folder-items {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    &.collapse {
+      display: none;
+    }
+    &.collapse.in,
+    &.collapsing {
+      display: flex;
+      padding-left: 10px;
+    }
+
+    .container-icons-entry {
+      flex-direction: row;
+      width: 260px;
+      padding: 6px;
+      text-align: center;
+      font-size: 90%;
+
+      a.browse-icon {
+        width: 92px;
+        height: 92px;
+        border: 1px solid silver;
+        background-color: rgb(214, 214, 214);
+        display: inline-block;
+      }
+
+      .browse-icon-img {
+        width: 90px;
+        height: 90px;
+        opacity: 0;
+
+        &.broken-image {
+          opacity: 0;
+        }
+        &.loaded-image {
+          opacity: 1;
+          transition: ease-in 600ms;
+        }
+      }
+    }
+  }
+
+  .container-icons-folder {
+    width: 100% !important;
+    display: block;
+    position: relative;
+    float: none;
+    clear: both;
+
+    .folder-icon {
+      font-size: 60px;
+    }
+
+    .cif-inner {
+      width: 260px;
+      text-align: center;
+      display: block;
+    }
+  }
+
+  input[type="checkbox"] {
+    cursor: pointer;
+    vertical-align: top;
+    display: none;
+  }
+
+  input.container-new-folder-name {
+    font-weight: normal;
+  }
+
+  a.container-add {
+    margin-left: 1em;
+  }
+
+  .glyphicon-folder-close,
+  .glyphicon-folder-open {
+    cursor: pointer;
+    vertical-align: baseline;
+    color: #cf9c13;
+  }
+
+  .glyphicon-info-sign {
+    color: gray;
+  }
+
+  .root-folder {
+    .glyphicon-folder-close,
+    .glyphicon-folder-open {
+      color: #3db553;
+    }
+  }
+
+  &,
+  ul {
+    list-style-type: none;
+    padding-left: 1.5em;
+    li {
+      list-style-type: none;
+    }
+  }
+
+  .container-icons-entry.checked {
+    font-weight: bold;
+  }
+
+  .container-folder.checked {
+    font-weight: bold;
+  }
+
+  .container-folder {
+    .file-archive-tag {
+      font-style: italic;
+      color: gray;
+      padding-left: 0.6em;
+    }
+  }
+
+  .container-icons-entry {
+    .file-processing-tag {
+      font-style: italic;
+      color: gray;
+      padding-left: 0.6em;
+    }
+  }
+
+  .container-list-file-count {
+    font-style: italic;
+    color: gray;
+  }
+}
+
+.container-browser {
+  display: block;
+  position: relative;
+  max-height: 60vh;
+  min-height: 50px;
+  overflow: auto;
+  margin-bottom: 10px;
+  border: 1px solid silver;
+  border-radius: 3px;
+
+  padding: 10px;
+}
+
+.container-browser.ajax-running {
+  .container-list-items,
+  .no-container-list-items {
+    filter: blur(2px);
+  }
+
+  &.ajax-running form.new_download {
+    overflow: hidden;
+  }
+}
+
+.container-icons-entry {
+  width: 270px;
+  padding: 6px;
+  text-align: center;
+  font-size: 90%;
+
+  &:hover {
+    background-color: rgb(251, 254, 177);
+    .browse-filename {
+      background-color: rgba(251, 254, 177, 0.8);
+    }
+  }
+
+  .browse-filename {
+    background-color: transparent;
+    padding-left: 0.5em;
+    padding-right: 1em;
+  }
+  .browse-filename:hover {
+    background-color: rgba(251, 254, 177, 0.8);
+  }
+
+  .browse-entry-meta,
+  .browse-entry-classifications {
+    display: block;
+    color: rgb(128, 128, 128);
+    font-size: 93%;
+    z-index: 0;
+  }
+
+  .browse-entry-classifications {
+    color: #333;
+
+    .bem-meta-link {
+      text-decoration: none;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+    .bem-class-title {
+      display: block;
+      font-weight: bold;
+    }
+
+    .bem-class-description {
+      display: block;
+    }
+  }
+  span.bem-classification-attrs {
+    margin-bottom: 0.3em;
+    display: block;
+  }
+  .browse-entry-meta {
+    font-size: 85%;
+
+    .bem-mime-type {
+      display: block;
+    }
+
+    .bem-mod-date {
+      padding-left: 1em;
+      display: inline-block;
+      text-align: right;
+    }
+  }
+}
+
+.nfs-store-valid-files.panel {
+  display: none;
+  background: rgb(243, 243, 243);
+  padding-left: 16px;
+  border-bottom: 1px solid rgb(221, 221, 221);
+  border-top: 1px solid rgb(221, 221, 221);
+  padding-top: 1px;
+  margin: 12px -10px -11px;
+
+  .panel-header {
+    font-size: 95%;
+    font-style: italic;
+    padding-top: 0.4em;
+    padding-bottom: 0.4em;
+  }
+
+  ul {
+    padding-left: 2em;
+    margin: 0.4em;
+  }
+
+  li {
+    font-family: monospace;
+    font-size: 12px;
+    list-style: none;
+  }
+}

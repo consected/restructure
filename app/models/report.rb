@@ -329,7 +329,9 @@ class Report < ActiveRecord::Base
         res.type_map = @type_map
       rescue StandardError => e
         logger.info "Failed to run sql: #{e.inspect}.\n#{clean_sql}"
-        raise FphsException, "Failed to run sql. #{e}"
+        msg = 'Failed to run query.'
+        msg += e.to_s unless Rails.env.production?
+        raise FphsException, msg
       end
       raise ActiveRecord::Rollback
     end

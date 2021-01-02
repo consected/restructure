@@ -62,7 +62,7 @@ module NfsStoreSupport
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
     @content = Admin::MessageTemplate.create! name: 'test email content upload', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
-    @aldef.extra_log_types = <<EOF
+    @aldef.extra_log_types = <<ENDDEF
     step_1:
       label: Step 1
       fields:
@@ -135,7 +135,7 @@ module NfsStoreSupport
             show: filestore
             new: not_embedded
 
-EOF
+ENDDEF
 
     @aldef.current_admin = @admin
     @aldef.save!
@@ -145,12 +145,13 @@ EOF
     finalize_al_setup
   end
 
-  def finalize_al_setup
-    @resource_name = ActivityLog::PlayerContactPhone.definition.option_type_config_for(:step_1).resource_name
+  def finalize_al_setup(activity: nil)
+    activity ||= :step_1
+    @resource_name = ActivityLog::PlayerContactPhone.definition.option_type_config_for(activity).resource_name
 
     setup_access 'activity_log__player_contact_phones', user: @user
     setup_access @resource_name, resource_type: :activity_log_type, user: @user
-    setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
+    setup_access "activity_log__player_contact_phone__#{activity}".to_sym, resource_type: :activity_log_type, user: @user
 
     setup_access 'nfs_store__manage__containers', user: @user
     setup_access 'nfs_store__manage__stored_files', user: @user
@@ -166,28 +167,25 @@ EOF
     mrs = ModelReference.all
     mrs.update_all from_record_master_id: @trash_master.id, from_record_id: nil
 
-    setup_container_and_al
-    
+    setup_container_and_al activity: activity
   end
 
-  def setup_container_and_al
-    names = ActivityLog::PlayerContactPhone.definition.option_configs.map(&:name)
-    expect(names).to include :step_1
+  def setup_container_and_al(activity: nil)
+    activity ||= :step_1
 
-    # unless @activity_log&.extra_log_type == :step_1 &&
-    #        @activity_log&.resource_name == 'activity_log__player_contact_phone__step_1' &&
-    #        @container.parent_item == @activity_log
+    names = ActivityLog::PlayerContactPhone.definition.option_configs.map(&:name)
+    expect(names).to include activity
 
     @activity_log = ActivityLog::PlayerContactPhone.new(
       select_call_direction: 'from player',
       select_who: 'user',
-      extra_log_type: :step_1,
+      extra_log_type: activity,
       player_contact: @player_contact,
       master: @player_contact.master
     )
 
     @activity_log.save!
-    expect(@activity_log.resource_name).to eq 'activity_log__player_contact_phone__step_1'
+    expect(@activity_log.resource_name).to eq "activity_log__player_contact_phone__#{activity}"
 
     @container = @activity_log.model_references.first.to_record
     expect(@container).not_to be nil
@@ -198,17 +196,18 @@ EOF
     @container.current_user = @user
 
     expect(@activity_log).to be_a ActivityLog::PlayerContactPhone
-    expect(@activity_log.resource_name).to eq 'activity_log__player_contact_phone__step_1'
+    expect(@activity_log.resource_name).to eq "activity_log__player_contact_phone__#{activity}"
     expect(@activity_log.extra_log_type_config.nfs_store).to be_a Hash
 
     @container
   end
 
-  def setup_default_filters
+  def setup_default_filters(activity: nil)
+    activity ||= :step_1
     create_filter('.*', role_name: nil)
     create_filter('.*', resource_name: 'nfs_store__manage__containers', role_name: nil)
     create_filter('.*', resource_name: 'activity_log__player_contact_phones', role_name: nil)
-    create_filter('.*', resource_name: 'activity_log__player_contact_phone__step_1', role_name: nil)
+    create_filter('.*', resource_name: "activity_log__player_contact_phone__#{activity}", role_name: nil)
   end
 
   def upload_file(filename = 'test-name.txt', content = nil)

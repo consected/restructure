@@ -143,11 +143,15 @@ _fpa.postprocessors_reports = {
         $(this).addClass('item-selected');
       }).addClass('hover-link');
 
-      $('td[data-col-type="msid"]').on('click', function () {
-        window.open('/masters/' + $(this).html().trim() + '?type=msid', "_blank");
-        $('.item-selected').removeClass('item-selected');
-        $(this).addClass('item-selected');
-      }).addClass('hover-link');
+      for (var i in _fpa.state.alternative_id_fields) {
+        var field = _fpa.state.alternative_id_fields[i];
+
+        $('td[data-col-type="' + field + '"]').on('click', function () {
+          window.open('/masters/' + $(this).html().trim() + '?type=' + $(this).attr('data-col-type'), "_blank");
+          $('.item-selected').removeClass('item-selected');
+          $(this).addClass('item-selected');
+        }).addClass('hover-link');
+      }
 
       for (var t in table_cell_types) {
         if (table_cell_types.hasOwnProperty(t)) {

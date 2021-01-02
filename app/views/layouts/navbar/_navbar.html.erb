@@ -1,0 +1,69 @@
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+        <a class="navbar-brand" href="/"><%= image_tag app_config_text :logo_filename, 'FPHS_Logo.jpg' %></a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <% if current_user && @app_type_switches.length > 1 %>
+        <li>
+          <%= render partial: 'layouts/navbar/app_selector' %>
+        </li>
+        <% end %>
+
+        <%
+        if current_user && current_user.app_type_id
+          @primary_navs.reject{|a| a[:label].blank? }.each do |nav| %>
+        <li <% if nav[:active] %>class="active"<% end %> ><%= link_to nav[:label].html_safe, nav[:url], nav[:extras] %>
+          <% if nav[:sub] %>
+          <ul class="dropdown-menu" role="menu">
+            <% nav[:sub].each do |nav1| %>
+            <li <% if nav1[:active] %>class="active"<% end %> ><%= link_to nav1[:label].html_safe, nav1[:url], nav1[:extras] %></li>
+            <% end %>
+          </ul>
+          <% end %>
+        </li>
+        <%
+          end
+        end
+        %>
+      </ul>
+
+      <%= render partial: 'layouts/navbar/search' %>
+
+      <ul class="nav navbar-nav navbar-right">
+      <% @secondary_navs.each do |nav| %>
+        <%
+          drop = {}
+          if nav[:sub]
+            drop = {class: "dropdown-toggle", "data-toggle": "dropdown", role: "button", "aria-expanded": "false"}
+          else
+            drop = {}
+          end
+
+          drop.merge! nav[:extras]
+        %>
+        <li class="dropdown">
+            <%= link_to nav[:label].html_safe, nav[:url], drop%>
+          <% if nav[:sub] %>
+          <ul class="dropdown-menu" role="menu">
+            <% nav[:sub].each do |nav1| %>
+            <li <% if nav1[:active] %>class="active"<% end %> ><%= link_to nav1[:label].html_safe, nav1[:url], nav1[:extras] %></li>
+            <% end %>
+          </ul>
+          <% end %>
+        </li>
+        <% end %>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>

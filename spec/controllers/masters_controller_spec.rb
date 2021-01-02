@@ -62,7 +62,7 @@ RSpec.describe MastersController, type: :controller do
     it 'searches MSID and returns nothing' do
       post :create if Master.count == 0
       mid = (Master.maximum(:msid) || 0) + 1
-      get :index, params: { mode: 'MSID', master: { msid: mid }, format: :json }
+      get :index, params: { mode: 'MSID', master: { external_id: { field: 'msid', id: mid } }, format: :json }
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}."
       expect(jres['count']['count']).to eq 0
@@ -73,7 +73,7 @@ RSpec.describe MastersController, type: :controller do
       m = create_master
       create_master
 
-      get :index, params: { mode: 'MSID', master: { msid: m.msid }, format: :json }
+      get :index, params: { mode: 'MSID', master: { external_id: { field: 'msid', id: m.msid } }, format: :json }
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
       expect(jres['count']['count']).to eq 1
@@ -82,7 +82,7 @@ RSpec.describe MastersController, type: :controller do
     end
 
     it 'searches Pro Id and returns nothing' do
-      get :index, params: { mode: 'MSID', master: { pro_id: 10_000 }, format: :json }
+      get :index, params: { mode: 'MSID', master: { external_id: { field: 'pro_id', id: 10_000 } }, format: :json }
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
       expect(jres['count']['count']).to eq 0
@@ -93,13 +93,14 @@ RSpec.describe MastersController, type: :controller do
       m = create_master
       create_master
 
-      get :index, params: { mode: 'MSID', master: { pro_id: m.pro_id }, format: :json }
+      get :index, params: { mode: 'MSID', master: { external_id: { field: 'pro_id', id: m.pro_id } }, format: :json }
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
       expect(jres['count']['count']).to eq 1
       expect(jres['masters'].length).to eq 1
       expect(jres['masters'].first['id']).to eq m.id
     end
+
     it 'searches record ID and returns nothing' do
       get :index, params: { mode: 'MSID', master: { id: 1_000_000 }, format: :json }
       jres = JSON.parse response.body

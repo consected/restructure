@@ -25,16 +25,14 @@ module NfsStore
       @master = @container.master
       @id = @container.id
       retrieved_file = @download.retrieve_file_from @download_id, retrieval_type, for_action: :download
-      if retrieved_file
-        @download.save!
-        if use_secure_view && secure_view_do_what
-          secure_view_action retrieved_file
-          return
-        else
-          send_file retrieved_file
-        end
+      FsException::NotFound.new 'Requested file not found' unless retrieved_file
+
+      @download.save!
+      if use_secure_view && secure_view_do_what
+        secure_view_action retrieved_file
+        nil
       else
-        FsException::NotFound.new 'Requested file not found'
+        send_file retrieved_file
       end
     end
 
@@ -53,7 +51,6 @@ module NfsStore
 
       unless selected_items.is_a?(Array) && !selected_items.empty?
         raise FsException::Download, 'No items were selected for download'
-        return
       end
 
       selected_items_info = selected_items.map do |s|

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Formatter
   class Substitution
     HtmlRegEx = /<(p ?.*|br ?.*|div ?.*|ul ?.*|hr ?.*)>/.freeze
@@ -85,8 +87,8 @@ module Formatter
         all_content.gsub!(tag_container, tag_value)
       end
 
-      # Unless we have requested to show missing tags, check for {{tag}} left in the text, i
-      # ndicating something was not replaced
+      # Unless we have requested to show missing tags, check for {{tag}} left in the text,
+      # indicating something was not replaced
       if ignore_missing != :show_tag && all_content.scan(/{{.*}}/).present?
         raise FphsException, 'Not all the tags were replaced. This suggests there was an error in the markup.'
       end
@@ -300,6 +302,10 @@ module Formatter
         elsif op == 'plaintext'
           res = ActionController::Base.helpers.sanitize(res)
           res = res.gsub("\n", '<br>').html_safe
+        elsif op == 'strip'
+          res = res.strip
+        elsif op == 'split_lines'
+          res = res.split("\n")
         elsif op == 'markup'
           res = Kramdown::Document.new(res).to_html.html_safe
         elsif op == 'ignore_missing'

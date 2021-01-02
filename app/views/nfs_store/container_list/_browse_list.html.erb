@@ -10,6 +10,7 @@
        data-can-submit-rename-file="<%= @container.can_move_files? %>" 
        data-can-submit-rename-folder="<%= @container.can_move_files? %>" 
        data-can-trigger-file-actions="<%= @container.can_user_file_actions? %>"
+       data-result-target-for-child=""
   >
     <% if @directory_not_found %>
     <p>Storage has not been initialized. This container is not usable.</p>
@@ -49,23 +50,7 @@
           <% end %>
         <% end %>
       <% end %>
-      <% if @container.can_edit? %>
-      <div class="nfs-store-valid-files panel">
-        <div class="panel-header">
-          <a data-toggle-caret="true" data-toggle="collapse" class="glyphicon glyphicon-triangle-bottom" href="#valid-files-list-<%=@container.id%>" aria-expanded="false" aria-controls="valid-files-list-<%=@container.id%>" role="button"></a> 
-          valid upload files
-        </div>
-        <div id="valid-files-list-<%=@container.id%>" class="collapse">
-          <ul>
-          <% NfsStore::Filter::Filter.filters_for(@activity_log).uniq.sort.each do |f| %>
-            <li>
-              <%= f.gsub('\.', '.').gsub('.*', '*').gsub('.+', '*').gsub(/^\*$/, '*.*').gsub('^/', '').gsub('^', '').gsub('$', '') %>
-            </li>
-          <% end %>
-        </ul>
-        </div>
-      </div>
-      <% end %>
+      <%= render partial: 'nfs_store/uploader/valid_files' %>
     <% end %>
   </div>
 </div>

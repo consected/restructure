@@ -1,7 +1,7 @@
 <script id="custom_block_attrs_html" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#each custom_block_attrs}}{{hyphenate @key}}={{{template this}}} {{/each}}</script>
 
 <script id="show_result_caption" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{{run_template ../caption}}}{{/with}}</script>
-<script id="result_extra_class" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{run_template ../extra_class}}{{/with}}</script>
+<script id="result_extra_class" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{../template_class}} {{run_template ../extra_class}}{{/with}}</script>
 
 
 <script id="result_item_block" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -22,13 +22,13 @@
             </div>
           </div>
           {{else}}
-            <li class="list-group-item result-field-container {{hyphenate ../../name}}-{{hyphenate ../../item_name}}-{{@key}}">
+            <li class="list-group-item result-field-container {{hyphenate ../../name}}-{{hyphenate ../../item_name}}-{{@key}}" data-field-name="{{@key}}">
               <small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong>
             </li>
           {{/is}}
         {{/filter}}
       {{else}}
-      <li class="list-group-item  result-field-container {{hyphenate ../../name}}-{{hyphenate ../../item_name}}">
+      <li class="list-group-item  result-field-container {{hyphenate ../../name}}-{{hyphenate ../../item_name}}" data-field-name="{{@key}}">
         {{#filter this ../item_list }}
         <small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong>
         {{/filter}}
@@ -45,8 +45,6 @@
   {{# with (fpa_state_item 'template_config' (underscore name) vdef_version )}}
     {{> common_template_result_inner result_data=../result_data name=../name template_config=this _created=../_created vdef_version=../vdef_version}}
   {{/with}}
-
-
 </script>
 
 <script id="common_template_result_inner-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -70,6 +68,8 @@
        data-view-handlers="{{join template_config.view_options.view_handlers ' '}}"
        data-def-version="{{def_version}}"
        >
+  {{else}}
+  <span class="common-template-item-inner index-{{_created}} inner-{{hyphenate name}}-item {{../extra_class}} inner-{{is_activity_log_class}}" >
   {{/was}}
   {{#caption_before_substitutions result_data }}
   <ul class="list-group {{#if prevent_edit }}prevent-edit{{else}}allow-edit{{/if}} {{is_activity_log_class}}" data-item-id="{{result_data.id}}" data-item-rank="{{result_data.rank}}" data-{{data_sort_attr}}="{{lookup result_data (underscore data_sort_attr)}}{{#if subsort_id }}--{{pad_start result_data.id 10 '0'}}{{/if}}" {{> custom_block_attrs_html }} >
@@ -83,7 +83,7 @@
       {{/with}}
 
     {{else}}
-      <li class="list-group-item is-heading object-results-header {{#is model_data_type 'external_identifier' }}header-for-external-identifier{{else}}header-for-gen-model{{/is}}">
+      <li class="list-group-item is-heading object-results-header {{#is model_data_type 'external_identifier' }}header-for-external-identifier{{else}}header-for-gen-model hide-if-children-invisible{{/is}}">
         {{#with result_data}}
           {{>edit_item_button resource=../name  edit_button_href=../edit_button_href}}
           {{#unless ../hide_rank_badge }}
@@ -134,11 +134,9 @@
       {{/if}}
     {{/if}}
     {{#with (fpa_state_item 'caption_before' (underscore name) vdef_version 'metadata' )}}
-    <div class="results-caption-before {{ hyphenate full_name }}-metadata">
-      <div class="panel panel-default panel-body">
-        <small>{{{this.show_caption}}}</small>
-      </div>
-    </div>
+    <li class="list-group-item caption-before results-caption-before {{ hyphenate ../full_name }}-metadata">
+        {{{this.show_caption}}}
+    </li>
     {{/with}}
 
     {{#unless exclude_metadata }}
@@ -151,5 +149,68 @@
   {{#was _created}}
   </div>
   {{#is name '!==' full_name }}</div> {{/is}}
+  {{else}}
+  </span>
   {{/was}}
+</script>
+
+
+<script id="common_page_template_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{# with (fpa_state_item 'template_config' (underscore name) vdef_version )}}
+    {{> common_page_template_result_inner result_data=../result_data name=../name template_config=this _created=../_created vdef_version=../vdef_version}}
+  {{/with}}
+
+</script>
+
+<script id="common_page_template_result_inner-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{#is name '!==' full_name }}<div id="{{ hyphenate name }}-{{result_data.master_id}}-{{result_data.id}}" {{{ data_sort_str }}}> {{/is}}
+  <div class="common-template-item common-page-template-item index-{{_created}} {{hyphenate name}}-item {{>result_extra_class}} {{is_activity_log_class}} default-layout-{{id_hyphenate result_data.default_layout}}" 
+       data-model-data-type="{{model_data_type}}" 
+       id="{{hyphenate full_name}}-{{result_data.master_id}}-{{result_data.id}}" 
+       data-template="{{hyphenate name}}-result-template" 
+       data-item-class="{{item_class_name}}" 
+       data-sub-item="{{full_name}}" 
+       data-sub-id="{{result_data.id}}" 
+       data-item-id="{{result_data.item_id}}" 
+       data-{{data_sort_attr}}="{{lookup result_data (underscore data_sort_attr)}}{{#if subsort_id }}--{{pad_start result_data.id 10 '0'}}{{/if}}" 
+       {{{ data_sort_str }}} 
+       data-human-name="{{>show_result_caption result_data=result_data}}"
+       data-view-handlers="{{join template_config.view_options.view_handlers ' '}}"
+       data-def-version="{{def_version}}"
+       data-default-layout="{{result_data.default_layout}}"
+  >
+    {{#caption_before_substitutions result_data }}
+    <ul class="page-item-container list-group {{#if prevent_edit }}prevent-edit{{else}}allow-edit{{/if}} {{is_activity_log_class}}" data-item-id="{{result_data.id}}" data-item-rank="{{result_data.rank}}" data-{{data_sort_attr}}="{{lookup result_data (underscore data_sort_attr)}}{{#if subsort_id }}--{{pad_start result_data.id 10 '0'}}{{/if}}" {{> custom_block_attrs_html }} >
+
+      {{#with result_data}}
+        {{#each embedded_items}}
+        <div class="embedded-items-item {{extra_classes}} ei-item-{{id_hyphenate title}} option-type-{{option_type}}"
+             style="order: {{or position_number '0'}}; width: {{or block_width 'unset'}};" 
+        >
+          {{> common_template_result_fields result_data=this name=resource_name template_config=(fpa_state_item 'template_config' resource_name vdef_version)}}
+
+          {{#with embedded_item}}
+            {{> common_template_result_fields result_data=this name=resource_name template_config=(fpa_state_item 'template_config' resource_name vdef_version)}}
+          
+            {{#is resource_name '===' 'nfs_store__manage__containers'}}
+              {{#each ../model_references}}
+                {{#is to_record_options_config.view_as.show '!==' 'hide'}}
+                  {{#is to_record_options_config.view_as.show '===' 'filestore'}}
+                    {{>filestore_simple_template_view prevent_edit=true name=name}}
+                  {{/is}}
+                {{/is}}
+              {{/each}}
+            {{/is}}
+          {{/with}}
+        </div>
+        {{/each}}
+      {{/with}}
+
+    </ul>
+
+    {{/caption_before_substitutions}}
+
+  </div>
+  {{#is name '!==' full_name }}</div> {{/is}}
+
 </script>

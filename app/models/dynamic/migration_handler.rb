@@ -28,6 +28,12 @@ module Dynamic
 
     # Generate a migration triggered after_save.
     def generate_migration
+      # Re-enabling an item requires it to be created
+      if saved_change_to_disabled?
+        generate_create_migration
+        return
+      end
+
       @do_migration = nil
       return if @ran_migration || !Rails.env.development?
 
@@ -40,6 +46,19 @@ module Dynamic
       gs = generator_script(migration_generator.migration_version, 'update')
       fn = migration_generator.write_db_migration gs, table_name, migration_generator.migration_version, mode: 'update'
       @do_migration = fn
+    end
+
+    #
+    # Produce "create table" migration for this configuration
+    def write_create_or_update_migration(export_type = nil)
+      return unless Rails.env.development?
+
+      # Force re-parsing of the option configs, to ensure comments are correctly handled
+      option_configs(force: true)
+      mg = migration_generator(force_reset: true)
+      gs = generator_script(mg.migration_version, mode = 'create_or_update')
+
+      mg.write_db_migration(gs, table_name, mg.migration_version, mode: 'create_or_update', export_type: export_type)
     end
 
     # Run a generated migration triggered after_save
@@ -68,15 +87,23 @@ module Dynamic
 
     # Set up and memoize a migration generator to be used for all DB and migration
     # related actions
-    def migration_generator
-      @migration_generator ||=
+    def migration_generator(force_reset: nil)
+      return @migration_generator if @migration_generator && !force_reset
+
+      btm = belongs_to_model if respond_to? :belongs_to_model
+
+      # Ensure option_configs have been parsed
+      option_configs
+
+      @migration_generator =
         Admin::MigrationGenerator.new(
           db_migration_schema,
           table_name,
           all_implementation_fields(ignore_errors: false),
           table_comments,
           implementation_no_master_association,
-          table_name_before_last_save
+          table_name_before_last_save,
+          btm
         )
     end
 

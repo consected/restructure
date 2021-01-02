@@ -18,10 +18,6 @@ class Admin::PageLayoutsController < AdminController
     }
   end
 
-  def view_folder
-    'admin/common_templates'
-  end
-
   private
 
   def permitted_params

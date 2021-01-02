@@ -5,7 +5,12 @@ module OptionConfigs
   # They provide the ability to present different record types in meaningful forms, for recording keeping or
   # driving workflows.
   class ActivityLogOptions < ExtraOptions
-    ValidSaveTriggers = %i[notify create_reference create_master update_reference create_filestore_container].freeze
+    ValidSaveTriggers = %i[notify
+                           create_reference
+                           create_master
+                           update_reference
+                           create_filestore_container
+                           update_this].freeze
 
     def self.add_key_attributes
       %i[references save_trigger e_sign nfs_store]
@@ -32,6 +37,9 @@ module OptionConfigs
             },
             filter_by: {
               field_name: 'value to filter the referenced items by'
+            },
+            order_by: {
+              field_name: 'asc | desc'
             },
             view_as: {
               edit: 'hide|readonly|not_embedded|select_or_add',
@@ -243,7 +251,7 @@ module OptionConfigs
     # This should be extended to provide additional checks when options are saved
     def self.raise_bad_configs(option_configs)
       bad_configs = option_configs.select { |c| c.bad_ref_items.present? }
-      raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?
+      # raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?
     end
 
     def calc_save_action_if(obj)

@@ -2,6 +2,7 @@
 
 class ProInfo < UserBase
   include UserHandler
+  include ViewHandlers::SecondaryInfo
 
   before_update :prevent_save
 
@@ -10,6 +11,10 @@ class ProInfo < UserBase
 
   def data
     "#{first_name} #{last_name}"
+  end
+
+  def self.prevent_crosswalk_check
+    %i[pro_info_id pro_id]
   end
 
   protected

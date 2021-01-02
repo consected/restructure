@@ -47,7 +47,7 @@ class Settings
   # none  = No unlock strategy. You should handle unlocking by yourself.
   PasswordUnlockStrategy = (ENV['FPHS_PASSWORD_UNLOCK_STRATEGY'] || 'time').to_sym
 
-  EnvironmentName = ENV['FPHS_ENV_NAME'] || 'unknown'
+  EnvironmentName = ENV['FPHS_ENV_NAME'] || 'App'
   BaseUrl = ENV['BASE_URL']
 
   LoginIssuesUrl = ENV['LOGIN_ISSUES_URL'] || "mailto: #{AdminEmail}?subject=Login%20Issues"
@@ -87,4 +87,12 @@ class Settings
   DefaultShortLinkS3Bucket = ENV['FPHS_SHORTLINK_BUCKET'] || (Rails.env.production? ? 'fphs.link' : 'test-shortlink.fphs.link')
   DefaultShortLinkLogS3Bucket = ENV['FPHS_SHORTLINK_LOG_BUCKET'] || (Rails.env.production? ? 'url-shortener-logs.fphs' : 'test-fphs-url-shortener-logs')
   LogBucketPrefix = 'access/'
+
+  DefaultSubjectInfoTableName = 'player_infos'
+  DefaultSecondaryInfoTableName = 'pro_infos'
+  DefaultContactInfoTableName = 'player_contacts'
+  DefaultAddressInfoTableName = 'addresses'
+
+  # Scripted job scripts are only run from a predefined directory
+  ScriptedJobDirectory = Rails.root.join('scripted_job_scripts')
 end

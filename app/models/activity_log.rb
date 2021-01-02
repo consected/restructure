@@ -58,7 +58,10 @@ class ActivityLog < ActiveRecord::Base
 
   # List of record types across all item types that are valid for use
   def self.all_valid_item_and_rec_types
-    Classification::GeneralSelection.selector_collection(['item_type like ?', '%_type']).map { |i| [i.item_type.sub(/(_rec)?_type$/, '').singularize, i.value].join('_') } + use_with_class_names
+    Classification::GeneralSelection
+      .selector_collection(['item_type like ?', '%_type'])
+      .map { |i| [i.item_type.sub(/(_rec)?_type$/, '').singularize, i.value].join('_') } +
+      use_with_class_names
   end
 
   # checks if this activity log works with the specified item_type and optionally rec_type based on admin activity log record configuration
@@ -205,6 +208,10 @@ class ActivityLog < ActiveRecord::Base
     false
   end
 
+  def belongs_to_model
+    item_type
+  end
+
   # The selection of possible class names that activity logs could be used with
   # This list is the full list of possible items, and only those configured and read by #works_with are actually available
   # for activity logging
@@ -261,10 +268,11 @@ class ActivityLog < ActiveRecord::Base
                       &association_block
 
       # Unlike external_id handlers (Scantron, etc) there is no need to update the
-      # master's nested attributes this model's symbol
+      # master's nested attributes for this model's symbol
       # since there is no link to advanced search
       add_parent_item_association
-    rescue FphsException => e
+    rescue StandardError => e
+      puts e
       logger.debug e
     end
   end
@@ -274,15 +282,21 @@ class ActivityLog < ActiveRecord::Base
     # Ensure the master is set on the activity log when building through the association block
     # build method being called
     # puts "Adding implementation class association: #{implementation_class.parent_class}.has_many #{self.model_association_name.to_sym} #{self.full_implementation_class_name}"
+    impl_parent_class = implementation_class.parent_class
 
-    remove_assoc_class "#{implementation_class.parent_class}ActivityLog" if item_type_exists
+    remove_assoc_class "#{impl_parent_class}ActivityLog" if item_type_exists
     #    has_many :activity_logs, as: :item, inverse_of: :item ????
-    implementation_class.parent_class.has_many model_association_name.to_sym, class_name: full_implementation_class_name do
+    impl_parent_class.has_many model_association_name.to_sym, class_name: full_implementation_class_name do
       def build(att = nil)
         att[:master] = proxy_association.owner.master
         super(att)
       end
     end
+  rescue StandardError => e
+    # Catch the errors to avoid an issue preventing the system from starting up
+    puts e
+    # puts e.backtrace.join("\n")
+    logger.error e
   end
 
   # set up a route for each available activity log definition
@@ -448,7 +462,7 @@ class ActivityLog < ActiveRecord::Base
         res.include TrackerHandler
         res.include WorksWithItem
         res.include UserHandler
-        res.include ActivityLogHandler
+        res.include Dynamic::ActivityLogImplementer
         ESignature::ESignatureManager.enable_e_signature_for res
         res.final_setup
 
@@ -498,6 +512,8 @@ class ActivityLog < ActiveRecord::Base
     cname = "#{mode}_#{table_name}_#{version}".camelize
     do_create_or_update = if mode == 'create'
                             'create_activity_log_tables'
+                          elsif mode == 'create_or_update'
+                            'create_or_update_activity_log_tables'
                           else
                             migration_generator.migration_update_table
                           end
@@ -510,7 +526,7 @@ class ActivityLog < ActiveRecord::Base
         def change
           self.belongs_to_model = '#{item_type}'
           #{migration_generator.migration_set_attribs}
-
+          
           #{do_create_or_update}
           create_activity_log_trigger
         end

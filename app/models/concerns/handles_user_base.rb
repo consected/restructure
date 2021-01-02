@@ -7,7 +7,7 @@ module HandlesUserBase
     belongs_to :user
 
     # If this model should be associated with a master, check it
-    before_validation :check_master, unless: :allows_nil_master?
+    before_validation :check_crosswalk, unless: :allows_nil_master?
 
     # Ensure the user id is saved
     before_validation :force_write_user
@@ -28,6 +28,9 @@ module HandlesUserBase
     after_save :handle_disabled, if: -> { respond_to?(:disabled?) && disabled? }
 
     attr_accessor :ignore_configurable_valid_if
+
+    # Setup alternative id field methods
+    Master.setup_resource_alternative_id_fields self
   end
 
   class_methods do
@@ -55,6 +58,15 @@ module HandlesUserBase
 
     def no_master_association
       false
+    end
+
+    #
+    # Method to override with an array of Symbol field names to ignore
+    # in the crosswalk check before validation
+    # For example [:pro_info_id]
+    # @return [Array{Symbol | nil}]
+    def prevent_crosswalk_check
+      nil
     end
 
     def human_name
@@ -297,32 +309,6 @@ module HandlesUserBase
     @creating_master
   end
 
-  if Master.respond_to? :alternative_id_fields
-    # add the alternative_id_fields from the master as attributes, so we can use them for matching
-    Master.alternative_id_fields.each do |f|
-      define_method :"#{f}=" do |value|
-        if attribute_names.include? f.to_s
-          write_attribute(f, value)
-        else
-          instance_variable_set("@#{f}", value)
-          return master if master
-
-          self.master = Master.find_with_alternative_id(f, value)
-        end
-      end
-
-      define_method :"#{f}" do
-        if attribute_names.include? f.to_s
-          read_attribute(f)
-        else
-          instance_variable_get("@#{f}")
-        end
-      end
-    end
-  else
-    puts 'Master does not respond to alternative_id_fields. Hopefully this is just during seeding'
-  end
-
   def set_referring_record(ref_record_type, ref_record_id, current_user)
     @ref_record_type = ref_record_type
     @ref_record_id = ref_record_id
@@ -384,17 +370,43 @@ module HandlesUserBase
 
   protected
 
-  def check_master
+  #
+  # Validate crosswalk attributes supplied do not attempt to duplicate
+  # any existing ids in other Master records, or provide crosswalk ids
+  # and master ids that don't match.
+  # This is skipped if this model is configured to not have a master association
+  # Only crosswalk IDs (not external IDs) are checked in this way
+  # If there is a specific crosswalk field in a model that should not be checked,
+  # override {HandlesUserBase#prevent_crosswalk_check} with an array of the fields (Symbols) to
+  # be ignored for this model.
+  # For example, FPHS model ProInfo has a pro_info_id field that sets the same crosswalk
+  # field in Master through a DB trigger after the ProInfo record has been persisted. Checking
+  # the crosswalk field would fail, because the master record has not been updated at this point.
+  def check_crosswalk
     return if self.class.no_master_association
 
-    msid = nil if msid.blank? && !msid.nil?
-    if msid && !master_id
-      m = Master.where(msid: msid).first
-      raise 'MSID set, but it does not match a master record' unless m
+    check_attrs = Master.crosswalk_attrs - (self.class.prevent_crosswalk_check || [])
+    check_attrs.each do |attr|
+      ext_id_val = send(attr)
+      ext_id_val = nil if ext_id_val.blank?
 
-      self.master_id = m.id
-    elsif msid && master_id && master.msid != msid
-      raise 'MSID and master_id set, but they do not correspond to the same record'
+      # An external id has been provided,
+      # so lookup the master with the external id
+      found_master = Master.find_with_alternative_id(attr, ext_id_val, current_user) if ext_id_val
+
+      if ext_id_val && !master_id
+        # An external id has been provided, and a master id has not,
+        # so use the looked up the master
+        raise "#{attr} set (#{ext_id_val}), but it does not match a master record #{master_id}" unless found_master
+
+        self.master_id = found_master.id
+      elsif ext_id_val && master_id && found_master&.id != master_id
+        # An external id has been provided, and so has a master_id
+        # but the master record found for the external id does not match
+        # the master_id
+        raise "#{attr}=#{ext_id_val} and master_id=#{master_id}, " \
+              "but they do not correspond to the same record (found master #{found_master&.id})"
+      end
     end
 
     return unless respond_to?(:master) && !(master_id && master) && !validating?

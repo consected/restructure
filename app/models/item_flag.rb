@@ -105,7 +105,7 @@ class ItemFlag < UserBase
 
     logger.info "Remaining flags in #{item} for #{item.master_user}: #{item.item_flags.map(&:id)}"
     if !added_flags.empty? || !removed_flags.empty?
-      ItemFlag.track_flag_updates item, added_flags, removed_flags
+      track_flag_updates item, added_flags, removed_flags
       update_action = true
     end
 

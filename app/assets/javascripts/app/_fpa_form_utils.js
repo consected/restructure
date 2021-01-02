@@ -529,9 +529,11 @@ _fpa.form_utils = {
         var master_id = block.parents('.master-panel').first().attr('data-master-id');
       }
 
-      var master = _fpa.state.masters[master_id];
+      var master = _fpa.state.masters && _fpa.state.masters[master_id];
       if (master) {
+        var id = new_data.id;
         new_data = Object.assign(new_data, master);
+        new_data.id = id;
       }
 
       res.forEach(function (el) {
@@ -589,7 +591,7 @@ _fpa.form_utils = {
           got = _fpa.form_utils.format_substitution(got, formatters, tag_name);
         }
 
-        if (!no_html_tag) {
+        if (no_html_tag == false) {
           got = '<em class="all_caps">' + got + '</em>';
         }
 
@@ -1524,7 +1526,7 @@ _fpa.form_utils = {
         var $eddiv = $(this).find('div.custom-editor');
         var edid = $eddiv.attr('id');
         var $edtools = $(this).find('.btn-toolbar[data-target="#' + edid + '"]');
-        var editor = $eddiv.wysiwyg({ dragAndDropImages: false });
+        var editor = $eddiv.wysiwyg({ dragAndDropImages: true });
 
         $edtools.hide();
         $eddiv.on('focus', function () {
@@ -1539,8 +1541,28 @@ _fpa.form_utils = {
             if ($eddiv.data('editor-changed')) {
               // Only if there has been a change
               $eddiv.data('editor-changed', null);
+
+              // Add a header if necessary
+              if (editor.find('thead').length === 0) {
+                var first_row = editor.find('tr').first();
+                var headers = first_row.find('td');
+                var thead_html = $('<thead><tr></tr></thead>')
+                var thead_tr = thead_html.find('tr');
+                headers.each(function () {
+                  var th = "<th>" + $(this).html() + "</th>";
+                  thead_tr.append(th);
+                });
+
+                first_row.remove()
+
+                editor.find('table').prepend(thead_html)
+              }
+
               var html = editor.cleanHtml();
               var txt = domador(html);
+              // Clean the text to remove
+              // any number of hash or asterisk symbols followed by 
+              // one or more spaces
               var cleantext = txt.replace(/(^|\n)(#|\*)+ *\n/g, '');
               $edta.val(cleantext);
             }
@@ -1587,10 +1609,11 @@ _fpa.form_utils = {
 
         var fn = $(this).html();
 
+        _fpa.secure_view.setup_links($(this), 'a.browse-icon', { allow_actions: acts, set_preview_as: spa, attr_for_filename: 'title', link_type: 'icon' });
         _fpa.secure_view.setup_links($(this), 'a.browse-filename', { allow_actions: acts, set_preview_as: spa });
       }
       if (usv == null || usv == '' || usv == 'false') {
-        $(this).find('a.browse-filename').on('click', function (ev) {
+        $(this).find('a.browse-filename, a.browse-icon').on('click', function (ev) {
           ev.preventDefault();
         });
       }
@@ -1764,6 +1787,20 @@ _fpa.form_utils = {
     }
   },
 
+  // If all children are not visible, add a class that allows this block to be hidden or styled
+  hide_empty_blocks: function (block) {
+    block.find('.hide-if-children-invisible').each(function () {
+      if ($(this).find(':visible').length == 0) {
+        $(this).addClass('all-children-invisible');
+        $(this).removeClass('some-children-visible');
+      }
+      else {
+        $(this).removeClass('all-children-invisible');
+        $(this).addClass('some-children-visible');
+      }
+    });
+  },
+
   // Run through all the general formatters for a new block to show nicely
   format_block: function (block) {
 
@@ -1797,6 +1834,7 @@ _fpa.form_utils = {
     _fpa.form_utils.setup_contact_field_mask(block);
     _fpa.form_utils.setup_filestore(block);
     _fpa.form_utils.setup_e_signature(block);
+    _fpa.form_utils.hide_empty_blocks(block);
     // Not currently used or tested.
     // _fpa.form_utils.setup_form_filtered_select(block);
 

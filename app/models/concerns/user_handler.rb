@@ -89,8 +89,8 @@ module UserHandler
     end
 
     # A secondary key is a field that can be used to uniquely identify a record. It is not a formal key,
-    # and can not be guaranteed to provide uniqueness, but for certain data situations (such as imports)
-    # it may be considered to be sufficient.
+    # and can not be guaranteed to provide uniqueness, but for certain data situations
+    # (such as imports and page layout lookups on a 'slug') it may be considered to be sufficient.
     # To facilitate matching code, the method secondary_key_unique? checks this fact.
     # Overriding methods will return a symbol representing the field name
     # @return [Symbol | nil]
@@ -136,6 +136,14 @@ module UserHandler
 
       res.first
     end
+
+    # Find all items by the secondary key value, checking that the secondary key field is set
+    # A ActiveRecord scope is returned that may have a count of 0, 1 or many
+    def find_all_by_secondary_key(value)
+      raise 'No secondary_key field defined' unless secondary_key
+
+      where(secondary_key => value)
+    end
   end
 
   def current_user
@@ -150,8 +158,11 @@ module UserHandler
     master unless self.class.no_master_association
   end
 
-  def is_admin?
-    master.is_admin? if respond_to?(:master) && master
+  #
+  # Check if the associated master has a current admin set for administrative tasks
+  # @return [Boolean]
+  def current_admin?
+    master.current_admin? if respond_to?(:master) && master
   end
 
   # A fallback data attribute to act as the human identifier for an item

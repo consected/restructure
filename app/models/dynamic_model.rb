@@ -158,7 +158,7 @@ class DynamicModel < ActiveRecord::Base
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
-        res.include DynamicModelHandler
+        res.include Dynamic::DynamicModelImplementer
         add_handlers(res)
 
         res.final_setup
@@ -259,6 +259,8 @@ class DynamicModel < ActiveRecord::Base
     cname = "#{mode}_#{table_name}_#{version}".camelize
     do_create_or_update = if mode == 'create'
                             'create_dynamic_model_tables'
+                          elsif mode == 'create_or_update'
+                            'create_or_update_dynamic_model_tables'
                           else
                             migration_generator.migration_update_table
                           end

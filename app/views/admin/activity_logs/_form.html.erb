@@ -14,13 +14,13 @@
     <%= f.label :item_type, 'data-add-icon' => 'info-sign', title: "#{object_instance.id ? 'item type for existing records can not be changed.' : 'Set item type'}" %>
     <%= f.select :item_type, item_types_array, {}, disabled: !!object_instance.id  %>
   </div>
- <div class="form-group">
-    <%= f.label :rec_type, 'data-add-icon' => 'info-sign', title: "#{object_instance.id ? 'record type for existing records can not be changed.' : 'Set record type (optional), for example: phone'}" %>
-    <%= f.select :rec_type, general_selection("%_type", value: object_instance.rec_type, use_like: true), include_blank: true %>
-  </div>
   <div class="form-group">
     <%= f.label :process_name %>
     <%= f.text_field :process_name %>
+  </div>
+  <div class="form-group">
+    <%= f.label :rec_type, 'data-add-icon' => 'info-sign', title: "#{object_instance.id ? 'record type for existing records can not be changed.' : 'Set record type (optional), for example: phone'}" %>
+    <%= f.select :rec_type, general_selection("%_type", value: object_instance.rec_type, use_like: true), include_blank: true %>
   </div>
   <div class="form-group">
     <%= f.label :schema_name %>
@@ -54,33 +54,16 @@
     <%= f.label :disable %>
     <%= f.check_box :disabled %>
   </div>
-  <div>
-    <div class="activity-list-section">
-      <%= f.label :activities %>
-      <ul class="activity-list">
-      <% object_instance.option_configs_names.each do |name| %>
-        <li><%=name%></li>
-      <% end %>
-      </ul>
-      <div id="activity-list-detail" class="activity-list-detail"></div>
-    <div>
-
+  <div class="main-options-block">
     <div class="form-group">
       <%= f.label :extra_log_types %><br>
-      <div style="width: 800px; height: 80vh;">
+      <div class="al-options-editor-block">
         <%= f.text_area :extra_log_types, class: "code-editor code-editor-#{editor_code_type}", data: {code_editor_type: editor_code_type} %>
       </div>
     </div>
-    <div class="form-group" style="vertical-align: top">
-      <label>Extra Log Options</label>
-      <% 
-      example = OptionConfigs::ActivityLogOptions.top_level_defs
-      example = example.merge('extras_log_type_name' => OptionConfigs::ActivityLogOptions.attr_defs.deep_stringify_keys)
-      %>
-      <div style="width: 800px; height: 80vh;">
-        <textarea style="font-size: 12px" class="extra-help-info">
-  <%= example.to_yaml %>
-        </textarea>
+    <div class="form-group">
+      <div class="al-options-ref-block">
+        <%= render partial: 'admin/activity_logs/form_info', locals: {object_instance: object_instance} %>
       </div>
     </div>
     <div class="form-group" style="vertical-align: top">

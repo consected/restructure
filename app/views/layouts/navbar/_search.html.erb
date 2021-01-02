@@ -1,0 +1,24 @@
+<% if current_user && !app_config_set(:hide_navbar_search) && current_user.app_type_id 
+
+      # The search fields in the nav bar allow for a quick search of one or more master IDs, or crosswalk IDs.
+      # The form request is actually submitted to a page that then makes an ajax search request for the 
+      # requested IDs, so it should be noted that the parameters used here are passed to masters#search
+      # where they end up being rendered in a page to submit back to masters#index 
+
+      # This approach ensures that the nav bar search can be used from any page, even if the master search results
+      # is not set up to receive results.
+      
+      pext = params[:external_id] || {}
+%>
+  <%= form_tag msid_search_path, method: :get,  class: "navbar-form navbar-left", role: "search" do %>
+    <div class="form-group">
+      <%= text_field_tag 'external_id[msid]', pext[:msid], class: "form-control nav-external-id-search", placeholder: "MSID Search" %>
+      <%= text_field_tag 'external_id[pro_id]', pext[:pro_id], class: "form-control nav-external-id-search", placeholder: "Pro ID Search" %>
+      <%= text_field_tag :nav_q_id, params[:nav_q_id], class: "form-control nav-master-id-search", placeholder: "Master ID" %>
+    </div>
+    <%= button_tag '<span class="glyphicon glyphicon-search"></span>'.html_safe, class:"btn btn-default"  %>
+    <%= submit_tag "CSV", name: :req_format, value: "csv", class: "btn btn-default"  if current_user.can?(:export_csv)%>
+    <%= submit_tag "JSON", name: :req_format, value: "json", class: "btn btn-default target_new_window" if current_user.can?(:export_json) %>
+
+  <% end %>
+<% end %>

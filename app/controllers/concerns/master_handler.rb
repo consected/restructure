@@ -402,14 +402,37 @@ module MasterHandler
     end
   end
 
+  # Overridable method for filtering objects based on the request,
+  # such as setting a limit and filtering based on specific requested ids
   def filter_records
+    filter_requested_ids
     limit_results
+  end
+
+  #
+  # Filter the object list to be returned based on a list of ids
+  def filter_requested_ids
+    pfilter = params[:filter]
+    return @master_objects unless pfilter.present?
+
+    requested_filtered_ids = pfilter[:resource_id]
+    secondary_key_filtered_ids = pfilter[:secondary_key]
+    if requested_filtered_ids.present?
+      requested_filtered_ids = requested_filtered_ids.split(',').map { |i| i.strip.to_i }
+      @master_objects = @master_objects.where(id: requested_filtered_ids)
+    elsif secondary_key_filtered_ids.present?
+      @master_objects = @master_objects.find_all_by_secondary_key(secondary_key_filtered_ids)
+    else
+      @master_objects
+    end
   end
 
   def requested_limit
     @requested_limit ||= params[:limit].to_i if params[:limit].present?
   end
 
+  #
+  # Limit the results to a specified limit if the limit param is set
   def limit_results
     if @master_objects.is_a? Array
       @master_objects

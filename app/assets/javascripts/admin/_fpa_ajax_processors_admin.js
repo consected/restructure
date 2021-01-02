@@ -113,8 +113,22 @@ _fpa.postprocessors_admin = {
     }).addClass('code-editor-formatted');
 
     block.find('.extra-help-info').not('.code-extra-help-info-formatted').each(function () {
+      if (!$(this).is(':visible')) return;
       _fpa.admin.setup_yaml_viewer($(this));
     }).addClass('code-extra-help-info-formatted');
+
+    $('[data-toggle="tab"]').on('shown.bs.tab', function () {
+
+      var tar = $($(this).attr('href'));
+      if (!tar.is(':visible')) return;
+
+      var ehi = tar.find('.extra-help-info').not('.code-extra-help-info-formatted-in-tab');
+      if (ehi.length) {
+        CodeMirror.fromTextArea(ehi[0]).refresh();
+        ehi.addClass('code-extra-help-info-formatted-in-tab')
+      }
+    })
+    _fpa.form_utils.on_open_click(block);
 
   },
 

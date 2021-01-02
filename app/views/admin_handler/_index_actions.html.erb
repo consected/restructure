@@ -1,17 +1,5 @@
+<% unless view_embedded? %>
 <div class="well admin-index-actions text-center">
   <%= render partial: 'admin_handler/action_buttons' %>
 </div>
-
-<script>
-  setTimeout(function(){
-    var blocks = $('.shrinkable-block')
-    _fpa.utils.make_readable_notes_expandable(blocks, 100);
-
-    $(document).on('change', '#config', function(){
-      var ext = $('#config').val().split('.').pop();
-      $('input[name="upload_format"]').prop('checked', false);
-      $('input[name="upload_format"][value="'+ext+'"]').prop('checked', true);
-    })
-
-  }, 10);
-</script>
+<% end %>

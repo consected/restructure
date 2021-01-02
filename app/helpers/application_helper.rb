@@ -105,7 +105,7 @@ module ApplicationHelper
     caption = captions[key]
     caption = caption["#{mode}_caption".to_sym] || caption[:caption] || '' if caption.is_a?(Hash)
     if @form_object_instance
-      caption = Formatter::Substitution.substitute(caption, data: @form_object_instance, tag_subs: 'em class="all_caps"')
+      caption = Formatter::Substitution.substitute(caption, data: @form_object_instance, tag_subs: nil)
     end
     caption.html_safe
   end

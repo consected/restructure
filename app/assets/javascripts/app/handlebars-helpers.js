@@ -322,7 +322,7 @@
 
 
 
-  Handlebars.registerHelper('fpa_state_item', function (name, key, sub_key, sub_key2, sub_key3) {
+  Handlebars.registerHelper('fpa_state_item', function (name, key, sub_key, sub_key2, sub_key3, sub_key4, sub_key5) {
     var res = _fpa.state[name];
     if (res && key && !key.hash)
       res = res[key];
@@ -332,6 +332,10 @@
       res = res[sub_key2];
     if (res && sub_key3 && !sub_key3.hash)
       res = res[sub_key3];
+    if (res && sub_key4 && !sub_key4.hash)
+      res = res[sub_key4];
+    if (res && sub_key5 && !sub_key5.hash)
+      res = res[sub_key5];
     return res;
   });
 
@@ -458,6 +462,12 @@
     if (!str) return;
     return str.hyphenate();
   });
+
+  Handlebars.registerHelper('id_hyphenate', function (str) {
+    if (!str) return;
+    return str.id_hyphenate();
+  });
+
 
   Handlebars.registerHelper('pathify', function (str) {
     if (!str) return;

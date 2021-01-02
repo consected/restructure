@@ -1,4 +1,6 @@
-<% rows.each do |row|
+<%
+  # Run through each row
+  rows.each do |row|
     row_classes = row['classes']
     cols = row['cols'] || []
     row_styles = (row['styles'] || {}).map {|k,v| "#{k}: #{v};"}.join(' ');
@@ -44,8 +46,34 @@
             result_type = 'resource'
             resource = resource_def['name']
             resource = resource.pluralize
+
+
+            url_parts = [
+              'masters',
+              @master_id,
+              resource.gsub('__', '/'),
+            ]
+            url_parts.compact!
+
             limit = resource_def['limit']
-            col_url = "/masters/#{@master_id}/#{resource.gsub('__', '/')}?limit=#{limit}"
+            embed_all_references = 'true' if resource_def['embed_all_references']
+
+            resource_id = resource_def['id'] || @resource_id
+            secondary_key = resource_def['secondary_key'] || @secondary_key
+            if resource_id && resource_id.positive?
+              filters = "filter[resource_id]=#{resource_id}" 
+            elsif secondary_key
+              filters = "filter[secondary_key]=#{secondary_key}" 
+            end
+
+            param_parts = [
+              "limit=#{limit}",
+              "embed_all_references=#{embed_all_references}",
+              filters
+            ]
+            param_parts.compact!
+
+            col_url = "/#{url_parts.join("/")}?#{param_parts.join("&")}"
           end
         end
       end
@@ -61,17 +89,17 @@
     <% else %>
     <div class="standalone-page-col <%=col_classes%> ajax-running" id="<%=col_block_id%>" data-url="<%=col_url%>">
       <div class="sp-col-inner">
-        <h2 class="sp-col-label"><%=col_label%></h2>
-        <div class="sp-col-header"><%= markdown_to_html(col_header) if col_header.present?%></div>
+        <%if col_label.present? %><h2 class="sp-col-label"><%=col_label%></h2><% end %>
+        <% if col_header.present? %><div class="sp-col-header"><%= markdown_to_html(col_header)%></div><% end %>
         <div class="result-target result-target-<%=result_type%>">
           <% if resource %>
-            <div id="<%= resource.hyphenate %>-<%=@master_id%>" class="no-table-results standalone-panel-generic-block <%= resource.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="<%=@master_id%>" data-sub-item="<%= resource %>" data-template="<%= resource.hyphenate %>-main-result-template"  >
+            <div id="<%= resource.hyphenate %>-<%=@master_id%>" class="no-table-results standalone-panel-generic-block <%= resource.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="<%=@master_id%>" data-sub-item="<%= resource %>" data-template="<%= resource.hyphenate %>-page-result-template">
               <div id="<%= resource.hyphenate %>-inner-<%=@master_id%>" class="standalone-panel-inner-block">
               </div>
             </div>
           <% end %>
         </div>
-        <div class="sp-col-footer"><%= markdown_to_html(col_footer) if col_footer.present?%></div>
+        <% if col_footer.present? %><div class="sp-col-footer"><%= markdown_to_html(col_footer)%></div><% end %>
       </div>
     </div>
     <% end %>

@@ -108,6 +108,8 @@ module NfsStore
         # If no filters are defined, exit. At least one is required to return a sensible result.
         return if filters.empty?
 
+        filters = [filters] if filters.is_a? String
+
         if item.is_a? NfsStore::Manage::Container
           container = item
         elsif item.model_data_type == :activity_log

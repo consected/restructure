@@ -1,5 +1,9 @@
 <%
-  locals[:embedded] = embedded
+  @matched_name = nil
+
+  if defined? embedded
+    locals[:embedded] = embedded
+  end
   local_vars = locals
   local_vars[:locals][:locals] = local_vars[:locals]
   # Get the list of filenames for templates, making them into the matchers we wish to use.
@@ -131,4 +135,5 @@
 
   end
 
+  @matched_name ||= match_name
 %>

@@ -9,7 +9,12 @@ module ActiveRecord
         attr_accessor :fields, :new_fields, :field_defs, :prev_fields,
                       :field_opts, :owner, :history_table_id_attr,
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
-                      :table_comment, :fields_comments, :mode, :no_master_association
+                      :table_comment, :fields_comments, :mode, :no_master_association,
+                      :requested_action
+      end
+
+      def force_rollback
+        ENV['FORCE_ROLLBACK'] == 'true' && reverting?
       end
 
       def schema=(new_schema)
@@ -46,10 +51,22 @@ module ActiveRecord
 
         add_fields "#{schema}.#{table_name}"
         add_fields "#{schema}.#{history_table_name}"
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
       end
 
       def rand_id
         Digest::MD5.hexdigest("#{schema}.#{table_name}")[0..7]
+      end
+
+      def create_or_update_activity_log_tables
+        self.requested_action = :create_or_update
+
+        if table_exists
+          update_fields
+        else
+          create_activity_log_tables
+        end
       end
 
       def create_activity_log_tables
@@ -57,29 +74,35 @@ module ActiveRecord
 
         self.belongs_to_model = belongs_to_model.to_s.underscore
 
-        create_table "#{schema}.#{table_name}", comment: table_comment do |t|
-          t.belongs_to :master, index: { name: "#{rand_id}_master_id_idx" }, foreign_key: true
-          t.belongs_to belongs_to_model,
-                       index: { name: "#{rand_id}_id_idx" },
-                       foreign_key: { to_table: "#{schema}.#{belongs_to_model.pluralize}" }
-          create_fields t
-          t.string :extra_log_type
-          t.references :user, index: { name: "#{rand_id}_user_id_idx" }, foreign_key: true
-          t.timestamps null: false
+        unless table_exists
+          create_table "#{schema}.#{table_name}", comment: table_comment do |t|
+            t.belongs_to :master, index: { name: "#{rand_id}_master_id_idx" }, foreign_key: true
+            t.belongs_to belongs_to_model,
+                         index: { name: "#{rand_id}_id_idx" },
+                         foreign_key: { to_table: "#{schema}.#{belongs_to_model.pluralize}" }
+            create_fields t
+            t.string :extra_log_type
+            t.references :user, index: { name: "#{rand_id}_user_id_idx" }, foreign_key: true
+            t.timestamps null: false
+          end
         end
 
-        create_table "#{schema}.#{history_table_name}" do |t|
-          t.belongs_to :master, index: { name: "#{rand_id}_master_id_h_idx" }, foreign_key: true
-          t.belongs_to belongs_to_model,
-                       index: { name: "#{rand_id}_id_h_idx" },
-                       foreign_key: { to_table: "#{schema}.#{belongs_to_model.pluralize}" }
-          create_fields t, true
-          t.string :extra_log_type
-          t.references :user, index: { name: "#{rand_id}_user_id_h_idx" }, foreign_key: true
-          t.timestamps null: false
+        unless history_table_exists || model_is_view
+          create_table "#{schema}.#{history_table_name}" do |t|
+            t.belongs_to :master, index: { name: "#{rand_id}_master_id_h_idx" }, foreign_key: true
+            t.belongs_to belongs_to_model,
+                         index: { name: "#{rand_id}_id_h_idx" },
+                         foreign_key: { to_table: "#{schema}.#{belongs_to_model.pluralize}" }
+            create_fields t, true
+            t.string :extra_log_type
+            t.references :user, index: { name: "#{rand_id}_user_id_h_idx" }, foreign_key: true
+            t.timestamps null: false
 
-          t.belongs_to table_name.singularize, index: { name: "#{rand_id}_b_id_h_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
+            t.belongs_to table_name.singularize, index: { name: "#{rand_id}_b_id_h_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
+          end
         end
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
       end
 
       def create_activity_log_trigger
@@ -95,31 +118,50 @@ module ActiveRecord
             ActiveRecord::Base.connection.execute reverse_activity_log_trigger_sql
           end
         end
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
+      end
+
+      def create_or_update_dynamic_model_tables
+        self.requested_action = :create_or_update
+        if table_exists
+          update_fields
+        else
+          create_dynamic_model_tables
+        end
       end
 
       def create_dynamic_model_tables
         setup_fields
 
-        create_table "#{schema}.#{table_name}", comment: table_comment do |t|
-          t.belongs_to :master, index: true, foreign_key: true unless no_master_association
-          create_fields t
-          t.references :user, index: true, foreign_key: true
-          t.timestamps null: false
-        end
-
-        create_table "#{schema}.#{history_table_name}" do |t|
-          unless no_master_association
-            t.belongs_to :master, index: { name: "#{rand_id}_history_master_id" }, foreign_key: true
+        unless table_exists
+          create_table "#{schema}.#{table_name}", comment: table_comment do |t|
+            t.belongs_to :master, index: true, foreign_key: true unless no_master_association
+            create_fields t
+            t.references :user, index: true, foreign_key: true
+            t.timestamps null: false
           end
-          create_fields t, true
-          t.references :user, index: { name: "#{rand_id}_user_idx" }, foreign_key: true
-          t.timestamps null: false
 
-          t.belongs_to table_name.singularize, index: { name: "#{rand_id}_id_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
         end
+        unless history_table_exists || model_is_view
+          create_table "#{schema}.#{history_table_name}" do |t|
+            unless no_master_association
+              t.belongs_to :master, index: { name: "#{rand_id}_history_master_id" }, foreign_key: true
+            end
+            create_fields t, true
+            t.references :user, index: { name: "#{rand_id}_user_idx" }, foreign_key: true
+            t.timestamps null: false
+
+            t.belongs_to table_name.singularize, index: { name: "#{rand_id}_id_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
+          end
+        end
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
       end
 
       def create_dynamic_model_trigger
+        return unless history_table_exists && !model_is_view
+
         setup_fields(fields & col_names(:sym))
 
         reversible do |dir|
@@ -132,6 +174,17 @@ module ActiveRecord
             ActiveRecord::Base.connection.execute reverse_dynamic_model_trigger_sql
           end
         end
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
+      end
+
+      def create_or_update_external_identifier_tables(id_field, id_field_type = :bigint)
+        self.requested_action = :create_or_update
+        if table_exists
+          update_fields
+        else
+          create_external_identifier_tables(id_field, id_field_type)
+        end
       end
 
       def create_external_identifier_tables(id_field, id_field_type = :bigint)
@@ -142,26 +195,33 @@ module ActiveRecord
 
         field_defs[id_field] = id_field_type
 
-        create_table "#{schema}.#{table_name}", comment: table_comment do |t|
-          t.belongs_to :master, index: true, foreign_key: true
-          create_fields t
-          t.references :user, index: true, foreign_key: true
-          t.references :admin, index: true, foreign_key: true
-          t.timestamps null: false
+        unless table_exists
+          create_table "#{schema}.#{table_name}", comment: table_comment do |t|
+            t.belongs_to :master, index: true, foreign_key: true
+            create_fields t
+            t.references :user, index: true, foreign_key: true
+            t.references :admin, index: true, foreign_key: true
+            t.timestamps null: false
+          end
         end
+        unless history_table_exists || model_is_view
+          create_table "#{schema}.#{history_table_name}" do |t|
+            t.belongs_to :master, index: true, foreign_key: true
+            create_fields t, true
+            t.references :user, index: true, foreign_key: true
+            t.references :admin, index: true, foreign_key: true
+            t.timestamps null: false
 
-        create_table "#{schema}.#{history_table_name}" do |t|
-          t.belongs_to :master, index: true, foreign_key: true
-          create_fields t, true
-          t.references :user, index: true, foreign_key: true
-          t.references :admin, index: true, foreign_key: true
-          t.timestamps null: false
-
-          t.belongs_to "#{table_name.singularize}_table", index: { name: "#{table_name.singularize}_id_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
+            t.belongs_to "#{table_name.singularize}_table", index: { name: "#{table_name.singularize}_id_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
+          end
         end
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
       end
 
       def create_external_identifier_trigger(_id_field)
+        return if history_table_exists || model_is_view
+
         self.fields ||= []
         # self.fields.unshift id_field
         self.fields = fields.uniq
@@ -177,6 +237,8 @@ module ActiveRecord
             ActiveRecord::Base.connection.execute reverse_external_identifier_trigger_sql
           end
         end
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
       end
 
       def update_table_name
@@ -195,6 +257,20 @@ module ActiveRecord
             ActiveRecord::Base.connection.execute "DROP FUNCTION #{calc_trigger_fn_name(table_name)}"
           end
         end
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
+      end
+
+      def table_exists
+        Admin::MigrationGenerator.table_or_view_exists? "#{schema}.#{table_name}"
+      end
+
+      def model_is_view
+        Admin::MigrationGenerator.view_exists? "#{schema}.#{table_name}"
+      end
+
+      def history_table_exists
+        ActiveRecord::Base.connection.table_exists? "#{schema}.#{history_table_name}"
       end
 
       def update_fields
@@ -212,7 +288,11 @@ module ActiveRecord
         col_names ||= []
 
         old_colnames = col_names - standard_columns
-        old_history_colnames = history_col_names - standard_columns
+        old_history_colnames = if history_table_exists
+                                 history_col_names - standard_columns
+                               else
+                                 []
+                               end
         new_colnames = fields.map(&:to_s) - standard_columns
         added = (new_colnames - old_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
         removed = (old_colnames - new_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
@@ -231,16 +311,16 @@ module ActiveRecord
 
         if reverting?
           puts 'Rollback'
-          puts "Adding: #{removed -= col_names}"
-          puts "Removing: #{added &= col_names}"
-          puts "Adding (history): #{removed_history -= history_col_names}"
-          puts "Removing (history): #{added_history &= history_col_names}"
+          puts "Adding: #{removed &= col_names}"
+          puts "Removing: #{added -= col_names}"
+          puts "Adding (history): #{removed_history &= history_col_names}" if history_table_exists
+          puts "Removing (history): #{added_history -= history_col_names}" if history_table_exists
         else
           puts 'Migrate'
           puts "Adding: #{added -= col_names}"
           puts "Removing: #{removed &= col_names}"
-          puts "Adding (history): #{added_history -= history_col_names}"
-          puts "Removing (history): #{removed_history &= history_col_names}"
+          puts "Adding (history): #{added_history -= history_col_names}" if history_table_exists
+          puts "Removing (history): #{removed_history &= history_col_names}" if history_table_exists
         end
 
         if Rails.env.production? && (removed.present? || removed_history.present?) && ENV['ALLOW_DROP_COLUMNS'] != 'true'
@@ -255,14 +335,23 @@ module ActiveRecord
         commented_colnames = fields_comments.keys.map(&:to_s)
         changed = commented_colnames - added - removed
 
-        if old_table_comment != table_comment
-          if ActiveRecord::Base.connection.table_exists? "#{schema}.#{table_name}"
-            change_table_comment("#{schema}.#{table_name}", table_comment)
-          end
+        # Skip updates to missing history tables
+        unless history_table_exists
+          puts 'HISTORY TABLE does not exist'
+          added_history = []
+          removed_history = []
+        end
+
+        if old_table_comment != table_comment && table_exists && !model_is_view
+          change_table_comment("#{schema}.#{table_name}", table_comment)
         end
 
         if belongs_to_model && !old_colnames.include?(belongs_to_model) && !col_names.include?(belongs_to_model_field)
-          add_reference "#{schema}.#{table_name}", belongs_to_model, index: { name: "#{rand_id}_bt_id_idx" }
+          begin
+            add_reference "#{schema}.#{table_name}", belongs_to_model, index: { name: "#{rand_id}_bt_id_idx" }
+          rescue StandardError, ActiveRecord::StatementInvalid
+            nil
+          end
         end
 
         added.each do |c|
@@ -270,10 +359,19 @@ module ActiveRecord
           comment = fields_comments[c.to_sym]
           options[:comment] = comment if comment.present?
           fdef = field_defs[c.to_sym]
+
+          # If we are rolling back, skip this one unless the col name exists in the table
+          # or if migrating up, skip this one unless the col name does not exist in the table
+          next unless reverting? && c.in?(col_names) || !reverting? && !c.in?(col_names)
+
           if fdef == :references
-            add_reference "#{schema}.#{table_name}", c, options unless c.in? col_names
+            begin
+              add_reference "#{schema}.#{table_name}", c, options
+            rescue StandardError, ActiveRecord::StatementInvalid
+              nil
+            end
           else
-            add_column "#{schema}.#{table_name}", c, fdef, options unless c.in? col_names
+            add_column "#{schema}.#{table_name}", c, fdef, options
           end
         end
 
@@ -282,14 +380,19 @@ module ActiveRecord
           comment = fields_comments[c.to_sym]
           options[:comment] = comment if comment.present?
           fdef = field_defs[c.to_sym] || {}
+
+          # If we are rolling back, skip this one unless the col name does not exist in the table
+          # or if migrating up, skip this one unless the col name exists in the table
+          next unless reverting? && !c.in?(col_names) || !reverting? && c.in?(col_names)
+
           if fdef == :references
             begin
-              remove_reference "#{schema}.#{table_name}", c, options if c.in?(col_names)
-            rescue StandardError
+              remove_reference "#{schema}.#{table_name}", c, options
+            rescue StandardError, ActiveRecord::StatementInvalid
               nil
             end
           else
-            remove_column "#{schema}.#{table_name}", c, fdef if c.in? col_names
+            remove_column "#{schema}.#{table_name}", c, fdef
           end
         end
 
@@ -298,11 +401,20 @@ module ActiveRecord
           comment = fields_comments[c.to_sym]
           options[:comment] = comment if comment.present?
           fdef = field_defs[c.to_sym]
+
+          # If we are rolling back, skip this one unless the col name exists in the table
+          # or if migrating up, skip this one unless the col name does not exist in the table
+          next unless reverting? && c.in?(history_col_names) || !reverting? && !c.in?(history_col_names)
+
           if fdef == :references
             options[:index][:name] += '_hist'
-            add_reference "#{schema}.#{history_table_name}", c, options unless c.in? history_col_names
+            begin
+              add_reference "#{schema}.#{history_table_name}", c, options
+            rescue StandardError, ActiveRecord::StatementInvalid
+              nil
+            end
           else
-            add_column "#{schema}.#{history_table_name}", c, fdef, options unless c.in? history_col_names
+            add_column "#{schema}.#{history_table_name}", c, fdef, options
           end
         end
 
@@ -311,11 +423,16 @@ module ActiveRecord
           comment = fields_comments[c.to_sym]
           options[:comment] = comment if comment.present?
           fdef = field_defs[c.to_sym] || {}
+
+          # If we are rolling back, skip this one unless the col name does not exist in the table
+          # or if migrating up, skip this one unless the col name exists in the table
+          next unless reverting? && !c.in?(history_col_names) || !reverting? && c.in?(history_col_names)
+
           if fdef == :references
             options[:index][:name] += '_hist'
             begin
               remove_reference "#{schema}.#{history_table_name}", c, options if c.in? history_col_names
-            rescue StandardError
+            rescue StandardError, ActiveRecord::StatementInvalid
               nil
             end
           else
@@ -328,11 +445,13 @@ module ActiveRecord
 
           col = cols.select { |csel| csel.name == c }.first
           new_comment = fields_comments[c.to_sym]
-          next if col&.comment == new_comment
+          next if !col || col&.comment == new_comment
 
           change_column_comment "#{schema}.#{table_name}", c, new_comment
-          change_column_comment "#{schema}.#{history_table_name}", c, new_comment
+          change_column_comment "#{schema}.#{history_table_name}", c, new_comment if history_table_exists
         end
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
       end
 
       protected
@@ -362,9 +481,20 @@ module ActiveRecord
         res
       end
 
+      # The previous column names were either specified when initializing this
+      # instance, or if in create_or_update mode then use the current table columns
       def prev_col_names(to_type = nil)
-        res = prev_fields
-        res = res.map(&:to_sym) if to_type == :sym
+        res = if requested_action == :create_or_update
+                Admin::MigrationGenerator.table_column_names table_name
+              else
+                prev_fields
+              end
+
+        res = if to_type == :sym
+                res.map(&:to_sym)
+              else
+                res.map(&:to_s)
+              end
         res
       end
 
@@ -411,7 +541,7 @@ module ActiveRecord
             f = :boolean
           elsif a.index(/(?:_id)$/)
             f = :bigint
-          elsif a.index(/^(?:number)|^(?:age|rank)$|(?:_number|_timestamp|score)$/)
+          elsif a.index(/^(?:number)|^(?:age|rank)$|(?:_number|_timestamp|score|_count)$/)
             f = :integer
           end
           field_defs[attr_name] = f
@@ -423,7 +553,7 @@ module ActiveRecord
             fopts[:comment] = comment
           end
 
-          if a.start_with?('tag_select')
+          if a.start_with?('tag_select') || a.start_with?('multi_select')
             fopts ||= {}
             fopts[:array] = true
           end
@@ -438,14 +568,14 @@ module ActiveRecord
           if fopts && fopts[:index]
             fopts[:index][:name] += '_hist' if history
             tbl.send(f, attr_name, fopts)
+          elsif fopts
+            tbl.send(f, attr_name, fopts)
           else
-            if fopts
-              tbl.send(f, attr_name, fopts)
-            else
-              tbl.send(f, attr_name)
-            end
+            tbl.send(f, attr_name)
           end
         end
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
       end
 
       def add_fields(tbl)
@@ -453,14 +583,14 @@ module ActiveRecord
           fopts = field_opts[attr_name]
           if fopts
             add_column(tbl, attr_name, f, fopts)
+          elsif fopts
+            add_column(tbl, attr_name, f, fopts)
           else
-            if fopts
-              add_column(tbl, attr_name, f, fopts)
-            else
-              add_column(tbl, attr_name)
-            end
+            add_column(tbl, attr_name)
           end
         end
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
       end
 
       def updating?

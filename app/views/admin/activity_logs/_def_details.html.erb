@@ -1,0 +1,20 @@
+<div class="al-details-section">
+  <label>item type name</label>
+  <p class="al-item-type">
+  <%= object_instance.full_item_type_name %>
+  </p>
+
+  <label>fields</label>
+  <p class="al-field-list">
+  <%= object_instance.all_implementation_fields.join(" ") %>
+  </p>
+</div>
+<div class="activity-list-section">
+  <label>activities</label>
+  <ul class="activity-list">
+  <% object_instance.option_configs_names.each do |name| %>
+    <li><%=name%><%= object_instance.option_type_config_for(name) ? '' : "(invalid)" %></li>
+  <% end %>
+  </ul>
+  <div id="activity-list-detail" class="activity-list-detail"></div>
+</div>

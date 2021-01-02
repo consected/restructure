@@ -53,6 +53,14 @@ class Admin < ActiveRecord::Base
     @matching_user_app_type || matching_user&.app_type
   end
 
+  #
+  # Get an admin that matches the current user's email, if one exists
+  # @param [User] user
+  # @return [Admin]
+  def self.for_user(user)
+    active.where(email: user.email).first
+  end
+
   # Set the matching user's app type forcefully, to override the current value
   # This facilitates app type importing and automatic migrations
   attr_writer :matching_user_app_type
