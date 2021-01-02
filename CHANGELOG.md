@@ -16,8 +16,20 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-
 ## Unreleased
+
+- [Added] Scripted jobs functionality in filestore pipelines
+- [Added] Standalone pages in layouts include web page styled views and file folders
+- [Added] improved migration generation and create_or_update migrations generated on app type export
+- [Added] External identifiers now use option configurations to apply dynamic definitions to fields and forms
+- [Added] improved DB table and field comments, automatically generated from captions and labels
+- [Added] activity_selector reference option
+- [Changed] improved image previewing and icons
+- [Changed] bugfixes in editable report forms and model reference edit buttons
+- [Changed] model reference handling in views
+- [Changed] Activity Log admin edit form to provide more information about the current definition
+- [Fixed] many fixes
+
 ## [8.0.2] - 2020-11-18
 
 - [Added] Role, user access controls and app configuration caching
