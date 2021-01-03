@@ -21,8 +21,8 @@ GITSTATUS="$(git status --porcelain=1)"
 git push
 
 ALLTAGS="$(git tag --sort=-taggerdate)"
-CURRVER=$(cat ../install-playbook/ansible/build_version.txt)
-NEWVER="$(VERSION_FILE=../install-playbook/ansible/build_version.txt app-scripts/upversion.rb -p)"
+CURRVER=$(cat shared/build_version.txt)
+NEWVER="$(VERSION_FILE=shared/build_version.txt app-scripts/upversion.rb -p)"
 RELEASESTARTED="$(echo ${ALLTAGS} | grep ${NEWVER})"
 
 if [ -z "${RELEASESTARTED}" ]; then
