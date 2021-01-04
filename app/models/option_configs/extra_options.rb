@@ -4,7 +4,7 @@ module OptionConfigs
   # Top level definition of option configurations for dynamic class definitions
   # Consider this an abstract class to be subclassed by any dynamic options provider
   # class.
-  class ExtraOptions
+  class ExtraOptions < BaseOptions
     def self.base_key_attributes
       %i[
         name label config_obj caption_before show_if resource_name save_action view_options
@@ -241,7 +241,8 @@ module OptionConfigs
       config.each do |k, v|
         send("#{k}=", v)
       rescue NoMethodError
-        raise FphsException, "Prevented a bad configuration of #{self.class.name} in #{config_obj.class.name} (#{config_obj.respond_to?(:human_name) ? config_obj.human_name : config_obj.id}). #{k} is not recognized as a valid attribute."
+        raise FphsException,
+              "Prevented a bad configuration of #{self.class.name} in #{config_obj.class.name} (#{config_obj.respond_to?(:human_name) ? config_obj.human_name : config_obj.id}). #{k} is not recognized as a valid attribute."
       end
 
       self.label ||= name.to_s.humanize
@@ -528,16 +529,6 @@ module OptionConfigs
       Rails.logger.debug "Checking calc_valid_if on #{obj} with #{ci}"
       ca = ConditionalActions.new ci, obj, return_failures: return_failures
       ca.calc_action_if
-    end
-
-    # Get an array of ConfigLibrary objects from the options text
-    def self.config_libraries(config_obj)
-      c = config_obj.options_text.dup
-      return [] unless c.present?
-
-      format = config_obj.is_a?(Report) ? :sql : :yaml
-
-      Admin::ConfigLibrary.make_substitutions! c, format
     end
 
     def self.set_defaults(config_obj, all_options = {}); end
