@@ -24,13 +24,15 @@ module AdminControllerHandler
     if params[:copy_with_id].present?
       # Get the model with ID in the copy_with_id parameter and generate a hash that has only the permitted params for forms
       # This hash will be used to initialize a new model
-      @copy_with = primary_model.find(params[:copy_with_id]).attributes.select { |k, _v| permitted_params.include? k.to_sym }
+      @copy_with = primary_model.find(params[:copy_with_id]).attributes.select do |k, _v|
+        permitted_params.include? k.to_sym
+      end
     end
 
     # Ensure the app type is defaulted, if not copying an existing item and the primary model uses app types
     if !@copy_with && primary_model_uses_app_type?
       @copy_with = {
-        app_type_id: current_user.app_type_id
+        app_type_id: current_admin.matching_user&.app_type_id
       }
     end
 
@@ -272,7 +274,7 @@ module AdminControllerHandler
   # This returns a partial index, and hides the filter buttons
   # @return [Boolean]
   def view_embedded?
-    params[:view_as]&.in? ['embedded', 'simple-embedded']
+    params[:view_as]&.in? %w[embedded simple-embedded]
   end
 
   #
