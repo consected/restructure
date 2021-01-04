@@ -58,7 +58,7 @@
       "check_name": "MassAssignment",
       "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
       "file": "app/controllers/reports_controller.rb",
-      "line": 396,
+      "line": 406,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.require(:search_attrs).permit!",
       "render_path": null,
@@ -188,6 +188,26 @@
         "method": "NfsStore::Utils::MimeType.full_mime_type"
       },
       "user_input": "full_file_path",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "9d5662e84cd23c0222b9362de21842797c5c441c70bd829b4e180350b3ba6e47",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/concerns/external_id_handler.rb",
+      "line": 229,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "connection.execute((\"INSERT into #{table_name} (#{external_id_attribute}, admin_id, master_id, created_at, updated_at) VALUES \" + [\"('#{generate_random_id}', #{admin.id}, NULL, '#{DateTime.now.iso8601}', '#{DateTime.now.iso8601}')\"].join(\",\")))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ExternalIdHandler",
+        "method": "generate_ids"
+      },
+      "user_input": "[\"('#{generate_random_id}', #{admin.id}, NULL, '#{DateTime.now.iso8601}', '#{DateTime.now.iso8601}')\"].join(\",\")",
       "confidence": "Medium",
       "note": ""
     },
@@ -335,6 +355,26 @@
     {
       "warning_type": "SQL Injection",
       "warning_code": 0,
+      "fingerprint": "b87f89a667bbb536e8122300d90e1d6ca3e3263113b64bfc09b98147f1e5fab7",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/concerns/external_id_handler.rb",
+      "line": 202,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "connection.execute((\"INSERT into #{table_name} (#{external_id_attribute}, admin_id, master_id, created_at, updated_at) VALUES \" + [\"('#{generate_random_id}', #{admin.id}, #{m}, '#{DateTime.now.iso8601}', '#{DateTime.now.iso8601}')\"].join(\",\")))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ExternalIdHandler",
+        "method": "generate_ids_for_all_masters"
+      },
+      "user_input": "[\"('#{generate_random_id}', #{admin.id}, #{m}, '#{DateTime.now.iso8601}', '#{DateTime.now.iso8601}')\"].join(\",\")",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
       "fingerprint": "c4849bbd5ad704cab1a06825b331b0bb903881abf1a54590aab0ed6af1d03276",
       "check_name": "SQL",
       "message": "Possible SQL injection",
@@ -433,6 +473,6 @@
       "note": ""
     }
   ],
-  "updated": "2020-12-24 12:27:24 +0000",
-  "brakeman_version": "4.10.0"
+  "updated": "2021-01-04 14:33:46 +0000",
+  "brakeman_version": "4.10.1"
 }
