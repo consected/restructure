@@ -20,7 +20,7 @@ GITSTATUS="$(git status --porcelain=1)"
 
 git push
 
-CURRVERFILE=shared/build_version.txt
+CURRVERFILE=version.txt
 ALLTAGS="$(git tag --sort=-taggerdate)"
 CURRVER=$(cat ${CURRVERFILE})
 NEWVER="$(VERSION_FILE=${CURRVERFILE} app-scripts/upversion.rb -p)"
