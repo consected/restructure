@@ -25,7 +25,7 @@
     action: '<%= action_name %>'
   };
   </script>
-  <%= render partial: "layouts/setup_app" if current_email %>
+  <%= render partial: "layouts/setup_app" if current_user %>
   <%= csrf_meta_tags %>
   <link rel="shortcut icon" type="image/png" href="/favicon.png">
 </head>

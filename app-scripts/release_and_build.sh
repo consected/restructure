@@ -20,9 +20,10 @@ GITSTATUS="$(git status --porcelain=1)"
 
 git push
 
+CURRVERFILE=version.txt
 ALLTAGS="$(git tag --sort=-taggerdate)"
-CURRVER=$(cat ../install-playbook/ansible/build_version.txt)
-NEWVER="$(VERSION_FILE=../install-playbook/ansible/build_version.txt app-scripts/upversion.rb -p)"
+CURRVER=$(cat ${CURRVERFILE})
+NEWVER="$(VERSION_FILE=${CURRVERFILE} app-scripts/upversion.rb -p)"
 RELEASESTARTED="$(echo ${ALLTAGS} | grep ${NEWVER})"
 
 if [ -z "${RELEASESTARTED}" ]; then
@@ -40,16 +41,16 @@ git checkout develop
 cd ../restructure-build
 ./build.sh
 
-if [ ! -s shared/build_version.txt ]; then
-  echo "shared/build_version.txt in $(pwd) was not set. The build was not successful"
+if [ ! -s ${CURRVERFILE} ]; then
+  echo "${CURRVERFILE} in $(pwd) was not set. The build was not successful"
   exit 1
 fi
 
-TESTVER=$(cat shared/build_version.txt)
+TESTVER=$(cat ${CURRVERFILE})
 
 if [ "${TESTVER}" == "${CURRVER}" ]; then
   echo "Build failed"
-  echo "${TESTVER} == ${CURRVER}"
+  echo "'${TESTVER}' == '${CURRVER}'"
   exit 1
 else
   echo "Build successful"
