@@ -16,7 +16,7 @@ echo "Enter the DB username"
 read DB_USER
 echo
 echo "Enter password for the user"
-read -s -p "F$DB_USER user password: " TEMP_DB_PW
+read -s -p "$DB_USER user password: " TEMP_DB_PW
 echo
 
 FPHS_POSTGRESQL_HOSTNAME=$DB_HOST \
