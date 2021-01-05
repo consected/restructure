@@ -1,4 +1,6 @@
 #!/bin/bash
+
+echo "Starting release and build"
 CURRDIR="$(pwd)"
 
 ONDEVELOP="$(git branch | grep '* develop')"
@@ -7,30 +9,36 @@ if [ -z "${ONDEVELOP}" ]; then
   exit 1
 fi
 
+GITSTATUS="$(git status --porcelain=1)"
 if [ ! -z "${GITSTATUS}" ]; then
   echo "No files must be uncommitted"
   git status
   exit 1
 fi
 
+echo "Clean up assets before we start"
 FPHS_LOAD_APP_TYPES=1 bundle exec rake assets:clobber
 git commit public/assets -m "Cleanup"
-
-GITSTATUS="$(git status --porcelain=1)"
-
 git push
 
+
+GENVERFILE=shared/build_version.txt
 CURRVERFILE=version.txt
 ALLTAGS="$(git tag --sort=-taggerdate)"
 CURRVER=$(cat ${CURRVERFILE})
 NEWVER="$(VERSION_FILE=${CURRVERFILE} app-scripts/upversion.rb -p)"
 RELEASESTARTED="$(echo ${ALLTAGS} | grep ${NEWVER})"
 
+echo "Current version: ${CURRVER}"
+echo "Next version: ${NEWVER}"
+
 if [ -z "${RELEASESTARTED}" ]; then
+  echo "Starting git-flow release"
   git flow release start ${NEWVER}
   git push --set-upstream origin release/${NEWVER}
   git flow release finish ${NEWVER}
 else
+  echo "Release already started. Checking out and continuing"
   git checkout new-master && git pull && git merge develop
 fi
 git push origin --tags
@@ -38,6 +46,7 @@ git push origin --all
 
 git checkout develop
 
+echo "Starting build container"
 cd ../restructure-build
 ./build.sh
 
@@ -46,7 +55,7 @@ if [ ! -s ${CURRVERFILE} ]; then
   exit 1
 fi
 
-TESTVER=$(cat ${CURRVERFILE})
+TESTVER=$(cat ${GENVERFILE})
 
 if [ "${TESTVER}" == "${CURRVER}" ]; then
   echo "Build failed"
