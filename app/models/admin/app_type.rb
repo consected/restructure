@@ -94,24 +94,16 @@ class Admin::AppType < Admin::AdminBase
 
       # override the name if specified
       a_conf[:current_admin] = admin
-
       a_conf['name'] = name if name
 
-      app_type = Admin::AppType.where(name: a_conf['name']).first || Admin::AppType.create!(a_conf)
+      app_type = find_or_create_with_config(a_conf)
 
       # set the app type to allow automatic migrations to work
       admin.matching_user_app_type = app_type
 
       res = results['app_type']
 
-      ### Force update of reports that don't have a short_name (yet)
-      rs = Report.active.where(short_name: nil)
-      rs.each do |r|
-        r.current_admin = admin
-        r.gen_short_name
-        r.save!
-      end
-      ###
+      force_report_short_names
 
       res['app_configurations'] = app_type.import_config_sub_items app_type_config, 'app_configurations', ['name', 'role_name']
 
@@ -134,6 +126,7 @@ class Admin::AppType < Admin::AdminBase
       res['associated_message_templates'] = app_type.import_config_sub_items app_type_config, 'associated_message_templates', ['name', 'message_type', 'template_type']
 
       res['associated_protocols'] = app_type.import_config_sub_items app_type_config, 'associated_protocols', ['name']
+      # Earlier versions exported all protocols, not just those associated with an app. Attempt to load this as well
       res['protocols'] = app_type.import_config_sub_items app_type_config, 'protocols', ['name']
       res['associated_sub_processes'] = app_type.import_config_sub_items app_type_config, 'associated_sub_processes', ['name'], filter_on: ['protocol_name']
       res['associated_protocol_events'] = app_type.import_config_sub_items app_type_config, 'associated_protocol_events', ['name'], filter_on: ['sub_process_name', 'protocol_name']
@@ -148,10 +141,27 @@ class Admin::AppType < Admin::AdminBase
     end
 
     app_type = find(new_id)
+    # Ensure only imported user access controls are retained
     app_type.clean_user_access_controls id_list
     app_type.reload
 
     [app_type, results]
+  end
+
+  ### Force update of reports that don't have a short_name (yet)
+  def self.force_report_short_names
+    rs = Report.active.where(short_name: nil)
+    rs.each do |r|
+      r.current_admin = admin
+      r.gen_short_name
+      r.save!
+    end
+  end
+
+  # Find or create an app type based on a configuration, 
+  # matching on the name
+  def self.find_or_create_with_config a_conf
+    Admin::AppType.where(name: a_conf['name']).first || Admin::AppType.create!(a_conf)    
   end
 
   def filtered_results(items, filter)
@@ -257,11 +267,13 @@ class Admin::AppType < Admin::AdminBase
     results
   end
 
+  # Clean up user access controls that are not in the id_list
+  # by disabling them.
+  # Typically this is done after an import, ensuring that only the 
+  # imported user access controls are retained, and others that were
+  # previously present are disabled.
   def clean_user_access_controls(id_list)
-    # Invalid user access control ID list, so we can disable them
-    # vuc = valid_user_access_controls.pluck(:id)
-
-    inv = user_access_controls.active.pluck(:id) - id_list #- vuc
+    inv = user_access_controls.active.pluck(:id) - id_list
 
     inv.each do |i|
       el = Admin::UserAccessControl.find(i)
@@ -402,6 +414,15 @@ class Admin::AppType < Admin::AdminBase
     ms.sort { |a, b| a.id <=> b.id }.uniq
   end
 
+  # Which configurations are associated with this app indirectly,
+  # by being referenced as a user access control in the app.
+  # If there is no user access control, no user can access the 
+  # model / table, so we assume it is not used.
+  # This assumption is reinforced, since new items within an app
+  # create a user access control associated with a special user
+  # template@template that ensures that we can export configurations
+  # that are not directly used, or for which there are no other 
+  # matching user records on the destination server
   def associated_config_libraries
     ms = []
 
@@ -427,6 +448,8 @@ class Admin::AppType < Admin::AdminBase
   #
   # Export the configuration as json or yaml
   # Only export if option configs are valid
+  # If in the development environment, also export migrations
+  # to allow a complete build of an environment to be completed
   def export_config(format: :json)
     force_validations!
 
@@ -441,17 +464,19 @@ class Admin::AppType < Admin::AdminBase
 
   #
   # Export migrations to a specific --app-export directory
+  # The order of exports is important, since it activity logs
+  # can reference other items
   # @return [<Type>] <description>
   def export_migrations
-    valid_associated_activity_logs.each do |dynamic_def|
-      export_migration_and_clean_export_dir dynamic_def
-    end
-
     associated_dynamic_models.each do |dynamic_def|
       export_migration_and_clean_export_dir dynamic_def
     end
-
+    
     associated_external_identifiers.each do |dynamic_def|
+      export_migration_and_clean_export_dir dynamic_def
+    end
+
+    valid_associated_activity_logs.each do |dynamic_def|
       export_migration_and_clean_export_dir dynamic_def
     end
   end
@@ -499,6 +524,7 @@ class Admin::AppType < Admin::AdminBase
     migration_generator.add_schema
   end
 
+  # Export the full application definition as JSON
   def as_json(options = {})
     options[:root] = true
     options[:methods] ||= []
@@ -515,7 +541,7 @@ class Admin::AppType < Admin::AdminBase
     options[:methods] << :user_roles
     options[:methods] << :associated_message_templates
     options[:methods] << :associated_config_libraries
-    options[:methods] << :protocols
+    # options[:methods] << :protocols
     options[:methods] << :associated_protocols
     options[:methods] << :associated_sub_processes
     options[:methods] << :associated_protocol_events

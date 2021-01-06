@@ -10,7 +10,7 @@ module Seeds
 
     def self.create_protocol_events
 
-      protocol = Classification::Protocol.active.find_or_initialize_by(name: 'Q1')
+      protocol = Classification::Protocol.active.find_or_initialize_by(name: 'Q1', app_type_id: 1)
       protocol.current_admin = auto_admin
       protocol.position = 20
       protocol.save!
