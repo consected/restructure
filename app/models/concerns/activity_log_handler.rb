@@ -64,25 +64,18 @@ module ActivityLogHandler
       name.ns_underscore.pluralize.to_sym
     end
 
-    # # Find the record in the admin activity log that defines this activity log
-    # def admin_activity_log
-    #   res = ActivityLog.active.select{|s| s.table_name == self.table_name}
-    #   raise "Found incorrect number (#{res.length}) of admin activity logs for table name #{self.table_name} from possible list of #{ActivityLog.active.length}" if res.length != 1
-    #   res.first
-    # end
-
     # List of attributes to be used in common template views
     # Use the defined field_list if it is not blank
     # Otherwise use attribute names from the model, removing common junk
     def view_attribute_list
       al = definition
-      if al.field_list.blank?
-        res = attribute_names - ['id', 'master_id', 'disabled', parent_type, "#{parent_type}_id", 'user_id', 'created_at', 'updated_at', 'rank', 'source'] + ['tracker_history_id']
-      else
-        res = al.view_attribute_list + ['tracker_history_id']
-      end
-      res = res.map(&:to_sym)
-      res
+      res = if al.field_list.blank?
+              attribute_names - ['id', 'master_id', 'disabled', parent_type, "#{parent_type}_id", 'user_id',
+                                 'created_at', 'updated_at', 'rank', 'source'] + ['tracker_history_id']
+            else
+              al.view_attribute_list + ['tracker_history_id']
+            end
+      res.map(&:to_sym)
     end
 
     # List of attributes to be used in blank log template views
@@ -197,39 +190,39 @@ module ActivityLogHandler
   end
 
   def alt_order
-    if extra_log_type_config&.view_options
-      da = extra_log_type_config.view_options[:alt_order]
-      da = [da] unless da.is_a? Array
-      res = ''
-      # collect potential date / time pairs from adjacent fields
-      dtp = nil
-      da.each do |n|
-        v = attributes[n]
-        if v.is_a? Date
-          # Set the date portion of the date / time pair, but don't store it yet
-          dtp = DateTime.new(v.year, v.month, v.day, 0, 0, 0, Time.current.send(:zone))
-        elsif v.is_a? Time
-          if dtp
-            # A date portion of a date / time pair is present, so add the time and store to the result
-            res = DateTime.new(dtp.year, dtp.month, dtp.day, v.hour, v.min, 0, v.send(:zone))
-            # Clear the date / time pair now we are done with it
-            dtp = nil
-          else
-            # Since no date portion was already available, just store the time (this is based on 2001-01-01 date)
-            res += v.to_i.to_s
-          end
-        else
-          # If a date / time pair is set, but was not yet stored, then a date portion was provided, but no time.
-          # Store that date to the result from the previous iteration, before storing the value for the current attribute.
-          # Remember to clear the date / time pair after storing
-          res += dtp.to_s if dtp
-          dtp = nil
-          res += v if v
-        end
-      end
+    return unless extra_log_type_config&.view_options
 
-      res
+    da = extra_log_type_config.view_options[:alt_order]
+    da = [da] unless da.is_a? Array
+    res = ''
+    # collect potential date / time pairs from adjacent fields
+    dtp = nil
+    da.each do |n|
+      v = attributes[n]
+      if v.is_a? Date
+        # Set the date portion of the date / time pair, but don't store it yet
+        dtp = DateTime.new(v.year, v.month, v.day, 0, 0, 0, Time.current.send(:zone))
+      elsif v.is_a? Time
+        if dtp
+          # A date portion of a date / time pair is present, so add the time and store to the result
+          res = DateTime.new(dtp.year, dtp.month, dtp.day, v.hour, v.min, 0, v.send(:zone))
+          # Clear the date / time pair now we are done with it
+          dtp = nil
+        else
+          # Since no date portion was already available, just store the time (this is based on 2001-01-01 date)
+          res += v.to_i.to_s
+        end
+      else
+        # If a date / time pair is set, but was not yet stored, then a date portion was provided, but no time.
+        # Store that date to the result from the previous iteration, before storing the value for the current attribute.
+        # Remember to clear the date / time pair after storing
+        res += dtp.to_s if dtp
+        dtp = nil
+        res += v if v
+      end
     end
+
+    res
   end
 
   def no_master_association
@@ -280,8 +273,8 @@ module ActivityLogHandler
   end
 
   # set the association
-  def item_id=(i)
-    send("#{self.class.parent_type}_id=", i)
+  def item_id=(new_id)
+    send("#{self.class.parent_type}_id=", new_id)
   end
 
   # set the action_when attribute to the current date time, if it is not already set
@@ -295,13 +288,12 @@ module ActivityLogHandler
   # the action_when attribute may vary from one activity log model to another. Get the value
   def action_when
     action = self.class.action_when_attribute
-    res = send(action)
-    res
+    send(action)
   end
 
-  def action_when=(d)
+  def action_when=(date_time)
     action = self.class.action_when_attribute
-    send("#{action}=", d)
+    send("#{action}=", date_time)
   end
 
   def save_action
@@ -343,24 +335,27 @@ module ActivityLogHandler
       refitem.each do |ref_type, ref_config|
         f = ref_config[:from]
         without_reference = (ref_config[:without_reference] == true)
-        got = if f == 'this'
+        filter = ref_config[:filter_by]
+
+        got = case f
+              when 'this'
                 ModelReference.find_references self,
                                                to_record_type: ref_type,
-                                               filter_by: ref_config[:filter_by],
+                                               filter_by: filter,
                                                without_reference: without_reference,
                                                ref_order: ref_order,
                                                active: active_only
-              elsif f == 'master'
+              when 'master'
                 ModelReference.find_references master,
                                                to_record_type: ref_type,
-                                               filter_by: ref_config[:filter_by],
+                                               filter_by: filter,
                                                without_reference: without_reference,
                                                ref_order: ref_order,
                                                active: active_only
-              elsif f == 'any'
+              when 'any'
                 ModelReference.find_references master,
                                                to_record_type: ref_type,
-                                               filter_by: ref_config[:filter_by],
+                                               filter_by: filter,
                                                without_reference: true,
                                                ref_order: ref_order,
                                                active: active_only
@@ -417,7 +412,7 @@ module ActivityLogHandler
           l = ref_config[:limit]
           under_limit = true
 
-          if l&.is_a?(Integer)
+          if l.is_a?(Integer)
             under_limit = (ModelReference.find_references(master,
                                                           to_record_type: ref_type,
                                                           filter_by: fb,
@@ -515,7 +510,7 @@ module ActivityLogHandler
     # Ensure that the filter_by attributes are used to generate the referenced item,
     # otherwise the filter will not work correctly after creation (since the fields won't be set)
     # Also include additional add_with items if provided
-    fb = ref_config[:filter_by] || {}
+    fb = ModelReference.substitute_filter(ref_config[:filter_by], self) || {}
     aw = ref_config[:add_with] || {}
     tot = fb.merge(aw)
 
@@ -555,11 +550,12 @@ module ActivityLogHandler
 
       # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
       pe = sub_process.protocol_events.where(name: self.class.activity_log_name).first
-      if pe
-        protocol_event_id = pe.id
-      else
-        raise "Could not find a protocol event for sub process #{sub_process_id} in sync_tracker (#{self.class}). There are these: #{sub_process.protocol_events.map(&:name).join(', ')}."
+      unless pe
+        raise "Could not find a protocol event for sub process #{sub_process_id} in sync_tracker (#{self.class})." \
+              "There are these: #{sub_process.protocol_events.map(&:name).join(', ')}."
       end
+
+      protocol_event_id = pe.id
     end
 
     # be sure about the user being set, to avoid hidden errors
@@ -779,8 +775,8 @@ module ActivityLogHandler
     master.current_user
   end
 
-  def current_user=(cu)
-    master.current_user = cu
+  def current_user=(curr)
+    master.current_user = curr
   end
 
   # An app specific DB trigger may have have created a message notification record.
@@ -879,10 +875,10 @@ module ActivityLogHandler
     elsif action_name.in?(%w[new create]) && always_embed_creatable
       # If creatable has been specified as always embedded, use this, unless the embeddable item is an activity log.
       cmr_view_as = begin
-                      cmrs.first.last.first.last[:ref_config][:view_as]
-                    rescue StandardError
-                      nil
-                    end
+        cmrs.first.last.first.last[:ref_config][:view_as]
+      rescue StandardError
+        nil
+      end
       embed_cmrs = cmrs[always_embed_creatable.to_sym]
       unless embed_cmrs
         raise FphsException,
@@ -897,10 +893,10 @@ module ActivityLogHandler
     elsif action_name.in?(%w[new create]) && cmrs.length == 1
       # If exactly one item is creatable, use this, unless the embeddable item is an activity log.
       cmr_view_as = begin
-                      cmrs.first.last.first.last[:ref_config][:view_as]
-                    rescue StandardError
-                      nil
-                    end
+        cmrs.first.last.first.last[:ref_config][:view_as]
+      rescue StandardError
+        nil
+      end
       @embedded_item = oi.build_model_reference cmrs.first
       if @embedded_item.class.parent == ActivityLog || cmr_view_as && cmr_view_as[:new].in?(not_embedded_options)
         @embedded_item = nil
@@ -919,10 +915,10 @@ module ActivityLogHandler
       # Therefore just use this existing item
       @embedded_item = mrs.first.to_record
       mr_view_as = begin
-                     mrs.first.to_record_options_config[:view_as]
-                   rescue StandardError
-                     nil
-                   end
+        mrs.first.to_record_options_config[:view_as]
+      rescue StandardError
+        nil
+      end
       @embedded_item = nil if mr_view_as && mr_view_as[:edit].in?(not_embedded_options)
 
     elsif action_name.in?(%w[show index]) && mrs.length == 1 && cmrs.empty?
