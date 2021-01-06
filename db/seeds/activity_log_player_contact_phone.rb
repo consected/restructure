@@ -10,10 +10,12 @@ module Seeds
     end
 
     def self.create_phone_log_admin_activity_log
-      res = ActivityLog.find_or_initialize_by(name: 'Phone Log', item_type: 'player_contact', rec_type: 'phone', disabled: false, action_when_attribute: 'called_when',
-                                              field_list: 'data, select_call_direction, select_who, called_when, select_result, select_next_step, follow_up_when, notes, protocol_id, set_related_player_contact_rank',
-                                              blank_log_field_list: 'select_who, called_when, select_next_step, follow_up_when, notes, protocol_id')
-
+      res = ActivityLog.where(name: 'Phone Log').first
+      unless res
+        res = ActivityLog.find_or_initialize_by(name: 'Phone Log', item_type: 'player_contact', rec_type: 'phone', disabled: false, action_when_attribute: 'called_when',
+                                                field_list: 'data, select_call_direction, select_who, called_when, select_result, select_next_step, follow_up_when, notes, protocol_id, set_related_player_contact_rank',
+                                                blank_log_field_list: 'select_who, called_when, select_next_step, follow_up_when, notes, protocol_id')
+      end
       unless res.active_model_configuration?
         Trackers.setup
         GeneralSelections.setup
