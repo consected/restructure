@@ -224,6 +224,30 @@
   }
 }
 
+.icon-rows {
+  .container-icons-items .container-icons-folder-items {
+    display: block;
+    .container-icons-entry {
+      width: auto;
+      text-align: left;
+
+      .browse-icon {
+        float: left;
+        margin-right: 4%;
+      }
+
+      .browse-filename {
+        padding-left: 0;
+      }
+
+      .browse-entry-meta .bem-mime-type {
+        display: inline-block;
+        padding-right: 1em;
+      }
+    }
+  }
+}
+
 .nfs-store-valid-files.panel {
   display: none;
   background: rgb(243, 243, 243);
