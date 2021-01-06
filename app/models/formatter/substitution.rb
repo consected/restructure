@@ -26,7 +26,7 @@ module Formatter
       return unless all_content
 
       all_content = all_content.dup
-      tags = all_content.scan(/{{[0-9a-zA-Z_\.\:]+}}/)
+      tags = all_content.scan(/{{[0-9a-zA-Z_.:]+}}/)
 
       # Only setup data if there are tags
       sub_data = setup_data(data) unless tags.empty?
@@ -267,8 +267,9 @@ module Formatter
           res = res.first
         elsif op == 'age'
           if orig_val.respond_to? :year
-            age = Date.today.year - orig_val.year
-            age -= 1 if Date.today < orig_val + age.years
+            today = ::Date.today
+            age = today.year - orig_val.year
+            age -= 1 if today < orig_val + age.years
             res = age
           end
         elsif op == 'date'
@@ -414,9 +415,13 @@ module Formatter
       elsif an == 'first' && item.respond_to?(:first)
         item.first
       elsif an == 'app_protocols' && master.current_user
-        Classification::Protocol.enabled.where(
-          app_type_id: [master.current_user.app_type_id, nil]
-        ).order(position: :asc).first
+        Classification::Protocol
+          .enabled
+          .where(
+            app_type_id: [master.current_user.app_type_id, nil]
+          )
+          .order(position: :asc)
+          .first
       elsif an.in?(allowable_associations(item.class))
         objs = item.send(an)
         if objs.respond_to? :first
@@ -454,7 +459,10 @@ module Formatter
 
       raise FphsException, "No master set for create_link: #{sub_data}" unless sub_data[:master]
 
-      res = sl.create_link(tag_args, master: sub_data[:master], batch_user: true, for_item: sub_data[:alt_item] || sub_data[:original_item])
+      res = sl.create_link(tag_args,
+                           master: sub_data[:master],
+                           batch_user: true,
+                           for_item: sub_data[:alt_item] || sub_data[:original_item])
       res[:short_link_instance]&.short_url
     end
   end
