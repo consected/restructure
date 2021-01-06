@@ -100,9 +100,12 @@ For faster testing, [parallel_tests](https://github.com/grosser/parallel_tests) 
 
 ## Set up development environment
 
-The app is easy to set up. First clone the repo, then set up the database:
+The app is easy to set up. First clone the server repo (this one), app configs, and build container.
+Then set up the database.
 
+    git clone https://github.com/consected/restructure.git
     git clone https://github.com/consected/restructure-build.git
+    git clone https://github.com/consected/restructure-apps.git
     DB_USER=$(whoami)
     sudo -u postgres psql -c "create database restr_development owner ${DB_USER};"
     
@@ -144,7 +147,7 @@ Click the button **+ Manage user** to add a user, enter the email **test@test**
 and be sure to record the password that is generated. 
 
 Click **admin menu** button, click *App Types* link, then in the *Upload a configuration file* block,
-choose the file `db/app_configs/zeus_config.yaml` then click the **Save Changes** button.
+choose the file `db/dumps/zeus_config.yaml` then click the **Save Changes** button.
 
 Assuming this was successful, logout of the admin panel. 
 
