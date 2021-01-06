@@ -38,10 +38,10 @@ class Admin::MigrationGenerator
   def self.tables_and_views
     @tables_and_views ||=
       connection.execute <<~END_SQL
-        select table_schema "schema_name", table_name from information_schema.tables 
+        select table_schema "schema_name", table_name from information_schema.tables
         where table_schema IN (#{quoted_schemas})
         and table_catalog = '#{current_database}'
-        UNION 
+        UNION
         select table_schema "schema_name", table_name from information_schema.views
         where table_schema IN (#{quoted_schemas})
         and table_catalog = '#{current_database}'
@@ -73,7 +73,7 @@ class Admin::MigrationGenerator
         FROM
             information_schema.columns cols
         INNER JOIN pg_catalog.pg_class c
-        ON 
+        ON
           c.oid = ('"' || cols.table_name || '"')::regclass::oid
           AND c.relname = cols.table_name
 
@@ -308,7 +308,6 @@ class Admin::MigrationGenerator
 
   def migration_set_attribs
     tcs = table_comments || {}
-    byebug if tcs[:table].blank?
     <<~SETATRRIBS
       self.schema = '#{db_migration_schema}'
           self.table_name = '#{table_name}'
