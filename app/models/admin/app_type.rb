@@ -105,33 +105,67 @@ class Admin::AppType < Admin::AdminBase
 
       force_report_short_names
 
-      res['app_configurations'] = app_type.import_config_sub_items app_type_config, 'app_configurations', ['name', 'role_name']
+      res['app_configurations'] =
+        app_type.import_config_sub_items app_type_config, 'app_configurations', %w[name role_name]
 
       # Make two passes at loading general selections, the first time rejecting dynamic items that may not yet be defined
-      reject_items = proc { |k, v| k == :item_type && v.index(/^(activity_log__|dynamic_model__|external_identifier__)/) }
-      res['associated_general_selections'] = app_type.import_config_sub_items app_type_config, 'associated_general_selections', ['item_type', 'value'], reject: reject_items
+      reject_items = proc { |k, v|
+        k == :item_type && v.index(/^(activity_log__|dynamic_model__|external_identifier__)/)
+      }
+      res['associated_general_selections'] =
+        app_type.import_config_sub_items app_type_config, 'associated_general_selections', %w[item_type value],
+                                         reject: reject_items
 
-      res['associated_config_libraries'] = app_type.import_config_sub_items app_type_config, 'associated_config_libraries', ['name', 'category', 'format']
-      res['associated_dynamic_models'] = app_type.import_config_sub_items app_type_config, 'associated_dynamic_models', ['table_name'], create_disabled: force_disable
-      res['associated_external_identifiers'] = app_type.import_config_sub_items app_type_config, 'associated_external_identifiers', ['name'], create_disabled: force_disable
-      res['associated_activity_logs'] = app_type.import_config_sub_items app_type_config, 'valid_associated_activity_logs', ['item_type', 'rec_type', 'process_name'], create_disabled: force_disable
+      res['associated_config_libraries'] =
+        app_type.import_config_sub_items app_type_config, 'associated_config_libraries', %w[name category format]
 
-      res['associated_general_selections'] = app_type.import_config_sub_items app_type_config, 'associated_general_selections', ['item_type', 'value']
-      res['associated_reports'] = app_type.import_config_sub_items app_type_config, 'associated_reports', ['short_name', 'item_type']
+      res['associated_dynamic_models'] =
+        app_type.import_config_sub_items app_type_config, 'associated_dynamic_models', ['table_name'],
+                                         create_disabled: force_disable
 
-      res['page_layouts'] = app_type.import_config_sub_items app_type_config, 'page_layouts', ['layout_name', 'panel_name']
-      res['user_roles'] = app_type.import_config_sub_items app_type_config, 'user_roles', ['role_name']
-      res['nfs_store_filters'] = app_type.import_config_sub_items app_type_config, 'nfs_store_filters', ['role_name', 'resource_name', 'filter']
+      res['associated_external_identifiers'] =
+        app_type.import_config_sub_items app_type_config, 'associated_external_identifiers', ['name'],
+                                         create_disabled: force_disable
 
-      res['associated_message_templates'] = app_type.import_config_sub_items app_type_config, 'associated_message_templates', ['name', 'message_type', 'template_type']
+      res['associated_activity_logs'] =
+        app_type.import_config_sub_items app_type_config, 'valid_associated_activity_logs',
+                                         %w[item_type rec_type process_name], create_disabled: force_disable
+
+      res['associated_general_selections'] =
+        app_type.import_config_sub_items app_type_config, 'associated_general_selections', %w[item_type value]
+
+      res['associated_reports'] =
+        app_type.import_config_sub_items app_type_config, 'associated_reports', %w[short_name item_type]
+
+      res['page_layouts'] =
+        app_type.import_config_sub_items app_type_config, 'page_layouts', %w[layout_name panel_name]
+
+      res['user_roles'] =
+        app_type.import_config_sub_items app_type_config, 'user_roles', ['role_name']
+
+      res['nfs_store_filters'] =
+        app_type.import_config_sub_items app_type_config, 'nfs_store_filters', %w[role_name resource_name filter]
+
+      res['associated_message_templates'] =
+        app_type.import_config_sub_items app_type_config, 'associated_message_templates',
+                                         %w[name message_type template_type]
 
       res['associated_protocols'] = app_type.import_config_sub_items app_type_config, 'associated_protocols', ['name']
+
       # Earlier versions exported all protocols, not just those associated with an app. Attempt to load this as well
       res['protocols'] = app_type.import_config_sub_items app_type_config, 'protocols', ['name']
-      res['associated_sub_processes'] = app_type.import_config_sub_items app_type_config, 'associated_sub_processes', ['name'], filter_on: ['protocol_name']
-      res['associated_protocol_events'] = app_type.import_config_sub_items app_type_config, 'associated_protocol_events', ['name'], filter_on: ['sub_process_name', 'protocol_name']
 
-      res['user_access_controls'] = app_type.import_config_sub_items app_type_config, 'valid_user_access_controls', ['resource_type', 'resource_name', 'role_name'], add_vals: { allow_bad_resource_name: true }, id_list: id_list
+      res['associated_sub_processes'] =
+        app_type.import_config_sub_items app_type_config, 'associated_sub_processes', ['name'],
+                                         filter_on: ['protocol_name']
+
+      res['associated_protocol_events'] =
+        app_type.import_config_sub_items app_type_config, 'associated_protocol_events', ['name'],
+                                         filter_on: %w[sub_process_name protocol_name]
+
+      res['user_access_controls'] =
+        app_type.import_config_sub_items app_type_config, 'valid_user_access_controls',
+                                         %w[resource_type resource_name role_name], add_vals: { allow_bad_resource_name: true }, id_list: id_list
 
       app_type.reload
       new_id = app_type.id
@@ -158,19 +192,18 @@ class Admin::AppType < Admin::AdminBase
     end
   end
 
-  # Find or create an app type based on a configuration, 
+  # Find or create an app type based on a configuration,
   # matching on the name
-  def self.find_or_create_with_config a_conf
-    Admin::AppType.where(name: a_conf['name']).first || Admin::AppType.create!(a_conf)    
+  def self.find_or_create_with_config(a_conf)
+    Admin::AppType.where(name: a_conf['name']).first || Admin::AppType.create!(a_conf)
   end
 
   def filtered_results(items, filter)
-    f = items.select do |item|
+    items.select do |item|
       res = true
       filter.each { |fk, fv| res &&= (item.send(fk.to_s) == fv) }
       res
     end
-    f
   end
 
   def import_config_sub_items(app_type_config, name, lookup_existing_with_fields, reject: nil, add_vals: {}, create_disabled: false, filter_on: nil, id_list: [])
@@ -246,6 +279,7 @@ class Admin::AppType < Admin::AdminBase
         if i
           el = i
           new_vals['disabled'] = true if i.respond_to?(:ready_to_generate?) && !i.ready_to_generate?
+          new_vals.delete 'id'
           el = nil unless el.changed?
           i.update! new_vals
         else
@@ -269,7 +303,7 @@ class Admin::AppType < Admin::AdminBase
 
   # Clean up user access controls that are not in the id_list
   # by disabling them.
-  # Typically this is done after an import, ensuring that only the 
+  # Typically this is done after an import, ensuring that only the
   # imported user access controls are retained, and others that were
   # previously present are disabled.
   def clean_user_access_controls(id_list)
@@ -339,7 +373,12 @@ class Admin::AppType < Admin::AdminBase
 
   def associated_external_identifiers
     eids = ExternalIdentifier.active.map(&:name)
-    names = user_access_controls.valid_resources.where(resource_type: :table).select { |a| a.access && a.resource_name.in?(eids) }.map(&:resource_name).uniq
+    names = user_access_controls
+            .valid_resources
+            .where(resource_type: :table)
+            .select { |a| a.access && a.resource_name.in?(eids) }
+            .map(&:resource_name).uniq
+
     ExternalIdentifier.active.where(name: names).reorder('').order(id: :asc)
   end
 
@@ -356,7 +395,12 @@ class Admin::AppType < Admin::AdminBase
     associated_table_names.each do |tn|
       tnlike = "#{tn.singularize}_%"
       tnplurallike = "#{tn}_%"
-      res = Classification::GeneralSelection.active.where('item_type LIKE ? or item_type LIKE ?', tnlike, tnplurallike).order(id: :asc)
+      res = Classification::GeneralSelection
+            .active
+            .where('item_type LIKE ? or item_type LIKE ?',
+                   tnlike,
+                   tnplurallike)
+            .order(id: :asc)
       gs += res
     end
 
@@ -383,7 +427,14 @@ class Admin::AppType < Admin::AdminBase
     associated_activity_logs.all.each do |a|
       a.option_configs.each do |c|
         c.dialog_before.each do |_d, v|
-          res = Admin::MessageTemplate.active.where(name: v[:name], message_type: 'dialog', template_type: 'content').first
+          res = Admin::MessageTemplate
+                .active
+                .where(
+                  name: v[:name],
+                  message_type: 'dialog',
+                  template_type: 'content'
+                )
+                .first
           ms << res
         end
         c.save_trigger.each do |_d, st|
@@ -406,7 +457,14 @@ class Admin::AppType < Admin::AdminBase
     associated_dynamic_models.all.each do |a|
       a.option_configs.each do |c|
         c.dialog_before.each do |_d, v|
-          res = Admin::MessageTemplate.active.where(name: v[:name], message_type: 'dialog', template_type: 'content').first
+          res = Admin::MessageTemplate
+                .active
+                .where(
+                  name: v[:name],
+                  message_type: 'dialog',
+                  template_type: 'content'
+                )
+                .first
           ms << res
         end
       end
@@ -416,12 +474,12 @@ class Admin::AppType < Admin::AdminBase
 
   # Which configurations are associated with this app indirectly,
   # by being referenced as a user access control in the app.
-  # If there is no user access control, no user can access the 
+  # If there is no user access control, no user can access the
   # model / table, so we assume it is not used.
   # This assumption is reinforced, since new items within an app
   # create a user access control associated with a special user
   # template@template that ensures that we can export configurations
-  # that are not directly used, or for which there are no other 
+  # that are not directly used, or for which there are no other
   # matching user records on the destination server
   def associated_config_libraries
     ms = []
@@ -471,7 +529,7 @@ class Admin::AppType < Admin::AdminBase
     associated_dynamic_models.each do |dynamic_def|
       export_migration_and_clean_export_dir dynamic_def
     end
-    
+
     associated_external_identifiers.each do |dynamic_def|
       export_migration_and_clean_export_dir dynamic_def
     end
