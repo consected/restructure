@@ -196,9 +196,9 @@ class Admin::MigrationGenerator
     super()
   end
 
-  def add_schema
+  def add_schema export_type = nil
     mig_text = schema_generator_script(db_migration_schema, 'create')
-    write_db_migration mig_text, "#{db_migration_schema}_schema"
+    write_db_migration mig_text, "#{db_migration_schema}_schema", export_type: export_type
   end
 
   # Standard columns are used by migrations
