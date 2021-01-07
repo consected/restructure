@@ -33,55 +33,7 @@ module Formatter
       # Replace each tag {{tag}}
       tags.each do |tag_container|
         tag = tag_container[2..-3]
-        missing = false
-
-        tagpair = tag.split('.')
-
-        if tagpair.length >= 2
-          # For {{tag.attr}} or {{tag.sub.attr}} items, get the association (if needed), then
-          # get the actual attribute value
-
-          ref_parts = tagpair[0..-2]
-          # Make the current tag just the attribute name, since it may include {{attr::formatting}} to be processed
-          tag = tagpair.last
-          d = get_assoc(sub_data[:master], ref_parts, sub_data)
-        else
-          d = sub_data
-        end
-
-        # Handle formatting directives, following the ::
-        tag_split = tag.split('::')
-        tag_name = tag_split.first
-        first_format_directive = tag_split[1]
-        this_ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
-
-        unless d&.is_a?(Hash) && (d&.key?(tag_name) || d&.key?(tag_name.to_sym)) || tag.start_with?('embedded_report_')
-          if ignore_missing || this_ignore_missing
-            d = {}
-            missing = true
-          else
-            raise FphsException,
-                  "Data (#{d.class.name}) does not contain the tag '#{tag_name}' or :#{tag_name} for #{tagpair}\n#{d || 'data is empty'}"
-          end
-        end
-
-        tag_value = if missing
-                      if ignore_missing == :show_tag
-                        "{{#{tag}}}"
-                      else
-                        ''
-                      end
-                    else
-                      get_tag_value d, tag
-                    end
-
-        # Handle the formatting of html tags for tag substitutions, if they have been specified
-        if tag_subs
-          tag_subs_type = tag_subs.split(' ').first
-          tag_value = "<#{tag_subs}>#{tag_value}</#{tag_subs_type}>"
-        else
-          tag_value = tag_value.to_s
-        end
+        tag_value = value_for_tag(tag, sub_data, tag_subs)
 
         # Finally, substitute the results into the original text
         all_content.gsub!(tag_container, tag_value)
@@ -101,15 +53,7 @@ module Formatter
       # Replace each tag [[tag]], representing functional directives, such as shortlink production
       tags.each do |tag_container|
         tag = tag_container[2..-3]
-
-        tag_parts = tag.split(' ', 2)
-        tag_action = tag_parts.first
-
-        if tag_action == 'shortlink'
-          tag_value = handle_shortlink sub_data, tag_parts[1]
-        else
-          raise FphsException, "Bad message template tag action [[#{tag_action}]] specified"
-        end
+        tag_value = functional_directive(tag, sub_data)
 
         # Make the replacement
         all_content.gsub!(tag_container, tag_value) if tag_value
@@ -117,6 +61,73 @@ module Formatter
 
       # Return the resulting text
       all_content
+    end
+
+    def self.value_for_tag(tag, sub_data, tag_subs)
+      missing = false
+
+      tagpair = tag.split('.')
+
+      if tagpair.length >= 2
+        # For {{tag.attr}} or {{tag.sub.attr}} items, get the association (if needed), then
+        # get the actual attribute value
+
+        ref_parts = tagpair[0..-2]
+        # Make the current tag just the attribute name, since it may include {{attr::formatting}} to be processed
+        tag = tagpair.last
+        d = get_assoc(sub_data[:master], ref_parts, sub_data)
+      else
+        d = sub_data
+      end
+
+      # Handle formatting directives, following the ::
+      tag_split = tag.split('::')
+      tag_name = tag_split.first
+      first_format_directive = tag_split[1]
+      this_ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
+
+      unless d.is_a?(Hash) && (d&.key?(tag_name) || d&.key?(tag_name.to_sym)) || tag.start_with?('embedded_report_')
+        if ignore_missing || this_ignore_missing
+          d = {}
+          missing = true
+        else
+          raise FphsException,
+                "Data (#{d.class.name}) does not contain the tag '#{tag_name}'" \
+                 "or :#{tag_name} for #{tagpair}\n#{d || 'data is empty'}"
+        end
+      end
+
+      tag_value = if missing
+                    if ignore_missing == :show_tag
+                      "{{#{tag}}}"
+                    else
+                      ''
+                    end
+                  else
+                    get_tag_value d, tag
+                  end
+
+      # Handle the formatting of html tags for tag substitutions, if they have been specified
+      if tag_subs
+        tag_subs_type = tag_subs.split(' ').first
+        tag_value = "<#{tag_subs}>#{tag_value}</#{tag_subs_type}>"
+      else
+        tag_value = tag_value.to_s
+      end
+
+      tag_value
+    end
+
+    def self.functional_directive(tag, sub_data)
+      tag_parts = tag.split(' ', 2)
+      tag_action = tag_parts.first
+
+      unless tag_action == 'shortlink'
+        raise FphsException,
+              "Bad message template tag action [[#{tag_action}]] specified"
+      end
+
+      handle_shortlink sub_data, tag_parts[1]
     end
 
     # If the text does not contain any HTML tags, assume it is markdown and format it as HTML
@@ -139,8 +150,7 @@ module Formatter
     #
     def self.setup_data(item, alt_item = nil)
       if item.is_a? Hash
-        data = item.dup
-        data.symbolize_keys!
+        data = item.dup.symbolize_keys
         master = item[:master]
         master = Master.find(item[:master_id]) if item[:master_id] && !master
       else
@@ -154,7 +164,6 @@ module Formatter
         elsif item.is_a? Master
           master = item
         end
-
       end
 
       # Common constants tags
@@ -221,21 +230,7 @@ module Formatter
 
       current_user = data[:current_user_instance]
 
-      if tag.start_with? 'embedded_report_'
-        report_name = tag.sub('embedded_report_', '')
-        # Find the source item to call the report with
-        if data[:original_item].respond_to?(:referring_record) && data[:original_item].referring_record
-          list_item = data[:original_item].referring_record
-          list_id = list_item.id
-        else
-          list_item = data[:original_item]
-          list_id = list_item[:id]
-        end
-
-        list_type = list_item.class.name
-
-        return Reports::Template.embedded_report report_name, list_id, list_type
-      end
+      run_embedded_report tag, data if tag.start_with? 'embedded_report_'
 
       orig_val = data[tag] || data[tag.to_sym]
       res = orig_val || ''
@@ -246,77 +241,29 @@ module Formatter
 
       # Automatically titleize names
       tagp << 'titleize' if tagp.length == 1 && (tag == 'name' || tag.end_with?('_name'))
-      tagp[1..-1].each do |op|
+      tagp[1..].each do |op|
         # NOTE: if additional formatters are added here, they also need matching javascript
         # in _fpa_form_utils.format_subtitution
-        if op == 'capitalize'
-          res = res.capitalize
-        elsif op == 'titleize'
-          res = res.titleize
-        elsif op == 'uppercase'
-          res = res.upcase
-        elsif op == 'lowercase'
-          res = res.downcase
-        elsif op == 'underscore'
-          res = res.underscore
-        elsif op == 'hyphenate'
-          res = res.hyphenate
-        elsif op == 'initial'
-          res = res.first&.upcase
-        elsif op == 'first'
-          res = res.first
-        elsif op == 'age'
-          if orig_val.respond_to? :year
-            today = ::Date.today
-            age = today.year - orig_val.year
-            age -= 1 if today < orig_val + age.years
-            res = age
-          end
-        elsif op == 'date'
-          res = Formatter::TimeWithZone.format(orig_val, current_user: current_user, date_only: true)
-        elsif op == 'time'
-          res = Formatter::TimeWithZone.format(orig_val, current_user: current_user, time_only: true)
-        elsif op == 'dicom_datetime'
-          res = orig_val.strftime('%Y%m%d%H%M%S+0000') if orig_val.respond_to? :strftime
-        elsif op == 'dicom_date'
-          res = orig_val.strftime('%Y%m%d') if orig_val.respond_to? :strftime
-        elsif op == 'join_with_space'
-          res = res.join(' ') if res.is_a? Array
-        elsif op == 'join_with_comma'
-          res = res.join(', ') if res.is_a? Array
-        elsif op == 'join_with_semicolon'
-          res = res.join('; ') if res.is_a? Array
-        elsif op == 'join_with_newline'
-          res = res.join("\n") if res.is_a? Array
-        elsif op == 'join_with_2newlines'
-          res = res.join("\n\n") if res.is_a? Array
-        elsif op == 'compact'
-          res = res.reject(&:blank?) if res.is_a? Array
-        elsif op == 'sort'
-          res = res.sort if res.is_a? Array
-        elsif op == 'uniq'
-          res = res.uniq if res.is_a? Array
-        elsif op == 'markdown_list'
-          res = '  - ' + res.join("\n  - ") if res.is_a? Array
-        elsif op == 'html_list'
-          res = '<ul><li>' + res.join("</li>\n  <li>") + '</li></ul>' if res.is_a? Array
-        elsif op == 'plaintext'
-          res = ActionController::Base.helpers.sanitize(res)
-          res = res.gsub("\n", '<br>').html_safe
-        elsif op == 'strip'
-          res = res.strip
-        elsif op == 'split_lines'
-          res = res.split("\n")
-        elsif op == 'markup'
-          res = Kramdown::Document.new(res).to_html.html_safe
-        elsif op == 'ignore_missing'
-          res ||= ''
-        elsif op.to_i != 0
-          res = res[0..op.to_i]
-        end
+        TagFormatter.format_with(op, res, orig_val)
       end
 
       res
+    end
+
+    def self.run_embedded_report(tag, data)
+      report_name = tag.sub('embedded_report_', '')
+      # Find the source item to call the report with
+      if data[:original_item].respond_to?(:referring_record) && data[:original_item].referring_record
+        list_item = data[:original_item].referring_record
+        list_id = list_item.id
+      else
+        list_item = data[:original_item]
+        list_id = list_item[:id]
+      end
+
+      list_type = list_item.class.name
+
+      Reports::Template.embedded_report report_name, list_id, list_type
     end
 
     # Associations that are allowable when getting model associations to resolve tags
@@ -442,8 +389,10 @@ module Formatter
         # Note - beware to ensure the activity log type is singular before the extra log type
         #   activity_log__player_contact__step_1 NOT activity_log__player_contact**s**__step_1
         imr = item.model_references
-        imr.select { |mr| mr.to_record_type_us == an.singularize }.first&.to_record ||
-          imr.select { |mr| mr.to_record.resource_name.to_s == an }.first&.to_record
+        imr.select { |mr| mr.to_record_type_us == an.singularize }
+           .first&.to_record ||
+          imr.select { |mr| mr.to_record.resource_name.to_s == an }
+             .first&.to_record
       end
     end
 
@@ -463,6 +412,7 @@ module Formatter
                            master: sub_data[:master],
                            batch_user: true,
                            for_item: sub_data[:alt_item] || sub_data[:original_item])
+
       res[:short_link_instance]&.short_url
     end
   end
