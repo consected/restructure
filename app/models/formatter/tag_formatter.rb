@@ -3,7 +3,6 @@
 module Formatter
   module TagFormatter
     ValidOps = %w[
-      format_with
       capitalize
       titleize
       uppercase
@@ -35,7 +34,7 @@ module Formatter
       int_index
     ].freeze
 
-    def format_with(operation, res, orig_val)
+    def self.format_with(operation, res, orig_val)
       if operation.in?(ValidOps)
         send operation, res, orig_val
       elsif operation.to_i != 0
@@ -43,39 +42,39 @@ module Formatter
       end
     end
 
-    def capitalize(res, _orig_val)
+    def self.capitalize(res, _orig_val)
       res.capitalize
     end
 
-    def titleize(res, _orig_val)
+    def self.titleize(res, _orig_val)
       res.titleize
     end
 
-    def uppercase(res, _orig_val)
+    def self.uppercase(res, _orig_val)
       res.upcase
     end
 
-    def lowercase(res, _orig_val)
+    def self.lowercase(res, _orig_val)
       res.downcase
     end
 
-    def underscore(res, _orig_val)
+    def self.underscore(res, _orig_val)
       res.underscore
     end
 
-    def hyphenate(res, _orig_val)
+    def self.hyphenate(res, _orig_val)
       res.hyphenate
     end
 
-    def initial(res, _orig_val)
+    def self.initial(res, _orig_val)
       res.first&.upcase
     end
 
-    def first(res, _orig_val)
+    def self.first(res, _orig_val)
       res.first
     end
 
-    def age(_res, orig_val)
+    def self.age(_res, orig_val)
       return unless orig_val.respond_to? :year
 
       today = ::Date.today
@@ -84,84 +83,84 @@ module Formatter
       age
     end
 
-    def date(_res, orig_val)
+    def self.date(_res, orig_val)
       Formatter::TimeWithZone.format(orig_val, current_user: current_user, date_only: true)
     end
 
-    def time(_res, orig_val)
+    def self.time(_res, orig_val)
       Formatter::TimeWithZone.format(orig_val, current_user: current_user, time_only: true)
     end
 
-    def dicom_datetime(_res, orig_val)
+    def self.dicom_datetime(_res, orig_val)
       orig_val.strftime('%Y%m%d%H%M%S+0000') if orig_val.respond_to? :strftime
     end
 
-    def dicom_date(_res, orig_val)
+    def self.dicom_date(_res, orig_val)
       orig_val.strftime('%Y%m%d') if orig_val.respond_to? :strftime
     end
 
-    def join_with_space(res, _orig_val)
+    def self.join_with_space(res, _orig_val)
       res.join(' ') if res.is_a? Array
     end
 
-    def join_with_comma(res, _orig_val)
+    def self.join_with_comma(res, _orig_val)
       res.join(', ') if res.is_a? Array
     end
 
-    def join_with_semicolon(res, _orig_val)
+    def self.join_with_semicolon(res, _orig_val)
       res.join('; ') if res.is_a? Array
     end
 
-    def join_with_newline(res, _orig_val)
+    def self.join_with_newline(res, _orig_val)
       res.join("\n") if res.is_a? Array
     end
 
-    def join_with_2newlines(res, _orig_val)
+    def self.join_with_2newlines(res, _orig_val)
       res.join("\n\n") if res.is_a? Array
     end
 
-    def compact(res, _orig_val)
+    def self.compact(res, _orig_val)
       res.reject(&:blank?) if res.is_a? Array
     end
 
-    def sort(res, _orig_val)
+    def self.sort(res, _orig_val)
       res.sort if res.is_a? Array
     end
 
-    def uniq(res, _orig_val)
+    def self.uniq(res, _orig_val)
       res.uniq if res.is_a? Array
     end
 
-    def markdown_list(res, _orig_val)
+    def self.markdown_list(res, _orig_val)
       "  - #{res.join("\n  - ")}" if res.is_a? Array
     end
 
-    def html_list(res, _orig_val)
+    def self.html_list(res, _orig_val)
       "<ul><li>#{res.join("</li>\n  <li>")}</li></ul>'" if res.is_a? Array
     end
 
-    def plaintext(res, orig_val)
+    def self.plaintext(res, orig_val)
       res = ActionController::Base.helpers.sanitize(res, orig_val)
       res.gsub("\n", '<br>').html_safe
     end
 
-    def strip(res, _orig_val)
+    def self.strip(res, _orig_val)
       res.strip
     end
 
-    def split_lines(res, _orig_val)
+    def self.split_lines(res, _orig_val)
       res.split("\n")
     end
 
-    def markup(res, orig_val)
+    def self.markup(res, orig_val)
       Kramdown::Document.new(res, orig_val).to_html.html_safe
     end
 
-    def ignore_missing(res, _orig_val)
+    def self.ignore_missing(res, _orig_val)
       res || ''
     end
 
-    def int_index(res, _orig_val)
+    def self.int_index(res, _orig_val)
       res[0..op.to_i]
     end
   end
