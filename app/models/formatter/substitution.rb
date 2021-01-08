@@ -244,7 +244,7 @@ module Formatter
       tagp[1..].each do |op|
         # NOTE: if additional formatters are added here, they also need matching javascript
         # in _fpa_form_utils.format_subtitution
-        TagFormatter.format_with(op, res, orig_val)
+        res = TagFormatter.format_with(op, res, orig_val)
       end
 
       res

@@ -31,14 +31,15 @@ module Formatter
       split_lines
       markup
       ignore_missing
-      int_index
     ].freeze
 
     def self.format_with(operation, res, orig_val)
       if operation.in?(ValidOps)
         send operation, res, orig_val
       elsif operation.to_i != 0
-        int_index res, orig_val
+        res[0..operation.to_i]
+      else
+        res
       end
     end
 
@@ -160,8 +161,5 @@ module Formatter
       res || ''
     end
 
-    def self.int_index(res, _orig_val)
-      res[0..op.to_i]
-    end
   end
 end
