@@ -13,6 +13,11 @@ class Classification::ItemFlagName < ActiveRecord::Base
 
   default_scope -> { order 'item_flag_names.updated_at DESC nulls last' }
 
+  #
+  # Are item flags available for this item type by this user
+  # @param [String | Symbol] item_type undescore namespaced model name / resource name
+  # @param [User] user
+  # @return [Boolean] result
   def self.enabled_for?(item_type, user)
     logger.debug "Checking we're enabled for #{item_type} with user #{user.id}"
     l = selector_array item_type: item_type
@@ -23,10 +28,15 @@ class Classification::ItemFlagName < ActiveRecord::Base
     user.has_access_to? :access, :table, "#{item_type.pluralize}_item_flags".to_sym
   end
 
+  #
+  # Unique list of item types (model names) configured
+  # @return [Array{String}] <description>
   def self.item_types
     selector_array(nil, :item_type).uniq
   end
 
+  #
+  # @see ItemFlag.use_with_class_names
   def self.use_with_class_names
     ItemFlag.use_with_class_names
   end

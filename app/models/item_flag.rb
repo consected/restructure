@@ -19,6 +19,12 @@ class ItemFlag < UserBase
   # create is reasonable.
 
   validates :item, presence: true
+
+  # The Item Flag Name validations should not be seen in normal operation
+  # These indicate that ItemFlag records have been entered into the database
+  # through an external process with item_flag_name NULL.
+  # In January 2021 a database constrain was added to prevent records
+  # with NULL values being inserted / updated.
   validates :item_flag_name_id, presence: true
   validates :item_flag_name, presence: true
 
@@ -45,7 +51,9 @@ class ItemFlag < UserBase
 
   # The full list of model names that ItemFlag can work with.
   # The result is simply downcased for simple models and fully module/class qualified
-  # for namespaced models (such as ActivityLog::PlayerContactPhone)
+  # for namespaced models
+  # For example activity_log__player_contact_phone for ActivityLog::PlayerContactPhone
+  # @return [Array{String}]
   def self.use_with_class_names
     all_assocs = Master.reflect_on_all_associations(:has_many)
     # Be sure to reject the association on item_flag, since it can't flag itself
