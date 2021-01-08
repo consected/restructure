@@ -16,57 +16,6 @@ SET row_security = off;
 CREATE SCHEMA ml_app;
 
 
-SET default_tablespace = '';
-
-SET default_with_oids = false;
-
---
--- Name: nfs_store_archived_files; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_archived_files (
-    id integer NOT NULL,
-    file_hash character varying,
-    file_name character varying NOT NULL,
-    content_type character varying NOT NULL,
-    archive_file character varying NOT NULL,
-    path character varying NOT NULL,
-    file_size bigint NOT NULL,
-    file_updated_at timestamp without time zone,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    nfs_store_container_id integer,
-    user_id integer,
-    title character varying,
-    description character varying,
-    nfs_store_stored_file_id integer,
-    file_metadata jsonb
-);
-
-
---
--- Name: nfs_store_stored_files; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_stored_files (
-    id integer NOT NULL,
-    file_hash character varying NOT NULL,
-    file_name character varying NOT NULL,
-    content_type character varying NOT NULL,
-    file_size bigint NOT NULL,
-    path character varying,
-    file_updated_at timestamp without time zone,
-    user_id integer,
-    nfs_store_container_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    title character varying,
-    description character varying,
-    last_process_name_run character varying,
-    file_metadata jsonb
-);
-
-
 --
 -- Name: activity_log_bhs_assignment_info_request_notification(integer); Type: FUNCTION; Schema: ml_app; Owner: -
 --
@@ -797,6 +746,10 @@ CREATE FUNCTION ml_app.create_message_notification_job(message_notification_id i
     END;
     $$;
 
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
 
 --
 -- Name: player_contacts; Type: TABLE; Schema: ml_app; Owner: -
@@ -1844,6 +1797,53 @@ END IF;
 end;
 
 $$;
+
+
+--
+-- Name: nfs_store_archived_files; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_archived_files (
+    id integer NOT NULL,
+    file_hash character varying,
+    file_name character varying NOT NULL,
+    content_type character varying NOT NULL,
+    archive_file character varying NOT NULL,
+    path character varying NOT NULL,
+    file_size bigint NOT NULL,
+    file_updated_at timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    nfs_store_container_id integer,
+    user_id integer,
+    title character varying,
+    description character varying,
+    nfs_store_stored_file_id integer,
+    file_metadata jsonb
+);
+
+
+--
+-- Name: nfs_store_stored_files; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_stored_files (
+    id integer NOT NULL,
+    file_hash character varying NOT NULL,
+    file_name character varying NOT NULL,
+    content_type character varying NOT NULL,
+    file_size bigint NOT NULL,
+    path character varying,
+    file_updated_at timestamp without time zone,
+    user_id integer,
+    nfs_store_container_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    title character varying,
+    description character varying,
+    last_process_name_run character varying,
+    file_metadata jsonb
+);
 
 
 --
@@ -15291,34 +15291,6 @@ CREATE TRIGGER admin_history_update AFTER UPDATE ON ml_app.admins FOR EACH ROW W
 
 
 --
--- Name: app_configurations app_configuration_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER app_configuration_history_insert AFTER INSERT ON ml_app.app_configurations FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_app_configuration_update();
-
-
---
--- Name: app_configurations app_configuration_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER app_configuration_history_update AFTER UPDATE ON ml_app.app_configurations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_app_configuration_update();
-
-
---
--- Name: app_types app_type_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER app_type_history_insert AFTER INSERT ON ml_app.app_types FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_app_type_update();
-
-
---
--- Name: app_types app_type_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER app_type_history_update AFTER UPDATE ON ml_app.app_types FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_app_type_update();
-
-
---
 -- Name: bhs_assignments bhs_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -15473,20 +15445,6 @@ CREATE TRIGGER item_flag_name_history_update AFTER UPDATE ON ml_app.item_flag_na
 
 
 --
--- Name: message_templates message_template_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER message_template_history_insert AFTER INSERT ON ml_app.message_templates FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_message_template_update();
-
-
---
--- Name: message_templates message_template_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER message_template_history_update AFTER UPDATE ON ml_app.message_templates FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_message_template_update();
-
-
---
 -- Name: new_tests new_test_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -15498,76 +15456,6 @@ CREATE TRIGGER new_test_history_insert AFTER INSERT ON ml_app.new_tests FOR EACH
 --
 
 CREATE TRIGGER new_test_history_update AFTER UPDATE ON ml_app.new_tests FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_new_test_update();
-
-
---
--- Name: nfs_store_archived_files nfs_store_archived_file_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER nfs_store_archived_file_history_insert AFTER INSERT ON ml_app.nfs_store_archived_files FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_nfs_store_archived_file_update();
-
-
---
--- Name: nfs_store_archived_files nfs_store_archived_file_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER nfs_store_archived_file_history_update AFTER UPDATE ON ml_app.nfs_store_archived_files FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_nfs_store_archived_file_update();
-
-
---
--- Name: nfs_store_containers nfs_store_container_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER nfs_store_container_history_insert AFTER INSERT ON ml_app.nfs_store_containers FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_nfs_store_container_update();
-
-
---
--- Name: nfs_store_containers nfs_store_container_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER nfs_store_container_history_update AFTER UPDATE ON ml_app.nfs_store_containers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_nfs_store_container_update();
-
-
---
--- Name: nfs_store_filters nfs_store_filter_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER nfs_store_filter_history_insert AFTER INSERT ON ml_app.nfs_store_filters FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_nfs_store_filter_update();
-
-
---
--- Name: nfs_store_filters nfs_store_filter_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER nfs_store_filter_history_update AFTER UPDATE ON ml_app.nfs_store_filters FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_nfs_store_filter_update();
-
-
---
--- Name: nfs_store_stored_files nfs_store_stored_file_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER nfs_store_stored_file_history_insert AFTER INSERT ON ml_app.nfs_store_stored_files FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_nfs_store_stored_file_update();
-
-
---
--- Name: nfs_store_stored_files nfs_store_stored_file_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER nfs_store_stored_file_history_update AFTER UPDATE ON ml_app.nfs_store_stored_files FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_nfs_store_stored_file_update();
-
-
---
--- Name: page_layouts page_layout_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER page_layout_history_insert AFTER INSERT ON ml_app.page_layouts FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_page_layout_update();
-
-
---
--- Name: page_layouts page_layout_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER page_layout_history_update AFTER UPDATE ON ml_app.page_layouts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_page_layout_update();
 
 
 --
@@ -15841,20 +15729,6 @@ CREATE TRIGGER tracker_record_delete AFTER DELETE ON ml_app.tracker_history FOR 
 --
 
 CREATE TRIGGER tracker_upsert BEFORE INSERT ON ml_app.trackers FOR EACH ROW EXECUTE PROCEDURE ml_app.tracker_upsert();
-
-
---
--- Name: user_access_controls user_access_control_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER user_access_control_history_insert AFTER INSERT ON ml_app.user_access_controls FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_user_access_control_update();
-
-
---
--- Name: user_access_controls user_access_control_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER user_access_control_history_update AFTER UPDATE ON ml_app.user_access_controls FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_user_access_control_update();
 
 
 --
