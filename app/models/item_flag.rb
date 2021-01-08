@@ -39,7 +39,8 @@ class ItemFlag < UserBase
   # Is this class_name one of the possible classes ItemFlag can work with, independent of whether
   # the admin configuration is actually created or enabled for it
   def self.works_with(class_name)
-    # Get the value from the array and return it, so we can return a value that is not the original passed in (failing Brakeman test otherwise)
+    # Get the value from the array and return it, so we can return a value that is not
+    # the original passed in (failing Brakeman test otherwise)
     pos = use_with_class_names.index(class_name.ns_underscore)
     if pos
       use_with_class_names[pos.to_i].ns_camelize
@@ -72,7 +73,7 @@ class ItemFlag < UserBase
     active_class_names.map { |ifcs| "#{ifcs.pluralize}_item_flags" }
   end
 
-  def self.is_active_for?(class_or_class_name)
+  def self.active_for?(class_or_class_name)
     return unless class_or_class_name
 
     class_name = if class_or_class_name.is_a? Class
@@ -143,12 +144,12 @@ class ItemFlag < UserBase
     Master.has_many "#{ifcs}_item_flags".to_sym, through: ifcs, source: :item_flags
   end
 
-  protected
-
   def self.track_flag_updates(item, added_flags, removed_flags)
     logger.info "Track record update for added item_flags #{added_flags} and removed #{removed_flags}"
     Tracker.track_flag_update item, added_flags, removed_flags
   end
+
+  protected
 
   def prevent_item_change
     errors.add :item_flag_name_id, 'can not be changed' if item_flag_name_id_changed?

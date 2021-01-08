@@ -135,7 +135,11 @@ class Admin::AppType < Admin::AdminBase
   end
 
   def associated_reports
-    names = user_access_controls.valid_resources.where(resource_type: :report).where("access IS NOT NULL and access <> ''").map(&:resource_name).uniq
+    names = user_access_controls
+            .valid_resources.where(resource_type: :report)
+            .where("access IS NOT NULL and access <> ''")
+            .map(&:resource_name)
+            .uniq
     names = Report.active.map(&:alt_resource_name).uniq if names.include? '_all_reports_'
 
     Report.active.where("(REGEXP_REPLACE(item_type, '( |-)', '_') || '__' || short_name) in (?)",
@@ -179,11 +183,11 @@ class Admin::AppType < Admin::AdminBase
     tns = associated_table_names
     sing_and_plur_tns = tns + tns.map(&:singularize)
 
-    ifns = Classification::ItemFlagName
-           .active
-           .where(item_type: sing_and_plur_tns)
-           .reorder('')
-           .order(id: :asc)
+    Classification::ItemFlagName
+      .active
+      .where(item_type: sing_and_plur_tns)
+      .reorder('')
+      .order(id: :asc)
   end
 
   def associated_message_templates

@@ -92,7 +92,7 @@ module MasterSupport
     @master = master
   end
 
-  def create_items(from_list = :list_valid_attribs, master_or_admin = nil, expect_failures = false)
+  def create_items(from_list = :list_valid_attribs, master_or_admin = nil, expect_failures = nil)
     @created_count = 0
     @exceptions = []
     @list = send(from_list)
