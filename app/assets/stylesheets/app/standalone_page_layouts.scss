@@ -61,6 +61,18 @@ div.reset-row,
   li[data-field-name="extra_classes"] {
     display: none;
   }
+
+  p br {
+    display: block;
+    content: "";
+    margin-top: 0.8em;
+    line-height: 190%;
+    vertical-align: top;
+  }
+
+  .standalone-page-col .result-target {
+    margin: 0;
+  }
 }
 
 div.reset-row,
@@ -148,6 +160,19 @@ div.reset-row,
     p {
       width: 60%;
     }
+
+    h1 + p,
+    h2 + p,
+    h3 + p,
+    h4 + p {
+      margin-bottom: 1.5em;
+    }
+
+    .notes-text th,
+    .notes-text tr {
+      word-break: normal;
+      vertical-align: top;
+    }
   }
 
   .standalone-page-design .custom-editor,
@@ -160,6 +185,12 @@ div.reset-row,
     h3,
     h4 {
       margin-bottom: 0.67em;
+    }
+
+    .notes-text th,
+    .notes-text tr {
+      word-break: normal;
+      vertical-align: top;
     }
   }
 

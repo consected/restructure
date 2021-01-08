@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "#{::Rails.root}/spec/support/seeds"
-require './db/table_generators/external_identifiers_table.rb'
+require './db/table_generators/external_identifiers_table'
 
 $STARTED_AT = DateTime.now.to_i
 
@@ -22,7 +22,7 @@ module SetupHelper
   end
 
   def self.setup_app_dbs
-    return if ActiveRecord::Base.connection.table_exists?('bhs_assignments')
+    return if ActiveRecord::Base.connection.table_exists?('adders')
 
     puts 'Setup app DBs'
 
@@ -244,7 +244,8 @@ module SetupHelper
 
     format = config_fn.split('.').last.to_sym
 
-    res = Admin::AppType.import_config File.read(Rails.root.join(config_dir, config_fn)), admin, name: name, format: format
+    res = Admin::AppType.import_config File.read(Rails.root.join(config_dir, config_fn)), admin, name: name,
+                                                                                                 format: format
 
     reload_configs
 

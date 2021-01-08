@@ -16,8 +16,7 @@ module OptionConfigs
       %i[references save_trigger e_sign nfs_store]
     end
 
-    attr_accessor(*key_attributes)
-    attr_accessor :bad_ref_items
+    attr_accessor(*key_attributes, :bad_ref_items)
 
     def self.attr_defs
       res = {
@@ -36,7 +35,7 @@ module OptionConfigs
               }
             },
             filter_by: {
-              field_name: 'value to filter the referenced items by'
+              field_name: 'value to filter the referenced items by (may include {{substitution}}'
             },
             order_by: {
               field_name: 'asc | desc'

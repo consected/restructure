@@ -23,7 +23,7 @@ class Admin::AppTypesController < AdminController
 
     begin
       _, results = Admin::AppType.import_config(uploaded_io.read, current_admin, format: f.to_sym)
-    rescue StandardError => e
+    rescue StandardError, FphsException => e
       @message = 'FAILED'
       @primary = "#{e}\n#{e.backtrace.join("\n")}"
       render 'upload_results'
@@ -38,7 +38,7 @@ class Admin::AppTypesController < AdminController
     end
 
     Rails.cache.clear
-    
+
     render 'upload_results'
   end
 
@@ -50,6 +50,8 @@ class Admin::AppTypesController < AdminController
     else
       f = 'json'
     end
+
+    app_type.current_admin = current_admin
 
     send_data app_type.export_config(format: f.to_sym), filename: "#{app_type.name}_config.#{f}"
   end

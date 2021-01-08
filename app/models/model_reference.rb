@@ -143,6 +143,7 @@ class ModelReference < ActiveRecord::Base
                            order_by: nil)
 
     ref_order ||= default_ref_order
+    filter_by = substitute_filter(filter_by, from_item_or_master)
 
     if to_record_type
       to_record_type_class = to_record_class_for_type(to_record_type)
@@ -150,7 +151,8 @@ class ModelReference < ActiveRecord::Base
     end
 
     if without_reference
-      cond = { master: from_item_or_master }
+      cond = { master: from_item_or_master } if to_record_type_class.respond_to? :master
+      cond ||= {}
       cond.merge!(filter_by) if filter_by
       recs = to_record_type_class.where(cond).order(ref_order)
       recs = recs.active if active
@@ -216,6 +218,17 @@ class ModelReference < ActiveRecord::Base
       r.current_user ||= mu
     end
     res
+  end
+
+  def self.substitute_filter(filter, data)
+    if filter.is_a? Hash
+      filter.each do |k, v|
+        if v.is_a?(String) && v.include?('{{')
+          filter[k] = Formatter::Substitution.substitute(v, data: data, ignore_missing: true)
+        end
+      end
+    end
+    filter
   end
 
   def self.to_record_class_for_type(rec_type)
@@ -377,6 +390,7 @@ class ModelReference < ActiveRecord::Base
                                   ref_order: default_ref_order, active: nil)
     res = []
     cond = { master: master }
+    filter_by = substitute_filter(filter_by, master)
     cond.merge! filter_by if filter_by
 
     to_record_class_for_type(to_record_type).where(cond).order(ref_order).each do |i|

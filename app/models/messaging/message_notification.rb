@@ -7,7 +7,7 @@ module Messaging
     StatusComplete = 'complete'
     StatusInProgress = 'in progress'
     StatusFailed = 'failed'
-    ValidImportance = ['Promotional', 'Transactional'].freeze
+    ValidImportance = %w[Promotional Transactional].freeze
 
     include WorksWithItem
 
@@ -32,7 +32,8 @@ module Messaging
     attr_accessor :generated_text, :disabled, :admin_id, :for_item
 
     # Get a layout template by name and optionally message type
-    # Useful as a quick check to see if a specific template has been defined before instantiating a full MessageNotification
+    # Useful as a quick check to see if a specific template has been defined before
+    # instantiating a full MessageNotification
     def self.layout_template(name, message_type: :email)
       Admin::MessageTemplate.active.layout_templates.named name, type: message_type
     end
@@ -90,7 +91,10 @@ module Messaging
         raise FphsException, 'Content template name or text must be set'
       end
 
-      self.generated_text = layout_template.generate content_template_name: content_template_name, content_template_text: content_template_text, data: data, ignore_missing: ignore_missing
+      self.generated_text = layout_template.generate content_template_name: content_template_name,
+                                                     content_template_text: content_template_text,
+                                                     data: data,
+                                                     ignore_missing: ignore_missing
     end
 
     def generate_view(ignore_missing: false)
@@ -120,8 +124,11 @@ module Messaging
     def recipient_sms_numbers
       return @recipient_numbers if @recipient_numbers
 
-      if recipient_users&.length > 0
-        recipient_users.reject { |u| !u.contact_info || u.contact_info.sms_number.blank? }.map { |u| u.contact_info&.sms_number }.uniq
+      if recipient_users&.present?
+        recipient_users
+          .reject { |u| !u.contact_info || u.contact_info.sms_number.blank? }
+          .map { |u| u.contact_info&.sms_number }
+          .uniq
       else
         recipient_data
       end
@@ -168,12 +175,12 @@ module Messaging
         # If not, we just have a list of emails of phones
         recipient_records = nil
         rd = recipient_data&.first
-        if rd&.is_a?(String)
+        if rd.is_a?(String)
           jrd = begin
-                    JSON.parse(rd)
-                rescue StandardError
-                  nil
-                  end
+            JSON.parse(rd)
+          rescue StandardError
+            nil
+          end
           recipient_records = recipient_data.map { |r| JSON.parse(r) } if jrd.is_a?(Hash) && jrd['list_type']
         end
 
@@ -185,7 +192,7 @@ module Messaging
           recipient_data = []
           recipient_records.each do |rec|
             rec.symbolize_keys!
-            def_country_code = list_type = rec[:default_country_code]
+            def_country_code = rec[:default_country_code]
             list_type = rec[:list_type]
             list_id = rec[:id]
             list_type_class = ModelReference.to_record_class_for_type list_type.singularize
@@ -221,7 +228,7 @@ module Messaging
               logger.warn "A recipient list item did not exist (#{!!list_item}) or some other reason for not sending"
             end
           end
-          # self.data = {bulk_message_data: "#{recipient_records.length} #{'records'.pluralize(recipient_records.length)}"}
+
           self.recipient_data = recipient_data
         else
           generate_and_send
@@ -252,7 +259,8 @@ module Messaging
         NotificationMailer.send_message_notification(self, logger: logger).deliver_now
       elsif is_sms?
         sms = Messaging::NotificationSms.new
-        sms.send_now(self, recipient_sms_numbers: recipient_sms_numbers, generated_text: generated_text, importance: importance, logger: logger)
+        sms.send_now(self, recipient_sms_numbers: recipient_sms_numbers, generated_text: generated_text,
+                           importance: importance, logger: logger)
       else
         raise FphsException, "No recognized message type for message notification: #{message_type}"
       end
@@ -274,9 +282,9 @@ module Messaging
     end
 
     def content_template_specified?
-      unless content_template_text || content_template_name
-        errors.add :content_template_name, 'or content template text must be set'
-      end
+      return if content_template_text || content_template_name
+
+      errors.add :content_template_name, 'or content template text must be set'
     end
   end
 end

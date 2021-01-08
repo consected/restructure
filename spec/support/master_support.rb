@@ -58,10 +58,12 @@ module MasterSupport
 
   def create_sources(name)
     i = "#{name}_source"
-    gs = Classification::GeneralSelection.active.where(item_type: i, value: ['nfl', 'nflpa'])
+    gs = Classification::GeneralSelection.active.where(item_type: i, value: %w[nfl nflpa])
     if gs.empty?
-      Classification::GeneralSelection.create item_type: i, name: 'NFL', value: 'nfl', current_admin: auto_admin, create_with: true
-      Classification::GeneralSelection.create item_type: i, name: 'NFLPA', value: 'nflpa', current_admin: auto_admin, create_with: true
+      Classification::GeneralSelection.create item_type: i, name: 'NFL', value: 'nfl', current_admin: auto_admin,
+                                              create_with: true
+      Classification::GeneralSelection.create item_type: i, name: 'NFLPA', value: 'nflpa', current_admin: auto_admin,
+                                              create_with: true
     else
       gs.update_all create_with: true
       Rails.cache.clear
@@ -77,7 +79,7 @@ module MasterSupport
 
     user.app_type ||= Admin::AppType.active.first
 
-    att ||= { msid: rand(10_000_000), pro_id: rand(1_000_000) }
+    att ||= { msid: rand(1_000_000_000), pro_id: rand(1_000_000_000) }
 
     master = Master.new att
     master.current_user = user
@@ -90,7 +92,7 @@ module MasterSupport
     @master = master
   end
 
-  def create_items(from_list = :list_valid_attribs, master_or_admin = nil, expect_failures = false)
+  def create_items(from_list = :list_valid_attribs, master_or_admin = nil, expect_failures = nil)
     @created_count = 0
     @exceptions = []
     @list = send(from_list)
@@ -159,15 +161,18 @@ module MasterSupport
   end
 
   def first_names
-    ['Glenn', 'Mose', 'Leandro', 'Damien', 'Claude', 'Kelvin', 'Rudolf', 'Shad', 'Wm', 'Nathanial', 'Dominick', 'Carlton', 'Arthur', 'Jame', 'Doug', 'Tod', 'Nickolas', 'Israel', 'Domingo', 'Donovan', 'Scott', 'Carol', 'Cesar', 'Ismael', 'Michael', 'Reyes', 'Blake', 'Odis', 'Brant', 'Luther', 'Mauricio', 'Olin', 'Victor', 'Milford', 'Tony', 'Aubrey', 'Dana', 'Berry', 'Salvador', 'Parker', 'Marcelo', 'Ray', 'Gerard', 'Miguel', 'Cornelius', 'Coleman', 'Dwayne', 'Wilbert', 'Leonardo', 'Bud']
+    %w[Glenn Mose Leandro Damien Claude Kelvin Rudolf Shad Wm Nathanial Dominick
+       Carlton Arthur Jame Doug Tod Nickolas Israel Domingo Donovan Scott Carol Cesar Ismael Michael Reyes Blake Odis Brant Luther Mauricio Olin Victor Milford Tony Aubrey Dana Berry Salvador Parker Marcelo Ray Gerard Miguel Cornelius Coleman Dwayne Wilbert Leonardo Bud]
   end
 
   def last_names
-    ['Basilio', 'Portillo', 'Just', 'Northup', 'Ankrom', 'Seto', 'Dominick', 'Dehn', 'Ramirez', 'Polley', 'Detwiler', 'Mahone', 'Mchenry', 'Fink', 'Keesling', 'Shaikh', 'Mazurek', 'Brashears', 'Arel', 'Perrella', 'Ver', 'Fitzgibbon', 'Tefft', 'Burruel', 'Boulter', 'Klatt', 'Linger', 'Kyser', 'Silversmith', 'Tregre', 'Millett', 'Welk', 'Down', 'Bate', 'Mchaney', 'Pope', 'Wagoner', 'Mcdougal', 'Nolan', 'Melendez', 'Imler', 'Way', 'Crimmins', 'Korando', 'Cohen', 'Keisler', 'Hardman', 'Sallis', 'Pinder', 'Acey']
+    %w[Basilio Portillo Just Northup Ankrom Seto Dominick Dehn Ramirez Polley Detwiler
+       Mahone Mchenry Fink Keesling Shaikh Mazurek Brashears Arel Perrella Ver Fitzgibbon Tefft Burruel Boulter Klatt Linger Kyser Silversmith Tregre Millett Welk Down Bate Mchaney Pope Wagoner Mcdougal Nolan Melendez Imler Way Crimmins Korando Cohen Keisler Hardman Sallis Pinder Acey]
   end
 
   def other_names
-    ['Dingus', 'Vella', 'Bowland', 'Sackett', 'Arias', 'Pannell', 'Swinehart', 'Bezio', 'Goble', 'Greenley', 'Sides', 'Utz', 'Andres', 'Witt', 'Mraz', 'Cheever', 'Muma', 'Diana', 'Weston', 'Lennox', 'Carasco', 'Stavros', 'Platts', 'Bunyard', 'Bahena', 'Marciano', 'Normandeau', 'Small', 'Sellars', 'Bahr', 'Yard', 'Hankerson', 'Abram', 'Bouffard', 'Arruda', 'Faulkenberry', 'Sirmans', 'Mabon', 'Chavarin', 'Uphoff', 'Billingslea', 'Montandon', 'Neilson', 'Repka', 'Delucia', 'Juarbe', 'Govan', 'Mattern', 'Bendel', 'Flatley']
+    %w[Dingus Vella Bowland Sackett Arias Pannell Swinehart Bezio Goble Greenley Sides
+       Utz Andres Witt Mraz Cheever Muma Diana Weston Lennox Carasco Stavros Platts Bunyard Bahena Marciano Normandeau Small Sellars Bahr Yard Hankerson Abram Bouffard Arruda Faulkenberry Sirmans Mabon Chavarin Uphoff Billingslea Montandon Neilson Repka Delucia Juarbe Govan Mattern Bendel Flatley]
   end
 
   def colleges
