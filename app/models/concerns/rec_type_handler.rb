@@ -4,7 +4,7 @@ module RecTypeHandler
   extend ActiveSupport::Concern
 
   included do
-    valid_rec_types.each do |rt|
+    valid_rec_types&.each do |rt|
       is_rt = "is_#{rt}?".to_sym
       scope rt, -> { where(rec_type: rt).order(rank: :desc) }
       before_validation :force_data_format
@@ -13,12 +13,17 @@ module RecTypeHandler
       end
       validates :rec_type, presence: true
 
-      Master.has_many "#{name.underscore}_#{rt}".pluralize.to_sym, -> { where(rec_type: rt).order(Master::RankNotNullClause) }, inverse_of: :master, class_name: name.to_s
+      Master.has_many "#{name.underscore}_#{rt}".pluralize.to_sym,
+                      lambda {
+                        where(rec_type: rt).order(Master::RankNotNullClause)
+                      },
+                      inverse_of: :master,
+                      class_name: name.to_s
     end
 
     validate :valid_data_format?
 
-    valid_rec_types.each do |rt|
+    valid_rec_types&.each do |rt|
       # Setup the is_abc? methods such as is_phone?
       define_method("is_#{rt}?") do
         rec_type == rt.to_s
