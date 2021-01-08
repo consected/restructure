@@ -2,9 +2,9 @@
 
 This file documents notable changes to the apps for each release, including:
 
-* core source code shared by all Zeus and Commuter Rails apps
-* database schema definitions and updates
-* app configuration files
+- core source code shared by all Zeus and Commuter Rails apps
+- database schema definitions and updates
+- app configuration files
 
 The format of this file is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -25,13 +25,14 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 - [Added] External identifiers now use option configurations to apply dynamic definitions to fields and forms
 - [Added] improved DB table and field comments, automatically generated from captions and labels
 - [Added] activity_selector reference option
+- [Changed] item_flags table now enforces not null on item_flag_name_id to avoid data causing app errors
+- [Changed] app types now import / export item flag name configurations
 - [Changed] improved image previewing and icons
 - [Changed] bugfixes in editable report forms and model reference edit buttons
 - [Changed] model reference handling in views
 - [Changed] Activity Log admin edit form to provide more information about the current definition
 - [Fixed] bugfixes in editable report forms and model reference edit buttons
 - [Fixed] many fixes
-
 
 ## [7.3.168] - 2020-11-20
 
@@ -43,13 +44,11 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 - [Changed] Activity Log admin edit form to provide more information about the current definition
 - [Fixed] many fixes
 
-
 ## [7.3.167] - 2020-11-12
 
 ## [7.3.163] - 2020-11-11
 
 - [Changed] small bugfixes and build to support release to Filestore
-
 
 ## [7.3.151] - 2020-11-07
 
@@ -65,7 +64,6 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 - [Changed] updated platform to Rails 5.2
 - [Fixed] bugs and usability issues
 
-
 ## [7.3.83] - 2020-01-13
 
 - [Added] [IPA] sync-back participant data and events to Zeus
@@ -79,7 +77,6 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 - [Added] [Admin] improvements to support admin configurations of applications and user roles
 - [Fixed] Small bug fixes
 
-
 ## [7.3.59] - 2019-10-17
 
 - [Added] [Sleep Study] configurations for Athena app
@@ -90,7 +87,6 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 - [Added] [Zeus] External Identifier for Sleep Study IDs
 - [Added] [Zeus] Authorized users can view added identifiers based on role assignments
 - [Fixed] Many bug fixes
-
 
 ## [7.3.49] - 2019-09-23
 
@@ -110,7 +106,6 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 - [Added] Dashboards include timeseries charts
 - [Added] [IPA] Phone screen comprehension questions
-
 
 ## [7.3.10] - 2019-06-24
 
@@ -204,140 +199,252 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 ## [7.2.4] - 2019-04-03
 
 ### Fixed
+
 - [Build] Testing improved build process to add branch to Github
 
 ## [7.2.3] - 2019-04-03
 
 ### Changed
+
 - [UI] Made the one-time code field for login and electronic signatures show the entered digits, to make entry more reliable and avoid issues with password managers attempting to save the code
 - [Config] [IPA] Changes to notify MedNav on finalization of phone screener
 
 ### Fixed
-- [Admin] A special section filter for *IS NULL* no longer returns an error
+
+- [Admin] A special section filter for _IS NULL_ no longer returns an error
 - [Docs] Fixed issues in the new deployment readme for secure-view installations
-
-
 
 ## [7.2.2] - 2019-03-29
 
 ### Added
+
 - [Docs] Added secure-view readme to support building and installation of server-side programs required for creating previews
 
 ### Fixed
+
 - [UI] [Secure-View] Make the HTML preview zoom in a more usable way
 - [UI] [Access-Controls] [Secure-View] Manage which roles / users can preview as image, HTML, or can download
-
 
 ## [7.2.1] - 2019-03-29
 
 ### Added
+
 - [Secure-View] Provide a secure-viewer directly for users clicking a file link in a filestore container. Just view the pages of documents directly in the browser without having to worry about where files were downloaded, or cleaning them up afterwards.
+
 ## [7.2.15] - 2019-04-18
+
 ## [7.2.18] - 2019-05-03
+
 ## [7.2.19] - 2019-05-03
+
 ## [7.2.20] - 2019-05-05
+
 ## [7.2.21] - 2019-05-08
+
 ## [7.2.22] - 2019-05-08
+
 ## [7.2.26] - 2019-05-16
+
 ## [7.2.27] - 2019-05-17
+
 ## [7.2.28] - 2019-05-20
+
 ## [7.2.29] - 2019-05-23
+
 ## [7.3.1] - 2019-06-10
+
 ## [7.3.2] - 2019-06-11
+
 ## [7.3.3] - 2019-06-14
+
 ## [7.3.4] - 2019-06-14
+
 ## [7.3.5] - 2019-06-17
+
 ## [7.3.6] - 2019-06-18
+
 ## [7.3.7] - 2019-06-18
+
 ## [7.3.8] - 2019-06-19
+
 ## [7.3.9] - 2019-06-21
+
 ## [7.3.10] - 2019-06-24
+
 ## [7.3.11] - 2019-06-24
+
 ## [7.3.12] - 2019-06-24
+
 ## [7.3.13] - 2019-06-25
+
 ## [7.3.14] - 2019-06-27
+
 ## [7.3.15] - 2019-06-27
+
 ## [7.3.16] - 2019-06-27
+
 ## [7.3.17] - 2019-06-28
+
 ## [7.3.18] - 2019-07-01
+
 ## [7.3.19] - 2019-07-02
+
 ## [7.3.20] - 2019-07-03
+
 ## [7.3.21] - 2019-07-03
+
 ## [7.3.22] - 2019-07-08
+
 ## [7.3.23] - 2019-07-08
+
 ## [7.3.24] - 2019-07-10
+
 ## [7.3.25] - 2019-07-11
+
 ## [7.3.26] - 2019-07-15
+
 ## [7.3.27] - 2019-07-15
+
 ## [7.3.28] - 2019-07-16
+
 ## [7.3.29] - 2019-07-16
+
 ## [7.3.30] - 2019-07-17
+
 ## [7.3.31] - 2019-07-17
+
 ## [7.3.32] - 2019-07-17
+
 ## [7.3.33] - 2019-07-24
+
 ## [7.3.34] - 2019-07-30
+
 ## [7.3.35] - 2019-08-01
+
 ## [7.3.36] - 2019-08-07
+
 ## [7.3.37] - 2019-08-23
+
 ## [7.3.38] - 2019-08-23
+
 ## [7.3.39] - 2019-09-02
+
 ## [7.3.40] - 2019-09-03
+
 ## [7.3.41] - 2019-09-04
+
 ## [7.3.42] - 2019-09-05
+
 ## [7.3.43] - 2019-09-05
+
 ## [7.3.44] - 2019-09-11
+
 ## [7.3.45] - 2019-09-11
+
 ## [7.3.46] - 2019-09-11
+
 ## [7.3.47] - 2019-09-19
+
 ## [7.3.48] - 2019-09-19
+
 ## [7.3.49] - 2019-09-20
+
 ## [7.3.50] - 2019-09-30
+
 ## [7.3.51] - 2019-10-01
+
 ## [7.3.52] - 2019-10-01
+
 ## [7.3.53] - 2019-10-02
+
 ## [7.3.54] - 2019-10-04
+
 ## [7.3.55] - 2019-10-06
+
 ## [7.3.56] - 2019-10-08
+
 ## [7.3.57] - 2019-10-09
+
 ## [7.3.58] - 2019-10-09
+
 ## [7.3.60] - 2019-10-18
+
 ## [7.3.61] - 2019-10-18
+
 ## [7.3.62] - 2019-10-25
+
 ## [7.3.63] - 2019-10-25
+
 ## [7.3.64] - 2019-10-28
+
 ## [7.3.65] - 2019-10-28
+
 ## [7.3.66] - 2019-10-29
+
 ## [7.3.67] - 2019-10-29
+
 ## [7.3.68] - 2019-10-31
+
 ## [7.3.69] - 2019-11-01
+
 ## [7.3.70] - 2019-11-01
+
 ## [7.3.71] - 2019-11-08
+
 ## [7.3.72] - 2019-11-08
+
 ## [7.3.73] - 2019-11-11
+
 ## [7.3.74] - 2019-11-15
+
 ## [7.3.75] - 2019-11-18
+
 ## [7.3.76] - 2019-11-18
+
 ## [7.3.77] - 2019-11-18
+
 ## [7.3.78] - 2019-11-21
+
 ## [7.3.79] - 2019-11-25
+
 ## [7.3.80] - 2019-12-03
+
 ## [7.3.81] - 2019-12-04
+
 ## [7.3.82] - 2019-12-05
+
 ## [7.3.83] - 2020-01-08
+
 ## [7.3.85] - 2020-01-15
+
 ## [7.3.86] - 2020-01-20
+
 ## [7.3.87] - 2020-01-24
+
 ## [7.3.88] - 2020-01-29
+
 ## [7.3.89] - 2020-03-09
+
 ## [7.3.90] - 2020-03-09
+
 ## [7.3.91] - 2020-03-13
+
 ## [7.3.92] - 2020-03-24
+
 ## [7.3.93] - 2020-03-24
+
 ## [7.3.94] - 2020-03-27
+
 ## [7.3.95] - 2020-03-27
+
 ## [7.3.97] - 2020-04-03
+
 ## [7.3.98] - 2020-04-03
+
 ## [7.3.99] - 2020-04-03
+
 ## [7.3.100] - 2020-04-03
+
 ## [7.3.101] - 2020-04-06
+
 ## [7.3.102] - 2020-04-06
