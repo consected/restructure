@@ -543,6 +543,9 @@ module ActiveRecord
             f = :bigint
           elsif a.index(/^(?:number)|^(?:age|rank)$|(?:_number|_timestamp|score|_count)$/)
             f = :integer
+          elsif a == 'disabled'
+            f = :boolean
+            fopts = { default: false }
           end
           field_defs[attr_name] = f
 
