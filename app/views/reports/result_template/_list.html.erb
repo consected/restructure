@@ -1,0 +1,93 @@
+<%
+  @report = report if local_assigns[:report]
+  @results = results if local_assigns[:results]
+  @outer_block_id = outer_block_id if local_assigns[:outer_block_id]
+
+  col_classes = {}
+  col_tags = {}
+  col_hide = {}
+  show_as = {}
+
+  if @report.column_options
+    @report.column_options.classes&.each do |k,v|
+      col_classes[k] = v.is_a?(Array) ? v.join(' ') : v
+    end
+
+    @report.column_options.tags&.each do |k,v|
+      col_tags[k] = v
+    end
+
+    @report.column_options.hide&.each do |k,v|
+      col_hide[k] = v
+    end
+
+    @report.column_options.show_as&.each do |k,v|
+      show_as[k] = v
+    end
+
+  end
+
+
+  show_col_comments = @report.view_options&.show_column_comments
+  if show_col_comments
+    tn = @report.data_ref_table_name
+    sn = @report.data_ref_schema_name
+
+    tab_col_comments = Admin::MigrationGenerator.column_comments
+  end
+
+  if tn
+    corr_data_dic = @report.view_options&.corresponding_data_dic || tn&.sub("_data", '')
+    data_dic = Admin::MigrationGenerator.data_dic(corr_data_dic, nil_if_empty: divue)
+  end
+
+%>
+<div class="report-results-list-block" id="<%=@outer_block_id%>-table-block">
+
+  <div class="report-list">
+    
+    <div>
+
+      <% @results.each_row do |list_item| %>
+
+
+        <div class="report-list-result" id="report-item-<%=list_item[0]%>">
+         <% if editable? %>
+         <div class="report-list-el report-edit-btn-cell"><%= report_edit_btn list_item[0]%> </div>
+         <% end %>
+          <% i = 0 %>
+
+          <% 
+            list_item.each do |col| 
+              col_name = @results.fields[i]
+              unless col_hide[col_name]
+          %>
+          <div data-col-type="<%=@results.fields[i] %>" data-col-table="<%=result_tables[i] %>" class="report-list-el <%= @results.fields[i] == 'id' ? 'report-el-object-id' : '' %> <%= col_classes[@results.fields[i]] %>"><%
+                col_tag = col_tags[col_name] 
+                l = col&.scan("\n")&.length if col.is_a?(String)
+                l ||= 0
+                got_nl = (l >= 1)
+                col = col.to_json if col.is_a?(Hash)
+                col_tag ||= 'pre' if got_nl
+
+                col_tag = 'div' if show_as[col_name] == 'div'
+
+                if show_as[col_name] == 'url'
+                  col_url_parts = col&.scan(/^\[([\w\s\d]+)\]\((.+)\)$/)
+                  col = link_to(col_url_parts&.first&.first, col_url_parts&.first&.last, target: '_blank')
+                  col_tag = nil
+                  got_nl = nil
+                end
+                
+            %><% if got_nl || col_tag%><<%=col_tag%> class="<% if l > 4%>expandable<% end %>"><% end %><%= col %><% if got_nl%></<%=col_tag%>><% end %></div>
+          <%  
+              end
+              i += 1
+            end 
+          %>
+        </div>
+      <% end %>
+    
+    </div>
+  </table>
+</div>
