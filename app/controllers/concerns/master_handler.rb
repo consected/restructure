@@ -263,10 +263,10 @@ module MasterHandler
 
   def set_fields_from_params
     p = begin
-              secure_params
-        rescue StandardError
-          nil
-            end
+      secure_params
+    rescue StandardError
+      nil
+    end
     p&.each do |k, v|
       object_instance.send("#{k}=", v)
     end
@@ -360,7 +360,7 @@ module MasterHandler
     @flag_item_type = object_instance.item_type
     # Check for blank item_flag param to cover testing scenarios that do not return
     # the item_flag set. Which is reasonable and conceivable in a real form too
-    if ItemFlag.is_active_for?(@flag_item_type) && params[:item_flag]
+    if ItemFlag.active_for?(@flag_item_type) && params[:item_flag]
       secure_item_flag_params = params.require(:item_flag).permit(item_flag_name_id: [])
       flag_list = secure_item_flag_params[:item_flag_name_id].reject(&:blank?).map(&:to_i)
       ItemFlag.set_flags flag_list, object_instance, current_user
