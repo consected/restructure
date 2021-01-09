@@ -129,9 +129,13 @@
                 col = col.to_json if col.is_a?(Hash)
                 col_tag ||= 'pre' if got_nl
 
+                col_tag = 'div' if show_as[col_name] == 'div'
+
                 if show_as[col_name] == 'url'
-                  col_url_parts = col.scan(/^\[([\w\s\d]+)\]\((.+)\)$/)
-                  col = link_to(col_url_parts.first&.first, col_url_parts&.first&.last, target: '_blank')
+                  col_url_parts = col&.scan(/^\[([\w\s\d]+)\]\((.+)\)$/)
+                  col = link_to(col_url_parts&.first&.first, col_url_parts&.first&.last, target: '_blank')
+                  col_tag = 'div'
+
                 end
                 
             %><% if got_nl || col_tag%><<%=col_tag%> class="<% if l > 4%>expandable<% end %>"><% end %><%= col %><% if got_nl%></<%=col_tag%>><% end %></td>
