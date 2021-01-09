@@ -8,28 +8,32 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-        <a class="navbar-brand" href="/"><%= image_tag app_config_text :logo_filename, 'restructure-logo.svg' %></a>
+      <a class="navbar-brand" href="/"><%= image_tag app_config_text :logo_filename, 'restructure-logo.svg' %></a>
     </div>
-
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
         <% if current_user && @app_type_switches.length > 1 %>
-        <li>
-          <%= render partial: 'layouts/navbar/app_selector' %>
-        </li>
+          <li>
+            <%= render partial: 'layouts/navbar/app_selector' %>
+          </li>
         <% end %>
-
         <%
         if current_user && current_user.app_type_id
-          @primary_navs.reject{|a| a[:label].blank? }.each do |nav| %>
-        <li <% if nav[:active] %>class="active"<% end %> ><%= link_to nav[:label].html_safe, nav[:url], nav[:extras] %>
+          @primary_navs.reject{|a| a[:label].blank? }.each do |nav| 
+            icon = ''
+            if nav[:icon]
+              icon = "<i class=\"glyphicon glyphicon-#{nav[:icon]}\"></i> "
+            end
+            nlabel = "#{icon}#{nav[:label]}".html_safe
+          %>
+        <li <% if nav[:active] %>class="active"<% end %> ><%= link_to nlabel, nav[:url], nav[:extras] %>
           <% if nav[:sub] %>
-          <ul class="dropdown-menu" role="menu">
-            <% nav[:sub].each do |nav1| %>
-            <li <% if nav1[:active] %>class="active"<% end %> ><%= link_to nav1[:label].html_safe, nav1[:url], nav1[:extras] %></li>
-            <% end %>
-          </ul>
+            <ul class="dropdown-menu" role="menu">
+              <% nav[:sub].each do |nav1| %>
+                <li <% if nav1[:active] %>class="active"<% end %> ><%= link_to nav1[:label].html_safe, nav1[:url], nav1[:extras] %></li>
+              <% end %>
+            </ul>
           <% end %>
         </li>
         <%
@@ -37,12 +41,10 @@
         end
         %>
       </ul>
-
       <%= render partial: 'layouts/navbar/search' %>
-
       <ul class="nav navbar-nav navbar-right">
-      <% @secondary_navs.each do |nav| %>
-        <%
+        <% @secondary_navs.each do |nav| %>
+          <%
           drop = {}
           if nav[:sub]
             drop = {class: "dropdown-toggle", "data-toggle": "dropdown", role: "button", "aria-expanded": "false"}
@@ -52,18 +54,20 @@
 
           drop.merge! nav[:extras]
         %>
-        <li class="dropdown">
+          <li class="dropdown">
             <%= link_to nav[:label].html_safe, nav[:url], drop%>
-          <% if nav[:sub] %>
-          <ul class="dropdown-menu" role="menu">
-            <% nav[:sub].each do |nav1| %>
-            <li <% if nav1[:active] %>class="active"<% end %> ><%= link_to nav1[:label].html_safe, nav1[:url], nav1[:extras] %></li>
+            <% if nav[:sub] %>
+              <ul class="dropdown-menu" role="menu">
+                <% nav[:sub].each do |nav1| %>
+                  <li <% if nav1[:active] %>class="active"<% end %> ><%= link_to nav1[:label].html_safe, nav1[:url], nav1[:extras] %></li>
+                <% end %>
+              </ul>
             <% end %>
-          </ul>
-          <% end %>
-        </li>
+          </li>
         <% end %>
       </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container-fluid -->
 </nav>

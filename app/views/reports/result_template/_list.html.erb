@@ -43,20 +43,14 @@
 
 %>
 <div class="report-results-list-block" id="<%=@outer_block_id%>-table-block">
-
-  <div class="report-list">
-    
+  <div class="report-list" data-results-count="<%=@results.count%>">
     <div>
-
       <% @results.each_row do |list_item| %>
-
-
         <div class="report-list-result" id="report-item-<%=list_item[0]%>">
-         <% if editable? %>
-         <div class="report-list-el report-edit-btn-cell"><%= report_edit_btn list_item[0]%> </div>
-         <% end %>
+          <% if editable? %>
+            <div class="report-list-el report-edit-btn-cell"><%= report_edit_btn list_item[0]%> </div>
+          <% end %>
           <% i = 0 %>
-
           <% 
             list_item.each do |col| 
               col_name = @results.fields[i]
@@ -87,7 +81,6 @@
           %>
         </div>
       <% end %>
-    
     </div>
   </table>
 </div>

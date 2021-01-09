@@ -87,11 +87,17 @@ module NavHandler
         if l[:resource_type]
           rt = l[:resource_type].to_sym
           rn = l[:resource_name]
-          next unless current_user.has_access_to? :access, rt, rn
+          begin
+            next unless current_user.has_access_to? :access, rt, rn
+          rescue StandardError => e
+            logger.warn "Bad resource name or type specified: #{e}"
+            next
+          end
         end
         url = l[:url]
         label = l[:label]
-        @primary_navs << { label: label, url: url }
+        icon = l[:icon]
+        @primary_navs << { label: label, url: url, icon: icon }
       end
 
     end
