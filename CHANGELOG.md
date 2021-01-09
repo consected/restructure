@@ -18,12 +18,17 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Added] Report list view
+- [Added] Brand updates (logo)
 - [Added] Scripted jobs functionality in filestore pipelines
 - [Added] Standalone pages in layouts include web page styled views and file folders
 - [Added] improved migration generation and create_or_update migrations generated on app type export
 - [Added] External identifiers now use option configurations to apply dynamic definitions to fields and forms
 - [Added] improved DB table and field comments, automatically generated from captions and labels
 - [Added] activity_selector reference option
+- [Changed] app type refactoring and item flag name export / import
+- [Changed] item flag (name) improvements to guard against external data errors
+- [Changed] moved app configs and migrations to separate repo (https://github.com/consected/restructure-apps)
 - [Changed] improved image previewing and icons
 - [Changed] bugfixes in editable report forms and model reference edit buttons
 - [Changed] model reference handling in views
