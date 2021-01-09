@@ -1,3 +1,2 @@
-class FphsException < Exception
-
+class FphsException < StandardError
 end
