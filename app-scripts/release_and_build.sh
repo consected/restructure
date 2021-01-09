@@ -21,7 +21,6 @@ FPHS_LOAD_APP_TYPES=1 bundle exec rake assets:clobber
 git commit public/assets -m "Cleanup"
 git push
 
-
 GENVERFILE=shared/build_version.txt
 CURRVERFILE=version.txt
 ALLTAGS="$(git tag --sort=-taggerdate)"
@@ -35,6 +34,11 @@ echo "Next version: ${NEWVER}"
 if [ -z "${RELEASESTARTED}" ]; then
   echo "Starting git-flow release"
   git flow release start ${NEWVER}
+  RES=$?
+  if [ "$RES" != "0" ]; then
+    echo $RES
+    exit
+  fi
   git push --set-upstream origin release/${NEWVER}
   git flow release finish ${NEWVER}
 else
