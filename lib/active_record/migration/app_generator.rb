@@ -136,7 +136,9 @@ module ActiveRecord
 
         unless table_exists
           create_table "#{schema}.#{table_name}", comment: table_comment do |t|
-            t.belongs_to :master, index: true, foreign_key: true unless no_master_association
+            t.belongs_to :master, index: {
+               name: "dmbt_#{rand_id}_id_idx" 
+            }, foreign_key: true unless no_master_association
             create_fields t
             t.references :user, index: true, foreign_key: true
             t.timestamps null: false
@@ -197,7 +199,7 @@ module ActiveRecord
 
         unless table_exists
           create_table "#{schema}.#{table_name}", comment: table_comment do |t|
-            t.belongs_to :master, index: true, foreign_key: true
+            t.belongs_to :master, index: { name: "ei#{rand_id}_id_idx" }, foreign_key: true
             create_fields t
             t.references :user, index: true, foreign_key: true
             t.references :admin, index: true, foreign_key: true
@@ -206,7 +208,7 @@ module ActiveRecord
         end
         unless history_table_exists || model_is_view
           create_table "#{schema}.#{history_table_name}" do |t|
-            t.belongs_to :master, index: true, foreign_key: true
+            t.belongs_to :master, index: { name: "eih#{rand_id}_id_idx" }, foreign_key: true
             create_fields t, true
             t.references :user, index: true, foreign_key: true
             t.references :admin, index: true, foreign_key: true

@@ -6,18 +6,28 @@ APP_TYPE_ID=$1
 
 if [ -z "$APP_TYPE_ID" ]; then
   echo "Call with argument <app_type_id>"
-  exit
+  read -p 'Enter app type ID: ' APP_TYPE_ID
 fi
 
 if [ -z "$MOUNTPOINT" ]; then
-  if [ "$USER" == 'phil' ]; then
+  if [ "$RAILS_ENV" == 'production' ]; then
+    MOUNTPOINT=/efs1
+  elif [ "$USER" == 'phil' ]; then
     MOUNTPOINT=/media/phil/Data
   else
     MOUNTPOINT=/home/$USER/dev-filestore
   fi
 fi
 
-FS_ROOT=${MOUNTPOINT}/test-fphsfs
+echo "Mountpoint is: $MOUNTPOINT"
+
+if [ -z "${SUBDIR}" ]; then
+  ls ${MOUNTPOINT}
+  read -p 'Enter the selected directory: ' SUBDIR
+fi
+
+
+FS_ROOT=${MOUNTPOINT}/${SUBDIR}
 FS_DIR=main
 APPTYPE_DIR=app-type-${APP_TYPE_ID}
 
