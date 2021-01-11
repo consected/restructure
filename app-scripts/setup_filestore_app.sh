@@ -28,7 +28,7 @@ fi
 
 
 FS_ROOT=${MOUNTPOINT}/${SUBDIR}
-FS_DIR=main
+# FS_DIR=main
 APPTYPE_DIR=app-type-${APP_TYPE_ID}
 
 cd $FS_ROOT/$FS_DIR
