@@ -101,7 +101,7 @@ _fpa.masters = {
 
 
 
-            f.find('input[type="submit"]').click(function () {
+            f.find('[type="submit"]').click(function () {
                 var v = $(this).val();
                 var dov = false;
                 if (v === 'csv' || v === 'json') {

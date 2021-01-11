@@ -33,7 +33,7 @@ module Formatter
       # Replace each tag {{tag}}
       tags.each do |tag_container|
         tag = tag_container[2..-3]
-        tag_value = value_for_tag(tag, sub_data, tag_subs)
+        tag_value = value_for_tag(tag, sub_data, tag_subs, ignore_missing)
 
         # Finally, substitute the results into the original text
         all_content.gsub!(tag_container, tag_value)
@@ -63,7 +63,7 @@ module Formatter
       all_content
     end
 
-    def self.value_for_tag(tag, sub_data, tag_subs)
+    def self.value_for_tag(tag, sub_data, tag_subs, ignore_missing)
       missing = false
 
       tagpair = tag.split('.')

@@ -112,8 +112,11 @@ _fpa.postprocessors_reports = {
       }
       c = parseInt(c);
       data.count = { count: c, show_count: c };
-      var h = _fpa.templates['search-count-template'](data);
-      $('.search_count_reports').html(h);
+
+      if (_fpa.templates['search-count-template']) {
+        var h = _fpa.templates['search-count-template'](data);
+        $('.search_count_reports').html(h);
+      }
     }
 
 

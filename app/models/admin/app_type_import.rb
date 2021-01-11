@@ -33,6 +33,7 @@ module Admin::AppTypeImport
 
         # set the app type to allow automatic migrations to work
         admin.matching_user_app_type = app_type
+        app_type.setup_migrations
 
         res = results['app_type']
 

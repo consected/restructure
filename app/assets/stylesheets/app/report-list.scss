@@ -1,0 +1,15 @@
+.report-list {
+  padding: 1.3%;
+
+  .report-list-result {
+    padding: 1.4em 1em;
+    border-bottom: 1px solid rgb(228, 228, 228);
+  }
+
+  &[data-results-count="0"]:after {
+    content: "no results";
+    text-align: center;
+    font-size: 22px;
+    display: block;
+  }
+}

@@ -80,7 +80,7 @@ module AdminSetup
     if admins.blank? || action.blank?
       msg = <<~EOF
 
-        Add, update or remove admin users from the FPHS app
+        Add, update or remove admin users from the app
 
         Usage:
 

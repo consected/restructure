@@ -274,7 +274,7 @@ class Admin::AppType < Admin::AdminBase
   def setup_migrations
     return true unless Rails.env.development?
 
-    return true if self.class.where(default_schema_name: default_schema_name).count > 1
+    return true if self.class.active.where(default_schema_name: default_schema_name).count > 1
 
     migration_generator = Admin::MigrationGenerator.new(default_schema_name)
     migration_generator.add_schema
