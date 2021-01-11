@@ -1,0 +1,12 @@
+/*@import url("https://fonts.googleapis.com/css2?family=Ubuntu&display=swap");*/
+@import url("https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400");
+.standalone-page-container,
+.standalone-page-design {
+  /*font-family: "Ubuntu", sans-serif;*/
+  font-family: "Titillium Web", sans-serif;
+  font-size: 18px;
+}
+
+.notes-text {
+  font-size: 18px;
+}
