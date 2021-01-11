@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Settings
+  PageTitle = 'FPHS'
   DefaultMigrationSchema = 'ml_app'
   DefaultSchemaOwner = 'fphs'
 
