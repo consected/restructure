@@ -54,8 +54,8 @@ echo "Starting build container"
 cd ../restructure-build
 ./build.sh
 
-if [ ! -s ${CURRVERFILE} ]; then
-  echo "${CURRVERFILE} in $(pwd) was not set. The build was not successful"
+if [ ! -s ${GENVERFILE} ]; then
+  echo "${GENVERFILE} in $(pwd) was not set. The build was not successful"
   exit 1
 fi
 
