@@ -140,8 +140,8 @@ module Formatter
       "<ul><li>#{res.join("</li>\n  <li>")}</li></ul>'" if res.is_a? Array
     end
 
-    def self.plaintext(res, orig_val)
-      res = ActionController::Base.helpers.sanitize(res, orig_val)
+    def self.plaintext(res, _orig_val)
+      res = ActionController::Base.helpers.sanitize(res)
       res.gsub("\n", '<br>').html_safe
     end
 
@@ -153,13 +153,12 @@ module Formatter
       res.split("\n")
     end
 
-    def self.markup(res, orig_val)
-      Kramdown::Document.new(res, orig_val).to_html.html_safe
+    def self.markup(res, _orig_val)
+      Kramdown::Document.new(res).to_html.html_safe
     end
 
     def self.ignore_missing(res, _orig_val)
       res || ''
     end
-
   end
 end
