@@ -10,6 +10,8 @@ module Seeds
 
     def self.create_protocol_events
 
+      return unless Admin::AppType.find_by_id 1
+
       protocol = Classification::Protocol.active.find_or_initialize_by(name: 'Q1', app_type_id: 1)
       protocol.current_admin = auto_admin
       protocol.position = 20
@@ -75,6 +77,7 @@ EOF
     def self.setup
       log "In #{self}.setup"
       if Rails.env.test? || Classification::Protocol.active.count == 0
+
         create_protocol_events
         log "Ran #{self}.setup"
       else
