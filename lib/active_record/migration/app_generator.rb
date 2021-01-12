@@ -98,7 +98,8 @@ module ActiveRecord
             t.references :user, index: { name: "#{rand_id}_user_id_h_idx" }, foreign_key: true
             t.timestamps null: false
 
-            t.belongs_to table_name.singularize, index: { name: "#{rand_id}_b_id_h_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
+            t.belongs_to table_name.singularize, index: { name: "#{rand_id}_b_id_h_idx" },
+                                                 foreign_key: { to_table: "#{schema}.#{table_name}" }
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -136,9 +137,11 @@ module ActiveRecord
 
         unless table_exists
           create_table "#{schema}.#{table_name}", comment: table_comment do |t|
-            t.belongs_to :master, index: {
-               name: "dmbt_#{rand_id}_id_idx" 
-            }, foreign_key: true unless no_master_association
+            unless no_master_association
+              t.belongs_to :master, index: {
+                name: "dmbt_#{rand_id}_id_idx"
+              }, foreign_key: true
+            end
             create_fields t
             t.references :user, index: true, foreign_key: true
             t.timestamps null: false
@@ -154,7 +157,8 @@ module ActiveRecord
             t.references :user, index: { name: "#{rand_id}_user_idx" }, foreign_key: true
             t.timestamps null: false
 
-            t.belongs_to table_name.singularize, index: { name: "#{rand_id}_id_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
+            t.belongs_to table_name.singularize, index: { name: "#{rand_id}_id_idx" },
+                                                 foreign_key: { to_table: "#{schema}.#{table_name}" }
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -214,7 +218,8 @@ module ActiveRecord
             t.references :admin, index: true, foreign_key: true
             t.timestamps null: false
 
-            t.belongs_to "#{table_name.singularize}_table", index: { name: "#{table_name.singularize}_id_idx" }, foreign_key: { to_table: "#{schema}.#{table_name}" }
+            t.belongs_to "#{table_name.singularize}_table", index: { name: "#{table_name.singularize}_id_idx" },
+                                                            foreign_key: { to_table: "#{schema}.#{table_name}" }
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -298,8 +303,12 @@ module ActiveRecord
         new_colnames = fields.map(&:to_s) - standard_columns
         added = (new_colnames - old_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
         removed = (old_colnames - new_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
-        added_history = (new_colnames - old_history_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
-        removed_history = (old_history_colnames - new_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
+        added_history = (new_colnames - old_history_colnames - [belongs_to_model_field]).reject do |a|
+          a.to_s.index(ignore_fields)
+        end
+        removed_history = (old_history_colnames - new_colnames - [belongs_to_model_field]).reject do |a|
+          a.to_s.index(ignore_fields)
+        end
 
         idx = added.index('created_by_user_id')
         added[idx] = 'created_by_user' if idx
@@ -354,6 +363,28 @@ module ActiveRecord
           rescue StandardError, ActiveRecord::StatementInvalid
             nil
           end
+        end
+
+        if no_master_association
+          begin
+            remove_reference "#{schema}.#{table_name}", :master
+            remove_reference "#{schema}.#{history_table_name}", :master
+          rescue StandardError, ActiveRecord::StatementInvalid
+            nil
+          end
+
+        else
+          begin
+            add_reference "#{schema}.#{table_name}", :master, index: {
+              name: "dmbt_#{rand_id}_id_idx"
+            }, foreign_key: true
+
+            add_reference "#{schema}.#{history_table_name}", :master, index: { name: "#{rand_id}_history_master_id" },
+                                                                      foreign_key: true
+          rescue StandardError, ActiveRecord::StatementInvalid
+            nil
+          end
+
         end
 
         added.each do |c|
@@ -437,8 +468,8 @@ module ActiveRecord
             rescue StandardError, ActiveRecord::StatementInvalid
               nil
             end
-          else
-            remove_column "#{schema}.#{history_table_name}", c, fdef if c.in? history_col_names
+          elsif c.in? history_col_names
+            remove_column "#{schema}.#{history_table_name}", c, fdef
           end
         end
 
@@ -492,12 +523,11 @@ module ActiveRecord
                 prev_fields
               end
 
-        res = if to_type == :sym
-                res.map(&:to_sym)
-              else
-                res.map(&:to_s)
-              end
-        res
+        if to_type == :sym
+          res.map(&:to_sym)
+        else
+          res.map(&:to_s)
+        end
       end
 
       def col_names(to_type = nil)
@@ -609,7 +639,6 @@ module ActiveRecord
       def activity_log_trigger_sql
         base_name_id = "#{belongs_to_model.to_s.underscore.gsub(%r{__|/}, '_')}_id"
         <<~DO_TEXT
-
           CREATE OR REPLACE FUNCTION #{trigger_fn_name} ()
             RETURNS TRIGGER
             LANGUAGE plpgsql
@@ -637,11 +666,10 @@ module ActiveRecord
           END;
           $$;
 
-          
           DROP FUNCTION IF EXISTS #{schema}.log_#{table_name.singularize}_update () CASCADE;
           DROP TRIGGER IF EXISTS log_#{history_table_name}_insert ON #{schema}.#{table_name};
           DROP TRIGGER IF EXISTS log_#{history_table_name}_update ON #{schema}.#{table_name};
-          
+
           CREATE TRIGGER log_#{history_table_name}_insert
             AFTER INSERT ON #{schema}.#{table_name}
             FOR EACH ROW
