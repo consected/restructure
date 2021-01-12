@@ -146,7 +146,8 @@ class DynamicModel < ActiveRecord::Base
         begin
           # This may fail if an underlying dependent class (parent class) has been redefined by
           # another dynamic implementation, such as external identifier
-          if implementation_class_defined?(klass, fail_without_exception: true, fail_without_exception_newable_result: true)
+          if implementation_class_defined?(klass, fail_without_exception: true,
+                                                  fail_without_exception_newable_result: true)
             klass.send(:remove_const, model_class_name)
           end
         rescue StandardError => e
@@ -173,7 +174,9 @@ class DynamicModel < ActiveRecord::Base
 
         # Create an alias in the main namespace to make dynamic model easier to refer to
         begin
-          if implementation_class_defined?(Object, fail_without_exception: true, fail_without_exception_newable_result: true, class_name: model_class_name)
+          if implementation_class_defined?(Object, fail_without_exception: true,
+                                                   fail_without_exception_newable_result: true,
+                                                   class_name: model_class_name)
             Object.send(:remove_const, model_class_name)
           end
         rescue StandardError => e

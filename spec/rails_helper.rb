@@ -51,7 +51,6 @@ Warden.test_mode!
 #
 
 puts 'Validate and setup app dbs'
-# SetupHelper.setup_byebug
 SetupHelper.validate_db_setup
 
 # The DB setup can be forced to skip with an env variable

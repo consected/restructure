@@ -163,7 +163,7 @@ module Dynamic
         doptif = dopt.showable_if
       end
 
-      if doptif.is_a?(Hash) && doptif.first
+      if doptif.is_a?(Hash) && doptif.first && respond_to?(:master)
         # Generate an old version of the object prior to changes
         old_obj = dup
         changes.each do |k, v|
