@@ -6,6 +6,8 @@ module Dynamic
     include GeneralDataConcerns
 
     included do
+      after_commit :reset_model_references
+
       attr_accessor :action_name
 
       # a list of embedded items (full data for each model reference)
