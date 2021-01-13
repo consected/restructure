@@ -6,8 +6,8 @@ RSpec.describe Admin::MessageTemplate, type: :model do
   include MasterSupport
   include ModelSupport
   include PlayerInfoSupport
-  include ItemFlagSupport
   include ReportSupport
+  include ItemFlagSupport
 
   before :example do
     seed_database # to ensure embedded reports work
@@ -130,6 +130,8 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     create_reports
     rn = @report1.alt_resource_name
     @master.current_user = @user
+
+    expect(@item_flag).not_to be nil
 
     Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :general,
                                      resource_name: :view_reports, current_admin: @admin

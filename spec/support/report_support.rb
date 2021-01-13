@@ -29,6 +29,6 @@ module ReportSupport
     expect(@user.can?(:view_reports)).to be_truthy
     expect(@user.has_access_to?(:read, :report, rn)).to be_truthy
 
-    # expect(Report.find_by_sql(@report_sql).length).not be_empty
+    expect(User.find_by_sql([@report_sql]).length).to be > 0
   end
 end
