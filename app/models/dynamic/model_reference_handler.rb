@@ -43,13 +43,14 @@ module Dynamic
       use_options_order_by ||= @config_order_model_references
 
       res = []
-      if reference_type == :references
+      case reference_type
+      when :references
         refs = extra_log_type_config.references
-      elsif reference_type == :e_sign
+      when :e_sign
         refs = extra_log_type_config.e_sign && extra_log_type_config.e_sign[:document_reference]
       end
-      @model_references[mr_key] = res
 
+      @model_references[mr_key] = res
       return res unless extra_log_type_config && refs
 
       refs.each do |_ref_key, refitem|
@@ -131,35 +132,29 @@ module Dynamic
 
           a = ref_config[:add]
           without_reference = (ref_config[:without_reference] == true)
+
+          pass_options = {
+            to_record_type: ref_type,
+            filter_by: fb,
+            active: true,
+            without_reference: without_reference
+          }
+
           if a == 'many'
             l = ref_config[:limit]
-            under_limit = true
 
-            if l&.is_a?(Integer)
-              under_limit = (ModelReference.find_references(master,
-                                                            to_record_type: ref_type,
-                                                            filter_by: fb,
-                                                            active: true,
-                                                            without_reference: without_reference).length < l)
-            end
+            under_limit =
+              if l.is_a?(Integer)
+                (ModelReference.find_references(master, **pass_options).length < l)
+              else
+                true
+              end
 
             ires = a if under_limit
           elsif a == 'one_to_master'
-            if ModelReference.find_references(master,
-                                              to_record_type: ref_type,
-                                              filter_by: fb,
-                                              active: true,
-                                              without_reference: without_reference).empty?
-              ires = a
-            end
+            ires = a if ModelReference.find_references(master, **pass_options).empty?
           elsif a == 'one_to_this'
-            if ModelReference.find_references(self,
-                                              to_record_type: ref_type,
-                                              filter_by: fb,
-                                              active: true,
-                                              without_reference: without_reference).empty?
-              ires = a
-            end
+            ires = a if ModelReference.find_references(self, **pass_options).empty?
           elsif a.present?
             raise FphsException, "Unknown add type for creatable_model_references: #{a}"
           end
