@@ -22,7 +22,7 @@ class Admin::AppTypesController < AdminController
     end
 
     begin
-      _, results = Admin::AppType.import_config(uploaded_io.read, current_admin, format: f.to_sym)
+      @app_type, results = Admin::AppType.import_config(uploaded_io.read, current_admin, format: f.to_sym)
     rescue StandardError, FphsException => e
       @message = 'FAILED'
       @primary = "#{e}\n#{e.backtrace.join("\n")}"

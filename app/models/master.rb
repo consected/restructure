@@ -624,6 +624,19 @@ class Master < ActiveRecord::Base
     true
   end
 
+  # Support Imports
+  def check_valid?
+    true
+  end
+
+  def item_type_us
+    'master'
+  end
+
+  def model_data_type
+    :master
+  end
+
   private
 
   def init_vars_master
@@ -646,7 +659,9 @@ class Master < ActiveRecord::Base
   # The current_user must be set using a persisted, active User
   def set_user
     cu = @current_user
-    raise "Attempting to set user with non user: #{cu}" unless cu.is_a?(User) && cu.persisted? && !cu.disabled
+    unless cu.is_a?(User) && cu.persisted? && !cu.disabled
+      raise "Attempting to set user with non user: #{cu.nil? ? 'nil' : cu}"
+    end
 
     write_attribute :user_id, cu.id
   end

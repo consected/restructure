@@ -51,8 +51,8 @@ Warden.test_mode!
 #
 
 puts 'Validate and setup app dbs'
-# SetupHelper.setup_byebug
 SetupHelper.validate_db_setup
+SetupHelper.migrate_if_needed
 
 # The DB setup can be forced to skip with an env variable
 # It will automatically skip if a specific table is already in place
@@ -87,7 +87,7 @@ Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 
 # Checks for pending migrations before tests are run.
 # If you are not using ActiveRecord, you can remove this line.
-puts 'Check migrations'
+puts 'Enforce migrations'
 ActiveRecord::Migration.maintain_test_schema!
 
 RSpec.configure do |config|

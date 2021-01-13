@@ -104,7 +104,8 @@ module HandlesUserBase
     end
 
     def permitted_params
-      res = attribute_names.map(&:to_sym) - %i[disabled user_id created_at updated_at tracker_id tracker_history_id admin_id]
+      res = attribute_names.map(&:to_sym) - %i[disabled user_id created_at updated_at tracker_id tracker_history_id
+                                               admin_id]
       refine_permitted_params res
     end
 
@@ -205,11 +206,11 @@ module HandlesUserBase
     return current_user if self.class.no_master_association
 
     if respond_to?(:master) && master
-      current_user = master.current_user
-      current_user
+      master.current_user
+
     elsif respond_to?(:item) && item.respond_to?(:master) && item.master
-      current_user = item.master.current_user
-      current_user
+      item.master.current_user
+
     else
       raise "master is nil and can't be used to get the current user" unless validating?
 
@@ -275,6 +276,36 @@ module HandlesUserBase
     return @referenced_from unless @referenced_from.nil?
 
     @referenced_from = ModelReference.find_where_referenced_from self
+  end
+
+  # A referring record is either set based on the the specific record that the controller say is being viewed
+  # when an action is performed, or
+  # if there is only one model reference we use that instead.
+  def referring_record
+    return @referring_record == :nil ? nil : @referring_record unless @referring_record.nil?
+
+    res = referenced_from
+    @referring_record = res.first&.from_record
+    return @referring_record if @referring_record && res.length == 1
+
+    @referring_record = :nil
+    nil
+  end
+
+  # Top referring record is the top record in the reference hierarchy
+  def top_referring_record
+    return @top_referring_record == :nil ? nil : @top_referring_record unless @top_referring_record.nil?
+
+    @top_referring_record = next_up = referring_record
+    while next_up
+      next_up = next_up.referring_record
+      @top_referring_record = next_up if next_up
+    end
+
+    return @top_referring_record if @top_referring_record
+
+    @top_referring_record = :nil
+    nil
   end
 
   def model_reference_disable
@@ -496,7 +527,8 @@ module HandlesUserBase
 
   def check_can_save
     if persisted? && !can_edit?
-      raise FphsException, "This item is not editable (#{respond_to?(:human_name) ? human_name : self.class.name}) #{id}"
+      raise FphsException,
+            "This item is not editable (#{respond_to?(:human_name) ? human_name : self.class.name}) #{id}"
     end
 
     if !persisted? && !can_create?
@@ -539,11 +571,13 @@ module HandlesUserBase
               if c_var == :all
                 errors.add k.to_sym, "is invalid. Expected value to be #{v}"
               elsif c_var == :any
-                errors.add k.to_sym, "is one of several possible fields that is invalid - one must match. Expected value #{v}"
+                errors.add k.to_sym,
+                           "is one of several possible fields that is invalid - one must match. Expected value #{v}"
               elsif c_var == :not_any
                 errors.add k.to_sym, "is invalid. Expected value not to be #{v}"
               elsif c_var == :not_all
-                errors.add k.to_sym, "is one of several possible fields that is invalid - none must match. Expected value not #{v}"
+                errors.add k.to_sym,
+                           "is one of several possible fields that is invalid - none must match. Expected value not #{v}"
               end
             end
           end

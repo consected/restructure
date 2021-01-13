@@ -8,7 +8,7 @@ module NavHandler
   def setup_navs
     return true if request.xhr?
 
-    admin_view = current_admin && is_a?(AdminController)
+    admin_view = current_admin && (is_a?(AdminController) || controller_name == 'pages' && action_name == 'index')
 
     @primary_navs = []
     @app_type_switches = nil
@@ -17,11 +17,13 @@ module NavHandler
 
     if current_user
       unless app_config_text(:menu_research_label) == 'none'
-        @primary_navs << { label: app_config_text(:menu_research_label, 'Research'), url: '/masters/', route: 'masters#index' }
+        @primary_navs << { label: app_config_text(:menu_research_label, 'Research'), url: '/masters/',
+                           route: 'masters#index' }
       end
 
       if current_user.can? :create_master
-        @primary_navs << { label: app_config_text(:menu_create_master_record_label, 'Create Master'), url: '/masters/new', route: 'masters#new' }
+        @primary_navs << { label: app_config_text(:menu_create_master_record_label, 'Create Master'),
+                           url: '/masters/new', route: 'masters#new' }
       end
 
       setup_page_layout_navs
@@ -35,7 +37,8 @@ module NavHandler
         @primary_navs << { label: 'Reports', url: '/reports', route: 'reports#index' }
       end
       if admin_view || current_user.can?(:print)
-        @primary_navs << { label: 'Print', url: '#body-top', extras: { id: 'print-action', class: 'print-action-button' } }
+        @primary_navs << { label: 'Print', url: '#body-top',
+                           extras: { id: 'print-action', class: 'print-action-button' } }
       end
       if admin_view || current_user.can?(:import_csv)
         @primary_navs << { label: 'Import CSV', url: '/imports', route: 'imports#index' }
@@ -107,7 +110,8 @@ module NavHandler
     if current_admin
       admin_sub << { label: 'manage', url: '/', route: '#root' }
       admin_sub << { label: 'password', url: '/admins/edit', extras: { 'data-do-action' => 'admin-change-password' } }
-      admin_sub << { label: 'logout_admin', url: '/admins/sign_out', extras: { method: :delete, 'data-do-action' => 'admin-logout' } }
+      admin_sub << { label: 'logout_admin', url: '/admins/sign_out',
+                     extras: { method: :delete, 'data-do-action' => 'admin-logout' } }
     elsif current_user && Admin.for_user(current_user)
       admin_sub << { label: 'Admin Login', url: '/admins/sign_in', route: 'admins#sign_in' }
     end
@@ -119,7 +123,8 @@ module NavHandler
     @app_type_switches = current_user.accessible_app_types.map { |m| [m.label, m.id] }
 
     user_sub << { label: 'password', url: '/users/edit', extras: { 'data-do-action' => 'user-change-password' } }
-    user_sub << { label: 'logout', url: '/users/sign_out', extras: { method: :delete, 'data-do-action' => 'user-logout' } }
+    user_sub << { label: 'logout', url: '/users/sign_out',
+                  extras: { method: :delete, 'data-do-action' => 'user-logout' } }
   end
 
   def standalone_layouts?

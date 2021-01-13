@@ -263,6 +263,28 @@ class ModelReference < ActiveRecord::Base
     res
   end
 
+  #
+  # Convert a string, class or instance to a symbol association name
+  # @param [<Type>] record_type <description>
+  # @return [<Type>] <description>
+  def self.record_type_to_assoc_sym(record_type)
+    if record_type.is_a?(String) || record_type.is_a?(Symbol)
+      res = record_type.to_s
+    elsif record_type.respond_to? :name
+      res = record_type.name.ns_underscore
+    elsif record_type.respond_to? :class
+      res = record_type.class.name.ns_underscore
+    else
+      return
+    end
+
+    assoc = res.pluralize
+    return assoc.to_sym if Master.get_all_associations.include?(assoc)
+
+    raise FphsException,
+          "record_type_to_assoc_sym produced an association #{assoc} not recognized by Master"
+  end
+
   def force_create?
     @force_create
   end

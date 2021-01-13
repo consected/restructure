@@ -230,7 +230,7 @@ module Formatter
 
       current_user = data[:current_user_instance]
 
-      run_embedded_report tag, data if tag.start_with? 'embedded_report_'
+      return run_embedded_report tag, data if tag.start_with? 'embedded_report_'
 
       orig_val = data[tag] || data[tag.to_sym]
       res = orig_val || ''

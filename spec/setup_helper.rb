@@ -69,23 +69,20 @@ module SetupHelper
     raise "Database #{db_name} does not have role fphsetl set up" unless res == 1
   end
 
-  # Setup the byebug service if breakpoints are set in the .byebugrc file
-  # if not, just skip it
-  def self.setup_byebug
-    bbrc = Rails.root.join('.byebugrc')
-    init_bb = false
-    if File.exist?(bbrc)
-      fbb = File.read(bbrc)
-      init_bb = !!fbb.index(/^b /)
-    end
+  def self.migrate_if_needed
+    puts 'Check migrations'
 
-    if ENV['BYEBUG'] == 'true'
-      puts "Running Remote Byebug server.\nTo connect, run:\n   byebug -R localhost:8099"
-      require 'byebug/core'
-      Byebug.wait_connection = true
-      Byebug.start_server('localhost', 8099)
-    end
-    byebug if init_bb
+    # Outside the current transaction
+    Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do
+        dirname = 'db/migrations'
+        mc = ActiveRecord::MigrationContext.new(dirname)
+        if mc.needs_migration?
+          puts 'Running migrations'
+          mc.migrate
+        end
+      end
+    end.join
   end
 
   def self.reload_configs

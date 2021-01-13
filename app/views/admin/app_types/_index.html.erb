@@ -17,6 +17,7 @@
       <th>Default Schema Name</th>
       <th>Disabled</th>
       <th>Last Admin Update</th>
+      <th>Filestore setup</th>
     </tr>
   </thead>
 
@@ -31,7 +32,9 @@
         <td><%= list_item.disabled ? 'disabled' : ''%></td>
 
         <td><%= list_item.admin_name %></td>
+        <td><code>app-scripts/setup_filestore_app.sh <%=list_item.id%></code></td>
         <td><%= link_to 'export json', admin_app_type_path(list_item, export_format: :json) %> | <%= link_to 'export yaml', admin_app_type_path(list_item, export_format: :yaml) %></td>
+
       </tr>
     <% end %>
   </tbody>
