@@ -365,26 +365,22 @@ module ActiveRecord
           end
         end
 
-        if no_master_association
-          begin
-            remove_reference "#{schema}.#{table_name}", :master
-            remove_reference "#{schema}.#{history_table_name}", :master
-          rescue StandardError, ActiveRecord::StatementInvalid
-            nil
-          end
+        if no_master_association && !reverting? && col_names.include?('master_id')
 
-        else
-          begin
-            add_reference "#{schema}.#{table_name}", :master, index: {
-              name: "dmbt_#{rand_id}_id_idx"
-            }, foreign_key: true
+          remove_reference "#{schema}.#{table_name}", :master
+          remove_reference "#{schema}.#{history_table_name}", :master
 
-            add_reference "#{schema}.#{history_table_name}", :master, index: { name: "#{rand_id}_history_master_id" },
-                                                                      foreign_key: true
-          rescue StandardError, ActiveRecord::StatementInvalid
-            nil
-          end
+        elsif !no_master_association && !reverting? && !col_names.include?('master_id')
+          add_reference "#{schema}.#{table_name}", :master,
+                        index: {
+                          name: "dmbt_#{rand_id}_id_idx"
+                        }, foreign_key: true
 
+          add_reference "#{schema}.#{history_table_name}", :master,
+                        index: {
+                          name: "#{rand_id}_history_master_id"
+                        },
+                        foreign_key: true
         end
 
         added.each do |c|
