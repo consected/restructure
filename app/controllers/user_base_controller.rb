@@ -41,8 +41,17 @@ class UserBaseController < ApplicationController
     end
 
     # If the user requests a change to the app type from the nav bar selector, make the change
-    if params[:use_app_type].present?
-      a = all_apps.select { |app_id| app_id == params[:use_app_type].to_i }.first
+    uat = params[:use_app_type]
+    
+    if uat.present?
+      if uat.to_i.to_s == uat
+        a = all_apps.select { |app_id| app_id == uat }.first
+      else  
+        a = Admin::AppType
+          .all_available_to(current_user)
+          .select{ |app| app.name == uat }
+          .map(&:id).first
+      end
       if a && current_user.app_type_id != a
         current_user.app_type_id = a
         current_user.save

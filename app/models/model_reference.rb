@@ -221,6 +221,7 @@ class ModelReference < ActiveRecord::Base
   end
 
   def self.substitute_filter(filter, data)
+    filter = filter.dup
     if filter.is_a? Hash
       filter.each do |k, v|
         if v.is_a?(String) && v.include?('{{')
