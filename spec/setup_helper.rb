@@ -69,6 +69,22 @@ module SetupHelper
     raise "Database #{db_name} does not have role fphsetl set up" unless res == 1
   end
 
+  def self.migrate_if_needed
+    puts 'Check migrations'
+
+    # Outside the current transaction
+    Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do
+        dirname = 'db/migrations'
+        mc = ActiveRecord::MigrationContext.new(dirname)
+        if mc.needs_migration?
+          puts 'Running migrations'
+          mc.migrate
+        end
+      end
+    end.join
+  end
+
   def self.reload_configs
     Rails.logger.info 'Reload configs'
     AppControl.define_models
