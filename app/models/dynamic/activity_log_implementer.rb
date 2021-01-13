@@ -143,7 +143,7 @@ module Dynamic
       def permitted_params
         fts = fields_to_sync.map(&:to_sym)
         attribute_names.map(&:to_sym) -
-          [:disabled, :user_id, :created_at, :updated_at, "#{parent_type}_id".to_sym, parent_type, :tracker_id] +
+          [:user_id, :created_at, :updated_at, "#{parent_type}_id".to_sym, parent_type, :tracker_id] +
           [:item_id] -
           fts
       end
