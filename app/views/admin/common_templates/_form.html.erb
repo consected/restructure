@@ -69,7 +69,7 @@
   </div>
   <% end %>
 
-<% if @show_extra_help_info %>
+<% if @show_extra_help_info && @show_extra_help_info[:text] %>
   <div class="form-group" style="vertical-align: top">
     <label><%= @show_extra_help_info[:title] %></label>
     <div style="width: 800px; height: 80vh;">
@@ -78,6 +78,12 @@
       </textarea>
     </div>
   </div>
+<% elsif @show_extra_help_info && @show_extra_help_info[:form_info_partial] %>
+    <div class="form-group">
+      <div class="al-options-ref-block">
+        <%= render partial: @show_extra_help_info[:form_info_partial], locals: {object_instance: object_instance} %>
+      </div>
+    </div>
 <% end %>
 
   <div class="form-group">
