@@ -2,7 +2,7 @@
 <%
   no_create = no_edit rescue nil
 %>
-<% unless controller_name == 'pages' %>
+<% unless controller_name == 'pages' && action_name != 'reference_data' %>
   <%= link_to "admin menu", "/", class: "btn btn-warning" %>
 
   <%if @sub_processes || @protocol_events%>
