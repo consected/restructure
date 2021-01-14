@@ -18,3 +18,26 @@
   </ul>
   <div id="activity-list-detail" class="activity-list-detail"></div>
 </div>
+<div class="activity-list-references">
+  <label>references</label>
+  <ul class="activity-list">
+  <% show_refs = []
+     object_instance.option_configs.each do |oc| 
+       oc&.references&.each do |ref| %>
+    <li>
+    <%    got = ref.is_a?(Hash) ? ref.first.first : ref.first 
+          next unless got
+
+          got = got.to_s
+          unless show_refs.include?(got)
+            show_refs << got
+          end
+    %>
+    <%= got %>
+    </li>
+  <%  end 
+    end 
+  %>
+  </ul>
+  <div id="activity-list-detail" class="activity-list-detail"></div>
+</div>

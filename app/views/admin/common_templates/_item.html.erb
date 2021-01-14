@@ -22,18 +22,19 @@
 
         test_assoc_ids = nil if test_assoc_ids == p.to_s
         test_assoc = nil if test_assoc_ids == test_assoc || test_assoc == p.to_s
+
+        list_val = list_item.send(p)
     %>
 
-    <% if test_assoc && list_item.respond_to?(test_assoc) %>
+    <% if p.to_s.end_with?('options') || p.to_s.end_with?('template') %>
+    <% elsif test_assoc && list_item.respond_to?(test_assoc) %>
       <td class="admin-field-<%=p%>"><%= list_item.send(test_assoc).to_s %></td>
     <% elsif test_assoc_ids && list_item.respond_to?(test_assoc_ids) %>
       <td class="admin-field-<%=p%>"><%= list_item.send(test_assoc_ids).map(&:to_s).join("; ") %></td>
-    <% elsif p.to_s.end_with?('_error') %>
-      <td class="admin-field-<%=p%>"><pre class="expandable"><%= list_item.send(p) %></pre></td>
+    <% elsif p.to_s.end_with?('_error') || list_val.is_a?(String) && list_val.include?("\n") %>
+      <td class="admin-field-<%=p%>"><pre class="expandable"><%= list_val %></pre></td>
     <% else %>
-      <% unless p.to_s.end_with?('options') || p.to_s.end_with?('template') %>
-        <td class="admin-field-<%=p%>"><%= list_item.send(p) %></td>
-      <% end %>
+      <td class="admin-field-<%=p%>"><%= list_val %></td>
     <% end %>
     <% end %>
 
