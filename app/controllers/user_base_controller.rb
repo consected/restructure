@@ -44,8 +44,8 @@ class UserBaseController < ApplicationController
     uat = params[:use_app_type]
     
     if uat.present?
-      if uat.to_i.to_s == uat
-        a = all_apps.select { |app_id| app_id == uat }.first
+      if uat.to_i > 0
+        a = all_apps.select { |app_id| app_id == uat.to_i }.first
       else  
         a = Admin::AppType
           .all_available_to(current_user)
