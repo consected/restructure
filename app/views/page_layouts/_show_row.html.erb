@@ -56,6 +56,7 @@
             url_parts.compact!
 
             limit = resource_def['limit']
+            cache_result = resource_def['cache_result']
             embed_all_references = 'true' if resource_def['embed_all_references']
 
             resource_id = resource_def['id'] || @resource_id
@@ -71,6 +72,8 @@
               "embed_all_references=#{embed_all_references}",
               filters
             ]
+
+            param_parts << "cache_result=#{Digest::SHA256.hexdigest partial_cache_key(:page_layout)}" if cache_result
             param_parts.compact!
 
             col_url = "/#{url_parts.join("/")}?#{param_parts.join("&")}"
