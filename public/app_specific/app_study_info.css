@@ -10,3 +10,9 @@
 .notes-text {
   font-size: 18px;
 }
+
+.footer li {
+  list-style: none;
+  list-style-position: none;
+  list-style-type: none;
+}
