@@ -12,6 +12,7 @@ module Dynamic
 
     included do
       attr_accessor :create_count, :just_assigned, :assign_all, :assign_all_request, :existing_item_updated
+
       after_initialize :init_vars_external_id_handler
 
       before_validation :during_create_master
@@ -267,7 +268,7 @@ module Dynamic
     # @param [Hash] attr - attributes to be updated
     # @return [Boolean] result from super
     def update(attr)
-      unless persisted? || external_id
+      if (self.class.allow_to_generate_ids? || self.class.prevent_edit?) && !(persisted? || external_id)
         attr.delete self.class.external_id_attribute
         assign_generated_or_random_id
       end
@@ -310,7 +311,7 @@ module Dynamic
 
       # Merge in the attributes from the existing item, to make the new instance represent the original
       attributes.each do |k, v|
-        next_item.send("#{k}=", v) unless v.blank? || k.in?(['user_id', 'master_id'])
+        next_item.send("#{k}=", v) unless v.blank? || k.in?(%w[user_id master_id])
       end
 
       next_item.current_user = c_user

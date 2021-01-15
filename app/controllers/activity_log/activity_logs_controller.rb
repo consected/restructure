@@ -186,7 +186,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
     creatables = @master_objects.build.creatables(**options)
 
-    extras = {
+    {
       al_type: al_type,
       item_type: item_type_us,
       item_types_name: @item_type,
@@ -195,8 +195,6 @@ class ActivityLog::ActivityLogsController < UserBaseController
       @item_type => items,
       creatables: creatables
     }
-
-    extras
   end
 
   def set_additional_attributes(obj)
