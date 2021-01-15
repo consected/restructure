@@ -116,6 +116,42 @@ if [ "$TEMP_ENV" == 'zeus-production' ]; then
   psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < ../fphs-app-configs/fphs-sql/grant_roles_access_to_zeus.sql
 fi
 
+psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $fphs 2>&1 << EOF
+REVOKE ALL ON SCHEMA ${SCHEMA_NAME} FROM fphs;
+GRANT ALL ON SCHEMA ${SCHEMA_NAME} TO fphs;
+GRANT USAGE ON SCHEMA ${SCHEMA_NAME} TO fphsadm;
+GRANT USAGE ON SCHEMA ${SCHEMA_NAME} TO fphsusr;
+GRANT USAGE ON SCHEMA ${SCHEMA_NAME} TO fphsetl;
+GRANT ALL ON ALL TABLES IN SCHEMA ${SCHEMA_NAME} TO fphs;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ${SCHEMA_NAME} TO fphsusr;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ${SCHEMA_NAME} TO fphsetl;
+GRANT SELECT, INSERT, DELETE, TRUNCATE, UPDATE ON ALL TABLES IN SCHEMA ${SCHEMA_NAME} TO fphsadm;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA ${SCHEMA_NAME} TO fphs;
+GRANT SELECT, USAGE ON ALL SEQUENCES IN SCHEMA ${SCHEMA_NAME} TO fphsusr;
+GRANT SELECT, USAGE ON ALL SEQUENCES IN SCHEMA ${SCHEMA_NAME} TO fphsetl;
+GRANT SELECT, USAGE ON ALL SEQUENCES IN SCHEMA ${SCHEMA_NAME} TO fphsadm;
+DO \$body\$
+BEGIN
+  IF EXISTS (
+    SELECT * FROM pg_catalog.pg_roles WHERE rolname = 'fphsrailsapp'
+    ) THEN
+GRANT USAGE ON SCHEMA ${SCHEMA_NAME} TO fphsrailsapp;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ${SCHEMA_NAME} TO fphsrailsapp;
+GRANT SELECT, USAGE ON ALL SEQUENCES IN SCHEMA ${SCHEMA_NAME} TO fphsrailsapp;
+END IF;
+END \$body\$; 
+DO \$body\$
+BEGIN
+  IF EXISTS (
+    SELECT * FROM pg_catalog.pg_roles WHERE rolname = 'fphsrailsapp1'
+    ) THEN
+GRANT USAGE ON SCHEMA ${SCHEMA_NAME} TO fphsrailsapp1;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ${SCHEMA_NAME} TO fphsrailsapp1;
+GRANT SELECT, USAGE ON ALL SEQUENCES IN SCHEMA ${SCHEMA_NAME} TO fphsrailsapp1;
+END IF;
+END \$body\$;
+EOF
+
 echo "Note:"
 echo "For Athena or Filestore, it may be necessary to force the migrations that have been completed directly in the database"
 echo "  rails db"
