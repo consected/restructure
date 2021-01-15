@@ -506,12 +506,12 @@
 
 
   Handlebars.registerHelper('template', function (source) {
-    return Handlebars.compile(source)(this);
+    return Handlebars.compile(source, _fpa.HandlebarsCompileOptions)(this);
   });
 
 
   Handlebars.registerHelper('compile_template', function (source) {
-    return Handlebars.compile(source);
+    return Handlebars.compile(source, _fpa.HandlebarsCompileOptions);
   });
 
   Handlebars.registerHelper('run_template', function (template, context) {
