@@ -13,7 +13,6 @@ class Admin::UserAccessControl < ActiveRecord::Base
   after_save :invalidate_cache
 
   attr_accessor :allow_bad_resource_name
-  cattr_accessor :latest_update
 
   def self.resource_types
     %i[table general limited_access report activity_log_type external_id_assignments]
@@ -108,7 +107,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
       ).uniq
     elsif resource_type == :general
       general_resource_names
-    elsif resource_type == :external_id_assignments || resource_type == :limited_access
+    elsif %i[external_id_assignments limited_access].include?(resource_type)
       ExternalIdentifier.active.map(&:resource_name) + DynamicModel.active.map(&:resource_name)
     elsif resource_type == :report
       Report.active.map(&:alt_resource_name) + Report.active.map(&:name) + ['_all_reports_']
@@ -163,7 +162,9 @@ class Admin::UserAccessControl < ActiveRecord::Base
     app_type_id = alt_app_type_id || user&.app_type_id
 
     if can_perform
-      unless can_perform.is_a?(Array) || valid_access_level?(on_resource_type, can_perform) || valid_combo_level?(on_resource_type, can_perform)
+      unless can_perform.is_a?(Array) || valid_access_level?(on_resource_type,
+                                                             can_perform) || valid_combo_level?(on_resource_type,
+                                                                                                can_perform)
         raise FphsException, "Access level #{can_perform} does not exist for resource type #{on_resource_type}"
       end
 
@@ -197,7 +198,8 @@ class Admin::UserAccessControl < ActiveRecord::Base
   def self.create_all_for(app_type, admin, default_access = nil)
     rt = :table
     resource_names_for(rt).each do |rn|
-      res = app_type.user_access_controls.build resource_name: rn, resource_type: rt, access: default_access, current_admin: admin, user_id: nil
+      res = app_type.user_access_controls.build resource_name: rn, resource_type: rt, access: default_access,
+                                                current_admin: admin, user_id: nil
       res.save! if app_type.persisted?
     end
   end
@@ -207,20 +209,25 @@ class Admin::UserAccessControl < ActiveRecord::Base
   def self.create_control_for_all_apps(admin, resource_type, resource_name, default_access: nil, disabled: nil)
     Admin::AppType.active.all.each do |app_type|
       # Fails quietly if the item already exists
-      Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: resource_type, resource_name: resource_name, access: default_access, current_admin: admin)
+      Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: resource_type,
+                                      resource_name: resource_name, access: default_access, current_admin: admin)
     end
   end
 
   def self.create_template_control(admin, app_type, resource_type, resource_name, default_access: :read, disabled: nil)
     # Fails quietly if the item already exists
-    Admin::UserRole.create(role_name: Settings::AppTemplateRole, app_type: app_type, user: User.template_user, current_admin: admin)
+    Admin::UserRole.create(role_name: Settings::AppTemplateRole, app_type: app_type, user: User.template_user,
+                           current_admin: admin)
 
-    uac = Admin::UserAccessControl.where(role_name: Settings::AppTemplateRole, app_type: app_type, resource_type: resource_type, resource_name: resource_name).first
+    uac = Admin::UserAccessControl.where(role_name: Settings::AppTemplateRole, app_type: app_type,
+                                         resource_type: resource_type, resource_name: resource_name).first
 
     if uac
-      uac.update(role_name: Settings::AppTemplateRole, app_type: app_type, resource_type: resource_type, resource_name: resource_name, access: default_access, disabled: disabled, current_admin: admin)
+      uac.update(role_name: Settings::AppTemplateRole, app_type: app_type, resource_type: resource_type,
+                 resource_name: resource_name, access: default_access, disabled: disabled, current_admin: admin)
     else
-      Admin::UserAccessControl.create(role_name: Settings::AppTemplateRole, app_type: app_type, resource_type: resource_type, resource_name: resource_name, access: default_access, disabled: disabled, current_admin: admin)
+      Admin::UserAccessControl.create(role_name: Settings::AppTemplateRole, app_type: app_type,
+                                      resource_type: resource_type, resource_name: resource_name, access: default_access, disabled: disabled, current_admin: admin)
     end
   end
 
@@ -270,6 +277,17 @@ class Admin::UserAccessControl < ActiveRecord::Base
     res
   end
 
+  def self.latest_update
+    return @latest_update if @latest_update
+
+    obj = reorder('').last
+    @latest_update = obj&.updated_at || obj&.created_at
+  end
+
+  def self.reset_latest_update
+    @latest_update = nil
+  end
+
   def bad_resource_name(cache_resource_names_for_type = nil)
     return if disabled
     return true if resource_name.nil?
@@ -298,12 +316,15 @@ class Admin::UserAccessControl < ActiveRecord::Base
     elsif !allow_bad_resource_name && (resource_name.nil? || !self.class.resource_names_for(resource_type.to_sym).include?(resource_name.to_s))
       errors.add :resource_name, "is an invalid value (#{resource_name} in #{resource_type})"
     elsif !disabled
-      res = self.class.access_for? user, nil, resource_type, resource_name, alt_role_name: role_name, alt_app_type_id: app_type_id
+      res = self.class.access_for? user, nil, resource_type, resource_name, alt_role_name: role_name,
+                                                                            alt_app_type_id: app_type_id
       if res && res.id != id # If we have a result and it is not this record
         if user_id && user_id == res.user_id # If the user has the authorization set
-          errors.add :user, "already has the access control #{access} on #{resource_type} #{resource_name} #{app_type ? app_type.name : ''} #{options}"
+          errors.add :user,
+                     "already has the access control #{access} on #{resource_type} #{resource_name} #{app_type ? app_type.name : ''} #{options}"
         elsif !user_id && res.user_id.nil? && role_name == res.role_name # If the new record has no user set and has a matching role _name
-          errors.add :user_access_control, "already exists for #{role_name} #{access} on #{resource_type} #{resource_name} #{app_type ? app_type.name : ''} #{options}"
+          errors.add :user_access_control,
+                     "already exists for #{role_name} #{access} on #{resource_type} #{resource_name} #{app_type ? app_type.name : ''} #{options}"
         end
       end
     end
@@ -313,7 +334,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
     logger.info "User Role added or updated (#{self.class.name}). Invalidating cache."
 
     # Allows caching in other classes to reset
-    self.class.latest_update = updated_at || created_at
+    self.class.reset_latest_update
 
     # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
     Rails.cache.clear

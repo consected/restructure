@@ -2,8 +2,21 @@
 
 class PagesController < ApplicationController
   before_action :authenticate_user_or_admin!
+
+  def home
+    home_url = if current_user && !current_admin
+                 app_config_text(:logo_link, '/')
+               else
+                 '/'
+               end
+    redirect_to home_url
+  end
+
   def index
-    redirect_to :masters if current_user && !current_admin
+    return unless current_user && !current_admin
+
+    home_url = app_config_text(:logo_link, masters_search_path)
+    redirect_to home_url
   end
 
   # Simple action to refresh the session timeout

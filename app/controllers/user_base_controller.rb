@@ -18,7 +18,8 @@ class UserBaseController < ApplicationController
 
     # If the current user does not have any app types available, logout and flash a message
     if all_apps.empty?
-      msg = 'You have not been granted access to any application types. Contact an administrator to continue use of the application.'
+      msg = 'You have not been granted access to any application types.' \
+            'Contact an administrator to continue use of the application.'
     elsif !@current_user.app_type_valid?
       current_user.app_type_id = all_apps.first
       return current_user.save
@@ -42,16 +43,17 @@ class UserBaseController < ApplicationController
 
     # If the user requests a change to the app type from the nav bar selector, make the change
     uat = params[:use_app_type]
-    
+
     if uat.present?
-      if uat.to_i > 0
-        a = all_apps.select { |app_id| app_id == uat.to_i }.first
-      else  
-        a = Admin::AppType
-          .all_available_to(current_user)
-          .select{ |app| app.name == uat }
-          .map(&:id).first
-      end
+      a = if uat.to_i > 0
+            all_apps.select { |app_id| app_id == uat.to_i }.first
+          else
+            Admin::AppType
+              .all_available_to(current_user)
+              .select { |app| app.name == uat }
+              .map(&:id).first
+          end
+
       if a && current_user.app_type_id != a
         current_user.app_type_id = a
         current_user.save
@@ -59,7 +61,7 @@ class UserBaseController < ApplicationController
         respond_to do |type|
           type.html do
             # Redirect, to ensure the flash and navs in the layout are updated
-            redirect_to masters_search_path
+            redirect_to pages_home_url
           end
           type.json do
           end
@@ -80,28 +82,27 @@ class UserBaseController < ApplicationController
     end
 
     # If we don't have an app type set, force one
-    if current_user.app_type.nil?
+    return unless current_user.app_type.nil?
 
-      respond_to do |type|
-        type.html do
-          # If there is only one app type, use it
-          # Otherwise, assume the first until a user selects otherwise
-          current_user.app_type_id = all_apps.first
-          current_user.save
-          # Redirect, to ensure the flash and navs in the layout are updated
-          redirect_to masters_search_path
-        end
-        msg = 'No app type has been selected. Include use_app_type=<id> parameter to set the current application to work with'
-        type.json do
-          render json: { message: msg }, status: 400
-        end
-        type.html do
-          flash[:warning] = msg
-          redirect_to '/'
-        end
+    respond_to do |type|
+      type.html do
+        # If there is only one app type, use it
+        # Otherwise, assume the first until a user selects otherwise
+        current_user.app_type_id = all_apps.first
+        current_user.save
+        # Redirect, to ensure the flash and navs in the layout are updated
+        redirect_to pages_home_url
       end
-      nil
-
+      msg = 'No app type has been selected. ' \
+            'Include use_app_type=<id> parameter to set the current application to work with'
+      type.json do
+        render json: { message: msg }, status: 400
+      end
+      type.html do
+        flash[:warning] = msg
+        redirect_to '/'
+      end
     end
+    nil
   end
 end
