@@ -1,0 +1,32 @@
+<div class="container">
+  <div class="row">
+    <h1>Server Information</h1>
+  </div>
+  <div class="row">
+      <h2>Restart Server and Clear Memcached</h2>
+      <%= form_tag(admin_app_types_restart_server_url, remote: true) do %>
+        <%= submit_tag "Restart server" %>
+      <% end %>
+  </div>
+
+  <div class="row">  
+    <h2>App Settings</h2>
+    <%= render partial: 'admin/server_info/view_settings', locals: {settings: @app_settings} %>
+  </div>
+  <div class="row">  
+    <h2>Database Settings</h2>
+    <%= render partial: 'admin/server_info/view_settings', locals: {settings: @db_settings} %>
+  </div>
+  <div class="row">  
+    <h2>Passenger Status</h2>
+    <pre><%=@passenger_status%></pre>
+  </div>
+  <div class="row">  
+    <h2>Passenger Memory Stats</h2>
+    <pre><%=@passenger_memory_stats%></pre>
+  </div>
+  <div class="row">  
+    <h2>Processes</h2>
+    <pre><%=@processes%></pre>
+  </div>
+</div>

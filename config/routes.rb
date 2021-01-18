@@ -39,6 +39,7 @@ Rails.application.routes.draw do
     resources :message_templates, except: %i[show destroy]
     resources :message_notifications, except: %i[show destroy]
     resources :job_reviews, except: %i[show destroy]
+    resources :server_info
 
     resources :app_types, except: [:destroy]
     post 'app_types/upload', to: 'app_types#upload'

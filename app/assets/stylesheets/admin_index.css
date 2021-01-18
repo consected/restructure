@@ -18,6 +18,7 @@
  *= require codemirror/addon/scroll/simplescrollbars
  *= require admin/activity_list
  *= require admin/admin_options
+ *= require admin/server_info
  *= require admin/z_admin_overrides
  *= require_self
  */
