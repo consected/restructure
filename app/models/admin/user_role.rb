@@ -9,7 +9,9 @@ class Admin::UserRole < ActiveRecord::Base
   belongs_to :user, optional: true
 
   validates :role_name, presence: true
-  validates :user_id, uniqueness: { scope: %i[app_type_id role_name disabled] }, unless: -> { user_id.nil? || disabled? }
+  validates :user_id, uniqueness: { scope: %i[app_type_id role_name disabled] }, unless: lambda {
+                                                                                           user_id.nil? || disabled?
+                                                                                         }
 
   after_save :save_template
   after_save :invalidate_cache
@@ -17,8 +19,6 @@ class Admin::UserRole < ActiveRecord::Base
   # Scope used when user.user_roles association is called, effectively forcing the results
   # to the user's current app type
   scope :user_app_type, ->(user) { where user_roles: { app_type_id: user.app_type_id } }
-
-  cattr_accessor :latest_update
 
   # Get a resultset of active roles for the user.
   # @param user [User] if the app_type attribute is set in the user, and is not set in conditions
@@ -134,6 +134,17 @@ class Admin::UserRole < ActiveRecord::Base
     to_roles
   end
 
+  def self.latest_update
+    return @latest_update if @latest_update
+
+    obj = reorder('').last
+    @latest_update = obj&.updated_at || obj&.created_at
+  end
+
+  def self.reset_latest_update
+    @latest_update = nil
+  end
+
   private
 
   # Automatically add a template@template record if needed
@@ -147,7 +158,7 @@ class Admin::UserRole < ActiveRecord::Base
 
   def invalidate_cache
     logger.info "User Role added or updated (#{self.class.name}). Invalidating cache."
-    self.class.latest_update = updated_at || created_at
+    self.class.reset_latest_update
 
     # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
     Rails.cache.clear
