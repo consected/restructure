@@ -69,6 +69,7 @@ Rails.application.routes.draw do
   end
 
   get 'admin/reference_data' => 'pages#reference_data'
+  get 'pages/home' => 'pages#home'
   resources :pages, only: %i[index show] do
     member do
       get :template
@@ -148,12 +149,12 @@ Rails.application.routes.draw do
     get 'users/edit' => 'devise/registrations#edit', :as => 'edit_user_registration'
     put 'users/:id' => 'devise/registrations#update', :as => 'user_registration'
 
-    root to: 'masters#search', as: 'authenticated_user_root'
+    root to: 'pages#home', as: 'authenticated_user_root'
   end
 
   get 'child_error_reporter', to: 'application#child_error_reporter'
 
-  root 'masters#search', as: 'guest_home'
+  root 'pages#home', as: 'guest_home'
 
   # Dynamic model goes at the end to avoid any issues with accidental clash of naming. The
   # dynamic model will only be applied if another item is not matched first
