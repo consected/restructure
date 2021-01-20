@@ -91,7 +91,7 @@ module Dynamic
             got.delete_if do |mr|
               mr.to_record.current_user = current_user
               self.reference = mr.to_record
-              !extra_log_type_config.calc_reference_if(ref_config, :showable_if, self)
+              !extra_log_type_config.calc_reference_if(ref_config, :showable_if, self, default_if_no_config: true)
             end
           end
 
@@ -128,7 +128,7 @@ module Dynamic
           # Check if creatable_if has been defined on the reference configuration
           # and if it evaluates to true
 
-          ci_res = extra_log_type_config.calc_reference_if ref_config, :creatable_if, self
+          ci_res = extra_log_type_config.calc_reference_if ref_config, :creatable_if, self, default_if_no_config: true
           fb = ref_config[:filter_by]
 
           next unless ci_res

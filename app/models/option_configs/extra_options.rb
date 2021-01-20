@@ -478,10 +478,12 @@ module OptionConfigs
     # @param [Hash] ref_config - the references configuration from the extra options definition
     # @param [Symbol] key - a key such as :showable_if, :creatable_if within the references definition
     # @param [UserBase] obj - object to test against
+    # @param [Boolean] default_if_no_config - the default value to return if no references
+    #                                         configuration is defined for this key
     # @return [Boolean | Object] ConditionalAction#calc_action_if result
-    def calc_reference_if(ref_config, key, obj)
+    def calc_reference_if(ref_config, key, obj, default_if_no_config: false)
       ci = ref_config[key]
-      return true unless ci
+      return default_if_no_config unless ci
 
       Rails.logger.debug "Checking calc_reference_if with #{key} on #{obj} with #{ci}"
       ca = ConditionalActions.new ci, obj

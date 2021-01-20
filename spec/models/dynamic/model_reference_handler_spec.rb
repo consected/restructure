@@ -133,7 +133,7 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
 
     al_showable.reference = pc2
     ref_config = al_showable.extra_log_type_config.references.first.last[:player_contact]
-    res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable)
+    res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
     expect(res).to be_truthy
 
     al_showable.reset_model_references
