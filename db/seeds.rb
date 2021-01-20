@@ -5,6 +5,7 @@ Dir[Rails.root.join('db/seeds/*.rb')].sort.each { |f| Rails.logger.info "requiri
 module Seeds
   def self.setup
     Rails.logger.info "============ Starting seed setup (#{DateTime.now}) ==============="
+    puts "#{Time.now} Starting seed setup"
 
     do_last = []
     do_first = []
@@ -26,6 +27,7 @@ module Seeds
     do_last.each(&:setup)
 
     Rails.logger.info "============ Completed seed setup (#{DateTime.now}) ==============="
+    puts "#{Time.now} Completed seed setup"
   end
 end
 
@@ -40,7 +42,7 @@ def auto_admin
 end
 
 def log(txt)
-  # puts txt
+  puts "#{Time.now} #{txt}"
   Rails.logger.info txt
 end
 

@@ -43,6 +43,11 @@ module HandlesUserBase
     # Doesn't appear to be used anywhere at the moment
     attr_accessor :ignore_configurable_valid_if
 
+    # The #reference is used to identify the current to_record when iterating model references
+    # to check the ability to access the record being pointed to from this one.
+    # Used primarily by #model_references to calculate ConditionalAction#calc_reference_if
+    attr_accessor :reference
+
     # Setup alternative id field methods
     Master.setup_resource_alternative_id_fields self
   end
@@ -341,6 +346,9 @@ module HandlesUserBase
     !!m.allows_user_access
   end
 
+  #
+  # Return all the objects that refer to this item through model references
+  # @return [Array{UserBase}]
   def referenced_from
     return @referenced_from unless @referenced_from.nil?
 
@@ -649,8 +657,7 @@ module HandlesUserBase
   def evaluate_valid_if_config
     return true if @ignore_configurable_valid_if || !option_type_config.respond_to?(:valid_if)
 
-    option_type_config.valid_if
-    return true if vi.empty?
+    return true if option_type_config.valid_if.empty?
 
     action_name = persisted? ? :update : :create
     @return_failures = {}

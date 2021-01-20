@@ -6,7 +6,9 @@ module Seeds
 
     def self.create_app_type
       app_type = Admin::AppType.find_by_id(1)
-      if app_type.disabled?
+      return if app_type&.enabled?
+
+      if app_type&.disabled?
         app_type.current_admin = auto_admin
         app_type.disabled = false
         app_type.save!
@@ -14,7 +16,7 @@ module Seeds
 
       return if app_type&.enabled?
 
-      app_type ||= Admin::AppType.create!(
+      Admin::AppType.create!(
         id: 1,
         name: 'zeus',
         label: 'Zeus',

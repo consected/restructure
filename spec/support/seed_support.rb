@@ -7,10 +7,12 @@ module SeedSupport
 
   def self.setup
     Rails.logger.info 'Starting seed setup'
+    puts "#{Time.now} Starting SeedSupport setup"
     Seeds.setup
   end
 
   def setup
+    puts "#{Time.now} Starting SeedSupport#setup"
     Seeds.setup
   end
 end

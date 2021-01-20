@@ -8,6 +8,7 @@ module MasterSupport
 
   def seed_database
     Rails.logger.info 'Starting seed setup in Master Support'
+    puts "#{Time.now} Starting seed setup in Master Support"
     SeedSupport.setup
   end
 

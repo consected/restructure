@@ -167,7 +167,7 @@ module Dynamic
 
         def_record.option_configs.each do |c|
           result = current_user.has_access_to?(:create, :activity_log_type, c.resource_name)
-          result &&= c.calc_creatable_if(current_activity) if current_activity
+          result &&= c.calc_if(:creatable_if, current_activity) if current_activity
           result &&= !(c.view_options && c.view_options[:only_create_as_reference]) unless include_references
           res[c.name] = result ? c.resource_name : nil
         end

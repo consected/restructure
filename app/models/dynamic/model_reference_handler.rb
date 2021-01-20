@@ -25,9 +25,10 @@ module Dynamic
     # independent of the entries in the model_references table. If you do not get back the results
     # you expect, check the references definition to ensure it includes the appropriate
     # add_with and filter_by entries.
-    # If the configuration has not set :enforce_showable then the referenced to-records will be shown
-    # If the configuration has set :enforce_showable then the *showable_if* rules in the target record
-    # will be checked to ensure the to-record is viewable.
+    # If the configuration has not set :showable_if then the referenced to-records will be shown
+    # If the configuration has set :showable_if then the configuration
+    # will be checked to ensure the to-record is viewable. This checks both the current instance
+    # and the to_record, accessed through the key :reference.
     # @param [Symbol] reference_type either :references or :e_sign to filter by the specific reference type
     # @param [Boolean] active_only only return active reference records, or those that have also been disabled
     # @param [Hash] ref_order forces the user of a {field: direction} on all references returned, ordering against
@@ -59,7 +60,6 @@ module Dynamic
           without_reference = (ref_config[:without_reference] == true)
 
           order_by = ref_config[:order_by] if use_options_order_by
-          enforce_showable = ref_config[:enforce_showable]
 
           pass_options = {
             to_record_type: ref_type,
@@ -85,10 +85,13 @@ module Dynamic
           next unless got
 
           got = got.to_a
-          if enforce_showable
+
+          # Filter out the items based on reference specific showable_if rules
+          if ref_config[:showable_if]
             got.delete_if do |mr|
               mr.to_record.current_user = current_user
-              !mr.to_record.can_access?
+              self.reference = mr.to_record
+              !extra_log_type_config.calc_reference_if(ref_config, :showable_if, self)
             end
           end
 
@@ -125,7 +128,7 @@ module Dynamic
           # Check if creatable_if has been defined on the reference configuration
           # and if it evaluates to true
 
-          ci_res = extra_log_type_config.calc_reference_creatable_if ref_config, self
+          ci_res = extra_log_type_config.calc_reference_if ref_config, :creatable_if, self
           fb = ref_config[:filter_by]
 
           next unless ci_res

@@ -1,5 +1,15 @@
 # frozen_string_literal: true
 
+# Model references provide a generic mechanism for recording the relationship from a parent "from-record"
+# or master record alone, to a configured "to-record".
+# Model references are used instead of direct foreign key associations, since they allow configurations for new
+# relationships to be added over time without disrupting data tables, and perhaps more importantly allow multiple
+# from-records to point to a single to-record.
+# The flexible nature of model references comes at a cost. Database level joins between records
+# must be performed through the model_references table, which can lead to complex queries and reduced performance.
+# There is a plan to allow certain activity logs / dynamic models to represent references directly through
+# traditional foreign key relationships, extending the existing model references functionality to provide
+# a consistent mechanism for app functionality to find referenced records, independent of mechanism used.
 class ModelReference < ActiveRecord::Base
   belongs_to :user
 
@@ -20,6 +30,7 @@ class ModelReference < ActiveRecord::Base
   after_create :set_created
 
   attr_accessor :current_user, :force_create
+  attr_writer :to_record
 
   def self.default_ref_order
     { id: :asc }
@@ -204,7 +215,39 @@ class ModelReference < ActiveRecord::Base
     res
   end
 
-  # Find which items reference this item
+  # Find referenced items belonging to a master record
+  # whether or not they belong to a specific instance (from_record_id) too.
+  # These can be further limited by a filter_by condition on the to_record,
+  # allowing for specific records to be selected from the master (such as a specific 'type' of referenced record)
+  # The param active == true returns only results that are not disabled
+  # order_by forces ordering against fields in the target (ro_record) records
+  def self.find_records_in_master(master: nil, to_record_type: nil, filter_by: nil,
+                                  ref_order: default_ref_order, active: nil)
+    res = []
+    cond = { master: master }
+    filter_by = substitute_filter(filter_by, master)
+    cond.merge! filter_by if filter_by
+
+    to_record_class_for_type(to_record_type).where(cond).order(ref_order).each do |i|
+      recs = ModelReference.where from_record_master_id: master.id,
+                                  to_record_type: to_record_type,
+                                  to_record_id: i.id,
+                                  to_record_master_id: i.master_id
+      recs = recs.active if active
+      rec = recs.first
+      if rec
+        rec.to_record = i
+        res << rec
+      end
+    end
+
+    res
+  end
+
+  #
+  # Return all the objects that refer to the to_item through model references
+  # @param [UserBase] to_item
+  # @return [Array{UserBase}]
   def self.find_where_referenced_from(to_item)
     cond = { to_record_type: to_item.class.name, to_record_id: to_item.id }
     res = ModelReference.where cond
@@ -220,6 +263,11 @@ class ModelReference < ActiveRecord::Base
     res
   end
 
+  #
+  # Model reference *filter:* definition allows substitutions
+  # @param [Hash] filter - definition (duped to avoid accidental change)
+  # @param [UserBase] data - to use for substitutions
+  # @return [Hash] returns updated filter hash
   def self.substitute_filter(filter, data)
     filter = filter.dup
     if filter.is_a? Hash
@@ -232,6 +280,11 @@ class ModelReference < ActiveRecord::Base
     filter
   end
 
+  #
+  # Takes a string representing a record type and generates the class.
+  # This utility method is used widely
+  # @param [String] rec_type - namespace underscored representation of the name
+  # @return [UserBase] resulting class
   def self.to_record_class_for_type(rec_type)
     rec_type.ns_camelize.constantize
   rescue NameError => e
@@ -240,10 +293,12 @@ class ModelReference < ActiveRecord::Base
     nil
   end
 
+  #
   # Params are provided for singularize and pluralize to highlight the fact that otherwise we rely on the data that is
   # passed in and don't enforce it one way or another.
-  # This means that if a singular record_type is passed in, the result is not truly a table name, since the result
-  # will be singular unless explicitly pluralized
+  # This means that if a singular record_type is passed in, the result is may not truly be a table name,
+  # since the result will be singular unless explicitly pluralized.
+  # This is required, since dynamic models may use singular table names
   def self.record_type_to_ns_table_name(record_type, pluralize: nil, singularize: nil)
     if record_type.is_a?(String) || record_type.is_a?(Symbol)
       res = record_type.to_s
@@ -265,9 +320,17 @@ class ModelReference < ActiveRecord::Base
   end
 
   #
+  # @see ModelReference.record_type_to_ns_table_name
+  # The result has double underscores removed, to truly represent a DB table name
+  def self.record_type_to_table_name(record_type)
+    record_type_to_ns_table_name(record_type).gsub('__', '_')
+  end
+
+  #
   # Convert a string, class or instance to a symbol association name
-  # @param [<Type>] record_type <description>
-  # @return [<Type>] <description>
+  # The result if checked to ensure Master actually includes this association
+  # @param [Object] record_type - one of many representations
+  # @return [Symbol | nil] - master association name as a symbol
   def self.record_type_to_assoc_sym(record_type)
     if record_type.is_a?(String) || record_type.is_a?(Symbol)
       res = record_type.to_s
@@ -286,16 +349,14 @@ class ModelReference < ActiveRecord::Base
           "record_type_to_assoc_sym produced an association #{assoc} not recognized by Master"
   end
 
+  #
+  # Allow model references to be created without checking user access allows it
   def force_create?
     @force_create
   end
 
   def item_type
     'model_reference'
-  end
-
-  def self.record_type_to_table_name(record_type)
-    record_type_to_ns_table_name(record_type).gsub('__', '_')
   end
 
   def to_record_class
@@ -318,12 +379,19 @@ class ModelReference < ActiveRecord::Base
     to_record_type.split('::').last.ns_underscore
   end
 
+  #
+  # Check if the to-record is viewable, based on table user access controls only.
+  # @todo - Consider whether this should be extended to include option config showable_if rules
   def to_record_viewable
     return @to_record_viewable unless @to_record_viewable.nil?
 
     @to_record_viewable = !!current_user.has_access_to?(:access, :table, to_record_type_us.pluralize)
   end
 
+  #
+  # Is the to-record editable based on user access controls and editable_as option configuration
+  # Memoized to allow repetitive calls.
+  # @return [Boolean]
   def to_record_editable
     return @to_record_editable unless @to_record_editable.nil?
 
@@ -350,12 +418,20 @@ class ModelReference < ActiveRecord::Base
     from_record_type.split('::').last.ns_underscore
   end
 
+  #
+  # Is the from-record viewable based on table user access controls only
+  # This method appears to be unused
+  # @todo - evaluate if this should be extended to
+  # check access more granularly (showable_if config) before use.
   def from_record_viewable
     return unless from_record_type_us
 
     !!current_user.has_access_to?(:access, :table, from_record_type_us.pluralize)
   end
 
+  #
+  # The actual instance a model reference the from_record_type/id corresponds to
+  # @return [UserBase | nil] - returns nil if from_record_type/id are not set
   def from_record
     return @from_record if @from_record
     return unless from_record_type && from_record_id
@@ -369,6 +445,10 @@ class ModelReference < ActiveRecord::Base
     to_record.data if to_record_viewable
   end
 
+  #
+  # The actual instance a model reference points to with
+  # the to_record_type/id
+  # @return [UserBase]
   def to_record
     return @to_record if @to_record
 
@@ -382,54 +462,38 @@ class ModelReference < ActiveRecord::Base
     @to_record
   end
 
+  #
+  # A 'key' used by the front end to identify the parent instance and form that this result actually belongs to
   def to_record_result_key
     return "#{to_record_type_us}_#{to_record.extra_log_type}" if to_record.respond_to? :extra_log_type
 
     to_record_type_us
   end
 
+  #
+  # Helps the front end identify which template should be used to render this result
   def to_record_template
     return "#{to_record_type_us}_#{to_record.extra_log_type}" if to_record.respond_to? :extra_log_type
 
     to_record_short_type_us
   end
 
+  # Name of the association from the master
   def to_record_assoc
     @to_record_assoc ||= to_record_class.assoc_inverse
   end
 
-  attr_writer :to_record
-
+  #
+  # Configuration for model reference (as defined in the from-record's option config)
+  # corresponding to the to-record.
+  # @return [Hash | nil]
   def to_record_options_config
-    return unless from_record&.respond_to?(:option_type_config) && from_record&.option_type_config
+    return unless from_record.respond_to?(:option_type_config) && from_record&.option_type_config
 
     res = from_record.option_type_config.model_reference_config self
     return unless res
 
     res[to_record_assoc.to_s.singularize.to_sym]
-  end
-
-  def self.find_records_in_master(master: nil, to_record_type: nil, filter_by: nil,
-                                  ref_order: default_ref_order, active: nil)
-    res = []
-    cond = { master: master }
-    filter_by = substitute_filter(filter_by, master)
-    cond.merge! filter_by if filter_by
-
-    to_record_class_for_type(to_record_type).where(cond).order(ref_order).each do |i|
-      recs = ModelReference.where from_record_master_id: master.id,
-                                  to_record_type: to_record_type,
-                                  to_record_id: i.id,
-                                  to_record_master_id: i.master_id
-      recs = recs.active if active
-      rec = recs.first
-      if rec
-        rec.to_record = i
-        res << rec
-      end
-    end
-
-    res
   end
 
   # The reference can be disabled if:
@@ -443,8 +507,8 @@ class ModelReference < ActiveRecord::Base
 
     c = find_config || {}
     if from_record && c.is_a?(Hash) && from_record.respond_to?(:option_type_config) && from_record.option_type_config
-      pd = from_record.option_type_config.calc_reference_prevent_disable_if c, to_record
-      ane = from_record.option_type_config.calc_reference_allow_disable_if_not_editable_if c, to_record
+      pd = from_record.option_type_config.calc_reference_if c, :prevent_disable, to_record
+      ane = from_record.option_type_config.calc_reference_if c, :allow_disable_if_not_editable, to_record
     else
       pd = false
       ane = false
@@ -502,6 +566,10 @@ class ModelReference < ActiveRecord::Base
 
   private
 
+  #
+  # Validation method enforcing the can_disable rule for the model reference
+  # with a validation error if can not disable.
+  # @return [true | nil]
   def allows_disable
     unless can_disable
       errors.add :disable, 'of this reference is not allowed'
@@ -510,6 +578,14 @@ class ModelReference < ActiveRecord::Base
     true
   end
 
+  #
+  # Validation method enforcing a compount rule for the model reference
+  # based on can_edit? and can_add_reference? on the from-record
+  # with a validation error if can not disable.
+  # The #force_create? method is checked to see if these checks should be disregarded,
+  # allowing save triggers to create references from items that a front-end user does not
+  # have permission to create from.
+  # @return [true | nil]
   def allows_create
     return true unless from_record
 
@@ -526,6 +602,10 @@ class ModelReference < ActiveRecord::Base
     true
   end
 
+  #
+  # Handles the situation when a model reference is disabled, checking the configuration
+  # if the to-record should also be disabled, and if so disabling it.
+  # @return [<Type>] <description>
   def handle_disabled
     @was_updated = 'updated'
     return true unless saved_change_to_disabled?
@@ -534,6 +614,9 @@ class ModelReference < ActiveRecord::Base
     to_record.model_reference_disable if troc && troc[:also_disable_record]
   end
 
+  #
+  # Simply set an attribute flag if the model reference was just created
+  # @return [String]
   def set_created
     @was_created = 'created'
   end
