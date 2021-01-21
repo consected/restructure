@@ -137,7 +137,7 @@ class Admin::UserRole < ActiveRecord::Base
   def self.latest_update
     return @latest_update if @latest_update
 
-    obj = reorder('').last
+    obj = reorder('').order(Arel.sql('coalesce(updated_at, created_at) desc nulls last')).first
     @latest_update = obj&.updated_at || obj&.created_at
   end
 

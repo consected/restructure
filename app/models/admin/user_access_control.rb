@@ -280,7 +280,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
   def self.latest_update
     return @latest_update if @latest_update
 
-    obj = reorder('').last
+    obj = reorder('').order(Arel.sql('coalesce(updated_at, created_at) desc nulls last')).first
     @latest_update = obj&.updated_at || obj&.created_at
   end
 
@@ -303,17 +303,28 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
   private
 
+  #
+  # Validation method to ensure the user access control has been configured correctly:
+  # - any settings are allowed if disabled
+  # - disabled must be set if the user is disabled
+  # - the resource type is one of the valid options
+  # - a valid access level has been provided for the resource type
+  # - the resource name if not a valid resource for the resource type
+  # - another user access control with this user, resource name & type, role name and app type
+  #   does not already exist
   def correct_access
     self.access = nil if access.blank?
     if disabled
       true
     elsif user&.disabled && !disabled
       errors.add :disabled, 'flag of an access control must be disabled, since the user is disabled'
-    elsif !self.class.valid_access_level?(resource_type.to_sym, access)
-      errors.add :access, 'is an invalid value'
     elsif resource_type.nil? || !self.class.resource_types.include?(resource_type.to_sym)
       errors.add :resource_type, 'is an invalid value'
-    elsif !allow_bad_resource_name && (resource_name.nil? || !self.class.resource_names_for(resource_type.to_sym).include?(resource_name.to_s))
+    elsif !self.class.valid_access_level?(resource_type.to_sym, access)
+      errors.add :access, 'is an invalid value'
+    elsif !allow_bad_resource_name && (
+            resource_name.nil? || !self.class.resource_names_for(resource_type.to_sym).include?(resource_name.to_s)
+          )
       errors.add :resource_name, "is an invalid value (#{resource_name} in #{resource_type})"
     elsif !disabled
       res = self.class.access_for? user, nil, resource_type, resource_name, alt_role_name: role_name,
@@ -331,7 +342,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
   end
 
   def invalidate_cache
-    logger.info "User Role added or updated (#{self.class.name}). Invalidating cache."
+    logger.info "User Access Control added or updated (#{self.class.name}). Invalidating cache."
 
     # Allows caching in other classes to reset
     self.class.reset_latest_update
