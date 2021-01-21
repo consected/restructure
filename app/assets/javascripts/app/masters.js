@@ -113,8 +113,16 @@ _fpa.masters = {
                 // For the report forms, set the 'part' to return appropriate results
                 f.find('input[name="part"]').val(dov ? '' : 'results');
 
-                if (dov)
+                if (dov) {
                     $('#master_results_block').html('<h3 class="text-center">Exported ' + v + '</h3>');
+
+                    // UJS disables the buttons, but only ajax responses re-enable them.
+                    // For csv and json export requests, re-enable by hand
+                    window.setTimeout(function () {
+                        console.log('here')
+                        f.find('input[type="submit"][disabled], button[type="submit"][disabled]').attr('disabled', null).prop('disabled', null);
+                    }, 1500);
+                }
             });
         }).on('keypress', function (e) {
             // On any keypress inside a form, cancel an existing ajax search, since the user is probably doing something else
