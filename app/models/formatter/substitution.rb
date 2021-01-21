@@ -26,7 +26,7 @@ module Formatter
       return unless all_content
 
       all_content = all_content.dup
-      tags = all_content.scan(/{{[0-9a-zA-Z_.:]+}}/)
+      tags = all_content.scan(/{{[0-9a-zA-Z_.:]+}}/).uniq
 
       # Only setup data if there are tags
       sub_data = setup_data(data) unless tags.empty?
@@ -45,7 +45,7 @@ module Formatter
         raise FphsException, 'Not all the tags were replaced. This suggests there was an error in the markup.'
       end
 
-      tags = all_content.scan(/\[\[[^\]]+\]\]/)
+      tags = all_content.scan(/\[\[[^\]]+\]\]/).uniq
 
       # Setup the data if it wasn't previously setup and there are tags to replace
       sub_data ||= setup_data(data) unless tags.empty?
@@ -174,7 +174,7 @@ module Formatter
       data[:password_reminder_days] = Settings::PasswordReminderDays
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
-      data[:item] = item.item.attributes if item.respond_to?(:item) && item.item.respond_to?(:attributes)
+      data[:item] = item.item.attributes.dup if item.respond_to?(:item) && item.item.respond_to?(:attributes)
 
       data[:created_by_user] = nil
       data[:created_by_user_email] = nil
@@ -193,10 +193,10 @@ module Formatter
 
       iu = item.user if item.respond_to?(:user) && item.respond_to?(:user_id)
       if iu
-        data[:item_user] = iu.attributes
+        data[:item_user] = iu.attributes.dup
         data[:user_email] = iu.email
-        data[:user_preference] = iu.user_preference.attributes
-        data[:user_contact_info] = iu.contact_info&.attributes || Users::ContactInfo.new.attributes
+        data[:user_preference] = iu.user_preference.attributes.dup
+        data[:user_contact_info] = iu.contact_info&.attributes&.dup || Users::ContactInfo.new.attributes
 
       end
 
@@ -204,11 +204,11 @@ module Formatter
       cu ||= master.current_user if master
       if cu
         data[:current_user_instance] ||= cu
-        data[:current_user] ||= cu.attributes
+        data[:current_user] ||= cu.attributes.dup
         data[:current_user_email] ||= cu.email
         data[:user_email] ||= cu.email
-        data[:current_user_preference] ||= cu.user_preference.attributes
-        data[:current_user_contact_info] = cu.contact_info&.attributes || Users::ContactInfo.new.attributes
+        data[:current_user_preference] ||= cu.user_preference.attributes.dup
+        data[:current_user_contact_info] = cu.contact_info&.attributes&.dup || Users::ContactInfo.new.attributes
       end
 
       data
