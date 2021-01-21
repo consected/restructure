@@ -1846,6 +1846,71 @@ CREATE TABLE ml_app.nfs_store_stored_files (
 );
 
 
+
+--
+-- Name: nfs_store_imports; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_imports (
+    id integer NOT NULL,
+    file_hash character varying,
+    file_name character varying,
+    user_id integer,
+    nfs_store_container_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: nfs_store_imports_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.nfs_store_imports_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: nfs_store_imports_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.nfs_store_imports_id_seq OWNED BY ml_app.nfs_store_imports.id;
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_imports ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_imports_id_seq'::regclass);
+
+--
+-- Name: nfs_store_imports_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_imports
+    ADD CONSTRAINT nfs_store_imports_pkey PRIMARY KEY (id);
+
+--
+-- Name: fk_rails_0ad81c489c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_imports
+    ADD CONSTRAINT fk_rails_0ad81c489c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+--
+-- Name: fk_rails_0d30944d1b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_imports
+    ADD CONSTRAINT fk_rails_0d30944d1b FOREIGN KEY (nfs_store_container_id) REFERENCES ml_app.nfs_store_containers(id);
+
+
+
+
 --
 -- Name: filestore_report_full_file_path(ml_app.nfs_store_stored_files, ml_app.nfs_store_archived_files); Type: FUNCTION; Schema: ml_app; Owner: -
 --
@@ -1875,9 +1940,9 @@ BEGIN
   RETURN QUERY
     SELECT distinct m.id, ipa.ipa_id, al.extra_log_type
     FROM masters m
-    INNER JOIN ipa_ops.ipa_assignments ipa
+    INNER JOIN ml_app.ipa_assignments ipa
       ON m.id = ipa.master_id
-    INNER JOIN ipa_ops.activity_log_ipa_assignments al
+    INNER JOIN ml_app.activity_log_ipa_assignments al
       ON m.id = al.master_id
       AND al.extra_log_type = event_name
     LEFT JOIN sync_statuses s
@@ -7113,49 +7178,6 @@ CREATE SEQUENCE ml_app.activity_log_player_contact_elts_id_seq
 ALTER SEQUENCE ml_app.activity_log_player_contact_elts_id_seq OWNED BY ml_app.activity_log_player_contact_elts.id;
 
 
---
--- Name: activity_log_player_contact_emails; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.activity_log_player_contact_emails (
-    id integer NOT NULL,
-    data character varying,
-    select_email_direction character varying,
-    select_who character varying,
-    emailed_when date,
-    select_result character varying,
-    select_next_step character varying,
-    follow_up_when date,
-    protocol_id integer,
-    notes character varying,
-    user_id integer,
-    player_contact_id integer,
-    master_id integer,
-    disabled boolean,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    set_related_player_contact_rank character varying
-);
-
-
---
--- Name: activity_log_player_contact_emails_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
---
-
-CREATE SEQUENCE ml_app.activity_log_player_contact_emails_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: activity_log_player_contact_emails_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
---
-
-ALTER SEQUENCE ml_app.activity_log_player_contact_emails_id_seq OWNED BY ml_app.activity_log_player_contact_emails.id;
-
 
 --
 -- Name: activity_log_player_contact_phone_history; Type: TABLE; Schema: ml_app; Owner: -
@@ -8876,6 +8898,42 @@ CREATE SEQUENCE ml_app.message_notifications_id_seq
 
 ALTER SEQUENCE ml_app.message_notifications_id_seq OWNED BY ml_app.message_notifications.id;
 
+--
+-- Name: message_template_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.message_template_history (
+    id integer NOT NULL,
+    name character varying,
+    template_type character varying,
+    template character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    message_template_id integer,
+    message_type character varying,
+    category character varying
+);
+
+
+--
+-- Name: message_template_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.message_template_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+--
+-- Name: message_template_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.message_template_history_id_seq OWNED BY ml_app.message_template_history.id;
+
 
 --
 -- Name: message_templates; Type: TABLE; Schema: ml_app; Owner: -
@@ -8913,6 +8971,65 @@ CREATE SEQUENCE ml_app.message_templates_id_seq
 
 ALTER SEQUENCE ml_app.message_templates_id_seq OWNED BY ml_app.message_templates.id;
 
+
+------------------
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.message_template_history ALTER COLUMN id SET DEFAULT nextval('ml_app.message_template_history_id_seq'::regclass);
+
+--
+-- Name: message_template_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.message_template_history
+    ADD CONSTRAINT message_template_history_pkey PRIMARY KEY (id);
+
+--
+-- Name: index_message_template_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_message_template_history_on_admin_id ON ml_app.message_template_history USING btree (admin_id);
+
+
+--
+-- Name: index_message_template_history_on_message_template_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_message_template_history_on_message_template_id ON ml_app.message_template_history USING btree (message_template_id);
+
+--
+-- Name: message_template_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER message_template_history_insert AFTER INSERT ON ml_app.message_templates FOR EACH ROW EXECUTE PROCEDURE ml_app.log_message_template_update();
+
+
+--
+-- Name: message_template_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER message_template_history_update AFTER UPDATE ON ml_app.message_templates FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_message_template_update();
+
+--
+-- Name: fk_message_template_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.message_template_history
+    ADD CONSTRAINT fk_message_template_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_message_template_history_message_templates; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.message_template_history
+    ADD CONSTRAINT fk_message_template_history_message_templates FOREIGN KEY (message_template_id) REFERENCES ml_app.message_templates(id);
+
+
+------------------
 
 --
 -- Name: ml_copy; Type: TABLE; Schema: ml_app; Owner: -
@@ -11316,6 +11433,82 @@ CREATE TABLE ml_app.users (
 
 
 --
+-- Name: users_contact_infos; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.users_contact_infos (
+    id integer NOT NULL,
+    user_id integer,
+    sms_number character varying,
+    phone_number character varying,
+    alt_email character varying,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    admin_id integer,
+    disabled boolean
+);
+
+CREATE SEQUENCE ml_app.users_contact_infos_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: users_contact_infos_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.users_contact_infos_id_seq OWNED BY ml_app.users_contact_infos.id;
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.users_contact_infos ALTER COLUMN id SET DEFAULT nextval('ml_app.users_contact_infos_id_seq'::regclass);
+
+
+--
+-- Name: users_contact_infos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.users_contact_infos
+    ADD CONSTRAINT users_contact_infos_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: index_users_contact_infos_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_users_contact_infos_on_admin_id ON ml_app.users_contact_infos USING btree (admin_id);
+
+
+--
+-- Name: index_users_contact_infos_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_users_contact_infos_on_user_id ON ml_app.users_contact_infos USING btree (user_id);
+
+
+
+--
+-- Name: fk_rails_4decdf690b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.users_contact_infos
+    ADD CONSTRAINT fk_rails_4decdf690b FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_7808f5fdb3; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.users_contact_infos
+    ADD CONSTRAINT fk_rails_7808f5fdb3 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+
+--
 -- Name: users_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -11410,12 +11603,6 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_elt_history ALTER COLUMN id 
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_elts ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_player_contact_elts_id_seq'::regclass);
 
-
---
--- Name: activity_log_player_contact_emails id; Type: DEFAULT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ml_app.activity_log_player_contact_emails ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_player_contact_emails_id_seq'::regclass);
 
 
 --
@@ -12261,13 +12448,6 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_elt_history
 ALTER TABLE ONLY ml_app.activity_log_player_contact_elts
     ADD CONSTRAINT activity_log_player_contact_elts_pkey PRIMARY KEY (id);
 
-
---
--- Name: activity_log_player_contact_emails activity_log_player_contact_emails_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ml_app.activity_log_player_contact_emails
-    ADD CONSTRAINT activity_log_player_contact_emails_pkey PRIMARY KEY (id);
 
 
 --
@@ -13329,33 +13509,6 @@ CREATE INDEX index_activity_log_player_contact_elts_on_player_contact_elt_id ON 
 
 CREATE INDEX index_activity_log_player_contact_elts_on_user_id ON ml_app.activity_log_player_contact_elts USING btree (user_id);
 
-
---
--- Name: index_activity_log_player_contact_emails_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE INDEX index_activity_log_player_contact_emails_on_master_id ON ml_app.activity_log_player_contact_emails USING btree (master_id);
-
-
---
--- Name: index_activity_log_player_contact_emails_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE INDEX index_activity_log_player_contact_emails_on_player_contact_id ON ml_app.activity_log_player_contact_emails USING btree (player_contact_id);
-
-
---
--- Name: index_activity_log_player_contact_emails_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE INDEX index_activity_log_player_contact_emails_on_protocol_id ON ml_app.activity_log_player_contact_emails USING btree (protocol_id);
-
-
---
--- Name: index_activity_log_player_contact_emails_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE INDEX index_activity_log_player_contact_emails_on_user_id ON ml_app.activity_log_player_contact_emails USING btree (user_id);
 
 
 --

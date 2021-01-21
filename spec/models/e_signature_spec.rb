@@ -70,7 +70,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
         @al.e_signature_password = @good_password
         @al.e_signature_otp_attempt = @user.current_otp
         @al.save!
-      end.not_to raise_error(ESignature::ESignatureUserError)
+      end.not_to raise_error # (ESignature::ESignatureUserError)
     end
 
     it 'validates the user that prepared the document is the same one that signs it' do
@@ -96,7 +96,8 @@ RSpec.describe 'electronic signature of records', type: 'model' do
         @al2.e_signature_otp_attempt = @user.current_otp
         @al2.e_signed_status = ESignature::ESignatureManager::SignNowStatus
         @al2.save!
-      end.to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Password or two-factor authentication code is not correct. Please try again.')
+      end.to raise_error(ActiveRecord::RecordInvalid,
+                         'Validation failed: Password or two-factor authentication code is not correct. Please try again.')
     end
 
     it 'prevents a signature with a bad two-factor authentication code' do
@@ -108,7 +109,8 @@ RSpec.describe 'electronic signature of records', type: 'model' do
         @al2.e_signature_otp_attempt = '000000'
         @al2.e_signed_status = ESignature::ESignatureManager::SignNowStatus
         @al2.save!
-      end.to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Password or two-factor authentication code is not correct. Please try again.')
+      end.to raise_error(ActiveRecord::RecordInvalid,
+                         'Validation failed: Password or two-factor authentication code is not correct. Please try again.')
     end
   end
 
@@ -184,8 +186,8 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       expect(res.length).to eq 64
 
       expect do
-        @signed_document.validate_prepared_doc_digest
-      end.not_to raise_error ESignature::ESignatureException
+        @signed_document.send :validate_prepared_doc_digest
+      end.not_to raise_error # ESignature::ESignatureException
     end
 
     it 'saves the signed document back to the activity record' do

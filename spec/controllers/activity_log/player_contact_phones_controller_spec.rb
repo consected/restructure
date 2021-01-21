@@ -39,7 +39,7 @@ RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
 
     setup_access :player_contacts
     setup_access :activity_log__player_contact_phones
-    setup_access :activity_log__player_contact_phones_primary, resource_type: :activity_log_type
+    setup_access :activity_log__player_contact_phone_primary, resource_type: :activity_log_type
   end
 
   # before :each do

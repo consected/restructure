@@ -4,7 +4,7 @@
 -- Command line:
 -- table_generators/generate.sh activity_logs_table create activity_log_player_info_e_signs player_info e_signed_document e_signed_how e_signed_at e_signed_by e_signed_code
 
-      CREATE TABLE activity_log_player_info_e_sign_history (
+      CREATE TABLE IF NOT EXISTS activity_log_player_info_e_sign_history (
           id integer NOT NULL,
           master_id integer,
           player_info_id integer,
@@ -20,7 +20,7 @@
           updated_at timestamp without time zone NOT NULL,
           activity_log_player_info_e_sign_id integer
       );
-      CREATE TABLE activity_log_player_info_e_signs (
+      CREATE TABLE IF NOT EXISTS activity_log_player_info_e_signs (
           id integer NOT NULL,
           master_id integer,
           player_info_id integer,

@@ -28,7 +28,8 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     @user, @good_password = create_user
     @good_email = @user.email
 
-    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
+    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general,
+                                     resource_name: :create_master, current_admin: @admin, user: @user
 
     expect(@user.can?(:create_master)).to be_truthy
 
@@ -39,7 +40,8 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
       ac.current_admin = @admin
       ac.save!
     else
-      Admin::AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info', current_admin: @admin
+      Admin::AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info',
+                                      current_admin: @admin
     end
 
     #
@@ -53,6 +55,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     # setup_access :trackers
     # setup_access :tracker_histories
     # setup_access :latest_tracker_history
+    setup_access :create_master, resource_type: :general
   end
 
   def add_contact(ctype, entry, expected)
@@ -151,7 +154,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
         else
           expect(f.value).to match(/#{y}-0?#{m}-0?#{d}/)
         end
-     end
+      end
 
       find('input[type="submit"]').click unless no_submit
       sleep 1
@@ -427,7 +430,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     # Clear the chosen box
     page.all('h4.list-group-item-heading').first.click
 
-    within ('.item-flags-block form') do
+    within('.item-flags-block form') do
       click_button 'Save Item flag'
     end
 

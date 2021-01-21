@@ -21,6 +21,7 @@ module Seeds
         name: 'zeus',
         label: 'Zeus',
         disabled: false,
+        default_schema_name: 'ml_app',
         current_admin: auto_admin
       )
     end

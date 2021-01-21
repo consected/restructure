@@ -8,7 +8,7 @@ module ModelSupport
 
   def seed_database
     Rails.logger.info 'Starting seed setup in Model Support'
-    puts "#{Time.now} Starting seed setup in Model Support"
+    # puts "#{Time.now} Starting seed setup in Model Support"
     SeedSupport.setup
   end
 
