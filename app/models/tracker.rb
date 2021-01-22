@@ -1,5 +1,35 @@
 # frozen_string_literal: true
 
+# Implement status tracker functionality, recording status events for
+# a master record.
+# A three level hierarchy is used to classify status entries in the database,
+# corresponding to lookup tables of predefined values:
+#
+# - protocol
+# - sub_process
+# - protocol_event *optional*
+#
+# These actually correspond to more meaningful terms:
+#
+# - protocol (or study)
+# - event
+# - method *optional*
+#
+# The third level is optional if no predefined values are available for it
+#
+# The *trackers* table / model only contains a single entry for a protocol, showing
+# the latest sub_process / protocol_event entry based on the event date. This
+# is effectively a surface level view onto the tracker status events.
+# The tracker_history (note, not pluralized against convention) contains all
+# protocol / sub_process / protocol_event entries, including the current one. This
+# table should be used when checking if a status event has occurred against a
+# master record.
+#
+# Note: database triggers are defined that actually ensure the tracker table is
+# managed correctly. Although record inserts or updates can be made directly into
+# trackers or tracker_history tables, the same result will appear in both tables.
+# The app relies on these DB triggers to avoid duplicating functionality that is
+# regularly used outside of the app directly against the database.
 class Tracker < UserBase
   include UserHandler
   include TrackerHandler
@@ -15,7 +45,8 @@ class Tracker < UserBase
   validates :master, presence: true
   validates :event_date, presence: true, if: :sub_process_id?
 
-  # We can't use this next validation, since the error attribute is not translatable, and therefore we can't get sub_process to appear to users as 'status'
+  # We can't use this next validation, since the error attribute is not translatable,
+  # and therefore we can't get sub_process to appear to users as 'status'
   #  validates :sub_process, presence: true, if: :protocol_id?
 
   # _merged attribute is used to indicate if a tracker record was merged into an existing
@@ -76,10 +107,15 @@ class Tracker < UserBase
     t.save!
   end
 
+  #
   # Called by UserHandler managed records to save the latest update to the tracker
+  # in the Updates protocol
   def self.track_record_update(record)
     return nil if record.is_a?(Tracker) || record.is_a?(TrackerHistory)
 
+    # Get a prepared tracker instance to update with changes. This may
+    # be a new or existing tracker record, although it doesn't really matter
+    # to the rest of the functionality
     t = update_tracker :record, record
 
     cp = ''
@@ -141,6 +177,16 @@ class Tracker < UserBase
     end
   end
 
+  #
+  # Summaries of updates to records and flags are recorded into the tracker
+  # to provide full context to any changes and status events, allowing users
+  # a single place to find changes that may have been made to any record or flag
+  # associated with a master record.
+  # Simply add a record to the tracker, of a certain type based on the
+  # update being recorded.
+  # @param [Symbol] type - :record or :flag
+  # @param [UserBase] record - the instance created or updated so data can be summarized
+  # @return [Tracker] returns the new tracker record
   def self.update_tracker(type, record)
     t = get_or_create_record_updates_tracker record
 
@@ -156,6 +202,10 @@ class Tracker < UserBase
     t
   end
 
+  #
+  # Generate the protocol / sub process  / protocol event entries that will be
+  # used by implementations when updating and creating records, and subsequently tracking
+  # those changes in the tracker history.
   def self.add_record_update_entries(name, admin, update_type = 'record')
     begin
       protocol = Classification::Protocol.updates.first
@@ -199,6 +249,9 @@ class Tracker < UserBase
           'check double spacing is correct in the definition for namespaced classes.'
   end
 
+  #
+  # The sub_process attribute is set from the cache where possible to avoid unnecessary lookups
+  # to find the Updates / flag or Updates / record subprocess to be assigned to a new tracker entry
   def set_record_updates_sub_process(type)
     self.sub_process = Rails.cache.fetch "record_updates_sub_process_#{type}" do
       Classification::Protocol.record_updates_protocol.sub_processes.where(name: "#{type} updates").first
@@ -207,6 +260,13 @@ class Tracker < UserBase
     raise "Bad sub_process for tracker (#{type})" unless sub_process
   end
 
+  #
+  # Returns the tracker entry corresponding to the Updates protocol, if it exists, otherwise creates
+  # sets up a new instance for this protocol_id.
+  # This reflects the fact that trackers only show a single entry for each protocol, so updates
+  # will probably only update the existing one after the very first update item has been created.
+  # Reality is that the underlying DB triggers would handle this appropriately even if we just
+  # blindly created a new tracker entry without checking if one already existed.
   def self.get_or_create_record_updates_tracker(record)
     t = record.master.trackers.where(protocol_id: Classification::Protocol.record_updates_protocol).first
     t ||= record.master.trackers.new protocol: Classification::Protocol.record_updates_protocol

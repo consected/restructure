@@ -95,11 +95,15 @@ module GeneralDataConcerns
 
     # Check for the existence of tracker_histories in the super class. If it
     # already exists, it is an association that we should not be overriding
-    if defined?(super)
-      @memo_tracker_histories = super
-    else
-      @memo_tracker_histories = TrackerHistory.where(item_id: id, item_type: self.class.name, master_id: master_id).order(id: :asc)
-    end
+    @memo_tracker_histories = if defined?(super)
+                                super
+                              else
+                                TrackerHistory
+                                  .where(item_id: id,
+                                         item_type: self.class.name,
+                                         master_id: master_id)
+                                  .order(id: :asc)
+                              end
   end
 
   # look up the tracker_history item that corresponds to the latest tracker entry linked to this item

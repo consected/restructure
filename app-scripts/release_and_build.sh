@@ -31,6 +31,16 @@ RELEASESTARTED="$(echo ${ALLTAGS} | grep ${NEWVER})"
 echo "Current version: ${CURRVER}"
 echo "Next version: ${NEWVER}"
 
+echo "Checking brakeman before we go through the whole process"
+bin/brakeman -q --summary > /tmp/fphs-brakeman-summary.txt
+if [ "$?" == 0 ]; then
+  echo "Brakeman OK"
+else
+  cat /tmp/fphs-brakeman-summary.txt
+  echo "Brakeman Failed"
+  exit 1
+fi
+
 if [ -z "${RELEASESTARTED}" ]; then
   echo "Starting git-flow release"
   git flow release start ${NEWVER}

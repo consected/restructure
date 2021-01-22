@@ -245,7 +245,9 @@ module AlternativeIds
 
     assoc_name = ext_id.model_association_name
     # Ensure the first item is used, since adding new IDs could lead to spurious results
-    m = send(assoc_name).reorder('').order(id: :asc).first
+    # Also check that the master has this association defined, as there are unusual situations where
+    # this can cause unexpected errors
+    m = send(assoc_name).reorder('').order(id: :asc).first if respond_to?(assoc_name)
 
     m&.external_id
   end

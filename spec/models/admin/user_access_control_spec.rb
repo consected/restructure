@@ -22,10 +22,12 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     app_type_id = Admin::AppType.active.first.id
     3.times do
       create_user
-      Admin::UserAccessControl.create user: @user, resource_type: :table, resource_name: 'player_infos', current_admin: @admin, app_type_id: app_type_id
+      Admin::UserAccessControl.create user: @user, resource_type: :table, resource_name: 'player_infos',
+                                      current_admin: @admin, app_type_id: app_type_id
 
       expect do
-        Admin::UserAccessControl.create! user: @user, resource_type: :table, resource_name: 'player_infos', current_admin: @admin, app_type_id: app_type_id
+        Admin::UserAccessControl.create! user: @user, resource_type: :table, resource_name: 'player_infos',
+                                         current_admin: @admin, app_type_id: app_type_id
       end.to raise_error ActiveRecord::RecordInvalid
     end
   end
@@ -178,9 +180,12 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     create_item
 
-    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user, access: :read, resource_type: :table, resource_name: :latest_tracker_history
-    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user, access: :read, resource_type: :table, resource_name: :tracker_histories
-    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user, access: :create, resource_type: :table, resource_name: :trackers
+    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user, access: :read,
+                                     resource_type: :table, resource_name: :latest_tracker_history
+    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user, access: :read,
+                                     resource_type: :table, resource_name: :tracker_histories
+    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user, access: :create,
+                                     resource_type: :table, resource_name: :trackers
 
     res = @user.has_access_to? :access, :table, :tracker_histories
     expect(res).to be_truthy
@@ -293,13 +298,15 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     create_user
     @implementation_table_name = 'test_external_uac_identifiers'
     @implementation_attr_name = 'uac_identifier_id'
-    SetupHelper.setup_ext_identifier implementation_table_name: @implementation_table_name, implementation_attr_name: @implementation_attr_name
+    SetupHelper.setup_ext_identifier implementation_table_name: @implementation_table_name,
+                                     implementation_attr_name: @implementation_attr_name
 
     # We don't know if user1 can access the same app as @user.
     # Set things up so she can
     res = user1.has_access_to? :read, :general, :app_type, alt_app_type_id: @user.app_type_id
     unless res
-      Admin::UserAccessControl.create! user: user1, app_type: @user.app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: @admin
+      Admin::UserAccessControl.create! user: user1, app_type: @user.app_type, access: :read, resource_type: :general,
+                                       resource_name: :app_type, current_admin: @admin
     end
     user1.app_type_id = @user.app_type_id
     user1.save!
@@ -344,7 +351,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
       expect(res.length).to eq 10
 
       # Initialize the acceess control to external id assignments, but don't enforce a restriction
-      ac = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: rt, resource_name: @implementation_table_name, current_admin: @admin
+      ac = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: rt,
+                                            resource_name: @implementation_table_name, current_admin: @admin
       expect(Admin::UserAccessControl.limited_access_restrictions(@user)).to be nil
       res = @user.has_access_to? :limited, rt, @implementation_table_name
       expect(res).to be_falsey
@@ -368,8 +376,10 @@ RSpec.describe Admin::UserAccessControl, type: :model do
       # because he can't see the master. This is of course correct, otherwise the current user could add an
       # external identifier himself to gain access
       # This demonstrates again that the default value can be overridden for a specific user
-      ac2 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: rt, resource_name: @implementation_table_name, current_admin: @admin, user: user1
-      ac3 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :create, resource_type: :table, resource_name: @implementation_table_name, current_admin: @admin, user: user1
+      ac2 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: rt,
+                                             resource_name: @implementation_table_name, current_admin: @admin, user: user1
+      ac3 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :create, resource_type: :table,
+                                             resource_name: @implementation_table_name, current_admin: @admin, user: user1
       res = user1.has_access_to? :limited, rt, @implementation_table_name
       expect(res).to be_falsey
       expect(Admin::UserAccessControl.limited_access_restrictions(user1)).to be nil
@@ -411,9 +421,15 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     create_user
 
     res = @user.has_access_to? :access, :general, :create_master
+    if res
+      res.update! disabled: true, current_admin: @admin
+      res = @user.has_access_to? :access, :general, :create_master
+    end
+
     expect(res).to be_falsey
 
-    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
+    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general,
+                                     resource_name: :create_master, current_admin: @admin, user: @user
 
     res = @user.has_access_to? :access, :general, :create_master
     expect(res).to be_truthy
@@ -507,13 +523,16 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     uac_test_role.update! current_admin: @admin, access: :create
 
-    uac_user = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :table, resource_name: :player_infos, user_id: @user1.id).first
+    uac_user = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :table,
+                                              resource_name: :player_infos, user_id: @user1.id).first
     uac_user&.update! current_admin: @admin, disabled: true
 
-    uac_user = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :table, resource_name: :player_infos, user_id: @user2.id).first
+    uac_user = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :table,
+                                              resource_name: :player_infos, user_id: @user2.id).first
     uac_user.update! current_admin: @admin, disabled: true
 
-    uac_user = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :table, resource_name: :player_infos, user_id: @user3.id).first
+    uac_user = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :table,
+                                              resource_name: :player_infos, user_id: @user3.id).first
     uac_user.update! current_admin: @admin, disabled: true
 
     res = @user1.has_access_to? :create, :table, :player_infos
@@ -538,7 +557,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     expect(res).to be_falsey
 
     # Create a basic - all access - uac
-    all_access = Admin::UserAccessControl.create! app_type_id: @user1.app_type_id, access: :read, resource_type: :table, resource_name: :player_infos, current_admin: @admin
+    all_access = Admin::UserAccessControl.create! app_type_id: @user1.app_type_id, access: :read,
+                                                  resource_type: :table, resource_name: :player_infos, current_admin: @admin
     res = @user1.has_access_to? :read, :table, :player_infos
     expect(res).to be_truthy
 
@@ -591,7 +611,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     user_role1.update!(current_admin: @admin, disabled: false)
 
     # Restrict with a user
-    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user2, access: nil, resource_type: :table, resource_name: :player_infos
+    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user2, access: nil,
+                                     resource_type: :table, resource_name: :player_infos
     res = @user1.has_access_to? :create, :table, :player_infos
     expect(res).to be_truthy
 

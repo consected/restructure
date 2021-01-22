@@ -88,13 +88,12 @@ module Dynamic
 
       def permitted_params
         field_list = definition.field_list
-        field_list = if field_list.blank?
-                       attribute_names.map(&:to_sym) - %i[disabled user_id created_at updated_at tracker_id] + [:item_id]
-                     else
-                       definition.field_list_array.map(&:to_sym)
-                     end
-
-        field_list
+        if field_list.blank?
+          attribute_names.map(&:to_sym) - %i[user_id created_at updated_at
+                                             tracker_id] + [:item_id]
+        else
+          definition.field_list_array.map(&:to_sym)
+        end
       end
     end
 

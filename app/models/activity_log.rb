@@ -233,7 +233,9 @@ class ActivityLog < ActiveRecord::Base
     activity_log = al_class.find(id)
     activity_log.current_user = current_user
     unless activity_log.allows_current_user_access_to? :access
-      raise FsException::NoAccess, "User (#{current_user.id}) does not have access to this activity log (#{activity_log.extra_log_type}) in (#{activity_log.class.resource_name})"
+      raise FsException::NoAccess,
+            "User (#{current_user.id}) does not have access to this activity log " \
+            "(#{activity_log.extra_log_type}) in (#{activity_log.class.resource_name})"
     end
 
     activity_log
@@ -333,7 +335,8 @@ class ActivityLog < ActiveRecord::Base
 
             # used by item flags to generate appropriate URLs
             begin
-              get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show", as: "activity_log_#{pg.implementation_model_name}"
+              get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show",
+                                             as: "activity_log_#{pg.implementation_model_name}"
             rescue StandardError
               Rails.logger.warn "Skipped creating route activity_log__#{mn}/:id since activity_log_#{pg.implementation_model_name} already exists?"
             end
@@ -390,7 +393,9 @@ class ActivityLog < ActiveRecord::Base
   def check_item_type_and_rec_type
     unless disabled
       unless item_type_valid?
-        errors.add(:item_type, "#{item_type} is invalid. It must be one of (#{self.class.use_with_class_names.join(', ')})")
+        errors.add(:item_type,
+                   "#{item_type} is invalid. It must be one of " \
+                   "(#{self.class.use_with_class_names.join(', ')})")
         return
       end
       unless rec_type_valid?
@@ -463,6 +468,8 @@ class ActivityLog < ActiveRecord::Base
         res.include WorksWithItem
         res.include UserHandler
         res.include Dynamic::ActivityLogImplementer
+        res.include Dynamic::ModelReferenceHandler
+        res.include Dynamic::RelatedModelHandler
         ESignature::ESignatureManager.enable_e_signature_for res
         res.final_setup
 
@@ -519,18 +526,18 @@ class ActivityLog < ActiveRecord::Base
                           end
 
     <<~CONTENT
-      require 'active_record/migration/app_generator'
-      class #{cname} < ActiveRecord::Migration[5.2]
-        include ActiveRecord::Migration::AppGenerator
-
-        def change
-          self.belongs_to_model = '#{item_type}'
-          #{migration_generator.migration_set_attribs}
-          
-          #{do_create_or_update}
-          create_activity_log_trigger
-        end
-      end
+                  require 'active_record/migration/app_generator'
+                  class #{cname} < ActiveRecord::Migration[5.2]
+                    include ActiveRecord::Migration::AppGenerator
+      #{'      '}
+                    def change
+                      self.belongs_to_model = '#{item_type}'
+                      #{migration_generator.migration_set_attribs}
+            #{'          '}
+                      #{do_create_or_update}
+                      create_activity_log_trigger
+                    end
+                  end
     CONTENT
   end
 
@@ -548,7 +555,10 @@ class ActivityLog < ActiveRecord::Base
       implementation_class.parent_class
     rescue StandardError => e
       logger.debug e
-      errors.add :item_type, "It seems that the model that this activity log definition is associated with does not exist. Check that the #{item_type.pluralize} table exists, and if this is a dynamic model or external ID, check it is enabled"
+      errors.add :item_type,
+                 'It seems that the model that this activity log definition is associated with does not exist. ' \
+                 "Check that the #{item_type.pluralize} table exists, and if this is a dynamic model " \
+                 'or external ID, check it is enabled'
     end
   end
 

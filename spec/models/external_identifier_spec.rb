@@ -8,8 +8,10 @@ RSpec.describe ExternalIdentifier, type: :model do
 
   def allow_ext_id_create
     unless @user.has_access_to? :create, :table, @implementation_table_name
-      uac = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :table, resource_name: @implementation_table_name.pluralize).first
-      uac ||= Admin::UserAccessControl.create app_type: @user.app_type, resource_type: :table, resource_name: @implementation_table_name.pluralize
+      uac = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :table,
+                                           resource_name: @implementation_table_name.pluralize).first
+      uac ||= Admin::UserAccessControl.create app_type: @user.app_type, resource_type: :table,
+                                              resource_name: @implementation_table_name.pluralize
       uac.current_admin = @admin
       uac.access = :create
       uac.save!
@@ -131,7 +133,7 @@ RSpec.describe ExternalIdentifier, type: :model do
 
   it 'creates an external ID automatically' do
     create_master
-
+    setup_access :sage_assignments, user: @master.current_user
     expect(SageAssignment.definition.pregenerate_ids).to be true
 
     SageAssignment.generate_ids(@admin, 100)

@@ -47,7 +47,8 @@ describe 'user and admin authentication' do
       url = url.gsub('(.:format)', '')
       rcont = special_urls[url] || r.defaults[:controller]
 
-      res = url.gsub(':item_controller', 'player_infos').gsub(%r{:.+?/}, "#{rand(100_000)}/").gsub(/:.+?$/, rand(100_000).to_s)
+      res = url.gsub(':item_controller', 'player_infos').gsub(%r{:.+?/}, "#{rand(100_000)}/").gsub(/:.+?$/,
+                                                                                                   rand(100_000).to_s)
 
       { url: res, method: method, controller: rcont, orig_url: url }
     end
@@ -69,7 +70,7 @@ describe 'user and admin authentication' do
                            admin/app_types admin/user_access_controls
                            admin/app_configurations admin/message_notifications admin/message_templates
                            admin/job_reviews admin/page_layouts admin/user_roles admin/nfs_store/filter/filters
-                           users/contact_infos admin/config_libraries]
+                           users/contact_infos admin/config_libraries admin/server_info]
 
     @url_list.each do |url|
       next unless url[:controller] && !skip_urls.include?(url[:url])
@@ -90,11 +91,14 @@ describe 'user and admin authentication' do
 
         expect(response).to have_http_status(302), "expected a redirect for #{url}. Got #{response.status}"
         if url[:controller] == :redirect_home
-          expect(response).to redirect_to('http://www.example.com/'), "expected a redirect to home page for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
+          expect(response).to redirect_to('http://www.example.com/'),
+                              "expected a redirect to home page for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
         elsif admin_controllers.include?(url[:controller].to_s)
-          expect(response).to redirect_to('http://www.example.com/admins/sign_in'), "expected a redirect to admins/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
+          expect(response).to redirect_to('http://www.example.com/admins/sign_in'),
+                              "expected a redirect to admins/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
         else
-          expect(response).to redirect_to('http://www.example.com/users/sign_in'), "expected a redirect to users/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. (#{url[:url]}) Got #{response.inspect}"
+          expect(response).to redirect_to('http://www.example.com/users/sign_in'),
+                              "expected a redirect to users/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. (#{url[:url]}) Got #{response.inspect}"
         end
       rescue AbstractController::ActionNotFound
         Rails.logger.info "Action not defined. Skipping #{url.inspect}"

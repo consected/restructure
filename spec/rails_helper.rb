@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
-puts 'Starting rspec'
+def put_now(msg)
+  puts "#{Time.now} #{msg}"
+end
+
+put_now 'Starting rspec'
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 ENV['RAILS_ENV'] ||= 'test'
 ENV['FPHS_ADMIN_SETUP'] = 'yes'
@@ -18,18 +22,20 @@ ENV['FPHS_USE_LOGGER'] = 'TRUE'
 unless ENV['IGNORE_MFA'] == 'true'
   res = `aws sts get-caller-identity | grep "UserId"`
   if res == ''
-    puts "AWS MFA is needed. Run\n  AWS_ACCT_ID=<account id> app-scripts/aws_mfa_set.rb"
+    put_now "AWS MFA is needed. Run\n  AWS_ACCT_ID=<account id> app-scripts/aws_mfa_set.rb"
     exit
   end
 end
 
-puts 'Require and include'
+put_now 'Require spec_helper'
 require 'spec_helper'
+put_now 'Require environment'
 require File.expand_path('../config/environment', __dir__)
+put_now 'Require rspec/rails'
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 
-puts 'Browser setups'
+put_now 'Browser setups'
 require 'capybara/rspec'
 require 'browser_helper'
 require 'setup_helper'
@@ -37,7 +43,7 @@ include BrowserHelper
 
 setup_browser unless ENV['SKIP_BROWSER_SETUP']
 
-puts 'Devise and warden'
+put_now 'Devise and warden'
 require 'devise'
 include Warden::Test::Helpers
 Warden.test_mode!
@@ -50,9 +56,9 @@ Warden.test_mode!
 # option on the command line or in ~/.rspec, .rspec or `.rspec-local`.
 #
 
-puts 'Validate and setup app dbs'
-# SetupHelper.setup_byebug
+put_now 'Validate and setup app dbs'
 SetupHelper.validate_db_setup
+SetupHelper.migrate_if_needed
 
 # The DB setup can be forced to skip with an env variable
 # It will automatically skip if a specific table is already in place
@@ -60,20 +66,21 @@ SetupHelper.setup_app_dbs unless ENV['SKIP_DB_SETUP']
 
 # Seed the database before loading files, since things like Scantron model and
 # controller will not exist without the seed
-puts 'Seed setup'
+put_now 'Seed setup'
 require "#{::Rails.root}/db/seeds.rb"
-Seeds.setup
+# Seeds.setup is automatically run when seeds.rb is required
+$dont_seed = true
 raise 'Scantron not defined by seeds' unless defined?(Scantron) && defined?(ScantronsController)
 
-puts 'Filestore mount'
+put_now 'Filestore mount'
 res = `#{::Rails.root}/app-scripts/setup-dev-filestore.sh`
 if res != "mountpoint OK\n"
-  puts res
-  puts 'Run app-scripts/setup-dev-filestore.sh and try again'
+  put_now res
+  put_now 'Run app-scripts/setup-dev-filestore.sh and try again'
   exit
 end
 
-puts 'Require more'
+put_now 'Require more'
 # The following line is provided for convenience purposes. It has the downside
 # of increasing the boot-up time by auto-requiring all files in the support
 # directory. Alternatively, in the individual `*_spec.rb` files, manually
@@ -87,7 +94,7 @@ Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 
 # Checks for pending migrations before tests are run.
 # If you are not using ActiveRecord, you can remove this line.
-puts 'Check migrations'
+put_now 'Enforce migrations'
 ActiveRecord::Migration.maintain_test_schema!
 
 RSpec.configure do |config|
@@ -97,26 +104,30 @@ RSpec.configure do |config|
 
     # Skip app setups with an env variable
     unless ENV['SKIP_APP_SETUP']
-      puts 'Setup apps'
+      put_now 'Setup apps'
 
+      put_now 'Setup ActivityLogPlayerContactPhone'
       Seeds::ActivityLogPlayerContactPhone.setup
+      put_now 'setup_al_player_contact_emails'
       SetupHelper.setup_al_player_contact_emails
+      put_now 'Setup ext_identifier'
       SetupHelper.setup_ext_identifier
+      put_now 'setup_test_app'
       SetupHelper.setup_test_app
-
+      put_now 'Handle zeus_bulk_message'
       als = ActivityLog.active.where(item_type: 'zeus_bulk_message')
       als.each do |a|
         a.update! current_admin: a.admin, disabled: true if a.enabled?
       end
     end
-
+    put_now 'load_tasks'
     Rails.application.load_tasks
-    puts 'Precompile assets'
+    put_now 'Precompile assets'
     Rake::Task['assets:precompile'].invoke unless ENV['SKIP_ASSETS']
-    puts 'Done before suite'
+    put_now 'Done before suite'
   end
 
-  puts 'Fixtures'
+  put_now 'Fixtures'
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_path = "#{::Rails.root}/spec/fixtures"
 

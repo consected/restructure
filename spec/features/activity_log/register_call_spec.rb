@@ -23,14 +23,36 @@ describe 'Register an incoming call', driver: :app_firefox_driver do
     SetupHelper.feature_setup
     seed_database
     setup_database
+
+    all_als = ActivityLog.active.select { |a| a.item_type_name == 'player_contact_phone' }
+    if all_als.length > 1
+
+      first = true
+      all_als.each do |a|
+        a.current_admin = @admin
+        a.disable! unless first
+        first = false
+      end
+    end
+
     ::ActivityLog.define_models
 
     ensure_user_matches_login_email
     setup_access :player_contacts
     setup_access :player_contacts, user: @user
 
+    setup_access :activity_log__player_contact_phones, user: @user
+    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: @user
+
     expect(@user.has_access_to?(:access, :table, :player_contacts)).to be_truthy
     expect(ActivityLog.model_names).to include 'player_contact_phone'
+
+    expect(@user.has_access_to?(:access, :table, :activity_log__player_contact_phones)).to be_truthy
+    expect(@user.has_access_to?(:access, :activity_log_type, :activity_log__player_contact_phone__primary)).to be_truthy
+
+    ac = Admin::AppConfiguration.find_default_app_config(@user.app_type, 'menu research label')
+    ac&.disable!(@admin)
   end
 
   before :example do

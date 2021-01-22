@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Handle the setting of users and master records, and checking of permissions
 module HandlesUserBase
   extend ActiveSupport::Concern
 
@@ -15,19 +16,37 @@ module HandlesUserBase
     before_validation :downcase_attributes
 
     before_create :write_created_by_user
+
+    # Check we can save, unless force_save flag has been set
+    # for example, to handle model reference triggers forcing referred records to be save
     before_save :check_can_save, unless: -> { force_save? }
 
     # This validation ensures that the user ID has been set in the master object
     # It implicitly reinforces security, in that the user must be authenticated for
     # the user to have been set
     validate :user_set
+
+    # Validate the record is valid, based on a valid_if configuration
     validate :configurable_valid_if
+
+    # Check the embedded item is valid, and if not pull its error into this object
     validate :valid_embedded_item
 
+    # Create a referring record, if it has been set up
     after_save :create_referring_record
+
+    # If records have the `disabled` column (or a method that wants to pretend this),
+    # trigger a handler if the record was disabled
     after_save :handle_disabled, if: -> { respond_to?(:disabled?) && disabled? }
 
+    # Attribute prevents the configured valid_if being evaluated.
+    # Doesn't appear to be used anywhere at the moment
     attr_accessor :ignore_configurable_valid_if
+
+    # The #reference is used to identify the current to_record when iterating model references
+    # to check the ability to access the record being pointed to from this one.
+    # Used primarily by #model_references to calculate ConditionalAction#calc_reference_if
+    attr_accessor :reference
 
     # Setup alternative id field methods
     Master.setup_resource_alternative_id_fields self
@@ -56,6 +75,10 @@ module HandlesUserBase
       false
     end
 
+    #
+    # Most models have a master association. Dynamic models may be defined without this,
+    # allowing views onto generic tables. This method may be overridden to handle these
+    # configurations
     def no_master_association
       false
     end
@@ -69,6 +92,9 @@ module HandlesUserBase
       nil
     end
 
+    #
+    # Provide a simple human friendly name for this type of model, based on the class name.
+    # Typically overridden and obtained by configurations, but this fallback remains
     def human_name
       cn = name
 
@@ -79,6 +105,13 @@ module HandlesUserBase
       cn.underscore.humanize.titleize
     end
 
+    #
+    # Check if a user is allowed some kind of access to this type of model,
+    # based on the user access controls 'table' resource type
+    # @param [User] user
+    # @param [Symbol] perform - such as :access, :edit, :update, :create
+    # @param [Hash] with_options -  usage is vague and should be avoided
+    # @return [Boolean] result
     def allows_user_access_to?(user, perform, with_options = nil)
       raise FphsException, 'no user in allows_user_access_to?' unless user
 
@@ -91,6 +124,14 @@ module HandlesUserBase
       !!user.has_access_to?(perform, :table, named, with_options)
     end
 
+    #
+    # Permitted parameters for strong param whitelist are generated based on
+    # configured attributes, minus some standard fields
+    # Ensure that database columns that are defined as array type can receive
+    # arrays in the permitted params by checking the actual column definition
+    # and changing the permitted param to an array if necessary
+    # @param [Array] param_list - the standard list of params to allow
+    # @return [Array] the refined resulting permitted params definition
     def refine_permitted_params(param_list)
       res = param_list.dup
 
@@ -103,45 +144,76 @@ module HandlesUserBase
       res
     end
 
+    #
+    # Permitted parameters for strong param whitelist are generated based on
+    # configured attributes, minus some standard fields. They are then refined
+    # to access arrays if needed
     def permitted_params
-      res = attribute_names.map(&:to_sym) - %i[disabled user_id created_at updated_at tracker_id tracker_history_id admin_id]
+      res = attribute_names.map(&:to_sym) - %i[disabled user_id created_at updated_at tracker_id tracker_history_id
+                                               admin_id]
       refine_permitted_params res
     end
 
+    #
+    # An overridable method for dynamic definitions
     def default_options; end
   end
 
+  #
+  # Most record types require the master to be set when persisted.
+  # External identifiers allow a nil for master_id initially, until assigned to a master record.
+  # This method may be overridden in subclasses
   def allows_nil_master?
     false
   end
 
+  #
+  # Most record types require the user to be set when persisted.
+  # External identifiers allow a nil for user_id initially, until assigned to a master record.
+  # This method may be overridden in subclasses
   def creatable_without_user
     false
   end
 
+  #
+  # Simply check if an object can be edited based on the user access controls *table* settings
+  # This model may be overridden by dynamic definitions
   def can_edit?
     allows_current_user_access_to? :edit
   end
 
+  #
+  # Simply check if an object prevents editing, as the inverse of #can_edit?
   def prevent_edit
     !can_edit?
   end
 
+  #
+  # Overridable method in dynamic definitions to check if this model can be added as a
+  # to-model reference
+  # The overrides check if `add_reference_if` is specified, and use it if it is
   def can_add_reference?
     true
   end
 
+  #
   # Prevent add reference buttons appearing on results blocks
-  # If `add_reference_if` is specified then use it. Otherwise fall back to can_edit?
+  # Otherwise fall back to can_edit?
   def prevent_add_reference
     res = can_add_reference?
     !(res.nil? ? can_edit? : res)
   end
 
+  #
+  # Check if this type of model can be created based on user access controls
+  # Overridden in dynamic definitions
   def can_create?
     allows_current_user_access_to? :create
   end
 
+  #
+  # Check if this type of model can be accessed based on user access controls
+  # Overridden in dynamic definitions
   def can_access?
     allows_current_user_access_to? :access
   end
@@ -161,6 +233,9 @@ module HandlesUserBase
     res
   end
 
+  #
+  # Items can be marked invalid through a soft validation test
+  # when an attribute is actually set, rather than at save
   def marked_invalid?
     @marked_invalid
   end
@@ -173,8 +248,8 @@ module HandlesUserBase
     @validating
   end
 
-  def validating=(v)
-    @validating = v
+  def validating=(val)
+    @validating = val
   end
 
   # Provide a modified human name for an instance
@@ -205,11 +280,11 @@ module HandlesUserBase
     return current_user if self.class.no_master_association
 
     if respond_to?(:master) && master
-      current_user = master.current_user
-      current_user
+      master.current_user
+
     elsif respond_to?(:item) && item.respond_to?(:master) && item.master
-      current_user = item.master.current_user
-      current_user
+      item.master.current_user
+
     else
       raise "master is nil and can't be used to get the current user" unless validating?
 
@@ -259,10 +334,10 @@ module HandlesUserBase
     res = self.class.allows_user_access_to? curr_user, perform
     return false unless res
 
-    if self.class.no_master_association
-      # Since there is no master association, there is no master to block the access
-      return true
-    elsif respond_to?(:master) && master
+    # Since there is no master association, there is no master to block the access
+    return true if self.class.no_master_association
+
+    if respond_to?(:master) && master
       m = master
     elsif respond_to?(:item) && item.respond_to?(:master) && item.master
       m = item.master
@@ -271,12 +346,49 @@ module HandlesUserBase
     !!m.allows_user_access
   end
 
+  #
+  # Return all the objects that refer to this item through model references
+  # @return [Array{UserBase}]
   def referenced_from
     return @referenced_from unless @referenced_from.nil?
 
     @referenced_from = ModelReference.find_where_referenced_from self
   end
 
+  # A referring record is either set based on the the specific record that the controller say is being viewed
+  # when an action is performed, or
+  # if there is only one model reference we use that instead.
+  def referring_record
+    return @referring_record == :nil ? nil : @referring_record unless @referring_record.nil?
+
+    res = referenced_from
+    @referring_record = res.first&.from_record
+    return @referring_record if @referring_record && res.length == 1
+
+    @referring_record = :nil
+    nil
+  end
+
+  # Top referring record is the top record in the reference hierarchy
+  def top_referring_record
+    return @top_referring_record == :nil ? nil : @top_referring_record unless @top_referring_record.nil?
+
+    @top_referring_record = next_up = referring_record
+    while next_up
+      next_up = next_up.referring_record
+      @top_referring_record = next_up if next_up
+    end
+
+    return @top_referring_record if @top_referring_record
+
+    @top_referring_record = :nil
+    nil
+  end
+
+  #
+  # Model references can set an option to also disable the record they point to if
+  # the reference is disabled. This method handles that if called from the model reference
+  # and calls back to the save triggers if needed
   def model_reference_disable
     if respond_to? :disabled
       disable! force_save: true
@@ -286,29 +398,37 @@ module HandlesUserBase
     end
   end
 
+  #
+  # An embedded item is a model reference that has been assessed at runtime to appear embedded
+  # in another item (an activity log) as a seamless form.
+  # This is that embedded item - a regular UserBase instance
   def embedded_item
     @embedded_item
   end
 
-  def embedded_item=(o)
-    if o.is_a? UserBase
-      @embedded_item = o
-    elsif o.is_a?(Hash) && @embedded_item
+  def embedded_item=(obj)
+    if obj.is_a? UserBase
+      @embedded_item = obj
+    elsif obj.is_a?(Hash) && @embedded_item
       @embedded_item.master.current_user ||= master_user
-      @embedded_item.update o
+      @embedded_item.update obj
       touch(time: @embedded_item.updated_at) if @embedded_item.updated_at_previously_changed?
     end
   end
 
   # Used as an indicator in certain models to show that this is part of a master record creation
-  def creating_master=(cm)
-    @creating_master = cm
+  # This is used within an external identifier to disable certain validations
+  def creating_master=(cm_flag)
+    @creating_master = cm_flag
   end
 
   def creating_master
     @creating_master
   end
 
+  #
+  # The referring record attributes are typically set up to identify the record that refers to
+  # this one, when this is itself embedded in the referrer.
   def set_referring_record(ref_record_type, ref_record_id, current_user)
     @ref_record_type = ref_record_type
     @ref_record_id = ref_record_id
@@ -317,43 +437,52 @@ module HandlesUserBase
     @referring_record
   end
 
+  #
+  # Do the actual search to find the referring record based on the settings
+  # made in #set_referring_record
   def find_referring_record
-    if @ref_record_type
-      ref_item_class_name = @ref_record_type.singularize.camelize
+    return unless @ref_record_type
 
-      # Find the matching UserBase subclass that has this name, avoiding using the supplied param
-      # in a way that could be risky by allowing code injection
-      ic = UserBase.class_from_name ref_item_class_name
+    ref_item_class_name = @ref_record_type.singularize.camelize
 
-      # look up the item using the item_id parameter.
-      @referring_record = ic.find(@ref_record_id.to_i)
-      @referring_record.current_user = current_user
-      @referring_record
-    end
+    # Find the matching UserBase subclass that has this name, avoiding using the supplied param
+    # in a way that could be risky by allowing code injection
+    ic = UserBase.class_from_name ref_item_class_name
+
+    # Look up the item using the item_id parameter.
+    @referring_record = ic.find(@ref_record_id.to_i)
+    @referring_record.current_user = current_user
+    @referring_record
   end
 
+  #
+  # Create a record for the referring record object that has been set up, if
+  # a referring record type has been specified
+  # @return [ModelReference]
   def create_referring_record
-    if @ref_record_type
+    return unless @ref_record_type
 
-      @referring_record = find_referring_record
-
-      ModelReference.create_with @referring_record, self if @referring_record
-    end
+    @referring_record = find_referring_record
+    ModelReference.create_with @referring_record, self if @referring_record
   end
 
+  #
   # If the model has an attribute background_job_ref then use this to find and cancel the background job
+  #  Typically used if disabling a record, to avoid future jobs attempting to reference it
   def cancel_associated_job!
-    if respond_to?(:background_job_ref) && background_job_ref.present?
-      ref_parts = background_job_ref.split('%')
-      valid_ref_cns = ['delayed__backend__active_record__job'].freeze
-      valid_ref_cn = valid_ref_cns.select { |s| s == ref_parts.first }.first
-      if valid_ref_cn
-        job = valid_ref_cn.ns_camelize.constantize.find(ref_parts.last.to_i)
-        job&.delete
-      end
-    end
+    return unless respond_to?(:background_job_ref) && background_job_ref.present?
+
+    ref_parts = background_job_ref.split('%')
+    valid_ref_cns = ['delayed__backend__active_record__job'].freeze
+    valid_ref_cn = valid_ref_cns.select { |s| s == ref_parts.first }.first
+    return unless valid_ref_cn
+
+    job = valid_ref_cn.ns_camelize.constantize.find(ref_parts.last.to_i)
+    job&.delete
   end
 
+  #
+  # Allow a record to be saved without checking if the current user actually has access controls to do this
   def force_save!
     @force_save = true
   end
@@ -362,6 +491,10 @@ module HandlesUserBase
     @force_save
   end
 
+  #
+  # Disable a record using either the master's current user, an explicit
+  # current user, or force a save skipping the checks
+  # This assumes the record has a `disabled` attribute
   def disable!(current_user: nil, force_save: false)
     force_save! if force_save
     self.current_user ||= current_user
@@ -420,6 +553,10 @@ module HandlesUserBase
       (self.class.no_master_association && !respond_to?(:current_user))
   end
 
+  #
+  # Typically the user_id is not written to directly, and has been overriden to avoid
+  # accidental changes. This method allows the model to write the user_id based on the
+  # current user for the master that this object belongs to.
   def force_write_user
     return true if no_user_validation
 
@@ -428,7 +565,8 @@ module HandlesUserBase
 
     mu = master_user
     unless mu.is_a?(User) && mu.persisted?
-      raise "bad user (for master #{master}) being pulled from master_user (#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '' : ' not persisted'})"
+      raise "bad user (for master #{master}) being pulled from master_user " \
+      "(#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '' : ' not persisted'})"
     end
 
     write_attribute :user_id, mu.id
@@ -442,7 +580,8 @@ module HandlesUserBase
 
     mu = master_user
     unless mu.is_a?(User) && mu.persisted?
-      raise "bad user (for master #{master}) being pulled from master_user when creating record (#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '' : ' not persisted'})"
+      raise "bad user (for master #{master}) being pulled from master_user when creating record " \
+            "(#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '' : ' not persisted'})"
     end
 
     # Failsafe, in case this is already set
@@ -451,6 +590,7 @@ module HandlesUserBase
     write_attribute :created_by_user_id, mu.id
   end
 
+  # A validation method for if the user has been set
   def user_set
     return true if no_user_validation
 
@@ -484,7 +624,8 @@ module HandlesUserBase
       ea += "(#{e})?"
     end
 
-    ignore = /(item_type)?(notes)?(description)?(message)?(.+_notes)?(.+_description)?(.+_details)?(e_signed_document)?#{ea}/
+    ignore =
+      /(item_type)?(notes)?(description)?(message)?(.+_notes)?(.+_description)?(.+_details)?(e_signed_document)?#{ea}/
 
     attributes.select { |k, _v| k.to_sym.in? self.class.permitted_params }
               .reject { |k, _v| k && k.match(ignore)[0].present? }
@@ -494,9 +635,12 @@ module HandlesUserBase
     true
   end
 
+  #
+  # Check if the record can be saved (based on editable and creatable rules) and if not, raise an exception
   def check_can_save
     if persisted? && !can_edit?
-      raise FphsException, "This item is not editable (#{respond_to?(:human_name) ? human_name : self.class.name}) #{id}"
+      raise FphsException,
+            "This item is not editable (#{respond_to?(:human_name) ? human_name : self.class.name}) #{id}"
     end
 
     if !persisted? && !can_create?
@@ -504,63 +648,81 @@ module HandlesUserBase
     end
   end
 
-  def configurable_valid_if
+  #
+  # Get the valid_if configuration from the option type config if available
+  # then evaluate it.
+  # Automatically true if there is no configuration
+  # Sets @return_failures attribute hash if there are failures to report
+  # @return [truthy]
+  def evaluate_valid_if_config
     return true if @ignore_configurable_valid_if || !option_type_config.respond_to?(:valid_if)
 
-    vi = option_type_config.valid_if
-    return true if vi.empty?
+    return true if option_type_config.valid_if.empty?
 
     action_name = persisted? ? :update : :create
-    return_failures = {}
-    res = option_type_config.calc_valid_if action_name, self, return_failures: return_failures
+    @return_failures = {}
+    option_type_config.calc_valid_if action_name, self, return_failures: @return_failures
+  end
 
-    if res
-      true
-    else
-      if return_failures.empty?
-        errors.add :field_validation, 'failed. Check your entries and try again'
-      else
-        return_failures.each do |c_var, c_vals|
-          c_vals.each do |table, cond|
-            cond.each do |k, v|
-              v = v.present? ? v : '(blank)'
-              if v.is_a? Hash
-                if v[:hide_error]
-                  next
-                elsif v[:condition]
-                  v = "#{v[:condition]} #{v[:value].present? ? v[:value] : '(blank)'}"
+  #
+  # Validation method that checks if a valid_if configuration shows all the fields being valid,
+  # or produces the appropriate errors if not
+  def configurable_valid_if
+    return true if evaluate_valid_if_config
+
+    if @return_failures.empty?
+      errors.add :field_validation, 'failed. Check your entries and try again'
+      return
+    end
+
+    @return_failures.each do |c_var, c_vals|
+      c_vals.each do |table, cond|
+        cond.each do |k, v|
+          v = v.present? ? v : '(blank)'
+          if v.is_a? Hash
+            next if v[:hide_error]
+
+            v = if v[:condition]
+                  "#{v[:condition]} #{v[:value].present? ? v[:value] : '(blank)'}"
                 else
-                  v = "#{v.first.first.to_s.humanize.downcase}: #{v.first.last.present? ? v.first.last : '(blank)'}"
+                  "#{v.first.first.to_s.humanize.downcase}: #{v.first.last.present? ? v.first.last : '(blank)'}"
                 end
-              else
-                v = ": #{v}"
-              end
-              k = table == :this ? k : "#{table}.#{k}"
-              if c_var == :all
-                errors.add k.to_sym, "is invalid. Expected value to be #{v}"
-              elsif c_var == :any
-                errors.add k.to_sym, "is one of several possible fields that is invalid - one must match. Expected value #{v}"
-              elsif c_var == :not_any
-                errors.add k.to_sym, "is invalid. Expected value not to be #{v}"
-              elsif c_var == :not_all
-                errors.add k.to_sym, "is one of several possible fields that is invalid - none must match. Expected value not #{v}"
-              end
-            end
+          else
+            v = ": #{v}"
           end
+          k = table == :this ? k : "#{table}.#{k}"
+
+          msg = nil
+          case c_var
+          when :all
+            msg = "is invalid. Expected value to be #{v}"
+          when :any
+            msg = "is one of several possible fields that is invalid - one must match. Expected value #{v}"
+          when :not_any
+            msg = "is invalid. Expected value not to be #{v}"
+          when :not_all
+            msg = "is one of several possible fields that is invalid - none must match. Expected value not #{v}"
+          end
+
+          errors.add k.to_sym, msg if msg
         end
       end
-      nil
     end
+    nil
   end
 
+  # Validation method for the embedded item, checking whether the item has errors set,
+  # and making them available locally if so
   def valid_embedded_item
-    if embedded_item && !embedded_item.errors.empty?
-      embedded_item.errors.each do |k, v|
-        errors.add k, v
-      end
+    return unless embedded_item && !embedded_item.errors.empty?
+
+    embedded_item.errors.each do |k, v|
+      errors.add k, v
     end
   end
 
+  #
+  # Set a flag if the record was disabled and cancel an associated background job if there is one
   def handle_disabled
     @was_disabled = true
     cancel_associated_job!

@@ -26,11 +26,15 @@ describe 'simple search reports', js: true, driver: :app_firefox_driver do
     @user, @good_password = create_user
     @good_email = @user.email
 
-    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
-    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :export_csv, current_admin: @admin, user: @user
+    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general,
+                                     resource_name: :create_master, current_admin: @admin, user: @user
+    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general,
+                                     resource_name: :export_csv, current_admin: @admin, user: @user
 
     expect(@user.can?(:create_master)).to be_truthy
     expect(@user.can?(:export_csv)).to be_truthy
+    pl = player_list.first
+    expect(PlayerInfo.where(last_name: pl[:last_name]).first).not_to be nil
   end
 
   before :each do
@@ -55,6 +59,7 @@ describe 'simple search reports', js: true, driver: :app_firefox_driver do
 
     within '#simple_search_master' do
       fill_in 'Last name', with: pl[:last_name]
+      sleep 1
       click_button 'search'
     end
 
@@ -71,8 +76,9 @@ describe 'simple search reports', js: true, driver: :app_firefox_driver do
 
     within '#simple_search_master' do
       fill_in 'Last name', with: ''
-      click_button 'search'
       sleep 1
+      click_button 'search'
+      sleep 5
       click_button 'csv'
     end
 

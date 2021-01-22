@@ -14,8 +14,8 @@
         <%= f.text_field 'external_id[field]', id: 'simple_external_id_field', class: 'form-control', min: 0, value: @ext_field %>
       </div>
     <%= f.submit :search, id: 'msid_search_reg', class: "btn btn-default btn-sm pull-right auto-submitter #{@master_req_format == 'reg' ? 'run-master-search' : ''}" %>
-    <%= f.submit "CSV", id: 'msid_search_csv', name: :format, value: "csv", class: "btn btn-default pull-right btn-sm #{@master_req_format == 'csv' ? 'run-master-search' : ''}" %>
-    <%= f.submit "JSON", id: 'msid_search_json', name: :format, value: "json", class: "btn btn-default btn-sm  target_new_window pull-right #{@master_req_format == 'json' ? 'run-master-search' : ''}" %>
+    <%= f.submit "csv", id: 'msid_search_csv', name: :format, value: "csv", class: "btn btn-default pull-right btn-sm #{@master_req_format == 'csv' ? 'run-master-search' : ''}" %>
+    <%= f.submit "json", id: 'msid_search_json', name: :format, value: "json", class: "btn btn-default btn-sm  target_new_window pull-right #{@master_req_format == 'json' ? 'run-master-search' : ''}" %>
 
   <% end %>
 <% end %>
