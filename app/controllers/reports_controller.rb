@@ -219,7 +219,7 @@ class ReportsController < UserBaseController
 
   def add_to_list
     atl_params = params[:add_to_list]
-    list = Reports::ReportList.setup atl_params, current_user, current_admin
+    list = Reports::ReportList.setup atl_params[:list_name], atl_params[:items], current_user, current_admin
 
     n = list.add_items_to_list
 
@@ -229,7 +229,7 @@ class ReportsController < UserBaseController
 
   def update_list
     atl_params = params[:update_list]
-    list = Reports::ReportList.setup atl_params, current_user, current_admin
+    list = Reports::ReportList.setup atl_params[:list_name], atl_params[:items], current_user, current_admin
 
     n = list.update_items_in_list
 
@@ -239,7 +239,7 @@ class ReportsController < UserBaseController
 
   def remove_from_list
     atl_params = params[:remove_from_list]
-    list = Reports::ReportList.setup atl_params, current_user, current_admin
+    list = Reports::ReportList.setup atl_params[:list_name], atl_params[:items], current_user, current_admin
 
     ids = list.remove_items_from_list
     n = ids.length
