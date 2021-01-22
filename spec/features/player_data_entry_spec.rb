@@ -31,8 +31,6 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general,
                                      resource_name: :create_master, current_admin: @admin, user: @user
 
-    expect(@user.can?(:create_master)).to be_truthy
-
     ac = Admin::AppConfiguration.where(app_type: @user.app_type, name: 'create master with').first
 
     if ac
@@ -56,6 +54,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     # setup_access :tracker_histories
     # setup_access :latest_tracker_history
     setup_access :create_master, resource_type: :general
+    expect(@user.can?(:create_master)).to be_truthy
   end
 
   def add_contact(ctype, entry, expected)
@@ -297,12 +296,13 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
 
     # login_as @user, scope: :user
     expect(user.has_access_to?(:create, :table, :player_contacts))
-
+    expect(@user.has_access_to?(:read, :general, :create_master))
     login
   end
 
   it 'should allow a new MSID and player information to be added' do
     expect(@user.has_access_to?(:create, :table, :player_contacts))
+    expect(@user.has_access_to?(:read, :general, :create_master))
 
     visit '/masters/search'
 
