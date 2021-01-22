@@ -1,4 +1,6 @@
-DB_BASE_NAME=${DB_BASE_NAME:=restr}
+DB_BASE_NAME=${DB_BASE_NAME:=fpa}
+
+echo "Dropping: ${DB_BASE_NAME}"
 
 function drop() {
 
