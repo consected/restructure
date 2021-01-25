@@ -42,7 +42,31 @@ _fpa.admin = {
     code_el.CodeMirror = cm;
     cm.refresh();
 
+  },
+
+  setup_yaml_editor: function (block) {
+
+    var code_el = block.get(0);
+    var mode = block.attr('data-code-editor-type');
+    if (!mode) mode = 'yaml';
+
+    var cm = CodeMirror.fromTextArea(code_el, {
+      lineNumbers: true,
+      mode: mode,
+      readOnly: false,
+      foldGutter: true,
+      gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+    });
+
+    var cme = cm.getWrapperElement();
+    cme.style.width = '100%';
+    cme.style.height = '100%';
+    cme.style.backgroundColor = 'rgb(255,255,255)';
+    code_el.CodeMirror = cm;
+    cm.refresh();
+
   }
+
 
 
 };

@@ -33,13 +33,9 @@ class Report < ActiveRecord::Base
   configure :component, with: [:options]
   configure :column_options, with: %i[tags classes hide show_as]
 
-  attr_reader :clean_sql
-  attr_reader :filtering_on
-  attr_writer :current_user
-  attr_reader :current_user
+  attr_accessor :current_user, :data_ref_table_name, :data_ref_schema_name, :data_ref_table_fields
+  attr_reader :clean_sql, :filtering_on
   attr_writer :search_attr_values
-
-  attr_accessor :data_ref_table_name, :data_ref_schema_name, :data_ref_table_fields
 
   class BadSearchCriteria < FphsException
     def message
@@ -83,8 +79,7 @@ class Report < ActiveRecord::Base
 
     i = parts.first
     # Allow hyphenated categories to be matched with underscores
-    its = [i, i.gsub('_', '-')].uniq
-
+    its = [i, i.gsub('_', '-'), i.gsub('_', ' ')].uniq
     res = where(item_type: its, short_name: parts.last).first
     raise ActiveRecord::RecordNotFound unless res
 
@@ -123,8 +118,10 @@ class Report < ActiveRecord::Base
     Rails.cache.fetch('Report.item_types') do
       res = []
       editable_data_reports.each do |r|
-        unless r.selection_fields.blank?
-          res += r.selection_fields.split(/[^a-zA-Z0-9_]/).collect { |c| "report_#{r.name.id_underscore}_#{c.downcase}".to_sym }
+        next if r.selection_fields.blank?
+
+        res += r.selection_fields.split(/[^a-zA-Z0-9_]/).collect do |c|
+          "report_#{r.name.id_underscore}_#{c.downcase}".to_sym
         end
       end
       res
@@ -254,7 +251,8 @@ class Report < ActiveRecord::Base
       logger.info "Trying to get data from cache (#{current_user.id} :#{ids}"
       if ids && sql.include?(':filter_previous')
         inner_sql = ' inner join (select id master_id from masters where id in (:filter_previous_ids)) filter_previous_alias using(master_id) '
-        clean_inner_sql = ActiveRecord::Base.send(:sanitize_sql_for_conditions, [inner_sql, { filter_previous_ids: ids }])
+        clean_inner_sql = ActiveRecord::Base.send(:sanitize_sql_for_conditions,
+                                                  [inner_sql, { filter_previous_ids: ids }])
         sql.gsub!(':filter_previous', clean_inner_sql) if clean_inner_sql
 
         filtering_previous = true
@@ -274,7 +272,9 @@ class Report < ActiveRecord::Base
     self.data_ref_schema_name = options[:schema_name]
     self.data_ref_table_fields = options[:table_fields]
     if data_ref_table_name && data_ref_schema_name
-      table_exists = Admin::MigrationGenerator.tables_and_views.find { |t| t['table_name'] == data_ref_table_name && t['schema_name'] == data_ref_schema_name }
+      table_exists = Admin::MigrationGenerator.tables_and_views.find do |t|
+        t['table_name'] == data_ref_table_name && t['schema_name'] == data_ref_schema_name
+      end
       raise FphsException, 'invalid table name' unless table_exists
 
       raise FphsException, 'table fields incorrect' unless data_ref_table_fields == '*'
@@ -544,7 +544,10 @@ class Report < ActiveRecord::Base
     res = self.class.active.where(test)
     unless (res.map(&:id) - [id]).empty?
       res.each do |res0|
-        errors.add :resource_name, "is a duplicate of another report record: (#{name}) #{self} --duplicates-- (#{res0.name}) #{{ short_name: res0.short_name, item_type: res0.item_type }} "
+        errors.add :resource_name,
+                   "is a duplicate of another report record: (#{name}) #{self} --duplicates-- (#{res0.name}) #{{
+                     short_name: res0.short_name, item_type: res0.item_type
+                   }} "
       end
     end
   end
@@ -555,7 +558,8 @@ class Report < ActiveRecord::Base
 
     parts = item_type.id_underscore.split('__')
     if parts.length > 1
-      errors.add :item_type, "must not use multiple space or punctuation characters between letters: '#{item_type}' becomes #{item_type.id_underscore}"
+      errors.add :item_type,
+                 "must not use multiple space or punctuation characters between letters: '#{item_type}' becomes #{item_type.id_underscore}"
     end
   end
 end
