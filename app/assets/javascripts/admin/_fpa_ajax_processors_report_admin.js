@@ -53,7 +53,7 @@ _fpa.postprocessors_report_admin = {
       var hidden_field = $('#search_hidden_field').is(':checked');
       var multi = $('#search_attrs_multi').val();
       var label = $('#search_attrs_label').val();
-      var disabled = $('#search_attrs_default').val();
+      var defval = $('#search_attrs_default').val();
       if (ra_config_selections) {
         var selections = ra_config_selections.getValue();
       }
@@ -77,18 +77,18 @@ _fpa.postprocessors_report_admin = {
         if (label)
           search_attr_def += "\n    label: " + label;
 
-        if (disabled) {
+        if (defval) {
           if (multi === 'single') {
-            disabled = disabled.trim();
+            defval = defval.trim();
           } else {
-            var ds = disabled.split('\n');
-            disabled = '';
+            var ds = defval.split('\n');
+            defval = '';
             for (var id in ds) {
-              disabled += '\n      - ' + ds[id];
+              defval += '\n      - ' + ds[id];
             }
           }
 
-          search_attr_def += "\n    default: " + disabled;
+          search_attr_def += "\n    default: " + defval;
         }
         else {
           if (no_disabled)

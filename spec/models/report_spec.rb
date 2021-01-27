@@ -28,13 +28,15 @@ RSpec.describe Report, type: :model do
 
     first_rep = Report.active.searchable.first
     expect(first_rep).to be_a Report
-    Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :report, resource_name: first_rep.name, current_admin: @admin
+    Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :report,
+                                     resource_name: first_rep.name, current_admin: @admin
 
     res = Report.active.searchable.for_user(@user)
     expect(res.length).to eq 1
     expect(res.first).to eq first_rep
 
-    Admin::UserAccessControl.create! app_type: @user.app_type, user: @user, access: nil, resource_type: :report, resource_name: first_rep.name, current_admin: @admin
+    Admin::UserAccessControl.create! app_type: @user.app_type, user: @user, access: nil, resource_type: :report,
+                                     resource_name: first_rep.name, current_admin: @admin
     res = Report.active.searchable.for_user(@user)
     expect(res.length).to eq 0
   end
@@ -53,6 +55,6 @@ RSpec.describe Report, type: :model do
     first_rep = first_rep.reload
     expect(first_rep.item_type).to eq first_rep.item_type.downcase
 
-    Report.find_category_short_name "#{first_rep.item_type}__#{first_rep.short_name}"
+    Report.find_by_alt_resource_name "#{first_rep.item_type}__#{first_rep.short_name}"
   end
 end

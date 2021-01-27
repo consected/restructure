@@ -5,7 +5,7 @@ class ReportsController < UserBaseController
   before_action :init_vars
   before_action :authenticate_user_or_admin!
   before_action :index_authorized?, only: [:index]
-  before_action :set_report, only: [:show]
+  before_action :setup_report, only: [:show]
   before_action :set_editable_instance_from_id, only: %i[edit update new create]
   before_action :set_instance_from_build, only: %i[new create]
   before_action :set_master_and_user, only: %i[create update]
@@ -24,7 +24,7 @@ class ReportsController < UserBaseController
     pm = filtered_primary_model(pm)
 
     @reports = pm.order auto: :desc, report_type: :asc, position: :asc
-    @reports = @reports.reject { |r| r.list_options.hide_in_list }
+    @reports = @reports.reject { |r| r.report_options.list_options.hide_in_list }
 
     respond_to do |format|
       format.html { render :index }
@@ -39,74 +39,52 @@ class ReportsController < UserBaseController
     @results_target = 'master_results_block'
     @embedded_report = (params[:embed] == 'true')
 
-    options = {}
-    search_attrs = search_attrs_params_hash
-    @search_attrs = search_attrs
+    @search_attrs = search_attrs_params_hash
 
-    table_name = params[:table_name]
-    schema_name = params[:schema_name]
+    setup_data_reference_request
 
-    @view_context = params[:view_context]
-    @view_context = if @view_context.blank?
-                      nil
-                    else
-                      @view_context.to_sym
-                    end
+    @view_context = params[:view_context].blank? ? nil : params[:view_context].to_sym
 
     if params[:commit] == 'count'
       @no_masters = true
-      options[:count_only] = true
+      @runner.count_only = true
       @count_only = true
     end
 
-    if search_attrs&.is_a?(Hash)
-      options[:filter_previous] = true if search_attrs[:_filter_previous_] == 'true'
-      no_run = !search_attrs[:no_run].blank?
+    if @search_attrs.is_a?(Hash)
+      @runner.previous_filtering.requested = true if @search_attrs[:_filter_previous_] == 'true'
+      @no_run = @search_attrs[:no_run] == 'true'
     end
 
-    unless @report.searchable || show_authorized?
+    unless (@report.searchable || show_authorized?) && (current_admin || @report.can_access?(current_user))
       @no_masters = true
       return
     end
 
-    unless current_admin || @report.can_access?(current_user)
-      @no_masters = true
-      return
-    end
-
-    if (search_attrs || table_name && schema_name) && !no_run
+    if @search_attrs && !@no_run
+      # Search attributes or data reference parameters have been provided
+      # and the query should be run
       begin
-        if table_name && schema_name
-
-          return not_authorized unless current_user.can? :view_data_reference
-
-          search_attrs = '_use_defaults_'
-
-          table_fields = '*' if params[:table_fields].blank?
-
-          @results = @report.run(search_attrs,
-                                 table_name: table_name,
-                                 schema_name: schema_name,
-                                 table_fields: table_fields)
-        else
-          @results = @report.run(search_attrs, options)
-        end
+        @results = @runner.run(@search_attrs)
 
         if params[:commit] == 'search'
+          # Based on the results for the report, the MasterHandler uses the ids returned to
+          # get the results as a masters search, allowing it to be viewed as a search rather
+          # than tabular report.
           run 'REPORT'
           return
         end
       rescue ActiveRecord::PreparedStatementInvalid => e
-        logger.info "Prepared statement invalid in reports_controller (#{search_attrs}) show: #{e.inspect}\n#{e.backtrace.join("\n")}"
+        logger.info "Prepared statement invalid in reports_controller (#{@search_attrs}) show: #{e.inspect}\n#{e.backtrace.join("\n")}"
         @results = nil
         @no_masters = true
-        flash.now[:danger] = "Generated SQL invalid.\n#{@report.clean_sql}\n#{e}"
+        flash.now[:danger] = "Generated SQL invalid.\n#{@runner.sql}\n#{e}"
         respond_to do |format|
           format.html do
             if params[:part] == 'results'
-              render plain: "Generated SQL invalid.\n#{@report.clean_sql}\n#{e}", status: 400
+              render plain: "Generated SQL invalid.\n#{@runner.sql}\n#{e}", status: 400
             else
-              @report.search_attr_values ||= search_attrs
+              @runner.search_attr_values ||= @search_attrs
               show_report
             end
           end
@@ -125,12 +103,12 @@ class ReportsController < UserBaseController
             render partial: 'results'
           else
             @report_criteria = true
-            @report.search_attr_values ||= search_attrs
+            @runner.search_attr_values ||= @search_attrs
             show_report
           end
         end
         format.json do
-          render json: { results: @results, search_attributes: @report.search_attr_values }
+          render json: { results: @results, search_attributes: @runner.search_attr_values }
         end
         format.csv do
           res_a = []
@@ -155,7 +133,7 @@ class ReportsController < UserBaseController
       render partial: 'filter_on'
     else
       @no_masters = true
-      @report.search_attr_values = search_attrs
+      @runner.search_attr_values = @search_attrs
 
       begin
         respond_to do |format|
@@ -171,7 +149,7 @@ class ReportsController < UserBaseController
             end
           end
           format.json do
-            render json: { results: @results, search_attributes: (@report.search_attr_values || search_attrs) }
+            render json: { results: @results, search_attributes: (@runner.search_attr_values || @search_attrs) }
           end
         end
       rescue StandardError => e
@@ -266,10 +244,10 @@ class ReportsController < UserBaseController
 
   def set_instance_from_build
     build_with = begin
-                     secure_params
-                 rescue StandardError
-                   nil
-                   end
+      secure_params
+    rescue StandardError
+      nil
+    end
 
     if report_model.respond_to?(:no_master_association) && report_model.no_master_association || !report_model.respond_to?(:master)
       @report_item = report_model.new(build_with)
@@ -281,17 +259,27 @@ class ReportsController < UserBaseController
   # :id parameter can be either an integer ID, or a string, which looks up a item_type__short_name
   # By default it uses the params[:id] for the id, but specifying id as the argument will use this instead
   # @param id [(optional) Intger | String]
-  def set_report(id = nil)
+  def setup_report(id = nil)
     id ||= params[:id]
     redirect_to :index if id.blank?
-    num_id = id.to_i
-    @report = if num_id > 0
-                Report.active.find(num_id)
-              else
-                Report.active.find_category_short_name id
-              end
-
+    @report = Report.find_by_id_or_resource_name(id)
     @report.current_user = current_user
+    @runner = @report.runner
+  end
+
+  def setup_data_reference_request
+    table_name = params[:table_name]
+    schema_name = params[:schema_name]
+    table_fields = '*' if params[:table_fields].blank?
+
+    return unless table_name && schema_name
+
+    return not_authorized unless current_user.can? :view_data_reference
+
+    @search_attrs ||= '_use_defaults_'
+    @runner.data_reference.init(table_name: table_name,
+                                schema_name: schema_name,
+                                table_fields: table_fields)
   end
 
   def show_report
@@ -383,7 +371,7 @@ class ReportsController < UserBaseController
 
   def set_editable_instance_from_id
     id = params[:report_id]
-    set_report id
+    setup_report id
 
     return if params[:id] == 'cancel' || params[:id].blank?
 
@@ -403,7 +391,7 @@ class ReportsController < UserBaseController
 
   def search_attrs_params_hash
     # Permit everything, since this is not used for assignment.
-    params.require(:search_attrs).permit!.to_h unless params[:search_attrs].nil? || params[:search_attrs]&.is_a?(String)
+    params.require(:search_attrs).permit!.to_h unless params[:search_attrs].nil? || params[:search_attrs].is_a?(String)
   end
 
   def init_vars

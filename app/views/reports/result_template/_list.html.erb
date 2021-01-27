@@ -2,42 +2,43 @@
   @report = report if local_assigns[:report]
   @results = results if local_assigns[:results]
   @outer_block_id = outer_block_id if local_assigns[:outer_block_id]
+  column_options = @report.report_options.column_options
 
   col_classes = {}
   col_tags = {}
   col_hide = {}
   show_as = {}
 
-  if @report.column_options
-    @report.column_options.classes&.each do |k,v|
+  if column_options
+    column_options.classes&.each do |k,v|
       col_classes[k] = v.is_a?(Array) ? v.join(' ') : v
     end
 
-    @report.column_options.tags&.each do |k,v|
+    column_options.tags&.each do |k,v|
       col_tags[k] = v
     end
 
-    @report.column_options.hide&.each do |k,v|
+    column_options.hide&.each do |k,v|
       col_hide[k] = v
     end
 
-    @report.column_options.show_as&.each do |k,v|
+    column_options.show_as&.each do |k,v|
       show_as[k] = v
     end
 
   end
 
 
-  show_col_comments = @report.view_options&.show_column_comments
+  show_col_comments = @report.report_options.view_options&.show_column_comments
   if show_col_comments
-    tn = @report.data_ref_table_name
-    sn = @report.data_ref_schema_name
+    tn = @runner.data_reference.table_name
+    sn = @runner.data_reference.schema_name
 
     tab_col_comments = Admin::MigrationGenerator.column_comments
   end
 
   if tn
-    corr_data_dic = @report.view_options&.corresponding_data_dic || tn&.sub("_data", '')
+    corr_data_dic = @report.report_options.view_options&.corresponding_data_dic || tn&.sub("_data", '')
     data_dic = Admin::MigrationGenerator.data_dic(corr_data_dic, nil_if_empty: divue)
   end
 
