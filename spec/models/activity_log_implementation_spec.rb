@@ -42,8 +42,9 @@ RSpec.describe 'Activity Log implementation', type: :model do
       al.save
     end.to raise_error FphsException
 
-    setup_access :activity_log__player_contact_phones, resource_type: :activity_log_type, access: :create, user: @user
-    setup_access resource_name, resource_type: :activity_log_type, access: :create, user: @user
+    setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create,
+                                                       user: al.current_user
+    setup_access resource_name, resource_type: :activity_log_type, access: :create, user: al.current_user
 
     expect(al.current_user.has_access_to?(:create, :table, :activity_log__player_contact_phones)).to be_truthy
     expect(al.current_user.has_access_to?(:create, :activity_log_type, resource_name)).to be_truthy
