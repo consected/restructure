@@ -118,10 +118,14 @@ class Admin::PageLayout < ActiveRecord::Base
 
   scope :standalone, -> { where layout_name: 'standalone' }
   scope :view, -> { where layout_name: 'view' }
-  scope :showable, -> { where layout_name: ['view', 'standalone'] }
+  scope :showable, -> { where layout_name: %w[view standalone] }
 
   def to_s
     "#{layout_name}: #{panel_label}"
+  end
+
+  def config_text
+    options
   end
 
   def self.no_master_association

@@ -1,95 +1,94 @@
 <%
   json = @results.to_json
   block_id = "report-chart-#{SecureRandom.hex}"
-  component_options = @report.component.options || {}
+  component_options = @report.report_options.component.options || {}
 %>
 <div id="<%=block_id%>" class="report-chart" >
 </div>
 <script>
-window.setTimeout(function() {
-
-  var $block = $('#<%=block_id%>');
-  $('#<%=@outer_block_id%> .report-results-inner').css({overflow: 'hidden'});
-  var component_options = <%=component_options.to_json.html_safe %>;
-  var json = <%= json.html_safe %>;
-
-  var opts = {
-    width: 100,
-    height: 100,
-    type: '',
-    label_with_column: 'label',
-    options: {},
-    dataset_options: [],
-    data_labels: []
-  };
-
-  $.extend(opts, component_options);
-
-  <% if @embedded_report%>
-    opts.height = '30%';
-    opts.width = '100%';
-    opts.options.maintainAspectRatio = false;
-    opts.options.responsive = true;
+  window.setTimeout(function() {
+  
+    var $block = $('#<%=block_id%>');
+    $('#<%=@outer_block_id%> .report-results-inner').css({overflow: 'hidden'});
+    var component_options = <%=component_options.to_json.html_safe %>;
+    var json = <%= json.html_safe %>;
+  
+    var opts = {
+      width: 100,
+      height: 100,
+      type: '',
+      label_with_column: 'label',
+      options: {},
+      dataset_options: [],
+      data_labels: []
+    };
+  
+    $.extend(opts, component_options);
+  
+    <% if @embedded_report%>
+      opts.height = '30%';
+      opts.width = '100%';
+      opts.options.maintainAspectRatio = false;
+      opts.options.responsive = true;
+    <% end %>
+  
+    var width = opts.width;
+    var height = opts.height;
+  
+    if(width || height) {
+      var fixed_size = true;
+    }
+  
+  <% unless @embedded_report%>
+  
+    if(opts.options.responsive == null)
+      opts.options.responsive = !fixed_size;
   <% end %>
-
-  var width = opts.width;
-  var height = opts.height;
-
-  if(width || height) {
-    var fixed_size = true;
-  }
-
-<% unless @embedded_report%>
-
-  if(opts.options.responsive == null)
-    opts.options.responsive = !fixed_size;
-<% end %>
-
-  opts.data = {};
-
-  opts.data.datasets = [];
-  var datasets = opts.data.datasets;
-  var data_labels = opts.data.labels = opts.data_labels;
-  var dataset_options = opts.dataset_options;
-
-  for(var i = 0; i < json.length; i++) {
-    var row = json[i];
-    var col_label = null;
-
-    var col_iter = 0;
-    var row_iter = 0;
-    for(col_label in row) {
-      if(row.hasOwnProperty(col_label)) {
-        var colval = row[col_label];
-        if (col_label == opts.label_with_column) {
-          data_labels.push(colval);
-        }
-        else {
-          if (!datasets[col_iter]) {
-            datasets[col_iter] = {
-              data: [],
-              label: col_label
-            }
-            if (dataset_options[col_iter]) {
-              $.extend(datasets[col_iter], dataset_options[col_iter]);
-            }
+  
+    opts.data = {};
+  
+    opts.data.datasets = [];
+    var datasets = opts.data.datasets;
+    var data_labels = opts.data.labels = opts.data_labels;
+    var dataset_options = opts.dataset_options;
+  
+    for(var i = 0; i < json.length; i++) {
+      var row = json[i];
+      var col_label = null;
+  
+      var col_iter = 0;
+      var row_iter = 0;
+      for(col_label in row) {
+        if(row.hasOwnProperty(col_label)) {
+          var colval = row[col_label];
+          if (col_label == opts.label_with_column) {
+            data_labels.push(colval);
           }
-          datasets[col_iter].data.push(colval);
-
-          col_iter++;
+          else {
+            if (!datasets[col_iter]) {
+              datasets[col_iter] = {
+                data: [],
+                label: col_label
+              }
+              if (dataset_options[col_iter]) {
+                $.extend(datasets[col_iter], dataset_options[col_iter]);
+              }
+            }
+            datasets[col_iter].data.push(colval);
+  
+            col_iter++;
+          }
         }
       }
+      row_iter++;
     }
-    row_iter++;
-  }
-
-  var new_html = $('<canvas width="'+width+'" height="'+height+'" class="report-chart-canvas"></canvas>');
-
-  $block.html(new_html);
-  var ctx = $block.find('canvas');
-
-  var myPieChart = new Chart(ctx, opts);
-
-  }, 100);
-
+  
+    var new_html = $('<canvas width="'+width+'" height="'+height+'" class="report-chart-canvas"></canvas>');
+  
+    $block.html(new_html);
+    var ctx = $block.find('canvas');
+  
+    var myPieChart = new Chart(ctx, opts);
+  
+    }, 100);
 </script>

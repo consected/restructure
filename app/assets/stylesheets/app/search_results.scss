@@ -9,6 +9,12 @@ div#master_results_block {
   margin: 0 -8px 0 -7px;
 }
 
+div#master_results_block.report-results-outer {
+  #results-accordion {
+    margin: 0 8px 0 7px;
+  }
+}
+
 .panel-title .pro-info-header {
   font-size: 14px;
   color: rgb(71, 71, 71);

@@ -49,6 +49,17 @@ class Admin::MigrationGenerator
       END_SQL
   end
 
+  #
+  # Does a table or view exist in the named schema, based on cached table and view names
+  # @param [String] table_name - table or view name
+  # @param [String] schema_name
+  # @return [truthy | nil]
+  def self.table_or_view_exists_in_schema?(table_name, schema_name)
+    tables_and_views.find do |t|
+      t['table_name'] == table_name && t['schema_name'] == schema_name
+    end
+  end
+
   # Reset the memoized tables and views value
   def self.tables_and_views_reset!
     @tables_and_views = nil
@@ -196,7 +207,7 @@ class Admin::MigrationGenerator
     super()
   end
 
-  def add_schema export_type = nil
+  def add_schema(export_type = nil)
     mig_text = schema_generator_script(db_migration_schema, 'create')
     write_db_migration mig_text, "#{db_migration_schema}_schema", export_type: export_type
   end
