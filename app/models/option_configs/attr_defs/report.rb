@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module OptionConfigs
   module AttrDefs
     module Report

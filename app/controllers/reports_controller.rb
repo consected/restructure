@@ -2,7 +2,7 @@
 
 class ReportsController < UserBaseController
   include MasterSearch
-  before_action :init_vars
+
   before_action :authenticate_user_or_admin!
   before_action :index_authorized?, only: [:index]
   before_action :setup_report, only: [:show]
@@ -11,14 +11,14 @@ class ReportsController < UserBaseController
   before_action :set_master_and_user, only: %i[create update]
   after_action :clear_results, only: %i[show run]
 
-  helper_method :filters, :filters_on, :index_path, :permitted_params, :filter_params_permitted
+  helper_method :filters, :filters_on, :index_path, :permitted_params, :filter_params_permitted,
+                :search_attrs_params_hash
   ResultsLimit = Master.results_limit
 
   # List of available reports
   def index
     @no_create = true
     @no_masters = true
-    @embedded_report = (params[:embed] == 'true')
 
     pm = @all_reports_for_user = Report.enabled.for_user(current_user)
     pm = filtered_primary_model(pm)
@@ -37,9 +37,6 @@ class ReportsController < UserBaseController
     return not_authorized unless @report.can_access?(current_user) || current_admin
 
     @results_target = 'master_results_block'
-    @embedded_report = (params[:embed] == 'true')
-
-    @search_attrs = search_attrs_params_hash
 
     setup_data_reference_request
 
@@ -48,12 +45,6 @@ class ReportsController < UserBaseController
     if params[:commit] == 'count'
       @no_masters = true
       @runner.count_only = true
-      @count_only = true
-    end
-
-    if @search_attrs.is_a?(Hash)
-      @runner.previous_filtering.requested = true if @search_attrs[:_filter_previous_] == 'true'
-      @no_run = @search_attrs[:no_run] == 'true'
     end
 
     unless (@report.searchable || show_authorized?) && (current_admin || @report.can_access?(current_user))
@@ -61,11 +52,11 @@ class ReportsController < UserBaseController
       return
     end
 
-    if @search_attrs && !@no_run
+    if search_attrs_params_hash && !no_run
       # Search attributes or data reference parameters have been provided
       # and the query should be run
       begin
-        @results = @runner.run(@search_attrs)
+        @results = @runner.run(search_attrs_params_hash)
 
         if params[:commit] == 'search'
           # Based on the results for the report, the MasterHandler uses the ids returned to
@@ -75,23 +66,7 @@ class ReportsController < UserBaseController
           return
         end
       rescue ActiveRecord::PreparedStatementInvalid => e
-        logger.info "Prepared statement invalid in reports_controller (#{@search_attrs}) show: #{e.inspect}\n#{e.backtrace.join("\n")}"
-        @results = nil
-        @no_masters = true
-        flash.now[:danger] = "Generated SQL invalid.\n#{@runner.sql}\n#{e}"
-        respond_to do |format|
-          format.html do
-            if params[:part] == 'results'
-              render plain: "Generated SQL invalid.\n#{@runner.sql}\n#{e}", status: 400
-            else
-              @runner.search_attr_values ||= @search_attrs
-              show_report
-            end
-          end
-          format.json do
-            return general_error 'invalid query for report. Please check search fields or try to run the report again.'
-          end
-        end
+        handle_bad_search_query(e)
         return
       end
 
@@ -99,11 +74,10 @@ class ReportsController < UserBaseController
 
       respond_to do |format|
         format.html do
-          if params[:part] == 'results'
+          if view_mode == 'results'
             render partial: 'results'
           else
             @report_criteria = true
-            @runner.search_attr_values ||= @search_attrs
             show_report
           end
         end
@@ -133,12 +107,12 @@ class ReportsController < UserBaseController
       render partial: 'filter_on'
     else
       @no_masters = true
-      @runner.search_attr_values = @search_attrs
+      @runner.search_attr_values = search_attrs_params_hash
 
       begin
         respond_to do |format|
           format.html do
-            if params[:part] == 'form'
+            if view_mode == 'form'
               render partial: 'form'
             else
               return unless show_authorized? == true
@@ -149,7 +123,8 @@ class ReportsController < UserBaseController
             end
           end
           format.json do
-            render json: { results: @results, search_attributes: (@runner.search_attr_values || @search_attrs) }
+            render json: { results: @results,
+                           search_attributes: (@runner.search_attr_values || search_attrs_params_hash) }
           end
         end
       rescue StandardError => e
@@ -276,16 +251,16 @@ class ReportsController < UserBaseController
 
     return not_authorized unless current_user.can? :view_data_reference
 
-    @search_attrs ||= '_use_defaults_'
     @runner.data_reference.init(table_name: table_name,
                                 schema_name: schema_name,
                                 table_fields: table_fields)
   end
 
   def show_report
-    @report_page = !@embedded_report
+    @runner.search_attr_values ||= search_attrs_params_hash
+    @report_page = !embedded_report
 
-    if @embedded_report
+    if embedded_report
       @results_target = 'embed_results_block'
       render partial: 'show'
     else
@@ -359,6 +334,30 @@ class ReportsController < UserBaseController
     reports_path p
   end
 
+  def handle_bad_search_query(exception)
+    logger.info "Prepared statement invalid in reports_controller (#{search_attrs_params_hash}) show: " \
+                "#{exception.inspect}\n#{exception.backtrace.join("\n")}"
+    @results = nil
+    @no_masters = true
+    flash.now[:danger] = "Generated SQL invalid.\n#{@runner.sql}\n#{exception}"
+    respond_to do |format|
+      format.html do
+        if view_mode == 'results'
+          render plain: "Generated SQL invalid.\n#{@runner.sql}\n#{exception}", status: 400
+        else
+          show_report
+        end
+      end
+      format.json do
+        return general_error 'invalid query for report. Please check search fields or try to run the report again.'
+      end
+    end
+  end
+
+  def view_mode
+    params[:part]
+  end
+
   ### For editable reports
 
   def permitted_params
@@ -389,13 +388,23 @@ class ReportsController < UserBaseController
     report_model.to_s.ns_underscore.gsub('__', '_')
   end
 
+  #
+  # Permit everything, since this is not used for assignment.
+  # If the search_attrs param is a string, just return it
   def search_attrs_params_hash
-    # Permit everything, since this is not used for assignment.
-    params.require(:search_attrs).permit!.to_h unless params[:search_attrs].nil? || params[:search_attrs].is_a?(String)
+    @search_attrs_params_hash ||= if params[:search_attrs].nil? || params[:search_attrs] == '_use_defaults_'
+                                    @runner.using_defaults = true
+                                    { _use_defaults_: '_use_defaults_' }
+                                  else
+                                    params.require(:search_attrs).permit!.to_h.dup
+                                  end
   end
 
-  def init_vars
-    instance_var_init :results
-    instance_var_init :count_only
+  def embedded_report
+    @embedded_report ||= (params[:embed] == 'true')
+  end
+
+  def no_run
+    @no_run ||= search_attrs_params_hash[:no_run] == 'true'
   end
 end

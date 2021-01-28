@@ -1,4 +1,11 @@
+# frozen_string_literal: true
+
 module OptionConfigs
+  #
+  # Report options, defining all options that are not directly SQL or search attributes.
+  #
+  # For details on about the YAML configuration
+  # @see OptionConfigs::AttrDefs::Report
   class ReportOptions < BaseOptions
     include OptionsHandler
 
@@ -23,7 +30,7 @@ module OptionConfigs
     #
     # Returns the options text version specific to this report
     # @return [String] options text
-    def options
+    def config_text
       owner.options
     end
 

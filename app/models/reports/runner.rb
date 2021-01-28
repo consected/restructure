@@ -19,16 +19,13 @@ module Reports
     # @param [Hash | String] search_attr_values - hash of search values, or '_use_defaults_' to force use of
     #                                             default values from the report options
     # @return [Array] results array from ActiveRecord::Base.connection.execute
-    def run(search_attr_values)
+    def run(initial_search_attr_values)
       raise FphsException, 'SQL is not set' if sql.blank?
 
-      self.search_attr_values = search_attr_values
-      self.using_defaults = (search_attr_values == '_use_defaults_')
-
-      search_attrs_prep
+      search_attrs_prep initial_search_attr_values
       sql_substitute_all
 
-      res = []
+      self.results = []
 
       # Get arbitrary data from a table
       # Perform this within a transaction to avoid unexpected data or definition updates,
@@ -44,9 +41,9 @@ module Reports
         end
 
         begin
-          res = connection.execute(sql)
+          self.results = connection.execute(sql)
           # Set the type_map to handle JSON correctly
-          res.type_map = type_map
+          results.type_map = type_map
         rescue StandardError => e
           Rails.logger.info "Failed to run sql: #{e.inspect}.\n#{sql}"
           msg = 'Failed to run query.'
@@ -56,9 +53,7 @@ module Reports
         raise ActiveRecord::Rollback
       end
 
-      self.results = res
       cache_results
-
       results
     end
 
@@ -108,11 +103,11 @@ module Reports
       return @result_tables if @result_tables
 
       @result_tables = {}
-      Rails.logger.info 'Getting the array of result_tables'
+
       i = 0
       @results.fields.each do |_col|
         oid = @results.ftable(i).to_i.to_s # make sure it's clean and usable
-        Rails.logger.info "OID: #{oid}"
+
         unless @result_tables.key? oid
           clean_sql = "select relname from pg_class where oid=#{oid.to_i}"
           get_res = Report.connection.execute(clean_sql)
@@ -133,12 +128,9 @@ module Reports
 
       l = @results.fields.length
 
-      Rails.logger.info "Setting up oids for tables in #{l} columns"
-
       @result_tables_oid = []
       (0..l - 1).each do |i|
         oid = @results.ftable(i).to_s
-        Rails.logger.info "Getting oid: #{oid} for col #{i}"
         @result_tables_oid[i] = result_tables[oid]
       end
       @result_tables_oid
@@ -230,6 +222,10 @@ module Reports
       report.search_attributes
     end
 
+    def search_attributes_config
+      report.search_attributes_config
+    end
+
     #
     # Assign default values to the search attribute values, based on the search attributes configuration
     # Saves the hash to the #search_attr_values attribute and returns the same value
@@ -240,7 +236,6 @@ module Reports
       search_attributes_config.each do |k, v|
         search_attr_values[k.to_sym] = FieldDefaults.calculate_default(self, v.default, v.type)
       end
-      Rails.logger.info "Using defaults as search attributes #{search_attr_values}"
       search_attr_values
     end
 
@@ -255,7 +250,8 @@ module Reports
     # - hash values collect the values as an array
     # - strings with newlines are cleaned if simple, or prepared for regex if multiple-regex requested
     # Set up value for :ids_filter_previous filtering is on
-    def search_attrs_prep
+    def search_attrs_prep(initial_search_attr_values)
+      self.search_attr_values = initial_search_attr_values
       self.search_attr_values = use_defaults if using_defaults
 
       if search_attr_values.respond_to? :to_unsafe_h
@@ -285,7 +281,11 @@ module Reports
       end
 
       search_attr_values[:ids_filter_previous] = nil
-      search_attr_values[:ids_filter_previous] = previous_filtering.filtering_ids if previous_filtering.filtering_on
+
+      if previous_filtering.sql_requests_filtering
+        previous_filtering.requested = (search_attr_values[:_filter_previous_] == 'true')
+        search_attr_values[:ids_filter_previous] = previous_filtering.filtering_ids
+      end
     end
 
     #

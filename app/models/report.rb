@@ -144,7 +144,9 @@ class Report < ActiveRecord::Base
 
   #
   # Set up or return the search attributes config class, for parsing the
-  # attribute #search_attibs
+  # text attribute #search_attibs.
+  # Access configuration attributes directly as:
+  #    search_attributes_config[:<param name>].<label | type | default ...>
   def search_attributes_config
     @search_attributes_config = Reports::SearchAttributesConfig.new(self)
   end
@@ -156,6 +158,10 @@ class Report < ActiveRecord::Base
     @runner ||= Reports::Runner.new self
   end
 
+  #
+  # Set up or return the report options class, parsing the text attribute #options.
+  # Access configuration items directly as:
+  #    report_options.<view_css | component | list_options ...>
   def report_options
     @report_options ||= OptionConfigs::ReportOptions.new self
   end

@@ -15,7 +15,7 @@ view_options = @report.report_options.view_options
         <div class="form-group">
           <%
                   fp = false
-                  if @runner.search_attr_values.is_a?(Hash) && @runner.search_attr_values[:_filter_previous_]
+                  if @runner.search_attr_values.is_a?(Hash) && @runner.previous_filtering.requested
                     fp = "true"
                   end
                 %>

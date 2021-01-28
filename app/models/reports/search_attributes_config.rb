@@ -1,26 +1,21 @@
+# frozen_string_literal: true
+
 module Reports
-  class SearchAttributesConfig
-    attr_accessor :errors, :report, :configurations
-
-    class NamedConfiguration < OptionConfigs::BaseOptions
-      include OptionsHandler
-
-      attr_accessor :owner, :use_hash_config
-
-      def persisted?
-        owner&.persisted? || true
-      end
-
+  #
+  # Definition of the search attributes that appear on search forms.
+  # These become accessible in a report instance as:
+  #   report.search_attributes_config
+  class SearchAttributesConfig < OptionConfigs::BaseConfiguration
+    class NamedConfiguration < OptionConfigs::BaseNamedConfiguration
       configure_attributes %i[name label type all item_type multiple default disabled hidden selections conditions]
     end
 
-    def initialize(report)
-      self.report = report
-      self.errors = []
-      setup_configurations
-    end
-
-    def setup_configurations
+    #
+    # Override OptionConfigs::BaseConfiguration#setup_named_configurations to
+    # reorganize the stored search attribute config YAML structure into
+    # a more sensible, flat named configuration format
+    # Automatically called when this class is initialized
+    def setup_named_configurations
       self.configurations = {}
       hash_configuration.each do |k, v|
         newconf = {
@@ -34,34 +29,10 @@ module Reports
     end
 
     #
-    # Access a configuration by symbolized key name
-    # @param [Symbol] key
-    # @return [NamedConfiguration]
-    def [](key)
-      configurations[key]
-    end
-
-    def each
-      configurations.each
-    end
-
-    #
     # The persisted configuration YAML (or JSON) in the report definition record
     # @return [String]
-    def search_attrs_text
-      report.search_attrs
-    end
-
-    #
-    # Parse the YAML (or JSON) search attributes definition, stored in #search_attrs
-    # and return a Hash with the definition
-    def hash_configuration
-      @search_attributes_config = {} if search_attrs_text.blank?
-      begin
-        @search_attributes_config ||= JSON.parse search_attrs_text
-      rescue StandardError
-        @search_attributes_config ||= YAML.safe_load(search_attrs_text, [], [], true)
-      end
+    def config_text
+      owner.search_attrs
     end
 
     def valid?
@@ -73,7 +44,7 @@ module Reports
     end
 
     def persisted?
-      report.persisted?
+      owner.persisted?
     end
   end
 end
