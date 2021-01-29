@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module Reports
+  #
+  # Handle substitution of report tables into message templates
   class Template
     # Embed a report
     def self.embedded_report(report_name, list_id, list_type)
@@ -10,9 +12,10 @@ module Reports
 
     def embedded_report(report_name, list_id, list_type)
       search_attrs = { list_id: list_id, list_type: list_type }
-      report = Report.active.find_category_short_name report_name
-      results = report.run search_attrs
-      result_tables = report.result_tables_by_index || []
+      report = Report.active.find_by_alt_resource_name report_name
+      runner = report.runner
+      results = runner.run search_attrs
+      result_tables = runner.result_tables_by_index || []
       outer_block_id = "report-container-#{SecureRandom.hex}"
 
       # ActionController::Base.new.render_to_string()

@@ -69,3 +69,4 @@ bin/rspec
 
 .vscode
 db/demo-data.sql
+master.key

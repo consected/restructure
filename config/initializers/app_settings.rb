@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 class Settings
-
-  PageTitle = 'ReStructure'
+  PageTitle = 'FPHS'
   DefaultMigrationSchema = 'ml_app'
-  DefaultSchemaOwner = 'restradmin'
+  DefaultSchemaOwner = 'fphs'
 
   StartYearRange = (1900..(Date.current.year)).freeze
   EndYearRange = (1900..(Date.current.year)).freeze
@@ -35,7 +34,7 @@ class Settings
   AdminEmail = ENV['FPHS_ADMIN_EMAIL']
 
   TwoFactorAuthDisabled = (ENV['FPHS_2FA_AUTH_DISABLED'] == 'true')
-  TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'ReStructure'
+  TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'FPHS Apps'
   TwoFactorAuthDrift = (ENV['FPHS_2FA_DRIFT'] || 30).to_i
 
   CheckPrevPasswords = (ENV['FPHS_CHECK_PREV_PASSWORDS'] || (Rails.env.development? ? 0 : 5)).to_i
@@ -86,8 +85,8 @@ class Settings
   end
 
   ShortcodeLength = 6
-  DefaultShortLinkS3Bucket = ENV['FPHS_SHORTLINK_BUCKET'] || (Rails.env.production? ? 'restr.link' : 'test-shortlink.restr.link')
-  DefaultShortLinkLogS3Bucket = ENV['FPHS_SHORTLINK_LOG_BUCKET'] || (Rails.env.production? ? 'url-shortener-logs.restr' : 'test-restr-url-shortener-logs')
+  DefaultShortLinkS3Bucket = ENV['FPHS_SHORTLINK_BUCKET'] || (Rails.env.production? ? 'fphs.link' : 'test-shortlink.fphs.link')
+  DefaultShortLinkLogS3Bucket = ENV['FPHS_SHORTLINK_LOG_BUCKET'] || (Rails.env.production? ? 'url-shortener-logs.fphs' : 'test-fphs-url-shortener-logs')
   LogBucketPrefix = 'access/'
 
   DefaultSubjectInfoTableName = 'player_infos'

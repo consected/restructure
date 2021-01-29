@@ -1,0 +1,83 @@
+.report-admin-description-block,
+.report-admin-options-block,
+.report-admin-sql-block {
+  width: 99%;
+  margin-bottom: 10px;
+}
+
+.report-admin-description-block {
+  .custom-editor {
+    height: 70px;
+    background-color: white;
+  }
+}
+
+.report-admin-options-block-inner {
+  height: 20vh;
+}
+
+.report-admin-sql-block-inner {
+  height: 60vh;
+}
+
+.report-admin-submit-block {
+  margin-bottom: 20px;
+}
+
+.btn.admin-test-report-btn {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+.report-admin-report-path-link:after {
+  padding-left: 0.6em;
+  content: "\e164";
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  font-family: "Glyphicons Halflings" !important;
+}
+
+.report-admin-search-attr-block {
+  #report-admin-search-attr-add-block {
+    margin-top: 10px;
+  }
+
+  .report-admin-search-attr-yaml-editor {
+    width: 99%;
+    height: 240px;
+  }
+
+  .report-admin-sb-item {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  .report-admin-sb-field {
+    margin-bottom: 15px;
+  }
+
+  .report-admin-search-attr-final-config {
+    height: 340px;
+  }
+
+  .report-admin-subblock {
+    margin-bottom: 15px;
+  }
+
+  .report-admin-sb-item-submit {
+    margin-top: 30px;
+    margin-bottom: 30px;
+  }
+
+  div#search_attr_instruction {
+    margin-bottom: 15px;
+  }
+
+  pre.help-block {
+    width: 99%;
+  }
+}

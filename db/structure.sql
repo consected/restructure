@@ -9,10 +9,277 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
+-- Name: data_requests; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA data_requests;
+
+
+--
+-- Name: extra_app; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA extra_app;
+
+
+--
 -- Name: ml_app; Type: SCHEMA; Schema: -; Owner: -
 --
 
 CREATE SCHEMA ml_app;
+
+
+--
+-- Name: log_activity_log_data_request_assignments_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_activity_log_data_request_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_data_request_assignment_history (
+    master_id,
+    data_request_assignment_id,
+    created_by_user_id, status, notes, next_step, follow_up_date,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_data_request_assignment_id)
+  SELECT
+    NEW.master_id,
+    NEW.data_request_assignment_id,
+    NEW.created_by_user_id, NEW.status, NEW.notes, NEW.next_step, NEW.follow_up_date,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_data_request_attribs_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_data_request_attribs_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO data_request_attrib_history (
+    master_id,
+    data_source,
+    user_id,
+    created_at,
+    updated_at,
+    data_request_attrib_id)
+  SELECT
+    NEW.master_id,
+    NEW.data_source,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_data_request_initial_reviews_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_data_request_initial_reviews_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO data_request_initial_review_history (
+    master_id,
+    restructure_analyst_yes_no, restructure_server_yes_no, tag_select_data_classifications, message_notes, next_step, review_approved_yes_no, created_by_user_id,
+    user_id,
+    created_at,
+    updated_at,
+    data_request_initial_review_id)
+  SELECT
+    NEW.master_id,
+    NEW.restructure_analyst_yes_no, NEW.restructure_server_yes_no, NEW.tag_select_data_classifications, NEW.message_notes, NEW.next_step, NEW.review_approved_yes_no, NEW.created_by_user_id,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_data_request_messages_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_data_request_messages_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO data_request_message_history (
+    master_id,
+    message_notes, created_by_user_id,
+    user_id,
+    created_at,
+    updated_at,
+    data_request_message_id)
+  SELECT
+    NEW.master_id,
+    NEW.message_notes, NEW.created_by_user_id,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_data_requests_selected_attribs_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_data_requests_selected_attribs_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO data_requests_selected_attrib_history (
+    master_id,
+    record_id, data, data_request_id, disabled, variable_name, record_type,
+    user_id,
+    created_at,
+    updated_at,
+    data_requests_selected_attrib_id)
+  SELECT
+    NEW.master_id,
+    NEW.record_id, NEW.data, NEW.data_request_id, NEW.disabled, NEW.variable_name, NEW.record_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_data_requests_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_data_requests_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO data_request_history (
+    master_id,
+    status, project_title, select_purpose, other_purpose, research_question_notes, restructure_analyst_yes_no, full_name, title, institution, other_institution, others_handling_data, pm_contact, other_pm_contact, data_start_date, data_end_date, restructure_server_yes_no, restructure_server_tools_notes, off_restructure_server_reason_notes, data_use_agreement_status, data_use_agreement_notes, terms_of_use_yes_no, created_by_user_id,
+    user_id,
+    created_at,
+    updated_at,
+    data_request_id)
+  SELECT
+    NEW.master_id,
+    NEW.status, NEW.project_title, NEW.select_purpose, NEW.other_purpose, NEW.research_question_notes, NEW.restructure_analyst_yes_no, NEW.full_name, NEW.title, NEW.institution, NEW.other_institution, NEW.others_handling_data, NEW.pm_contact, NEW.other_pm_contact, NEW.data_start_date, NEW.data_end_date, NEW.restructure_server_yes_no, NEW.restructure_server_tools_notes, NEW.off_restructure_server_reason_notes, NEW.data_use_agreement_status, NEW.data_use_agreement_notes, NEW.terms_of_use_yes_no, NEW.created_by_user_id,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_grit_assignments_update(); Type: FUNCTION; Schema: extra_app; Owner: -
+--
+
+CREATE FUNCTION extra_app.log_grit_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO grit_assignment_history (
+    master_id,
+    grit_id,
+    user_id,
+    admin_id,
+    created_at,
+    updated_at,
+    grit_assignment_table_id)
+  SELECT
+    NEW.master_id,
+    NEW.grit_id,
+    NEW.user_id,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_pitt_bhi_assignments_update(); Type: FUNCTION; Schema: extra_app; Owner: -
+--
+
+CREATE FUNCTION extra_app.log_pitt_bhi_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO pitt_bhi_assignment_history (
+    master_id,
+    pitt_bhi_id,
+    user_id,
+    admin_id,
+    created_at,
+    updated_at,
+    pitt_bhi_assignment_table_id)
+  SELECT
+    NEW.master_id,
+    NEW.pitt_bhi_id,
+    NEW.user_id,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_sleep_assignments_update(); Type: FUNCTION; Schema: extra_app; Owner: -
+--
+
+CREATE FUNCTION extra_app.log_sleep_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO sleep_assignment_history (
+    master_id,
+    sleep_id,
+    user_id,
+    admin_id,
+    created_at,
+    updated_at,
+    sleep_assignment_table_id)
+  SELECT
+    NEW.master_id,
+    NEW.sleep_id,
+    NEW.user_id,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -2492,6 +2759,1293 @@ CREATE FUNCTION ml_app.update_player_contact_ranks(set_master_id integer, set_re
 
 
 --
+-- Name: activity_log_data_request_assignment_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.activity_log_data_request_assignment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    data_request_assignment_id bigint,
+    created_by_user_id bigint,
+    status character varying,
+    notes character varying,
+    next_step character varying,
+    follow_up_date date,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_data_request_assignment_id bigint
+);
+
+
+--
+-- Name: activity_log_data_request_assignment_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.activity_log_data_request_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_data_request_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.activity_log_data_request_assignment_history_id_seq OWNED BY data_requests.activity_log_data_request_assignment_history.id;
+
+
+--
+-- Name: activity_log_data_request_assignments; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.activity_log_data_request_assignments (
+    id bigint NOT NULL,
+    master_id bigint,
+    data_request_assignment_id bigint,
+    created_by_user_id bigint,
+    status character varying,
+    notes character varying,
+    next_step character varying,
+    follow_up_date date,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE activity_log_data_request_assignments; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.activity_log_data_request_assignments IS 'Activitylog: Re Structure Data Request Form';
+
+
+--
+-- Name: activity_log_data_request_assignments_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.activity_log_data_request_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_data_request_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.activity_log_data_request_assignments_id_seq OWNED BY data_requests.activity_log_data_request_assignments.id;
+
+
+--
+-- Name: data_request_assignment_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_assignment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    data_request_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    data_request_assignment_table_id bigint
+);
+
+
+--
+-- Name: data_request_assignment_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_assignment_history_id_seq OWNED BY data_requests.data_request_assignment_history.id;
+
+
+--
+-- Name: data_request_assignments; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_assignments (
+    id bigint NOT NULL,
+    master_id bigint,
+    data_request_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE data_request_assignments; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.data_request_assignments IS 'Externalidentifier: Data Request Assignments';
+
+
+--
+-- Name: data_request_assignments_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_assignments_id_seq OWNED BY data_requests.data_request_assignments.id;
+
+
+--
+-- Name: data_request_attrib_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_attrib_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    data_source character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    data_request_attrib_id bigint
+);
+
+
+--
+-- Name: COLUMN data_request_attrib_history.data_source; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_attrib_history.data_source IS 'Which ReStructure study are you requesting data from?';
+
+
+--
+-- Name: data_request_attrib_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_attrib_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_attrib_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_attrib_history_id_seq OWNED BY data_requests.data_request_attrib_history.id;
+
+
+--
+-- Name: data_request_attribs; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_attribs (
+    id bigint NOT NULL,
+    master_id bigint,
+    data_source character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE data_request_attribs; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.data_request_attribs IS 'Dynamicmodel: Requested Data';
+
+
+--
+-- Name: COLUMN data_request_attribs.data_source; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_attribs.data_source IS 'Which ReStructure study are you requesting data from?';
+
+
+--
+-- Name: data_request_attribs_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_attribs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_attribs_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_attribs_id_seq OWNED BY data_requests.data_request_attribs.id;
+
+
+--
+-- Name: data_request_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    status character varying,
+    project_title character varying,
+    select_purpose character varying,
+    other_purpose character varying,
+    research_question_notes character varying,
+    full_name character varying,
+    title character varying,
+    institution character varying,
+    other_institution character varying,
+    others_handling_data character varying,
+    pm_contact character varying,
+    other_pm_contact character varying,
+    data_start_date date,
+    data_end_date date,
+    data_use_agreement_status character varying,
+    data_use_agreement_notes character varying,
+    terms_of_use_yes_no character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    data_request_id bigint,
+    restructure_analyst_yes_no character varying,
+    restructure_server_yes_no character varying,
+    restructure_server_tools_notes character varying,
+    off_restructure_server_reason_notes character varying
+);
+
+
+--
+-- Name: COLUMN data_request_history.project_title; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.project_title IS 'Project title';
+
+
+--
+-- Name: COLUMN data_request_history.select_purpose; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.select_purpose IS 'Purpose of this data request';
+
+
+--
+-- Name: COLUMN data_request_history.other_purpose; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.other_purpose IS '*other purpose*: please explain';
+
+
+--
+-- Name: COLUMN data_request_history.research_question_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.research_question_notes IS 'Research question and hypothesis for the proposed analysis
+
+*To include supporting documents or files, complete this form, then
+select the Supporting Files section at the end of the form*';
+
+
+--
+-- Name: COLUMN data_request_history.full_name; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.full_name IS 'Your full name';
+
+
+--
+-- Name: COLUMN data_request_history.title; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.title IS 'Your title';
+
+
+--
+-- Name: COLUMN data_request_history.institution; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.institution IS 'Your primary affiliation';
+
+
+--
+-- Name: COLUMN data_request_history.others_handling_data; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.others_handling_data IS 'Name and title of others who will be handling ReStructure data (one per line)';
+
+
+--
+-- Name: COLUMN data_request_history.pm_contact; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.pm_contact IS 'ReStructure Project Manager contact';
+
+
+--
+-- Name: COLUMN data_request_history.other_pm_contact; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.other_pm_contact IS 'Project Manager name';
+
+
+--
+-- Name: COLUMN data_request_history.data_start_date; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.data_start_date IS 'Planned analysis start date';
+
+
+--
+-- Name: COLUMN data_request_history.data_end_date; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.data_end_date IS 'Planned analysis end date';
+
+
+--
+-- Name: COLUMN data_request_history.data_use_agreement_status; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.data_use_agreement_status IS 'Do you have a Data Use Agreement or other sort of contractual agreement with ReStructure that allows sharing of data?';
+
+
+--
+-- Name: COLUMN data_request_history.data_use_agreement_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.data_use_agreement_notes IS 'Additional information about Data Use Agreement';
+
+
+--
+-- Name: COLUMN data_request_history.terms_of_use_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.terms_of_use_yes_no IS 'I attest that I have read, understood, and accepted the terms of use stated in the data use agreement, or other form of contractual agreement, with the Sample Study at Sample University.';
+
+
+--
+-- Name: COLUMN data_request_history.restructure_analyst_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.restructure_analyst_yes_no IS 'Are you an internal ReStructure analyst?';
+
+
+--
+-- Name: COLUMN data_request_history.restructure_server_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.restructure_server_yes_no IS 'Will analysis be performed within the *ReStructure secure environment*?';
+
+
+--
+-- Name: COLUMN data_request_history.restructure_server_tools_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.restructure_server_tools_notes IS 'Any other software applications or tools that 
+are required for analysis of this data set within
+the *ReStructure secure environment*';
+
+
+--
+-- Name: COLUMN data_request_history.off_restructure_server_reason_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.off_restructure_server_reason_notes IS 'Explain why analysis is to be performed outside of the *ReStructure secure environment*';
+
+
+--
+-- Name: data_request_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_history_id_seq OWNED BY data_requests.data_request_history.id;
+
+
+--
+-- Name: data_request_initial_review_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_initial_review_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    restructure_analyst_yes_no character varying,
+    restructure_server_yes_no character varying,
+    tag_select_data_classifications character varying[],
+    message_notes character varying,
+    next_step character varying,
+    review_approved_yes_no character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    data_request_initial_review_id bigint
+);
+
+
+--
+-- Name: COLUMN data_request_initial_review_history.restructure_analyst_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_review_history.restructure_analyst_yes_no IS 'Is the requester an ReStructure analyst?';
+
+
+--
+-- Name: COLUMN data_request_initial_review_history.restructure_server_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_review_history.restructure_server_yes_no IS 'Will the analysis be run on the ReStructure server?';
+
+
+--
+-- Name: COLUMN data_request_initial_review_history.tag_select_data_classifications; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_review_history.tag_select_data_classifications IS 'Which classes of data have been requested?';
+
+
+--
+-- Name: COLUMN data_request_initial_review_history.message_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_review_history.message_notes IS 'Reviewer''s notes';
+
+
+--
+-- Name: COLUMN data_request_initial_review_history.next_step; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_review_history.next_step IS 'Is the review complete?';
+
+
+--
+-- Name: COLUMN data_request_initial_review_history.review_approved_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_review_history.review_approved_yes_no IS '**Approve the request?**
+
+- Select **no** to reject the data request and inform the requester.
+- Select **yes** if the request is *approved* and to send on for PI notifications and reviews.';
+
+
+--
+-- Name: data_request_initial_review_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_initial_review_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_initial_review_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_initial_review_history_id_seq OWNED BY data_requests.data_request_initial_review_history.id;
+
+
+--
+-- Name: data_request_initial_reviews; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_initial_reviews (
+    id bigint NOT NULL,
+    master_id bigint,
+    restructure_analyst_yes_no character varying,
+    restructure_server_yes_no character varying,
+    tag_select_data_classifications character varying[],
+    message_notes character varying,
+    next_step character varying,
+    review_approved_yes_no character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE data_request_initial_reviews; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.data_request_initial_reviews IS 'Dynamicmodel: Initial Review';
+
+
+--
+-- Name: COLUMN data_request_initial_reviews.restructure_analyst_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_reviews.restructure_analyst_yes_no IS 'Is the requester an ReStructure analyst?';
+
+
+--
+-- Name: COLUMN data_request_initial_reviews.restructure_server_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_reviews.restructure_server_yes_no IS 'Will the analysis be run on the ReStructure server?';
+
+
+--
+-- Name: COLUMN data_request_initial_reviews.tag_select_data_classifications; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_reviews.tag_select_data_classifications IS 'Which classes of data have been requested?';
+
+
+--
+-- Name: COLUMN data_request_initial_reviews.message_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_reviews.message_notes IS 'Reviewer''s notes';
+
+
+--
+-- Name: COLUMN data_request_initial_reviews.next_step; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_reviews.next_step IS 'Is the review complete?';
+
+
+--
+-- Name: COLUMN data_request_initial_reviews.review_approved_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_reviews.review_approved_yes_no IS '**Approve the request?**
+
+- Select **no** to reject the data request and inform the requester.
+- Select **yes** if the request is *approved* and to send on for PI notifications and reviews.';
+
+
+--
+-- Name: data_request_initial_reviews_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_initial_reviews_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_initial_reviews_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_initial_reviews_id_seq OWNED BY data_requests.data_request_initial_reviews.id;
+
+
+--
+-- Name: data_request_message_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_message_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    message_notes character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    data_request_message_id bigint
+);
+
+
+--
+-- Name: COLUMN data_request_message_history.message_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_message_history.message_notes IS 'Message to requester';
+
+
+--
+-- Name: data_request_message_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_message_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_message_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_message_history_id_seq OWNED BY data_requests.data_request_message_history.id;
+
+
+--
+-- Name: data_request_messages; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_messages (
+    id bigint NOT NULL,
+    master_id bigint,
+    message_notes character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE data_request_messages; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.data_request_messages IS 'Dynamicmodel: Message';
+
+
+--
+-- Name: COLUMN data_request_messages.message_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_messages.message_notes IS 'Message to requester';
+
+
+--
+-- Name: data_request_messages_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_messages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_messages_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_messages_id_seq OWNED BY data_requests.data_request_messages.id;
+
+
+--
+-- Name: data_requests; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_requests (
+    id bigint NOT NULL,
+    master_id bigint,
+    status character varying,
+    project_title character varying,
+    select_purpose character varying,
+    other_purpose character varying,
+    research_question_notes character varying,
+    full_name character varying,
+    title character varying,
+    institution character varying,
+    other_institution character varying,
+    others_handling_data character varying,
+    pm_contact character varying,
+    other_pm_contact character varying,
+    data_start_date date,
+    data_end_date date,
+    data_use_agreement_status character varying,
+    data_use_agreement_notes character varying,
+    terms_of_use_yes_no character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    restructure_analyst_yes_no character varying,
+    restructure_server_yes_no character varying,
+    restructure_server_tools_notes character varying,
+    off_restructure_server_reason_notes character varying
+);
+
+
+--
+-- Name: TABLE data_requests; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.data_requests IS 'Dynamicmodel: Data Request';
+
+
+--
+-- Name: COLUMN data_requests.project_title; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.project_title IS 'Project title';
+
+
+--
+-- Name: COLUMN data_requests.select_purpose; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.select_purpose IS 'Purpose of this data request';
+
+
+--
+-- Name: COLUMN data_requests.other_purpose; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.other_purpose IS '*other purpose*: please explain';
+
+
+--
+-- Name: COLUMN data_requests.research_question_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.research_question_notes IS 'Research question and hypothesis for the proposed analysis
+
+*To include supporting documents or files, complete this form, then
+select the Supporting Files section at the end of the form*';
+
+
+--
+-- Name: COLUMN data_requests.full_name; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.full_name IS 'Your full name';
+
+
+--
+-- Name: COLUMN data_requests.title; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.title IS 'Your title';
+
+
+--
+-- Name: COLUMN data_requests.institution; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.institution IS 'Your primary affiliation';
+
+
+--
+-- Name: COLUMN data_requests.others_handling_data; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.others_handling_data IS 'Name and title of others who will be handling ReStructure data (one per line)';
+
+
+--
+-- Name: COLUMN data_requests.pm_contact; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.pm_contact IS 'ReStructure Project Manager contact';
+
+
+--
+-- Name: COLUMN data_requests.other_pm_contact; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.other_pm_contact IS 'Project Manager name';
+
+
+--
+-- Name: COLUMN data_requests.data_start_date; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.data_start_date IS 'Planned analysis start date';
+
+
+--
+-- Name: COLUMN data_requests.data_end_date; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.data_end_date IS 'Planned analysis end date';
+
+
+--
+-- Name: COLUMN data_requests.data_use_agreement_status; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.data_use_agreement_status IS 'Do you have a Data Use Agreement or other sort of contractual agreement with ReStructure that allows sharing of data?';
+
+
+--
+-- Name: COLUMN data_requests.data_use_agreement_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.data_use_agreement_notes IS 'Additional information about Data Use Agreement';
+
+
+--
+-- Name: COLUMN data_requests.terms_of_use_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.terms_of_use_yes_no IS 'I attest that I have read, understood, and accepted the terms of use stated in the data use agreement, or other form of contractual agreement, with the Sample Study at Sample University.';
+
+
+--
+-- Name: COLUMN data_requests.restructure_analyst_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.restructure_analyst_yes_no IS 'Are you an internal ReStructure analyst?';
+
+
+--
+-- Name: COLUMN data_requests.restructure_server_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.restructure_server_yes_no IS 'Will analysis be performed within the *ReStructure secure environment*?';
+
+
+--
+-- Name: COLUMN data_requests.restructure_server_tools_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.restructure_server_tools_notes IS 'Any other software applications or tools that 
+are required for analysis of this data set within
+the *ReStructure secure environment*';
+
+
+--
+-- Name: COLUMN data_requests.off_restructure_server_reason_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.off_restructure_server_reason_notes IS 'Explain why analysis is to be performed outside of the *ReStructure secure environment*';
+
+
+--
+-- Name: data_requests_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_requests_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_requests_id_seq OWNED BY data_requests.data_requests.id;
+
+
+--
+-- Name: data_requests_selected_attrib_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_requests_selected_attrib_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    record_id bigint,
+    data character varying,
+    data_request_id bigint,
+    disabled boolean DEFAULT false,
+    variable_name character varying,
+    record_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    data_requests_selected_attrib_id bigint
+);
+
+
+--
+-- Name: data_requests_selected_attrib_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_requests_selected_attrib_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_requests_selected_attrib_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_requests_selected_attrib_history_id_seq OWNED BY data_requests.data_requests_selected_attrib_history.id;
+
+
+--
+-- Name: data_requests_selected_attribs; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_requests_selected_attribs (
+    id bigint NOT NULL,
+    master_id bigint,
+    record_id bigint,
+    data character varying,
+    data_request_id bigint,
+    disabled boolean DEFAULT false,
+    variable_name character varying,
+    record_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE data_requests_selected_attribs; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.data_requests_selected_attribs IS 'Dynamicmodel: Selected Data Attributes';
+
+
+--
+-- Name: data_requests_selected_attribs_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_requests_selected_attribs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_requests_selected_attribs_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_requests_selected_attribs_id_seq OWNED BY data_requests.data_requests_selected_attribs.id;
+
+
+--
+-- Name: q1_datadic; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.q1_datadic (
+    id integer NOT NULL,
+    variable_name character varying,
+    domain text,
+    field_type_rc text,
+    field_type_sa text,
+    field_label text,
+    field_attributes text,
+    field_note text,
+    text_valid_type text,
+    text_valid_min text,
+    text_valid_max text,
+    required_field text,
+    field_attr_array text[],
+    source text,
+    owner text,
+    classification text,
+    display text
+);
+
+
+--
+-- Name: q1_datadic_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.q1_datadic_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: q1_datadic_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.q1_datadic_id_seq OWNED BY data_requests.q1_datadic.id;
+
+
+--
+-- Name: q2_datadic; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.q2_datadic (
+    id integer NOT NULL,
+    variable_name character varying,
+    domain text,
+    field_type_rc text,
+    field_type_sa text,
+    field_label text,
+    field_attributes text,
+    field_note text,
+    text_valid_type text,
+    text_valid_min text,
+    text_valid_max text,
+    required_field text,
+    field_attr_array text[],
+    source text,
+    owner text,
+    classification text,
+    display text
+);
+
+
+--
+-- Name: q2_datadic_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.q2_datadic_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: q2_datadic_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.q2_datadic_id_seq OWNED BY data_requests.q2_datadic.id;
+
+
+--
+-- Name: grit_assignment_history; Type: TABLE; Schema: extra_app; Owner: -
+--
+
+CREATE TABLE extra_app.grit_assignment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    grit_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    grit_assignment_table_id bigint
+);
+
+
+--
+-- Name: grit_assignment_history_id_seq; Type: SEQUENCE; Schema: extra_app; Owner: -
+--
+
+CREATE SEQUENCE extra_app.grit_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: grit_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: extra_app; Owner: -
+--
+
+ALTER SEQUENCE extra_app.grit_assignment_history_id_seq OWNED BY extra_app.grit_assignment_history.id;
+
+
+--
+-- Name: grit_assignments; Type: TABLE; Schema: extra_app; Owner: -
+--
+
+CREATE TABLE extra_app.grit_assignments (
+    id bigint NOT NULL,
+    master_id bigint,
+    grit_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: grit_assignments_id_seq; Type: SEQUENCE; Schema: extra_app; Owner: -
+--
+
+CREATE SEQUENCE extra_app.grit_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: grit_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: extra_app; Owner: -
+--
+
+ALTER SEQUENCE extra_app.grit_assignments_id_seq OWNED BY extra_app.grit_assignments.id;
+
+
+--
+-- Name: pitt_bhi_assignment_history; Type: TABLE; Schema: extra_app; Owner: -
+--
+
+CREATE TABLE extra_app.pitt_bhi_assignment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    pitt_bhi_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    pitt_bhi_assignment_table_id bigint
+);
+
+
+--
+-- Name: pitt_bhi_assignment_history_id_seq; Type: SEQUENCE; Schema: extra_app; Owner: -
+--
+
+CREATE SEQUENCE extra_app.pitt_bhi_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: extra_app; Owner: -
+--
+
+ALTER SEQUENCE extra_app.pitt_bhi_assignment_history_id_seq OWNED BY extra_app.pitt_bhi_assignment_history.id;
+
+
+--
+-- Name: pitt_bhi_assignments; Type: TABLE; Schema: extra_app; Owner: -
+--
+
+CREATE TABLE extra_app.pitt_bhi_assignments (
+    id bigint NOT NULL,
+    master_id bigint,
+    pitt_bhi_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: pitt_bhi_assignments_id_seq; Type: SEQUENCE; Schema: extra_app; Owner: -
+--
+
+CREATE SEQUENCE extra_app.pitt_bhi_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: extra_app; Owner: -
+--
+
+ALTER SEQUENCE extra_app.pitt_bhi_assignments_id_seq OWNED BY extra_app.pitt_bhi_assignments.id;
+
+
+--
+-- Name: sleep_assignment_history; Type: TABLE; Schema: extra_app; Owner: -
+--
+
+CREATE TABLE extra_app.sleep_assignment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    sleep_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    sleep_assignment_table_id bigint
+);
+
+
+--
+-- Name: sleep_assignment_history_id_seq; Type: SEQUENCE; Schema: extra_app; Owner: -
+--
+
+CREATE SEQUENCE extra_app.sleep_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sleep_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: extra_app; Owner: -
+--
+
+ALTER SEQUENCE extra_app.sleep_assignment_history_id_seq OWNED BY extra_app.sleep_assignment_history.id;
+
+
+--
+-- Name: sleep_assignments; Type: TABLE; Schema: extra_app; Owner: -
+--
+
+CREATE TABLE extra_app.sleep_assignments (
+    id bigint NOT NULL,
+    master_id bigint,
+    sleep_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: sleep_assignments_id_seq; Type: SEQUENCE; Schema: extra_app; Owner: -
+--
+
+CREATE SEQUENCE extra_app.sleep_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sleep_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: extra_app; Owner: -
+--
+
+ALTER SEQUENCE extra_app.sleep_assignments_id_seq OWNED BY extra_app.sleep_assignments.id;
+
+
+--
 -- Name: accuracy_score_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -3855,7 +5409,7 @@ CREATE TABLE ml_app.item_flags (
     id integer NOT NULL,
     item_id integer,
     item_type character varying,
-    item_flag_name_id integer,
+    item_flag_name_id integer NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     user_id integer,
@@ -5930,6 +7484,160 @@ ALTER SEQUENCE ml_app.users_id_seq OWNED BY ml_app.users.id;
 
 
 --
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history ALTER COLUMN id SET DEFAULT nextval('data_requests.activity_log_data_request_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignments ALTER COLUMN id SET DEFAULT nextval('data_requests.activity_log_data_request_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignment_history ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignments ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attrib_history ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_attrib_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attribs ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_attribs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_history ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_review_history ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_initial_review_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_reviews ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_initial_reviews_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_message_history ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_message_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_messages ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_messages_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests ALTER COLUMN id SET DEFAULT nextval('data_requests.data_requests_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attrib_history ALTER COLUMN id SET DEFAULT nextval('data_requests.data_requests_selected_attrib_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attribs ALTER COLUMN id SET DEFAULT nextval('data_requests.data_requests_selected_attribs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.q1_datadic ALTER COLUMN id SET DEFAULT nextval('data_requests.q1_datadic_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.q2_datadic ALTER COLUMN id SET DEFAULT nextval('data_requests.q2_datadic_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignment_history ALTER COLUMN id SET DEFAULT nextval('extra_app.grit_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignments ALTER COLUMN id SET DEFAULT nextval('extra_app.grit_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignment_history ALTER COLUMN id SET DEFAULT nextval('extra_app.pitt_bhi_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignments ALTER COLUMN id SET DEFAULT nextval('extra_app.pitt_bhi_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignment_history ALTER COLUMN id SET DEFAULT nextval('extra_app.sleep_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignments ALTER COLUMN id SET DEFAULT nextval('extra_app.sleep_assignments_id_seq'::regclass);
+
+
+--
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
@@ -6529,6 +8237,166 @@ ALTER TABLE ONLY ml_app.users ALTER COLUMN id SET DEFAULT nextval('ml_app.users_
 --
 
 ALTER TABLE ONLY ml_app.users_contact_infos ALTER COLUMN id SET DEFAULT nextval('ml_app.users_contact_infos_id_seq'::regclass);
+
+
+--
+-- Name: activity_log_data_request_assignment_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history
+    ADD CONSTRAINT activity_log_data_request_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_data_request_assignments_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignments
+    ADD CONSTRAINT activity_log_data_request_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_assignment_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignment_history
+    ADD CONSTRAINT data_request_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_assignments_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignments
+    ADD CONSTRAINT data_request_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_attrib_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attrib_history
+    ADD CONSTRAINT data_request_attrib_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_attribs_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attribs
+    ADD CONSTRAINT data_request_attribs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_history
+    ADD CONSTRAINT data_request_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_initial_review_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_review_history
+    ADD CONSTRAINT data_request_initial_review_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_initial_reviews_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_reviews
+    ADD CONSTRAINT data_request_initial_reviews_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_message_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_message_history
+    ADD CONSTRAINT data_request_message_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_messages_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_messages
+    ADD CONSTRAINT data_request_messages_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_requests_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests
+    ADD CONSTRAINT data_requests_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_requests_selected_attrib_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attrib_history
+    ADD CONSTRAINT data_requests_selected_attrib_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_requests_selected_attribs_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attribs
+    ADD CONSTRAINT data_requests_selected_attribs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: grit_assignment_history_pkey; Type: CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignment_history
+    ADD CONSTRAINT grit_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: grit_assignments_pkey; Type: CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignments
+    ADD CONSTRAINT grit_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_assignment_history_pkey; Type: CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignment_history
+    ADD CONSTRAINT pitt_bhi_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_assignments_pkey; Type: CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignments
+    ADD CONSTRAINT pitt_bhi_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sleep_assignment_history_pkey; Type: CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignment_history
+    ADD CONSTRAINT sleep_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sleep_assignments_pkey; Type: CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignments
+    ADD CONSTRAINT sleep_assignments_pkey PRIMARY KEY (id);
 
 
 --
@@ -7257,6 +9125,482 @@ ALTER TABLE ONLY ml_app.users_contact_infos
 
 ALTER TABLE ONLY ml_app.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: 36bd4ead_b_id_h_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_b_id_h_idx" ON data_requests.activity_log_data_request_assignment_history USING btree (activity_log_data_request_assignment_id);
+
+
+--
+-- Name: 36bd4ead_id_h_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_id_h_idx" ON data_requests.activity_log_data_request_assignment_history USING btree (data_request_assignment_id);
+
+
+--
+-- Name: 36bd4ead_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_id_idx" ON data_requests.activity_log_data_request_assignments USING btree (data_request_assignment_id);
+
+
+--
+-- Name: 36bd4ead_master_id_h_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_master_id_h_idx" ON data_requests.activity_log_data_request_assignment_history USING btree (master_id);
+
+
+--
+-- Name: 36bd4ead_master_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_master_id_idx" ON data_requests.activity_log_data_request_assignments USING btree (master_id);
+
+
+--
+-- Name: 36bd4ead_ref_cb_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_ref_cb_user_idx" ON data_requests.activity_log_data_request_assignments USING btree (created_by_user_id);
+
+
+--
+-- Name: 36bd4ead_ref_cb_user_idx_hist; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_ref_cb_user_idx_hist" ON data_requests.activity_log_data_request_assignment_history USING btree (created_by_user_id);
+
+
+--
+-- Name: 36bd4ead_user_id_h_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_user_id_h_idx" ON data_requests.activity_log_data_request_assignment_history USING btree (user_id);
+
+
+--
+-- Name: 36bd4ead_user_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_user_id_idx" ON data_requests.activity_log_data_request_assignments USING btree (user_id);
+
+
+--
+-- Name: 56fce463_history_master_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "56fce463_history_master_id" ON data_requests.data_request_attrib_history USING btree (master_id);
+
+
+--
+-- Name: 56fce463_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "56fce463_id_idx" ON data_requests.data_request_attrib_history USING btree (data_request_attrib_id);
+
+
+--
+-- Name: 56fce463_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "56fce463_user_idx" ON data_requests.data_request_attrib_history USING btree (user_id);
+
+
+--
+-- Name: 6e54d54e_history_master_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "6e54d54e_history_master_id" ON data_requests.data_request_history USING btree (master_id);
+
+
+--
+-- Name: 6e54d54e_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "6e54d54e_id_idx" ON data_requests.data_request_history USING btree (data_request_id);
+
+
+--
+-- Name: 6e54d54e_ref_cb_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "6e54d54e_ref_cb_user_idx" ON data_requests.data_requests USING btree (created_by_user_id);
+
+
+--
+-- Name: 6e54d54e_ref_cb_user_idx_hist; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "6e54d54e_ref_cb_user_idx_hist" ON data_requests.data_request_history USING btree (created_by_user_id);
+
+
+--
+-- Name: 6e54d54e_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "6e54d54e_user_idx" ON data_requests.data_request_history USING btree (user_id);
+
+
+--
+-- Name: 76842e8d_history_master_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "76842e8d_history_master_id" ON data_requests.data_requests_selected_attrib_history USING btree (master_id);
+
+
+--
+-- Name: 76842e8d_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "76842e8d_id_idx" ON data_requests.data_requests_selected_attrib_history USING btree (data_requests_selected_attrib_id);
+
+
+--
+-- Name: 76842e8d_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "76842e8d_user_idx" ON data_requests.data_requests_selected_attrib_history USING btree (user_id);
+
+
+--
+-- Name: 952319f7_history_master_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "952319f7_history_master_id" ON data_requests.data_request_initial_review_history USING btree (master_id);
+
+
+--
+-- Name: 952319f7_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "952319f7_id_idx" ON data_requests.data_request_initial_review_history USING btree (data_request_initial_review_id);
+
+
+--
+-- Name: 952319f7_ref_cb_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "952319f7_ref_cb_user_idx" ON data_requests.data_request_initial_reviews USING btree (created_by_user_id);
+
+
+--
+-- Name: 952319f7_ref_cb_user_idx_hist; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "952319f7_ref_cb_user_idx_hist" ON data_requests.data_request_initial_review_history USING btree (created_by_user_id);
+
+
+--
+-- Name: 952319f7_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "952319f7_user_idx" ON data_requests.data_request_initial_review_history USING btree (user_id);
+
+
+--
+-- Name: data_request_assignment_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX data_request_assignment_id_idx ON data_requests.data_request_assignment_history USING btree (data_request_assignment_table_id);
+
+
+--
+-- Name: dmbt_56fce463_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX dmbt_56fce463_id_idx ON data_requests.data_request_attribs USING btree (master_id);
+
+
+--
+-- Name: dmbt_6e54d54e_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX dmbt_6e54d54e_id_idx ON data_requests.data_requests USING btree (master_id);
+
+
+--
+-- Name: dmbt_76842e8d_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX dmbt_76842e8d_id_idx ON data_requests.data_requests_selected_attribs USING btree (master_id);
+
+
+--
+-- Name: dmbt_952319f7_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX dmbt_952319f7_id_idx ON data_requests.data_request_initial_reviews USING btree (master_id);
+
+
+--
+-- Name: dmbt_f84064ee_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX dmbt_f84064ee_id_idx ON data_requests.data_request_messages USING btree (master_id);
+
+
+--
+-- Name: ei7348f152_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX ei7348f152_id_idx ON data_requests.data_request_assignments USING btree (master_id);
+
+
+--
+-- Name: eih7348f152_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX eih7348f152_id_idx ON data_requests.data_request_assignment_history USING btree (master_id);
+
+
+--
+-- Name: f84064ee_history_master_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX f84064ee_history_master_id ON data_requests.data_request_message_history USING btree (master_id);
+
+
+--
+-- Name: f84064ee_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX f84064ee_id_idx ON data_requests.data_request_message_history USING btree (data_request_message_id);
+
+
+--
+-- Name: f84064ee_ref_cb_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX f84064ee_ref_cb_user_idx ON data_requests.data_request_messages USING btree (created_by_user_id);
+
+
+--
+-- Name: f84064ee_ref_cb_user_idx_hist; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX f84064ee_ref_cb_user_idx_hist ON data_requests.data_request_message_history USING btree (created_by_user_id);
+
+
+--
+-- Name: f84064ee_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX f84064ee_user_idx ON data_requests.data_request_message_history USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_request_assignment_history_on_admin_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_assignment_history_on_admin_id" ON data_requests.data_request_assignment_history USING btree (admin_id);
+
+
+--
+-- Name: index_data_requests.data_request_assignment_history_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_assignment_history_on_user_id" ON data_requests.data_request_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_request_assignments_on_admin_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_assignments_on_admin_id" ON data_requests.data_request_assignments USING btree (admin_id);
+
+
+--
+-- Name: index_data_requests.data_request_assignments_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_assignments_on_user_id" ON data_requests.data_request_assignments USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_request_attribs_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_attribs_on_user_id" ON data_requests.data_request_attribs USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_request_initial_reviews_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_initial_reviews_on_user_id" ON data_requests.data_request_initial_reviews USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_request_messages_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_messages_on_user_id" ON data_requests.data_request_messages USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_requests_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_requests_on_user_id" ON data_requests.data_requests USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_requests_selected_attribs_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_requests_selected_attribs_on_user_id" ON data_requests.data_requests_selected_attribs USING btree (user_id);
+
+
+--
+-- Name: grit_assignment_id_idx; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX grit_assignment_id_idx ON extra_app.grit_assignment_history USING btree (grit_assignment_table_id);
+
+
+--
+-- Name: index_extra_app.grit_assignment_history_on_admin_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.grit_assignment_history_on_admin_id" ON extra_app.grit_assignment_history USING btree (admin_id);
+
+
+--
+-- Name: index_extra_app.grit_assignment_history_on_master_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.grit_assignment_history_on_master_id" ON extra_app.grit_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_extra_app.grit_assignment_history_on_user_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.grit_assignment_history_on_user_id" ON extra_app.grit_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_extra_app.grit_assignments_on_admin_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.grit_assignments_on_admin_id" ON extra_app.grit_assignments USING btree (admin_id);
+
+
+--
+-- Name: index_extra_app.grit_assignments_on_master_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.grit_assignments_on_master_id" ON extra_app.grit_assignments USING btree (master_id);
+
+
+--
+-- Name: index_extra_app.grit_assignments_on_user_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.grit_assignments_on_user_id" ON extra_app.grit_assignments USING btree (user_id);
+
+
+--
+-- Name: index_extra_app.pitt_bhi_assignment_history_on_admin_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.pitt_bhi_assignment_history_on_admin_id" ON extra_app.pitt_bhi_assignment_history USING btree (admin_id);
+
+
+--
+-- Name: index_extra_app.pitt_bhi_assignment_history_on_master_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.pitt_bhi_assignment_history_on_master_id" ON extra_app.pitt_bhi_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_extra_app.pitt_bhi_assignment_history_on_user_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.pitt_bhi_assignment_history_on_user_id" ON extra_app.pitt_bhi_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_extra_app.pitt_bhi_assignments_on_admin_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.pitt_bhi_assignments_on_admin_id" ON extra_app.pitt_bhi_assignments USING btree (admin_id);
+
+
+--
+-- Name: index_extra_app.pitt_bhi_assignments_on_master_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.pitt_bhi_assignments_on_master_id" ON extra_app.pitt_bhi_assignments USING btree (master_id);
+
+
+--
+-- Name: index_extra_app.pitt_bhi_assignments_on_user_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.pitt_bhi_assignments_on_user_id" ON extra_app.pitt_bhi_assignments USING btree (user_id);
+
+
+--
+-- Name: index_extra_app.sleep_assignment_history_on_admin_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.sleep_assignment_history_on_admin_id" ON extra_app.sleep_assignment_history USING btree (admin_id);
+
+
+--
+-- Name: index_extra_app.sleep_assignment_history_on_master_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.sleep_assignment_history_on_master_id" ON extra_app.sleep_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_extra_app.sleep_assignment_history_on_user_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.sleep_assignment_history_on_user_id" ON extra_app.sleep_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_extra_app.sleep_assignments_on_admin_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.sleep_assignments_on_admin_id" ON extra_app.sleep_assignments USING btree (admin_id);
+
+
+--
+-- Name: index_extra_app.sleep_assignments_on_master_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.sleep_assignments_on_master_id" ON extra_app.sleep_assignments USING btree (master_id);
+
+
+--
+-- Name: index_extra_app.sleep_assignments_on_user_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.sleep_assignments_on_user_id" ON extra_app.sleep_assignments USING btree (user_id);
+
+
+--
+-- Name: pitt_bhi_assignment_id_idx; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX pitt_bhi_assignment_id_idx ON extra_app.pitt_bhi_assignment_history USING btree (pitt_bhi_assignment_table_id);
+
+
+--
+-- Name: sleep_assignment_id_idx; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX sleep_assignment_id_idx ON extra_app.sleep_assignment_history USING btree (sleep_assignment_table_id);
 
 
 --
@@ -8366,6 +10710,132 @@ CREATE UNIQUE INDEX unique_schema_migrations ON ml_app.schema_migrations USING b
 
 
 --
+-- Name: log_activity_log_data_request_assignment_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_data_request_assignment_history_insert AFTER INSERT ON data_requests.activity_log_data_request_assignments FOR EACH ROW EXECUTE PROCEDURE data_requests.log_activity_log_data_request_assignments_update();
+
+
+--
+-- Name: log_activity_log_data_request_assignment_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_data_request_assignment_history_update AFTER UPDATE ON data_requests.activity_log_data_request_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_activity_log_data_request_assignments_update();
+
+
+--
+-- Name: log_data_request_attrib_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_attrib_history_insert AFTER INSERT ON data_requests.data_request_attribs FOR EACH ROW EXECUTE PROCEDURE data_requests.log_data_request_attribs_update();
+
+
+--
+-- Name: log_data_request_attrib_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_attrib_history_update AFTER UPDATE ON data_requests.data_request_attribs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_data_request_attribs_update();
+
+
+--
+-- Name: log_data_request_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_history_insert AFTER INSERT ON data_requests.data_requests FOR EACH ROW EXECUTE PROCEDURE data_requests.log_data_requests_update();
+
+
+--
+-- Name: log_data_request_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_history_update AFTER UPDATE ON data_requests.data_requests FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_data_requests_update();
+
+
+--
+-- Name: log_data_request_initial_review_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_initial_review_history_insert AFTER INSERT ON data_requests.data_request_initial_reviews FOR EACH ROW EXECUTE PROCEDURE data_requests.log_data_request_initial_reviews_update();
+
+
+--
+-- Name: log_data_request_initial_review_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_initial_review_history_update AFTER UPDATE ON data_requests.data_request_initial_reviews FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_data_request_initial_reviews_update();
+
+
+--
+-- Name: log_data_request_message_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_message_history_insert AFTER INSERT ON data_requests.data_request_messages FOR EACH ROW EXECUTE PROCEDURE data_requests.log_data_request_messages_update();
+
+
+--
+-- Name: log_data_request_message_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_message_history_update AFTER UPDATE ON data_requests.data_request_messages FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_data_request_messages_update();
+
+
+--
+-- Name: log_data_requests_selected_attrib_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_requests_selected_attrib_history_insert AFTER INSERT ON data_requests.data_requests_selected_attribs FOR EACH ROW EXECUTE PROCEDURE data_requests.log_data_requests_selected_attribs_update();
+
+
+--
+-- Name: log_data_requests_selected_attrib_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_requests_selected_attrib_history_update AFTER UPDATE ON data_requests.data_requests_selected_attribs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_data_requests_selected_attribs_update();
+
+
+--
+-- Name: log_grit_assignment_history_insert; Type: TRIGGER; Schema: extra_app; Owner: -
+--
+
+CREATE TRIGGER log_grit_assignment_history_insert AFTER INSERT ON extra_app.grit_assignments FOR EACH ROW EXECUTE PROCEDURE extra_app.log_grit_assignments_update();
+
+
+--
+-- Name: log_grit_assignment_history_update; Type: TRIGGER; Schema: extra_app; Owner: -
+--
+
+CREATE TRIGGER log_grit_assignment_history_update AFTER UPDATE ON extra_app.grit_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE extra_app.log_grit_assignments_update();
+
+
+--
+-- Name: log_pitt_bhi_assignment_history_insert; Type: TRIGGER; Schema: extra_app; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_assignment_history_insert AFTER INSERT ON extra_app.pitt_bhi_assignments FOR EACH ROW EXECUTE PROCEDURE extra_app.log_pitt_bhi_assignments_update();
+
+
+--
+-- Name: log_pitt_bhi_assignment_history_update; Type: TRIGGER; Schema: extra_app; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_assignment_history_update AFTER UPDATE ON extra_app.pitt_bhi_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE extra_app.log_pitt_bhi_assignments_update();
+
+
+--
+-- Name: log_sleep_assignment_history_insert; Type: TRIGGER; Schema: extra_app; Owner: -
+--
+
+CREATE TRIGGER log_sleep_assignment_history_insert AFTER INSERT ON extra_app.sleep_assignments FOR EACH ROW EXECUTE PROCEDURE extra_app.log_sleep_assignments_update();
+
+
+--
+-- Name: log_sleep_assignment_history_update; Type: TRIGGER; Schema: extra_app; Owner: -
+--
+
+CREATE TRIGGER log_sleep_assignment_history_update AFTER UPDATE ON extra_app.sleep_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE extra_app.log_sleep_assignments_update();
+
+
+--
 -- Name: accuracy_score_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -8916,6 +11386,550 @@ CREATE TRIGGER user_role_history_insert AFTER INSERT ON ml_app.user_roles FOR EA
 --
 
 CREATE TRIGGER user_role_history_update AFTER UPDATE ON ml_app.user_roles FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_user_role_update();
+
+
+--
+-- Name: fk_rails_018f25e797; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_message_history
+    ADD CONSTRAINT fk_rails_018f25e797 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_09244bb3dc; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attrib_history
+    ADD CONSTRAINT fk_rails_09244bb3dc FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_0aeeec6876; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attrib_history
+    ADD CONSTRAINT fk_rails_0aeeec6876 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_0bc905968a; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_review_history
+    ADD CONSTRAINT fk_rails_0bc905968a FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1257de9827; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history
+    ADD CONSTRAINT fk_rails_1257de9827 FOREIGN KEY (activity_log_data_request_assignment_id) REFERENCES data_requests.activity_log_data_request_assignments(id);
+
+
+--
+-- Name: fk_rails_21c43e2d3f; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_messages
+    ADD CONSTRAINT fk_rails_21c43e2d3f FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_21e6e0496d; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignments
+    ADD CONSTRAINT fk_rails_21e6e0496d FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_23475adebc; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attrib_history
+    ADD CONSTRAINT fk_rails_23475adebc FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_23edb1d63b; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history
+    ADD CONSTRAINT fk_rails_23edb1d63b FOREIGN KEY (data_request_assignment_id) REFERENCES data_requests.data_request_assignments(id);
+
+
+--
+-- Name: fk_rails_2eb6563795; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignments
+    ADD CONSTRAINT fk_rails_2eb6563795 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_31e0691a21; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignment_history
+    ADD CONSTRAINT fk_rails_31e0691a21 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_3697b84df2; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_history
+    ADD CONSTRAINT fk_rails_3697b84df2 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_3b5bcce9fb; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_reviews
+    ADD CONSTRAINT fk_rails_3b5bcce9fb FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_3ea24a65fd; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests
+    ADD CONSTRAINT fk_rails_3ea24a65fd FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_3fed9dc95f; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_message_history
+    ADD CONSTRAINT fk_rails_3fed9dc95f FOREIGN KEY (data_request_message_id) REFERENCES data_requests.data_request_messages(id);
+
+
+--
+-- Name: fk_rails_44faf7af40; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignments
+    ADD CONSTRAINT fk_rails_44faf7af40 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_4d465b6e85; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignments
+    ADD CONSTRAINT fk_rails_4d465b6e85 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_59cf667728; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_history
+    ADD CONSTRAINT fk_rails_59cf667728 FOREIGN KEY (data_request_id) REFERENCES data_requests.data_requests(id);
+
+
+--
+-- Name: fk_rails_6c73bce4e5; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_history
+    ADD CONSTRAINT fk_rails_6c73bce4e5 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_7004dc15e9; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignments
+    ADD CONSTRAINT fk_rails_7004dc15e9 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_72b82fa91b; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_message_history
+    ADD CONSTRAINT fk_rails_72b82fa91b FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_782e11a7b8; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests
+    ADD CONSTRAINT fk_rails_782e11a7b8 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_84d6bfc68b; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attribs
+    ADD CONSTRAINT fk_rails_84d6bfc68b FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_8e0ef86d46; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attrib_history
+    ADD CONSTRAINT fk_rails_8e0ef86d46 FOREIGN KEY (data_requests_selected_attrib_id) REFERENCES data_requests.data_requests_selected_attribs(id);
+
+
+--
+-- Name: fk_rails_8f01eb43fa; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_messages
+    ADD CONSTRAINT fk_rails_8f01eb43fa FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_9581557259; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history
+    ADD CONSTRAINT fk_rails_9581557259 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_9ab5b92f74; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history
+    ADD CONSTRAINT fk_rails_9ab5b92f74 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_9fcbe0574d; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignment_history
+    ADD CONSTRAINT fk_rails_9fcbe0574d FOREIGN KEY (data_request_assignment_table_id) REFERENCES data_requests.data_request_assignments(id);
+
+
+--
+-- Name: fk_rails_b184b7ce1b; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attribs
+    ADD CONSTRAINT fk_rails_b184b7ce1b FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_b339299708; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attrib_history
+    ADD CONSTRAINT fk_rails_b339299708 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_b6fd89ee5b; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_messages
+    ADD CONSTRAINT fk_rails_b6fd89ee5b FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_b97a24587b; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignments
+    ADD CONSTRAINT fk_rails_b97a24587b FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_c10fc3daf5; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_review_history
+    ADD CONSTRAINT fk_rails_c10fc3daf5 FOREIGN KEY (data_request_initial_review_id) REFERENCES data_requests.data_request_initial_reviews(id);
+
+
+--
+-- Name: fk_rails_d0f41b523a; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_reviews
+    ADD CONSTRAINT fk_rails_d0f41b523a FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_d1479234ac; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignment_history
+    ADD CONSTRAINT fk_rails_d1479234ac FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_d73d7870a9; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_message_history
+    ADD CONSTRAINT fk_rails_d73d7870a9 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_da6612b225; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attribs
+    ADD CONSTRAINT fk_rails_da6612b225 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_e4a6e38e6f; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_history
+    ADD CONSTRAINT fk_rails_e4a6e38e6f FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_e89bc05f2a; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attrib_history
+    ADD CONSTRAINT fk_rails_e89bc05f2a FOREIGN KEY (data_request_attrib_id) REFERENCES data_requests.data_request_attribs(id);
+
+
+--
+-- Name: fk_rails_ead3ce3763; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests
+    ADD CONSTRAINT fk_rails_ead3ce3763 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_eb22a58fff; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attribs
+    ADD CONSTRAINT fk_rails_eb22a58fff FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_ec4718ef45; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignments
+    ADD CONSTRAINT fk_rails_ec4718ef45 FOREIGN KEY (data_request_assignment_id) REFERENCES data_requests.data_request_assignments(id);
+
+
+--
+-- Name: fk_rails_f1e305eb37; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_reviews
+    ADD CONSTRAINT fk_rails_f1e305eb37 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_f37d802307; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_review_history
+    ADD CONSTRAINT fk_rails_f37d802307 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_fac2c6fac3; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history
+    ADD CONSTRAINT fk_rails_fac2c6fac3 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_fddf5fc543; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_review_history
+    ADD CONSTRAINT fk_rails_fddf5fc543 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_fea4d0d8c9; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignment_history
+    ADD CONSTRAINT fk_rails_fea4d0d8c9 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_081ee3469f; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignments
+    ADD CONSTRAINT fk_rails_081ee3469f FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_15a9d2b53b; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignment_history
+    ADD CONSTRAINT fk_rails_15a9d2b53b FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_3657d6c5a5; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignment_history
+    ADD CONSTRAINT fk_rails_3657d6c5a5 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_3e2d90b6a7; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignments
+    ADD CONSTRAINT fk_rails_3e2d90b6a7 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_4498353cb8; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignment_history
+    ADD CONSTRAINT fk_rails_4498353cb8 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_5948cd2e04; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignment_history
+    ADD CONSTRAINT fk_rails_5948cd2e04 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_5953540cf4; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignments
+    ADD CONSTRAINT fk_rails_5953540cf4 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_675c55afb1; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignments
+    ADD CONSTRAINT fk_rails_675c55afb1 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_6fb9cf3716; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignment_history
+    ADD CONSTRAINT fk_rails_6fb9cf3716 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_8075a87e8f; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignment_history
+    ADD CONSTRAINT fk_rails_8075a87e8f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_821973c8c6; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignments
+    ADD CONSTRAINT fk_rails_821973c8c6 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_838684f7e8; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignment_history
+    ADD CONSTRAINT fk_rails_838684f7e8 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_8b41db7451; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignments
+    ADD CONSTRAINT fk_rails_8b41db7451 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_8fcf1391e1; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignment_history
+    ADD CONSTRAINT fk_rails_8fcf1391e1 FOREIGN KEY (sleep_assignment_table_id) REFERENCES extra_app.sleep_assignments(id);
+
+
+--
+-- Name: fk_rails_ab8e683d49; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignments
+    ADD CONSTRAINT fk_rails_ab8e683d49 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_cbc00f914a; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignments
+    ADD CONSTRAINT fk_rails_cbc00f914a FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_cbe030ce55; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignment_history
+    ADD CONSTRAINT fk_rails_cbe030ce55 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_db9353d15f; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignments
+    ADD CONSTRAINT fk_rails_db9353d15f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_dc3803548c; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignment_history
+    ADD CONSTRAINT fk_rails_dc3803548c FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_de5807ee5f; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignment_history
+    ADD CONSTRAINT fk_rails_de5807ee5f FOREIGN KEY (grit_assignment_table_id) REFERENCES extra_app.grit_assignments(id);
+
+
+--
+-- Name: fk_rails_fdd5a80000; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignment_history
+    ADD CONSTRAINT fk_rails_fdd5a80000 FOREIGN KEY (pitt_bhi_assignment_table_id) REFERENCES extra_app.pitt_bhi_assignments(id);
 
 
 --
@@ -10242,7 +13256,7 @@ ALTER TABLE ONLY ml_app.tracker_history
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app,extra_app;
+SET search_path TO ml_app,extra_app,fem,data_requests,data,study_info,sleep;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20150602181200'),
@@ -10508,6 +13522,26 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20201111165107'),
 ('20201111165109'),
 ('20201111165110'),
-('20201112163129');
+('20201112163129'),
+('20210108085826'),
+('20210110191022'),
+('20210110191023'),
+('20210110191024'),
+('20210110191026'),
+('20210110191028'),
+('20210110191029'),
+('20210110191030'),
+('20210110191031'),
+('20210110191033'),
+('20210124185731'),
+('20210124185733'),
+('20210124185959'),
+('20210124190000'),
+('20210124190034'),
+('20210124190035'),
+('20210124190150'),
+('20210124190152'),
+('20210124190153'),
+('20210124190155');
 
 
