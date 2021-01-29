@@ -96,4 +96,9 @@ class Settings
 
   # Scripted job scripts are only run from a predefined directory
   ScriptedJobDirectory = Rails.root.join('scripted_job_scripts')
+
+  # Encryption key and salt for attribute encryption
+  # @see Utilities::Encryption
+  EncryptionSecretKeyBase = ENV['FPHS_ENC_SECRET_KEY_BASE'] || (Rails.env.production? ? nil : 'test')
+  EncryptionSalt = ENV['FPHS_ENC_SALT'] || (Rails.env.production? ? nil : 'test-salt')
 end

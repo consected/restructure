@@ -64,6 +64,11 @@ Rails.application.routes.draw do
     end
   end
 
+  namespace :redcap do
+    resources :project_admins, except: %i[show destroy]
+    resources :client_requests, except: %i[edit show destroy]
+  end
+
   namespace :users do
     resources :contact_infos, except: %i[show destroy]
   end

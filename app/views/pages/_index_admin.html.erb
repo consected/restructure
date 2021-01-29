@@ -1,64 +1,73 @@
 <div class="panel panel-primary">
-    <div class="panel-body">
-  <h2 >Admin Actions</h2>
-  <div class="row">
-    <div class="col-sm-4">
-      <h3>Manage Selections</h3>
-      <ul class="nav">
-        <li class="nav"><%= link_to "Accuracy Scores", admin_accuracy_scores_path %> </li>
-        <li class="nav"><%= link_to "Colleges List", admin_colleges_path %> </li>
-        <li class="nav"><%= link_to "Drop-Down Selections", admin_general_selections_path %> </li>
-        <li class="nav"><%= link_to "Item Flags", admin_item_flag_names_path %> </li>
-        <li class="nav"><%= link_to "External Links", admin_external_links_path %> </li>
-        <li class="nav"><%= link_to "Protocol / Status / Method", admin_protocols_path %> </li>
-      </ul>
+  <div class="panel-body">
+    <h2 >Admin Actions</h2>
+    <div class="row">
+      <div class="col-sm-4">
+        <h3>Manage Selections</h3>
+        <ul class="nav">
+          <li class="nav"><%= link_to "Accuracy Scores", admin_accuracy_scores_path %> </li>
+          <li class="nav"><%= link_to "Colleges List", admin_colleges_path %> </li>
+          <li class="nav"><%= link_to "Drop-Down Selections", admin_general_selections_path %> </li>
+          <li class="nav"><%= link_to "Item Flags", admin_item_flag_names_path %> </li>
+          <li class="nav"><%= link_to "External Links", admin_external_links_path %> </li>
+          <li class="nav"><%= link_to "Protocol / Status / Method", admin_protocols_path %> </li>
+        </ul>
+      </div>
+      <div class="col-sm-4">
+        <h3>App Configs</h3>
+        <ul class="nav">
+          <li class="nav"><%= link_to "App Types", admin_app_types_path %> </li>
+          <li class="nav"><%= link_to "Page Layouts", admin_page_layouts_path %> </li>
+          <li class="nav"><%= link_to "App Configurations", admin_app_configurations_path %> </li>
+          <li class="nav"><%= link_to "Server Settings", admin_server_info_index_path %> </li>
+        </ul>
+      </div>
+      <div class="col-sm-4">
+        <h3>Definitions</h3>
+        <ul class="nav">
+          <li class="nav"><%= link_to "Reports", admin_reports_path %> </li>
+          <li class="nav"><%= link_to "Activity Logs", admin_activity_logs_path %> </li>
+          <li class="nav"><%= link_to "Dynamic Models", admin_dynamic_models_path %> </li>
+          <li class="nav"><%= link_to "External Identifiers", admin_external_identifiers_path %> </li>
+          <li class="nav"><%= link_to "Config Library", admin_config_libraries_path %> </li>
+          <li class="nav"><%= link_to "Reference Data", admin_reference_data_path %> </li>
+        </ul>
+      </div>
+      <div class="col-sm-4">
+        <h3>Users and Access</h3>
+        <ul class="nav">
+          <li class="nav"><%= link_to "Usernames & Passwords", admin_manage_users_path %> </li>
+          <li class="nav"><%= link_to "User Contact Info", users_contact_infos_path %> </li>
+          <li class="nav"><%= link_to "User Roles", admin_user_roles_path %> </li>
+          <li class="nav"><%= link_to "User Access Controls", admin_user_access_controls_path %> </li>
+          <li class="nav"><%= link_to "File Filters", admin_nfs_store_filter_filters_path %> </li>
+          <li class="nav"><%= link_to "Administrators", admin_manage_admins_path %> </li>
+        </ul>
+      </div>
+      <div class="col-sm-4">
+        <h3>Messaging</h3>
+        <ul class="nav">
+          <li class="nav"><%= link_to "Message Templates", admin_message_templates_path %> </li>
+          <li class="nav"><%= link_to "Message Notifications", admin_message_notifications_path %> </li>
+          <li class="nav"><%= link_to "Background Jobs", admin_job_reviews_path %> </li>
+        </ul>
+      </div>
+      <div class="col-sm-4">
+        <h3>External ID Details</h3>
+        <ul class="admin-menu-list">
+          <%= render partial: 'pages/index_admin_external_identifiers' %>
+        </ul>
+      </div>
     </div>
-    <div class="col-sm-4">
-      <h3>App Configs</h3>
-      <ul class="nav">
-        <li class="nav"><%= link_to "App Types", admin_app_types_path %> </li>
-        <li class="nav"><%= link_to "Page Layouts", admin_page_layouts_path %> </li>
-        <li class="nav"><%= link_to "App Configurations", admin_app_configurations_path %> </li>
-        <li class="nav"><%= link_to "Server Settings", admin_server_info_index_path %> </li>
-      </ul>
+    <div class="row">
+      <div class="col-sm-4">
+        <h3>REDCap</h3>
+        <ul class="nav">
+          <li class="nav"><%= link_to "Projects", redcap_project_admins_path %> </li>
+          <li class="nav"><%= link_to "Client Request Log", redcap_client_requests_path %> </li>
+        </ul>
+      </div>
     </div>
-    <div class="col-sm-4">
-      <h3>Definitions</h3>
-      <ul class="nav">
-        <li class="nav"><%= link_to "Reports", admin_reports_path %> </li>
-        <li class="nav"><%= link_to "Activity Logs", admin_activity_logs_path %> </li>
-        <li class="nav"><%= link_to "Dynamic Models", admin_dynamic_models_path %> </li>
-        <li class="nav"><%= link_to "External Identifiers", admin_external_identifiers_path %> </li>
-        <li class="nav"><%= link_to "Config Library", admin_config_libraries_path %> </li>
-        <li class="nav"><%= link_to "Reference Data", admin_reference_data_path %> </li>
-      </ul>
-    </div>
-    <div class="col-sm-4">
-      <h3>Users and Access</h3>
-      <ul class="nav">
-        <li class="nav"><%= link_to "Usernames & Passwords", admin_manage_users_path %> </li>
-        <li class="nav"><%= link_to "User Contact Info", users_contact_infos_path %> </li>
-        <li class="nav"><%= link_to "User Roles", admin_user_roles_path %> </li>
-        <li class="nav"><%= link_to "User Access Controls", admin_user_access_controls_path %> </li>
-        <li class="nav"><%= link_to "File Filters", admin_nfs_store_filter_filters_path %> </li>
-        <li class="nav"><%= link_to "Administrators", admin_manage_admins_path %> </li>
-      </ul>
-    </div>
-    <div class="col-sm-4">
-      <h3>Messaging</h3>
-      <ul class="nav">
-        <li class="nav"><%= link_to "Message Templates", admin_message_templates_path %> </li>
-        <li class="nav"><%= link_to "Message Notifications", admin_message_notifications_path %> </li>
-        <li class="nav"><%= link_to "Background Jobs", admin_job_reviews_path %> </li>
-      </ul>
-    </div>
-    <div class="col-sm-4">
-      <h3>External ID Details</h3>
-      <ul class="admin-menu-list">
-        <%= render partial: 'pages/index_admin_external_identifiers' %>
-      </ul>
-    </div>
-  </div>
-  <h4 class="text-center"><%= link_to "Admin Logout", destroy_admin_session_path, method: :delete, class: 'btn btn-default' %> </h4>
+    <h4 class="text-center"><%= link_to "Admin Logout", destroy_admin_session_path, method: :delete, class: 'btn btn-default' %> </h4>
   </div>
 </div>

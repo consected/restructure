@@ -614,8 +614,6 @@ module ActiveRecord
           fopts = field_opts[attr_name]
           if fopts
             add_column(tbl, attr_name, f, fopts)
-          elsif fopts
-            add_column(tbl, attr_name, f, fopts)
           else
             add_column(tbl, attr_name)
           end
