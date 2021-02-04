@@ -8,6 +8,9 @@ module Redcap
 
     self.table_name = 'redcap_project_admins'
 
+    has_one :redcap_data_dictionary, class_name: 'Redcap::DataDictionary', foreign_key: :redcap_project_admin_id
+    has_many :redcap_client_requests, class_name: 'Redcap::ClientRequest'
+
     validates :name, presence: true, unless: -> { disabled? }
     validates :api_key, presence: true, unless: -> { disabled? }
     validates :server_url, presence: true, unless: -> { disabled? }
@@ -17,7 +20,11 @@ module Redcap
     validate :server_url, -> { already_taken(:server_url) ? errors.add(:server_url, 'already exists') : true }
 
     before_save :empty_disabled_api_key
-    after_create :capture_current_project_info
+    # After save, capture the project info from REDCap
+    # except if the record has not saved or the current_project_info has
+    # just changed, to avoid never ending callbacks
+    after_save :capture_current_project_info, unless: -> { captured_project_info_changed? || !saved_changes? }
+    after_save :capture_data_dictionary, if: -> { saved_changes? }
 
     # Override the api_key accessor to return a decrypted value
     def api_key
@@ -60,9 +67,15 @@ module Redcap
     end
 
     #
-    # Called before save to store the captured project info from Redcap for future reference
+    # Called after save to store the captured project info from Redcap for future reference
     def capture_current_project_info
       Redcap::CaptureCurrentProjectInfoJob.perform_later(self)
+    end
+
+    def capture_data_dictionary
+      dd = redcap_data_dictionary || create_redcap_data_dictionary(current_admin: current_admin)
+
+      dd.capture_data_dictionary
     end
   end
 end

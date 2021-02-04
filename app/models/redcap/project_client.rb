@@ -76,6 +76,16 @@ module Redcap
       @redcap
     end
 
+    def self.symbolize_result(res)
+      case res
+      when Hash
+        res.symbolize_keys!
+      when Array
+        res.each { |row| row.symbolize_keys! if row.is_a? Hash }
+      end
+      res
+    end
+
     private
 
     #
@@ -107,13 +117,7 @@ module Redcap
 
     def post_action(action)
       res = redcap.send(action)
-      case res
-      when Hash
-        res.symbolize_keys!
-      when Array
-        res.each { |row| row.symbolize_keys! if row.is_a? Hash }
-      end
-      res
+      self.class.symbolize_result res
     end
   end
 end

@@ -32,7 +32,6 @@ gem 'strong_password', '~> 0.0.5'
 gem 'syslog-logger'
 
 group :development do
-  gem 'htmlbeautifier'
   gem 'listen'
   gem 'solargraph'
   gem 'web-console'

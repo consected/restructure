@@ -15,3 +15,13 @@ a.collapsed > .caret {
 .CodeMirror.cm-s-default {
   border: 1px solid rgb(204, 204, 204);
 }
+
+.common-admin-markdown-editor .custom-editor {
+  width: 800px;
+  height: 40vh;
+  background: white;
+}
+
+.form-group[data-out-attr-name="notes"] {
+  vertical-align: top;
+}

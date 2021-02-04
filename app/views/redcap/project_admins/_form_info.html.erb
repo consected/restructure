@@ -1,0 +1,23 @@
+<div class="">
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab">Details</a></li>
+
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+
+    <div role="tabpanel" class="tab-pane active" id="def-details-block">
+      <h4>Details</h4>
+      <% if object_instance.captured_project_info.present?%>
+        <div class="admin-options-ref-textarea-block">
+          <textarea style="font-size: 12px" class="extra-help-info">
+<%= object_instance.captured_project_info.to_yaml%>
+          </textarea>
+        </div>
+      <% end%>
+    </div>
+  </div>
+</div>

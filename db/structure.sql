@@ -14169,14 +14169,14 @@ CREATE FUNCTION ml_app.redcap_data_dictionary_history_upd() RETURNS trigger
     AS $$
 BEGIN
   INSERT INTO redcap_data_dictionary_history (
-    redcap_project_admin, dynamic_model_res_name, record_count, project_metadata,
+    redcap_project_admin_id, dynamic_model_res_name, field_count, captured_metadata,
     disabled,
     admin_id,
     created_at,
     updated_at,
     redcap_data_dictionary_id)
   SELECT
-    NEW.redcap_project_admin, NEW.dynamic_model_res_name, NEW.record_count, NEW.project_metadata,
+    NEW.redcap_project_admin_id, NEW.dynamic_model_res_name, NEW.field_count, NEW.captured_metadata,
     NEW.disabled,
     NEW.admin_id,
     NEW.created_at,
@@ -14196,14 +14196,14 @@ CREATE FUNCTION ml_app.redcap_project_admin_history_upd() RETURNS trigger
     AS $$
 BEGIN
   INSERT INTO redcap_project_admin_history (
-    name, api_key, server_url, captured_project_info,
+    name, api_key, server_url, captured_project_info, transfer_mode, frequency, status, post_transfer_pipeline, notes,
     disabled,
     admin_id,
     created_at,
     updated_at,
     redcap_project_admin_id)
   SELECT
-    NEW.name, NEW.api_key, NEW.server_url, NEW.captured_project_info,
+    NEW.name, NEW.api_key, NEW.server_url, NEW.captured_project_info, NEW.transfer_mode, NEW.frequency, NEW.status, NEW.post_transfer_pipeline, NEW.notes,
     NEW.disabled,
     NEW.admin_id,
     NEW.created_at,
@@ -46588,11 +46588,12 @@ CREATE TABLE ml_app.redcap_data_dictionaries (
     id bigint NOT NULL,
     redcap_project_admin_id bigint,
     dynamic_model_res_name character varying,
-    record_count integer,
-    project_metadata jsonb,
+    field_count integer,
+    captured_metadata jsonb,
     disabled boolean,
     admin_id bigint,
-    timestamps character varying
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
 );
 
 
@@ -46631,11 +46632,12 @@ CREATE TABLE ml_app.redcap_data_dictionary_history (
     redcap_data_dictionary_id bigint,
     redcap_project_admin_id bigint,
     dynamic_model_res_name character varying,
-    record_count integer,
-    project_metadata jsonb,
+    field_count integer,
+    captured_metadata jsonb,
     disabled boolean,
     admin_id bigint,
-    timestamps character varying
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
 );
 
 
@@ -46679,7 +46681,12 @@ CREATE TABLE ml_app.redcap_project_admin_history (
     disabled boolean,
     admin_id bigint,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    transfer_mode character varying,
+    frequency character varying,
+    status character varying,
+    post_transfer_pipeline character varying[] DEFAULT '{}'::character varying[],
+    notes character varying
 );
 
 
@@ -46722,7 +46729,12 @@ CREATE TABLE ml_app.redcap_project_admins (
     disabled boolean,
     admin_id bigint,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    transfer_mode character varying,
+    frequency character varying,
+    status character varying,
+    post_transfer_pipeline character varying[] DEFAULT '{}'::character varying[],
+    notes character varying
 );
 
 
@@ -101238,6 +101250,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20210122163753'),
 ('20210128180947'),
 ('20210129150044'),
-('20210129154600');
+('20210129154600'),
+('20210201124324');
 
 

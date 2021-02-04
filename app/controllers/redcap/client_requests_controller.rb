@@ -4,6 +4,10 @@
 class Redcap::ClientRequestsController < AdminController
   private
 
+  def no_edit
+    true
+  end
+
   def view_folder
     'admin/common_templates'
   end
@@ -17,6 +21,6 @@ class Redcap::ClientRequestsController < AdminController
   end
 
   def permitted_params
-    %i[name server_url action disabled]
+    %i[name server_url action created_at]
   end
 end

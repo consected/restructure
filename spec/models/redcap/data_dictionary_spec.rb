@@ -12,4 +12,11 @@ RSpec.describe Redcap::DataDictionary, type: :model do
     create_admin
     @projects = setup_redcap_project_admin_configs
   end
+
+  it 'stores the data dictionary metadata for future reference' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    expect(rc.redcap_data_dictionary.captured_metadata).to eq rc.project_client.metadata
+  end
 end
