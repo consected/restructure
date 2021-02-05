@@ -4,7 +4,7 @@ require 'rails_helper'
 # This test calls both mocks and a live endpoint (if configured).
 # The live endpoint configuration must be set up in the initializer
 # recap_config.rb
-RSpec.describe Redcap::PullDataDictionaryJob, type: :job do
+RSpec.describe Redcap::CaptureDataDictionaryJob, type: :job do
   include Redcap::RedcapSupport
 
   before :example do

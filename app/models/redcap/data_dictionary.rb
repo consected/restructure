@@ -15,6 +15,11 @@ module Redcap
 
     belongs_to :redcap_project_admin, class_name: 'Redcap::ProjectAdmin', foreign_key: :redcap_project_admin_id
 
+    after_save :refresh_choices_records, if: -> { captured_metadata }
+
+    #
+    # All form representations for this database
+    # @return [Hash] { <form_name>: Redcap::DataDictionaries::Form }
     def forms
       return [] if captured_metadata.blank?
 
@@ -44,6 +49,28 @@ module Redcap
     # @return [Array{Symbol}]
     def form_names
       forms&.keys
+    end
+
+    #
+    # The source name for data items is the server domain name
+    # @return [String] <description>
+    def source_name
+      @source_name ||= URI.parse(redcap_project_admin.server_url).host
+    end
+
+    private
+
+    #
+    # Datadic::Choice records need to be updated to match the new metadata
+    # if there have been changes to dropdown, radio or checkbox fields
+    def refresh_choices_records
+      return unless captured_metadata
+
+      forms.each do |_k, form|
+        form.fields.each do |_k, field|
+          field.field_type.refresh_choices_records
+        end
+      end
     end
   end
 end

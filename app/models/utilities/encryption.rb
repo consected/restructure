@@ -5,11 +5,11 @@ module Utilities
   # Usage within a class:
   #
   # def api_token
-  #   Utilities::Encryption.decrypt(encrypted_api_token)
+  #   ::Utilities::Encryption.decrypt(encrypted_api_token)
   # end
   #
   # def api_token=(value)
-  #   self.encrypted_api_token = Utilities::Encryption.encrypt(value)
+  #   self.encrypted_api_token = ::Utilities::Encryption.encrypt(value)
   # end
   #
   class Encryption

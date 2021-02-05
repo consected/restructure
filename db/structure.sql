@@ -9243,6 +9243,33 @@ CREATE FUNCTION ml_app.current_user_id() RETURNS integer
 
 
 --
+-- Name: datadic_choice_history_upd(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.datadic_choice_history_upd() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO datadic_choice_history (
+    source_name, source_type, form_name, field_name, value, label, redcap_data_dictionary_id,
+    disabled,
+    admin_id,
+    created_at,
+    updated_at,
+    datadic_choice_id)
+  SELECT
+    NEW.source_name, NEW.source_type, NEW.form_name, NEW.field_name, NEW.value, NEW.label, NEW.redcap_data_dictionary_id,
+    NEW.disabled,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: demo_sync_bhs_record(integer, bigint); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -44177,6 +44204,85 @@ CREATE TABLE ml_app.copy_player_infos (
 
 
 --
+-- Name: datadic_choice_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.datadic_choice_history (
+    id bigint NOT NULL,
+    datadic_choice_id bigint,
+    source_name character varying,
+    source_type character varying,
+    form_name character varying,
+    field_name character varying,
+    value character varying,
+    label character varying,
+    disabled boolean,
+    admin_id bigint,
+    redcap_data_dictionary_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: datadic_choice_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.datadic_choice_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: datadic_choice_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.datadic_choice_history_id_seq OWNED BY ml_app.datadic_choice_history.id;
+
+
+--
+-- Name: datadic_choices; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.datadic_choices (
+    id bigint NOT NULL,
+    source_name character varying,
+    source_type character varying,
+    form_name character varying,
+    field_name character varying,
+    value character varying,
+    label character varying,
+    disabled boolean,
+    admin_id bigint,
+    redcap_data_dictionary_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: datadic_choices_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.datadic_choices_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: datadic_choices_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.datadic_choices_id_seq OWNED BY ml_app.datadic_choices.id;
+
+
+--
 -- Name: delayed_jobs; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -64377,6 +64483,20 @@ ALTER TABLE ONLY ml_app.config_library_history ALTER COLUMN id SET DEFAULT nextv
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.datadic_choice_history ALTER COLUMN id SET DEFAULT nextval('ml_app.datadic_choice_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.datadic_choices ALTER COLUMN id SET DEFAULT nextval('ml_app.datadic_choices_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.delayed_jobs ALTER COLUMN id SET DEFAULT nextval('ml_app.delayed_jobs_id_seq'::regclass);
 
 
@@ -69019,6 +69139,22 @@ ALTER TABLE ONLY ml_app.config_libraries
 
 ALTER TABLE ONLY ml_app.config_library_history
     ADD CONSTRAINT config_library_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: datadic_choice_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.datadic_choice_history
+    ADD CONSTRAINT datadic_choice_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: datadic_choices_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.datadic_choices
+    ADD CONSTRAINT datadic_choices_pkey PRIMARY KEY (id);
 
 
 --
@@ -76697,6 +76833,13 @@ CREATE INDEX delayed_jobs_priority ON ml_app.delayed_jobs USING btree (priority,
 
 
 --
+-- Name: idx_history_on_datadic_choice_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX idx_history_on_datadic_choice_id ON ml_app.datadic_choice_history USING btree (datadic_choice_id);
+
+
+--
 -- Name: idx_history_on_redcap_data_dictionary_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -77177,6 +77320,34 @@ CREATE INDEX index_config_library_history_on_admin_id ON ml_app.config_library_h
 --
 
 CREATE INDEX index_config_library_history_on_config_library_id ON ml_app.config_library_history USING btree (config_library_id);
+
+
+--
+-- Name: index_datadic_choice_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_datadic_choice_history_on_admin_id ON ml_app.datadic_choice_history USING btree (admin_id);
+
+
+--
+-- Name: index_datadic_choice_history_on_redcap_data_dictionary_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_datadic_choice_history_on_redcap_data_dictionary_id ON ml_app.datadic_choice_history USING btree (redcap_data_dictionary_id);
+
+
+--
+-- Name: index_datadic_choices_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_datadic_choices_on_admin_id ON ml_app.datadic_choices USING btree (admin_id);
+
+
+--
+-- Name: index_datadic_choices_on_redcap_data_dictionary_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_datadic_choices_on_redcap_data_dictionary_id ON ml_app.datadic_choices USING btree (redcap_data_dictionary_id);
 
 
 --
@@ -85507,6 +85678,20 @@ CREATE TRIGGER log_activity_log_player_contact_phone_history_insert AFTER INSERT
 --
 
 CREATE TRIGGER log_activity_log_player_contact_phone_history_update AFTER UPDATE ON ml_app.activity_log_player_contact_phones FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_player_contact_phones_update();
+
+
+--
+-- Name: log_datadic_choice_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_datadic_choice_history_insert AFTER INSERT ON ml_app.datadic_choices FOR EACH ROW EXECUTE PROCEDURE ml_app.datadic_choice_history_upd();
+
+
+--
+-- Name: log_datadic_choice_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_datadic_choice_history_update AFTER UPDATE ON ml_app.datadic_choices FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.datadic_choice_history_upd();
 
 
 --
@@ -94687,6 +94872,14 @@ ALTER TABLE ONLY ml_app.player_infos
 
 
 --
+-- Name: fk_rails_26e1079011; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.datadic_choices
+    ADD CONSTRAINT fk_rails_26e1079011 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
 -- Name: fk_rails_2708bd6a94; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -94748,6 +94941,14 @@ ALTER TABLE ONLY ml_app.user_roles
 
 ALTER TABLE ONLY ml_app.admin_action_logs
     ADD CONSTRAINT fk_rails_3389f178f6 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_3769c4d4af; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.datadic_choice_history
+    ADD CONSTRAINT fk_rails_3769c4d4af FOREIGN KEY (datadic_choice_id) REFERENCES ml_app.datadic_choices(id);
 
 
 --
@@ -94959,6 +95160,14 @@ ALTER TABLE ONLY ml_app.model_references
 
 
 --
+-- Name: fk_rails_4db1a32511; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.datadic_choices
+    ADD CONSTRAINT fk_rails_4db1a32511 FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ml_app.redcap_data_dictionaries(id);
+
+
+--
 -- Name: fk_rails_4decdf690b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -95060,6 +95269,14 @@ ALTER TABLE ONLY ml_app.nfs_store_containers
 
 ALTER TABLE ONLY ml_app.users
     ADD CONSTRAINT fk_rails_6a971dc818 FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
+
+
+--
+-- Name: fk_rails_6b4801c6e4; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.datadic_choice_history
+    ADD CONSTRAINT fk_rails_6b4801c6e4 FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ml_app.redcap_data_dictionaries(id);
 
 
 --
@@ -95268,6 +95485,14 @@ ALTER TABLE ONLY ml_app.redcap_data_dictionary_history
 
 ALTER TABLE ONLY ml_app.redcap_data_dictionaries
     ADD CONSTRAINT fk_rails_a70bde593c FOREIGN KEY (redcap_project_admin_id) REFERENCES ml_app.redcap_project_admins(id);
+
+
+--
+-- Name: fk_rails_ad48ef2f4c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.datadic_choice_history
+    ADD CONSTRAINT fk_rails_ad48ef2f4c FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
@@ -101251,6 +101476,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20210128180947'),
 ('20210129150044'),
 ('20210129154600'),
-('20210201124324');
+('20210201124324'),
+('20210204205746');
 
 

@@ -24,16 +24,19 @@ module Redcap
     # except if the record has not saved or the current_project_info has
     # just changed, to avoid never ending callbacks
     after_save :capture_current_project_info, unless: -> { captured_project_info_changed? || !saved_changes? }
-    after_save :capture_data_dictionary, if: -> { saved_changes? }
+    after_save :capture_data_dictionary, if: -> { saved_changes? || force_refresh }
+    after_save :reset_force_refresh
+
+    attr_accessor :force_refresh
 
     # Override the api_key accessor to return a decrypted value
     def api_key
-      Utilities::Encryption.decrypt(attributes['api_key'])
+      ::Utilities::Encryption.decrypt(attributes['api_key'])
     end
 
     # Override the api_key= accessor to store an encrypted value to the database
     def api_key=(value)
-      super(Utilities::Encryption.encrypt(value))
+      super(::Utilities::Encryption.encrypt(value))
     end
 
     #
@@ -76,6 +79,10 @@ module Redcap
       dd = redcap_data_dictionary || create_redcap_data_dictionary(current_admin: current_admin)
 
       dd.capture_data_dictionary
+    end
+
+    def reset_force_refresh
+      self.force_refresh = nil
     end
   end
 end

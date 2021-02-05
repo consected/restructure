@@ -16,6 +16,9 @@ module Redcap
         self.label = field_metadata[:field_label]
       end
 
+      #
+      # Get the field type representation of for this field
+      # @return [Redcap::DataDictionary::FieldType]
       def field_type
         @field_type ||= FieldType.new(self, def_metadata[:field_type])
       end
@@ -24,6 +27,9 @@ module Redcap
         name.to_s
       end
 
+      #
+      # Quick way to get a plain text label
+      # @return [String]
       def label_plain
         Redcap::Utilities.html_to_plain_text label
       end

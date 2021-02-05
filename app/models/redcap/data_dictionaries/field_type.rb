@@ -19,10 +19,11 @@ module Redcap
         descriptive
       ].freeze
 
-      attr_accessor :name, :select_choices_string_from_def
+      attr_accessor :name, :select_choices_string_from_def, :field
 
       def initialize(field, field_type_name)
         field_metadata = field.def_metadata
+        self.field = field
         self.name = field_type_name.to_sym
         self.select_choices_string_from_def = field_metadata[:select_choices_or_calculations]
       end
@@ -60,6 +61,71 @@ module Redcap
             [value, label]
           end
         end
+      end
+
+      #
+      # Shortcut to the owning data dictionary
+      # @return [Redcap::DataDictionary]
+      def data_dictionary
+        field.form.data_dictionary
+      end
+
+      #
+      # The source name for data items is the server domain name
+      # @return [String] <description>
+      def source_name
+        data_dictionary.source_name
+      end
+
+      #
+      # Current admin to support updates
+      # @return [Admin]
+      def current_admin
+        data_dictionary.current_admin
+      end
+
+      def refresh_choices_records
+        return if choices.empty?
+
+        all_stored_choices = []
+
+        choices(plain_text: true).each do |choice|
+          label = choice.last
+          value = choice.first
+          data = {
+            source_name: source_name,
+            source_type: :redcap,
+            form_name: field.form.name,
+            field_name: field.name,
+            value: value,
+            redcap_data_dictionary: data_dictionary
+          }
+
+          stored_choice = Datadic::Choice.active.where(data).first
+          if stored_choice&.label == label
+            nil
+          elsif stored_choice
+            stored_choice.update! label: label, current_admin: current_admin
+          else
+            data[:label] = label
+            data[:current_admin] = current_admin
+            stored_choice = Datadic::Choice.create!(data)
+          end
+          all_stored_choices << stored_choice
+        end
+
+        all_stored_choices_ids = all_stored_choices.map(&:id)
+
+        # Now disable any remaining stored choices that are no longer in the configuration
+        # for this field
+        Datadic::Choice.active
+                       .where(
+                         redcap_data_dictionary: data_dictionary,
+                         form_name: field.form.name,
+                         field_name: field.name
+                       )
+                       .where.not(id: all_stored_choices_ids)
+                       .update_all(disabled: true)
       end
     end
   end

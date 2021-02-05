@@ -14,6 +14,9 @@ module Redcap
         self.name = name.to_sym
       end
 
+      #
+      # All field type representations for this form
+      # @return [Hash] { <field_name>: Redcap::DataDictionaries::Field }
       def fields
         @fields ||= Field.all_from(self)
       end

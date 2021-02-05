@@ -3,14 +3,22 @@
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab">Details</a></li>
+    <li role="presentation" class=""><a href="#def-metadata-block" aria-controls="def-metadata-block" role="tab" data-toggle="tab">Metadata</a></li>
 
   </ul>
 
   <!-- Tab panes -->
   <div class="tab-content">
-
-    <div role="tabpanel" class="tab-pane active" id="def-details-block">
+    <div role="tabpanel" class="tab-pane active" id="def-metadata-block">
       <h4>Details</h4>
+      <% if object_instance.captured_project_info.present?%>
+        <%= link_to 'data dictionaries', redcap_data_dictionaries_path %>
+      <% end%>
+    </div>
+  
+
+    <div role="tabpanel" class="tab-pane" id="def-metadata-block">
+      <h4>Metadata</h4>
       <% if object_instance.captured_project_info.present?%>
         <div class="admin-options-ref-textarea-block">
           <textarea style="font-size: 12px" class="extra-help-info">
