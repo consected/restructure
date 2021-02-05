@@ -8,8 +8,10 @@ class CreateRedcapClientRequests < ActiveRecord::Migration[5.2]
 
     table_comment = 'Redcap client requests'
 
-    create_table(:redcap_client_requests, comment: table_comment) do |t|
-      t.belongs_to :redcap_project_admin
+    create_table('ref_data.redcap_client_requests', comment: table_comment) do |t|
+      t.belongs_to :redcap_project_admin, foreign_key: true,
+                                          index: { name: 'idx_rcr_on_redcap_admin_id' }
+
       t.string :action
       t.string :name
       t.string :server_url

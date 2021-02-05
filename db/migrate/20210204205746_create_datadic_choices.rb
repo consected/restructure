@@ -3,7 +3,7 @@ class CreateDatadicChoices < ActiveRecord::Migration[5.2]
   include ActiveRecord::Migration::SqlHelpers
 
   def change
-    create_table :datadic_choices do |t|
+    create_table 'ref_data.datadic_choices' do |t|
       t.string :source_name
       t.string :source_type
       t.string :form_name
@@ -16,7 +16,7 @@ class CreateDatadicChoices < ActiveRecord::Migration[5.2]
       t.timestamps
     end
 
-    create_table :datadic_choice_history do |t|
+    create_table 'ref_data.datadic_choice_history' do |t|
       t.belongs_to :datadic_choice, foreign_key: true,
                                     index: { name: 'idx_history_on_datadic_choice_id' }
 
@@ -28,11 +28,13 @@ class CreateDatadicChoices < ActiveRecord::Migration[5.2]
       t.string :label
       t.boolean :disabled
       t.belongs_to :admin, foreign_key: true
-      t.belongs_to :redcap_data_dictionary, foreign_key: true
+      t.belongs_to :redcap_data_dictionary, foreign_key: true,
+                                            index: { name: 'idx_dch_on_redcap_dd_id' }
+
       t.timestamps
     end
 
-    create_general_admin_history_trigger('ml_app',
+    create_general_admin_history_trigger('ref_data',
                                          :datadic_choices,
                                          %i[
                                            source_name
