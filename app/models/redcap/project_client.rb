@@ -24,7 +24,7 @@ module Redcap
       # and a current_admin is required, so we can't just access #attributes
       ExpectedKeys.each do |k|
         val = project_admin.send(k)
-        raise FphsException, "Initialization with #{k} blank is not valid" unless val.present?
+        raise FphsException, "Initialization with #{k} blank is not valid" unless val.present? || project_admin.disabled
 
         send("#{k}=", val)
       end
