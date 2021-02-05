@@ -34,7 +34,6 @@ group :development do
   gem 'listen'
   gem 'web-console'
   gem 'solargraph'
-  gem 'htmlbeautifier'
 end
 
 group :development, :test do
