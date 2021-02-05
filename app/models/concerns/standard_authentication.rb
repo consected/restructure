@@ -23,7 +23,7 @@ module StandardAuthentication
     validate :strength_validation, if: :password_changed?
     before_create :setup_two_factor_auth
     before_save :handle_password_change
-    after_save :handle_password_reminder, if: :requires_reminder
+    after_save :setup_future_password_reminder, if: :requires_reminder
     after_save :clear_plaintext_password
     attr_accessor :new_two_factor_auth_code, :forced_password_reset, :new_password, :new_token
 
@@ -298,7 +298,7 @@ module StandardAuthentication
   #
   # Sets up a password expiration reminder is a reminder is required
   # Called by after_save callback.
-  def handle_password_reminder
+  def setup_future_password_reminder
     Users::Reminders.password_expiration(self) if requires_reminder
   end
 
