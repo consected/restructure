@@ -3,8 +3,8 @@ begin;
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 10.14
--- Dumped by pg_dump version 10.14
+-- Dumped from database version 10.10
+-- Dumped by pg_dump version 10.10
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1369,7 +1369,8 @@ CREATE FUNCTION ml_app.log_external_identifier_update() RETURNS trigger
               created_at,
               updated_at,
               external_identifier_id,
-              schema_name
+              schema_name,
+              options
               )
           SELECT
               NEW.name,
@@ -1388,7 +1389,8 @@ CREATE FUNCTION ml_app.log_external_identifier_update() RETURNS trigger
               NEW.created_at,
               NEW.updated_at,
               NEW.id,
-              NEW.schema_name
+              NEW.schema_name,
+              NEW.options
           ;
           RETURN NEW;
       END;
@@ -3492,7 +3494,8 @@ CREATE TABLE ml_app.external_identifier_history (
     external_identifier_id integer,
     extra_fields character varying,
     alphanumeric boolean,
-    schema_name character varying
+    schema_name character varying,
+    options character varying
 );
 
 
@@ -3537,7 +3540,8 @@ CREATE TABLE ml_app.external_identifiers (
     alphanumeric boolean,
     extra_fields character varying,
     category character varying,
-    schema_name character varying
+    schema_name character varying,
+    options character varying
 );
 
 
