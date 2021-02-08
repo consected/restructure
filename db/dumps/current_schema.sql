@@ -3864,7 +3864,7 @@ CREATE TABLE ml_app.item_flags (
     id integer NOT NULL,
     item_id integer,
     item_type character varying,
-    item_flag_name_id integer,
+    item_flag_name_id integer NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     user_id integer,
