@@ -20,6 +20,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 ## Unreleased
 
 
+## [7.3.193] - 2021-02-08
+
+
 ## [7.3.192] - 2021-01-18
 
 - [Added] server information in admin panel, and moved server restart to it
