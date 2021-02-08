@@ -1,0 +1,17 @@
+.admin-edit-form .well {
+  background: rgb(245, 245, 245);
+}
+
+a > .caret {
+  visibility: visible;
+  transform: rotate(180deg);
+}
+
+a.collapsed > .caret {
+  visibility: visible;
+  transform: none;
+}
+
+.CodeMirror.cm-s-default {
+  border: 1px solid rgb(204, 204, 204);
+}

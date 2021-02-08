@@ -59,7 +59,12 @@ class MastersController < UserBaseController
   # associations to support the search.
   def search
     pext = params[:external_id]
-    if pext
+
+    if params[:nav_q_id].present?
+      @master_id ||= params[:nav_q_id] unless app_config_text(:prevent_reload_master_list, nil)
+      @requested_master = @master_id
+
+    elsif pext
       @ext_field ||= pext[:field]
       named_id = pext.to_unsafe_h.select { |_k, v| v.present? }.first
 
@@ -71,9 +76,6 @@ class MastersController < UserBaseController
       end
 
       @requested_master = Master.find_with_alternative_id(@ext_field, @ext_id, current_user) if @ext_field && @ext_id
-    else
-      @master_id ||= params[:nav_q_id] unless app_config_text(:prevent_reload_master_list, nil)
-      @requested_master = @master_id
     end
 
     # What format is being requested. If nothing is specified, 'reg' indicates a UI search result

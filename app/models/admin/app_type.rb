@@ -20,6 +20,10 @@ class Admin::AppType < Admin::AdminBase
 
   after_create :setup_migrations
 
+  attr_accessor :associated_external_identifier_names,
+                :associated_activity_log_names,
+                :associated_dynamic_model_names
+
   def name_not_already_taken
     return true if disabled
 
@@ -90,17 +94,21 @@ class Admin::AppType < Admin::AdminBase
 
   # Select activity logs that have some kind of access, typically scoped to a specific app type
   # @return [ActiveRecord::Relation]
-  def associated_activity_logs(valid_resources_only: false)
+  def associated_activity_logs(valid_resources_only: false, not_resource_names: nil)
+    nrn = not_resource_names
+
     uacs = if valid_resources_only
              user_access_controls.valid_resources
            else
              user_access_controls.active
            end
 
-    get_names = uacs.where(resource_type: :table)
-                    .select { |a| a.access && a.resource_name.start_with?('activity_log__') }
+    get_names =
+      uacs.where(resource_type: :table)
+          .select { |a| a.access && a.resource_name.start_with?('activity_log__') && (nrn.nil? || !a.resource_name.in?(nrn)) }
     names = get_names.map { |n| n.resource_name.singularize.sub('activity_log__', '') }.uniq
     names += get_names.map { |n| n.resource_name.sub('activity_log__', '') }.uniq
+    self.associated_activity_log_names = names
 
     ActivityLog.active.where("
          (rec_type is NULL OR rec_type = '') AND (process_name IS NULL OR process_name = '') AND item_type in (?)
@@ -109,29 +117,41 @@ class Admin::AppType < Admin::AdminBase
       ", names, names, names).reorder('').order(id: :asc)
   end
 
-  def associated_dynamic_models(valid_resources_only: true)
+  def associated_dynamic_models(valid_resources_only: true, not_resource_names: nil)
+    nrn = not_resource_names
+
     uacs = if valid_resources_only
              user_access_controls.valid_resources
            else
              user_access_controls.active
            end
 
-    names = uacs.where(resource_type: :table)
-                .select { |a| a.access && a.resource_name.start_with?('dynamic_model__') }
-                .map { |n| n.resource_name.sub('dynamic_model__', '') }.uniq
+    self.associated_dynamic_model_names =
+      uacs.where(resource_type: :table)
+          .select { |a| a.access && a.resource_name.start_with?('dynamic_model__') && (nrn.nil? || !a.resource_name.in?(nrn)) }
+          .map { |n| n.resource_name.sub('dynamic_model__', '') }
+          .uniq
 
-    DynamicModel.active.where(table_name: names).reorder('').order(id: :asc)
+    DynamicModel.active.where(table_name: associated_dynamic_model_names).reorder('').order(id: :asc)
   end
 
-  def associated_external_identifiers
-    eids = ExternalIdentifier.active.map(&:name)
-    names = user_access_controls
-            .valid_resources
-            .where(resource_type: :table)
-            .select { |a| a.access && a.resource_name.in?(eids) }
-            .map(&:resource_name).uniq
+  #
+  # Get external identifiers that are active and associated with this app type
+  # though user access controls being assigned to them
+  # @return [ActiveRecord::Relation] external identifiers returned
+  def associated_external_identifiers(not_resource_names: nil)
+    nrn = not_resource_names
+    eids = ExternalIdentifier.active.pluck(:name)
 
-    ExternalIdentifier.active.where(name: names).reorder('').order(id: :asc)
+    self.associated_external_identifier_names =
+      user_access_controls
+      .valid_resources
+      .where(resource_type: :table)
+      .select { |a| a.access && a.resource_name.in?(eids) && (nrn.nil? || !a.resource_name.in?(nrn)) }
+      .map(&:resource_name)
+      .uniq
+
+    ExternalIdentifier.active.where(name: associated_external_identifier_names).reorder('').order(id: :asc)
   end
 
   def associated_reports

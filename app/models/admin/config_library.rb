@@ -28,7 +28,7 @@ class Admin::ConfigLibrary < Admin::AdminBase
   # Directly substitute the library configurations into the supplied text
   # @param text [String] text that will be updated. Be sure to pass an unfrozen string
   # @param format [Symbol] :yaml or :sql
-  # @return [Array] list of Admin::ConfigLibrary instances that were substitued in
+  # @return [Array] list of Admin::ConfigLibrary instances that were substituted in
   def self.make_substitutions!(text, format)
     return unless text
 

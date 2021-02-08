@@ -64,7 +64,8 @@ EOF
     expect(c2.fields).to eq %w[select_call_direction extra_text]
 
     # Additional field for extra_log_type is expected to be added to the configuration by default
-    expect(OptionConfigs::ActivityLogOptions.fields_for_all_in(al)).to eq %w[select_call_direction select_who extra_text]
+    expect(OptionConfigs::ActivityLogOptions.fields_for_all_in(al)).to eq %w[select_call_direction select_who
+                                                                             extra_text]
   end
 
   it 'prevents user from accessing specific activity log extra log types' do
@@ -72,26 +73,28 @@ EOF
 
     resource_name = al.option_configs.first.resource_name
 
-    res = Admin::UserAccessControl.active.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: resource_name
+    res = Admin::UserAccessControl.active.where app_type: @user.app_type, resource_type: :activity_log_type,
+                                                resource_name: resource_name
     res.first&.update!(current_admin: @admin, disabled: true)
 
     res = @user.has_access_to? :access, :activity_log_type, resource_name
     expect(res).to be_falsey
-    Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :activity_log_type, resource_name: resource_name, current_admin: @admin
+    Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :activity_log_type,
+                                     resource_name: resource_name, current_admin: @admin
 
     res = @user.has_access_to? :access, :activity_log_type, resource_name
     expect(res).to be_truthy
   end
 
   it 'allows a user only to see the presence of an iten, not its content' do
-    al = @activity_log
-
     resource_name = ActivityLog::PlayerContactPhone.definition.option_type_config_for(:primary).resource_name
 
+    setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create, user: @user
     setup_access resource_name, resource_type: :activity_log_type, access: :create, user: @user
 
     @player_contact.master.current_user = @user
-    al = @player_contact.activity_log__player_contact_phones.build(select_call_direction: 'from player', select_who: 'user')
+    al = @player_contact.activity_log__player_contact_phones.build(select_call_direction: 'from player',
+                                                                   select_who: 'user')
     al.save!
     alid = al.id
 
@@ -116,7 +119,8 @@ EOF
     res = @user.has_access_to? :see_presence, :activity_log_type, alpcps.first.extra_log_type_config.resource_name
     expect(res).to be_truthy
 
-    res = @user.has_access_to? :see_presence_or_access, :activity_log_type, alpcps.first.extra_log_type_config.resource_name
+    res = @user.has_access_to? :see_presence_or_access, :activity_log_type,
+                               alpcps.first.extra_log_type_config.resource_name
     expect(res).to be_truthy
 
     alpcps.each do |a|

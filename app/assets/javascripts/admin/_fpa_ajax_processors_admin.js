@@ -117,7 +117,7 @@ _fpa.postprocessors_admin = {
       _fpa.admin.setup_yaml_viewer($(this));
     }).addClass('code-extra-help-info-formatted');
 
-    $('[data-toggle="tab"]').on('shown.bs.tab', function () {
+    $('[data-toggle="tab"]').filter(':visible').on('shown.bs.tab', function () {
 
       var tar = $($(this).attr('href'));
       if (!tar.is(':visible')) return;
@@ -128,6 +128,27 @@ _fpa.postprocessors_admin = {
         ehi.addClass('code-extra-help-info-formatted-in-tab')
       }
     })
+
+    // $('.has-editor[data-toggle="collapse"]').filter(':visible').each(function () {
+    //   var el = $($(this).attr('href'));
+
+    //   el.on('shown.bs.collapse', function () {
+    //     var ehi = $(this).find('.extra-help-info').not('.code-extra-help-info-formatted-in-collapse, .code-extra-help-info-formatted-in-tab').filter(':visible');
+    //     ehi.each(function () {
+    //       _fpa.admin.setup_yaml_editor($(this));
+    //       ehi.addClass('code-extra-help-info-formatted-in-collapse code-extra-help-info-formatted-in-tab')
+    //     });
+    //   })
+    // });
+
+    $('.collapse.has-editor').on('shown.bs.collapse', function () {
+      var ehi = $(this).find('.extra-help-info').not('.code-extra-help-info-formatted-in-collapse, .code-extra-help-info-formatted-in-tab').filter(':visible');
+      ehi.each(function () {
+        _fpa.admin.setup_yaml_editor($(this));
+        ehi.addClass('code-extra-help-info-formatted-in-collapse code-extra-help-info-formatted-in-tab')
+      });
+    })
+
     _fpa.form_utils.on_open_click(block);
 
   },
@@ -144,102 +165,6 @@ _fpa.postprocessors_admin = {
     window.setTimeout(function () {
       $('prevent-scroll').removeClass('prevent-scroll');
     }, 1000);
-  },
-
-  handle_admin_report_config: function (block) {
-
-    $('#search_attrs_filter').val('all').attr('disabled', true);
-    $('#search_no_disabled').val('1').attr('checked', true).attr('disabled', true);
-
-    $('#search_attr_instruction').hide();
-    $('#search_attrs_type').change(function () {
-      $('#search_attrs_filter').val('all');
-
-      var d = ($(this).val() !== 'general_selection');
-      $('#search_attrs_filter').attr('disabled', d);
-      $('#search_no_disabled').attr('disabled', d);
-    });
-    $('#search_attrs_add').click(function (ev) {
-      ev.preventDefault();
-      var n = $('#search_attrs_name').val();
-      n = n.underscore();
-      var t = $('#search_attrs_type').val();
-      var f = $('#search_attrs_filter').val();
-      var nd = $('#search_no_disabled').is(':checked');
-      var hf = $('#search_hidden_field').is(':checked');
-      var m = $('#search_attrs_multi').val();
-      var l = $('#search_attrs_label').val();
-      var d = $('#search_attrs_default').val();
-      var s = $('#search_attrs_config_selections')[0].CodeMirror.getValue();
-      var c = $('#search_attrs_conditions')[0].CodeMirror.getValue();
-      $('#search_attr_ex').html(":" + n);
-      $('#search_attr_instruction').show();
-
-
-
-      var add = n + ': ';
-      {
-        add += '\n  ' + t + ': ';
-        if (f === 'all') {
-          add += '\n    all: true';
-        } else {
-          add += "\n    " + f;
-        }
-        if (m)
-          add += "\n    multiple: " + m;
-        if (l)
-          add += "\n    label: " + l;
-
-        if (d) {
-          if (m === 'single') {
-            d = d.trim();
-          } else {
-            var ds = d.split('\n');
-            d = '';
-            for (var id in ds) {
-              d += '\n      - ' + ds[id];
-            }
-          }
-
-          add += "\n    default: " + d;
-        }
-        else {
-          if (nd)
-            add += "\n    disabled: false";
-        }
-
-
-        if (hf)
-          add += "\n    hidden: true";
-
-        if (s) {
-          add += "\n    selections: ";
-          var ds = s.split('\n');
-          for (var id in ds) {
-            add += '\n      ' + ds[id];
-          }
-        }
-        if (c) {
-          add += "\n    conditions: ";
-          var ds = c.split('\n');
-          for (var id in ds) {
-            add += '\n      ' + ds[id];
-          }
-        }
-
-
-      }
-      var $attel = $('#report_search_attrs');
-      var attel = $attel[0];
-
-
-      attel.CodeMirror.save();
-      var v = $attel.val();
-      $attel.val(v + "\n\n" + add);
-      attel.CodeMirror.setValue($attel.val());
-      attel.CodeMirror.refresh();
-
-    });
   }
 
 };

@@ -1,0 +1,14 @@
+.server-info-settings {
+  margin: 2em;
+  .setting-value {
+    padding: 0.3em 1em;
+    font-family: monospace;
+    max-width: 70%;
+    word-break: break-all;
+  }
+  .setting-key {
+    font-weight: bold;
+    padding: 0.3em 1em;
+    font-family: monospace;
+  }
+}

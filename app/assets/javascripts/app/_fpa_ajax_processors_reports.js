@@ -32,7 +32,7 @@ _fpa.postprocessors_reports = {
 
   embedded_report: function (block, data) {
     _fpa.postprocessors_reports.reports_form(block, data);
-    block.find('input[type="submit"].auto-run').click();
+    block.find('[type="submit"].auto-run').click();
 
   },
 
@@ -96,7 +96,7 @@ _fpa.postprocessors_reports = {
       return false;
     }).addClass('attached-click-listener');
 
-    if (!show_fob) block.find('input[type="submit"].auto-run').click();
+    if (!show_fob) block.find('[type="submit"].auto-run').click();
 
   },
 

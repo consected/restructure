@@ -7,24 +7,30 @@ RSpec.describe Admin::MessageTemplate, type: :model do
   include ModelSupport
   include PlayerInfoSupport
   include ReportSupport
+  include ItemFlagSupport
 
   before :example do
+    seed_database # to ensure embedded reports work
     create_admin
     create_user
     create_master
     l = Admin::MessageTemplate.last.id
     Admin::MessageTemplate.where(name: 'test email layout').update_all(name: "test old layout #{l}")
     Admin::MessageTemplate.where(name: 'test email content').update_all(name: "test old content #{l}")
+    create_items
   end
 
   it 'generates a message' do
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
-    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
+    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout,
+                                            template: t, current_admin: @admin
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name}}.</p>'
-    Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
+    Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content,
+                                   template: t, current_admin: @admin
 
-    res = layout.generate content_template_name: 'test email content', data: { master_id: @master.id, 'name' => 'test name' }
+    res = layout.generate content_template_name: 'test email content',
+                          data: { master_id: @master.id, 'name' => 'test name' }
     expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{@master.id}. This is a name: Test Name.</p></div></body></html>"
 
     expect(res).to eq expected_text
@@ -48,10 +54,12 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     dateformatted = tz.parse(@player_info.created_at.to_s).strftime(df).gsub('  ', ' ')
 
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
-    layout = Admin::MessageTemplate.create! name: 'test email layout 2', message_type: :email, template_type: :layout, template: t, current_admin: @admin
+    layout = Admin::MessageTemplate.create! name: 'test email layout 2', message_type: :email, template_type: :layout,
+                                            template: t, current_admin: @admin
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}} for {{player_info.created_at}} by {{player_info.user_email}}. This is a name: {{player_info.first_name}} and {{player_contact_phones.data}}.</p>'
-    Admin::MessageTemplate.create! name: 'test email content 2', message_type: :email, template_type: :content, template: t, current_admin: @admin
+    Admin::MessageTemplate.create! name: 'test email content 2', message_type: :email, template_type: :content,
+                                   template: t, current_admin: @admin
 
     # Should work with either master or a record specified as data
     res = layout.generate content_template_name: 'test email content 2', data: master
@@ -66,7 +74,8 @@ RSpec.describe Admin::MessageTemplate, type: :model do
 
   it 'generates a message with a text template' do
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
-    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
+    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout,
+                                            template: t, current_admin: @admin
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name}}.</p>'
     # Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
@@ -82,7 +91,8 @@ RSpec.describe Admin::MessageTemplate, type: :model do
 
   it 'substitutes user fields' do
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
-    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
+    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout,
+                                            template: t, current_admin: @admin
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name}}. Done by current user: {{current_user.first_name}}.</p>'
     # Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
@@ -98,7 +108,8 @@ RSpec.describe Admin::MessageTemplate, type: :model do
 
   it 'provides formatting options for substituted fields' do
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
-    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
+    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout,
+                                            template: t, current_admin: @admin
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase}}.</p>'
 
@@ -118,13 +129,23 @@ RSpec.describe Admin::MessageTemplate, type: :model do
   it 'embeds reports' do
     create_reports
     rn = @report1.alt_resource_name
+    @master.current_user = @user
+
+    expect(@item_flag).not_to be nil
+
+    Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :general,
+                                     resource_name: :view_reports, current_admin: @admin
+
+    check_reports_accessible
 
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
-    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
+    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout,
+                                            template: t, current_admin: @admin
 
     t = "<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase}}.</p>{{embedded_report_#{rn}}}<br/>"
 
-    res = layout.generate content_template_text: t, data: { master_id: @master.id, 'name' => 'test name bob', id: -1, original_item: { id: -1 } }
+    res = layout.generate content_template_text: t,
+                          data: { master_id: @master.id, 'name' => 'test name bob', id: -1, original_item: { id: -1 } }
 
     expect(res).to include '<table '
   end
@@ -143,7 +164,8 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     setup_access :activity_log__player_contact_phones, user: @user
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
     setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: @user
-    @activity_log = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player', select_who: 'user', master: @player_contact.master)
+    @activity_log = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
+                                                                                select_who: 'user', master: @player_contact.master)
     @activity_log.extra_log_type_config.references = {
       player_contact: {
         player_contact: {
@@ -159,7 +181,8 @@ RSpec.describe Admin::MessageTemplate, type: :model do
       }
     }
 
-    @activity_log2 = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player', select_who: 'user', master: @player_contact.master)
+    @activity_log2 = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player',
+                                                                                 select_who: 'user', master: @player_contact.master)
     ModelReference.create_with(@activity_log2, pc3, force_create: true)
     ModelReference.create_with(@activity_log, @activity_log2, force_create: true)
 
@@ -176,10 +199,12 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     dateformatted = tz.parse(@player_info.created_at.to_s).strftime(df).gsub('  ', ' ')
 
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
-    layout = Admin::MessageTemplate.create! name: 'test email layout 2', message_type: :email, template_type: :layout, template: t, current_admin: @admin
+    layout = Admin::MessageTemplate.create! name: 'test email layout 2', message_type: :email, template_type: :layout,
+                                            template: t, current_admin: @admin
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}} for {{player_info.created_at}} by {{player_info.user_email}}. This is a name: {{player_info.first_name}} and {{player_contact_phones.data}} and {{latest_reference.data}} and {{activity_log__player_contact_phones.player_contact.data}}.</p>'
-    Admin::MessageTemplate.create! name: 'test email content 2', message_type: :email, template_type: :content, template: t, current_admin: @admin
+    Admin::MessageTemplate.create! name: 'test email content 2', message_type: :email, template_type: :content,
+                                   template: t, current_admin: @admin
 
     res = layout.generate content_template_name: 'test email content 2', data: @activity_log
     expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id} for #{dateformatted} by #{@player_info.user_email}. This is a name: #{@player_info.first_name.titleize} and #{pn} and #{pn_ref1} and #{@player_contact.data}.</p></div></body></html>"
@@ -208,7 +233,7 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     t = Benchmark.realtime do
       masters.each do |master|
         data = Formatter::Substitution.setup_data(master.player_contacts[0], master.player_contacts[1])
-        res = Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
+        Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
       end
     end
 

@@ -579,8 +579,16 @@ button.btn.hamburger {
   background: rgb(245, 245, 245);
 }
 
+.well {
+  background: rgb(245, 245, 245);
+}
+
 .add-linked-tracker div.panel {
   background: none;
   border: 0;
   box-shadow: none;
+}
+
+code {
+  color: rgb(109, 0, 0);
 }

@@ -14,7 +14,9 @@ RSpec.describe 'Works With handler', type: :model do
     # Create a random player contact item
     create_item(data: rand(10_000_000_000_000_000), rank: 10, rec_type: 'phone')
 
-    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, access: :create, user: @user
+    setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create, user: @user
+    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, access: :create,
+                                                               user: @user
   end
 
   it 'matches underlying items based on a secondary_key field' do

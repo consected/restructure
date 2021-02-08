@@ -33,6 +33,6 @@ module UserActionsSetup
   end
 
   def select_app(app_name)
-    select app_name, from: 'use_app_type_select' if has_css?('use_app_type_select')
+    select app_name, from: 'use_app_type_select' if has_css?('#use_app_type_select')
   end
 end

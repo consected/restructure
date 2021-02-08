@@ -8,6 +8,7 @@ module ModelSupport
 
   def seed_database
     Rails.logger.info 'Starting seed setup in Model Support'
+    # puts "#{Time.now} Starting seed setup in Model Support"
     SeedSupport.setup
   end
 
@@ -42,5 +43,6 @@ module ModelSupport
 
   # Force a database seed at config time, to avoid issues later
   Rails.logger.info 'Starting seed setup in setup of Master Support'
-  SeedSupport.setup
+  puts "#{Time.now} Starting seed setup in setup of Master Support"
+  # SeedSupport.setup
 end

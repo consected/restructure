@@ -115,7 +115,8 @@ RSpec.describe TrackersController, type: :controller do
         create_master
         ia = invalid_attributes
         post :create, params: { object_symbol => ia, master_id: @master_id }
-        expect(assigns(object_symbol)).to be_a_new(object_class), "Create should have item with no id using attribs #{ia.inspect}"
+        expect(assigns(object_symbol)).to be_a_new(object_class),
+                                          "Create should have item with no id using attribs #{ia.inspect}"
       end
 
       it "re-renders the 'new' template" do
@@ -199,7 +200,7 @@ RSpec.describe TrackersController, type: :controller do
 
         expect(resp.length).to be > 0
 
-        expect(resp['protocol']).not_to be_nil, "Expected key: protocol error. Got #{resp}"
+        expect(resp['tracker']).not_to be_nil, "Expected key: protocol error. Got #{resp}"
       end
     end
   end

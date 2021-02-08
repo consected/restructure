@@ -4,7 +4,7 @@
 -- Command line:
 -- table_generators/generate.sh create dynamic_models_table ipa_inex_checklists false fixed_checklist_type ix_consent_blank_yes_no ix_consent_details ix_not_pro_blank_yes_no ix_not_pro_details ix_age_range_blank_yes_no ix_age_range_details ix_weight_ok_blank_yes_no ix_weight_ok_details ix_no_seizure_blank_yes_no ix_no_seizure_details ix_no_device_impl_blank_yes_no ix_no_device_impl_details ix_no_ferromagnetic_impl_blank_yes_no ix_no_ferromagnetic_impl_details ix_diagnosed_sleep_apnea_blank_yes_no ix_diagnosed_sleep_apnea_details ix_diagnosed_heart_stroke_or_meds_blank_yes_no ix_diagnosed_heart_stroke_or_meds_details ix_chronic_pain_and_meds_blank_yes_no ix_chronic_pain_and_meds_details ix_tmoca_score_blank_yes_no ix_tmoca_score_details ix_no_hemophilia_blank_yes_no ix_no_hemophilia_details ix_raynauds_ok_blank_yes_no ix_raynauds_ok_details ix_mi_ok_blank_yes_no ix_mi_ok_details ix_bicycle_ok_blank_yes_no ix_bicycle_ok_details
 
-      CREATE FUNCTION log_ipa_inex_checklist_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_ipa_inex_checklist_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -89,7 +89,7 @@
               END;
           $$;
 
-      CREATE TABLE ipa_inex_checklist_history (
+      CREATE TABLE IF NOT EXISTS ipa_inex_checklist_history (
           id integer NOT NULL,
           master_id integer,
           fixed_checklist_type varchar,
@@ -129,7 +129,7 @@
           ipa_inex_checklist_id integer
       );
 
-      CREATE SEQUENCE ipa_inex_checklist_history_id_seq
+      CREATE SEQUENCE IF NOT EXISTS ipa_inex_checklist_history_id_seq
           START WITH 1
           INCREMENT BY 1
           NO MINVALUE
@@ -138,7 +138,7 @@
 
       ALTER SEQUENCE ipa_inex_checklist_history_id_seq OWNED BY ipa_inex_checklist_history.id;
 
-      CREATE TABLE ipa_inex_checklists (
+      CREATE TABLE IF NOT EXISTS ipa_inex_checklists (
           id integer NOT NULL,
           master_id integer,
           fixed_checklist_type varchar,
@@ -176,7 +176,7 @@
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
       );
-      CREATE SEQUENCE ipa_inex_checklists_id_seq
+      CREATE SEQUENCE IF NOT EXISTS ipa_inex_checklists_id_seq
           START WITH 1
           INCREMENT BY 1
           NO MINVALUE
@@ -194,15 +194,15 @@
       ALTER TABLE ONLY ipa_inex_checklists
           ADD CONSTRAINT ipa_inex_checklists_pkey PRIMARY KEY (id);
 
-      CREATE INDEX index_ipa_inex_checklist_history_on_master_id ON ipa_inex_checklist_history USING btree (master_id);
+      CREATE INDEX IF NOT EXISTS index_ipa_inex_checklist_history_on_master_id ON ipa_inex_checklist_history USING btree (master_id);
 
 
-      CREATE INDEX index_ipa_inex_checklist_history_on_ipa_inex_checklist_id ON ipa_inex_checklist_history USING btree (ipa_inex_checklist_id);
-      CREATE INDEX index_ipa_inex_checklist_history_on_user_id ON ipa_inex_checklist_history USING btree (user_id);
+      CREATE INDEX IF NOT EXISTS index_ipa_inex_checklist_history_on_ipa_inex_checklist_id ON ipa_inex_checklist_history USING btree (ipa_inex_checklist_id);
+      CREATE INDEX IF NOT EXISTS index_ipa_inex_checklist_history_on_user_id ON ipa_inex_checklist_history USING btree (user_id);
 
-      CREATE INDEX index_ipa_inex_checklists_on_master_id ON ipa_inex_checklists USING btree (master_id);
+      CREATE INDEX IF NOT EXISTS index_ipa_inex_checklists_on_master_id ON ipa_inex_checklists USING btree (master_id);
 
-      CREATE INDEX index_ipa_inex_checklists_on_user_id ON ipa_inex_checklists USING btree (user_id);
+      CREATE INDEX IF NOT EXISTS index_ipa_inex_checklists_on_user_id ON ipa_inex_checklists USING btree (user_id);
 
       CREATE TRIGGER ipa_inex_checklist_history_insert AFTER INSERT ON ipa_inex_checklists FOR EACH ROW EXECUTE PROCEDURE log_ipa_inex_checklist_update();
       CREATE TRIGGER ipa_inex_checklist_history_update AFTER UPDATE ON ipa_inex_checklists FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_ipa_inex_checklist_update();

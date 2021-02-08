@@ -15,8 +15,9 @@ module AdminControllerHandler
 
   def index
     pm = filtered_primary_model
-
-    set_objects_instance pm.limited_index.order(default_index_order)
+    pm = pm.limited_index
+    pm = pm.reorder('').order(default_index_order) if default_index_order.present?
+    set_objects_instance pm
     response_to_index
   end
 

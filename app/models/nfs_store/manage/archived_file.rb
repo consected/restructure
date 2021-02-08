@@ -84,7 +84,7 @@ module NfsStore
         remove_dups = <<~END_SQL
           UPDATE nfs_store_archived_files
           SET file_name = $1
-          WHERE 
+          WHERE
           archive_file = $2 AND
           id NOT IN (
             SELECT id FROM

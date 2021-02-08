@@ -1,0 +1,12 @@
+<div class="report-details-section">
+  <label>item type name</label>
+  <p class="report-item-type">
+    <%= @report.alt_resource_name %>
+  </p>
+  <label>path to report</label>
+  <p class="report-item-type">
+    <%=link_to report_path(@report.alt_resource_name), report_path(@report.alt_resource_name), target: '_blank', class: 'report-admin-report-path-link' %>
+  </p>
+</div>
+<div class="report-config-options">
+</div>

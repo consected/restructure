@@ -18,6 +18,8 @@ _fpa = {
 
   non_versioned_template_types: ['trackers', 'player_infos', 'pro_infos', 'addresses', 'player_contacts'],
 
+  HandlebarsCompileOptions: { preventIndent: true },
+
   result_target: function (block) {
     var d = $(block).attr('data-result-target');
     if (d && d.length > 1) return d;
@@ -66,7 +68,8 @@ _fpa = {
       var id = $(this).attr('id');
 
       id = id.replace('-partial', '');
-      var fnTemplate = Handlebars.compile($(this).html());
+      console.log(Handlebars.CompileOptions);
+      var fnTemplate = Handlebars.compile($(this).html(), _fpa.HandlebarsCompileOptions);
       Handlebars.registerPartial(id, fnTemplate);
       _fpa.partials[id] = fnTemplate;
     });
@@ -75,7 +78,7 @@ _fpa = {
       $(this).addClass('compiled');
       var id = $(this).attr('id');
       var source = $(this).html();
-      _fpa.templates[id] = Handlebars.compile(source);
+      _fpa.templates[id] = Handlebars.compile(source, _fpa.HandlebarsCompileOptions);
 
     });
     $('body').removeClass('status-compiling');

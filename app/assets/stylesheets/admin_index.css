@@ -16,8 +16,11 @@
  *= require codemirror/addon/dialog/dialog
  *= require codemirror/addon/search/matchesonscrollbar
  *= require codemirror/addon/scroll/simplescrollbars
+ *= require admin/admin
  *= require admin/activity_list
  *= require admin/admin_options
+ *= require admin/server_info
+ *= require admin/report_admin
  *= require admin/z_admin_overrides
  *= require_self
  */

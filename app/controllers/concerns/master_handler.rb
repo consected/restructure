@@ -24,17 +24,20 @@ module MasterHandler
     helper_method :primary_model, :permitted_params, :edit_form_helper_prefix, :item_type_id, :object_name
   end
 
+  # Get the index JSON results from cache if the :cache_result param is set,
+  # otherwise just get the current data.
+  # Any change to the params will cause a new version to be retrieved if using cache,
+  # so simply add a parameter like :cache_version => current timestamp to force new data
   def index
-    set_objects_instance @master_objects
-    s = { objects_name => filter_records.as_json(current_user: current_user), multiple_results: objects_name }
-    s.merge!(extend_result)
-    if object_instance
-      s[:original_item] = object_instance
-      s[objects_name] <<  object_instance
-    end
-    s[:master_id] = @master.id unless primary_model.no_master_association
+    index_res = if params[:cache_result].present?
+                  Rails.cache.fetch(index_cache_key) do
+                    retrieve_index
+                  end
+                else
+                  retrieve_index
+                end
 
-    render json: s
+    render json: index_res
   end
 
   def show
@@ -124,6 +127,62 @@ module MasterHandler
 
   protected
 
+  #
+  # Retrieve the index action JSON from master objects and extended data
+  # @return [String] JSON
+  def retrieve_index
+    set_objects_instance @master_objects
+    s = { objects_name => filter_records.as_json(current_user: current_user), multiple_results: objects_name }
+    s.merge!(extend_result)
+    if object_instance
+      s[:original_item] = object_instance
+      s[objects_name] <<  object_instance
+    end
+    s[:master_id] = @master.id unless primary_model.no_master_association
+    s.to_json
+  end
+
+  #
+  # Cache key for index action, ensuring uniqueness for:
+  # - request params
+  # - app version
+  # - user
+  # - controller / action
+  # - each object instance in @master_objects:
+  #   - class / id / updated_at
+  #   - each model reference for the object instance:
+  #     - class / id / updated_at
+  # Although typically web pages would not require user specific caching, the
+  # difference user access / roles of users require cached data not to be shared
+  # between users
+  # By checking updates on object instances and the their model references, we ensure that
+  # the cache automatically gets invalidated if a change is made to any related data
+  # @return [Hash] <description>
+  def index_cache_key
+    return @index_cache_key if @index_cache_key
+
+    upd_all = []
+    upd_all << "#{Application.server_cache_version}-#{current_user&.id}-#{controller_name}-#{action_name}"
+    @master_objects.each do |m|
+      upd_all << m.class.name
+      upd_all << m.id
+      upd_all << m.updated_at
+
+      next unless m.respond_to? :model_references
+
+      m.model_references.each do |r|
+        upd_all << r.to_record_type
+        upd_all << r.to_record_id
+        upd_all << r.to_record.updated_at
+      end
+    end
+    upd_ver = Digest::SHA256.hexdigest upd_all.join('>')
+
+    @index_cache_key = params.permit!.to_h
+    @index_cache_key[:_upd_ver] = upd_ver
+    @index_cache_key
+  end
+
   # Before update and before insert triggers can lead update and create actions to return incorrect
   # values, since column values may have changed in the database at the point of #save or #update
   # being called. These changes are not reflected in the attributes of the object or embedded intem
@@ -135,10 +194,18 @@ module MasterHandler
     object_instance.embedded_item&.current_user = current_user
   end
 
+  #
+  # Name of the edit form partial
+  # @return [String]
   def edit_form
     'edit_form'
   end
 
+  #
+  # Extra local variable to be passed to the edit form partial for rendering
+  # allowing for human friendly form naming and captions
+  # The method may be overridden by actual controllers
+  # @return [Hash]
   def edit_form_extras
     dopt = object_instance.class.default_options
     if dopt
@@ -153,10 +220,16 @@ module MasterHandler
     }
   end
 
+  # Identify common helper methods for edit forms. This may be overridden
+  # in specific controller implementations, allowing for alternative helper methods
+  # to be used
   def edit_form_helper_prefix
     'common'
   end
 
+  # Details for the *_control* data item to be returned in a #show action.
+  # Provides creatable model references for the returned instance
+  # and details about the latest save action (on_save, on_create, etc...)
   def control_feedback
     res = {}
 
@@ -186,31 +259,39 @@ module MasterHandler
 
   private
 
+  #
+  # Render a plain 401 page if object doesn't allow access
   def check_showable?
     return unless object_instance
 
-    unless object_instance.allows_current_user_access_to? :access
-      not_authorized
-      nil
-    end
+    return if object_instance.allows_current_user_access_to? :access
+
+    not_authorized
+    nil
   end
 
+  #
+  # Render a plain 401 page if object doesn't allow editing
   def check_editable?
-    unless object_instance.allows_current_user_access_to? :edit
-      not_editable
-      nil
-    end
+    return if object_instance.allows_current_user_access_to? :edit
+
+    not_editable
+    nil
   end
 
+  #
+  # Render a plain 401 page if object can't be created
   def check_creatable?
-    unless object_instance.allows_current_user_access_to? :create
-      not_creatable
-      nil
-    end
+    return if object_instance.allows_current_user_access_to? :create
+
+    not_creatable
+    nil
   end
 
+  # Allow overrides
   def set_additional_attributes(obj); end
 
+  # Errors for logging
   def object_instance_errors
     object_instance.errors.map { |k, av| "#{k}: #{av}" }.join(' | ')
   end
@@ -224,14 +305,13 @@ module MasterHandler
     set_object_instance nil
   end
 
+  # Generically retrieve the current object referenced by parameter :id
+  # Store it into the @singlular_name instance variable
+  # This is the equivalent of e.g.
+  # @player_info  = PlayerInfo.find(params[:id])
+  # This allows for us to retrieve the @master consistently, so that the master association
+  # is not used repetitively (potentially breaking the current_user functionality and poor performance)
   def set_me_and_master
-    # Generically retrieve the current object referenced by parameter :id
-    # Store it into the @singlular_name instance variable
-    # This is the equivalent of e.g.
-    # @player_info  = PlayerInfo.find(params[:id])
-    # This allows for us to retrieve the @master consistently, so that the master association
-    # is not used repetitively (potentially breaking the current_user functionality and poor performance)
-
     if UseMasterParam.include?(action_name)
       @master = Master.find(params[:master_id]) unless primary_model.no_master_association
     else
@@ -256,11 +336,12 @@ module MasterHandler
     @master
   end
 
+  # Necessary to allow activity log to call permitted_params
   def set_implementation_class
-    # Necessary to allow activity log to call permitted_params
     @implementation_class = implementation_class if defined? implementation_class
   end
 
+  # Edit form fields can be preset based on permitted parameter values
   def set_fields_from_params
     p = begin
       secure_params
@@ -272,10 +353,13 @@ module MasterHandler
     end
   end
 
+  # A standard way of cancelling an edit form, reloading the show data
   def canceled?
     params[:id] == 'cancel'
   end
 
+  # Setup the instance to show, based on :id param and
+  # gets the current user set up in the master
   def set_instance_from_id
     return if canceled?
 
@@ -284,6 +368,8 @@ module MasterHandler
     @id = object_instance.id
   end
 
+  # If the :id param contains commas, split the list into an array of ids to retrieve
+  # a list of instances for a template config request
   def set_instance_list_from_id
     @id_list = params[:id].split(',')
     @instance_list = primary_model.where(id: @id_list)
@@ -291,8 +377,11 @@ module MasterHandler
   end
 
   #
-  # If an instance id is specified using a ref_to_record_id param
+  # If an instance id is specified using a :ref_to_record_id param
   # use it to set the object instance and set up the current user
+  # *ref_to_record_id* provides the functionality for an edit form to
+  # provide a drop down to select an existing instance from a list, or
+  # to add a new one as an embedded extension to the form.
   # @return [Integer] - the id of the object instance
   def set_instance_from_reference_id
     return if canceled? || params[:ref_to_record_id].blank?
@@ -306,6 +395,8 @@ module MasterHandler
     @id = @set_from_reference_id = object_instance.id
   end
 
+  # #new and #create actions build a new instance on the current master
+  # This method simple sets this up consistently
   def set_instance_from_build
     return if @set_from_reference_id
 
@@ -322,6 +413,10 @@ module MasterHandler
     object_instance.item_id = @item_id if @item && object_instance.respond_to?(:item_id) && !object_instance.item_id
   end
 
+  #
+  # Set the instance variable specific to the request, so we have both the
+  # @object_instance and a usefully named instance variable (such as @player_contact)
+  # to represent the action's instance
   def set_object_instance(o)
     instance_variable_set("@#{object_name}", o)
 
@@ -332,35 +427,45 @@ module MasterHandler
     end
   end
 
+  #
+  # Set a usefully named instance variable for the objects, representing
+  # a list of results rather than a single instance
   def set_objects_instance(o)
     instance_variable_set("@#{objects_name}", o)
   end
 
-  # This is not used: def object_instance=(o)
-  # ... since it requires self. prefix to make it work in controller, and is
-  # therefore more confusing than helpful
-
+  #
+  # A consistent name to access the current object instance in forms and partials
   def object_instance
     instance_variable_get("@#{object_name}")
   end
 
+  #
+  # A consistent name to access the current list of instances in partials
+  # using multiple results
   def objects_instance
     instance_variable_get("@#{objects_name}")
   end
 
+  #
+  # Handle the presentation of item flags, if enabled for this type of object
   def prep_item_flags
-    # Handle the presentation of item flags, if enabled for this type of object
-    if object_instance.class.uses_item_flags?(current_user)
-      @flag_item_type = object_instance.item_type
-      @item_flag = object_instance.item_flags.build
-    end
+    return unless object_instance.class.uses_item_flags?(current_user)
+
+    @flag_item_type = object_instance.item_type
+    @item_flag = object_instance.item_flags.build
   end
 
+  #
+  # #create and #update actions require additional updates to be performed.
+  # This:
+  # - sets up flags changed during new / edit
+  # - creates a model reference for an embedded item form
   def handle_additional_updates
     @flag_item_type = object_instance.item_type
     # Check for blank item_flag param to cover testing scenarios that do not return
     # the item_flag set. Which is reasonable and conceivable in a real form too
-    if ItemFlag.active_for?(@flag_item_type) && params[:item_flag]
+    if ItemFlag.active_for?(@flag_item_type) && params[:item_flag].present?
       secure_item_flag_params = params.require(:item_flag).permit(item_flag_name_id: [])
       flag_list = secure_item_flag_params[:item_flag_name_id].reject(&:blank?).map(&:to_i)
       ItemFlag.set_flags flag_list, object_instance, current_user
@@ -373,21 +478,26 @@ module MasterHandler
     true
   end
 
+  #
+  # Items may be referenced in create and update forms, adding or updating embedded items
+  # The params :ref_record_type and :ref_record_id  identify the type and id of the record
+  # being referred to.
   def capture_ref_item
-    # Follow the pattern of the tracker to capture referenced items
     # The submitted item has hidden fields that state the 'from' item referencing this object instance
-    pr = params[full_object_name.gsub('__', '_').to_sym]
-    if pr.present?
-      ref_record_type = pr[:ref_record_type]
-      ref_record_id = pr[:ref_record_id]
-      if ref_record_type.present? && ref_record_id.present? && object_instance.respond_to?(:set_referring_record)
+    pr = params[primary_params_name]
+    return unless pr.present?
 
-        object_instance.set_referring_record(ref_record_type, ref_record_id, current_user)
-        # The reference will actually get created when the object instance is saved
-      end
+    ref_record_type = pr[:ref_record_type]
+    ref_record_id = pr[:ref_record_id]
+    unless ref_record_type.present? && ref_record_id.present? && object_instance.respond_to?(:set_referring_record)
+      return
     end
+
+    # The reference will actually get created when the object instance is saved
+    object_instance.set_referring_record(ref_record_type, ref_record_id, current_user)
   end
 
+  #
   # For instances being used in a new action, set the referring record so it can be used in calc actions
   def set_ref_item_for_new
     ref_params = params[:references]
@@ -395,11 +505,12 @@ module MasterHandler
       ref_record_type = ref_params[:record_type]
       ref_record_id = ref_params[:record_id]
     end
-    if ref_record_type.present? && ref_record_id.present? && object_instance.respond_to?(:set_referring_record)
-
-      object_instance.set_referring_record(ref_record_type, ref_record_id, current_user)
-      # The reference will actually get created when the object instance is saved
+    unless ref_record_type.present? && ref_record_id.present? && object_instance.respond_to?(:set_referring_record)
+      return
     end
+
+    # The reference will actually get created when the object instance is saved
+    object_instance.set_referring_record(ref_record_type, ref_record_id, current_user)
   end
 
   # Overridable method for filtering objects based on the request,
@@ -443,18 +554,21 @@ module MasterHandler
     end
   end
 
+  #
+  # Allow #index results to be extended by overriding this method
   def extend_result
     {}
   end
 
+  #
+  # Get the permitted params from the implementation class
   def permitted_params
-    full_object_name.gsub('__', '/').camelize.constantize.permitted_params
+    primary_model.permitted_params
   end
 
   def readonly_params
-    c = full_object_name.gsub('__', '/').camelize.constantize
-    if c.respond_to? :readonly_params
-      c.readonly_params
+    if primary_model.respond_to? :readonly_params
+      primary_model.readonly_params
     else
       []
     end

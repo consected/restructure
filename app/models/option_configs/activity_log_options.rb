@@ -51,7 +51,8 @@ module OptionConfigs
             prevent_disable: 'true|false (default = false) OR reference',
             allow_disable_if_not_editable: 'true|false (default = false) OR reference',
             also_disable_record: 'when disabled, also disable the referenced record',
-            creatable_if: 'conditional rules',
+            showable_if: 'will use this definition to decide whether to show, in the same way as showable_if at the base level works',
+            creatable_if: 'will use this definition to decide if a reference can be created, in the same way as creatable_if at the base level works',
             type_config: {
               activity_selector: {
                 an_activity_name: 'Activity Label',

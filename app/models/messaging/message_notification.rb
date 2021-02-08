@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 module Messaging
+  #
+  # Used to record messages sent to users and external emails / SMS numbers. Currently also handles
+  # the sending of the messages, which probably needs to be split out in the future.
+  # This class needs some TLC
+  # @todo refactor to make the role of this class clear
   class MessageNotification < ActiveRecord::Base
     # Set the max number of recipients for a message, to avoid an unexpected nasty error spamming the whole organization
     MaxRecipients = 20
@@ -162,7 +167,14 @@ module Messaging
       res
     end
 
+    #
     # Process this Messaging::MessageNotification record
+    # This method is used by standard transaction messaging notification in the app,
+    # and for bulk SMS sending. It has become big a hairy and requires careful refactoring.
+    # The best approach may be to separate out bulk SMS from regular messaging,
+    # so the risk of changes becomes limited to one area.
+    # For now it is functional, but not something to be extended.
+    # @todo refactor this method
     def handle_notification_now(logger: Rails.logger, for_item: nil, on_complete_config: {})
       logger.info "Handling item #{id}"
       update! status: StatusInProgress
@@ -252,6 +264,8 @@ module Messaging
       # end
     end
 
+    #
+    # Send an email or SMS as appropriate
     def generate_and_send(recipient_sms_numbers: nil)
       generate
 

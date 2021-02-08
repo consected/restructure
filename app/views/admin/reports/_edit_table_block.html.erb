@@ -1,0 +1,18 @@
+<p><a href="#edit_table_block" class="collapsed btn btn-default" data-toggle="collapse"><span class="caret"></span> Edit table data?</a>  </p>
+<div class="collapse well" id="edit_table_block">
+  <div class="help-block">
+    <p>Entering an edit table name enables data editing for this report. Users authorized to edit report data can edit rows in a report, when viewed as a table.</p>
+  </div>
+  <div class="form-group">
+    <%= f.label :table_name, 'data-add-icon' => 'info-sign', title: 'To allow a report\'s data to be editable, enter the table name to be edited. Note: the first column in the report will be used as the identifier for the table row.' %>
+    <%= f.text_field :edit_model, class: "form-control"%>
+  </div>
+  <div class="form-group">
+    <%= f.label :editable_field_names, 'data-add-icon' => 'info-sign', title: 'Comma or space separated list of field names to make available for editing' %>
+    <%= f.text_field :edit_field_names, class: "form-control"%>
+  </div>
+  <div class="form-group">
+    <%= f.label :fields_to_display_as_selection_drop_down, 'data-add-icon' => 'info-sign', title: 'The names of any fields that should be entered with a drop down (defined in General Selections)' %>
+    <%= f.text_field :selection_fields, class: "form-control"%>
+  </div>
+</div>

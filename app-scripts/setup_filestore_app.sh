@@ -12,8 +12,8 @@ fi
 if [ -z "$MOUNTPOINT" ]; then
   if [ "$RAILS_ENV" == 'production' ]; then
     MOUNTPOINT=/efs1
-  elif [ "$USER" == 'phil' ]; then
-    MOUNTPOINT=/media/phil/Data
+  elif [ -d /media/$USER/Data ]; then
+    MOUNTPOINT=/media/$USER/Data
   else
     MOUNTPOINT=/home/$USER/dev-filestore
   fi
@@ -26,9 +26,14 @@ if [ -z "${SUBDIR}" ]; then
   read -p 'Enter the selected directory: ' SUBDIR
 fi
 
-
 FS_ROOT=${MOUNTPOINT}/${SUBDIR}
-# FS_DIR=main
+
+if [ -d $FS_ROOT/main ]; then
+  FS_DIR=main
+else
+  FS_DIR=''
+fi
+
 APPTYPE_DIR=app-type-${APP_TYPE_ID}
 
 cd $FS_ROOT/$FS_DIR

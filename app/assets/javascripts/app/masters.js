@@ -77,7 +77,7 @@ _fpa.masters = {
                     // a valid button click
                     window.setTimeout(function () {
                         if (!_fpa.state.search_running) {
-                            var bel = f.find('input[type="submit"].auto-submitter');
+                            var bel = f.find('[type="submit"].auto-submitter');
                             if (bel.length > 0) {
                                 bel.click();
                                 _fpa.state.search_running = true;
@@ -94,7 +94,7 @@ _fpa.masters = {
             // be a data-only-for field
             f.find('input.tt-input').not('.attached-change').on('blur', function (e) {
                 window.setTimeout(function () {
-                    f.find('input[type="submit"].auto-submitter').click();
+                    f.find('[type="submit"].auto-submitter').click();
                 }, 1);
             }).addClass('attached-change');
 
@@ -113,8 +113,16 @@ _fpa.masters = {
                 // For the report forms, set the 'part' to return appropriate results
                 f.find('input[name="part"]').val(dov ? '' : 'results');
 
-                if (dov)
+                if (dov) {
                     $('#master_results_block').html('<h3 class="text-center">Exported ' + v + '</h3>');
+
+                    // UJS disables the buttons, but only ajax responses re-enable them.
+                    // For csv and json export requests, re-enable by hand
+                    window.setTimeout(function () {
+                        console.log('here')
+                        f.find('input[type="submit"][disabled], button[type="submit"][disabled]').attr('disabled', null).prop('disabled', null);
+                    }, 1500);
+                }
             });
         }).on('keypress', function (e) {
             // On any keypress inside a form, cancel an existing ajax search, since the user is probably doing something else
@@ -210,7 +218,7 @@ _fpa.loaded.masters = function () {
             if ($('#search-action').html() != ('MSID')) {
                 // Prevent an auto run report if the page is refreshing with a requested master or result set
                 if (!$('#master-search-accordion').hasClass('loading-results')) {
-                    panel.find('input[type="submit"].auto-run').click();
+                    panel.find('[type="submit"].auto-run').click();
                 }
             }
         }
@@ -222,7 +230,7 @@ _fpa.loaded.masters = function () {
             $('.search_count_reports').html(h);
             // Prevent an auto run report if the page is refreshing with a requested master or result set
             if (!$('#master-search-accordion').hasClass('loading-results')) {
-                $(this).find('input[type="submit"].auto-run').click();
+                $(this).find('[type="submit"].auto-run').click();
             }
         });
 

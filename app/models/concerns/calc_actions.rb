@@ -27,35 +27,35 @@ module CalcActions
 
   include FieldDefaults
 
+  # We won't use a query join when referring to tables based on these keys
+  NonJoinTableNames = %i[this parent referring_record top_referring_record this_references parent_references
+                         parent_or_this_references user master condition value hide_error role_name reference].freeze
+  NonQueryTableNames = %i[this user parent referring_record top_referring_record role_name reference].freeze
+  NonQueryNestedKeyNames = %i[this referring_record top_referring_record this_references parent_references
+                              parent_or_this_references reference validate].freeze
+
+  SelectionTypes = %i[all any not_all not_any].freeze
+
+  BoolTypeString = '__!BOOL__'
+
+  UnaryConditions = ['IS NOT NULL', 'IS NULL'].freeze
+  BinaryConditions = ['=', '<', '>', '<>', '<=', '>=', 'LIKE', '~'].freeze
+  ValidExtraConditions = (BinaryConditions + UnaryConditions).freeze
+  ValidExtraConditionsArrays = [
+    '= ANY', # The value of this field (must be scalar) matches any value from the retrieved array field
+    '<> ANY', # The value of this field (must be scalar) must not match any value from the retrieved array field
+    '= ARRAY_LENGTH', # The value of this field (must be integer) equals the length of the retrieved array field
+    '<> ARRAY_LENGTH', # The value of this field (must be integer) must not equal length of the retrieved array field
+    '= LENGTH', # The value of this field (must be integer) equals the length of the string (varchar or text) field
+    '<> LENGTH', # The value of this field (must be integer) must not equal length of the string (varchar/text) field
+    '&&', # There is an overlap, so any value of this field (an array) must be in the retrieved array field
+    '@>', # This array field contains all of the elements of the retrieved array field
+    '<@' # This array field's elements are all found in the retrieved array field
+  ].freeze
+
+  ReturnTypes = %w[return_value return_value_list return_result].freeze
+
   included do
-    # We won't use a query join when referring to tables based on these keys
-    NonJoinTableNames = %i[this parent referring_record top_referring_record this_references parent_references
-                           parent_or_this_references user master condition value hide_error role_name].freeze
-    NonQueryTableNames = %i[this user parent referring_record top_referring_record role_name].freeze
-    NonQueryNestedKeyNames = %i[this referring_record top_referring_record this_references parent_references
-                                parent_or_this_references validate].freeze
-
-    SelectionTypes = %i[all any not_all not_any].freeze
-
-    BoolTypeString = '__!BOOL__'
-
-    UnaryConditions = ['IS NOT NULL', 'IS NULL'].freeze
-    BinaryConditions = ['=', '<', '>', '<>', '<=', '>=', 'LIKE', '~'].freeze
-    ValidExtraConditions = (BinaryConditions + UnaryConditions).freeze
-    ValidExtraConditionsArrays = [
-      '= ANY', # The value of this field (must be scalar) matches any value from the retrieved array field
-      '<> ANY', # The value of this field (must be scalar) must not match any value from the retrieved array field
-      '= ARRAY_LENGTH', # The value of this field (must be integer) equals the length of the retrieved array field
-      '<> ARRAY_LENGTH', # The value of this field (must be integer) must not equal length of the retrieved array field
-      '= LENGTH', # The value of this field (must be integer) equals the length of the string (varchar or text) field
-      '<> LENGTH', # The value of this field (must be integer) must not equal length of the string (varchar/text) field
-      '&&', # There is an overlap, so any value of this field (an array) must be in the retrieved array field
-      '@>', # This array field contains all of the elements of the retrieved array field
-      '<@' # This array field's elements are all found in the retrieved array field
-    ].freeze
-
-    ReturnTypes = ['return_value', 'return_value_list', 'return_result'].freeze
-
     attr_accessor :condition_scope, :this_val
   end
 
@@ -308,10 +308,11 @@ module CalcActions
     return unless return_failures && !@skip_merge
 
     results.first.last.each do |t, res|
-      if res.is_a?(Hash) && res.first.last && res.first.last.first.first == :validate
-        field = res.first.first
-        results.first.last[t] = { field => new_validator(res.first.last[:validate].first.first, nil, options: {}).message }
-      end
+      next unless res.is_a?(Hash) && res.first.last && res.first.last.first.first == :validate
+
+      field = res.first.first
+      results.first.last[t] =
+        { field => new_validator(res.first.last[:validate].first.first, nil, options: {}).message }
     end
     return_failures.deep_merge!(results)
   end
@@ -429,20 +430,23 @@ module CalcActions
       end
 
       #### If we have a non-query table specified
-      if table.in?(%i[this parent referring_record top_referring_record]) ||
+      if table.in?(%i[this parent referring_record top_referring_record reference]) ||
          (table == :user && field_name != :role_name)
 
         # Pick the instance we are referring to
-        if table == :this
+        case table
+        when :this
           in_instance = current_instance
-        elsif table == :user
+        when :user
           in_instance = @current_instance.master.current_user
-        elsif table == :parent
+        when :parent
           in_instance = current_instance.parent_item
-        elsif table == :referring_record
+        when :referring_record
           in_instance = current_instance.referring_record
-        elsif table == :top_referring_record
+        when :top_referring_record
           in_instance = current_instance.top_referring_record
+        when :reference
+          in_instance = current_instance.reference
         end
 
         if field_name == :exists
@@ -454,68 +458,66 @@ module CalcActions
         elsif !in_instance
           # We failed to find the instance we need to continue.
           raise FphsException, "Instance not found for #{table}"
-        else
+        elsif expected_val.is_a?(Hash)
 
-          if expected_val.is_a?(Hash)
-            ## An expected value hash may mean several things, including
-            # field (not just equals) conditions, validations and nested conditions
+          if expected_val[:condition]
+            assoc_name = ModelReference.record_type_to_assoc_sym(in_instance)
+            expected_val = { assoc_name => { field_name => expected_val, id: in_instance.id } }
+            field_name = :all
+          end
 
-            # If this is a field condition (something other than equals), set it up to be calculated
-            # Generate a query that references the in_instance object through its association,
-            # specifying the id as an expected value, plus the condition to be calculated within the query
-            # This forces us to run this as a nested condition.
-            if expected_val[:condition]
-              assoc_name = ModelReference.record_type_to_ns_table_name(in_instance).pluralize.to_sym
-              expected_val = { assoc_name => { field_name => expected_val, id: in_instance.id } }
-              field_name = :all
-            end
+          if is_selection_type field_name
+            #### Handle a Nested Condition
+            # If we have the field name key being all, any, etc, then run the nested conditions
+            # with the current condition scope
+            ca = ConditionalActions.new({ field_name => expected_val }, in_instance,
+                                        current_scope: @condition_scope, return_failures: return_failures)
+            res &&= ca.calc_action_if
 
-            if is_selection_type field_name
-              #### Handle a Nested Condition
-              # If we have the field name key being all, any, etc, then run the nested conditions
-              # with the current condition scope
-              ca = ConditionalActions.new({ field_name => expected_val }, in_instance, current_scope: @condition_scope, return_failures: return_failures)
-              res &&= ca.calc_action_if
+            # Handle a return value if one was not already set
+            @this_val ||= ca.this_val
+            @skip_merge = true
 
-              # Handle a return value if one was not already set
-              @this_val ||= ca.this_val
-              @skip_merge = true
-
-            elsif expected_val.keys.first == :validate
-              #### Handle validate
-              # take the validate definition and calculate the result
-              res &&= calc_complex_validation expected_val[:validate], in_instance.attributes[field_name.to_s]
-
-            else
-              #### Something was wrong in the definition
-              raise FphsException, <<~ERROR_MSG
-                calc_non_query_condition field is not a selection type or :validate hash. Ensure you have an all, any, not_any, not_all before all nested expressions.
-
-                #{@condition_config.to_yaml}
-              ERROR_MSG
-            end
+          elsif expected_val.keys.first == :validate
+            #### Handle validate
+            # take the validate definition and calculate the result
+            res &&= calc_complex_validation expected_val[:validate], in_instance.attributes[field_name.to_s]
 
           else
-            ## The expected value was not a hash.
-            # Simply handle the comparison, and return a value or result instance if requested
+            #### Something was wrong in the definition
+            raise FphsException, <<~ERROR_MSG
+              calc_non_query_condition field is not a selection type or :validate hash. Ensure you have an all, any, not_any, not_all before all nested expressions.
 
-            # Get the value
-            this_val = in_instance.attributes[field_name.to_s]
-            res &&= if expected_val.is_a? Array
-                      # Since we have expected value as an array, simply see if it includes the value we found
-                      expected_val.include?(this_val)
-                    else
-                      # Simply compare the expected value against the one we found
-                      this_val == expected_val
-                    end
+              #{@condition_config.to_yaml}
+            ERROR_MSG
+          end
+        ## An expected value hash may mean several things, including
+        # field (not just equals) conditions, validations and nested conditions
 
-            # Handle return value or result
-            if expected_value_requests_return? :value, expected_val
-              @this_val = this_val
-            elsif expected_value_requests_return? :result, expected_val
-              @this_val = in_instance
-            end
+        # If this is a field condition (something other than equals), set it up to be calculated
+        # Generate a query that references the in_instance object through its association,
+        # specifying the id as an expected value, plus the condition to be calculated within the query
+        # This forces us to run this as a nested condition.
 
+        else
+          ## The expected value was not a hash.
+          # Simply handle the comparison, and return a value or result instance if requested
+
+          # Get the value
+          this_val = in_instance.attributes[field_name.to_s]
+          res &&= if expected_val.is_a? Array
+                    # Since we have expected value as an array, simply see if it includes the value we found
+                    expected_val.include?(this_val)
+                  else
+                    # Simply compare the expected value against the one we found
+                    this_val == expected_val
+                  end
+
+          # Handle return value or result
+          if expected_value_requests_return? :value, expected_val
+            @this_val = this_val
+          elsif expected_value_requests_return? :result, expected_val
+            @this_val = in_instance
           end
 
         end
@@ -614,17 +616,26 @@ module CalcActions
       from_instance = @current_instance.top_referring_record
       val = from_instance && attribute_from_instance(from_instance, val_item_value)
 
+    elsif val_item_key == :reference && !val_item_value.is_a?(Hash)
+      # Get a literal value from the current instance's reference,
+      # the current to_record in a model reference iteration.
+      # If no reference exists, the result is nil
+      from_instance = @current_instance.reference
+      val = from_instance && attribute_from_instance(from_instance, val_item_value)
+
     elsif val_item_key.in? %i[this_references parent_references parent_or_this_references]
       # Get possible values from records referenced by this instance, or this instance's referring record (parent)
 
-      if val_item_key == :this_references
+      case val_item_key
+      when :this_references
         # Identify all records this instance references
         from_instance = @current_instance
-      elsif val_item_key == :parent_references
+      when :parent_references
         # Identify all records this instance's referrring record (parent) references
         from_instance = @current_instance.referring_record
-      elsif val_item_key == :parent_or_this_references
-        # Identify all records this instance's referrring record (parent) references, or if there is no parent, this record references
+      when :parent_or_this_references
+        # Identify all records this instance's referrring record (parent) references,
+        # or if there is no parent, this record references
         from_instance = @current_instance.referring_record || @current_instance
       end
 
@@ -792,16 +803,10 @@ module CalcActions
 
     end
 
-    unless condition_type
-      # We did not have a non-equals condition type specified.
-      # Just add a condition value for the query, except if the expected value is requesting a return, with "return_*"
-      # (not return_* in an array though, since this is part of an IN statement)
-      unless val.in?(ReturnTypes)
-        @condition_values[table_name] ||= {}
-        val = val.reject { |r| r.in?(ReturnTypes) } if val.is_a?(Array)
-        @condition_values[table_name][field_name] = dynamic_value(val)
-      end
-
+    if !condition_type && !val.in?(ReturnTypes)
+      @condition_values[table_name] ||= {}
+      val = val.reject { |r| r.in?(ReturnTypes) } if val.is_a?(Array)
+      @condition_values[table_name][field_name] = dynamic_value(val)
     end
   end
 
@@ -928,7 +933,8 @@ module CalcActions
       st = is_selection_type c_type
       next unless st
 
-      ca = ConditionalActions.new({ c_type => t_conds }, current_instance, current_scope: @condition_scope, return_failures: return_failures)
+      ca = ConditionalActions.new({ c_type => t_conds }, current_instance, current_scope: @condition_scope,
+                                                                           return_failures: return_failures)
       res_a = ca.calc_action_if
 
       if return_first_false

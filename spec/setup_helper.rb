@@ -22,39 +22,45 @@ module SetupHelper
   end
 
   def self.setup_app_dbs
-    return if ActiveRecord::Base.connection.table_exists?('adders')
-
     puts 'Setup app DBs'
 
-    # ESign setup
-    # Setup the triggers, functions, etc
-    sql_files = %w[create_al_table.sql create_ipa_inex_checklist_table.sql]
-    sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'test_esign_sql')
-    SetupHelper.setup_app_db sql_source_dir, sql_files
+    unless ActiveRecord::Base.connection.table_exists?('ipa_inex_checklists')
+      # ESign setup
+      # Setup the triggers, functions, etc
+      sql_files = %w[create_al_table.sql create_ipa_inex_checklist_table.sql]
+      sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'test_esign_sql')
+      SetupHelper.setup_app_db sql_source_dir, sql_files
+    end
 
-    # ExportApp
-    sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql
-                   3-add_notification_triggers.sql 4-add_testmybrain_trigger.sql 5-create_sync_subject_data_aws_db.sql
-                   6-grant_roles_access_to_ml_app.sql]
-    sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'bhs_sql')
-    SetupHelper.setup_app_db sql_source_dir, sql_files
+    unless ActiveRecord::Base.connection.table_exists?('bhs_assignments')
+      # ExportApp
+      sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql
+                     3-add_notification_triggers.sql 4-add_testmybrain_trigger.sql 5-create_sync_subject_data_aws_db.sql
+                     6-grant_roles_access_to_ml_app.sql]
+      sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'bhs_sql')
+      SetupHelper.setup_app_db sql_source_dir, sql_files
+    end
 
-    # Export App
-    sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql
-                   6-grant_roles_access_to_ml_app.sql create_adders_table.sql]
-    sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_tests_sql')
-    SetupHelper.setup_app_db sql_source_dir, sql_files
+    unless ActiveRecord::Base.connection.table_exists?('adders')
+      # Export App
+      sql_files = %w[1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql
+                     6-grant_roles_access_to_ml_app.sql create_adders_table.sql]
+      sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_tests_sql')
+      SetupHelper.setup_app_db sql_source_dir, sql_files
+    end
 
-    # Bulk
-    # Setup the triggers, functions, etc
-    sql_files = %w[test/drop_schema.sql test/create_schema.sql
-                   bulk/create_zeus_bulk_messages_table.sql bulk/dup_check_recipients.sql
-                   bulk/create_zeus_bulk_message_recipients_table.sql bulk/create_al_bulk_messages.sql
-                   bulk/create_zeus_bulk_message_statuses.sql bulk/setup_master.sql bulk/create_zeus_short_links.sql
-                   bulk/create_player_contact_phone_infos.sql
-                   bulk/create_zeus_short_link_clicks.sql 0-scripts/z_grant_roles.sql]
-    sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'bulk_msg_sql')
-    SetupHelper.setup_app_db sql_source_dir, sql_files
+    unless ActiveRecord::Base.connection.table_exists?('zeus_bulk_message_statuses')
+      # Bulk
+      # Setup the triggers, functions, etc
+      sql_files = %w[test/drop_schema.sql test/create_schema.sql
+                     bulk/create_zeus_bulk_messages_table.sql bulk/dup_check_recipients.sql
+                     bulk/create_zeus_bulk_message_recipients_table.sql bulk/create_al_bulk_messages.sql
+                     bulk/create_zeus_bulk_message_statuses.sql bulk/setup_master.sql bulk/create_zeus_short_links.sql
+                     bulk/create_player_contact_phone_infos.sql
+                     bulk/create_zeus_short_link_clicks.sql 0-scripts/z_grant_roles.sql]
+      sql_source_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'bulk_msg_sql')
+      SetupHelper.setup_app_db sql_source_dir, sql_files
+    end
   end
 
   def self.validate_db_setup
@@ -69,23 +75,20 @@ module SetupHelper
     raise "Database #{db_name} does not have role fphsetl set up" unless res == 1
   end
 
-  # Setup the byebug service if breakpoints are set in the .byebugrc file
-  # if not, just skip it
-  def self.setup_byebug
-    bbrc = Rails.root.join('.byebugrc')
-    init_bb = false
-    if File.exist?(bbrc)
-      fbb = File.read(bbrc)
-      init_bb = !!fbb.index(/^b /)
-    end
+  def self.migrate_if_needed
+    puts 'Check migrations'
 
-    if ENV['BYEBUG'] == 'true'
-      puts "Running Remote Byebug server.\nTo connect, run:\n   byebug -R localhost:8099"
-      require 'byebug/core'
-      Byebug.wait_connection = true
-      Byebug.start_server('localhost', 8099)
-    end
-    byebug if init_bb
+    # Outside the current transaction
+    Thread.new do
+      ActiveRecord::Base.connection_pool.with_connection do
+        dirname = 'db/migrations'
+        mc = ActiveRecord::MigrationContext.new(dirname)
+        if mc.needs_migration?
+          puts 'Running migrations'
+          mc.migrate
+        end
+      end
+    end.join
   end
 
   def self.reload_configs

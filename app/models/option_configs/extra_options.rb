@@ -5,6 +5,8 @@ module OptionConfigs
   # Consider this an abstract class to be subclassed by any dynamic options provider
   # class.
   class ExtraOptions < BaseOptions
+    ValidCalcIfKeys = %i[showable_if editable_if creatable_if add_reference_if].freeze
+
     def self.base_key_attributes
       %i[
         name label config_obj caption_before show_if resource_name save_action view_options
@@ -470,56 +472,48 @@ module OptionConfigs
       false
     end
 
-    def calc_creatable_if(obj)
-      Rails.logger.debug "Checking calc_creatable_if on #{obj} with #{self.creatable_if}"
-      ca = ConditionalActions.new self.creatable_if, obj
-      ca.calc_action_if
-    end
+    #
+    # Check within the :references configuration for a *_if definition specified by the key argument
+    # If it doesn't exist, return true, otherwise evaluate it and return the result
+    # @param [Hash] ref_config - the references configuration from the extra options definition
+    # @param [Symbol] key - a key such as :showable_if, :creatable_if within the references definition
+    # @param [UserBase] obj - object to test against
+    # @param [Boolean] default_if_no_config - the default value to return if no references
+    #                                         configuration is defined for this key
+    # @return [Boolean | Object] ConditionalAction#calc_action_if result
+    def calc_reference_if(ref_config, key, obj, default_if_no_config: false)
+      ci = ref_config[key]
+      return default_if_no_config unless ci
 
-    def calc_reference_creatable_if(ref_config, obj)
-      ci = ref_config[:creatable_if]
-      return true unless ci
-
-      Rails.logger.debug "Checking calc_reference_creatable_if on #{obj} with #{ci}"
+      Rails.logger.debug "Checking calc_reference_if with #{key} on #{obj} with #{ci}"
       ca = ConditionalActions.new ci, obj
       ca.calc_action_if
     end
 
-    def calc_reference_prevent_disable_if(ref_config, obj)
-      ci = ref_config[:prevent_disable]
-      return false unless ci
+    #
+    # Handle a calc_action_if evaluation for a base definition in the extra options configuration.
+    # A base definition is one of the valid types specified in *ValidCalcIfKeys*, and
+    # is something like :editable_if, :showable_if
+    # @param [Symbol] key - onto the base level *_if config to check
+    # @param [<Type>] obj - object to test against
+    # @return [Boolean | Object] ConditionalAction#calc_action_if result
+    def calc_if(key, obj)
+      raise FphsException, "invalid calc_if key #{key}" unless key.in?(ValidCalcIfKeys)
 
-      Rails.logger.debug "Checking calc_reference_prevent_disable_if on #{obj} with #{ci}"
-      ca = ConditionalActions.new ci, obj
+      config = send(key)
+
+      Rails.logger.debug "Checking calc_if with #{key} on #{obj} with #{config}"
+      ca = ConditionalActions.new config, obj
       ca.calc_action_if
     end
 
-    def calc_reference_allow_disable_if_not_editable_if(ref_config, obj)
-      ci = ref_config[:allow_disable_if_not_editable]
-      return false unless ci
-
-      Rails.logger.debug "Checking calc_reference_allow_disable_if_not_editable_if on #{obj} with #{ci}"
-      ca = ConditionalActions.new ci, obj
-      ca.calc_action_if
-    end
-
-    def calc_editable_if(obj)
-      Rails.logger.debug "Checking calc_editable_if on #{obj} with #{self.editable_if}"
-      ca = ConditionalActions.new self.editable_if, obj
-      ca.calc_action_if
-    end
-
-    def calc_add_reference_if(obj)
-      Rails.logger.debug "Checking calc_add_reference_if on #{obj} with #{add_reference_if}"
-      ca = ConditionalActions.new add_reference_if, obj
-      ca.calc_action_if
-    end
-
-    def calc_showable_if(obj)
-      ca = ConditionalActions.new self.showable_if, obj
-      ca.calc_action_if
-    end
-
+    #
+    # Evaluate the result of the *valid_if* configuration, based on the latest
+    # values for the instance (and its embedded item if there is one)
+    # @param [String] action_type - the action being performed: create, update or save
+    # @param [UserBase] obj - the current instance
+    # @param [Hash] return_failures - a hash to receive field-level failures from evaluation
+    # @return [truthy] truthy if valid
     def calc_valid_if(action_type, obj, return_failures: nil)
       unless action_type.to_s.in?(%w[create update save])
         raise FphsException, "incorrect action type requested in calc_valid_if #{action_type}"
@@ -533,6 +527,10 @@ module OptionConfigs
 
     def self.set_defaults(config_obj, all_options = {}); end
 
+    #
+    # Inject config libraries into the provided content
+    # @param [String] content_to_update (will not be updated)
+    # @return [String] updated content
     def self.include_libraries(content_to_update)
       content_to_update = content_to_update.dup
       reg = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/

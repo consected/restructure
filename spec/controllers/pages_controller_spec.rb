@@ -20,7 +20,7 @@ RSpec.describe PagesController, type: :controller do
 
     it 'redirects to search page' do
       get :index, params: {}
-      expect(response).to redirect_to '/masters'
+      expect(response).to redirect_to '/masters/search'
     end
   end
 end

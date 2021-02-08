@@ -30,10 +30,8 @@
 
   current_definition = implementation_class.definition
 %>
-
 <% if current_user.has_access_to?(:access, :table, full_name.pluralize) %>
-
-<%= render partial: 'common_templates/search_results_template', locals: {
+  <%= render partial: 'common_templates/search_results_template', locals: {
     def_version: def_version,
     name: main_log_full_name,
     model_data_type: :activity_log,
@@ -63,8 +61,7 @@
     view_options: primary_options.view_options,
     extra_data_attribs: [:extra_log_type]
   } %>
-
-<%= render partial: 'common_templates/search_results_template', locals: {
+  <%= render partial: 'common_templates/search_results_template', locals: {
     def_version: def_version,
     name: blank_log_full_name,
     model_data_type: :activity_log,
@@ -94,17 +91,14 @@
     view_options: blank_options.view_options,
     extra_data_attribs: [:extra_log_type]
   } %>
-
-<% option_configs.each do |option_type_config|
+  <% option_configs.each do |option_type_config|
     mapped_vars = OptionConfigs::TemplateOptionMapping.activity_log_mapping(def_record, option_type_config, current_user)
 %>
   <%= render partial: 'common_templates/search_results_template', locals: mapped_vars %>
 <% end %>
-
-
 <script id="sub_list_<%=item_type_name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#was _created}}<div class="panel index-{{_created}} sub-list-item activity-log--<%=item_type_name_hyphenated%>-type" id="activity-log-<%=item_type_name_hyphenated%>-sub-list-{{master_id}}-{{id}}" data-template="sub-list-<%=item_type_name_hyphenated%>-result-template" data-sub-item="<%=item_type%>" data-sub-id="{{id}}" data-sort-desc="data-item-rank" data-preprocessor="<%=item_type%>_edit_form">{{/was}}
-
+  
     <ul class="list-group" data-item-id="{{id}}" data-item-rank="{{rank}}">
       <li class="list-group-item sub-list-data">
         <i class="glyphicon glyphicon-phone"></i>
@@ -116,20 +110,17 @@
           {{> activity_logs_<%=item_type_name%>_actions item_id=id}}
       </li>
     </ul>
-
+  
   {{#was _created}}</div>{{/was}}
 </script>
-
 <script id="sub-list-<%=item_type_name_hyphenated%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with <%=item_type%>}}
       {{>sub_list_<%=item_type_name%>_result}}
   {{/with}}
 </script>
-
 <script id="activity_logs_<%=item_type_name%>_actions_block" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{> activity_logs_<%=item_type_name%>_actions item_id=item_id}}
 </script>
-
 <script id="activity_logs_<%=item_type_name%>_actions-partial" type="text/x-handlebars-template" class="hidden handlebars-partial handlebars-template">
   <% unless prevent_create  || !current_user.has_access_to?(:create, :activity_log_type, current_definition.option_type_config_for(:primary).resource_name)%>
   <span id="activity-log-{{master_id}}-initial-action" class="al-initial-action-container" >
@@ -139,14 +130,13 @@
    </span>
    <% end %>
 </script>
-
 <%
   # Template for page layout resource results. A plain list without activity log controls.
 %>
 <script id="activity-log--<%=item_type_name_hyphenated.pluralize%>-page-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   <div id="<%=item_type_hyphenated%>-activity-logs-<%=item_type_name_hyphenated%>-type-{{item_id}}" class="panel panel-default activity-logs-item-block activity-logs-<%=item_type_name_hyphenated%>-type-block <%= hide_item_list_panel ? 'hidden-item-list-panel' : 'shown-item-list-panel' %>" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
     <div class="col-md-24">
-        <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="<%=item_type_name%>_logs">          
+        <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="<%=item_type_name%>_logs">
           {{#each <%=full_name.pluralize%>}}
             {{#if extra_log_type}}
             <% all_option_configs.each do |c| %>
@@ -157,19 +147,18 @@
             {{/if}}
           {{/each}}
         </div>
-      </div>  
+      </div>
   </div>
 </script>
-
 <script id="activity-log--<%=item_type_name_hyphenated.pluralize%>-main-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   <div id="<%=item_type_hyphenated%>-activity-logs-<%=item_type_name_hyphenated%>-type-{{item_id}}" class="panel panel-default activity-logs-item-block activity-logs-<%=item_type_name_hyphenated%>-type-block <%= hide_item_list_panel ? 'hidden-item-list-panel' : 'shown-item-list-panel' %>" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
-
+  
     <div class="is-heading activity-logs-header">
     <% unless hide_player_tabs? %>
       <a data-target="#activity-log--<%=item_type_name_hyphenated.pluralize%>-{{master_id}}" data-toggle="collapse" class="show-entity pull-right glyphicon glyphicon-remove-sign no-scroll-on-collapse" title="close panel"></a>
     <% end %>
       <h4 class="list-group-item-heading al-label-<%=item_type_name_hyphenated%>-item"><%=al_name%></h4>
-
+  
       <% if hide_item_list_panel && !prevent_create%>
       <p class="text-center action-buttons">
         {{#each <%=item_type.pluralize%>}}
@@ -201,13 +190,13 @@
            end %>
       </p>
       <% end %>
-
+  
     </div>
     <div class="row">
-
+  
       <% unless hide_item_list_panel %>
       <div class="col-md-5 activity-log-sub-list" data-selected-id="{{item_id}}" id="activity-log-<%=item_type_name_hyphenated.pluralize%>-sub-list-{{master_id}}-" data-sub-list="<%=item_type.pluralize%>">
-
+  
         {{#each <%=item_type.pluralize%>}}
         <% if rec_type.blank? %>
           {{>sub_list_<%=item_type_name%>_result _created=@index}}
@@ -218,7 +207,7 @@
         <% end %>
         {{/each}}
         <div class="new-block" form-res-id="<%=item_type_hyphenated%>-{{master_id}}-" form-res-template="sub-list-<%=item_type_name_hyphenated%>-result-template" id="activity-log--<%=item_type_name_hyphenated%>-edit-form-{{master_id}}-" data-subscription="<%=item_type_hyphenated%>-edit-form-{{master_id}}-" data-preprocessor="<%=item_type%>_edit_form">
-
+  
         </div>
         <br />
         <% unless prevent_create %>
@@ -246,16 +235,27 @@
       </div>
       <% end %>
       <div class="col-md-<%= hide_item_list_panel ? '24' : '19' %> ">
-
-
+  
+  
         <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="<%=item_type_name%>_logs">
           {{>sublist_controls sub_list="<%=item_type_name%>_logs" sub_list_data_name="activity_log__<%=item_type_name.pluralize%>" filter_attr='extra_log_type' filter_name="human_name" filter_all=true order='asc' all_active=true layout=true}}
           <div data-sort-desc="<%= data_action_when.hyphenate %>" <%= data_action_when.hyphenate %>="" class="new-blocks-container">
             <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-primary-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-primary-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form">
             </div>
             <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-blank-log-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>
-            <% option_configs.each do |c| %>
-              <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>
+            <% option_configs.each do |c| 
+            
+              vos = c.view_options[:alt_width_classes]
+              cwc = if vos
+                      vos
+                    elsif c.e_sign
+                      'e-sign-doc col-md-24 col-lg-12'
+                    else
+                      col_width_classes
+                    end
+
+            %>
+              <div class="new-block new-after-parent alr-new-block <%=cwc%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>
             <% end %>
           </div>
           {{#each <%=full_name.pluralize%>}}
@@ -265,17 +265,15 @@
                 {{> common_template_result name='<%= full_name %>_<%=c.name%>' result_data=this _created=@index}}
               {{/is}}
             <% end %>
-
+  
             {{/if}}
           {{/each}}
         </div>
       </div>
     </div>
-
+  
   </div>
-
 </script>
-
 <script>
   <%
     eltcn = []
@@ -285,5 +283,4 @@
   %>
   _fpa.activity_logs.generate_postprocessors('<%=item_type_name%>', <%= eltcn.to_json.html_safe %>)
 </script>
-
 <% end %>

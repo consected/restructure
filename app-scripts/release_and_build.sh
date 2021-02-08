@@ -31,6 +31,16 @@ RELEASESTARTED="$(echo ${ALLTAGS} | grep ${NEWVER})"
 echo "Current version: ${CURRVER}"
 echo "Next version: ${NEWVER}"
 
+echo "Checking brakeman before we go through the whole process"
+bin/brakeman -q --summary > /tmp/fphs-brakeman-summary.txt
+if [ "$?" == 0 ]; then
+  echo "Brakeman OK"
+else
+  cat /tmp/fphs-brakeman-summary.txt
+  echo "Brakeman Failed"
+  exit 1
+fi
+
 if [ -z "${RELEASESTARTED}" ]; then
   echo "Starting git-flow release"
   git flow release start ${NEWVER}
@@ -54,8 +64,8 @@ echo "Starting build container"
 cd ../restructure-build
 ./build.sh
 
-if [ ! -s ${CURRVERFILE} ]; then
-  echo "${CURRVERFILE} in $(pwd) was not set. The build was not successful"
+if [ ! -s ${GENVERFILE} ]; then
+  echo "${GENVERFILE} in $(pwd) was not set. The build was not successful"
   exit 1
 fi
 

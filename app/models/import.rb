@@ -10,7 +10,7 @@ class Import < ActiveRecord::Base
   # List of all models that can be imported
   # @return [Array{String}]
   def self.accepts_models
-    Master.get_all_associations
+    (Master.get_all_associations + ['masters']).sort
   end
 
   #
@@ -96,7 +96,7 @@ class Import < ActiveRecord::Base
     pt = item_class_for(primary_table)
     return unless pt
 
-    res = pt.attribute_names - ['id', 'user_id', 'created_at', 'updated_at', 'disabled']
+    res = pt.attribute_names - %w[id user_id created_at updated_at disabled]
     res += Master.alternative_id_fields.map(&:to_s) if include_alt_ids && res.include?('master_id')
     res.uniq!
     res

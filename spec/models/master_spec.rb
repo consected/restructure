@@ -88,9 +88,8 @@ RSpec.describe Master, type: :model do
     expect(@master.save).to be false
   end
 
-  it 'should create a master and player like a user' do
+  it 'should create a master and player like a user would, with the player info embedded in the master' do
     m = Master.create_master_record(@user)
-
     expect(m).to be_a Master
     expect(m).to be_persisted
     expect(m.player_infos.length).to eq 1
@@ -162,13 +161,15 @@ RSpec.describe Master, type: :model do
     res = Master.search_on_params params
     expect(res.length).to eq 0
 
-    params = { general_infos_attributes: { '0' => { start_year: @full_player_info.start_year, end_year: @full_player_info.end_year } } }
+    params = { general_infos_attributes: { '0' => { start_year: @full_player_info.start_year,
+                                                    end_year: @full_player_info.end_year } } }
     res = Master.search_on_params params
     expect(res.first).to eq(@full_master_record), master_error(res, params)
     expect(res.first.player_infos.first).to eq @full_player_info
     expect(res.first.pro_infos.first).to eq @full_pro_info
 
-    params = { general_infos_attributes: { '0' => { start_year: @full_pro_info.start_year, end_year: @full_pro_info.end_year } } }
+    params = { general_infos_attributes: { '0' => { start_year: @full_pro_info.start_year,
+                                                    end_year: @full_pro_info.end_year } } }
     res = Master.search_on_params params
     expect(res.first).to eq(@full_master_record), master_error(res, params)
     expect(res.first.player_infos.first).to eq @full_player_info
@@ -176,17 +177,20 @@ RSpec.describe Master, type: :model do
   end
 
   it 'should support simple search for birth and death dates' do
-    params = { general_infos_attributes: { '0' => { birth_date: Time.now - 100.years, death_date: Time.now - 100.years } } }
+    params = { general_infos_attributes: { '0' => { birth_date: Time.now - 100.years,
+                                                    death_date: Time.now - 100.years } } }
     res = Master.search_on_params params
     expect(res.length).to eq 0
 
-    params = { general_infos_attributes: { '0' => { birth_date: @full_player_info.birth_date, death_date: @full_player_info.death_date } } }
+    params = { general_infos_attributes: { '0' => { birth_date: @full_player_info.birth_date,
+                                                    death_date: @full_player_info.death_date } } }
     res = Master.search_on_params params
     expect(res.first).to eq(@full_master_record), master_error(res, params)
     expect(res.first.player_infos.first).to eq @full_player_info
     expect(res.first.pro_infos.first).to eq @full_pro_info
 
-    params = { general_infos_attributes: { '0' => { birth_date: @full_pro_info.birth_date, death_date: @full_pro_info.death_date } } }
+    params = { general_infos_attributes: { '0' => { birth_date: @full_pro_info.birth_date,
+                                                    death_date: @full_pro_info.death_date } } }
     res = Master.search_on_params params
     expect(res.first).to eq(@full_master_record), master_error(res, params)
     expect(res.first.player_infos.first).to eq @full_player_info
@@ -212,7 +216,8 @@ RSpec.describe Master, type: :model do
   end
 
   it 'should support simple search for several attributes' do
-    params = { general_infos_attributes: { '0' => { college: @full_player_info.college, last_name: @full_pro_info.last_name, start_year: @full_player_info.start_year } } }
+    params = { general_infos_attributes: { '0' => { college: @full_player_info.college,
+                                                    last_name: @full_pro_info.last_name, start_year: @full_player_info.start_year } } }
     res = Master.search_on_params params
     expect(res.first).to eq(@full_master_record), master_error(res, params)
     expect(res.first.player_infos.first).to eq @full_player_info
@@ -239,8 +244,10 @@ RSpec.describe Master, type: :model do
     before(:example) do
       create_data_set
       @contact_1 = @full_master_record.player_contacts.create!(data: '(617)794-1213', rec_type: 'phone', rank: 10)
-      @contact_2 = @full_master_record.player_contacts.create!(data: '(617)223-1213 ext 1621', rec_type: 'phone', rank: 5)
-      @contact_3 = @full_master_record.player_contacts.create!(data: 'some.email@testdomain.com', rec_type: 'email', rank: 10)
+      @contact_2 = @full_master_record.player_contacts.create!(data: '(617)223-1213 ext 1621', rec_type: 'phone',
+                                                               rank: 5)
+      @contact_3 = @full_master_record.player_contacts.create!(data: 'some.email@testdomain.com', rec_type: 'email',
+                                                               rank: 10)
     end
 
     it 'should search ok' do

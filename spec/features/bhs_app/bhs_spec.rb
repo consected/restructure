@@ -11,7 +11,6 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
   include BhsExpectations
   include BhsActions
 
-  
   before :all do
     BhsImportConfig.import_config
     SetupHelper.feature_setup
@@ -24,7 +23,10 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
     # By default the app limits access to only those masters that have a BHS assignment
     # already made in another app.
     # To avoid this, just disable this restriction for now.
-    Admin::UserAccessControl.active.where(app_type_id: @app_type.id, resource_type: %i[external_id_assignments limited_access]).update_all(disabled: true)
+    Admin::UserAccessControl.active
+                            .where(app_type_id: @app_type.id,
+                                   resource_type: %i[external_id_assignments limited_access])
+                            .update_all(disabled: true)
 
     # Can't seem to avoid an error without this
     BhsAssignment.definition.update_tracker_events
@@ -66,7 +68,8 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
     as_user @ra
     login_to_app
     expect(@user.app_type_id).to eq @app_type.id
-    a = Admin::UserAccessControl.active.where(user: @user, app_type: @app_type, resource_type: :general, resource_name: 'create_master').first.access
+    a = Admin::UserAccessControl.active.where(user: @user, app_type: @app_type, resource_type: :general,
+                                              resource_name: 'create_master').first.access
     expect(a).to eq 'read'
     expect(@user.can?(:create_master)).to be_truthy
     create_bhs_master
