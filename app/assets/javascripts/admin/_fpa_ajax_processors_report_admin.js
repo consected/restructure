@@ -38,6 +38,9 @@ _fpa.postprocessors_report_admin = {
 
     $('#search_attrs_add').click(function (ev) {
       ev.preventDefault();
+
+      var ra_config_selections = $('#search_attrs_config_selections')[0].CodeMirror;
+      var ra_conditions = $('#search_attrs_conditions')[0].CodeMirror;
       var name = $('#search_attrs_name').val();
 
       if (!name) {
