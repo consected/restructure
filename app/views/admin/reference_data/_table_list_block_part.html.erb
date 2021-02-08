@@ -1,106 +1,65 @@
-<div class="table-list-block" style="text-align: left">
+<div>
+  <div class="table-list-block" style="text-align: left" data-result="table-list-block">
 
-  <div class="row">
-    <div class="form-group col-md-8">
-      <%= select_tag 'primary_tables_schema_select', options_for_select(Admin::MigrationGenerator.current_search_paths), prompt: '-- select schema --', class: 'form-control input-sm ff'  %>
+    <div class="row">
+      <div class="form-group col-md-8">
+        <%= select_tag 'primary_tables_schema_select', options_for_select(Admin::MigrationGenerator.current_search_paths), prompt: '-- select schema --', class: 'form-control input-sm ff'  %>
+      </div>
+      <div class="form-group col-md-8">
+        <label class="">
+          <input type="checkbox" id="primary_tables_filter_out_history" checked style="width: initial; display: inline-block" /> filter out history tables
+        </label>
+      </div>
     </div>
-    <div class="form-group col-md-8">
-      <label class="">
-        <input type="checkbox" id="primary_tables_filter_out_history" checked style="width: initial; display: inline-block" /> filter out history tables
-      </label>
-    </div>
-  </div>
-  <ul id="table-list" style="overflow: auto; background-color: white; height: 0;">
-    <%  
+    <ul id="table-list" style="overflow: auto; background-color: white; height: 0;">
+      <%  
 
-      table_info = Admin::MigrationGenerator.tables_and_views
-      cn = Admin::MigrationGenerator.connection
-      column_comments = Admin::MigrationGenerator.column_comments
-      column_fks = Admin::MigrationGenerator.foreign_keys
+        table_info = Admin::MigrationGenerator.tables_and_views
+        cn = Admin::MigrationGenerator.connection
+        column_comments = Admin::MigrationGenerator.column_comments
+        column_fks = Admin::MigrationGenerator.foreign_keys
 
-      table_info.each do |table|       
-        table_name = table['table_name']
-        schema_name = table['schema_name']
-        history_table = table_name.end_with? '_history'
-        table_comment = Admin::MigrationGenerator.table_comment(table_name, schema_name)
-      %>
-    <li id="t-<%=table_name%>" data-schema="<%=schema_name%>" class="ref-table-item <%=history_table ? 'history-table' : 'regular-table' %>">
-      <a href="#tblock-<%=schema_name%>-<%=table_name%>" data-toggle="collapse" class="table-name-collapser collapsed"><%= table_name  %></a>
-      <%= link_to '', report_path(
-                                        'reference_data__table_data', 
-                                        table_name: table_name, 
-                                        schema_name: schema_name, 
-                                        search_attrs: { _blank: true }
-                                      ), 
-                                      target: '_blank', class: 'glyphicon glyphicon-search' %>
-      <% if table_comment %>
-      <div class="table-comment help-block"><%= table_comment %></div>
-      <% end %>
-    </li>
-    <ul id="tblock-<%=schema_name%>-<%=table_name%>" class="collapse ref-tblock">
-      <% cn.columns(table_name).each  do |c| 
-            column_name = c.name
-            column_comment = column_comments.find {|cs| cs['schema_name'] == schema_name && cs['table_name'] == table_name && cs['column_name'] == column_name }
-            column_comment = column_comment['column_comment'] if column_comment
-          
-            column_fk = column_fks.find {|cfk| cfk['source_schema'] == schema_name && cfk['source_table'] == table_name && cfk['source_column'] == column_name}
-            column_fk = "#{column_fk['target_schema']}.#{column_fk['target_table']} (#{column_fk['target_column']})" if column_fk
+        table_info.each do |table|       
+          table_name = table['table_name']
+          schema_name = table['schema_name']
+          history_table = table_name.end_with? '_history'
+          table_comment = Admin::MigrationGenerator.table_comment(table_name, schema_name)
         %>
-      <li id="table-<%= column_name %>" class="ref-table-col-item">
-        <span><%= column_name %></span> <span class="ref-table-column-name"><%=c.type.to_s%></span>
-        <% if column_fk %>
-        <span class="column-fk"><i class="glyphicon glyphicon-link"></i><%= column_fk %></span>
-        <% end %>
-        <% if column_comment %>
-        <div class="column-comment help-block"><%= column_comment %></div>
+      <li id="t-<%=table_name%>" data-schema="<%=schema_name%>" class="ref-table-item <%=history_table ? 'history-table' : 'regular-table' %>">
+        <a href="#tblock-<%=schema_name%>-<%=table_name%>" data-toggle="collapse" class="table-name-collapser collapsed"><%= table_name  %></a>
+        <%= link_to '', report_path(
+                                          'reference_data__table_data', 
+                                          table_name: table_name, 
+                                          schema_name: schema_name, 
+                                          search_attrs: { _blank: true }
+                                        ), 
+                                        target: '_blank', class: 'glyphicon glyphicon-search' %>
+        <% if table_comment %>
+        <div class="table-comment help-block"><%= table_comment %></div>
         <% end %>
       </li>
-      <% end %>
+      <ul id="tblock-<%=schema_name%>-<%=table_name%>" class="collapse ref-tblock">
+        <% cn.columns(table_name).each  do |c| 
+              column_name = c.name
+              column_comment = column_comments.find {|cs| cs['schema_name'] == schema_name && cs['table_name'] == table_name && cs['column_name'] == column_name }
+              column_comment = column_comment['column_comment'] if column_comment
+            
+              column_fk = column_fks.find {|cfk| cfk['source_schema'] == schema_name && cfk['source_table'] == table_name && cfk['source_column'] == column_name}
+              column_fk = "#{column_fk['target_schema']}.#{column_fk['target_table']} (#{column_fk['target_column']})" if column_fk
+          %>
+        <li id="table-<%= column_name %>" class="ref-table-col-item">
+          <span><%= column_name %></span> <span class="ref-table-column-name"><%=c.type.to_s%></span>
+          <% if column_fk %>
+          <span class="column-fk"><i class="glyphicon glyphicon-link"></i><%= column_fk %></span>
+          <% end %>
+          <% if column_comment %>
+          <div class="column-comment help-block"><%= column_comment %></div>
+          <% end %>
+        </li>
+        <% end %>
+      </ul>
+
+      <%  end %>
     </ul>
-
-    <%  end %>
-  </ul>
+  </div>
 </div>
-
-<script>
-  function handle_primary_tables() {
-
-    var $schema_select = $('#primary_tables_schema_select');
-    var $foh_checkbox = $('#primary_tables_filter_out_history');
-
-    var filter_tables = function() {
-      var foh = $foh_checkbox.is(':checked');
-      var schema = $schema_select.val();
-      $('.ref-tblock.in').each(function() {
-        $(this).collapse('hide');
-      })
-      $('.ref-table-item').slideUp();
-      if (foh) {
-        $('.ref-table-item.regular-table[data-schema="' + schema + '"]').slideDown();
-      } else {
-        $('.ref-table-item[data-schema="' + schema + '"]').slideDown();
-      }
-
-
-
-    }
-
-    $('#table-list').css({
-      height: 'auto'
-    });
-
-    $schema_select.on('change', function() {
-      filter_tables();
-
-    })
-
-    $foh_checkbox.on('change', function() {
-      filter_tables();
-    });
-
-    filter_tables();
-
-
-  };
-  handle_primary_tables();
-</script>

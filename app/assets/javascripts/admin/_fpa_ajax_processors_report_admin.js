@@ -131,6 +131,5 @@ _fpa.postprocessors_report_admin = {
 
     });
   }
-
 };
 $.extend(_fpa.postprocessors, _fpa.postprocessors_report_admin);

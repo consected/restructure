@@ -14,7 +14,7 @@
           <%= select_tag :dummy, options_for_select(field.field_type.choices(rails_format: true))%>
         </div>
         <div>
-          <%= render partial: 'choices_table', locals: {field: field} %>
+          <%= render partial: 'redcap/data_dictionaries/choices_table', locals: {field: field} %>
         </div>
       <% end%>  
     </div>

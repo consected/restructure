@@ -209,13 +209,13 @@ class Report < ActiveRecord::Base
     test = { short_name: short_name, item_type: item_type }
 
     res = self.class.active.where(test)
-    unless (res.map(&:id) - [id]).empty?
-      res.each do |res0|
-        errors.add :resource_name,
-                   "is a duplicate of another report record: (#{name}) #{self} --duplicates-- (#{res0.name}) #{{
-                     short_name: res0.short_name, item_type: res0.item_type
-                   }} "
-      end
+    return if (res.pluck(:id) - [id]).empty?
+
+    res.each do |res0|
+      errors.add :resource_name,
+                 "is a duplicate of another report record: (#{name}) #{self} --duplicates-- (#{res0.name}) #{{
+                   short_name: res0.short_name, item_type: res0.item_type
+                 }} "
     end
   end
 
@@ -224,9 +224,14 @@ class Report < ActiveRecord::Base
     return unless item_type
 
     parts = item_type.id_underscore.split('__')
-    if parts.length > 1
-      errors.add :item_type,
-                 "must not use multiple space or punctuation characters between letters: '#{item_type}' becomes #{item_type.id_underscore}"
-    end
+    return if parts.length <= 1
+
+    errors.add :item_type,
+               'must not use multiple space or punctuation characters between letters: ' \
+               "'#{item_type}' becomes #{item_type.id_underscore}"
+  end
+
+  def invalidate_cache
+    logger.info 'Not invalidating cache for report'
   end
 end
