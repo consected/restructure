@@ -11,6 +11,7 @@ module Dynamic
 
       after_save :add_master_association, if: -> { @regenerate }
       after_save :add_user_access_controls, if: -> { @regenerate }
+      after_save :reset_active_model_configurations!
 
       after_commit :update_tracker_events, if: -> { @regenerate }
       after_commit :restart_server, if: -> { @regenerate }
@@ -76,27 +77,51 @@ module Dynamic
       # or are not included in the OnlyLoadAppTypes setting.
       # This is typically used to improve load times and ensure we only generate
       # templates for models that will actually be used.
+      # @return [ActiveRecord::Relation] scopeed results
       def active_model_configurations
+        # return @active_model_configurations if @active_model_configurations
+
         olat = Admin::AppType.active_app_types
 
-        if olat && !olat.empty?
+        # List of names that the associated_* items have already returned
+        # to avoid building huge lists of repetitive joined queries
+        got_names = []
+
+        if olat&.present?
           qs = []
           olat.each do |app_type|
+            resnames = []
             # Compare against string class names, to avoid autoload errors
-            if name == 'ActivityLog'
-              qs << app_type.associated_activity_logs.reorder('').to_sql
-            elsif name == 'DynamicModel'
-              qs << app_type.associated_dynamic_models(valid_resources_only: false).reorder('').to_sql
-            elsif name == 'ExternalIdentifier'
-              qs << app_type.associated_external_identifiers.reorder('').to_sql
+            case name
+            when 'ActivityLog'
+              res = app_type.associated_activity_logs(not_resource_names: got_names)
+              resnames = app_type.associated_activity_log_names
+            when 'DynamicModel'
+              res = app_type.associated_dynamic_models(valid_resources_only: false, not_resource_names: got_names)
+              resnames = app_type.associated_dynamic_model_names
+            when 'ExternalIdentifier'
+              res = app_type.associated_external_identifiers(not_resource_names: got_names)
+              resnames = app_type.associated_external_identifier_names
+            end
+            if resnames.present? && (resnames - got_names).present?
+              qs << res.reorder('').to_sql
+              got_names |= resnames
             end
           end
-          unions = qs.join("\nUNION\n")
-          dma = from("(#{unions}) AS #{table_name}")
+          if qs.present?
+            unions = qs.join("\nUNION\n")
+            dma = from(Arel.sql("(#{unions}) AS #{table_name}"))
+          else
+            dma = where(id: nil)
+          end
         else
           dma = active
         end
-        dma
+        @active_model_configurations = dma
+      end
+
+      def reset_active_model_configurations!
+        @active_model_configurations = nil
       end
 
       #
@@ -342,8 +367,7 @@ module Dynamic
 
       # Check that the class is defined
       klass = parent_class.const_get(full_implementation_controller_name)
-      res = klass.is_a?(Class)
-      res
+      klass.is_a?(Class)
     rescue NameError
       false
     end
@@ -390,10 +414,10 @@ module Dynamic
     # @return [Class | nil] truthy result unless the model exists in the namespace
     def prevent_regenerate_model
       got_class = begin
-                    full_implementation_class_name.constantize
-                  rescue StandardError
-                    nil
-                  end
+        full_implementation_class_name.constantize
+      rescue StandardError
+        nil
+      end
       got_class if got_class&.to_s&.start_with?(self.class.implementation_prefix)
     end
 
@@ -582,6 +606,12 @@ module Dynamic
         # Force exit of callbacks
         raise FphsException, err
       end
+    end
+
+    #
+    # Active model configurations are memoized in a class attribute and need to be reset on a change
+    def reset_active_model_configurations!
+      self.class.reset_active_model_configurations!
     end
 
     # If we have forced a regeneration of classes, for example if a new DB table

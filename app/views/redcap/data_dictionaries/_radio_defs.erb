@@ -1,0 +1,27 @@
+<% if object_instance.captured_metadata.present?%>
+  <label>Checkbox Fields</label>
+  <% forms = object_instance.forms %>
+  <div>
+  <% forms.each do |fn, form| %>
+    <h4 class="h4"><%= fn %></h5>
+    <div class="admin-options-tag-list">
+      <%
+        form.fields_of_type(:radio).each do |k, field| %>
+        <div>
+          <label><%=field.name%></label><p><%=field.label_plain%></p>
+        </div>
+        <div>
+          <% field.field_type.choices(plain_text: true).each do |i| %>
+          <div>
+            <%= radio_button_tag :dummy, value: i.first %> <%= i.last %>
+          </div>
+          <% end %>
+        </div>
+        <div>
+          <%= render partial: 'choices_table', locals: {field: field} %>
+        </div>
+      <% end%>  
+    </div>
+  <% end %>
+  </div>
+<% end%>

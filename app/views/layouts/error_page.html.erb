@@ -1,6 +1,12 @@
-<div class="container">
-  <h1>&nbsp;</h1>
-  <p class="text-center"><br/>
+<%
+ text = '' unless defined? text
+%>
+<div class="container well">
+  <h1>Unexpected Error</h1>
+  <p class="">
+    <%= text %>
+  </p>
+  <p class="text-center">
     <%=link_to 'Go Back', :back, class: 'btn btn-default' %>
   </p>
 </div>

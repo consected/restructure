@@ -27,35 +27,35 @@ module CalcActions
 
   include FieldDefaults
 
+  # We won't use a query join when referring to tables based on these keys
+  NonJoinTableNames = %i[this parent referring_record top_referring_record this_references parent_references
+                         parent_or_this_references user master condition value hide_error role_name reference].freeze
+  NonQueryTableNames = %i[this user parent referring_record top_referring_record role_name reference].freeze
+  NonQueryNestedKeyNames = %i[this referring_record top_referring_record this_references parent_references
+                              parent_or_this_references reference validate].freeze
+
+  SelectionTypes = %i[all any not_all not_any].freeze
+
+  BoolTypeString = '__!BOOL__'
+
+  UnaryConditions = ['IS NOT NULL', 'IS NULL'].freeze
+  BinaryConditions = ['=', '<', '>', '<>', '<=', '>=', 'LIKE', '~'].freeze
+  ValidExtraConditions = (BinaryConditions + UnaryConditions).freeze
+  ValidExtraConditionsArrays = [
+    '= ANY', # The value of this field (must be scalar) matches any value from the retrieved array field
+    '<> ANY', # The value of this field (must be scalar) must not match any value from the retrieved array field
+    '= ARRAY_LENGTH', # The value of this field (must be integer) equals the length of the retrieved array field
+    '<> ARRAY_LENGTH', # The value of this field (must be integer) must not equal length of the retrieved array field
+    '= LENGTH', # The value of this field (must be integer) equals the length of the string (varchar or text) field
+    '<> LENGTH', # The value of this field (must be integer) must not equal length of the string (varchar/text) field
+    '&&', # There is an overlap, so any value of this field (an array) must be in the retrieved array field
+    '@>', # This array field contains all of the elements of the retrieved array field
+    '<@' # This array field's elements are all found in the retrieved array field
+  ].freeze
+
+  ReturnTypes = %w[return_value return_value_list return_result].freeze
+
   included do
-    # We won't use a query join when referring to tables based on these keys
-    NonJoinTableNames = %i[this parent referring_record top_referring_record this_references parent_references
-                           parent_or_this_references user master condition value hide_error role_name].freeze
-    NonQueryTableNames = %i[this user parent referring_record top_referring_record role_name].freeze
-    NonQueryNestedKeyNames = %i[this referring_record top_referring_record this_references parent_references
-                                parent_or_this_references validate].freeze
-
-    SelectionTypes = %i[all any not_all not_any].freeze
-
-    BoolTypeString = '__!BOOL__'
-
-    UnaryConditions = ['IS NOT NULL', 'IS NULL'].freeze
-    BinaryConditions = ['=', '<', '>', '<>', '<=', '>=', 'LIKE', '~'].freeze
-    ValidExtraConditions = (BinaryConditions + UnaryConditions).freeze
-    ValidExtraConditionsArrays = [
-      '= ANY', # The value of this field (must be scalar) matches any value from the retrieved array field
-      '<> ANY', # The value of this field (must be scalar) must not match any value from the retrieved array field
-      '= ARRAY_LENGTH', # The value of this field (must be integer) equals the length of the retrieved array field
-      '<> ARRAY_LENGTH', # The value of this field (must be integer) must not equal length of the retrieved array field
-      '= LENGTH', # The value of this field (must be integer) equals the length of the string (varchar or text) field
-      '<> LENGTH', # The value of this field (must be integer) must not equal length of the string (varchar/text) field
-      '&&', # There is an overlap, so any value of this field (an array) must be in the retrieved array field
-      '@>', # This array field contains all of the elements of the retrieved array field
-      '<@' # This array field's elements are all found in the retrieved array field
-    ].freeze
-
-    ReturnTypes = %w[return_value return_value_list return_result].freeze
-
     attr_accessor :condition_scope, :this_val
   end
 
@@ -430,20 +430,23 @@ module CalcActions
       end
 
       #### If we have a non-query table specified
-      if table.in?(%i[this parent referring_record top_referring_record]) ||
+      if table.in?(%i[this parent referring_record top_referring_record reference]) ||
          (table == :user && field_name != :role_name)
 
         # Pick the instance we are referring to
-        if table == :this
+        case table
+        when :this
           in_instance = current_instance
-        elsif table == :user
+        when :user
           in_instance = @current_instance.master.current_user
-        elsif table == :parent
+        when :parent
           in_instance = current_instance.parent_item
-        elsif table == :referring_record
+        when :referring_record
           in_instance = current_instance.referring_record
-        elsif table == :top_referring_record
+        when :top_referring_record
           in_instance = current_instance.top_referring_record
+        when :reference
+          in_instance = current_instance.reference
         end
 
         if field_name == :exists
@@ -613,17 +616,26 @@ module CalcActions
       from_instance = @current_instance.top_referring_record
       val = from_instance && attribute_from_instance(from_instance, val_item_value)
 
+    elsif val_item_key == :reference && !val_item_value.is_a?(Hash)
+      # Get a literal value from the current instance's reference,
+      # the current to_record in a model reference iteration.
+      # If no reference exists, the result is nil
+      from_instance = @current_instance.reference
+      val = from_instance && attribute_from_instance(from_instance, val_item_value)
+
     elsif val_item_key.in? %i[this_references parent_references parent_or_this_references]
       # Get possible values from records referenced by this instance, or this instance's referring record (parent)
 
-      if val_item_key == :this_references
+      case val_item_key
+      when :this_references
         # Identify all records this instance references
         from_instance = @current_instance
-      elsif val_item_key == :parent_references
+      when :parent_references
         # Identify all records this instance's referrring record (parent) references
         from_instance = @current_instance.referring_record
-      elsif val_item_key == :parent_or_this_references
-        # Identify all records this instance's referrring record (parent) references, or if there is no parent, this record references
+      when :parent_or_this_references
+        # Identify all records this instance's referrring record (parent) references,
+        # or if there is no parent, this record references
         from_instance = @current_instance.referring_record || @current_instance
       end
 

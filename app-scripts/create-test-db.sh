@@ -1,5 +1,7 @@
 BASEDIR=$0
-DB_BASE_NAME=${DB_BASE_NAME:=restr}
+DB_BASE_NAME=${DB_BASE_NAME:=fpa}
+
+echo "Creating: ${DB_BASE_NAME}"
 
 function setup() {
 

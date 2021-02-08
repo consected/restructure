@@ -21,8 +21,6 @@ class Admin < ActiveRecord::Base
   validate :only_allow_disable
   after_save :unlock_account, on: :update
 
-  scope :active, -> { where 'disabled is null or disabled = false' }
-
   def enabled?
     !disabled
   end

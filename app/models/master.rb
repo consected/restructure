@@ -260,7 +260,7 @@ class Master < ActiveRecord::Base
 
   #
   # Some associations have an equivalent 'filtered' version, used to get lists that have removed items that do not
-  # meet calc_showable_if rules defined in extra options
+  # meet calc_if(:showable_if, ...) rules defined in extra options
   # @param tname [String] the name of the association
   # @return [String] returns the filtered name if it exists, otherwise return the name that was passed
   def filtered_assoc_name(tname)

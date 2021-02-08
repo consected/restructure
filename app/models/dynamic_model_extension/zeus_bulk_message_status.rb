@@ -274,7 +274,9 @@ module DynamicModelExtension
               end
               reh[:timestamp] = tsi
             rescue StandardError => e
-              Rails.logger.info "Failed to parse message response timestamp (#{tsstr}): #{e}"
+              msg = "Failed to parse message response timestamp (#{tsstr}): #{e}"
+              Rails.logger.info msg
+              reh[:app_error] = msg
             end
 
             reh[:status_reason] = reh[:delivery][:providerResponse]

@@ -29,10 +29,11 @@ class ActivityLog::ActivityLogsController < UserBaseController
     'common_templates/edit_form'
   end
 
+  #
+  # Allow passing of params to embedded item to initialize the new form
   def set_embedded_item_optional_params
     return unless @embedded_item
 
-    # Allow passing of params to embedded item to initialize the new form
     return unless params[al_type.singularize.to_sym] && params[al_type.singularize.to_sym][:embedded_item]
 
     ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(embedded_item_permitted_params)
@@ -41,6 +42,12 @@ class ActivityLog::ActivityLogsController < UserBaseController
     end
   end
 
+  #
+  # Set up all the requirements for an embedded item, based on the current action
+  # This includes setting the current user on the item, and updating the embedded item
+  # with secure params from the request if the item is being created.
+  # @param [UserBase | nil] use_object - force the use of a specific instance as
+  #                                      the parent (rather than default requested instance)
   def handle_embedded_item(use_object = nil)
     oi = use_object || object_instance
     return unless oi
@@ -51,9 +58,10 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
     return unless @embedded_item
 
-    if action_name == 'new'
+    case action_name
+    when 'new'
       set_embedded_item_optional_params
-    elsif action_name == 'create'
+    when 'create'
       begin
         ei_secure_params = params[al_type.singularize.to_sym]
                            .require(:embedded_item)
@@ -66,6 +74,9 @@ class ActivityLog::ActivityLogsController < UserBaseController
     end
   end
 
+  #
+  # Set up extra configurations for an edit form, such as save actions, captions and tracker history links,
+  # based on the extra option configs and viewable attributes
   def edit_form_extras
     extras_caption_before = {}
     if @option_type_config
@@ -147,6 +158,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
     end
   end
 
+  #
   # Remove items that are not showable, based on showable_if in the extra log type config
   # This is a soft filtering of items, rather than a secure approach to avoiding them being seen,
   # since we are using showable_if only to filter in the activity log list, but continue to show the
@@ -158,13 +170,16 @@ class ActivityLog::ActivityLogsController < UserBaseController
   def filter_records
     return @master_objects if @master_objects.is_a? Array
 
-    @filtered_ids = @master_objects.select { |i| i.option_type_config&.calc_showable_if(i) }.map(&:id)
+    @filtered_ids = @master_objects
+                    .select { |i| i.option_type_config&.calc_if(:showable_if, i) }
+                    .map(&:id)
     @master_objects = @master_objects.where(id: @filtered_ids)
     filter_requested_ids
     limit_results
     embed_all_references
   end
 
+  #
   # Tell each object in the index results to populate embedded items for each model reference
   def embed_all_references
     return @master_objects unless params[:embed_all_references] == 'true' && @master_objects.present?
@@ -175,6 +190,11 @@ class ActivityLog::ActivityLogsController < UserBaseController
     @master_objects
   end
 
+  #
+  # Extend the data returned for an index request
+  # to include an item listing the "creatables", the activity logs
+  # that can be created by a user directly in this master,
+  # not as model references within a specific item.
   def extend_result
     item_id = @item.id if @item
 
@@ -197,6 +217,9 @@ class ActivityLog::ActivityLogsController < UserBaseController
     }
   end
 
+  #
+  # Actions new or create need to set up the @item relationship
+  # which is the model instance the activity log is related to.
   def set_additional_attributes(obj)
     return unless @item && obj.class != @item.class
 
@@ -204,8 +227,11 @@ class ActivityLog::ActivityLogsController < UserBaseController
     obj.send("#{item_type_us}=", @item)
   end
 
-  # set the parent item for the activity log by getting it from the URL params
-  # and also checking that it is actually valid based on Activity Log config
+  #
+  # Set the parent item for the activity log by getting it from the URL params
+  # and also checking that it is actually valid based on Activity Log config.
+  # For example an @item is a PlayerContact in activity_log__player_contacts
+  # or ExtAssignment in activity_log__ext_assignments
   def set_item
     return @item if @item && @implementation_class
 
@@ -241,6 +267,8 @@ class ActivityLog::ActivityLogsController < UserBaseController
     return not_found unless @implementation_class
   end
 
+  #
+  # The list of permitted parameters based on the definition
   def permitted_params
     res = @implementation_class.permitted_params
     res = @implementation_class.refine_permitted_params res
@@ -251,22 +279,30 @@ class ActivityLog::ActivityLogsController < UserBaseController
     res
   end
 
+  #
+  # The list of permitted parameters for an embedded item
   def embedded_item_permitted_params
     epp = @embedded_item.class.permitted_params
     @embedded_item.class.refine_permitted_params(epp)
   end
 
+  #
+  # The secure parameters (key / value strong params) that can be used to
+  # create or update instances
   def secure_params
     params.require(al_type.singularize.to_sym).permit(*permitted_params)
   end
 
+  #
+  # The activity log implementation class, based on the controller name
   def implementation_class
     cn = controller_name.singularize.to_s.camelize
     cnf = "ActivityLog::#{cn}"
     cnf.constantize
   end
 
-  # Use the correct extra log type, based on either the param (for a new action) or
+  #
+  # Use the correct extra log type value, based on either the param (for a new action) or
   # the object_instance attribute (for an edit action)
   def handle_extra_log_type
     etp = params[:extra_type]
@@ -312,6 +348,10 @@ class ActivityLog::ActivityLogsController < UserBaseController
     nil
   end
 
+  #
+  # Force a sign out if the current user access is locked since we started the action.
+  # This may happen during an e-signature if the user fails the authentication challenge
+  # too many times.
   def check_authentication_still_valid
     sign_out(current_user) if current_user.access_locked?
   end

@@ -6,8 +6,13 @@ module Seeds
 
     def self.add_values(values)
       values.each do |v|
-        res = Admin::AppType.find_or_initialize_by(v)
-        res.update(current_admin: auto_admin) unless res.admin
+        res = Admin::AppType.find_by_name(v['name'])
+        if res
+          res.update(current_admin: auto_admin) unless res.admin
+        else
+          v[:current_admin] = auto_admin
+          Admin::AppType.create!(v)
+        end
       end
     end
 

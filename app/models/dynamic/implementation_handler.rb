@@ -141,10 +141,10 @@ module Dynamic
       dopt = option_type_config
       return unless dopt
 
-      if dopt.add_reference_if.is_a?(Hash) && dopt.add_reference_if.first
-        res = dopt.calc_add_reference_if(self)
-        @can_add_reference = !!res
-      end
+      return unless dopt.add_reference_if.is_a?(Hash) && dopt.add_reference_if.first
+
+      res = dopt.calc_if(:add_reference_if, self)
+      @can_add_reference = !!res
     end
 
     # Calculate the can rules for the required type, based on user access controls and showable_if rules
@@ -153,35 +153,38 @@ module Dynamic
     # @param type [Symbol] either :access or :edit for showable_if or editable_if
     # @return [Boolean | nil]
     def calc_can(type)
-      # either use the editable_if configuration if there is one
       dopt = option_type_config
       return unless dopt
 
-      if type == :edit
+      case type
+      when :edit
         doptif = dopt.editable_if
-      elsif type == :access
+      when :access
         doptif = dopt.showable_if
+      else
+        return
       end
 
-      if doptif.is_a?(Hash) && doptif.first && respond_to?(:master)
-        # Generate an old version of the object prior to changes
-        old_obj = dup
-        changes.each do |k, v|
-          old_obj.send("#{k}=", v.first) if k.to_s != 'user_id'
-        end
+      return unless doptif.is_a?(Hash) && doptif.first && respond_to?(:master)
 
-        # Set the id, since dup doesn't do this and we may need it
-        old_obj.id = id
+      # Generate an old version of the object prior to changes
+      old_obj = dup
+      changes.each do |k, v|
+        old_obj.send("#{k}=", v.first) if k.to_s != 'user_id'
+      end
 
-        # Ensure the duplicate old_obj references the real master, ensuring current user can
-        # be referenced correctly in conditional calculations
-        old_obj.master = master
+      # Set the id, since dup doesn't do this and we may need it
+      old_obj.id = id
 
-        if type == :edit
-          res = !!dopt.calc_editable_if(old_obj)
-        elsif type == :access
-          res = !!dopt.calc_showable_if(old_obj)
-        end
+      # Ensure the duplicate old_obj references the real master, ensuring current user can
+      # be referenced correctly in conditional calculations
+      old_obj.master = master
+
+      case type
+      when :edit
+        res = !!dopt.calc_if(:editable_if, old_obj)
+      when :access
+        res = !!dopt.calc_if(:showable_if, old_obj)
       end
 
       res

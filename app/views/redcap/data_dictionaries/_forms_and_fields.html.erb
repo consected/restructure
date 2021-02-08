@@ -1,0 +1,27 @@
+<div>
+  <label>Number of fields</label>
+  <%= object_instance.field_count %>
+</div>
+
+<% if object_instance.captured_metadata.present?%>
+  <div>
+  <label>Forms</label>
+  <ul class="admin-options-tag-list">
+  <% object_instance.form_names.each do |fn| %>
+    <li><%= fn %></li>
+  <% end %>
+  </ul>
+  </div>
+  <label>Fields</label>
+  <ul>
+  <% forms = object_instance.forms %>
+  <% forms.each do |fn, form| %>
+    <li class="h4"><%= fn %></li>
+    <ul class="admin-options-tag-list">
+    <% form.field_names.each do |f| %>
+      <li><%= f %></li>
+    <% end%>  
+    </ul>
+  <% end %>
+  </ul>
+<% end%>

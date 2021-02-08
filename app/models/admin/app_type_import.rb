@@ -42,7 +42,8 @@ module Admin::AppTypeImport
         res['app_configurations'] =
           app_type.import_config_sub_items app_type_config, 'app_configurations', %w[name role_name]
 
-        # Make two passes at loading general selections, the first time rejecting dynamic items that may not yet be defined
+        # Make two passes at loading general selections, the first time
+        # rejecting dynamic items that may not yet be defined
         reject_items = proc { |k, v|
           k == :item_type && v.index(/^(activity_log__|dynamic_model__|external_identifier__)/)
         }
@@ -100,7 +101,9 @@ module Admin::AppTypeImport
 
         res['user_access_controls'] =
           app_type.import_config_sub_items app_type_config, 'valid_user_access_controls',
-                                           %w[resource_type resource_name role_name], add_vals: { allow_bad_resource_name: true }, id_list: id_list
+                                           %w[resource_type resource_name role_name],
+                                           add_vals: { allow_bad_resource_name: true },
+                                           id_list: id_list
 
         app_type.reload
         new_id = app_type.id
@@ -134,6 +137,14 @@ module Admin::AppTypeImport
     end
   end
 
+  #
+  # Handles filtering of a list of items (either an association scope or direct query scope)
+  # if #import_config_sub_items specified *filter_on*
+  # This receives the attributes from the current sub item definition as the filter,
+  # simply looking within all the possible items passed in to limit the set
+  # @param [ActiveRecord::Relation | Array] items - the scope or array to filter
+  # @param [Hash] filter - key / value to filter items with
+  # @return [Array] filtered items
   def filtered_results(items, filter)
     items.select do |item|
       res = true
@@ -142,6 +153,26 @@ module Admin::AppTypeImport
     end
   end
 
+  #
+  # Import sub items related to the app type. These are all the components that make up an app.
+  # Importing will create items that do not yet exist, or update items if they are newer than the existing item.
+  # There are two categories of sub items: directly assoicated and not directly associated
+  # - directly associated: have an app_type_id specifying absolute ownership by the app through an association
+  # - not directly associated: are only related to the app loosely, typically through the presence of user
+  #                            access controls referencing the item in the app
+  #
+  # @param [Hash] app_type_config - the full app type configuration to import the sub item from
+  # @param [String] name - the key name from the configuration to import
+  # @param [Array{String}] lookup_existing_with_fields - list of fields used to identify if a sub item already exists
+  # @param [Proc | nil] reject - optional proc accepting |key, value| arguments that allows items in the
+  #                              configuration to be rejected during the import. This allows a sub item of
+  #                              to import a subset of its configuration at one stage and the remainder later
+  # @param [Hash] add_vals - a hash representing attribute / values to add to every imported item
+  # @param [Boolean] create_disabled - force the item to be created with disabled: true
+  #                                    (has no effect on update of existing items)
+  # @param [Array[String]] filter_on - list fields to compare between new and existing items to identify matches
+  # @param [Array] id_list - pass (by reference) an empty array which ids of new or updated items will be added to
+  # @return [Array{Object}] returns an array of the objects representing new and updated sub items
   def import_config_sub_items(app_type_config, name, lookup_existing_with_fields, reject: nil, add_vals: {}, create_disabled: false, filter_on: nil, id_list: [])
     results = []
     orig_name = name

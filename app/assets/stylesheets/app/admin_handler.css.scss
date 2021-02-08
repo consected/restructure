@@ -28,6 +28,11 @@ table.admin-list tbody {
     margin-left: 10px;
     margin-right: 10px;
   }
+
+  .nav-tabs > li > a {
+    border-radius: 4px 4px 0 0;
+    border: 1px solid rgb(221, 221, 221);
+  }
 }
 
 .wide-field {

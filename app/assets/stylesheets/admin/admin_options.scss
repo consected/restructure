@@ -23,8 +23,33 @@
 
 .admin-options-ref-block {
   height: 80vh;
-  width: 50%;
+  width: 40vw;
   margin: 6px;
+}
+
+.admin-options-block-outer {
+  overflow: hidden;
+  height: 100%;
+
+  .tab-content {
+    overflow: auto;
+    height: 94%;
+  }
+}
+
+ul.admin-options-tag-list {
+  li {
+    padding: 3px 5px;
+    border: 1px solid silver;
+    border-radius: 3px;
+    line-height: 1em;
+    display: inline-block;
+    list-style: none;
+    background-color: white;
+    margin: 1px;
+    font-family: monospace;
+    font-size: 12px;
+  }
 }
 
 .admin-options-ref-textarea-block {

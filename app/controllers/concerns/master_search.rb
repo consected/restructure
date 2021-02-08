@@ -91,7 +91,7 @@ module MasterSearch
   def run_report
     @search_type = "REPORT: #{@report.name}"
 
-    m_field = @report.field_index('master_id')
+    m_field = @report.runner.field_index('master_id')
 
     return unless m_field
 

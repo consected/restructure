@@ -19,21 +19,29 @@ class DynamicModel < ActiveRecord::Base
     'DynamicModel'
   end
 
+  #
   # Dynamic Models may have singular or plural table names, so we must use
   # this definition rather than the general resource name method
   def resource_name
     "dynamic_model__#{table_name}"
   end
 
+  #
   # Class that implements options functionality
   def self.options_provider
     OptionConfigs::DynamicModelOptions
   end
 
+  #
+  # Short singular name without prefix - the model name for the implementation
   def implementation_model_name
     table_name.singularize
   end
 
+  #
+  # All fields used by the implementation are either specified in the field list
+  # or if empty, the fields are pulled from the underlying table fields, removing
+  # standard fields (such as id, created_at...)
   def all_implementation_fields(ignore_errors: true)
     fl = field_list_array
 
@@ -57,12 +65,17 @@ class DynamicModel < ActiveRecord::Base
     []
   end
 
+  #
+  # A simple (and unreliable) mechanism for forcing the orientation
+  # that dynamic model blocks appear in within
+  # a panel. Page Layouts is the preferred mechanism for handling this.
   def self.orientation(category)
     return :horizontal if category.to_s.include?('history') || category.to_s.include?('-records')
 
     :vertical
   end
 
+  #
   # Set up an association to this class on the Master if there is a foreign_key_name set
   # If there is no foreign_key_name set, then this is not attached to a master record
   def add_master_association
@@ -75,25 +88,34 @@ class DynamicModel < ActiveRecord::Base
                          primary_key: primary_key_name
 
     # Add a filtered scope method, which allows master associations to remove non-accessible items automatically
-    # This is not the default scope, since it calls calc_showable_if under the covers, and that may
+    # This is not the default scope, since it calls #calc_if(:showable_if,...) under the covers, and that may
     # reference the associations itself, causing a cascade of calls
     Master.send :define_method, "#{Master::FilteredAssocPrefix}#{man}" do
       send(man).filter_results
     end
   end
 
+  #
+  # Default array of category names, with blanks set to 'default'
   def self.categories
-    active.select(:category).distinct(:category).unscope(:order).map { |s| s.category || 'default' }
+    active.select(:category)
+          .distinct(:category)
+          .unscope(:order)
+          .map { |s| s.category || 'default' }
   end
 
+  #
+  # Generate the protocol / sub process  / protocol event entries that will be
+  # used by implementations when updating and creating records, and subsequently tracking
+  # those changes in the tracker history.
   def update_tracker_events
     return unless name && !disabled
 
     Tracker.add_record_update_entries table_name.singularize, current_admin, 'record'
-    # flag items are added when item flag names are added to the list
-    # Tracker.add_record_update_entries self.name.singularize, current_admin, 'flag'
   end
 
+  #
+  # Generate the implementation model
   def generate_model
     logger.info "---------------------------------------------------------------------------
 ************** GENERATING DynamicModel MODEL #{name} ****************
@@ -219,6 +241,11 @@ class DynamicModel < ActiveRecord::Base
     @regenerate = res
   end
 
+  #
+  # View handlers allow the use of code extensions to implement specific functionality
+  # for this model.
+  # For example, a view handler 'address' handles country processing and other features
+  # of models with specific fields that need address handling
   def add_handlers(res)
     vh = default_options.view_options[:view_handlers]
     return unless vh.present?
@@ -231,6 +258,8 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
+  #
+  # Load dynamic model routes for all active implementations
   def self.routes_load
     m = active_model_configurations
     Rails.application.routes.draw do
@@ -305,6 +334,3 @@ class DynamicModel < ActiveRecord::Base
     []
   end
 end
-
-# Force the initialization. Do this here, rather than an initializer, since forces a reload if rails reloads classes in development mode.
-# DynamicModel.define_models

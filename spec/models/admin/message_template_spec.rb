@@ -233,7 +233,7 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     t = Benchmark.realtime do
       masters.each do |master|
         data = Formatter::Substitution.setup_data(master.player_contacts[0], master.player_contacts[1])
-        res = Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
+        Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
       end
     end
 
