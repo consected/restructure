@@ -2,51 +2,11 @@
 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab">Details</a></li>
-    <li role="presentation" class=""><a href="#def-dropdowns-block" aria-controls="def-dropdowns-block" role="tab" data-toggle="tab">Dropdowns</a></li>
-    <li role="presentation" class=""><a href="#def-checkboxes-block" aria-controls="def-checkboxes-block" role="tab" data-toggle="tab">Checkboxes</a></li>
-    <li role="presentation" class=""><a href="#def-radio-block" aria-controls="def-radio-block" role="tab" data-toggle="tab">Radio</a></li>
-    <li role="presentation" class=""><a href="#def-metadata-block" aria-controls="def-metadata-block" role="tab" data-toggle="tab">Metadata</a></li>
+    <%= render partial: 'redcap/data_dictionaries/tabs', object_instance: object_instance %>
   </ul>
 
   <!-- Tab panes -->
   <div class="tab-content">
-
-    <div role="tabpanel" class="tab-pane active" id="def-details-block">
-      <h4>Details</h4>
-      
-      <div>
-        <label>Project name</label>
-        <%= link_to object_instance.redcap_project_admin_name, object_instance.redcap_project_admin %>
-      </div>
-      <%= render partial: 'forms_and_fields', locals: { object_instance: object_instance }%>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="def-dropdowns-block">
-      <h4>Dropdowns</h4>
-      <%= render partial: 'dropdowns_defs', locals: { object_instance: object_instance }%>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="def-checkboxes-block">
-      <h4>Checkboxes</h4>
-      <%= render partial: 'checkboxes_defs', locals: { object_instance: object_instance }%>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="def-radio-block">
-      <h4>Radio</h4>
-      <%= render partial: 'radio_defs', locals: { object_instance: object_instance }%>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="def-metadata-block">
-      <h4>Metadata</h4>
-      
-      <% if object_instance.captured_metadata.present?%>
-        <div class="admin-options-ref-textarea-block">
-          <textarea style="font-size: 12px" class="extra-help-info">
-<%= object_instance.captured_metadata.to_yaml%>
-          </textarea>
-        </div>
-      <% end%>
-    </div>
+    <%= render partial: 'redcap/data_dictionaries/tab_panels', object_instance: object_instance %>
   </div>
 </div>

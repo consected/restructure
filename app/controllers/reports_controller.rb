@@ -52,7 +52,7 @@ class ReportsController < UserBaseController
       return
     end
 
-    if search_attrs_params_hash && !no_run
+    if params[:search_attrs] && !no_run
       # Search attributes or data reference parameters have been provided
       # and the query should be run
       begin
@@ -224,11 +224,12 @@ class ReportsController < UserBaseController
       nil
     end
 
-    if report_model.respond_to?(:no_master_association) && report_model.no_master_association || !report_model.respond_to?(:master)
-      @report_item = report_model.new(build_with)
-    else
-      @report_item = @master.send(report_model.to_s.ns_underscore.pluralize).build(build_with)
-    end
+    @report_item = if report_model.respond_to?(:no_master_association) && report_model.no_master_association ||
+                      !report_model.respond_to?(:master)
+                     report_model.new(build_with)
+                   else
+                     @master.send(report_model.to_s.ns_underscore.pluralize).build(build_with)
+                   end
   end
 
   # :id parameter can be either an integer ID, or a string, which looks up a item_type__short_name
@@ -330,8 +331,8 @@ class ReportsController < UserBaseController
     throw(:abort)
   end
 
-  def index_path(p)
-    reports_path p
+  def index_path(par)
+    reports_path par
   end
 
   def handle_bad_search_query(exception)

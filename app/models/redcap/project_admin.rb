@@ -17,7 +17,6 @@ module Redcap
 
     validate :name, -> { already_taken(:name) ? errors.add(:name, 'already exists') : true }
     validate :api_key, -> { already_taken(:api_key) ? errors.add(:api_key, 'already exists') : true }
-    validate :server_url, -> { already_taken(:server_url) ? errors.add(:server_url, 'already exists') : true }
 
     before_save :empty_disabled_api_key
     # After save, capture the project info from REDCap
