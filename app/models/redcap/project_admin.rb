@@ -3,6 +3,32 @@
 module Redcap
   #
   # Representation of a Redcap project as configured by an administrator
+  # This is retrieved from a REDCap JSON structure, a Hash:
+  # {
+  #   "project_id": '77',
+  #   "project_title": 'q2_demo',
+  #   "creation_time": '2019-01-17 14:02:14',
+  #   "production_time": '',
+  #   "in_production": '0',
+  #   "project_language": 'English',
+  #   "purpose": '2',
+  #   "purpose_other": '5',
+  #   "project_notes": 'Demo project for the Q2 survey (03/15/2019)',
+  #   "custom_record_label": '[redcap_survey_identifier]',
+  #   "secondary_unique_field": '',
+  #   "is_longitudinal": 0,
+  #   "surveys_enabled": '1',
+  #   "scheduling_enabled": '0',
+  #   "record_autonumbering_enabled": '1',
+  #   "randomization_enabled": '0',
+  #   "ddp_enabled": '0',
+  #   "project_irb_number": '',
+  #   "project_grant_number": '',
+  #   "project_pi_firstname": '',
+  #   "project_pi_lastname": '',
+  #   "display_today_now_button": '1',
+  #   "has_repeating_instruments_or_events": 0
+  # }
   class ProjectAdmin < Admin::AdminBase
     include AdminHandler
 
@@ -11,6 +37,7 @@ module Redcap
     has_one :redcap_data_dictionary, class_name: 'Redcap::DataDictionary', foreign_key: :redcap_project_admin_id
     has_many :redcap_client_requests, class_name: 'Redcap::ClientRequest'
 
+    validates :study, presence: true, unless: -> { disabled? }
     validates :name, presence: true, unless: -> { disabled? }
     validates :api_key, presence: true, unless: -> { disabled? }
     validates :server_url, presence: true, unless: -> { disabled? }

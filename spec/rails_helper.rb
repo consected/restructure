@@ -35,6 +35,9 @@ put_now 'Require rspec/rails'
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 
+put_now 'Require webmock'
+require 'webmock/rspec'
+
 put_now 'Browser setups'
 require 'capybara/rspec'
 require 'browser_helper'

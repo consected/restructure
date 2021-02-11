@@ -15,6 +15,7 @@ module Redcap
 
     belongs_to :redcap_project_admin, class_name: 'Redcap::ProjectAdmin', foreign_key: :redcap_project_admin_id
 
+    after_save :refresh_variables_records, if: -> { captured_metadata }
     after_save :refresh_choices_records, if: -> { captured_metadata }
 
     #
@@ -58,7 +59,27 @@ module Redcap
       @source_name ||= URI.parse(redcap_project_admin.server_url).host
     end
 
+    #
+    # Shortcut to the study name
+    # @return [String]
+    def study
+      redcap_project_admin.study
+    end
+
     private
+
+    #
+    # Datadic::Variable records need to be updated to match the new metadata
+    # if there have been changes, additions or deletions
+    def refresh_variables_records
+      return unless captured_metadata
+
+      forms.each do |_k, form|
+        form.fields.each do |_k, field|
+          field.refresh_variable_record
+        end
+      end
+    end
 
     #
     # Datadic::Choice records need to be updated to match the new metadata
@@ -68,7 +89,7 @@ module Redcap
 
       forms.each do |_k, form|
         form.fields.each do |_k, field|
-          field.field_type.refresh_choices_records
+          field.field_choices.refresh_choices_records
         end
       end
     end

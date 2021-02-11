@@ -565,7 +565,7 @@ module ActiveRecord
             f = :timestamp
           elsif a.index(/^(?:select_)|^(?:notes|data)$|(?:_name)$/)
             f = :string
-          elsif a.index(/(?:_check)$/)
+          elsif a.index(/^(?:is_|has_)|(?:_check|_bool)$/)
             f = :boolean
           elsif a.index(/(?:_id)$/)
             f = :bigint
@@ -584,7 +584,7 @@ module ActiveRecord
             fopts[:comment] = comment
           end
 
-          if a.start_with?('tag_select') || a.start_with?('multi_select')
+          if a.start_with?('tag_select') || a.start_with?('multi_')
             fopts ||= {}
             fopts[:array] = true
           end

@@ -11,7 +11,7 @@
           <label><%=field.name%></label><p><%=field.label_plain%></p>
         </div>
         <div>
-          <%= select_tag :dummy, options_for_select(field.field_type.choices(rails_format: true))%>
+          <%= select_tag :dummy, options_for_select(field.field_choices.choices(rails_format: true))%>
         </div>
         <div>
           <%= render partial: 'redcap/data_dictionaries/choices_table', locals: {field: field} %>

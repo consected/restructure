@@ -5,7 +5,9 @@
         no_active = false 
       end
       @rc_data_dictionary = object_instance.redcap_data_dictionary if object_instance.respond_to? :redcap_data_dictionary
-      @rc_data_dictionary ||= object_instance
+      @rc_data_dictionary ||= object_instance if object_instance.is_a? Redcap::DataDictionary
+
+      if @rc_data_dictionary
     %>
     <div role="tabpanel" class="tab-pane <%= no_active ? '' : 'active'%>" id="def-dd-details-block">
       <h4>Details</h4>
@@ -43,3 +45,5 @@
         </div>
       <% end%>
     </div>
+
+    <% end %>

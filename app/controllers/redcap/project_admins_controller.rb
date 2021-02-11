@@ -51,6 +51,6 @@ class Redcap::ProjectAdminsController < AdminController
   end
 
   def permitted_params
-    %i[name server_url api_key transfer_mode frequency status disabled notes]
+    %i[study name server_url api_key transfer_mode frequency status disabled notes]
   end
 end

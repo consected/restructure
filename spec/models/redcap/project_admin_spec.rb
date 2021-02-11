@@ -15,12 +15,14 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
 
   it 'requires an admin' do
     expect do
-      Redcap::ProjectAdmin.create! current_admin: nil, name: 'test', api_key: 'abc', server_url: 'https://testapi'
+      Redcap::ProjectAdmin.create! current_admin: nil, name: 'test', api_key: 'abc', server_url: 'https://testapi',
+                                   study: 'Q2 Demo'
     end
       .to raise_error('Current admin not set')
 
     expect do
-      Redcap::ProjectAdmin.create! current_admin: @bad_admin, name: 'test', api_key: 'abc', server_url: 'https://testapi'
+      Redcap::ProjectAdmin.create! current_admin: @bad_admin, name: 'test', api_key: 'abc',
+                                   server_url: 'https://testapi', study: 'Q2 Demo'
     end
       .to raise_error('Admin not enabled')
   end
@@ -31,14 +33,16 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
 
     expect(Redcap::ProjectAdmin.active.find_by_name(name)).not_to be_nil
 
-    res = Redcap::ProjectAdmin.new current_admin: @admin, name: name, api_key: 'abc', server_url: 'https://testapi'
+    res = Redcap::ProjectAdmin.new current_admin: @admin, name: name, api_key: 'abc', server_url: 'https://testapi',
+                                   study: 'Q2 Demo'
     expect(res.save).to eq false
     expect(res.errors).to include :name
   end
 
-  it 'has a name, api_key and server_url that must be present' do
-    res = Redcap::ProjectAdmin.new current_admin: @admin, name: nil, api_key: nil, server_url: nil
+  it 'has a study, name, api_key and server_url that must be present' do
+    res = Redcap::ProjectAdmin.new current_admin: @admin, name: nil, api_key: nil, server_url: nil, study: nil
     expect(res.save).to eq false
+    expect(res.errors).to include :study
     expect(res.errors).to include :name
     expect(res.errors).to include :api_key
     expect(res.errors).to include :server_url
@@ -51,7 +55,8 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
     rc = Redcap::ProjectAdmin.create! current_admin: @admin,
                                       name: p[:name],
                                       api_key: p[:api_key],
-                                      server_url: p[:server_url]
+                                      server_url: p[:server_url],
+                                      study: 'Q2 Demo'
 
     expect(rc.api_key).to eq p[:api_key]
 
