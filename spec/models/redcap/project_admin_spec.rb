@@ -87,6 +87,6 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
   it 'stores the project info for future reference' do
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
-    expect(rc.captured_project_info).to eq rc.project_client.project
+    expect(rc.captured_project_info).to eq rc.api_client.project
   end
 end

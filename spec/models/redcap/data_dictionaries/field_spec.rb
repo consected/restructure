@@ -53,6 +53,27 @@ RSpec.describe Redcap::DataDictionaries::Field, type: :model do
     expect(check_field.checkbox_choice_fields.first).to match(/^#{check_field.name}___.+$/)
   end
 
+  it 'gets a full list of fields to be persisted to' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    forms = rc.redcap_data_dictionary.forms
+    form = forms.first.last
+
+    fs = Redcap::DataDictionaries::Field.all_retrievable_fields(form)
+
+    expect(fs.keys).to eq %i[record_id dob current_weight smoketime___pnfl smoketime___dnfl smoketime___anfl smoke_start smoke_stop
+                             smoke_curr demog_date ncmedrec_add ladder_wealth ladder_comm born_address twelveyrs_address
+                             othealth___complete othealth_date]
+
+    form = forms[forms.keys.last]
+    fs = Redcap::DataDictionaries::Field.all_retrievable_fields(form)
+
+    expect(fs.keys).to eq %i[sdfsdaf___0 sdfsdaf___1 sdfsdaf___2
+                             rtyrtyrt___0 rtyrtyrt___1 rtyrtyrt___2
+                             test_field test_phone i57 f57 dd yes_or_no]
+  end
+
   it 'automatically populates relationship between "checkbox" type fields' do
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin

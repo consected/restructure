@@ -37,6 +37,7 @@ require 'rspec/rails'
 
 put_now 'Require webmock'
 require 'webmock/rspec'
+WebMock.allow_net_connect!
 
 put_now 'Browser setups'
 require 'capybara/rspec'
@@ -99,6 +100,11 @@ Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 # If you are not using ActiveRecord, you can remove this line.
 put_now 'Enforce migrations'
 ActiveRecord::Migration.maintain_test_schema!
+
+sql = 'DROP SCHEMA IF EXISTS redcap_test CASCADE; CREATE SCHEMA redcap_test;'
+ActiveRecord::Base.connection.execute sql
+db_migration_dirname = Rails.root.join('spec/migrations')
+ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
 
 RSpec.configure do |config|
   config.before(:suite) do

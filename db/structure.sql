@@ -44,10 +44,24 @@ CREATE SCHEMA persnet;
 
 
 --
+-- Name: redcap_test; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA redcap_test;
+
+
+--
 -- Name: ref_data; Type: SCHEMA; Schema: -; Owner: -
 --
 
 CREATE SCHEMA ref_data;
+
+
+--
+-- Name: test; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA test;
 
 
 --
@@ -8325,6 +8339,58 @@ CREATE FUNCTION ml_app.log_activity_log_new_test_update() RETURNS trigger
 
 
 --
+-- Name: log_activity_log_player_contact_elt_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_activity_log_player_contact_elt_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO activity_log_player_contact_elt_history
+                  (
+                      master_id,
+                      player_contact_id,
+                      data,
+                      select_call_direction,
+                      select_who,
+                      called_when,
+                      select_result,
+                      select_next_step,
+                      follow_up_when,
+                      notes,
+                      protocol_id,
+                      set_related_player_contact_rank,
+                      extra_log_type,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      activity_log_player_contact_elt_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.player_contact_id,
+                      NEW.data,
+                      NEW.select_call_direction,
+                      NEW.select_who,
+                      NEW.called_when,
+                      NEW.select_result,
+                      NEW.select_next_step,
+                      NEW.follow_up_when,
+                      NEW.notes,
+                      NEW.protocol_id,
+                      NEW.set_related_player_contact_rank,
+                      NEW.extra_log_type,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
 -- Name: log_activity_log_player_contact_email_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -12024,6 +12090,33 @@ CREATE FUNCTION ml_app.log_user_update() RETURNS trigger
 
 
 --
+-- Name: redcap_data_dictionary_history_upd(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.redcap_data_dictionary_history_upd() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO redcap_data_dictionary_history (
+    redcap_project_admin_id, field_count, captured_metadata,
+    disabled,
+    admin_id,
+    created_at,
+    updated_at,
+    redcap_data_dictionary_id)
+  SELECT
+    NEW.redcap_project_admin_id, NEW.field_count, NEW.captured_metadata,
+    NEW.disabled,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: redcap_project_admin_history_upd(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -12032,14 +12125,14 @@ CREATE FUNCTION ml_app.redcap_project_admin_history_upd() RETURNS trigger
     AS $$
 BEGIN
   INSERT INTO redcap_project_admin_history (
-    name, api_key, server_url, captured_project_info, study,
+    name, api_key, server_url, captured_project_info, study, transfer_mode, frequency, status, post_transfer_pipeline, notes, dynamic_model_table,
     disabled,
     admin_id,
     created_at,
     updated_at,
     redcap_project_admin_id)
   SELECT
-    NEW.name, NEW.api_key, NEW.server_url, NEW.captured_project_info, NEW.study,
+    NEW.name, NEW.api_key, NEW.server_url, NEW.captured_project_info, NEW.study, NEW.transfer_mode, NEW.frequency, NEW.status, NEW.post_transfer_pipeline, NEW.notes, NEW.dynamic_model_table,
     NEW.disabled,
     NEW.admin_id,
     NEW.created_at,
@@ -14645,6 +14738,33 @@ BEGIN
     NEW.name, NEW.api_key, NEW.server_url, NEW.captured_project_info, NEW.transfer_mode, NEW.frequency, NEW.status, NEW.post_transfer_pipeline, NEW.notes,
     NEW.disabled,
     NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_rc_sample_responses_update(); Type: FUNCTION; Schema: test; Owner: -
+--
+
+CREATE FUNCTION test.log_rc_sample_responses_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO rc_sample_response_history (
+    
+    record_id, dob, current_weight, smoketime___pnfl, smoketime___dnfl, smoketime___anfl, smoke_start, smoke_stop, smoke_curr, demog_date, ncmedrec_add, ladder_wealth, ladder_comm, born_address, twelveyrs_address, othealth___complete, othealth_date, sdfsdaf___0, sdfsdaf___1, sdfsdaf___2, rtyrtyrt___0, rtyrtyrt___1, rtyrtyrt___2, test_field, test_phone, i57, f57, dd, yes_or_no,
+    user_id,
+    created_at,
+    updated_at,
+    rc_sample_response_id)
+  SELECT
+    
+    NEW.record_id, NEW.dob, NEW.current_weight, NEW.smoketime___pnfl, NEW.smoketime___dnfl, NEW.smoketime___anfl, NEW.smoke_start, NEW.smoke_stop, NEW.smoke_curr, NEW.demog_date, NEW.ncmedrec_add, NEW.ladder_wealth, NEW.ladder_comm, NEW.born_address, NEW.twelveyrs_address, NEW.othealth___complete, NEW.othealth_date, NEW.sdfsdaf___0, NEW.sdfsdaf___1, NEW.sdfsdaf___2, NEW.rtyrtyrt___0, NEW.rtyrtyrt___1, NEW.rtyrtyrt___2, NEW.test_field, NEW.test_phone, NEW.i57, NEW.f57, NEW.dd, NEW.yes_or_no,
+    NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
     NEW.id;
@@ -31087,54 +31207,6 @@ ALTER SEQUENCE ipa_ops.nfs_store_trash_actions_id_seq OWNED BY ipa_ops.nfs_store
 
 
 --
--- Name: masters; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.masters (
-    id integer NOT NULL,
-    msid integer,
-    pro_id integer,
-    pro_info_id integer,
-    rank integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    user_id integer,
-    contact_id integer
-);
-
-
---
--- Name: q1_ages; Type: VIEW; Schema: ipa_ops; Owner: -
---
-
-CREATE VIEW ipa_ops.q1_ages AS
- SELECT m.id AS master_id,
-    surveys.msid,
-    surveys.q1_date,
-    surveys.q1_dob,
-    surveys.q1_age,
-    pi.birth_date AS ml_app_dob,
-    (surveys.q1_dob = pi.birth_date) AS q1_ml_app_dob_match,
-    (date_part('year'::text, age(surveys.q1_date, (surveys.q1_dob)::timestamp without time zone)))::integer AS q1_calc_age,
-    (date_part('year'::text, age(surveys.q1_date, (pi.birth_date)::timestamp without time zone)))::integer AS ml_app_calc_age,
-    ((date_part('year'::text, age(surveys.q1_date, (surveys.q1_dob)::timestamp without time zone)) >= (24)::double precision) AND (date_part('year'::text, age(surveys.q1_date, (surveys.q1_dob)::timestamp without time zone)) <= (55)::double precision)) AS q1_age_eligible_for_ipa,
-    ((date_part('year'::text, age(surveys.q1_date, (pi.birth_date)::timestamp without time zone)) >= (24)::double precision) AND (date_part('year'::text, age(surveys.q1_date, (pi.birth_date)::timestamp without time zone)) <= (55)::double precision)) AS ml_app_age_eligible_for_ipa
-   FROM ((ml_app.masters m
-     JOIN ml_app.player_infos pi ON ((pi.master_id = m.id)))
-     JOIN ( SELECT sc_stage.msid,
-            sc_stage.opp_date AS q1_date,
-            sc_stage.dob AS q1_dob,
-            sc_stage.age AS q1_age
-           FROM q1.sc_stage
-        UNION
-         SELECT rc_stage.redcap_survey_identifier AS msid,
-            rc_stage.football_players_health_study_questionnaire_1_timestamp AS q1_date,
-            rc_stage.dob AS q1_dob,
-            rc_stage.age AS q1_age
-           FROM q1.rc_stage) surveys ON ((m.msid = surveys.msid)));
-
-
---
 -- Name: user_role_history; Type: TABLE; Schema: ipa_ops; Owner: -
 --
 
@@ -31558,6 +31630,95 @@ CREATE SEQUENCE ml_app.activity_log_new_tests_id_seq
 --
 
 ALTER SEQUENCE ml_app.activity_log_new_tests_id_seq OWNED BY ml_app.activity_log_new_tests.id;
+
+
+--
+-- Name: activity_log_player_contact_elt_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_player_contact_elt_history (
+    id integer NOT NULL,
+    master_id integer,
+    player_contact_id integer,
+    data character varying,
+    select_call_direction character varying,
+    select_who character varying,
+    called_when date,
+    select_result character varying,
+    select_next_step character varying,
+    follow_up_when date,
+    notes character varying,
+    protocol_id bigint,
+    set_related_player_contact_rank character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_player_contact_elt_id integer
+);
+
+
+--
+-- Name: activity_log_player_contact_elt_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_player_contact_elt_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_player_contact_elt_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_player_contact_elt_history_id_seq OWNED BY ml_app.activity_log_player_contact_elt_history.id;
+
+
+--
+-- Name: activity_log_player_contact_elts; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_player_contact_elts (
+    id integer NOT NULL,
+    master_id integer,
+    player_contact_id integer,
+    data character varying,
+    select_call_direction character varying,
+    select_who character varying,
+    called_when date,
+    select_result character varying,
+    select_next_step character varying,
+    follow_up_when date,
+    notes character varying,
+    protocol_id bigint,
+    set_related_player_contact_rank character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_player_contact_elts_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_player_contact_elts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_player_contact_elts_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_player_contact_elts_id_seq OWNED BY ml_app.activity_log_player_contact_elts.id;
 
 
 --
@@ -33194,21 +33355,6 @@ ALTER SEQUENCE ml_app.imports_id_seq OWNED BY ml_app.imports.id;
 
 
 --
--- Name: ipa_recruitment_ranks; Type: VIEW; Schema: ml_app; Owner: -
---
-
-CREATE VIEW ml_app.ipa_recruitment_ranks AS
- SELECT ranks.id,
-    ranks.master_id,
-    ranks.rank,
-    ages.ml_app_age_eligible_for_ipa,
-    now() AS created_at,
-    now() AS updated_at
-   FROM (ipa_ops.ipa_recruitment_ranks ranks
-     JOIN ipa_ops.q1_ages ages ON ((ranks.master_id = ages.master_id)));
-
-
---
 -- Name: item_flag_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -33420,6 +33566,23 @@ CREATE VIEW ml_app.marketo_master_ids AS
     NULL::integer AS user_id
    FROM (ml_app.marketo_ids mi
      JOIN ml_app.player_contacts pc ON ((((pc.data)::text = (mi.email)::text) AND ((pc.rec_type)::text = 'email'::text))));
+
+
+--
+-- Name: masters; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.masters (
+    id integer NOT NULL,
+    msid integer,
+    pro_id integer,
+    pro_info_id integer,
+    rank integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    user_id integer,
+    contact_id integer
+);
 
 
 --
@@ -34738,35 +34901,6 @@ CREATE SEQUENCE ml_app.protocols_id_seq
 --
 
 ALTER SEQUENCE ml_app.protocols_id_seq OWNED BY ml_app.protocols.id;
-
-
---
--- Name: q1_rc_links; Type: VIEW; Schema: ml_app; Owner: -
---
-
-CREATE VIEW ml_app.q1_rc_links AS
- SELECT rc_links.id,
-    rc_links.master_id,
-    rc_links.link AS q1_rc_link_ext_id,
-    NULL::timestamp without time zone AS created_at,
-    NULL::timestamp without time zone AS updated_at,
-    NULL::integer AS user_id
-   FROM q1.rc_links;
-
-
---
--- Name: q2_rc_links; Type: VIEW; Schema: ml_app; Owner: -
---
-
-CREATE VIEW ml_app.q2_rc_links AS
- SELECT rc.id,
-    masters.id AS master_id,
-    split_part((rc.link)::text, '='::text, 2) AS q2_rc_link_ext_id,
-    NULL::timestamp without time zone AS created_at,
-    NULL::timestamp without time zone AS updated_at,
-    NULL::integer AS user_id
-   FROM (q2.rc_links rc
-     JOIN ml_app.masters ON ((masters.msid = rc.msid)));
 
 
 --
@@ -36780,7 +36914,8 @@ CREATE TABLE ref_data.redcap_client_requests (
     server_url character varying,
     admin_id bigint,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    result jsonb
 );
 
 
@@ -36817,7 +36952,6 @@ ALTER SEQUENCE ref_data.redcap_client_requests_id_seq OWNED BY ref_data.redcap_c
 CREATE TABLE ref_data.redcap_data_dictionaries (
     id bigint NOT NULL,
     redcap_project_admin_id bigint,
-    dynamic_model_res_name character varying,
     field_count integer,
     captured_metadata jsonb,
     disabled boolean,
@@ -36861,7 +36995,6 @@ CREATE TABLE ref_data.redcap_data_dictionary_history (
     id bigint NOT NULL,
     redcap_data_dictionary_id bigint,
     redcap_project_admin_id bigint,
-    dynamic_model_res_name character varying,
     field_count integer,
     captured_metadata jsonb,
     disabled boolean,
@@ -36917,7 +37050,8 @@ CREATE TABLE ref_data.redcap_project_admin_history (
     status character varying,
     post_transfer_pipeline character varying[] DEFAULT '{}'::character varying[],
     notes character varying,
-    study character varying
+    study character varying,
+    dynamic_model_table character varying
 );
 
 
@@ -36966,7 +37100,8 @@ CREATE TABLE ref_data.redcap_project_admins (
     status character varying,
     post_transfer_pipeline character varying[] DEFAULT '{}'::character varying[],
     notes character varying,
-    study character varying
+    study character varying,
+    dynamic_model_table character varying
 );
 
 
@@ -36994,6 +37129,134 @@ CREATE SEQUENCE ref_data.redcap_project_admins_id_seq
 --
 
 ALTER SEQUENCE ref_data.redcap_project_admins_id_seq OWNED BY ref_data.redcap_project_admins.id;
+
+
+--
+-- Name: rc_sample_response_history; Type: TABLE; Schema: test; Owner: -
+--
+
+CREATE TABLE test.rc_sample_response_history (
+    id bigint NOT NULL,
+    record_id character varying,
+    dob date,
+    current_weight numeric,
+    smoketime___pnfl boolean,
+    smoketime___dnfl boolean,
+    smoketime___anfl boolean,
+    smoke_start numeric,
+    smoke_stop numeric,
+    smoke_curr character varying,
+    demog_date timestamp without time zone,
+    ncmedrec_add character varying,
+    ladder_wealth character varying,
+    ladder_comm character varying,
+    born_address character varying,
+    twelveyrs_address character varying,
+    othealth___complete boolean,
+    othealth_date timestamp without time zone,
+    sdfsdaf___0 boolean,
+    sdfsdaf___1 boolean,
+    sdfsdaf___2 boolean,
+    rtyrtyrt___0 boolean,
+    rtyrtyrt___1 boolean,
+    rtyrtyrt___2 boolean,
+    test_field character varying,
+    test_phone character varying,
+    i57 integer,
+    f57 numeric,
+    dd timestamp without time zone,
+    yes_or_no boolean,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    rc_sample_response_id bigint
+);
+
+
+--
+-- Name: rc_sample_response_history_id_seq; Type: SEQUENCE; Schema: test; Owner: -
+--
+
+CREATE SEQUENCE test.rc_sample_response_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: rc_sample_response_history_id_seq; Type: SEQUENCE OWNED BY; Schema: test; Owner: -
+--
+
+ALTER SEQUENCE test.rc_sample_response_history_id_seq OWNED BY test.rc_sample_response_history.id;
+
+
+--
+-- Name: rc_sample_responses; Type: TABLE; Schema: test; Owner: -
+--
+
+CREATE TABLE test.rc_sample_responses (
+    id bigint NOT NULL,
+    record_id character varying,
+    dob date,
+    current_weight numeric,
+    smoketime___pnfl boolean,
+    smoketime___dnfl boolean,
+    smoketime___anfl boolean,
+    smoke_start numeric,
+    smoke_stop numeric,
+    smoke_curr character varying,
+    demog_date timestamp without time zone,
+    ncmedrec_add character varying,
+    ladder_wealth character varying,
+    ladder_comm character varying,
+    born_address character varying,
+    twelveyrs_address character varying,
+    othealth___complete boolean,
+    othealth_date timestamp without time zone,
+    sdfsdaf___0 boolean,
+    sdfsdaf___1 boolean,
+    sdfsdaf___2 boolean,
+    rtyrtyrt___0 boolean,
+    rtyrtyrt___1 boolean,
+    rtyrtyrt___2 boolean,
+    test_field character varying,
+    test_phone character varying,
+    i57 integer,
+    f57 numeric,
+    dd timestamp without time zone,
+    yes_or_no boolean,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE rc_sample_responses; Type: COMMENT; Schema: test; Owner: -
+--
+
+COMMENT ON TABLE test.rc_sample_responses IS 'Dynamicmodel: Rc Sample Response';
+
+
+--
+-- Name: rc_sample_responses_id_seq; Type: SEQUENCE; Schema: test; Owner: -
+--
+
+CREATE SEQUENCE test.rc_sample_responses_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: rc_sample_responses_id_seq; Type: SEQUENCE OWNED BY; Schema: test; Owner: -
+--
+
+ALTER SEQUENCE test.rc_sample_responses_id_seq OWNED BY test.rc_sample_responses.id;
 
 
 --
@@ -38253,6 +38516,20 @@ ALTER TABLE ONLY ml_app.activity_log_new_tests ALTER COLUMN id SET DEFAULT nextv
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.activity_log_player_contact_elt_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_player_contact_elt_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_contact_elts ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_player_contact_elts_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.activity_log_player_contact_email_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_player_contact_email_history_id_seq'::regclass);
 
 
@@ -39213,6 +39490,20 @@ ALTER TABLE ONLY ref_data.redcap_project_admin_history ALTER COLUMN id SET DEFAU
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_admins ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_project_admins_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: test; Owner: -
+--
+
+ALTER TABLE ONLY test.rc_sample_response_history ALTER COLUMN id SET DEFAULT nextval('test.rc_sample_response_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: test; Owner: -
+--
+
+ALTER TABLE ONLY test.rc_sample_responses ALTER COLUMN id SET DEFAULT nextval('test.rc_sample_responses_id_seq'::regclass);
 
 
 --
@@ -40656,6 +40947,22 @@ ALTER TABLE ONLY ml_app.activity_log_new_tests
 
 
 --
+-- Name: activity_log_player_contact_elt_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_contact_elt_history
+    ADD CONSTRAINT activity_log_player_contact_elt_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_player_contact_elts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_contact_elts
+    ADD CONSTRAINT activity_log_player_contact_elts_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: activity_log_player_contact_email_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -41757,6 +42064,22 @@ ALTER TABLE ONLY ref_data.redcap_project_admin_history
 
 ALTER TABLE ONLY ref_data.redcap_project_admins
     ADD CONSTRAINT redcap_project_admins_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: rc_sample_response_history_pkey; Type: CONSTRAINT; Schema: test; Owner: -
+--
+
+ALTER TABLE ONLY test.rc_sample_response_history
+    ADD CONSTRAINT rc_sample_response_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: rc_sample_responses_pkey; Type: CONSTRAINT; Schema: test; Owner: -
+--
+
+ALTER TABLE ONLY test.rc_sample_responses
+    ADD CONSTRAINT rc_sample_responses_pkey PRIMARY KEY (id);
 
 
 --
@@ -45057,6 +45380,27 @@ CREATE INDEX index_activity_log_new_tests_on_user_id ON ml_app.activity_log_new_
 
 
 --
+-- Name: index_activity_log_player_contact_elts_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_contact_elts_on_master_id ON ml_app.activity_log_player_contact_elts USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_player_contact_elts_on_player_contact_elt_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_contact_elts_on_player_contact_elt_id ON ml_app.activity_log_player_contact_elts USING btree (player_contact_id);
+
+
+--
+-- Name: index_activity_log_player_contact_elts_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_contact_elts_on_user_id ON ml_app.activity_log_player_contact_elts USING btree (user_id);
+
+
+--
 -- Name: index_activity_log_player_contact_emails_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -45278,6 +45622,34 @@ CREATE INDEX index_admin_history_on_upd_admin_id ON ml_app.admin_history USING b
 --
 
 CREATE INDEX index_admins_on_admin_id ON ml_app.admins USING btree (admin_id);
+
+
+--
+-- Name: index_al_player_contact_elt_history_on_activity_log_player_cont; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_al_player_contact_elt_history_on_activity_log_player_cont ON ml_app.activity_log_player_contact_elt_history USING btree (activity_log_player_contact_elt_id);
+
+
+--
+-- Name: index_al_player_contact_elt_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_al_player_contact_elt_history_on_master_id ON ml_app.activity_log_player_contact_elt_history USING btree (master_id);
+
+
+--
+-- Name: index_al_player_contact_elt_history_on_player_contact_elt_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_al_player_contact_elt_history_on_player_contact_elt_id ON ml_app.activity_log_player_contact_elt_history USING btree (player_contact_id);
+
+
+--
+-- Name: index_al_player_contact_elt_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_al_player_contact_elt_history_on_user_id ON ml_app.activity_log_player_contact_elt_history USING btree (user_id);
 
 
 --
@@ -47290,6 +47662,27 @@ CREATE INDEX "index_ref_data.datadic_variables_on_redcap_data_dictionary_id" ON 
 
 
 --
+-- Name: 865cf264_id_idx; Type: INDEX; Schema: test; Owner: -
+--
+
+CREATE INDEX "865cf264_id_idx" ON test.rc_sample_response_history USING btree (rc_sample_response_id);
+
+
+--
+-- Name: 865cf264_user_idx; Type: INDEX; Schema: test; Owner: -
+--
+
+CREATE INDEX "865cf264_user_idx" ON test.rc_sample_response_history USING btree (user_id);
+
+
+--
+-- Name: index_test.rc_sample_responses_on_user_id; Type: INDEX; Schema: test; Owner: -
+--
+
+CREATE INDEX "index_test.rc_sample_responses_on_user_id" ON test.rc_sample_responses USING btree (user_id);
+
+
+--
 -- Name: activity_log_zeus_bulk_message_history_insert; Type: TRIGGER; Schema: bulk_msg; Owner: -
 --
 
@@ -49040,6 +49433,20 @@ CREATE TRIGGER activity_log_new_test_history_update AFTER UPDATE ON ml_app.activ
 
 
 --
+-- Name: activity_log_player_contact_elt_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_player_contact_elt_history_insert AFTER INSERT ON ml_app.activity_log_player_contact_elts FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_player_contact_elt_update();
+
+
+--
+-- Name: activity_log_player_contact_elt_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_player_contact_elt_history_update AFTER UPDATE ON ml_app.activity_log_player_contact_elts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_player_contact_elt_update();
+
+
+--
 -- Name: activity_log_player_contact_email_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -49911,14 +50318,14 @@ CREATE TRIGGER log_datadic_variable_history_update AFTER UPDATE ON ref_data.data
 -- Name: log_redcap_data_dictionary_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_data_dictionary_history_insert AFTER INSERT ON ref_data.redcap_data_dictionaries FOR EACH ROW EXECUTE PROCEDURE ref_data.redcap_data_dictionary_history_upd();
+CREATE TRIGGER log_redcap_data_dictionary_history_insert AFTER INSERT ON ref_data.redcap_data_dictionaries FOR EACH ROW EXECUTE PROCEDURE ml_app.redcap_data_dictionary_history_upd();
 
 
 --
 -- Name: log_redcap_data_dictionary_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_data_dictionary_history_update AFTER UPDATE ON ref_data.redcap_data_dictionaries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ref_data.redcap_data_dictionary_history_upd();
+CREATE TRIGGER log_redcap_data_dictionary_history_update AFTER UPDATE ON ref_data.redcap_data_dictionaries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.redcap_data_dictionary_history_upd();
 
 
 --
@@ -49933,6 +50340,20 @@ CREATE TRIGGER log_redcap_project_admin_history_insert AFTER INSERT ON ref_data.
 --
 
 CREATE TRIGGER log_redcap_project_admin_history_update AFTER UPDATE ON ref_data.redcap_project_admins FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.redcap_project_admin_history_upd();
+
+
+--
+-- Name: log_rc_sample_response_history_insert; Type: TRIGGER; Schema: test; Owner: -
+--
+
+CREATE TRIGGER log_rc_sample_response_history_insert AFTER INSERT ON test.rc_sample_responses FOR EACH ROW EXECUTE PROCEDURE test.log_rc_sample_responses_update();
+
+
+--
+-- Name: log_rc_sample_response_history_update; Type: TRIGGER; Schema: test; Owner: -
+--
+
+CREATE TRIGGER log_rc_sample_response_history_update AFTER UPDATE ON test.rc_sample_responses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE test.log_rc_sample_responses_update();
 
 
 --
@@ -53632,6 +54053,38 @@ ALTER TABLE ONLY ml_app.activity_log_new_test_history
 
 
 --
+-- Name: fk_activity_log_player_contact_elt_history_activity_log_player_; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_contact_elt_history
+    ADD CONSTRAINT fk_activity_log_player_contact_elt_history_activity_log_player_ FOREIGN KEY (activity_log_player_contact_elt_id) REFERENCES ml_app.activity_log_player_contact_elts(id);
+
+
+--
+-- Name: fk_activity_log_player_contact_elt_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_contact_elt_history
+    ADD CONSTRAINT fk_activity_log_player_contact_elt_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_activity_log_player_contact_elt_history_player_contact_elt_i; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_contact_elt_history
+    ADD CONSTRAINT fk_activity_log_player_contact_elt_history_player_contact_elt_i FOREIGN KEY (player_contact_id) REFERENCES ml_app.player_contacts(id);
+
+
+--
+-- Name: fk_activity_log_player_contact_elt_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_contact_elt_history
+    ADD CONSTRAINT fk_activity_log_player_contact_elt_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_activity_log_player_contact_email_history_activity_log_playe; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -54504,6 +54957,14 @@ ALTER TABLE ONLY ml_app.test_external_test7_identifiers
 
 
 --
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_contact_elts
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -54896,6 +55357,14 @@ ALTER TABLE ONLY ml_app.test_external_test7_identifiers
 
 
 --
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_contact_elts
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_47b051d356; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -55116,6 +55585,14 @@ ALTER TABLE ONLY ml_app.activity_log_new_tests
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_emails
+    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (player_contact_id) REFERENCES ml_app.player_contacts(id);
+
+
+--
+-- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_contact_elts
     ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (player_contact_id) REFERENCES ml_app.player_contacts(id);
 
 
@@ -56128,10 +56605,34 @@ ALTER TABLE ONLY ref_data.datadic_variable_history
 
 
 --
+-- Name: fk_rails_066f2edc29; Type: FK CONSTRAINT; Schema: test; Owner: -
+--
+
+ALTER TABLE ONLY test.rc_sample_response_history
+    ADD CONSTRAINT fk_rails_066f2edc29 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_a23cbf2dc7; Type: FK CONSTRAINT; Schema: test; Owner: -
+--
+
+ALTER TABLE ONLY test.rc_sample_responses
+    ADD CONSTRAINT fk_rails_a23cbf2dc7 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_cbc85cb383; Type: FK CONSTRAINT; Schema: test; Owner: -
+--
+
+ALTER TABLE ONLY test.rc_sample_response_history
+    ADD CONSTRAINT fk_rails_cbc85cb383 FOREIGN KEY (rc_sample_response_id) REFERENCES test.rc_sample_responses(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app,ipa_ops,testmybrain,persnet,bulk_msg,ref_data;
+SET search_path TO ml_app,ipa_ops,testmybrain,persnet,bulk_msg,ref_data,test,redcap_test;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20150602181200'),
@@ -56999,6 +57500,21 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20210201124324'),
 ('20210204205746'),
 ('20210209095546'),
-('20210209154901');
+('20210209154901'),
+('20210215153201'),
+('20210215184600'),
+('20210216053217'),
+('20210216053444'),
+('20210216054240'),
+('20210216055236'),
+('20210216055844'),
+('20210216060031'),
+('20210216060146'),
+('20210216060638'),
+('20210216064227'),
+('20210216104600'),
+('20210216105700'),
+('20210216132458'),
+('20210216133011');
 
 

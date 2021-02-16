@@ -2,16 +2,16 @@
 
 module Redcap
   #
-  # Direct access to the Redcap gem client, set up with details from a ProjectAdmin record
-  # Each request to the API is recorded in the table for audit
-  class ProjectClient
+  # Direct access to the Redcap gem api_client, set up with details from a ProjectAdmin record
+  # Each request to the API is recorded in the redcap_client_requests table for audit
+  class ApiClient
     CacheExpiresIn = 60.seconds
     ExpectedKeys = %i[server_url api_key name current_admin].freeze
 
     attr_accessor :project_admin, *ExpectedKeys
 
     #
-    # Setup the client against the project admin record:
+    # Setup the api_client against the project admin record:
     # @param [Redcap::ProjectAdmin] req_project_admin - project admin record with current admin:
     def initialize(req_project_admin)
       unless req_project_admin.is_a? Redcap::ProjectAdmin
@@ -43,9 +43,16 @@ module Redcap
 
     #
     # Get the project metadata (data dictionary)
-    # @return [Hash] hash with symbolized keys
+    # @return [Array{Hash}] hash with symbolized keys
     def metadata
       request :metadata
+    end
+
+    #
+    # Get the data records for the project
+    # @return [Array{Hash}] hash with symbolized keys
+    def records
+      request :records
     end
 
     #
@@ -104,7 +111,7 @@ module Redcap
                               name: name,
                               redcap_project_admin: project_admin
 
-        Rails.cache.delete(cache_key(action)) if force_reload
+        clear_cache(action) if force_reload
         Rails.cache.fetch(cache_key(action), expires_in: CacheExpiresIn) do
           post_action action
         end
@@ -113,6 +120,10 @@ module Redcap
 
     def cache_key(action)
       "#{project_admin.id}-#{action}"
+    end
+
+    def clear_cache(action)
+      Rails.cache.delete(cache_key(action))
     end
 
     def post_action(action)

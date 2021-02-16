@@ -66,6 +66,16 @@ module Redcap
         'time' => :to_time
       }.freeze
 
+      # Non-string database types
+      VariableTypesToDatabaseTypes = {
+        'dichotomous' => :boolean,
+        'integer' => :integer,
+        'numeric' => :decimal,
+        'date' => :date,
+        'date time' => :timestamp,
+        'time' => :time
+      }.freeze
+
       attr_accessor :name, :field
 
       def initialize(field, field_type_name)
@@ -114,13 +124,44 @@ module Redcap
         field.def_metadata[:text_validation_type_or_show_slider_number]
       end
 
+      def database_type
+        VariableTypesToDatabaseTypes[default_variable_type] || :string
+      end
+
       #
-      # Use the real data type from the definition to cast the supplied value to the real data type
+      # Use the real data type from the definition to cast the supplied value to the real data type.
+      # We handle '' blank strings carefully, since we don't want blank being converted to numeric zero
       # @param [String] value
       # @return [Object]
       def cast_value_to_real(value)
         real_type = VariableTypesToRealTypes[default_variable_type] || :to_s
+        return nil if value.blank? && real_type != :to_s
+
         value.send(real_type)
+      end
+
+      #
+      # Convert the value stored in the database to a string matching how it would be retrieved through the
+      # REDCap API.
+      # @param [Object] value
+      # @return [String]
+      def cast_stored_value_to_redcap_string(value)
+        if default_variable_type == 'dichotomous'
+          case value
+          when true
+            '1'
+          when false
+            '0'
+          else
+            ''
+          end
+        elsif value.blank?
+          ''
+        elsif default_variable_type == 'date time' && !value.is_a?(String)
+          Redcap::Utilities.date_time_to_api_string(value)
+        else
+          value.to_s
+        end
       end
     end
   end

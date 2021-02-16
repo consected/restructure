@@ -6,6 +6,23 @@ class Redcap::ProjectAdminsController < AdminController
 
   helper_method :transfer_mode_options, :notes_editor
 
+  def request_records
+    set_instance_from_id
+    if @redcap__project_admin.dynamic_model_table.blank?
+      raise FphsException, 'set the dynamic model table name before requesting records'
+    end
+
+    unless @redcap__project_admin.dynamic_storage.dynamic_model_ready?
+      raise FphsException,
+            'set the dynamic model has not been set up'
+    end
+
+    @redcap__project_admin.dynamic_storage.request_records
+
+    msg = "Records requested at #{DateTime.now}"
+    render json: { message: msg }, status: 200
+  end
+
   private
 
   def set_defaults
@@ -51,6 +68,6 @@ class Redcap::ProjectAdminsController < AdminController
   end
 
   def permitted_params
-    %i[study name server_url api_key transfer_mode frequency status disabled notes]
+    %i[study name server_url api_key transfer_mode frequency dynamic_model_table status disabled notes]
   end
 end

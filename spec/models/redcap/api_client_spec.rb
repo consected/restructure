@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Redcap::ProjectClient, type: :model do
+RSpec.describe Redcap::ApiClient, type: :model do
   include ModelSupport
   include Redcap::RedcapSupport
 
@@ -18,8 +18,8 @@ RSpec.describe Redcap::ProjectClient, type: :model do
     expect(rc).to be_a Redcap::ProjectAdmin
 
     rc.current_admin = @admin
-    c = Redcap::ProjectClient.new(rc)
-    expect(c).to be_a Redcap::ProjectClient
+    c = Redcap::ApiClient.new(rc)
+    expect(c).to be_a Redcap::ApiClient
     expect(c.api_key).to eq rc.api_key
     expect(c.server_url).to eq rc.server_url
     expect(c.name).to eq rc.name
@@ -35,10 +35,11 @@ RSpec.describe Redcap::ProjectClient, type: :model do
     name = @projects.first[:name]
 
     rc = Redcap::ProjectAdmin.find_by_name(name)
+    rc.current_admin = @admin
     expect(rc).to be_a Redcap::ProjectAdmin
 
     expect do
-      rc.project_client.metadata
+      rc.api_client.metadata
     end.to raise_error(FphsException, 'Initialization with current_admin blank is not valid')
   end
 
@@ -49,8 +50,23 @@ RSpec.describe Redcap::ProjectClient, type: :model do
     rc.current_admin = @admin
     expect(rc).to be_a Redcap::ProjectAdmin
 
-    m = rc.project_client.metadata
+    m = rc.api_client.metadata
     expect(m).to be_a Array
     expect(m).to be_present
+  end
+
+  it 'pulls all records from redcap' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    res = pc.records
+    expect(res).to be_a Array
+    expect(res.first).to be_a Hash
+    expect(res.first.keys).to be_present
+    expect(res.first.keys.first).to be_a Symbol
+    expect(res[1][:dob]).to eq '1998-04-16'
+    expect(res[1][:record_id]).to eq '4'
   end
 end

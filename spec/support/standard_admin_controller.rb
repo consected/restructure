@@ -97,13 +97,15 @@ shared_examples 'a standard admin controller' do
       it 'assigns a newly created item as @var' do
         post :create, params: { object_param_symbol => valid_attributes }
         expect(assigns(object_symbol)).to be_a(object_class)
-        expect(assigns(object_symbol)).to be_persisted, "#{object_symbol} was not persisted. #{assigns(object_symbol).errors.to_a.join(' ')}"
+        expect(assigns(object_symbol)).to be_persisted,
+                                          "#{object_symbol} was not persisted. #{assigns(object_symbol).errors.to_a.join(' ')}"
       end
 
       it 'return success' do
         va = valid_attributes
         post :create, params: { object_param_symbol => va }
-        expect(response).to render_template(saved_item_template), "Incorrect response from create #{object_symbol} with #{va} (#{response}). Expected render template #{saved_item_template}.  #{assigns(object_symbol).errors.to_a.join("\n")}"
+        expect(response).to render_template(saved_item_template),
+                            "Incorrect response from create #{object_symbol} with #{va} (#{response}). Expected render template #{saved_item_template}.  #{assigns(object_symbol).errors.to_a.join("\n")}"
       end
     end
 

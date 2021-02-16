@@ -80,7 +80,7 @@ RSpec.describe Redcap::DataDictionaries::FieldType, type: :model do
   it 'updates the data dictionary choices' do
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
-    expect(rc.redcap_data_dictionary.captured_metadata).to eq rc.project_client.metadata
+    expect(rc.redcap_data_dictionary.captured_metadata).to eq rc.api_client.metadata
 
     forms = rc.redcap_data_dictionary.forms
     form = forms.first.last

@@ -52,6 +52,7 @@ module Redcap
     after_save :capture_current_project_info, unless: -> { captured_project_info_changed? || !saved_changes? }
     after_save :capture_data_dictionary, if: -> { saved_changes? || force_refresh }
     after_save :reset_force_refresh
+    after_save :setup_dynamic_model, if: -> { saved_change_to_id? || saved_change_to_dynamic_model_table? }
 
     attr_accessor :force_refresh
 
@@ -66,12 +67,12 @@ module Redcap
     end
 
     #
-    # Instantiate a project client for this project
+    # Instantiate a project api_client for this project
     # Generally this should really be called within a Job rather than directly,
     # to avoid locking up the front end
-    # @return [Redcap::ProjectClient]
-    def project_client
-      @project_client ||= ProjectClient.new(self)
+    # @return [Redcap::ApiClient]
+    def api_client
+      @api_client ||= Redcap::ApiClient.new(self)
     end
 
     #
@@ -79,6 +80,16 @@ module Redcap
     # @return [Hash | nil]
     def captured_project_info
       super&.symbolize_keys!
+    end
+
+    #
+    # Dynamic storage instance for this project, allowing access to
+    # dynamic model related functionality
+    # @return [Redcap::DynamicStorage]
+    def dynamic_storage
+      return if dynamic_model_table.blank?
+
+      @dynamic_storage ||= Redcap::DynamicStorage.new self, dynamic_model_table
     end
 
     private
@@ -101,6 +112,8 @@ module Redcap
       Redcap::CaptureCurrentProjectInfoJob.perform_later(self)
     end
 
+    #
+    # Capture the data dictionary metadata from REDCap and store to table
     def capture_data_dictionary
       dd = redcap_data_dictionary || create_redcap_data_dictionary(current_admin: current_admin)
 
@@ -109,6 +122,18 @@ module Redcap
 
     def reset_force_refresh
       self.force_refresh = nil
+    end
+
+    #
+    # Called after save to set up a dynamic model for this project
+    # The #dynamic_model_table name will be used, which may optionally be
+    # qualified with a schema name, as <schema name>.<table name>
+    def setup_dynamic_model
+      return if dynamic_model_table.blank?
+
+      return if dynamic_storage.dynamic_model
+
+      dynamic_storage.create_dynamic_model
     end
   end
 end

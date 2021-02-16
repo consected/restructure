@@ -35,7 +35,7 @@ module Redcap
     end
 
     def captured_metadata
-      ProjectClient.symbolize_result super
+      Redcap::ApiClient.symbolize_result super
     end
 
     #
@@ -64,6 +64,38 @@ module Redcap
     # @return [String]
     def study
       redcap_project_admin.study
+    end
+
+    #
+    # Get an array of all fields from all forms
+    # @return [Array{Hash}]
+    def all_fields
+      return @all_fields if @all_fields
+
+      @all_fields = {}
+      forms.each do |_k, form|
+        @all_fields.merge! form.fields
+      end
+
+      @all_fields
+    end
+
+    #
+    # Get a Hash of all fields that should be returned in a REDCap record retrieval, which takes into account
+    # the checkbox choice fields that are persisted individually. This is based on the latest retrieved REDCap
+    # metadata data dictionary.
+    # Checkbox choice fields, with checkbox_field___choice style appear in the results, and the
+    # base checkbox_field without the suffix does not appear, since it is not a field actually retrieved.
+    # @return [Hash{Symbol => Field}]
+    def all_retrievable_fields
+      Redcap::DataDictionaries::Form.all_retrievable_fields(self)
+    end
+
+    #
+    # The sequential record_id field is not a fixed name. Get the first field from the data dictionary
+    # @return [Symbol]
+    def record_id_field
+      all_fields.keys.first
     end
 
     private

@@ -9,7 +9,7 @@ module ActiveRecord
         attr_accessor :fields, :new_fields, :field_defs, :prev_fields,
                       :field_opts, :owner, :history_table_id_attr,
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
-                      :table_comment, :fields_comments, :mode, :no_master_association,
+                      :table_comment, :fields_comments, :db_configs, :mode, :no_master_association,
                       :requested_action
       end
 
@@ -553,7 +553,14 @@ module ActiveRecord
           a = attr_name.to_s
           f = :string
           fopts = nil
-          if a == 'created_by_user_id'
+          field_config = db_configs[attr_name]
+          if field_config.present?
+            # Field definition overrides everything else
+            f = field_config[:type]
+            fopts = {}
+            fopts[:default] = field_config[:default] if field_config[:default]
+            fopts[:index] = field_config[:index] if field_config[:index]
+          elsif a == 'created_by_user_id'
             attr_name = :created_by_user
             f = :references
             fopts = { index: { name: "#{rand_id}_ref_cb_user_idx" }, foreign_key: { to_table: :users } }

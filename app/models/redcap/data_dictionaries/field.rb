@@ -81,7 +81,7 @@ module Redcap
       # Get an Hash of all field representations, keyed with the symbolized field name
       # for a form
       # @param [Form] form
-      # @return [Array{Form}]
+      # @return [Hash{Symbol => Field}]
       def self.all_from(in_form)
         fields_metadata = in_form.def_metadata
         return unless fields_metadata.present?
@@ -94,6 +94,32 @@ module Redcap
         end
 
         fields
+      end
+
+      #
+      # Get a Hash of all fields that should be returned in a REDCap record retrieval, which takes into account
+      # the checkbox choice fields that are persisted individually. This is based on the latest retrieved REDCap
+      # metadata data dictionary.
+      # Checkbox choice fields, with checkbox_field___choice style appear in the results, and the
+      # base checkbox_field without the suffix does not appear, since it is not a field actually retrieved.
+      # @param [Form] form
+      # @return [Hash{Symbol => Field}]
+      def self.all_retrievable_fields(in_form)
+        new_set = {}
+        all_from(in_form).each do |field_name, field|
+          ccf = field.checkbox_choice_fields
+          if ccf
+            ccf.each do |c|
+              field.field_type.name = :checkbox_choice
+              new_set[c] = field
+            end
+            next
+          end
+
+          new_set[field_name] = field
+        end
+
+        new_set
       end
 
       #
@@ -121,6 +147,10 @@ module Redcap
         data_dictionary.source_name
       end
 
+      #
+      # Refresh variable records (Datadic::Variable) based on
+      # current definition.
+      # @see Redcap::DataDictionaries::FieldDatadicVariables#refresh_variable_record
       def refresh_variable_record
         FieldDatadicVariable.new(self).refresh_variable_record
       end

@@ -11,7 +11,7 @@ module OptionConfigs
       %i[
         name label config_obj caption_before show_if resource_name save_action view_options
         field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
-        filestore labels fields button_label orig_config
+        filestore labels fields button_label orig_config db_configs
       ]
     end
 
@@ -295,6 +295,9 @@ module OptionConfigs
 
       self.field_options ||= {}
       self.field_options = self.field_options.symbolize_keys
+
+      self.db_configs ||= {}
+      self.db_configs = self.db_configs.symbolize_keys
 
       # Allow field_options.edit_as.alt_options to be an array
       self.field_options.each do |k, v|

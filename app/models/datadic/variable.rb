@@ -2,7 +2,7 @@
 
 module Datadic
   #
-  # Direct access to the Redcap gem client, set up with details from a ProjectAdmin record
+  # Direct access to the Redcap gem api_client, set up with details from a ProjectAdmin record
   # Each request to the API is recorded in the table for audit
   class Variable < Admin::AdminBase
     include AdminHandler

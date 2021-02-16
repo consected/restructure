@@ -4,7 +4,7 @@
   <div>
   <% forms.each do |fn, form| %>
     <h4 class="h4"><%= fn %></h5>
-    <div class="admin-options-tag-list">
+    <div class="admin-options-tag-list form-inline">
       <%
         form.fields_of_type(:checkbox).each do |k, field| %>
         <div>
