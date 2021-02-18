@@ -1,6 +1,11 @@
 <div>
-  <label>Number of fields</label>
+  <label>Number of fields (without choices)</label>
   <%= object_instance.field_count %>
+</div>
+
+<div>
+  <label>Number of fields (with choices) </label>
+  <%= object_instance.all_retrievable_fields.length %>
 </div>
 
 <% if object_instance.captured_metadata.present?%>

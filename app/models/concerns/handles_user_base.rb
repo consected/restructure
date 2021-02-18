@@ -5,7 +5,7 @@ module HandlesUserBase
   extend ActiveSupport::Concern
 
   included do
-    belongs_to :user
+    belongs_to :user, optional: true
 
     # If this model should be associated with a master, check it
     before_validation :check_crosswalk, unless: :allows_nil_master?
@@ -549,7 +549,7 @@ module HandlesUserBase
 
   def no_user_validation
     (creatable_without_user && !persisted?) ||
-      validating? ||
+      validating? || force_save? ||
       (self.class.no_master_association && !respond_to?(:current_user))
   end
 
@@ -565,6 +565,7 @@ module HandlesUserBase
 
     mu = master_user
     unless mu.is_a?(User) && mu.persisted?
+      master = '[not defined]' unless respond_to? master
       raise "bad user (for master #{master}) being pulled from master_user " \
       "(#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '' : ' not persisted'})"
     end

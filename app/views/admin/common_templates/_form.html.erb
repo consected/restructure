@@ -11,6 +11,7 @@
   end
   has_options = false
 %>
+<div class="admin-form-block-outer">
 <%= form_for(fref, url: url, class: "inline-form admin-edit-form", remote: true, data: {result_target: "#admin-item-#{object_instance.id}", preprocessor: "admin_result"}) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
 
@@ -93,20 +94,21 @@
       </textarea>
     </div>
   </div>
-<% elsif @show_extra_help_info && @show_extra_help_info[:form_info_partial] %>
-    <div class="form-group">
+<% end %>
+
+  <div class="admin-buttons-block">
+    <%= hidden_filter_fields %>
+    <%= f.submit class: "btn btn-primary", value: "save" %> <%= admin_edit_cancel %>
+  </div>
+<% end %>
+
+<% if @show_extra_help_info && @show_extra_help_info[:form_info_partial] %>
+    <div class="admin-options-outer-block">
       <div class="admin-options-ref-block">
         <%= render partial: @show_extra_help_info[:form_info_partial], locals: {object_instance: object_instance} %>
       </div>
     </div>
 <% end %>
-
-  <div class="form-group">
-
-    <%= hidden_filter_fields %>
-
-    <%= f.submit class: "btn btn-primary", value: "save" %> <%= admin_edit_cancel %>
-  </div>
-<% end %>
+    </div>
   </div>
 </div>

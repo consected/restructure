@@ -8,6 +8,7 @@ module OptionConfigs
   # @see OptionConfigs::AttrDefs::Report
   class ReportOptions < BaseOptions
     include OptionsHandler
+    include OptionConfigs::AttrDefs::Report
 
     configure :view_options, with: %i[hide_table_names humanize_column_names
                                       hide_result_count hide_export_buttons

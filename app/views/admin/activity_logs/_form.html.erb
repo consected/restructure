@@ -66,13 +66,12 @@
         <%= render partial: 'admin/activity_logs/form_info', locals: {object_instance: object_instance} %>
       </div>
     </div>
-    <div class="form-group" style="vertical-align: top">
-      <div data-spy="affix" class="affixed-admin-edit-btns" >
-        <%= hidden_filter_fields %>
-        <p><%= f.submit class: "btn btn-primary" %></p><p><%= admin_edit_cancel %></p>
-      </div>
-    </div>
   </div>
+    <div class="admin-buttons-block">
+        <%= hidden_filter_fields %>
+        <p><%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %></p>
+      
+    </div>
 <% end %>
   </div>
 </div>

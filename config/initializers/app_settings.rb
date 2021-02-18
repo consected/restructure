@@ -101,4 +101,7 @@ class Settings
   # @see Utilities::Encryption
   EncryptionSecretKeyBase = ENV['FPHS_ENC_SECRET_KEY_BASE'] || (Rails.env.production? ? nil : 'test')
   EncryptionSalt = ENV['FPHS_ENC_SALT'] || (Rails.env.production? ? nil : 'test-salt')
+
+  # Dynamic models create their own migrations during configuration, if this is set
+  AllowDynamicMigrations = ENV['FPHS_ALLOW_DYN_MIGRATIONS'] == 'true' || Rails.env.development?
 end

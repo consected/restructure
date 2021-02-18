@@ -28,6 +28,10 @@ module Redcap
         fields&.keys
       end
 
+      #
+      # Return an array of fields matching the Redcap definition field_type
+      # @param [Symbol] field_type
+      # @return [Array]
       def fields_of_type(field_type)
         unless field_type.in? FieldType::ValidFieldTypes
           raise FphsException,
@@ -35,6 +39,19 @@ module Redcap
         end
 
         fields.filter { |_k, f| f.field_type.name == field_type }
+      end
+
+      #
+      # Return an array of fields matching the data dictionary variable type
+      # @param [Symbol] variable_type
+      # @return [Array]
+      def fields_of_variable_type(variable_type)
+        unless variable_type.in? FieldType::ValidVariableTypes
+          raise FphsException,
+                "Redcap field definition lookup failed for bad variable_type: #{variable_type}"
+        end
+
+        fields.filter { |_k, f| f.field_type.default_variable_type == variable_type }
       end
 
       def to_s
@@ -56,6 +73,23 @@ module Redcap
         end
 
         forms
+      end
+
+      #
+      # Get a Hash of all fields that should be returned in a REDCap record retrieval, which takes into account
+      # the checkbox choice fields that are persisted individually. This is based on the latest retrieved REDCap
+      # metadata data dictionary.
+      # Checkbox choice fields, with checkbox_field___choice style appear in the results, and the
+      # base checkbox_field without the suffix does not appear, since it is not a field actually retrieved.
+      # @param [Recap::DataDictionary] data_dictionary
+      # @return [Hash{Symbol => Field}]
+      def self.all_retrievable_fields(data_dictionary)
+        all_fields = {}
+        all_from(data_dictionary).each do |_k, form|
+          all_fields.merge! Redcap::DataDictionaries::Field.all_retrievable_fields(form)
+        end
+
+        all_fields
       end
 
       #

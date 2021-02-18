@@ -2,16 +2,16 @@
 
 module Redcap
   #
-  # Direct access to the Redcap gem client, set up with details from a ProjectAdmin record
-  # Each request to the API is recorded in the table for audit
-  class ProjectClient
+  # Direct access to the Redcap gem api_client, set up with details from a ProjectAdmin record
+  # Each request to the API is recorded in the redcap_client_requests table for audit
+  class ApiClient
     CacheExpiresIn = 60.seconds
     ExpectedKeys = %i[server_url api_key name current_admin].freeze
 
     attr_accessor :project_admin, *ExpectedKeys
 
     #
-    # Setup the client against the project admin record:
+    # Setup the api_client against the project admin record:
     # @param [Redcap::ProjectAdmin] req_project_admin - project admin record with current admin:
     def initialize(req_project_admin)
       unless req_project_admin.is_a? Redcap::ProjectAdmin
@@ -43,9 +43,16 @@ module Redcap
 
     #
     # Get the project metadata (data dictionary)
-    # @return [Hash] hash with symbolized keys
+    # @return [Array{Hash}] hash with symbolized keys
     def metadata
       request :metadata
+    end
+
+    #
+    # Get the data records for the project
+    # @return [Array{Hash}] hash with symbolized keys
+    def records
+      request :records
     end
 
     #
@@ -54,6 +61,7 @@ module Redcap
     # and the API is responding.
     # @return [::Redcap]
     def redcap
+      raise FphsException, 'Initialization with current_admin blank is not valid' unless current_admin
       raise FphsException, 'a valid admin is required' unless current_admin.is_a?(Admin) && current_admin.enabled?
 
       return @redcap if @redcap
@@ -90,29 +98,36 @@ module Redcap
 
     #
     # Make a request to the Redcap server, and save the request action as an audit record.
-    # The record insert precedes the request, within a transaction, so erroneous actions are not recorded
-    # if the action was not actually requested due to a DB error.
     # All requests are cached for 60 seconds to avoid spamming the server.
     # @param [Symbol] action - the name of the request method to call
     # @param [Boolean] force_reload - forces reload of cached data
     # @return [Hash | Array] result
     def request(action, force_reload: nil)
+      res = nil
       ClientRequest.transaction do
+        clear_cache(action) if force_reload
+        retrieved_from = 'api'
+        res = Rails.cache.fetch(cache_key(action), expires_in: CacheExpiresIn) do
+          retrieved_from = 'cache'
+          post_action action
+        end
+
         ClientRequest.create! current_admin: current_admin,
                               action: action,
                               server_url: server_url,
                               name: name,
-                              redcap_project_admin: project_admin
-
-        Rails.cache.delete(cache_key(action)) if force_reload
-        Rails.cache.fetch(cache_key(action), expires_in: CacheExpiresIn) do
-          post_action action
-        end
+                              redcap_project_admin: project_admin,
+                              result: { retrieved_from: retrieved_from }
       end
+      res
     end
 
     def cache_key(action)
-      "#{project_admin.id}-#{action}"
+      "#{self.class.name}-#{project_admin.id}-#{action}"
+    end
+
+    def clear_cache(action)
+      Rails.cache.delete(cache_key(action))
     end
 
     def post_action(action)

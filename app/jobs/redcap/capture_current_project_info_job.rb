@@ -15,7 +15,7 @@ module Redcap
 
       # Use the original admin as the current admin
       project_admin.current_admin = project_admin.admin
-      pi = project_admin.project_client.project
+      pi = project_admin.api_client.project
 
       raise FphsException, 'Project info returned is not correct format' unless pi.is_a? Hash
 

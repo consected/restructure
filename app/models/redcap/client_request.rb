@@ -2,8 +2,8 @@
 
 module Redcap
   #
-  # Direct access to the Redcap gem client, set up with details from a ProjectAdmin record
-  # Each request to the API is recorded in the table for audit
+  # Each request to the API is recorded in the table for audit. Additionally,
+  # background Redcap record storage is also captured.
   class ClientRequest < Admin::AdminBase
     include AdminHandler
 
