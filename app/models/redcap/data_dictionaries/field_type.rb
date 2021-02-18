@@ -32,7 +32,7 @@ module Redcap
         file: 'file',
         slider: 'integer',
         descriptive: 'fixed caption',
-        form_complete: 'status' # This is not a real REDCap type, but is used as a lookup
+        form_complete: 'redcap status' # This is not a real REDCap type, but is used as a lookup
       }.freeze
 
       TextFieldToVariableTypes = {
@@ -64,7 +64,8 @@ module Redcap
         'numeric' => :to_d,
         'date' => :to_date,
         'date time' => :to_datetime,
-        'time' => :to_time
+        'time' => :to_time,
+        'redcap status' => :to_i
       }.freeze
 
       # Non-string database types
@@ -74,7 +75,8 @@ module Redcap
         'numeric' => :decimal,
         'date' => :date,
         'date time' => :timestamp,
-        'time' => :time
+        'time' => :time,
+        'redcap status' => :integer
       }.freeze
 
       attr_accessor :name, :field
