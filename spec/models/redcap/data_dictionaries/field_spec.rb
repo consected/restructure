@@ -47,7 +47,7 @@ RSpec.describe Redcap::DataDictionaries::Field, type: :model do
     expect(v).not_to be_nil
 
     expect(v.variable_name).to eq 'q2_survey_complete'
-    expect(v.variable_type).to eq 'status'
+    expect(v.variable_type).to eq 'redcap status'
     expect(v.presentation_type).to eq 'form_complete [integer]'
     expect(v.annotation).to eq 'Redcap values: 0 Incomplete, 1 Unverified, 2 Complete'
   end
