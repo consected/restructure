@@ -31,7 +31,8 @@ module Redcap
         truefalse: 'dichotomous',
         file: 'file',
         slider: 'integer',
-        descriptive: 'fixed caption'
+        descriptive: 'fixed caption',
+        form_complete: 'status' # This is not a real REDCap type, but is used as a lookup
       }.freeze
 
       TextFieldToVariableTypes = {

@@ -17,7 +17,7 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
 
-    `rm -f db/app_migrations/redcap-test-env/*.rb`
+    `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_rc*.rb`
 
     ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
     ds.category = 'redcap-test-env'
@@ -66,6 +66,7 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
       twelveyrs_address: { type: 'string' },
       othealth___complete: { type: 'boolean' },
       othealth_date: { type: 'timestamp' },
+      q2_survey_complete: { type: 'integer' },
       sdfsdaf___0: { type: 'boolean' },
       sdfsdaf___1: { type: 'boolean' },
       sdfsdaf___2: { type: 'boolean' },
@@ -77,7 +78,8 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
       i57: { type: 'integer' },
       f57: { type: 'decimal' },
       dd: { type: 'timestamp' },
-      yes_or_no: { type: 'boolean' }
+      yes_or_no: { type: 'boolean' },
+      test_complete: { type: 'integer' }
     )
   end
 

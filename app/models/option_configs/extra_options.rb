@@ -297,7 +297,7 @@ module OptionConfigs
       self.field_options = self.field_options.symbolize_keys
 
       self.db_configs ||= {}
-      self.db_configs = self.db_configs.symbolize_keys
+      config_obj.db_configs = self.db_configs = self.db_configs.symbolize_keys
 
       # Allow field_options.edit_as.alt_options to be an array
       self.field_options.each do |k, v|

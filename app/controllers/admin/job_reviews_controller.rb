@@ -9,8 +9,8 @@ class Admin::JobReviewsController < AdminController
 
   def filters
     {
-      queue: ['default', 'nfs_store_process', 'recurring-tasks'],
-      failed: ['true', 'false']
+      queue: %w[default nfs_store_process recurring-tasks redcap],
+      failed: %w[true false]
     }
   end
 

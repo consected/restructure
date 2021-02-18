@@ -35,7 +35,7 @@ RSpec.describe Redcap::ApiClient, type: :model do
     name = @projects.first[:name]
 
     rc = Redcap::ProjectAdmin.find_by_name(name)
-    rc.current_admin = @admin
+
     expect(rc).to be_a Redcap::ProjectAdmin
 
     expect do

@@ -21,6 +21,6 @@ class Redcap::ClientRequestsController < AdminController
   end
 
   def permitted_params
-    %i[name server_url action created_at]
+    %i[name server_url action created_at result]
   end
 end

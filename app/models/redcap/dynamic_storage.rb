@@ -52,6 +52,13 @@ module Redcap
     end
 
     #
+    # List of field names to be used in a dynamic model field list
+    # @return [String]
+    def field_list
+      @field_list ||= db_configs.keys.map(&:to_s).join(' ')
+    end
+
+    #
     # Create an active dynamic model instance for storage of REDcap data records.
     # The table name can be qualified with a schema name, as <schema name>.<table name>
     # @param [String] table_name
@@ -62,8 +69,6 @@ module Redcap
 
       name = table_name.singularize
 
-      field_list = db_configs.keys.map(&:to_s).join(' ')
-
       default_options = {
         default: {
           db_configs: db_configs
@@ -72,16 +77,23 @@ module Redcap
 
       options = YAML.dump default_options
 
-      self.dynamic_model = DynamicModel.create! current_admin: project_admin.current_admin,
-                                                name: name,
-                                                table_name: table_name,
-                                                primary_key_name: :id,
-                                                foreign_key_name: nil,
-                                                category: category,
-                                                field_list: field_list,
-                                                options: options,
-                                                schema_name: schema_name,
-                                                allow_migrations: true
+      if dynamic_model && dynamic_model.field_list != field_list
+        dynamic_model.update! current_admin: project_admin.current_admin,
+                              field_list: field_list,
+                              options: options,
+                              allow_migrations: true
+      else
+        self.dynamic_model = DynamicModel.create! current_admin: project_admin.current_admin,
+                                                  name: name,
+                                                  table_name: table_name,
+                                                  primary_key_name: :id,
+                                                  foreign_key_name: nil,
+                                                  category: category,
+                                                  field_list: field_list,
+                                                  options: options,
+                                                  schema_name: schema_name,
+                                                  allow_migrations: true
+      end
     end
 
     #

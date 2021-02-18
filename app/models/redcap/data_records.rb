@@ -82,14 +82,15 @@ module Redcap
               "than expected (#{existing_records_length})"
       end
 
-      existing_rec_ids = existing_records.pluck(record_id_field)
       retrieved_rec_ids = records.map { |r| r[record_id_field] }
 
       if retrieved_rec_ids.find(&:blank?)
         raise FphsException, 'Redcap::DataRecords retrieved data that has a nil record id'
       end
 
-      existing_not_in_retrieved_ids = existing_rec_ids - retrieved_rec_ids
+      existing_rec_ids = existing_records.pluck(record_id_field).map(&:to_i)
+      retrieved_rec_int_ids = retrieved_rec_ids.map(&:to_i)
+      existing_not_in_retrieved_ids = existing_rec_ids - retrieved_rec_int_ids
       if existing_not_in_retrieved_ids.present?
         raise FphsException,
               'Redcap::DataRecords existing records were not in the retrieved records: ' \

@@ -84,7 +84,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
     dr.retrieve
     expect do
       dr.validate
-    end.to raise_error(FphsException, 'Redcap::DataRecords retrieved record fields are not present in the model')
+    end.to raise_error(FphsException,
+                       "Redcap::DataRecords retrieved record fields are not present in the model:\nmismatch_field")
   end
 
   it 'stores retrieved records' do

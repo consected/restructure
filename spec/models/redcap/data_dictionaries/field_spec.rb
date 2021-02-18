@@ -37,6 +37,21 @@ RSpec.describe Redcap::DataDictionaries::Field, type: :model do
     expect(v.presentation_type).to eq 'text [date_mdy]'
   end
 
+  it 'adds a Datadic::Variable record for the form_complete field' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    dd = rc.redcap_data_dictionary
+
+    v = Datadic::Variable.active.where(redcap_data_dictionary_id: dd.id, variable_name: 'q2_survey_complete').first
+    expect(v).not_to be_nil
+
+    expect(v.variable_name).to eq 'q2_survey_complete'
+    expect(v.variable_type).to eq 'status'
+    expect(v.presentation_type).to eq 'form_complete [integer]'
+    expect(v.annotation).to eq 'Redcap values: 0 Incomplete, 1 Unverified, 2 Complete'
+  end
+
   it 'automatically gets the list of "checkbox" type fields' do
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
@@ -64,14 +79,14 @@ RSpec.describe Redcap::DataDictionaries::Field, type: :model do
 
     expect(fs.keys).to eq %i[record_id dob current_weight smoketime___pnfl smoketime___dnfl smoketime___anfl smoke_start smoke_stop
                              smoke_curr demog_date ncmedrec_add ladder_wealth ladder_comm born_address twelveyrs_address
-                             othealth___complete othealth_date]
+                             othealth___complete othealth_date q2_survey_complete]
 
     form = forms[forms.keys.last]
     fs = Redcap::DataDictionaries::Field.all_retrievable_fields(form)
 
     expect(fs.keys).to eq %i[sdfsdaf___0 sdfsdaf___1 sdfsdaf___2
                              rtyrtyrt___0 rtyrtyrt___1 rtyrtyrt___2
-                             test_field test_phone i57 f57 dd yes_or_no]
+                             test_field test_phone i57 f57 dd yes_or_no test_complete]
   end
 
   it 'automatically populates relationship between "checkbox" type fields' do

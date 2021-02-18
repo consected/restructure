@@ -6,9 +6,10 @@ module Redcap
     # Store the field definition to a datadic variable
     class FieldDatadicVariable
       MatchingAttribs = %i[form name label label_note annotation is_required
-                           valid_min valid_max is_identifier label_plain label_note_plain
+                           valid_type valid_min valid_max is_identifier label_plain label_note_plain
                            data_dictionary field_type field_choices
-                           source_name checkbox_choice_fields].freeze
+                           source_name checkbox_choice_fields
+                           storage_type db_or_fs schema_or_path table_or_file].freeze
 
       attr_accessor(*MatchingAttribs)
 
@@ -36,10 +37,15 @@ module Redcap
           label_note: label_note_plain,
           annotation: annotation,
           is_required: is_required,
+          valid_type: valid_type,
           valid_min: valid_min,
           valid_max: valid_max,
           multi_valid_choices: field_choices.choices(plain_text: true),
-          is_identifier: is_identifier
+          is_identifier: is_identifier,
+          storage_type: storage_type,
+          db_or_fs: db_or_fs,
+          schema_or_path: schema_or_path,
+          table_or_file: table_or_file
         }
       end
 

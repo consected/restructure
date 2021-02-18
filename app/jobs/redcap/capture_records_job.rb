@@ -2,7 +2,7 @@
 
 module Redcap
   class CaptureRecordsJob < ApplicationJob
-    queue_as :default
+    queue_as :redcap
 
     #
     # Capture the REDCap records for the configured project admin.
@@ -20,7 +20,16 @@ module Redcap
       # Use the original admin as the current admin
       project_admin.current_admin ||= project_admin.admin
 
-      Redcap::DataRecords.new(project_admin, class_name).retrieve_validate_store
+      dr = Redcap::DataRecords.new(project_admin, class_name)
+      dr.retrieve_validate_store
+    rescue StandardError => e
+      Redcap::ClientRequest.create current_admin: project_admin.current_admin,
+                                   action: 'capture records job',
+                                   server_url: project_admin.server_url,
+                                   name: project_admin.name,
+                                   redcap_project_admin: project_admin,
+                                   result: { error: e, backtrace: e.backtrace[0..7].join("\n") }
+      raise
     end
   end
 end

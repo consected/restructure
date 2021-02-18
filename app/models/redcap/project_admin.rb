@@ -35,15 +35,14 @@ module Redcap
     self.table_name = 'redcap_project_admins'
 
     has_one :redcap_data_dictionary, class_name: 'Redcap::DataDictionary', foreign_key: :redcap_project_admin_id
-    has_many :redcap_client_requests, class_name: 'Redcap::ClientRequest'
+    has_many :redcap_client_requests, class_name: 'Redcap::ClientRequest', foreign_key: :redcap_project_admin_id
 
     validates :study, presence: true, unless: -> { disabled? }
     validates :name, presence: true, unless: -> { disabled? }
     validates :api_key, presence: true, unless: -> { disabled? }
     validates :server_url, presence: true, unless: -> { disabled? }
 
-    validate :name, -> { already_taken(:name) ? errors.add(:name, 'already exists') : true }
-    validate :api_key, -> { already_taken(:api_key) ? errors.add(:api_key, 'already exists') : true }
+    validate :name, -> { already_taken(:name, :study) ? errors.add(:name, 'already exists in this study') : true }
 
     before_save :empty_disabled_api_key
     # After save, capture the project info from REDCap
@@ -51,8 +50,8 @@ module Redcap
     # just changed, to avoid never ending callbacks
     after_save :capture_current_project_info, unless: -> { captured_project_info_changed? || !saved_changes? }
     after_save :capture_data_dictionary, if: -> { saved_changes? || force_refresh }
+    after_save :setup_dynamic_model, if: -> { saved_change_to_id? || saved_change_to_dynamic_model_table? || force_refresh }
     after_save :reset_force_refresh
-    after_save :setup_dynamic_model, if: -> { saved_change_to_id? || saved_change_to_dynamic_model_table? }
 
     attr_accessor :force_refresh
 
@@ -102,10 +101,6 @@ module Redcap
       self.api_key = nil
     end
 
-    def project_info_cache_key
-      "#{self.class.name.ns_underscore}--#{id}-#{created_at}-#{updated_at}"
-    end
-
     #
     # Called after save to store the captured project info from Redcap for future reference
     def capture_current_project_info
@@ -130,8 +125,6 @@ module Redcap
     # qualified with a schema name, as <schema name>.<table name>
     def setup_dynamic_model
       return if dynamic_model_table.blank?
-
-      return if dynamic_storage.dynamic_model
 
       dynamic_storage.create_dynamic_model
     end

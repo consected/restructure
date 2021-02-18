@@ -27,7 +27,8 @@ module Redcap
     # }
     class Field
       attr_accessor :def_metadata, :form, :name, :label, :label_note, :annotation, :is_required,
-                    :valid_min, :valid_max, :is_identifier
+                    :valid_type, :valid_min, :valid_max, :is_identifier,
+                    :storage_type, :db_or_fs, :schema_or_path, :table_or_file
 
       def initialize(form, field_metadata)
         super()
@@ -40,9 +41,14 @@ module Redcap
         self.annotation = field_metadata[:field_annotation]
         self.is_required = field_metadata[:required_field] == 'y'
 
+        self.valid_type = field_metadata[:text_validation_type_or_show_slider_number]
         self.valid_min = field_metadata[:text_validation_min]
         self.valid_max = field_metadata[:text_validation_max]
         self.is_identifier = field_metadata[:identifier] == 'y'
+
+        self.storage_type = 'database'
+        self.db_or_fs = ActiveRecord::Base.connection_config[:database]
+        self.schema_or_path, self.table_or_file = schema_and_table_name
       end
 
       #
@@ -106,7 +112,10 @@ module Redcap
       # @return [Hash{Symbol => Field}]
       def self.all_retrievable_fields(in_form)
         new_set = {}
+
         all_from(in_form).each do |field_name, field|
+          next if field.field_type.name == :descriptive
+
           ccf = field.checkbox_choice_fields
           if ccf
             ccf.each do |c|
@@ -119,7 +128,33 @@ module Redcap
           new_set[field_name] = field
         end
 
+        new_set[form_complete_field_name(in_form)] = form_complete_field(in_form)
+
         new_set
+      end
+
+      #
+      # Each form has an additional <form name>_complete field
+      # Return the name for the requested form
+      # @param [Redcap::DataDictionaries::Form] form
+      # @return [Symbol]
+      def self.form_complete_field_name(form)
+        "#{form.name}_complete".to_sym
+      end
+
+      #
+      # A <form name>_complete field representation to support the extra field
+      # that Redcap adds for every form
+      # @param [Redcap::DataDictionaries::Form] form
+      # @return [Redcap::DataDictionaries::Field]
+      def self.form_complete_field(form)
+        field_metadata = {
+          field_name: form_complete_field_name(form),
+          field_type: 'form_complete',
+          text_validation_type_or_show_slider_number: 'integer',
+          field_annotation: 'Redcap values: 0 Incomplete, 1 Unverified, 2 Complete'
+        }
+        Field.new(form, field_metadata)
       end
 
       #
@@ -138,6 +173,10 @@ module Redcap
       # @return [Redcap::DataDictionary]
       def data_dictionary
         form.data_dictionary
+      end
+
+      def schema_and_table_name
+        data_dictionary.redcap_project_admin.dynamic_storage&.schema_and_table_name || [nil, nil]
       end
 
       #

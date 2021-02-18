@@ -11,30 +11,31 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
     @bad_admin.update! disabled: true
     create_admin
     @projects = setup_redcap_project_admin_configs
+    @project = @projects.first
   end
 
   it 'requires an admin' do
     expect do
-      Redcap::ProjectAdmin.create! current_admin: nil, name: 'test', api_key: 'abc', server_url: 'https://testapi',
+      Redcap::ProjectAdmin.create! current_admin: nil, name: 'test', api_key: 'abc', server_url: @project[:server_url],
                                    study: 'Q2 Demo'
     end
       .to raise_error('Current admin not set')
 
     expect do
       Redcap::ProjectAdmin.create! current_admin: @bad_admin, name: 'test', api_key: 'abc',
-                                   server_url: 'https://testapi', study: 'Q2 Demo'
+                                   server_url: @project[:server_url], study: 'Q2 Demo'
     end
       .to raise_error('Admin not enabled')
   end
 
-  it 'has a name that cannot be duplicated' do
+  it 'has a name that cannot be duplicated within a study' do
     name = @projects.first[:name]
     expect(name).to be_present
 
-    expect(Redcap::ProjectAdmin.active.find_by_name(name)).not_to be_nil
+    expect(Redcap::ProjectAdmin.active.where(name: name, study: 'Q2').first).not_to be_nil
 
-    res = Redcap::ProjectAdmin.new current_admin: @admin, name: name, api_key: 'abc', server_url: 'https://testapi',
-                                   study: 'Q2 Demo'
+    res = Redcap::ProjectAdmin.new current_admin: @admin, name: name, api_key: 'abc', server_url: @project[:server_url],
+                                   study: 'Q2'
     expect(res.save).to eq false
     expect(res.errors).to include :name
   end

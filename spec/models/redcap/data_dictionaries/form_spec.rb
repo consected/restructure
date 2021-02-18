@@ -47,8 +47,9 @@ RSpec.describe Redcap::DataDictionaries::Form, type: :model do
 
     expect(fs.keys).to eq %i[record_id dob current_weight smoketime___pnfl smoketime___dnfl smoketime___anfl smoke_start smoke_stop
                              smoke_curr demog_date ncmedrec_add ladder_wealth ladder_comm born_address twelveyrs_address
-                             othealth___complete othealth_date sdfsdaf___0 sdfsdaf___1 sdfsdaf___2
+                             othealth___complete othealth_date q2_survey_complete
+                             sdfsdaf___0 sdfsdaf___1 sdfsdaf___2
                              rtyrtyrt___0 rtyrtyrt___1 rtyrtyrt___2
-                             test_field test_phone i57 f57 dd yes_or_no]
+                             test_field test_phone i57 f57 dd yes_or_no test_complete]
   end
 end

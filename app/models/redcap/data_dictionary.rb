@@ -110,6 +110,8 @@ module Redcap
         form.fields.each do |_k, field|
           field.refresh_variable_record
         end
+
+        Redcap::DataDictionaries::Field.form_complete_field(form).refresh_variable_record
       end
     end
 

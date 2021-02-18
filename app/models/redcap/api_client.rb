@@ -61,6 +61,7 @@ module Redcap
     # and the API is responding.
     # @return [::Redcap]
     def redcap
+      raise FphsException, 'Initialization with current_admin blank is not valid' unless current_admin
       raise FphsException, 'a valid admin is required' unless current_admin.is_a?(Admin) && current_admin.enabled?
 
       return @redcap if @redcap
@@ -97,29 +98,32 @@ module Redcap
 
     #
     # Make a request to the Redcap server, and save the request action as an audit record.
-    # The record insert precedes the request, within a transaction, so erroneous actions are not recorded
-    # if the action was not actually requested due to a DB error.
     # All requests are cached for 60 seconds to avoid spamming the server.
     # @param [Symbol] action - the name of the request method to call
     # @param [Boolean] force_reload - forces reload of cached data
     # @return [Hash | Array] result
     def request(action, force_reload: nil)
+      res = nil
       ClientRequest.transaction do
+        clear_cache(action) if force_reload
+        retrieved_from = 'api'
+        res = Rails.cache.fetch(cache_key(action), expires_in: CacheExpiresIn) do
+          retrieved_from = 'cache'
+          post_action action
+        end
+
         ClientRequest.create! current_admin: current_admin,
                               action: action,
                               server_url: server_url,
                               name: name,
-                              redcap_project_admin: project_admin
-
-        clear_cache(action) if force_reload
-        Rails.cache.fetch(cache_key(action), expires_in: CacheExpiresIn) do
-          post_action action
-        end
+                              redcap_project_admin: project_admin,
+                              result: { retrieved_from: retrieved_from }
       end
+      res
     end
 
     def cache_key(action)
-      "#{project_admin.id}-#{action}"
+      "#{self.class.name}-#{project_admin.id}-#{action}"
     end
 
     def clear_cache(action)

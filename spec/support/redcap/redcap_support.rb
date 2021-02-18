@@ -70,16 +70,41 @@ module Redcap
             'token' => api_key,
             'content' => 'record',
             'format' => 'json'
-            # 'type' => 'flat',
-            # 'rawOrLabel' => 'raw',
-            # 'rawOrLabelHeaders' => 'raw',
-            # 'exportCheckboxLabel' => 'false',
-            # 'exportSurveyFields' => 'false',
-            # 'exportDataAccessGroups' => 'false',
-            # 'returnFormat' => 'json'
+
           }
         )
         .to_return(status: 200, body: data_sample_response(type), headers: {})
+    end
+
+    def stub_request_full_project(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: { 'content' => 'project', 'format' => 'json', 'token' => api_key }
+
+        )
+        .to_return(status: 200, body: project_admin_sample_response, headers: {})
+    end
+
+    def stub_request_full_metadata(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: { 'content' => 'metadata', 'fields' => nil, 'format' => 'json', 'token' => api_key }
+
+        )
+        .to_return(status: 200, body: metadata_full_response, headers: {})
+    end
+
+    def stub_request_full_records(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'token' => api_key,
+            'content' => 'record',
+            'format' => 'json'
+
+          }
+        )
+        .to_return(status: 200, body: data_full_response, headers: {})
     end
 
     def project_admin_sample_response
@@ -88,6 +113,14 @@ module Redcap
 
     def metadata_sample_response
       File.read('spec/fixtures/redcap/short_metadata_narrow.json')
+    end
+
+    def metadata_full_response
+      File.read('spec/fixtures/redcap/full_metadata.json')
+    end
+
+    def data_full_response
+      File.read('spec/fixtures/redcap/full_records.json')
     end
 
     #
@@ -133,6 +166,7 @@ module Redcap
             twelveyrs_address: { type: 'string' },
             othealth___complete: { type: 'boolean' },
             othealth_date: { type: 'timestamp' },
+            q2_survey_complete: { type: 'integer' },
             sdfsdaf___0: { type: 'boolean' },
             sdfsdaf___1: { type: 'boolean' },
             sdfsdaf___2: { type: 'boolean' },
@@ -144,7 +178,8 @@ module Redcap
             i57: { type: 'integer' },
             f57: { type: 'decimal' },
             dd: { type: 'timestamp' },
-            yes_or_no: { type: 'boolean' }
+            yes_or_no: { type: 'boolean' },
+            test_complete: { type: 'integer' }
           }
         }
       }
