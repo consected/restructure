@@ -34,6 +34,7 @@ class ExternalIdentifier::ExternalIdentifierController < UserBaseController
   #
   # Remove items that are not showable, based on showable_if in the options config
   def filter_records
+    return unless @master_objects
     return @master_objects if @master_objects.is_a? Array
 
     @filtered_ids = @master_objects

@@ -7,7 +7,6 @@
 class UserBase < ActiveRecord::Base
   self.abstract_class = true
 
-  belongs_to :user
   include HandlesUserBase
 
   def model_data_type

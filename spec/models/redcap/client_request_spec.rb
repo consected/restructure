@@ -20,7 +20,7 @@ RSpec.describe Redcap::ClientRequest, type: :model do
     rc.current_admin = @admin
     expect(rc).to be_a Redcap::ProjectAdmin
 
-    rc.project_client.project
+    rc.api_client.project
 
     expect(Redcap::ClientRequest.count).to be > num
     expect(Redcap::ClientRequest.last.action).to eq 'project'

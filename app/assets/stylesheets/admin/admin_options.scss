@@ -17,7 +17,7 @@
 
 .admin-options-editor-block {
   height: 80vh;
-  width: 50%;
+  width: auto;
   margin: 6px;
 }
 
@@ -25,15 +25,22 @@
   height: 80vh;
   width: 40vw;
   margin: 6px;
+
+  > div {
+    height: 100%;
+  }
 }
 
 .admin-options-block-outer {
   overflow: hidden;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 
   .tab-content {
     overflow: auto;
-    height: 94%;
+    height: auto;
+    flex-grow: 1;
   }
 }
 
@@ -73,4 +80,10 @@ ul.admin-options-tag-list {
   padding: 1em;
   border: 1px solid rgb(221, 221, 221);
   border-top: 0;
+  height: 100%;
+  overflow: auto;
+}
+
+.admin-form-block-outer {
+  display: flex;
 }

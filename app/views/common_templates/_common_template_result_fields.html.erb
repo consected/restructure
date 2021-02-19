@@ -113,8 +113,8 @@
     <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{else is key 'includes' '_selection$' }}
     <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_selection$' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
-  {{else is key 'includes' '^multi_select_' }}
-    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^multi_select_' }}
+  {{else is key 'includes' '^multi_' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^multi_' }}
       {{#* inline "iterateMultiSelect"}}
         {{#each multi_vals}}
           {{#is this '!in' "0,false,no" }}

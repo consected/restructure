@@ -149,6 +149,18 @@ _fpa.postprocessors_admin = {
       });
     })
 
+    window.setTimeout(function () {
+      // Handle auto opening of links in tab panels
+      block.find('[data-toggle="tab"]').not('.attached-tab-show').on('show.bs.tab', function () {
+        $($(this).attr('href')).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+      }).addClass('attached-tab-show');
+
+      // Handle auto opening of links in tab panels when the initial panel is already open
+      block.find('[data-toggle="tab"][aria-expanded="true"]').not('.attached-tab-init').each(function () {
+        $($(this).attr('href')).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+      }).addClass('attached-tab-init')
+    }, 100);
+
     _fpa.form_utils.on_open_click(block);
 
   },

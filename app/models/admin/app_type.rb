@@ -292,7 +292,7 @@ class Admin::AppType < Admin::AdminBase
   end
 
   def setup_migrations
-    return true unless Rails.env.development?
+    return true unless Settings::AllowDynamicMigrations
 
     return true if self.class.active.where(default_schema_name: default_schema_name).count > 1
 

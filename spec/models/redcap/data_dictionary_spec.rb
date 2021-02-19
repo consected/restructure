@@ -17,6 +17,24 @@ RSpec.describe Redcap::DataDictionary, type: :model do
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
 
-    expect(rc.redcap_data_dictionary.captured_metadata).to eq rc.project_client.metadata
+    expect(rc.redcap_data_dictionary.captured_metadata).to eq rc.api_client.metadata
   end
+
+  it 'produces a list of all fields from all forms' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    dd = rc.redcap_data_dictionary
+
+    count_fields = 0
+    dd.forms.each do |_k, form|
+      count_fields += form.fields.length
+    end
+
+    expect(dd.all_fields).to be_a Hash
+    expect(dd.all_fields.length).to eq count_fields
+
+    expect(dd.record_id_field).to eq :record_id
+  end
+
 end

@@ -3,9 +3,8 @@ module Redcap
     queue_as :default
 
     #
-    # Capture the REDCap data dictionary "meatadata" for the configured project admin.
+    # Capture the REDCap data dictionary "metadata" for the configured project admin.
     # The result is stored directly back to the data dictionary record.
-    # @param [Redcap::ProjectAdmin] project_admin
     # @param [Redcap::DataDictionary] data_dictionary
     # @return [Boolean] success
     def perform(data_dictionary)
@@ -19,7 +18,7 @@ module Redcap
       # Use the original admin as the current admin
       project_admin.current_admin ||= project_admin.admin
       data_dictionary.current_admin ||= project_admin.admin
-      m = project_admin.project_client.metadata
+      m = project_admin.api_client.metadata
 
       raise FphsException, 'Metadata returned is not correct format' unless m.is_a? Array
 

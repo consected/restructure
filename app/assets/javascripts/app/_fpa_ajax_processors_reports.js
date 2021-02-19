@@ -199,7 +199,7 @@ _fpa.postprocessors_reports = {
     }, 50);
 
     window.setTimeout(function () {
-      $('td[data-col-type$="_when"], td[data-col-type$=" when"], td[data-col-type$="_date"], td[data-col-type$=" date"], td[data-col-type="date"]').not('.td-date-formatted').each(function () {
+      $('td[data-col-type$="_when"], td[data-col-type$=" when"], td[data-col-type$="_date"], td[data-col-type$=" date"], td[data-col-type="date"], td[data-col-var-type="Date"]').not('.td-date-formatted, [data-col-var-type="Time"]').each(function () {
         var d = null;
         var val = $(this).html();
         if (val == 'Invalid Date')
@@ -209,7 +209,7 @@ _fpa.postprocessors_reports = {
         $(this).html(d);
       }).addClass('td-date-formatted');
 
-      $('td[data-col-type$="_at"], td[data-col-type$="_time"], td[data-col-type$=" time"], td[data-col-type$=" at"]').not('.td-time-formatted').each(function () {
+      $('td[data-col-type$="_at"], td[data-col-type$="_time"], td[data-col-type$=" time"], td[data-col-type$=" at"], td[data-col-var-type="Time"]').not('.td-time-formatted').each(function () {
         var d = null;
         var val = $(this).html();
         if (val == 'Invalid Date')

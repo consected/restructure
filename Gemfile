@@ -61,6 +61,7 @@ group :test do
   gem 'simplecov'
   gem 'simplecov-console'
   gem 'spring-commands-rspec'
+  gem 'webmock'
 end
 
 group :assets do

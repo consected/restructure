@@ -64,8 +64,14 @@ Rails.application.routes.draw do
     end
   end
 
+  # get 'redcap/project_admins/:id/request_records' => 'redcap/project_admins#request_records'
   namespace :redcap do
     resources :project_admins, except: %i[show destroy]
+    resources :project_admins do
+      member do
+        post :request_records
+      end
+    end
     resources :data_dictionaries, except: %i[show destroy]
     resources :client_requests, except: %i[edit show destroy]
   end

@@ -53,7 +53,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     # setup_access :trackers
     # setup_access :tracker_histories
     # setup_access :latest_tracker_history
-    setup_access :create_master, resource_type: :general
+    setup_access :create_master, resource_type: :general, access: :read
     expect(@user.can?(:create_master)).to be_truthy
   end
 

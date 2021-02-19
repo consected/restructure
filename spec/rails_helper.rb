@@ -35,6 +35,10 @@ put_now 'Require rspec/rails'
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 
+put_now 'Require webmock'
+require 'webmock/rspec'
+WebMock.allow_net_connect!
+
 put_now 'Browser setups'
 require 'capybara/rspec'
 require 'browser_helper'
@@ -97,6 +101,11 @@ Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 put_now 'Enforce migrations'
 ActiveRecord::Migration.maintain_test_schema!
 
+sql = 'DROP SCHEMA IF EXISTS redcap_test CASCADE; CREATE SCHEMA redcap_test;'
+ActiveRecord::Base.connection.execute sql
+db_migration_dirname = Rails.root.join('spec/migrations')
+ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+
 RSpec.configure do |config|
   config.before(:suite) do
     # Do some setup that could impact all tests through the availability of master associations
@@ -105,6 +114,9 @@ RSpec.configure do |config|
     # Skip app setups with an env variable
     unless ENV['SKIP_APP_SETUP']
       put_now 'Setup apps'
+
+      sql = "ALTER TABLE ONLY ml_app.app_types ALTER COLUMN id SET DEFAULT nextval('ml_app.app_types_id_seq'::regclass);"
+      ActiveRecord::Base.connection.execute sql
 
       put_now 'Setup ActivityLogPlayerContactPhone'
       Seeds::ActivityLogPlayerContactPhone.setup

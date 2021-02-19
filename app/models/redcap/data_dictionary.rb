@@ -15,6 +15,7 @@ module Redcap
 
     belongs_to :redcap_project_admin, class_name: 'Redcap::ProjectAdmin', foreign_key: :redcap_project_admin_id
 
+    after_save :refresh_variables_records, if: -> { captured_metadata }
     after_save :refresh_choices_records, if: -> { captured_metadata }
 
     #
@@ -34,7 +35,7 @@ module Redcap
     end
 
     def captured_metadata
-      ProjectClient.symbolize_result super
+      Redcap::ApiClient.symbolize_result super
     end
 
     #
@@ -58,7 +59,61 @@ module Redcap
       @source_name ||= URI.parse(redcap_project_admin.server_url).host
     end
 
+    #
+    # Shortcut to the study name
+    # @return [String]
+    def study
+      redcap_project_admin.study
+    end
+
+    #
+    # Get an array of all fields from all forms
+    # @return [Array{Hash}]
+    def all_fields
+      return @all_fields if @all_fields
+
+      @all_fields = {}
+      forms.each do |_k, form|
+        @all_fields.merge! form.fields
+      end
+
+      @all_fields
+    end
+
+    #
+    # Get a Hash of all fields that should be returned in a REDCap record retrieval, which takes into account
+    # the checkbox choice fields that are persisted individually. This is based on the latest retrieved REDCap
+    # metadata data dictionary.
+    # Checkbox choice fields, with checkbox_field___choice style appear in the results, and the
+    # base checkbox_field without the suffix does not appear, since it is not a field actually retrieved.
+    # @return [Hash{Symbol => Field}]
+    def all_retrievable_fields
+      Redcap::DataDictionaries::Form.all_retrievable_fields(self)
+    end
+
+    #
+    # The sequential record_id field is not a fixed name. Get the first field from the data dictionary
+    # @return [Symbol]
+    def record_id_field
+      all_fields.keys.first
+    end
+
     private
+
+    #
+    # Datadic::Variable records need to be updated to match the new metadata
+    # if there have been changes, additions or deletions
+    def refresh_variables_records
+      return unless captured_metadata
+
+      forms.each do |_k, form|
+        form.fields.each do |_k, field|
+          field.refresh_variable_record
+        end
+
+        Redcap::DataDictionaries::Field.form_complete_field(form).refresh_variable_record
+      end
+    end
 
     #
     # Datadic::Choice records need to be updated to match the new metadata
@@ -68,7 +123,7 @@ module Redcap
 
       forms.each do |_k, form|
         form.fields.each do |_k, field|
-          field.field_type.refresh_choices_records
+          field.field_choices.refresh_choices_records
         end
       end
     end

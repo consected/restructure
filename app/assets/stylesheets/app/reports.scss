@@ -270,3 +270,12 @@ th.has-comment {
 .report-results-row {
   background-color: #eee;
 }
+
+table.table.report-table td pre.expanded {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table .report-cb-inner {
+  text-align: center;
+}

@@ -68,6 +68,7 @@ class Admin::ServerInfo
   # Initialize the class with a valid, active admin
   # @param [Admin] admin
   def initialize(admin)
+    raise FphsException, 'Initialization with admin blank is not valid' unless admin
     raise FphsException, 'a valid admin is required' unless admin.is_a?(Admin) && admin.enabled?
 
     self.current_admin = admin

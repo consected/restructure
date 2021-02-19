@@ -6,6 +6,8 @@ module Dynamic
 
     included do
       attr_accessor :table_comments # comments from definition to be applied to DB table
+      attr_accessor :allow_migrations
+      attr_accessor :db_configs # field configurations from definition to be applied during creation
 
       before_validation :init_schema_name
 
@@ -15,9 +17,15 @@ module Dynamic
       after_save :run_migration, if: -> { @do_migration }
     end
 
+    def allow_migrations
+      return @allow_migrations unless @allow_migrations.nil?
+
+      @allow_migrations = Settings::AllowDynamicMigrations
+    end
+
     # Check the table exists. If not, generate a migration and create it if in development
     def generate_create_migration
-      return if @ran_migration || table_or_view_ready? || !Rails.env.development?
+      return if @ran_migration || table_or_view_ready? || !allow_migrations
 
       raise FphsException, "Use a plural table name: #{table_name}" if table_name.singularize == table_name
 
@@ -35,7 +43,7 @@ module Dynamic
       end
 
       @do_migration = nil
-      return if @ran_migration || !Rails.env.development?
+      return if @ran_migration || !allow_migrations
 
       # Force re-parsing of the option configs, to ensure comments are correctly handled
       option_configs(force: true)
@@ -51,7 +59,7 @@ module Dynamic
     #
     # Produce "create table" migration for this configuration
     def write_create_or_update_migration(export_type = nil)
-      return unless Rails.env.development?
+      return unless allow_migrations
 
       # Force re-parsing of the option configs, to ensure comments are correctly handled
       option_configs(force: true)
@@ -103,7 +111,9 @@ module Dynamic
           table_comments,
           implementation_no_master_association,
           table_name_before_last_save,
-          btm
+          btm,
+          db_configs,
+          allow_migrations: allow_migrations
         )
     end
 

@@ -24,7 +24,7 @@ module SetupHelper
   def self.setup_app_dbs
     puts 'Setup app DBs'
 
-    unless ActiveRecord::Base.connection.table_exists?('ipa_inex_checklists')
+    unless ActiveRecord::Base.connection.table_exists?('activity_log_player_info_e_signs')
       # ESign setup
       # Setup the triggers, functions, etc
       sql_files = %w[create_al_table.sql create_ipa_inex_checklist_table.sql]

@@ -119,7 +119,7 @@ _fpa.form_utils = {
       }
 
       window.setTimeout(function () {
-        item.trigger('click.rails');
+        // item.trigger('click.rails');
         item.click();
       }, p);
     });
@@ -1340,12 +1340,22 @@ _fpa.form_utils = {
       });
       el.on('shown.bs.collapse', function () {
         el.removeClass('hidden');
-        //el.css({display: 'block', height: 'auto', overflow: 'hidden'});
+        $(this).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
       });
       el.on('hide.bs.collapse', function () {
 
       });
     }).addClass('attached-force-collapse');
+
+    // Handle auto opening of links in tab panels
+    block.find('[data-toggle="tab"]').not('.attached-tab-show').on('show.bs.tab', function () {
+      $($(this).attr('href')).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+    }).addClass('attached-tab-show');
+
+    // Handle auto opening of links in tab panels when the initial panel is already open
+    block.find('[data-toggle="tab"][aria-expanded="true"]').not('.attached-tab-init').each(function () {
+      $($(this).attr('href')).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+    }).addClass('attached-tab-init')
 
 
     block.find('[data-add-icon]').not('.attached-add-icon').each(function () {

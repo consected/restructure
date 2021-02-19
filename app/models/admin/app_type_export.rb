@@ -15,7 +15,7 @@ module Admin::AppTypeExport
   def export_config(format: :json)
     force_validations!
 
-    export_migrations if Rails.env.development?
+    export_migrations if Settings::AllowDynamicMigrations
 
     if format == :json
       JSON.pretty_generate(JSON.parse(to_json))

@@ -89,7 +89,7 @@ class Classification::GeneralSelection < ActiveRecord::Base
   def self.use_with_attribute? attr
     !attr.in?(%w[disabled user_id created_at updated_at]) && (
       attr.start_with?('select_') ||
-      attr.start_with?('multi_select_') ||
+      attr.start_with?('multi_') ||
       attr.start_with?('tag_select_') ||
       attr.end_with?('_selection') ||
       attr.in?(%w[source rec_type rank])

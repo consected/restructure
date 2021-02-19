@@ -1,8 +1,8 @@
-<div class="">
+<div class="admin-options-block-outer">
 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#report-def" aria-controls="report-def" role="tab" data-toggle="tab">Definition</a></li>
+    <li role="presentation" class="active"><a href="#report-def" aria-controls="report-def" role="tab" data-toggle="tab" aria-expanded="true">Definition</a></li>
     <li role="presentation"><a href="#config-options" aria-controls="config-options" role="tab" data-toggle="tab">Configuration</a></li>
     <li role="presentation"><a href="#data-dicts" aria-controls="data-dicts" role="tab" data-toggle="tab">Data Dictionaries</a></li>
     <li role="presentation"><a href="#tables" aria-controls="tables" role="tab" data-toggle="tab">Tables</a></li>
@@ -25,15 +25,19 @@
     </div>
     <div role="tabpanel" class="tab-pane" id="data-dicts">
       <h4>Data Dictionaries</h4>
-      <%= render partial: 'admin/reference_data/data_dic_block'%>
+      <div id="data-dic-block-container" data-subscription="data-dic-block">
+      <%= link_to "loading...", admin_reference_data_url(type: :data_dic), remote: true, class: 'on-show-auto-click' %>
+      </div>      
     </div>
     <div role="tabpanel" class="tab-pane" id="tables">
       <h4>Tables</h4>
-      <%= render partial: 'admin/reference_data/table_list_block'%>
+      <div id="table-list-block-container" data-subscription="table-list-block" data-preprocessor="ref_data_table_list_block">
+      <%= link_to "loading...", admin_reference_data_url(type: :table_list), remote: true, class: 'on-show-auto-click' %>
+      </div>
     </div>
     <div role="tabpanel" class="tab-pane" id="protocol_events">
       <h4>Protocol / status / method </h4>
-      <%= render partial: 'admin/reference_data/protocol_block'%>
+      <%= Rails.cache.fetch('info-block-protocol-block') { render partial: 'admin/reference_data/protocol_block' }.html_safe %>
     </div>
     <div role="tabpanel" class="tab-pane" id="selection-options">
       <h4>General Selections </h4>

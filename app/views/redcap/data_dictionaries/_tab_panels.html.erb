@@ -1,0 +1,49 @@
+
+
+    <%
+      unless defined? no_active
+        no_active = false 
+      end
+      @rc_data_dictionary = object_instance.redcap_data_dictionary if object_instance.respond_to? :redcap_data_dictionary
+      @rc_data_dictionary ||= object_instance if object_instance.is_a? Redcap::DataDictionary
+
+      if @rc_data_dictionary
+    %>
+    <div role="tabpanel" class="tab-pane <%= no_active ? '' : 'active'%>" id="def-dd-details-block">
+      <h4>Details</h4>
+      
+      <div>
+        <label>Project name</label>
+        <%= link_to @rc_data_dictionary.redcap_project_admin_name, @rc_data_dictionary.redcap_project_admin %>
+      </div>
+      <%= render partial: 'redcap/data_dictionaries/forms_and_fields', locals: { object_instance: @rc_data_dictionary}%>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="def-dropdowns-block">
+      <h4>Dropdowns</h4>
+      <%= render partial: 'redcap/data_dictionaries/dropdowns_defs', locals: { object_instance: @rc_data_dictionary}%>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="def-checkboxes-block">
+      <h4>Checkboxes</h4>
+      <%= render partial: 'redcap/data_dictionaries/checkboxes_defs', locals: { object_instance: @rc_data_dictionary}%>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="def-radio-block">
+      <h4>Radio</h4>
+      <%= render partial: 'redcap/data_dictionaries/radio_defs', locals: { object_instance: @rc_data_dictionary}%>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="def-dd-metadata-block">
+      <h4>Metadata</h4>
+      
+      <% if @rc_data_dictionary.captured_metadata.present?%>
+        <div class="admin-options-ref-textarea-block">
+          <textarea style="font-size: 12px" class="extra-help-info">
+<%= @rc_data_dictionary.captured_metadata.map(&:stringify_keys).to_yaml%>
+          </textarea>
+        </div>
+      <% end%>
+    </div>
+
+    <% end %>

@@ -123,24 +123,52 @@
               col_name = @results.fields[i]
               unless col_hide[col_name]
           %>
-          <td data-col-type="<%=@results.fields[i] %>" data-col-table="<%=result_tables[i] %>" class="report-el <%= @results.fields[i] == 'id' ? 'report-el-object-id' : '' %> <%= col_classes[@results.fields[i]] %>"><%
+          <td data-col-type="<%=@results.fields[i] %>" data-col-table="<%=result_tables[i] %>" data-col-var-type="<%=col.class.name%>" <% if col.class == Date || col.class == Time %> data-time-orig-val="<%=col.to_s%>" <% end %> class="report-el <%= @results.fields[i] == 'id' ? 'report-el-object-id' : '' %> <%= col_classes[@results.fields[i]] %>"><%
                 col_tag = col_tags[col_name] 
                 l = col&.scan("\n")&.length if col.is_a?(String)
                 l ||= 0
                 got_nl = (l >= 1)
                 col = col.to_json if col.is_a?(Hash)
                 col_tag ||= 'pre' if got_nl
-
-                col_tag = 'div' if show_as[col_name] == 'div'
-
-                if show_as[col_name] == 'url'
-                  col_url_parts = col&.scan(/^\[([\w\s\d]+)\]\((.+)\)$/)
-                  col = link_to(col_url_parts&.first&.first, col_url_parts&.first&.last, target: '_blank')
+                
+                case show_as[col_name] 
+                when 'div'
+                  col_tag = 'div' 
+                when 'checkbox'
+                  col_tag = 'div'   
+                  col = if col
+                          "<span class=\"glyphicon glyphicon-check val-true\"></span>".html_safe  
+                        else
+                          "<span class=\"val-false\"></span>".html_safe  
+                        end
+                  col = "<div class=\"report-cb-inner\">#{col}</div>".html_safe
+                when 'options'
                   col_tag = 'div'
-
+                  
+                  if col.is_a?(String)
+                    if col.present?
+                      col = JSON.parse(col) 
+                    else
+                      col = nil
+                    end
+                  end
+                  
+                  if col
+                    col = col.map do |citem|
+                      "<div class=\"report-option-items\"><div><strong>#{citem.first}</strong>&nbsp;<span>#{citem.last}</span></div></div>"
+                    end.join("").html_safe
+                  end
+                when 'url'
+                  if col.present?
+                    col_url_parts = col&.scan(/^\[([\w\s\d]+)\]\((.+)\)$/)
+                    col = link_to(col_url_parts&.first&.first, col_url_parts&.first&.last, target: '_blank')
+                  end
+                  col_tag = 'div'
+                else
+                col_tag = show_as[col_name] if show_as[col_name].present? 
                 end
                 
-            %><% if got_nl || col_tag%><<%=col_tag%> class="<% if l > 4%>expandable<% end %>"><% end %><%= col %><% if got_nl%></<%=col_tag%>><% end %></td>
+            %><% if col_tag%><<%=col_tag%> class="<% if l > 4%>expandable<% end %>"><% end %><%= col %><% if col_tag %></<%=col_tag%>><% end %></td>
           <%  
               end
               i += 1

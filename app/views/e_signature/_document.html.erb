@@ -92,8 +92,8 @@
           show_value ||= field_val
     %>
       <li class="<%= field_result_class %> is--select-field"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '(^select_|_selection$)' } %> <strong><%= show_value %></strong></li>
-    <% elsif key.index /^multi_select_/  %>
-      <li class="<%= field_result_class %> is--select-field"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '^multi_select_' } %>
+    <% elsif key.index /^multi_/  %>
+      <li class="<%= field_result_class %> is--select-field"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '^multi_' } %>
         <strong>
           <%= render partial: 'e_signature/multi_select', locals: {field_key: key, multi_vals: field_val} %>
         </strong>

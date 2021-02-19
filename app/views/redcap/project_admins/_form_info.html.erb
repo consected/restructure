@@ -1,19 +1,38 @@
-<div class="">
+<div class="admin-options-block-outer">
 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab">Details</a></li>
+    <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab" aria-expanded="true">Details</a></li>
     <li role="presentation" class=""><a href="#def-metadata-block" aria-controls="def-metadata-block" role="tab" data-toggle="tab">Metadata</a></li>
-
+    <%= render partial: 'redcap/data_dictionaries/tabs', locals: { no_active: true } %>
+    <li role="presentation" class=""><a href="#def-data-records-block" aria-controls="def-data-records-block" role="tab" data-toggle="tab">Data</a></li>
   </ul>
 
   <!-- Tab panes -->
   <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active" id="def-metadata-block">
-      <h4>Details</h4>
-      <% if object_instance.captured_project_info.present?%>
-        <%= link_to 'data dictionaries', redcap_data_dictionaries_path %>
-      <% end%>
+    <div role="tabpanel" class="tab-pane active" id="def-details-block">
+      <h4><%= object_instance.name %></h4>
+      <p><label>updated at</label> <span><%= object_instance.updated_at %></span></p>
+      <p><label>dynamic model</label> <span><%= object_instance.dynamic_storage&.dynamic_model_ready? ? 'ready' : 'not available' %> </span></p>
+      
+
+      <h4>Latest Requests</h4>
+
+      <table class="table"><thead><tr><th>action</th><th>name</th><th>server URL</th><th>admin</th><th>created</th><th>result</th></tr></thead>
+      <tbody>
+      <% object_instance.redcap_client_requests.order(id: :desc).limit(5).each do |cr| %>
+        <tr>
+        <td><%= cr.action %></td>
+        <td><%= cr.name %></td>
+        <td><%= cr.server_url %></td>
+        <td><%= cr.admin&.email %></td>
+        <td><%= cr.created_at %></td>
+        <td><pre><%= cr.result&.to_yaml %></pre></td>
+        </tr>
+      <% end %>
+      </tbody>
+      </table>
+
     </div>
   
 
@@ -22,10 +41,38 @@
       <% if object_instance.captured_project_info.present?%>
         <div class="admin-options-ref-textarea-block">
           <textarea style="font-size: 12px" class="extra-help-info">
-<%= object_instance.captured_project_info.to_yaml%>
+<%= object_instance.captured_project_info.stringify_keys.to_yaml%>
           </textarea>
         </div>
-      <% end%>
+      <% else %>
+        <p>Project Info Metadata not yet retrieved</p>
+      <% end %>
     </div>
+
+    <%= render partial: 'redcap/data_dictionaries/tab_panels', locals: { object_instance: object_instance, no_active: true } %>
+
+    <div role="tabpanel" class="tab-pane" id="def-data-records-block">
+      <h4>Data</h4>
+      <% if object_instance.dynamic_storage&.dynamic_model_ready? %>
+        <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), method: :post, remote: true, class: 'btn btn-danger' %></p>
+      <% else %>
+        <p>The dynamic model has not been set up</p>
+      <% end %>
+
+      <%
+        dm = object_instance.dynamic_storage&.dynamic_model
+        if dm
+          dmfl = dm.field_list 
+          fl = object_instance.dynamic_storage.field_list
+
+          dmfla = dm&.field_list.split(' ')
+          fla = object_instance.dynamic_storage.field_list.split(' ')
+
+      %>
+      <p><label>dynamic model fields</label> <span><%= dmfl == fl ? 'match' : "mismatched: +[#{dmfla -fla}] -[#{fla -dmfla}]" %> </span></p>
+      <%= link_to 'search table data', "/reports/reference_data__table_data?schema_name=#{dm.schema_name}&search_attrs%5B_blank%5D=true&table_name=#{dm.table_name}", target: '_blank' %>
+      <% end %>
+    </div>
+  
   </div>
 </div>
