@@ -37,6 +37,13 @@ class Report < ActiveRecord::Base
   end
 
   #
+  # Map options field to options_text attribute expected for config libraries
+  # @todo - also handle the search attribute configs
+  def options_text
+    options
+  end
+
+  #
   # Attribute containing options to be parsed by the options provider
   # in the admin report definition page
   def self.option_configs_attr
