@@ -22031,18 +22031,19 @@ ALTER SEQUENCE bulk_msg.player_contact_phone_infos_id_seq OWNED BY bulk_msg.play
 CREATE TABLE bulk_msg.zeus_bulk_message_history (
     id integer NOT NULL,
     master_id integer,
-    name character varying,
-    notes character varying,
-    channel character varying,
-    message character varying,
+    name varchar,
+    notes varchar,
+    channel varchar,
+    message varchar,
     send_date date,
     send_time time without time zone,
-    status character varying,
+    status varchar,
+    cancel varchar,
+    ready varchar,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    zeus_bulk_message_id integer,
-    cancel character varying
+    zeus_bulk_message_id integer
 );
 
 
@@ -22228,19 +22229,19 @@ ALTER SEQUENCE bulk_msg.zeus_bulk_message_statuses_id_seq OWNED BY bulk_msg.zeus
 CREATE TABLE bulk_msg.zeus_bulk_messages (
     id integer NOT NULL,
     master_id integer,
-    name character varying,
-    notes character varying,
-    channel character varying,
-    message character varying,
+    name varchar,
+    notes varchar,
+    channel varchar,
+    message varchar,
     send_date date,
     send_time time without time zone,
-    status character varying,
+    status varchar,
+    cancel varchar,
+    ready varchar,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    cancel character varying
+    updated_at timestamp without time zone NOT NULL
 );
-
 
 --
 -- Name: zeus_bulk_messages_id_seq; Type: SEQUENCE; Schema: bulk_msg; Owner: -

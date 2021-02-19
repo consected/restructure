@@ -14,7 +14,7 @@ RSpec.describe Admin::ServerInfo, type: :model do
 
     expect do
       Admin::ServerInfo.new(nil)
-    end.to raise_error(FphsException, 'Initialization with current_admin blank is not valid')
+    end.to raise_error(FphsException, 'Initialization with admin blank is not valid')
   end
 
   it 'gets a list of server settings' do

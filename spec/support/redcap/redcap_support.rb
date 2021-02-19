@@ -32,8 +32,8 @@ module Redcap
     end
 
     # Get project configurations from encrypted credential storage
-    def redcap_project_configs(mocks: true)
-      return @redcap_project_configs if @redcap_project_configs
+    def redcap_project_configs(mocks: true, force_reload: false)
+      return @redcap_project_configs if @redcap_project_configs && !force_reload
 
       rcconf = Rails.application.credentials.redcap
       return unless rcconf

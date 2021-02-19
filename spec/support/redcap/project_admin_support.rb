@@ -1,8 +1,7 @@
 module Redcap
   module ProjectAdminSupport
     def valid_attribs
-      Redcap::ProjectAdmin.update_all(disabled: true)
-      redcap_project_configs.dup.first.merge(study: 'Q2')
+      redcap_project_configs(force_reload: true).dup.first.merge(study: "Study-#{rand 100_000_000_000_000}")
     end
 
     def list_invalid_attribs
