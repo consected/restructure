@@ -50,7 +50,8 @@ module Redcap
     # just changed, to avoid never ending callbacks
     after_save :capture_current_project_info, unless: -> { captured_project_info_changed? || !saved_changes? }
     after_save :capture_data_dictionary, if: -> { saved_changes? || force_refresh }
-    after_save :setup_dynamic_model, if: -> { saved_change_to_id? || saved_change_to_dynamic_model_table? || force_refresh }
+    after_save :setup_dynamic_model,
+               if: -> { saved_change_to_id? || saved_change_to_dynamic_model_table? || force_refresh }
     after_save :reset_force_refresh
 
     attr_accessor :force_refresh

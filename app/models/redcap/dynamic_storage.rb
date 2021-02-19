@@ -51,6 +51,18 @@ module Redcap
       @db_configs
     end
 
+    def field_options
+      @field_options ||= {}
+
+      data_dictionary.all_retrievable_fields.each do |field_name, _field|
+        @field_options[field_name] = {
+          no_downcase: true
+        }
+      end
+
+      @field_options
+    end
+
     #
     # List of field names to be used in a dynamic model field list
     # @return [String]
@@ -71,7 +83,8 @@ module Redcap
 
       default_options = {
         default: {
-          db_configs: db_configs
+          db_configs: db_configs,
+          field_options: field_options
         }
       }.deep_stringify_keys
 
