@@ -1,8 +1,8 @@
 GIT
-  remote: https://github.com/peterclark/redcap.git
-  revision: 4c1e46fc4efaaa4c5b3482533fe76249d08bb530
+  remote: https://github.com/consected/redcap.git
+  revision: 7bf9ac14d0057f9d1c4a4225dfa2559846c6e01f
   specs:
-    redcap (0.3.0)
+    redcap (0.3.3)
       dotenv
       hashie (~> 3.4.6)
       json
@@ -53,7 +53,7 @@ GEM
       activemodel (= 5.2.4.5)
       activesupport (= 5.2.4.5)
       arel (>= 9.0)
-    activerecord-import (1.0.7)
+    activerecord-import (1.0.8)
       activerecord (>= 3.2)
     activestorage (5.2.4.5)
       actionpack (= 5.2.4.5)
@@ -72,7 +72,7 @@ GEM
     attr_encrypted (3.1.0)
       encryptor (~> 3.0.0)
     aws-eventstream (1.1.0)
-    aws-partitions (1.427.0)
+    aws-partitions (1.428.0)
     aws-sdk-cloudwatchlogs (1.39.0)
       aws-sdk-core (~> 3, >= 3.112.0)
       aws-sigv4 (~> 1.1)
@@ -381,7 +381,8 @@ GEM
       sprockets (>= 3.0.0)
     strong_password (0.0.9)
     syslog-logger (1.6.8)
-    terminal-table (1.6.0)
+    terminal-table (3.0.0)
+      unicode-display_width (~> 1.1, >= 1.1.1)
     therubyracer (0.12.3)
       libv8 (~> 3.16.14.15)
       ref
@@ -395,7 +396,7 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.7)
-    unicode-display_width (2.0.0)
+    unicode-display_width (1.7.0)
     unicode_utils (1.4.0)
     warden (1.2.9)
       rack (>= 2.0.9)

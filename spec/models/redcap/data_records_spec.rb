@@ -106,6 +106,21 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(dr.updated_ids).to be_empty
   end
 
+  it "fails if survey fields are requested and the dynamic model doesn't expect them" do
+    dm = create_dynamic_model_for_sample_response
+
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+    rc.records_request_options = { exportSurveyFields: true }
+
+    stub_request_records @project[:server_url], @project[:api_key]
+    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+    dr.retrieve
+    expect { dr.validate }.to raise_error FphsException,
+                                          "Redcap::DataRecords retrieved record fields are not present in the model:\n" \
+                                          'redcap_survey_identifier q2_survey_timestamp test_timestamp'
+  end
+
   it 'complains if records are missing' do
     dm = create_dynamic_model_for_sample_response
 
@@ -124,7 +139,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(dr.updated_ids).to be_empty
 
     WebMock.reset!
-    rc.api_client.send :clear_cache, :records
+    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
 
     stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
@@ -166,10 +182,11 @@ RSpec.describe Redcap::DataRecords, type: :model do
   end
 
   it 'does updates on records that have changed' do
-    dm = create_dynamic_model_for_sample_response
+    dm = create_dynamic_model_for_sample_response(survey_fields: true)
 
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
+    rc.records_request_options = { exportSurveyFields: true }
 
     stub_request_records @project[:server_url], @project[:api_key]
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
@@ -183,9 +200,12 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(dr.updated_ids).to be_empty
 
     WebMock.reset!
-    rc.api_client.send :clear_cache, :records
+    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+
+    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
 
     stub_request_records @project[:server_url], @project[:api_key], 'updated_records'
+
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
     dr.retrieve
     expect { dr.validate }.not_to raise_error
@@ -193,7 +213,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     expect(dr.errors).to be_empty
     expect(dr.created_ids.sort).to be_empty
-    expect(dr.updated_ids.sort).to eq %w[14 19]
+    expect(dr.updated_ids.sort).to eq %w[1 4 14 19].sort
   end
 
   it 'retrieves all records in the background' do

@@ -51,8 +51,8 @@ module Redcap
     #
     # Get the data records for the project
     # @return [Array{Hash}] hash with symbolized keys
-    def records
-      request :records
+    def records(request_options: nil)
+      request :records, request_options: request_options
     end
 
     #
@@ -102,14 +102,15 @@ module Redcap
     # @param [Symbol] action - the name of the request method to call
     # @param [Boolean] force_reload - forces reload of cached data
     # @return [Hash | Array] result
-    def request(action, force_reload: nil)
+    def request(action, force_reload: nil, request_options: nil)
       res = nil
       ClientRequest.transaction do
-        clear_cache(action) if force_reload
+        cc = cache_key(action, request_options)
+        clear_cache(cc) if force_reload
         retrieved_from = 'api'
-        res = Rails.cache.fetch(cache_key(action), expires_in: CacheExpiresIn) do
+        res = Rails.cache.fetch(cc, expires_in: CacheExpiresIn) do
           retrieved_from = 'cache'
-          post_action action
+          post_action action, request_options
         end
 
         ClientRequest.create! current_admin: current_admin,
@@ -122,16 +123,16 @@ module Redcap
       res
     end
 
-    def cache_key(action)
-      "#{self.class.name}-#{project_admin.id}-#{action}"
+    def cache_key(action, request_options = nil)
+      "#{self.class.name}-#{project_admin.id}-#{action}-#{request_options}"
     end
 
-    def clear_cache(action)
-      Rails.cache.delete(cache_key(action))
+    def clear_cache(cache_key)
+      Rails.cache.delete(cache_key)
     end
 
-    def post_action(action)
-      res = redcap.send(action)
+    def post_action(action, request_options)
+      res = redcap.send(action, { request_options: request_options })
       self.class.symbolize_result res
     end
   end

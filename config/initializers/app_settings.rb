@@ -104,4 +104,8 @@ class Settings
 
   # Dynamic models create their own migrations during configuration, if this is set
   AllowDynamicMigrations = ENV['FPHS_ALLOW_DYN_MIGRATIONS'] == 'true' || Rails.env.development?
+
+  # Redcap records request options - additional request parameters to add / override the payload
+  # to a records request.
+  RedcapRecordsRequestOptions = Rails.env.production? ? { exportSurveyFields: true } : nil
 end

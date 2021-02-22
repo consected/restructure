@@ -39,6 +39,15 @@ module StringExtensions
   def true_if_1
     to_s == '1'
   end
+
+  #
+  # String to DateTime, ignoring non-date/time strings
+  # @return [DateTime]
+  def to_datetime_or_null
+    to_datetime
+  rescue ArgumentError
+    nil
+  end
 end
 
 class String
