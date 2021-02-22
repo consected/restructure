@@ -1,4 +1,15 @@
 GIT
+  remote: https://github.com/consected/redcap.git
+  revision: 7bf9ac14d0057f9d1c4a4225dfa2559846c6e01f
+  specs:
+    redcap (0.3.3)
+      dotenv
+      hashie (~> 3.4.6)
+      json
+      memoist
+      rest-client
+
+GIT
   remote: https://github.com/philayres/simple_token_authentication.git
   revision: 04db492a24a6a841aed92cbed780ada2464113e7
   specs:
@@ -6,16 +17,6 @@ GIT
       actionmailer (>= 3.2.6, < 7)
       actionpack (>= 3.2.6, < 7)
       devise (>= 3.2, < 6)
-
-PATH
-  remote: ../redcap
-  specs:
-    redcap (0.3.2)
-      dotenv
-      hashie (~> 3.4.6)
-      json
-      memoist
-      rest-client
 
 GEM
   remote: https://rubygems.org/
