@@ -30,6 +30,14 @@ RSpec.describe Redcap::DataRecords, type: :model do
     @dm = rc.dynamic_storage.dynamic_model
     expect(rc.dynamic_storage.dynamic_model_ready?).to be_truthy
     @dmcn = @dm.implementation_class.name
+
+    tn = "redcap_test.test_full_sf_rc#{rand 100_000_000_000_000}_recs"
+    @project_admin_sf = rc_sf = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url, api_key: @project[:api_key], study: 'Q4',
+                                                             current_admin: @admin, dynamic_model_table: tn, records_request_options: { exportSurveyFields: true }
+
+    @dm_sf = rc_sf.dynamic_storage.dynamic_model
+    expect(rc_sf.dynamic_storage.dynamic_model_ready?).to be_truthy
+    @dmcn_sf = @dm_sf.implementation_class.name
   end
 
   it 'cleanly handles full records' do
@@ -48,6 +56,34 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(dr.updated_ids).to be_empty
 
     dr = Redcap::DataRecords.new(rc, @dmcn)
+    dr.retrieve
+    expect { dr.validate }.not_to raise_error
+
+    dr.store
+
+    expect(dr.errors).to be_empty
+    expect(dr.created_ids.sort).to be_empty
+    expect(dr.updated_ids).to be_empty
+  end
+
+  it 'cleanly handles full records with survey fields' do
+    rc = @project_admin_sf
+    rc.current_admin = @admin
+    reset_mocks
+
+    dr = Redcap::DataRecords.new(rc, @dmcn_sf)
+    dr.retrieve
+    expect { dr.validate }.not_to raise_error
+
+    dr.store
+
+    expect(dr.errors).to be_empty
+    expect(dr.created_ids.sort).to eq (1..33).map(&:to_s).sort
+    expect(dr.updated_ids).to be_empty
+
+    expect(@dm_sf.implementation_class.first.q2_survey_timestamp).to be_nil
+
+    dr = Redcap::DataRecords.new(rc, @dmcn_sf)
     dr.retrieve
     expect { dr.validate }.not_to raise_error
 

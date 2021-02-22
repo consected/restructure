@@ -13,7 +13,10 @@ module Redcap
     self.table_name = 'redcap_data_dictionaries'
     include AdminHandler
 
-    belongs_to :redcap_project_admin, class_name: 'Redcap::ProjectAdmin', foreign_key: :redcap_project_admin_id
+    belongs_to :redcap_project_admin,
+               class_name: 'Redcap::ProjectAdmin',
+               foreign_key: :redcap_project_admin_id,
+               inverse_of: :redcap_data_dictionary
 
     after_save :refresh_variables_records, if: -> { captured_metadata }
     after_save :refresh_choices_records, if: -> { captured_metadata }
@@ -82,13 +85,23 @@ module Redcap
 
     #
     # Get a Hash of all fields that should be returned in a REDCap record retrieval, which takes into account
-    # the checkbox choice fields that are persisted individually. This is based on the latest retrieved REDCap
-    # metadata data dictionary.
+    # the checkbox choice fields that are persisted individually and the additional survey fields if the
+    # project admin has configured them to be returned.
+    # The configuration is based on the latest retrieved REDCap metadata data dictionary.
     # Checkbox choice fields, with checkbox_field___choice style appear in the results, and the
     # base checkbox_field without the suffix does not appear, since it is not a field actually retrieved.
     # @return [Hash{Symbol => Field}]
     def all_retrievable_fields
-      Redcap::DataDictionaries::Form.all_retrievable_fields(self)
+      all_rf = Redcap::DataDictionaries::Form.all_retrievable_fields(self)
+
+      records_request_options = redcap_project_admin.records_request_options
+      if records_request_options && records_request_options[:exportSurveyFields]
+        # Handle the redcap_survey_identifier field
+        f = Redcap::DataDictionaries::SpecialFields
+        all_rf[f.survey_identifier_field_name] = f.survey_identifier_field(self)
+      end
+
+      all_rf
     end
 
     #
@@ -111,7 +124,7 @@ module Redcap
           field.refresh_variable_record
         end
 
-        Redcap::DataDictionaries::Field.form_complete_field(form).refresh_variable_record
+        Redcap::DataDictionaries::SpecialFields.form_complete_field(form).refresh_variable_record
       end
     end
 

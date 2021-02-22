@@ -34,8 +34,15 @@ module Redcap
 
     self.table_name = 'redcap_project_admins'
 
-    has_one :redcap_data_dictionary, class_name: 'Redcap::DataDictionary', foreign_key: :redcap_project_admin_id
-    has_many :redcap_client_requests, class_name: 'Redcap::ClientRequest', foreign_key: :redcap_project_admin_id
+    has_one :redcap_data_dictionary,
+            class_name: 'Redcap::DataDictionary',
+            foreign_key: :redcap_project_admin_id,
+            inverse_of: :redcap_project_admin
+
+    has_many :redcap_client_requests,
+             class_name: 'Redcap::ClientRequest',
+             foreign_key: :redcap_project_admin_id,
+             inverse_of: :redcap_project_admin
 
     validates :study, presence: true, unless: -> { disabled? }
     validates :name, presence: true, unless: -> { disabled? }
@@ -55,6 +62,7 @@ module Redcap
     after_save :reset_force_refresh
 
     attr_accessor :force_refresh
+    attr_writer :records_request_options
 
     # Override the api_key accessor to return a decrypted value
     def api_key
@@ -90,6 +98,16 @@ module Redcap
       return if dynamic_model_table.blank?
 
       @dynamic_storage ||= Redcap::DynamicStorage.new self, dynamic_model_table
+    end
+
+    #
+    # Override Redcap records request with additional options, by default
+    # to retrieve survey fields.
+    # This has been situated in the project admin, rather directly in api client,
+    # since it should become configurable at some point, and this will allow per-project config.
+    # @return [Hash] <description>
+    def records_request_options
+      @records_request_options ||= Settings::RedcapRecordsRequestOptions
     end
 
     private

@@ -30,10 +30,20 @@ module Redcap
                     :valid_type, :valid_min, :valid_max, :is_identifier,
                     :storage_type, :db_or_fs, :schema_or_path, :table_or_file
 
-      def initialize(form, field_metadata)
+      attr_writer :data_dictionary
+
+      #
+      # Set up a field representation from metadata. By default a form the field belongs to is expected,
+      # but some fields do not belong to a form, so a data_dictionary can be passed as an option instead
+      # @param [Redcap::DataDictionaries::Form] form - nil if the field does not belong to a form
+      # @param [Hash] field_metadata
+      # @param [Redcap::DataDictionary] data_dictionary - specific if form is nil
+      def initialize(form, field_metadata, data_dictionary: nil)
         super()
 
         self.form = form
+        self.data_dictionary = data_dictionary
+
         self.def_metadata = field_metadata.dup
         self.name = field_metadata[:field_name].to_sym
         self.label = field_metadata[:field_label]
@@ -128,33 +138,10 @@ module Redcap
           new_set[field_name] = field
         end
 
-        new_set[form_complete_field_name(in_form)] = form_complete_field(in_form)
+        SpecialFields.add_form_complete_field(new_set, in_form)
+        SpecialFields.add_form_timestamp_field(new_set, in_form)
 
         new_set
-      end
-
-      #
-      # Each form has an additional <form name>_complete field
-      # Return the name for the requested form
-      # @param [Redcap::DataDictionaries::Form] form
-      # @return [Symbol]
-      def self.form_complete_field_name(form)
-        "#{form.name}_complete".to_sym
-      end
-
-      #
-      # A <form name>_complete field representation to support the extra field
-      # that Redcap adds for every form
-      # @param [Redcap::DataDictionaries::Form] form
-      # @return [Redcap::DataDictionaries::Field]
-      def self.form_complete_field(form)
-        field_metadata = {
-          field_name: form_complete_field_name(form),
-          field_type: 'form_complete',
-          text_validation_type_or_show_slider_number: 'integer',
-          field_annotation: 'Redcap values: 0 Incomplete, 1 Unverified, 2 Complete'
-        }
-        Field.new(form, field_metadata)
       end
 
       #
@@ -172,7 +159,7 @@ module Redcap
       # Shortcut to the owning data dictionary
       # @return [Redcap::DataDictionary]
       def data_dictionary
-        form.data_dictionary
+        @data_dictionary ||= form.data_dictionary
       end
 
       def schema_and_table_name

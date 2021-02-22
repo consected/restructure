@@ -74,6 +74,23 @@ module Redcap
           }
         )
         .to_return(status: 200, body: data_sample_response(type), headers: {})
+
+      type = if type
+               "#{type}-survey-fields"
+             else
+               'survey-fields'
+             end
+
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'token' => api_key,
+            'content' => 'record',
+            'format' => 'json',
+            'exportSurveyFields' => 'true'
+          }
+        )
+        .to_return(status: 200, body: data_sample_response(type), headers: {})
     end
 
     def stub_request_full_project(server_url, api_key)
@@ -105,6 +122,18 @@ module Redcap
           }
         )
         .to_return(status: 200, body: data_full_response, headers: {})
+
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'token' => api_key,
+            'content' => 'record',
+            'format' => 'json',
+            'exportSurveyFields' => 'true'
+
+          }
+        )
+        .to_return(status: 200, body: data_full_response('-survey-fields'), headers: {})
     end
 
     def project_admin_sample_response
@@ -119,8 +148,8 @@ module Redcap
       File.read('spec/fixtures/redcap/full_metadata.json')
     end
 
-    def data_full_response
-      File.read('spec/fixtures/redcap/full_records.json')
+    def data_full_response(suffix = nil)
+      File.read("spec/fixtures/redcap/full_records#{suffix}.json")
     end
 
     #
@@ -137,15 +166,15 @@ module Redcap
     #
     # List of field names in the sample response data
     # @return [Array{String}]
-    def data_sample_response_fields
-      JSON.parse(data_sample_response).first.keys
+    def data_sample_response_fields(type = 'narrow')
+      JSON.parse(data_sample_response(type)).first.keys
     end
 
     #
     # Set up the appropriate dynamic model for the narrow record data.
     # The spec/migrations/20210212065538_create_rc_sample_responses_qoezsq.rb migration
     # handles the creation of the table
-    def create_dynamic_model_for_sample_response
+    def create_dynamic_model_for_sample_response(survey_fields: nil)
       j = {
         default: {
           db_configs: {
@@ -184,15 +213,26 @@ module Redcap
         }
       }
 
+      type = 'narrow'
+      tn = 'rc_sample_responses'
+      if survey_fields
+        j[:default][:db_configs].merge!  test_timestamp: { type: 'timestamp' },
+                                         q2_survey_timestamp: { type: 'timestamp' },
+                                         redcap_survey_identifier: { type: 'string' }
+
+        type = 'narrow-survey-fields'
+        tn = 'rc_sample_sf_responses'
+      end
+
       options = YAML.dump j.deep_stringify_keys
 
       @dynamic_model = DynamicModel.create! current_admin: @admin,
-                                            name: 'rc_sample_response',
-                                            table_name: 'rc_sample_responses',
+                                            name: tn.singularize,
+                                            table_name: tn,
                                             primary_key_name: :id,
                                             foreign_key_name: nil,
                                             category: :test,
-                                            field_list: data_sample_response_fields.join(' '),
+                                            field_list: data_sample_response_fields(type).join(' '),
                                             options: options
     end
   end

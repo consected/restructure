@@ -13,6 +13,7 @@ function setup() {
   sudo -u postgres psql -c "create database $DBNAME with owner $DBOWNER;"
   psql -d $DBNAME < "../db/structure.sql"
   psql -d $DBNAME -c "create schema if not exists bulk_msg;"
+  psql -d $DBNAME -c "create schema if not exists ref_data;"
 }
 
 if [ ! -z $1 ]; then

@@ -69,4 +69,21 @@ RSpec.describe Redcap::ApiClient, type: :model do
     expect(res[1][:dob]).to eq '1998-04-16'
     expect(res[1][:record_id]).to eq '4'
   end
+
+  it 'pulls all records from redcap with survey fields' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    res = pc.records(request_options: { exportSurveyFields: true })
+    expect(res).to be_a Array
+    expect(res.first).to be_a Hash
+    expect(res.first.keys).to be_present
+    expect(res.first.keys.first).to be_a Symbol
+    expect(res[1][:dob]).to eq '1998-04-16'
+    expect(res[1][:record_id]).to eq '4'
+    expect(res[1][:redcap_survey_identifier]).to be_a String
+    expect(res[1][:q2_survey_timestamp]).to eq '[not completed]'
+  end
 end

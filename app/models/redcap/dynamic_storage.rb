@@ -8,7 +8,7 @@ module Redcap
     DefaultCategory = 'redcap'
     DefaultSchemaName = 'redcap'
 
-    attr_accessor :project_admin, :dynamic_model, :qualified_table_name, :category
+    attr_accessor :project_admin, :qualified_table_name, :category
 
     def initialize(project_admin, qualified_table_name)
       self.project_admin = project_admin
@@ -96,16 +96,16 @@ module Redcap
                               options: options,
                               allow_migrations: true
       else
-        self.dynamic_model = DynamicModel.create! current_admin: project_admin.current_admin,
-                                                  name: name,
-                                                  table_name: table_name,
-                                                  primary_key_name: :id,
-                                                  foreign_key_name: nil,
-                                                  category: category,
-                                                  field_list: field_list,
-                                                  options: options,
-                                                  schema_name: schema_name,
-                                                  allow_migrations: true
+        @dynamic_model = DynamicModel.create! current_admin: project_admin.current_admin,
+                                              name: name,
+                                              table_name: table_name,
+                                              primary_key_name: :id,
+                                              foreign_key_name: nil,
+                                              category: category,
+                                              field_list: field_list,
+                                              options: options,
+                                              schema_name: schema_name,
+                                              allow_migrations: true
       end
     end
 
