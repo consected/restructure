@@ -4,6 +4,7 @@
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab" aria-expanded="true">Details</a></li>
     <li role="presentation" class=""><a href="#def-metadata-block" aria-controls="def-metadata-block" role="tab" data-toggle="tab">Metadata</a></li>
+    <li role="presentation" class=""><a href="#def-requests-block" aria-controls="def-requests-block" role="tab" data-toggle="tab">Requests</a></li>
     <%= render partial: 'redcap/data_dictionaries/tabs', locals: { no_active: true } %>
     <li role="presentation" class=""><a href="#def-data-records-block" aria-controls="def-data-records-block" role="tab" data-toggle="tab">Data</a></li>
   </ul>
@@ -14,17 +15,23 @@
       <h4><%= object_instance.name %></h4>
       <p><label>updated at</label> <span><%= object_instance.updated_at %></span></p>
       <p><label>dynamic model</label> <span><%= object_instance.dynamic_storage&.dynamic_model_ready? ? 'ready' : 'not available' %> </span></p>
-      
+      <% if object_instance.captured_project_info.present?%>
+        <p>Project Info Metadata available</p>
+      <% else %>
+        <p>Project Info Metadata not yet retrieved</p>
+      <% end %>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="def-requests-block">
 
       <h4>Latest Requests</h4>
 
-      <table class="table"><thead><tr><th>action</th><th>name</th><th>server URL</th><th>admin</th><th>created</th><th>result</th></tr></thead>
+      <table class="table"><thead><tr><th>action</th><th>admin</th><th>created</th><th>result</th></tr></thead>
       <tbody>
       <% object_instance.redcap_client_requests.order(id: :desc).limit(5).each do |cr| %>
         <tr>
         <td><%= cr.action %></td>
-        <td><%= cr.name %></td>
-        <td><%= cr.server_url %></td>
+        
         <td><%= cr.admin&.email %></td>
         <td><%= cr.created_at %></td>
         <td><pre><%= cr.result&.to_yaml %></pre></td>

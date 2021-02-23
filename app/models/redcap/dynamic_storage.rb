@@ -107,6 +107,11 @@ module Redcap
                                               schema_name: schema_name,
                                               allow_migrations: true
       end
+
+      # Force delayed job to update with the new definition
+      AppControl.restart_delayed_job
+
+      @dynamic_model
     end
 
     #
