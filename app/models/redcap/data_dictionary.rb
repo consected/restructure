@@ -73,6 +73,7 @@ module Redcap
     # Get an array of all fields from all forms
     # @return [Array{Hash}]
     def all_fields
+      return unless captured_metadata.present?
       return @all_fields if @all_fields
 
       @all_fields = {}
@@ -92,6 +93,8 @@ module Redcap
     # base checkbox_field without the suffix does not appear, since it is not a field actually retrieved.
     # @return [Hash{Symbol => Field}]
     def all_retrievable_fields
+      return unless captured_metadata.present?
+
       all_rf = Redcap::DataDictionaries::Form.all_retrievable_fields(self)
 
       records_request_options = redcap_project_admin.records_request_options

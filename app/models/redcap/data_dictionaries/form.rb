@@ -84,6 +84,9 @@ module Redcap
       # @param [Recap::DataDictionary] data_dictionary
       # @return [Hash{Symbol => Field}]
       def self.all_retrievable_fields(data_dictionary)
+        captured_metadata = data_dictionary.captured_metadata
+        return unless captured_metadata.present?
+
         all_fields = {}
         all_from(data_dictionary).each do |_k, form|
           all_fields.merge! Redcap::DataDictionaries::Field.all_retrievable_fields(form)
