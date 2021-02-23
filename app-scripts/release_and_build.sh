@@ -63,6 +63,10 @@ git checkout develop
 echo "Starting build container"
 cd ../restructure-build
 ./build.sh
+if [ $? != 0 ]; then
+  echo "***** build.sh failed with exit code $? *****"
+  exit 101
+fi
 
 if [ ! -s ${GENVERFILE} ]; then
   echo "${GENVERFILE} in $(pwd) was not set. The build was not successful"
@@ -71,7 +75,7 @@ fi
 
 TESTVER=$(cat ${GENVERFILE})
 
-if [ "${TESTVER}" == "${CURRVER}" ]; then
+if [ "${TESTVER}" == "${CURRVER}" ] || [ ! "${TESTVER}" ]; then
   echo "Build failed"
   echo "'${TESTVER}' == '${CURRVER}'"
   exit 1
