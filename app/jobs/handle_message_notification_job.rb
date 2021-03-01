@@ -1,4 +1,6 @@
-# Queue a message notification job, either email or sms
+# frozen_string_literal: true
+
+# Queue a background message notification job, either email or sms
 class HandleMessageNotificationJob < ApplicationJob
   # retry_on FphsException
   queue_as :default

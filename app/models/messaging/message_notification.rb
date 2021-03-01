@@ -39,7 +39,7 @@ module Messaging
     scope :unhandled, -> { where status: nil }
     scope :limited_index, -> { limit 20 }
 
-    attr_accessor :generated_text, :disabled, :admin_id, :for_item
+    attr_accessor :generated_text, :disabled, :admin_id, :for_item, :on_complete_config
     attr_writer :extra_substitutions_data
 
     #
@@ -123,6 +123,7 @@ module Messaging
     # A before_save callback decides that if not empty then the user ids set #recipient_data
     # @param [Array{User | Integer}] users
     def recipient_user_ids=(users)
+      reset_recipients!
       user_ids = users.map { |u| u.is_a?(User) ? u.id : u }
       super(user_ids)
     end
@@ -131,10 +132,15 @@ module Messaging
       return @recipient_emails if @recipient_emails
       return unless email?
 
-      @recipient_emails = recipient_data
+      @recipient_emails = if recipient_data && !recipient_user_ids&.present?
+                            recipient_data
+                          else
+                            recipient_users_email
+                          end
     end
 
     def recipient_emails=(emails)
+      reset_recipients!
       self.recipient_data = emails
     end
 
@@ -142,10 +148,15 @@ module Messaging
       return @recipient_sms_numbers if @recipient_sms_numbers
       return unless sms?
 
-      @recipient_sms_numbers = recipient_data
+      @recipient_sms_numbers = if recipient_data && !recipient_user_ids&.present?
+                                 recipient_data
+                               else
+                                 recipient_users_sms
+                               end
     end
 
     def recipient_sms_numbers=(nums)
+      reset_recipients!
       self.recipient_data = nums
     end
 
@@ -190,70 +201,29 @@ module Messaging
     # Process this Messaging::MessageNotification record within a background job
     # Do not use a transaction, since we want successfully sent recipients to have a record saved so they
     # don't get hit again
+    # @param [Logger] logger - logger to use from the background job, or the default Rails logger
+    # @param [UserBase] for_item - typically an activity log item
+    # @param [Hash] on_complete_config - the on_complete configuration from the activity log definition
     def handle_notification_now(logger: Rails.logger, for_item: nil, on_complete_config: {})
       logger.info "Handling item #{id}"
       update! status: StatusInProgress
 
       self.for_item ||= for_item
+      self.on_complete_config ||= on_complete_config
 
       # Check if recipient records have been set in the recipient_data (typically from SaveTriggers::Notify)
       # If not, we just have a list of emails or phones
-      # If we have been passed recipient records, use these to generate each message for sending
       if recipient_hash_from_data
-
-        new_recipient_data = []
-        recipient_hash_from_data.each do |rec|
-          def_country_code = rec[:default_country_code]
-          list_item = list_item_for(rec[:list_type], rec[:id])
-
-          if list_item && (list_item.send_status == 'not sent' || list_item.can_retry?)
-            # Get the referenced record item (such as live contact record)
-            ri = list_item.record_item no_exception: true
-            # Set the data to nil to ensure template generation uses the item instead
-            self.data = nil
-            # If a record_item is referenced from the list item, use that as data instead
-            self.item = ri || list_item
-            # Force a current user to be the last user if one is not set
-            item.current_user ||= for_item&.user || user
-            pn = Formatter::Phone.format list_item.data, format: :unformatted, default_country_code: def_country_code
-            recipient_sms_numbers = [pn]
-            resp = generate_and_send recipient_sms_numbers: recipient_sms_numbers
-
-            list_item.set_response list_item.user, resp
-
-            # The final results is a list of recipient phone numbers
-            new_recipient_data << rec.merge(data: list_item.data)
-          elsif list_item&.send_status == Messaging::NotificationSms::BadFormatMsg
-            logger.info 'Recipient in list had bad format phone number. Will not attempt to resend'
-          elsif list_item&.send_status == 'success'
-            logger.info 'Recipient in list was already succesfully sent. Will not resend'
-          elsif !list_item&.can_retry?
-            logger.info 'Recipient previously failed but can not retry'
-          elsif list_item&.send_status == 'sent'
-            logger.info 'Recipient in list was already sent. Will not resend for some other reason'
-          else
-            logger.warn "A recipient list item did not exist (#{!!list_item}) or some other reason for not sending"
-          end
-        end
-
-        self.recipient_data = new_recipient_data
-
+        generate_and_send_for_recipient_records
       else
+        # Generate and send the same message to all the recipients
         generate_and_send
       end
 
-      logger.info "Deliver now #{id}"
       update! status: StatusComplete
-
-      # Once the notifications have been sent, fire the on_complete triggers
-      if for_item
-        for_item.current_user = for_item.user
-        OptionConfigs::ActivityLogOptions.calc_save_triggers for_item, on_complete_config
-      end
-
+      fire_item_on_complete_triggers
       logger.info "Handled item #{id}"
     rescue StandardError => e
-      Rails.logger.warn "handle_notification_now job failed (may retry?): #{e}\n#{e.backtrace[0..20].join("\n")}"
       update! status: StatusFailed
       raise FphsException, "Exception captured in handle_notification_now: #{e}\n#{e.backtrace[0..20].join("\n")}"
     end
@@ -289,7 +259,47 @@ module Messaging
       message_type&.to_sym == :email
     end
 
+    def reset_recipients!
+      @recipient_sms_numbers = nil
+      @recipient_emails = nil
+    end
+
     private
+
+    #
+    # If we have been passed recipient records, use these to generate each message for sending
+    def generate_and_send_for_recipient_records
+      new_recipient_data = []
+      recipient_hash_from_data.each do |rec|
+        # Get the list item instance referenced by the list_type and id values
+        list_item = list_item_for(rec[:list_type], rec[:id])
+
+        if list_item && (list_item.send_status == 'not sent' || list_item.can_retry?)
+          # Get the referenced record item from the list item (such as live contact record)
+          record_item = list_item.record_item no_exception: true
+          # If a record_item is referenced from the list item, use that as data instead
+          self.item = record_item || list_item
+          # Set the data to nil to ensure template generation uses the item
+          self.data = nil
+          # Force a current user to be the last user if one is not set
+          item.current_user ||= for_item&.user || user
+          pn = Formatter::Phone.format list_item.data,
+                                       format: :unformatted,
+                                       default_country_code: rec[:default_country_code]
+          recipient_sms_numbers = [pn]
+          # Generate and send to this specific phone number with the data for this item
+          resp = generate_and_send recipient_sms_numbers: recipient_sms_numbers
+
+          list_item.set_response list_item.user, resp
+          # Add the phone number to the recipient data hash
+          new_recipient_data << rec.merge(data: list_item.data)
+        else
+          log_recipient_data_reason list_item
+        end
+      end
+
+      self.recipient_data = new_recipient_data
+    end
 
     #
     # Validation to check if the item type represents a valid class.
@@ -425,6 +435,32 @@ module Messaging
     def list_item_for(list_type, list_id)
       list_type_class = ModelReference.to_record_class_for_type list_type.singularize
       list_type_class.active.where(id: list_id).first
+    end
+
+    #
+    # Once the notifications have been sent, fire the on_complete triggers
+    def fire_item_on_complete_triggers
+      return unless for_item && on_complete_config.present?
+
+      for_item.current_user = for_item.user
+      OptionConfigs::ActivityLogOptions.calc_save_triggers for_item, on_complete_config
+    end
+
+    #
+    # Log the result of recipient data processing
+    # @param [UserBase] list_item
+    def log_recipient_data_reason(list_item)
+      if list_item&.send_status == Messaging::NotificationSms::BadFormatMsg
+        logger.info 'Recipient in list had bad format phone number. Will not attempt to resend'
+      elsif list_item&.send_status == 'success'
+        logger.info 'Recipient in list was already succesfully sent. Will not resend'
+      elsif !list_item&.can_retry?
+        logger.info 'Recipient previously failed but can not retry'
+      elsif list_item&.send_status == 'sent'
+        logger.info 'Recipient in list was already sent. Will not resend for some other reason'
+      else
+        logger.warn "A recipient list item did not exist (#{!!list_item}) or some other reason for not sending"
+      end
     end
   end
 end
