@@ -125,6 +125,7 @@ RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
 
   it 'can pull logs' do
     # Limit 1 to test paging
+
     res = @bms.delivery_responses :success, limit: 10
     expect(res[:raw_events].length).to be == 10
     expect(res[:events].length).to be == 10

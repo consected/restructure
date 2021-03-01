@@ -13,9 +13,9 @@ RSpec.describe Formatter::DialogTemplate, type: :model do
     ca = @player_contact.created_at
 
     t = <<~END_TEXT
-      ## Simple Dialog Template
-      
-      This is a simple dialog template for {{data}}
+            ## Simple Dialog Template
+      #{'      '}
+            This is a simple dialog template for {{data}}
     END_TEXT
 
     expected_text = Formatter::Substitution.text_to_html(t).gsub('{{data}}', "<em class=\"all_caps\">#{@player_contact.data}</em>")
@@ -32,12 +32,13 @@ RSpec.describe Formatter::DialogTemplate, type: :model do
     create_user
     create_master
 
+    ts1 = DateTime.now
     create_item
     pc1 = @player_contact
 
     t = <<~END_TEXT
       ## Simple Dialog Template
-      
+
       This is a simple dialog template for {{data}}
     END_TEXT
 
@@ -48,12 +49,13 @@ RSpec.describe Formatter::DialogTemplate, type: :model do
     expect(dmsg1).to eq expected_text1
 
     sleep 2
+    ts2 = DateTime.now
     create_item
     pc2 = @player_contact
 
     t = <<~END_TEXT
       ## Simple Dialog Template 2
-      
+
       This is the second simple dialog template for {{data}}
     END_TEXT
 
@@ -62,6 +64,11 @@ RSpec.describe Formatter::DialogTemplate, type: :model do
     dmsg2 = Formatter::DialogTemplate.generate_message(dt.name, pc2)
     expected_text2 = Formatter::Substitution.text_to_html(t).gsub('{{data}}', "<em class=\"all_caps\">#{pc2.data}</em>")
     expect(dmsg2).to eq expected_text2
+
+    expect(pc1.created_at).to be < pc2.created_at
+    mt = Admin::MessageTemplate.active.dialog_templates.where(name: 'test dialog').first
+    versioned_mt = mt.versioned(pc1.created_at)
+    expect(versioned_mt).not_to be_nil
 
     dmsg1 = Formatter::DialogTemplate.generate_message(dt.name, pc1)
     expect(dmsg1).to eq expected_text1

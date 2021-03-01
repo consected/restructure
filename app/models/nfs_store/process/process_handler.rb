@@ -93,7 +93,7 @@ module NfsStore
       def run(name)
         return unless name
 
-        puts "Job Running: (#{name}) of (#{job_list})"
+        puts "Job Running: (#{name}) of (#{job_list})" unless Rails.env.test?
         Rails.logger.info "Job Running: (#{name}) of (#{job_list})"
 
         self.class.job_class(name).perform_later container_files, parent_item, call_options

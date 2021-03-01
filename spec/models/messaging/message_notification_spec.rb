@@ -207,6 +207,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
     expect(mn.data)
     expect(mn.from_user_email).to eq Settings::NotificationsFromEmail || mn.user.email
+    expect(mn.recipient_hash_from_data.map { |m| m[:data] }.sort).to eq zbrs.pluck(:data).sort
   end
 
   it 'performs a background job to check for new notifications after an activity log has been created' do

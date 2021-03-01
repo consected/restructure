@@ -303,7 +303,6 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     setup_data = {
       app_type: @user.app_type,
       user: @user,
-      recipient_user_ids: @receiving_user_ids,
       layout_template_name: @layout_template,
       content_template_name: content_template,
       content_template_text: content_template_text,
@@ -316,6 +315,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       extra_substitutions: extra_substitutions
     }
 
+    setup_data[:recipient_user_ids] = @receiving_user_ids if @receiving_user_ids
     setup_data[:recipient_sms_numbers] = @force_phones if @force_phones
     setup_data[:recipient_emails] = @force_emails if @force_emails
     setup_data[:recipient_data] = @force_recip_recs if @force_recip_recs

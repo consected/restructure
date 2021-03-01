@@ -166,6 +166,7 @@ module Messaging
     # @param [Array{String | Hash}] data
     def recipient_data=(data)
       data = data.map(&:to_json) if data.is_a?(Array) && data.first.is_a?(Hash)
+      @recipient_hash_from_data = nil
       super(data)
     end
 
@@ -264,6 +265,50 @@ module Messaging
       @recipient_emails = nil
     end
 
+    #
+    # The message notification works with an underlying item (likely an activity log implementation)
+    # Handle setting of the item and use of the actual class referenced
+    # in the item_type / item_id attributes
+    def item=(new_item)
+      @item = new_item
+      self.item_id = @item.id
+      self.item_type = new_item.class.name.classify
+    end
+
+    #
+    # The message notification works with an underlying item (likely an activity log implementation)
+    # Handle getting the item and use of the actual class referenced
+    # in the item_type / item_id attributes
+    def item
+      @item ||= item_class.where(id: item_id).first if item_class
+    end
+
+    #
+    # The #recipient_data attribute can contain an array of emails, SMS numbers or JSON strings.
+    # If it is an array of JSON strings and the JSON represents hashes with key 'list_type'
+    # (based on checking the first one), map each JSON string to a Hash:
+    #   {
+    #     list_type: 'namespace__model_name',
+    #     id: 'id from an instance of the list_type class',
+    #     default_country_code: 'optional country code for numbers that don't specify them directly'
+    #   }
+    # @return [Array{Hash}] <description>
+    def recipient_hash_from_data
+      return @recipient_hash_from_data if @recipient_hash_from_data
+
+      first_rec_data_json = recipient_data&.first
+      return unless first_rec_data_json.is_a?(String)
+
+      begin
+        first_rec_data = JSON.parse(first_rec_data_json)
+        return unless first_rec_data.is_a?(Hash) && first_rec_data['list_type']
+
+        @recipient_hash_from_data = recipient_data.map { |r| JSON.parse(r).symbolize_keys }
+      rescue StandardError
+        nil
+      end
+    end
+
     private
 
     #
@@ -360,32 +405,6 @@ module Messaging
     end
 
     #
-    # The #recipient_data attribute can contain an array of emails, SMS numbers or JSON strings.
-    # If it is an array of JSON strings and the JSON represents hashes with key 'list_type'
-    # (based on checking the first one), map each JSON string to a Hash:
-    #   {
-    #     list_type: 'namespace__model_name',
-    #     id: 'id from an instance of the list_type class',
-    #     default_country_code: 'optional country code for numbers that don't specify them directly'
-    #   }
-    # @return [Array{Hash}] <description>
-    def recipient_hash_from_data
-      return @recipient_hash_from_data if @recipient_hash_from_data
-
-      first_rec_data_json = recipient_data&.first
-      return unless first_rec_data_json.is_a?(String)
-
-      begin
-        first_rec_data = JSON.parse(first_rec_data_json)
-        return unless first_rec_data.is_a?(Hash) && first_rec_data['list_type']
-
-        @recipient_hash_from_data = recipient_data.map { |r| JSON.parse(r).symbolize_keys }
-      rescue StandardError
-        nil
-      end
-    end
-
-    #
     # Typically called in a before_save callback,
     # set the #from_user_email address if it is not already set,
     # using either the Settings (typically) or the owner user (if set)
@@ -401,24 +420,6 @@ module Messaging
       return unless extra_substitutions
 
       @extra_substitutions_data = YAML.safe_load(extra_substitutions, [Symbol])
-    end
-
-    #
-    # The message notification works with an underlying item (likely an activity log implementation)
-    # Handle setting of the item and use of the actual class referenced
-    # in the item_type / item_id attributes
-    def item=(new_item)
-      @item = new_item
-      self.item_id = @item.id
-      self.item_type = new_item.class.name.classify
-    end
-
-    #
-    # The message notification works with an underlying item (likely an activity log implementation)
-    # Handle getting the item and use of the actual class referenced
-    # in the item_type / item_id attributes
-    def item
-      @item ||= item_class.where(id: item_id).first if item_class
     end
 
     #
