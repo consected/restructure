@@ -3,8 +3,15 @@
 require 'rails_helper'
 
 RSpec.describe Messaging::MessageNotification, type: :model do
+  include MasterSupport
   include ModelSupport
   include PlayerContactSupport
+  include BulkMsgSupport
+
+  def mock_notification_mailer
+    mailer = double('mailer', deliver_now: true)
+    allow(NotificationMailer).to receive(:send_message_notification) { mailer }
+  end
 
   before :example do
     create_admin
@@ -32,6 +39,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
     @content = Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
+    mock_notification_mailer
     Delayed::Job.delete_all
   end
 
@@ -63,9 +71,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     t = '<p>This is some content in a text template.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
 
     master = @activity_log.master
-
     layout = @layout
-    content = @content
 
     expect do
       Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
@@ -83,6 +89,124 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a text template.</p><p>Related to master_id #{master.id}. This is a name: #{expected_name}.</p></div></body></html>"
 
     expect(res).to eq expected_text
+    expect(mn.generated_content).to eq res
+  end
+
+  it 'sets up a notification to be sent, recording appropriate information' do
+    t = '<p>This is some new content in a text template.</p><p>Related to another master_id {{master_id}}. This is a name: {{select_who}}.</p>'
+
+    master = @activity_log.master
+    layout = @layout
+
+    mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
+                                                content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master: master, message_type: :email
+
+    mn.handle_notification_now logger: Delayed::Worker.logger,
+                               for_item: @activity_log,
+                               on_complete_config: nil
+
+    mn.reload
+    res = mn.generated_text
+    expected_name = @activity_log.select_who
+
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some new content in a text template.</p><p>Related to another master_id #{master.id}. This is a name: #{expected_name}.</p></div></body></html>"
+
+    expect(res).to eq expected_text
+    expect(mn.generated_content).to eq res
+
+    expect(mn.recipient_data).not_to be_empty
+    expect(mn.recipient_data).to be_a Array
+    expect(mn.recipient_data.first).to be_a String
+    expect(mn.recipient_data.first).to eq @rec_user.email
+
+    expect(mn.data)
+    expect(mn.from_user_email).to eq Settings::NotificationsFromEmail || mn.user.email
+  end
+
+  it 'sets a from email address' do
+    t = '<p>This is some new content in a text template.</p><p>Related to another master_id {{master_id}}. This is a name: {{select_who}}.</p>'
+
+    master = @activity_log.master
+    layout = @layout
+
+    mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
+                                                content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master: master, message_type: :email,
+                                                from_user_email: { address: 'test@testemail.test', display_name: 'Test Email' }
+
+    expect(mn.from_user_email).to eq 'Test Email <test@testemail.test>'
+
+    mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
+                                                content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master: master, message_type: :email,
+                                                from_user_email: 'test@testemail2.test'
+
+    expect(mn.from_user_email).to eq 'test@testemail2.test'
+  end
+
+  it 'uses extra_substitutions as data' do
+    t = '<p>This is some new content in a text template.</p><p>Related to another master_id {{master_id}}. This is a name: {{select_who}}. Footer has {{extra_substitutions.data1}}</p>'
+
+    master = @activity_log.master
+    layout = @layout
+
+    mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
+                                                content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master: master, message_type: :email,
+                                                from_user_email: { address: 'test@testemail.test', display_name: 'Test Email' },
+                                                extra_substitutions: { data1: 'es-data-one', data2: 'es-data-two' }
+    mn.generate
+
+    expect(mn.generated_text).to eq "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some new content in a text template.</p><p>Related to another master_id #{master.id}. This is a name: #{@activity_log.select_who}. Footer has es-data-one</p></div></body></html>"
+  end
+
+  it 'sets up a notification to be sent with an array of JSON representing recipient data' do
+    setup_bulk_message_app
+    populate_recipients
+
+    t = '<p>This is some new content in a text template.</p><p>Related to another master_id {{master_id}}. This is a data: {{data}}.</p>'
+
+    master = @activity_log.master
+    layout = @layout
+
+    zbrs = DynamicModel::ZeusBulkMessageRecipient.active.order(id: :asc)
+    expect(zbrs.count).to be > 1
+
+    rd = zbrs.map do |u|
+      {
+        list_type: 'dynamic_model__zeus_bulk_message_recipients',
+        id: u.id,
+        default_country_code: 1
+      }
+    end
+
+    expect(rd.length).to be > 1
+
+    data = zbrs.last.data
+    master = PlayerContact.find(zbrs.last[:record_id]).master
+
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some new content in a text template.</p><p>Related to another master_id #{master.id}. This is a data: #{data}.</p></div></body></html>"
+
+    mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_data: rd, layout_template_name: layout.name,
+                                                content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master: master, message_type: :email
+
+    mn.handle_notification_now logger: Delayed::Worker.logger,
+                               for_item: @activity_log,
+                               on_complete_config: nil
+
+    res = mn.generated_text
+    expect(res).to eq expected_text
+    mn.reload
+
+    expect(mn.generated_content).to eq res
+
+    expect(mn.recipient_data).not_to be_empty
+    expect(mn.recipient_data).to be_a Array
+    expect(mn.recipient_data.first).to be_a String
+    jrd = JSON.parse(mn.recipient_data.first)
+    expect(jrd).to be_a Hash
+    expect(jrd).to have_key 'list_type'
+    expect(jrd['data']).to eq zbrs.first.data
+
+    expect(mn.data)
+    expect(mn.from_user_email).to eq Settings::NotificationsFromEmail || mn.user.email
   end
 
   it 'performs a background job to check for new notifications after an activity log has been created' do

@@ -2,7 +2,8 @@
 
 class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   attr_accessor :model_defs, :role, :users, :layout_template, :message_type,
-                :receiving_user_ids, :phones, :emails, :default_country_code, :job
+                :receiving_user_ids, :phones, :emails, :default_country_code, :job,
+                :from_user_email
 
   def self.config_def(if_extras: {})
     [
@@ -25,6 +26,11 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         list_type: 'association name to use to retrieve phone records. ' \
                    'For example: dynamic_model__zeus_bulk_message_recipients',
         default_country_code: '(optional) country code for SMS numbers, if they are not otherwise specified',
+        from_user_email: {
+          address: 'email address the message should appear to be from',
+          display_name: 'display name for email address'
+        },
+        "from_user_email(alternative)": 'string email address',
         layout_template: 'name of layout template',
         content_template: 'name of content template',
         content_template_text: 'alternative content template text',
@@ -73,7 +79,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       elsif @phones
         setup_phones
       elsif @phone_records
-        setup_phone_records
+        setup_recipient_data
       elsif @emails
         setup_emails
       else
@@ -112,8 +118,9 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @emails = config[:emails]
     @default_country_code = config[:default_country_code]
     @layout_template = config[:layout_template]
-
     @on_complete = config[:on_complete]
+    @from_user_email = config[:from_user_email]
+
     @message_type = config[:type]
     @run_if = config[:if]
   end
@@ -165,7 +172,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     end
   end
 
-  def setup_phone_records
+  def setup_recipient_data
     ids = calc_field_or_return(@phone_records)
     raise FphsException, 'no recipients were found in the list' if ids.nil? || ids.empty?
 
@@ -177,7 +184,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         list_type: @list_type,
         id: rec.id,
         default_country_code: @default_country_code
-      }.to_json
+      }
     end
   end
 
@@ -271,7 +278,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   # Extra substitutions are defined by config[:extra_substitutions], to provide a hash that is
   # to be substituted into the message using substitutions like {{extra_substitutions.data1}}
   # Data within the extra substitutions is substituted from the item, so may also contain its own
-  # {{curly}} substitutions, set at the time the notification is created.
+  # {{curly}} substitutions, set at the time the notification is created, not at the time it is sent.
   # @return [Hash | nil]
   def extra_substitutions
     return @extra_substitutions if @extra_substitutions
@@ -296,7 +303,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     setup_data = {
       app_type: @user.app_type,
       user: @user,
-      recipient_user_ids: [@receiving_user_ids],
+      recipient_user_ids: @receiving_user_ids,
       layout_template_name: @layout_template,
       content_template_name: content_template,
       content_template_text: content_template_text,
@@ -305,14 +312,15 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       master_id: @item.master_id,
       message_type: @message_type,
       subject: subject,
-      role_name: @role_name
+      role_name: @role_name,
+      extra_substitutions: extra_substitutions
     }
 
     setup_data[:recipient_sms_numbers] = @force_phones if @force_phones
     setup_data[:recipient_emails] = @force_emails if @force_emails
     setup_data[:recipient_data] = @force_recip_recs if @force_recip_recs
     setup_data[:importance] = importance if importance
-    setup_data[:extra_substitutions] = extra_substitutions
+    setup_data[:from_user_email] = from_user_email if from_user_email
 
     @message_notification = Messaging::MessageNotification.create! setup_data
   end
