@@ -163,7 +163,6 @@ RSpec.describe Messaging::MessageNotification, type: :model do
 
     t = '<p>This is some new content in a text template.</p><p>Related to another master_id {{master_id}}. This is a data: {{data}}.</p>'
 
-    master = @activity_log.master
     layout = @layout
 
     zbrs = DynamicModel::ZeusBulkMessageRecipient.active.order(id: :asc)
@@ -178,6 +177,9 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     end
 
     expect(rd.length).to be > 1
+
+    expect(zbrs.first.record_type).to eq 'player_contact'
+    expect(zbrs.first.record_id).not_to be_nil
 
     data = zbrs.last.data
     master = PlayerContact.find(zbrs.last[:record_id]).master
@@ -205,8 +207,9 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     expect(jrd).to have_key 'list_type'
     expect(jrd['data']).to eq zbrs.first.data
 
-    expect(mn.data)
-    expect(mn.from_user_email).to eq Settings::NotificationsFromEmail || mn.user.email
+    expect(zbrs.first.record_type).to eq 'player_contact'
+    expect(zbrs.first.record_id).not_to be_nil
+
     expect(mn.recipient_hash_from_data.map { |m| m[:data] }.sort).to eq zbrs.pluck(:data).sort
   end
 

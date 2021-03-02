@@ -97,11 +97,11 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       end
 
       create_message_notification
-      queue_job
+      res = queue_job
 
-      next unless @item.respond_to?(:background_job_ref) && job&.provider_job
+      next unless @item.respond_to?(:background_job_ref) && res&.provider_job
 
-      @item.background_job_ref = job
+      @item.set_background_job_ref res
       @item.save
     end
   end
@@ -336,7 +336,6 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     # for_item is the ActivityLog instance that was triggered on save
     # Also pass the on_complete configuration to follow up after the main job processing completes
     job.perform_later(@message_notification, for_item: @item, on_complete_config: @on_complete)
-    job
   end
 
   def calc_field_or_return(cond)

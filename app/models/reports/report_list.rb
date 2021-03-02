@@ -280,14 +280,14 @@ module Reports
     def source_class
       return @source_class if @source_class
 
-      full_item_type_name = source_type.singularize
-      @source_class = ModelReference.to_record_class_for_type full_item_type_name
+      self.full_source_type_name = source_type.singularize
+      @source_class = ModelReference.to_record_class_for_type full_source_type_name
       return @source_class if @source_class
 
-      full_item_type_name = "dynamic_model/#{source_type.singularize}"
-      @source_class = ModelReference.to_record_class_for_type full_item_type_name
+      self.full_source_type_name = "dynamic_model/#{source_type.singularize}"
+      @source_class = ModelReference.to_record_class_for_type full_source_type_name
 
-      raise FphsException, "Full item type name not found: #{full_item_type_name}" unless source_class
+      raise FphsException, "Full item type name not found: #{full_source_type_name}" unless source_class
     end
 
     def items_in_list

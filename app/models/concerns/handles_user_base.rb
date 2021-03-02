@@ -501,9 +501,11 @@ module HandlesUserBase
   # Set the background_job_ref attribute, either using a job, or directly with a string.
   # The stored format is "namespace__class_name%id"
   # @param [Job | String] job
-  def background_job_ref=(job)
+  def set_background_job_ref(job)
+    return unless respond_to?(:background_job_ref=)
+
     job = "#{job.provider_job.class.name.ns_underscore}%#{job.provider_job.id}" if job.respond_to?(:provider_job)
-    super(job)
+    self.background_job_ref = job
   end
 
   #
