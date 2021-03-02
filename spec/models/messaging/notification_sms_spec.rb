@@ -8,9 +8,7 @@ RSpec.describe Messaging::NotificationSms, type: :model do
 
   before :example do
     create_admin
-  end
 
-  before :each do
     @message_notification = Messaging::MessageNotification.new message_type: :sms
     @message_notification.generated_text = 'This is a test message to send via the SMS service'
   end
@@ -67,6 +65,8 @@ RSpec.describe Messaging::NotificationSms, type: :model do
     expect(nums).to include '+12025550156'
 
     sms = Messaging::NotificationSms.new
+    mock_send_sms_response sms
+
     sms.send_now @message_notification
   end
 
@@ -88,10 +88,12 @@ RSpec.describe Messaging::NotificationSms, type: :model do
 
     @message_notification.recipient_user_ids = [u1.id, u2.id, u3.id]
     sms = Messaging::NotificationSms.new
+    mock_send_sms_response sms
     sms.send_now @message_notification
 
     @message_notification.recipient_sms_numbers = ['+12025550147']
     sms = Messaging::NotificationSms.new
+    # No mock - send a real one to be sure
     sms.send_now @message_notification
 
     expect(sms).not_to be nil
@@ -102,6 +104,7 @@ RSpec.describe Messaging::NotificationSms, type: :model do
     # This is a known bad number
     @message_notification.recipient_sms_numbers = ['+12025550147']
     sms = Messaging::NotificationSms.new
+    mock_send_sms_response sms
     sms.send_now @message_notification
 
     expect(sms).not_to be nil
@@ -111,7 +114,9 @@ RSpec.describe Messaging::NotificationSms, type: :model do
     @message_notification.importance = 'Promotional'
     # This is a known bad number
     @message_notification.recipient_sms_numbers = ['+12025550147']
+
     sms = Messaging::NotificationSms.new
+    mock_send_sms_response sms
 
     t = Benchmark.realtime do
       3.times do
