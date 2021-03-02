@@ -125,6 +125,14 @@ module HandlesUserBase
     end
 
     #
+    # Resource name used to identify models in user access controls and elsewhere.
+    # May be overridden by dynamic types.
+    # @return [String]
+    def resource_name
+      name.ns_underscore.pluralize
+    end
+
+    #
     # Permitted parameters for strong param whitelist are generated based on
     # configured attributes, minus some standard fields
     # Ensure that database columns that are defined as array type can receive
@@ -157,6 +165,14 @@ module HandlesUserBase
     #
     # An overridable method for dynamic definitions
     def default_options; end
+  end
+
+  #
+  # Resource name used to identify models in user access controls and elsewhere.
+  # May be overridden by dynamic types.
+  # @return [String]
+  def resource_name
+    self.class.name.ns_underscore.pluralize
   end
 
   #
@@ -479,6 +495,17 @@ module HandlesUserBase
 
     job = valid_ref_cn.ns_camelize.constantize.find(ref_parts.last.to_i)
     job&.delete
+  end
+
+  #
+  # Set the background_job_ref attribute, either using a job, or directly with a string.
+  # The stored format is "namespace__class_name%id"
+  # @param [Job | String] job
+  def set_background_job_ref(job)
+    return unless respond_to?(:background_job_ref=)
+
+    job = "#{job.provider_job.class.name.ns_underscore}%#{job.provider_job.id}" if job.respond_to?(:provider_job)
+    self.background_job_ref = job
   end
 
   #

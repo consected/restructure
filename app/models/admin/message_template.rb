@@ -14,11 +14,11 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
   #
   # First matching definition matching name and optional type
-  #
+  # This includes disabled templates. Scope MessageTemplate.active
+  # to ensure only the first active item is returned.
   # @param [String|Symbol] name the name to find
   # @param [String|Symbol|nil] type optionally the type to find
   # @return [Admin::MessageTemplate|nil] matching instance
-  #
   def self.named(name, type: nil)
     res = where(name: name)
     res = res.where(message_type: type) if type
@@ -83,8 +83,6 @@ class Admin::MessageTemplate < ActiveRecord::Base
     text = content_template_text.dup
 
     all_content = template.sub('{{main_content}}', text)
-    all_content = substitute all_content, data: data, ignore_missing: ignore_missing
-
-    all_content
+    substitute all_content, data: data, ignore_missing: ignore_missing
   end
 end

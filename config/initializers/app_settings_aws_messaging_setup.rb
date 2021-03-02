@@ -9,5 +9,5 @@ ActiveSupport.on_load(:messaging_setup) do
   end
 
   # Number from https://fakenumber.org/us/boston
-  self.test_sms_number = '+16175550118'
+  self.test_sms_number = '+16177942330'
 end

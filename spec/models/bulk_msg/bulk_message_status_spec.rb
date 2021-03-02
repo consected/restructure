@@ -123,8 +123,11 @@ RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
     # puts lg
   end
 
+  # NOTE: this test may fail if we have not sent a sufficient
+  # number of test messages recently
   it 'can pull logs' do
     # Limit 1 to test paging
+
     res = @bms.delivery_responses :success, limit: 10
     expect(res[:raw_events].length).to be == 10
     expect(res[:events].length).to be == 10

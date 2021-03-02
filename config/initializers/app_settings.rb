@@ -33,6 +33,9 @@ class Settings
   # Email address for admin contact
   AdminEmail = ENV['FPHS_ADMIN_EMAIL']
 
+  # Set the max number of recipients for a message, to avoid an unexpected nasty error spamming the whole organization
+  MaxNotificationRecipients = ENV['FPHS_MAX_NOTIFY_RECIPS']&.to_i || 200
+
   TwoFactorAuthDisabled = (ENV['FPHS_2FA_AUTH_DISABLED'] == 'true')
   TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'FPHS Apps'
   TwoFactorAuthDrift = (ENV['FPHS_2FA_DRIFT'] || 30).to_i
