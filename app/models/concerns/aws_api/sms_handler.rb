@@ -64,9 +64,7 @@ module AwsApi
     # @param [String] importance - one of ValidImportances
     # @return [Aws::SNS::Types::PublishResponse] Structure containing attribute:
     #   #message_id (String)
-    def send_sms(sms_number, msg_text, importance, force_test_send: false)
-      return mock_send_sms_response if Rails.env.test? && !force_test_send
-
+    def send_sms(sms_number, msg_text, importance)
       # Use a fixed test number for dev and test (non production) environments
       sms_number = self.class.test_sms_number unless Rails.env.production?
 
@@ -86,12 +84,6 @@ module AwsApi
           }
         }
       )
-    end
-
-    def mock_send_sms_response
-      resp = Aws::SNS::Types::PublishResponse.new
-      resp.message_id = "MOCK-#{rand 1_000_000_000}"
-      resp
     end
 
     #

@@ -4,6 +4,7 @@ module Messaging
 
     BadFormatMsg = 'bad format phone number'.freeze
 
+    #
     # Send a series of SMS messages to a list of recipients with the same message
     # @param mnobj [Messaging::MessageNotification] object describing the list of numbers and message
     # @param recipient_sms_numbers [Array | nil] optional list of SMS numbers to override message notification
@@ -25,7 +26,7 @@ module Messaging
       recipient_sms_numbers ||= mnobj.recipient_sms_numbers
       generated_text ||= mnobj.generated_text
 
-      raise FphsException, 'No recipients to SMS' unless recipient_sms_numbers
+      raise FphsException, 'No recipients to SMS' unless recipient_sms_numbers&.present?
 
       recipient_sms_numbers.each do |sms_number|
         val = PhoneValidation.validate_sms_number_format sms_number, no_exception: true

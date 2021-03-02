@@ -285,7 +285,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     @trigger.perform
 
     # The time should be close enough
-    expect(@trigger.when[:wait_until].to_i / 10).to eq((DateTime.now + 1.day).to_i / 10) || eq(((DateTime.now + 1.day).to_i - 1) / 10)
+    expect(@trigger.send(:run_when)[:wait_until].to_i / 10).to eq((DateTime.now + 1.day).to_i / 10) || eq(((DateTime.now + 1.day).to_i - 1) / 10)
   end
 
   it 'sets the notification to send at a specific time in the future' do
@@ -308,7 +308,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     @trigger.perform
 
     # The time should be close enough
-    expect(@trigger.when[:wait_until].to_i / 10).to eq((DateTime.now + 1.day).to_i / 10) || eq(((DateTime.now + 1.day).to_i - 1) / 10)
+    expect(@trigger.send(:run_when)[:wait_until].to_i / 10).to eq((DateTime.now + 1.day).to_i / 10) || eq(((DateTime.now + 1.day).to_i - 1) / 10)
   end
 
   it 'sets the notification to send at a specific time in the future based on a date / time / zone definition' do
@@ -336,7 +336,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     @trigger.perform
 
     # The time should be close enough
-    expect(@trigger.when[:wait_until].to_i / 10).to eq(d.to_i / 10) || eq((d.to_i - 1) / 10)
+    expect(@trigger.send(:run_when)[:wait_until].to_i / 10).to eq(d.to_i / 10) || eq((d.to_i - 1) / 10)
   end
 
   it 'uses an if select the correct notification' do
@@ -379,7 +379,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     @trigger.perform
 
     expect(@trigger.receiving_user_ids.first).to eq @al.user_id
-    expect(@trigger.subject).to eq 'subject text 2'
+    expect(@trigger.send(:subject)).to eq 'subject text 2'
   end
 
   it 'sends notifications on a save_trigger in an activity log' do

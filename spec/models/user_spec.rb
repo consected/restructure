@@ -125,7 +125,7 @@ describe User do
 
     create_admin
 
-    @user = User.new email: @user.email + '-allow-test-email', current_admin: @admin, first_name: 'fn', last_name: 'ln'
+    @user = User.new email: "#{@user.email}-allow-test-email", current_admin: @admin, first_name: 'fn', last_name: 'ln'
 
     @user.otp_required_for_login = false
 
@@ -133,12 +133,17 @@ describe User do
     # So we create an alias, change the method, then use the alias to put the original method back afterwards.
     @user.class.send :alias_method, :orig_password_updated_at, :password_updated_at
 
+    # Set the time so that it is too late for repeated reminders to be sent, since without an actual delay from
+    # a future delayed job, the repeats will happen indefinitely.
     @user.class.send(:define_method, :password_updated_at) do
       Time.now - 87.days
     end
+
     @user.save!
 
-    expect(Settings::PasswordAgeLimit).to eq 90
+    expect(User.expire_password_after).to eq 90
+    expect(User.remind_days_before).to eq 15
+    expect(User.remind_repeat_days).to eq 4
 
     expect(Messaging::MessageNotification.count).to eq 1
     expect(Messaging::MessageNotification.first.user).to eq @user

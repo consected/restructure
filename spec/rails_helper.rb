@@ -114,7 +114,8 @@ RSpec.configure do |config|
     # Skip app setups with an env variable
     unless ENV['SKIP_APP_SETUP']
       put_now 'Setup apps'
-
+      sql = "SELECT pg_catalog.setval('ml_app.app_types_id_seq', (select max(id)+1 from ml_app.app_types), true);"
+      ActiveRecord::Base.connection.execute sql
       put_now 'Setup ActivityLogPlayerContactPhone'
       Seeds::ActivityLogPlayerContactPhone.setup
       put_now 'setup_al_player_contact_emails'
@@ -123,8 +124,7 @@ RSpec.configure do |config|
       SetupHelper.setup_ext_identifier
       put_now 'setup_test_app'
       SetupHelper.setup_test_app
-      sql = "SELECT pg_catalog.setval('ml_app.app_types_id_seq', (select max(id) from ml_app.app_types), true);"
-      ActiveRecord::Base.connection.execute sql
+
       put_now 'Handle zeus_bulk_message'
       als = ActivityLog.active.where(item_type: 'zeus_bulk_message')
       als.each do |a|

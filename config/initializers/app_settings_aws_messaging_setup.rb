@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Set up AWS messaging default configurations
 ActiveSupport.on_load(:messaging_setup) do
   self.sms_aws_region = ENV['SMS_AWS_REGION'] || 'us-east-1'
   if Rails.env.production?
@@ -8,6 +11,6 @@ ActiveSupport.on_load(:messaging_setup) do
     self.importance = 'Transactional'
   end
 
-  # Number from https://fakenumber.org/us/boston
+  # Select a number from https://fakenumber.org/us/boston
   self.test_sms_number = '+16175550118'
 end
