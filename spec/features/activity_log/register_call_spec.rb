@@ -137,6 +137,7 @@ describe 'Register an incoming call', driver: :app_firefox_driver do
     mark_next_step_status ActivityLogMain::NextStepComplete
     select_related_protocol ActivityLogMain::StudyProtocol
     add_free_text_notes 'Look at me!'
+    sleep 2
     save_log
 
     expect_log_to_show select_call_direction: ActivityLogMain::CallToPlayer,
