@@ -55,3 +55,9 @@ h2.sp-col-label {
 .sp-col-footer:empty {
   display: none;
 }
+
+.standalone-page-container {
+  .back-to-search-form {
+    display: none;
+  }
+}

@@ -12,8 +12,10 @@ class ReportsController < UserBaseController
   after_action :clear_results, only: %i[show run]
 
   helper_method :filters, :filters_on, :index_path, :permitted_params, :filter_params_permitted,
-                :search_attrs_params_hash
+                :search_attrs_params_hash, :embedded_report
   ResultsLimit = Master.results_limit
+
+  attr_accessor :failed
 
   # List of available reports
   def index
@@ -39,6 +41,8 @@ class ReportsController < UserBaseController
     @results_target = 'master_results_block'
 
     setup_data_reference_request
+
+    return if failed
 
     @view_context = params[:view_context].blank? ? nil : params[:view_context].to_sym
 
@@ -250,7 +254,11 @@ class ReportsController < UserBaseController
 
     return unless table_name && schema_name
 
-    return not_authorized unless current_user.can? :view_data_reference
+    unless current_user.can?(:view_data_reference) || current_admin
+      self.failed = true
+      not_authorized
+      return
+    end
 
     @runner.data_reference.init(table_name: table_name,
                                 schema_name: schema_name,
@@ -315,6 +323,7 @@ class ReportsController < UserBaseController
     return true if current_admin
     return true if current_user.can?(:view_report_not_list) || current_user.can?(:view_reports)
 
+    self.failed = true
     not_authorized
     throw(:abort)
   end
@@ -327,6 +336,7 @@ class ReportsController < UserBaseController
     return true if current_admin
     return true if current_user.can?(:view_reports)
 
+    self.failed = true
     not_authorized
     throw(:abort)
   end

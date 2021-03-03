@@ -5,6 +5,10 @@ class MastersController < UserBaseController
 
   before_action :authorized?, only: %i[new create]
 
+  helper_method :embedded_report
+
+  attr_accessor :embedded_report
+
   include MasterSearch
   include Fphs::PlayerActionHandler
 

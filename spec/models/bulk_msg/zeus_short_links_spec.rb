@@ -112,7 +112,7 @@ RSpec.describe 'DynamicModel::ZeusShortLink', type: :model do
 
     puts "It took #{t} seconds to create #{test_times} shortlinks"
 
-    expect(t).to be < 5
+    expect(t).to be < 15
   end
 
   it 'gets logs from s3' do

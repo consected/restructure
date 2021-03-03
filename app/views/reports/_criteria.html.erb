@@ -1,6 +1,6 @@
 <%
 click_to_search = @report_page #&& @report.report_type  == 'search'
-btn = !click_to_search && !@embedded_report ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
+btn = !click_to_search && !embedded_report ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
 view_options = @report.report_options.view_options
 %>
 <div>
@@ -55,18 +55,18 @@ view_options = @report.report_options.view_options
     <div class="form-group form-actions clearfix" style="border-color: transparent;">
       <%= hidden_field_tag  "search_attrs[#{Reports::Runner::ReportIdAttribName}]", ''%>
       <%= hidden_field_tag  "part", '', id: nil%>
-      <%= hidden_field_tag  "embed", @embedded_report, id: nil%>
+      <%= hidden_field_tag  "embed", embedded_report, id: nil%>
       <% if click_to_search %> <span></span><%end%>
       <% if @report.report_type == 'search' && !(@report.editable_data? || !@report_criteria) %>
         <%= submit_tag :search, value: :search, class: "#{btn} #{!@report_criteria && @report.auto ? 'hidden' : ''} #{!@report_page ? 'auto-submitter' : ''} #{!@report_page && @report.auto ? 'auto-run' : ''}" %>
         <%= button_tag (view_options.search_button_label || 'table'), name: 'commit', value: 'table', type: 'submit', class: "#{btn}"  unless @view_context==:search %>
       <% else %>
-        <%= button_tag (@embedded_report ? :list :  (view_options.search_button_label || :table) ), name: 'commit', value: 'table', type: 'submit', class: "#{btn} #{(!@report_page || view_options.report_auto_submit_on_change) ? 'auto-submitter' : ''} #{ @report.auto ? 'auto-run' : ''}", id: "report-form-submit-btn"  unless @view_context==:search %>
+        <%= button_tag (embedded_report ? :list :  (view_options.search_button_label || :table) ), name: 'commit', value: 'table', type: 'submit', class: "#{btn} #{(!@report_page || view_options.report_auto_submit_on_change) ? 'auto-submitter' : ''} #{ @report.auto ? 'auto-run' : ''}", id: "report-form-submit-btn"  unless @view_context==:search %>
         <% if @report_page && @report.searchable && @view_context!=:search %>
           <%= submit_tag 'auto-submitter', class: "hidden auto-submitter", id: "report-form-auto-submitter-btn" %>
         <% end %>
       <% end %>
-      <% unless @report.editable_data? || @embedded_report %>
+      <% unless @report.editable_data? || embedded_report %>
         <%= submit_tag :count, class: "#{btn}" unless @report.report_type == 'count' || @view_context==:search || view_options.hide_result_count %>
         <% unless view_options.hide_export_buttons %>
           <%= submit_tag "csv", name: :format, value: "csv", class: "#{btn}" if current_admin || current_user && current_user.can?(:export_csv) %>
