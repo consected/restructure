@@ -107,9 +107,9 @@ module Redcap
       ClientRequest.transaction do
         cc = cache_key(action, request_options)
         clear_cache(cc) if force_reload
-        retrieved_from = 'api'
+        retrieved_from = 'cache'
         res = Rails.cache.fetch(cc, expires_in: CacheExpiresIn) do
-          retrieved_from = 'cache'
+          retrieved_from = 'api'
           post_action action, request_options
         end
 

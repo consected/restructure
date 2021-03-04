@@ -16,9 +16,9 @@
       <p><label>updated at</label> <span><%= object_instance.updated_at %></span></p>
       <p><label>dynamic model</label> <span><%= object_instance.dynamic_storage&.dynamic_model_ready? ? 'ready' : 'not available' %> </span></p>
       <% if object_instance.captured_project_info.present?%>
-        <p>Project Info Metadata available</p>
+        <p><label>project info</label> metadata available</p>
       <% else %>
-        <p>Project Info Metadata not yet retrieved</p>
+        <p><label>project info</label> metadata not yet retrieved</p>
       <% end %>
     </div>
 

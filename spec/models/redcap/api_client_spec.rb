@@ -14,7 +14,7 @@ RSpec.describe Redcap::ApiClient, type: :model do
   it 'connects and gets project info' do
     name = @projects.first[:name]
 
-    rc = Redcap::ProjectAdmin.find_by_name(name)
+    rc = Redcap::ProjectAdmin.active.find_by_name(name)
     expect(rc).to be_a Redcap::ProjectAdmin
 
     rc.current_admin = @admin
@@ -34,7 +34,7 @@ RSpec.describe Redcap::ApiClient, type: :model do
   it 'requires a ProjectAdmin#current_admin to be set' do
     name = @projects.first[:name]
 
-    rc = Redcap::ProjectAdmin.find_by_name(name)
+    rc = Redcap::ProjectAdmin.active.find_by_name(name)
 
     expect(rc).to be_a Redcap::ProjectAdmin
 
@@ -46,7 +46,7 @@ RSpec.describe Redcap::ApiClient, type: :model do
   it 'connects and gets project data dictionary' do
     name = @projects.first[:name]
 
-    rc = Redcap::ProjectAdmin.find_by_name(name)
+    rc = Redcap::ProjectAdmin.active.find_by_name(name)
     rc.current_admin = @admin
     expect(rc).to be_a Redcap::ProjectAdmin
 

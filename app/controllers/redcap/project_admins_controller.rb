@@ -68,6 +68,6 @@ class Redcap::ProjectAdminsController < AdminController
   end
 
   def permitted_params
-    %i[study name server_url api_key transfer_mode frequency dynamic_model_table status disabled notes]
+    %i[study name server_url api_key dynamic_model_table transfer_mode frequency status disabled notes]
   end
 end
