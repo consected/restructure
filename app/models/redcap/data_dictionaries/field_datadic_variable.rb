@@ -9,7 +9,8 @@ module Redcap
                            valid_type valid_min valid_max is_identifier label_plain label_note_plain
                            data_dictionary field_type field_choices
                            source_name checkbox_choice_fields
-                           storage_type db_or_fs schema_or_path table_or_file].freeze
+                           storage_type db_or_fs schema_or_path table_or_file
+                           position section sub_section title_plain].freeze
 
       attr_accessor(*MatchingAttribs)
 
@@ -20,10 +21,42 @@ module Redcap
       end
 
       #
+      # Get the variable instance from the identifying information provided,
+      # by searching for the variable name within the set
+      # of variables for the specified form.
+      # @return [Datadic::Variable | nil]
+      def self.find_by_identifiers(source_name:,
+                                   form_name:,
+                                   variable_name:,
+                                   redcap_data_dictionary:,
+                                   source_type: :redcap)
+
+        Datadic::Variable.active.where(source_name: source_name,
+                                       source_type: source_type,
+                                       form_name: form_name,
+                                       variable_name: variable_name,
+                                       redcap_data_dictionary: redcap_data_dictionary)
+      end
+
+      #
       # Current admin to support updates
       # @return [Admin]
       def current_admin
         data_dictionary.current_admin
+      end
+
+      #
+      # Get the variable instance from the variable name we have been provided,
+      # by searching for the variable name within the current set
+      # of variables for this form.
+      # @param [String | Symbol] var_name
+      # @return [Datadic::Variable | nil]
+      def id_from_name(var_name)
+        return unless var_name
+
+        identified_by = identifiers.dup
+        identified_by[:variable_name] = var_name
+        self.class.find_by_identifiers(**identified_by).first&.id
       end
 
       #
@@ -45,7 +78,11 @@ module Redcap
           storage_type: storage_type,
           db_or_fs: db_or_fs,
           schema_or_path: schema_or_path,
-          table_or_file: table_or_file
+          table_or_file: table_or_file,
+          position: position,
+          section_id: id_from_name(section),
+          sub_section_id: id_from_name(sub_section),
+          title: title_plain
         }
       end
 

@@ -35,6 +35,9 @@ RSpec.describe Redcap::DataDictionaries::Field, type: :model do
     expect(v.variable_name).to eq 'dob'
     expect(v.variable_type).to eq 'date'
     expect(v.presentation_type).to eq 'text [date_mdy]'
+    expect(v.position).to eq 1
+    expect(v.section_id).to be_nil
+    expect(v.sub_section_id).to be_nil
   end
 
   it 'adds a Datadic::Variable record for the form_complete field' do
