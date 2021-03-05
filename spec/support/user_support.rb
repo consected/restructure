@@ -8,7 +8,7 @@ module UserSupport
     start_time = Time.now
 
     part ||= Time.new.to_f.to_s
-    good_email = gen_username("#{part}-#{extra}-")
+    good_email = opt[:email] || gen_username("#{part}-#{extra}-")
 
     admin, = @admin || create_admin
     user = User.create! email: good_email, current_admin: admin, first_name: "fn#{part}", last_name: "ln#{part}"
@@ -24,7 +24,7 @@ module UserSupport
     # # Can't reload, as that doesn't clear non-db attributes
     user = User.find(user.id)
 
-    app_type = @user&.app_type || Admin::AppType.active.first
+    app_type = opt[:app_type] || @user&.app_type || Admin::AppType.active.first
     raise 'No active app type!' unless app_type
 
     unless opt[:no_app_type_setup]

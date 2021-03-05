@@ -1,6 +1,8 @@
 module Redcap
   module RedcapSupport
     def setup_redcap_project_admin_configs(mocks: true)
+      setup_file_store
+
       projects = redcap_project_configs mocks: mocks
 
       Redcap::ProjectAdmin.update_all(disabled: true)
@@ -20,6 +22,14 @@ module Redcap
 
       expect(Redcap::ProjectAdmin.active.count).to eq 1
       projects
+    end
+
+    def setup_file_store
+      # Create a matching user for the admin
+      @app_type ||= Admin::AppType.active.where(name: 'ref-data').first
+      @user, = create_user nil, '', email: @admin.email, app_type: @app_type
+      add_user_to_role Settings.admin_nfs_role, for_user: @user
+      add_user_to_role 'admin', for_user: @user
     end
 
     def reset_mocks

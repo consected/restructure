@@ -26,6 +26,7 @@ if [ -z "${SUBDIR}" ]; then
   read -p 'Enter the selected directory: ' SUBDIR
 fi
 
+OWNER_GROUP=${OWNER_GROUP:='nfs_store_group_0'}
 
 FS_ROOT=${MOUNTPOINT}/${SUBDIR}
 # FS_DIR=main
@@ -35,9 +36,9 @@ cd $FS_ROOT/$FS_DIR
 mkdir -p $APPTYPE_DIR/containers
 
 echo "become sudo to setup file ownership"
-sudo echo ""
+sudo echo "in: $APPTYPE_DIR/containers"
 
 sudo chmod 770 $APPTYPE_DIR
 sudo chmod 770 $APPTYPE_DIR/containers
 sudo chown nfsuser:nfs_store_all_access $APPTYPE_DIR
-sudo chown nfsuser:nfs_store_group_0 $APPTYPE_DIR/containers
+sudo chown nfsuser:${OWNER_GROUP} $APPTYPE_DIR/containers

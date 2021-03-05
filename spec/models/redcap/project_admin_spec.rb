@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Redcap::ProjectAdmin, type: :model do
+  include UserSupport
   include ModelSupport
   include Redcap::RedcapSupport
 
@@ -89,5 +90,16 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
     expect(rc.captured_project_info).to eq rc.api_client.project
+  end
+
+  it 'creates a filestore container for file fields and project XML dump' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    expect(@user.app_type_id).not_to be_nil
+    # res = rc.create_file_store
+
+    # expect(res).to be_a NfsStore::Manage::Container
+    expect(rc.file_store).to be_a NfsStore::Manage::Container
   end
 end

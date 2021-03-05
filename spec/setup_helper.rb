@@ -220,6 +220,18 @@ module SetupHelper
     new_app_type
   end
 
+  def self.setup_ref_data_app
+    app_name = 'ref-data'
+
+    config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_files')
+    config_fn = 'ref-data_config.yaml'
+    SetupHelper.setup_app_from_import app_name, config_dir, config_fn
+
+    a = Admin::AppType.where(name: app_name).active.first
+    FileUtils.mkdir_p "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{a.id}/containers"
+    a
+  end
+
   # Setup an app from an import configuration (json or yaml)
   #
   # @param [String] name the name of the app to be set

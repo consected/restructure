@@ -17,6 +17,7 @@ module NfsStore
       after_create :create_in_nfs_store
 
       attr_accessor :create_with_role, :parent_item, :previous_uploads, :previous_upload_stored_file_ids
+
       alias_attribute :container_id, :nfs_store_container_id
 
       def self.resource_name

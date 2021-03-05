@@ -124,6 +124,8 @@ RSpec.configure do |config|
       SetupHelper.setup_ext_identifier
       put_now 'setup_test_app'
       SetupHelper.setup_test_app
+      put_now 'setup_ref_data_app'
+      SetupHelper.setup_ref_data_app
 
       put_now 'Handle zeus_bulk_message'
       als = ActivityLog.active.where(item_type: 'zeus_bulk_message')
