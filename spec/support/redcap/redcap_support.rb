@@ -41,6 +41,23 @@ module Redcap
       end
     end
 
+    def server_url(type)
+      @project[:server_url] + "?v=get#{type}"
+    end
+
+    def mock_full_requests
+      stub_request_full_project server_url('full'), @project[:api_key]
+      stub_request_full_metadata server_url('full'), @project[:api_key]
+      stub_request_full_records server_url('full'), @project[:api_key]
+    end
+
+    def mock_file_field_requests
+      stub_request_file_field_project server_url('file_field'), @project[:api_key]
+      stub_request_file_field_metadata server_url('file_field'), @project[:api_key]
+      stub_request_file_field_records server_url('file_field'), @project[:api_key]
+      stub_request_file server_url('file_field'), @project[:api_key]
+    end
+
     # Get project configurations from encrypted credential storage
     def redcap_project_configs(mocks: true, force_reload: false)
       return @redcap_project_configs if @redcap_project_configs && !force_reload
@@ -146,6 +163,67 @@ module Redcap
         .to_return(status: 200, body: data_full_response('-survey-fields'), headers: {})
     end
 
+    def stub_request_file_field_project(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: { 'content' => 'project', 'format' => 'json', 'token' => api_key }
+
+        )
+        .to_return(status: 200, body: project_admin_sample_response, headers: {})
+    end
+
+    def stub_request_file_field_metadata(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: { 'content' => 'metadata', 'fields' => nil, 'format' => 'json', 'token' => api_key }
+
+        )
+        .to_return(status: 200, body: metadata_file_field_response, headers: {})
+    end
+
+    def stub_request_file_field_records(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'token' => api_key,
+            'content' => 'record',
+            'format' => 'json'
+
+          }
+        )
+        .to_return(status: 200, body: data_file_field_response, headers: {})
+
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'token' => api_key,
+            'content' => 'record',
+            'format' => 'json',
+            'exportSurveyFields' => 'true'
+
+          }
+        )
+        .to_return(status: 200, body: data_file_field_response('-survey-fields'), headers: {})
+    end
+
+    def stub_request_file(server_url, api_key, body: nil)
+
+      body ||= Digest::SHA256.hexdigest(rand(1000000000000).to_s)
+
+      stub_request(:post, server_url)
+      .with(
+        body: {
+          "action"=>"export", 
+          "content"=>"file", 
+          "field"=>/.+/, 
+          "format"=>"json", 
+          "record"=>/\d+/, 
+          "token"=>api_key
+        })
+      .to_return(status: 200, body: body, headers: {})
+  
+    end
+
     def project_admin_sample_response
       File.read('spec/fixtures/redcap/full_project_info.json')
     end
@@ -160,6 +238,14 @@ module Redcap
 
     def data_full_response(suffix = nil)
       File.read("spec/fixtures/redcap/full_records#{suffix}.json")
+    end
+
+    def metadata_file_field_response
+      File.read('spec/fixtures/redcap/file_field_metadata.json')
+    end
+
+    def data_file_field_response(suffix = nil)
+      File.read("spec/fixtures/redcap/file_field_records#{suffix}.json")
     end
 
     #
@@ -244,6 +330,14 @@ module Redcap
                                             category: :test,
                                             field_list: data_sample_response_fields(type).join(' '),
                                             options: options
+    end
+
+    def setup_file_fields
+      mock_file_field_requests
+
+      tn = 'redcap_test.test_file_field_recs'
+      @project_admin = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url('file_field'), api_key: @project[:api_key], study: 'Q3',
+                                                         current_admin: @admin, dynamic_model_table: tn
     end
   end
 end

@@ -6,7 +6,7 @@ module Redcap
   # Works with the dynamic models created by Redcap::DynamicStorage, although this is not strictly required
   class DataRecords
     attr_accessor :project_admin, :records, :class_name, :errors, :created_ids, :updated_ids, :unchanged_ids,
-                  :current_admin
+                  :current_admin, :retrieved_files, :upserted_records, :imported_files
 
     def initialize(project_admin, class_name)
       super()
@@ -17,6 +17,9 @@ module Redcap
       self.unchanged_ids = []
       self.errors = []
       self.current_admin = project_admin.admin
+      self.retrieved_files = {}
+      self.upserted_records = []
+      self.imported_files = []
     end
 
     #
@@ -43,6 +46,15 @@ module Redcap
     # @return [Array{Hash}]
     def retrieve
       self.records = project_admin.api_client.records request_options: project_admin.records_request_options
+    end
+
+    #
+    # Immediately retrieve file from a REDCap file field for a
+    # specific record. The most recent request is stored to the
+    # retrieved_files Hash.
+    # @return [Hash{Symbol => File}] <description>
+    def retrieve_file(record_id, field_name)
+      retrieved_files[field_name] = project_admin.api_client.file record_id, field_name
     end
 
     #
@@ -104,9 +116,18 @@ module Redcap
     # Error will appear in #errors
     # IDs of created items will appear in #created_ids
     # IDs of updated items will appear in #updated_ids
+    # For each updated or created record, also download the file fields to the
+    # associated file store
     def store
+      upserts = []
+
       records.each do |record|
-        create_or_update record
+        res = create_or_update record
+        upserts << res if res
+      end
+
+      upserted_records.each do |record|
+        capture_files record
       end
 
       result = {
@@ -169,6 +190,16 @@ module Redcap
             "Redcap::DataRecords model is not a valid type: #{class_name}"
     end
 
+    #
+    # Handle creation of new record if the record does not already exist based on its
+    # record_id_field matching, update if it does exist and has new information, or
+    # do nothing if it exists and is unchanged.
+    # Validations are applied to creates and updates and errors are returned within an
+    # errors array. Callbacks (dynamic save triggers) are fired.
+    # If an update or create is successful, return the record_id, if there is no change return false
+    # and if there is any other result (an error) return nil.
+    # @param [Hash] record
+    # @return [Integer | false | nil]
     def create_or_update(record)
       record_id = record[record_id_field]
       existing_record = model.where(record_id_field => record_id).first
@@ -178,12 +209,14 @@ module Redcap
         # Check if there is an exact match for the record. If so, we are done
         if record_matches_retrieved(existing_record, record)
           unchanged_ids << record_id
-          return
+          return false
         end
 
         existing_record.force_save!
         if existing_record.update(record)
           updated_ids << record_id
+          upserted_records << existing_record
+          return record_id
         else
           errors << { id: record_id, errors: existing_record.errors, action: :update }
         end
@@ -192,10 +225,62 @@ module Redcap
         new_record.force_save!
         if new_record.save
           created_ids << record_id
+          upserted_records << new_record
+          return record_id
         else
           errors << { id: record_id, errors: new_record.errors, action: :create }
         end
       end
+
+      nil
+    end
+
+    #
+    # Capture files from file fields in the requested record, which typically represents
+    # an updated or created dynamic model instance.
+    # Files are only retrieved if the record includes a string entry in the
+    # retrieved record field.
+    # Once retrieved, files are stored in the project's filestore,
+    # with the path: file-fields/<record id>
+    # and file name: <field name>
+    # @param [UserBase] record - the record to capture the file fields from
+    def capture_files(record)
+      file_fields.each do |field_name|
+        next if record[field_name].blank?
+
+        record_id = record[record_id_field]
+        begin
+        temp_file = retrieve_file(record_id, field_name)
+        path = "file-fields/#{record_id}"
+        filename = field_name
+        container = project_admin.file_store
+        current_user = project_admin.current_user
+
+        
+          res = NfsStore::Import.import_file(container.id,
+                                             filename,
+                                             temp_file.path,
+                                             current_user,
+                                             path: path,
+                                             replace: true)
+          imported_files << res if res
+        rescue RestClient::BadRequest => e
+          msg = "Failed to retrieve or import REDCap file #{record_id} #{field_name}"
+          Rails.logger.warn msg
+          errors << { id: record_id, errors: { capture_files: msg }, action: :capture_files }
+
+        ensure
+          temp_file&.close
+          temp_file&.unlink
+        end
+      end
+    end
+
+    #
+    # Array of file field fieldnames
+    # @return [Array{Symbol}]
+    def file_fields
+      data_dictionary.all_fields_of_type(:file).keys
     end
 
     #

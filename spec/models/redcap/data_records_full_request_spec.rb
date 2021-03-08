@@ -7,16 +7,6 @@ RSpec.describe Redcap::DataRecords, type: :model do
   include ModelSupport
   include Redcap::RedcapSupport
 
-  def server_url
-    @project[:server_url] + '?v=getfull'
-  end
-
-  def mock_full_requests
-    stub_request_full_project server_url, @project[:api_key]
-    stub_request_full_metadata server_url, @project[:api_key]
-    stub_request_full_records server_url, @project[:api_key]
-  end
-
   before :all do
     @bad_admin, = create_admin
     @bad_admin.update! disabled: true
@@ -29,7 +19,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_full_rc*.rb`
 
     tn = "redcap_test.test_full_rc#{rand 100_000_000_000_000}_recs"
-    @project_admin = rc = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url, api_key: @project[:api_key], study: 'Q3',
+    @project_admin = rc = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url('full'), api_key: @project[:api_key], study: 'Q3',
                                                        current_admin: @admin, dynamic_model_table: tn
 
     @dm = rc.dynamic_storage.dynamic_model
@@ -37,7 +27,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     @dmcn = @dm.implementation_class.name
 
     tn = "redcap_test.test_full_sf_rc#{rand 100_000_000_000_000}_recs"
-    @project_admin_sf = rc_sf = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url, api_key: @project[:api_key], study: 'Q4',
+    @project_admin_sf = rc_sf = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url('full'), api_key: @project[:api_key], study: 'Q4',
                                                              current_admin: @admin, dynamic_model_table: tn, records_request_options: { exportSurveyFields: true }
 
     @dm_sf = rc_sf.dynamic_storage.dynamic_model

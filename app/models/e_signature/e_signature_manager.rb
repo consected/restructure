@@ -1,6 +1,15 @@
 # frozen_string_literal: true
 
 module ESignature
+  
+  #
+  # Provide e-signature support to an activity log style model.
+  # To simplify the inclusion of this functionality in activity logs of arbitrary implementations
+  # use:
+  #   ESignature::ESignatureManager.enable_e_signature_for klass
+  #
+  # which will only include the functionality if the appropriate e_signed_status 
+  # field is present in the implementation.
   module ESignatureManager
     extend ActiveSupport::Concern
 

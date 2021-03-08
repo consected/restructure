@@ -244,4 +244,68 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(cr.result['unchanged_ids']).to be_empty
     expect(cr.result['errors']).to be_empty
   end
+
+  it 'downloads files' do
+    setup_file_fields
+    rc = @project_admin
+    rc.current_admin = @admin
+
+    dd = rc.redcap_data_dictionary
+
+    dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+
+    expect(dr.send(:file_fields)).to eq %i[file1 signature]
+
+    dr.retrieve
+    expect(dr.records.length).to be > 0
+
+    dr.send(:capture_files, dr.records[1])
+    puts dr.errors if dr.errors.present?
+    expect(dr.errors).not_to be_present
+
+    files = dr.imported_files
+    expect(files.count).to eq 2
+    expect(files.map{|f| "#{f.path}/#{f.file_name}"}.sort).to eq %w[file-fields/4/file1 file-fields/4/signature]
+
+    # Repeat - should not update the files
+    dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+    dr.retrieve
+    dr.send(:capture_files, dr.records[1])
+    expect(dr.errors).not_to be_present
+    files = dr.imported_files
+    expect(files.count).to eq 0
+
+    # Reset with new file content
+    mock_file_field_requests
+    dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+    dr.retrieve
+    dr.send(:capture_files, dr.records[1])
+    expect(dr.errors).not_to be_present
+    files = dr.imported_files
+    expect(files.count).to eq 2
+
+  end
+
+  it 'downloads files in background' do
+    setup_file_fields
+    rc = @project_admin
+    rc.current_admin = @admin
+
+    dd = rc.redcap_data_dictionary
+
+    dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
+
+    expect(dr.existing_records_length).to eq 0
+    dr.request_records
+    expect(dr.existing_records_length).to be > 0
+
+    puts dr.errors if dr.errors.present?
+    expect(dr.errors).not_to be_present
+
+    files = rc.file_store.stored_files
+    puts files.map{|f| "#{f.path}/#{f.file_name}"}
+    expect(files.count).to eq 4
+    expect(files.map{|f| "#{f.path}/#{f.file_name}"}.sort).
+      to eq %w[file-fields/4/file1 file-fields/4/signature file-fields/19/signature file-fields/32/file1].sort
+  end
 end

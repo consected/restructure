@@ -55,6 +55,10 @@ module NfsStore
       current_user
     end
 
+    def extra_log_type_config
+      nil
+    end
+
     private
 
     #

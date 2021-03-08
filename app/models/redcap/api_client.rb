@@ -56,6 +56,15 @@ module Redcap
     end
 
     #
+    # Get a file from a file field
+    # @param [String | Integer] record_id
+    # @param [String | Symbol] field_name
+    # @return [File] - temp file result
+    def file(record_id, field_name)
+      redcap.file record_id, field_name
+    end
+
+    #
     # Configure (or return an existing) Redcap gem client
     # A check is made against the project title to ensure the project is set up correctly,
     # and the API is responding.
