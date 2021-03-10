@@ -7,7 +7,9 @@
 .report-results-inner {
   width: auto;
   background-color: white;
+}
 
+.report-results-table-block {
   height: calc(100vh - 50px);
   overflow-y: scroll;
   overflow-x: scroll;
@@ -17,6 +19,9 @@
   .import-edit-form,
   .report-results-inner {
     height: auto;
+  }
+  .report-results-table-block {
+    height: 73vh;
   }
 }
 
