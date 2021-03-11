@@ -89,6 +89,14 @@ module NfsStore
         create! extra_params.merge(app_type_id: app_type_id, name: name, current_user: user)
       end
 
+      #
+      # Get the container referenced by the specified item, or nil if there isn't one
+      # @param [ActiveRecord::Model] for_item
+      # @return [NfsStore::Manage::Container | nil]
+      def self.referenced_container(for_item)
+        ModelReference.find_referenced_items(for_item, record_type: 'NfsStore::Manage::Container').first
+      end
+
       # Set current user used when creating new containers
       # @param user [User] current user
       def current_user=(user)
@@ -291,7 +299,7 @@ module NfsStore
       end
 
       def user_file_actions_config
-        extra_options_config.nfs_store[:user_file_actions] if extra_options_config.nfs_store
+        extra_options_config.nfs_store[:user_file_actions] if extra_options_config&.nfs_store
       end
 
       private

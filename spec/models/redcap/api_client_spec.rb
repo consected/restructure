@@ -9,6 +9,7 @@ RSpec.describe Redcap::ApiClient, type: :model do
   before :example do
     create_admin
     @projects = setup_redcap_project_admin_configs
+    @project = @projects.first
   end
 
   it 'connects and gets project info' do
@@ -85,5 +86,15 @@ RSpec.describe Redcap::ApiClient, type: :model do
     expect(res[1][:record_id]).to eq '4'
     expect(res[1][:redcap_survey_identifier]).to be_a String
     expect(res[1][:q2_survey_timestamp]).to eq '[not completed]'
+  end
+
+  it 'pulls the project_xml file' do
+    mock_file_field_requests
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+    rc.server_url = server_url('file_field')
+    pc = rc.api_client
+    res = pc.project_archive
+    expect(res).to be_a Tempfile
   end
 end

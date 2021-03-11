@@ -10711,7 +10711,8 @@ CREATE TABLE ml_app.nfs_store_imports (
     user_id integer,
     nfs_store_container_id integer,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    path character varying
 );
 
 
@@ -21813,6 +21814,16 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20210303164632'),
 ('20210303185434'),
 ('20210303185633'),
-('20210305113828');
+('20210305113828'),
+('20210308143952'),
+('20210309121011'),
+('20210309121304'),
+('20210309130529'),
+('20210309132550'),
+('20210309134840'),
+('20210309141058'),
+('20210309145849'),
+('20210309175437'),
+('20210311173439');
 
 

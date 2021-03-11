@@ -2,7 +2,10 @@
 
 # View Redcap project configurations
 class Redcap::ProjectAdminsController < AdminController
+  include AppTypeChange
+
   before_action :set_defaults
+  before_action :setup_file_store, only: [:edit]
 
   helper_method :transfer_mode_options, :notes_editor
 
@@ -20,6 +23,15 @@ class Redcap::ProjectAdminsController < AdminController
     @redcap__project_admin.dynamic_storage.request_records
 
     msg = "Records requested at #{DateTime.now}"
+    render json: { message: msg }, status: 200
+  end
+
+  def request_archive
+    set_instance_from_id
+    @redcap__project_admin.current_admin ||= current_admin
+    @redcap__project_admin.dump_archive
+
+    msg = "Project archive requested at #{DateTime.now}"
     render json: { message: msg }, status: 200
   end
 
@@ -69,5 +81,15 @@ class Redcap::ProjectAdminsController < AdminController
 
   def permitted_params
     %i[study name server_url api_key dynamic_model_table transfer_mode frequency status disabled notes]
+  end
+
+  #
+  # Just in case the file store has not been set up for this project admin,
+  # create it now if necessary
+  def setup_file_store
+    object_instance.current_admin ||= current_admin
+    return if object_instance.file_store
+
+    object_instance.create_file_store
   end
 end

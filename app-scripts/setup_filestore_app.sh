@@ -12,8 +12,6 @@ fi
 if [ -z "$MOUNTPOINT" ]; then
   if [ "$RAILS_ENV" == 'production' ]; then
     MOUNTPOINT=/efs1
-  elif [ "$USER" == 'phil' ]; then
-    MOUNTPOINT=/media/phil/Data
   else
     MOUNTPOINT=/home/$USER/dev-filestore
   fi
@@ -29,7 +27,10 @@ fi
 OWNER_GROUP=${OWNER_GROUP:='nfs_store_group_0'}
 
 FS_ROOT=${MOUNTPOINT}/${SUBDIR}
-# FS_DIR=main
+
+if [ -d ${FS_ROOT}/main ]; then
+  FS_DIR=main
+fi
 APPTYPE_DIR=app-type-${APP_TYPE_ID}
 
 cd $FS_ROOT/$FS_DIR

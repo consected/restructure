@@ -125,6 +125,9 @@ class Settings
     'nfs_store group 601'
   end
 
+  # A list of resource names for admin classes that us filestore for file storage
+  FilestoreAdminResourceNames = %w[redcap__project_admin].freeze
+
   #
   # Short links are generated and can be used by text substitutions
   # Length of a short code

@@ -113,6 +113,13 @@ module Redcap
       @records_request_options ||= Settings::RedcapRecordsRequestOptions
     end
 
+    #
+    # In the background, download the full XML project archive,
+    # and store it to the file_store container.
+    def dump_archive
+      Redcap::CaptureProjectArchiveJob.perform_later(self, current_admin)
+    end
+
     private
 
     #

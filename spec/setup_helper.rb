@@ -228,6 +228,7 @@ module SetupHelper
     SetupHelper.setup_app_from_import app_name, config_dir, config_fn
 
     a = Admin::AppType.where(name: app_name).active.first
+    FileUtils.rm_rf "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{a.id}"
     FileUtils.mkdir_p "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{a.id}/containers"
     a
   end

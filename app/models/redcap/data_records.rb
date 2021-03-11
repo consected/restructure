@@ -85,7 +85,8 @@ module Redcap
 
         raise FphsException,
               "Redcap::DataRecords retrieved record fields don't match the data dictionary:\n" \
-              "[#{r.keys.sort.join(' ')}]\nshould match the data dictionary\n[#{all_expected_fields.keys.sort.join(' ')}]"
+              "[#{r.keys.sort.join(' ')}]\nshould match the data dictionary\n" \
+              "[#{all_expected_fields.keys.sort.join(' ')}]"
       end
 
       if records.length < existing_records_length
@@ -103,11 +104,11 @@ module Redcap
       existing_rec_ids = existing_records.pluck(record_id_field).map(&:to_i)
       retrieved_rec_int_ids = retrieved_rec_ids.map(&:to_i)
       existing_not_in_retrieved_ids = existing_rec_ids - retrieved_rec_int_ids
-      if existing_not_in_retrieved_ids.present?
-        raise FphsException,
-              'Redcap::DataRecords existing records were not in the retrieved records: ' \
-              "#{existing_not_in_retrieved_ids.join(', ')}"
-      end
+      return unless existing_not_in_retrieved_ids.present?
+
+      raise FphsException,
+            'Redcap::DataRecords existing records were not in the retrieved records: ' \
+            "#{existing_not_in_retrieved_ids.join(', ')}"
     end
 
     #
@@ -134,7 +135,9 @@ module Redcap
         created_ids: created_ids,
         updated_ids: updated_ids,
         unchanged_ids: unchanged_ids,
-        errors: errors
+        table: project_admin.dynamic_model_table,
+        errors: errors,
+        imported_files: imported_files.map { |i| "#{i.path}/#{i.file_name}" }
       }
 
       ClientRequest.create! current_admin: current_admin,
@@ -250,13 +253,14 @@ module Redcap
 
         record_id = record[record_id_field]
         begin
-        temp_file = retrieve_file(record_id, field_name)
-        path = "file-fields/#{record_id}"
-        filename = field_name
-        container = project_admin.file_store
-        current_user = project_admin.current_user
+          temp_file = retrieve_file(record_id, field_name)
+          # We must change the permissions now, since the final NFS store
+          # requires the group to have read-write.
+          path = "#{project_admin.dynamic_model_table}/file-fields/#{record_id}"
+          filename = field_name
+          container = project_admin.file_store
+          current_user = project_admin.current_user
 
-        
           res = NfsStore::Import.import_file(container.id,
                                              filename,
                                              temp_file.path,
@@ -264,11 +268,11 @@ module Redcap
                                              path: path,
                                              replace: true)
           imported_files << res if res
-        rescue RestClient::BadRequest => e
-          msg = "Failed to retrieve or import REDCap file #{record_id} #{field_name}"
+        rescue Exception => e # rubocop:disable Lint/RescueException
+          # We rescue Exception rather than StandardError, since file errors inherit from Exception
+          msg = "Failed to retrieve or import REDCap file #{record_id} #{field_name}. #{e}"
           Rails.logger.warn msg
           errors << { id: record_id, errors: { capture_files: msg }, action: :capture_files }
-
         ensure
           temp_file&.close
           temp_file&.unlink

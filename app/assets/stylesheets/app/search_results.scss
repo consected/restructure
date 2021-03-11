@@ -353,6 +353,7 @@ table.table.tablesorter > thead > tr > th {
   position: sticky;
   top: 0;
   z-index: 20;
+  background: rgb(238, 238, 238);
 
   &:hover {
     cursor: pointer;

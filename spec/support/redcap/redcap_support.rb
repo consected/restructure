@@ -56,6 +56,7 @@ module Redcap
       stub_request_file_field_metadata server_url('file_field'), @project[:api_key]
       stub_request_file_field_records server_url('file_field'), @project[:api_key]
       stub_request_file server_url('file_field'), @project[:api_key]
+      stub_request_project_xml server_url('file_field'), @project[:api_key]
     end
 
     # Get project configurations from encrypted credential storage
@@ -207,21 +208,38 @@ module Redcap
     end
 
     def stub_request_file(server_url, api_key, body: nil)
-
-      body ||= Digest::SHA256.hexdigest(rand(1000000000000).to_s)
+      body ||= Digest::SHA256.hexdigest(rand(1_000_000_000_000).to_s)
 
       stub_request(:post, server_url)
-      .with(
-        body: {
-          "action"=>"export", 
-          "content"=>"file", 
-          "field"=>/.+/, 
-          "format"=>"json", 
-          "record"=>/\d+/, 
-          "token"=>api_key
-        })
-      .to_return(status: 200, body: body, headers: {})
-  
+        .with(
+          body: {
+            'action' => 'export',
+            'content' => 'file',
+            'field' => /.+/,
+            'format' => 'json',
+            'record' => /\d+/,
+            'token' => api_key
+          }
+        )
+        .to_return(status: 200, body: body, headers: {})
+    end
+
+    def stub_request_project_xml(server_url, api_key, body: nil)
+      body ||= File.read('spec/fixtures/redcap/q2_demo_project.xml')
+
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'content' => 'project_xml',
+            'exportDataAccessGroups' => 'true',
+            'exportSurveyFields' => 'true',
+            'format' => 'json',
+            'returnFormat' => 'json',
+            'returnMetadataOnly' => 'false',
+            'token' => api_key
+          }
+        )
+        .to_return(status: 200, body: body, headers: {})
     end
 
     def project_admin_sample_response
@@ -337,7 +355,7 @@ module Redcap
 
       tn = 'redcap_test.test_file_field_recs'
       @project_admin = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url('file_field'), api_key: @project[:api_key], study: 'Q3',
-                                                         current_admin: @admin, dynamic_model_table: tn
+                                                    current_admin: @admin, dynamic_model_table: tn
     end
   end
 end

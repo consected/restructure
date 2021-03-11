@@ -33,7 +33,11 @@ module NfsStore
     # Retrieve the file store container
     # @return [NfsStore::Manage::Container]
     def file_store
-      @file_store ||= ModelReference.find_referenced_items(self, record_type: 'NfsStore::Manage::Container').first
+      @file_store ||= NfsStore::Manage::Container.referenced_container self
+      return unless @file_store
+
+      @file_store.current_user ||= file_store_user
+      @file_store
     end
 
     #
@@ -48,7 +52,11 @@ module NfsStore
     end
 
     def current_user
-      master.current_user || file_store_user
+      @current_user ||= master.current_user || file_store_user
+    end
+
+    def current_user=(user)
+      @current_user = user
     end
 
     def master_user
@@ -59,6 +67,18 @@ module NfsStore
       nil
     end
 
+    def model_data_type
+      nil
+    end
+
+    def can_view?
+      true
+    end
+
+    def can_edit?
+      true
+    end
+
     private
 
     #
@@ -67,6 +87,8 @@ module NfsStore
     # @return [User]
     def file_store_user
       return @file_store_user if @file_store_user
+
+      return unless current_admin
 
       @file_store_user = current_admin.matching_user
       raise FphsException, "no matching user for admin #{current_admin}" unless @file_store_user

@@ -220,9 +220,12 @@ RSpec.describe Redcap::DataRecords, type: :model do
     dm = create_dynamic_model_for_sample_response
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
+    rc.dynamic_model_table = dm.implementation_class.table_name.to_s
+    rc.save # to ensure the background job works
+    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
 
     start_time = DateTime.now
-    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+    expect(dm.implementation_class_defined?)
 
     expect(dr.existing_records_length).to eq 0
 
@@ -265,7 +268,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     files = dr.imported_files
     expect(files.count).to eq 2
-    expect(files.map{|f| "#{f.path}/#{f.file_name}"}.sort).to eq %w[file-fields/4/file1 file-fields/4/signature]
+    expect(files.map { |f| "#{f.path}/#{f.file_name}" }.sort).to eq ["#{rc.dynamic_model_table}/file-fields/4/file1", "#{rc.dynamic_model_table}/file-fields/4/signature"]
 
     # Repeat - should not update the files
     dr = Redcap::DataRecords.new(rc, 'TestFileFieldRec')
@@ -283,7 +286,6 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(dr.errors).not_to be_present
     files = dr.imported_files
     expect(files.count).to eq 2
-
   end
 
   it 'downloads files in background' do
@@ -303,9 +305,9 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(dr.errors).not_to be_present
 
     files = rc.file_store.stored_files
-    puts files.map{|f| "#{f.path}/#{f.file_name}"}
+
     expect(files.count).to eq 4
-    expect(files.map{|f| "#{f.path}/#{f.file_name}"}.sort).
-      to eq %w[file-fields/4/file1 file-fields/4/signature file-fields/19/signature file-fields/32/file1].sort
+    expect(files.map { |f| "#{f.path}/#{f.file_name}" }.sort)
+      .to eq ["#{rc.dynamic_model_table}/file-fields/4/file1", "#{rc.dynamic_model_table}/file-fields/4/signature", "#{rc.dynamic_model_table}/file-fields/19/signature", "#{rc.dynamic_model_table}/file-fields/32/file1"].sort
   end
 end

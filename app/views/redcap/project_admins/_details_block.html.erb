@@ -1,0 +1,21 @@
+<h4><%= object_instance.name %></h4>
+
+<% if current_admin&.matching_user_app_type&.name != 'ref-data' %>
+<h4>Important - switch to app ref-data to review and update Redcap information</h4>
+<% end%>
+
+<p><label>updated at</label> <span><%= object_instance.updated_at %></span></p>
+<p><label>dynamic model</label>
+  <span><%= object_instance.dynamic_storage&.dynamic_model_ready? ? 'ready' : 'not available' %> </span>
+</p>
+<% if object_instance.captured_project_info.present?%>
+  <p><label>project info</label> metadata available</p>
+<% else %>
+  <p><label>project info</label> metadata not yet retrieved</p>
+<% end %>
+<% if object_instance.file_store %>
+  <p><label>filestore</label> ready</p>
+  <p><%= link_to 'dump project archive to filestore', request_archive_redcap_project_admin_path(id: object_instance.id), method: :post, remote: true, class: 'btn btn-danger' %></p>
+<% else %>
+  <p><label>filestore</label> not set up</p>
+<% end %>

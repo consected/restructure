@@ -97,9 +97,19 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
     rc.current_admin = @admin
 
     expect(@user.app_type_id).not_to be_nil
-    # res = rc.create_file_store
-
-    # expect(res).to be_a NfsStore::Manage::Container
     expect(rc.file_store).to be_a NfsStore::Manage::Container
+  end
+
+  it 'dumps the full project XML to the filestore container' do
+    mock_file_field_requests
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+    rc.dynamic_model_table = 'test_file_field_sf_recs'
+    rc.server_url = server_url('file_field')
+    rc.save
+
+    rc.dump_archive
+
+    expect(rc.file_store.stored_files.where(path: 'test_file_field_sf_recs/project').count).not_to eq 0
   end
 end

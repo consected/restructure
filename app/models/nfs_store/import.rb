@@ -62,7 +62,7 @@ module NfsStore
     end
 
     #
-    # Check if a file exists in a container, 
+    # Check if a file exists in a container,
     # checking on the existence based on file name and path
     # @return [NfsStore::Manage::StoredFile]
     def already_in_container
