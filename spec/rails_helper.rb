@@ -38,6 +38,7 @@ require 'rspec/rails'
 put_now 'Require webmock'
 require 'webmock/rspec'
 WebMock.allow_net_connect!
+# WebMock.disable_net_connect!(allow_localhost: true)
 
 put_now 'Browser setups'
 require 'capybara/rspec'
