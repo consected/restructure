@@ -42,6 +42,29 @@ module Redcap
     end
 
     #
+    # Get the project archive XML file, including study fields.
+    # Return a temp file result.
+    # @return [File] - temp file result
+    def project_archive
+      tempfile = redcap.project_xml request_options: {
+        returnMetadataOnly: 'false',
+        exportSurveyFields: 'true',
+        exportDataAccessGroups: 'true',
+        returnFormat: 'json'
+      }
+
+      ClientRequest.create! current_admin: current_admin,
+                            action: 'project_xml',
+                            server_url: server_url,
+                            name: name,
+                            redcap_project_admin: project_admin,
+                            result: { retrieved_from: 'api' }
+
+      FileUtils.chmod 0o660, tempfile
+      tempfile
+    end
+
+    #
     # Get the project metadata (data dictionary)
     # @return [Array{Hash}] hash with symbolized keys
     def metadata
@@ -53,6 +76,19 @@ module Redcap
     # @return [Array{Hash}] hash with symbolized keys
     def records(request_options: nil)
       request :records, request_options: request_options
+    end
+
+    #
+    # Get a file from a file field.
+    # Don't record the file field retrievals in ClientRequest
+    # since it will flood them with useless logs
+    # @param [String | Integer] record_id
+    # @param [String | Symbol] field_name
+    # @return [File] - temp file result
+    def file(record_id, field_name)
+      tempfile = redcap.file record_id, field_name
+      FileUtils.chmod 0o660, tempfile
+      tempfile
     end
 
     #
@@ -107,9 +143,9 @@ module Redcap
       ClientRequest.transaction do
         cc = cache_key(action, request_options)
         clear_cache(cc) if force_reload
-        retrieved_from = 'api'
+        retrieved_from = 'cache'
         res = Rails.cache.fetch(cc, expires_in: CacheExpiresIn) do
-          retrieved_from = 'cache'
+          retrieved_from = 'api'
           post_action action, request_options
         end
 

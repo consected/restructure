@@ -62,10 +62,19 @@
     <div class="row">
       <div class="col-sm-4">
         <h3>REDCap</h3>
+      <% if current_admin&.matching_user&.accessible_app_types.map(&:name).include? 'ref-data' %>
         <ul class="nav">
-          <li class="nav"><%= link_to "Projects", redcap_project_admins_path %> </li>
+          <li class="nav"><%= link_to "Projects", 
+                                      redcap_project_admins_path(
+                                        no_redirect: true, 
+                                        use_app_type: Admin::AppType.active.find_by_name('ref-data')&.id
+                                      ) %> </li>
           <li class="nav"><%= link_to "Client Request Log", redcap_client_requests_path %> </li>
         </ul>
+      <% else %>
+        <p>Your user profile must copy roles for <b>redcap-admin@template</b> in app <b>ref-data</b> to use the REDCap admin panel</p>
+      <% end%>
+
       </div>
     </div>
     <h4 class="text-center"><%= link_to "Admin Logout", destroy_admin_session_path, method: :delete, class: 'btn btn-default' %> </h4>

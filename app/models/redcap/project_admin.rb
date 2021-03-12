@@ -31,6 +31,7 @@ module Redcap
   # }
   class ProjectAdmin < Admin::AdminBase
     include AdminHandler
+    include NfsStore::ForAdminResources
 
     self.table_name = 'redcap_project_admins'
 
@@ -52,6 +53,8 @@ module Redcap
     validate :name, -> { already_taken(:name, :study) ? errors.add(:name, 'already exists in this study') : true }
 
     before_save :empty_disabled_api_key
+
+    after_save :create_file_store, unless: :file_store
     # After save, capture the project info from REDCap
     # except if the record has not saved or the current_project_info has
     # just changed, to avoid never ending callbacks
@@ -108,6 +111,13 @@ module Redcap
     # @return [Hash] <description>
     def records_request_options
       @records_request_options ||= Settings::RedcapRecordsRequestOptions
+    end
+
+    #
+    # In the background, download the full XML project archive,
+    # and store it to the file_store container.
+    def dump_archive
+      Redcap::CaptureProjectArchiveJob.perform_later(self, current_admin)
     end
 
     private

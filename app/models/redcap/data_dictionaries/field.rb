@@ -28,7 +28,8 @@ module Redcap
     class Field
       attr_accessor :def_metadata, :form, :name, :label, :label_note, :annotation, :is_required,
                     :valid_type, :valid_min, :valid_max, :is_identifier,
-                    :storage_type, :db_or_fs, :schema_or_path, :table_or_file
+                    :storage_type, :db_or_fs, :schema_or_path, :table_or_file,
+                    :position, :section, :sub_section, :title
 
       attr_writer :data_dictionary
 
@@ -38,7 +39,8 @@ module Redcap
       # @param [Redcap::DataDictionaries::Form] form - nil if the field does not belong to a form
       # @param [Hash] field_metadata
       # @param [Redcap::DataDictionary] data_dictionary - specific if form is nil
-      def initialize(form, field_metadata, data_dictionary: nil)
+      # @param [Integer] position
+      def initialize(form, field_metadata, data_dictionary: nil, position: nil, section: nil, sub_section: nil)
         super()
 
         self.form = form
@@ -46,6 +48,7 @@ module Redcap
 
         self.def_metadata = field_metadata.dup
         self.name = field_metadata[:field_name].to_sym
+        self.title = field_metadata[:section_header]
         self.label = field_metadata[:field_label]
         self.label_note = field_metadata[:field_note]
         self.annotation = field_metadata[:field_annotation]
@@ -59,6 +62,9 @@ module Redcap
         self.storage_type = 'database'
         self.db_or_fs = ActiveRecord::Base.connection_config[:database]
         self.schema_or_path, self.table_or_file = schema_and_table_name
+        self.position = position
+        self.section = section
+        self.sub_section = sub_section
       end
 
       #
@@ -80,6 +86,13 @@ module Redcap
       end
 
       #
+      # Quick way to get a plain text title
+      # @return [String]
+      def title_plain
+        Redcap::Utilities.html_to_plain_text title
+      end
+
+      #
       # Quick way to get a plain text label
       # @return [String]
       def label_plain
@@ -95,7 +108,11 @@ module Redcap
 
       #
       # Get an Hash of all field representations, keyed with the symbolized field name
-      # for a form
+      # for a form.
+      # Each field has a position in the form, incrementing from 0.
+      # If a descriptive field is found, its position will be saved and the following
+      # regular fields will refer to its position in the @section attribute.
+      # A descriptive field itself never has a position.
       # @param [Form] form
       # @return [Hash{Symbol => Field}]
       def self.all_from(in_form)
@@ -103,10 +120,17 @@ module Redcap
         return unless fields_metadata.present?
 
         fields = {}
+        position = 0
+        section = nil
 
         fields_metadata.each do |field_metadata|
-          form = Field.new(in_form, field_metadata)
-          fields[form.name] = form
+          section = nil if field_metadata[:field_type] == 'descriptive'
+          field = Field.new(in_form, field_metadata,
+                            position: position,
+                            section: section)
+          fields[field.name] = field
+          section = field.name if field_metadata[:field_type] == 'descriptive'
+          position += 1
         end
 
         fields

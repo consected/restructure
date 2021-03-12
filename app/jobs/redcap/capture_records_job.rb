@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module Redcap
-  class CaptureRecordsJob < ApplicationJob
+  #
+  # Job to capture the REDCap project's records
+  class CaptureRecordsJob < RedcapJob
     queue_as :redcap
 
     #
@@ -12,23 +14,16 @@ module Redcap
     # @param [String] class_name
     # @return [Boolean] success
     def perform(project_admin, class_name)
-      unless project_admin.is_a? ProjectAdmin
-        raise FphsException,
-              'ProjectAdmin record required to capture current project info job'
-      end
+      setup_with project_admin
 
-      # Use the original admin as the current admin
-      project_admin.current_admin ||= project_admin.admin
+      unless project_admin&.dynamic_storage&.dynamic_model_ready?
+        raise FphsException, "Data Model not ready for table: #{project_admin.dynamic_model_table}"
+      end
 
       dr = Redcap::DataRecords.new(project_admin, class_name)
       dr.retrieve_validate_store
     rescue StandardError => e
-      Redcap::ClientRequest.create current_admin: project_admin.current_admin,
-                                   action: 'capture records job',
-                                   server_url: project_admin.server_url,
-                                   name: project_admin.name,
-                                   redcap_project_admin: project_admin,
-                                   result: { error: e, backtrace: e.backtrace[0..7].join("\n") }
+      create_failure_record(e, 'capture records job', project_admin)
       raise
     end
   end

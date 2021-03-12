@@ -42,6 +42,7 @@ module AdminControllerHandler
   end
 
   def edit
+    object_instance.current_admin = current_admin
     render partial: view_path('form')
   end
 

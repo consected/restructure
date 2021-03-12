@@ -437,7 +437,7 @@ class ModelReference < ActiveRecord::Base
     return unless from_record_type && from_record_id
 
     @from_record = from_record_type.ns_constantize.find(from_record_id)
-    @from_record.current_user ||= current_user if current_user
+    @from_record.current_user ||= current_user
     @from_record
   end
 
@@ -457,7 +457,7 @@ class ModelReference < ActiveRecord::Base
       raise FphsException, "Model Reference (#{id}) 'to record' not found: #{to_record_class} #{to_record_id}"
     end
 
-    @to_record.current_user ||= current_user if current_user
+    @to_record.current_user ||= current_user
     @to_record.parent_item = from_record if to_record.respond_to?(:parent_item)
     @to_record
   end

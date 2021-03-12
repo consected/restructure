@@ -16,6 +16,12 @@ module Seeds
         Master.create! id: -1, current_user: User.active.first
         log "Ran #{self}.setup"
       end
+      if Master.where(id: -2).first
+        log "Did not run #{self}.setup"
+      else
+        Master.create! id: -2, current_user: User.active.first
+        log "Ran #{self}.setup"
+      end
     end
   end
 end

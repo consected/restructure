@@ -30,4 +30,5 @@ echo $EB_SUPPORT_DIR/envvars
 
 cd $EB_APP_CURRENT_DIR
 
+source /etc/profile
 bundle exec bin/delayed_job -n $NUM_WORKERS --pid-dir=$EB_APP_PIDS_DIR restart

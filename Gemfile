@@ -25,6 +25,7 @@ gem 'nokogiri', '1.11.0.rc4'
 gem 'pg', '~> 0.15'
 gem 'rails', '~> 5.0'
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
+# for development, replace with with: `path: '../redcap'`
 gem 'rqrcode'
 gem 'rubyzip'
 gem 'simple_token_authentication', '~> 1.0', git: 'https://github.com/philayres/simple_token_authentication.git'
@@ -32,6 +33,7 @@ gem 'strong_password', '~> 0.0.5'
 gem 'syslog-logger'
 
 group :development do
+  gem 'flog'
   gem 'listen'
   gem 'solargraph'
   gem 'web-console'

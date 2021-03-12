@@ -163,9 +163,11 @@ module SecureView
     def self.image_to_jpeg(type, file, scale = nil, output_type: :string_io)
       check_netpbm_exists!
 
+      extra_options = []
       topnm_cmd = if type == 'jpeg'
                     'jpegtopnm'
                   elsif type == 'png'
+                    extra_options = ['-mix']
                     'pngtopnm'
                   elsif type == 'bmp'
                     'bmptopnm'
@@ -181,12 +183,8 @@ module SecureView
                file.path
              end
 
-      cmds = []
-
-      cmds << [
-        topnm_cmd,
-        path
-      ]
+      primary_cmd = ([topnm_cmd] + extra_options + [path])
+      cmds = [primary_cmd]
 
       if scale
         cmds << [
