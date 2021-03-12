@@ -12,8 +12,6 @@ fi
 if [ -z "$MOUNTPOINT" ]; then
   if [ "$RAILS_ENV" == 'production' ]; then
     MOUNTPOINT=/efs1
-  elif [ "$USER" == 'phil' ]; then
-    MOUNTPOINT=/media/phil/Data
   else
     MOUNTPOINT=/home/$USER/dev-filestore
   fi
@@ -26,18 +24,22 @@ if [ -z "${SUBDIR}" ]; then
   read -p 'Enter the selected directory: ' SUBDIR
 fi
 
+OWNER_GROUP=${OWNER_GROUP:='nfs_store_group_0'}
 
 FS_ROOT=${MOUNTPOINT}/${SUBDIR}
-# FS_DIR=main
+
+if [ -d ${FS_ROOT}/main ]; then
+  FS_DIR=main
+fi
 APPTYPE_DIR=app-type-${APP_TYPE_ID}
 
 cd $FS_ROOT/$FS_DIR
 mkdir -p $APPTYPE_DIR/containers
 
 echo "become sudo to setup file ownership"
-sudo echo ""
+sudo echo "in: $APPTYPE_DIR/containers"
 
 sudo chmod 770 $APPTYPE_DIR
 sudo chmod 770 $APPTYPE_DIR/containers
 sudo chown nfsuser:nfs_store_all_access $APPTYPE_DIR
-sudo chown nfsuser:nfs_store_group_0 $APPTYPE_DIR/containers
+sudo chown nfsuser:${OWNER_GROUP} $APPTYPE_DIR/containers

@@ -70,8 +70,8 @@ module Redcap
     end
 
     #
-    # Get an array of all fields from all forms
-    # @return [Array{Hash}]
+    # Get an hash of all fields from all forms
+    # @return [Hash]
     def all_fields
       return unless captured_metadata.present?
       return @all_fields if @all_fields
@@ -82,6 +82,14 @@ module Redcap
       end
 
       @all_fields
+    end
+
+    #
+    # Get an hash of all fields from all forms with a specific field type
+    # @param [Symbol] type_name
+    # @return [Hash]
+    def all_fields_of_type(type_name)
+      all_fields.filter { |_field_name, field| field.field_type.name == type_name }
     end
 
     #

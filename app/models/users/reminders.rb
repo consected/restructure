@@ -21,7 +21,7 @@ module Users
       remind_after = password_expiration_defaults[:remind_after]
       Rails.logger.info "Setting up the password expiration reminder for #{remind_after}"
       remind_when = user.password_updated_at + remind_after
-      HandlePasswordExpirationReminderJob.set(wait_until: remind_when).perform_later(user)
+      HandlePasswordExpirationReminderJob.set(wait_until: remind_when).perform_later(user) unless Rails.env.development?
     end
 
     #

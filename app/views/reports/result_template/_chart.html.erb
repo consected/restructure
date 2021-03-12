@@ -25,7 +25,7 @@
   
     $.extend(opts, component_options);
   
-    <% if @embedded_report%>
+    <% if embedded_report%>
       opts.height = '30%';
       opts.width = '100%';
       opts.options.maintainAspectRatio = false;
@@ -39,7 +39,7 @@
       var fixed_size = true;
     }
   
-  <% unless @embedded_report%>
+  <% unless embedded_report%>
   
     if(opts.options.responsive == null)
       opts.options.responsive = !fixed_size;

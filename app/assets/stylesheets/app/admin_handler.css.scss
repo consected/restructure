@@ -70,6 +70,7 @@ table.admin-list {
     display: block;
     overflow: hidden;
     overflow-x: auto;
+    position: relative;
 
     &:hover {
       cursor: s-resize;
@@ -84,7 +85,9 @@ table.admin-list {
       padding-top: 0;
       color: rgb(128, 128, 128);
       position: absolute;
-      top: 104px;
+      bottom: 1px;
+      right: 8px;
+      background-color: rgba(255, 255, 255, 0.8);
     }
   }
   .expanded {
@@ -101,12 +104,19 @@ table.admin-list {
       font-style: italic;
       position: relative;
       top: 4px;
+      text-align: right;
     }
   }
 
   pre.shrinkable-block.expandable {
     max-width: 1300px;
   }
+}
+
+pre.scrollable-block {
+  max-height: 200px;
+  max-width: 50vw;
+  overflow: auto;
 }
 
 td.admin-field-generate_view {

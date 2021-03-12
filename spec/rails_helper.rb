@@ -37,7 +37,8 @@ require 'rspec/rails'
 
 put_now 'Require webmock'
 require 'webmock/rspec'
-WebMock.allow_net_connect!
+# WebMock.allow_net_connect!
+WebMock.disable_net_connect!(allow_localhost: true)
 
 put_now 'Browser setups'
 require 'capybara/rspec'
@@ -124,6 +125,8 @@ RSpec.configure do |config|
       SetupHelper.setup_ext_identifier
       put_now 'setup_test_app'
       SetupHelper.setup_test_app
+      put_now 'setup_ref_data_app'
+      SetupHelper.setup_ref_data_app
 
       put_now 'Handle zeus_bulk_message'
       als = ActivityLog.active.where(item_type: 'zeus_bulk_message')

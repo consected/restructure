@@ -136,4 +136,17 @@ module AdminHandler
 
     !!res.first
   end
+
+  #
+  # Resource name used to identify models in for admin / user matched resources and elsewhere.
+  # @return [String]
+  def admin_resource_name
+    self.class.name.ns_underscore.pluralize
+  end
+
+  def resource_name
+    return super if defined? super
+
+    admin_resource_name
+  end
 end

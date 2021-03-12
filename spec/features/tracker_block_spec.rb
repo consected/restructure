@@ -30,6 +30,8 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     setup_access :player_infos
     setup_access :trackers
     setup_access :tracker_histories
+    setup_access :create_master, resource_type: :general, access: :read, user: @user
+
     # end
 
     # before :each do
@@ -41,6 +43,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     setup_access :player_infos, user: user
     setup_access :trackers, user: user
     setup_access :tracker_histories, user: user
+    setup_access :create_master, resource_type: :general, access: :read, user: user
 
     login
   end
@@ -181,7 +184,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     end
 
     # Wait for the new tracker form to show
-    find '.tracker-tree-results #new_tracker', wait: 10
+    expect(page).to have_css '.tracker-tree-results #new_tracker'
 
     # Enter new tracker details
     within '.tracker-tree-results #new_tracker' do
@@ -193,7 +196,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     end
     dismiss_modal
     # After a moment the tracker will show the newly created item
-    expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="' + protocol.name.downcase + '"] span.record-meta', text: @user.email.to_s
+    expect(page).to have_css 'tbody[data-template="tracker-result-template"][data-tracker-protocol="' + protocol.name.downcase.underscore + '"] span.record-meta', text: @user.email.to_s
 
     sleep 1
     have_css '.tracker-tree-results tbody.new-block'

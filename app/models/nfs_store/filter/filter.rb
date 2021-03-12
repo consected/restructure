@@ -52,7 +52,9 @@ module NfsStore
       def self.resource_names
         # Get only the names that have an extra log type config with a reference to a container
         names = ActivityLog.all_option_configs_resource_names { |e| e&.references && e.references[:nfs_store__manage__container] }
-        (names + [NfsStore::Manage::Container.resource_name]).uniq
+        names << NfsStore::Manage::Container.resource_name
+        names += Settings::FilestoreAdminResourceNames
+        names.uniq
       end
 
       # Evaluate all filters for the current user (and associated roles) in the activity log
@@ -110,11 +112,11 @@ module NfsStore
 
         filters = [filters] if filters.is_a? String
 
-        if item.is_a? NfsStore::Manage::Container
-          container = item
-        elsif item.model_data_type == :activity_log
-          container = ModelReference.find_referenced_items(item, record_type: 'NfsStore::Manage::Container').first
-        end
+        container = if item.is_a? NfsStore::Manage::Container
+                      item
+                    else
+                      NfsStore::Manage::Container.referenced_container item
+                    end
 
         raise FsException::Action, 'No filestore container provided to evaluate filter' unless container
 
