@@ -113,6 +113,12 @@ table.admin-list {
   }
 }
 
+pre.scrollable-block {
+  max-height: 200px;
+  max-width: 50vw;
+  overflow: auto;
+}
+
 td.admin-field-generate_view {
   max-width: 500px;
   white-space: pre;

@@ -114,3 +114,10 @@ The NfsStore expects a specific structure for new App Types.
     chown nfsuser:nfs_store_group_0 $APPTYPE_DIR/containers
 
 **Note** the *nfs_store_all_access* group owner can be changed to another owner, such as *nfs_store_group_0* if access is to be controlled by the OS and user role *nfs_store group 600*
+
+Add Filestore for **ref-data** app
+---
+
+The ref-data app provides file storage for admin functions such as REDCap integration. To set it up:
+
+    OWNER_GROUP=nfs_store_group_1 fphs_scripts/setup_filestore_app.sh <app id>

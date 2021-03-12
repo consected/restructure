@@ -1,0 +1,11 @@
+
+<h4>Metadata</h4>
+<% if object_instance.captured_project_info.present?%>
+  <div class="admin-options-ref-textarea-block">
+    <textarea style="font-size: 12px" class="extra-help-info">
+<%= object_instance.captured_project_info.stringify_keys.to_yaml%>
+    </textarea>
+  </div>
+<% else %>
+  <p>Project Info Metadata not yet retrieved</p>
+<% end %>

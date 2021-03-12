@@ -115,6 +115,19 @@ class Settings
     Master.find(-1)
   end
 
+  # Master record to use for admin features that need an underlying master, such as file store
+  def self.admin_master
+    @admin_master ||= Master.find(-2)
+  end
+
+  # nfs_store role for admin features that provide file store containers
+  def self.admin_nfs_role
+    'nfs_store group 601'
+  end
+
+  # A list of resource names for admin classes that us filestore for file storage
+  FilestoreAdminResourceNames = %w[redcap__project_admin].freeze
+
   #
   # Short links are generated and can be used by text substitutions
   # Length of a short code

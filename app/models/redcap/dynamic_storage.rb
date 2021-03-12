@@ -120,13 +120,16 @@ module Redcap
     # @param [String | Symbol] table_name
     # @param [String] category - optional category, defaults to redcap
     # @return [DynamicModel]
-    def dynamic_model
+    def dynamic_model(no_check: nil)
       return @dynamic_model if @dynamic_model
 
       schema_name, table_name = schema_and_table_name
       name = table_name.singularize
 
       @dynamic_model = DynamicModel.active.where(name: name, category: category, schema_name: schema_name).first
+      return if !no_check && !dynamic_model_ready?
+
+      @dynamic_model
     end
 
     #
@@ -151,8 +154,16 @@ module Redcap
       dynamic_model.implementation_class.name
     end
 
+    #
+    # Check if the dynamic model for storage is ready to use,
+    # both the DB table has been created and the class is defined
+    # @return [true | nil]
     def dynamic_model_ready?
-      dynamic_model&.implementation_class_defined?(Object, fail_without_exception: true)
+      return unless dynamic_model(no_check: true)
+      return true if dynamic_model.implementation_class_defined?(Object, fail_without_exception: true)
+
+      dynamic_model.generate_model if dynamic_model&.ready_to_generate?
+      dynamic_model.implementation_class_defined?(Object, fail_without_exception: true)
     end
   end
 end

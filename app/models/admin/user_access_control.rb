@@ -290,7 +290,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
   def bad_resource_name(cache_resource_names_for_type = nil)
     return if disabled
-    return true if resource_name.nil?
+    return true if !respond_to?(:resource_name) || resource_name.nil? || resource_type.nil?
 
     resource_name_for_type = if cache_resource_names_for_type
                                cache_resource_names_for_type[resource_type.to_sym]

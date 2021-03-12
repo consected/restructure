@@ -16,7 +16,7 @@ RSpec.describe Redcap::ClientRequest, type: :model do
 
     num = Redcap::ClientRequest.count
 
-    rc = Redcap::ProjectAdmin.find_by_name(name)
+    rc = Redcap::ProjectAdmin.active.find_by_name(name)
     rc.current_admin = @admin
     expect(rc).to be_a Redcap::ProjectAdmin
 

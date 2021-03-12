@@ -26,7 +26,18 @@ module NfsStore
       @master.current_user ||= current_user
 
       if alid.present? && altype.present?
-        @activity_log = ActivityLog.open_activity_log altype, alid, current_user
+        if altype.start_with?('activity_log_')
+          @activity_log = ActivityLog.open_activity_log altype, alid, current_user
+        else
+          unless altype.in? Settings::FilestoreAdminResourceNames
+            raise FphsException, "invalid resource type for altype: #{altype}"
+          end
+
+          altype = Settings::FilestoreAdminResourceNames.find { |r| r == altype } # ensure Brakeman doesn't complain
+          @activity_log = altype.singularize.ns_camelize.ns_constantize.find(alid)
+          @activity_log.current_user = current_user
+        end
+
         @container.parent_item = @activity_log
         # Get all the activity logs that may reference this container. Then check the specified one actually does
         refs = ModelReference.find_where_referenced_from(@container).pluck(:from_record_id, :from_record_type)

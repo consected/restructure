@@ -70,6 +70,7 @@ Rails.application.routes.draw do
     resources :project_admins do
       member do
         post :request_records
+        post :request_archive
       end
     end
     resources :data_dictionaries, except: %i[show destroy]

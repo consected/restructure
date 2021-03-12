@@ -1,0 +1,385 @@
+---
+app_type:
+  id: 63
+  name: ref-data
+  label: Ref Data
+  disabled: false
+  admin_id: 21
+  created_at: '2021-02-19T15:45:18.289Z'
+  updated_at: '2021-02-19T15:45:18.289Z'
+  default_schema_name: ref_data
+  app_configurations:
+  - id: 606
+    name: hide player tabs
+    value: 'true'
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 63
+    role_name: ''
+    created_at: '2021-03-05T12:22:13.823Z'
+    updated_at: '2021-03-05T12:22:13.823Z'
+    user_email: 
+  - id: 607
+    name: default search form
+    value: reference_data__study_data_dictionary
+    disabled: false
+    admin_id: 21
+    user_id: 
+    app_type_id: 63
+    role_name: ''
+    created_at: '2021-03-05T12:23:46.529Z'
+    updated_at: '2021-03-05T12:23:46.529Z'
+    user_email: 
+  valid_user_access_controls:
+  - id: 2881
+    user_id: 
+    resource_type: general
+    resource_name: app_type
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 63
+    role_name: admin
+    created_at: '2021-02-19T15:47:42.776Z'
+    updated_at: '2021-02-19T15:47:42.776Z'
+    user_email: 
+  - id: 2882
+    user_id: 
+    resource_type: general
+    resource_name: view_data_reference
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 63
+    role_name: admin
+    created_at: '2021-02-19T15:48:22.028Z'
+    updated_at: '2021-02-19T15:48:22.028Z'
+    user_email: 
+  - id: 2883
+    user_id: 
+    resource_type: general
+    resource_name: export_csv
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 63
+    role_name: admin
+    created_at: '2021-02-19T15:48:40.153Z'
+    updated_at: '2021-02-19T15:48:40.153Z'
+    user_email: 
+  - id: 2884
+    user_id: 
+    resource_type: report
+    resource_name: reference_data__data_dictionary_choices
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 63
+    role_name: admin
+    created_at: '2021-02-19T15:49:00.177Z'
+    updated_at: '2021-02-19T15:49:00.177Z'
+    user_email: 
+  - id: 2885
+    user_id: 
+    resource_type: report
+    resource_name: reference_data__study_data_dictionary
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 63
+    role_name: admin
+    created_at: '2021-02-19T15:49:07.450Z'
+    updated_at: '2021-02-19T15:49:07.450Z'
+    user_email: 
+  - id: 2886
+    user_id: 
+    resource_type: report
+    resource_name: reference_data__table_data
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 63
+    role_name: admin
+    created_at: '2021-02-19T15:49:13.371Z'
+    updated_at: '2021-02-19T15:49:13.371Z'
+    user_email: 
+  - id: 2922
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__containers
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 63
+    role_name: admin
+    created_at: '2021-03-05T13:59:47.082Z'
+    updated_at: '2021-03-05T14:00:30.780Z'
+    user_email: 
+  - id: 2923
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__archived_files
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 63
+    role_name: admin
+    created_at: '2021-03-05T13:59:54.876Z'
+    updated_at: '2021-03-05T14:00:23.680Z'
+    user_email: 
+  - id: 2924
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__stored_files
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 63
+    role_name: admin
+    created_at: '2021-03-05T14:00:01.847Z'
+    updated_at: '2021-03-05T14:00:13.015Z'
+    user_email: 
+  - id: 2925
+    user_id: 
+    resource_type: table
+    resource_name: trackers
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 63
+    role_name: admin
+    created_at: '2021-03-05T15:33:44.227Z'
+    updated_at: '2021-03-05T15:33:44.227Z'
+    user_email: 
+  valid_associated_activity_logs: []
+  associated_dynamic_models: []
+  associated_external_identifiers: []
+  associated_reports:
+  - id: 327
+    name: Table Data
+    description: ''
+    sql: "select \r\n  {{table_fields}}\r\nfrom\r\n  {{schema_name}}.{{table_name}}\r\nlimit
+      :limit;"
+    search_attrs: "\r\n\r\nlimit: \r\n  number: \r\n    all: true\r\n    multiple:
+      single\r\n    default: 50"
+    admin_id: 21
+    disabled: false
+    created_at: '2020-09-23T16:11:06.058Z'
+    updated_at: '2020-09-23T18:10:24.093Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: reference-data
+    short_name: table_data
+    options: "view_options:\r\n  show_column_comments: true"
+    user_email: 
+  - id: 339
+    name: Data Dictionary Choices
+    description: ''
+    sql: "select * \r\nfrom datadic_choices\r\norder by\r\nsource_type asc, \r\nsource_name
+      asc,\r\nform_name asc, \r\nfield_name asc;"
+    search_attrs: "\r\n\r\newrtret: \r\n  config_selector: \r\n    all: true\r\n    multiple:
+      single\r\n    disabled: false"
+    admin_id: 21
+    disabled: false
+    created_at: '2021-02-05T17:15:57.557Z'
+    updated_at: '2021-02-08T13:44:39.698Z'
+    report_type: regular_report
+    auto: false
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: reference-data
+    short_name: data_dictionary_choices
+    options: ''
+    user_email: 
+  - id: 340
+    name: Study Data Dictionary
+    description: "Variables can be uniquely identified by the *domain* and \r\n*variable
+      name*. Note this information if you are considering making a data request, \r\nin
+      order to quickly select the variables in the request later.\r\n\r\nIf you are
+      planning on making a data request, you may find it more \r\nexpedient to fill
+      out the data request form and select the required \r\nvariables directly.\r\n\r\n"
+    sql: "\r\n\r\nselect distinct\r\na.id,\r\ncase when coalesce(a.title, '') != ''
+      then a.title \r\nwhen coalesce(sec.title, '') != '' then sec.title\r\nelse sec.label
+      end title,\r\na.study,\r\na.source_name,\r\na.source_type,\r\na.domain,\r\na.form_name,\r\na.variable_name,\r\na.variable_type,\r\na.presentation_type,\r\na.label,\r\na.label_note,\r\na.annotation,\r\na.is_required,\r\na.valid_type,\r\na.valid_min,\r\na.valid_max,\r\na.multi_valid_choices
+      \"choices\",\r\na.is_identifier,\r\na.is_derived_var,\r\na.multi_derived_from_id,\r\ncase
+      when a.doc_url is not null then\r\n'[documentation](' || a.doc_url || ')' \r\nend\r\n\"doc_url\",\r\na.target_type,\r\na.owner_email,\r\na.classification,\r\na.other_classification,\r\na.multi_timepoints,\r\neq.variable_name
+      || ' in ' || eq.study || ' ' || eq.source_type\r\n|| ' (' || eq.source_name
+      || ')'\r\n \"equivalent_to\",\r\na.storage_type,\r\na.db_or_fs,\r\na.schema_or_path,\r\ncase
+      when a.storage_type = 'database' then\r\n  '[' || a.table_or_file || '](/reports/reference_data__table_data'||chr(63)||'search_attrs[_blank]=true&schema_name='
+      || a.schema_or_path || '&table_name='|| a.table_or_file ||')' \r\nelse\r\n  a.table_or_file\r\nend\r\n\"table_or_file\",
+      \ \r\na.disabled,\r\na.admin_id,\r\na.redcap_data_dictionary_id,\r\na.position,\r\na.section_id,\r\na.created_at,\r\na.updated_at\r\nfrom
+      ref_data.datadic_variables a\r\nleft join ref_data.datadic_variables eq on a.equivalent_to_id
+      = eq.id\r\nleft join ref_data.datadic_variables sec on a.section_id = sec.id\r\nwhere\r\n
+      \ (\r\n    (\r\n      (:domain) is NULL OR a.domain IN (:domain)\r\n    )\r\n
+      \   AND (\r\n      :name_or_label_contains is NULL \r\n      OR a.variable_name
+      ~* :name_or_label_contains\r\n      OR a.label ~* :name_or_label_contains      \r\n
+      \   )\r\n  )\r\norder by \r\nid;\r\n"
+    search_attrs: "\r\n\r\ndomain: \r\n  config_selector: \r\n    all: true\r\n    multiple:
+      multiple\r\n    disabled: false\r\n    selections: \r\n      cardiac: cardiac\r\n
+      \     demographics: demographics\r\n      neurocognitive: neurocognitive\r\n
+      \     other health: other health\r\n      other_health: other_health\r\n      pain:
+      pain\r\n      tracking: tracking\r\n\r\nname_or_label_contains: \r\n  text:
+      \r\n    all: true\r\n    multiple: single\r\n    disabled: false\r\n    \r\n
+      \   "
+    admin_id: 21
+    disabled: false
+    created_at: '2021-02-18T16:58:07.950Z'
+    updated_at: '2021-03-04T19:01:44.547Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 100
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: reference-data
+    short_name: study_data_dictionary
+    options: "view_options:\r\n  hide_table_names: true\r\n\r\nlist_options:\r\n  list_description:
+      |\r\n    View variables\r\n  \r\ncolumn_options:\r\n  classes:\r\n    label:
+      datadict-field-label\r\n    attributes: datadict-field-attributes\r\n  show_as:\r\n
+      \   table_or_file: url\r\n    doc_url: url\r\n    label: pre\r\n    attributes:
+      pre\r\n    label_note: pre\r\n    annotation: pre\r\n    attributes: pre\r\n
+      \   choices: options\r\n    is_required: checkbox\r\n    is_identifier: checkbox\r\n
+      \   is_derived_var: checkbox\r\n    disabled: checkbox\r\n  hide:\r\n    id:
+      true\r\n  \r\nview_css:\r\n  classes:\r\n    table-header.select-items .table-header-col-type:
+      \r\n      display: 'none'\r\n\r\n\r\n  selectors:\r\n    pre:\r\n      font-family:
+      monospace;\r\n      font-size: 12px\r\n      padding: 0\r\n\r\n    table.table.report-table
+      .report-el:\r\n      font-family: monospace\r\n      font-size: 12px\r\n  \r\n
+      \   \"[data-col-type]\": \r\n      min-width: 110px\r\n  \r\n    \"[data-col-type='choices']\":
+      \r\n      min-width: 200px\r\n      max-width: 200px\r\n    \r\n    \"[data-col-type='label']\":
+      \r\n      min-width: 30vw\r\n      max-width: 30vw\r\n      \r\n    \"[data-col-type='label_note']\":
+      \r\n      min-width: 200px\r\n      max-width: 200px\r\n      width: auto\r\n\r\n
+      \   \"[data-col-type='annotation']\": \r\n      min-width: 30vw\r\n      max-width:
+      30vw\r\n\r\n    table.table.report-table td pre.expanded, table.table.report-table
+      td pre:\r\n      width: 100%\r\n      overflow-x: hidden\r\n      white-space:
+      pre-wrap\r\n      word-break: break-word\r\n"
+    user_email: 
+  associated_general_selections: []
+  page_layouts: []
+  user_roles:
+  - id: 1194
+    app_type_id: 63
+    role_name: admin
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2021-02-19T15:46:41.435Z'
+    updated_at: '2021-02-19T15:47:09.945Z'
+    user_email: phil_ayres@test.com
+  - id: 1195
+    app_type_id: 63
+    role_name: email
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2021-02-19T15:46:41.455Z'
+    updated_at: '2021-02-19T15:46:41.455Z'
+    user_email: template@template
+  - id: 1196
+    app_type_id: 63
+    role_name: admin
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2021-02-19T15:46:55.261Z'
+    updated_at: '2021-02-19T15:46:55.261Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1197
+    app_type_id: 63
+    role_name: admin
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2021-02-19T15:46:55.271Z'
+    updated_at: '2021-02-19T15:46:55.271Z'
+    user_email: template@template
+  - id: 1206
+    app_type_id: 63
+    role_name: nfs_store group 601
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2021-03-05T14:49:36.281Z'
+    updated_at: '2021-03-05T14:49:36.281Z'
+    user_email: phil_ayres@test.com
+  - id: 1207
+    app_type_id: 63
+    role_name: nfs_store group 601
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2021-03-05T14:49:36.298Z'
+    updated_at: '2021-03-05T14:49:36.298Z'
+    user_email: template@template
+  - id: 1208
+    app_type_id: 63
+    role_name: nfs_store group 601
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2021-03-05T14:49:45.088Z'
+    updated_at: '2021-03-05T14:49:45.088Z'
+    user_email: phil_ayres@hms.harvard.edu
+  associated_message_templates: []
+  associated_config_libraries: []
+  associated_protocols: []
+  associated_sub_processes: []
+  associated_protocol_events: []
+  associated_item_flag_names:
+  - id: 16
+    name: Q1 mailing 1
+    item_type: tracker
+    created_at: '2015-06-29T21:45:34.438Z'
+    updated_at: '2015-06-29T21:45:34.438Z'
+    disabled: 
+    admin_id: 
+    user_email: 
+  - id: 17
+    name: Q1 mailing 2
+    item_type: tracker
+    created_at: '2015-06-29T21:45:38.767Z'
+    updated_at: '2015-06-29T21:45:38.767Z'
+    disabled: 
+    admin_id: 
+    user_email: 
+  - id: 18
+    name: Q1 mailing 3
+    item_type: tracker
+    created_at: '2015-06-29T21:45:43.293Z'
+    updated_at: '2015-06-29T21:45:43.293Z'
+    disabled: 
+    admin_id: 
+    user_email: 
+  nfs_store_filters:
+  - id: 129
+    app_type_id: 63
+    role_name: admin
+    user_id: 
+    resource_name: nfs_store__manage__containers
+    filter: ".*"
+    description: ''
+    disabled: false
+    admin_id: 21
+    created_at: '2021-03-05T14:02:07.598Z'
+    updated_at: '2021-03-05T14:02:07.598Z'
+    user_email: 
+  user_email: 
