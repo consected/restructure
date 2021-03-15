@@ -9,7 +9,6 @@ class Admin::PageLayout < ActiveRecord::Base
   include AppTyped
   include OptionsHandler
 
-  validates :app_type_id, presence: { scope: :active }
   validates :layout_name, presence: { scope: :active }
   validates :panel_name, presence: { scope: :active }, uniqueness: { scope: %i[app_type_id layout_name] }
   validates :panel_label, presence: { scope: :active }
@@ -140,6 +139,10 @@ class Admin::PageLayout < ActiveRecord::Base
   # Active view or standalone layouts for the specified app type
   def self.app_show_layouts(app_type_id)
     Admin::PageLayout.active.showable.where(app_type_id: app_type_id)
+  end
+
+  def standalone?
+    layout_name == 'standalone'
   end
 
   protected

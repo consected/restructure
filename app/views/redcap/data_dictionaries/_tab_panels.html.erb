@@ -1,6 +1,4 @@
-
-
-    <%
+<%
       unless defined? no_active
         no_active = false 
       end
@@ -9,41 +7,36 @@
 
       if @rc_data_dictionary
     %>
-    <div role="tabpanel" class="tab-pane <%= no_active ? '' : 'active'%>" id="def-dd-details-block">
-      <h4>Details</h4>
-      
-      <div>
-        <label>Project name</label>
-        <%= link_to @rc_data_dictionary.redcap_project_admin_name, @rc_data_dictionary.redcap_project_admin %>
-      </div>
-      <%= render partial: 'redcap/data_dictionaries/forms_and_fields', locals: { object_instance: @rc_data_dictionary}%>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="def-dropdowns-block">
-      <h4>Dropdowns</h4>
-      <%= render partial: 'redcap/data_dictionaries/dropdowns_defs', locals: { object_instance: @rc_data_dictionary}%>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="def-checkboxes-block">
-      <h4>Checkboxes</h4>
-      <%= render partial: 'redcap/data_dictionaries/checkboxes_defs', locals: { object_instance: @rc_data_dictionary}%>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="def-radio-block">
-      <h4>Radio</h4>
-      <%= render partial: 'redcap/data_dictionaries/radio_defs', locals: { object_instance: @rc_data_dictionary}%>
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="def-dd-metadata-block">
-      <h4>Metadata</h4>
-      
-      <% if @rc_data_dictionary.captured_metadata.present?%>
-        <div class="admin-options-ref-textarea-block">
-          <textarea style="font-size: 12px" class="extra-help-info">
+<div role="tabpanel" class="tab-pane <%= no_active ? '' : 'active'%>" id="def-dd-details-block">
+  <h4>Data Dictionary Details</h4>
+  <div>
+    <p>
+      <label>Project name</label>
+      <%= link_to @rc_data_dictionary.redcap_project_admin_name, @rc_data_dictionary.redcap_project_admin %>
+    </p>
+  </div>
+  <%= render partial: 'redcap/data_dictionaries/forms_and_fields', locals: { object_instance: @rc_data_dictionary}%>
+</div>
+<div role="tabpanel" class="tab-pane" id="def-dropdowns-block">
+  <h4>Dropdowns</h4>
+  <%= render partial: 'redcap/data_dictionaries/dropdowns_defs', locals: { object_instance: @rc_data_dictionary}%>
+</div>
+<div role="tabpanel" class="tab-pane" id="def-checkboxes-block">
+  <h4>Checkboxes</h4>
+  <%= render partial: 'redcap/data_dictionaries/checkboxes_defs', locals: { object_instance: @rc_data_dictionary}%>
+</div>
+<div role="tabpanel" class="tab-pane" id="def-radio-block">
+  <h4>Radio</h4>
+  <%= render partial: 'redcap/data_dictionaries/radio_defs', locals: { object_instance: @rc_data_dictionary}%>
+</div>
+<div role="tabpanel" class="tab-pane" id="def-dd-metadata-block">
+  <h4>Metadata</h4>
+  <% if @rc_data_dictionary.captured_metadata.present?%>
+    <div class="admin-options-ref-textarea-block">
+      <textarea style="font-size: 12px" class="extra-help-info">
 <%= @rc_data_dictionary.captured_metadata.map(&:stringify_keys).to_yaml%>
           </textarea>
-        </div>
-      <% end%>
     </div>
-
-    <% end %>
+  <% end%>
+</div>
+<% end %>

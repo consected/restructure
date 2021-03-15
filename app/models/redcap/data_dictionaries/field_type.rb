@@ -26,7 +26,7 @@ module Redcap
         dropdown: 'categorical',
         radio: 'categorical',
         checkbox: 'categorical',
-        checkbox_choice: 'dichotomous', # This is not a real REDCap type, but is used as a lookup
+        checkbox_choice: 'dichotomous item', # This is not a real REDCap type, but is used as a lookup
         yesno: 'dichotomous',
         truefalse: 'dichotomous',
         file: 'file',
@@ -62,6 +62,7 @@ module Redcap
       # Non-string real type conversions for variable types
       VariableTypesToRealTypes = {
         'dichotomous' => :true_if_1,
+        'dichotomous item' => :true_if_1,
         'integer' => :to_i,
         'numeric' => :to_d,
         'date' => :to_date,
@@ -74,6 +75,7 @@ module Redcap
       # Non-string database types
       VariableTypesToDatabaseTypes = {
         'dichotomous' => :boolean,
+        'dichotomous item' => :boolean,
         'integer' => :integer,
         'numeric' => :decimal,
         'date' => :date,
@@ -131,6 +133,9 @@ module Redcap
         field.def_metadata[:text_validation_type_or_show_slider_number]
       end
 
+      #
+      # Data type for the field in the study database
+      # @return [Symbol]
       def database_type
         VariableTypesToDatabaseTypes[default_variable_type] || :string
       end

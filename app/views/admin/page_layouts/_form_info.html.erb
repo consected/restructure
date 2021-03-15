@@ -1,14 +1,12 @@
 <div class="">
-
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab">Details</a></li>
     <li role="presentation"><a href="#options-ref" aria-controls="options-ref" role="tab" data-toggle="tab">Options Reference</a></li>
+    <li role="presentation"><a href="#how-to-ref" aria-controls="how-to-ref" role="tab" data-toggle="tab">How To</a></li>
   </ul>
-
   <!-- Tab panes -->
   <div class="tab-content">
-
     <div role="tabpanel" class="tab-pane active" id="def-details-block">
       <h4>Details</h4>
       <%= render partial: 'admin/page_layouts/def_details', locals: {object_instance: object_instance} %>
@@ -16,6 +14,9 @@
     <div role="tabpanel" class="tab-pane" id="options-ref">
       <h4>Options Reference</h4>
       <%= render partial: 'admin/page_layouts/options_ref'%>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="how-to-ref">
+      <%= render partial: 'admin/page_layouts/how_to_ref'%>
     </div>
   </div>
 </div>

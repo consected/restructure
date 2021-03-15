@@ -28,16 +28,18 @@ module AdminControllerHandler
       @copy_with = primary_model.find(params[:copy_with_id]).attributes.select do |k, _v|
         permitted_params.include? k.to_sym
       end
+
+      init_attrs = @copy_with
     end
 
     # Ensure the app type is defaulted, if not copying an existing item and the primary model uses app types
     if !@copy_with && primary_model_uses_app_type?
-      @copy_with = {
+      init_attrs = {
         app_type_id: current_admin.matching_user&.app_type_id
       }
     end
 
-    set_object_instance primary_model.new(@copy_with) unless options[:use_current_object]
+    set_object_instance primary_model.new(init_attrs) unless options[:use_current_object]
     render partial: view_path('form')
   end
 

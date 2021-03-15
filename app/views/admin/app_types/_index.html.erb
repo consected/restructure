@@ -1,63 +1,74 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">
-<h1>App Types</h1>
-<p>
-  <%= show_filters %>
-</p>
-
-<div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
-
-<table class="table tablesorter admin-list">
-  <thead>
-    <tr>
-      <th class="no-sort"></th>
-      <th>ID</th>
-      <th>Name</th>
-      <th>Label</th>
-      <th>Default Schema Name</th>
-      <th>Disabled</th>
-      <th>Last Admin Update</th>
-      <th>Filestore setup</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <% objects_instance.each do |list_item| %>
-      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
-        <td><%= admin_edit_btn list_item.id%> </td>
-        <td><%= list_item.id %></td>
-        <td><%= list_item.name %></td>
-        <td><%= list_item.label %></td>
-        <td><%= list_item.default_schema_name %></td>
-        <td><%= list_item.disabled ? 'disabled' : ''%></td>
-
-        <td><%= list_item.admin_name %></td>
-        <td><code>app-scripts/setup_filestore_app.sh <%=list_item.id%></code></td>
-        <td><%= link_to 'export json', admin_app_type_path(list_item, export_format: :json) %> | <%= link_to 'export yaml', admin_app_type_path(list_item, export_format: :yaml) %></td>
-
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<div class="row">
-
-  <div class="panel panel-default panel-body col-sm-8 col-sm-offset-8">
-    <h3>Upload a configuration file</h3>
-
-    <%= form_tag({action: :upload}, multipart: true) do %>
-    <%= file_field_tag 'config' %>
-    <div>
-      <input name="upload_format" type="radio" value="json" id="upload_format_json" checked="checked"/> <label for="upload_format_json">JSON</label>
-    &nbsp;&nbsp;
-      <input name="upload_format" type="radio" value="yaml" id="upload_format_yaml" /> <label for="upload_format_yaml">YAML</label>
+    <h1>App Types</h1>
+    <p>
+      <%= show_filters %>
+    </p>
+    <div class="row">
+      <div class="col-md-8">
+        <p class="h4">Active in Settings</p>
+        <ul class="admin-tag-list">
+          <% Admin::AppType.active_app_types.pluck(:name).each do |t|%>
+            <li><%=t%></li>
+          <% end %>
+        </ul>
+      </div>
+      <div class="col-md-8">
+        <p class="h4">Current Search Path</p>
+        <ul class="admin-tag-list">
+          <% Admin::MigrationGenerator.current_search_paths.each do |t|%>
+            <li><%=t%></li>
+          <% end %>
+        </ul>
+      </div>
     </div>
-    <%= submit_tag %>
-    <% end %>
-  </div>
-</div>
-
-
-<%=  render partial: 'admin_handler/index_actions'  %>
+    <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
+    <table class="table tablesorter admin-list">
+      <thead>
+        <tr>
+          <th class="no-sort"></th>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Label</th>
+          <th>Default Schema Name</th>
+          <th>Active on Server?</th>
+          <th>Disabled</th>
+          <th>Last Admin Update</th>
+          <th>Filestore setup</th>
+          <th>Export</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% objects_instance.each do |list_item| %>
+          <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+            <td><%= admin_edit_btn list_item.id%> </td>
+            <td><%= list_item.id %></td>
+            <td><%= list_item.name %></td>
+            <td><%= list_item.label %></td>
+            <td><%= list_item.default_schema_name %></td>
+            <td><%= list_item.active_on_server? ? 'yes' : '<b>no</b>'.html_safe %></td>
+            <td><%= list_item.disabled ? 'disabled' : ''%></td>
+            <td><%= list_item.admin_name %></td>
+            <td><code>app-scripts/setup_filestore_app.sh <%=list_item.id%></code></td>
+            <td><%= link_to 'export json', admin_app_type_path(list_item, export_format: :json) %> | <%= link_to 'export yaml', admin_app_type_path(list_item, export_format: :yaml) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <div class="row">
+      <div class="panel panel-default panel-body col-sm-8 col-sm-offset-8">
+        <h3>Upload a configuration file</h3>
+        <%= form_tag({action: :upload}, multipart: true) do %>
+          <%= file_field_tag 'config' %>
+          <div>
+            <input name="upload_format" type="radio" value="json" id="upload_format_json" checked="checked"/> <label for="upload_format_json">JSON</label>
+            &nbsp;&nbsp;
+            <input name="upload_format" type="radio" value="yaml" id="upload_format_yaml" /> <label for="upload_format_yaml">YAML</label>
+          </div>
+          <%= submit_tag %>
+        <% end %>
+      </div>
+    </div>
+    <%=  render partial: 'admin_handler/index_actions'  %>
   </div>
 </div>

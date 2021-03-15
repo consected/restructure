@@ -107,9 +107,11 @@ RSpec.describe Redcap::DataDictionaries::Field, type: :model do
     check_field = check_fields.first.last
 
     # The individual choice fields should list the main field as #equivalent_to
+    # and should have an appropriate presentation_type
     check_field.checkbox_choice_fields.each do |f|
       v = Datadic::Variable.active.where(redcap_data_dictionary_id: dd.id, variable_name: f).first
       expect(v.equivalent_to).not_to be_nil
+      expect(v.presentation_type).to eq 'checkbox [choice]'
     end
 
     # The main field should list the individual choice fields as #also_equivalent_to
