@@ -37,10 +37,10 @@ module NfsStore
           mounter.stored_file = sf
           # How old is the file?
           td = begin
-                 Time.now - File.ctime(sf.retrieval_path)
-               rescue StandardError
-                 nil
-               end
+            Time.now - File.ctime(sf.retrieval_path)
+          rescue StandardError
+            nil
+          end
 
           if (td && td < ProcessingRetryTime) || mounter.archive_extracted? || sf.last_process_name_run == '_all_done_'
             next
@@ -248,7 +248,9 @@ module NfsStore
         @archive_path = stored_file.retrieval_path
         @mounted_path = "#{@archive_path}#{ArchiveMountSuffix}"
         @archive_file = stored_file.file_name
-        puts "Start to extract files? (archive not extracted? #{!archive_extracted?}) to DB for #{@mounted_path}"
+        unless Rails.env.test?
+          puts "Start to extract files? (archive not extracted? #{!archive_extracted?}) to DB for #{@mounted_path}"
+        end
 
         result = true
         return true if archive_extracted?
@@ -265,7 +267,7 @@ module NfsStore
 
           files = Dir.glob(glob_path)
 
-          puts "Starting extract_archived_files of #{files.length} files"
+          puts "Starting extract_archived_files of #{files.length} files" unless Rails.env.test?
 
           container = stored_file.container
 
