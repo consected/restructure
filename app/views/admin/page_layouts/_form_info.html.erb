@@ -16,7 +16,12 @@
       <%= render partial: 'admin/page_layouts/options_ref'%>
     </div>
     <div role="tabpanel" class="tab-pane" id="how-to-ref">
-      <%= render partial: 'admin/page_layouts/how_to_ref'%>
+      <%= render partial: 'help/view_doc', 
+                 locals: {
+                   library: :admin_reference, 
+                   section: :page_layouts, 
+                   subsection: :detailed_options 
+                 } %>
     </div>
   </div>
 </div>

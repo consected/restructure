@@ -55,6 +55,10 @@ class Admin::ManageUsersController < AdminController
     'user'
   end
 
+  def title
+    'Usernames and Passwords'
+  end
+
   def filters
     {
       app_type_id: Admin::AppType.all_by_name

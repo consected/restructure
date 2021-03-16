@@ -64,6 +64,11 @@ module NavHandler
 
     unless admin_sub.empty?
       @secondary_navs << {
+        label: '<span class="glyphicon glyphicon-question-sign" title="administrator help"></span>',
+        url: '/help'
+      }
+
+      @secondary_navs << {
         label: '<span class="glyphicon glyphicon-wrench" title="administrator"></span>',
         url: '#',
         sub: admin_sub,
@@ -109,8 +114,8 @@ module NavHandler
   def setup_admin_sub_nav(admin_sub)
     if current_admin
       admin_sub << { label: 'manage', url: '/', route: '#root' }
-      admin_sub << { label: 'password', url: '/admins/edit', extras: { 'data-do-action' => 'admin-change-password' } }
-      admin_sub << { label: 'logout_admin', url: '/admins/sign_out',
+      admin_sub << { label: 'admin password', url: '/admins/edit', extras: { 'data-do-action' => 'admin-change-password' } }
+      admin_sub << { label: 'logout admin', url: '/admins/sign_out',
                      extras: { method: :delete, 'data-do-action' => 'admin-logout' } }
     elsif current_user && Admin.for_user(current_user)
       admin_sub << { label: 'Admin Login', url: '/admins/sign_in', route: 'admins#sign_in' }
@@ -122,7 +127,7 @@ module NavHandler
 
     @app_type_switches = current_user.accessible_app_types.map { |m| [m.label, m.id] }
 
-    user_sub << { label: 'password', url: '/users/edit', extras: { 'data-do-action' => 'user-change-password' } }
+    user_sub << { label: "#{current_admin ? 'user ' : ''}password", url: '/users/edit', extras: { 'data-do-action' => 'user-change-password' } }
     user_sub << { label: 'logout', url: '/users/sign_out',
                   extras: { method: :delete, 'data-do-action' => 'user-logout' } }
   end

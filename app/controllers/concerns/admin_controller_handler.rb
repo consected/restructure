@@ -10,7 +10,8 @@ module AdminControllerHandler
 
     helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance,
                   :objects_instance, :human_name, :no_edit, :primary_model,
-                  :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?
+                  :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?,
+                  :help_section, :help_subsection, :title, :no_create
   end
 
   def index
@@ -180,6 +181,10 @@ module AdminControllerHandler
     object_name.humanize
   end
 
+  def title
+    object_name.pluralize.split('__').map { |t| t.humanize.titleize }.join(': ')
+  end
+
   #
   # Make index lists appear without edit buttons
   # By default, (although the method may be overridden for certain controllers),
@@ -188,6 +193,10 @@ module AdminControllerHandler
   # @return [Boolean]
   def no_edit
     false || params[:readonly] == 'true'
+  end
+
+  def no_create
+    no_edit
   end
 
   def default_index_order
@@ -286,5 +295,13 @@ module AdminControllerHandler
   # @return [Boolean]
   def hide_app_type?
     params[:view_as] == 'simple-embedded'
+  end
+
+  def help_section
+    object_name.split('__').last.ns_underscore.pluralize
+  end
+
+  def help_subsection
+    '0_introduction'
   end
 end

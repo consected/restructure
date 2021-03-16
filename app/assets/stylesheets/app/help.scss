@@ -1,0 +1,178 @@
+div.help-view-doc,
+.common-help-item,
+.md-formatted-block {
+  .common-help-item {
+    padding: 0 30px;
+    background: rgb(255, 255, 255);
+    padding-top: 30px;
+    padding-bottom: 60px;
+  }
+
+  .nfs-store--manage--container-data {
+    display: none;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  hr {
+    border-top: 3px solid rgb(213, 213, 213);
+  }
+
+  div,
+  h1,
+  h2,
+  h3,
+  h4 {
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    height: auto;
+    width: auto;
+    float: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    margin-bottom: 0.67em;
+    margin-top: 0.34em;
+  }
+
+  .list-group-item.is-heading.object-results-header {
+    display: none;
+  }
+
+  p br {
+    display: block;
+    content: "";
+    margin-top: 0.8em;
+    line-height: 190%;
+    vertical-align: top;
+  }
+
+  .default-layout {
+    margin: 0;
+
+    h1 {
+      font-size: 44px;
+      line-height: 130%;
+    }
+
+    h2 {
+      font-size: 30px;
+      line-height: 130%;
+    }
+
+    h3 {
+      font-size: 26px;
+      line-height: 130%;
+    }
+
+    h4 {
+      font-size: 22px;
+      line-height: 130%;
+    }
+
+    .page-item-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+    }
+    .main-item {
+      width: 100%;
+    }
+  }
+
+  .default-layout-rows,
+  .default-layout {
+    &.content {
+      margin: 0 14%;
+      width: auto;
+      float: none;
+    }
+  }
+  .default-layout-columns,
+  .default-layout-one-column,
+  .default-layout-two-columns,
+  .default-layout-three-columns {
+    &.content {
+      margin: 0 7%;
+      width: auto;
+      float: none;
+    }
+  }
+
+  .common-help-item,
+  .common-help-item,
+  .default-layout-columns,
+  div.browse-container {
+    margin: 0.4em 1.7em 1.5em;
+
+    .notes-text th,
+    .notes-text tr {
+      word-break: normal;
+      vertical-align: top;
+    }
+  }
+
+  .embedded-items-item.option-type-attachments {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgb(221, 221, 221);
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 3px 3px 0px #d6d6d6;
+    margin: 0.4em 0 1.2em;
+
+    h1,
+    h2 {
+      border-bottom: 1px rgb(221, 221, 221) solid;
+      padding-bottom: 0.3em;
+    }
+  }
+
+  > ol,
+  > ul {
+    padding-inline-end: 40px;
+    margin-bottom: 1.4em;
+    padding-left: 0;
+  }
+
+  ul li,
+  ul ul {
+    list-style-position: outside;
+    list-style-type: disc;
+    margin-left: 1.6em;
+    overflow: visible;
+  }
+
+  ol li,
+  ol ol {
+    list-style-position: outside;
+    list-style-type: decimal;
+    margin-left: 1.6em;
+    overflow: visible;
+  }
+
+  & {
+    font-size: 16px;
+  }
+
+  p {
+    min-height: 1.6em;
+  }
+
+  .help-footer {
+    padding: 15px;
+    background-color: rgb(221, 221, 221);
+    text-align: center;
+
+    a,
+    a:link {
+    }
+  }
+}
