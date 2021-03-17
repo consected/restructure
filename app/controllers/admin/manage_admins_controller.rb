@@ -6,11 +6,18 @@
 class Admin::ManageAdminsController < AdminController
   # Only allow update of the disabled status of an administrator to disabled.
   def update
-    if secure_params[:disabled] != '1'
+    if @admin.disabled && secure_params[:disabled] != '1'
       not_authorized
-      flash.now[:warning] = 'Only allowed to disable existing admins'
+      flash.now[:warning] = 'Admins can not be re-enabled'
       return
     end
+
+    if params[:gen_new_pw] == '1'
+      @admin.force_password_reset
+      logger.info 'Force password reset'
+    end
+
+    @admin.reset_two_factor_auth if params[:reset_two_factor_auth]
 
     @admin.current_admin = current_admin
     if @admin.update(secure_params)
@@ -62,6 +69,6 @@ class Admin::ManageAdminsController < AdminController
   private
 
   def permitted_params
-    %i[disabled]
+    %i[email first_name last_name disabled]
   end
 end

@@ -1,5 +1,8 @@
 <div class="admin-edit-form alert" role="alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
   <p>Email: <%= @admin.email %></p>
+  <% if @admin.new_password %>
+    <p>New password: <%= @admin.new_password %> </p>
+  <% end %>
   <p>Disabled:<%=!!@admin.disabled%></p>
 </div>

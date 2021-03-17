@@ -6,14 +6,36 @@ _fpa.postprocessors_admin = {
     // Extend each anchor tag to be a remote request, to use the relative path
     // rather than the window path, and to request embedded pages.
     block.find('a').each(function () {
-      $(this).attr('data-remote', 'true')
       var href = $(this).attr('href')
-      if (href[0] != '/') {
+      if (href[0] == '#') {
+        $(this).attr('data-toggle', "scrollto-target");
+        return;
+      }
+      if (href[0] != '/' && href.indexOf('http') != 0) {
         href = data_doc_path + '/' + href;
       }
-      $(this).attr('href', href + '?display_as=embedded')
+      if (href.indexOf('/help') == 0) {
+        $(this).attr('data-remote', 'true')
+        $(this).attr('href', href + '?display_as=embedded')
+      }
+      else {
+        $(this).attr('target', '_blank');
+      }
     });
 
+    // Ensure image tags with relative paths point to the correct location
+    block.find('img').each(function () {
+      var src = $(this).attr('src')
+      if (src[0] != '/' && src.indexOf('http') != 0) {
+        src = data_doc_path + '/' + src;
+        $(this).attr('src', src)
+      }
+    });
+
+    // Add table class to tables
+    block.find('table').addClass('table')
+
+    // Handle the expander
     $('[data-toggle="sidebar-expand"]').not('.toggle-added-sidebar-expander').on('click', function () {
       var target = $(this).attr('data-target');
       $(target).addClass('expanded')

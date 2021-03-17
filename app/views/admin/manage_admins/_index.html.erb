@@ -1,6 +1,6 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">
-    <h1>Admins</h1>
+    <%= show_admin_heading %>
     <p>
       <%= show_filters %>
     </p>
@@ -18,6 +18,8 @@
           <th>Admin</th>
           <th>First Name</th>
           <th>Last Name</th>
+          <th>Matching User?</th>
+          <th>Expires in (days)</th>
           <th>Locked</th>
           <th>Disabled</th>
         </tr>
@@ -31,6 +33,8 @@
             <td><%= list_item.email %></td>
             <td><%= list_item.first_name %></td>
             <td><%= list_item.last_name %></td>
+            <td><%= list_item.matching_user ? 'yes' : 'no' %></td>
+            <td><%= list_item.expires_in == 0 ? '<i class="password-expired">expired</i>'.html_safe : list_item.expires_in %></td>
             <td><%= list_item.access_locked? ? 'locked' : ''%></td>
             <td><%= list_item.disabled ? 'disabled' : ''%></td>
 

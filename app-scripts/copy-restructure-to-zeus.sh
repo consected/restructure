@@ -17,6 +17,7 @@ fi
 
 for FROM in app bin config db/migrate db/seeds db/table_generators db/app_migrations/data_requests app-scripts/supporting \
   lib public/fonts public/app_specific/data_requests script spec \
+  docs/admin_reference docs/user_reference docs/dev_reference \
   vendor/assets/images vendor/assets/javascripts vendor/assets/stylesheets; do
 
   rsync -av --update --exclude="${EXCLUDE}" ${SRC}/${FROM}/ ${FROM}/

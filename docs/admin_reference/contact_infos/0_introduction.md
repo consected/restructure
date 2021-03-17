@@ -1,4 +1,4 @@
-# Contact Information
+# Additional User Contact Information
 
 ## Introduction
 
@@ -27,5 +27,3 @@ The phone number is used for display purposes within apps, to allow a user's pho
 
 Some users may prefer to be emailed at an address that is
 different to their username email address. Setting this allows specific apps to display this alternative email to other users or within scripts. It does not change the address that application notifications are sent to.
-
-

@@ -45,7 +45,7 @@ module AdminHelper
 
     unless title == 'all' || title.to_s.include?('__') || @shown_filter_break
       @shown_filter_break = true
-      res = '<p>&nbsp;</p>'.html_safe
+      res = '<p class="filter-small-gap">&nbsp;</p>'.html_safe
     end
 
     if val.present? || title == 'all'
