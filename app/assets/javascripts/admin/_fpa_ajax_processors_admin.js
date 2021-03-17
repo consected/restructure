@@ -1,4 +1,31 @@
 _fpa.postprocessors_admin = {
+  help_sidebar: function (block, data) {
+
+    // Setup the relative path for the links
+    var data_doc_path = block.find('[data-doc-path]').attr('data-doc-path');
+    // Extend each anchor tag to be a remote request, to use the relative path
+    // rather than the window path, and to request embedded pages.
+    block.find('a').each(function () {
+      $(this).attr('data-remote', 'true')
+      var href = $(this).attr('href')
+      if (href[0] != '/') {
+        href = data_doc_path + '/' + href;
+      }
+      $(this).attr('href', href + '?display_as=embedded')
+    });
+
+    $('[data-toggle="sidebar-expand"]').not('.toggle-added-sidebar-expander').on('click', function () {
+      var target = $(this).attr('data-target');
+      $(target).addClass('expanded')
+    });
+
+    $('[data-toggle="sidebar-shrink"]').not('.toggle-added-sidebar-shrinker').on('click', function () {
+      var target = $(this).attr('data-target');
+      $(target).removeClass('expanded')
+    });
+
+  },
+
   admin_edit_form: function (block, data) {
     var _admin = this;
     _fpa.utils.scrollTo(block, 200, -50);

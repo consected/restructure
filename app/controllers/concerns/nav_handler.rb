@@ -64,8 +64,11 @@ module NavHandler
 
     unless admin_sub.empty?
       @secondary_navs << {
-        label: '<span class="glyphicon glyphicon-question-sign" title="administrator help"></span>',
-        url: '/help'
+        label: '<span class="glyphicon glyphicon-question-sign" title="help"></span>',
+        url: '/help?display_as=embedded',
+        extras: {
+          'data-remote': 'true', 'data-toggle': 'collapse', 'data-target': '#help-sidebar'
+        }
       }
 
       @secondary_navs << {

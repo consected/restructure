@@ -96,13 +96,17 @@ module AdminHelper
 
   def show_admin_heading
     "<h1 class=\"admin-title\">#{title}" \
-      "#{link_to('',
-                 help_page_path(
-                   library: :admin_reference,
-                   subsection: help_subsection,
-                   section: help_section
-                 ),
-                 class: 'glyphicon glyphicon-question-sign small admin-help-icon')}" \
+      "#{ link_to(
+        '',
+        help_page_path(
+          library: :admin_reference,
+          subsection: help_subsection,
+          section: help_section,
+          display_as: :embedded
+        ),
+        class: 'glyphicon glyphicon-question-sign small admin-help-icon',
+        data: { remote: true, toggle: 'collapse', target: '#help-sidebar' }
+      ) }" \
     '</h1>'.html_safe
   end
 
@@ -112,6 +116,16 @@ module AdminHelper
       res += hidden_field_tag "filter[#{filter.first}]", filter.last
     end
     res.html_safe
+  end
+
+  def help_doc_path(library, section)
+    where = [
+      '',
+      'help',
+      library.to_s,
+      section.to_s
+    ]
+    File.join(*where)
   end
 
   def formatted_doc(library, section, subsection)
@@ -128,6 +142,7 @@ module AdminHelper
            else
              '# page not found'
            end
-    Formatter::Substitution.text_to_html(text).html_safe
+    text = Formatter::Substitution.text_to_html(text).html_safe
+    Formatter::Substitution.substitute(text).html_safe
   end
 end

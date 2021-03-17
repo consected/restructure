@@ -2,7 +2,7 @@ div.help-view-doc,
 .common-help-item,
 .md-formatted-block {
   .common-help-item {
-    padding: 0 30px;
+    padding: 0 4%;
     background: rgb(255, 255, 255);
     padding-top: 30px;
     padding-bottom: 60px;
@@ -170,9 +170,13 @@ div.help-view-doc,
     padding: 15px;
     background-color: rgb(221, 221, 221);
     text-align: center;
+  }
 
-    a,
-    a:link {
-    }
+  pre {
+    overflow-x: auto;
+  }
+  pre code {
+    word-wrap: normal;
+    white-space: pre;
   }
 }

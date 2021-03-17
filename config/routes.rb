@@ -10,6 +10,7 @@ Rails.application.routes.draw do
 
   get '/help/:library/:section/:subsection', to: 'help#show', as: 'help_page'
   get '/help/:library/:section/:id', to: 'help#show', as: 'help_path'
+  get '/help/:library/:section/images/:image_name', to: 'help#image', as: 'help_image'
 
   resources :help, only: %i[index]
 

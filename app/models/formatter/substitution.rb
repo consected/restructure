@@ -172,6 +172,9 @@ module Formatter
       data[:environment_name] = Settings::EnvironmentName
       data[:password_age_limit] = Settings::PasswordAgeLimit
       data[:password_reminder_days] = Settings::PasswordReminderDays
+      data[:password_max_attempts] = Settings::PasswordMaxAttempts
+      data[:mfa_disabled] = Settings::TwoFactorAuthDisabled
+      data[:login_issues_url] = Settings::LoginIssuesUrl
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       data[:item] = item.item.attributes.dup if item.respond_to?(:item) && item.item.respond_to?(:attributes)

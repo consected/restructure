@@ -67,7 +67,7 @@ class Settings
   EnvironmentName = ENV['FPHS_ENV_NAME'] || 'App'
   # Allow text substitutions for messages, etc to provide a base URL for the app, accessible
   # using the curly substitution {{base_url}}
-  BaseUrl = ENV['BASE_URL']
+  BaseUrl = ENV['BASE_URL'] || '(not set)'
   # title tag page title, appears in tab or browser heading
   PageTitle = ENV['PAGE_TITLE'] || 'FPHS'
 

@@ -1,6 +1,6 @@
 <div class="help-footer">
-  <% if @subsection.in? %w[README 0_introduction] %>
-    <%= link_to 'home', '/help' %>
+  <% if  @section = 'main' || @subsection.in?( %w[README 0_introduction]) %>
+    <%= link_to 'library home', '/help' %>
   <% else %>
     <%= link_to 'back to main section', '0_introduction' %>
   <% end %>
