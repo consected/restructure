@@ -15,7 +15,10 @@ module OptionConfigs
               hide_export_buttons:
               hide_criteria_panel:
               prevent_collapse_for_list:
-              show_column_comments:
+              hide_field_names_with_comments:
+              show_column_comments: # true or array
+                - schema.table
+                - schema.other_table
               corresponding_data_dic:
               view_as:
               search_button_label:

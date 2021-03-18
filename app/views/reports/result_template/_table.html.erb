@@ -88,7 +88,7 @@
             end
         %>
           <th title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="<%=col%>" class="table-header <%= col_classes[@results.fields[i]] %> <%=comment.present? ? 'has-comment' : 'no-comment' %>">
-            <p class="table-header-col-type"><%=view_options.humanize_column_names ? col.humanize : col%></p>
+            <% unless view_options.hide_field_names_with_comments && comment %><p class="table-header-col-type"><%=view_options.humanize_column_names ? col.humanize : col%></p><% end %>
             <% unless num_tables == 1 %>
             <% unless view_options.hide_table_names %>
             <p class="small report-table-name" title="<%=result_tables[i] %>"><%=result_tables[i] %></p>
