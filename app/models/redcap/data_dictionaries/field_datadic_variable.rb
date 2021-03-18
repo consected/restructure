@@ -79,6 +79,7 @@ module Redcap
           db_or_fs: db_or_fs,
           schema_or_path: schema_or_path,
           table_or_file: table_or_file,
+          storage_varname: name,
           position: position,
           section_id: id_from_name(section),
           sub_section_id: id_from_name(sub_section),
@@ -218,6 +219,7 @@ module Redcap
       def checkbox_choice_overrides(new_variable_name, equivalent_to_variable)
         {
           variable_name: new_variable_name,
+          storage_varname: new_variable_name,
           equivalent_to_id: equivalent_to_variable&.id,
           variable_type: FieldType::FieldToVariableTypes[:checkbox_choice],
           presentation_type: FieldType.presentation_type_for(field_type.name, 'choice')

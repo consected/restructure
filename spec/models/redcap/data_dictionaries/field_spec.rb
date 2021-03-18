@@ -33,6 +33,7 @@ RSpec.describe Redcap::DataDictionaries::Field, type: :model do
     expect(v).not_to be_nil
 
     expect(v.variable_name).to eq 'dob'
+    expect(v.storage_varname).to eq 'dob'
     expect(v.variable_type).to eq 'date'
     expect(v.presentation_type).to eq 'text [date_mdy]'
     expect(v.position).to eq 1
