@@ -23,7 +23,7 @@
         test_assoc_ids = nil if test_assoc_ids == p.to_s
         test_assoc = nil if test_assoc_ids == test_assoc || test_assoc == p.to_s
 
-        p_type = list_item.class.columns_hash[p.to_s].type
+        p_type = list_item.class.columns_hash[p.to_s]&.type
         list_val = list_item.send(p)
     %>
 
