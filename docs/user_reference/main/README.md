@@ -4,7 +4,7 @@
 
 The Study app provides a user interface that is easy to use without specific training. The approach is to present a complete view of the large number of records and activities related to a participant in a compact way.
 
-The main components of the user interface are:
+The common components of the user interface are:
 
 - [Login](login)
 - Search and Work Queues
@@ -13,6 +13,8 @@ The main components of the user interface are:
 - Emails and SMS notifications
 - Change Password
 - Logout
+
+Additional information for your current app: [{{current_user_app_type_label}}](/help/app_reference/{{current_user_app_type_name::lowercase::id_underscore}}/0_introduction)
 
 ## User Profiles
 
