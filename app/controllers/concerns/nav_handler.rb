@@ -60,16 +60,17 @@ module NavHandler
     setup_admin_sub_nav(admin_sub)
     setup_user_sub_nav(user_sub)
 
+    @secondary_navs << {
+      label: '<span class="glyphicon glyphicon-question-sign" title="help"></span>',
+      url: '/help?display_as=embedded',
+      extras: {
+        'data-remote': 'true', 'data-toggle': 'collapse', 'data-target': '#help-sidebar'
+      }
+    }
+
     return unless current_user || current_admin
 
     unless admin_sub.empty?
-      @secondary_navs << {
-        label: '<span class="glyphicon glyphicon-question-sign" title="help"></span>',
-        url: '/help?display_as=embedded',
-        extras: {
-          'data-remote': 'true', 'data-toggle': 'collapse', 'data-target': '#help-sidebar'
-        }
-      }
 
       @secondary_navs << {
         label: '<span class="glyphicon glyphicon-wrench" title="administrator"></span>',

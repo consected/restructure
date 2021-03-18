@@ -205,6 +205,7 @@ module Formatter
 
       cu = item.current_user if item.respond_to?(:current_user)
       cu ||= master.current_user if master
+      cu ||= item if item.is_a? User
       if cu
         data[:current_user_instance] ||= cu
         data[:current_user] ||= cu.attributes.dup
@@ -212,6 +213,9 @@ module Formatter
         data[:user_email] ||= cu.email
         data[:current_user_preference] ||= cu.user_preference.attributes.dup
         data[:current_user_contact_info] = cu.contact_info&.attributes&.dup || Users::ContactInfo.new.attributes
+        data[:current_user_app_type_id] = cu.app_type_id
+        data[:current_user_app_type_name] = cu.app_type&.name
+        data[:current_user_app_type_label] = cu.app_type&.label
       end
 
       data

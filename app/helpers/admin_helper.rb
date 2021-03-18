@@ -100,8 +100,8 @@ module AdminHelper
         '',
         help_page_path(
           library: :admin_reference,
-          subsection: help_subsection,
           section: help_section,
+          subsection: help_subsection,
           display_as: :embedded
         ),
         class: 'glyphicon glyphicon-question-sign small admin-help-icon',
@@ -116,33 +116,5 @@ module AdminHelper
       res += hidden_field_tag "filter[#{filter.first}]", filter.last
     end
     res.html_safe
-  end
-
-  def help_doc_path(library, section)
-    where = [
-      '',
-      'help',
-      library.to_s,
-      section.to_s
-    ]
-    File.join(*where)
-  end
-
-  def formatted_doc(library, section, subsection)
-    where = [
-      'docs',
-      library.to_s,
-      section.to_s,
-      "#{subsection}.md"
-    ]
-    path = Rails.root.join(*where)
-
-    text = if File.exist?(path)
-             File.read(path)
-           else
-             '# page not found'
-           end
-    text = Formatter::Substitution.text_to_html(text).html_safe
-    Formatter::Substitution.substitute(text).html_safe
   end
 end

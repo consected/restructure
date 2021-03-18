@@ -1,43 +1,30 @@
 # frozen_string_literal: true
 
 class HelpController < ApplicationController
-  before_action :authenticate_user_or_admin!
-
+  ValidLibraries = %w[guest_reference admin_reference user_reference app_reference].freeze
   AcceptableImageFormats = %w[png jpg jpeg svg gif].freeze
+  DocumentsDirectory = 'docs'
+  IndexSection = 'main'
+  IndexSubsection = 'README'
+  ImagesSubdirectory = 'images'
 
+  helper_method :library, :section, :subsection
+
+  #
+  # Show the default help page for the current authentication or guest
   def index
-    return not_authorized unless current_user || current_admin
-
-    @library = if current_admin
-                 :admin_reference
-               elsif current_user
-                 :user_reference
-               else
-                 :guest_reference
-               end
-
-    @section = 'main'
-    @subsection = 'README'
-
-    redirect_to help_page_path(library: @library,
-                               section: @section,
-                               subsection: @subsection,
+    redirect_to help_page_path(library: library,
+                               section: IndexSection,
+                               subsection: IndexSubsection,
                                display_as: display_as)
   end
 
+  #
   # Show the requested help page
   def show
-    @library ||= params[:library]
-    @section ||= params[:section]
-    @subsection ||= params[:subsection] || params[:id]
+    redirect_to help_index_path if library.blank? || section.blank? || subsection.blank?
 
-    redirect_to '/help/' if @library.blank? || @section.blank? || @subsection.blank?
-
-    @library = clean_path @library
-    @section = clean_path @section
-    @subsection = clean_path @subsection
-
-    if display_as == 'embedded'
+    if display_embedded?
       render partial: 'help/show_embedded'
     else
       render 'help/show'
@@ -46,33 +33,73 @@ class HelpController < ApplicationController
 
   #
   # Handle image requests.
-  # @return [<Type>] <description>
   def image
-    @library ||= params[:library]
-    @section ||= params[:section]
-    @image_name ||= params[:image_name] || params[:id]
-    @image_format ||= params[:format]
+    return not_found if library.blank? || section.blank?
 
-    unless @image_format&.in? AcceptableImageFormats
-      raise FphsException, "unacceptable image format requested: #{@image_format}"
-    end
-
-    return not_found if @library.blank? | @section.blank?
-
-    @library = clean_path @library
-    @section = clean_path @section
-    @image_name = clean_path @image_name
-
-    @image_file_name = "#{@image_name}.#{@image_format}"
-
-    where = ['docs', @library, @section, 'images', @image_file_name]
+    where = [DocumentsDirectory, library, section, ImagesSubdirectory, image_file_name]
     path = Rails.root.join(*where)
     return not_found unless File.exist?(path)
 
-    send_file path, filename: @image_file_name
+    send_file path, filename: image_file_name
   end
 
   private
+
+  #
+  # Return a library name, overriding with the suggested library
+  # if the user is authenticated as an admin or user.
+  # If a guest (not authenticated), the suggested library if set, must be guest_reference
+  # @param [Symbol | String] suggested
+  # @return [String]
+  def library
+    suggested = params[:library]&.to_s
+    res = if current_admin
+            clean_path(suggested || 'admin_reference')
+          elsif current_user
+            clean_path(suggested || 'user_reference')
+          else
+            not_authorized if suggested.present? && suggested != 'guest_reference'
+
+            'guest_reference'
+          end
+
+    raise FphsException, "invalid help library: #{res}" unless res&.in? ValidLibraries
+
+    res
+  end
+
+  #
+  # Return the cleaned section name from the :section param
+  # @return [String]
+  def section
+    clean_path(params[:section])
+  end
+
+  #
+  # Return the cleaned subsection name from the :subsection param
+  # or the :id param
+  # @return [String]
+  def subsection
+    clean_path(params[:subsection] || params[:id])
+  end
+
+  #
+  # The file name to use to retrieve the image.
+  # The requested image is based on params:
+  # <:image_name|:id>.<:format>
+  # @return [<Type>] <description>
+  def image_file_name
+    image_format ||= params[:format]
+    image_name = clean_path(params[:image_name] || params[:id])
+
+    unless image_format&.in? AcceptableImageFormats
+      raise FphsException, "unacceptable image format requested: #{image_format}"
+    end
+
+    raise FphsException, 'blank image name is not allowed' if image_name.blank?
+
+    "#{image_name}.#{image_format}"
+  end
 
   #
   # Don't record this as an action in the log
@@ -92,7 +119,16 @@ class HelpController < ApplicationController
     component.to_s.gsub(/[^a-zA-Z0-9\-_]/, '_')
   end
 
+  #
+  # How should the requested page be rendered? The only option is 'embedded'
+  # in the :display_as param
   def display_as
     params[:display_as]
+  end
+
+  #
+  # Was the requested page to be displayed embedded, or as a full page?
+  def display_embedded?
+    display_as == 'embedded'
   end
 end

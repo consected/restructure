@@ -1,6 +1,18 @@
 <div class="panel panel-primary">
   <div class="panel-body">
-    <h2 >Admin Actions</h2>
+    <h2 >Admin Actions
+    <%= link_to(
+          '',
+          help_page_path(
+            library: :admin_reference,
+            section: 'main',
+            subsection: 'README',
+            display_as: :embedded
+          ),
+          class: 'glyphicon glyphicon-question-sign small admin-help-icon',
+          data: { remote: true, toggle: 'collapse', target: '#help-sidebar' }
+        ) %>
+    </h2>
     <div class="row">
       <div class="col-sm-4">
         <h3>Manage Selections</h3>

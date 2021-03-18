@@ -14,6 +14,27 @@ div.help-view-doc,
 
   img {
     max-width: 100%;
+
+    min-width: 200px;
+    min-height: 50px;
+    opacity: 0.5;
+    background-color: silver;
+    animation: working 1s ease-in-out infinite;
+
+    &.broken-image {
+      animation: none;
+    }
+    &.loaded-image {
+      opacity: 1;
+      transition: ease-in 600ms;
+      animation: none;
+      min-width: 0;
+      min-height: 0;
+      padding: 0.3em;
+      background: none;
+      border: 1px solid rgb(232, 232, 232);
+      border-radius: 3px;
+    }
   }
 
   hr {
@@ -40,7 +61,7 @@ div.help-view-doc,
   h3,
   h4 {
     margin-bottom: 0.67em;
-    margin-top: 0.34em;
+    margin-top: 1em;
   }
 
   .list-group-item.is-heading.object-results-header {
