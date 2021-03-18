@@ -153,7 +153,7 @@ module Formatter
         data = item.dup.symbolize_keys
         master = item[:master]
         master = Master.find(item[:master_id]) if item[:master_id] && !master
-      else
+      elsif item
         data = item.attributes.dup
         data[:original_item] = item
         data[:alt_item] = alt_item
@@ -164,6 +164,8 @@ module Formatter
         elsif item.is_a? Master
           master = item
         end
+      else
+        data = {}
       end
 
       # Common constants tags
