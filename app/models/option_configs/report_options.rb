@@ -10,7 +10,9 @@ module OptionConfigs
     include OptionsHandler
     include OptionConfigs::AttrDefs::Report
 
-    configure :view_options, with: %i[hide_table_names humanize_column_names
+    configure :view_options, with: %i[hide_table_names
+                                      hide_field_names_with_comments
+                                      humanize_column_names
                                       hide_result_count hide_export_buttons
                                       hide_criteria_panel prevent_collapse_for_list
                                       show_column_comments corresponding_data_dic

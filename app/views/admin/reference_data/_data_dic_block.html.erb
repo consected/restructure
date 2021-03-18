@@ -1,6 +1,6 @@
 <div>
-<div class="ref-data-data-dic" data-result="data-dic-block">
-      <%
+  <div class="ref-data-data-dic" data-result="data-dic-block">
+    <%
         @no_create = true
         @no_masters = true
         @embedded_report = true
@@ -12,7 +12,7 @@
         @reports = @reports.reject { |r| r.report_options.list_options&.hide_in_list }
       
       %>
-      <%= render partial: 'reports/index', 
+    <%= render partial: 'reports/index', 
                   locals: {
                     simple_view: true,
                     link_extras: {
@@ -27,5 +27,5 @@
                     }
                   }
       %>
-</div>
+  </div>
 </div>

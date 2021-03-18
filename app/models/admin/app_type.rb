@@ -79,6 +79,11 @@ class Admin::AppType < Admin::AdminBase
     user
   end
 
+  def active_on_server?
+    self.class.active_app_types.include?(self) &&
+      Admin::MigrationGenerator.current_search_paths.include?(default_schema_name)
+  end
+
   def valid_user_access_controls
     user_access_controls.valid_resources.reorder('').order(id: :asc)
   end

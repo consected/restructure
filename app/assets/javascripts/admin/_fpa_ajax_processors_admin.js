@@ -1,4 +1,5 @@
 _fpa.postprocessors_admin = {
+
   admin_edit_form: function (block, data) {
     var _admin = this;
     _fpa.utils.scrollTo(block, 200, -50);

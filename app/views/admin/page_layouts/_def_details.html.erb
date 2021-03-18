@@ -1,7 +1,10 @@
 <div class="al-details-section">
-  <label>Panel</label>
   <p class="al-item-type">
-  <%= object_instance.panel_label %>
+    <label>label</label> <%= object_instance.panel_label %>
   </p>
-
+  <% if object_instance.standalone? %>
+    <p class="al-item-type">
+      <label>view URL</label> <%= link_to page_layout_path(object_instance.panel_name), page_layout_path(object_instance.panel_name), target: '_blank'  %>
+    </p>
+  <% end %>
 </div>

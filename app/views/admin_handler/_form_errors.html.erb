@@ -1,4 +1,6 @@
-<p class="admin-form-title"><%= @copy_with ? "Copy Entry" : object_instance.id ? "Edit Entry" : "New Entry" %></p>
+<p class="admin-form-title">
+  <%= @copy_with ? "Copy Entry" : object_instance.id ? "Edit Entry" : "New Entry" %>
+</p>
 <% if object_instance.errors.any?
     shown = []
     object_instance.errors.full_messages.each do |message|
@@ -6,11 +8,10 @@
       unless shown.include? message
         shown << message
     %>
-
-      <div class="alert alert-warning" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <%= message.split("\n").join('<br/>').html_safe %>
-      </div>
-    <% end
+<div class="alert alert-warning" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  <%= message.split("\n").join('<br/>').html_safe %>
+</div>
+<% end
     end
   end %>

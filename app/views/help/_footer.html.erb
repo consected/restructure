@@ -1,0 +1,8 @@
+<div class="help-footer">
+  <%= link_to 'top', '#help-doc-content', data: {toggle: 'scrollto-target'}, class: 'help-scrollto-top' %>
+  <% if  @section = 'main' || @subsection.in?( %w[README 0_introduction]) %>
+    <%= link_to 'library home', '/help' %>
+  <% else %>
+    <%= link_to 'back to main section', '0_introduction' %>
+  <% end %>
+</div>

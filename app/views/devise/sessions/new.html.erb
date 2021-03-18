@@ -30,7 +30,13 @@
     </div>
 
   <% end %>
-  <p class="forgot-password"><%=link_to "Forgotten password or trouble logging in?", Settings::LoginIssuesUrl, target: "_blank" %></p>
+  <p class="forgot-password">
+    <%=link_to "Forgotten password or trouble logging in?", '/help/guest_reference/main/login_issues?display_as=embedded',
+      data: {
+        'remote': 'true', 'toggle': 'collapse', 'target': '#help-sidebar'
+      }
+    %>
+  </p>
   <p><br/></p>
   <p class="version-info">Version <%=Application.version%></p>
 

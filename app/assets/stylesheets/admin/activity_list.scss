@@ -2,7 +2,10 @@
   padding: 0 10px;
 }
 
-ul.activity-list {
+ul.activity-list,
+ul.admin-tag-list {
+  padding-left: 0;
+
   li {
     padding: 3px 5px;
     border: 1px solid silver;

@@ -45,6 +45,8 @@
 }
 
 ul.admin-options-tag-list {
+  padding-left: 0;
+
   li {
     padding: 3px 5px;
     border: 1px solid silver;
@@ -86,4 +88,23 @@ ul.admin-options-tag-list {
 
 .admin-form-block-outer {
   display: flex;
+}
+
+.admin-how-to {
+  margin-bottom: 30px;
+}
+
+.md-formatted-block {
+  h1,
+  h2,
+  h3,
+  h4 {
+    margin-top: 30px;
+  }
+}
+
+.admin-details-section {
+  .toc {
+    margin-bottom: 30px;
+  }
 }
