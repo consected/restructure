@@ -126,6 +126,8 @@ RSpec.describe ExternalIdentifier, type: :model do
     res.save
     expect(res.id).not_to be nil
 
+    expect(@user.has_access_to?(:access, :table, c.resource_name))
+
     # Attempt to find the master
     found = Master.find_with_alternative_id(vals[:external_id_attribute], eid, @user)
     expect(found).to eq m

@@ -47,7 +47,6 @@ module Redcap
 
     validates :study, presence: true, unless: -> { disabled? }
     validates :name, presence: true, unless: -> { disabled? }
-    validates :api_key, presence: true, unless: -> { disabled? }
     validates :server_url, presence: true, unless: -> { disabled? }
 
     validate :name, -> { already_taken(:name, :study) ? errors.add(:name, 'already exists in this study') : true }
@@ -58,10 +57,23 @@ module Redcap
     # After save, capture the project info from REDCap
     # except if the record has not saved or the current_project_info has
     # just changed, to avoid never ending callbacks
-    after_save :capture_current_project_info, unless: -> { captured_project_info_changed? || !saved_changes? }
-    after_save :capture_data_dictionary, if: -> { saved_changes? || force_refresh }
+    after_save :capture_current_project_info, unless: lambda {
+                                                        captured_project_info_changed? ||
+                                                          !saved_changes? ||
+                                                          api_key.blank?
+                                                      }
+
+    after_save :capture_data_dictionary, if: lambda {
+                                               api_key.present? &&
+                                                 (saved_changes? || force_refresh)
+                                             }
+
     after_save :setup_dynamic_model,
-               if: -> { saved_change_to_id? || saved_change_to_dynamic_model_table? || force_refresh }
+               if: lambda {
+                     api_key.present? &&
+                       (saved_change_to_id? || saved_change_to_dynamic_model_table? || force_refresh)
+                   }
+
     after_save :reset_force_refresh
 
     attr_accessor :force_refresh
@@ -69,6 +81,8 @@ module Redcap
 
     # Override the api_key accessor to return a decrypted value
     def api_key
+      return unless attributes['api_key']
+
       ::Utilities::Encryption.decrypt(attributes['api_key'])
     end
 

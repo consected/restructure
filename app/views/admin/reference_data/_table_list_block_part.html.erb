@@ -1,6 +1,5 @@
 <div>
   <div class="table-list-block" style="text-align: left" data-result="table-list-block">
-
     <div class="row">
       <div class="form-group col-md-8">
         <%= select_tag 'primary_tables_schema_select', options_for_select(Admin::MigrationGenerator.current_search_paths), prompt: '-- select schema --', class: 'form-control input-sm ff'  %>
@@ -13,7 +12,7 @@
     </div>
     <ul id="table-list" style="overflow: auto; background-color: white; height: 0;">
       <%  
-        can_view_table_data = current_admin || current_user.can?(:view_data_reference)
+        can_view_table_data = current_admin || current_user.has_access_to?( :read, :report, :reference_data__table_data)
         table_info = Admin::MigrationGenerator.tables_and_views
         cn = Admin::MigrationGenerator.connection
         column_comments = Admin::MigrationGenerator.column_comments
@@ -32,9 +31,9 @@
                                           schema_name: schema_name, 
                                           search_attrs: { no_run: true }
                                         ), 
-                                        target: '_blank', class: 'glyphicon glyphicon-search' if @can_view_table_data %>
+                                        target: '_blank', class: 'glyphicon glyphicon-search' if can_view_table_data %>
         <% if table_comment %>
-        <div class="table-comment help-block"><%= table_comment %></div>
+          <div class="table-comment help-block"><%= table_comment %></div>
         <% end %>
       </li>
       <ul id="tblock-<%=schema_name%>-<%=table_name%>" class="collapse ref-tblock">
@@ -49,16 +48,15 @@
         <li id="table-<%= column_name %>" class="ref-table-col-item">
           <span><%= column_name %></span> <span class="ref-table-column-name"><%=c.type.to_s%></span>
           <% if column_fk %>
-          <span class="column-fk"><i class="glyphicon glyphicon-link"></i><%= column_fk %></span>
+            <span class="column-fk"><i class="glyphicon glyphicon-link"></i><%= column_fk %></span>
           <% end %>
           <% if column_comment %>
-          <div class="column-comment help-block"><%= column_comment %></div>
+            <div class="column-comment help-block"><%= column_comment %></div>
           <% end %>
         </li>
-        <% end %>
-      </ul>
-
-      <%  end %>
+      <% end %>
     </ul>
-  </div>
+  <%  end %>
+</ul>
+</div>
 </div>

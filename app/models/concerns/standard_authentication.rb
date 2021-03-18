@@ -97,6 +97,15 @@ module StandardAuthentication
     end
   end
 
+  def expires_in
+    return 0 unless password_updated_at
+
+    [
+      ((password_updated_at - self.class.expire_password_after.days.ago) / 1.day).ceil,
+      0
+    ].max
+  end
+
   def two_factor_auth_disabled
     self.class.two_factor_auth_disabled
   end

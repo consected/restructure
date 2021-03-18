@@ -1,32 +1,56 @@
 <% if object_instance.captured_metadata.present?%>
   <div>
-    <label>Number of fields (without choices)</label>
-    <%= object_instance.field_count %>
+    <p>
+      <label>Number of fields (without choices)</label>
+      <%= object_instance.field_count %>
+    </p>
+    <p>
+      <label>Number of fields (with choices) </label>
+      <%= object_instance.all_retrievable_fields.length %>
+    </p>
+    <p>
+      <label>Data dictionary </label>
+      <%= link_to 'view', 
+                report_path(
+                  'reference_data__study_data_dictionary', 
+                  search_attrs: {
+                    data_dictionary: object_instance.id,
+                    no_run: 'true'
+                  }
+                ), 
+                target: '_blank' %>
+    </p>
+    <p>
+      <label>Data dictionary choices lookup </label>
+      <%= link_to 'view', 
+                report_path(
+                  'reference_data__data_dictionary_choices', 
+                  search_attrs: {
+                    data_dictionary: object_instance.id,
+                    no_run: 'true'
+                  }
+                ), 
+                target: '_blank' %>
+    </p>
   </div>
-
   <div>
-    <label>Number of fields (with choices) </label>
-    <%= object_instance.all_retrievable_fields.length %>
-  </div>
-
-  <div>
-  <label>Forms</label>
-  <ul class="admin-options-tag-list">
-  <% object_instance.form_names.each do |fn| %>
-    <li><%= fn %></li>
-  <% end %>
-  </ul>
+    <label>Forms</label>
+    <ul class="admin-options-tag-list">
+      <% object_instance.form_names.each do |fn| %>
+        <li><%= fn %></li>
+      <% end %>
+    </ul>
   </div>
   <label>Fields</label>
   <ul>
-  <% forms = object_instance.forms %>
-  <% forms.each do |fn, form| %>
-    <li class="h4"><%= fn %></li>
-    <ul class="admin-options-tag-list">
-    <% form.field_names.each do |f| %>
-      <li><%= f %></li>
-    <% end%>  
-    </ul>
-  <% end %>
+    <% forms = object_instance.forms %>
+    <% forms.each do |fn, form| %>
+      <li class="h4"><%= fn %></li>
+      <ul class="admin-options-tag-list">
+        <% form.field_names.sort.each do |f| %>
+          <li><%= f %></li>
+        <% end%>
+      </ul>
+    <% end %>
   </ul>
 <% end%>

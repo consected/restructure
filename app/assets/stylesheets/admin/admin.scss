@@ -25,3 +25,27 @@ a.collapsed > .caret {
 .form-group[data-out-attr-name="notes"] {
   vertical-align: top;
 }
+
+.admin-title {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.admin-help-icon {
+  float: right;
+}
+
+.password-expired {
+  color: gray;
+}
+
+.admin-field- {
+  min-width: 60px;
+}
+
+.admin-result-index {
+  td,
+  th {
+    min-width: 60px;
+  }
+}

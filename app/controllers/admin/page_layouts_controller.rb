@@ -18,8 +18,6 @@ class Admin::PageLayoutsController < AdminController
     }
   end
 
-  private
-
   def permitted_params
     %i[app_type_id layout_name panel_name panel_label panel_position description options disabled]
   end

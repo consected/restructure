@@ -45,7 +45,7 @@ module AdminHelper
 
     unless title == 'all' || title.to_s.include?('__') || @shown_filter_break
       @shown_filter_break = true
-      res = '<p>&nbsp;</p>'.html_safe
+      res = '<p class="filter-small-gap">&nbsp;</p>'.html_safe
     end
 
     if val.present? || title == 'all'
@@ -92,6 +92,22 @@ module AdminHelper
                   locals: { fo: fo, filters_on_multiple: filters_on_multiple, these_filters: these_filters })
 
     res.html_safe
+  end
+
+  def show_admin_heading
+    "<h1 class=\"admin-title\">#{title}" \
+      "#{ link_to(
+        '',
+        help_page_path(
+          library: :admin_reference,
+          section: help_section,
+          subsection: help_subsection,
+          display_as: :embedded
+        ),
+        class: 'glyphicon glyphicon-question-sign small admin-help-icon',
+        data: { remote: true, toggle: 'collapse', target: '#help-sidebar' }
+      ) }" \
+    '</h1>'.html_safe
   end
 
   def hidden_filter_fields

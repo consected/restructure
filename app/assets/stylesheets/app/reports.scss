@@ -132,6 +132,20 @@ p.small.report-table-name {
   box-shadow: 0 5px 4px 2px #e4e4e4;
 }
 
+.search_report {
+  input.form-control {
+    height: 29px;
+    padding: 4px;
+  }
+
+  .chosen-container-multi .chosen-choices {
+    border-radius: 4px;
+    border: 1px solid rgb(204, 204, 204);
+    box-shadow: none;
+    background: white;
+  }
+}
+
 td[data-col-type^="perform action:"],
 td[data-col-type^="select items:"],
 td[data-col-type^="search_reports_"] {

@@ -19,7 +19,6 @@ class ReportsController < UserBaseController
 
   # List of available reports
   def index
-    @no_create = true
     @no_masters = true
 
     pm = @all_reports_for_user = Report.enabled.for_user(current_user)
@@ -205,6 +204,10 @@ class ReportsController < UserBaseController
   end
 
   protected
+
+  def no_create
+    true
+  end
 
   def set_master_and_user
     return unless @report_item

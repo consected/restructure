@@ -1,56 +1,48 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">
-  <h1><%=human_name%></h1>
-
-  <p>
-    <%= show_filters %>
-  </p>
-
-  <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below">
-    <% if @show_again_on_save && @updated_with %>
-      <%= render partial: "#{view_folder}/form"%>
-    <% end %>
-  </div>
-
-  <table class="table tablesorter admin-list">
-    <thead>
-      <tr>
-        <th class="no-sort"></th>
-        <%
+    <%= show_admin_heading %>
+    <p>
+      <%= show_filters %>
+    </p>
+    <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below">
+      <% if @show_again_on_save && @updated_with %>
+        <%= render partial: "#{view_folder}/form"%>
+      <% end %>
+    </div>
+    <table class="table tablesorter admin-list">
+      <thead>
+        <tr>
+          <th class="no-sort"></th>
+          <%
           index_params.each do |p|
             is_options_field = p.to_s.end_with?('options') || p.to_s.end_with?('template')
           %>
           <% unless is_options_field %>
-          <th><%= p.to_s.humanize %></th>
+            <th><%= p.to_s.humanize %></th>
           <% end %>
         <% end %>
-        <% if admin_links.present? %><th>admin links</th><% end %>
-
+        <% if admin_links.present? %>
+          <th>admin links</th>
+        <% end %>
       </tr>
     </thead>
-      <%= render partial: view_path('item'), locals: {list_item: primary_model.new} %>
-      <% objects_instance.each do |list_item| %>
-        <%= render partial: view_path('item'), locals: {list_item: list_item} %>
-      <% end %>
+    <%= render partial: view_path('item'), locals: {list_item: primary_model.new} %>
+    <% objects_instance.each do |list_item| %>
+      <%= render partial: view_path('item'), locals: {list_item: list_item} %>
+    <% end %>
   </table>
-
   <div class="container">
     <%= @help_description %>
   </div>
-
   <% if @extra_part %>
-  <%=  render partial: @extra_part  %>
+    <%=  render partial: @extra_part  %>
   <% end %>
-
   <%=  render partial: 'admin_handler/index_actions'  %>
-  </div>
 </div>
-
+</div>
 <script>
-
-      $('.expandable').not('.attached-exp').on('click', function(){
-          if($(this).attr('disabled')) return;
-          _fpa.form_utils.toggle_expandable($(this));
-      }).addClass('attached-exp');
-
+  $('.expandable').not('.attached-exp').on('click', function(){
+      if($(this).attr('disabled')) return;
+      _fpa.form_utils.toggle_expandable($(this));
+  }).addClass('attached-exp');
 </script>

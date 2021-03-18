@@ -9,6 +9,7 @@ module Formatter
       lowercase
       underscore
       hyphenate
+      id_underscore
       initial
       first
       age
@@ -65,6 +66,10 @@ module Formatter
 
     def self.hyphenate(res, _orig_val)
       res.hyphenate
+    end
+
+    def self.id_underscore(res, _orig_val)
+      res.id_underscore
     end
 
     def self.initial(res, _orig_val)

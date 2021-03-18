@@ -1,56 +1,49 @@
 <div class="data-results">
   <div data-result="admin-edit-form-"  class="admin-edit-form">
-  <div class="admin-form-block-outer">
-<%= form_for([object_instance], class: "inline-form", remote: true) do |f| %>
-  <%= render partial: 'admin_handler/form_errors' %>
-  <div class="form-group">
-    <%= f.label :app_type_id %>
-    <%= f.select :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item), {}, extra_field_attributes[:app_type_id]||{} %>
-  </div>
-
-  <div class="form-group">
-    <%= f.label 'use as' %>
-    <%= f.select :layout_name, [['Master Panel', 'master'], ['Dashboard / Page', 'standalone'], ['Panel View', 'view'], ['Navigation', 'nav']] %>
-  </div>
-  <div class="form-group">
-    <%= f.label :panel_name %>
-    <%= f.text_field :panel_name %>
-  </div>
-  <div class="form-group">
-    <%= f.label :panel_label %>
-    <%= f.text_field :panel_label %>
-  </div>
-  <div class="form-group">
-    <%= f.label :panel_position %>
-    <%= f.number_field :panel_position %>
-  </div>
-  <div class="form-group">
-    <%= f.label :disable %>
-    <%= f.check_box :disabled %>
-  </div>
-  <div>
-    <%= f.label :description %>
-    <%= f.text_area :description,  style: "width: 99%; height: 70px;" %>     
-  </div>
-  
-  <div class="admin-options-editor-block">
-    <%= f.text_area :options, class: "code-editor code-editor-yaml", data: {code_editor_type: 'yaml'} %>
-  </div>
-  
-  <div class="admin-buttons-block" >
-      <%= hidden_filter_fields %>
-      <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
-  </div>
-
-
-<% end %>
-  <div class="admin-main-options-block">
-
-    <div class="admin-options-ref-block">
-      <%= render partial: 'admin/page_layouts/form_info', locals: {object_instance: object_instance} %>
-    </div>
-    
-  </div>
+    <div class="admin-form-block-outer">
+      <%= form_for(object_instance, class: "inline-form", remote: true) do |f| %>
+        <%= render partial: 'admin_handler/form_errors' %>
+        <div class="form-group">
+          <%= f.label :app_type_id %>
+          <%= f.select :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item), {}, extra_field_attributes[:app_type_id]||{} %>
+        </div>
+        <div class="form-group">
+          <%= f.label 'use as' %>
+          <%= f.select :layout_name, [['Master Panel', 'master'], ['Dashboard / Page', 'standalone'], ['Panel View', 'view'], ['Navigation', 'nav']] %>
+        </div>
+        <div class="form-group">
+          <%= f.label :panel_name %>
+          <%= f.text_field :panel_name %>
+        </div>
+        <div class="form-group">
+          <%= f.label :panel_label %>
+          <%= f.text_field :panel_label %>
+        </div>
+        <div class="form-group">
+          <%= f.label :panel_position %>
+          <%= f.number_field :panel_position %>
+        </div>
+        <div class="form-group">
+          <%= f.label :disable %>
+          <%= f.check_box :disabled %>
+        </div>
+        <div>
+          <%= f.label :description %>
+          <%= f.text_area :description,  style: "width: 99%; height: 70px;" %>
+        </div>
+        <div class="admin-options-editor-block">
+          <%= f.text_area :options, class: "code-editor code-editor-yaml", data: {code_editor_type: 'yaml'} %>
+        </div>
+        <div class="admin-buttons-block" >
+          <%= hidden_filter_fields %>
+          <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
+        </div>
+      <% end %>
+      <div class="admin-main-options-block">
+        <div class="admin-options-ref-block">
+          <%= render partial: 'admin/page_layouts/form_info', locals: {object_instance: object_instance} %>
+        </div>
+      </div>
     </div>
   </div>
 </div>
