@@ -21,7 +21,10 @@
 
     <%
     showdyncats = (DynamicModel.categories - ['details']).length > 1
-    showdyncats &&= (DynamicModel.categories - ['details']).map{|cat| DynamicModel.active_model_configurations.where(category: cat).all.select {|d| @true_views.include? d.model_association_name }.length }.sum > 0
+    showdyncats &&= (DynamicModel.categories - ['details'])
+                      .map{|cat| DynamicModel.active_model_configurations.where(category: cat)
+                                  .all
+                                  .select {|d| true_master_viewables.include? d.model_association_name }.length }.sum > 0
     if showdyncats
     %>
     <li role="presentation" class="dropdown">
@@ -29,7 +32,7 @@
       <ul class="dropdown-menu" aria-labelledby="dm-tag-drop" id="dm-tag-drop-contents">
     <%end%>
     <% (DynamicModel.categories - ['details']).each do |cat| %>
-      <% if DynamicModel.active_model_configurations.where(category: cat).all.select {|d| @true_views.include? d.model_association_name }.length  > 0 %>
+      <% if DynamicModel.active_model_configurations.where(category: cat).all.select {|d| true_master_viewables.include? d.model_association_name }.length  > 0 %>
     <li role="presentation" class="<%= cat.underscore.in?(default_panels) ? 'on-open-click' : '' %>">
       <a href="#/" data-toggle="collapse" data-panel-tab="<%=cat.underscore%>" data-target="#<%=cat%>-{{id}}" class="collapsed scroll-to-expanded "><%= cat.underscore.humanize.downcase %></a>
     </li>
@@ -47,7 +50,7 @@
     <% end %>
 
     <% ActivityLog.enabled.each do |a| %>
-      <% if view?[a.full_item_types_name.to_sym]
+      <% if master_viewables[a.full_item_types_name.to_sym]
         initial_show = (default_panels.length == 0 && app_config_text(:show_activity_log_panel) == a.item_type_name) || a.item_type_name.in?(default_panels)
       %>
       <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
