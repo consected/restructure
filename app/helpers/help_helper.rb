@@ -15,7 +15,7 @@ module HelpHelper
       "#{subsection}.md"
     ]
 
-    raise FphsException, "invalid help library: #{library}" unless library&.in? HelpController::ValidLibraries
+    raise FphsException, "invalid help library: #{library}" unless library&.to_s.in? HelpController::ValidLibraries
 
     path = Rails.root.join(*where)
     raise FphsException, 'invalid request' if path.to_s.include?('..')

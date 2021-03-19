@@ -105,7 +105,10 @@ module AdminHelper
           display_as: :embedded
         ),
         class: 'glyphicon glyphicon-question-sign small admin-help-icon',
-        data: { remote: true, toggle: 'collapse', target: '#help-sidebar' }
+        data: { remote: true,
+                toggle: 'collapse',
+                target: '#help-sidebar',
+                'working-target': '#help-sidebar-body' }
       ) }" \
     '</h1>'.html_safe
   end

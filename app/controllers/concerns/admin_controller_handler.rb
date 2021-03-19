@@ -302,6 +302,6 @@ module AdminControllerHandler
   end
 
   def help_subsection
-    '0_introduction'
+    HelpController::IntroductionDocument
   end
 end
