@@ -17,6 +17,7 @@ _fpa.postprocessors_help = {
       if (href.indexOf('/help') == 0) {
         $(this).attr('data-remote', 'true')
         $(this).attr('href', href + '?display_as=embedded')
+        $(this).attr('data-working-target', '#help-sidebar-body')
       }
       else {
         $(this).attr('target', '_blank');
@@ -54,6 +55,8 @@ _fpa.postprocessors_help = {
       $(target).removeClass('expanded')
     });
 
+    var c = $('#help-doc-content')
+    _fpa.utils.scrollTo(c, 0, -60, block);
   }
 
 };
