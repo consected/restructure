@@ -1,5 +1,5 @@
 require 'rails_helper'
-require './app-scripts/supporting/admin_setup.rb'
+require './app-scripts/supporting/admin_setup'
 
 describe Admin do
   include ModelSupport
@@ -19,8 +19,9 @@ describe Admin do
     expect(@admin.save).to be true
   end
 
-  it 'prevents email address change by any admin' do
+  it 'prevents own email address change by admin' do
     @admin.email = 'testadmin-change@testing.com'
+    @admin.current_admin = @admin
     expect(@admin.save).to be false
   end
 
@@ -34,8 +35,11 @@ describe Admin do
   it 'prevent admin changing disabled flag outside of setup, except to disable' do
     ENV['FPHS_ADMIN_SETUP'] = 'no'
     expect(@admin.disabled).to eq false
+
+    # Can change nil or to false or vice versa
     @admin.disabled = nil
-    expect(@admin.save).to be false
+
+    expect(@admin.save).to be true
     @admin.disabled = true
     expect(@admin.save).to be true
     @admin.disabled = false

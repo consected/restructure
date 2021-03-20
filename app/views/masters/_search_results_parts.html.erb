@@ -44,7 +44,7 @@
   {{#if death_date}}
     <small>DOD</small> {{local_date death_date '-'}}
   {{/if}}
-  <% unless app_config_set(:hide_player_accuracy) %>
+  <% unless app_config_set(:hide_player_accuracy) || app_config_set(:hide_participant_accuracy) %>
   <span data-sub-for="master_id" data-sub-id="{{master_id}}" data-sub-item="player_info" data-template="accuracy-badge-template">
     {{>accuracy_badge player_info=this}}
   </span>
@@ -68,7 +68,7 @@
             {{#if header_title}}
               <strong class="fixed-header-title-subject-info">{{>master_header_title}}</strong>
             {{else}}
-              <% if view?[subject_data_type.to_sym] %>
+              <% if master_viewables[subject_data_type.to_sym] %>
               {{#with <%=subject_data_type%>.[0]}}
                 {{>subject_info_summary_result}}
               {{else}}
@@ -79,7 +79,7 @@
               <% end %>
           {{/if}}
           </div>
-          <% if view?[:pro_infos] %>
+          <% if master_viewables[:pro_infos] %>
           <div class="{{#if header_prefix}}col-md-8{{else}}col-md-9{{/if}} col-md-offset-1 pro-info-header">
           {{#with pro_infos.[0]}}
             {{>secondary_info_summary_result}}

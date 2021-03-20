@@ -1,0 +1,23 @@
+<% if object_instance.captured_metadata.present?%>
+  <label>Dropdown Fields</label>
+  <% forms = object_instance.forms %>
+  <div>
+  <% forms.each do |fn, form| %>
+    <h4 class="h4"><%= fn %></h5>
+    <div class="admin-options-tag-list form-inline">
+      <%
+        form.fields_of_type(:dropdown).each do |k, field| %>
+        <div>
+          <label><%=field.name%></label><p><%=field.label_plain%></p>
+        </div>
+        <div>
+          <%= select_tag :dummy, options_for_select(field.field_choices.choices(rails_format: true))%>
+        </div>
+        <div>
+          <%= render partial: 'redcap/data_dictionaries/choices_table', locals: {field: field} %>
+        </div>
+      <% end%>  
+    </div>
+  <% end %>
+  </div>
+<% end%>

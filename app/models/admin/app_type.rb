@@ -79,6 +79,11 @@ class Admin::AppType < Admin::AdminBase
     user
   end
 
+  def active_on_server?
+    self.class.active_app_types.include?(self) &&
+      Admin::MigrationGenerator.current_search_paths.include?(default_schema_name)
+  end
+
   def valid_user_access_controls
     user_access_controls.valid_resources.reorder('').order(id: :asc)
   end
@@ -292,7 +297,7 @@ class Admin::AppType < Admin::AdminBase
   end
 
   def setup_migrations
-    return true unless Rails.env.development?
+    return true unless Settings::AllowDynamicMigrations
 
     return true if self.class.active.where(default_schema_name: default_schema_name).count > 1
 

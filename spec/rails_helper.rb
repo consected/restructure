@@ -35,6 +35,11 @@ put_now 'Require rspec/rails'
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 
+put_now 'Require webmock'
+require 'webmock/rspec'
+WebMock.allow_net_connect!
+# WebMock.disable_net_connect!(allow_localhost: true)
+
 put_now 'Browser setups'
 require 'capybara/rspec'
 require 'browser_helper'
@@ -97,6 +102,11 @@ Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 put_now 'Enforce migrations'
 ActiveRecord::Migration.maintain_test_schema!
 
+sql = 'DROP SCHEMA IF EXISTS redcap_test CASCADE; CREATE SCHEMA redcap_test;'
+ActiveRecord::Base.connection.execute sql
+db_migration_dirname = Rails.root.join('spec/migrations')
+ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+
 RSpec.configure do |config|
   config.before(:suite) do
     # Do some setup that could impact all tests through the availability of master associations
@@ -105,7 +115,8 @@ RSpec.configure do |config|
     # Skip app setups with an env variable
     unless ENV['SKIP_APP_SETUP']
       put_now 'Setup apps'
-
+      sql = "SELECT pg_catalog.setval('ml_app.app_types_id_seq', (select max(id)+1 from ml_app.app_types), true);"
+      ActiveRecord::Base.connection.execute sql
       put_now 'Setup ActivityLogPlayerContactPhone'
       Seeds::ActivityLogPlayerContactPhone.setup
       put_now 'setup_al_player_contact_emails'
@@ -114,6 +125,9 @@ RSpec.configure do |config|
       SetupHelper.setup_ext_identifier
       put_now 'setup_test_app'
       SetupHelper.setup_test_app
+      put_now 'setup_ref_data_app'
+      SetupHelper.setup_ref_data_app
+
       put_now 'Handle zeus_bulk_message'
       als = ActivityLog.active.where(item_type: 'zeus_bulk_message')
       als.each do |a|

@@ -8,8 +8,13 @@ class AppControl
       FileUtils.touch Rails.root.join('app', 'models', 'dev_server.rb')
       Rails.reload! if Rails.respond_to? :reload!
     end
+    restart_delayed_job
   rescue StandardError => e
     Rails.logger.warn "Failed to restart server: #{e.inspect}"
+  end
+
+  def self.restart_delayed_job
+    `app-scripts/restart_delayed_job.sh`
   end
 
   def self.define_models

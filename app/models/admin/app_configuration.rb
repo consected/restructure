@@ -27,21 +27,49 @@ class Admin::AppConfiguration < Admin::AdminBase
   # menu research label may enter none to hide the menu (otherwise it defaults to Research)
 
   def self.configurations
-    [
-      'create master with', 'completion sub processes',
-      'default search form', 'default report tab', 'file browser default view', 'header no subject details label',
-      'header subject data type', 'header secondary data type',
-      'hide navbar search', 'hide player accuracy',
-      'hide player tabs', 'hide pro info', 'hide search form advanced', 'hide search form searchable reports',
-      'hide search form simple', 'hide tracker panel', 'heading create master record label', 'filestore directory id',
-      'logo filename', 'logo link',
-      'master header prefix', 'master header title',
-      'menu create master record label',
-      'menu research label', 'notes field caption', 'notes field format', 'open panels',
-      'prevent reload master list', 'reports list title', 'report library button label',
-      'show activity log panel', 'show ids in master result',
-      'show search form on single result', 'user session timeout'
-    ]
+    configuation_meanings.keys
+  end
+
+  def self.configuation_meanings
+    {
+      'create master with' => 'Form to embed in the "create master" block. A dynamic data model or participant resource name.',
+      'heading create master record label' => 'Heading appearing on the "create master" block. Default is "Create a new Master Record"',
+      'menu create master record label' => 'In the main menu navbar, what ',
+      'completion sub processes' => 'Completion events to be displayed as badges on the Tracker panel. A commma separate list of subprocess IDs',
+      'default search form' => 'Search form to display by default. A report resource name',
+      'default report tab' => 'The default report category (tab) to display when listing reports. A report category',
+      'file browser default view' => 'Initial view on a filestore brower. One of "no details", "file info", "classifications"',
+      'header no subject details label' => 'Text to display in a master record header if no participant details are available. By default "(no subject details)". Will be presented as blank if the value is "none"',
+      'header subject data type' => 'In the master header, the data model to get subject names from. A data model resource name',
+      'header secondary data type' => 'In the master header, the data model to get secondary subject names from. A data model resource name',
+      'hide navbar search' => 'By default, the main menu navbar has ID search fields. Value "true" hides it',
+      'hide player accuracy' => 'Hide the primary participant accuracy in master header and on the details block. Value "true" hides it',
+      'hide participant accuracy' => 'Hide the primary participant accuracy in master header and on the details block. Value "true" hides it',
+      'hide player tabs' => 'In a master record, the tabs row pointing to panels can be hidden. Value "true" hides it',
+      'hide participant tabs' => 'In a master record, the tabs row pointing to panels can be hidden. Value "true" hides it',
+      'hide pro info' => 'Hide the secondary participant info block and master header summary. Value "true" hides it',
+      'hide secondary info' => 'Hide the secondary participant info block and master header summary. Value "true" hides it',
+      'hide search form advanced' => 'Hide the "advanced" search form. Value "true" hides it',
+      'hide search form simple' => 'Hide the "simple" search form. Value "true" hides it',
+      'hide search form searchable reports' => 'Don\'t show reports marked as "searchable" as search forms. Value "true" hides them',
+      'hide tracker panel' => 'The Tracker panel in a master record can be hidden. Value "true" hides it',
+      'filestore directory id' => 'If the server setting for use_parent_sub_dir is set, this value is the external ID resource name to getthe identifier from. By default it uses master ID',
+      'logo filename' => 'Use an alternative logo. Path relative to the app root for a logo. For example: /app_specific/sample_app/project-logo.png',
+      'logo link' => 'Link to go to when the logo is clicked. By default "/". Relative to the app root',
+      'master header prefix' => 'Prefix to display on the master header. May include curly {{ substitutions }}',
+      'master header title' => 'Alternative text  appear instead of participant info names on the master header. May include curly {{ substitutions }}',
+      'menu research label' => '',
+      'notes field caption' => '',
+      'notes field format' => '',
+      'open panels' => '',
+      'prevent reload master list' => '',
+      'reports list title' => '',
+      'report library button label' => '',
+      'show activity log panel' => '',
+      'show ids in master result' => '',
+      'show search form on single result' => '',
+      'user session timeout' => ''
+    }
   end
 
   # Use `Admin::AppConfiguration.value_for name` to get a cached configuration value

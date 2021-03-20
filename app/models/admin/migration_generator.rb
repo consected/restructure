@@ -3,7 +3,8 @@ class Admin::MigrationGenerator
   DefaultMigrationSchema = Settings::DefaultMigrationSchema
 
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
-                :table_comments, :no_master_association, :prev_table_name, :belongs_to_model
+                :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
+                :allow_migrations, :db_configs
 
   #
   # Simply return the current connection
@@ -196,7 +197,8 @@ class Admin::MigrationGenerator
   end
 
   def initialize(db_migration_schema, table_name = nil, all_implementation_fields = nil, table_comments = nil,
-                 no_master_association = nil, prev_table_name = nil, belongs_to_model = nil)
+                 no_master_association = nil, prev_table_name = nil, belongs_to_model = nil, db_configs = nil,
+                 allow_migrations: nil)
     self.db_migration_schema = db_migration_schema
     self.table_name = table_name
     self.prev_table_name = prev_table_name
@@ -204,6 +206,10 @@ class Admin::MigrationGenerator
     self.table_comments = table_comments
     self.no_master_association = no_master_association
     self.belongs_to_model = belongs_to_model
+    self.db_configs = db_configs
+
+    self.allow_migrations = allow_migrations
+    self.allow_migrations = Settings::AllowDynamicMigrations if allow_migrations.nil?
     super()
   end
 
@@ -325,6 +331,7 @@ class Admin::MigrationGenerator
           self.fields = %i[#{migration_fields_array.join(' ')}]
           self.table_comment = '#{tcs[:table]}'
           self.fields_comments = #{(tcs[:fields] || {}).to_json}
+          self.db_configs = #{(db_configs || {}).to_json}
           self.no_master_association = #{!!no_master_association}
     SETATRRIBS
   end
@@ -337,7 +344,7 @@ class Admin::MigrationGenerator
   # @param [String] export_type - optionally add a type "--export_type" suffix to the directory, "exports" for example
   # @return [String] full file path
   def write_db_migration(mig_text, name, version = nil, mode: 'create', export_type: nil)
-    return unless Rails.env.development?
+    return unless allow_migrations
 
     version ||= migration_version
 
@@ -373,7 +380,7 @@ class Admin::MigrationGenerator
   end
 
   def run_migration
-    return unless Rails.env.development? && db_migration_schema != DefaultMigrationSchema
+    return unless allow_migrations && db_migration_schema != DefaultMigrationSchema
 
     # Outside the current transaction
     Thread.new do

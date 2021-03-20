@@ -1,0 +1,66 @@
+.help-sidebar {
+  width: 25vw;
+  // display: block;
+  background: rgb(255, 255, 255);
+  position: fixed;
+  top: 0;
+  right: 0;
+  border-left: 1px solid rgb(128, 128, 128);
+  padding: 1%;
+  box-shadow: 0 1px 6px 4px rgba(0, 0, 0, 0.15);
+  z-index: 2000;
+  overflow: hidden;
+
+  .btn-expander {
+    display: inline-block;
+  }
+  .btn-shrinker {
+    display: none;
+  }
+
+  .help-scrollto-top {
+    float: left;
+  }
+
+  &.in {
+    height: 100vh;
+  }
+
+  &.expanded {
+    width: 95vw;
+
+    .btn-expander {
+      display: none;
+    }
+
+    .btn-shrinker {
+      display: inline-block;
+    }
+  }
+
+  .help-sidebar-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+  }
+
+  #help-sidebar-header {
+    flex: 0 1 auto;
+  }
+  #help-sidebar-body {
+    flex: 1 1 auto;
+    display: block;
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: auto;
+    width: 100%;
+    padding: 1%;
+
+    table td,
+    table th {
+      min-width: 100px;
+    }
+  }
+}

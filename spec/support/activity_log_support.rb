@@ -1,7 +1,7 @@
 module ActivityLogSupport
   include MasterSupport
 
-  def gen_activity_log_path master_id, item_id, id=nil
+  def gen_activity_log_path(master_id, item_id, id = nil)
     res = "/masters/#{master_id}/player_contacts/#{item_id}/activity_log/player_contact_phones"
     res += "/#{id}" if id
     res
@@ -34,7 +34,7 @@ module ActivityLogSupport
     al
   end
 
-  def refresh_step_access al_def
+  def refresh_step_access(al_def)
     setup_access :activity_log__player_contact_emails, user: @user
     setup_access :activity_log__player_contact_emails, user: @user0 if @user0
 
@@ -115,7 +115,7 @@ module ActivityLogSupport
     }
   end
 
-  def create_item att=nil, _item=nil
+  def create_item(att = nil, _item = nil)
     setup_access :player_contacts, user: @user
     att ||= valid_attribs
     # master ||= @master || @player_contact.master
@@ -129,5 +129,13 @@ module ActivityLogSupport
     setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: @user
 
     @activity_log = @player_contact.activity_log__player_contact_phones.create! att
+  end
+
+  def mock_send_sms_response(notification_inst)
+    allow(notification_inst).to receive(:send_sms) do |_sms_number, _msg_text, _importance|
+      resp = Aws::SNS::Types::PublishResponse.new
+      resp.message_id = "MOCK-#{rand 1_000_000_000}"
+      resp
+    end
   end
 end

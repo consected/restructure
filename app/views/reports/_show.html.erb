@@ -1,11 +1,3 @@
-<%
-  def view?
-    return @viewables if @viewables
-    @viewables = Admin::UserAccessControl.view_tables? current_user
-    @viewables[:pro_infos] &&= !app_config_set(:hide_pro_info)
-    @viewables
-  end
-%>
 <%= render partial: 'masters/modal_pi_search_results_template' %>
 <script id="edit-report-result" type="text/x-handlebars-template" class="hidden handlebars-template">
   <span>
@@ -18,7 +10,7 @@
   <div class="row" data-result="#report-embedded">
     <div class="col-sm-22 col-sm-offset-1">
       <div class="well report-criteria-block">
-        <%= link_to app_config_text(:report_library_button_label, "report library"), reports_path, class: 'btn btn-info pull-right' unless @embedded_report %>
+        <%= link_to app_config_text(:report_library_button_label, "report library"), reports_path, class: 'btn btn-info pull-right' unless embedded_report %>
         <h1><%=@report.name%>
           <% if @runner.data_reference.table_name %><small><%= @runner.data_reference.table_name %></small><% end %>
         </h1>

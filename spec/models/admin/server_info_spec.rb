@@ -12,7 +12,9 @@ RSpec.describe Admin::ServerInfo, type: :model do
   it 'requires an active admin user' do
     expect { Admin::ServerInfo.new(@admin) }.not_to raise_error
 
-    expect { Admin::ServerInfo.new(nil) }.to raise_error(FphsException, 'a valid admin is required')
+    expect do
+      Admin::ServerInfo.new(nil)
+    end.to raise_error(FphsException, 'Initialization with admin blank is not valid')
   end
 
   it 'gets a list of server settings' do

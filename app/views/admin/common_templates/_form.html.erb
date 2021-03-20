@@ -11,6 +11,7 @@
   end
   has_options = false
 %>
+<div class="admin-form-block-outer">
 <%= form_for(fref, url: url, class: "inline-form admin-edit-form", remote: true, data: {result_target: "#admin-item-#{object_instance.id}", preprocessor: "admin_result"}) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
 
@@ -24,10 +25,22 @@
       <% if col_type == :boolean %>
         <%= f.label p %>
         <%= f.check_box p %>
-      <% elsif p == :description %>
+      <% elsif p == :description || p == :notes %>
         <%= f.label p %>
+        <% if respond_to?("#{p}_editor") && send("#{p}_editor") == :markdown %>        
+        <div class="common-admin-markdown-editor">
+          <%= render partial: 'common_templates/markdown_editor/show_editor', locals: { editor_format: 'markdown', 
+                                                                          editor_id: "#{object_instance.class.name.ns_underscore}-admin-description--#{object_instance.id}",
+                                                                          form: f,
+                                                                          field_options: {},
+                                                                          form_object_instance: object_instance, 
+                                                                          field_name_sym: p,
+                                                                          form_object_item_type_us: object_instance.class.name.ns_underscore } %>
+        </div>
+        <% else %>
         <%= f.text_area p %>
-      <% elsif respond_to? ("#{p}_options") %>
+        <% end %>
+      <% elsif respond_to?("#{p}_options") %>
         <%= f.label p %>
         <%
           select_item_type = {}
@@ -52,6 +65,9 @@
       <% elsif p == :user_id %>
           <%= f.label p %>
           <%= f.select :user_id, active_user_options, include_blank: true %>
+      <% elsif p == :api_key %>
+        <%= f.label p %>
+        <%= f.password_field p, value: object_instance.api_key %>
       <% else %>
         <%= f.label p %>
         <%= f.text_field p %>
@@ -78,20 +94,21 @@
       </textarea>
     </div>
   </div>
-<% elsif @show_extra_help_info && @show_extra_help_info[:form_info_partial] %>
-    <div class="form-group">
-      <div class="al-options-ref-block">
+<% end %>
+
+  <div class="admin-buttons-block">
+    <%= hidden_filter_fields %>
+    <%= f.submit class: "btn btn-primary", value: "save" %> <%= admin_edit_cancel %>
+  </div>
+<% end %>
+
+<% if @show_extra_help_info && @show_extra_help_info[:form_info_partial] %>
+    <div class="admin-options-outer-block">
+      <div class="admin-options-ref-block">
         <%= render partial: @show_extra_help_info[:form_info_partial], locals: {object_instance: object_instance} %>
       </div>
     </div>
 <% end %>
-
-  <div class="form-group">
-
-    <%= hidden_filter_fields %>
-
-    <%= f.submit class: "btn btn-primary", value: "save" %> <%= admin_edit_cancel %>
-  </div>
-<% end %>
+    </div>
   </div>
 </div>

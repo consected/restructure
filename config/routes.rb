@@ -8,6 +8,13 @@ Rails.application.routes.draw do
   get '/content/:id/:master_id/:secondary_key', to: 'page_layouts#show_content'
   get '/content/:id/:master_type/:master_id/:secondary_key', to: 'page_layouts#show_content'
 
+  get '/help/:library/:section/:subsection', to: 'help#show', as: 'help_page'
+  get '/help/:library/:section/:id', to: 'help#show', as: 'help'
+  get '/help/:library', to: 'help#index', as: 'help_library_home'
+  get '/help/:library/:section/images/:image_name', to: 'help#image', as: 'help_image'
+
+  resources :help, only: %i[index]
+
   resources :reports do
     member do
       post :add_to_list
@@ -62,6 +69,19 @@ Rails.application.routes.draw do
         resources :filters, except: %i[show destroy]
       end
     end
+  end
+
+  # get 'redcap/project_admins/:id/request_records' => 'redcap/project_admins#request_records'
+  namespace :redcap do
+    resources :project_admins, except: %i[show destroy]
+    resources :project_admins do
+      member do
+        post :request_records
+        post :request_archive
+      end
+    end
+    resources :data_dictionaries, except: %i[show destroy]
+    resources :client_requests, except: %i[edit show destroy]
   end
 
   namespace :users do

@@ -1,0 +1,38 @@
+<div class="admin-options-block-outer">
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab" aria-expanded="true">Details</a></li>
+    <li role="presentation" class=""><a href="#def-metadata-block" aria-controls="def-metadata-block" role="tab" data-toggle="tab">Metadata</a></li>
+    <li role="presentation" class=""><a href="#def-requests-block" aria-controls="def-requests-block" role="tab" data-toggle="tab">Requests</a></li>
+    <%= render partial: 'redcap/data_dictionaries/tabs', locals: { no_active: true } %>
+    <li role="presentation" class=""><a href="#def-data-records-block" aria-controls="def-data-records-block" role="tab" data-toggle="tab">Data</a></li>
+    <li role="presentation" class=""><a href="#def-files-block" aria-controls="def-files-block" role="tab" data-toggle="tab">Files</a></li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="def-details-block">
+      <%= render partial: 'redcap/project_admins/details_block', locals: {object_instance: object_instance} %>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="def-requests-block">
+      <%= render partial: 'redcap/project_admins/requests_block', locals: {object_instance: object_instance} %>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="def-metadata-block">
+      <%= render partial: 'redcap/project_admins/metadata_block', locals: {object_instance: object_instance} %>
+    </div>
+
+    <%= render partial: 'redcap/data_dictionaries/tab_panels', locals: { object_instance: object_instance, no_active: true } %>
+
+    <div role="tabpanel" class="tab-pane" id="def-data-records-block">
+      <%= render partial: 'redcap/project_admins/data_block', locals: {object_instance: object_instance} %>
+    </div>
+    
+    <div role="tabpanel" class="tab-pane" id="def-files-block">
+      <%= render partial: 'redcap/project_admins/files_block', locals: {object_instance: object_instance} %>
+    </div>
+
+  </div>
+</div>

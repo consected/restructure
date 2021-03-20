@@ -12,12 +12,13 @@ class ReportsController < UserBaseController
   after_action :clear_results, only: %i[show run]
 
   helper_method :filters, :filters_on, :index_path, :permitted_params, :filter_params_permitted,
-                :search_attrs_params_hash
+                :search_attrs_params_hash, :embedded_report
   ResultsLimit = Master.results_limit
+
+  attr_accessor :failed
 
   # List of available reports
   def index
-    @no_create = true
     @no_masters = true
 
     pm = @all_reports_for_user = Report.enabled.for_user(current_user)
@@ -40,6 +41,8 @@ class ReportsController < UserBaseController
 
     setup_data_reference_request
 
+    return if failed
+
     @view_context = params[:view_context].blank? ? nil : params[:view_context].to_sym
 
     if params[:commit] == 'count'
@@ -52,7 +55,7 @@ class ReportsController < UserBaseController
       return
     end
 
-    if search_attrs_params_hash && !no_run
+    if params[:search_attrs] && !no_run
       # Search attributes or data reference parameters have been provided
       # and the query should be run
       begin
@@ -202,6 +205,10 @@ class ReportsController < UserBaseController
 
   protected
 
+  def no_create
+    true
+  end
+
   def set_master_and_user
     return unless @report_item
 
@@ -224,11 +231,12 @@ class ReportsController < UserBaseController
       nil
     end
 
-    if report_model.respond_to?(:no_master_association) && report_model.no_master_association || !report_model.respond_to?(:master)
-      @report_item = report_model.new(build_with)
-    else
-      @report_item = @master.send(report_model.to_s.ns_underscore.pluralize).build(build_with)
-    end
+    @report_item = if report_model.respond_to?(:no_master_association) && report_model.no_master_association ||
+                      !report_model.respond_to?(:master)
+                     report_model.new(build_with)
+                   else
+                     @master.send(report_model.to_s.ns_underscore.pluralize).build(build_with)
+                   end
   end
 
   # :id parameter can be either an integer ID, or a string, which looks up a item_type__short_name
@@ -249,7 +257,11 @@ class ReportsController < UserBaseController
 
     return unless table_name && schema_name
 
-    return not_authorized unless current_user.can? :view_data_reference
+    unless current_user.can?(:view_data_reference) || current_admin
+      self.failed = true
+      not_authorized
+      return
+    end
 
     @runner.data_reference.init(table_name: table_name,
                                 schema_name: schema_name,
@@ -314,6 +326,7 @@ class ReportsController < UserBaseController
     return true if current_admin
     return true if current_user.can?(:view_report_not_list) || current_user.can?(:view_reports)
 
+    self.failed = true
     not_authorized
     throw(:abort)
   end
@@ -326,12 +339,13 @@ class ReportsController < UserBaseController
     return true if current_admin
     return true if current_user.can?(:view_reports)
 
+    self.failed = true
     not_authorized
     throw(:abort)
   end
 
-  def index_path(p)
-    reports_path p
+  def index_path(par)
+    reports_path par
   end
 
   def handle_bad_search_query(exception)

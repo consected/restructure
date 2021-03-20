@@ -4,7 +4,12 @@
   <%= object_instance.full_item_type_name %>
   </p>
 
+  <p>
+    <%= link_to 'search table data', "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&table_name=#{object_instance.table_name}", target: '_blank' %>
+  </p>
+
   <label>fields</label>
+  <p><%=object_instance.all_implementation_fields.length%> fields</p>
   <p class="dynamic-field-list">
   <code><%= object_instance.all_implementation_fields.join("</code> <code>").html_safe %></code>
   </p>

@@ -1,16 +1,16 @@
 <%
   result_tables = @runner.result_tables_by_index || []
   @outer_block_id = "report-container-#{SecureRandom.hex}"
-  no_results_scroll = @embedded_report || @report.report_options.view_options.no_results_scroll
+  no_results_scroll = embedded_report || @report.report_options.view_options.no_results_scroll
 %>
-<div class="data-results report-container" id="<%=@outer_block_id%>" data-report-id="<%=@report.id%>">
+<div class="data-results report-container <%= embedded_report ? 'report-is-embedded' : '' %>" id="<%=@outer_block_id%>" data-report-id="<%=@report.id%>">
   <div class="<%= @runner.count_only ? 'count-only' : '' %>">
     <div id="report-edit-" data-preprocessor="report-edit-form" data-subscription="report-edit-form-" class="new-block new-below no-processed-scroll"></div>
-    <% unless @embedded_report %>
+    <% unless embedded_report %>
       <p class="text-center"><%= link_to "link to report", report_path(id: @report.alt_resource_name, search_attrs: search_attrs_params_hash.merge(no_run: 'true')) if current_admin || current_user.can?(:view_reports)%> </p>
     <% end %>
     <%= render partial: 'filter_on' if @runner.previous_filtering.sql_requests_filtering %>
-    <% if current_admin && @runner.sql && !@embedded_report%>
+    <% if current_admin && @runner.sql && !embedded_report%>
       <p class="text-center"><a href="#<%=@outer_block_id%>-clean-sql" data-toggle="collapse" class="collapsed">show SQL</a></p>
       <div class="row">
         <div class="col-md-20 col-md-offset-2 collapse clean-sql" id="<%=@outer_block_id%>-clean-sql">

@@ -2,12 +2,6 @@
 
 require 'bcrypt'
 
-#
-# The *StandardAuthentication* concern provides password authentication and two-factor authentication
-# support to the user and admin Devise scopes.
-# In addition to setting up valid passwords, password reminders are also set up as background jobs,
-# to send an email to users. Visible reminders appear at login for users when they login,
-# if the expiration time is approaching.
 module StandardAuthentication
   extend ActiveSupport::Concern
 
@@ -20,51 +14,68 @@ module StandardAuthentication
     validate :no_matching_prev_passwords, if: :password
     validates :password, password_strength: password_config, if: :password_changed?
     validate :password_like_email, if: :password_changed?
-    validate :strength_validation, if: :password_changed?
+    validate :check_strength, if: :password_changed?
     before_create :setup_two_factor_auth
     before_save :handle_password_change
-    after_save :setup_future_password_reminder, if: :requires_reminder
+    after_save :handle_password_reminder_setup, if: :set_reminder
     after_save :clear_plaintext_password
-    attr_accessor :new_two_factor_auth_code, :forced_password_reset, :new_password, :new_token
+    attr_accessor :new_two_factor_auth_code, :forced_password_reset, :new_password, :set_reminder
 
     scope :can_email, -> { where 'do_not_email IS NULL or do_not_email = FALSE' }
   end
 
   class_methods do
+    #
+    # @return [Boolean] - true if 2FA is disabled
     def two_factor_auth_disabled
       Settings::TwoFactorAuthDisabled
     end
 
+    #
+    # Number of days after a password has been created or updated to expire it
     def expire_password_after
       Settings::PasswordAgeLimit
     end
 
+    #
+    # Number of days before a password expires to remind the user
     def remind_days_before
       Settings::PasswordReminderDays
     end
 
-    # Key used to encrypt OTP keys
-    def otp_enc_key
-      (ENV['FPHS_RAILS_DEVISE_SECRET_KEY'] || Rails.application.secrets[:secret_key_base]) + "-#{name}"
+    #
+    # Number of days before a password expires to remind the user
+    def remind_repeat_days
+      Settings::PasswordReminderRepeatDays
     end
 
+    #
+    # Key used to encrypt OTP keys
+    def otp_enc_key
+      (Devise.secret_key || Rails.application.secrets[:secret_key_base]) + "-#{name}"
+    end
+
+    #
     # Config for password complexity
     def password_config
       Settings::PasswordEntropyConfig
     end
 
-    # Calculate password strength
+    #
+    # Calculate password strength, setting up the strength checker based on
+    # Settings::PasswordEntropyConfig
     def calculate_strength(password)
       c = password_config
-      checker = StrongPassword::StrengthChecker.new(min_word_length: c[:min_word_length], use_dictionary: true,
+      # extra_dictionary_words: is specified in the config and points to any method in this class.
+      # In reality it is likely to be :word_list
+      checker = StrongPassword::StrengthChecker.new(min_word_length: c[:min_word_length],
+                                                    use_dictionary: true,
                                                     extra_dictionary_words: send(c[:extra_dictionary_words]))
       checker.calculate_entropy password
     end
 
     #
     # Word list to prevent use of in passwords
-    # If there are massive word lists or numbers of users this should be refactored
-    # But for what we need it works satifactorily.
     def word_list
       return [] if Rails.env.test?
 
@@ -75,24 +86,24 @@ module StandardAuthentication
         end
       end
 
-      # Add email address components to the list of words, as long as a component length
-      # is four or more characters in length
       User.all.each do |u|
-        words += email_components(u.email) if u.email
+        words += u.email.split(/[^a-zA-Z]/).reject { |w| w.length < 4 }.map(&:downcase) if u.email
       end
       Admin.all.each do |u|
-        words += email_components(u.email) if u.email
+        words += u.email.split(/[^a-zA-Z]/).reject { |w| w.length < 4 }.map(&:downcase) if u.email
       end
 
       words
     end
+  end
 
-    #
-    # Break an email address into its non alphabetic parts that are four characters or longer
-    # Return an array of these parts
-    def email_components(email)
-      email.split(/[^a-zA-Z]/).reject { |w| w.length < 4 }.map(&:downcase)
-    end
+  def expires_in
+    return 0 unless password_updated_at
+
+    [
+      ((password_updated_at - self.class.expire_password_after.days.ago) / 1.day).ceil,
+      0
+    ].max
   end
 
   def two_factor_auth_disabled
@@ -107,43 +118,46 @@ module StandardAuthentication
   end
 
   #
-  # If the password is expiring soon, return the number of days until it expires
+  # If the password is expiring soon, return the number of days left
   # Othewise return nil
+  # @return [Integer | nil]
   def password_expiring_soon?
     set_default_password_expiration
-    return unless password_updated_at < reminder_lag
+    return unless password_updated_at < (self.class.expire_password_after - self.class.remind_days_before).days.ago
 
     ((password_updated_at - self.class.expire_password_after.days.ago) / 1.day).to_i
   end
 
   #
-  # If a password was updated before this date the user must be reminded to update it
-  def reminder_lag
-    (self.class.expire_password_after - self.class.remind_days_before).days.ago
-  end
-
-  #
   # Force a user password reset by an admin, and unlock the account if it was locked
-  # @return (String)
-  #   a newly generated temporary password
+  # @return (String) - a newly generated temporary password
   def force_password_reset
     unlock_access!
-    self.forced_password_reset = true
+    @forced_password_reset = true
     generate_password
   end
 
   #
   # Check if the user or admin password is a temporary password generated by a force_password_reset
-  def temp_password?
+  def has_temp_password?
     !!reset_password_sent_at
   end
 
+  #
+  # Return the newly generated API token
+  # @return [String]
+  def new_token
+    @new_token
+  end
+
+  #
   # Disable the user or admin account
   def disable!
     self.disabled = true
     save
   end
 
+  #
   # URI to be used in a two factor auth QR code
   def two_factor_auth_uri
     issuer = Settings::TwoFactorAuthIssuer
@@ -151,16 +165,16 @@ module StandardAuthentication
     otp_provisioning_uri(label, issuer: issuer)
   end
 
+  #
   # Reset the two factor auth secret
   def reset_two_factor_auth
     setup_two_factor_auth
   end
 
+  #
   # Validate that the provided two-factor authentication code is valid for the user
-  # @param code (String)
-  #  The code to check
-  # @return (Boolean)
-  # true if valid
+  # @param code (String) - the code to check
+  # @return (Boolean) - true if valid
   def validate_one_time_code(code)
     return unless validate_and_consume_otp!(code)
 
@@ -170,15 +184,14 @@ module StandardAuthentication
 
   #
   # Generate a random password for a user
-  # Capture the plain text password in the #new_password attribute
-  # @return (String)
-  #   Generated plain text password
+  # Capture the plain text password in the @new_password attribute
+  # @return (String) - Generated plain text password
   def generate_password
     res = false
     i = 0
     until res
       generated_password = Devise.friendly_token.first(16)
-      res = (self.class.calculate_strength(generated_password) >= min_entropy)
+      res = (self.class.calculate_strength(generated_password) >= self.class.password_config[:min_entropy])
       i += 1
     end
 
@@ -187,41 +200,32 @@ module StandardAuthentication
       puts "Took #{i} times to make password"
     end
 
-    self.new_token = Devise.friendly_token(30)
-    self.authentication_token = new_token
+    @new_token = Devise.friendly_token(30)
+    self.authentication_token = @new_token
 
-    self.new_password = generated_password
+    @new_password = generated_password
     self.password = generated_password
   end
 
   protected
 
   #
-  # Validaton checking the password strength is sufficient
-  # This will only fire if the main password strength check
-  # has already failed (errors.any?) and a password is set.
-  # Only then is the entropy is checked.
-  def strength_validation
+  # Validation to check the password strength is sufficient
+  def check_strength
     return unless errors.any? && password
 
-    entropy = self.class.calculate_strength(password)
-    return if entropy >= min_entropy
+    res = self.class.calculate_strength(password)
+    c = self.class.password_config
+    return true if res >= c[:min_entropy]
 
-    show_strength = (entropy.to_f / min_entropy * 100).to_i
-    errors.add :password,
-               "strength is #{show_strength}%. Try to use a mix of upper and lower case, symbols and numbers, " \
-               'and avoid dictionary words.'
+    errors.add :password, "strength is #{(res.to_f / c[:min_entropy] * 100).to_i}%. Try to use a mix of upper and lower case, symbols and numbers, and avoid dictionary words."
+    false
   end
 
   #
-  # The configured minimum entropy for a password
-  def min_entropy
-    self.class.password_config[:min_entropy]
-  end
-
-  # Check if a password is like the user's email address
+  # Validation to check if a password is like the user's email address
   def password_like_email
-    return unless password && email && password.downcase == email
+    return unless password && email && password.downcase.include?(email)
 
     errors.add :password, 'can not be similar to your email address'
   end
@@ -229,7 +233,7 @@ module StandardAuthentication
   # Setup password for new user
   def setup_new_password
     generate_password
-    self.forced_password_reset = true
+    @forced_password_reset = true
   end
 
   # Get the password word blacklist
@@ -237,11 +241,13 @@ module StandardAuthentication
     self.class.word_list
   end
 
+  #
   # Validation for a new password, to check it has actually changed
   def new_password_changed?
     errors.add :password, 'must be changed' unless password_changed?
   end
 
+  #
   # A direct comparison of encrypted_password against what is saved in the DB is not possible, since
   # bcrypt generates a new salt every time.
   # Instead, extract the salt from the old password, then generate a temp hash
@@ -264,6 +270,7 @@ module StandardAuthentication
     temp_password_hash != prev_password_hash
   end
 
+  #
   # Setup two factor auth for the current user
   # A secret is generated, ready to be communicated to the user in the form of a QR code
   # the next time they login.
@@ -282,24 +289,28 @@ module StandardAuthentication
   # In either case, record the timestamp the password was updated at
   # and set a password reminder job up for a User
   def handle_password_change
-    if forced_password_reset
+    @set_reminder = nil
+    if @forced_password_reset
       self.reset_password_sent_at = DateTime.now
       self.password_updated_at = DateTime.now
+      @set_reminder = true
     elsif password_changed?
       self.reset_password_sent_at = nil
       self.password_updated_at = DateTime.now
+      @set_reminder = true
     end
   end
 
-  def requires_reminder
-    return true if forced_password_reset || password_changed?
-  end
-
   #
-  # Sets up a password expiration reminder is a reminder is required
-  # Called by after_save callback.
-  def setup_future_password_reminder
-    Users::Reminders.password_expiration(self) if requires_reminder
+  # Callback after save to handle the setup of password expiration reminders
+  # to the user's email address.
+  # The reminder will happen if the password was forcibly reset or the user
+  # changed the password (based on the value of @set_reminder).
+  # Other User model changes will not trigger the reminder.
+  # NOTE: currently reminders are only sent for User models not Admin
+  # @return [HandlePasswordExpirationReminderJob]
+  def handle_password_reminder_setup
+    Users::Reminders.password_expiration(self) if @set_reminder && is_a?(User)
   end
 
   # Check if there are no matching previous passwords in the history
@@ -307,14 +318,12 @@ module StandardAuthentication
   def no_matching_prev_passwords
     num = Settings::CheckPrevPasswords
 
-    # If number is 1, this counts as the previous password,
-    # which we are checking anyway in default new_password_changed?
+    # If number is 1, this counts as the previous password, which we are checking anyway in default new_password_changed?
     return true if num < 2
 
     history_table = "#{self.class.name.downcase.singularize}_history"
 
-    # We limit to one more than the specified number in history table, since this
-    # contains the current one in addition to the previous
+    # We limit to one more than the specified number in history table, since this contains the current one in addition to the previous
     # Also, we have to pick only the distinct items, since the history table records logins, not just password changes
     userid = id
     tn = self.class.table_name
@@ -354,28 +363,28 @@ module StandardAuthentication
 
     # Skip the first one, which we've checked, as mentioned above
     limited_pwhs.each do |pwh|
+      c = password_changed? prev_password_hash: pwh
       # If not changed then we found a match
-      next if password_changed?(prev_password_hash: pwh)
-
-      errors.add :new_password, "matches a previous password. #{num} previous passwords are checked."
-      break
+      unless c
+        errors.add :new_password, "matches a previous password. #{num} previous passwords are checked."
+        break
+      end
     end
   end
 
+  #
   # Clear the plain text password after saving to avoid accidental leakage
   def clear_plaintext_password
     @password = nil
   end
 
   #
-  # To guard against the unexpected situation where the password_updated_at value
-  # has not been set, force it to be set to the amount of time a user starts to
-  # be reminded to change their password.
-  # In most cases this method will just return without performing an action.
+  # Set a default value for password_updated_at
+  # if nothing is currently set
   def set_default_password_expiration
     return if password_updated_at
 
-    self.password_updated_at = reminder_lag
+    self.password_updated_at = (self.class.expire_password_after - self.class.remind_days_before).days.ago
     save
   end
 end

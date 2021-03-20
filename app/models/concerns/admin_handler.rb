@@ -68,7 +68,9 @@ module AdminHandler
   end
 
   def current_admin=(new_admin)
-    raise 'Bad Admin' unless new_admin.is_a?(Admin) && new_admin.id && !new_admin.disabled
+    raise 'Current admin not set' unless new_admin&.id
+    raise 'Bad Admin' unless new_admin.is_a?(Admin)
+    raise 'Admin not enabled' if new_admin.disabled
 
     @admin_set = true
     @current_admin = new_admin
@@ -133,5 +135,18 @@ module AdminHandler
     res = res.where('id <> ?', id) if id
 
     !!res.first
+  end
+
+  #
+  # Resource name used to identify models in for admin / user matched resources and elsewhere.
+  # @return [String]
+  def admin_resource_name
+    self.class.name.ns_underscore.pluralize
+  end
+
+  def resource_name
+    return super if defined? super
+
+    admin_resource_name
   end
 end

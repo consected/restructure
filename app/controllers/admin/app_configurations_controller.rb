@@ -33,6 +33,6 @@ class Admin::AppConfigurationsController < AdminController
   private
 
   def permitted_params
-    %i[name value app_type_id role_name user_id disabled]
+    %i[app_type_id role_name user_id name value disabled]
   end
 end

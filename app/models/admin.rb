@@ -86,30 +86,23 @@ class Admin < ActiveRecord::Base
   end
 
   def prevent_email_change
-    if email_changed? && persisted?
-      errors.add(:email, 'change not allowed!')
-      # throw(:abort)
-    end
+    errors.add(:email, 'change not allowed!') if id == current_admin&.id && email_changed? && persisted?
   end
 
   def prevent_reenabling_admin
-    if disabled_changed? && persisted? && disabled != true && !in_setup_script
+    if disabled_changed? && persisted? && disabled != true && disabled_was == true && !in_setup_script
       errors.add(:disabled, 'change not allowed!')
-      # throw(:abort)
     end
   end
 
   def prevent_not_in_setup_script
-    unless in_setup_script
-      errors.add(:admin, 'can only create admins in console')
-      # throw(:abort)
-    end
+    errors.add(:admin, 'can only create admins in console') unless in_setup_script
   end
 
   def only_allow_disable
     return if in_setup_script
-    return unless disabled_changed? && !disabled
+    return unless !disabled && disabled_changed? && !disabled_was != true
 
-    errors.add(:admin, 'can only disable outside of setup script')
+    errors.add(:admin, 'can not re-enable administrators')
   end
 end

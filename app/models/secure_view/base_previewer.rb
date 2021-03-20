@@ -3,7 +3,7 @@
 module SecureView
   class BasePreviewer
     DefaultResolution = 150
-    DocumentExtensions = %w[doc docx odt html rtf].freeze
+    DocumentExtensions = %w[doc docx odt html rtf html md].freeze
     SpreadsheetExtensions = %w[xls xlsx ods csv].freeze
     PresentationExtensions = %w[ppt pptx odp odg].freeze
     OfficeDocTypesTo = %w[html pdf].freeze
@@ -34,10 +34,8 @@ module SecureView
       !!(document? || spreadsheet? || presentation? || pdf? || viewable_image?)
     end
 
-    def self.open_tempfile
-      Tempfile.open('SecureView-', SecureView::Config.tempdir) do |f|
-        yield f
-      end
+    def self.open_tempfile(&block)
+      Tempfile.open('SecureView-', SecureView::Config.tempdir, &block)
     end
 
     def self.change_extension(path, to_ext)

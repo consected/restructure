@@ -9,7 +9,7 @@
     tab_panels.each do |panel|
 
       if panel.contains&.resources
-        next if view?.stringify_keys.slice(*panel.contains&.resources).select{|k,v| v}.length == 0
+        next if master_viewables.stringify_keys.slice(*panel.contains&.resources).select{|k,v| v}.length == 0
       end
 
       drop_down = panel.tab && panel.tab.parent

@@ -5,8 +5,6 @@ class Admin::ManageUsersController < AdminController
     if params[:gen_new_pw] == '1'
       @user.force_password_reset
       logger.info 'Force password reset'
-
-      flash[:info] = "New password #{@user.new_password}"
     end
 
     @user.reset_two_factor_auth if params[:reset_two_factor_auth]
@@ -53,6 +51,10 @@ class Admin::ManageUsersController < AdminController
 
   def human_name
     'user'
+  end
+
+  def title
+    'Usernames and Passwords'
   end
 
   def filters

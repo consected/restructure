@@ -350,7 +350,10 @@ table.table.tablesorter > thead > tr > th {
   // &.tablesorter-header.tablesorter-headerAsc {
   //     border-bottom: 4px solid #c9e2b3 !important;
   // }
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgb(238, 238, 238);
 
   &:hover {
     cursor: pointer;

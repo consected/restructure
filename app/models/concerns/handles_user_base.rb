@@ -5,7 +5,7 @@ module HandlesUserBase
   extend ActiveSupport::Concern
 
   included do
-    belongs_to :user
+    belongs_to :user, optional: true
 
     # If this model should be associated with a master, check it
     before_validation :check_crosswalk, unless: :allows_nil_master?
@@ -125,6 +125,14 @@ module HandlesUserBase
     end
 
     #
+    # Resource name used to identify models in user access controls and elsewhere.
+    # May be overridden by dynamic types.
+    # @return [String]
+    def resource_name
+      name.ns_underscore.pluralize
+    end
+
+    #
     # Permitted parameters for strong param whitelist are generated based on
     # configured attributes, minus some standard fields
     # Ensure that database columns that are defined as array type can receive
@@ -157,6 +165,14 @@ module HandlesUserBase
     #
     # An overridable method for dynamic definitions
     def default_options; end
+  end
+
+  #
+  # Resource name used to identify models in user access controls and elsewhere.
+  # May be overridden by dynamic types.
+  # @return [String]
+  def resource_name
+    self.class.name.ns_underscore.pluralize
   end
 
   #
@@ -482,6 +498,17 @@ module HandlesUserBase
   end
 
   #
+  # Set the background_job_ref attribute, either using a job, or directly with a string.
+  # The stored format is "namespace__class_name%id"
+  # @param [Job | String] job
+  def set_background_job_ref(job)
+    return unless respond_to?(:background_job_ref=)
+
+    job = "#{job.provider_job.class.name.ns_underscore}%#{job.provider_job.id}" if job.respond_to?(:provider_job)
+    self.background_job_ref = job
+  end
+
+  #
   # Allow a record to be saved without checking if the current user actually has access controls to do this
   def force_save!
     @force_save = true
@@ -549,7 +576,7 @@ module HandlesUserBase
 
   def no_user_validation
     (creatable_without_user && !persisted?) ||
-      validating? ||
+      validating? || force_save? ||
       (self.class.no_master_association && !respond_to?(:current_user))
   end
 
@@ -565,6 +592,7 @@ module HandlesUserBase
 
     mu = master_user
     unless mu.is_a?(User) && mu.persisted?
+      master = '[not defined]' unless respond_to? master
       raise "bad user (for master #{master}) being pulled from master_user " \
       "(#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '' : ' not persisted'})"
     end

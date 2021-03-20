@@ -45,13 +45,14 @@ module AdminHelper
 
     unless title == 'all' || title.to_s.include?('__') || @shown_filter_break
       @shown_filter_break = true
-      res = '<p>&nbsp;</p>'.html_safe
+      res = '<p class="filter-small-gap">&nbsp;</p>'.html_safe
     end
 
     if val.present? || title == 'all'
       like_type = title.to_s.end_with?('__%')
       title = title[0..-4] if like_type
-      linkres = link_to(title, index_path(filter: filter), class: "btn #{val.blank? && prev_val.blank? || val.to_s == prev_val.to_s ? 'btn-primary' : 'btn-default'} btn-sm #{like_type ? 'like-type' : ''}")
+      linkres = link_to(title, index_path(filter: filter),
+                        class: "btn #{val.blank? && prev_val.blank? || val.to_s == prev_val.to_s ? 'btn-primary' : 'btn-default'} btn-sm #{like_type ? 'like-type' : ''}")
       if like_type
         @shown_filter_break = false
         res += "<p class=\"like-type\">#{linkres}</p>".html_safe
@@ -83,13 +84,33 @@ module AdminHelper
     these_filters = { filters_on => these_filters } if these_filters.is_a? Array
 
     if current_admin
-      these_filters[:disabled] = ['disabled', 'enabled']
+      these_filters[:disabled] = %w[disabled enabled]
       fo << :disabled
     end
 
-    res += render(partial: 'admin_handler/filters', locals: { fo: fo, filters_on_multiple: filters_on_multiple, these_filters: these_filters })
+    res += render(partial: 'admin_handler/filters',
+                  locals: { fo: fo, filters_on_multiple: filters_on_multiple, these_filters: these_filters })
 
     res.html_safe
+  end
+
+  def show_admin_heading
+    "<h1 class=\"admin-title\">#{title}" \
+      "#{ link_to(
+        '',
+        help_page_path(
+          library: :admin_reference,
+          section: help_section,
+          subsection: help_subsection,
+          display_as: :embedded
+        ),
+        class: 'glyphicon glyphicon-question-sign small admin-help-icon',
+        data: { remote: true,
+                toggle: 'collapse',
+                target: '#help-sidebar',
+                'working-target': '#help-sidebar-body' }
+      ) }" \
+    '</h1>'.html_safe
   end
 
   def hidden_filter_fields

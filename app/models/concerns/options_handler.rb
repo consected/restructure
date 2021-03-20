@@ -129,7 +129,7 @@ module OptionsHandler
   # @param [Nil | Hash] options - if a Hash, this is expected to have the following options:
   # @option [Hash] :use_hash_config - provide option configurations as a hash rather than requiring YAML parsing
   def initialize(owner_or_params = nil, options = nil)
-    if owner_or_params.is_a? Hash
+    if owner_or_params.is_a?(Hash) || owner_or_params.is_a?(ActionController::Parameters)
       options = owner_or_params
       owner = nil
     else

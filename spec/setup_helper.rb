@@ -24,7 +24,7 @@ module SetupHelper
   def self.setup_app_dbs
     puts 'Setup app DBs'
 
-    unless ActiveRecord::Base.connection.table_exists?('ipa_inex_checklists')
+    unless ActiveRecord::Base.connection.table_exists?('activity_log_player_info_e_signs')
       # ESign setup
       # Setup the triggers, functions, etc
       sql_files = %w[create_al_table.sql create_ipa_inex_checklist_table.sql]
@@ -218,6 +218,19 @@ module SetupHelper
     ).update_all(disabled: true)
 
     new_app_type
+  end
+
+  def self.setup_ref_data_app
+    app_name = 'ref-data'
+
+    config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_files')
+    config_fn = 'ref-data_config.yaml'
+    SetupHelper.setup_app_from_import app_name, config_dir, config_fn
+
+    a = Admin::AppType.where(name: app_name).active.first
+    FileUtils.rm_rf "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{a.id}"
+    FileUtils.mkdir_p "#{NfsStore::Manage::Filesystem.nfs_store_directory}/gid601/app-type-#{a.id}/containers"
+    a
   end
 
   # Setup an app from an import configuration (json or yaml)

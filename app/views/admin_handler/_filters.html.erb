@@ -30,7 +30,7 @@ fo.each do |filter_on|
   <div class="panel panel-default">
     <div class="panel-heading" role="tab"  id="heading-<%=filter_on%>-<%=title%>">
       <h4 class="panel-title">
-        <a role="button" data-toggle="collapse" data-parent="#filter-accordion" href="#collapse-<%=filter_on%>-<%=title%>" aria-expanded="<%=is_first%>" aria-controls="collapse-<%=filter_on%>-<%=title%>"><%=filter_on.to_s.humanize%><% if title != :all %>: <%=title.to_s.humanize%><% end %></a>
+        <a role="button" data-toggle="collapse" data-parent="#filter-accordion" href="#collapse-<%=filter_on%>-<%=title%>" aria-expanded="<%=is_first%>" aria-controls="collapse-<%=filter_on%>-<%=title%>" class="collapsed no-link-underline"><i class="caret up"></i> <%=filter_on.to_s.humanize%><% if title != :all %>: <%=title.to_s.humanize%><% end %></a>
       </h4>
     </div>
     <div id="collapse-<%=filter_on%>-<%=title%>" class="panel-collapse collapse <%=is_first ? 'in' : ''%>" role="tabpanel" aria-labelledby="heading-<%=filter_on%>-<%=title%>">

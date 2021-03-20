@@ -15,3 +15,37 @@ a.collapsed > .caret {
 .CodeMirror.cm-s-default {
   border: 1px solid rgb(204, 204, 204);
 }
+
+.common-admin-markdown-editor .custom-editor {
+  width: 800px;
+  height: 40vh;
+  background: white;
+}
+
+.form-group[data-out-attr-name="notes"] {
+  vertical-align: top;
+}
+
+.admin-title {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.admin-help-icon {
+  float: right;
+}
+
+.password-expired {
+  color: gray;
+}
+
+.admin-field- {
+  min-width: 60px;
+}
+
+.admin-result-index {
+  td,
+  th {
+    min-width: 60px;
+  }
+}

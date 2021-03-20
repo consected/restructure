@@ -12,14 +12,14 @@ default: &default
   schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA']%>
   migrations_paths:
     # Schema specific app migrations are collected in their own directories, which can be either
-    # managed directly in this repo, or symlinked to another.
-    - <%= ENV['MIG_PATH'] ? File.join("db/app_migrations",  ENV['MIG_PATH']) : 'db/migrate' %>
+    # managed directly in this repo, or symlinked to another.    
+    - <%= ENV['MIG_PATH'] ? File.join((ENV['MIG_PATH'].include?('/') ? '.' : "db/app_migrations"),  ENV['MIG_PATH']) : 'db/migrate' %>
   
 
 development:
   <<: *default
   database: <%= ENV['FPHS_POSTGRESQL_DATABASE'].present? ? ENV['FPHS_POSTGRESQL_DATABASE'] : 'restr_development' %>
-  schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA'].present? ? ENV['FPHS_POSTGRESQL_SCHEMA'] : 'ml_app,extra_app,fem,data_requests,study_info,sleep' %>
+  schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA'].present? ? ENV['FPHS_POSTGRESQL_SCHEMA'] : 'ml_app,extra_app,fem,data_requests,study_info,sleep,ref_data,redcap' %>
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -27,7 +27,7 @@ development:
 test: &test
   <<: *default
   database: restr_test<%= ENV['TEST_ENV_NUMBER'] %>
-  schema_search_path: 'ml_app,extra_app,ipa_ops,testmybrain,persnet,bulk_msg'
+  schema_search_path: 'ml_app,ipa_ops,testmybrain,persnet,bulk_msg,ref_data,test,redcap_test'
 
 production:
   <<: *default

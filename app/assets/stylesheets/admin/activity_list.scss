@@ -2,7 +2,10 @@
   padding: 0 10px;
 }
 
-ul.activity-list {
+ul.activity-list,
+ul.admin-tag-list {
+  padding-left: 0;
+
   li {
     padding: 3px 5px;
     border: 1px solid silver;
@@ -55,4 +58,7 @@ ul.activity-list {
   padding: 1em;
   border: 1px solid rgb(221, 221, 221);
   border-top: 0;
+  max-height: 100%;
+  overflow: auto;
+  height: 77vh;
 }

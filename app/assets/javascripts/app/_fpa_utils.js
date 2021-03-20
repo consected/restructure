@@ -82,8 +82,9 @@ _fpa.utils.inViewport = function (el, topHalf) {
   return (rect.top >= 0 && rect.top <= $(window).height() / topHalf);
 };
 
-_fpa.utils.scrollTo = function (el, height, offset) {
-  $.scrollTo(el, height, { offset: offset });
+_fpa.utils.scrollTo = function (el, height, offset, container) {
+  container = container || $;
+  container.scrollTo(el, height, { offset: offset });
 };
 
 _fpa.utils.pluralize = function (str) {
