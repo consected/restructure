@@ -1,0 +1,30 @@
+.use-big-select[readonly] {
+  background-color: white;
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.big-select-item {
+  padding: 0.3em 0.6em;
+  margin: 2px;
+  background: rgb(241, 241, 241);
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  .bsi--head {
+    font-weight: bold;
+    padding-bottom: 0.16em;
+  }
+
+  .bsi--body {
+    font-size: 94%;
+    color: rgb(82, 82, 82);
+  }
+
+  &.bsi-selected {
+    background: #cce5ec;
+  }
+}

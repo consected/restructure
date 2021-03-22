@@ -4,7 +4,7 @@ create master with: |
 heading create master record label: |
   Heading appearing on the "create master" block. Default is "Create a new Master Record"
 menu create master record label: |
-  In the main menu navbar, what 
+  In the main menu navbar, the "Create Master" navigation item label.
 completion sub processes: |
   Completion events to be displayed as badges on the Tracker panel. A commma separate list of subprocess IDs
 default search form: |
@@ -39,7 +39,7 @@ hide search form advanced: |
 hide search form simple: |
   Hide the "simple" search form. Value "true" hides it
 hide search form searchable reports: |
-  Don\'t show reports marked as "searchable" as search forms. Value "true" hides them
+  Don't show reports marked as "searchable" as search forms. Value "true" hides them
 hide tracker panel: |
   The Tracker panel in a master record can be hidden. Value "true" hides it
 filestore directory id: |
@@ -51,10 +51,10 @@ logo filename: |
 logo link: |
   Link to go to when the logo is clicked. By default "/". Relative to the app root
 master header prefix: |
-  Prefix to display on the master header. May include curly {{ substitutions }}
+  Prefix to display on the master header. May include curly { { substitutions } }
 master header title: |
   Alternative text  appear instead of participant info names on the master header. 
-  May include curly {{ substitutions }}
+  May include curly { { substitutions } }
 menu research label: |
   Label for "research" menu item, linking to user home page. Default "Research". Value "none" will hide the item
 notes field caption: |

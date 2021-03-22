@@ -1008,6 +1008,15 @@ _fpa = {
     return pm;
   },
 
+  hide_modal: function () {
+    var pm = $('#primary-modal');
+    var t = pm.find('.modal-title');
+    var m = pm.find('.modal-body');
+    t.html('');
+    m.html('');
+    pm.modal('hide');
+  },
+
   get_item_by: function (attr, obj, evid) {
     for (var pi in obj) {
       if (obj.hasOwnProperty(pi)) {

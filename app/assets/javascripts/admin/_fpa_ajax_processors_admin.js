@@ -162,6 +162,20 @@ _fpa.postprocessors_admin = {
       }).addClass('attached-tab-init')
     }, 100);
 
+
+    // Handle big-select fields
+
+    block.find('.use-big-select').each(function () {
+      var label = $(`label[for="${$(this).attr('id')}"]`).html();
+      $.big_select($(this),
+        $('#primary-modal .modal-body'),
+        $(this)[0].big_select_hash,
+        function () { _fpa.show_modal('', label); },
+        function () { _fpa.hide_modal(); }
+      );
+
+    })
+
     _fpa.form_utils.on_open_click(block);
 
   },
