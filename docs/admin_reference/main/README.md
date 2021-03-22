@@ -32,3 +32,4 @@ A separate developer's reference, including API samples, is available in the [De
 
 - [Users and Passwords](/help/admin_reference/users/0_introduction)
 - [Additional User Contact Info](/help/admin_reference/contact_infos/0_introduction)
+- [User Roles](/help/admin_reference/user_roles/0_introduction)
