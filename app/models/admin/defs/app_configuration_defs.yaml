@@ -1,0 +1,86 @@
+
+create master with: |
+  Form to embed in the "create master" block. A dynamic data model or participant resource name.
+heading create master record label: |
+  Heading appearing on the "create master" block. Default is "Create a new Master Record"
+menu create master record label: |
+  In the main menu navbar, what 
+completion sub processes: |
+  Completion events to be displayed as badges on the Tracker panel. A commma separate list of subprocess IDs
+default search form: |
+  Search form to display by default. A report resource name
+default report tab: |
+  The default report category (tab) to display when listing reports. A report category
+file browser default view: |
+  Initial view on a filestore brower. One of "no details", "file info", "classifications"
+header no subject details label: |
+  Text to display in a master record header if no participant details are available. 
+  By default "(no subject details)". Will be presented as blank if the value is "none"
+header subject data type: |
+  In the master header, the data model to get subject names from. A data model resource name
+header secondary data type: |
+  In the master header, the data model to get secondary subject names from. A data model resource name
+hide navbar search: |
+  By default, the main menu navbar has ID search fields. Value "true" hides it
+hide player accuracy: |
+  Hide the primary participant accuracy in master header and on the details block. Value "true" hides it
+hide participant accuracy: |
+  Hide the primary participant accuracy in master header and on the details block. Value "true" hides it
+hide player tabs: |
+  In a master record, the tabs row pointing to panels can be hidden. Value "true" hides it
+hide participant tabs: |
+  In a master record, the tabs row pointing to panels can be hidden. Value "true" hides it
+hide pro info: |
+  Hide the secondary participant info block and master header summary. Value "true" hides it
+hide secondary info: |
+  Hide the secondary participant info block and master header summary. Value "true" hides it
+hide search form advanced: |
+  Hide the "advanced" search form. Value "true" hides it
+hide search form simple: |
+  Hide the "simple" search form. Value "true" hides it
+hide search form searchable reports: |
+  Don\'t show reports marked as "searchable" as search forms. Value "true" hides them
+hide tracker panel: |
+  The Tracker panel in a master record can be hidden. Value "true" hides it
+filestore directory id: |
+  If the server setting for use_parent_sub_dir is set, this value is the external ID resource name to get 
+  the identifier from. By default it uses master ID
+logo filename: |
+  Use an alternative logo. Path relative to the app root for a logo. 
+  For example: /app_specific/sample_app/project-logo.png
+logo link: |
+  Link to go to when the logo is clicked. By default "/". Relative to the app root
+master header prefix: |
+  Prefix to display on the master header. May include curly {{ substitutions }}
+master header title: |
+  Alternative text  appear instead of participant info names on the master header. 
+  May include curly {{ substitutions }}
+menu research label: |
+  Label for "research" menu item, linking to user home page. Default "Research". Value "none" will hide the item
+notes field caption: |
+  Caption that appears above default "notes" fields if not overridden by field options. Default "Notes"
+notes field format: |
+  Default notes field format for this app. Defaults to plain text. Set value "markdown" for rich text editor
+open panels: |
+  List of panels to open automatically when the master record is displayed. 
+  Comma separated list of default panel names or resource names for 
+  activity logs matching the Page Layout panels.
+  Default panels are: trackers (the regular trackers panel), details (the participant name / contact panel), 
+  external_ids (all available external identifiers), external_links (master record links to websites)
+prevent reload master list: |
+  If the user refreshes a page showing master records from a search, the list of previous master records 
+  will be reloaded. This can be prevented, to avoid confusing results, by setting the value to any value
+reports list title: |
+  The title that appears at the top of the list of reports when the Reports menu item is clicked. 
+  Any value overrides the default "Reports"
+report library button label: |
+  The label on the "report library" button that appears in the reports list page.
+show ids in master result: |
+  Master record results headers show one or more IDs. Provide a comma separated list of IDs to show using 
+  alternative ID names, "master_id", or "none" to hide all IDs
+user session timeout: |
+  The timeout a user session in this app, in minutes. Default is set by app server settings.
+show search form on single result: |
+  (not used)
+show activity log panel: |
+  (deprecated) Display a specific activity log panel when master record loads. Use "open panels" instead'
