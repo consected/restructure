@@ -11,7 +11,7 @@ module AdminControllerHandler
     helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance,
                   :objects_instance, :human_name, :no_edit, :primary_model,
                   :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?,
-                  :help_section, :help_subsection, :title, :no_create
+                  :help_section, :help_subsection, :title, :no_create, :show_head_info
   end
 
   def index
@@ -303,5 +303,11 @@ module AdminControllerHandler
 
   def help_subsection
     HelpController::IntroductionDocument
+  end
+
+  #
+  # Should a head info partial be shown?
+  def show_head_info
+    false
   end
 end
