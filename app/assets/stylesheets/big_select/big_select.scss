@@ -28,3 +28,19 @@
     background: #cce5ec;
   }
 }
+
+.big-select-group-head {
+  font-size: 114%;
+  font-weight: bold;
+  padding-top: 0.8em;
+  padding-bottom: 0.3em;
+  padding-left: 3px;
+
+  a,
+  a:link,
+  a:active,
+  a:focus {
+    color: rgb(51, 51, 51);
+    text-decoration: none;
+  }
+}
