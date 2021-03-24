@@ -12,6 +12,16 @@ Names that are used to enable *Activity Log* process functionality must match th
 
 Every **User Role** entry has a user selected, to receive that role. The list of **User Roles** is ordered by user then role name, so you can easily see all the roles assigned to a specific user. If instead you want to see all the users assigned to a role, either click the *role name* table heading, or use the filters.
 
+## Role Naming for User Access Controls
+
+*User Role* naming is important when applied to *User Access Controls*, since the naming sets the priority with which they are applied. Roles that appear higher up the *User Access Controls* list override access to the same resource from roles that appear lower.
+
+As a rule of thumb, for a general, default role, name the role like `user - some function`, where *some function* represents the process a user with that role has access to. Then for higher priority roles, those that will override the default, name something like `org role - some function`, where the *org role* could be something like 'manager'.
+
+For example, a process could have roles defined: `user - scheduling`, `planner - scheduling`, `approver - scheduling`,`reviewer - scheduling`
+
+Any role name that is earlier alphabetically will override those farther down the alphabet, meaning that `user - ...` is a convenient convention for default users since it will be overridden in most cases.
+
 ## Filestore Role Names
 
 *Filestore Role Names* carry a special meaning. They are specially formatted text that has a meaning to Filestore when deciding if a user can access a specific container.
