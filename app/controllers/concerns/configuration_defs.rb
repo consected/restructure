@@ -27,5 +27,21 @@ module ConfigurationDefs
       content = File.read(file_path)
       loaded_defs[config_type] = YAML.safe_load(content)
     end
+
+    #
+    # Get just the key names across all groups from a configuration def that is grouped
+    # @param [Hash] config
+    # @return [Array{String}]
+    def keys_from_grouped_config(config)
+      config.map { |i| i.last.keys }.flatten
+    end
+
+    #
+    # Get the key value pairs across all groups from a configuration def that is grouped
+    # @param [Hash] config
+    # @return [Hash]
+    def key_vals_from_grouped_config(config)
+      config.map { |i| i.last.to_a }.to_h
+    end
   end
 end
