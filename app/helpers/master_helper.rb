@@ -2,7 +2,7 @@ module MasterHelper
   def master_viewables
     return @master_viewables if @master_viewables
 
-    @master_viewables = Admin::UserAccessControl.view_tables? current_user
+    @master_viewables = Admin::UserAccessControl.viewable_tables current_user
     @master_viewables[:pro_infos] &&= !hide_pro_info_tabs?
     @master_viewables
   end

@@ -2,7 +2,7 @@
 
 # Define page, panel and navigation layouts for standard master results panels, standalone pages (dashboards),
 # content pages, top nav (menu bar) navigation, master results tab navigation, and custom view panels
-class Admin::PageLayout < ActiveRecord::Base
+class Admin::PageLayout < Admin::AdminBase
   self.table_name = 'page_layouts'
 
   include AdminHandler

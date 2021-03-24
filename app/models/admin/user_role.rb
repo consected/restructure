@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Admin::UserRole < ActiveRecord::Base
+class Admin::UserRole < Admin::AdminBase
   self.table_name = 'user_roles'
 
   include AdminHandler
@@ -14,7 +14,6 @@ class Admin::UserRole < ActiveRecord::Base
                                                                                          }
 
   after_save :save_template
-  after_save :invalidate_cache
 
   # Scope used when user.user_roles association is called, effectively forcing the results
   # to the user's current app type
@@ -134,17 +133,6 @@ class Admin::UserRole < ActiveRecord::Base
     to_roles
   end
 
-  def self.latest_update
-    return @latest_update if @latest_update
-
-    obj = reorder('').order(Arel.sql('coalesce(updated_at, created_at) desc nulls last')).first
-    @latest_update = obj&.updated_at || obj&.created_at
-  end
-
-  def self.reset_latest_update
-    @latest_update = nil
-  end
-
   private
 
   # Automatically add a template@template record if needed
@@ -154,13 +142,5 @@ class Admin::UserRole < ActiveRecord::Base
     tu = User.template_user
     tu.app_type = app_type
     self.class.add_to_role tu, app_type, role_name, current_admin
-  end
-
-  def invalidate_cache
-    logger.info "User Role added or updated (#{self.class.name}). Invalidating cache."
-    self.class.reset_latest_update
-
-    # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
-    Rails.cache.clear
   end
 end
