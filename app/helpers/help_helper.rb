@@ -59,9 +59,19 @@ module HelpHelper
 
       defs_content = ''
       YAML.safe_load(File.read(path)).each do |k, v|
+        if v.is_a? Hash
+          v = v.map do |i|
+            <<~END_TEXT
+              #### #{i.first}
+
+              #{i.last}
+            END_TEXT
+          end.join("\n\n")
+        end
+
         defs_content = <<~END_TEXT
           #{defs_content}
-          #### #{k}
+          ### #{k}
 
           #{v}
         END_TEXT
