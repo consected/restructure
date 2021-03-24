@@ -138,8 +138,9 @@ class Settings
   DefaultShortLinkLogS3Bucket = ENV['FPHS_SHORTLINK_LOG_BUCKET'] || (Rails.env.production? ? 'url-shortener-logs.fphs' : 'test-fphs-url-shortener-logs')
   LogBucketPrefix = 'access/'
 
-  # Default table names for the primary CRM (Zeus) app
+  # Default table names (and associated configs) for the primary CRM (Zeus) app
   DefaultSubjectInfoTableName = 'player_infos'
+  BestAccuracyScore = 12
   DefaultSecondaryInfoTableName = 'pro_infos'
   DefaultContactInfoTableName = 'player_contacts'
   DefaultAddressInfoTableName = 'addresses'
