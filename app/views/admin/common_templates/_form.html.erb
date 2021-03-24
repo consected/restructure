@@ -53,6 +53,9 @@
       <% elsif p.to_s.end_with?('options') || p.to_s.end_with?('template')
           has_options = p
       %>
+      <% elsif respond_to?("#{p}_big_select") %>
+        <%= f.label p %>
+        <%= big_select_field(f, p, send("#{p}_big_select")) %>
       <% elsif p == :disabled %>
         <%= f.check_box p %>
         <%= f.label p %>
