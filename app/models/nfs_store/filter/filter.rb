@@ -2,6 +2,9 @@
 
 module NfsStore
   module Filter
+    #
+    # Filtering of Stored and Archived Files for user browsing, viewing and uploading.
+    # May also be used to identify files for automated background processing.
     class Filter < Admin::AdminBase
       self.table_name = 'nfs_store_filters'
       include AdminHandler
@@ -12,6 +15,7 @@ module NfsStore
 
       validate :filter_is_valid
 
+      #
       # Get the defined filters for this user (from role and user overrides) for the specified activity log.
       # It should be noted that a container can be referenced, and viewed, from within multiple activity logs.
       # This actually allows one extra log type to provide a view onto the container differently from another
@@ -19,7 +23,6 @@ module NfsStore
       # @param item [ActivityLog | NfsStore::Manage::Container] container or the activity log the container is within
       # @param user [User|nil] user that has filter definitions through role membership or user override
       # @return [Array] of filters
-      # [ActiveRecord::Relation] resultset of filters
       def self.filters_for(item, user: nil, alt_role: nil)
         user ||= item.current_user
 
@@ -33,6 +36,7 @@ module NfsStore
         fs.map { |f| f.filter_for item }
       end
 
+      #
       # Simply lookup the filters based on the resource name for the scoped user roles.
       # Basic function used by those that have activity log and other item instances, or just
       # naming in view templates
@@ -50,11 +54,7 @@ module NfsStore
       # List of resource names for definitions of filters
       # @return [Array] list of full activity_log__type and container resource names
       def self.resource_names
-        # Get only the names that have an extra log type config with a reference to a container
-        names = ActivityLog.all_option_configs_resource_names { |e| e&.references && e.references[:nfs_store__manage__container] }
-        names << NfsStore::Manage::Container.resource_name
-        names += Settings::FilestoreAdminResourceNames
-        names.uniq
+        Resources::FilestoreFilter.resource_descriptions.keys
       end
 
       # Evaluate all filters for the current user (and associated roles) in the activity log
@@ -63,17 +63,25 @@ module NfsStore
         user ||= item.current_user
         fs = filters_for item, user: user
         fs.each do |f|
-          return true if evaluate_with f, text
+          return true if evaluate_raw_filter f, text
         end
 
         false
       end
 
+      #
+      # Setup the filter, ensuring substitutions for the item data are applied
+      # @param [String] item
+      # @return [String]
       def filter_for(item)
-        # Substitute filters
         self.class.filter_for filter, item
       end
 
+      #
+      # Setup the filter, ensuring substitutions for the item data are applied
+      # @param [NfsStore::Filter::Filter] filter
+      # @param [String] item
+      # @return [String]
       def self.filter_for(filter, item)
         Formatter::Substitution.substitute filter, data: item, tag_subs: nil
       end
@@ -120,12 +128,19 @@ module NfsStore
 
         raise FsException::Action, 'No filestore container provided to evaluate filter' unless container
 
+        sf_sql = "replace('/' || coalesce(path, '') || '/' || file_name, '//', '/') ~ ?"
+        af_sql = "replace('/' || archive_file || '/' ||  coalesce(path, '') || '/' || file_name , '//', '/') ~ ?"
+
         conds = [''] + filters
-        conds[0] = filters.map { |_f| "replace('/' || coalesce(path, '') || '/' || file_name, '//', '/') ~ ?" }.join(' OR ')
+        conds[0] = filters
+                   .map { |_f| sf_sql }
+                   .join(' OR ')
         sf = container.stored_files.where(conds)
 
         conds = [''] + filters
-        conds[0] = filters.map { |_f| "replace('/' || archive_file || '/' ||  coalesce(path, '') || '/' || file_name , '//', '/') ~ ?" }.join(' OR ')
+        conds[0] = filters
+                   .map { |_f| af_sql }
+                   .join(' OR ')
 
         af = container.archived_files.where(conds)
 
@@ -136,12 +151,12 @@ module NfsStore
       # Handles substitutions {{...}} by allowing any character sequence to match
       # @return [String] SQL that can be used directly in a report for filtering results
       def self.generate_filters_for(activity_log_resource_name, user: nil)
-        if activity_log_resource_name.start_with? 'activity_log__'
-          res_class = ActivityLog.activity_log_class_from_type(activity_log_resource_name)
-          extra_log_types = res_class.definition.option_configs_names
-        else
+        unless activity_log_resource_name.start_with? 'activity_log__'
           raise FphsException, 'Generate Filters requires a resource name starting with activity_log'
         end
+
+        res_class = ActivityLog.activity_log_class_from_type(activity_log_resource_name)
+        extra_log_types = res_class.definition.option_configs_names
 
         sql_sets = []
 
@@ -152,34 +167,55 @@ module NfsStore
 
           next if filters.empty?
 
-          conds_sf = filters.map { |_f| "(coalesce(nfs_store_stored_files.path, '') || '/' || nfs_store_stored_files.file_name) ~ ?" }.join(' OR ')
-          conds_af = filters.map { |_f| "('/' || nfs_store_archived_files.archive_file || '/' ||  coalesce(nfs_store_archived_files.path, '') || '/' || nfs_store_archived_files.file_name) ~ ?" }.join(' OR ')
+          sf_sql = "(coalesce(nfs_store_stored_files.path, '') || '/' || nfs_store_stored_files.file_name) ~ ?"
+          af_sql = "('/' || nfs_store_archived_files.archive_file || '/' || " \
+                    "coalesce(nfs_store_archived_files.path, '') " \
+                    "|| '/' || nfs_store_archived_files.file_name) ~ ?"
+          conds_sf = filters
+                     .map { |_f| sf_sql }
+                     .join(' OR ')
+          conds_af = filters
+                     .map { |_f| af_sql }
+                     .join(' OR ')
 
-          # Replace substitution {{...}} markers with .+ to match any character sequence, since we need to produce generic SQL
+          # Replace substitution {{...}} markers with .+ to match any character sequence,
+          # since we need to produce generic SQL
           filter_strings = filters.map { |f| f.filter.gsub(/\{\{.+\}\}/, '.+') }
 
-          sql_sets << ActiveRecord::Base.send(:sanitize_sql_array, [
-            "extra_log_type = ? AND (nfs_store_archived_files.id IS NOT NULL AND (#{conds_af}) OR nfs_store_stored_files.id IS NOT NULL AND (#{conds_sf}))"
-          ] + [extra_log_type] + filter_strings + filter_strings)
+          full_sql = "extra_log_type = ? AND (nfs_store_archived_files.id IS NOT NULL AND (#{conds_af}) " \
+                     "OR nfs_store_stored_files.id IS NOT NULL AND (#{conds_sf}))"
+          sql_sets << ActiveRecord::Base.send(:sanitize_sql_array,
+                                              [full_sql] + [extra_log_type] + filter_strings + filter_strings)
         end
 
         res = sql_sets.join("\n  OR\n  ")
         "(\n#{res}\n)"
       end
 
-      # Evaluate the text against the current filter
+      #
+      # Evaluate the text against the current filter, ensuring substitutions with item data are made
+      # before passing the filter text to the underlying evaluation
       # @return [nil, MatchData] if the match is made, a MatchData object is returned, otherwise nil
       def evaluate(text, item)
-        self.class.evaluate_with filter_for(item), text
+        self.class.evaluate_raw_filter filter_for(item), text
       end
 
-      def self.evaluate_with(filter, text)
+      #
+      # Handle the base matching of filter text against a text string
+      # @param [String] filter - prepared filter (with any necessary substitutions) to use
+      # @param [String] text - text to test against the filter
+      # @return [<Type>] <description>
+      def self.evaluate_raw_filter(filter, text)
         re = Regexp.new filter
         re.match(text)
       end
 
       private
 
+      #
+      # Check filter is valid definition.
+      # Adds to #errors if the filter is an invalid regex
+      # @return [true | nil]
       def filter_is_valid
         begin
           Regexp.new(filter)

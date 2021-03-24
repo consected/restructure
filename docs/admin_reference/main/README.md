@@ -27,9 +27,13 @@ A separate developer's reference, including API samples, is available in the [De
 ### App Configs
 
 - [Page Layouts](/help/admin_reference/page_layouts/0_introduction)
+- [App Configurations](/help/admin_reference/app_configurations/0_introduction)
 
 ### Users and Access
 
 - [Users and Passwords](/help/admin_reference/users/0_introduction)
 - [Additional User Contact Info](/help/admin_reference/contact_infos/0_introduction)
 - [User Roles](/help/admin_reference/user_roles/0_introduction)
+- [User Access Controls](/help/admin_reference/user_access_controls/0_introduction)
+- [File Filters](/help/admin_reference/filters/0_introduction)
+- [Manage Administrators](/help/admin_reference/admins/0_introduction)
