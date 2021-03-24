@@ -41,7 +41,7 @@ module ConfigurationDefs
     # @param [Hash] config
     # @return [Hash]
     def key_vals_from_grouped_config(config)
-      config.map { |i| i.last.to_a }.to_h
+      config.map { |i| i.last.to_a.flatten }.to_h
     end
   end
 end
