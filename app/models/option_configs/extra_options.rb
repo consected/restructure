@@ -27,7 +27,7 @@ module OptionConfigs
       key_attributes - %i[name config_obj resource_name] + [:label]
     end
 
-    attr_accessor(*key_attributes)
+    attr_accessor(*key_attributes, :def_item)
 
     def self.top_level_defs
       {
@@ -235,7 +235,7 @@ module OptionConfigs
       @name = name
       @orig_config = config
 
-      @config_obj = config_obj
+      self.def_item = @config_obj = config_obj
 
       # Protect against invalid configurations preventing server startup
       config = {} unless config.respond_to? :each

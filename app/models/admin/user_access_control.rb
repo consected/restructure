@@ -6,6 +6,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
   include AdminHandler
   include AppTyped
   include UserAndRoles
+  include ConfigurationDefs
 
   belongs_to :user, optional: true
 
@@ -15,7 +16,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
   attr_accessor :allow_bad_resource_name
 
   def self.resource_types
-    %i[table general limited_access report activity_log_type external_id_assignments]
+    %i[table general limited_access report activity_log_type]
   end
 
   # access levels provide a distinct scale of control for each resource type
@@ -35,16 +36,22 @@ class Admin::UserAccessControl < ActiveRecord::Base
     }
   end
 
+  #
+  # List of resource names for the General resource type.
+  # Take the 3 layer "meanings" definition and pull out the second layer of keys
+  # @return [Array{String}] <description>
   def self.general_resource_names
-    %w[
-      app_type create_master
-      export_csv export_json view_reports view_report_not_list view_external_links
-      edit_report_data create_report_data import_csv
-      print
-      download_files view_files_as_image view_files_as_html send_files_to_trash move_files user_file_actions
-      view_dashboards view_pages
-      view_data_reference
-    ]
+    @general_resource_names ||= general_resource_name_meanings.map { |i| i.last.keys }.flatten
+  end
+
+  #
+  # Retrieve the grouped meanings for the General resource types
+  def self.general_resource_name_meanings
+    configuration_defs_for :uac_general_resource_names
+  end
+
+  def self.resource_name_meanings_for(res_type)
+    resource_names_for(res_type).map { |n| [n, ''] }.to_h
   end
 
   def self.valid_access_level?(on_resource_type, can_perform)
@@ -113,6 +120,98 @@ class Admin::UserAccessControl < ActiveRecord::Base
       Report.active.map(&:alt_resource_name) + Report.active.map(&:name) + ['_all_reports_']
     elsif resource_type == :activity_log_type
       ActivityLog.all_option_configs_resource_names
+    else
+      []
+    end
+  end
+
+  def self.resource_descriptions_for(resource_type)
+    if resource_type == :table
+      res = {
+        'Common Master Tables':
+          {
+            Settings::DefaultSubjectInfoTableName => 'Participant info (names, biographical)',
+            Settings::DefaultSecondaryInfoTableName => 'Participant secondary info (associated indentifiable info)',
+            Settings::DefaultContactInfoTableName => 'Participant contact info (email / phone)',
+            Settings::DefaultAddressInfoTableName => 'Participant addresses',
+            'trackers': 'Latest tracker entry per protocol',
+            'tracker_histories': 'All tracker entries',
+            'item_flags': 'Item Flags core table'
+          }
+      }
+
+      categories = ActivityLog.active.select(:category).distinct.reorder('').pluck(:category)
+      categories.each do |cat|
+        res.merge!(
+          "activity log: #{cat || '(no category)'}":
+            ActivityLog.active.where(category: cat).map { |r| [r.resource_name, r.name] }.to_h
+        )
+      end
+
+      categories = DynamicModel.active.select(:category).distinct.reorder('').pluck(:category)
+      categories.each do |cat|
+        res.merge!(
+          "dynamic model: #{cat || '(no category)'}":
+            DynamicModel.active.where(category: cat).map { |r| [r.resource_name, r.name] }.to_h
+        )
+      end
+
+      res.merge!(
+        "external identifiers":
+          ExternalIdentifier.active.map { |r| [r.resource_name, r.label] }.to_h
+      )
+
+      res.merge!(
+        "item flags":
+          ItemFlag.active_resource_names.map { |r| [r, 'Item Flags for table'] }.to_h
+      )
+
+      res.merge!(
+        'Filestore Tables':
+          {
+            'nfs_store__manage__containers': 'All Filestore containers',
+            'nfs_store__manage__stored_files': 'All Filestore stored files',
+            'nfs_store__manage__archived_files': 'All Filestore files extracted from archives'
+          }
+      )
+
+      res
+    elsif resource_type == :general
+      general_resource_name_meanings
+    elsif %i[external_id_assignments limited_access].include?(resource_type)
+      res = {}
+      categories = DynamicModel.active.select(:category).distinct.reorder('').pluck(:category)
+      categories.each do |cat|
+        res.merge!(
+          "dynamic model: #{cat || '(no category)'}":
+            DynamicModel.active.where(category: cat).map { |r| [r.resource_name, r.name] }.to_h
+        )
+      end
+
+      res.merge!(
+        "external identifiers":
+          ExternalIdentifier.active.map { |r| [r.resource_name, r.label] }.to_h
+      )
+
+      res
+
+    elsif resource_type == :report
+
+      res = {
+        'All': { '_all_reports_': 'All Reports' }
+      }
+
+      categories = Report.active.select(:item_type).distinct.reorder('').pluck(:item_type)
+      categories.each do |cat|
+        res.merge!(
+          "report: #{cat || '(no category)'}":
+            Report.active.map { |r| [r.alt_resource_name, r.name] }.to_h
+        )
+      end
+      res
+
+    elsif resource_type == :activity_log_type
+      ActivityLog.all_option_configs_grouped_resources
     else
       []
     end
@@ -298,7 +397,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
                                self.class.resource_names_for(resource_type.to_sym)
                              end
 
-    !resource_name_for_type.include?(resource_name.to_s)
+    !resource_name_for_type&.include?(resource_name.to_s)
   end
 
   private
