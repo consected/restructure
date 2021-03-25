@@ -151,6 +151,31 @@ div.help-view-doc,
     }
   }
 
+  .md-formatted-block {
+    h1,
+    h2,
+    h3,
+    h4 {
+      margin-top: 1em;
+      color: rgb(80, 80, 80);
+    }
+
+    h1 {
+      font-size: 32px;
+    }
+    h2 {
+      font-size: 24px;
+    }
+
+    h3 {
+      font-size: 20px;
+    }
+
+    h4 {
+      font-size: 18px;
+    }
+  }
+
   .default-layout-rows,
   .default-layout {
     &.content {
@@ -222,7 +247,7 @@ div.help-view-doc,
   }
 
   & {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   p {

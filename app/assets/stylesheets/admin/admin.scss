@@ -49,3 +49,20 @@ a.collapsed > .caret {
     min-width: 60px;
   }
 }
+
+.admin-edit-form .form-group,
+.admin-edit-form .form-text-area-group {
+  label {
+    display: block;
+  }
+
+  input[type="checkbox"] + label,
+  input[type="radio"] + label {
+    display: inline-block;
+  }
+}
+
+.admin-edit-form .form-text-area-group {
+  margin: 0 10px 8px;
+  min-width: 400px;
+}

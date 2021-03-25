@@ -38,7 +38,9 @@
                                                                           form_object_item_type_us: object_instance.class.name.ns_underscore } %>
         </div>
         <% else %>
+        <div class="form-text-area-group">
         <%= f.text_area p %>
+        </div>
         <% end %>
       <% elsif respond_to?("#{p}_options") %>
         <%= f.label p %>

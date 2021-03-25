@@ -1,0 +1,36 @@
+Name: |
+  table name.
+
+External id attribute: |
+  field used as the external identifier, which must end in `_id`
+
+Alphanumeric: |
+  *true* to allow alphanumeric identifiers, otherwise limit to integer numbers
+
+External identifier view formatter: |
+  (optional) named implementation of a formatter for the identifier
+
+External id edit pattern: |
+  (optional) regex style formatter - such as `.{0,16}` (0-16 characters), `\d{0,6}` (0-6 digits) 
+
+Prevent edit: |
+  for pre-generated or pre-assigned identifiers, make readonly
+
+Pregenerate ids: |
+  pre-generated identifiers are enabled
+
+Min: |
+  minimum integer value
+
+Max: |
+  maximum integer value
+
+Extra fields: |
+  additional fields to add to the model (comma separated list)
+
+Schema name: |
+  the schema the database table belongs to
+
+Options: |
+  extended options - allowing captioning of fields, database table comments, etc
+

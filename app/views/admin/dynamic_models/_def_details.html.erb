@@ -1,3 +1,4 @@
+<% if object_instance.persisted? %>
 <div class="dynamic-details-section">
   <label>item type name</label>
   <p class="dynamic-item-type">
@@ -37,3 +38,6 @@
    lookups in forms using a field <i>select_record_from_table_...</i>
   </p>
 </div>
+<% else %>
+  <label>not yet saved</label>
+<% end %>

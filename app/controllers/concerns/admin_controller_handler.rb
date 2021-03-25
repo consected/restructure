@@ -292,9 +292,10 @@ module AdminControllerHandler
 
   #
   # Allow admin tables to be viewed without the app type column by passing the param view_as=simple-embedded
+  # if there are no filters or the app_type_id filter does not appear in the params
   # @return [Boolean]
   def hide_app_type?
-    params[:view_as] == 'simple-embedded'
+    params[:view_as] == 'simple-embedded' && (!params[:filter] || params[:filter][:app_type_id].nil?)
   end
 
   def help_section
