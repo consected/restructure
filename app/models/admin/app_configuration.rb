@@ -15,6 +15,7 @@ class Admin::AppConfiguration < Admin::AdminBase
   include SelectorCache
   include AppTyped
   include UserAndRoles
+  include ConfigurationDefs
 
   belongs_to :user, optional: true
   before_validation :humanize_name
@@ -27,21 +28,11 @@ class Admin::AppConfiguration < Admin::AdminBase
   # menu research label may enter none to hide the menu (otherwise it defaults to Research)
 
   def self.configurations
-    [
-      'create master with', 'completion sub processes',
-      'default search form', 'default report tab', 'file browser default view', 'header no subject details label',
-      'header subject data type', 'header secondary data type',
-      'hide navbar search', 'hide player accuracy',
-      'hide player tabs', 'hide pro info', 'hide search form advanced', 'hide search form searchable reports',
-      'hide search form simple', 'hide tracker panel', 'heading create master record label', 'filestore directory id',
-      'logo filename', 'logo link',
-      'master header prefix', 'master header title',
-      'menu create master record label',
-      'menu research label', 'notes field caption', 'notes field format', 'open panels',
-      'prevent reload master list', 'reports list title', 'report library button label',
-      'show activity log panel', 'show ids in master result',
-      'show search form on single result', 'user session timeout'
-    ]
+    configuation_meanings.keys
+  end
+
+  def self.configuation_meanings
+    configuration_defs_for :app_configuration
   end
 
   # Use `Admin::AppConfiguration.value_for name` to get a cached configuration value

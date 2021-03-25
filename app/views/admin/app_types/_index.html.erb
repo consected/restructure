@@ -1,27 +1,11 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">
-    <h1>App Types</h1>
+    <%= show_admin_heading %>
     <p>
       <%= show_filters %>
     </p>
-    <div class="row">
-      <div class="col-md-8">
-        <p class="h4">Active in Settings</p>
-        <ul class="admin-tag-list">
-          <% Admin::AppType.active_app_types.pluck(:name).each do |t|%>
-            <li><%=t%></li>
-          <% end %>
-        </ul>
-      </div>
-      <div class="col-md-8">
-        <p class="h4">Current Search Path</p>
-        <ul class="admin-tag-list">
-          <% Admin::MigrationGenerator.current_search_paths.each do |t|%>
-            <li><%=t%></li>
-          <% end %>
-        </ul>
-      </div>
-    </div>
+    <%= render partial: 'head_info' %>
+    
     <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
     <table class="table tablesorter admin-list">
       <thead>
@@ -55,20 +39,6 @@
         <% end %>
       </tbody>
     </table>
-    <div class="row">
-      <div class="panel panel-default panel-body col-sm-8 col-sm-offset-8">
-        <h3>Upload a configuration file</h3>
-        <%= form_tag({action: :upload}, multipart: true) do %>
-          <%= file_field_tag 'config' %>
-          <div>
-            <input name="upload_format" type="radio" value="json" id="upload_format_json" checked="checked"/> <label for="upload_format_json">JSON</label>
-            &nbsp;&nbsp;
-            <input name="upload_format" type="radio" value="yaml" id="upload_format_yaml" /> <label for="upload_format_yaml">YAML</label>
-          </div>
-          <%= submit_tag %>
-        <% end %>
-      </div>
-    </div>
-    <%=  render partial: 'admin_handler/index_actions'  %>
+    <%= render partial: 'admin_handler/index_actions'  %>
   </div>
 </div>

@@ -1,3 +1,4 @@
+<% if object_instance.persisted? %>
 <div class="dynamic-details-section">
   <label>item type name</label>
   <p class="dynamic-item-type">
@@ -21,41 +22,6 @@
   </ul>
   <div id="dynamic-list-detail" class="dynamic-list-detail"></div>
 </div>
-
-<div class="dynamic-config-section">
-
-  <label>configurations</label>
-  <p><i>Name</i> 
-   is the table name.
-  </p>
-  <p><i>External id attribute</i> 
-   is the field used as the external identifier, which must end in <code>_id</code>
-  </p>
-  <p><i>Alphanumeric</i> 
-   <i>true</i> to allow alphanumeric identifiers, otherwise limit to integer numbers
-  </p>
-  <p><i>External identifier view formatter</i> 
-   (optional) named implementation of a formatter for the identifier
-  </p>
-  <p><i>External id edit pattern</i> 
-   (optional) regex style formatter - such as <code>.{0,16}</code> (0-16 characters), <code>\d{0,6}</code> (0-6 digits) 
-  </p>
-  <p><i>Prevent edit</i> 
-   for pre-generated or pre-assigned identifiers, make readonly
-  </p>
-  <p><i>Pregenerate ids</i> 
-   pre-generated identifiers are enabled
-  </p>
-  <p><i>Min</i>
-    Minimum integer value
-  </p>
-  <p><i>Max</i>
-    Maximum integer value
-  </p>
-  <p><i>Extra fields</i>
-    Additional fields to add to the model
-  </p>
-
-
-</div>
-
+<% else %>
+  <label>not yet saved</label>
+<% end %>

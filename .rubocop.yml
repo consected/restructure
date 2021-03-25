@@ -68,4 +68,6 @@ Style/NumericPredicate:
 
 Style/SpecialGlobalVars:
   Enabled: false
-  
+
+Style/ClassAndModuleChildren:
+  Enabled: false

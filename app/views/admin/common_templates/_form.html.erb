@@ -38,7 +38,9 @@
                                                                           form_object_item_type_us: object_instance.class.name.ns_underscore } %>
         </div>
         <% else %>
+        <div class="form-text-area-group">
         <%= f.text_area p %>
+        </div>
         <% end %>
       <% elsif respond_to?("#{p}_options") %>
         <%= f.label p %>
@@ -53,6 +55,9 @@
       <% elsif p.to_s.end_with?('options') || p.to_s.end_with?('template')
           has_options = p
       %>
+      <% elsif respond_to?("#{p}_big_select") %>
+        <%= f.label p %>
+        <%= big_select_field(f, p, send("#{p}_big_select")) %>
       <% elsif p == :disabled %>
         <%= f.check_box p %>
         <%= f.label p %>
@@ -63,8 +68,11 @@
           <%= f.label p %>
           <%= f.select :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item), {}, extra_field_attributes[p.to_sym]||{} %>
       <% elsif p == :user_id %>
+          <%
+            default_user_id = filter_params_hash.first.last if filter_params_hash&.first&.first == 'user_id'
+          %>
           <%= f.label p %>
-          <%= f.select :user_id, active_user_options, include_blank: true %>
+          <%= f.select :user_id, active_user_options(default_user_id: default_user_id), { include_blank: true } %>
       <% elsif p == :api_key %>
         <%= f.label p %>
         <%= f.password_field p, value: object_instance.api_key %>

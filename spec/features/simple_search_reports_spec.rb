@@ -65,6 +65,12 @@ describe 'simple search reports', js: true, driver: :app_firefox_driver do
 
     expect(page).to have_css('#master_results_block')
 
+    expect(page).to have_css('#expand-simple-form')
+    if has_css?('#expand-simple-form.collapse')
+      click_button '#expand-simple-form.collapse'
+      has_css? '.btn-csv'
+    end
+
     within '#simple_search_master' do
       click_button 'csv'
       sleep 2

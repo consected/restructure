@@ -8,14 +8,15 @@ module HelpHelper
   # @param [String] subsection
   # @return [String]
   def formatted_doc(library, section, subsection)
+    subsection = clean_path(subsection)
     where = [
       'docs',
-      library.to_s,
-      section.to_s,
+      clean_path(library.to_s),
+      clean_path(section.to_s),
       "#{subsection}.md"
     ]
 
-    raise FphsException, "invalid help library: #{library}" unless library&.in? HelpController::ValidLibraries
+    raise FphsException, "invalid help library: #{library}" unless library&.to_s.in? HelpController::ValidLibraries
 
     path = Rails.root.join(*where)
     raise FphsException, 'invalid request' if path.to_s.include?('..')
@@ -25,6 +26,9 @@ module HelpHelper
            else
              '# page not found'
            end
+
+    text = embed_defs(text)
+
     text = Formatter::Substitution.text_to_html(text).html_safe
 
     # It is necessary to fix the image source before the page is rendered,
@@ -34,6 +38,65 @@ module HelpHelper
     text = text.gsub(' src="images/', " src=\"#{ipath}/images/")
 
     Formatter::Substitution.substitute(text, data: current_admin || current_user).html_safe
+  end
+
+  #
+  # Embed a config definition from app/models/admin/defs/<item>_def.yaml into
+  # a help page where we have the marker:
+  #    !defs(<item>)
+  # @param [String] text - scan this text
+  # @return [String] duplicate of text with substitutions made
+  def embed_defs(text)
+    text.scan(/!defs\((.+\.yaml)\)/).each do |item|
+      defsw = [
+        'app',
+        'models',
+        'admin',
+        'defs',
+        clean_path(item[0]).gsub('_yaml', '.yaml')
+      ]
+      path = Rails.root.join(*defsw)
+
+      if File.exist?(path)
+        File.read(path)
+      else
+        '# embed definition not found'
+      end
+
+      defs_yaml = File.read(path)
+
+      text = text.gsub("!defs(#{item[0]})", defs_content(defs_yaml))
+    end
+
+    text
+  end
+
+  #
+  # Convert config definition YAML into Markdown, for embedding
+  # @param [String] defs_yaml - YAML content to convert
+  # @return [String]
+  def defs_content(defs_yaml)
+    defs_content = ''
+    YAML.safe_load(defs_yaml).each do |k, v|
+      if v.is_a? Hash
+        v = v.map do |i|
+          <<~END_TEXT
+            #### #{i.first}
+
+            #{i.last}
+          END_TEXT
+        end.join("\n\n")
+      end
+
+      defs_content = <<~END_TEXT
+        #{defs_content}
+        ### #{k}
+
+        #{v}
+      END_TEXT
+    end
+
+    defs_content
   end
 
   #
@@ -47,9 +110,15 @@ module HelpHelper
     where = [
       '',
       'help',
-      library.to_s,
-      section.to_s
+      clean_path(library.to_s),
+      clean_path(section.to_s)
     ]
     File.join(*where)
+  end
+
+  #
+  # Clean path components to avoid directory traversal
+  def clean_path(component)
+    component.to_s.gsub(/[^a-zA-Z0-9\-_]/, '_')
   end
 end

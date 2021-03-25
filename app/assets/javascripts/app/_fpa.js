@@ -28,6 +28,13 @@ _fpa = {
   ajax_working: function (block) {
     try {
       var $block = $(block);
+
+      // data-working-target attribute allows us to indicate
+      // a specific element is the target and is loading,
+      // rather than the link or button we clicked.
+      var alt_target = $block.attr('data-working-target')
+      $block = $(alt_target) || $block;
+
       $block.addClass('ajax-running').removeClass('ajax-canceled');
       var bclicked = $block.data('button_clicked');
       if (bclicked) bclicked.addClass('ajax-clicked-running');
@@ -38,6 +45,14 @@ _fpa = {
   ajax_done: function (block) {
     try {
       var $block = $(block);
+
+
+      // data-working-target attribute allows us to indicate
+      // a specific element is the target and is loading,
+      // rather than the link or button we clicked.
+      var alt_target = $block.attr('data-working-target')
+      $block = $(alt_target) || $block;
+
       $block.removeClass('ajax-running').removeClass('ajax-canceled');
       var bclicked = $block.data('button_clicked');
       if (bclicked) bclicked.removeClass('ajax-clicked-running').blur();
@@ -991,6 +1006,15 @@ _fpa = {
     pm.modal('show');
 
     return pm;
+  },
+
+  hide_modal: function () {
+    var pm = $('#primary-modal');
+    var t = pm.find('.modal-title');
+    var m = pm.find('.modal-body');
+    t.html('');
+    m.html('');
+    pm.modal('hide');
   },
 
   get_item_by: function (attr, obj, evid) {

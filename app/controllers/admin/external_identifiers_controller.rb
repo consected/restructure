@@ -36,4 +36,15 @@ class Admin::ExternalIdentifiersController < AdminController
       ['details', "/admin/external_identifier_details/#{id}"]
     ]
   end
+
+  def filters
+    {
+      category: ExternalIdentifier.pluck(:category).uniq.compact,
+      name: ExternalIdentifier.pluck(:name).uniq.compact
+    }
+  end
+
+  def filters_on
+    %i[category name]
+  end
 end

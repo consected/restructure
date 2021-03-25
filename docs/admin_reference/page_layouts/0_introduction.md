@@ -6,10 +6,11 @@
 
 The components that can be configured are:
 
-- Master Panel
-- Dashboard / Page
-- Panel View
-- Navigation
+- [Master Panels](master_panels)
+- [Navigations](navigations)
+- [Dashboards](dashboards)
+- [Content Pages](content_pages)
+- [Panel Views](panel_views)
 
 Administration is provided in [Admin: Page Layouts](/admin/page_layouts)
 

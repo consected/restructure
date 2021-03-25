@@ -130,10 +130,6 @@ module ApplicationHelper
     }
   end
 
-  def hide_player_tabs?
-    @hide_player_tabs ||= app_config_set(:hide_player_tabs)
-  end
-
   def partial_cache_key(partial)
     u = current_user || current_admin
     apptype = u&.app_type_id if u.is_a? User

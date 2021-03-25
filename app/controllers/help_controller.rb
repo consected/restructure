@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 class HelpController < ApplicationController
-  ValidLibraries = %w[guest_reference admin_reference user_reference app_reference].freeze
+  ValidLibraries = %w[guest_reference admin_reference user_reference app_reference dev_reference].freeze
   AcceptableImageFormats = %w[png jpg jpeg svg gif].freeze
   DocumentsDirectory = 'docs'
   IndexSection = 'main'
   IndexSubsection = 'README'
   ImagesSubdirectory = 'images'
+  IntroductionDocument = '0_introduction'
 
   helper_method :library, :section, :subsection
 
@@ -14,8 +15,8 @@ class HelpController < ApplicationController
   # Show the default help page for the current authentication or guest
   def index
     redirect_to help_page_path(library: library,
-                               section: IndexSection,
-                               subsection: IndexSubsection,
+                               section: index_section,
+                               subsection: index_subsection,
                                display_as: display_as)
   end
 
@@ -56,16 +57,26 @@ class HelpController < ApplicationController
     res = if current_admin
             clean_path(suggested || 'admin_reference')
           elsif current_user
-            clean_path(suggested || 'user_reference')
+            @index_section = current_user.app_type&.name&.id_underscore
+            @index_subsection = IntroductionDocument
+            clean_path(suggested || 'app_reference')
           else
             not_authorized if suggested.present? && suggested != 'guest_reference'
 
             'guest_reference'
           end
 
-    raise FphsException, "invalid help library: #{res}" unless res&.in? ValidLibraries
+    raise FphsException, "invalid help library: #{res}" unless res&.to_s&.in? ValidLibraries
 
     res
+  end
+
+  def index_section
+    @index_section ||= IndexSection
+  end
+
+  def index_subsection
+    @index_subsection ||= IndexSubsection
   end
 
   #

@@ -11,7 +11,7 @@ module AdminControllerHandler
     helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance,
                   :objects_instance, :human_name, :no_edit, :primary_model,
                   :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?,
-                  :help_section, :help_subsection, :title, :no_create
+                  :help_section, :help_subsection, :title, :no_create, :show_head_info
   end
 
   def index
@@ -292,9 +292,10 @@ module AdminControllerHandler
 
   #
   # Allow admin tables to be viewed without the app type column by passing the param view_as=simple-embedded
+  # if there are no filters or the app_type_id filter does not appear in the params
   # @return [Boolean]
   def hide_app_type?
-    params[:view_as] == 'simple-embedded'
+    params[:view_as] == 'simple-embedded' && (!params[:filter] || params[:filter][:app_type_id].nil?)
   end
 
   def help_section
@@ -302,6 +303,12 @@ module AdminControllerHandler
   end
 
   def help_subsection
-    '0_introduction'
+    HelpController::IntroductionDocument
+  end
+
+  #
+  # Should a head info partial be shown?
+  def show_head_info
+    false
   end
 end

@@ -3,8 +3,7 @@
 module Admin::NfsStore
   module Filter
     class FiltersController < AdminController
-      before_action :set_help_description
-      helper_method :resource_name_options, :role_name_options, :extra_field_attributes
+      helper_method :resource_name_big_select, :role_name_options, :extra_field_attributes
 
       protected
 
@@ -16,17 +15,24 @@ module Admin::NfsStore
         NfsStore::Filter::Filter
       end
 
+      def title
+        'Filestore File Filters'
+      end
+
       def human_name
         'File Filters'
       end
 
       def default_index_order
-        Arel.sql "app_type_id asc, translate(resource_name, '__', 'ZZZZ') asc, #{Admin::UserAccessControl.priority_order}"
+        Arel.sql "app_type_id asc, translate(resource_name, '__', 'ZZZZ') asc, " \
+                 "#{Admin::UserAccessControl.priority_order}"
       end
 
       def filters
         rns = NfsStore::Filter::Filter.resource_names
-        rnp = rns.map { |rn| rn.split('__')[0..-2].join('__') + '__%' }.uniq.reject { |rn| rn == '__%' }
+        rnp = rns.map { |rn| "#{rn.split('__')[0..-2].join('__')}__%" }
+                 .uniq
+                 .reject { |rn| rn == '__%' }
         reslist = (rns + rnp).sort
         {
           app_type_id: Admin::AppType.all_by_name,
@@ -39,8 +45,8 @@ module Admin::NfsStore
         %i[app_type_id resource_name user_id]
       end
 
-      def resource_name_options
-        NfsStore::Filter::Filter.resource_names
+      def resource_name_big_select
+        Resources::FilestoreFilter.resource_descriptions
       end
 
       def role_name_options
@@ -58,21 +64,6 @@ module Admin::NfsStore
       def permitted_params
         @permitted_params = %i[id app_type_id role_name user_id resource_name filter disabled description]
       end
-
-      def set_help_description
-        @help_description = <<~EOF
-          <h4>Configurations</h4>
-          <p>All filter use Regular Expressions to match file paths.
-          <p>Containers with no filters defined (for the app, role or user) for the current user will always return no files.
-          <p>To match any file, use the filter <code>.*</code>
-          <p>Remember that to match a <code>.</code> (dot) character, the character must be escaped in a regex <code>\\.</code>
-          <p>File paths follow Unix standards. Therefore file path separators are forward-slash <code>/</code>. These characters do not need to be escaped (unlike many scripting languages that use <code>/.../</code> to indicate a regex definition)
-          <p>Stored and archived files to be filtered against have an initial forward-slash <code>/</code> character.
-          <p>Filter definitions that use the regex <code>^</code> (start of line) character must take this into account.
-          <p>For example, a file in the root directory of the container named <code>00000.dcm</code> will be matched by filter <code>^/0+\.dcm</code> or <code>/0+\.dcm</code> but will not be matched by <code>^0+\.dcm</code> since it does not expect to see the initial forward-slash.
-        EOF
-        @help_description = @help_description.html_safe
-      end
     end
   end
-  end
+end

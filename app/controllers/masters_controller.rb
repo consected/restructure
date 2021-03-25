@@ -55,7 +55,18 @@ class MastersController < UserBaseController
   end
 
   #
-  # Search action for search forms and structured URL query strings
+  # Search action for search forms and structured URL query strings.
+  #
+  # A list of master IDs may be passed in, with the param *nav_q_id*. This is typically
+  # used to display the set of master records displayed in a previous search when the
+  # user refreshed the page.
+  # If the app config :prevent_reload_master_list is set, do not reload
+  # the list of masters that were displayed from a previous search. In some scenarios this
+  # list will be out of date, or confusing to users.
+  #
+  # An external ID (or master crosswalk ID) may be used to search instead, using the params
+  # external_id[id], external_id[field]. The 'field' param names the alternative ID to use.
+  #
   # params[:external_id] - we have an external_id parameter, use this to search
   # params[:nav_q_id] - if not an external_id instead search by master id
   # params[:req_format] - determines the result format. 'reg' for UI, alternatively 'csv' or 'json'

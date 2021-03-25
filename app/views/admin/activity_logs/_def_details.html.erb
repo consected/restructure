@@ -1,3 +1,4 @@
+<% if object_instance.persisted? %>
 <div class="al-details-section">
   <label>item type name</label>
   <p class="al-item-type">
@@ -41,3 +42,6 @@
   </ul>
   <div id="activity-list-detail" class="activity-list-detail"></div>
 </div>
+<% else %>
+  <label>not yet saved</label>
+<% end %>

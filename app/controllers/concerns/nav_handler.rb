@@ -62,9 +62,10 @@ module NavHandler
 
     @secondary_navs << {
       label: '<span class="glyphicon glyphicon-question-sign" title="help"></span>',
-      url: '/help?display_as=embedded',
+      url: help_index_path(display_as: :embedded),
       extras: {
-        'data-remote': 'true', 'data-toggle': 'collapse', 'data-target': '#help-sidebar'
+        'data-remote': 'true', 'data-toggle': 'collapse', 'data-target': '#help-sidebar',
+        'data-working-target': '#help-sidebar-body'
       }
     }
 

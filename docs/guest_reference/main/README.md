@@ -1,6 +1,6 @@
 # Guest Help
 
-## Welcome to the {{environment_name}}
+## Welcome to {{environment_name}}
 
 To get started, you will need to login.
 

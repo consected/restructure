@@ -13,7 +13,7 @@ class CommentDatadicVariables < ActiveRecord::Migration[5.2]
       source_type: 'Source type',
       domain: 'Domain',
       form_name: 'Form name (if the source was a type of form)',
-      variable_name: 'Variable name (as stored)',
+      variable_name: 'Variable name',
       variable_type: 'Variable type',
       presentation_type: 'Data type for presentation purposes',
       label: 'Primary label or title (if source was a form, the label presented for the field)',
