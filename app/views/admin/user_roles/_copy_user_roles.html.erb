@@ -1,4 +1,4 @@
-<div class="col-sm-20 col-sm-offset-2 admin-head-block">
+<div class="col-sm-20 admin-head-block">
   <h4>Copy Roles from One User to Another</h3>
 
   <%= form_tag admin_user_roles_copy_user_roles_path, action: :post do %>
@@ -13,7 +13,7 @@
 
   <div class="form-group">
     <%= hidden_filter_fields %>
-    <%= submit_tag :save, class: "btn btn-primary" %> <%= admin_edit_cancel %>
+    <%= submit_tag :copy, class: "btn btn-primary" %>
   </div>
 
   <% end %>
