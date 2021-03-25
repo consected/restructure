@@ -66,8 +66,8 @@ group :test do
   gem 'webmock'
 end
 
-group :assets do
-  gem 'sass-rails', '~> 5.0'
+group :development, :production, :assets do
+  gem 'sass-rails', '~> 5.1'
   gem 'therubyracer'
   gem 'uglifier', '>= 1.3.0'
 end
