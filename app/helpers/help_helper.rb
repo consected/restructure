@@ -40,6 +40,12 @@ module HelpHelper
     Formatter::Substitution.substitute(text, data: current_admin || current_user).html_safe
   end
 
+  #
+  # Embed a config definition from app/models/admin/defs/<item>_def.yaml into
+  # a help page where we have the marker:
+  #    !defs(<item>)
+  # @param [String] text - scan this text
+  # @return [String] duplicate of text with substitutions made
   def embed_defs(text)
     text.scan(/!defs\((.+\.yaml)\)/).each do |item|
       defsw = [
@@ -57,30 +63,40 @@ module HelpHelper
         '# embed definition not found'
       end
 
-      defs_content = ''
-      YAML.safe_load(File.read(path)).each do |k, v|
-        if v.is_a? Hash
-          v = v.map do |i|
-            <<~END_TEXT
-              #### #{i.first}
+      defs_yaml = File.read(path)
 
-              #{i.last}
-            END_TEXT
-          end.join("\n\n")
-        end
-
-        defs_content = <<~END_TEXT
-          #{defs_content}
-          ### #{k}
-
-          #{v}
-        END_TEXT
-      end
-
-      text = text.gsub("!defs(#{item[0]})", defs_content)
+      text = text.gsub("!defs(#{item[0]})", defs_content(defs_yaml))
     end
 
     text
+  end
+
+  #
+  # Convert config definition YAML into Markdown, for embedding
+  # @param [String] defs_yaml - YAML content to convert
+  # @return [String]
+  def defs_content(defs_yaml)
+    defs_content = ''
+    YAML.safe_load(defs_yaml).each do |k, v|
+      if v.is_a? Hash
+        v = v.map do |i|
+          <<~END_TEXT
+            #### #{i.first}
+
+            #{i.last}
+          END_TEXT
+        end.join("\n\n")
+      end
+
+      defs_content = <<~END_TEXT
+        #{defs_content}
+        ### #{k}
+
+        #{v}
+      END_TEXT
+    end
+
+    defs_content
   end
 
   #
