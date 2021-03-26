@@ -37,7 +37,7 @@ module Messaging
     before_save :set_from_email_address
 
     scope :unhandled, -> { where status: nil }
-    scope :limited_index, -> { limit 20 }
+    scope :limited_index, -> { limit 50 }
 
     attr_accessor :generated_text, :disabled, :admin_id, :for_item, :on_complete_config
     attr_writer :extra_substitutions_data
