@@ -104,7 +104,7 @@ class Admin::AppConfiguration < Admin::AdminBase
       app_type: app_type,
       name: sym_to_name(config_name),
       user_id: nil,
-      role_name: nil
+      role_name: [nil, '']
     ).first
   end
 

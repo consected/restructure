@@ -539,7 +539,7 @@ $$;
 -- Name: create_message_notification_email(character varying, character varying, character varying, json, character varying[], character varying); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
-CREATE FUNCTION ml_app.create_message_notification_email(layout_template_name character varying, content_template_name character varying, subject character varying, data json, recipient_emails character varying[], from_user_email character varying) RETURNS integer
+CREATE FUNCTION ml_app.create_message_notification_email(layout_template_name character varying, content_template_name character varying, subject character varying, data json, recipient_data character varying[], from_user_email character varying) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -555,7 +555,7 @@ BEGIN
     content_template_name,
     subject,
     data,
-    recipient_emails,
+    recipient_data,
     from_user_email
   )
   VALUES
@@ -567,7 +567,7 @@ BEGIN
     content_template_name,
     subject,
     data,
-    recipient_emails,
+    recipient_data,
     from_user_email
   )
   RETURNING id
@@ -587,7 +587,7 @@ $$;
 -- Name: create_message_notification_email(character varying, character varying, character varying, json, character varying[], character varying, timestamp without time zone); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
-CREATE FUNCTION ml_app.create_message_notification_email(layout_template_name character varying, content_template_name character varying, subject character varying, data json, recipient_emails character varying[], from_user_email character varying, run_at timestamp without time zone DEFAULT NULL::timestamp without time zone) RETURNS integer
+CREATE FUNCTION ml_app.create_message_notification_email(layout_template_name character varying, content_template_name character varying, subject character varying, data json, recipient_data character varying[], from_user_email character varying, run_at timestamp without time zone DEFAULT NULL::timestamp without time zone) RETURNS integer
     LANGUAGE plpgsql
     AS $$
     DECLARE
@@ -607,7 +607,7 @@ CREATE FUNCTION ml_app.create_message_notification_email(layout_template_name ch
         content_template_name,
         subject,
         data,
-        recipient_emails,
+        recipient_data,
         from_user_email
       )
       VALUES
@@ -619,7 +619,7 @@ CREATE FUNCTION ml_app.create_message_notification_email(layout_template_name ch
         content_template_name,
         subject,
         data,
-        recipient_emails,
+        recipient_data,
         from_user_email
       )
       RETURNING id

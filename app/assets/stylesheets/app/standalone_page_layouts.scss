@@ -291,4 +291,14 @@ div.reset-row,
   p {
     min-height: 1.6em;
   }
+
+  .ei-item-footer {
+    ul li,
+    ul ul {
+      list-style-position: inside;
+      list-style-type: none;
+      margin-left: 0;
+      overflow: hidden;
+    }
+  }
 }

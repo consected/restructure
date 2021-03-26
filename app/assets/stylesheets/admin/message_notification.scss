@@ -1,0 +1,10 @@
+.iframe-message-notification {
+  width: 100%;
+  height: 400px;
+  background: white;
+  border: 1px solid gray;
+
+  &.if-mn-sms {
+    height: 100px;
+  }
+}

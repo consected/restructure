@@ -41,7 +41,19 @@ module ConfigurationDefs
     # @param [Hash] config
     # @return [Hash]
     def key_vals_from_grouped_config(config)
-      config.map { |i| i.last.to_a.flatten }.to_h
+      res = {}
+      config.each do |i|
+        case i.last
+        when Hash
+          res.merge!(i.last.to_a.to_h)
+        when Array
+          i.last.each do |i2|
+            res.merge!(i2.last.to_a.to_h) if i2.last.is_a? Hash
+          end
+        end
+      end
+
+      res
     end
   end
 end
