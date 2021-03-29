@@ -8,13 +8,15 @@ module Redcap
     DefaultCategory = 'redcap'
     DefaultSchemaName = 'redcap'
 
+    include Dynamic::ModelGenerator
+
     attr_accessor :project_admin, :qualified_table_name, :category
 
     def initialize(project_admin, qualified_table_name)
       self.project_admin = project_admin
       self.qualified_table_name = qualified_table_name
       self.category = DefaultCategory
-      super()
+      super
     end
 
     def data_dictionary
@@ -36,134 +38,16 @@ module Redcap
     end
 
     #
-    # Return db_configs to summarize the real field types and enable definition
+    # Return field_types hash to summarize the real field types and enable definition
     # of a dynamic model
     # @return [Hash]
-    def db_configs
-      @db_configs ||= {}
-
+    def field_types
+      @field_types = {}
       data_dictionary.all_retrievable_fields.each do |field_name, field|
-        @db_configs[field_name] = {
-          type: field.field_type.database_type.to_s
-        }
+        @field_types[field_name] = field.field_type.database_type.to_s
       end
 
-      @db_configs
-    end
-
-    def field_options
-      @field_options ||= {}
-
-      data_dictionary.all_retrievable_fields.each do |field_name, _field|
-        @field_options[field_name] = {
-          no_downcase: true
-        }
-      end
-
-      @field_options
-    end
-
-    #
-    # List of field names to be used in a dynamic model field list
-    # @return [String]
-    def field_list
-      @field_list ||= db_configs.keys.map(&:to_s).join(' ')
-    end
-
-    #
-    # Create an active dynamic model instance for storage of REDcap data records.
-    # The table name can be qualified with a schema name, as <schema name>.<table name>
-    # @param [String] table_name
-    # @param [String] category - optional category, defaults to redcap
-    # @return [DynamicModel]
-    def create_dynamic_model(category: DefaultCategory)
-      schema_name, table_name = schema_and_table_name
-
-      name = table_name.singularize
-
-      default_options = {
-        default: {
-          db_configs: db_configs,
-          field_options: field_options
-        }
-      }.deep_stringify_keys
-
-      options = YAML.dump default_options
-
-      if dynamic_model && dynamic_model.field_list != field_list
-        dynamic_model.update! current_admin: project_admin.current_admin,
-                              field_list: field_list,
-                              options: options,
-                              allow_migrations: true
-      else
-        @dynamic_model = DynamicModel.create! current_admin: project_admin.current_admin,
-                                              name: name,
-                                              table_name: table_name,
-                                              primary_key_name: :id,
-                                              foreign_key_name: nil,
-                                              category: category,
-                                              field_list: field_list,
-                                              options: options,
-                                              schema_name: schema_name,
-                                              allow_migrations: true
-      end
-
-      # Force delayed job to update with the new definition
-      AppControl.restart_delayed_job
-
-      @dynamic_model
-    end
-
-    #
-    # The dynamic model instance referenced by the table name.
-    # The table name can be qualified with a schema name, as <schema name>.<table name>
-    # @param [String | Symbol] table_name
-    # @param [String] category - optional category, defaults to redcap
-    # @return [DynamicModel]
-    def dynamic_model(no_check: nil)
-      return @dynamic_model if @dynamic_model
-
-      schema_name, table_name = schema_and_table_name
-      name = table_name.singularize
-
-      @dynamic_model = DynamicModel.active.where(name: name, category: category, schema_name: schema_name).first
-      return if !no_check && !dynamic_model_ready?
-
-      @dynamic_model
-    end
-
-    #
-    # Split the qualified table name into schema and table, if possible,
-    # otherwise return with the default schema name
-    # @return [<Type>] <description>
-    def schema_and_table_name
-      if qualified_table_name.include? '.'
-        schema_name, table_name = qualified_table_name.split('.', 2)
-      else
-        table_name = qualified_table_name
-        schema_name = DefaultSchemaName
-      end
-      [schema_name, table_name]
-    end
-
-    #
-    # Get the implementation class name for the dynamic model,
-    # which is used for storage of records
-    # @return [String]
-    def dynamic_model_class_name
-      dynamic_model.implementation_class.name
-    end
-
-    #
-    # Check if the dynamic model for storage is ready to use,
-    # both the DB table has been created and the class is defined
-    # @return [true | nil]
-    def dynamic_model_ready?
-      return unless dynamic_model(no_check: true)
-      return true if dynamic_model.implementation_class_defined?(Object, fail_without_exception: true)
-
-      dynamic_model.generate_model if dynamic_model&.ready_to_generate?
-      dynamic_model.implementation_class_defined?(Object, fail_without_exception: true)
+      @field_types
     end
   end
 end
