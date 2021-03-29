@@ -109,6 +109,9 @@ _fpa.form_utils = {
     res.each(function () {
       var item = $(this);
 
+      if (item.hasClass('was-autoclicked')) return;
+      item.addClass('was-autoclicked');
+
       var p = timeout;
       if (!p) {
         p = item.attr('data-open-priority');
