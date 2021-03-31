@@ -61,6 +61,10 @@ table.table.report-table {
   tr.report-item-edit td.report-el-disabled {
     background-color: #eee;
   }
+
+  td select {
+    line-height: normal;
+  }
 }
 
 table.import-grid,
