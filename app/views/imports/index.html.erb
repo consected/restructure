@@ -76,7 +76,7 @@
           <td><%= import.filename %></td>
           <td><%= import.user || 'upload not completed' %></td>
           <td data-format-date-local="true"><%= import.created_at %></td>
-          <td><%= link_to 'Show', import %></td>
+          <td><%= link_to 'Show', import_path(import) %></td>
         </tr>
       <% end %>
     </tbody>
