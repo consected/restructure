@@ -8,9 +8,9 @@ RSpec.describe Imports::ModelGenerator, type: :model do
   before :all do
     create_admin
 
-    `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports_*.rb`
+    `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
 
-    ds = Imports::ModelGenerator.new import: Import.new, dynamic_model_table: "dynamic.test_imports_#{rand 100_000_000_000_000}_recs"
+    ds = Imports::ModelGenerator.new import: Import.new, dynamic_model_table: "dynamic.test_imports#{rand 100_000_000_000_000}_recs"
     ds.current_admin = @admin
     ds.category = 'dynamic-test-env'
     @dm = ds.create_dynamic_model
