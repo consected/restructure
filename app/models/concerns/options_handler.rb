@@ -35,24 +35,34 @@
 #
 module OptionsHandler
   extend ActiveSupport::Concern
+  include ActiveModel::Validations
 
   class Configuration
     def initialize(params)
       return unless params
 
+      params = params.deep_symbolize_keys
+
+      unrecognized = params.keys - self.class.configure_with_items
+      raise FphsException, "Unrecognized configuration params: #{unrecognized.join(', ')}" if unrecognized.present?
+
       params.each { |key, value| send "#{key}=", value }
     end
   end
 
+  class ConfigurationHash < Hash
+  end
+
   included do
-    validate :access_options
-    attr_accessor :owner, :use_hash_config
+    attr_accessor :owner
+    attr_writer :hash_configuration
 
     # If we are within an ActiveRecord model, after_initialize will setup the
     # configurations automatically after instantiation of the class by new
     # If used outside a model, it is necessary to ensure new is called explicitly
     # and that the #initialize method (if defined) calls `super`
-    after_initialize :access_options if respond_to? :after_initialize
+    after_initialize :setup_options if respond_to? :after_initialize
+    validate :save_options
   end
 
   class_methods do
@@ -65,13 +75,18 @@ module OptionsHandler
     # A list of the config items is available from #option_types
     # @param [Symbol] config_item_name - the name of the configuration item
     # @param [Array{Symbol}] with - the child options this configuration item defines
-    def configure(config_item_name, with:)
-      raise FphsException, ':access_options not allowed as a configure item' if with.include? :access_options
+    def configure(config_item_name, with:, is_child_of: nil)
+      if with.include? :setup_from_hash_config
+        raise FphsException, ':setup_from_hash_config not allowed as a configure item'
+      end
 
       c = Class.new(OptionsHandler::Configuration)
       c.send(:attr_accessor, *with)
+      c.send(:mattr_accessor, :configure_with_items)
+      c.configure_with_items = with
       const_set(config_item_name.ns_camelize, c)
-      add_option_type config_item_name
+
+      add_option_type :multi, config_item_name, is_child_of
     end
 
     #
@@ -79,16 +94,34 @@ module OptionsHandler
     # This creates an accessor attribute in the main model instance which is populated
     # when the configuration is loaded when the model is instantiated.
     # A list of the simple attributes is available from #option_types_simple
+    # Allow config_item_names to be specified as an array of symbols or as individual args
     # @param [Array{Symbol}] config_item_name - list of names of the config items
-    def configure_attributes(config_item_names)
-      if config_item_names.include? :access_options
-        raise FphsException,
-              ':access_options not allowed as a configure item'
+    def configure_attributes(*config_item_names)
+      if config_item_names.length == 1 && config_item_names.first.is_a?(Array)
+        config_item_names = config_item_names.first
       end
+
+      overlay_methods = config_item_names & instance_methods
+      raise FphsException, "#{overlay_methods} not allowed as a configure item" if overlay_methods.present?
 
       attr_accessor(*config_item_names)
 
-      config_item_names.each { |config_item_name| add_option_type_simple(config_item_name) }
+      config_item_names.each { |config_item_name| add_option_type(:simple, config_item_name) }
+    end
+
+    def configure_hash(config_item_name, with:)
+      attr_accessor(config_item_name)
+
+      add_option_type(:hash, config_item_name)
+
+      ch = Class.new(OptionsHandler::ConfigurationHash)
+      const_set(config_item_name.ns_camelize, ch)
+
+      c = Class.new(OptionsHandler::Configuration)
+      c.send(:attr_accessor, *with)
+      c.send(:mattr_accessor, :configure_with_items)
+      c.configure_with_items = with
+      ch.const_set(config_item_name.ns_camelize, c)
     end
 
     #
@@ -96,27 +129,29 @@ module OptionsHandler
     # Each represents the name of an accessor attribute in this model
     # @return [Array{Symbol}]
     def option_types
-      @option_types ||= []
-    end
-
-    #
-    # List of simple configuration items
-    # Each represents the name of an accessor attribute in this model
-    # @return [Array{Symbol}]
-    def option_types_simple
-      @option_types_simple ||= []
+      @option_types ||= {
+        multi: [],
+        simple: [],
+        hash: []
+      }
     end
 
     private
 
-    def add_option_type(opt)
-      option_types << opt
-      attr_accessor(opt)
+    def add_option_type(type, opt, parent = nil)
+      parent ||= self
+      option_types[type] << opt
+
+      # raise FphsException, "#{opt} not allowed as an option type" if instance_methods.include? opt
+
+      parent.attr_accessor(opt)
     end
 
-    def add_option_type_simple(opt)
-      option_types_simple << opt
-      attr_accessor(opt)
+    #
+    # The dynamic class for a configured option type
+    def class_for(option_type, in_parent = nil)
+      in_parent ||= self
+      "#{in_parent.name}::#{option_type.to_s.ns_camelize}".constantize
     end
   end
 
@@ -127,7 +162,7 @@ module OptionsHandler
   # @param [Hash | UserBase] owner_or_params - if a Hash is passed this is expected to be initialization
   #    params for a regular model, otherwise we expect this to be a UserBase model itself to be referred back to
   # @param [Nil | Hash] options - if a Hash, this is expected to have the following options:
-  # @option [Hash] :use_hash_config - provide option configurations as a hash rather than requiring YAML parsing
+  # @option [Hash] :hash_configuration - provide option configurations as a hash rather than requiring YAML parsing
   def initialize(owner_or_params = nil, options = nil)
     if owner_or_params.is_a?(Hash) || owner_or_params.is_a?(ActionController::Parameters)
       options = owner_or_params
@@ -144,41 +179,127 @@ module OptionsHandler
 
     options ||= {}
     self.owner = owner || self
-    self.use_hash_config = options[:use_hash_config]
-    access_options
+    self.hash_configuration = options[:use_hash_config]
+
+    parse_config_text unless hash_configuration
+
+    setup_from_hash_config
+  end
+
+  #
+  # Parse the YAML (or JSON) config text definition, stored in #config_text
+  # and return a Hash with the definition
+  def hash_configuration
+    return @hash_configuration if @hash_configuration
+
+    @hash_configuration = setup_options
+  end
+
+  #
+  # Get the current hash_configuration, prepare a YAML document and
+  # save to the options config_text attribute
+  def save_options
+    self.config_text = config_hash_to_yaml
   end
 
   protected
+
+  def setup_options
+    parse_config_text
+    setup_from_hash_config
+  end
+
+  def parse_config_text
+    self.hash_configuration = {}
+
+    return if config_text.blank?
+
+    self.hash_configuration = JSON.parse config_text
+  rescue StandardError
+    self.hash_configuration = YAML.safe_load(config_text, [Date, Time], [], true)
+  end
+
+  #
+  # The dynamic class for a configured option type
+  def class_for(option_type, in_parent = nil)
+    in_parent ||= self.class
+    "#{in_parent.name}::#{option_type.to_s.ns_camelize}".constantize
+  end
 
   #
   # Setup the options defined by:
   # - configure
   # - configure_attributes
-  # Set the #user_hash_config attribute if the #config_text is parsed, or
-  # use #user_hash_config directly if it already set
-  # @return [Hash] the parsed config_text (or #use_hash_config) structure
-  def access_options
-    return unless persisted?
+  # - configure_hash
+  # Use #hash_configuration directly
+  # @return [Hash]
+  def setup_from_hash_config
+    return {} unless hash_configuration.is_a? Hash
 
-    unless use_hash_config
-      self.use_hash_config = YAML.safe_load(config_text, [Date, Time], [], true) if config_text.present?
-      self.use_hash_config ||= {}
-    end
+    self.hash_configuration = hash_configuration.symbolize_keys
 
-    self.use_hash_config = self.use_hash_config.symbolize_keys
-
-    self.class.option_types.each do |ot|
-      option_type = ot.to_s
-      ot_class = "#{self.class.name}::#{option_type.ns_camelize}".constantize
-      config_val = use_hash_config[ot]
+    self.class.option_types[:multi].each do |option_type|
+      ot_class = class_for(option_type)
+      config_val = hash_configuration[option_type]
       send("#{option_type}=", ot_class.new(config_val))
     end
 
-    self.class.option_types_simple.each do |ot|
-      config_val = use_hash_config[ot]
-      send("#{ot}=", config_val)
+    self.class.option_types[:simple].each do |option_type|
+      config_val = hash_configuration[option_type]
+      send("#{option_type}=", config_val)
     end
 
-    use_hash_config
+    self.class.option_types[:hash].each do |option_type|
+      ot_hash_class = class_for(option_type)
+      ot_class = class_for("#{option_type}__#{option_type}")
+      config_val = hash_configuration[option_type]
+
+      all_vals = ot_hash_class.new
+      config_val&.each do |k, v|
+        all_vals[k] = ot_class.new(v)
+      end
+
+      send("#{option_type}=", all_vals)
+    end
+
+    hash_configuration
+  end
+
+  #
+  # Take the current options and recreate a config hash based on the
+  # current option settings
+  # @return [Hash]
+  def options_to_config_hash
+    def_hash = {}
+
+    self.class.option_types[:multi].each do |ot|
+      obj = send(ot)
+      obj.class.configure_with_items.each do |i|
+        def_hash[ot.to_s] ||= {}
+        def_hash[ot.to_s][i] = obj.send(i)
+      end
+    end
+
+    self.class.option_types[:simple].each do |ot|
+      def_hash[ot.to_s] = send(ot)
+    end
+
+    self.class.option_types[:hash].each do |ot|
+      obj_hash = send(ot)
+      d = def_hash[ot.to_s] = {}
+      obj_hash.each do |k, obj|
+        obj.class.configure_with_items.each do |i|
+          d[k.to_s] ||= {}
+          d[k.to_s][i] = obj.send(i)
+        end
+      end
+    end
+
+    def_hash.deep_symbolize_keys
+  end
+
+  def config_hash_to_yaml
+    config = options_to_config_hash
+    YAML.dump(JSON.parse(config.to_json))
   end
 end

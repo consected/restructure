@@ -16,7 +16,7 @@ module Redcap
       self.project_admin = project_admin
       self.qualified_table_name = qualified_table_name
       self.category = DefaultCategory
-      super
+      setup_generator(project_admin, qualified_table_name)
     end
 
     def data_dictionary

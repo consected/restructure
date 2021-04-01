@@ -18,11 +18,10 @@ module Dynamic
       attr_accessor :parent, :qualified_table_name, :category
     end
 
-    def initialize(parent, qualified_table_name)
+    def setup_generator(parent, qualified_table_name)
       self.parent = parent
       self.qualified_table_name = qualified_table_name
       self.category = DefaultCategory
-      super()
     end
 
     #
