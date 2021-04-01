@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-module Reports
+module OptionConfigs
   #
   # Definition of the search attributes that appear on search forms.
   # These become accessible in a report instance as:
   #   report.search_attributes_config
-  class SearchAttributesConfig < OptionConfigs::BaseConfiguration
+  class SearchAttributesConfig < BaseConfiguration
     class NamedConfiguration < OptionConfigs::BaseNamedConfiguration
       configure_attributes %i[name label type all item_type multiple default disabled hidden selections conditions]
     end
@@ -33,6 +33,10 @@ module Reports
     # @return [String]
     def config_text
       owner.search_attrs
+    end
+
+    def config_text=(value)
+      owner.search_attrs = value
     end
 
     def valid?

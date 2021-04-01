@@ -37,6 +37,10 @@ module OptionConfigs
       owner.options
     end
 
+    def config_text=(value)
+      owner.options = value
+    end
+
     #
     # Required to support the initialization of options outside of a model
     # @see ActiveRecord::Persistence#persisted?
