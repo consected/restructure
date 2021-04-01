@@ -49,5 +49,13 @@ module Redcap
 
       @field_types
     end
+
+    #
+    # Should a field prevent downcasing
+    # @param [String | Symbol] field_name
+    # @return [Boolean]
+    def no_downcase_field(_field_name)
+      true
+    end
   end
 end

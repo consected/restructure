@@ -33,7 +33,7 @@ end
 if @page_layout.view_css.selectors
   res ||= []
   res += @page_layout.view_css.selectors.map {|c, v|
-    cs = c.split(',').map{|c1| "#{outer} #{c1}"}.join(", ")
+    cs = c.to_s.split(',').map{|c1| "#{outer} #{c1}"}.join(", ")
     styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
     "#{cs} \{  #{styles.join(' ')}\}"
   }

@@ -14,6 +14,8 @@ module Imports
 
     belongs_to :admin
 
+    after_initialize -> { setup_generator(import, dynamic_model_table) }
+
     before_validation :save_options
     validates :name, presence: true
     validates :dynamic_model_table, presence: true
@@ -27,10 +29,9 @@ module Imports
     end
 
     def initialize(attrs = {})
-      self.import = attrs[:import]
-      setup_generator(import, attrs[:dynamic_model_table])
-      self.field_types = {}
       super
+      setup_generator self, dynamic_model_table
+      self.field_types = {}
     end
 
     #
@@ -117,13 +118,6 @@ module Imports
     #    generator_config.<param name>.<name | type | default ...>
     def generator_config
       @generator_config ||= OptionConfigs::ImportModelGeneratorConfigs.new(self)
-    end
-
-    #
-    # The parsed configuration as a Hash, without further processing
-    # @return [Hash]
-    def generator_hash_config
-      generator_config.hash_configuration
     end
 
     #

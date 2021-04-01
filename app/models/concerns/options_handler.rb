@@ -41,7 +41,7 @@ module OptionsHandler
     def initialize(params)
       return unless params
 
-      params = params.deep_symbolize_keys
+      params = params.symbolize_keys
 
       unrecognized = params.keys - self.class.configure_with_items
       raise FphsException, "Unrecognized configuration params: #{unrecognized.join(', ')}" if unrecognized.present?
@@ -136,6 +136,13 @@ module OptionsHandler
       }
     end
 
+    #
+    # The dynamic class for a configured option type
+    def class_for(option_type, type: nil)
+      option_type = "#{option_type}__#{option_type}" if type == :hash_item
+      "#{name}::#{option_type.to_s.ns_camelize}".constantize
+    end
+
     private
 
     def add_option_type(type, opt, parent = nil)
@@ -145,13 +152,6 @@ module OptionsHandler
       # raise FphsException, "#{opt} not allowed as an option type" if instance_methods.include? opt
 
       parent.attr_accessor(opt)
-    end
-
-    #
-    # The dynamic class for a configured option type
-    def class_for(option_type, in_parent = nil)
-      in_parent ||= self
-      "#{in_parent.name}::#{option_type.to_s.ns_camelize}".constantize
     end
   end
 
@@ -221,9 +221,8 @@ module OptionsHandler
 
   #
   # The dynamic class for a configured option type
-  def class_for(option_type, in_parent = nil)
-    in_parent ||= self.class
-    "#{in_parent.name}::#{option_type.to_s.ns_camelize}".constantize
+  def class_for(option_type, type: nil)
+    self.class.class_for(option_type, type: type)
   end
 
   #
@@ -238,31 +237,45 @@ module OptionsHandler
 
     self.hash_configuration = hash_configuration.symbolize_keys
 
+    setup_all_options_multi hash_configuration
+    setup_all_options_simple hash_configuration
+    setup_all_options_hash hash_configuration
+
+    hash_configuration
+  end
+
+  def setup_all_options_multi(hash_configuration)
     self.class.option_types[:multi].each do |option_type|
       ot_class = class_for(option_type)
       config_val = hash_configuration[option_type]
       send("#{option_type}=", ot_class.new(config_val))
     end
+  end
 
+  def setup_all_options_simple(hash_configuration)
     self.class.option_types[:simple].each do |option_type|
       config_val = hash_configuration[option_type]
       send("#{option_type}=", config_val)
     end
+  end
 
+  def setup_all_options_hash(hash_configuration)
     self.class.option_types[:hash].each do |option_type|
-      ot_hash_class = class_for(option_type)
-      ot_class = class_for("#{option_type}__#{option_type}")
-      config_val = hash_configuration[option_type]
+      setup_options_hash(hash_configuration, option_type)
+    end
+  end
 
-      all_vals = ot_hash_class.new
-      config_val&.each do |k, v|
-        all_vals[k] = ot_class.new(v)
-      end
+  def setup_options_hash(hash_configuration, option_type)
+    ot_hash_class = class_for(option_type)
+    ot_class = class_for(option_type, type: :hash_item)
+    config_val = hash_configuration[option_type]
 
-      send("#{option_type}=", all_vals)
+    all_vals = ot_hash_class.new
+    config_val&.each do |k, v|
+      all_vals[k] = ot_class.new(v)
     end
 
-    hash_configuration
+    send("#{option_type}=", all_vals)
   end
 
   #
@@ -286,9 +299,10 @@ module OptionsHandler
 
     self.class.option_types[:hash].each do |ot|
       obj_hash = send(ot)
+      hash_class = class_for("#{ot}__#{ot}")
       d = def_hash[ot.to_s] = {}
       obj_hash.each do |k, obj|
-        obj.class.configure_with_items.each do |i|
+        hash_class.configure_with_items.each do |i|
           d[k.to_s] ||= {}
           d[k.to_s][i] = obj.send(i)
         end

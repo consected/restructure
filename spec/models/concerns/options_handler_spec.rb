@@ -131,7 +131,9 @@ RSpec.describe 'OptionsHandler', type: :model do
     expect(t.test3_var1).to be_a TestOptionsHandler::ConfigurationHash
 
     expect { t.send(:class_for, :test3_var1__test3_var1) }.not_to raise_error
-    expect(t.send(:class_for, :test3_var1__test3_var1)).to eq TestOptionsHandler::Test3Var1::Test3Var1
+    expect(t.send(:class_for, :test3_var1, type: :hash_item)).to eq TestOptionsHandler::Test3Var1::Test3Var1
+    expect(TestOptionsHandler::Test3Var1::Test3Var1).to respond_to :configure_with_items
+    expect(TestOptionsHandler::Test3Var1::Test3Var1.configure_with_items).to eq %i[test3_var1_a1 test3_var1_a2]
     expect(TestOptionsHandler::Test3Var1::Test3Var1.new({})).to respond_to :test3_var1_a1
     expect(TestOptionsHandler::Test3Var1::Test3Var1.new({})).to respond_to :test3_var1_a2
     expect(TestOptionsHandler::Test3Var1.new({})).not_to respond_to :test3_var1_a1
