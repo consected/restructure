@@ -24,9 +24,30 @@ body {
   }
 }
 
-body.status-compiling {
+body#body-top {
   filter: grayscale(100%);
   opacity: 0.2;
+}
+
+body#body-top.status-compiled,
+body#body-top.sessions {
+  filter: none;
+  opacity: 1;
+  transition: filter 0.5s ease;
+
+  animation-name: fadeInOpacity;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in;
+  animation-duration: 0.5s;
+}
+
+@keyframes fadeInOpacity {
+  0% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 body.page-loading {

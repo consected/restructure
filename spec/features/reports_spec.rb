@@ -67,6 +67,7 @@ describe 'reports', js: true, driver: :app_firefox_driver do
     within ".data-results table.tablesorter tr[data-report-id='#{id}']" do
       click_link 'Item Flags types'
     end
+    has_css? '.status-compiled'
   end
 
   def get_column_values(col, table, db_table = nil)
