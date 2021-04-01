@@ -96,7 +96,7 @@ _fpa = {
       _fpa.templates[id] = Handlebars.compile(source, _fpa.HandlebarsCompileOptions);
 
     });
-    $('body').removeClass('status-compiling');
+    $('body').removeClass('status-compiling initial-compiling').addClass('status-compiled');
   },
 
   send_ajax_request: function (url, options) {

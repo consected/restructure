@@ -24,7 +24,7 @@ module ApplicationHelper
   end
 
   def body_classes
-    " class=\"#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class} \"".html_safe
+    " class=\"#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class} initial-compiling \"".html_safe
   end
 
   def common_inline_cancel_button(class_extras = nil, link_text = nil)
