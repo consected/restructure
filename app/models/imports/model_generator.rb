@@ -60,6 +60,7 @@ module Imports
 
           ftype = field.class.name.ns_underscore.to_sym
           ftype = :boolean if ftype == :string && field.in?(%w[true false])
+          ftype = :datetime if ftype == :date_time
 
           curr_type = field_types[name]
 

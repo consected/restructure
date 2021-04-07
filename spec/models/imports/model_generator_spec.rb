@@ -10,12 +10,15 @@ RSpec.describe Imports::ModelGenerator, type: :model do
 
     `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
 
-    ds = Imports::ModelGenerator.new import: Import.new, dynamic_model_table: "dynamic.test_imports#{rand 100_000_000_000_000}_recs"
+    csv = File.read('spec/fixtures/import/test-types.csv')
+    ds = Imports::ModelGenerator.new import: Import.new, dynamic_model_table: "dynamic_test.test_imports#{rand 100_000_000_000_000}_recs"
     ds.current_admin = @admin
     ds.category = 'dynamic-test-env'
+    ds.analyze_csv(csv)
     @dm = ds.create_dynamic_model
 
     expect(ds.dynamic_model_ready?).to be_truthy
+    expect(@dm.field_list_array).to eq %w[a_string a_int a_float a_date a_time a_mixed_string a_boolean a_unknown a_string2]
   end
 
   before :example do
@@ -34,7 +37,7 @@ RSpec.describe Imports::ModelGenerator, type: :model do
 
     expect(res).to be_a Hash
     expect(res.keys).to eq %i[a_string a_int a_float a_date a_time a_mixed_string a_boolean a_unknown a_string2]
-    expect(res.values).to eq %i[string integer float date date_time string boolean string string]
+    expect(res.values).to eq %i[string integer float date datetime string boolean string string]
 
     expect(mg.generator_config.fields).to be_a mg.generator_config.class.class_for(:fields)
 
@@ -46,7 +49,7 @@ RSpec.describe Imports::ModelGenerator, type: :model do
         a_int: { caption: nil, comment: nil, label: nil, name: 'a_int', type: :integer },
         a_float: { caption: nil, comment: nil, label: nil, name: 'a_float', type: :float },
         a_date: { caption: nil, comment: nil, label: nil, name: 'a_date', type: :date },
-        a_time: { caption: nil, comment: nil, label: nil, name: 'a_time', type: :date_time },
+        a_time: { caption: nil, comment: nil, label: nil, name: 'a_time', type: :datetime },
         a_mixed_string: { caption: nil, comment: nil, label: nil, name: 'a_mixed_string', type: :string },
         a_boolean: { caption: nil, comment: nil, label: nil, name: 'a_boolean', type: :boolean },
         a_unknown: { caption: nil, comment: nil, label: nil, name: 'a_unknown', type: :string },
@@ -84,7 +87,7 @@ RSpec.describe Imports::ModelGenerator, type: :model do
           comment:#{' '}
         a_time:
           name: a_time
-          type: date_time
+          type: datetime
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
@@ -122,7 +125,7 @@ RSpec.describe Imports::ModelGenerator, type: :model do
         a_int: { caption: nil, comment: nil, label: nil, name: 'a_int', type: :integer },
         a_float: { caption: nil, comment: nil, label: nil, name: 'a_float', type: :float },
         a_date: { caption: nil, comment: nil, label: nil, name: 'a_date', type: :date },
-        a_time: { caption: nil, comment: nil, label: nil, name: 'a_time', type: :date_time, caption: 'A time field' },
+        a_time: { caption: nil, comment: nil, label: nil, name: 'a_time', type: :datetime, caption: 'A time field' },
         a_mixed_string: { caption: nil, comment: nil, label: nil, name: 'a_mixed_string', type: :string },
         a_boolean: { caption: nil, comment: nil, label: nil, name: 'a_boolean', type: :boolean },
         a_unknown: { caption: nil, comment: nil, label: nil, name: 'a_unknown', type: :string },
@@ -163,7 +166,7 @@ RSpec.describe Imports::ModelGenerator, type: :model do
           comment:#{' '}
         a_time:
           name: a_time
-          type: date_time
+          type: datetime
           label:#{' '}
           caption: A time field
           comment:#{' '}

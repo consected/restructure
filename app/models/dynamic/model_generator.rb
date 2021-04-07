@@ -144,7 +144,7 @@ module Dynamic
 
       field_types.each do |field_name, field_type|
         @db_configs[field_name] = {
-          type: field_type
+          type: field_type.to_s
         }
       end
 
