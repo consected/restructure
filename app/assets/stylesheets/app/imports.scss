@@ -1,15 +1,13 @@
-.import-action-container{
+.import-action-container {
   margin: 30px 30px 0 30px;
 }
-
 
 .import-form-actions {
   margin: 12px 30px;
 }
 
-
 .bottom-tab {
-  background-color: #E6E6E6;
+  background-color: #e6e6e6;
   padding: 8px;
   color: #333;
 
@@ -20,4 +18,14 @@
   &.hide-blank-rows {
     display: inline-block;
   }
+}
+.upload-not-completed,
+.import-has-no-user {
+  color: gray;
+  font-style: italic;
+}
+
+.import-filename {
+  font-family: monospace;
+  font-size: 14px;
 }

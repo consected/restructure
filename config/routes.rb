@@ -70,11 +70,10 @@ Rails.application.routes.draw do
   end
 
   namespace :imports do
-    resources :model_generators, except: %i[show destroy]
+    resources :model_generators, except: %i[destroy]
     resources :imports
   end
 
-  # get 'redcap/project_admins/:id/request_records' => 'redcap/project_admins#request_records'
   namespace :redcap do
     resources :project_admins, except: %i[show destroy]
     resources :project_admins do

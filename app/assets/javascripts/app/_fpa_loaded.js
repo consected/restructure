@@ -140,6 +140,9 @@ _fpa.loaded.default = function () {
     }
   }
 
+  window.onbeforeunload = function () {
+    $('body').addClass('page-transition');
+  }
 
   $('body').removeClass('page-loading');
 };

@@ -15,14 +15,14 @@ class Imports::ImportsController < ApplicationController
           raise FphsException, 'Select a table to export'
         end
         format.html do
-          @primary_tables = Import.accepts_models
+          @primary_tables = Imports::Import.accepts_models
 
           setup_table_rules
 
           if current_admin
-            @imports = Import.all
+            @imports = Imports::Import.all
           elsif current_user
-            @imports = Import.where('user_id=? AND imported_items is not NULL', current_user.id).order(created_at: :desc).limit(10)
+            @imports = Imports::Import.where('user_id=? AND imported_items is not NULL', current_user.id).order(created_at: :desc).limit(10)
           end
         end
       end
@@ -30,7 +30,7 @@ class Imports::ImportsController < ApplicationController
       respond_to do |format|
         format.csv do
           m = params[:get_template_for]
-          raise 'Invalid table selection' unless Import.accepted_model(m)
+          raise 'Invalid table selection' unless Imports::Import.accepted_model(m)
 
           @primary_table = m
           # Get an empty list for the model
@@ -47,7 +47,7 @@ class Imports::ImportsController < ApplicationController
     @primary_table = @import.primary_table
 
     @import.items = []
-    @import.imported_items.each do |id|
+    @import.imported_items&.each do |id|
       @import.items << item_class.find(id)
     end
 
@@ -56,15 +56,15 @@ class Imports::ImportsController < ApplicationController
 
   # Select a model and file to upload
   def new
-    @primary_tables = Import.accepts_models
+    @primary_tables = Imports::Import.accepts_models
     @primary_table = params[:primary_table] if @primary_tables.include? params[:primary_table]
-    @import = Import.new
+    @import = Imports::Import.new
   end
 
   # Accepts an uploaded file and parses the CSV
   def create
     if params[:primary_table]
-      @primary_tables = Import.accepts_models
+      @primary_tables = Imports::Import.accepts_models
       @primary_table = params[:primary_table] if @primary_tables.include? params[:primary_table]
       filename = ''
       if params[:import_file]
@@ -72,7 +72,7 @@ class Imports::ImportsController < ApplicationController
         csv = uploaded_io.read
         filename = uploaded_io.original_filename
       end
-      @import = Import.setup_import(@primary_table, current_user, filename)
+      @import = Imports::Import.setup_import(@primary_table, current_user, filename)
 
       if params[:import_file]
         @import.import_csv csv
@@ -209,7 +209,7 @@ class Imports::ImportsController < ApplicationController
   end
 
   def permitted_params(include_alt_ids = true)
-    Import.permitted_params_for @primary_table, include_alt_ids
+    Imports::Import.permitted_params_for @primary_table, include_alt_ids
   end
 
   def fields
@@ -273,12 +273,12 @@ class Imports::ImportsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_import
-    @import = Import.find(params[:id])
+    @import = Imports::Import.find(params[:id])
   end
 
   # Only allow a trusted parameter "white list" through.
   def import_params
-    params.require(:import).permit(:primary_table, :item_count, :filename, :items, :user_id, item_parameters)
+    params.require(:imports_import).permit(:primary_table, :item_count, :filename, :items, :user_id, item_parameters)
   end
 
   def authorized?

@@ -1,0 +1,12 @@
+<div class="model-generators-action-container">
+  <%= form_tag object_instance, multipart: true, method: :post, id: 'new_import', class: "form form-formatted" do |f| %>
+
+    
+    <h5 id="upload-message">Upload data</h5>
+    <label for="import_file">Pick the file to upload<br/>Import will start immediately after selection</label>
+    <%= file_field_tag :import_file, class: 'ff' %>
+
+  <% end %>
+  <br/>
+
+</div>

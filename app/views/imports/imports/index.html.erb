@@ -61,6 +61,7 @@
       <tr>
         <th>Primary table</th>
         <th>Item count</th>
+        <th>Total imported</th>
         <th>Filename</th>
         <th>User</th>
         <th>Date</th>
@@ -69,14 +70,17 @@
     </thead>
 
     <tbody>
-      <% @imports.order(id: :desc).each do |import| %>
+      <% @imports.order(id: :desc).each do |import| 
+            real_count = import.imported_items&.count
+      %>
         <tr>
           <td><%= import.primary_table %></td>
           <td><%= import.item_count %></td>
-          <td><%= import.filename %></td>
-          <td><%= import.user || 'upload not completed' %></td>
+          <td class="<%= real_count ? 'upload-completed': 'upload-not-completed' %>"><%= real_count || 'upload not completed' %></td>
+          <td class="import-filename"><%= import.filename %></td>
+          <td class="<%= import.user ? 'import-has-user': 'import-has-no-user' %>"><%= import.user || 'upload not completed' %></td>
           <td data-format-date-local="true"><%= import.created_at %></td>
-          <td><%= link_to 'Show', imports_import_path(import) %></td>
+          <td><%= link_to 'Show', imports_import_path(import) if real_count%></td>
         </tr>
       <% end %>
     </tbody>

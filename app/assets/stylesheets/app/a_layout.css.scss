@@ -69,6 +69,13 @@ body#body-top.sessions {
   }
 }
 
+body#body-top.page-transition {
+  filter: grayscale(100%);
+
+  opacity: 0.2;
+  transition: opacity 500ms, filter 0.5s ease;
+}
+
 @keyframes fadeInOpacity {
   0% {
     opacity: 0.2;

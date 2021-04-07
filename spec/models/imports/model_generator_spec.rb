@@ -11,7 +11,7 @@ RSpec.describe Imports::ModelGenerator, type: :model do
     `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
 
     csv = File.read('spec/fixtures/import/test-types.csv')
-    ds = Imports::ModelGenerator.new import: Import.new, dynamic_model_table: "dynamic_test.test_imports#{rand 100_000_000_000_000}_recs"
+    ds = Imports::ModelGenerator.new import: Imports::Import.new, dynamic_model_table: "dynamic_test.test_imports#{rand 100_000_000_000_000}_recs"
     ds.current_admin = @admin
     ds.category = 'dynamic-test-env'
     ds.analyze_csv(csv)
@@ -28,7 +28,7 @@ RSpec.describe Imports::ModelGenerator, type: :model do
   it 'analyzes a CSV to guess at the field types' do
     csv = File.read('spec/fixtures/import/test-types.csv')
 
-    import = Import.new
+    import = Imports::Import.new
     mg = Imports::ModelGenerator.new(name: 'Test CSV',
                                      import: import,
                                      dynamic_model_table: 'test_csv_imports',
