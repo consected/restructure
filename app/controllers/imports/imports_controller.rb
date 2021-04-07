@@ -91,10 +91,10 @@ class ImportsController < ApplicationController
         flash.now[:warning] = @import.errors.to_a.join("\n")[0..2000] unless @import.errors.empty?
         render 'new_import'
       else
-        redirect_to new_import_path, alert: "Error preparing the import: #{Application.record_error_message @import}"
+        redirect_to new_imports_import_path, alert: "Error preparing the import: #{Application.record_error_message @import}"
       end
     else
-      redirect_to new_import_path, notice: 'Ensure that a file and table are set'
+      redirect_to new_imports_import_path, notice: 'Ensure that a file and table are set'
     end
   end
 
