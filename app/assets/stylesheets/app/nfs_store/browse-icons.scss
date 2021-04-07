@@ -41,6 +41,15 @@
           transition: ease-in 600ms;
         }
       }
+
+      a.browse-filename {
+        color: rgb(64, 64, 64);
+        &:link,
+        &:active,
+        &:focus {
+          color: rgb(64, 64, 64);
+        }
+      }
     }
   }
 
