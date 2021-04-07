@@ -1,4 +1,4 @@
-class ImportsController < ApplicationController
+class Imports::ImportsController < ApplicationController
   include ParentHandler
   before_action :authenticate_user_or_admin!
   before_action :authorized?

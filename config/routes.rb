@@ -25,8 +25,6 @@ Rails.application.routes.draw do
 
   resources :client_logs, only: [:create]
 
-  resources :imports
-
   namespace :admin do
     resources :external_identifiers, except: %i[show destroy]
     resources :reports, except: %i[show destroy]
@@ -69,6 +67,11 @@ Rails.application.routes.draw do
         resources :filters, except: %i[show destroy]
       end
     end
+  end
+
+  namespace :imports do
+    resources :model_generators, except: %i[show destroy]
+    resources :imports
   end
 
   # get 'redcap/project_admins/:id/request_records' => 'redcap/project_admins#request_records'

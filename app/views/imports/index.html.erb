@@ -3,7 +3,7 @@
   <div class="row">
     <div class="col-md-7">
       <h3>Step 1: Select table to import into</h3>
-      <%= form_tag imports_path(format: :csv), method: :get, target: 'csvfile', id: 'import_template_download' do %>
+      <%= form_tag imports_imports_path(format: :csv), method: :get, target: 'csvfile', id: 'import_template_download' do %>
         <div class="form-group">
           <%= select_tag :get_template_for, options_for_select(@primary_tables), prompt: '- select table -' %>
         </div>
@@ -15,7 +15,7 @@
       <p><br/></p>
       <p><br/></p>
 
-      <%= form_tag new_import_path, method: :get, id: 'start_csv_import' do %>
+      <%= form_tag new_imports_import_path, method: :get, id: 'start_csv_import' do %>
       <%= field_set_tag '', disabled: true do %>
       <h3>Step 3: Start CSV import</h3>
       <%= hidden_field_tag :primary_table %>
@@ -76,7 +76,7 @@
           <td><%= import.filename %></td>
           <td><%= import.user || 'upload not completed' %></td>
           <td data-format-date-local="true"><%= import.created_at %></td>
-          <td><%= link_to 'Show', import_path(import) %></td>
+          <td><%= link_to 'Show', imports_import_path(import) %></td>
         </tr>
       <% end %>
     </tbody>
