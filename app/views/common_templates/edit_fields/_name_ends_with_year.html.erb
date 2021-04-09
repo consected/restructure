@@ -1,7 +1,12 @@
 <%= form.label field_name_sym, label_for(field_name_sym, labels) %>
 <%
   h = {}
-  r = Settings.const_get("#{field_name.camelize}Range")
-  h[:in] = r if r
+  begin
+    r = Settings.const_get("#{field_name.camelize}Range")
+    h[:in] = r if r
+  rescue StandardError => e
+    h[:in] = nil
+  end
+
 %>
 <%= form.number_field field_name_sym, h.merge( { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}) %>

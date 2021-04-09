@@ -9,7 +9,7 @@ module OptionConfigs
     include OptionsHandler
 
     # Fields hash of FieldConfiguration
-    configure_hash :fields, with: %i[name type label caption comment]
+    configure_hash :fields, with: %i[type label caption comment]
 
     #
     # Set up the fields configuration from the CSV field types hash
@@ -20,10 +20,19 @@ module OptionConfigs
       }
       field_types.each do |name, field_type|
         f[:fields][name] ||= {}
-        f[:fields][name].merge! name: name.to_s, type: field_type
+        f[:fields][name].merge! type: field_type
       end
 
       setup_options_hash(f, :fields)
+    end
+
+    #
+    # Set up the field types hash from the persisted configuration
+    # @param [Hash] field_types
+    def setup_field_types_from_config(field_types)
+      fields.each do |name, field|
+        field_types[name] = field.type.to_sym
+      end
     end
 
     #

@@ -37,6 +37,8 @@ module Dynamic
     # @param [String] category - optional category, defaults to import
     # @return [DynamicModel]
     def create_dynamic_model
+      raise FphsException, 'no fields specified to create dynamic model' unless field_list.present?
+
       schema_name, table_name = schema_and_table_name
       category = self.category || DefaultCategory
 
@@ -52,17 +54,21 @@ module Dynamic
 
       options = YAML.dump default_options
 
-      if dynamic_model && dynamic_model.field_list != field_list
+      foreign_key_name = 'master_id' if field_list.split.include?('master_id')
+
+      if dynamic_model
+        @dynamic_model = dynamic_model
         dynamic_model.update! current_admin: current_admin,
                               field_list: field_list,
                               options: options,
-                              allow_migrations: true
+                              allow_migrations: true,
+                              foreign_key_name: foreign_key_name
       else
         @dynamic_model = DynamicModel.create! current_admin: current_admin,
                                               name: name,
                                               table_name: table_name,
                                               primary_key_name: :id,
-                                              foreign_key_name: nil,
+                                              foreign_key_name: foreign_key_name,
                                               category: category,
                                               field_list: field_list,
                                               options: options,

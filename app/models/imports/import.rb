@@ -8,9 +8,19 @@ class Imports::Import < ActiveRecord::Base
 
   #
   # List of all models that can be imported
+  # @param [User] user - optionally limit the result to the specified user and current app type
   # @return [Array{String}]
-  def self.accepts_models
-    (Master.get_all_associations + ['masters']).sort
+  def self.accepts_models(user = nil)
+    uac = Admin::UserAccessControl.active.where(resource_type: :table)
+    if user
+      uac = uac.scope_user_and_role(user)
+      uac.pluck(:resource_name).uniq
+    end
+
+    tables = uac.where(resource_type: 'table').valid_resources.pluck(:resource_name).sort
+    tables -= %w[item_flags]
+    # mtables = Master.get_all_associations
+    (tables + ['masters']).sort
   end
 
   #

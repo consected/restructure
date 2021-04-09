@@ -10,8 +10,24 @@ _fpa.loaded.imports = function () {
 _fpa.loaded.model_generators = function () {
   $(document).on('change', '#import_file', function () {
     $('#upload-message').html('Uploading file');
+    $('.dynamic-details-fields').hide();
     $('#import_file').hide();
-    $('#new_import').trigger('submit.rails');
+
+    $('#analyze_csv_form_res').on('load', function () {
+      var res = $('#analyze_csv_form_res').contents().text();
+      if (res == 'ok') {
+        $('#analyze_csv_refresh').trigger('click');
+      }
+      else {
+        $('#upload-message').html('<p class="upload-failed">Failed to evaluate CSV file: ' + res + '</p><p class="upload-failed">Try uploading again</p>');
+
+        $('#import_file').show();
+      }
+    })
+
+    $('#analyze_csv').trigger('submit.rails');
+
+
   })
 
 }

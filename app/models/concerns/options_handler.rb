@@ -54,7 +54,7 @@ module OptionsHandler
   end
 
   included do
-    attr_accessor :owner
+    attr_accessor :owner, :orig_config_text
     attr_writer :hash_configuration
 
     # If we are within an ActiveRecord model, after_initialize will setup the
@@ -62,6 +62,8 @@ module OptionsHandler
     # If used outside a model, it is necessary to ensure new is called explicitly
     # and that the #initialize method (if defined) calls `super`
     after_initialize :setup_options if respond_to? :after_initialize
+
+    before_validation :update_options if respond_to? :before_validation
     validate :save_options
   end
 
@@ -202,9 +204,16 @@ module OptionsHandler
     self.config_text = config_hash_to_yaml
   end
 
+  #
+  # Force a reload from the configuration text if it has changed since we loaded
+  def update_options
+    setup_options if config_text != orig_config_text
+  end
+
   protected
 
   def setup_options
+    self.orig_config_text ||= config_text
     parse_config_text
     setup_from_hash_config
   end

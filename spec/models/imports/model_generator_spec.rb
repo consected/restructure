@@ -11,14 +11,17 @@ RSpec.describe Imports::ModelGenerator, type: :model do
     `mkdir -p db/app_migrations/imports_test; rm -f db/app_migrations/imports_test/*test_imports*.rb`
 
     csv = File.read('spec/fixtures/import/test-types.csv')
-    ds = Imports::ModelGenerator.new import: Imports::Import.new, dynamic_model_table: "dynamic_test.test_imports#{rand 100_000_000_000_000}_recs"
-    ds.current_admin = @admin
-    ds.category = 'dynamic-test-env'
+    ds = Imports::ModelGenerator.new dynamic_model_table: "dynamic_test.test_imports#{rand 100_000_000_000_000}_recs",
+                                     category: 'dynamic-test-env',
+                                     current_admin: @admin
+
     ds.analyze_csv(csv)
     @dm = ds.create_dynamic_model
 
     expect(ds.dynamic_model_ready?).to be_truthy
     expect(@dm.field_list_array).to eq %w[a_string a_int a_float a_date a_time a_mixed_string a_boolean a_unknown a_string2]
+    expect(ds.dynamic_model.id).to eq @dm.id
+    expect(ds.dynamic_model_def_current?).to be true
   end
 
   before :example do
@@ -28,9 +31,7 @@ RSpec.describe Imports::ModelGenerator, type: :model do
   it 'analyzes a CSV to guess at the field types' do
     csv = File.read('spec/fixtures/import/test-types.csv')
 
-    import = Imports::Import.new
     mg = Imports::ModelGenerator.new(name: 'Test CSV',
-                                     import: import,
                                      dynamic_model_table: 'test_csv_imports',
                                      description: 'A test')
     res = mg.analyze_csv(csv)
@@ -45,15 +46,15 @@ RSpec.describe Imports::ModelGenerator, type: :model do
     expect(new_config).to be_a Hash
     expect(new_config).to eq(
       fields: {
-        a_string: { caption: nil, comment: nil, label: nil, name: 'a_string', type: :string },
-        a_int: { caption: nil, comment: nil, label: nil, name: 'a_int', type: :integer },
-        a_float: { caption: nil, comment: nil, label: nil, name: 'a_float', type: :float },
-        a_date: { caption: nil, comment: nil, label: nil, name: 'a_date', type: :date },
-        a_time: { caption: nil, comment: nil, label: nil, name: 'a_time', type: :datetime },
-        a_mixed_string: { caption: nil, comment: nil, label: nil, name: 'a_mixed_string', type: :string },
-        a_boolean: { caption: nil, comment: nil, label: nil, name: 'a_boolean', type: :boolean },
-        a_unknown: { caption: nil, comment: nil, label: nil, name: 'a_unknown', type: :string },
-        a_string2: { caption: nil, comment: nil, label: nil, name: 'a_string2', type: :string }
+        a_string: { caption: nil, comment: nil, label: nil, type: :string },
+        a_int: { caption: nil, comment: nil, label: nil, type: :integer },
+        a_float: { caption: nil, comment: nil, label: nil, type: :float },
+        a_date: { caption: nil, comment: nil, label: nil,  type: :date },
+        a_time: { caption: nil, comment: nil, label: nil,  type: :datetime },
+        a_mixed_string: { caption: nil, comment: nil, label: nil, type: :string },
+        a_boolean: { caption: nil, comment: nil, label: nil,  type: :boolean },
+        a_unknown: { caption: nil, comment: nil, label: nil,  type: :string },
+        a_string2: { caption: nil, comment: nil, label: nil,  type: :string }
       }
     )
 
@@ -62,55 +63,46 @@ RSpec.describe Imports::ModelGenerator, type: :model do
       ---
       fields:
         a_string:
-          name: a_string
           type: string
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_int:
-          name: a_int
           type: integer
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_float:
-          name: a_float
           type: float
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_date:
-          name: a_date
           type: date
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_time:
-          name: a_time
           type: datetime
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_mixed_string:
-          name: a_mixed_string
           type: string
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_boolean:
-          name: a_boolean
           type: boolean
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_unknown:
-          name: a_unknown
           type: string
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_string2:
-          name: a_string2
           type: string
           label:#{' '}
           caption:#{' '}
@@ -121,15 +113,15 @@ RSpec.describe Imports::ModelGenerator, type: :model do
     new_config = mg.generator_config.send(:options_to_config_hash).deep_symbolize_keys
     expect(new_config).to eq(
       fields: {
-        a_string: { caption: nil, comment: nil, label: nil, name: 'a_string', type: :string },
-        a_int: { caption: nil, comment: nil, label: nil, name: 'a_int', type: :integer },
-        a_float: { caption: nil, comment: nil, label: nil, name: 'a_float', type: :float },
-        a_date: { caption: nil, comment: nil, label: nil, name: 'a_date', type: :date },
-        a_time: { caption: nil, comment: nil, label: nil, name: 'a_time', type: :datetime, caption: 'A time field' },
-        a_mixed_string: { caption: nil, comment: nil, label: nil, name: 'a_mixed_string', type: :string },
-        a_boolean: { caption: nil, comment: nil, label: nil, name: 'a_boolean', type: :boolean },
-        a_unknown: { caption: nil, comment: nil, label: nil, name: 'a_unknown', type: :string },
-        a_string2: { caption: nil, comment: nil, label: nil, name: 'a_string2', type: :string }
+        a_string: { caption: nil, comment: nil, label: nil, type: :string },
+        a_int: { caption: nil, comment: nil, label: nil, type: :integer },
+        a_float: { caption: nil, comment: nil, label: nil, type: :float },
+        a_date: { caption: nil, comment: nil, label: nil,  type: :date },
+        a_time: { caption: nil, comment: nil, label: nil,  type: :datetime, caption: 'A time field' },
+        a_mixed_string: { caption: nil, comment: nil, label: nil, type: :string },
+        a_boolean: { caption: nil, comment: nil, label: nil,  type: :boolean },
+        a_unknown: { caption: nil, comment: nil, label: nil,  type: :string },
+        a_string2: { caption: nil, comment: nil, label: nil,  type: :string }
       }
     )
 
@@ -141,55 +133,46 @@ RSpec.describe Imports::ModelGenerator, type: :model do
       ---
       fields:
         a_string:
-          name: a_string
           type: string
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_int:
-          name: a_int
           type: integer
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_float:
-          name: a_float
           type: float
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_date:
-          name: a_date
           type: date
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_time:
-          name: a_time
           type: datetime
           label:#{' '}
           caption: A time field
           comment:#{' '}
         a_mixed_string:
-          name: a_mixed_string
           type: string
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_boolean:
-          name: a_boolean
           type: boolean
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_unknown:
-          name: a_unknown
           type: string
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
         a_string2:
-          name: a_string2
           type: string
           label:#{' '}
           caption:#{' '}

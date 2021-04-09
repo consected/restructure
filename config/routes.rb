@@ -70,6 +70,12 @@ Rails.application.routes.draw do
   end
 
   namespace :imports do
+    resources :model_generators do
+      member do
+        post :analyze_csv
+        post :create_model
+      end
+    end
     resources :model_generators, except: %i[destroy]
     resources :imports
   end

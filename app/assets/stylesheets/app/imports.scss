@@ -29,3 +29,12 @@
   font-family: monospace;
   font-size: 14px;
 }
+
+.dynamic-details-upload {
+  margin-top: 1em;
+
+  .upload-failed {
+    font-weight: bold;
+    color: rgb(107, 0, 0);
+  }
+}

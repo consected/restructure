@@ -15,7 +15,7 @@ class Imports::ImportsController < ApplicationController
           raise FphsException, 'Select a table to export'
         end
         format.html do
-          @primary_tables = Imports::Import.accepts_models
+          @primary_tables = accepts_models
 
           setup_table_rules
 
@@ -56,7 +56,7 @@ class Imports::ImportsController < ApplicationController
 
   # Select a model and file to upload
   def new
-    @primary_tables = Imports::Import.accepts_models
+    @primary_tables = accepts_models
     @primary_table = params[:primary_table] if @primary_tables.include? params[:primary_table]
     @import = Imports::Import.new
   end
@@ -64,7 +64,7 @@ class Imports::ImportsController < ApplicationController
   # Accepts an uploaded file and parses the CSV
   def create
     if params[:primary_table]
-      @primary_tables = Imports::Import.accepts_models
+      @primary_tables = accepts_models
       @primary_table = params[:primary_table] if @primary_tables.include? params[:primary_table]
       filename = ''
       if params[:import_file]
@@ -201,6 +201,10 @@ class Imports::ImportsController < ApplicationController
   end
 
   protected
+
+  def accepts_models
+    Imports::Import.accepts_models current_user
+  end
 
   def item_parameters
     item = {}

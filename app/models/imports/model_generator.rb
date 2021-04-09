@@ -14,13 +14,15 @@ module Imports
 
     belongs_to :admin
 
-    after_initialize -> { setup_generator(import, dynamic_model_table) }
+    after_initialize :setup
 
+    before_validation :update_options
     before_validation :save_options
+
     validates :name, presence: true
     validates :dynamic_model_table, presence: true
 
-    attr_accessor :import
+    after_save :add_user_access_control
 
     #
     # Class that implements options functionality
@@ -30,8 +32,15 @@ module Imports
 
     def initialize(attrs = {})
       super
+      setup
+    end
+
+    def setup
       setup_generator self, dynamic_model_table
       self.field_types = {}
+      generator_config.setup_field_types_from_config field_types
+    rescue StandardError => e
+      Rails.logger.warn e
     end
 
     #
@@ -49,6 +58,7 @@ module Imports
     def analyze_csv(csv, keep_core_fields: nil)
       csv_rows = parse(csv)
 
+      self.field_types = {}
       # Ensure the fields are set up in the original order
       csv_rows.headers.each do |name|
         field_types[name] = nil
@@ -85,6 +95,8 @@ module Imports
         field_types[k] ||= :string
       end
 
+      field_types[:master_id] = :references if field_types.keys.include? :master_id
+
       generator_config.setup_fields_config field_types
 
       field_types
@@ -111,6 +123,35 @@ module Imports
     end
 
     #
+    # The latest database columns for the dynamic model.
+    # Returns an array of connection.columns definitions.
+    # Get name and type for each record with:
+    #   record.name
+    #   record.type
+    # @return [Array]
+    def dynamic_model_columns
+      @dynamic_model_columns ||= ActiveRecord::Base.connection.columns(dynamic_model.table_name)
+    end
+
+    #
+    # Does the current dynamic model definition match the field types configuration?
+    # @return [Boolean | nil]
+    def dynamic_model_def_current?
+      return unless (dynamic_model_columns.map(&:name) - self.class.core_field_names).length == field_types.length
+
+      res = true
+      field_types.each do |k, v|
+        v = :integer if v == :references
+        unless dynamic_model_columns.find { |c| c.name == k.to_s }.type == v
+          res = false
+          break
+        end
+      end
+
+      res
+    end
+
+    #
     # Set up or return the generator config class, for parsing the
     # text attribute #options.
     # Access configuration attributes directly as:
@@ -127,12 +168,31 @@ module Imports
       generator_config.save_options
     end
 
+    #
+    # Ensure the config options are updated if the configuration text has changed
+    def update_options
+      generator_config.update_options
+    end
+
     def disabled
       false
     end
 
     def disabled=(value)
       # ignore
+    end
+
+    def add_user_access_control
+      return unless admin.matching_user && dynamic_model
+      return if admin.matching_user.has_access_to? :create, :table, dynamic_model.resource_name
+
+      Admin::UserAccessControl.create!(app_type: admin.matching_user.app_type,
+                                       resource_type: :table,
+                                       resource_name: dynamic_model.resource_name,
+                                       access: :create,
+                                       disabled: false,
+                                       current_admin: admin,
+                                       user_id: admin.matching_user.id)
     end
   end
 end
