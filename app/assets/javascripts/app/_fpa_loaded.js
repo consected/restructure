@@ -140,6 +140,17 @@ _fpa.loaded.default = function () {
     }
   }
 
+
+
+  $(document).on('click', 'a', function () {
+    var href = $(this).attr('href');
+    var data_remote = $(this).attr('data-remote');
+    if (!href || data_remote) return;
+    if (href.indexOf('/nfs_store/downloads/') >= 0) {
+      $('body').addClass('prevent-page-transition');
+    }
+  });
+
   window.onbeforeunload = function () {
 
     if ($('body').hasClass('prevent-page-transition')) {
