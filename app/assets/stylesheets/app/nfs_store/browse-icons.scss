@@ -198,6 +198,15 @@
 
   .browse-entry-classifications {
     color: #333;
+    &:link,
+    &:active,
+    &:focus {
+      color: #333;
+    }
+
+    &:hover {
+      cursor: pointer;
+    }
 
     .bem-meta-link {
       text-decoration: none;
@@ -282,5 +291,34 @@
     font-family: monospace;
     font-size: 12px;
     list-style: none;
+  }
+}
+
+.plain-list {
+  .container-icons-folder-items {
+    flex-direction: column;
+
+    .container-icons-entry {
+      text-align: left;
+      padding-left: 0;
+
+      a.browse-icon,
+      .browse-entry-meta {
+        display: none;
+      }
+
+      a.browse-entry-classifications {
+        color: rgb(51, 122, 183);
+        &:link,
+        &:active,
+        &:focus {
+          color: rgb(51, 122, 183);
+        }
+      }
+
+      a.browse-filename {
+        display: none;
+      }
+    }
   }
 }
