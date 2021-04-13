@@ -3,6 +3,23 @@
 .report-results-block {
   margin: 30px 30px 0 30px;
 }
+
+.import-edit-container {
+  overflow: auto;
+  max-height: 50vh;
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgb(238, 238, 238);
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+}
+
 .import-edit-form,
 .report-results-inner {
   width: auto;
@@ -60,6 +77,10 @@ table.table.report-table {
 
   tr.report-item-edit td.report-el-disabled {
     background-color: #eee;
+  }
+
+  td select {
+    line-height: normal;
   }
 }
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module CommonTemplatesHelper
-  def handle_set_related_field(field_name)
+  def handle_set_related_field(object_instance, field_name)
     object_instance.set_related_fields[field_name] if object_instance.respond_to?(:set_related_fields)
   end
 

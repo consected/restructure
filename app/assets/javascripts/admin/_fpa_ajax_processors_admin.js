@@ -7,6 +7,7 @@ _fpa.postprocessors_admin = {
     $('tr.new-record').before($('tr.admin-list-item').first());
 
     $('.saved-row').removeClass('saved-row');
+    $('.edit-as-custom-setup').removeClass('edit-as-custom-setup');
     _fpa.form_utils.format_block(block);
     block.find('#admin-edit-cancel').click(function (ev) {
       ev.preventDefault();

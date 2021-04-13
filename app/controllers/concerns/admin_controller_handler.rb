@@ -11,7 +11,7 @@ module AdminControllerHandler
     helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance,
                   :objects_instance, :human_name, :no_edit, :primary_model,
                   :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?,
-                  :help_section, :help_subsection, :title, :no_create, :show_head_info
+                  :help_section, :help_subsection, :title, :no_create, :show_head_info, :view_folder
   end
 
   def index
@@ -69,7 +69,11 @@ module AdminControllerHandler
     if res
       @updated_with = object_instance
       begin
-        render partial: view_path('item'), locals: { list_item: object_instance }
+        if @show_again_on_save
+          index
+        else
+          render partial: view_path('item'), locals: { list_item: object_instance }
+        end
       rescue ActionView::MissingTemplate
         index
       end
@@ -86,7 +90,11 @@ module AdminControllerHandler
       flash.now[:notice] = "#{human_name} updated successfully"
       @updated_with = object_instance
       begin
-        render partial: view_path('item'), locals: { list_item: object_instance }
+        if @show_again_on_save
+          index
+        else
+          render partial: view_path('item'), locals: { list_item: object_instance }
+        end
       rescue ActionView::MissingTemplate
         index
       end

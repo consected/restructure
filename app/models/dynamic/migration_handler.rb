@@ -113,6 +113,7 @@ module Dynamic
           table_name_before_last_save,
           btm,
           db_configs,
+          self.class.name.underscore.to_sym,
           allow_migrations: allow_migrations
         )
     end

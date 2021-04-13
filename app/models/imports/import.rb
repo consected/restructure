@@ -1,4 +1,4 @@
-class Import < ActiveRecord::Base
+class Imports::Import < ActiveRecord::Base
   belongs_to :user
 
   validate :accepted_model
@@ -8,9 +8,19 @@ class Import < ActiveRecord::Base
 
   #
   # List of all models that can be imported
+  # @param [User] user - optionally limit the result to the specified user and current app type
   # @return [Array{String}]
-  def self.accepts_models
-    (Master.get_all_associations + ['masters']).sort
+  def self.accepts_models(user = nil)
+    uac = Admin::UserAccessControl.active.where(resource_type: :table)
+    if user
+      uac = uac.scope_user_and_role(user)
+      uac.pluck(:resource_name).uniq
+    end
+
+    tables = uac.where(resource_type: 'table').valid_resources.pluck(:resource_name).sort
+    tables -= %w[item_flags]
+    # mtables = Master.get_all_associations
+    (tables + ['masters']).sort
   end
 
   #
@@ -20,7 +30,7 @@ class Import < ActiveRecord::Base
   # @param [String] filename to record
   # @return [Import] resulting Import instance
   def self.setup_import(primary_table, current_user, filename)
-    import = Import.new
+    import = Imports::Import.new
     import.primary_table = primary_table
     import.user = current_user
     import.filename = filename
@@ -129,7 +139,7 @@ class Import < ActiveRecord::Base
         end
 
         new_obj.current_user ||= user if new_obj.respond_to? :current_user
-        new_obj[:user_id] ||= current_id if new_obj.respond_to? :user_id
+        new_obj[:user_id] ||= user_id if new_obj.respond_to? :user_id
       rescue FphsException => e
         errors.add 'import error', e.message
       rescue StandardError => e
@@ -178,7 +188,7 @@ class Import < ActiveRecord::Base
   # @param [String] primary_table
   # @return [Boolean]
   def self.accepted_model(primary_table)
-    Import.accepts_models.include?(primary_table)
+    Imports::Import.accepts_models.include?(primary_table)
   end
 
   #
@@ -196,7 +206,7 @@ class Import < ActiveRecord::Base
   # either leakage of data structures or import into tables that are
   # not acceptable
   def accepted_model
-    Import.accepted_model(primary_table)
+    Imports::Import.accepted_model(primary_table)
   end
 
   # Do the setup!

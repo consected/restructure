@@ -13,7 +13,10 @@ class PagesController < ApplicationController
   end
 
   def index
-    return unless current_user && !current_admin
+    unless current_user && !current_admin
+      render 'index', layout: 'admin_application'
+      return
+    end
 
     home_url = app_config_text(:logo_link, masters_search_path)
     redirect_to home_url

@@ -1,0 +1,16 @@
+<div class="admin-options-block-outer">
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab" aria-expanded="true">Details</a></li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="def-details-block">
+      <%= render partial: 'imports/model_generators/details_block', locals: {object_instance: object_instance} %>
+    </div>
+
+
+  </div>
+</div>

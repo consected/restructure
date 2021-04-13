@@ -1540,13 +1540,33 @@ _fpa.form_utils = {
         var edid = $eddiv.attr('id');
         var $edtools = $(this).find('.btn-toolbar[data-target="#' + edid + '"]');
         var editor = $eddiv.wysiwyg({ dragAndDropImages: true });
+        var wysiwygEditor = editor.wysiwygEditor;
 
         $edtools.hide();
         $eddiv.on('focus', function () {
           $('.custom-editor-container .btn-toolbar').not("[data-target='" + $edtools.attr('data-target') + "']").hide();
           $edtools.slideDown();
+          wysiwygEditor.restoreSelection()
+
         }).on('change', function () {
           $eddiv.data('editor-changed', true);
+          wysiwygEditor.saveSelection()
+        }).on('blur', function () {
+          wysiwygEditor.saveSelection()
+
+        }).on('paste', function () {
+          wysiwygEditor.saveSelection()
+          window.setTimeout(function () {
+
+            var obj = { html: editor.cleanHtml() };
+            var txt = _fpa.utils.html_to_markdown(obj);
+            editor.html(obj.html);
+            $edta.val(txt);
+            $eddiv.data('editor-changed', null);
+            wysiwygEditor.restoreSelection()
+
+          }, 100);
+
         });
 
         var autoparse = function () {
@@ -1555,29 +1575,11 @@ _fpa.form_utils = {
               // Only if there has been a change
               $eddiv.data('editor-changed', null);
 
-              // Add a header if necessary
-              if (editor.find('thead').length === 0) {
-                var first_row = editor.find('tr').first();
-                var headers = first_row.find('td');
-                var thead_html = $('<thead><tr></tr></thead>')
-                var thead_tr = thead_html.find('tr');
-                headers.each(function () {
-                  var th = "<th>" + $(this).html() + "</th>";
-                  thead_tr.append(th);
-                });
 
-                first_row.remove()
+              var obj = { html: editor.cleanHtml() };
+              var txt = _fpa.utils.html_to_markdown(obj);
 
-                editor.find('table').prepend(thead_html)
-              }
-
-              var html = editor.cleanHtml();
-              var txt = domador(html);
-              // Clean the text to remove
-              // any number of hash or asterisk symbols followed by 
-              // one or more spaces
-              var cleantext = txt.replace(/(^|\n)(#|\*)+ *\n/g, '');
-              $edta.val(cleantext);
+              $edta.val(txt);
             }
 
             window.setTimeout(function () {
@@ -1624,9 +1626,10 @@ _fpa.form_utils = {
 
         _fpa.secure_view.setup_links($(this), 'a.browse-icon', { allow_actions: acts, set_preview_as: spa, attr_for_filename: 'title', link_type: 'icon' });
         _fpa.secure_view.setup_links($(this), 'a.browse-filename', { allow_actions: acts, set_preview_as: spa });
+        _fpa.secure_view.setup_links($(this), 'a.browse-entry-classifications', { allow_actions: acts, set_preview_as: spa, link_type: 'classifications' });
       }
       if (usv == null || usv == '' || usv == 'false') {
-        $(this).find('a.browse-filename, a.browse-icon').on('click', function (ev) {
+        $(this).find('a.browse-filename, a.browse-icon, a.browse-entry-classifications').on('click', function (ev) {
           ev.preventDefault();
         });
       }

@@ -25,7 +25,7 @@ require 'rails_helper'
 # removed from Rails core in Rails 5, but can be added back in via the
 # `rails-controller-testing` gem.
 
-RSpec.describe ImportsController, type: :controller do
+RSpec.describe Imports::ImportsController, type: :controller do
   include ModelSupport
   include MasterSupport
 
