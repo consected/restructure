@@ -80,13 +80,21 @@ module ReportsHelper
         options.merge!(multiple: true)
         main_field += select_tag("search_attrs[#{name}]", use_dropdown, options)
       else
-        options.merge!(type: type_string, class: 'form-control no-auto-submit', data: { attribute: name })
+        options.merge!(
+          type: type_string,
+          class: 'form-control no-auto-submit multivalue-field-single',
+          data: { attribute: name },
+          placeholder: '(single value)'
+        )
+
         main_field += text_field_tag("multiple_attrs[#{name}]", '', options)
         main_field += link_to('+', "add_multiple_attrs[#{name}]", data: { attribute: name },
-                                                                  class: 'btn btn-default add-btn multivalue-field-add', title: 'add to search')
+                                                                  class: 'btn btn-default add-btn multivalue-field-add',
+                                                                  title: 'add to search')
         v = value
         v = value.join("\n") if value.is_a? Array
-        main_field += text_area_tag("search_attrs[#{name}]", v, class: 'auto-grow')
+        main_field += text_area_tag("search_attrs[#{name}]", v, class: 'auto-grow multivalue-field-vals',
+                                                                placeholder: '(multiple values on separate lines)')
 
       end
     elsif use_dropdown

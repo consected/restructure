@@ -272,7 +272,7 @@ module Reports
         elsif v.is_a? Hash
           search_attr_values[k] = v.collect { |_, v1| v1 }
         elsif v.is_a?(String) && v.include?("\n")
-          search_attr_values[k] = if search_attributes_config[k].multiple == 'multiple-regex'
+          search_attr_values[k] = if search_attributes_config[k.to_sym].multiple == 'multiple-regex'
                                     "(#{v.split("\n").map(&:squish).join('|')})"
                                   else
                                     v.split("\n").map(&:squish)

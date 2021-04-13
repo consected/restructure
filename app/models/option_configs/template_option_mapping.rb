@@ -99,6 +99,7 @@ module OptionConfigs
     end
 
     def self.activity_log_mapping(def_record, option_type_config, current_user)
+      current_definition = def_record.current_definition || def_record
       view_options = option_type_config.view_options || {}
 
       if def_record.hide_item_list_panel
@@ -119,7 +120,7 @@ module OptionConfigs
             end
 
       full_name = def_record.full_item_type_name
-      data_action_when = "data_#{def_record.action_when_attribute}".to_sym
+      data_action_when = "data_#{current_definition.action_when_attribute}".to_sym
 
       {
         def_record: def_record,
@@ -166,6 +167,8 @@ module OptionConfigs
     end
 
     def self.activity_log_all_configs_mapping(def_record, current_user)
+      current_definition = def_record.current_definition || def_record
+
       {
         def_record: def_record,
         def_version: def_record.def_version,
@@ -180,7 +183,7 @@ module OptionConfigs
         al_name: def_record.name,
         rec_type: def_record.rec_type,
         item_type: def_record.item_type,
-        action_when_attribute: def_record.action_when_attribute,
+        action_when_attribute: current_definition.action_when_attribute,
         item_type_name: def_record.item_type_name,
         full_name: def_record.full_item_type_name,
         blank_log_full_name: "#{def_record.full_item_type_name}_blank_log",

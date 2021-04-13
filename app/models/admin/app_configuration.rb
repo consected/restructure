@@ -23,10 +23,6 @@ class Admin::AppConfiguration < Admin::AdminBase
   validate :valid_entry
   after_save :clear_memo!
 
-  # Special notes:
-  # hide and show items should enter true, false or blank (equivalent to false)
-  # menu research label may enter none to hide the menu (otherwise it defaults to Research)
-
   def self.configurations
     configuation_meanings.keys
   end

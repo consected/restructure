@@ -155,7 +155,7 @@ class Report < ActiveRecord::Base
   # Access configuration attributes directly as:
   #    search_attributes_config[:<param name>].<label | type | default ...>
   def search_attributes_config
-    @search_attributes_config = Reports::SearchAttributesConfig.new(self)
+    @search_attributes_config ||= OptionConfigs::SearchAttributesConfig.new(self)
   end
 
   #

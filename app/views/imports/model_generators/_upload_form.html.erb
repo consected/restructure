@@ -1,0 +1,21 @@
+<div class="model-generators-action-container">
+  <% if object_instance&.id %>
+    <% 
+      url = analyze_csv_imports_model_generator_path(object_instance)
+    %>
+    <%= form_for object_instance, url: url, method: :post, 
+    html: {id: 'analyze_csv', class: "form form-formatted", target: 'analyze_csv_form_res', multipart: true} do |f| %>
+
+      <div id="upload-message">
+        <label for="import_file">Pick the file to use as a table template<br/>Import will start immediately after selection</label>
+      </div>
+      <%= file_field_tag :import_file, class: 'ff' %>
+      <%= hidden_filter_fields %>
+      <iframe name="analyze_csv_form_res" id="analyze_csv_form_res" class="hidden">
+      </iframe>
+      <%= link_to 'refresh', edit_imports_model_generator_path(object_instance, {from_upload: true}), remote: true, class: 'hidden', id: 'analyze_csv_refresh' if object_instance.id%>
+
+    <% end %>
+  <% end %>
+
+</div>

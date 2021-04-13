@@ -127,6 +127,10 @@ class Admin::PageLayout < Admin::AdminBase
     options
   end
 
+  def config_text=(value)
+    self.options = value
+  end
+
   def self.no_master_association
     true
   end
