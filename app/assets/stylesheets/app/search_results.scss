@@ -141,7 +141,7 @@ li.list-group-item {
     display: none;
   }
 
-  &:not(.caption-before, .notes-block) {
+  &:not(.caption-before, .notes-block, .dialog-before) {
     strong {
       text-transform: capitalize;
       text-transform: none;

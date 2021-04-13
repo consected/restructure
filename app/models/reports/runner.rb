@@ -145,7 +145,7 @@ module Reports
     end
 
     def search_attr_values
-      @search_attr_values || ''
+      @search_attr_values || {}
     end
 
     protected
