@@ -1546,7 +1546,13 @@ _fpa.form_utils = {
         $eddiv.on('focus', function () {
           $('.custom-editor-container .btn-toolbar').not("[data-target='" + $edtools.attr('data-target') + "']").hide();
           $edtools.slideDown();
-          wysiwygEditor.restoreSelection()
+
+          if (_fpa.state.previous_wysiwyg_editor == editor) {
+            wysiwygEditor.restoreSelection()
+          }
+          else {
+            _fpa.state.previous_wysiwyg_editor = editor
+          }
 
         }).on('change', function () {
           $eddiv.data('editor-changed', true);
@@ -1555,16 +1561,17 @@ _fpa.form_utils = {
           wysiwygEditor.saveSelection()
 
         }).on('paste', function () {
-          wysiwygEditor.saveSelection()
           window.setTimeout(function () {
-
             var obj = { html: editor.cleanHtml() };
+            var prev_html = obj.html;
             var txt = _fpa.utils.html_to_markdown(obj);
-            editor.html(obj.html);
+
+            if (prev_html != obj.html) {
+              editor.html(obj.html);
+            }
+
             $edta.val(txt);
             $eddiv.data('editor-changed', null);
-            wysiwygEditor.restoreSelection()
-
           }, 100);
 
         });
