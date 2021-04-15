@@ -58,14 +58,25 @@ module HelpHelper
       path = Rails.root.join(*defsw)
 
       if File.exist?(path)
-        File.read(path)
+        defs_yaml = File.read(path)
+
+        content = if defs_yaml.index(/^#+/)
+                    defs_yaml
+                  else
+                    begin
+                      defs_content(defs_yaml)
+                    rescue StandardError => e
+                      "\`substitution Error (#{item.join('/')}): #{e}\`\n"
+                    end
+
+                  end
+
+        content = embed_defs(content)
       else
-        '# embed definition not found'
+        content = "\`embed definition not found (#{item})\`"
       end
 
-      defs_yaml = File.read(path)
-
-      text = text.gsub("!defs(#{item[0]})", defs_content(defs_yaml))
+      text = text.gsub("!defs(#{item[0]})", content)
     end
 
     text
@@ -77,7 +88,9 @@ module HelpHelper
   # @return [String]
   def defs_content(defs_yaml)
     defs_content = ''
-    YAML.safe_load(defs_yaml).each do |k, v|
+    data = YAML.safe_load(defs_yaml)
+
+    data.each do |k, v|
       if v.is_a? Hash
         v = v.map do |i|
           <<~END_TEXT

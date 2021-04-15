@@ -1,8 +1,8 @@
-# Page Layouts
+# Reports
 
 ## Introduction
 
-**Page Layouts** provide configuration for the visual layout of various components within an app.
+**Reports** provide configuration for reporting, search, charts and CSV export.
 
 The components that can be configured are:
 

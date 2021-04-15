@@ -1,0 +1,6 @@
+
+        # Save Trigger: Create Filestore Container options
+        name: 'part of directory name or array of attribute names to use to generate directory name (value used directly if attribute not found)',
+        label: 'human name',
+        create_with_role: 'role name',
+        if: if_extras

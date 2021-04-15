@@ -1,0 +1,20 @@
+<%
+  admin_master = Settings::admin_master
+%>
+<p>
+<%= link_to 'refresh', "/masters/#{admin_master}/#{object_instance.implementation_class.to_s.underscore.pluralize}/new?admin_sample=true", 
+    data: {remote: true, target: "##{object_instance.resource_name.hyphenate}-#{admin_master}-"},
+    class: 'on-show-auto-click' %>
+</p>
+<div 
+  id="<%= "#{object_instance.resource_name.hyphenate}-#{admin_master}-" %>" 
+  data-subscription="<%= "#{object_instance.implementation_model_name.hyphenate}-edit-form-#{admin_master}-" %>"
+>
+loading...
+</div>
+<% # Reload the captions and show_if definitions %>
+<%= render partial: 'dynamic_models/common_search_results_template_item', 
+           locals: { 
+             def_record: object_instance,
+             option_type_config: object_instance.default_options
+           } %>

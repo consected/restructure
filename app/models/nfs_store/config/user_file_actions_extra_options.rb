@@ -4,15 +4,15 @@ module NfsStore
   module Config
     class UserFileActionsExtraOptions
       def self.config_def(if_extras: {})
-        [
-          {
-            name: 'name to present to user',
-            id: '(optional) underscored identifier for the action',
-            pipeline: [
-              { _job_name: {} }
-            ]
-          }
-        ]
+        # [
+        #   {
+        #     name: 'name to present to user',
+        #     id: '(optional) underscored identifier for the action',
+        #     pipeline: [
+        #       { _job_name: {} }
+        #     ]
+        #   }
+        # ]
       end
 
       def initialize(config, item)

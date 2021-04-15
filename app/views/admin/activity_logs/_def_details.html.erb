@@ -7,7 +7,9 @@
 
   <label>fields</label>
   <p class="al-field-list">
-  <code><%= object_instance.all_implementation_fields.join("</code> <code>").html_safe %></code>
+  <ul class="activity-list">
+    <li><%= object_instance.all_implementation_fields.join("</li> <li>").html_safe %></;i>
+  </ul>
   </p>
 </div>
 <div class="activity-list-section">

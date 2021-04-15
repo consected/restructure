@@ -29,6 +29,13 @@ A separate developer's reference, including API samples, is available in the [De
 - [Page Layouts](/help/admin_reference/page_layouts/0_introduction)
 - [App Configurations](/help/admin_reference/app_configurations/0_introduction)
 
+### Definitions
+
+- [Reports](/help/admin_reference/reports/0_introduction)
+- [External Identifiers](/help/admin_reference/external_identifiers/0_introduction)
+- [Dynamic Models](/help/admin_reference/dynamic_models/0_introduction)
+- [Activity Logs](/help/admin_reference/activity_logs/0_introduction)
+
 ### Users and Access
 
 - [Users and Passwords](/help/admin_reference/users/0_introduction)

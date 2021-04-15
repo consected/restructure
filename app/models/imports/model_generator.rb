@@ -186,7 +186,7 @@ module Imports
       return unless admin.matching_user && dynamic_model
       return if admin.matching_user.has_access_to? :create, :table, dynamic_model.resource_name
 
-      Admin::UserAccessControl.create!(app_type: admin.matching_user.app_type,
+      Admin::UserAccessControl.create!(app_type_id: admin.matching_user.app_type_id,
                                        resource_type: :table,
                                        resource_name: dynamic_model.resource_name,
                                        access: :create,

@@ -1,0 +1,90 @@
+---
+  references:
+    model_name:
+      label: button label
+      from: this | master | any
+      without_reference: true
+      add: many | one_to_master | one_to_this
+      add_with:
+        extra_log_type: type name
+        item_name:
+          embedded_item:
+            :field_name: value
+      filter_by:
+        field_name: value to filter the referenced items by (may include { {substitution}}
+      order_by:
+        field_name: asc | desc
+      view_as:
+        edit: hide|readonly|not_embedded|select_or_add
+        show: hide|readonly|see_presence|filestore
+        new: outside_this|not_embedded|select_or_add|activity_selector
+        _notes_:
+        - "*outside_this* presents a button that triggers a form outside of this container
+          in the regular panel"
+        - '*not_embedded* always shows this as an "action list" item'
+        - "*activity_selector* shows actions for any creatable activity log types listed
+          in type_config"
+      prevent_disable: true|false (default = false) OR reference
+      allow_disable_if_not_editable: true|false (default = false) OR reference
+      also_disable_record: when disabled, also disable the referenced record
+      showable_if: will use this definition to decide whether to show, in the same
+        way as showable_if at the base level works
+      creatable_if: will use this definition to decide if a reference can be created
+        in the same way as creatable_if at the base level works
+      type_config:
+        activity_selector:
+          an_activity_name: Activity Label
+          another_activity_name: Activity Label 2
+
+
+  save_trigger:
+    on_create:
+      notify: 
+        #!defs(save_triggers_notify_options_defs.yaml)
+
+      create_reference: 
+        #!defs(save_triggers_create_reference_options_defs.yaml)
+
+      update_reference: 
+        #!defs(save_triggers_update_reference_options_defs.yaml)
+
+      create_master: 
+        #!defs(save_triggers_create_master_options_defs.yaml)
+
+      create_filestore_container: 
+        #!defs(save_triggers_create_filestore_container_options_defs.yaml)
+
+      update_this: 
+        #!defs(save_triggers_update_this_options_defs.yaml)
+    
+    on_update: {}
+    
+    on_save:
+      # on_save provides a shorthand for on_create and on_update. on_create and on_update override on_save configurations.
+    
+    on_disable:
+      # on_disable is triggered for any item that has a field named disabled that is switched to true
+    
+    on_upload: {}
+
+    before_save:
+      # Run a specified trigger before the current item has saved, allowing output to be reflected 
+      # in the UI update, but before reference updates are available
+      # Typically used for update_this, although can be applied to the other triggers if necessary
+
+  
+  e_sign:
+    document_reference: !defs(save_triggers_create_reference_options_defs.yaml)
+    title: 'title to appear at top of prepared document'
+    intro: 'text to appear at top of prepared document'
+  
+  nfs_store:
+    pipeline: pipeline_config,
+    user_file_actions:
+      - name: 'name to present to user',
+        id: '(optional) underscored identifier for the action',
+        pipeline: 
+          - _job_name: {}
+        
+
+          

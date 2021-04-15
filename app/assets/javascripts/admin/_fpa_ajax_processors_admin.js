@@ -156,13 +156,13 @@ _fpa.postprocessors_admin = {
 
     window.setTimeout(function () {
       // Handle auto opening of links in tab panels
-      block.find('[data-toggle="tab"]').not('.attached-tab-show').on('show.bs.tab', function () {
-        $($(this).attr('href')).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+      block.find('[data-toggle="tab"]').on('show.bs.tab', function () {
+        $($(this).attr('href')).find('a.on-show-auto-click').not('.auto-clicked').addClass('auto-clicked').click();
       }).addClass('attached-tab-show');
 
       // Handle auto opening of links in tab panels when the initial panel is already open
       block.find('[data-toggle="tab"][aria-expanded="true"]').not('.attached-tab-init').each(function () {
-        $($(this).attr('href')).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+        $($(this).attr('href')).find('a.on-show-auto-click').not('.auto-clicked').addClass('auto-clicked').click();
       }).addClass('attached-tab-init')
     }, 100);
 
@@ -181,6 +181,11 @@ _fpa.postprocessors_admin = {
     })
 
     _fpa.form_utils.on_open_click(block);
+    _fpa.form_utils.setup_drag_and_drop(block);
+
+    if (block.find('.admin-edit-form .edit_dynamic_model').length === 1) {
+      _admin.handle_admin_dynamic_model(block);
+    };
 
   },
 
