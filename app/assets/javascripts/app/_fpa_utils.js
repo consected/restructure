@@ -506,11 +506,20 @@ _fpa.utils.html_to_markdown = function (obj) {
 
   var $html = $('<div>' + obj.html + '</div>');
 
+  $html.find('style').remove();
+
   $html.find('*')
     .not('div, p, h1, h2, h3, h4, i, b, strong, em, u, li, ol, ul, table, tr, td, thead, th, tbody, code, pre, img, a, br, sup')
     .contents()
     .unwrap().wrap('');
 
+
+
+  $html.find('*').each(function () {
+    // Remove unnecessary newlines
+    var newtxt = $(this).html().replace(/\n/g, ' ');
+    $(this).html(newtxt);
+  });
 
   $html.find('*').each(function () {
     var attributes = $.map(this.attributes, function (item) {
