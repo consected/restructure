@@ -2,25 +2,25 @@
 
 class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
   def self.config_def(if_extras: {})
-    [
-      {
-        model_name: {
-          if: if_extras,
-          first: 'update the first matching reference with this configuration, specifying {update: return_result}',
-          force_not_editable_save: 'true allows the update to succeed even if the referenced item is set as not_editable',
-          with: {
-            field_name: 'now()',
-            field_name_2: 'literal value',
-            field_name_3: {
-              this: 'field_name'
-            },
-            field_name_4: {
-              reference_name: 'field_name'
-            }
-          }
-        }
-      }
-    ]
+    # [
+    #   {
+    #     model_name: {
+    #       if: if_extras,
+    #       first: 'update the first matching reference with this configuration, specifying {update: return_result}',
+    #       force_not_editable_save: 'true allows the update to succeed even if the referenced item is set as not_editable',
+    #       with: {
+    #         field_name: 'now()',
+    #         field_name_2: 'literal value',
+    #         field_name_3: {
+    #           this: 'field_name'
+    #         },
+    #         field_name_4: {
+    #           reference_name: 'field_name'
+    #         }
+    #       }
+    #     }
+    #   }
+    # ]
   end
 
   def initialize(config, item)

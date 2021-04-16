@@ -172,6 +172,12 @@ _fpa.postprocessors = {
 
     if (di && typeof (di) == 'object') _fpa.postprocessors.info_update_handler(block, di);
 
+
+    block.find('pre code').each(function () {
+      hljs.highlightBlock($(this)[0])
+    })
+
+
   },
 
   modal_pi_search_results_template: function (block, data) {

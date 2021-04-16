@@ -78,3 +78,64 @@ a.collapsed > .caret {
 .admin-edit-form .form-group[data-out-attr-name="description"] {
   display: block;
 }
+
+.admin-flex-block {
+  display: flex;
+  align-items: stretch;
+}
+
+.make-sortable {
+  padding: 10px 0;
+
+  .sortable-block {
+    > * {
+      margin: 4px;
+      display: block;
+    }
+
+    > *:before {
+      content: "\e119";
+      margin-right: 0.8em;
+      color: rgb(128, 128, 128);
+      display: inline-block;
+      font-family: "Glyphicons Halflings";
+      font-size: 10px;
+    }
+
+    > *:hover {
+      cursor: pointer;
+    }
+  }
+
+  .sortable-block-trash {
+    min-height: 30px;
+    background-color: rgb(212, 212, 212);
+    padding: 4px;
+    &:before {
+      content: "(drop here to remove)";
+      font-size: 11px;
+      color: gray;
+      padding: 0 1em;
+      display: inline-block;
+    }
+    > *:hover {
+      cursor: pointer;
+    }
+  }
+
+  .sortable-add-item {
+    height: 20px;
+    line-height: 18px;
+    padding: 0 5px;
+    font-weight: bold;
+  }
+  .sortable-add-item-text {
+    width: 30em;
+    font-size: 12px;
+    font-family: monospace;
+    line-height: 1.3;
+    padding: 2px;
+    height: 20px;
+    display: inline-block;
+  }
+}

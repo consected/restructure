@@ -1343,7 +1343,7 @@ _fpa.form_utils = {
       });
       el.on('shown.bs.collapse', function () {
         el.removeClass('hidden');
-        $(this).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+        $(this).find('a.on-show-auto-click').not('.auto-clicked').addClass('auto-clicked').click();
       });
       el.on('hide.bs.collapse', function () {
 
@@ -1352,12 +1352,12 @@ _fpa.form_utils = {
 
     // Handle auto opening of links in tab panels
     block.find('[data-toggle="tab"]').not('.attached-tab-show').on('show.bs.tab', function () {
-      $($(this).attr('href')).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+      $($(this).attr('href')).find('a.on-show-auto-click').not('.auto-clicked').addClass('auto-clicked').click();
     }).addClass('attached-tab-show');
 
     // Handle auto opening of links in tab panels when the initial panel is already open
     block.find('[data-toggle="tab"][aria-expanded="true"]').not('.attached-tab-init').each(function () {
-      $($(this).attr('href')).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+      $($(this).attr('href')).find('a.on-show-auto-click').not('.auto-clicked').addClass('auto-clicked').click();
     }).addClass('attached-tab-init')
 
 
@@ -1414,6 +1414,92 @@ _fpa.form_utils = {
       var d = _fpa.utils.YMDtoLocale(text);
       $(this).html(d);
     }).addClass('formatted-date-local')
+  },
+
+  setup_drag_and_drop: function (block) {
+
+    block.find('.make-sortable').not('.made-sortable').each(function () {
+      var $this = $(this);
+      var $sortable_block = $(this).find('.sortable-block');
+      var $sortable_block_trash = $(this).find('.sortable-block-trash');
+
+      var get_data_from = $sortable_block.attr('data-get-data-from');
+      var items_as = $sortable_block.attr('data-items-as') || 'li';
+      var items_splitter = $sortable_block.attr('data-items-splitter') || ' ';
+
+      if (get_data_from) {
+        var $get_data_from = $(get_data_from);
+
+        var add_item = function (item) {
+          var $new_item = $(`<${items_as}>${item}</${items_as}>`);
+          $sortable_block.append($new_item);
+        }
+
+        var refresh_from_orig_data = function () {
+          var items = $get_data_from.val().split(/[^a-zA-Z0-9_]+/);
+          $sortable_block.html('');
+          for (var i in items) {
+            var item = items[i];
+            if (!item || item.trim() == '') continue;
+            add_item(item);
+          }
+        }
+
+        refresh_from_orig_data()
+
+        $get_data_from.on('blur', function () {
+          refresh_from_orig_data()
+        })
+      }
+
+      var refresh_orig_data = function () {
+        var texts = []
+        $sortable_block.find(items_as).each(function () {
+          // Get the first text element only
+          texts.push($(this).contents().first().text());
+        })
+        $get_data_from.val(texts.join(items_splitter));
+      }
+
+      Sortable.create($sortable_block[0], {
+        group: {
+          name: 'list',
+          put: ['trash']
+        },
+        onUpdate: function (ev) {
+          refresh_orig_data()
+        },
+        onRemove: function (ev) {
+          refresh_orig_data()
+        }
+      });
+
+      Sortable.create($sortable_block_trash[0], {
+        group: {
+          name: 'trash',
+          put: ['list']
+        }
+      });
+
+
+      var $item_val_add = $this.find('.sortable-add-item-text');
+      $item_val_add_btn = $this.find('.sortable-add-item')
+      $item_val_add_btn.on('click', function () {
+        var val = $item_val_add.val();
+        if (!val || val.trim() == '') return
+
+        add_item(val)
+        $item_val_add.val('')
+        refresh_orig_data()
+      });
+
+      $item_val_add.on('keypress', function (ev) {
+        if (ev.keyCode == 13) $item_val_add_btn.trigger('click');
+      });
+
+
+
+    }).addClass('made-sortable');
   },
 
   setup_sub_lists: function (block) {

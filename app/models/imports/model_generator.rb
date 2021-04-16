@@ -22,8 +22,6 @@ module Imports
     validates :name, presence: true
     validates :dynamic_model_table, presence: true
 
-    after_save :add_user_access_control
-
     #
     # Class that implements options functionality
     def self.options_provider
@@ -118,6 +116,14 @@ module Imports
                 ])
     end
 
+    #
+    # Create the model based on the current options configuration
+    def create_dynamic_model
+      res = super
+      add_user_access_control
+      res
+    end
+
     def self.core_field_names
       %w[id user_id created_at updated_at disabled]
     end
@@ -186,7 +192,7 @@ module Imports
       return unless admin.matching_user && dynamic_model
       return if admin.matching_user.has_access_to? :create, :table, dynamic_model.resource_name
 
-      Admin::UserAccessControl.create!(app_type: admin.matching_user.app_type,
+      Admin::UserAccessControl.create!(app_type_id: admin.matching_user.app_type_id,
                                        resource_type: :table,
                                        resource_name: dynamic_model.resource_name,
                                        access: :create,

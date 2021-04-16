@@ -11,9 +11,9 @@
 
   <label>fields</label>
   <p><%=object_instance.all_implementation_fields.length%> fields</p>
-  <p class="dynamic-field-list">
-  <code><%= object_instance.all_implementation_fields.join("</code> <code>").html_safe %></code>
-  </p>
+  <ul class="activity-list">
+    <%= sortable_block "#dynamic_model_field_list", "li" %>
+  </ul>
 </div>
 <div class="dynamic-list-section">
   <label>activities</label>

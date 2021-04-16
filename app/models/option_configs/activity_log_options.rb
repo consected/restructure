@@ -35,7 +35,7 @@ module OptionConfigs
               }
             },
             filter_by: {
-              field_name: 'value to filter the referenced items by (may include {{substitution}}'
+              field_name: 'value to filter the referenced items by (may include { {substitution}}'
             },
             order_by: {
               field_name: 'asc | desc'

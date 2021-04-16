@@ -27,7 +27,7 @@ module Dynamic
     def setup_generator(parent, qualified_table_name)
       self.parent = parent
       self.qualified_table_name = qualified_table_name
-      self.category = DefaultCategory
+      self.category = self.class::DefaultCategory
     end
 
     #
@@ -40,7 +40,7 @@ module Dynamic
       raise FphsException, 'no fields specified to create dynamic model' unless field_list.present?
 
       schema_name, table_name = schema_and_table_name
-      category = self.category || DefaultCategory
+      category = self.category || self.class::DefaultCategory
 
       name = table_name.singularize
 
@@ -133,6 +133,13 @@ module Dynamic
       dynamic_model.implementation_class_defined?(Object, fail_without_exception: true)
     end
 
+    #
+    # List of field names to be used in a dynamic model field list
+    # @return [String]
+    def field_list
+      @field_list ||= db_configs.keys.map(&:to_s).join(' ')
+    end
+
     private
 
     def current_admin
@@ -186,13 +193,6 @@ module Dynamic
     # @return [Boolean]
     def no_downcase_field(_field_name)
       false
-    end
-
-    #
-    # List of field names to be used in a dynamic model field list
-    # @return [String]
-    def field_list
-      @field_list ||= db_configs.keys.map(&:to_s).join(' ')
     end
   end
 end

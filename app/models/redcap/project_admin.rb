@@ -170,6 +170,7 @@ module Redcap
       return if dynamic_model_table.blank?
 
       dynamic_storage.create_dynamic_model
+      dynamic_storage.add_user_access_control
     end
   end
 end

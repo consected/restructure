@@ -8,7 +8,6 @@ module OptionConfigs
   # @see OptionConfigs::AttrDefs::Report
   class ReportOptions < BaseOptions
     include OptionsHandler
-    include OptionConfigs::AttrDefs::Report
 
     configure :view_options, with: %i[hide_table_names
                                       hide_field_names_with_comments
@@ -28,6 +27,10 @@ module OptionConfigs
     def self.raise_bad_configs(option_configs)
       # None defined - override with real checks
       # @todo
+    end
+
+    def self.attr_defs
+      read_admin_defs 'report_options_defs.yaml'
     end
 
     #

@@ -6,8 +6,8 @@ module Dynamic
 
     included do
       attr_accessor :table_comments # comments from definition to be applied to DB table
-      attr_accessor :allow_migrations
       attr_accessor :db_configs # field configurations from definition to be applied during creation
+      attr_writer :allow_migrations
 
       before_validation :init_schema_name
 

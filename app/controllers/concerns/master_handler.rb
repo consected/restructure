@@ -273,7 +273,7 @@ module MasterHandler
   #
   # Render a plain 401 page if object doesn't allow editing
   def check_editable?
-    return if object_instance.allows_current_user_access_to? :edit
+    return if object_instance.allows_current_user_access_to?(:edit)
 
     not_editable
     nil
@@ -282,7 +282,7 @@ module MasterHandler
   #
   # Render a plain 401 page if object can't be created
   def check_creatable?
-    return if object_instance.allows_current_user_access_to? :create
+    return if object_instance.allows_current_user_access_to?(:create) || current_admin_sample
 
     not_creatable
     nil
@@ -580,5 +580,13 @@ module MasterHandler
 
   def secure_params
     params.require(primary_params_name).permit(*permitted_params)
+  end
+
+  #
+  # Allow sample forms to be displayed in the admin panel if an
+  # admin is authenticated and the admin_sample param is 'true'
+  # @return [Boolean]
+  def current_admin_sample
+    current_admin && params[:admin_sample] == 'true'
   end
 end

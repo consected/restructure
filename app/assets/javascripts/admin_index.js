@@ -40,5 +40,7 @@
 //   For codemirror:
 //= require js-yaml/dist/js-yaml 
 //
+//= require sortablejs/Sortable.js
+//
 // All other required codemirror components
 //= require_tree ./admin

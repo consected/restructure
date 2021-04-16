@@ -44,6 +44,10 @@ _fpa.postprocessors_help = {
     // Add table class to tables
     block.find('table').addClass('table')
 
+    block.find('pre code').each(function () {
+      hljs.highlightBlock($(this)[0])
+    })
+
     // Handle the expander
     $('[data-toggle="sidebar-expand"]').not('.toggle-added-sidebar-expander').on('click', function () {
       var target = $(this).attr('data-target');
