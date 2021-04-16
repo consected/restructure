@@ -1,6 +1,6 @@
 <%
   admin_master = Settings::admin_master
-  extra_log_type = 'initial_review'
+  extra_log_type = nil
 %>
 <p>
 <form method="get" action="<%="/masters/#{admin_master}/#{object_instance.implementation_class.to_s.underscore.pluralize}/new?"%>" 
@@ -15,13 +15,21 @@
 </p>
 <div 
   id="<%= "#{object_instance.resource_name.hyphenate}-#{admin_master}-" %>" 
-  data-subscription="<%= "#{object_instance.resource_name.hyphenate.singularize}-#{extra_log_type.hyphenate}-edit-form-#{admin_master}-" %>"
+  data-subscription="<%= "#{object_instance.resource_name.hyphenate.singularize}--edit-form-#{admin_master}-" %>"
 >
 pick an activity type...
 </div>
-<% # Reload the captions and show_if definitions %>
-<%= render partial: 'activity_logs/common_search_results_template_item', 
-           locals: { 
-             def_record: object_instance,
-             option_type_config: object_instance.option_type_config_for(extra_log_type)
-           } %>
+
+<% # Reload the captions and show_if definitions 
+  otc = object_instance.option_type_config_for(extra_log_type) if extra_log_type
+  if otc
+%>
+  <%= render partial: 'activity_logs/common_search_results_template_item', 
+            locals: { 
+              def_record: object_instance,
+              option_type_config: otc
+            } %>
+<%
+else %>
+<p class="sample_form_message"></p>
+<% end %>

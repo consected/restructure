@@ -1,9 +1,16 @@
 <%
   admin_master = Settings::admin_master
+
+  url_pre = "/masters/#{admin_master}" unless object_instance.implementation_class.no_master_association
 %>
 <p>
-<%= link_to 'refresh', "/masters/#{admin_master}/#{object_instance.implementation_class.to_s.underscore.pluralize}/new?admin_sample=true", 
-    data: {remote: true, target: "##{object_instance.resource_name.hyphenate}-#{admin_master}-"},
+<%= link_to 'refresh', "#{url_pre}/#{object_instance.implementation_class.to_s.underscore.pluralize}/new?admin_sample=true", 
+    data: {
+      remote: true, 
+      target: "##{object_instance.resource_name.hyphenate}-#{admin_master}-",
+      'result-target': "##{object_instance.resource_name.hyphenate}-#{admin_master}-",
+      'result-target-force': "true"
+    },
     class: 'on-show-auto-click' %>
 </p>
 <div 
