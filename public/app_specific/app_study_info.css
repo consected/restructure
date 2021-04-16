@@ -16,3 +16,7 @@
   list-style-position: none;
   list-style-type: none;
 }
+
+.model-reference-disabled {
+  display: none;
+}
