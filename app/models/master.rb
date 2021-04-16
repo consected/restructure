@@ -232,7 +232,7 @@ class Master < ActiveRecord::Base
     elsif cu.is_a? Integer
       @current_user = User.find cu
     else
-      raise "Attempting to set current_user with non user: #{cu}"
+      raise "Attempting to set current_user with non user: #{cu} #{cu.class.name}"
     end
   end
 

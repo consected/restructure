@@ -5,10 +5,9 @@ module Redcap
   # Handle the generation of dynamic models, and the underlying
   # migrations for tables and views
   class DynamicStorage
+    include Dynamic::ModelGenerator
     DefaultCategory = 'redcap'
     DefaultSchemaName = 'redcap'
-
-    include Dynamic::ModelGenerator
 
     attr_accessor :project_admin, :qualified_table_name, :category
 
@@ -43,7 +42,7 @@ module Redcap
     # @return [Hash]
     def field_types
       @field_types = {}
-      data_dictionary.all_retrievable_fields.each do |field_name, field|
+      data_dictionary.all_retrievable_fields&.each do |field_name, field|
         @field_types[field_name] = field.field_type.database_type.to_s
       end
 
@@ -56,6 +55,23 @@ module Redcap
     # @return [Boolean]
     def no_downcase_field(_field_name)
       true
+    end
+
+    #
+    # Add default user access control for the current admin
+    # matching user
+    def add_user_access_control
+      admin = project_admin.current_admin
+      return unless admin&.matching_user && dynamic_model
+      return if admin.matching_user.has_access_to? :create, :table, dynamic_model.resource_name
+
+      Admin::UserAccessControl.create!(app_type_id: admin.matching_user.app_type_id,
+                                       resource_type: :table,
+                                       resource_name: dynamic_model.resource_name,
+                                       access: :create,
+                                       disabled: false,
+                                       current_admin: admin,
+                                       user_id: admin.matching_user.id)
     end
   end
 end

@@ -22,8 +22,6 @@ module Imports
     validates :name, presence: true
     validates :dynamic_model_table, presence: true
 
-    after_save :add_user_access_control
-
     #
     # Class that implements options functionality
     def self.options_provider
@@ -116,6 +114,14 @@ module Imports
                   date
                   date_time
                 ])
+    end
+
+    #
+    # Create the model based on the current options configuration
+    def create_dynamic_model
+      res = super
+      add_user_access_control
+      res
     end
 
     def self.core_field_names

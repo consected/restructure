@@ -13,7 +13,7 @@
 <% else %>
   <p><label>project info</label> metadata not yet retrieved</p>
 <% end %>
-<% if object_instance.file_store %>
+<% if object_instance.dynamic_storage&.dynamic_model_ready? && object_instance.file_store %>
   <p><label>filestore</label> ready</p>
   <p><%= link_to 'dump project archive to filestore', request_archive_redcap_project_admin_path(id: object_instance.id), method: :post, remote: true, class: 'btn btn-danger' %></p>
 <% else %>
