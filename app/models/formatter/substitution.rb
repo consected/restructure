@@ -135,7 +135,7 @@ module Formatter
       return text unless text.is_a? String
 
       has_html = !text.scan(HtmlRegEx).empty?
-      text = Kramdown::Document.new(text, input: 'GFM').to_html.html_safe unless has_html
+      text = Kramdown::Document.new(text, input: 'GFM', hard_wrap: false).to_html.html_safe unless has_html
 
       text
     end
