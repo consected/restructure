@@ -1431,7 +1431,7 @@ _fpa.form_utils = {
         var $get_data_from = $(get_data_from);
 
         var add_item = function (item) {
-          var $new_item = $(`<${items_as}>${item}</${items_as}>`);
+          var $new_item = $(`<${items_as} data-field-name="${item}">${item}</${items_as}>`);
           $sortable_block.append($new_item);
         }
 

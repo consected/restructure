@@ -1,5 +1,5 @@
-<% if object_instance.persisted? %>
 <div class="dynamic-details-section">
+<% if object_instance.persisted? %>
   <label>item type name</label>
   <p class="dynamic-item-type">
   <%= object_instance.full_item_type_name %>
@@ -8,13 +8,20 @@
   <p>
     <%= link_to 'search table data', "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&table_name=#{object_instance.table_name}", target: '_blank' %>
   </p>
-
+<% else %>
+  <p>
+  <label>not yet saved</label>
+  </p>
+<% end %>
   <label>fields</label>
+<% if object_instance.persisted? %>
   <p><%=object_instance.all_implementation_fields.length%> fields</p>
+<% end %>
   <ul class="activity-list">
     <%= sortable_block "#dynamic_model_field_list", "li" %>
   </ul>
 </div>
+<% if object_instance.persisted? %>
 <div class="dynamic-list-section">
   <label>activities</label>
   <ul class="activity-list">
@@ -24,6 +31,4 @@
   </ul>
   <div id="dynamic-list-detail" class="dynamic-list-detail"></div>
 </div>
-<% else %>
-  <label>not yet saved</label>
 <% end %>
