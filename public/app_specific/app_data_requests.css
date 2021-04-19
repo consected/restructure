@@ -397,3 +397,10 @@ li.list-group-item.caption-before.results-caption-before.dynamic-model--data-req
 li.list-group-item.caption-before.results-caption-before.dynamic-model--data-request-placeholder_attrib_requests h2 {
   margin-top: 10px;
 }
+
+li.placeholder-caption-before h3,
+li.placeholder-caption-before h4,
+li.caption-before h3,
+li.caption-before h4 {
+  font-weight: bold;
+}
