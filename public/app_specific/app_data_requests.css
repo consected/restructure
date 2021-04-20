@@ -65,6 +65,11 @@ form ul.list-group > li.list-group-item {
   font-size: 110%;
 }
 
+ul.list-group.is-activity-log > li.list-group-item.placeholder-caption-before,
+form ul.list-group > li.list-group-item.placeholder-caption-before {
+  background-color: rgb(234, 234, 234);
+}
+
 ul.list-group.is-activity-log h4.list-group-item-heading,
 li.edit-form-header h4.list-group-item-heading {
   color: rgb(88, 88, 88);
