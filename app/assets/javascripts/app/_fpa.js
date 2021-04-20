@@ -783,6 +783,7 @@ _fpa = {
               }
             }
           }
+          $('.view-template-created').removeClass('view-template-created');
 
         });
 

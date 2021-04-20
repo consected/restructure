@@ -58,7 +58,7 @@ class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
           ca = ConditionalActions.new config[:first], @item
           res = ca.get_this_val
           res.force_save! if config[:force_not_editable_save]
-          res.update! vals.merge(current_user: @item.user)
+          res.update! vals.merge(current_user: @item.current_user || @item.user)
         end
       end
     end

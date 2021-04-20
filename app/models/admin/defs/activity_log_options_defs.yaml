@@ -1,4 +1,5 @@
----
+#
+# Activity Log Options definitions
   references:
     model_name:
       label: button label
@@ -9,7 +10,7 @@
         extra_log_type: type name
         item_name:
           embedded_item:
-            :field_name: value
+            field_name: value
       filter_by:
         field_name: value to filter the referenced items by (may include { {substitution}}
       order_by:
@@ -81,8 +82,8 @@
   nfs_store:
     pipeline: pipeline_config,
     user_file_actions:
-      - name: 'name to present to user',
-        id: '(optional) underscored identifier for the action',
+      - name: 'name to present to user'
+        id: '(optional) underscored identifier for the action'
         pipeline: 
           - _job_name: {}
         

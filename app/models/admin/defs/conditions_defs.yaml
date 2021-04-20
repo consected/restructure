@@ -1,26 +1,31 @@
-        # Conditions Definitions
+# Conditions Definitions
 
         all:
           'model_table_name | this | this_references | parent_references | referring_record (the record referring to this one)':
-            field_name: 'all conditional values must be true in model_table_name (any matching record unless id or other filters specified separately) or this (this record)',
-            field_name_2: 'literal value | null',
-            field_name_3: this: 'attribute in this record' 
-            field_name_4: this_references: 'attribute in any referenced record' 
-            return_constant: 'value to return if previous condition matches',
-            field_to_return: 'return_value',
-            field_to_return_if_also_a_condition: %w[match1 match2 return_value],
-            list_field_to_return: 'return_value_list',
+            field_name: 'all conditional values must be true in model_table_name (any matching record unless id or other filters specified separately) or this (this record)'
+            field_name_2: 'literal value | null'
+            field_name_3: 
+              this: 'attribute in this record' 
+            field_name_4: 
+              this_references: 'attribute in any referenced record' 
+            return_constant: 'value to return if previous condition matches'
+            field_to_return: 'return_value'
+            field_to_return_if_also_a_condition:
+              - match1 
+              - match2 
+              - return_value
+            list_field_to_return: 'return_value_list'
             return: 'return_result (return the actual matched instance)'
           
         
         any:
           model_table_name:
-            field_name: 'any conditional value must be true',
+            field_name: 'any conditional value must be true'
             field_name_2:
-              condition: " one of #{(ConditionalActions::ValidExtraConditions + ConditionalActions::ValidExtraConditionsArrays).join(', ')}",
-              not: 'true|false (optional, default false) negate the result',
+              condition: "one of #{(ConditionalActions::ValidExtraConditions + ConditionalActions::ValidExtraConditionsArrays).join(', ')}"
+              not: 'true|false (optional, default false) negate the result'
               value: 'any value, with defaults or substitutions, or a hash reference to another table field'
-            }
+            
           
           'all|any|not_all|not_any':
             'nested conditions...': {}
@@ -36,7 +41,7 @@
             field_name: 'any conditional value must be false'
           
         
-        'all_2|not_any_3...': 'allows for repeat of the condition type',
+        'all_2|not_any_3...': 'allows for repeat of the condition type'
         'all|any|not_all|not_any':
             - repeated_model_table_name: {}
             - repeated_model_table_name: {}
