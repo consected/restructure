@@ -1,7 +1,7 @@
 
-        # Save Trigger: Create Reference options
+# Save Trigger: Create Reference options
         - model_name:
-            if: if_extras,
+            if: if_extras
             in: 'this | referring_record | master (creates no reference, just uses master_id) | master_with_reference (creates a reference to the master, not the item)'
             force_create: 'true to force the creation of a reference and referenced object, independent of user access controls'
             with: 

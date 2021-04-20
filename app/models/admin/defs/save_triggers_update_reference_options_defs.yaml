@@ -1,5 +1,5 @@
 
-        # Save Trigger: Update Reference options
+# Save Trigger: Update Reference options
         - model_name:
             if: if_extras
             first: 'update the first matching reference with this configuration, specifying {update: return_result}'

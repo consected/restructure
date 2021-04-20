@@ -1,5 +1,5 @@
 
-        # Save Trigger: Notify options
+# Save Trigger: Notify options
         # An array of definitions allowing multiple notifications to be specified
         # for a single trigger.  
         - type: 'email|sms'
