@@ -23,13 +23,33 @@ list_options:
 
 view_css:
   classes:
+    a_class_name:
+      min-width: 100%
+      color: green
+    another_class.subclass:
+      display: none
   selectors:
+    '#element-id':
+      font-weight: bold
+      font-size: 200%
+    'p > span':
+      font-decoration: underscore
+
 
 component:
   options:
 
 column_options:
-  tags:
-  classes:
-  hide:
-  show_as:
+  tags: # HTML tag to use for specified column elements
+    column_name: pre
+    column_name_2: code
+  classes: # List of CSS classes to add to each specified column element
+    column_name:
+      - class_1
+      - class_2
+    column_name_2:
+  hide: # Hide the column from results
+    column_name: true
+  show_as: # Special ways for showing specified columns
+    column_name: url
+
