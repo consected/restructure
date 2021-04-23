@@ -34,6 +34,8 @@ class Settings
   NotificationsFromEmail = ENV['FPHS_FROM_EMAIL']
   # Email address for admin contact
   AdminEmail = ENV['FPHS_ADMIN_EMAIL']
+  # Email address that identifies the batch user profile. Defaults to the user that matches the AdminEmail
+  BatchUserEmail = ENV['FPHS_BATCH_USER_EMAIL'] || AdminEmail
 
   # Set the max number of recipients for a message, to avoid an unexpected nasty error spamming the whole organization
   MaxNotificationRecipients = ENV['FPHS_MAX_NOTIFY_RECIPS']&.to_i || 200
