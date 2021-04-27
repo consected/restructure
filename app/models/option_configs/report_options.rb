@@ -29,10 +29,6 @@ module OptionConfigs
       # @todo
     end
 
-    def self.attr_defs
-      read_admin_defs 'report_options_defs.yaml'
-    end
-
     #
     # Returns the options text version specific to this report
     # @return [String] options text

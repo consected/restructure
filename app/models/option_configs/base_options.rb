@@ -7,14 +7,6 @@ module OptionConfigs
       # @todo
     end
 
-    def self.top_level_defs
-      ''
-    end
-
-    def self.attr_defs
-      ''
-    end
-
     # Get an array of ConfigLibrary objects from the options text
     def self.config_libraries(config_obj)
       c = config_obj.options_text.dup
