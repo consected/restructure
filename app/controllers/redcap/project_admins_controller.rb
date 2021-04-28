@@ -15,7 +15,7 @@ class Redcap::ProjectAdminsController < AdminController
       raise FphsException, 'set the dynamic model table name before requesting records'
     end
 
-    unless @redcap__project_admin.dynamic_storage.dynamic_model_ready?
+    unless @redcap__project_admin.dynamic_model_ready?
       raise FphsException,
             'set the dynamic model has not been set up'
     end
@@ -32,6 +32,15 @@ class Redcap::ProjectAdminsController < AdminController
     @redcap__project_admin.dump_archive
 
     msg = "Project archive requested at #{DateTime.now}"
+    render json: { message: msg }, status: 200
+  end
+
+  def force_reconfig
+    set_instance_from_id
+    @redcap__project_admin.current_admin ||= current_admin
+    @redcap__project_admin.force_refresh = true
+    @redcap__project_admin.update!(updated_at: DateTime.now)
+    msg = "Reconfiguration requested at #{DateTime.now}"
     render json: { message: msg }, status: 200
   end
 
@@ -80,7 +89,7 @@ class Redcap::ProjectAdminsController < AdminController
   end
 
   def permitted_params
-    %i[study name server_url api_key dynamic_model_table transfer_mode frequency status disabled notes]
+    %i[study name server_url api_key dynamic_model_table transfer_mode frequency status disabled options notes]
   end
 
   #

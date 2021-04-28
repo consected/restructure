@@ -16,7 +16,7 @@ module Redcap
     def perform(project_admin, class_name)
       setup_with project_admin
 
-      unless project_admin&.dynamic_storage&.dynamic_model_ready?
+      unless project_admin&.dynamic_model_ready?
         raise FphsException, "Data Model not ready for table: #{project_admin.dynamic_model_table}"
       end
 

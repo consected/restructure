@@ -149,4 +149,8 @@ module ApplicationHelper
   def markdown_to_html(md)
     Kramdown::Document.new(md).to_html.html_safe if md
   end
+
+  def link_label_open_in_new(label)
+    "#{label} <i class=\"glyphicon glyphicon-new-window\"></i>".html_safe
+  end
 end

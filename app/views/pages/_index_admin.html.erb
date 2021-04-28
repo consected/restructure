@@ -86,6 +86,9 @@
                                       ) %> </li>
           <li class="nav"><%= link_to "Client Request Log", redcap_client_requests_path %> </li>
         </ul>
+      <% elsif !Admin::AppType.where(name: 'ref-data').first&.active_on_server? %>
+        <p><b>ref-data</b> app is not active on this server. <br>
+          It must be enabled to use the REDCap tools.</p>
       <% else %>
         <p>Your user profile must copy roles for <br>
         <b>redcap-admin@template</b> <br>

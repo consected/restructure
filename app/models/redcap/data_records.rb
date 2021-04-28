@@ -45,7 +45,7 @@ module Redcap
     # This is only intended to be called from a background job.
     # @return [Array{Hash}]
     def retrieve
-      self.records = project_admin.api_client.records request_options: project_admin.records_request_options
+      self.records = project_admin.api_client.records
     end
 
     #
@@ -85,8 +85,8 @@ module Redcap
 
         raise FphsException,
               "Redcap::DataRecords retrieved record fields don't match the data dictionary:\n" \
-              "[#{r.keys.sort.join(' ')}]\nshould match the data dictionary\n" \
-              "[#{all_expected_fields.keys.sort.join(' ')}]"
+              "- [#{(all_expected_fields.keys - r.keys).sort.join(' ')}]\n" \
+              "+ [#{(r.keys - all_expected_fields.keys).sort.join(' ')}]"
       end
 
       if records.length < existing_records_length

@@ -8,14 +8,21 @@ module Dynamic
   module ModelGenerator
     extend ActiveSupport::Concern
 
-    DefaultCategory = 'dynamic'
-    DefaultSchemaName = 'dynamic'
-
     included do
       # :field_types is a Hash of field_name => field_type values, where the field_name
       # is a symbol and field_type is a valid DB migration data type (also a symbol)
       attr_accessor :field_types
       attr_accessor :parent, :qualified_table_name, :category
+    end
+
+    class_methods do
+      def default_category
+        'dynamic'
+      end
+
+      def default_schema_name
+        'dynamic'
+      end
     end
 
     #
@@ -27,7 +34,7 @@ module Dynamic
     def setup_generator(parent, qualified_table_name)
       self.parent = parent
       self.qualified_table_name = qualified_table_name
-      self.category = self.class::DefaultCategory
+      self.category ||= self.class.default_category
     end
 
     #
@@ -40,7 +47,7 @@ module Dynamic
       raise FphsException, 'no fields specified to create dynamic model' unless field_list.present?
 
       schema_name, table_name = schema_and_table_name
-      category = self.category || self.class::DefaultCategory
+      category = self.category || self.class.default_category
 
       name = table_name.singularize
 
@@ -108,7 +115,7 @@ module Dynamic
         schema_name, table_name = qualified_table_name.split('.', 2)
       else
         table_name = qualified_table_name
-        schema_name = DefaultSchemaName
+        schema_name = self.class.default_schema_name
       end
       [schema_name, table_name]
     end

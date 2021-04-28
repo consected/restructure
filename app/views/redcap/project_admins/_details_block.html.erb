@@ -5,17 +5,71 @@
 <% end%>
 
 <p><label>updated at</label> <span><%= object_instance.updated_at %></span></p>
-<p><label>dynamic model</label>
-  <span><%= object_instance.dynamic_storage&.dynamic_model_ready? ? 'ready' : 'not available' %> </span>
-</p>
 <% if object_instance.captured_project_info.present?%>
   <p><label>project info</label> metadata available</p>
 <% else %>
   <p><label>project info</label> metadata not yet retrieved</p>
 <% end %>
-<% if object_instance.dynamic_storage&.dynamic_model_ready? && object_instance.file_store %>
+<p><label>dynamic model</label>
+  <span><%= object_instance.dynamic_model_ready? ? 'ready' : 'not available' %> </span>
+</p>
+<%
+  dm = object_instance.dynamic_storage&.dynamic_model
+  if dm
+    fl, dmfl = object_instance.compare_storage_and_model_field_lists
+
+    dmfla = dmfl
+    fla = fl.split(' ')          
+
+%>
+<p><label>metadata and table fields</label> <span><%= dmfl == fl ? 'match' : "mismatched: +[#{dmfla -fla}] -[#{fla -dmfla}]" %> </span></p>
+<% end %>
+
+
+<% if object_instance.dynamic_model_ready? && object_instance.file_store %>
   <p><label>filestore</label> ready</p>
-  <p><%= link_to 'dump project archive to filestore', request_archive_redcap_project_admin_path(id: object_instance.id), method: :post, remote: true, class: 'btn btn-danger' %></p>
 <% else %>
   <p><label>filestore</label> not set up</p>
+<% end %>
+
+<% if object_instance.persisted? %>
+<hr/>
+<% if object_instance.dynamic_model_ready?%>
+<p><%= link_to link_label_open_in_new('search table data'), "/reports/reference_data__table_data?schema_name=#{dm.schema_name}&search_attrs%5B_blank%5D=true&table_name=#{dm.table_name}", 
+      target: '_blank' %></p>
+<% end %>
+<hr/>
+
+<p>
+<%= link_to 'refresh', edit_redcap_project_admin_path(object_instance), 
+    data: {
+      remote: true, 
+      target: "##{object_instance.resource_name.hyphenate}--",
+      'result-target': "##{object_instance.resource_name.hyphenate}--",
+      'result-target-force': "true"
+    },
+    class: 'btn btn-primary btn-sm' %>
+</p>
+
+<% if object_instance.dynamic_model_ready? %>
+  <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), 
+          method: :post, 
+          remote: true, 
+          class: 'btn btn-warning btn-sm' %></p>
+<% end %>
+
+<% if object_instance.dynamic_model_ready? && object_instance.file_store %>
+  <p><%= link_to 'dump project archive to filestore', request_archive_redcap_project_admin_path(id: object_instance.id), 
+          method: :post, 
+          remote: true, 
+          class: 'btn btn-warning btn-sm' %></p>
+<% end %>
+
+<hr/>
+<p>
+<%= link_to 'force reconfiguration', force_reconfig_redcap_project_admin_path(object_instance), 
+    remote: true,
+    class: 'btn btn-danger btn-sm',
+    method: :post %>
+</p>
 <% end %>

@@ -46,7 +46,24 @@ module OptionsHandler
       unrecognized = params.keys - self.class.configure_with_items
       raise FphsException, "Unrecognized configuration params: #{unrecognized.join(', ')}" if unrecognized.present?
 
-      params.each { |key, value| send "#{key}=", value }
+      init_with(params)
+    end
+
+    def to_h
+      res = {}
+      self.class.configure_with_items.each { |k| res[k] = send(k) }
+      res
+    end
+
+    alias to_hash to_h
+
+    def filtered_hash
+      to_h.filter { |_k, v| !v.nil? }
+    end
+
+    def init_with(params)
+      params ||= {}
+      self.class.configure_with_items.each { |key| send "#{key}=", params[key] }
     end
   end
 
@@ -169,6 +186,7 @@ module OptionsHandler
     if owner_or_params.is_a?(Hash) || owner_or_params.is_a?(ActionController::Parameters)
       options = owner_or_params
       owner = nil
+      options.delete :use_hash_config
     else
       owner = owner_or_params
     end

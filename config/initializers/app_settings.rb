@@ -160,5 +160,13 @@ class Settings
 
   # Redcap records request options - additional request parameters to add / override the payload
   # to a records request.
+  # Hash of options are:
+  # {
+  #    returnMetadataOnly: false,
+  #    exportSurveyFields: true,
+  #    exportDataAccessGroups: true,
+  #    returnFormat: 'json'
+  # }
   RedcapRecordsRequestOptions = Rails.env.production? ? { exportSurveyFields: true } : nil
+  RedcapMetadataRequestOptions = nil
 end

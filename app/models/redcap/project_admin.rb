@@ -32,6 +32,7 @@ module Redcap
   class ProjectAdmin < Admin::AdminBase
     include AdminHandler
     include NfsStore::ForAdminResources
+    include OptionsHandler
 
     self.table_name = 'redcap_project_admins'
 
@@ -57,27 +58,61 @@ module Redcap
     # After save, capture the project info from REDCap
     # except if the record has not saved or the current_project_info has
     # just changed, to avoid never ending callbacks
-    after_save :capture_current_project_info, unless: lambda {
-                                                        captured_project_info_changed? ||
-                                                          !saved_changes? ||
-                                                          api_key.blank?
-                                                      }
+    after_save :capture_current_project_info, if: lambda {
+                                                    force_refresh ||
+                                                      (
+                                                        !captured_project_info_changed? &&
+                                                        saved_changes? &&
+                                                        api_key.present?
+                                                      )
+                                                  }
 
     after_save :capture_data_dictionary, if: lambda {
                                                api_key.present? &&
-                                                 (saved_changes? || force_refresh)
+                                                 captured_project_info.present? &&
+                                                 (
+                                                   saved_changes? ||
+                                                   !data_dictionary_ready? ||
+                                                   force_refresh
+                                                 )
                                              }
-
     after_save :setup_dynamic_model,
                if: lambda {
-                     api_key.present? &&
-                       (saved_change_to_id? || saved_change_to_dynamic_model_table? || force_refresh)
+                     ready_to_setup_dynamic_model? &&
+                       (!dynamic_model_ready? || (saved_change_to_dynamic_model_table? && !dynamic_model_ready?) || force_refresh)
                    }
 
     after_save :reset_force_refresh
 
-    attr_accessor :force_refresh
-    attr_writer :records_request_options
+    attr_accessor :force_refresh, :use_hash_config
+
+    #
+    # Override Redcap records request with additional options, by default
+    # to retrieve survey fields.
+    configure :records_request_options, with: %i[exportSurveyFields
+                                                 returnMetadataOnly
+                                                 exportDataAccessGroups
+                                                 returnFormat]
+
+    configure :metadata_request_options, with: %i[returnFormat]
+
+    #
+    # Initialize with default request options for records and metadata
+    def initialize(attrs = nil)
+      attrs ||= {}
+      attrs[:use_hash_config] ||= {}
+      attrs[:use_hash_config][:records_request_options] ||= Settings::RedcapRecordsRequestOptions
+      attrs[:use_hash_config][:metadata_request_options] ||= Settings::RedcapMetadataRequestOptions
+      super
+    end
+
+    def config_text
+      options
+    end
+
+    def config_text=(value)
+      self.options = value
+    end
 
     # Override the api_key accessor to return a decrypted value
     def api_key
@@ -112,19 +147,9 @@ module Redcap
     # dynamic model related functionality
     # @return [Redcap::DynamicStorage]
     def dynamic_storage
-      return if dynamic_model_table.blank?
+      return if dynamic_model_table.blank? || !persisted?
 
       @dynamic_storage ||= Redcap::DynamicStorage.new self, dynamic_model_table
-    end
-
-    #
-    # Override Redcap records request with additional options, by default
-    # to retrieve survey fields.
-    # This has been situated in the project admin, rather directly in api client,
-    # since it should become configurable at some point, and this will allow per-project config.
-    # @return [Hash] <description>
-    def records_request_options
-      @records_request_options ||= Settings::RedcapRecordsRequestOptions
     end
 
     #
@@ -132,6 +157,28 @@ module Redcap
     # and store it to the file_store container.
     def dump_archive
       Redcap::CaptureProjectArchiveJob.perform_later(self, current_admin)
+    end
+
+    #
+    # Check if the dynamic model for storage is ready to use,
+    # both the DB table has been created and the class is defined
+    # @return [true | nil]
+    def dynamic_model_ready?
+      dynamic_storage&.dynamic_model_ready?
+    end
+
+    def data_dictionary_ready?
+      redcap_data_dictionary&.all_retrievable_fields&.present?
+    end
+
+    #
+    # Compare the field lists for that required by storage against
+    # the actual dynamic model configuration
+    # @return [Array{storage fields, dynamic model fields}]
+    def compare_storage_and_model_field_lists
+      fl = dynamic_storage.field_list
+      dmfl = dynamic_storage.dynamic_model.field_list
+      [fl, dmfl]
     end
 
     private
@@ -162,12 +209,20 @@ module Redcap
       self.force_refresh = nil
     end
 
+    def ready_to_setup_dynamic_model?
+      persisted? &&
+        api_key.present? &&
+        dynamic_model_table.present? &&
+        captured_project_info.present? &&
+        data_dictionary_ready?
+    end
+
     #
     # Called after save to set up a dynamic model for this project
     # The #dynamic_model_table name will be used, which may optionally be
     # qualified with a schema name, as <schema name>.<table name>
     def setup_dynamic_model
-      return if dynamic_model_table.blank?
+      raise FphsException, 'Not ready to set up dynamic model / database table' unless ready_to_setup_dynamic_model?
 
       dynamic_storage.create_dynamic_model
       dynamic_storage.add_user_access_control

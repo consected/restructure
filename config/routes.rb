@@ -81,11 +81,11 @@ Rails.application.routes.draw do
   end
 
   namespace :redcap do
-    resources :project_admins, except: %i[show destroy]
-    resources :project_admins do
+    resources :project_admins, except: %i[show destroy] do
       member do
         post :request_records
         post :request_archive
+        post :force_reconfig
       end
     end
     resources :data_dictionaries, except: %i[show destroy]

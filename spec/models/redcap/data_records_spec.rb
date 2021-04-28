@@ -111,7 +111,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
-    rc.records_request_options = { exportSurveyFields: true }
+    rc.records_request_options.exportSurveyFields = true
 
     stub_request_records @project[:server_url], @project[:api_key]
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
@@ -186,7 +186,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
-    rc.records_request_options = { exportSurveyFields: true }
+    rc.records_request_options.exportSurveyFields = true
 
     stub_request_records @project[:server_url], @project[:api_key]
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
