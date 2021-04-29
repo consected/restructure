@@ -1,9 +1,18 @@
-# frozen_string_literal: true
-
 module Redcap
   #
-  # Job to capture the REDCap project's records
-  class CaptureRecordsJob < RedcapJob
+  # Job to capture the REDCap project's records on a schedule
+  # Schedule with:
+  #
+  #     Redcap::RecurringPullTask.schedule! run_every: 1.hour,
+  #                                         job_matching_param: 'schedule_id',
+  #                                         schedule_id: project_admin.id
+  #
+  # If schedule is reissued with a matching schedule_id, preexisting schedules will be unscheduled first
+  class RecurringPullTask < ApplicationRecurringJob
+    queue :redcap
+
+    include RedcapJobHandler
+
     #
     # Capture the REDCap records for the configured project admin.
     # The records are stored directly to the specified model.
@@ -11,7 +20,11 @@ module Redcap
     # @param [Redcap::ProjectAdmin] project_admin
     # @param [String] class_name
     # @return [Boolean] success
-    def perform(project_admin, class_name)
+    def perform
+      puts recurring_job_data
+      project_admin = GlobalID::Locator.locate recurring_job_data[:project_admin]
+      class_name = recurring_job_data[:class_name]
+
       setup_with project_admin
 
       unless project_admin&.dynamic_model_ready?
@@ -27,10 +40,10 @@ module Redcap
 
       dr = Redcap::DataRecords.new(project_admin, class_name)
       dr.retrieve_validate_store
-      project_admin.update_status(:manual_run_successful)
+      project_admin.update_status(:scheduled_run_successful)
     rescue StandardError => e
-      create_failure_record(e, 'capture records job', project_admin)
-      project_admin.update_status(:manual_run_failed) unless status_already_set
+      create_failure_record(e, 'recurring capture records job', project_admin)
+      project_admin.update_status(:scheduled_run_failed) unless status_already_set
       raise
     end
   end

@@ -47,6 +47,7 @@ class Redcap::ProjectAdminsController < AdminController
   private
 
   def set_defaults
+    @show_again_on_save = true
     @show_extra_help_info = { form_info_partial: 'redcap/project_admins/form_info' }
   end
 
@@ -54,22 +55,14 @@ class Redcap::ProjectAdminsController < AdminController
   # Options for the select tag
   def transfer_mode_options
     [
-      ['no transfer', 'no transfer'],
-      ['manually transferred', 'manually transferred'],
-      ['automatically transferred once', 'automatically transferred once'],
-      ['automatic transfer running', 'automatic transfer running']
+      ['none', 'none'],
+      ['manual', 'manual'],
+      ['scheduled', 'scheduled']
     ]
   end
 
   def status_options
-    [
-      ['never run', 'never run'],
-      ['ran once', 'ran once'],
-      ['running periodically', 'running periodically'],
-      ['stopped - changes detected', 'stopped - changes detected'],
-      ['stopped - manually', 'stopped - manually'],
-      ['stopped - failed', 'stopped - failed']
-    ]
+    Redcap::ProjectAdmin::Statuses.map { |_k, v| [v, v] }
   end
 
   def notes_editor
@@ -88,8 +81,25 @@ class Redcap::ProjectAdminsController < AdminController
     Redcap::ProjectAdmin
   end
 
+  def index_params
+    %i[study name server_url dynamic_model_table transfer_mode frequency status]
+  end
+
   def permitted_params
     %i[study name server_url api_key dynamic_model_table transfer_mode frequency status disabled options notes]
+  end
+
+  def filters
+    pas = Redcap::ProjectAdmin.pluck(:study)
+    {
+      study: pas,
+      status: status_options.transpose[0].uniq,
+      transfer_mode: transfer_mode_options.transpose[0].uniq
+    }
+  end
+
+  def filters_on
+    %i[study status transfer_mode]
   end
 
   #

@@ -36,6 +36,18 @@ module Redcap
 
     self.table_name = 'redcap_project_admins'
 
+    Statuses = {
+      schedule_run_set_configured: 'scheduled run configured',
+      scheduled_run_successful: 'scheduled run successful',
+      scheduled_run_failed: 'scheduled run failed',
+      manual_run_successful: 'manual run successful',
+      manual_run_failed: 'manual run failed',
+      stopped_manually: 'stopped manually',
+      changes_detected: 'changes detected',
+      request_failed: 'request failed',
+      invalid_metadata: 'invalid metadata'
+    }.freeze
+
     has_one :redcap_data_dictionary,
             class_name: 'Redcap::DataDictionary',
             foreign_key: :redcap_project_admin_id,
@@ -51,8 +63,22 @@ module Redcap
     validates :server_url, presence: true, unless: -> { disabled? }
 
     validate :name, -> { already_taken(:name, :study) ? errors.add(:name, 'already exists in this study') : true }
+    validate :frequency, lambda {
+      disabled? ||
+        frequency.blank? ||
+        FieldDefaults.duration(frequency) ||
+        errors.add(:frequency, 'has invalid value')
+    }
 
     before_save :empty_disabled_api_key
+
+    before_save :set_schedule_status, if: lambda {
+                                            (
+                                              frequency_changed? ||
+                                              transfer_mode_changed? ||
+                                              disabled_changed?
+                                            )
+                                          }
 
     after_save :create_file_store, unless: :file_store
     # After save, capture the project info from REDCap
@@ -62,25 +88,45 @@ module Redcap
                                                     force_refresh ||
                                                       (
                                                         !captured_project_info_changed? &&
-                                                        saved_changes? &&
-                                                        api_key.present?
+                                                        api_key.present? &&
+                                                        (
+                                                          saved_change_to_server_url? ||
+                                                          saved_change_to_api_key? ||
+                                                          saved_change_to_name?
+                                                        )
                                                       )
                                                   }
 
     after_save :capture_data_dictionary, if: lambda {
                                                api_key.present? &&
                                                  captured_project_info.present? &&
+                                                 valid_metadata? &&
                                                  (
-                                                   saved_changes? ||
+                                                    saved_change_to_server_url? ||
+                                                    saved_change_to_api_key? ||
+                                                    saved_change_to_name? ||
                                                    !data_dictionary_ready? ||
                                                    force_refresh
-                                                 )
+                                                  )
                                              }
-    after_save :setup_dynamic_model,
-               if: lambda {
-                     ready_to_setup_dynamic_model? &&
-                       (!dynamic_model_ready? || (saved_change_to_dynamic_model_table? && !dynamic_model_ready?) || force_refresh)
-                   }
+    after_save :setup_dynamic_model, if: lambda {
+                                           ready_to_setup_dynamic_model? &&
+                                             valid_metadata? &&
+                                             (
+                                               !dynamic_model_ready? ||
+                                               (saved_change_to_dynamic_model_table? && !dynamic_model_ready?) ||
+                                               force_refresh
+                                             )
+                                         }
+
+    after_save :setup_schedule, if: lambda {
+                                      (
+                                        saved_change_to_frequency? ||
+                                        saved_change_to_transfer_mode? ||
+                                        saved_change_to_disabled? ||
+                                        force_refresh
+                                      )
+                                    }
 
     after_save :reset_force_refresh
 
@@ -181,6 +227,36 @@ module Redcap
       [fl, dmfl]
     end
 
+    #
+    # Do the field lists for that required by storage match
+    # the actual dynamic model configuration
+    # @return [Boolean]
+    def storage_and_model_fields_match?
+      pair = compare_storage_and_model_field_lists
+      pair[0] == pair[1]
+    end
+
+    def valid_metadata?
+      captured_project_info && captured_project_info[:project_title] == name
+    end
+
+    #
+    # Get the Delayed::Job for this schedule
+    # @return [Delayed::Job | nil]
+    def task_schedule
+      RecurringPullTask.task_schedule(self).first
+    end
+
+    #
+    # Update status in record immediately
+    # @param [Symbol] key - status key from Statuses
+    def update_status(key)
+      return if force_refresh # Failsafe to prevent infinite loops from callbacks
+      return unless persisted?
+
+      update(status: Statuses[key])
+    end
+
     private
 
     #
@@ -226,6 +302,32 @@ module Redcap
 
       dynamic_storage.create_dynamic_model
       dynamic_storage.add_user_access_control
+    end
+
+    #
+    # Schedule or unschedule a recurring pull for this project admin instance
+    def setup_schedule
+      if disabled || frequency.blank? || transfer_mode != 'scheduled'
+        RecurringPullTask.unschedule_task self
+        self.status = Statuses[:stopped_manually]
+      else
+        RecurringPullTask.schedule_task self,
+                                        { project_admin: to_global_id.to_s,
+                                          class_name: dynamic_storage.dynamic_model_class_name },
+                                        run_every: FieldDefaults.duration(frequency)
+
+        self.status = Statuses[:schedule_run_set_configured]
+      end
+    end
+
+    #
+    # Schedule or unschedule a recurring pull for this project admin instance
+    def set_schedule_status
+      self.status = if disabled || frequency.blank? || transfer_mode != 'scheduled'
+                      Statuses[:stopped_manually]
+                    else
+                      Statuses[:schedule_run_set_configured]
+                    end
     end
   end
 end
