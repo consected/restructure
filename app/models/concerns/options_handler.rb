@@ -186,7 +186,7 @@ module OptionsHandler
     if owner_or_params.is_a?(Hash) || owner_or_params.is_a?(ActionController::Parameters)
       options = owner_or_params
       owner = nil
-      options.delete :use_hash_config
+      use_hash_config = options.delete :use_hash_config
     else
       owner = owner_or_params
     end
@@ -197,9 +197,8 @@ module OptionsHandler
       super()
     end
 
-    options ||= {}
     self.owner = owner || self
-    self.hash_configuration = options[:use_hash_config]
+    self.hash_configuration = use_hash_config
 
     parse_config_text unless hash_configuration
 
