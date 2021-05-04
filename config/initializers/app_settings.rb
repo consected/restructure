@@ -167,6 +167,6 @@ class Settings
   #    exportDataAccessGroups: true,
   #    returnFormat: 'json'
   # }
-  RedcapRecordsRequestOptions = Rails.env.production? ? { exportSurveyFields: true } : nil
+  RedcapRecordsRequestOptions = Rails.env.test? ? nil : { exportSurveyFields: true }
   RedcapMetadataRequestOptions = nil
 end

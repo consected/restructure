@@ -203,6 +203,8 @@ module OptionsHandler
     parse_config_text unless hash_configuration
 
     setup_from_hash_config
+
+    save_options if config_text.blank? && hash_configuration&.present?
   end
 
   #
@@ -313,7 +315,7 @@ module OptionsHandler
 
     self.class.option_types[:multi].each do |ot|
       obj = send(ot)
-      obj.class.configure_with_items.each do |i|
+      obj.class.configure_with_items&.each do |i|
         def_hash[ot.to_s] ||= {}
         def_hash[ot.to_s][i] = obj.send(i)
       end
@@ -327,7 +329,7 @@ module OptionsHandler
       obj_hash = send(ot)
       hash_class = class_for("#{ot}__#{ot}")
       d = def_hash[ot.to_s] = {}
-      obj_hash.each do |k, obj|
+      obj_hash&.each do |k, obj|
         hash_class.configure_with_items.each do |i|
           d[k.to_s] ||= {}
           d[k.to_s][i] = obj.send(i)

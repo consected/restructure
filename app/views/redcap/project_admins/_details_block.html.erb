@@ -4,7 +4,20 @@
 <h4>Important - switch to app ref-data to review and update Redcap information</h4>
 <% end%>
 
-<p><label>updated at</label> <span><%= object_instance.updated_at %></span></p>
+<p><label>status</label> <span><%= object_instance.status %></span></p>
+<% 
+req = object_instance.redcap_client_requests.order(id: :desc).first 
+if req&.result 
+  got_error = req.result['error']
+  if !got_error && req.result['errors']&.present?
+    got_error = req.result['errors'].join(' | ')
+  end
+end
+%>
+<p><label>latest request</label>
+   <%= got_error || 'no error' %></p>
+</p>
+
 <% if object_instance.captured_project_info.present?%>
   <p><label>project info</label> metadata available</p>
 <% else %>
@@ -18,17 +31,16 @@
   if dm
     fl, dmfl = object_instance.compare_storage_and_model_field_lists
 
-    dmfla = dmfl
+    dmfla = dmfl&.split(' ')
     fla = fl.split(' ')          
 
 %>
-<p><label>metadata and table fields</label> <span><%= dmfl == fl ? 'match' : "mismatched: +[#{dmfla -fla}] -[#{fla -dmfla}]" %> </span></p>
+<p><label>metadata and table fields</label> <span>
+  <%= dmfl.present? && fl.present? ? (dmfl == fl ? 'match' : "mismatched: +[#{(dmfla - fla).join(" ")}] -[#{(fla - dmfla).join(" ")}]") : 'not set up'%> </span></p>
 <p><label>pull schedule</label> <span>
 <% if  object_instance.frequency.present? && object_instance.transfer_mode == 'scheduled' %>
-every <%= object_instance.frequency %> - next run at <% if object_instance.task_schedule&.run_at %>
-<%= Formatter::TimeWithZone.format object_instance.task_schedule&.run_at, nil, current_user: current_user %>
-<% else %>(no task scheduled)
-<% end %>
+every <%= object_instance.frequency %> - next run at 
+  <%= current_user_date_time(object_instance.task_schedule&.run_at) || '(no task scheduled)' %>
 <% elsif object_instance.transfer_mode == 'manual' %>manual
 <% else %>none
 <% end %>
@@ -36,25 +48,14 @@ every <%= object_instance.frequency %> - next run at <% if object_instance.task_
 
 <% end %>
 
-
 <% if object_instance.dynamic_model_ready? && object_instance.file_store %>
   <p><label>filestore</label> ready</p>
 <% else %>
   <p><label>filestore</label> not set up</p>
 <% end %>
 
-<% 
-req = object_instance.redcap_client_requests.order(id: :desc).first 
-if req&.result 
-  got_error = req.result['error']
-  if !got_error && req.result['errors']&.present?
-    got_error = req.result['errors'].join(' | ')
-  end
-end
-%>
-<p><label>latest request</label>
-   <%= got_error || 'no error' %></p>
-</p>
+<p><label>configuration updated at</label> <span><%=current_user_date_time( object_instance.updated_at) || '(not yet created)' %></span></p>
+
 
 <% if object_instance.persisted? %>
 <hr/>

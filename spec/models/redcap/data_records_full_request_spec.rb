@@ -22,7 +22,10 @@ RSpec.describe Redcap::DataRecords, type: :model do
     @project_admin = rc = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url('full'), api_key: @project[:api_key], study: 'Q3',
                                                        current_admin: @admin, dynamic_model_table: tn
 
+    rc.force_refresh = true
+    rc.update!(updated_at: DateTime.now)
     @dm = rc.dynamic_storage.dynamic_model
+
     expect(rc.dynamic_model_ready?).to be_truthy
     @dmcn = @dm.implementation_class.name
 
@@ -33,6 +36,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
                                                                records_request_options: { exportSurveyFields: true }
                                                              }
 
+    rc_sf.force_refresh = true
+    rc_sf.update!(updated_at: DateTime.now)
     @dm_sf = rc_sf.dynamic_storage.dynamic_model
     expect(rc_sf.dynamic_model_ready?).to be_truthy
     @dmcn_sf = @dm_sf.implementation_class.name

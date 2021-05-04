@@ -81,13 +81,21 @@ module Redcap
                                           }
 
     after_save :create_file_store, unless: :file_store
+
+    after_save :reset_field_metadata, if: lambda {
+                                            (
+                                              saved_change_to_captured_project_info? &&
+                                              captured_project_info.nil?
+                                            )
+                                          }
+
     # After save, capture the project info from REDCap
     # except if the record has not saved or the current_project_info has
     # just changed, to avoid never ending callbacks
     after_save :capture_current_project_info, if: lambda {
                                                     force_refresh ||
                                                       (
-                                                        !captured_project_info_changed? &&
+                                                        !saved_change_to_captured_project_info? &&
                                                         api_key.present? &&
                                                         (
                                                           saved_change_to_server_url? ||
@@ -149,7 +157,8 @@ module Redcap
       attrs[:use_hash_config] ||= {}
       attrs[:use_hash_config][:records_request_options] ||= Settings::RedcapRecordsRequestOptions
       attrs[:use_hash_config][:metadata_request_options] ||= Settings::RedcapMetadataRequestOptions
-      super
+
+      super(attrs)
     end
 
     def config_text
@@ -273,12 +282,18 @@ module Redcap
       Redcap::CaptureCurrentProjectInfoJob.perform_later(self)
     end
 
+    def reset_field_metadata
+      redcap_data_dictionary&.update!(captured_metadata: nil, field_count: nil, current_admin: current_admin)
+    end
+
     #
     # Capture the data dictionary metadata from REDCap and store to table
     def capture_data_dictionary
       dd = redcap_data_dictionary || create_redcap_data_dictionary(current_admin: current_admin)
 
-      dd.capture_data_dictionary
+      res = dd.capture_data_dictionary
+      dd.reload
+      res
     end
 
     def reset_force_refresh

@@ -39,7 +39,8 @@ class Redcap::ProjectAdminsController < AdminController
     set_instance_from_id
     @redcap__project_admin.current_admin ||= current_admin
     @redcap__project_admin.force_refresh = true
-    @redcap__project_admin.update!(updated_at: DateTime.now)
+    @redcap__project_admin.update!(captured_project_info: nil, transfer_mode: 'none')
+
     msg = "Reconfiguration requested at #{DateTime.now}"
     render json: { message: msg }, status: 200
   end
@@ -86,11 +87,11 @@ class Redcap::ProjectAdminsController < AdminController
   end
 
   def permitted_params
-    %i[study name server_url api_key dynamic_model_table transfer_mode frequency status disabled options notes]
+    %i[study name server_url api_key dynamic_model_table transfer_mode frequency disabled options notes]
   end
 
   def filters
-    pas = Redcap::ProjectAdmin.pluck(:study)
+    pas = Redcap::ProjectAdmin.pluck(:study).uniq
     {
       study: pas,
       status: status_options.transpose[0].uniq,

@@ -102,6 +102,11 @@ RSpec.describe Redcap::DataDictionaries::FieldType, type: :model do
     rc.notes = "#{rc.notes} more details"
     rc.save!
 
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+    forms = rc.redcap_data_dictionary.forms
+    form = forms.first.last
+
     check_all_choices form
   end
 end
