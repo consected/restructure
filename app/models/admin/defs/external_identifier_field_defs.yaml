@@ -1,5 +1,8 @@
 Name: |
-  table name.
+  table name
+
+Label: |
+  name presented to end users
 
 External id attribute: |
   field used as the external identifier, which must end in `_id`
@@ -7,7 +10,7 @@ External id attribute: |
 Alphanumeric: |
   *true* to allow alphanumeric identifiers, otherwise limit to integer numbers
 
-External identifier view formatter: |
+External id view formatter: |
   (optional) named implementation of a formatter for the identifier
 
 External id edit pattern: |

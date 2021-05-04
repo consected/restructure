@@ -1,15 +1,15 @@
 Table key name: |
-  is the field used to uniquely identify a record when retrieving it to be viewed or edited. 
+  the field used to uniquely identify a record when retrieving it to be viewed or edited. 
   It may be unrelated to the relationship between this item and a master record. Typically blank.
   
 Primary key name: |
-   is the field that a master record may use to reference this record. Typically `id`
+  the field that a master record may use to reference this record. Typically `id`
 
 Foreign key name: |
-   is the field used to match with a master record. Typically this is `master_id`, 
-   but may be one of the other fields on that table. 
+  the field used to match with a master record. Typically this is `master_id`, 
+  but may be one of the other fields on that table. 
 
-   If blank, then there is no connection to master records, but the table can be used for 
-   lookups in forms using a field *select_record_from_table_...*
+  If blank, then there is no connection to master records, but the table can be used for 
+  lookups in forms using a field *select_record_from_table_...*
 
 
