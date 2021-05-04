@@ -947,7 +947,8 @@ CREATE TABLE ref_data.redcap_project_admins (
     post_transfer_pipeline character varying[] DEFAULT '{}'::character varying[],
     notes character varying,
     study character varying,
-    dynamic_model_table character varying
+    dynamic_model_table character varying,
+    options character varying
 );
 
 
