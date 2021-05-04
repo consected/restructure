@@ -7,8 +7,18 @@ Rails.application.configure do
     if ActiveRecord::Base.connection.table_exists? :delayed_jobs
 
       class Delayed::Job
-        def self.lookup_jobs_by_class(class_name, queue: 'default')
-          Delayed::Job.where(queue: queue).where(['handler LIKE ?', "--- !ruby/object:#{class_name}%"])
+        #
+        # Look up jobs by class name, in a queue (default: default).
+        # Optionally, return only locked items if locked: true, or unlocked items if locked: false
+        # @param [String] class_name
+        # @param [String] queue
+        # @param [true | false | nil] locked
+        # @return [ActiveRecord::Relation]
+        def self.lookup_jobs_by_class(class_name, queue: 'default', locked: nil)
+          res = Delayed::Job.where(queue: queue).where(['handler LIKE ?', "--- !ruby/object:#{class_name}%"])
+          res = res.where('locked_at is not null') if locked
+          res = res.where('locked_at is null') if locked == false
+          res
         end
       end
 

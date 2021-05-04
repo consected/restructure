@@ -1,7 +1,5 @@
 module Redcap
   class CaptureDataDictionaryJob < RedcapJob
-    queue_as :default
-
     #
     # Capture the REDCap data dictionary "metadata" for the configured project admin.
     # The result is stored directly back to the data dictionary record.
@@ -24,6 +22,7 @@ module Redcap
       data_dictionary.update!(captured_metadata: m, field_count: m.length)
     rescue StandardError => e
       create_failure_record(e, 'capture data dictionary job', project_admin)
+      project_admin.update_status(:request_failed)
 
       raise
     end

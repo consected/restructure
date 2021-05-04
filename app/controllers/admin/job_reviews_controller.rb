@@ -48,7 +48,7 @@ class Admin::JobReviewsController < AdminController
   private
 
   def index_params
-    %i[id priority attempts handler last_error run_at locked_at failed failed_at locked_by queue created_at updated_at]
+    %i[id priority attempts handler run_at locked_at failed failed_at locked_by queue created_at updated_at last_error]
   end
 
   def permitted_params

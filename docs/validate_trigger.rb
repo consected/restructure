@@ -11,7 +11,7 @@ elt = al.extra_log_type_config
 # Setup the conditional actions
 ca = ConditionalActions.new elt.save_trigger, obj
 # Validate that we can perform what it is that we want
-res = ca.calc_save_action_if
+res = ca.calc_save_option_if
 puts res
 #
 config = elt.save_trigger[action][t]

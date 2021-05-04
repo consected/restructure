@@ -9,7 +9,6 @@ module Imports
     include AdminHandler
     include Dynamic::ModelGenerator
 
-    DefaultCategory = 'import'
     self.table_name = 'imports_model_generators'
 
     belongs_to :admin
@@ -21,6 +20,10 @@ module Imports
 
     validates :name, presence: true
     validates :dynamic_model_table, presence: true
+
+    def self.default_category
+      'import'
+    end
 
     #
     # Class that implements options functionality

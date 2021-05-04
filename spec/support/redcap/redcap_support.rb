@@ -133,7 +133,12 @@ module Redcap
     def stub_request_full_metadata(server_url, api_key)
       stub_request(:post, server_url)
         .with(
-          body: { 'content' => 'metadata', 'fields' => nil, 'format' => 'json', 'token' => api_key }
+          body: {
+            'content' => 'metadata',
+            'fields' => nil,
+            'format' => 'json',
+            'token' => api_key
+          }
 
         )
         .to_return(status: 200, body: metadata_full_response, headers: {})

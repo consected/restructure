@@ -454,13 +454,13 @@
     {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
-      "fingerprint": "f695fa06a704e8ef413d467f7b3c00ff7a89bf0e4829acda71bf58c976d58a3b",
+      "fingerprint": "fc502ff9a2b90e75064dbc148795bff5746ffce603140fb12b5a9857e28abcfe",
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/reports/_result_view_css.html.erb",
-      "line": 21,
+      "line": 22,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "(Report.find_by_id_or_resource_name(params[:id]).report_options.view_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end + Report.find_by_id_or_resource_name(params[:id]).report_options.view_css.selectors.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} #{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end).join(\"\\n\")",
+      "code": "(Report.find_by_id_or_resource_name(params[:id]).report_options.view_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end or ([] + Report.find_by_id_or_resource_name(params[:id]).report_options.view_css.selectors.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} #{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end)).join(\"\\n\")",
       "render_path": [
         {
           "type": "controller",
@@ -493,6 +493,6 @@
       "note": ""
     }
   ],
-  "updated": "2021-04-08 19:26:49 +0100",
+  "updated": "2021-04-27 14:42:13 +0100",
   "brakeman_version": "5.0.0"
 }

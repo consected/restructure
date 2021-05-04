@@ -402,11 +402,11 @@ class Admin::MigrationGenerator
   rescue StandardError => e
     FileUtils.mkdir_p db_migration_failed_dirname
     FileUtils.mv @do_migration, db_migration_failed_dirname
-    raise e
+    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}"
   rescue FphsException => e
     FileUtils.mkdir_p db_migration_failed_dirname
     FileUtils.mv @do_migration, db_migration_failed_dirname
-    raise e
+    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}"
   end
 
   def migration_version

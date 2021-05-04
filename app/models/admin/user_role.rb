@@ -9,9 +9,10 @@ class Admin::UserRole < Admin::AdminBase
   belongs_to :user, optional: true
 
   validates :role_name, presence: true
-  validates :user_id, uniqueness: { scope: %i[app_type_id role_name disabled] }, unless: lambda {
-                                                                                           user_id.nil? || disabled?
-                                                                                         }
+  validates :user_id, uniqueness: { scope: %i[app_type_id role_name disabled], message: "can't be already present" },
+                      unless: lambda {
+                                user_id.nil? || disabled?
+                              }
 
   after_save :save_template
 

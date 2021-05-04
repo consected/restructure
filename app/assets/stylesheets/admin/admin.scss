@@ -26,7 +26,7 @@ a.collapsed > .caret {
 
 .common-admin-markdown-editor .custom-editor {
   width: 800px;
-  height: 40vh;
+  height: 20vh;
   background: white;
 }
 
@@ -82,4 +82,8 @@ a.collapsed > .caret {
 .admin-flex-block {
   display: flex;
   align-items: stretch;
+}
+
+.label-help-icon {
+  color: gray;
 }

@@ -87,7 +87,7 @@ module MasterSupport
     master.save!
 
     setup_access
-    setup_access :trackers
+    setup_access :trackers unless user.has_access_to? :create, :table, :trackers
 
     @master_id = master.id
     @master = master

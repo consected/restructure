@@ -9,9 +9,10 @@ class Admin::PageLayout < Admin::AdminBase
   include AppTyped
   include OptionsHandler
 
-  validates :layout_name, presence: { scope: :active }
-  validates :panel_name, presence: { scope: :active }, uniqueness: { scope: %i[app_type_id layout_name] }
-  validates :panel_label, presence: { scope: :active }
+  validates :layout_name, presence: { scope: :active, message: "can't be blank" }
+  validates :panel_name, presence: { scope: :active, message: "can't be blank" },
+                         uniqueness: { scope: %i[app_type_id layout_name], message: "can't be already present" }
+  validates :panel_label, presence: { scope: :active, message: "can't be blank" }
   before_save :set_position
 
   # @attr [String] layout_name - the role of the definition

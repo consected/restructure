@@ -6,7 +6,6 @@
     <li role="presentation" class=""><a href="#def-metadata-block" aria-controls="def-metadata-block" role="tab" data-toggle="tab">Metadata</a></li>
     <li role="presentation" class=""><a href="#def-requests-block" aria-controls="def-requests-block" role="tab" data-toggle="tab">Requests</a></li>
     <%= render partial: 'redcap/data_dictionaries/tabs', locals: { no_active: true } %>
-    <li role="presentation" class=""><a href="#def-data-records-block" aria-controls="def-data-records-block" role="tab" data-toggle="tab">Data</a></li>
     <li role="presentation" class=""><a href="#def-files-block" aria-controls="def-files-block" role="tab" data-toggle="tab">Files</a></li>
   </ul>
 
@@ -26,10 +25,6 @@
 
     <%= render partial: 'redcap/data_dictionaries/tab_panels', locals: { object_instance: object_instance, no_active: true } %>
 
-    <div role="tabpanel" class="tab-pane" id="def-data-records-block">
-      <%= render partial: 'redcap/project_admins/data_block', locals: {object_instance: object_instance} %>
-    </div>
-    
     <div role="tabpanel" class="tab-pane" id="def-files-block">
       <%= render partial: 'redcap/project_admins/files_block', locals: {object_instance: object_instance} %>
     </div>

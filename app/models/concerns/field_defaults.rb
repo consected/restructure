@@ -18,10 +18,9 @@ module FieldDefaults
     res = value
     from_when ||= DateTime.now
     if value.is_a? String
-      m = value.scan(/^(-?\+?\d+) (second|seconds|minute|minutes|hour|hours|days|day|months|month|years|year)/)
-      if m.first
-        t = m.first.last
-        res = from_when + m.first.first.to_i.send(t)
+      dur = duration(value)
+      if dur
+        res = from_when + dur
       elsif value == 'id'
         res = obj&.id
       elsif value == 'now'
@@ -50,16 +49,38 @@ module FieldDefaults
       res = ca.get_this_val
     end
 
-    if type&.to_sym == :date
-      res = begin
-              res.strftime('%Y-%m-%d')
-            rescue StandardError
-              nil
-            end
-    elsif type&.to_sym == :datetime_type && res.is_a?(String)
-      res = DateTime.parse(res)
-    end
+    parse_date_and_time(res, type)
+  end
 
-    res
+  #
+  # Convert something like "15 minutes" or "-1 day" to a usable duration
+  # @param [String] value
+  # @return [nil | duration]
+  def self.duration(value)
+    m = value.scan(/^(-?\+?\d+) (second|seconds|minute|minutes|hour|hours|days|day|months|month|years|year)$/)
+    return unless m.first
+
+    t = m.first.last
+    m.first.first.to_i.send(t)
+  end
+
+  #
+  # Parse a string to a Date or DateTime
+  # If a type is not matched, return the input value
+  # @param [String] value
+  # @param [Symbol | String] type - :date | :datetime_type | anything else does nothing
+  # @return [Date | DateTime | Object] parsed date or date time or the input value
+  def self.parse_date_and_time(value, type)
+    if type&.to_sym == :date
+      begin
+        value.strftime('%Y-%m-%d')
+      rescue StandardError
+        nil
+      end
+    elsif type&.to_sym == :datetime_type && value.is_a?(String)
+      DateTime.parse(value)
+    else
+      value
+    end
   end
 end

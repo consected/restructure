@@ -1,0 +1,26 @@
+# Save Trigger: Add Tracker options
+        - protocol_name:
+            if: if_extras
+            with:
+              # The tracker entry information to add.
+              # Each of the attributes may be based on value, potentially including { {substitutions}}
+              # or a reference definition that returns a value (defined as a Hash with return_value)
+              # NOTE: substitutions will be handled against the current item and master record,
+              # regardless of an alterative being specified
+              sub_process_name: name
+              protocol_event_name: name # optional
+              event_date: YYYY-MM-DD | Date | Timestamp # optional - defaults to now
+              
+              # Optional notes
+              notes: |
+                Free text notes.
+                Is optional.
+                May include { {substitutions}}
+              
+              # item attributes are optional, to specify a model record to reference the tracker to
+              # By default, the current item is used
+              item_type: model name 
+              item_id: model id
+              # an alternative master_id is optional, and if specified the tracker will be tied to it
+              # Otherwise the default master is that the calling item belongs to
+              master_id: alternative master_id

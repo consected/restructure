@@ -9,10 +9,10 @@ class ActivityLog < ActiveRecord::Base
 
   before_validation :prevent_item_type_change, on: :update
   before_validation :set_table_name
-  validates :name, presence: { scope: :active }
-  validates :item_type, presence: { scope: :active }
-  validates :table_name, presence: { scope: :active }
-  validates :action_when_attribute, presence: { scope: :active }
+  validates :name, presence: { scope: :active, message: "can't be blank" }
+  validates :item_type, presence: { scope: :active, message: "can't be blank" }
+  validates :table_name, presence: { scope: :active, message: "can't be blank" }
+  validates :action_when_attribute, presence: { scope: :active, message: "can't be blank" }
   validate :item_type_exists
   validate :check_item_type_and_rec_type
   validate :name_ok

@@ -106,7 +106,7 @@ module Redcap
       all_rf = Redcap::DataDictionaries::Form.all_retrievable_fields(self)
 
       records_request_options = redcap_project_admin.records_request_options
-      if records_request_options && records_request_options[:exportSurveyFields]
+      if records_request_options&.exportSurveyFields
         # Handle the redcap_survey_identifier field
         f = Redcap::DataDictionaries::SpecialFields
         all_rf[f.survey_identifier_field_name] = f.survey_identifier_field(self)

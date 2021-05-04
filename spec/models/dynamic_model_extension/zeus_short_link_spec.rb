@@ -3,7 +3,7 @@
 require 'rails_helper'
 require 'benchmark'
 
-RSpec.describe 'DynamicModel::ZeusShortLink', type: :model do
+RSpec.describe 'DynamicModelExtension::ZeusShortLink', type: :model do
   include MasterSupport
   include ModelSupport
   include PlayerContactSupport

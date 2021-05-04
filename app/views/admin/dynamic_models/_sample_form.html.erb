@@ -1,4 +1,5 @@
 <%
+  if object_instance.persisted?
   admin_master = Settings::admin_master
 
   url_pre = "/masters/#{admin_master}" unless object_instance.implementation_class.no_master_association
@@ -25,3 +26,6 @@ loading...
              def_record: object_instance,
              option_type_config: object_instance.default_options
            } %>
+<% else %>
+<p><i>Save configuration to see sample</i></p>
+<% end %>

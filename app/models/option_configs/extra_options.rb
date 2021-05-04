@@ -5,13 +5,15 @@ module OptionConfigs
   # Consider this an abstract class to be subclassed by any dynamic options provider
   # class.
   class ExtraOptions < BaseOptions
+    include OptionConfigs::ExtraOptionImplementers::SaveTriggers
+
     ValidCalcIfKeys = %i[showable_if editable_if creatable_if add_reference_if].freeze
 
     def self.base_key_attributes
       %i[
         name label config_obj caption_before show_if resource_name save_action view_options
         field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
-        filestore labels fields button_label orig_config db_configs
+        filestore labels fields button_label orig_config db_configs save_trigger
       ]
     end
 
@@ -28,203 +30,6 @@ module OptionConfigs
     end
 
     attr_accessor(*key_attributes, :def_item)
-
-    def self.top_level_defs
-      {
-        '_' => '# @library category name',
-        '_comments' => {
-          'table' => 'describe the table',
-          'fields' => {
-            'field1' => 'describe the field',
-            'field2' => '...'
-          }
-        },
-        '_configurations' => {
-          secondary_key: 'field name to use as a secondary key to lookup items'
-        },
-        '_definitions' => {
-          'reusable_key' => '&anchor resusable objects for substitution in definitions'
-        }
-      }
-    end
-
-    def self.attr_defs
-      attr_for_conditions_marker = 'ref: ** conditions reference **'
-      {
-        label: 'button label',
-        fields: %w[field_name_1 field_name_2],
-        button_label: 'add record button label',
-        caption_before: {
-          field_name: 'string caption to appear before field',
-          all_fields: 'caption to appear before all fields',
-          submit: 'caption to appear before submit button',
-          field_to_retain_label: {
-            keep_label: true,
-            caption: 'caption to appear before label'
-          },
-          field_with_different_views: {
-            show_caption: 'caption in show mode',
-            edit_caption: 'caption in edit mode'
-          },
-          reference_with_reference_name: 'add caption above a reference action / list where the reference is named reference_<reference name>'
-
-        },
-        labels: {
-          field_name: 'label to show'
-        },
-        show_if: {
-          field_name: {
-            depends_on_field_name: 'conditional value',
-            current_mode: 'show | edit'
-          }
-        },
-        view_options: {
-          show_embedded_at_top: 'true | false to position a single auto loaded embedded item',
-          hide_unless_creatable: 'true | false to hide add-item buttons in activity logs if they are not creatable',
-          data_attribute: 'string or list of fields to use as the data attribute',
-          always_embed_reference: 'reference name to always show embedded',
-          always_embed_creatable_reference: 'reference name to always show embedded during new/create',
-          alt_order: 'string or list of date / time or integer fields to use for ordering',
-          show_cancel: 'show cancel button alongside save button',
-          only_create_as_reference: 'prevent creation as a standalone item, only embedded / referenced within another',
-          view_handlers: 'name of handler for UI and models (options include: address, contact, subject)',
-          header_caption: 'header caption to use - can include {{substition}}',
-          alt_width_classes: 'html classes (space separated) to replace standard col-* classes',
-          extra_class: 'html classes (space separated) to add to block'
-        },
-        filestore: {
-          container: {
-
-          }
-        },
-        save_action: {
-          label: 'button label',
-          on_update: {
-            create_next_creatable: {
-              if: attr_for_conditions_marker
-            },
-            show_panel: {
-              value: 'panel / category name',
-              if: attr_for_conditions_marker
-            },
-            hide_panel: {
-              value: 'panel / category name',
-              if: attr_for_conditions_marker
-            },
-            refresh_panel: {
-              value: 'panel / category name',
-              if: attr_for_conditions_marker
-            }
-
-          },
-          on_create: {},
-          on_save: {
-            notes: 'on_save: provides a shorthand for on_create and on_update. on_create and on_update override on_save configurations.'
-          }
-        },
-        field_options: {
-          field_name: {
-            include_blank: 'true or false to force a drop down field to include a selectable blank',
-            pattern: 'provide a mask for a text field',
-            value: 'default value | now() | today()',
-            no_downcase: 'true to prevent downcasing of the attribute when stored to the database',
-            format: 'plain | markdown - for free text editor fields such as notes and description',
-            config: {
-              _comment: 'additional configurations for editor fields',
-              toolbar_type: 'advanced - adds in additional editor toolbar controls'
-            },
-            edit_as: {
-              field_type: 'alternative field name to use for selection of edit field',
-              alt_options: 'optional specification of options for a select_ type field to use instead of general selection specified list. {Label: value, ...} or [Label,...]. For the latter the Label is downcased automatically to generate the value'
-            },
-            calculate_with: {
-              sum: []
-            }
-          }
-        },
-        dialog_before: {
-          field_name: { name: 'message template name', label: 'show dialog button label' },
-          all_fields: { name: 'message template name', label: 'show dialog button label' },
-          submit: { name: 'message template name', label: 'show dialog button label' }
-        },
-        creatable_if: attr_for_conditions_marker,
-        editable_if: attr_for_conditions_marker,
-        showable_if: attr_for_conditions_marker,
-        add_reference_if: attr_for_conditions_marker,
-        valid_if: {
-          on_save: attr_for_validations,
-          on_create: {
-            hide_error: 'true|false (default false) to hide an error associated with this validation'
-          },
-          on_update: {}
-        },
-
-        "** conditions reference **": attr_for_conditions
-      }
-    end
-
-    def self.attr_for_conditions
-      {
-
-        all: {
-          'model_table_name | this | this_references | parent_references | referring_record (the record referring to this one)': {
-            field_name: 'all conditional values must be true in model_table_name (any matching record unless id or other filters specified separately) or this (this record)',
-            field_name_2: 'literal value | null',
-            field_name_3: { this: 'attribute in this record' },
-            field_name_4: { this_references: 'attribute in any referenced record' },
-            return_constant: 'value to return if previous condition matches',
-            field_to_return: 'return_value',
-            field_to_return_if_also_a_condition: %w[match1 match2 return_value],
-            list_field_to_return: 'return_value_list',
-            return: 'return_result (return the actual matched instance)'
-          }
-        },
-        any: {
-          model_table_name: {
-            field_name: 'any conditional value must be true',
-            field_name_2: {
-              condition: " one of #{(ConditionalActions::ValidExtraConditions + ConditionalActions::ValidExtraConditionsArrays).join(', ')}",
-              not: 'true|false (optional, default false) negate the result',
-              value: 'any value, with defaults or substitutions, or a hash reference to another table field'
-            }
-          },
-          'all|any|not_all|not_any': {
-            'nested conditions...': {}
-          }
-        },
-        not_any: {
-          model_table_name: {
-            field_name: 'all conditional values must be false'
-          }
-        },
-        not_all: {
-          model_table_name: {
-            field_name: 'any conditional value must be false'
-          }
-        },
-        'all_2|not_any_3...': 'allows for repeat of the condition type',
-        'all|any|not_all|not_any': [
-          {
-            repeated_model_table_name: {}
-          },
-          {
-            repeated_model_table_name: {}
-          }
-        ]
-
-      }
-    end
-
-    def self.attr_for_validations
-      {
-        "ref: conditions": '** ref: conditions',
-        all: {
-          "model_table_name | this": {
-            validation_field_name_5: { validation_type: 'validation options' }
-          }
-        }
-      }
-    end
 
     #
     # Initialize a named option configuration, which may form one of many in a dynamic definition
@@ -336,6 +141,24 @@ module OptionConfigs
       self.filestore = self.filestore.symbolize_keys
 
       self.fields ||= []
+
+      clean_save_triggers
+    end
+
+    def clean_save_triggers
+      self.save_trigger ||= {}
+      self.save_trigger = self.save_trigger.symbolize_keys
+      # Make save_trigger.on_save the default for on_create and on_update
+      os = self.save_trigger[:on_save]
+      if os
+        ou = self.save_trigger[:on_update] || {}
+        oc = self.save_trigger[:on_create] || {}
+        self.save_trigger[:on_update] = os.merge(ou)
+        self.save_trigger[:on_create] = os.merge(oc)
+      end
+
+      self.save_trigger[:on_upload] ||= {}
+      self.save_trigger[:on_disable] ||= {}
     end
 
     #

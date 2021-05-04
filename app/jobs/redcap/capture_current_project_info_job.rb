@@ -1,7 +1,5 @@
 module Redcap
   class CaptureCurrentProjectInfoJob < RedcapJob
-    queue_as :default
-
     #
     # Capture the REDCap "project info" for the configured project admin.
     # The result is stored directly back to the project admin record.
@@ -16,6 +14,7 @@ module Redcap
       project_admin.update!(captured_project_info: pi)
     rescue StandardError => e
       create_failure_record(e, 'capture project info job', project_admin)
+      project_admin.update_status(:request_failed)
 
       raise
     end

@@ -6,15 +6,21 @@ module Redcap
   # migrations for tables and views
   class DynamicStorage
     include Dynamic::ModelGenerator
-    DefaultCategory = 'redcap'
-    DefaultSchemaName = 'redcap'
 
     attr_accessor :project_admin, :qualified_table_name, :category
+
+    def self.default_category
+      'redcap'
+    end
+
+    def self.default_schema_name
+      'redcap'
+    end
 
     def initialize(project_admin, qualified_table_name)
       self.project_admin = project_admin
       self.qualified_table_name = qualified_table_name
-      self.category = DefaultCategory
+      self.category = self.class.default_category
       setup_generator(project_admin, qualified_table_name)
     end
 
@@ -42,7 +48,7 @@ module Redcap
     # @return [Hash]
     def field_types
       @field_types = {}
-      data_dictionary.all_retrievable_fields&.each do |field_name, field|
+      data_dictionary&.all_retrievable_fields&.each do |field_name, field|
         @field_types[field_name] = field.field_type.database_type.to_s
       end
 
