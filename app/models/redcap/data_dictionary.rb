@@ -137,6 +137,9 @@ module Redcap
 
         Redcap::DataDictionaries::SpecialFields.form_complete_field(form).refresh_variable_record
       end
+
+      # Trigger updates on the project admin to ensure updates there if needed
+      redcap_project_admin.update!(updated_at: DateTime.now)
     end
 
     #

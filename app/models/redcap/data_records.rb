@@ -80,8 +80,15 @@ module Redcap
                              "#{missing_fields.join(' ')}"
       end
 
+      # We have to ignore fields named <form>_timestamp when checking
+      # for completeness of the retrieved records, since the API offers
+      # no way of recognizing which forms have surveys available and would
+      # therefore return a _timestamp field when completed.
+      timestamp_fields = project_admin.redcap_data_dictionary.form_names.map { |f| "#{f}_timestamp".to_sym }
+      expected_minus_form_timestamps = all_expected_fields.keys - timestamp_fields
       records.each do |r|
-        next if r.keys.sort == all_expected_fields.keys.sort
+        actual_fields_minus_timestamps = r.keys - timestamp_fields
+        next if actual_fields_minus_timestamps.sort == expected_minus_form_timestamps.sort
 
         raise FphsException,
               "Redcap::DataRecords retrieved record fields don't match the data dictionary:\n" \

@@ -83,6 +83,8 @@ module Redcap
     after_save :create_file_store, unless: :file_store
 
     after_save :reset_field_metadata, if: lambda {
+                                            return false if disabled
+
                                             (
                                               saved_change_to_captured_project_info? &&
                                               captured_project_info.nil?
@@ -93,6 +95,8 @@ module Redcap
     # except if the record has not saved or the current_project_info has
     # just changed, to avoid never ending callbacks
     after_save :capture_current_project_info, if: lambda {
+                                                    return false if disabled
+
                                                     force_refresh ||
                                                       (
                                                         !saved_change_to_captured_project_info? &&
@@ -106,6 +110,8 @@ module Redcap
                                                   }
 
     after_save :capture_data_dictionary, if: lambda {
+                                               return false if disabled
+
                                                api_key.present? &&
                                                  captured_project_info.present? &&
                                                  valid_metadata? &&
@@ -117,7 +123,10 @@ module Redcap
                                                    force_refresh
                                                   )
                                              }
+
     after_save :setup_dynamic_model, if: lambda {
+                                           return false if disabled
+
                                            ready_to_setup_dynamic_model? &&
                                              valid_metadata? &&
                                              (
