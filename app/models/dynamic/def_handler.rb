@@ -577,7 +577,13 @@ module Dynamic
     # @param [Admin::AppType] app_type to add the user access control to
     # @return [Admin::UserAccessControl] the created or updated user access control
     def add_user_access_controls(force: false, app_type: nil)
-      return unless !persisted? || saved_change_to_disabled? || force
+      changed_name = if respond_to? :table_name
+                       saved_change_to_table_name?
+                     elsif respond_to? :name
+                       saved_change_to_name?
+                     end
+
+      return unless !persisted? || saved_change_to_disabled? || changed_name || force
 
       begin
         if ready_to_generate? || disabled? || force

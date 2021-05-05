@@ -11,6 +11,8 @@ class HelpController < ApplicationController
 
   helper_method :library, :section, :subsection
 
+  include HelpHelper
+
   #
   # Show the default help page for the current authentication or guest
   def index
@@ -25,10 +27,19 @@ class HelpController < ApplicationController
   def show
     redirect_to help_index_path if library.blank? || section.blank? || subsection.blank?
 
+    begin
+      @view_doc = view_doc library,
+                           section,
+                           subsection
+    rescue StandardError
+      @view_doc = view_doc_in_wrapper('<h1>Page Not Found</h1>', library, section)
+      @result_status = 404
+    end
+
     if display_embedded?
       render partial: 'help/show_embedded'
     else
-      render 'help/show'
+      render 'help/show', status: @result_status
     end
   end
 

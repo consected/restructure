@@ -11,3 +11,7 @@ Administration is provided in [External Identifiers](/admin/external_identifiers
 ## Field Definitions
 
 !defs(external_identifier_field_defs.yaml)
+
+## Contents
+
+[Detailed Options](detailed_options.md)

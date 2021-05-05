@@ -227,12 +227,12 @@ class Master < ActiveRecord::Base
   # @param [User] cu - current user
   # @return [User]
   def current_user=(cu)
-    if cu.is_a? User
+    if cu.is_a?(User)
       @current_user = cu
-    elsif cu.is_a? Integer
+    elsif cu.is_a?(Integer)
       @current_user = User.find cu
     else
-      raise "Attempting to set current_user with non user: #{cu} #{cu.class.name}"
+      raise "Attempting to set current_user with non user: #{cu} #{cu.class.name} #{cu.class.__id__} #{User.__id__}"
     end
   end
 

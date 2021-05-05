@@ -1,6 +1,9 @@
 <%
   admin_master = Settings::admin_master
   extra_log_type = nil
+
+  if object_instance.implementation_class_defined?(Object, fail_without_exception: true)
+
 %>
 <p>
 <form method="get" action="<%="/masters/#{admin_master}/#{object_instance.implementation_class.to_s.underscore.pluralize}/new?"%>" 
@@ -13,6 +16,8 @@
 <button>refresh</button>
 </form>
 </p>
+<% end %>
+
 <div 
   id="<%= "#{object_instance.resource_name.hyphenate}-#{admin_master}-" %>" 
   data-subscription="<%= "#{object_instance.resource_name.hyphenate.singularize}--edit-form-#{admin_master}-" %>"

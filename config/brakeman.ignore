@@ -41,6 +41,26 @@
       "note": ""
     },
     {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "3c5e6a5b7b311bb51b49c35ff669a55b2ac5f277738e7d6ab4db258ed43779f8",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "lib/active_record/migration/app_generator.rb",
+      "line": 269,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ActiveRecord::Migration",
+        "method": "update_table_name"
+      },
+      "user_input": "calc_trigger_fn_name(table_name)",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
       "fingerprint": "4043158de8e943fbaaf39db923ffafff5f1c747067355597790d51d2d7978547",
@@ -168,26 +188,6 @@
         "method": "generate_ids_for_all_masters"
       },
       "user_input": "[\"('#{generate_random_id}', #{admin.id}, #{m}, '#{DateTime.now.iso8601}', '#{DateTime.now.iso8601}')\"].join(\",\")",
-      "confidence": "Medium",
-      "note": ""
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "6f2804d0b3a8bb174fd73cb3011786ceb01450eb74cfb6667a156244841da587",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "lib/active_record/migration/app_generator.rb",
-      "line": 265,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION #{calc_trigger_fn_name(prev_table_name)}\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "ActiveRecord::Migration",
-        "method": "update_table_name"
-      },
-      "user_input": "calc_trigger_fn_name(prev_table_name)",
       "confidence": "Medium",
       "note": ""
     },
@@ -414,40 +414,20 @@
     {
       "warning_type": "SQL Injection",
       "warning_code": 0,
-      "fingerprint": "e9abcb1a24581414685b3d134af45c2416470ca8fb75357008c5972a631289ee",
+      "fingerprint": "e76fa00b707c077dca2724d24b6cfca0685ffc06df826578358d6eccbd8e6f61",
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 269,
+      "line": 265,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION #{calc_trigger_fn_name(table_name)}\")",
+      "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE\")",
       "render_path": null,
       "location": {
         "type": "method",
         "class": "ActiveRecord::Migration",
         "method": "update_table_name"
       },
-      "user_input": "calc_trigger_fn_name(table_name)",
-      "confidence": "Medium",
-      "note": ""
-    },
-    {
-      "warning_type": "Command Injection",
-      "warning_code": 14,
-      "fingerprint": "edac64dedbf192ca033ca46a9c90399f18e187becdaebbc8db59a4de3843b437",
-      "check_name": "Execute",
-      "message": "Possible command injection",
-      "file": "app/models/nfs_store/archive/mounter.rb",
-      "line": 180,
-      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
-      "code": "Kernel.system(*[\"unzip\", stored_file.retrieval_path, \"-d\", \"#{File.join(Manage::Filesystem.temp_directory, \"__filestore__#{SecureRandom.hex}\")}/zip\"])",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "NfsStore::Archive::Mounter",
-        "method": "mount"
-      },
-      "user_input": "File.join(Manage::Filesystem.temp_directory, \"__filestore__#{SecureRandom.hex}\")",
+      "user_input": "calc_trigger_fn_name(prev_table_name)",
       "confidence": "Medium",
       "note": ""
     },
@@ -493,6 +473,6 @@
       "note": ""
     }
   ],
-  "updated": "2021-04-27 14:42:13 +0100",
-  "brakeman_version": "5.0.0"
+  "updated": "2021-05-05 15:46:24 +0100",
+  "brakeman_version": "5.0.1"
 }

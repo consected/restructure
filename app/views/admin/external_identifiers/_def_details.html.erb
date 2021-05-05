@@ -11,7 +11,9 @@
   </p>
 
   <label>assigned identifiers</label>
-  <p><%=link_to 'details', "/admin/external_identifier_details/#{object_instance.id}", target: '_blank' %>
+  <p><%=link_to link_label_open_in_new('details'), "/admin/external_identifier_details/#{object_instance.id}", target: '_blank' %>
+
+
 </div>
 <div class="dynamic-list-section">
   <label>activities</label>

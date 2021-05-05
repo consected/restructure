@@ -10,7 +10,7 @@ module ActiveRecord
                       :field_opts, :owner, :history_table_id_attr,
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
                       :table_comment, :fields_comments, :db_configs, :mode, :no_master_association,
-                      :requested_action, :resource_type
+                      :requested_action, :resource_type, :prev_table_name
       end
 
       def force_rollback
@@ -262,11 +262,11 @@ module ActiveRecord
         reversible do |dir|
           dir.up do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute "DROP FUNCTION #{calc_trigger_fn_name(prev_table_name)}"
+            ActiveRecord::Base.connection.execute "DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE"
           end
           dir.down do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute "DROP FUNCTION #{calc_trigger_fn_name(table_name)}"
+            ActiveRecord::Base.connection.execute "DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE"
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e

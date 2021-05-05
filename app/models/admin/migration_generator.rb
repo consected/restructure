@@ -309,7 +309,7 @@ class Admin::MigrationGenerator
     new_fields_comments ||= {}
 
     <<~ARCONTENT
-      #{table_name_changed ? "    self.prev_table_name = :#{prev_table_name}" : ''}
+      #{table_name_changed ? "    self.prev_table_name = '#{prev_table_name}'" : ''}
       #{table_name_changed ? '    update_table_name' : ''}
           self.prev_fields = %i[#{prev_fields.join(' ')}]
           \# added: #{added}
