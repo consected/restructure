@@ -1,6 +1,7 @@
 module Redcap
   module RedcapJobHandler
     def setup_with(project_admin, current_admin: nil)
+      puts "Setup project admin in Job: #{self}"
       unless project_admin.is_a? ProjectAdmin
         raise FphsException,
               'ProjectAdmin record required for Redcap jobs'
