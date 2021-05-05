@@ -1,11 +1,5 @@
 <div class="help-view-doc">
   <div class="common-help-item default-layout content">
-    <%= render partial: 'help/view_doc', 
-           locals: { 
-             library: library,
-             section: section, 
-             subsection: subsection
-           } %>
-  </div>
+    <%= @view_doc %>
   <%= render partial: 'help/footer' %>
 </div>

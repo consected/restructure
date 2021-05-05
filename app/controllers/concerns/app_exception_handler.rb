@@ -8,6 +8,7 @@ module AppExceptionHandler
     rescue_from ActiveRecord::RecordNotFound, with: :runtime_record_not_found_handler
     rescue_from ActionController::RoutingError, with: :routing_error_handler
     rescue_from ActionController::InvalidAuthenticityToken, with: :bad_auth_token
+    rescue_from ActionController::UnknownFormat, with: :bad_format_handler
     rescue_from FphsException, with: :fphs_app_exception_handler
     rescue_from FphsNotAuthorized, with: :not_authorized
     rescue_from FphsGeneralError, with: :general_error
@@ -97,6 +98,12 @@ module AppExceptionHandler
     return_and_log_error error, msg, code
   end
 
+  def bad_format_handler(error)
+    msg = 'A bad page format was requested'
+    code = 400
+    return_and_log_error error, msg, code
+  end
+
   def bad_auth_token(error)
     msg = 'The information could not be submitted. Try returning to the home page to refresh the session.'
     code = 422
@@ -147,6 +154,9 @@ module AppExceptionHandler
       type.csv do
         flash[:danger] = msg[0..2000]
         redirect_to child_error_reporter_path
+      end
+      type.all do
+        render plain: msg, status: code, content_type: 'text/plain'
       end
     end
     true

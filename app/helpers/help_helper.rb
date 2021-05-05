@@ -1,6 +1,22 @@
 # frozen_string_literal: true
 
 module HelpHelper
+  def view_doc(library, section, subsection)
+    <<~END_HTML
+      #{view_doc_in_wrapper(formatted_doc(library, section, subsection), library, section)}
+    END_HTML
+      .html_safe
+  end
+
+  def view_doc_in_wrapper(doc, library, section)
+    <<~END_HTML
+      <div id="help-doc-content" class="md-formatted-block" data-doc-path="#{help_doc_path(library, section)}" data-doc-library="#{library}">
+        #{doc.html_safe}
+      </div>
+    END_HTML
+      .html_safe
+  end
+
   #
   # Read and process a help document for display
   # @param [String] library
@@ -24,7 +40,7 @@ module HelpHelper
     text = if File.exist?(path)
              File.read(path)
            else
-             '# page not found'
+             raise 'page not found'
            end
 
     text = embed_defs(text)
