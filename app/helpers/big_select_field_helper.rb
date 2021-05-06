@@ -20,7 +20,8 @@ module BigSelectFieldHelper
         #{field_html}
         <span class="glyphicon glyphicon-info-sign big-select-description"
           data-toggle="popover"
-          title="" data-content=""></span>
+          data-trigger="click hover"
+          data-content=""></span>
         #{big_select_field_data(field_id, subtype, data)}
       </span>
     END_HTML

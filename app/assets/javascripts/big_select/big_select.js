@@ -10,7 +10,7 @@ $.big_select = function ($field, $target, full_hash, before, after) {
         var $group_title_h = $(`
         <div class="big-select-group-head" data-bsi-key="${k}" id="big-select-group-head--${field_parent_id}-${group_num}">
           <a role="button" data-toggle="collapse" data-parent="#${field_parent_id}" class="collapsed"
-             href="#big-select-panel--${field_parent_id}-${group_num}" aria-expanded="true" aria-controls="big-select-item--${k}">
+             href="#big-select-panel--${field_parent_id}-${group_num}" aria-expanded="false" aria-controls="big-select-item--${k}">
              <i class="caret"></i> ${k}
           </a>
         </div>`
@@ -27,6 +27,11 @@ $.big_select = function ($field, $target, full_hash, before, after) {
         for (var k_in of Object.keys(val)) {
           var val_in = val[k_in]
           append_item(k_in, val_in, selected_value, $panel_h)
+        }
+
+        if ($panel_h.find('.bsi-selected').length) {
+          $panel_h.addClass('in')
+          $group_title_h.find('a').removeClass('collapsed').attr('aria-expanded', 'true')
         }
 
         group_num++
@@ -56,7 +61,7 @@ $.big_select = function ($field, $target, full_hash, before, after) {
 
     var flat_hash = flatten_hash(hash)
     var val = flat_hash[init_val]
-    $desc.attr('title', 'show definition')
+    // $desc.attr('title', 'show definition')
     $desc.attr('data-content', val);
   }
 
@@ -108,6 +113,10 @@ $.big_select = function ($field, $target, full_hash, before, after) {
     if (!hash) return
 
     res = setup_with(hash, $target, $field.val());
+
+    window.setTimeout(function () {
+      _fpa.utils.scrollTo($target.find('.bsi-selected'), 0, -200, $target)
+    }, 300)
 
     res.on('click', '.big-select-item', function () {
       var val = $(this).attr('data-bsi-key')
