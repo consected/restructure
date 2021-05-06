@@ -1,4 +1,4 @@
-<% if object_instance.persisted? %>
+<% if object_instance.persisted? && object_instance.enabled?%>
 <div class="dynamic-details-section">
   <label>item type name</label>
   <p class="dynamic-item-type">

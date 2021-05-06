@@ -15,14 +15,14 @@
   </p>
 <% end %>
   <label>fields</label>
-<% if object_instance.persisted? %>
+<% if object_instance.persisted? && object_instance.enabled?%>
   <p><%=object_instance.all_implementation_fields.length%> fields</p>
 <% end %>
   <ul class="activity-list">
     <%= sortable_block "#dynamic_model_field_list", "li" %>
   </ul>
 </div>
-<% if object_instance.persisted? %>
+<% if object_instance.persisted? && object_instance.enabled? %>
 <div class="dynamic-list-section">
   <label>activities</label>
   <ul class="activity-list">

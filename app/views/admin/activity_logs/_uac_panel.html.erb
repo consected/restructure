@@ -1,6 +1,6 @@
 <div id="user-access-controls-embedded">
   <h4>User Access Controls for Activity Table</h4>
-  <% if object_instance.persisted? %>
+  <% if object_instance.persisted? && object_instance.enabled? %>
 
   <div class="admin-result-index" id="embedded-al-table-uac-embedded">
     <%= link_to "Load", admin_user_access_controls_path(

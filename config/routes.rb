@@ -49,6 +49,7 @@ Rails.application.routes.draw do
     resources :app_types, except: [:destroy]
     post 'app_types/upload', to: 'app_types#upload'
     post 'app_types/restart_server', to: 'app_types#restart_server'
+    post 'app_types/restart_delayed_job', to: 'app_types#restart_delayed_job'
 
     resources :user_roles, except: %i[show destroy]
     post 'user_roles/copy_user_roles', to: 'user_roles#copy_user_roles'

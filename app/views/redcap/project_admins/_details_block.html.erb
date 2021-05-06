@@ -57,7 +57,7 @@ every <%= object_instance.frequency %> - next run at
 <p><label>configuration updated at</label> <span><%=current_user_date_time( object_instance.updated_at) || '(not yet created)' %></span></p>
 
 
-<% if object_instance.persisted? %>
+<% if object_instance.persisted? && object_instance.enabled? %>
 <hr/>
 <% if object_instance.dynamic_model_ready?%>
 <p><%= link_to link_label_open_in_new('search table data'), "/reports/reference_data__table_data?schema_name=#{dm.schema_name}&search_attrs%5B_blank%5D=true&table_name=#{dm.table_name}", 

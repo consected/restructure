@@ -1,20 +1,23 @@
 class AppControl
   @@currently_defining_models = false
 
-  def self.restart_server
+  def self.restart_server(not_delayed_job: nil)
     if Rails.env.production?
       FileUtils.touch Rails.root.join('tmp', 'restart.txt')
     else
       FileUtils.touch Rails.root.join('app', 'models', 'dev_server.rb')
       Rails.reload! if Rails.respond_to? :reload!
     end
-    restart_delayed_job
+    restart_delayed_job unless not_delayed_job
   rescue StandardError => e
     Rails.logger.warn "Failed to restart server: #{e.inspect}"
   end
 
   def self.restart_delayed_job
-    `app-scripts/restart_delayed_job.sh`
+    pid = spawn('app-scripts/restart_delayed_job.sh')
+    Process.detach(pid)
+  rescue StandardError => e
+    Rails.logger.warn "Failed to restart DelayedJob: #{e.inspect}"
   end
 
   def self.define_models
