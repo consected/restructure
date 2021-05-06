@@ -53,7 +53,7 @@ class Admin::UserAccessControlsController < AdminController
   end
 
   def permitted_params
-    @permitted_params = %i[id access resource_type resource_name options app_type_id user_id role_name disabled]
+    @permitted_params = %i[id access resource_type resource_name app_type_id user_id role_name disabled]
   end
 
   # For edit forms on report resources, switch the value to the short name if the long name is being used
@@ -61,9 +61,7 @@ class Admin::UserAccessControlsController < AdminController
   def set_report_to_short_name
     if object_instance.resource_type == 'report'
       rn = object_instance.resource_name
-      if rn.present?
-        object_instance.resource_name = Report.resource_name_for_named_report(rn) unless rn.include? '_'
-      end
+      object_instance.resource_name = Report.resource_name_for_named_report(rn) if rn.present? && !(rn.include? '_')
     end
     true
   end

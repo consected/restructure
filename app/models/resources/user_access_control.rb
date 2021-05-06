@@ -48,21 +48,8 @@ module Resources
           }
       }
 
-      categories = ActivityLog.active.select(:category).distinct.reorder('').pluck(:category)
-      categories.each do |cat|
-        res.merge!(
-          "activity log: #{cat || '(no category)'}":
-            ActivityLog.active.where(category: cat).map { |r| [r.resource_name, r.name] }.to_h
-        )
-      end
-
-      categories = DynamicModel.active.select(:category).distinct.reorder('').pluck(:category)
-      categories.each do |cat|
-        res.merge!(
-          "dynamic model: #{cat || '(no category)'}":
-            DynamicModel.active.where(category: cat).map { |r| [r.resource_name, r.name] }.to_h
-        )
-      end
+      categorize_resources ActivityLog, 'activity log', res
+      categorize_resources DynamicModel, 'dynamic model', res
 
       res.merge!("external identifiers": ExternalIdentifier.active.map { |r| [r.resource_name, r.label] }.to_h)
 
@@ -83,13 +70,8 @@ module Resources
 
     def self.resource_descriptions_for_limited_access
       res = {}
-      categories = DynamicModel.active.select(:category).distinct.reorder('').pluck(:category)
-      categories.each do |cat|
-        res.merge!(
-          "dynamic model: #{cat || '(no category)'}":
-            DynamicModel.active.where(category: cat).map { |r| [r.resource_name, r.name] }.to_h
-        )
-      end
+
+      categorize_resources DynamicModel, 'dynamic model', res
 
       res.merge!(
         "external identifiers": ExternalIdentifier.active.map { |r| [r.resource_name, r.label] }.to_h
@@ -103,18 +85,31 @@ module Resources
         'All': { '_all_reports_': 'All Reports' }
       }
 
-      categories = Report.active.select(:item_type).distinct.reorder('').pluck(:item_type)
+      rs = Report.active.reorder('').order(item_type: :asc)
+      categories = rs.map(&:item_type).uniq
       categories.each do |cat|
         res.merge!(
-          "report: #{cat || '(no category)'}":
-            Report.active.map { |r| [r.alt_resource_name, r.name] }.to_h
+          "report: #{cat&.present? && cat || '(no category)'}":
+            rs.select { |r| r.item_type == cat }.map { |r| [r.alt_resource_name, r.name] }.to_h
         )
       end
+
       res
     end
 
     def self.resource_descriptions_for_activity_log_type
       ActivityLog.all_option_configs_grouped_resources
+    end
+
+    def self.categorize_resources(klass, label, into_hash)
+      recs = klass.active.reorder('').order(category: :asc)
+      categories = recs.map(&:category).uniq
+      categories.each do |cat|
+        into_hash.merge!(
+          "#{label}: #{cat&.present? && cat || '(no category)'}":
+            recs.select { |rec| rec.category == cat }.map { |r| [r.resource_name, r.name] }.to_h
+        )
+      end
     end
   end
 end
