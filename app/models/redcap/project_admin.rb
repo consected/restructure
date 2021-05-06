@@ -331,7 +331,7 @@ module Redcap
     #
     # Schedule or unschedule a recurring pull for this project admin instance
     def setup_schedule
-      if disabled || frequency.blank? || transfer_mode != 'scheduled'
+      if disabled || frequency.blank? || transfer_mode != 'scheduled' || !persisted? || !dynamic_model_ready?
         RecurringPullTask.unschedule_task self
         self.status = Statuses[:stopped_manually]
       else
