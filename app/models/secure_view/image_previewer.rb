@@ -206,7 +206,6 @@ module SecureView
       end
     rescue StandardError => e
       Rails.logger.warn "Failure in image previewer (#{pipe_chain}): #{e}"
-      pipe_chain&.cleanup!
     end
 
     # Convert a page using pdftoppm and ActiveStorage instrumentation, based on the command line specified

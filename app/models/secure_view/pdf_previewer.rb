@@ -3,20 +3,20 @@
 #    libreoffice --headless --convert-to html '~/Downloads/mr_scans_full.xlsx'
 
 module SecureView
-  class PDFPreviewer < Previewer
+  class PDFPreviewer < BasePreviewer
     DefaultResolution = 150
     def self.file_type
       :pdf
     end
 
-    def initialize options={}
+    def initialize(options = {})
       super
       office_docs_to :pdf unless pdf? || viewable_image?
       dicom_to_jpg if viewable_dicom?
     end
 
     # Return the page preview as a PNG format file
-    def preview page
+    def preview(page)
       if viewable_image? || viewable_dicom?
         File.open(path) do |output|
           res = { io: output, filename: output.path.to_s, disposition: 'inline' }
@@ -57,7 +57,8 @@ module SecureView
 
     # Convert a page using pdftoppm and ActiveStorage instrumentation, based on the command line specified
     # Adapted from ActiveStorage Poppler previewer
-    def self.draw(*argv) #:doc:
+    #:doc:
+    def self.draw(*argv)
       open_tempfile do |file|
         instrument :preview, key: file.path do
           capture(*argv, to: file)
