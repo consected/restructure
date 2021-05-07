@@ -4,6 +4,9 @@ class Settings
   DefaultMigrationSchema = 'ml_app'
   DefaultSchemaOwner = 'fphs'
 
+  # Does not set the prefix, just specifies what we search by in jobs
+  GlobalIdPrefix = 'fpa1'
+
   StartYearRange = (1900..(Date.current.year)).freeze
   EndYearRange = (1900..(Date.current.year)).freeze
   AgeRange = (1..150).freeze

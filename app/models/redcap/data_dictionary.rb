@@ -45,7 +45,12 @@ module Redcap
     # Store the data dictionary metadata from Redcap for future reference
     # Calls a delayed job to actually do the work
     def capture_data_dictionary
+      jobclass = Redcap::CaptureDataDictionaryJob
+      jobs = ProjectAdmin.existing_jobs(jobclass, self)
+      return if jobs.count > 0
+
       Redcap::CaptureDataDictionaryJob.perform_later(self)
+      redcap_project_admin.record_job_request('setup job: metadata')
     end
 
     #

@@ -58,12 +58,7 @@ module Redcap
         returnFormat: 'json'
       }
 
-      ClientRequest.create! current_admin: current_admin,
-                            action: 'project_xml',
-                            server_url: server_url,
-                            name: name,
-                            redcap_project_admin: project_admin,
-                            result: { retrieved_from: 'api' }
+      project_admin.record_job_request 'project_xml', result: { retrieved_from: 'api' }
 
       FileUtils.chmod 0o660, tempfile
       tempfile
@@ -156,12 +151,7 @@ module Redcap
           post_action action, request_options
         end
 
-        ClientRequest.create! current_admin: current_admin,
-                              action: action,
-                              server_url: server_url,
-                              name: name,
-                              redcap_project_admin: project_admin,
-                              result: { retrieved_from: retrieved_from }
+        project_admin.record_job_request action, result: { retrieved_from: retrieved_from }
       end
       res
     end
