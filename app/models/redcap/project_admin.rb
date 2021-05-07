@@ -48,6 +48,8 @@ module Redcap
       invalid_metadata: 'invalid metadata'
     }.freeze
 
+    JobQueue = 'redcap'
+
     has_one :redcap_data_dictionary,
             class_name: 'Redcap::DataDictionary',
             foreign_key: :redcap_project_admin_id,
@@ -220,7 +222,12 @@ module Redcap
     # In the background, download the full XML project archive,
     # and store it to the file_store container.
     def dump_archive
-      Redcap::CaptureProjectArchiveJob.perform_later(self, current_admin)
+      jobclass = Redcap::CaptureProjectArchiveJob
+      jobs = self.class.existing_jobs(jobclass, self)
+      return if jobs.count > 0
+
+      jobclass.perform_later(self, current_admin)
+      record_job_request('setup job: project_xml')
     end
 
     #
@@ -275,6 +282,34 @@ module Redcap
       update(status: Statuses[key])
     end
 
+    #
+    # Lookup existing jobs, based on the jobclass being run, and the global id record
+    # referenced in the arguments. Returns a scoped query, typically checked with something
+    # like result.count > 0
+    # @param [Class | String] jobclass
+    # @param [Admin::AdminBase] ref_record
+    # @return [ActiveRecord::Relation]
+    def self.existing_jobs(jobclass, ref_record)
+      jobtext = <<~END_TEXT
+        %
+          job_class: #{jobclass}
+        %
+          - _aj_globalid: gid://#{Settings::GlobalIdPrefix}/#{ref_record.class}/#{ref_record.id}
+        %
+      END_TEXT
+      Delayed::Job.handler_includes jobtext, queue: ProjectAdmin::JobQueue, failed: false
+    end
+
+    def record_job_request(action, result: nil)
+      result ||= { requested: true }
+      Redcap::ClientRequest.create current_admin: current_admin || admin,
+                                   action: action,
+                                   server_url: server_url,
+                                   name: name,
+                                   redcap_project_admin: self,
+                                   result: result
+    end
+
     private
 
     #
@@ -288,7 +323,12 @@ module Redcap
     #
     # Called after save to store the captured project info from Redcap for future reference
     def capture_current_project_info
-      Redcap::CaptureCurrentProjectInfoJob.perform_later(self)
+      jobclass = Redcap::CaptureCurrentProjectInfoJob
+      jobs = self.class.existing_jobs(jobclass, self)
+      return if jobs.count > 0
+
+      jobclass.perform_later(self)
+      record_job_request('setup job: project')
     end
 
     def reset_field_metadata
@@ -325,6 +365,7 @@ module Redcap
       raise FphsException, 'Not ready to set up dynamic model / database table' unless ready_to_setup_dynamic_model?
 
       dynamic_storage.create_dynamic_model
+      record_job_request 'create_dynamic_model', result: { dynamic_model: dynamic_storage.dynamic_model.id }
       dynamic_storage.add_user_access_control
     end
 

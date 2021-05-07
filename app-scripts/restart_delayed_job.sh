@@ -33,5 +33,18 @@ cd $EB_APP_CURRENT_DIR
 source /etc/profile
 # Provide a little time for delayed_job calling this to finish the job
 sleep 2
-nohup bundle exec bin/delayed_job -n $NUM_WORKERS --pid-dir=$EB_APP_PIDS_DIR restart &
+bundle exec bin/delayed_job -n $NUM_WORKERS --pid-dir=$EB_APP_PIDS_DIR stop
+
+sleeptime=20
+for p in $(pgrep -u webapp -f delayed_job); do
+  sleep $sleeptime
+  sleeptime=0
+  if [ $p != $$ ]; then
+    kill $p 2> /dev/null
+  fi
+done
+sleep 2
+
+bundle exec bin/delayed_job -n $NUM_WORKERS --pid-dir=$EB_APP_PIDS_DIR start
+
 echo 'Done'

@@ -28,13 +28,17 @@ pick an activity type...
 <% # Reload the captions and show_if definitions 
   otc = object_instance.option_type_config_for(extra_log_type) if extra_log_type
   if otc
+  
+  begin
 %>
   <%= render partial: 'activity_logs/common_search_results_template_item', 
             locals: { 
               def_record: object_instance,
               option_type_config: otc
             } %>
-<%
+<% rescue StandardError => e %>
+<p><i>Error preparing sample form: <%= e %></i></p>
+<% end
 else %>
 <p class="sample_form_message"></p>
 <% end %>

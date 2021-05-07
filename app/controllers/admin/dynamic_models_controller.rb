@@ -31,7 +31,6 @@ class Admin::DynamicModelsController < AdminController
     [:category]
   end
 
-
   def view_folder
     'admin/common_templates'
   end
@@ -41,5 +40,11 @@ class Admin::DynamicModelsController < AdminController
                            table_key_name primary_key_name
                            foreign_key_name result_order field_list position options
                            description disabled]
+  end
+
+  def index_params
+    %i[id name schema_name table_name category
+       table_key_name primary_key_name
+       foreign_key_name result_order position]
   end
 end
