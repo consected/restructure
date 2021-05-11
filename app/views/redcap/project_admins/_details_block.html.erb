@@ -60,7 +60,7 @@ every <%= object_instance.frequency %> - next run at
 <% if object_instance.persisted? && object_instance.enabled? %>
 <hr/>
 <% if object_instance.dynamic_model_ready?%>
-<p><%= link_to link_label_open_in_new('search table data'), "/reports/reference_data__table_data?schema_name=#{dm.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run5D=true&table_name=#{dm.table_name}", 
+<p><%= link_to link_label_open_in_new('search table data'), "/reports/reference_data__table_data?schema_name=#{dm.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{dm.table_name}", 
       target: '_blank' %></p>
 <% end %>
 <hr/>
