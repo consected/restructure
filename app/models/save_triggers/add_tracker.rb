@@ -34,21 +34,19 @@ class SaveTriggers::AddTracker < SaveTriggers::SaveTriggersBase
         end
 
         setup_with_config
-        @item.transaction do
-          # be sure about the user being set, to avoid hidden errors
-          raise 'no user set when adding tracker' unless use_master.current_user
+        # be sure about the user being set, to avoid hidden errors
+        raise 'no user set when adding tracker' unless use_master.current_user
 
-          t = use_master.trackers.create!(
-            protocol_id: protocol.id,
-            sub_process_id: sub_process.id,
-            protocol_event_id: protocol_event&.id,
-            notes: config_values[:notes],
-            item: use_item,
-            event_date: event_date
-          )
+        t = use_master.trackers.create!(
+          protocol_id: protocol.id,
+          sub_process_id: sub_process.id,
+          protocol_event_id: protocol_event&.id,
+          notes: config_values[:notes],
+          item: use_item,
+          event_date: event_date
+        )
 
-          trackers << { protocol_name => t }
-        end
+        trackers << { protocol_name => t }
       end
     end
     trackers
