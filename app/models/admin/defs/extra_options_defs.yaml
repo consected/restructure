@@ -86,6 +86,10 @@
           For the latter the Label is downcased automatically to generate the value
       calculate_with:
         sum: []
+      prompt: used by some select fields for the placeholder prompt text
+      use_app_type: |
+        use the specified app type id or name instead of the user's current app type
+        to filter protocol (and in the future other) selections
   dialog_before:
     field_name:
       name: message template name
@@ -114,3 +118,42 @@
         
 
 
+  save_trigger:
+    on_create:
+      notify: 
+#!defs(save_triggers_notify_options_defs.yaml)
+
+      create_reference: 
+#!defs(save_triggers_create_reference_options_defs.yaml)
+
+      update_reference: 
+#!defs(save_triggers_update_reference_options_defs.yaml)
+
+      create_master: 
+#!defs(save_triggers_create_master_options_defs.yaml)
+
+      create_filestore_container: 
+#!defs(save_triggers_create_filestore_container_options_defs.yaml)
+
+      update_this: 
+#!defs(save_triggers_update_this_options_defs.yaml)
+
+      add_tracker: 
+#!defs(save_triggers_add_tracker_options_defs.yaml)
+
+    on_update: {}
+    
+    on_save:
+      # on_save provides a shorthand for on_create and on_update. on_create and on_update override on_save configurations.
+    
+    on_disable:
+      # on_disable is triggered for any item that has a field named disabled that is switched to true
+    
+    on_upload: {}
+
+    before_save:
+      # Run a specified trigger before the current item has saved, allowing output to be reflected 
+      # in the UI update, but before reference updates are available
+      # Typically used for update_this, although can be applied to the other triggers if necessary
+
+ 
