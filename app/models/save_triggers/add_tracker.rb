@@ -81,8 +81,10 @@ class SaveTriggers::AddTracker < SaveTriggers::SaveTriggersBase
   end
 
   #
-  # Use the current master by default, or the master record specified
-  # by the master_id definitiion.
+  # Add trigger to the master, specified by:
+  # - the master record specified by {with: master_id:}
+  # - the master for the specified item_type / item_id
+  # - the current master by default
   # @return [Master]
   def use_master
     return @use_master if @use_master
@@ -91,7 +93,7 @@ class SaveTriggers::AddTracker < SaveTriggers::SaveTriggersBase
     @use_master = if master_id
                     Master.find(master_id)
                   else
-                    @master
+                    use_item&.master || @master
                   end
 
     @use_master.current_user ||= @master.current_user
@@ -118,9 +120,20 @@ class SaveTriggers::AddTracker < SaveTriggers::SaveTriggersBase
 
   #
   # Lookup protocol by name from config
+  # If a with: configuration has been specified using protocol_name:
+  # or protocol_id:
+  # use this, instead of the trigger definition key
   # @return [Classification::Protocol]
   def protocol
-    @protocol ||= Classification::Protocol.where(name: protocol_name).first
+    if config_values.key? :protocol_id
+      pid = config_values[:protocol_id]
+      @protocol ||= Classification::Protocol.where(id: pid).first
+    elsif config_values.key? :protocol_name
+      pn = config_values[:protocol_name]
+      @protocol ||= Classification::Protocol.where(name: pn).first
+    else
+      @protocol ||= Classification::Protocol.where(name: protocol_name).first
+    end
     raise "Could not find protocol name in add_tracker event (#{pn})" unless @protocol
 
     @protocol

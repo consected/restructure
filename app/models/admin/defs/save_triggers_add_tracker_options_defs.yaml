@@ -24,8 +24,9 @@
               
               # item attributes are optional, to specify a model record to reference the tracker to
               # By default, the current item is used
+              # Setting this leads to the master_id of the item being used.
               item_type: model name 
               item_id: model id
               # an alternative master_id is optional, and if specified the tracker will be tied to it
-              # Otherwise the default master is that the calling item belongs to
+              # Otherwise the default master is that the calling item belongs to (unless item_type / item_id specified)
               master_id: alternative master_id

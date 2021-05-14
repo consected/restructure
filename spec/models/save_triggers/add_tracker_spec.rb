@@ -114,6 +114,7 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
     pe_name = 'bounced email'
     text = "This is a test.\nIt works!"
 
+    study_p = Classification::Protocol.find_by_name('Study')
     sp1_name = 'Alerts'
     pe1_name = 'Level 1'
     text1 = 'Another test with {{master_id}}'
@@ -157,7 +158,26 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
             item_type: @al0.class.name
           }
         }
+      },
+      {
+        dynamic: {
+          with: {
+            protocol_name: 'Study',
+            sub_process_name: sp1_name,
+            protocol_event_name: pe1_name
+          }
+        }
+      },
+      {
+        dynamic2: {
+          with: {
+            protocol_id: study_p.id,
+            sub_process_name: sp1_name,
+            protocol_event_name: pe1_name
+          }
+        }
       }
+
     ]
 
     @trigger = SaveTriggers::AddTracker.new(config, @al)
@@ -165,7 +185,7 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
 
     expect(@trigger.trackers).to be_a Array
     expect(@trigger.trackers).not_to be_empty
-    expect(@trigger.trackers.map(&:keys).flatten).to eq %i[Q1 Study Q1]
+    expect(@trigger.trackers.map(&:keys).flatten).to eq %i[Q1 Study Q1 dynamic dynamic2]
 
     tracker = @trigger.trackers.first[:Q1]
 
@@ -192,6 +212,24 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
     expect(tracker.event_date).not_to be_nil
     expect(tracker.item).to eq @al0
     expect(tracker.master_id).to eq @master0.id
+
+    # Use the {with: {protocol_name: ...}} configuration instead of the {dynamic: } key
+    tracker = @trigger.trackers[3][:dynamic]
+
+    expect(tracker).to be_a Tracker
+    expect(tracker.protocol.name).to eq 'Study'
+    expect(tracker.sub_process.name).to eq sp1_name
+    expect(tracker.protocol_event.name).to eq pe1_name
+    expect(tracker.master_id).to eq @master.id
+
+    # Use the {with: {protocol_id: ...}} configuration instead of the {dynamic2: } key
+    tracker = @trigger.trackers[4][:dynamic2]
+
+    expect(tracker).to be_a Tracker
+    expect(tracker.protocol.id).to eq study_p.id
+    expect(tracker.sub_process.name).to eq sp1_name
+    expect(tracker.protocol_event.name).to eq pe1_name
+    expect(tracker.master_id).to eq @master.id
   end
 
   it 'add tracker on save_trigger in an activity log' do
