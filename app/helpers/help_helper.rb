@@ -145,6 +145,10 @@ module HelpHelper
     File.join(*where)
   end
 
+  def main_section
+    (section == HelpController::IndexSection ? HelpController::IndexSubsection : HelpController::IntroductionDocument)
+  end
+
   #
   # Clean path components to avoid directory traversal
   def clean_path(component)
