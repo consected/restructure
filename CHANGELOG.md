@@ -19,6 +19,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+
+## [7.4.1] - 2021-05-17
+
 [Changed] Ruby version to move to Amazon Linux 2
 
 ## [7.3.228] - 2021-05-17
