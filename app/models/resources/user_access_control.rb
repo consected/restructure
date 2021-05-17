@@ -101,13 +101,19 @@ module Resources
       ActivityLog.all_option_configs_grouped_resources
     end
 
+    #
+    # Categorize resources, taking care to treat both '' and nil categories as a single category
+    # @param [Class] klass - type of resources to categorize
+    # @param [String] label - label to form key prefix
+    # @param [Hash] into_hash - the hash to merge into
     def self.categorize_resources(klass, label, into_hash)
       recs = klass.active.reorder('').order(category: :asc)
       categories = recs.map(&:category).uniq
+      categories.delete_if { |cat| cat == '' }
       categories.each do |cat|
         into_hash.merge!(
-          "#{label}: #{cat&.present? && cat || '(no category)'}":
-            recs.select { |rec| rec.category == cat }.map { |r| [r.resource_name, r.name] }.to_h
+          "#{label}: #{cat&.present? ? cat : '(no category)'}":
+            recs.select { |rec| (rec.category || '') == (cat || '') }.map { |r| [r.resource_name, r.name] }.to_h
         )
       end
     end
