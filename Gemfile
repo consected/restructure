@@ -70,5 +70,6 @@ end
 group :development, :production, :assets do
   gem 'sass-rails', '~> 5.1'
   gem 'therubyracer'
+  gem 'execjs'
   gem 'uglifier', '>= 1.3.0'
 end

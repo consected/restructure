@@ -447,6 +447,7 @@ DEPENDENCIES
   devise (>= 4.6.1)
   devise-two-factor
   dicom
+  execjs
   flog
   jasmine-rails
   jquery-fileupload-rails (= 0.4.7)
@@ -484,4 +485,4 @@ DEPENDENCIES
   webmock
 
 BUNDLED WITH
-   2.2.13
+   2.2.17
