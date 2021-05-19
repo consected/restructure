@@ -447,7 +447,6 @@ DEPENDENCIES
   devise (>= 4.6.1)
   devise-two-factor
   dicom
-  e2mmap
   execjs
   flog
   jasmine-rails
