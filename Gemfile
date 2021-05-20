@@ -22,7 +22,7 @@ gem 'jquery-rails'
 gem 'kramdown'
 gem 'kramdown-parser-gfm'
 gem 'mime-types'
-gem 'nokogiri', '1.11.0.rc4'
+gem 'nokogiri', '1.11.5'
 gem 'pg', '~> 0.15'
 gem 'rails', '~> 5.0'
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
@@ -68,8 +68,8 @@ group :test do
 end
 
 group :development, :production, :assets do
+  gem 'execjs'
   gem 'sass-rails', '~> 5.1'
   gem 'therubyracer'
-  gem 'execjs'
   gem 'uglifier', '>= 1.3.0'
 end
