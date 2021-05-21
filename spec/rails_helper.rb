@@ -172,6 +172,8 @@ RSpec.configure do |config|
   # removed Devise::TestHelpers from the following line, since it is now deprecated.
   # Using Devise::Test::ControllerHelpers as advised
   config.include Devise::Test::ControllerHelpers, type: :controller
+  config.include Devise::Test::IntegrationHelpers, type: :request
+
   config.extend ControllerMacros, type: :controller
   config.after :each do
     Warden.test_reset!
