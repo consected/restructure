@@ -994,6 +994,24 @@ li.list-group-item.is_external_id_item {
   }
 }
 
+.label-no-create-container {
+  text-align: center;
+  width: auto;
+
+  .external-identifier-label-no-create {
+    background: rgb(172, 172, 172);
+    padding: 0.5em;
+    color: white;
+    border-radius: 3px;
+  }
+}
+
+.orientation-horizontal .label-no-create-container {
+  text-align: left;
+  // display: inline-block;
+  width: auto;
+}
+
 .orientation-horizontal .new-button-container {
   background: rgb(234, 234, 234);
   padding: 6px;
