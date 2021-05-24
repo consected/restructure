@@ -288,3 +288,11 @@ div.help-view-doc,
 .help-doc-header {
   text-align: center;
 }
+
+div.help-view-doc.not-embedded,
+.common-help-item,
+.md-formatted-block {
+  img {
+    opacity: 1;
+  }
+}

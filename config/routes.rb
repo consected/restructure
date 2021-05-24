@@ -8,10 +8,10 @@ Rails.application.routes.draw do
   get '/content/:id/:master_id/:secondary_key', to: 'page_layouts#show_content'
   get '/content/:id/:master_type/:master_id/:secondary_key', to: 'page_layouts#show_content'
 
-  get '/help/:library/:section/:subsection', to: 'help#show', as: 'help_page'
-  get '/help/:library/:section/:id', to: 'help#show', as: 'help'
-  get '/help/:library', to: 'help#index', as: 'help_library_home'
   get '/help/:library/:section/images/:image_name', to: 'help#image', as: 'help_image'
+  get '/help/:library/:section/:subsection', to: 'help#show', as: 'help_page', constraints: { subsection: /.+(\.md|\.jpg\.png)?/ }
+  get '/help/:library/:section/:id', to: 'help#show', as: 'help', constraints: { id: /.+(\.md|\.jpg\.png)?/ }
+  get '/help/:library', to: 'help#index', as: 'help_library_home'
 
   resources :help, only: %i[index]
 
