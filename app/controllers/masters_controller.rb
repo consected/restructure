@@ -123,10 +123,22 @@ class MastersController < UserBaseController
       end
     end
 
-    if @master&.id
-      redirect_to master_path(@master.id), notice: "Created Master Record with ID #{@master.id}"
-    else
-      redirect_to new_master_url, notice: "Error creating Master Record: #{Application.record_error_message @master}"
+    respond_to do |format|
+      format.html do
+        if @master&.id
+          redirect_to master_path(@master.id), notice: "Created Master Record with ID #{@master.id}"
+        else
+          redirect_to new_master_url, notice: "Error creating Master Record: #{Application.record_error_message @master}"
+        end
+      end
+      format.json do
+        if @master&.id
+          render json: { master: @master }
+        else
+          render json: { message: "Error creating Master Record: #{Application.record_error_message @master}" },
+                 status: 400
+        end
+      end
     end
   end
 

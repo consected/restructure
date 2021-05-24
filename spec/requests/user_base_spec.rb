@@ -49,7 +49,7 @@ describe 'csrf protection' do
 
   before :example do
     ActionController::Base.allow_forgery_protection = true
-    @user = create_user(create_master: true).first
+    @user = create_user(nil, '', create_master: true).first
 
     @master = create_master
     @token = login_user

@@ -20,6 +20,7 @@ module UserSupport
     user.otp_required_for_login = true
     user.new_two_factor_auth_code = false
     user.save!
+    @user_authentication_token = user.authentication_token
 
     # # Can't reload, as that doesn't clear non-db attributes
     user = User.find(user.id)
