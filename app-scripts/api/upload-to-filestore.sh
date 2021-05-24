@@ -12,7 +12,7 @@ upload_file=~/Downloads/123457_persnet.pdf \\
 container_id=75 \\
 activity_log_id=73 \\
 activity_log_type=activity_log__ipa_assignment_session_filestore \\
-app-scripts/upload-to-filestore.sh
+app-scripts/api/upload-to-filestore.sh
 EOF
   exit 1
 fi
