@@ -62,6 +62,7 @@ describe 'user and admin authentication' do
   # rather than more correct 404 errors
   it 'redirects to user login page for all paths when not logged in' do
     skip_urls = ['/admins/sign_in', '/users/sign_in', '/child_error_reporter']
+    skip_controllers = ['help']
 
     admin_controllers = %w[admin/accuracy_scores admin/colleges admin/general_selections admin/item_flag_names
                            admin/manage_admins admin/manage_users
@@ -75,7 +76,7 @@ describe 'user and admin authentication' do
                            redcap/project_admins redcap/client_requests redcap/data_dictionaries]
 
     @url_list.each do |url|
-      next unless url[:controller] && !skip_urls.include?(url[:url])
+      next unless url[:controller] && !skip_urls.include?(url[:url]) && !skip_controllers.include?(url[:controller])
 
       begin
         case url[:method]

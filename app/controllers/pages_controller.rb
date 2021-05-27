@@ -24,7 +24,11 @@ class PagesController < ApplicationController
 
   # Simple action to refresh the session timeout
   def show
-    render json: { version: Application.version }
+    if params[:id] == 'version'
+      render json: { version: Application.version }
+    else
+      not_found
+    end
   end
 
   # template

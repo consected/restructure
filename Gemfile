@@ -3,6 +3,7 @@
 source 'https://rubygems.org'
 
 gem 'activerecord-import'
+gem 'activerecord-session_store'
 gem 'aws-sdk-cloudwatchlogs', '~> 1'
 gem 'aws-sdk-pinpoint', '~> 1'
 gem 'aws-sdk-s3', '~> 1'

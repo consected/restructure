@@ -16,6 +16,8 @@ class HelpController < ApplicationController
   #
   # Show the default help page for the current authentication or guest
   def index
+    return not_found unless request.format.to_sym.in?(%i[html md]) || !request.path.include?('.')
+
     redirect_to help_page_path(library: library,
                                section: index_section,
                                subsection: index_subsection,
