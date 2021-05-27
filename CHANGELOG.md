@@ -19,51 +19,39 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
-
+- [Changed] session storage from cookie based to ActiveRecord. Requires a DB migration to create the new ml_app.sessions table.
+  
+  Version 7.4.17 tested and performed vulnerability scans against the new session storage to validate it.
+  
 ## [7.4.17] - 2021-05-27
-
 
 ## [7.4.16] - 2021-05-24
 
-
 ## [7.4.14] - 2021-05-20
-
 
 ## [7.4.13] - 2021-05-20
 
-
 ## [7.4.12] - 2021-05-19
-
 
 ## [7.4.11] - 2021-05-19
 
-
 ## [7.4.10] - 2021-05-19
-
 
 ## [7.4.9] - 2021-05-19
 
-
 ## [7.4.8] - 2021-05-19
-
 
 ## [7.4.7] - 2021-05-19
 
-
 ## [7.4.6] - 2021-05-19
-
 
 ## [7.4.5] - 2021-05-18
 
-
 ## [7.4.4] - 2021-05-18
-
 
 ## [7.4.3] - 2021-05-18
 
-
 ## [7.4.2] - 2021-05-17
-
 
 ## [7.4.1] - 2021-05-17
 
