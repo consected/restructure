@@ -94,25 +94,33 @@ Rails.application.configure do
   # Send deprecation notices to registered listeners.
   config.active_support.deprecation = :notify
 
-  if ENV['FPHS_USE_LOGGER'] == 'TRUE'
-    puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger disabled !!!!!!!!!!!!!!!!!!!!!!'
-    config.log_level = :info
+  config.log_level = if ENV['FPHS_LOG_LEVEL']
+                       ENV['FPHS_LOG_LEVEL'].to_sym
+                     else
+                       :fatal
+                     end
+
+  case ENV['FPHS_USE_LOGGER']
+  when 'TRUE', 'true', 'default'
+    puts '!!!!!!!!!!!!!!!!!!!!!! Standard logger enabled !!!!!!!!!!!!!!!!!!!!!!'
     # Use default logging formatter so that PID and timestamp are not suppressed.
     config.log_formatter = ::Logger::Formatter.new
-
+  when 'STDOUT'
+    logger           = ActiveSupport::Logger.new(STDOUT)
+    logger.formatter = ::Logger::Formatter.new
+    config.logger    = ActiveSupport::TaggedLogging.new(logger)
+  when 'syslog'
     # Use a different logger for distributed setups.
-    # require 'syslog/logger'
-    # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new 'app-name')
-
-    if ENV['RAILS_LOG_TO_STDOUT'].present?
-      logger           = ActiveSupport::Logger.new(STDOUT)
-      logger.formatter = config.log_formatter
-      config.logger    = ActiveSupport::TaggedLogging.new(logger)
-    end
-
-  else
+    puts '!!!!!!!!!!!!!!!!!!!!!! syslog enabled !!!!!!!!!!!!!!!!!!!!!!'
+    require 'syslog/logger'
+    config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new('restructure-app'))
+  when 'DoNothing'
     puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!'
     config.logger = DoNothingLogger.new
+  else
+    puts '!!!!!!!!!!!!!!!!!!!!!! Default (:fatal) logger   !!!!!!!!!!!!!!!!!!!!!!'
+    config.log_level = :fatal
+    config.log_formatter = ::Logger::Formatter.new
   end
 
   # Do not dump schema after migrations.
