@@ -27,8 +27,8 @@ describe 'Electronically sign a record', driver: :app_firefox_driver do
       # save_log
     end
 
-    it 'shows an action on an activity log to sign a document'
+    # it 'shows an action on an activity log to sign a document'
 
-    it 'shows the review document and all its fields'
+    # it 'shows the review document and all its fields'
   end
 end
