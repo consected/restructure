@@ -25,6 +25,8 @@ module NfsStore
           self.container_files = [container_files]
         end
 
+        raise FsException::Action, 'no file selected to process' unless container_file
+
         self.container = container_file.container
         # Save the parent_item activity log so we can use it to pick up additional configurations
         self.parent_item = container&.parent_item || container&.find_creator_parent_item
@@ -156,7 +158,7 @@ module NfsStore
         end
 
         if container
-          activity_log = container.parent_item
+          activity_log = container.parent_item || container.find_creator_parent_item
         elsif item.is_a? ActivityLog
           activity_log = item
         else
@@ -182,7 +184,10 @@ module NfsStore
       # @param [String | Symbol] name representing the job config to retrieve
       # @return [Hash] configuration
       def self.user_file_action_pipeline(item, action_name)
+        raise FsException::Action, 'item not set for file action pipeline request' unless item
+
         activity_log = activity_log_for item
+        raise FsException::Action, 'activity log not found for file action pipeline request' unless activity_log
 
         user_file_actions = activity_log.extra_log_type_config.nfs_store[:user_file_actions]
 
