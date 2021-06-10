@@ -1,3 +1,5 @@
-<button id="container-browse-download-<%=container_id%>" class="btn btn-primary container-browse-download" data-target-browser="#container-browser-<%=container_id%>">
+<button id="container-browse-download-<%=container_id%>" class="btn btn-primary container-browse-download <%= can_download ? 'can-download' : 'cannot-download'  %>" data-target-browser="#container-browser-<%=container_id%>"
+  <%= can_download ? '' : 'disabled'  %>
+>
   <span class="glyphicon glyphicon-cloud-download"></span> <span class="btn-caption">Download</span>
 </button>

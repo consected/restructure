@@ -166,7 +166,6 @@ module NfsStore
       # @todo
       # Need to check number of files in zip file against number on filesystem after unzip
       # unzip -v zipname.zip | grep 'Defl:N' | wc -l
-      # find zipname.zip.__mounted-archive__ -type f -print | wc -l
       def mount
         res = true
         return unless has_archive_extension?

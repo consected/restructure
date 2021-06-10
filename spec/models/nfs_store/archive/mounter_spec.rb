@@ -66,15 +66,15 @@ RSpec.describe NfsStore::Archive::Mounter, type: :model do
     sf = @zip_file.stored_file
     mounter = NfsStore::Archive::Mounter.new
     mounter.stored_file = sf
+    # Simulate a broken extract
+    mounter.extract_in_progress!
+    expect(mounter.extract_in_progress?).to be true
     Dir.glob('*', base: mounter.mounted_path).each do |f|
       FileUtils.rm_f(File.join(mounter.mounted_path, f))
     end
     expect(mounter.archive_file_count).to eq 0
-    mounter.extract_in_progress!
-    expect(mounter.extract_in_progress?).to be true
     expect(NfsStore::Archive::Mounter::ProcessingRetryTime).to eq 34.minutes
-    FileUtils.touch mounter.processing_archive_flag_path, mtime: Time.now - NfsStore::Archive::Mounter::ProcessingRetryTime
-    sleep 1
+    FileUtils.touch mounter.processing_archive_flag_path, mtime: Time.now - NfsStore::Archive::Mounter::ProcessingRetryTime - 10.seconds
     expect(mounter.extract_in_progress?).to be false
     expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be true
     expect(mounter.mount).to be_truthy
