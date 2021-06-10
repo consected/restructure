@@ -102,12 +102,28 @@ module NfsStore
       # @param archive_file_name [String] the file name of the archive file to be mounted
       # @return [String] the flag filename
       def processing_archive_flag_path
-        "#{stored_file.retrieval_path}#{ProcessingArchiveSuffix}"
+        "#{archive_path}#{ProcessingArchiveSuffix}"
       end
 
+      #
+      # An extract is marked as being in progress with a flag file in the root directory,
+      # named with the stored file name and a special extension.
+      # If the flag file does NOT exist, then an extract is definitely not in progress.
+      # If the flag file does exist, it will be ignored if
+      # the modification timestamp of the file is older than
+      # the ProcessingRetryTime (initially 30 minutes). The flag file will be removed,
+      # and the extract will be consider not in progress.
+      # Otherwise an extract status is consider to be in progress.
+      # @return [Boolean]
       def extract_in_progress?
-        File.exist?(processing_archive_flag_path) &&
-          (Time.now - File.mtime(processing_archive_flag_path)) < ProcessingRetryTime
+        return false unless File.exist?(processing_archive_flag_path)
+
+        if (Time.now - File.mtime(processing_archive_flag_path)) >= ProcessingRetryTime
+          extract_completed!
+          false
+        else
+          true
+        end
       end
 
       def extract_in_progress!
@@ -119,7 +135,7 @@ module NfsStore
       end
 
       def processing_index_flag_path
-        "#{stored_file.retrieval_path}#{ProcessingIndexSuffix}"
+        "#{archive_path}#{ProcessingIndexSuffix}"
       end
 
       def index_in_progress?
@@ -135,33 +151,31 @@ module NfsStore
         FileUtils.rm_f(processing_index_flag_path)
       end
 
-      # Perform the mount operation, if possible. This operation is idempotent and
+      #
+      # Perform the zip extract operation, if possible. This operation is idempotent and
       # only operates on archive files with file names with appropriate file extensions.
       # Any file that doesn't match ArchiveExtensions is skipped.
-      # Any file that is already mounted will not be mounted again.
+      # Any file that is already extracted will not be extracted again.
+      #
+      # The extraction is performed into a local temp directory. If successful, the
+      # group ownership is changed to the stored file group id.
+      # Then the files are copied into a temporary directory on the network file system
+      # using a hidden (dot) directory name.
+      # Finally, the complete directory is moved to its final location.
+      #
+      # @todo
+      # Need to check number of files in zip file against number on filesystem after unzip
+      # unzip -v zipname.zip | grep 'Defl:N' | wc -l
+      # find zipname.zip.__mounted-archive__ -type f -print | wc -l
       def mount
         res = true
-
         return unless has_archive_extension?
-
         return if extract_in_progress?
 
         extract_in_progress!
 
-        @archive_path = stored_file.retrieval_path
-        @mounted_path = "#{@archive_path}#{ArchiveMountSuffix}"
-        @archive_file = stored_file.file_name
-
-        pn = Pathname.new(@mounted_path)
-
-        if pn.exist?
-          if pn.empty?
-            puts "Removing the empty directory which appears at #{@mounted_path}"
-            Dir.rmdir @mounted_path
-          else
-            puts "The directory is not empty at #{@mounted_path}"
-          end
-        end
+        pn = Pathname.new(mounted_path)
+        Dir.rmdir mounted_path if pn.exist? && pn.empty?
 
         unless pn.exist?
           unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
@@ -169,36 +183,79 @@ module NfsStore
                   "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}"
           end
 
+          tpn = Pathname.new(temp_mounted_path)
+          FileUtils.rm_rf temp_mounted_path if tpn.exist?
           dir = File.join(Manage::Filesystem.temp_directory, "__filestore__#{SecureRandom.hex}")
-
           FileUtils.mkdir_p dir
 
           tmpzipdir = "#{dir}/zip"
-          FileUtils.mkdir tmpzipdir
-          cmd = ['unzip', @archive_path, '-d', tmpzipdir]
+          FileUtils.mkdir_p tmpzipdir
 
+          cmd = ['unzip', archive_path, '-d', tmpzipdir]
           res = Kernel.system(*cmd)
-          puts "Command: #{cmd}\nRes: #{res}"
-          raise FsException::Action, "Failed to unzip the archive file: #{@archive_path}" unless res
-
-          puts "Setting permissions (gid=#{stored_file.current_gid.to_i}) on #{tmpzipdir}"
+          raise FsException::Action, "Failed to unzip the archive file: #{archive_path}" unless res
 
           FileUtils.chown_R nil, stored_file.current_gid.to_i, tmpzipdir
+          FileUtils.cp_r tmpzipdir, temp_mounted_path
 
-          # Need to check number of files in zip file against number on filesystem after unzip
-          # unzip -v zipname.zip | grep 'Defl:N' | wc -l
-          # find zipname.zip.__mounted-archive__ -type f -print | wc -l
-          #
-
-          puts "Copying #{tmpzipdir} to #{@mounted_path}"
-          FileUtils.cp_r tmpzipdir, @mounted_path
-          puts 'Cleaning directory'
-          FileUtils.rm_rf dir
-          puts "Done with #{@mounted_path}"
-
+          begin
+            FileUtils.mv temp_mounted_path, mounted_path
+            FileUtils.rm_rf dir
+          rescue StandardError => e
+            extract_completed!
+            begin
+              FileUtils.rm_rf temp_mounted_path
+              FileUtils.rm_rf mounted_path
+            rescue StandardError => e2
+              raise FsException::Action,
+                    "Failed to move the extracted archive files and remove the mounted path for: #{archive_path}\n" \
+                    "#{e}\n#{e2}"
+            end
+            raise FsException::Action, "Failed to move the extracted archive files: #{archive_path}\n#{e}"
+          end
         end
 
         extract_completed! if res
+      end
+
+      #
+      # The directory path that the extracted files will be found in
+      # @return [String | nil]
+      def mounted_path
+        return unless archive_path
+
+        @mounted_path ||= "#{archive_path}#{ArchiveMountSuffix}"
+      end
+
+      #
+      # The temporary directory in the container on the network file system that files
+      # are extracted to, before being moved to the location of #mounted_path.
+      # The directory name is a hidden (dot) name, so it won't appear to a user
+      # until the files are eventually moved to the final location.
+      # @return [String]
+      def temp_mounted_path
+        mounted_path.sub("#{archive_file_name}#{ArchiveMountSuffix}", ".tmp-#{archive_file_name}#{ArchiveMountSuffix}")
+      end
+
+      #
+      # The path to the stored compressed file
+      # @return [String]
+      def archive_path
+        @archive_path ||= stored_file.retrieval_path
+      end
+
+      #
+      # File name of the stored compressed file
+      # @return [String]
+      def archive_file_name
+        @archive_file_name ||= stored_file.file_name
+      end
+
+      #
+      # Number of files extracted from the compressed archive
+      # @return [Integer]
+      def archive_file_count
+        Dir.glob('*', base: mounted_path).length
       end
 
       # Check the stored file has an archive file extension that matches files we want to mount
@@ -221,7 +278,6 @@ module NfsStore
       def archive_extracted?
         return @archive_extracted unless @archive_extracted.nil?
 
-        @archive_file ||= stored_file.file_name
         @archive_extracted = NfsStore::Manage::ArchivedFile.extracted? stored_file: stored_file
       end
 
@@ -245,11 +301,8 @@ module NfsStore
       # Extract files from an archive and add them to the database in a single bulk import
       # @return [Boolean] result true if all the archived files were extracted and stored
       def extract_archived_files
-        @archive_path = stored_file.retrieval_path
-        @mounted_path = "#{@archive_path}#{ArchiveMountSuffix}"
-        @archive_file = stored_file.file_name
         unless Rails.env.test?
-          puts "Start to extract files? (archive not extracted? #{!archive_extracted?}) to DB for #{@mounted_path}"
+          puts "Start to extract files? (archive not extracted? #{!archive_extracted?}) to DB for #{mounted_path}"
         end
 
         result = true
@@ -260,7 +313,7 @@ module NfsStore
           iterations = 0
           failures = 0
 
-          glob_path = "#{@mounted_path}/**/*"
+          glob_path = "#{mounted_path}/**/*"
           %w([ ] { } ?).each do |c|
             glob_path = glob_path.gsub(c, "\\#{c}")
           end
@@ -277,8 +330,8 @@ module NfsStore
             unless pn.directory?
               begin
                 # Don't use regex - it breaks with special characters
-                archived_file_path = pn.dirname.to_s.sub("#{@mounted_path}/", '').sub(@mounted_path.to_s, '')
-                afval = stored_file.path ? File.join(stored_file.path, @archive_file) : @archive_file
+                archived_file_path = pn.dirname.to_s.sub("#{mounted_path}/", '').sub(mounted_path.to_s, '')
+                afval = stored_file.path ? File.join(stored_file.path, archive_file_name) : archive_file_name
                 af = NfsStore::Manage::ArchivedFile.new container: container,
                                                         path: archived_file_path,
                                                         archive_file: afval,
@@ -313,7 +366,7 @@ module NfsStore
           # It is possible that repeated or overlapping background processes lead to double entries in the archive_files
           # table. To fix this it is fastest to complete the import, then remove the duplicates.
 
-          NfsStore::Manage::ArchivedFile.remove_duplicates @archive_file
+          NfsStore::Manage::ArchivedFile.remove_duplicates archive_file_name
         end
 
         result
