@@ -116,7 +116,7 @@
 
       {{#is to_record_options_config.view_as.show '!==' 'hide'}}
         {{#is to_record_options_config.view_as.show '===' 'filestore'}}
-          {{>filestore_common_template_view prevent_edit=../prevent_edit name='<%=name%>'}}
+          {{>filestore_common_template_view prevent_edit=../prevent_edit name='<%=name%>' can_download=../can_download}}
         {{/is}}
       {{/is}}
     {{/each}}

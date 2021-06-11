@@ -16,22 +16,69 @@
     file_name = file_name.sub(/\.__processing__$/, '')
     is_processing = true
   end
+
+  retrieval_type = download.class.retrieval_type
+  retrieval_type_h = retrieval_type.hyphenate
+  if @allow_show_flags.nil?
+    full_name = "nfs_store__manage__#{retrieval_type}"
+    @allow_show_flags = !!Classification::ItemFlagName.enabled_for?(full_name, current_user)
+  end
+
+  # Speedup path calculation with a simple string rather than routes
+  #a_path = Rails.application.routes.url_helpers.master_filestore_classification_path(@container.master_id, @container.id, download_id: download.id, retrieval_type: retrieval_type)
+  a_path = "/masters/#{@container.master_id}/filestore/classification/#{@container.id}?download_id=#{download.id}&retrieval_type=#{retrieval_type}"
+
+  extras = {
+    include: [:item_flag_name],
+    methods: [:method_id, :item_type_us]
+  }
 %>
-<li class="container-entry" id="container-entry-<%=@container.id%>-<%= download.id %>-<%= download.class.retrieval_type%>" data-retrieval-type="<%= download.class.retrieval_type%>" data-download-id="<%= download.id %>">
+<li class="container-entry" id="container-entry-<%=@container.id%>-<%= download.id %>-<%= retrieval_type%>" data-retrieval-type="<%= retrieval_type%>" data-download-id="<%= download.id %>">
   <% if download.id %>
-  <%= form.check_box :selected_items, {multiple: true, title: "select item for download", class: "ff"}, {id: download.id, retrieval_type: download.class.retrieval_type}.to_json, nil %>
+  <%= form.check_box :selected_items, {multiple: true, title: "select item for download", class: "ff"}, {id: download.id, retrieval_type: retrieval_type}.to_json, nil %>
   <% else %>
   <span class="file-entry-not-downloadable">&nbsp;&nbsp;</span>
   <% end %>
   <% if download.id %>
-    <%=link_to file_name, nfs_store_download_path(@container.id, download_id: download.id, retrieval_type: download.class.retrieval_type, activity_log_id: @activity_log.id, activity_log_type: @activity_log.class.to_s.ns_underscore), class: "browse-filename", disabled: !@container.can_download?, title: (!@container.can_download? ? "not authorized to download" : nil), target: '_blank' %>
+    <%=link_to file_name, nfs_store_download_path(@container.id, download_id: download.id, retrieval_type: retrieval_type, activity_log_id: @activity_log.id, activity_log_type: @activity_log.class.to_s.ns_underscore), class: "browse-filename", disabled: !@container.can_download_or_view?, title: (!@container.can_download_or_view? ? "not authorized to download" : nil), target: '_blank' %>
     <span class="browse-entry-meta">
       <span class="bem-mime-type"><%= download.mime_type_text %></span>
       <span class="bem-mime-type"><%= ((download.file_size.to_f / 1_000_000 * 10).to_i.to_f / 10)   %> MB</span>
       <span class="bem-mod-date" data-format-date-local="<%= download.file_updated_at ? 'true' : ''%>"><%= download.file_updated_at || '(no date)'%></span>
     </span>
     <span class="browse-entry-classifications">
-      <%= render partial: 'browse_list_classification', locals: { download: download } %>
+      <%# originally performed as render partial: 'browse_list_classification', locals: { download: download } 
+        # This has been moved inline for performance reasons, since the collection: mechanism that the outer partial
+        # calls does not perform well with nested partials
+      %>
+      <a class="bem-meta-link" data-remote="true" data-container-id="null" data-toggle="scrollto-result" data-result-target-force="true" data-result-target="<%="[data-subscription='filestore-classification-#{retrieval_type_h}-edit-form--#{@container.id}']"%>" data-template="<%="filestore-classification-#{retrieval_type_h}-full-result-template"%>" href="<%=a_path%>">
+        <span class="bem-classification-attrs">
+          <span class="bem-class-title"><%= download.title.present? ? download.title : '(no title)'  %></span>
+          <span class="bem-class-file-metadata">
+          <% if download.file_metadata.present?  %><i class="glyphicon glyphicon-list" title="has metadata extracted from the file content"></i>
+          <% else %><i class="empty-glyphicon"></i>
+          <% end %>
+          </span>
+        </span>
+      </a>
+
+  <% if @allow_show_flags %>
+  <script>
+    var flag_data = {item_flags: <%= download.item_flags&.as_json(extras)&.to_json&.html_safe || 'null' %>};
+    if(flag_data.item_flags.length == 0) {
+      var res = '<span class="no-item-flags"></span>'
+    }
+    else {
+      flag_data.item_type="<%=full_name%>";
+      flag_data.readonlyview=true;
+      var res = _fpa.partials.item_flag_container(flag_data);
+    }
+    var block = $('<span class="bem-class-flags">'+res+'</span>');
+    $('#container-entry-<%=@container.id%>-<%=download.id%>-<%=retrieval_type%> .bem-class-title').first().before(block);
+  </script>
+  <% end %>
+  <%# end of render partial: 'browse_list_classification', locals: { download: download } %>
+
     </span>
   <% else %>
     <span class="browse-filename missing-db-entry"><%= file_name %>

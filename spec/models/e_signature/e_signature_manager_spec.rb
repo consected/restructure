@@ -40,7 +40,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       expect(@al.e_signed_document).to start_with('<!doctype html>')
     end
 
-    it 'removes the fields that are hidden based on conditional rules'
+    # it 'removes the fields that are hidden based on conditional rules'
 
     it 'adds the user email address to the end of the document' do
       expect(@al.e_signed_document).to include("<small>Signed by</small> <esignuser>#{@user.first_name} #{@user.last_name} - #{@user.email} (id: #{@user.id})</esignuser>")
@@ -288,6 +288,6 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       end.to raise_error ESignature::ESignatureUserError
     end
 
-    it 'sends a notification of the signature to the user with a signature summary and digest'
+    # it 'sends a notification of the signature to the user with a signature summary and digest'
   end
 end

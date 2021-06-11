@@ -24,7 +24,10 @@ module NfsStore
       @download = Download.new container: @container, activity_log: @activity_log
       @master = @container.master
       @id = @container.id
-      retrieved_file = @download.retrieve_file_from @download_id, retrieval_type, for_action: :download
+
+      for_action = :download
+      for_action = :download_or_view if params[:secure_view] && params[:secure_view][:preview_as].present?
+      retrieved_file = @download.retrieve_file_from @download_id, retrieval_type, for_action: for_action
       FsException::NotFound.new 'Requested file not found' unless retrieved_file
 
       @download.save!
@@ -124,7 +127,8 @@ module NfsStore
     end
 
     def secure_params
-      params.require(:nfs_store_download).permit(:container_id, :activity_log_id, :activity_log_type, :new_path, :new_name, selected_items: [])
+      params.require(:nfs_store_download).permit(:container_id, :activity_log_id, :activity_log_type, :new_path,
+                                                 :new_name, selected_items: [])
     end
 
     # Handle find container differently for multi container actions
@@ -144,7 +148,9 @@ module NfsStore
         return
       end
 
-      @selected_items_info = selected_items.map { |s| h = JSON.parse(s); { id: h['id'].to_i, retrieval_type: h['retrieval_type'].to_sym } }
+      @selected_items_info = selected_items.map do |s|
+        h = JSON.parse(s); { id: h['id'].to_i, retrieval_type: h['retrieval_type'].to_sym }
+      end
     end
 
     def setup_action(action_class)

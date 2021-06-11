@@ -1,4 +1,8 @@
-<% # NOTE: there is a handlebars template that also provides some of this layout in filestore/classification/_result_template.html.erb %>
+<% 
+# NOTE: this partial is not used, and is now inlined in the outer _browse_list_entry partial, for significant performance gains
+# in a partial collection processor.
+# NOTE: there is a handlebars template that also provides some of this layout in filestore/classification/_result_template.html.erb 
+%>
 <%
   if @allow_show_flags.nil?
 

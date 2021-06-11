@@ -26,7 +26,7 @@
     <a class="browse-entry-classifications" href="<%=download_path%>" target="_blank>
       <%= render partial: 'browse_icons_classification', locals: { download: download } %>
     </a>
-    <%=link_to file_name, download_path, class: "browse-filename", disabled: !@container.can_download?, title: (!@container.can_download? ? "not authorized to download" : nil), target: '_blank' %>
+    <%=link_to file_name, download_path, class: "browse-filename", disabled: !@container.can_download_or_view?, title: (!@container.can_download_or_view? ? "not authorized to download" : nil), target: '_blank' %>
     <span class="browse-entry-meta">
       <span class="bem-mime-type"><%= download.mime_type_text %></span>
       <span class="bem-file-size"><%= ((download.file_size.to_f / 1_000_000 * 10).to_i.to_f / 10)   %> MB</span>

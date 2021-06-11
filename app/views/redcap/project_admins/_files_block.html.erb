@@ -9,7 +9,8 @@ window.setTimeout(function() {
     to_record_label: 'Admin Files',
     from_record_id: <%= object_instance.id %>,
     from_record_type_us: '<%= object_instance.admin_resource_name.singularize %>',
-    prevent_edit: true
+    prevent_edit: true,
+    can_download: true
   };
   var block = $('#admin-filestore-block-<%= object_instance.id %>');
   _fpa.view_template(block, 'filestore-view-template', data); 
