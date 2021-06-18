@@ -794,9 +794,14 @@ _fpa.form_utils = {
 
     if (block.hasClass('use-secure-view-on-links-setup')) return;
 
-    block.find('.use-secure-view-on-links a').each(function () {
+    var inner = block.find('a');
+    if (!_fpa.state.user_can.view_files_as_image) {
+      inner = block.find('.use-secure-view-on-links a')
+    }
+
+    inner.each(function () {
       var href = $(this).attr('href');
-      if (href.indexOf('/nfs_store/downloads') >= 0) {
+      if (href && href.indexOf('/nfs_store/downloads') >= 0 && $(this).parents('.nfs-store-container-block').length == 0) {
         $(this).addClass('use-secure-view');
       }
     });
