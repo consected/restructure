@@ -22,6 +22,12 @@
     <%= render partial: 'admin/server_info/view_settings', locals: {settings: @db_settings} %>
   </div>
   <div class="row">  
+    <h2>NfsStore Settings</h2>
+    <%= render partial: 'admin/server_info/view_settings', locals: {settings: @nfs_store_settings} %>
+  </div>  
+
+  <% if @server_type == :passenger %>
+  <div class="row">  
     <h2>Passenger Status</h2>
     <pre><%=@passenger_status%></pre>
   </div>
@@ -29,6 +35,8 @@
     <h2>Passenger Memory Stats</h2>
     <pre><%=@passenger_memory_stats%></pre>
   </div>
+  <% end %>
+
   <div class="row">  
     <h2>Processes</h2>
     <pre><%=@processes%></pre>
