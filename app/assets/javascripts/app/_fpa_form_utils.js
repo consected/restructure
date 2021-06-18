@@ -785,8 +785,28 @@ _fpa.form_utils = {
         _fpa.view_handlers[vh](block);
       }
     }
+  },
 
+  // Blocks marked with the class use-secure-view-on-links are checked
+  // to find <a> links for filestore downloads. These are then set to
+  // 
+  setup_secure_view_links: function (block) {
 
+    if (block.hasClass('use-secure-view-on-links-setup')) return;
+
+    block.find('.use-secure-view-on-links a').each(function () {
+      var href = $(this).attr('href');
+      if (href.indexOf('/nfs_store/downloads') >= 0) {
+        $(this).addClass('use-secure-view');
+      }
+    });
+
+    block.addClass('use-secure-view-on-links-setup');
+
+    _fpa.secure_view.setup_links(block, 'a.use-secure-view');
+    block.on('click', 'a.use-secure-view', function (ev) {
+      ev.preventDefault();
+    });
 
   },
 
@@ -1951,6 +1971,7 @@ _fpa.form_utils = {
     _fpa.form_utils.resize_children(block);
     _fpa.form_utils.setup_sub_lists(block);
     _fpa.form_utils.apply_view_handlers(block);
+    _fpa.form_utils.setup_secure_view_links(block);
 
     block.removeClass('formatting-block');
   }
