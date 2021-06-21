@@ -157,18 +157,19 @@ module UserSupport
     let_user_create :player_contacts, in_app_type: in_app_type
   end
 
-  def let_user_create(resource_name, in_app_type: nil)
-    res = @user.has_access_to? :access, :table, resource_name
-    if res && res.user_id == @user.id
+  def let_user_create(resource_name, in_app_type: nil, alt_user: nil)
+    user = alt_user || @user
+    res = user.has_access_to? :access, :table, resource_name
+    if res && res.user_id == user.id
       res.disabled = true
       res.current_admin = @admin
       res.save!
     end
 
-    in_app_type ||= @user.app_type
+    in_app_type ||= user.app_type
     return unless in_app_type
 
-    Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: @user, access: :create,
+    Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: user, access: :create,
                                      resource_type: :table, resource_name: resource_name
   end
 end
