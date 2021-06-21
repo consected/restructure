@@ -12,7 +12,7 @@ module Redcap
       project_admin.current_user ||= current_admin.matching_user
     end
 
-    def create_failure_record(exception, action, _project_admin)
+    def create_failure_record(exception, action, project_admin)
       e = exception
       result = { error: e, backtrace: e.backtrace[0..20].join("\n") }
       project_admin.record_job_request(action, result: result)
