@@ -3,7 +3,8 @@ class AppControl
 
   def self.restart_server(not_delayed_job: nil)
     if Rails.env.production?
-      FileUtils.touch Rails.root.join('tmp', 'restart.txt')
+      pid = spawn('app-scripts/restart_app_server.sh')
+      Process.detach(pid)
     else
       FileUtils.touch Rails.root.join('app', 'models', 'dev_server.rb')
       Rails.reload! if Rails.respond_to? :reload!
