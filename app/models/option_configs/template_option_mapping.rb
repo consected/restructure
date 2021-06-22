@@ -67,7 +67,7 @@ module OptionConfigs
         item_list[item_list.index('state')] = 'state_name' if item_list.include? 'state'
       end
 
-      data_sort = [:desc, 'data-rank'] if def_record.model_class.attribute_names.include? 'rank'
+      data_sort = [:desc, 'data-rank'] if def_record.model_class&.attribute_names&.include? 'rank'
       default_options = option_type_config
       view_options = default_options.view_options
 
