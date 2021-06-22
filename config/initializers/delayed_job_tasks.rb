@@ -7,8 +7,42 @@ Rails.application.configure do
     if ActiveRecord::Base.connection.table_exists? :delayed_jobs
 
       class Delayed::Job
-        def self.lookup_jobs_by_class(class_name, queue: 'default')
-          Delayed::Job.where(queue: queue).where(['handler LIKE ?', "--- !ruby/object:#{class_name}%"])
+        #
+        # Look up jobs by class name, in a queue (default: default).
+        # Optionally, return only locked items if locked: true, or unlocked items if locked: false
+        # Optionally, return only failed items if failed: true, or not yet failed items if failed: false
+        # @param [String] class_name
+        # @param [String] queue
+        # @param [true | false | nil] locked
+        # @param [true | false | nil] failed
+        # @return [ActiveRecord::Relation]
+        def self.lookup_jobs_by_class(class_name, queue: 'default', locked: nil, failed: nil)
+          res = Delayed::Job.where(queue: queue)
+                            .where(['handler LIKE ?', "--- !ruby/object:#{class_name}%"])
+          res = res.where('locked_at IS NOT NULL') if locked
+          res = res.where('locked_at IS NULL') if locked == false
+          res = res.where('failed_at IS NOT NULL') if failed
+          res = res.where('failed_at IS NULL') if failed == false
+          res
+        end
+
+        #
+        # Look up jobs by handler containing the specified text, in a queue (default: default).
+        # Optionally, return only locked items if locked: true, or unlocked items if locked: false
+        # Optionally, return only failed items if failed: true, or not yet failed items if failed: false
+        # @param [String] class_name
+        # @param [String] queue
+        # @param [true | false | nil] locked
+        # @param [true | false | nil] failed
+        # @return [ActiveRecord::Relation]
+        def self.handler_includes(text, queue: 'default', locked: nil, failed: nil)
+          res = Delayed::Job.where(queue: queue)
+                            .where((['handler LIKE ?', "%#{text}%"]))
+          res = res.where('locked_at IS NOT NULL') if locked
+          res = res.where('locked_at IS NULL') if locked == false
+          res = res.where('failed_at IS NOT NULL') if failed
+          res = res.where('failed_at IS NULL') if failed == false
+          res
         end
       end
 

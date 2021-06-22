@@ -1,3 +1,11 @@
+.admin-index-page,
+.admin-user-index-page {
+  border-color: silver;
+  .nav > li > a {
+    padding: 10px 1px;
+  }
+}
+
 .admin-edit-form .well {
   background: rgb(245, 245, 245);
 }
@@ -18,10 +26,68 @@ a.collapsed > .caret {
 
 .common-admin-markdown-editor .custom-editor {
   width: 800px;
-  height: 40vh;
+  height: 20vh;
   background: white;
 }
 
 .form-group[data-out-attr-name="notes"] {
   vertical-align: top;
+}
+
+.admin-title {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.admin-help-icon {
+  float: right;
+}
+
+.password-expired {
+  color: gray;
+}
+
+.admin-field- {
+  min-width: 60px;
+}
+
+.admin-result-index {
+  td,
+  th {
+    min-width: 60px;
+  }
+}
+
+.admin-edit-form .form-group,
+.admin-edit-form .form-text-area-group {
+  label {
+    display: block;
+  }
+
+  input[type="checkbox"] + label,
+  input[type="radio"] + label {
+    display: inline-block;
+  }
+}
+
+.admin-edit-form .form-text-area-group {
+  margin: 0 10px 8px;
+  min-width: 400px;
+}
+
+.admin-edit-form .form-group[data-out-attr-name="description"] {
+  display: block;
+}
+
+.admin-flex-block {
+  display: flex;
+  align-items: stretch;
+}
+
+.label-help-icon {
+  color: gray;
+}
+
+#admin_user_access_control_resource_name {
+  width: 30em;
 }

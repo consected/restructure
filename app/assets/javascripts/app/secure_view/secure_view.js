@@ -50,11 +50,11 @@ var SecureView = function () {
   this.setup_links = function (block, link_selector, options) {
     var _this = this;
 
+    options = options || {};
     var done_cname = 'sv-added-setup-links' + (options.link_type || '');
 
     if (block && link_selector) {
       $(block).not('.' + done_cname).on('click', link_selector, function (ev) {
-        options = options || {};
 
         options.page_path = $(this).attr('href');
 

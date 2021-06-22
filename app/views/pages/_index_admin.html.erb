@@ -1,6 +1,21 @@
-<div class="panel panel-primary">
+<div class="panel panel-primary admin-index-page">
   <div class="panel-body">
-    <h2 >Admin Actions</h2>
+    <h2 >Admin Actions
+    <%= link_to(
+          '',
+          help_page_path(
+            library: :admin_reference,
+            section: 'main',
+            subsection: 'README',
+            display_as: :embedded
+          ),
+          class: 'glyphicon glyphicon-question-sign small admin-help-icon',
+          data: { remote: true, 
+                  toggle: 'collapse', 
+                  target: '#help-sidebar',
+                  'working-target': '#help-sidebar-body' }
+        ) %>
+    </h2>
     <div class="row">
       <div class="col-sm-4">
         <h3>Manage Selections</h3>
@@ -62,7 +77,7 @@
     <div class="row">
       <div class="col-sm-4">
         <h3>REDCap</h3>
-      <% if current_admin&.matching_user&.accessible_app_types.map(&:name).include? 'ref-data' %>
+      <% if current_admin&.matching_user&.accessible_app_types&.map(&:name)&.include? 'ref-data' %>
         <ul class="nav">
           <li class="nav"><%= link_to "Projects", 
                                       redcap_project_admins_path(
@@ -71,11 +86,27 @@
                                       ) %> </li>
           <li class="nav"><%= link_to "Client Request Log", redcap_client_requests_path %> </li>
         </ul>
+      <% elsif !Admin::AppType.where(name: 'ref-data').first&.active_on_server? %>
+        <p><b>ref-data</b> app is not active on this server. <br>
+          It must be enabled to use the REDCap tools.</p>
       <% else %>
-        <p>Your user profile must copy roles for <b>redcap-admin@template</b> in app <b>ref-data</b> to use the REDCap admin panel</p>
+        <p>Your user profile must copy roles for <br>
+        <b>redcap-admin@template</b> <br>
+        in app <b>ref-data</b> <br>
+        to use the REDCap admin panel</p>
       <% end%>
 
       </div>
+      <div class="col-sm-4">
+        <h3>Imports</h3>
+      
+        <ul class="nav">
+          <li class="nav"><%= link_to "Import CSV", imports_imports_path %> </li>
+          <li class="nav"><%= link_to "Generate Table from CSV", imports_model_generators_path %> </li>
+        </ul>
+      
+
+      </div>      
     </div>
     <h4 class="text-center"><%= link_to "Admin Logout", destroy_admin_session_path, method: :delete, class: 'btn btn-default' %> </h4>
   </div>

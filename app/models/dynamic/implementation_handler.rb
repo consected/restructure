@@ -7,6 +7,8 @@ module Dynamic
       # Ensure that memoized versioned definition is cleared on creation, or if we
       # force an updated of the created_at timestamp to make it use a later definition
       before_save :reset_versioned_definition!, if: -> { !persisted? || created_at_changed? }
+      before_save :handle_before_save_triggers
+      after_commit :handle_save_triggers
       after_commit :reset_access_evaluations!
     end
 
@@ -196,6 +198,20 @@ module Dynamic
       @can_create = nil
       @can_add_reference = nil
       @can_edit = nil
+    end
+
+    #
+    # Handle on save save triggers
+    def handle_save_triggers
+      option_type_config&.calc_save_trigger_if self
+      true
+    end
+
+    #
+    # Handle actions that must be performed before on save save triggers
+    def handle_before_save_triggers
+      option_type_config&.calc_save_trigger_if self, alt_on: :before_save
+      true
     end
   end
 end

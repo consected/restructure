@@ -7,7 +7,7 @@
   <td><%= cr.action %></td>
   
   <td><%= cr.admin&.email %></td>
-  <td><%= cr.created_at %></td>
+  <td><%= current_user_date_time cr.created_at %></td>
   <td><pre class="scrollable-block"><%= cr.result&.to_yaml %></pre></td>
   </tr>
 <% end %>

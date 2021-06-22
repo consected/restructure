@@ -20,7 +20,8 @@ describe 'user and admin authentication' do
     special_urls = { '/admins/edit' => :admins, '/users/edit' => :users, '/admins/:id' => :admins,
                      '/users/:id' => :users, '/admins/sign_out' => :redirect_home, '/users/sign_out' => :redirect_home,
                      '/admins/test_otp' => :redirect_home, '/admins/show_otp' => :redirect_home,
-                     '/users/test_otp' => :redirect_home, '/users/show_otp' => :redirect_home }
+                     '/users/test_otp' => :redirect_home, '/users/show_otp' => :redirect_home,
+                     '/help/:library/:section/:subsection' => :not_authorized }
 
     @url_list = Rails.application.routes.routes.map do |r|
       url = r.path.spec.to_s
@@ -61,6 +62,7 @@ describe 'user and admin authentication' do
   # rather than more correct 404 errors
   it 'redirects to user login page for all paths when not logged in' do
     skip_urls = ['/admins/sign_in', '/users/sign_in', '/child_error_reporter']
+    skip_controllers = ['help']
 
     admin_controllers = %w[admin/accuracy_scores admin/colleges admin/general_selections admin/item_flag_names
                            admin/manage_admins admin/manage_users
@@ -74,7 +76,7 @@ describe 'user and admin authentication' do
                            redcap/project_admins redcap/client_requests redcap/data_dictionaries]
 
     @url_list.each do |url|
-      next unless url[:controller] && !skip_urls.include?(url[:url])
+      next unless url[:controller] && !skip_urls.include?(url[:url]) && !skip_controllers.include?(url[:controller])
 
       begin
         case url[:method]
@@ -90,7 +92,13 @@ describe 'user and admin authentication' do
           post url[:url]
         end
 
+        if url[:controller] == :not_authorized
+          expect(response).to have_http_status 401
+          break
+        end
+
         expect(response).to have_http_status(302), "expected a redirect for #{url}. Got #{response.status}"
+
         if url[:controller] == :redirect_home
           expect(response).to redirect_to('http://www.example.com/'),
                               "expected a redirect to home page for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"

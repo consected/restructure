@@ -57,7 +57,9 @@ module FilterUtils
     app_type_id = current_user&.app_type_id
     if app_type_id && primary_model_uses_app_type?
       f = filter_params_permitted && filter_params_permitted[:app_type_id]
-      if f.present?
+      if f&.blank?
+        {}
+      elsif f.present?
         { app_type_id: f }
       else
         { app_type_id: app_type_id.to_s }
@@ -91,8 +93,8 @@ module FilterUtils
   def filter_params
     return @filter_params if @filter_params
 
-    if filter_params_permitted.blank? || (filter_params_permitted.is_a?(Array) && filter_params_permitted[0].blank?)
-      @filter_params_permitted = { disabled: 'enabled' } if has_disabled_field
+    if (filter_params_permitted.blank? || (filter_params_permitted.is_a?(Array) && filter_params_permitted[0].blank?)) && has_disabled_field
+      @filter_params_permitted = { disabled: 'enabled' }
     end
 
     unless @filter_params_permitted

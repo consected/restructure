@@ -24,7 +24,7 @@ module ApplicationHelper
   end
 
   def body_classes
-    " class=\"#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class} \"".html_safe
+    " class=\"#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class} initial-compiling \"".html_safe
   end
 
   def common_inline_cancel_button(class_extras = nil, link_text = nil)
@@ -130,10 +130,6 @@ module ApplicationHelper
     }
   end
 
-  def hide_player_tabs?
-    @hide_player_tabs ||= app_config_set(:hide_player_tabs)
-  end
-
   def partial_cache_key(partial)
     u = current_user || current_admin
     apptype = u&.app_type_id if u.is_a? User
@@ -152,5 +148,15 @@ module ApplicationHelper
 
   def markdown_to_html(md)
     Kramdown::Document.new(md).to_html.html_safe if md
+  end
+
+  def link_label_open_in_new(label)
+    "#{label} <i class=\"glyphicon glyphicon-new-window\"></i>".html_safe
+  end
+
+  def current_user_date_time(date_time)
+    return unless date_time
+
+    Formatter::TimeWithZone.format date_time, nil, current_user: current_user
   end
 end

@@ -13,6 +13,14 @@ RSpec.describe Admin::AccuracyScoresController, type: :controller do
     @accuracy_score
   end
 
+  def edit_form_admin
+    @edit_form_admin = 'admin/accuracy_scores/_form'
+  end
+
+  def saved_item_template
+    'admin/accuracy_scores/_item'
+  end
+
   before(:context) do
     @path_prefix = '/admin'
 

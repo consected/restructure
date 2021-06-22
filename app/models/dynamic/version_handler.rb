@@ -6,6 +6,7 @@ module Dynamic
 
     included do
       attr_accessor :def_version # definition version = corresponging id of record in definition history table
+      attr_accessor :current_definition # latest defined configuration
     end
 
     class_methods do
@@ -39,13 +40,13 @@ module Dynamic
       # lastest version as the second record
       # allowing us to recognize if the matching version is in fact the latest
       all_res = Admin::MigrationGenerator.connection.execute <<~END_SQL
-        (select * from #{self.class.history_table_name} 
+        (select * from #{self.class.history_table_name}#{' '}
         where #{history_id_attr} = #{id}
-        and coalesce(updated_at, created_at) < '#{current_at.iso8601(4)}' 
+        and coalesce(updated_at, created_at) < '#{current_at.iso8601(4)}'#{' '}
         order by updated_at desc NULLS LAST
         limit 1)
         UNION
-        (select * from #{self.class.history_table_name} 
+        (select * from #{self.class.history_table_name}#{' '}
         where #{history_id_attr} = #{id}
         order by id desc
         limit 1)
@@ -63,7 +64,7 @@ module Dynamic
       res.delete(history_id_attr)
       res['def_version'] = res['id']
       res['id'] = id
-
+      res['current_definition'] = self
       # Instantiate (but don't save) this version as usable ActiveRecord object
       self.class.new res.to_h
     end
@@ -76,7 +77,7 @@ module Dynamic
       history_id_attr = self.class.history_id_attr
 
       all_results = Admin::MigrationGenerator.connection.execute <<~END_SQL
-        select * from #{self.class.history_table_name} 
+        select * from #{self.class.history_table_name}#{' '}
         where #{history_id_attr} = #{id}
         #{active ? 'AND (disabled IS NULL or disabled = false)' : ''}
         order by updated_at desc NULLS LAST

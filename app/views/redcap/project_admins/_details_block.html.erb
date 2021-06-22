@@ -4,18 +4,97 @@
 <h4>Important - switch to app ref-data to review and update Redcap information</h4>
 <% end%>
 
-<p><label>updated at</label> <span><%= object_instance.updated_at %></span></p>
-<p><label>dynamic model</label>
-  <span><%= object_instance.dynamic_storage&.dynamic_model_ready? ? 'ready' : 'not available' %> </span>
+<p><label>status</label> <span><%= object_instance.status %></span></p>
+<% 
+req = object_instance.redcap_client_requests.order(id: :desc).first 
+if req&.result 
+  got_error = req.result['error']
+  if !got_error && req.result['errors']&.present?
+    got_error = req.result['errors'].join(' | ')
+  end
+end
+%>
+<p><label>latest request</label>
+   <pre><%= got_error || 'no error' %></pre>
 </p>
+
 <% if object_instance.captured_project_info.present?%>
   <p><label>project info</label> metadata available</p>
 <% else %>
   <p><label>project info</label> metadata not yet retrieved</p>
 <% end %>
-<% if object_instance.file_store %>
+<p><label>dynamic model</label>
+  <span><%= object_instance.dynamic_model_ready? ? 'ready' : 'not available' %> </span>
+</p>
+<%
+  dm = object_instance.dynamic_storage&.dynamic_model
+  if dm
+    fl, dmfl = object_instance.compare_storage_and_model_field_lists
+
+    dmfla = dmfl&.split(' ')
+    fla = fl.split(' ')          
+
+%>
+<p><label>metadata and table fields</label> <span>
+  <%= dmfl.present? && fl.present? ? (dmfl == fl ? 'match' : "mismatched: +[#{(dmfla - fla).join(" ")}] -[#{(fla - dmfla).join(" ")}]") : 'not set up'%> </span></p>
+<p><label>pull schedule</label> <span>
+<% if  object_instance.frequency.present? && object_instance.transfer_mode == 'scheduled' %>
+every <%= object_instance.frequency %> - next run at 
+  <%= current_user_date_time(object_instance.task_schedule&.run_at) || '(no task scheduled)' %>
+<% elsif object_instance.transfer_mode == 'manual' %>manual
+<% else %>none
+<% end %>
+</span></p>
+
+<% end %>
+
+<% if object_instance.dynamic_model_ready? && object_instance.file_store %>
   <p><label>filestore</label> ready</p>
-  <p><%= link_to 'dump project archive to filestore', request_archive_redcap_project_admin_path(id: object_instance.id), method: :post, remote: true, class: 'btn btn-danger' %></p>
 <% else %>
   <p><label>filestore</label> not set up</p>
+<% end %>
+
+<p><label>configuration updated at</label> <span><%=current_user_date_time( object_instance.updated_at) || '(not yet created)' %></span></p>
+
+
+<% if object_instance.persisted? && object_instance.enabled? %>
+<hr/>
+<% if object_instance.dynamic_model_ready?%>
+<p><%= link_to link_label_open_in_new('search table data'), "/reports/reference_data__table_data?schema_name=#{dm.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{dm.table_name}", 
+      target: '_blank' %></p>
+<% end %>
+<hr/>
+
+<p>
+<%= link_to 'refresh', edit_redcap_project_admin_path(object_instance), 
+    data: {
+      remote: true, 
+      target: "##{object_instance.resource_name.hyphenate}--",
+      'result-target': "##{object_instance.resource_name.hyphenate}--",
+      'result-target-force': "true"
+    },
+    class: 'btn btn-primary btn-sm' %>
+</p>
+
+<% if object_instance.dynamic_model_ready? %>
+  <p><%= link_to 'retrieve records', request_records_redcap_project_admin_path(id: object_instance.id), 
+          method: :post, 
+          remote: true, 
+          class: 'btn btn-warning btn-sm' %></p>
+<% end %>
+
+<% if object_instance.dynamic_model_ready? && object_instance.file_store %>
+  <p><%= link_to 'dump project archive to filestore', request_archive_redcap_project_admin_path(id: object_instance.id), 
+          method: :post, 
+          remote: true, 
+          class: 'btn btn-warning btn-sm' %></p>
+<% end %>
+
+<hr/>
+<p>
+<%= link_to 'force reconfiguration', force_reconfig_redcap_project_admin_path(object_instance), 
+    remote: true,
+    class: 'btn btn-danger btn-sm',
+    method: :post %>
+</p>
 <% end %>

@@ -8,7 +8,7 @@ module OptionListHelper
   def app_type_options(default_app_type_id: nil)
     default_app_type_id = default_app_type_id[:selected] if default_app_type_id.is_a? Hash
 
-    options_from_collection_for_select(Admin::AppType.active, 'id', 'label', default_app_type_id)
+    options_from_collection_for_select(Admin::AppType.active_app_types, 'id', 'label', default_app_type_id)
   end
 
   def app_type_select_current_item(use_current_user: false)

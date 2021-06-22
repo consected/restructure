@@ -109,6 +109,9 @@ _fpa.form_utils = {
     res.each(function () {
       var item = $(this);
 
+      if (item.hasClass('was-autoclicked')) return;
+      item.addClass('was-autoclicked');
+
       var p = timeout;
       if (!p) {
         p = item.attr('data-open-priority');
@@ -782,8 +785,33 @@ _fpa.form_utils = {
         _fpa.view_handlers[vh](block);
       }
     }
+  },
 
+  // Blocks marked with the class use-secure-view-on-links are checked
+  // to find <a> links for filestore downloads. These are then set to
+  // 
+  setup_secure_view_links: function (block) {
 
+    if (block.hasClass('use-secure-view-on-links-setup')) return;
+
+    var inner = block.find('a');
+    if (!_fpa.state.user_can.view_files_as_image) {
+      inner = block.find('.use-secure-view-on-links a')
+    }
+
+    inner.each(function () {
+      var href = $(this).attr('href');
+      if (href && href.indexOf('/nfs_store/downloads') >= 0 && $(this).parents('.nfs-store-container-block').length == 0) {
+        $(this).addClass('use-secure-view');
+      }
+    });
+
+    block.addClass('use-secure-view-on-links-setup');
+
+    _fpa.secure_view.setup_links(block, 'a.use-secure-view');
+    block.on('click', 'a.use-secure-view', function (ev) {
+      ev.preventDefault();
+    });
 
   },
 
@@ -1340,7 +1368,7 @@ _fpa.form_utils = {
       });
       el.on('shown.bs.collapse', function () {
         el.removeClass('hidden');
-        $(this).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+        $(this).find('a.on-show-auto-click').not('.auto-clicked').addClass('auto-clicked').click();
       });
       el.on('hide.bs.collapse', function () {
 
@@ -1349,12 +1377,12 @@ _fpa.form_utils = {
 
     // Handle auto opening of links in tab panels
     block.find('[data-toggle="tab"]').not('.attached-tab-show').on('show.bs.tab', function () {
-      $($(this).attr('href')).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+      $($(this).attr('href')).find('a.on-show-auto-click').not('.auto-clicked').addClass('auto-clicked').click();
     }).addClass('attached-tab-show');
 
     // Handle auto opening of links in tab panels when the initial panel is already open
     block.find('[data-toggle="tab"][aria-expanded="true"]').not('.attached-tab-init').each(function () {
-      $($(this).attr('href')).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+      $($(this).attr('href')).find('a.on-show-auto-click').not('.auto-clicked').addClass('auto-clicked').click();
     }).addClass('attached-tab-init')
 
 
@@ -1411,6 +1439,92 @@ _fpa.form_utils = {
       var d = _fpa.utils.YMDtoLocale(text);
       $(this).html(d);
     }).addClass('formatted-date-local')
+  },
+
+  setup_drag_and_drop: function (block) {
+
+    block.find('.make-sortable').not('.made-sortable').each(function () {
+      var $this = $(this);
+      var $sortable_block = $(this).find('.sortable-block');
+      var $sortable_block_trash = $(this).find('.sortable-block-trash');
+
+      var get_data_from = $sortable_block.attr('data-get-data-from');
+      var items_as = $sortable_block.attr('data-items-as') || 'li';
+      var items_splitter = $sortable_block.attr('data-items-splitter') || ' ';
+
+      if (get_data_from) {
+        var $get_data_from = $(get_data_from);
+
+        var add_item = function (item) {
+          var $new_item = $(`<${items_as} data-field-name="${item}">${item}</${items_as}>`);
+          $sortable_block.append($new_item);
+        }
+
+        var refresh_from_orig_data = function () {
+          var items = $get_data_from.val().split(/[^a-zA-Z0-9_]+/);
+          $sortable_block.html('');
+          for (var i in items) {
+            var item = items[i];
+            if (!item || item.trim() == '') continue;
+            add_item(item);
+          }
+        }
+
+        refresh_from_orig_data()
+
+        $get_data_from.on('blur', function () {
+          refresh_from_orig_data()
+        })
+      }
+
+      var refresh_orig_data = function () {
+        var texts = []
+        $sortable_block.find(items_as).each(function () {
+          // Get the first text element only
+          texts.push($(this).contents().first().text());
+        })
+        $get_data_from.val(texts.join(items_splitter));
+      }
+
+      Sortable.create($sortable_block[0], {
+        group: {
+          name: 'list',
+          put: ['trash']
+        },
+        onUpdate: function (ev) {
+          refresh_orig_data()
+        },
+        onRemove: function (ev) {
+          refresh_orig_data()
+        }
+      });
+
+      Sortable.create($sortable_block_trash[0], {
+        group: {
+          name: 'trash',
+          put: ['list']
+        }
+      });
+
+
+      var $item_val_add = $this.find('.sortable-add-item-text');
+      $item_val_add_btn = $this.find('.sortable-add-item')
+      $item_val_add_btn.on('click', function () {
+        var val = $item_val_add.val();
+        if (!val || val.trim() == '') return
+
+        add_item(val)
+        $item_val_add.val('')
+        refresh_orig_data()
+      });
+
+      $item_val_add.on('keypress', function (ev) {
+        if (ev.keyCode == 13) $item_val_add_btn.trigger('click');
+      });
+
+
+
+    }).addClass('made-sortable');
   },
 
   setup_sub_lists: function (block) {
@@ -1537,13 +1651,40 @@ _fpa.form_utils = {
         var edid = $eddiv.attr('id');
         var $edtools = $(this).find('.btn-toolbar[data-target="#' + edid + '"]');
         var editor = $eddiv.wysiwyg({ dragAndDropImages: true });
+        var wysiwygEditor = editor.wysiwygEditor;
 
         $edtools.hide();
         $eddiv.on('focus', function () {
           $('.custom-editor-container .btn-toolbar').not("[data-target='" + $edtools.attr('data-target') + "']").hide();
           $edtools.slideDown();
+
+          if (_fpa.state.previous_wysiwyg_editor == editor) {
+            wysiwygEditor.restoreSelection()
+          }
+          else {
+            _fpa.state.previous_wysiwyg_editor = editor
+          }
+
         }).on('change', function () {
           $eddiv.data('editor-changed', true);
+          wysiwygEditor.saveSelection()
+        }).on('blur', function () {
+          wysiwygEditor.saveSelection()
+
+        }).on('paste', function () {
+          window.setTimeout(function () {
+            var obj = { html: editor.cleanHtml() };
+            var prev_html = obj.html;
+            var txt = _fpa.utils.html_to_markdown(obj);
+
+            if (prev_html != obj.html) {
+              editor.html(obj.html);
+            }
+
+            $edta.val(txt);
+            $eddiv.data('editor-changed', null);
+          }, 100);
+
         });
 
         var autoparse = function () {
@@ -1552,29 +1693,11 @@ _fpa.form_utils = {
               // Only if there has been a change
               $eddiv.data('editor-changed', null);
 
-              // Add a header if necessary
-              if (editor.find('thead').length === 0) {
-                var first_row = editor.find('tr').first();
-                var headers = first_row.find('td');
-                var thead_html = $('<thead><tr></tr></thead>')
-                var thead_tr = thead_html.find('tr');
-                headers.each(function () {
-                  var th = "<th>" + $(this).html() + "</th>";
-                  thead_tr.append(th);
-                });
 
-                first_row.remove()
+              var obj = { html: editor.cleanHtml() };
+              var txt = _fpa.utils.html_to_markdown(obj);
 
-                editor.find('table').prepend(thead_html)
-              }
-
-              var html = editor.cleanHtml();
-              var txt = domador(html);
-              // Clean the text to remove
-              // any number of hash or asterisk symbols followed by 
-              // one or more spaces
-              var cleantext = txt.replace(/(^|\n)(#|\*)+ *\n/g, '');
-              $edta.val(cleantext);
+              $edta.val(txt);
             }
 
             window.setTimeout(function () {
@@ -1621,9 +1744,10 @@ _fpa.form_utils = {
 
         _fpa.secure_view.setup_links($(this), 'a.browse-icon', { allow_actions: acts, set_preview_as: spa, attr_for_filename: 'title', link_type: 'icon' });
         _fpa.secure_view.setup_links($(this), 'a.browse-filename', { allow_actions: acts, set_preview_as: spa });
+        _fpa.secure_view.setup_links($(this), 'a.browse-entry-classifications', { allow_actions: acts, set_preview_as: spa, link_type: 'classifications' });
       }
       if (usv == null || usv == '' || usv == 'false') {
-        $(this).find('a.browse-filename, a.browse-icon').on('click', function (ev) {
+        $(this).find('a.browse-filename, a.browse-icon, a.browse-entry-classifications').on('click', function (ev) {
           ev.preventDefault();
         });
       }
@@ -1852,6 +1976,7 @@ _fpa.form_utils = {
     _fpa.form_utils.resize_children(block);
     _fpa.form_utils.setup_sub_lists(block);
     _fpa.form_utils.apply_view_handlers(block);
+    _fpa.form_utils.setup_secure_view_links(block);
 
     block.removeClass('formatting-block');
   }

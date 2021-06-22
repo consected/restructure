@@ -7,28 +7,11 @@ if [ ! -f '/opt/elasticbeanstalk/bin/get-config' ]; then
   exit
 fi
 
-if [ -z "${NUM_WORKERS}" ] || [ "${NUM_WORKERS}" == '0' ]; then
-  echo "No workers requested"
-  exit
-fi
+sleep 2
+# This relies on delayed_job being set up as a systemd service, which will be restarted automatically.
+# The AWS Elastic Beanstalk *Procfile* defines this service.
+# SIGINT is used, since this should allow the current job to
+# finish before the process closes itself.
+pkill --signal 2 -f bin/delayed_job
 
-EB_SCRIPT_DIR=/opt/elasticbeanstalk/support/scripts
-EB_SUPPORT_DIR=/opt/elasticbeanstalk/support
-EB_APP_USER=webapp
-EB_APP_CURRENT_DIR=/var/app/current
-EB_APP_PIDS_DIR=/var/app/support/pids
-
-if [ $(whoami) != "${EB_APP_USER}" ]; then
-  echo "Must be run as ${EB_APP_USER}"
-  exit 3
-fi
-
-# Setting up correct environment and ruby version so that bundle can load all gems
-echo $EB_SUPPORT_DIR/envvars
-. $EB_SUPPORT_DIR/envvars
-. $EB_SCRIPT_DIR/use-app-ruby.sh
-
-cd $EB_APP_CURRENT_DIR
-
-source /etc/profile
-bundle exec bin/delayed_job -n $NUM_WORKERS --pid-dir=$EB_APP_PIDS_DIR restart
+echo 'Done'

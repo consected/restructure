@@ -8,14 +8,14 @@
     <div class="row panel-body panel-with-sublists external-ids-panel">
       <div class="on-open-click hidden">
       <%  external_id_types.each do |e|%>
-        <% if view?[e.plural_name.to_sym] %>
+        <% if master_viewables[e.plural_name.to_sym] %>
         <a href="/masters/{{id}}/<%=e.plural_name%>" data-result-target="#<%=e.hyphenated_plural_name%>-{{id}}-" data-template="<%=e.hyphenated_plural_name%>-list-template" data-remote="true" class=""><%=e.label%></a>
         <% end %>
       <% end %>
 
       </div>
       <%  external_id_types.each do |e|%>
-        <% if view?[e.plural_name.to_sym] %>
+        <% if master_viewables[e.plural_name.to_sym] %>
         <div class="<%= layout_item_block_sizes[:narrow] %> sublist-column" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
         <% end %>
       <% end %>
@@ -27,13 +27,15 @@
 
    <div class="panel-body panel-with-sublists master-details-panel">
     <div class="row">
-      <% if view?[:player_infos] || view?[:pro_infos] %>
-      <div class="<%= app_config_set(:hide_pro_info) || !current_user.has_access_to?(:access, :table, :player_infos) || !current_user.has_access_to?( :access, :table, :pro_infos)  ? layout_item_block_sizes[:regular] : 'col-md-16 col-lg-12' %>">
+      <% if master_viewables[:player_infos] || master_viewables[:pro_infos] %>
+      <div class="<%= hide_pro_info_tabs? || 
+                      !current_user.has_access_to?(:access, :table, :player_infos) || 
+                      !current_user.has_access_to?( :access, :table, :pro_infos)  ? layout_item_block_sizes[:regular] : 'col-md-16 col-lg-12' %>">
         <div class="row">
-        <% if view?[:player_infos] %>
+        <% if master_viewables[:player_infos] %>
         {{#with player_infos.[0]}}
 
-            <div class="col-md-<%= !view?[:pro_infos] ? '24' : '12' %> sublist-column">
+            <div class="col-md-<%= !master_viewables[:pro_infos] ? '24' : '12' %> sublist-column">
               {{>sublist_controls}}
 
                 {{> common_template_result name='player_info' result_data=this _created=0}}
@@ -41,7 +43,7 @@
 
         {{else}}
 
-            <div class="col-md-<%= !view?[:pro_infos] ? '24' : '12' %> sublist-column">
+            <div class="col-md-<%= !master_viewables[:pro_infos] ? '24' : '12' %> sublist-column">
               <div id="player-info-{{id}}-" data-subscription="player-info-edit-form-{{id}}-" class="new-block">
                 <h4>No subject details</h4>
                 <p>{{>common_template_create_button resource='player_info' prevent_create=<%=@prevent_creates[:player_infos]%>}}</p>
@@ -50,9 +52,9 @@
 
         {{/with}}
         <% end %>
-        <% if view?[:pro_infos] %>
+        <% if master_viewables[:pro_infos] %>
         {{#with pro_infos.[0]}}
-            <div class="col-md-<%= !view?[:player_infos] ? '24' : '12' %> sublist-column">
+            <div class="col-md-<%= !master_viewables[:player_infos] ? '24' : '12' %> sublist-column">
               {{>sublist_controls}}
 
 
@@ -61,7 +63,7 @@
             </div>
         {{else}}
 
-            <div class="col-md-<%= !view?[:player_infos] ? '24' : '12' %> sublist-column">
+            <div class="col-md-<%= !master_viewables[:player_infos] ? '24' : '12' %> sublist-column">
               <div id="pro-info-{{../id}}-" >
                 <h4>No pro info </h4>
               </div>
@@ -74,7 +76,7 @@
       </div>
       <% end %>
 
-      <% if view?[:addresses] %>
+      <% if master_viewables[:addresses] %>
       <div class="<%= layout_item_block_sizes[:regular] %> sublist-column" id="addresses-{{id}}-" data-sub-list="addresses">
         {{>sublist_controls sub_list="addresses" filter_attr='rank' filter_name="rank_name" order='asc' }}
 
@@ -92,7 +94,7 @@
       </div>
       <% end %>
 
-      <% if view?[:player_contacts] %>
+      <% if master_viewables[:player_contacts] %>
       <div class="<%= layout_item_block_sizes[:regular] %> sublist-column" id="player_contacts-{{id}}-" data-sub-list="player_contacts">
         {{>sublist_controls sub_list="player_contacts" filter_attr='rank' filter_name="rank_name" order='asc' }}
 
@@ -112,9 +114,9 @@
 
       <%
         dm = DynamicModel.active_model_configurations.where(category: 'details')
-        dm = dm.select {|m| m.model_association_name.in? @true_views}
+        dm = dm.select {|m| m.model_association_name.in? true_master_viewables}
       %>
-      <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: 'details', force_load: 1, panel: nil, orientation: 'none' } %>
+      <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: master_viewables, category: 'details', force_load: 1, panel: nil, orientation: 'none' } %>
     </div>
    </div>
 

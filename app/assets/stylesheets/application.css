@@ -30,6 +30,10 @@
  * For nfs_store dependencies
  *= require blueimp-file-upload/css/jquery.fileupload
  *
+ *= require highlightjs/styles/default
+ *
+ *= require ./big_select/big_select
+ *
  *= require_tree ./app
  *= require_self
  */

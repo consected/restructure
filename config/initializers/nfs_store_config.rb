@@ -30,6 +30,7 @@ ActiveSupport.on_load(:nfs_store_config) do
     # when uploading and downloading large files
     self.temp_directory = '/var/tmp/nfs_store_tmp'
     self.containers_dirname = 'containers'
+    self.use_parent_sub_dir = (ENV['FILESTORE_USE_PARENT_SUB_DIR'] == 'TRUE')
 
     FileUtils.mkdir_p temp_directory
     group_id_range.each do |i|

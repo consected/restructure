@@ -23,6 +23,7 @@
         test_assoc_ids = nil if test_assoc_ids == p.to_s
         test_assoc = nil if test_assoc_ids == test_assoc || test_assoc == p.to_s
 
+        p_type = list_item.class.columns_hash[p.to_s]&.type
         list_val = list_item.send(p)
     %>
 
@@ -37,6 +38,15 @@
       <td class="admin-field-<%=p%>"><pre><%= list_val.to_yaml %></pre></td>  
     <% elsif p == :api_key %>
       <td class="admin-field-<%=p%>"><%= list_val.present? ? '********' : ''  %></td>
+    <% elsif p_type == :boolean %>
+      <td class="admin-field-<%=p%>">
+        <%= if list_val
+          "<span class=\"glyphicon glyphicon-check val-true\"></span>".html_safe  
+        else
+          "<span class=\"val-false\"></span>".html_safe  
+        end
+        %>
+      </td>
     <% else %>
       <td class="admin-field-<%=p%>"><%= list_val %></td>
     <% end %>

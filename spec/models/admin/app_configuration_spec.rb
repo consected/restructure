@@ -21,6 +21,9 @@ RSpec.describe Admin::AppConfiguration, type: :model do
     res = Admin::AppConfiguration.value_for :notes_field_config, @user
     expect(res).to be nil
 
+    res = Admin::AppConfiguration.find_default_app_config(app_type, 'notes field caption')
+    expect(res).to be nil
+
     res = Admin::AppConfiguration.value_for :notes_field_config
     expect(res).to be nil
 
@@ -33,6 +36,17 @@ RSpec.describe Admin::AppConfiguration, type: :model do
 
     res = Admin::AppConfiguration.value_for :notes_field_caption, @user
     expect(res).to eq 'a value'
+
+    # Default should work with both nil and blank role name
+    res = Admin::AppConfiguration.find_default_app_config(app_type, 'notes field caption')
+    expect(res).not_to be nil
+
+    res.update!(role_name: '', current_admin: @admin)
+
+    res = Admin::AppConfiguration.find_default_app_config(app_type, 'notes field caption')
+    expect(res).not_to be nil
+
+    # Check a user config
 
     res = Admin::AppConfiguration.add_user_config @user, app_type, 'notes field caption', 'user value', @admin
     expect(res).to be_a Admin::AppConfiguration

@@ -1,5 +1,6 @@
 <h4>Files</h4>
 <div id="admin-filestore-block-<%= object_instance.id %>">
+<% if object_instance&.file_store&.id %>
 <script> 
 window.setTimeout(function() {
   var data = {
@@ -8,10 +9,12 @@ window.setTimeout(function() {
     to_record_label: 'Admin Files',
     from_record_id: <%= object_instance.id %>,
     from_record_type_us: '<%= object_instance.admin_resource_name.singularize %>',
-    prevent_edit: true
+    prevent_edit: true,
+    can_download: true
   };
   var block = $('#admin-filestore-block-<%= object_instance.id %>');
   _fpa.view_template(block, 'filestore-view-template', data); 
 
 }, 500);
 </script>
+<% end %>

@@ -3,6 +3,7 @@
 source 'https://rubygems.org'
 
 gem 'activerecord-import'
+gem 'activerecord-session_store'
 gem 'aws-sdk-cloudwatchlogs', '~> 1'
 gem 'aws-sdk-pinpoint', '~> 1'
 gem 'aws-sdk-s3', '~> 1'
@@ -20,8 +21,9 @@ gem 'dicom'
 gem 'jquery-fileupload-rails', '0.4.7'
 gem 'jquery-rails'
 gem 'kramdown'
+gem 'kramdown-parser-gfm'
 gem 'mime-types'
-gem 'nokogiri', '1.11.0.rc4'
+gem 'nokogiri', '1.11.5'
 gem 'pg', '~> 0.15'
 gem 'rails', '~> 5.0'
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
@@ -66,8 +68,9 @@ group :test do
   gem 'webmock'
 end
 
-group :assets do
-  gem 'sass-rails', '~> 5.0'
+group :development, :production, :assets do
+  gem 'execjs'
+  gem 'sass-rails', '~> 5.1'
   gem 'therubyracer'
   gem 'uglifier', '>= 1.3.0'
 end

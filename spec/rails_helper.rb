@@ -37,8 +37,8 @@ require 'rspec/rails'
 
 put_now 'Require webmock'
 require 'webmock/rspec'
-# WebMock.allow_net_connect!
-WebMock.disable_net_connect!(allow_localhost: true)
+WebMock.allow_net_connect!
+# WebMock.disable_net_connect!(allow_localhost: true)
 
 put_now 'Browser setups'
 require 'capybara/rspec'
@@ -102,7 +102,11 @@ Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 put_now 'Enforce migrations'
 ActiveRecord::Migration.maintain_test_schema!
 
-sql = 'DROP SCHEMA IF EXISTS redcap_test CASCADE; CREATE SCHEMA redcap_test;'
+sql = 'DROP SCHEMA IF EXISTS redcap_test CASCADE;
+CREATE SCHEMA redcap_test;
+DROP SCHEMA IF EXISTS dynamic_test CASCADE;
+CREATE SCHEMA dynamic_test;
+'
 ActiveRecord::Base.connection.execute sql
 db_migration_dirname = Rails.root.join('spec/migrations')
 ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
@@ -168,6 +172,8 @@ RSpec.configure do |config|
   # removed Devise::TestHelpers from the following line, since it is now deprecated.
   # Using Devise::Test::ControllerHelpers as advised
   config.include Devise::Test::ControllerHelpers, type: :controller
+  config.include Devise::Test::IntegrationHelpers, type: :request
+
   config.extend ControllerMacros, type: :controller
   config.after :each do
     Warden.test_reset!

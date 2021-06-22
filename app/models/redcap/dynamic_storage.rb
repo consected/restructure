@@ -5,16 +5,23 @@ module Redcap
   # Handle the generation of dynamic models, and the underlying
   # migrations for tables and views
   class DynamicStorage
-    DefaultCategory = 'redcap'
-    DefaultSchemaName = 'redcap'
+    include Dynamic::ModelGenerator
 
     attr_accessor :project_admin, :qualified_table_name, :category
+
+    def self.default_category
+      'redcap'
+    end
+
+    def self.default_schema_name
+      'redcap'
+    end
 
     def initialize(project_admin, qualified_table_name)
       self.project_admin = project_admin
       self.qualified_table_name = qualified_table_name
-      self.category = DefaultCategory
-      super()
+      self.category = self.class.default_category
+      setup_generator(project_admin, qualified_table_name)
     end
 
     def data_dictionary
@@ -36,134 +43,41 @@ module Redcap
     end
 
     #
-    # Return db_configs to summarize the real field types and enable definition
+    # Return field_types hash to summarize the real field types and enable definition
     # of a dynamic model
     # @return [Hash]
-    def db_configs
-      @db_configs ||= {}
-
-      data_dictionary.all_retrievable_fields.each do |field_name, field|
-        @db_configs[field_name] = {
-          type: field.field_type.database_type.to_s
-        }
+    def field_types
+      @field_types = {}
+      data_dictionary&.all_retrievable_fields&.each do |field_name, field|
+        @field_types[field_name] = field.field_type.database_type.to_s
       end
 
-      @db_configs
-    end
-
-    def field_options
-      @field_options ||= {}
-
-      data_dictionary.all_retrievable_fields.each do |field_name, _field|
-        @field_options[field_name] = {
-          no_downcase: true
-        }
-      end
-
-      @field_options
+      @field_types
     end
 
     #
-    # List of field names to be used in a dynamic model field list
-    # @return [String]
-    def field_list
-      @field_list ||= db_configs.keys.map(&:to_s).join(' ')
+    # Should a field prevent downcasing
+    # @param [String | Symbol] field_name
+    # @return [Boolean]
+    def no_downcase_field(_field_name)
+      true
     end
 
     #
-    # Create an active dynamic model instance for storage of REDcap data records.
-    # The table name can be qualified with a schema name, as <schema name>.<table name>
-    # @param [String] table_name
-    # @param [String] category - optional category, defaults to redcap
-    # @return [DynamicModel]
-    def create_dynamic_model(category: DefaultCategory)
-      schema_name, table_name = schema_and_table_name
+    # Add default user access control for the current admin
+    # matching user
+    def add_user_access_control
+      admin = project_admin.current_admin
+      return unless admin&.matching_user && dynamic_model
+      return if admin.matching_user.has_access_to? :create, :table, dynamic_model.resource_name
 
-      name = table_name.singularize
-
-      default_options = {
-        default: {
-          db_configs: db_configs,
-          field_options: field_options
-        }
-      }.deep_stringify_keys
-
-      options = YAML.dump default_options
-
-      if dynamic_model && dynamic_model.field_list != field_list
-        dynamic_model.update! current_admin: project_admin.current_admin,
-                              field_list: field_list,
-                              options: options,
-                              allow_migrations: true
-      else
-        @dynamic_model = DynamicModel.create! current_admin: project_admin.current_admin,
-                                              name: name,
-                                              table_name: table_name,
-                                              primary_key_name: :id,
-                                              foreign_key_name: nil,
-                                              category: category,
-                                              field_list: field_list,
-                                              options: options,
-                                              schema_name: schema_name,
-                                              allow_migrations: true
-      end
-
-      # Force delayed job to update with the new definition
-      AppControl.restart_delayed_job
-
-      @dynamic_model
-    end
-
-    #
-    # The dynamic model instance referenced by the table name.
-    # The table name can be qualified with a schema name, as <schema name>.<table name>
-    # @param [String | Symbol] table_name
-    # @param [String] category - optional category, defaults to redcap
-    # @return [DynamicModel]
-    def dynamic_model(no_check: nil)
-      return @dynamic_model if @dynamic_model
-
-      schema_name, table_name = schema_and_table_name
-      name = table_name.singularize
-
-      @dynamic_model = DynamicModel.active.where(name: name, category: category, schema_name: schema_name).first
-      return if !no_check && !dynamic_model_ready?
-
-      @dynamic_model
-    end
-
-    #
-    # Split the qualified table name into schema and table, if possible,
-    # otherwise return with the default schema name
-    # @return [<Type>] <description>
-    def schema_and_table_name
-      if qualified_table_name.include? '.'
-        schema_name, table_name = qualified_table_name.split('.', 2)
-      else
-        table_name = qualified_table_name
-        schema_name = DefaultSchemaName
-      end
-      [schema_name, table_name]
-    end
-
-    #
-    # Get the implementation class name for the dynamic model,
-    # which is used for storage of records
-    # @return [String]
-    def dynamic_model_class_name
-      dynamic_model.implementation_class.name
-    end
-
-    #
-    # Check if the dynamic model for storage is ready to use,
-    # both the DB table has been created and the class is defined
-    # @return [true | nil]
-    def dynamic_model_ready?
-      return unless dynamic_model(no_check: true)
-      return true if dynamic_model.implementation_class_defined?(Object, fail_without_exception: true)
-
-      dynamic_model.generate_model if dynamic_model&.ready_to_generate?
-      dynamic_model.implementation_class_defined?(Object, fail_without_exception: true)
+      Admin::UserAccessControl.create!(app_type_id: admin.matching_user.app_type_id,
+                                       resource_type: :table,
+                                       resource_name: dynamic_model.resource_name,
+                                       access: :create,
+                                       disabled: false,
+                                       current_admin: admin,
+                                       user_id: admin.matching_user.id)
     end
   end
 end

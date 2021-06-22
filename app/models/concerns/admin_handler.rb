@@ -12,11 +12,11 @@ module AdminHandler
     belongs_to :admin, optional: @admin_optional
     scope :active, -> { where 'disabled is null or disabled = false' }
     scope :disabled, -> { where 'disabled = true' }
+    scope :limited_index, -> {}
 
     before_validation :ensure_admin_set, unless: -> { self.class.admin_optional }
     before_create :setup_values
-
-    scope :limited_index, -> {}
+    after_save :invalidate_cache
   end
 
   class_methods do
@@ -25,6 +25,23 @@ module AdminHandler
     # @return [Boolean]
     def admin_optional
       @admin_optional
+    end
+
+    #
+    # Get the latest updated_at or created_at value for this type and memoize it
+    # The memo can be dropped with reset_latest_update
+    # @return [DateTime]
+    def latest_update
+      return @latest_update if @latest_update
+
+      obj = reorder('').order(Arel.sql('coalesce(updated_at, created_at) desc nulls last')).first
+      @latest_update = obj&.updated_at || obj&.created_at
+    end
+
+    #
+    # Reset the memo for latest_update for this class
+    def reset_latest_update
+      @latest_update = nil
     end
   end
 
@@ -148,5 +165,18 @@ module AdminHandler
     return super if defined? super
 
     admin_resource_name
+  end
+
+  #
+  # Invalidate the cache and latest update value
+  # @return [<Type>] <description>
+  def invalidate_cache
+    logger.info "User Access Control added or updated (#{self.class.name}). Invalidating cache."
+
+    # Allows caching in other classes to reset
+    self.class.reset_latest_update
+
+    # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
+    Rails.cache.clear
   end
 end

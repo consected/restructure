@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Admin::UserRole < ActiveRecord::Base
+class Admin::UserRole < Admin::AdminBase
   self.table_name = 'user_roles'
 
   include AdminHandler
@@ -9,12 +9,12 @@ class Admin::UserRole < ActiveRecord::Base
   belongs_to :user, optional: true
 
   validates :role_name, presence: true
-  validates :user_id, uniqueness: { scope: %i[app_type_id role_name disabled] }, unless: lambda {
-                                                                                           user_id.nil? || disabled?
-                                                                                         }
+  validates :user_id, uniqueness: { scope: %i[app_type_id role_name disabled], message: "can't be already present" },
+                      unless: lambda {
+                                user_id.nil? || disabled?
+                              }
 
   after_save :save_template
-  after_save :invalidate_cache
 
   # Scope used when user.user_roles association is called, effectively forcing the results
   # to the user's current app type
@@ -61,7 +61,7 @@ class Admin::UserRole < ActiveRecord::Base
   # Get roles names in a hash, keyed by the "app.id/app.name". May be filtered by a previous scope
   # @return [Hash] hash with string keys of app names and values as arrays of role names for each
   def self.role_names_by_app_name
-    res = all.order(role_name: :asc)
+    res = select(:role_name, :app_type_id).distinct.includes(:app_type).order(role_name: :asc)
     items = {}
     res.each do |role|
       m = role.app_type
@@ -134,17 +134,6 @@ class Admin::UserRole < ActiveRecord::Base
     to_roles
   end
 
-  def self.latest_update
-    return @latest_update if @latest_update
-
-    obj = reorder('').order(Arel.sql('coalesce(updated_at, created_at) desc nulls last')).first
-    @latest_update = obj&.updated_at || obj&.created_at
-  end
-
-  def self.reset_latest_update
-    @latest_update = nil
-  end
-
   private
 
   # Automatically add a template@template record if needed
@@ -154,13 +143,5 @@ class Admin::UserRole < ActiveRecord::Base
     tu = User.template_user
     tu.app_type = app_type
     self.class.add_to_role tu, app_type, role_name, current_admin
-  end
-
-  def invalidate_cache
-    logger.info "User Role added or updated (#{self.class.name}). Invalidating cache."
-    self.class.reset_latest_update
-
-    # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
-    Rails.cache.clear
   end
 end

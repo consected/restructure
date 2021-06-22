@@ -3,7 +3,7 @@
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab">Details</a></li>
-    <li role="presentation"><a href="#options-ref" aria-controls="options-ref" role="tab" data-toggle="tab">Options Reference</a></li>
+    <li role="presentation"><a href="#sample-form" aria-controls="sample-form" role="tab" data-toggle="tab">Sample Form</a></li>
     <li role="presentation"><a href="#user-access-controls" aria-controls="user-access-controls" role="tab" data-toggle="tab">User Access Controls</a></li>
   </ul>
 
@@ -14,9 +14,10 @@
       <h4>Details</h4>
       <%= render partial: 'admin/dynamic_models/def_details', locals: {object_instance: object_instance} %>
     </div>
-    <div role="tabpanel" class="tab-pane" id="options-ref">
-      <h4>Options Reference</h4>
-      <%= render partial: 'admin/dynamic_models/options_ref', locals: {object_instance: object_instance} %>
+    
+    <div role="tabpanel" class="tab-pane" id="sample-form">
+      <h4>Sample Form</h4>
+      <%= render partial: 'sample_form', locals: {object_instance: object_instance} %>
     </div>
 
     <div role="tabpanel" class="tab-pane  on-open-click" id="user-access-controls">

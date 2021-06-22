@@ -1,6 +1,6 @@
 <div class="data-results">
   <div data-result="admin-edit-form-" class="admin-edit-form">
-<%= form_for(object_instance, class: "inline-form", remote: true) do |f| %>
+<%= form_for(object_instance, class: "inline-form admin-edit-form", remote: true, data: {result_target: "#admin-item-#{object_instance.id}", preprocessor: "admin_result"}) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
     <%= f.label :app_type_id %>
@@ -11,7 +11,7 @@
     <% select_item_type = {}
        select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == 'name'    %>
 
-    <%= f.select :name, app_configuration_options, select_item_type %>
+    <%= big_select_field(f, :name, Admin::AppConfiguration.configuation_meanings)%>
   </div>
   <div class="form-group">
     <%= f.label :value %>

@@ -13,7 +13,10 @@ class PagesController < ApplicationController
   end
 
   def index
-    return unless current_user && !current_admin
+    unless current_user && !current_admin
+      render 'index', layout: 'admin_application'
+      return
+    end
 
     home_url = app_config_text(:logo_link, masters_search_path)
     redirect_to home_url
@@ -21,7 +24,11 @@ class PagesController < ApplicationController
 
   # Simple action to refresh the session timeout
   def show
-    render json: { version: Application.version }
+    if params[:id] == 'version'
+      render json: { version: Application.version }
+    else
+      not_found
+    end
   end
 
   # template

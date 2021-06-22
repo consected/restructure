@@ -128,8 +128,7 @@ module AppTypeChange
                                else
                                  Admin::AppType
                                    .all_available_to(current_user)
-                                   .find { |app| app.name == app_type_requested }
-                                   .map(&:id)
+                                   .find { |app| app.name == app_type_requested }&.id
                                end
 
     raise FphsException, "App type requested was not found: #{app_type_requested}" unless @app_type_requested_id

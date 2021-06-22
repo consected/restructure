@@ -45,7 +45,12 @@ module Redcap
     # Store the data dictionary metadata from Redcap for future reference
     # Calls a delayed job to actually do the work
     def capture_data_dictionary
+      jobclass = Redcap::CaptureDataDictionaryJob
+      jobs = ProjectAdmin.existing_jobs(jobclass, self)
+      return if jobs.count > 0
+
       Redcap::CaptureDataDictionaryJob.perform_later(self)
+      redcap_project_admin.record_job_request('setup job: metadata')
     end
 
     #
@@ -106,7 +111,7 @@ module Redcap
       all_rf = Redcap::DataDictionaries::Form.all_retrievable_fields(self)
 
       records_request_options = redcap_project_admin.records_request_options
-      if records_request_options && records_request_options[:exportSurveyFields]
+      if records_request_options&.exportSurveyFields
         # Handle the redcap_survey_identifier field
         f = Redcap::DataDictionaries::SpecialFields
         all_rf[f.survey_identifier_field_name] = f.survey_identifier_field(self)
@@ -137,6 +142,9 @@ module Redcap
 
         Redcap::DataDictionaries::SpecialFields.form_complete_field(form).refresh_variable_record
       end
+
+      # Trigger updates on the project admin to ensure updates there if needed
+      redcap_project_admin.update!(updated_at: DateTime.now)
     end
 
     #

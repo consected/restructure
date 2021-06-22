@@ -5,98 +5,11 @@ module OptionConfigs
   # They provide the ability to present different record types in meaningful forms, for recording keeping or
   # driving workflows.
   class ActivityLogOptions < ExtraOptions
-    ValidSaveTriggers = %i[notify
-                           create_reference
-                           create_master
-                           update_reference
-                           create_filestore_container
-                           update_this].freeze
-
     def self.add_key_attributes
-      %i[references save_trigger e_sign nfs_store]
+      %i[references e_sign nfs_store]
     end
 
     attr_accessor(*key_attributes, :bad_ref_items)
-
-    def self.attr_defs
-      res = {
-        references: {
-          model_name: {
-            label: 'button label',
-            from: 'this | master | any',
-            without_reference: true,
-            add: 'many | one_to_master | one_to_this',
-            add_with: {
-              extra_log_type: 'type name',
-              item_name: {
-                embedded_item: {
-                  field_name: 'value'
-                }
-              }
-            },
-            filter_by: {
-              field_name: 'value to filter the referenced items by (may include {{substitution}}'
-            },
-            order_by: {
-              field_name: 'asc | desc'
-            },
-            view_as: {
-              edit: 'hide|readonly|not_embedded|select_or_add',
-              show: 'hide|readonly|see_presence|filestore',
-              new: 'outside_this|not_embedded|select_or_add|activity_selector',
-              _notes_: ['*outside_this* presents a button that triggers a form outside of this container, in the regular panel',
-                        '*not_embedded* always shows this as an "action list" item',
-                        '*activity_selector* shows actions for any creatable activity log types listed in type_config']
-            },
-            prevent_disable: 'true|false (default = false) OR reference',
-            allow_disable_if_not_editable: 'true|false (default = false) OR reference',
-            also_disable_record: 'when disabled, also disable the referenced record',
-            showable_if: 'will use this definition to decide whether to show, in the same way as showable_if at the base level works',
-            creatable_if: 'will use this definition to decide if a reference can be created, in the same way as creatable_if at the base level works',
-            type_config: {
-              activity_selector: {
-                an_activity_name: 'Activity Label',
-                another_activity_name: 'Activity Label 2'
-              }
-            }
-          }
-        },
-        save_trigger: {
-          on_create: {
-            notify: SaveTriggers::Notify.config_def(if_extras: 'ref: ** conditions reference **'),
-            create_reference: SaveTriggers::CreateReference.config_def(if_extras: 'ref: ** conditions reference **'),
-            update_reference: SaveTriggers::UpdateReference.config_def(if_extras: 'ref: ** conditions reference **'),
-            create_master: SaveTriggers::CreateMaster.config_def(if_extras: 'ref: ** conditions reference **'),
-            create_filestore_container: SaveTriggers::CreateFilestoreContainer.config_def(if_extras: 'ref: ** conditions reference **'),
-            update_this: SaveTriggers::UpdateThis.config_def(if_extras: 'ref: ** conditions reference **')
-          },
-          on_update: {
-          },
-          on_save: {
-            notes: 'on_save: provides a shorthand for on_create and on_update. on_create and on_update override on_save configurations.'
-          },
-          on_disable: {
-            notes: 'on_disable: is triggered for any item that has a field named disabled that is switched to true'
-          },
-          on_upload: {
-
-          },
-          before_save: {
-            _: 'Run a specified trigger before the current item has saved, allowing output to be reflected in the UI update, but before reference updates are available',
-            __: 'Typically used for update_this, although can be applied to the other triggers if necessary'
-          }
-
-        },
-        e_sign: {
-          document_reference: SaveTriggers::CreateReference.config_def(if_extras: 'ref: ** conditions reference **'),
-          title: 'title to appear at top of prepared document',
-          intro: 'text to appear at top of prepared document'
-        },
-        nfs_store: NfsStore::Config::ExtraOptions.config_def
-
-      }
-      res.merge(super)
-    end
 
     def initialize(name, config, parent_activity_log)
       super(name, config, parent_activity_log)
@@ -115,20 +28,6 @@ module OptionConfigs
       clean_references_def
       clean_e_sign_def
       clean_nfs_store_def
-
-      self.save_trigger ||= {}
-      self.save_trigger = self.save_trigger.symbolize_keys
-      # Make save_trigger.on_save the default for on_create and on_update
-      os = self.save_trigger[:on_save]
-      if os
-        ou = self.save_trigger[:on_update] || {}
-        oc = self.save_trigger[:on_create] || {}
-        self.save_trigger[:on_update] = os.merge(ou)
-        self.save_trigger[:on_create] = os.merge(oc)
-      end
-
-      self.save_trigger[:on_upload] ||= {}
-      self.save_trigger[:on_disable] ||= {}
     end
 
     def clean_nfs_store_def
@@ -256,92 +155,7 @@ module OptionConfigs
 
     def calc_save_action_if(obj)
       ca = ConditionalActions.new save_action, obj
-      ca.calc_save_action_if
-    end
-
-    def calc_save_trigger_if(obj, alt_on: nil)
-      ca = ConditionalActions.new self.save_trigger, obj
-
-      if alt_on == :before_save
-        action = :before_save
-      elsif alt_on == :upload
-        action = :on_upload
-      elsif obj._created
-        action = :on_create
-      elsif obj._disabled
-        action = :on_disable
-      elsif obj._updated
-        action = :on_update
-      else
-        # Neither create or update - so just return
-        return true
-      end
-
-      res = ca.calc_save_action_if
-
-      # Get a list of results from the triggers
-      results = []
-
-      if res.is_a?(Hash) && res[action]
-        res[action].each do |perform, _pres|
-          # Use the symbol from the list of valid items, to prevent manipulation that could cause Brakeman warnings
-          t = ValidSaveTriggers.select { |vt| vt == perform }.first
-          if t
-            config = self.save_trigger[action][t]
-            c = SaveTriggers.const_get(t.to_s.camelize)
-
-            o = c.new config, obj
-            # Add the trigger result to the list
-            results << o.perform
-          else
-            raise FphsException, "The save_trigger action #{action} is not valid when attempting to perform #{perform}"
-          end
-        end
-      end
-
-      # If we had any results then check if they were all true. If they were then return true.
-      # Otherwise don't
-      unless results.empty?
-        return true if results.uniq.length == 1 && results.uniq.first
-
-        return nil
-      end
-
-      # No results - return true
-      true
-    end
-
-    def self.calc_save_triggers(obj, configs)
-      return if configs.nil?
-
-      # Get a list of results from the triggers
-      results = []
-
-      configs.each do |perform, _pres|
-        # Use the symbol from the list of valid items, to prevent manipulation that could cause Brakeman warnings
-        t = ValidSaveTriggers.select { |vt| vt == perform }.first
-        if t
-          config = configs[t]
-          c = SaveTriggers.const_get(t.to_s.camelize)
-
-          o = c.new config, obj
-          # Add the trigger result to the list
-          results << o.perform
-        else
-          raise FphsException, "on_complete is not valid when attempting to perform #{perform}"
-        end
-      end
-
-      # If we had any results then check if they were all true. If they were then return true.
-      # Otherwise don't
-      unless results.empty?
-        return true if results.uniq.length == 1 && results.uniq.first
-
-        return nil
-      end
-
-      # No results - return true
-      true
+      ca.calc_save_option_if
     end
 
     def model_reference_config(model_reference)

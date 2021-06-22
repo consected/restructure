@@ -1,0 +1,298 @@
+@import url("https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400");
+// @import url("/fonts/roboto/Roboto-Regular.ttf");
+
+@font-face {
+  font-family: "Roboto";
+  src: url("/fonts/roboto/Roboto-Regular.ttf");
+}
+
+@font-face {
+  font-family: "Roboto-Bold";
+  src: url("/fonts/roboto/Roboto-Bold.ttf");
+}
+
+@font-face {
+  font-family: "Roboto-Italic";
+  src: url("/fonts/roboto/Roboto-Italic.ttf");
+}
+
+@font-face {
+  font-family: "Roboto-BoldItalic";
+  src: url("/fonts/roboto/Roboto-BoldItalic.ttf");
+}
+
+div.help-view-doc,
+.common-help-item,
+.md-formatted-block {
+  font-family: Roboto, sans-serif;
+
+  .common-help-item {
+    padding: 0 4%;
+    background: rgb(255, 255, 255);
+    padding-top: 30px;
+    padding-bottom: 60px;
+  }
+
+  .nfs-store--manage--container-data {
+    display: none;
+  }
+
+  img {
+    max-width: 100%;
+
+    min-width: 200px;
+    min-height: 50px;
+    opacity: 0.5;
+    background-color: silver;
+    animation: working 1s ease-in-out infinite;
+
+    &.broken-image {
+      animation: none;
+    }
+    &.loaded-image {
+      opacity: 1;
+      transition: ease-in 600ms;
+      animation: none;
+      min-width: 0;
+      min-height: 0;
+      padding: 0.3em;
+      background: none;
+      border: 1px solid rgb(232, 232, 232);
+      border-radius: 3px;
+      margin-bottom: 0.6em;
+    }
+  }
+
+  hr {
+    border-top: 3px solid rgb(213, 213, 213);
+  }
+
+  div,
+  h1,
+  h2,
+  h3,
+  h4 {
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    height: auto;
+    width: auto;
+    float: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  strong,
+  b {
+    margin-bottom: 0.67em;
+    margin-top: 1em;
+    font-family: Roboto-Bold, sans-serif;
+    i,
+    em {
+      font-family: Roboto-BoldItalic, sans-serif;
+    }
+  }
+
+  i,
+  em {
+    font-family: Roboto-Italic, sans-serif;
+    strong,
+    b {
+      font-family: Roboto-BoldItalic, sans-serif;
+    }
+  }
+
+  .list-group-item.is-heading.object-results-header {
+    display: none;
+  }
+
+  p br {
+    display: block;
+    content: "";
+    margin-top: 0.8em;
+    line-height: 190%;
+    vertical-align: top;
+  }
+
+  .default-layout {
+    margin: 0;
+
+    h1 {
+      font-size: 44px;
+      line-height: 130%;
+    }
+
+    h2 {
+      font-size: 30px;
+      line-height: 130%;
+    }
+
+    h3 {
+      font-size: 26px;
+      line-height: 130%;
+    }
+
+    h4 {
+      font-size: 22px;
+      line-height: 130%;
+    }
+
+    .page-item-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+    }
+    .main-item {
+      width: 100%;
+    }
+  }
+
+  .md-formatted-block {
+    h1,
+    h2,
+    h3,
+    h4 {
+      margin-top: 1em;
+      color: rgb(80, 80, 80);
+    }
+
+    h1 {
+      font-size: 32px;
+    }
+    h2 {
+      font-size: 24px;
+    }
+
+    h3 {
+      font-size: 20px;
+    }
+
+    h4 {
+      font-size: 18px;
+    }
+  }
+
+  .default-layout-rows,
+  .default-layout {
+    &.content {
+      margin: 0 14%;
+      width: auto;
+      float: none;
+    }
+  }
+  .default-layout-columns,
+  .default-layout-one-column,
+  .default-layout-two-columns,
+  .default-layout-three-columns {
+    &.content {
+      margin: 0 7%;
+      width: auto;
+      float: none;
+    }
+  }
+
+  .common-help-item,
+  .common-help-item,
+  .default-layout-columns,
+  div.browse-container {
+    margin: 0.4em 1.7em 1.5em;
+
+    .notes-text th,
+    .notes-text tr {
+      word-break: normal;
+      vertical-align: top;
+    }
+  }
+
+  .embedded-items-item.option-type-attachments {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgb(221, 221, 221);
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 3px 3px 0px #d6d6d6;
+    margin: 0.4em 0 1.2em;
+
+    h1,
+    h2 {
+      border-bottom: 1px rgb(221, 221, 221) solid;
+      padding-bottom: 0.3em;
+    }
+  }
+
+  > ol,
+  > ul {
+    padding-inline-end: 40px;
+    margin-bottom: 1.4em;
+    padding-left: 0;
+  }
+
+  ul li,
+  ul ul {
+    list-style-position: outside;
+    list-style-type: disc;
+    margin-left: 1.6em;
+    overflow: visible;
+  }
+
+  ol li,
+  ol ol {
+    list-style-position: outside;
+    list-style-type: decimal;
+    margin-left: 1.6em;
+    overflow: visible;
+  }
+
+  & {
+    font-size: 15px;
+  }
+
+  p {
+    min-height: 1.6em;
+  }
+
+  .help-footer {
+    padding: 15px;
+    background-color: rgb(221, 221, 221);
+    text-align: center;
+  }
+
+  pre {
+    overflow-x: auto;
+  }
+  pre code {
+    word-wrap: normal;
+    white-space: pre;
+  }
+
+  a[target]:after {
+    content: "\e164";
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: "Glyphicons Halflings";
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    padding-left: 0.4em;
+    font-size: 80%;
+  }
+}
+
+.help-doc-header {
+  text-align: center;
+}
+
+div.help-view-doc.not-embedded,
+.common-help-item,
+.md-formatted-block {
+  img {
+    opacity: 1;
+  }
+}

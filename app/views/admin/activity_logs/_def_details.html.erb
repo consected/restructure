@@ -1,3 +1,4 @@
+<% if object_instance.persisted? && object_instance.enabled?%>
 <div class="al-details-section">
   <label>item type name</label>
   <p class="al-item-type">
@@ -6,7 +7,9 @@
 
   <label>fields</label>
   <p class="al-field-list">
-  <code><%= object_instance.all_implementation_fields.join("</code> <code>").html_safe %></code>
+  <ul class="activity-list">
+    <li><%= object_instance.all_implementation_fields.join("</li> <li>").html_safe %></;i>
+  </ul>
   </p>
 </div>
 <div class="activity-list-section">
@@ -41,3 +44,6 @@
   </ul>
   <div id="activity-list-detail" class="activity-list-detail"></div>
 </div>
+<% else %>
+  <label>not yet saved</label>
+<% end %>

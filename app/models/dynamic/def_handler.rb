@@ -194,7 +194,7 @@ module Dynamic
       end
 
       # Get all the resource names for options configs in all active dynamic definitions
-      # Used by user access control definitions and filestore filters
+      # Used by user filestore filters
       # @param [Proc] an optional block may be passed to allow filtering based
       #   on values in the option config for each entry
       #   for example:
@@ -212,6 +212,33 @@ module Dynamic
                    a
                  end
           res += elts.map(&:resource_name)
+        end
+
+        res
+      end
+
+      # Get all the resource names for options configs in all active dynamic definitions
+      # grouped by the item category + name.
+      # Used by user access control definitions
+      # @param [Proc] an optional block may be passed to allow filtering based
+      #   on values in the option config for each entry
+      #   for example:
+      #      all_option_configs_resource_names {|e| e && e.references && e.references[:nfs_store__manage__container]}
+      # @return [Array] array of string names
+      def all_option_configs_grouped_resources(&block)
+        res = {}
+
+        @all_option_configs_resource_names ||= active_model_configurations.map(&:option_configs)
+
+        @all_option_configs_resource_names.each do |a|
+          elts = if block_given?
+                   a.select(&block)
+                 else
+                   a
+                 end
+
+          group_name = [a.first.def_item.category, a.first.def_item.name].select(&:present?).join(': ')
+          res[group_name] = elts.map { |r| [r.resource_name, r.label] }.to_h
         end
 
         res
@@ -550,7 +577,13 @@ module Dynamic
     # @param [Admin::AppType] app_type to add the user access control to
     # @return [Admin::UserAccessControl] the created or updated user access control
     def add_user_access_controls(force: false, app_type: nil)
-      return unless !persisted? || saved_change_to_disabled? || force
+      changed_name = if respond_to? :table_name
+                       saved_change_to_table_name?
+                     elsif respond_to? :name
+                       saved_change_to_name?
+                     end
+
+      return unless !persisted? || saved_change_to_disabled? || changed_name || force
 
       begin
         if ready_to_generate? || disabled? || force

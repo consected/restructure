@@ -52,6 +52,22 @@ RSpec.describe NfsStore::Scripted::ScriptHandler, type: :model do
     expect(sh.result).to eq ['This will work']
   end
 
+  it 'runs an R script based on a configuration' do
+    res = system('which Rscript > /dev/null 2>&1')
+    return unless res
+
+    config = {
+      script_filename: 'sample-rscript.r',
+      args: %w[/tmp/somefile]
+    }
+
+    sh = NfsStore::Scripted::ScriptHandler.new(config)
+    exit_res = sh.run_script nil
+    expect(exit_res).to be true
+    expect(sh.result).to be_a Array
+    expect(sh.result.length).to eq 2
+  end
+
   it 'runs a script that fails with an exception' do
     config = {
       script_filename: 'simple_failing_test.sh'

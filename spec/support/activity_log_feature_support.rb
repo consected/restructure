@@ -1,30 +1,25 @@
 module ActivityLogSupport
-
   include MasterSupport
 
-  def gen_activity_log_path master_id, item_id, id=nil
+  def gen_activity_log_path(master_id, item_id, id = nil)
     res = "/masters/#{master_id}/player_contacts/#{item_id}/activity_log/player_contact_phones"
     res += "/#{id}" if id
     res
   end
 
   def list_valid_attribs
-
-
     @player_contact = PlayerContact.last
-
-
 
     unless @player_contact
       @user = @master.current_user
       let_user_create :player_contacts
       @player_contact = @master.player_contacts.create!(
-      {
-        data: "(516)262-1289",
-        source: 'nfl',
-        rank: 10,
-        rec_type: 'phone'
-      }
+        {
+          data: '(516)262-1289',
+          source: 'nfl',
+          rank: 10,
+          rec_type: 'phone'
+        }
       )
       @player_contact = PlayerContact.last
     end
@@ -36,8 +31,6 @@ module ActivityLogSupport
         select_who: 'user'
       }
     ]
-
-
   end
 
   def list_invalid_attribs
@@ -50,7 +43,6 @@ module ActivityLogSupport
         item_controller: 'player_contacts',
         item_id: @player_contact.id
       }
-
 
     ]
   end
@@ -67,15 +59,13 @@ module ActivityLogSupport
   def new_attribs
     create_item
     @new_attribs = {
-        player_contact_id: @player_contact.id,
-        select_call_direction: 'to player',
-        select_who: 'user'
-      }
+      player_contact_id: @player_contact.id,
+      select_call_direction: 'to player',
+      select_who: 'user'
+    }
   end
 
-
-
-  def create_item att=nil, item=nil
+  def create_item(att = nil, item = nil, master = nil)
     att ||= valid_attribs
     master ||= create_master
     item ||= @player_contact
@@ -90,7 +80,5 @@ module ActivityLogSupport
     setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: master.current_user
 
     @activity_log = master.activity_log__player_contact_phones.create! att
-
   end
-
 end

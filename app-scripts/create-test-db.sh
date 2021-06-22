@@ -14,6 +14,8 @@ function setup() {
   psql -d $DBNAME < "../db/structure.sql"
   psql -d $DBNAME -c "create schema if not exists bulk_msg;"
   psql -d $DBNAME -c "create schema if not exists ref_data;"
+
+  RAILS_ENV=test TEST_ENV_NUMBER=${DBNUM} bundle exec rake db:seed
 }
 
 if [ ! -z $1 ]; then

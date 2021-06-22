@@ -2,17 +2,17 @@
 
 # Define page, panel and navigation layouts for standard master results panels, standalone pages (dashboards),
 # content pages, top nav (menu bar) navigation, master results tab navigation, and custom view panels
-class Admin::PageLayout < ActiveRecord::Base
+class Admin::PageLayout < Admin::AdminBase
   self.table_name = 'page_layouts'
 
   include AdminHandler
   include AppTyped
   include OptionsHandler
 
-  validates :app_type_id, presence: { scope: :active }
-  validates :layout_name, presence: { scope: :active }
-  validates :panel_name, presence: { scope: :active }, uniqueness: { scope: %i[app_type_id layout_name] }
-  validates :panel_label, presence: { scope: :active }
+  validates :layout_name, presence: { scope: :active, message: "can't be blank" }
+  validates :panel_name, presence: { scope: :active, message: "can't be blank" },
+                         uniqueness: { scope: %i[app_type_id layout_name], message: "can't be already present" }
+  validates :panel_label, presence: { scope: :active, message: "can't be blank" }
   before_save :set_position
 
   # @attr [String] layout_name - the role of the definition
@@ -128,6 +128,10 @@ class Admin::PageLayout < ActiveRecord::Base
     options
   end
 
+  def config_text=(value)
+    self.options = value
+  end
+
   def self.no_master_association
     true
   end
@@ -140,6 +144,10 @@ class Admin::PageLayout < ActiveRecord::Base
   # Active view or standalone layouts for the specified app type
   def self.app_show_layouts(app_type_id)
     Admin::PageLayout.active.showable.where(app_type_id: app_type_id)
+  end
+
+  def standalone?
+    layout_name == 'standalone'
   end
 
   protected

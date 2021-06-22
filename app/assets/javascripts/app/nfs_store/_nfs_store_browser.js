@@ -61,6 +61,7 @@ _nfs_store.fs_browser = function ($outer) {
     form.removeAttr("data-remote");
     form.removeData("remote");
 
+    $('body').addClass('prevent-page-transition');
     btn.click();
   };
 
@@ -93,6 +94,7 @@ _nfs_store.fs_browser = function ($outer) {
       refresh_browser($outer, container_id);
     }
 
+    $('body').addClass('prevent-page-transition');
     btn.click();
   };
 

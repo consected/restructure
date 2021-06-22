@@ -19,7 +19,9 @@
  *= require admin/admin
  *= require admin/activity_list
  *= require admin/admin_options
+ *= require admin/message_notification
  *= require admin/server_info
+ *= require admin/sortable
  *= require admin/report_admin
  *= require admin/z_admin_overrides
  *= require_self

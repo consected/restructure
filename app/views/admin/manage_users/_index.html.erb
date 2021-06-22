@@ -1,16 +1,14 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">
-    <h1>Users</h1>
+    <%= show_admin_heading %>
     <p>
       <%= show_filters %>
     </p>
-
     <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below">
       <% if @updated_with %>
         <%= render partial: 'show'%>
       <% end %>
     </div>
-
     <table class="table tablesorter admin-list">
       <thead>
         <tr>
@@ -22,16 +20,16 @@
           <th>Last Name</th>
           <th>Apps</th>
           <th>Do Not Email</th>
+          <th>Expires in (days)</th>
+          <th>Signed in at</th>
           <th>Locked</th>
           <th>Disabled</th>
-          <th>Admin</th>
+          <th>Updated By</th>
         </tr>
       </thead>
-
       <tbody>
         <% @users.each do |list_item| %>
           <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
-
             <td><%= admin_edit_btn list_item.id%> &nbsp; <%= admin_edit_btn list_item.id, copy: list_item%> </td>
             <td><%= link_to "contact", users_contact_infos_path(filter: {user_id: list_item.id})  %></td>
             <td><%= link_to "roles", admin_user_roles_path(filter: {user_id: list_item.id}) %></td>
@@ -39,22 +37,19 @@
             <td><%= list_item.first_name %></td>
             <td><%= list_item.last_name %></td>
             <td class="user-app-list"><% list_item.accessible_app_types.each do |a| %>
-              <p><span><%= a.label %></span></p>
-            <% end %>
+                <p><span><%= a.label %></span></p>
+              <% end %>
             </td>
             <td><%= list_item.do_not_email ? 'do not email' : ''%></td>
+            <td><%= list_item.expires_in == 0 ? '<i class="password-expired">expired</i>'.html_safe : list_item.expires_in %></td>
+            <td><%= list_item.current_sign_in_at %></td>
             <td><%= list_item.access_locked? ? 'locked' : ''%></td>
             <td><%= list_item.disabled ? 'disabled' : ''%></td>
             <td><%= list_item.admin_name %></td>
-
-
           </tr>
         <% end %>
       </tbody>
     </table>
-
     <%=  render partial: 'admin_handler/index_actions'  %>
-
-
   </div>
 </div>

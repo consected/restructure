@@ -15,6 +15,13 @@ class Admin::ServerInfo
     ScriptedJobDirectory
   ].freeze
 
+  NfsStoreSettingsVars = %w[
+    nfs_store_directory
+    temp_directory
+    containers_dirname
+    use_parent_sub_dir
+  ].freeze
+
   attr_accessor :current_admin
 
   #
@@ -24,6 +31,21 @@ class Admin::ServerInfo
     settings = {}
     AppSettingsVars.each do |a|
       val = Settings.const_get(a)
+    rescue StandardError => e
+      val = e.to_s
+    ensure
+      settings[a] = val
+    end
+
+    settings
+  end
+
+  # Get a hash of app settings from the NfsStore::Manage::Filesystem class
+  # @return [Hash]
+  def nfs_store_settings
+    settings = {}
+    NfsStoreSettingsVars.each do |a|
+      val = NfsStore::Manage::Filesystem.send(a)
     rescue StandardError => e
       val = e.to_s
     ensure

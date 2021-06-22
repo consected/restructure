@@ -1,7 +1,7 @@
 class Admin::AdminBase < ActiveRecord::Base
   self.abstract_class = true
 
-  ValidAdminModules = %w[Admin Classification Messaging Users Redcap]
+  ValidAdminModules = %w[Admin Classification Messaging Users Redcap Imports]
 
   def self.class_from_name(name)
     name = name.classify

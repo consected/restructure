@@ -1,0 +1,12 @@
+Study: name of study to help organize project configurations
+Name: REDCap project title (enter exactly as REDCap has this, to validate correct metadata retrieval)
+Server url: REDCap server API URL
+Api key: API token
+Dynamic model table: Database table name to create and store records to (name must be plural)
+Transfer mode: One of none | manual | scheduled
+Frequency: |
+  For scheduled transfers, the period of time between transfers.
+
+  Enter this in the form "<number> <unit>" - such as "15 minutes" or "12 hours" or "1 day"
+Notes: Enter any notes to document the project
+Options: Advanced configuration options

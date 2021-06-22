@@ -1,5 +1,4 @@
-class Admin::ExternalLink < ActiveRecord::Base
-
+class Admin::ExternalLink < Admin::AdminBase
   self.table_name = 'external_links'
 
   include AdminHandler

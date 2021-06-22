@@ -18,31 +18,31 @@ export FILESTORE_CONFIG_SKIP=true
 
 if [ "$TEMP_ENV" == 'athena-production' ]; then
   TEMP_DBNAME=fphs
-  DB_SEARCH_PATH='study_info,ipa_ops,ml_app'
+  DB_SEARCH_PATH='ml_app,data_requests,ipa_ops,q1,q2,study_info,ref_data,dynamic'
   TEMP_HOSTNAME='fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
 if [ "$TEMP_ENV" == 'filestore-production' ]; then
   TEMP_DBNAME=fphs
-  DB_SEARCH_PATH='filestore,filestore_admin,ipa_ops,ml_app'
+  DB_SEARCH_PATH='filestore,filestore_admin,ipa_ops,ml_app,ref_data,dynamic'
   TEMP_HOSTNAME='fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
 if [ "$TEMP_ENV" == 'zeus-production' ]; then
   TEMP_DBNAME=fphs
-  DB_SEARCH_PATH='ml_app'
+  DB_SEARCH_PATH='ml_app,ref_data,dynamic'
   TEMP_HOSTNAME='fphs-zeus-db-prod01.cqtftnqosfiy.us-east-1.rds.amazonaws.com'
 fi
 
 if [ "$TEMP_ENV" == 'athena-stage' ]; then
   TEMP_DBNAME=fphs_sleep_test
-  DB_SEARCH_PATH='filestore,filestore_admin,ml_app'
+  DB_SEARCH_PATH='filestore,filestore_admin,ml_app,ref_data,dynamic'
   TEMP_HOSTNAME='fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
 if [ "$TEMP_ENV" == 'athena-demo' ]; then
   TEMP_DBNAME=ebdb
-  DB_SEARCH_PATH='ml_app,data_requests,ipa_ops,q1,q2,study_info'
+  DB_SEARCH_PATH='ml_app,data_requests,ipa_ops,q1,q2,study_info,ref_data,dynamic'
   TEMP_HOSTNAME='fphs-aws-db-dev01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
@@ -102,21 +102,21 @@ FPHS_POSTGRESQL_HOSTNAME=$TEMP_HOSTNAME \
 
 export PGPASSWORD="$TEMP_DB_PW"
 
-psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < ../fphs-app-configs/fphs-sql/grant_roles_access_to_ml_app.sql
+psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME < ../fphs-app-configs/fphs-sql/grant_roles_access_to_ml_app.sql
 
 if [ -f "fphs-sql/grant_roles_access_to_${SCHEMA_NAME}.sql" ]; then
-  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < ../fphs-app-configs/fphs-sql/grant_roles_access_to_${SCHEMA_NAME}.sql
+  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME < ../fphs-app-configs/fphs-sql/grant_roles_access_to_${SCHEMA_NAME}.sql
 fi
 
 if [ "$TEMP_ENV" == 'filestore-production' ]; then
-  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < ../fphs-app-configs/fphs-sql/grant_roles_access_to_filestore.sql
+  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME < ../fphs-app-configs/fphs-sql/grant_roles_access_to_filestore.sql
 fi
 
 if [ "$TEMP_ENV" == 'zeus-production' ]; then
-  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U fphs < ../fphs-app-configs/fphs-sql/grant_roles_access_to_zeus.sql
+  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME < ../fphs-app-configs/fphs-sql/grant_roles_access_to_zeus.sql
 fi
 
-psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $fphs 2>&1 << EOF
+psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME 2>&1 << EOF
 REVOKE ALL ON SCHEMA ${SCHEMA_NAME} FROM fphs;
 GRANT ALL ON SCHEMA ${SCHEMA_NAME} TO fphs;
 GRANT USAGE ON SCHEMA ${SCHEMA_NAME} TO fphsadm;

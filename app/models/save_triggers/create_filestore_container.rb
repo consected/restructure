@@ -4,12 +4,12 @@ class SaveTriggers::CreateFilestoreContainer < SaveTriggers::SaveTriggersBase
   attr_accessor :role, :users, :layout_template, :content_template, :message_type, :subject, :receiving_user_ids
 
   def self.config_def(if_extras: {})
-    {
-      name: 'part of directory name or array of attribute names to use to generate directory name (value used directly if attribute not found)',
-      label: 'human name',
-      create_with_role: 'role name',
-      if: if_extras
-    }
+    # {
+    #   name: 'part of directory name or array of attribute names to use to generate directory name (value used directly if attribute not found)',
+    #   label: 'human name',
+    #   create_with_role: 'role name',
+    #   if: if_extras
+    # }
   end
 
   def initialize(config, item)
@@ -23,7 +23,7 @@ class SaveTriggers::CreateFilestoreContainer < SaveTriggers::SaveTriggersBase
       @name = @name.map { |i| atts.keys.include?(i) ? atts[i] : i }.join(' -- ')
     end
 
-    @name = @name.gsub(%r{[/\.]}, '-')
+    @name = @name.gsub(%r{[/.]}, '-')
 
     @label = config[:label]
     @create_with_role = config[:create_with_role]

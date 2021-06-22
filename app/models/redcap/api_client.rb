@@ -8,7 +8,10 @@ module Redcap
     CacheExpiresIn = 60.seconds
     ExpectedKeys = %i[server_url api_key name current_admin].freeze
 
-    attr_accessor :project_admin, *ExpectedKeys
+    attr_accessor :project_admin,
+                  :records_request_options,
+                  :metadata_request_options,
+                  *ExpectedKeys
 
     #
     # Setup the api_client against the project admin record:
@@ -20,6 +23,8 @@ module Redcap
       end
 
       self.project_admin = req_project_admin
+      self.records_request_options = project_admin.records_request_options.filtered_hash
+      self.metadata_request_options = project_admin.metadata_request_options.filtered_hash
       # We must call the accessors directly, since api_key is overridden to decrypt the value
       # and a current_admin is required, so we can't just access #attributes
       ExpectedKeys.each do |k|
@@ -53,12 +58,7 @@ module Redcap
         returnFormat: 'json'
       }
 
-      ClientRequest.create! current_admin: current_admin,
-                            action: 'project_xml',
-                            server_url: server_url,
-                            name: name,
-                            redcap_project_admin: project_admin,
-                            result: { retrieved_from: 'api' }
+      project_admin.record_job_request 'project_xml', result: { retrieved_from: 'api' }
 
       FileUtils.chmod 0o660, tempfile
       tempfile
@@ -67,14 +67,16 @@ module Redcap
     #
     # Get the project metadata (data dictionary)
     # @return [Array{Hash}] hash with symbolized keys
-    def metadata
-      request :metadata
+    def metadata(request_options: nil)
+      request_options ||= metadata_request_options
+      request :metadata, request_options: request_options
     end
 
     #
     # Get the data records for the project
     # @return [Array{Hash}] hash with symbolized keys
     def records(request_options: nil)
+      request_options ||= records_request_options
       request :records, request_options: request_options
     end
 
@@ -149,12 +151,7 @@ module Redcap
           post_action action, request_options
         end
 
-        ClientRequest.create! current_admin: current_admin,
-                              action: action,
-                              server_url: server_url,
-                              name: name,
-                              redcap_project_admin: project_admin,
-                              result: { retrieved_from: retrieved_from }
+        project_admin.record_job_request action, result: { retrieved_from: retrieved_from }
       end
       res
     end

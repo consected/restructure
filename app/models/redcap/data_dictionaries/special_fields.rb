@@ -11,7 +11,7 @@ module Redcap
       # @param [Hash] fields <description>
       # @param [Redcap::DataDictionaries::Form] in_form
       def self.add_form_timestamp_field(fields, in_form)
-        return unless in_form.data_dictionary.redcap_project_admin.records_request_options
+        return unless in_form.data_dictionary.redcap_project_admin.records_request_options&.exportSurveyFields
 
         fields[form_timestamp_field_name(in_form)] = form_timestamp_field(in_form)
       end
