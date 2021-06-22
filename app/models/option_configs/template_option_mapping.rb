@@ -55,6 +55,8 @@ module OptionConfigs
     end
 
     def self.dynamic_model_mapping(def_record, option_type_config, current_user)
+      raise FphsException, "dynamic_model_mapping model class not defined for #{def_record}" unless def_record.model_class
+      
       dfla = def_record.field_list_array
       field_list = dfla.present? ? dfla : def_record.default_field_list_array
 
