@@ -40,8 +40,7 @@ module Dynamic
       # Get the matching version as the first record and the
       # lastest version as the second record
       # allowing us to recognize if the matching version is in fact the latest
-      all_res = Rails.cache.fetch("version-handler-#{self.class.name}-#{id}-#{current_at_str}") do
-      
+      res = Rails.cache.fetch("version-handler-#{self.class.name}-#{id}-#{current_at_str}") do
         qres = Admin::MigrationGenerator.connection.execute <<~END_SQL
           (select * from #{self.class.history_table_name}#{' '}
           where #{history_id_attr} = #{id}
@@ -55,24 +54,27 @@ module Dynamic
           limit 1)
         END_SQL
 
-        all_res = qres.map &:to_h
+        all_res = qres.map(&:to_h)
+        # We expect two results. If not, just return and let the caller decide what to do
+        break unless all_res.length == 2
+
+        # If the first and second records match, the matching version is the current version.
+        # Just return and let the caller use the current definition.
+        break if all_res[0]['id'] == all_res[1]['id']
+
+        res = all_res.first
+        res.delete 'admin_id'
+        res.delete(history_id_attr)
+        res['def_version'] = res['id']
+        res['id'] = id
+        res
       end
 
-      # We expect two results. If not, just return and let the caller decide what to do
-      return unless all_res.length == 2
+      return unless res
 
-      # If the first and second records match, the matching version is the current version.
-      # Just return and let the caller use the current definition.
-      return if all_res[0]['id'] == all_res[1]['id']
-
-      res = all_res.first
-      res.delete 'admin_id'
-      res.delete(history_id_attr)
-      res['def_version'] = res['id']
-      res['id'] = id
       res['current_definition'] = self
       # Instantiate (but don't save) this version as usable ActiveRecord object
-      self.class.new res.to_h
+      self.class.new res
     end
 
     #
