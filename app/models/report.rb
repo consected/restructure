@@ -180,6 +180,10 @@ class Report < ActiveRecord::Base
   end
 
   def alt_resource_name
+    self.class.alt_resource_name item_type, short_name
+  end
+
+  def self.alt_resource_name(item_type, short_name)
     "#{item_type&.id_underscore || '_default'}__#{short_name}".downcase.id_underscore
   end
 
