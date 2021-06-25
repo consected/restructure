@@ -326,11 +326,17 @@ module OptionConfigs
     def calc_if(key, obj)
       raise FphsException, "invalid calc_if key #{key}" unless key.in?(ValidCalcIfKeys)
 
+      @calc_if ||= {}
+      memo_key = "#{key}-#{obj.class.name}-#{obj.id}"
+
+      return @calc_if[memo_key] if @calc_if.key? memo_key
+
       config = send(key)
 
       Rails.logger.debug "Checking calc_if with #{key} on #{obj} with #{config}"
       ca = ConditionalActions.new config, obj
-      ca.calc_action_if
+      @calc_if[memo_key] = ca.calc_action_if
+    
     end
 
     #

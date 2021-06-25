@@ -16,6 +16,10 @@ module GeneralDataConcerns
     raise 'can not set user_id=' if attribute_names.include?('master_id')
   end
 
+  def hide_tracker_panel
+    Admin::AppConfiguration.value_for(:hide_tracker_panel, current_user) != 'false'
+  end
+
   def _created
     @was_created
   end
@@ -167,7 +171,7 @@ module GeneralDataConcerns
       extras[:methods] << :protocol_name if respond_to? :protocol_name
       extras[:methods] << :sub_process_name if respond_to? :sub_process_name
       extras[:methods] << :protocol_event_name if respond_to? :protocol_event_name
-      if !is_a?(Tracker) && !is_a?(TrackerHistory) && (respond_to?(:tracker_history_id) || respond_to?(:tracker_history))
+      if !hide_tracker_panel && !is_a?(Tracker) && !is_a?(TrackerHistory) && (respond_to?(:tracker_history_id) || respond_to?(:tracker_history))
         extras[:methods] << :tracker_history_id
         extras[:methods] << :tracker_histories if respond_to? :tracker_histories
       end
