@@ -336,7 +336,15 @@ module OptionConfigs
       Rails.logger.debug "Checking calc_if with #{key} on #{obj} with #{config}"
       ca = ConditionalActions.new config, obj
       @calc_if[memo_key] = ca.calc_action_if
-    
+    end
+
+    def reset_calc_evaluations!(obj)
+      return unless @calc_if
+
+      ValidCalcIfKeys.each do |key|
+        memo_key = "#{key}-#{obj.class.name}-#{obj.id}"
+        @calc_if.delete memo_key
+      end
     end
 
     #

@@ -488,9 +488,9 @@ class ModelReference < ActiveRecord::Base
   # corresponding to the to-record.
   # @return [Hash | nil]
   def to_record_options_config
-    return unless from_record.respond_to?(:option_type_config) && from_record&.option_type_config
+    return unless from_record.respond_to?(:option_type_config)
 
-    res = from_record.option_type_config.model_reference_config self
+    res = from_record&.option_type_config&.model_reference_config(self)
     return unless res
 
     res[to_record_assoc.to_s.singularize.to_sym]
@@ -548,7 +548,7 @@ class ModelReference < ActiveRecord::Base
 
     extras[:methods] << :to_record_data
 
-    extras[:methods] << :to_record_options_config if from_record.respond_to? :option_type_config
+    extras[:methods] << :to_record_options_config
     extras[:methods] << :from_record_type_us
     extras[:methods] << :from_record_short_type_us
     extras[:methods] << :from_record_viewable
