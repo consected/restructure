@@ -108,51 +108,19 @@ module MasterSearch
     @masters = @masters.limit(results_limit_value) if @masters
   end
 
-  def preloadables
-    Rails.cache.fetch("preloadable_tables_for_user: #{current_user.id}") do
-      master = Master.new(current_user: current_user)
-      preloadables = []
-      tnames = [
-        master.subject_info_sym,
-        master.secondary_info_sym,
-        master.contact_info_sym,
-        master.address_info_sym,
-        :trackers
-      ]
-
-      tnames.each do |tname|
-        preloadables << tname if current_user.has_access_to? :access, :table, tname
-      end
-
-      preloadables
-    end
-  end
-
   def masters_response
     @masters = @masters.limited_access_scope(current_user)
 
-    @masters = @masters.distinct
+    @masters = @masters.uniq
     # If a list of IDs to sort by is provided (from a report search), sort by it
-    # SELECT c.*
-    # FROM   comments c
-    # JOIN   unnest('{1,3,2,4}'::int[]) WITH ORDINALITY t(id, ord) USING (id)
-    # ORDER  BY t.ord
-    original_length = @masters.count
+    @masters = @masters.sort_by { |m| @sort_by_ids.index(m.id) } if @sort_by_ids
 
-    @masters = @masters.preload(*preloadables)
+    original_length = @masters.length
+    @masters = @masters[0, results_limit_value]
 
-    if @sort_by_ids&.present?
-      sql = 'masters.id, array_position(array[?], masters.id) order_col'
-      safe_sql = ActiveRecord::Base.send(:sanitize_sql_for_conditions, [sql, @sort_by_ids])
-      @masters = @masters.select(safe_sql).order('order_col')
-    end
+    logger.debug "Masters should return #{@masters.length} items"
 
-    if original_length > results_limit_value
-      @masters = @masters.limit(results_limit_value)
-      mlen = results_limit_value
-    else
-      mlen = original_length
-    end
+    mlen = @masters.length
 
     if @search_type == 'MSID' && mlen > 0 && @masters.first.id >= 0
       @result_message = "Displaying results for a list of #{mlen} record #{'ID'.pluralize(mlen)}."
@@ -160,7 +128,7 @@ module MasterSearch
 
     # Only return a full set of data for the master record if there is a single item
     # Otherwise we just return the essentials for the index listing, saving loads of DB and processing time
-    style = mlen < 2 ? :full : :index
+    style = @masters.length < 2 ? :full : :index
 
     {
       masters: @masters.as_json(current_user: current_user, filtered_search_results: true, style: style),

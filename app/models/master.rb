@@ -370,10 +370,8 @@ class Master < ActiveRecord::Base
 
   #
   # Memoized count of associated tracker records
-  # NOTE: we use #length rather than #count, since we have already preloaded the trackers
-  # and don't want to run individual queries for each item
   def trackers_length
-    @trackers_length ||= trackers.length
+    @trackers_length ||= trackers.count
   end
 
   #
@@ -388,11 +386,9 @@ class Master < ActiveRecord::Base
   # Valid models mix in ViewHandlers::Subject
   # @return [Symbol | nil]
   def subject_info_sym
-    return @subject_info_sym if @subject_info_sym
-
-    @subject_info_sym = Admin::AppConfiguration.value_for(:header_subject_data_type, current_user)
-    @subject_info_sym = Settings::DefaultSubjectInfoTableName if @subject_info_sym.blank?
-    @subject_info_sym = @subject_info_sym.to_sym
+    subject_info_sym = Admin::AppConfiguration.value_for(:header_subject_data_type, current_user)
+    subject_info_sym = Settings::DefaultSubjectInfoTableName if subject_info_sym.blank?
+    subject_info_sym.to_sym
   end
 
   #
@@ -400,11 +396,9 @@ class Master < ActiveRecord::Base
   # Valid models mix in ViewHandlers::SecondaryInfo
   # @return [Symbol | nil]
   def secondary_info_sym
-    return @secondary_info_sym if @secondary_info_sym
-
-    @secondary_info_sym = Admin::AppConfiguration.value_for(:header_secondary_data_type, current_user)
-    @secondary_info_sym = Settings::DefaultSecondaryInfoTableName if @secondary_info_sym.blank?
-    @secondary_info_sym = @secondary_info_sym.to_sym
+    secondary_info_sym = Admin::AppConfiguration.value_for(:header_secondary_data_type, current_user)
+    secondary_info_sym = Settings::DefaultSecondaryInfoTableName if secondary_info_sym.blank?
+    secondary_info_sym.to_sym
   end
 
   #
@@ -412,11 +406,9 @@ class Master < ActiveRecord::Base
   # Valid models mix in ViewHandlers::Address
   # @return [Symbol | nil]
   def address_info_sym
-    return @address_info_sym if @address_info_sym
-
-    @address_info_sym = Admin::AppConfiguration.value_for(:data_type_address, current_user)
-    @address_info_sym = Settings::DefaultAddressInfoTableName if @address_info_sym.blank?
-    @address_info_sym = @address_info_sym.to_sym
+    address_info_sym = Admin::AppConfiguration.value_for(:data_type_address, current_user)
+    address_info_sym = Settings::DefaultAddressInfoTableName if address_info_sym.blank?
+    address_info_sym.to_sym
   end
 
   #
@@ -424,11 +416,9 @@ class Master < ActiveRecord::Base
   # Valid models mix in ViewHandlers::Contact
   # @return [Symbol | nil]
   def contact_info_sym
-    return @contact_info_sym if @contact_info_sym
-
-    @contact_info_sym = Admin::AppConfiguration.value_for(:data_type_contact, current_user)
-    @contact_info_sym = Settings::DefaultContactInfoTableName if @contact_info_sym.blank?
-    @contact_info_sym = @contact_info_sym.to_sym
+    contact_info_sym = Admin::AppConfiguration.value_for(:data_type_contact, current_user)
+    contact_info_sym = Settings::DefaultContactInfoTableName if contact_info_sym.blank?
+    contact_info_sym.to_sym
   end
 
   #
