@@ -169,7 +169,11 @@ module UserSupport
     in_app_type ||= user.app_type
     return unless in_app_type
 
-    Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: user, access: :create,
-                                     resource_type: :table, resource_name: resource_name
+    res = Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: user, access: :create,
+                                           resource_type: :table, resource_name: resource_name
+
+    expect(user.has_access_to?(:create, :table, resource_name)).to be_truthy
+
+    res
   end
 end

@@ -73,6 +73,7 @@ RSpec.describe 'DynamicModel::PlayerContactPhoneInfo', type: :model do
 
     expect(total_opt_outs).to be > 0
 
+    let_user_create :trackers, alt_user: User.batch_user, in_app_type: Settings.bulk_msg_app
     # Now run and update the records for real
     total_opt_outs = DynamicModel::PlayerContactPhoneInfo.update_opt_outs
 
