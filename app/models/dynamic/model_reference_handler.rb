@@ -117,10 +117,11 @@ module Dynamic
       memores = @creatable_model_references[memokey]
       return memores if memores
 
-      cre_res = {}
-      return cre_res unless extra_log_type_config&.references
+      @creatable_model_references[memokey] = cre_res = {}
+      eltcrefs = extra_log_type_config&.references
+      return cre_res unless eltcrefs
 
-      extra_log_type_config.references.each do |ref_key, refitem|
+      eltcrefs.each do |ref_key, refitem|
         refitem.each do |ref_type, ref_config|
           res = {}
           ires = nil
@@ -256,8 +257,10 @@ module Dynamic
       return @referring_record == :nil ? nil : @referring_record unless @referring_record.nil?
 
       res = referenced_from
-      @referring_record = res.first&.from_record
-      return @referring_record if @referring_record && res.length == 1
+      if res.length == 1
+        @referring_record = res.first&.from_record
+        return @referring_record if @referring_record
+      end
 
       @referring_record = :nil
       nil
