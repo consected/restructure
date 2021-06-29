@@ -202,13 +202,11 @@ module UserHandler
   end
 
   def source_correct
-    if respond_to?(:source) && source
-      unless source_name
-        logger.info "Requested source of #{source}. This is not a valid value."
-        errors.add :source, "(#{source}) not a valid value"
-        logger.warn "Source is not a valid value in #{inspect}"
-        return false
-      end
+    if respond_to?(:source) && source && !source_name
+      logger.info "Requested source of #{source}. This is not a valid value."
+      errors.add :source, "(#{source}) not a valid value"
+      logger.warn "Source is not a valid value in #{inspect}"
+      return false
     end
     true
   end
