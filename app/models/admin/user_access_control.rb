@@ -157,7 +157,7 @@ class Admin::UserAccessControl < Admin::AdminBase
     raise FphsException, 'Options can not be added to access_for?' if with_options
 
     app_type_id = alt_app_type_id.is_a?(Admin::AppType) ? alt_app_type_id.id : alt_app_type_id
-    cache_key = "#{user.id}-#{can_perform}-#{on_resource_type}-#{named}-#{app_type_id}-#{alt_role_name}-#{add_conditions}"
+    cache_key = "#{user&.id}-#{can_perform}-#{on_resource_type}-#{named}-#{app_type_id}-#{alt_role_name}-#{add_conditions}"
     res = Rails.cache.fetch(cache_key) do
       evaluate_access_for(user, can_perform, on_resource_type, named,
                           alt_app_type_id: alt_app_type_id,
@@ -185,9 +185,9 @@ class Admin::UserAccessControl < Admin::AdminBase
     app_type_id = alt_app_type_id || user&.app_type_id
 
     if can_perform
-      unless can_perform.is_a?(Array) || valid_access_level?(on_resource_type,
-                                                             can_perform) || valid_combo_level?(on_resource_type,
-                                                                                                can_perform)
+      unless can_perform.is_a?(Array) ||
+             valid_access_level?(on_resource_type, can_perform) ||
+             valid_combo_level?(on_resource_type, can_perform)
         raise FphsException, "Access level #{can_perform} does not exist for resource type #{on_resource_type}"
       end
 
