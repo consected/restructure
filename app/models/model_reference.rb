@@ -13,6 +13,12 @@
 class ModelReference < ActiveRecord::Base
   belongs_to :user
 
+  belongs_to :from_record, polymorphic: true, optional: true
+  belongs_to :to_record, polymorphic: true, optional: true
+
+  alias from_record_assoc from_record
+  alias to_record_assoc to_record
+
   scope :active, -> { where 'model_references.disabled is null or model_references.disabled = false' }
 
   validates :from_record_master_id, presence: true
@@ -149,8 +155,12 @@ class ModelReference < ActiveRecord::Base
   # allowing for specific records to be selected from the master (such as a specific 'type' of referenced record)
   # The param active == true returns only results that are not disabled
   # order_by forces ordering against fields in the target (ro_record) records
-  def self.find_references(from_item_or_master, to_record_type: nil, filter_by: nil,
-                           without_reference: false, ref_order: nil, active: nil,
+  def self.find_references(from_item_or_master,
+                           to_record_type: nil,
+                           filter_by: nil,
+                           without_reference: false,
+                           ref_order: nil,
+                           active: nil,
                            order_by: nil)
 
     ref_order ||= default_ref_order
@@ -199,7 +209,7 @@ class ModelReference < ActiveRecord::Base
 
       res = mr.where(cond).order(ref_order)
       res = res.active if active
-
+      res = res.preload(:from_record)
     end
 
     # Set the current user, so that access controls can be correctly applied
@@ -436,7 +446,8 @@ class ModelReference < ActiveRecord::Base
     return @from_record if @from_record
     return unless from_record_type && from_record_id
 
-    @from_record = from_record_type.ns_constantize.find(from_record_id)
+    @from_record = from_record_assoc
+    # @from_record = from_record_type.ns_constantize.find(from_record_id)
     @from_record.current_user ||= current_user
     @from_record
   end
@@ -452,7 +463,9 @@ class ModelReference < ActiveRecord::Base
   def to_record
     return @to_record if @to_record
 
-    @to_record = to_record_class.find(to_record_id)
+    # @to_record = to_record_class.find(to_record_id)
+    @to_record = to_record_assoc
+
     unless @to_record
       raise FphsException, "Model Reference (#{id}) 'to record' not found: #{to_record_class} #{to_record_id}"
     end
@@ -479,8 +492,8 @@ class ModelReference < ActiveRecord::Base
   end
 
   # Name of the association from the master
-  def to_record_assoc
-    @to_record_assoc ||= to_record_class.assoc_inverse
+  def to_record_assoc_name
+    @to_record_assoc_name ||= to_record_class.assoc_inverse
   end
 
   #
@@ -493,7 +506,7 @@ class ModelReference < ActiveRecord::Base
     res = from_record&.option_type_config&.model_reference_config(self)
     return unless res
 
-    res[to_record_assoc.to_s.singularize.to_sym]
+    res[to_record_assoc_name.to_s.singularize.to_sym]
   end
 
   # The reference can be disabled if:
