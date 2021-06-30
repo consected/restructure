@@ -43,13 +43,13 @@ module Dynamic
       # allowing us to recognize if the matching version is in fact the latest
       res = Rails.cache.fetch(cache_key) do
         qres = Admin::MigrationGenerator.connection.execute <<~END_SQL
-          (select * from #{self.class.history_table_name}#{' '}
+          (select * from #{self.class.history_table_name}
           where #{history_id_attr} = #{id}
-          and coalesce(updated_at, created_at) < '#{current_at_str}'#{' '}
+          and coalesce(updated_at, created_at) < '#{current_at_str}'
           order by updated_at desc NULLS LAST
           limit 1)
           UNION
-          (select * from #{self.class.history_table_name}#{' '}
+          (select * from #{self.class.history_table_name}
           where #{history_id_attr} = #{id}
           order by id desc
           limit 1)
@@ -61,22 +61,27 @@ module Dynamic
         # and the first and second records to be distinct.
         # If not, just return and let the caller decide what to do
         if all_res.length != 2 || all_res[0]['id'] == all_res[1]['id']
-          nil
+          res = nil
         else
           res = all_res.first
           res.delete 'admin_id'
           res.delete(history_id_attr)
           res['def_version'] = res['id']
           res['id'] = id
-          res
         end
+        res
       end
 
       return unless res
 
       res['current_definition'] = self
+
+      # Also keep the initialized instance as a memo,
+      # since this saves reinitialization of option configs
+      memo_key = "version-handler-#{res['def_version']}"
+      @versioned ||= {}
       # Instantiate (but don't save) this version as usable ActiveRecord object
-      self.class.new res
+      @versioned[memo_key] ||= self.class.new(res)
     end
 
     #
