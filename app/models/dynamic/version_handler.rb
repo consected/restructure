@@ -46,7 +46,6 @@ module Dynamic
 
       # Add a second, to avoid rounding issues between Rails and DB
       current_at += 1.second
-      current_at_str = current_at.iso8601(4)
 
       matched_version = nil
       avs = all_versions
@@ -62,9 +61,10 @@ module Dynamic
       end
 
       # If no version was matched it probably means the item was created
-      # from the current version.
-      # Just return nil and let the caller decide.
-      return if matched_version.nil? # || matched_version.id == avs.first.id
+      # from the current version. Return nil.
+      # If the version matched is the first in the list then just
+      # return nil and let the caller decide.
+      return if matched_version.nil? || matched_version.def_version == avs.first.def_version
 
       # Return the matched version
       matched_version
