@@ -674,7 +674,13 @@ module HandlesUserBase
     end
 
     if !persisted? && !can_create?
-      raise FphsException, "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name})"
+      msg = if Rails.env.test?
+              "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name})" \
+              "- #{current_user.email} - #{current_user.app_type&.name}"
+            else
+              "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name})"
+            end
+      raise FphsException, msg
     end
   end
 

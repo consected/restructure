@@ -70,6 +70,9 @@ RSpec.describe Formatter::DialogTemplate, type: :model do
     versioned_mt = mt.versioned(pc1.created_at)
     expect(versioned_mt).not_to be_nil
 
+    versioned_mt = mt.versioned(pc2.created_at)
+    expect(versioned_mt).to be_nil # since it is the current definition
+
     dmsg1 = Formatter::DialogTemplate.generate_message(dt.name, pc1)
     expect(dmsg1).to eq expected_text1
   end
