@@ -19,6 +19,7 @@ RSpec.describe 'DynamicModel::PlayerContactPhoneInfo', type: :model do
 
     DynamicModel::PlayerContactPhoneInfo.definition.update_tracker_events
     @batch_user = User.batch_user
+    @batch_user.update!(disabled: false, current_admin: @admin) if @batch_user.disabled?
     enable_user_app_access Settings.bulk_msg_app.name, @batch_user
     let_user_create :player_contacts, alt_user: @batch_user
     let_user_create :trackers, alt_user: @batch_user
