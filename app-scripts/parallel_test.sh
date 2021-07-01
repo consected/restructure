@@ -6,5 +6,5 @@ if [ "${NO_BRAKEMAN}" != 'true' ]; then
 fi
 echo > log/test.log
 # Run the rspec tests in parallel. Use the first arg to define the path if needed
-export PARALLEL_TEST_PROCESSORS=${PARALLEL_TEST_PROCESSORS:=8}
+export PARALLEL_TEST_PROCESSORS=${PARALLEL_TEST_PROCESSORS:=$(nproc)}
 bundle exec rake parallel:spec[$1]
