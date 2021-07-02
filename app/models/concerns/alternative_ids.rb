@@ -231,17 +231,22 @@ module AlternativeIds
   # @return [String | Integer | nil]
   def alternative_id_value(field_name)
     field_name = field_name.to_sym
+    @alternative_id_value ||= {}
+    return @alternative_id_value[field_name] if @alternative_id_value.key? field_name
+
     # Start by attempting to match on a field in the master record
     unless self.class.alternative_id?(field_name, access_by: current_user)
       raise "Can not match on this field. It is not an accepted alterative ID field. #{field_name}"
     end
 
-    return attributes[field_name.to_s] if self.class.crosswalk_attr?(field_name, access_by: current_user)
+    @alternative_id_value[field_name] = attributes[field_name.to_s]
+    return @alternative_id_value[field_name] if self.class.crosswalk_attr?(field_name, access_by: current_user)
 
     ext_id = self.class.external_id_definition(field_name, access_by: current_user)
     raise(FphsException, "External ID definition is not active for #{field_name}") unless ext_id
 
-    return unless self.class.external_id?(field_name, access_by: current_user)
+    @alternative_id_value[field_name] = self.class.external_id?(field_name, access_by: current_user)
+    return unless @alternative_id_value[field_name]
 
     assoc_name = ext_id.model_association_name
     # Ensure the first item is used, since adding new IDs could lead to spurious results
@@ -249,15 +254,17 @@ module AlternativeIds
     # this can cause unexpected errors
     m = send(assoc_name).reorder('').order(id: :asc).first if respond_to?(assoc_name)
 
-    m&.external_id
+    @alternative_id_value[field_name] = m&.external_id
   end
 
   #
   # Get a hash of all the alternative IDs and values for a master record
   # @return [Hash] a hash with symbol keys
   def alternative_ids
+    return @alternative_ids if @alternative_ids
+
     res = {}
     self.class.alternative_id_fields(access_by: current_user).each { |f| res[f] = alternative_id_value(f) }
-    res
+    @alternative_ids = res
   end
 end

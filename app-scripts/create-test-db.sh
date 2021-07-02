@@ -18,7 +18,9 @@ function setup() {
   RAILS_ENV=test TEST_ENV_NUMBER=${DBNUM} bundle exec rake db:seed
 }
 
-if [ ! -z $1 ]; then
+if [ -z $1 ]; then
+  PARALLEL=$(nproc)
+else
   PARALLEL=$1
 fi
 

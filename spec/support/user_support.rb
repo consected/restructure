@@ -118,7 +118,7 @@ module UserSupport
                                              resource_name: resource_name, user: user, current_admin: auto_admin
     end
 
-    if user && access
+    if user && access && resource_name != :app_type
       check_access = (access == :see_presence ? access : :access)
       expect(user.has_access_to?(check_access, resource_type, resource_name)).to be_truthy,
                                                                                  "Newly created User Access Control not working as expected: #{check_access}, #{resource_type}, #{resource_name}"
@@ -171,5 +171,7 @@ module UserSupport
 
     Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: user, access: :create,
                                      resource_type: :table, resource_name: resource_name
+
+    # expect(user.has_access_to?(:create, :table, resource_name)).to be_truthy
   end
 end

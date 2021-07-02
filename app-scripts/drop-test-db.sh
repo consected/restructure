@@ -13,7 +13,9 @@ function drop() {
 
 }
 
-if [ ! -z $1 ]; then
+if [ -z $1 ]; then
+  PARALLEL=$(nproc)
+else
   PARALLEL=$1
 fi
 
