@@ -72,7 +72,7 @@ module LogExpectations
 
     has_css?(LogTrackerHistoriesCss)
 
-    hists = all(LogTrackerHistoriesCss)[index]
+    hists = all(LogTrackerHistoriesCss)[index + 1]
 
     res = hists.find('.small')
     expect(res.text).to eq etext

@@ -17,7 +17,8 @@ module GeneralDataConcerns
   end
 
   def hide_tracker_panel
-    Admin::AppConfiguration.value_for(:hide_tracker_panel, current_user) != 'false'
+    val = Admin::AppConfiguration.value_for(:hide_tracker_panel, current_user)
+    !val.blank? && val != 'false'
   end
 
   def _created

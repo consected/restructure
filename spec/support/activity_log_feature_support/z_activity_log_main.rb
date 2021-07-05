@@ -1,5 +1,4 @@
 module ActivityLogMain
-
   CallConnected = 'Connected'
   NextStepComplete = 'Complete'
   NextStepCallBack = 'Call Back'
@@ -9,7 +8,7 @@ module ActivityLogMain
   RankBadContact = '-1 - bad contact'
   StudyProtocol = 'Study'
   ActivitySubProcess = 'Activity'
-  PhoneLogProtocolEvent = 'Phone Log'
+  PhoneLogProtocolEvent = 'AL Filter Test 2'
 
   include FeatureHelper
   include FeatureSupport
@@ -28,5 +27,4 @@ module ActivityLogMain
   include PhoneListActions
   include PhoneLogActions
   include PlayerContactActions
-
 end
