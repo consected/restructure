@@ -36,10 +36,11 @@ class User < ActiveRecord::Base
   end
 
   #
-  # The batch_user is the User instance for the user specified in Settings::AdminEmail
+  # The batch_user is the User instance for the user specified in Settings::BatchUserEmail
   def self.batch_user
+    e = Settings::BatchUserEmail
     # Use the admin email as the user - this assumes that the equivalent user has been set up for automated use
-    where(email: Settings::AdminEmail).first
+    where(email: e).first
   end
 
   #

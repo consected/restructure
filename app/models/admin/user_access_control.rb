@@ -98,7 +98,8 @@ class Admin::UserAccessControl < Admin::AdminBase
   # @return [Array{String}]
   def self.resource_names_for(resource_type)
     if resource_type == :report
-      return Report.active.map(&:alt_resource_name) + Report.active.map(&:name) + ['_all_reports_']
+      active_reports = Report.active
+      return active_reports.map(&:alt_resource_name) + active_reports.map(&:name) + ['_all_reports_']
     end
 
     Resources::UserAccessControl.resource_names_for(resource_type)
@@ -155,12 +156,36 @@ class Admin::UserAccessControl < Admin::AdminBase
                        alt_app_type_id: nil, alt_role_name: nil, add_conditions: nil)
     raise FphsException, 'Options can not be added to access_for?' if with_options
 
-    app_type_id = alt_app_type_id || user&.app_type_id
+    app_type_id = alt_app_type_id.is_a?(Admin::AppType) ? alt_app_type_id.id : alt_app_type_id
+    app_type_id ||= user&.app_type_id
+    cache_key = "#{user&.id}-#{can_perform}-#{on_resource_type}-#{named}-#{app_type_id}-#{alt_role_name}-#{add_conditions}"
+    res = Rails.cache.fetch(cache_key) do
+      evaluate_access_for(user, can_perform, on_resource_type, named, app_type_id,
+                          alt_role_name: alt_role_name,
+                          add_conditions: add_conditions)
+    end
+
+    return unless res
+
+    find(res)
+  end
+
+  # @param [User] user
+  # @param [nil | Array | Symbol] can_perform - access level (Array or Symbol) or combo access level (Symbol)
+  # @param [Symbol | String] on_resource_type - valid resource type
+  # @param [Symbol | String] named - resource name
+  # @param [Admin::AppType | Integer] alt_app_type_id - app type or ID for the app type to
+  #                                                     apply to if the user does not have a current app_type set
+  # @param [String] alt_role_name - for an Admin::UserRole when the role control is to override the default controls
+  # @param [Hash] add_conditions - additional conditions to apply to scoped user and roles
+  # @return [id | nil] - id of the UserAccessControl
+  def self.evaluate_access_for(user, can_perform, on_resource_type, named, app_type_id,
+                               alt_role_name: nil, add_conditions: nil)
 
     if can_perform
-      unless can_perform.is_a?(Array) || valid_access_level?(on_resource_type,
-                                                             can_perform) || valid_combo_level?(on_resource_type,
-                                                                                                can_perform)
+      unless can_perform.is_a?(Array) ||
+             valid_access_level?(on_resource_type, can_perform) ||
+             valid_combo_level?(on_resource_type, can_perform)
         raise FphsException, "Access level #{can_perform} does not exist for resource type #{on_resource_type}"
       end
 
@@ -186,7 +211,7 @@ class Admin::UserAccessControl < Admin::AdminBase
       return nil unless res_access.in?(can_perform)
     end
 
-    res
+    res&.id
   end
 
   #
@@ -316,6 +341,4 @@ class Admin::UserAccessControl < Admin::AdminBase
       end
     end
   end
-
-
 end

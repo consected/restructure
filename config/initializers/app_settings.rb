@@ -36,7 +36,7 @@ class Settings
   # a verified domain name.
   NotificationsFromEmail = ENV['FPHS_FROM_EMAIL']
   # Email address for admin contact
-  AdminEmail = ENV['FPHS_ADMIN_EMAIL']
+  AdminEmail = ENV['FPHS_ADMIN_EMAIL'] || 'admin@restructure'
   # Email address that identifies the batch user profile. Defaults to the user that matches the AdminEmail
   BatchUserEmail = ENV['FPHS_BATCH_USER_EMAIL'] || AdminEmail
 

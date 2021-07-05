@@ -493,7 +493,7 @@ module ActiveRecord
       protected
 
       def ignore_fields
-        /^placeholder_|^embedded_report_|^tracker_history_id$/
+        /^placeholder_|^embedded_report_|^tracker_history_id$|^id$/
       end
 
       def standard_columns

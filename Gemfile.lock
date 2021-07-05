@@ -247,6 +247,8 @@ GEM
       nio4r (~> 2.0)
     racc (1.5.2)
     rack (2.2.3)
+    rack-mini-profiler (2.3.2)
+      rack (>= 1.2.0)
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
     rails (5.2.6)
@@ -468,6 +470,7 @@ DEPENDENCIES
   parallel_tests
   pg (~> 0.15)
   puma
+  rack-mini-profiler
   rails (~> 5.0)
   rails-controller-testing
   readapt

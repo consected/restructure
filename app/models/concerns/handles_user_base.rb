@@ -380,7 +380,7 @@ module HandlesUserBase
   # Return all the objects that refer to this item through model references
   # @return [Array{UserBase}]
   def referenced_from
-    return @referenced_from unless @referenced_from.nil?
+    return @referenced_from if @referenced_from
 
     @referenced_from = ModelReference.find_where_referenced_from self
   end
@@ -392,8 +392,10 @@ module HandlesUserBase
     return @referring_record == :nil ? nil : @referring_record unless @referring_record.nil?
 
     res = referenced_from
-    @referring_record = res.first&.from_record
-    return @referring_record if @referring_record && res.length == 1
+    if res.length == 1
+      @referring_record = res.first&.from_record
+      return @referring_record if @referring_record
+    end
 
     @referring_record = :nil
     nil

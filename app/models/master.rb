@@ -370,8 +370,17 @@ class Master < ActiveRecord::Base
 
   #
   # Memoized count of associated tracker records
+  # NOTE: we selectively use #length rather than #count
+  # if we have already preloaded the trackers
+  # since we don't want to run individual queries for each item
   def trackers_length
-    @trackers_length ||= trackers.count
+    return @trackers_length if @trackers_length
+
+    @trackers_length = if association(:trackers).loaded?
+                         trackers.length
+                       else
+                         trackers.count
+                       end
   end
 
   #

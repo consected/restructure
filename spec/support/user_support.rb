@@ -118,7 +118,7 @@ module UserSupport
                                              resource_name: resource_name, user: user, current_admin: auto_admin
     end
 
-    if user && access
+    if user && access && resource_name != :app_type
       check_access = (access == :see_presence ? access : :access)
       expect(user.has_access_to?(check_access, resource_type, resource_name)).to be_truthy,
                                                                                  "Newly created User Access Control not working as expected: #{check_access}, #{resource_type}, #{resource_name}"
@@ -157,18 +157,21 @@ module UserSupport
     let_user_create :player_contacts, in_app_type: in_app_type
   end
 
-  def let_user_create(resource_name, in_app_type: nil)
-    res = @user.has_access_to? :access, :table, resource_name
-    if res && res.user_id == @user.id
+  def let_user_create(resource_name, in_app_type: nil, alt_user: nil)
+    user = alt_user || @user
+    res = user.has_access_to? :access, :table, resource_name
+    if res && res.user_id == user.id
       res.disabled = true
       res.current_admin = @admin
       res.save!
     end
 
-    in_app_type ||= @user.app_type
+    in_app_type ||= user.app_type
     return unless in_app_type
 
-    Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: @user, access: :create,
+    Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: user, access: :create,
                                      resource_type: :table, resource_name: resource_name
+
+    # expect(user.has_access_to?(:create, :table, resource_name)).to be_truthy
   end
 end

@@ -45,40 +45,55 @@ module Fphs
         middle_name: { value: :starts_with },
         nick_name: { value: :starts_with },
         notes: { value: :contains },
-        younger_than: { value: :years, condition: 'player_infos.birth_date is not null  AND ((current_date - interval ? )) < player_infos.birth_date' },
-        older_than: { value: :years, condition: 'player_infos.birth_date is not null  AND ((current_date - interval ?)) > player_infos.birth_date' }
+        younger_than: { value: :years,
+                        condition: 'player_infos.birth_date is not null  AND ((current_date - interval ? )) < player_infos.birth_date' },
+        older_than: { value: :years,
+                      condition: 'player_infos.birth_date is not null  AND ((current_date - interval ?)) > player_infos.birth_date' }
       },
       pro_infos: {
         first_name: { value: :starts_with },
         middle_name: { value: :starts_with },
         nick_name: { value: :starts_with },
-        less_than_career_years: { value: :is, condition: 'pro_infos.start_year is not null AND pro_infos.end_year IS NOT NULL  AND (pro_infos.end_year - pro_infos.start_year) < ?' },
-        more_than_career_years: { value: :is, condition: 'pro_infos.start_year is not null AND pro_infos.end_year IS NOT NULL  AND (pro_infos.end_year - pro_infos.start_year) > ?' }
+        less_than_career_years: { value: :is,
+                                  condition: 'pro_infos.start_year is not null AND pro_infos.end_year IS NOT NULL  AND (pro_infos.end_year - pro_infos.start_year) < ?' },
+        more_than_career_years: { value: :is,
+                                  condition: 'pro_infos.start_year is not null AND pro_infos.end_year IS NOT NULL  AND (pro_infos.end_year - pro_infos.start_year) > ?' }
       },
       addresses: {
         street: { value: :starts_with },
         zip: { value: :starts_with }
       },
       player_contacts: {
-        data: { value: %i[starts_with strip_non_alpha_numeric], condition: "regexp_replace(player_contacts.data, '\\W+', '', 'g') LIKE ?" }
+        data: { value: %i[starts_with strip_non_alpha_numeric],
+                condition: "regexp_replace(player_contacts.data, '\\W+', '', 'g') LIKE ?" }
       },
       not_trackers: {
-        protocol_event_id: { value: :is, condition: 'NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id EQUALS_OR_IS_NULL ? AND t_inner.sub_process_id = :not_trackers_sub_process_id  AND t_inner.master_id = masters.id)', joins: NotTrackerJoin },
+        protocol_event_id: { value: :is,
+                             condition: 'NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id EQUALS_OR_IS_NULL ? AND t_inner.sub_process_id = :not_trackers_sub_process_id  AND t_inner.master_id = masters.id)', joins: NotTrackerJoin },
         sub_process_id: { value: :is, condition: 'TRUE', joins: NotTrackerJoin }
       },
       not_tracker_histories: {
-        protocol_event_id: { value: :is, condition: 'NOT EXISTS (select NULL from tracker_history th_inner where th_inner.protocol_event_id EQUALS_OR_IS_NULL ? AND th_inner.sub_process_id = :not_tracker_histories_sub_process_id AND th_inner.master_id = masters.id)', joins: NotTrackerHistoryJoin },
+        protocol_event_id: { value: :is,
+                             condition: 'NOT EXISTS (select NULL from tracker_history th_inner where th_inner.protocol_event_id EQUALS_OR_IS_NULL ? AND th_inner.sub_process_id = :not_tracker_histories_sub_process_id AND th_inner.master_id = masters.id)', joins: NotTrackerHistoryJoin },
         sub_process_id: { value: :is, condition: 'TRUE', joins: NotTrackerHistoryJoin }
       },
       general_infos: {
-        first_name: { value: :starts_with, condition: '(player_infos.first_name LIKE ? OR pro_infos.first_name LIKE ? OR player_infos.nick_name LIKE ? OR pro_infos.nick_name LIKE ?)', joins: SimplePlayerJoin },
-        last_name: { value: :is, condition: '(player_infos.last_name = ? OR pro_infos.last_name = ?)', joins: SimplePlayerJoin },
-        birth_date: { value: :is, condition: '(player_infos.birth_date = ? OR pro_infos.birth_date = ?)', joins: SimplePlayerJoin },
-        death_date: { value: :is, condition: '(player_infos.death_date = ? OR pro_infos.death_date = ?)', joins: SimplePlayerJoin },
-        start_year: { value: :is, condition: '(player_infos.start_year = ? OR pro_infos.start_year = ?)', joins: SimplePlayerJoin },
-        end_year: { value: :is, condition: '(player_infos.end_year = ? OR pro_infos.end_year = ?)', joins: SimplePlayerJoin },
-        college: { value: :is, condition: '(player_infos.college = ? OR pro_infos.college = ?)', joins: SimplePlayerJoin },
-        contact_data: { value: %i[starts_with strip_non_alpha_numeric], condition: "regexp_replace(player_contacts.data, '\\W+', '', 'g') LIKE ?", joins: :player_contacts }
+        first_name: { value: :starts_with,
+                      condition: '(player_infos.first_name LIKE ? OR pro_infos.first_name LIKE ? OR player_infos.nick_name LIKE ? OR pro_infos.nick_name LIKE ?)', joins: SimplePlayerJoin },
+        last_name: { value: :is, condition: '(player_infos.last_name = ? OR pro_infos.last_name = ?)',
+                     joins: SimplePlayerJoin },
+        birth_date: { value: :is, condition: '(player_infos.birth_date = ? OR pro_infos.birth_date = ?)',
+                      joins: SimplePlayerJoin },
+        death_date: { value: :is, condition: '(player_infos.death_date = ? OR pro_infos.death_date = ?)',
+                      joins: SimplePlayerJoin },
+        start_year: { value: :is, condition: '(player_infos.start_year = ? OR pro_infos.start_year = ?)',
+                      joins: SimplePlayerJoin },
+        end_year: { value: :is, condition: '(player_infos.end_year = ? OR pro_infos.end_year = ?)',
+                    joins: SimplePlayerJoin },
+        college: { value: :is, condition: '(player_infos.college = ? OR pro_infos.college = ?)',
+                   joins: SimplePlayerJoin },
+        contact_data: { value: %i[starts_with strip_non_alpha_numeric],
+                        condition: "regexp_replace(player_contacts.data, '\\W+', '', 'g') LIKE ?", joins: :player_contacts }
       }
 
     }.freeze
@@ -106,7 +121,9 @@ module Fphs
         has_many :addresses, -> { order(RankNotNullClause) }, inverse_of: :master
 
         # Associations to allow advanced searches for NOT
-        has_many :not_tracker_histories, -> { order(Master::TrackerHistoryEventOrderClause) }, class_name: 'TrackerHistory'
+        has_many :not_tracker_histories, lambda {
+                                           order(Master::TrackerHistoryEventOrderClause)
+                                         }, class_name: 'TrackerHistory'
         has_many :not_trackers, -> { order(Master::TrackerEventOrderClause) }, class_name: 'Tracker'
 
         # This association is provided to allow 'simple' search on names in player_infos OR pro_infos
@@ -125,7 +142,7 @@ module Fphs
         joins = [] # list of joined tables
         wheres = {} # set of equality where clauses
         wheresalt = [nil, {}] # list of non-equality where clauses (such as LIKE)
-        selects = ['masters.id', 'masters.pro_info_id', 'masters.pro_id', 'masters.msid', 'masters.rank as master_rank']
+        selects = ['masters.id', 'masters.rank as master_rank', 'masters.pro_info_id', 'masters.pro_id', 'masters.msid']
 
         params.each do |params_key, params_val|
           if params_val.is_a? Hash
@@ -158,7 +175,9 @@ module Fphs
 
             # Keep only non-nil attributes for the primary wheres that don't have an alternative condition string
 
-            basic_condition_attribs = params_val.select { |key1, v1| !v1.nil? && !alt_condition(condition_key, [key1, v1]) }
+            basic_condition_attribs = params_val.select do |key1, v1|
+              !v1.nil? && !alt_condition(condition_key, [key1, v1])
+            end
 
             # Pull the attributes with an alternative condition string (note that this returns nil values too)
             # format: {condition: condition_clause, reference: {reference_name => value}, joins: joins_clauses}
@@ -299,9 +318,7 @@ module Fphs
 
         joins = altdef[:joins]
 
-        res = { condition: alt, reference: { refname.to_sym => cvaltotal }, joins: joins }
-
-        res
+        { condition: alt, reference: { refname.to_sym => cvaltotal }, joins: joins }
       end
 
       #
@@ -316,8 +333,6 @@ module Fphs
           order(MasterRank).all
         end
       end
-
-
     end
   end
 end

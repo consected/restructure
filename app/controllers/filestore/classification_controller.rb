@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 module Filestore
-  class ClassificationController < UserBaseController
+  #
+  # Controller responsible for requests related to user classification of
+  # stored and extracted archive documents.
+  class ClassificationController < NfsStore::FsBaseController
     include NfsStore::InNfsStoreContainer
     include MasterHandler
 
@@ -18,6 +21,8 @@ module Filestore
 
     protected
 
+    #
+    # Classification specific implementation to override NfsStore::InNfsStoreContainer#find_container
     def find_container
       if action_name.in? ['create', 'update']
         cid = params[:container_id]
@@ -27,9 +32,11 @@ module Filestore
       end
       @container = NfsStore::Browse.open_container id: cid, user: current_user
       @retrieval_type = params[:retrieval_type]
-      if @retrieval_type == 'stored_file'
+
+      case @retrieval_type
+      when 'stored_file'
         @download = @container.stored_files.where(id: params[:download_id]).first
-      elsif @retrieval_type == 'archived_file'
+      when 'archived_file'
         @download = @container.archived_files.where(id: params[:download_id]).first
       else
         raise FphsException, 'Incorrect retrieval_type set'
@@ -48,27 +55,44 @@ module Filestore
       "#{hyphenated_name}-edit-form--#{@container.id}"
     end
 
+    #
+    # Classification specific settings for the edit form
     def edit_form_hash(extras = {})
       res = extras.dup
 
       res[:remote] = true
       res[:html] ||= {}
-      res[:html].merge!('data-result-target' => "#container-entry-#{@container.id}-#{@download.id}-#{@download.class.retrieval_type} .bem-classification-attrs", 'data-template' => "#{hyphenated_name}-result-template")
-      res[:url] = master_filestore_classification_path(object_instance.master_id, object_instance.id, container_id: @container.id, retrieval_type: @retrieval_type)
+      res[:html].merge!(
+        'data-result-target' => "#container-entry-#{@container.id}-#{@download.id}-#{@download.class.retrieval_type} " \
+                                '.bem-classification-attrs',
+        'data-template' => "#{hyphenated_name}-result-template"
+      )
+      res[:url] =
+        master_filestore_classification_path(object_instance.master_id,
+                                             object_instance.id,
+                                             container_id: @container.id,
+                                             retrieval_type: @retrieval_type)
 
       res
     end
 
+    #
+    # Specific inline cancel button, overriding common application level definition
     def inline_cancel_button(class_extras = 'pull-right')
-      "<a class=\"show-entity show-#{hyphenated_name} #{class_extras} glyphicon glyphicon-remove-sign dropup\" title=\"cancel\" data-target=\"[data-subscription='#{hyphenated_name}-edit-form--#{@container.id}']\" data-toggle=\"clear-content\"></a>".html_safe
+      "<a class=\"show-entity show-#{hyphenated_name} #{class_extras} glyphicon glyphicon-remove-sign dropup\"
+          title=\"cancel\"
+          data-target=\"[data-subscription='#{hyphenated_name}-edit-form--#{@container.id}']\"
+          data-toggle=\"clear-content\"></a>".html_safe
     end
 
+    #
     # return the class for the current item
     # handles namespace if the item is like an ActivityLog:Something
     def primary_model
-      if params[:retrieval_type] == 'stored_file'
+      case params[:retrieval_type]
+      when 'stored_file'
         NfsStore::Manage::StoredFile
-      elsif params[:retrieval_type] == 'archived_file'
+      when 'archived_file'
         NfsStore::Manage::ArchivedFile
       else
         raise FphsException, 'No retrieval_type set'
@@ -76,9 +100,10 @@ module Filestore
     end
 
     def object_name
-      if params[:retrieval_type] == 'stored_file'
+      case params[:retrieval_type]
+      when 'stored_file'
         'stored_file'
-      elsif params[:retrieval_type] == 'archived_file'
+      when 'archived_file'
         'archived_file'
       else
         raise FphsException, 'No retrieval_type set'

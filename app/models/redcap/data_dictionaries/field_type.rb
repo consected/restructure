@@ -8,6 +8,7 @@ module Redcap
       ValidFieldTypes = %i[
         text
         text_area
+        notes
         calc
         dropdown
         radio
@@ -22,6 +23,7 @@ module Redcap
       FieldToVariableTypes = {
         text: 'plain text',
         text_area: 'free text',
+        notes: 'free text',
         calc: 'calculated',
         dropdown: 'categorical',
         radio: 'categorical',
