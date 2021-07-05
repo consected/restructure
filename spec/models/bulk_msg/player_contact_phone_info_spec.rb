@@ -46,6 +46,8 @@ RSpec.describe 'DynamicModel::PlayerContactPhoneInfo', type: :model do
     res[:player_contact_id] = pc.id
     res[:cleansed_phone_number_e164] = Formatter::Phone.format(data, format: :unformatted, default_country_code: 1)
     res[:cleansed_phone_number_national] = data
+    let_user_create :dynamic_model__player_contact_phone_infos, alt_user: master.current_user
+    let_user_create :trackers, alt_user: master.current_user
 
     master.dynamic_model__player_contact_phone_infos.create! res
   end

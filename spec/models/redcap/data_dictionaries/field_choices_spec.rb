@@ -100,6 +100,7 @@ RSpec.describe Redcap::DataDictionaries::FieldType, type: :model do
     expect(Datadic::Choice.active.where(redcap_data_dictionary_id: form.data_dictionary).first.label).not_to eq label
 
     rc.notes = "#{rc.notes} more details"
+    rc.force_refresh = true
     rc.save!
 
     rc = Redcap::ProjectAdmin.active.first
