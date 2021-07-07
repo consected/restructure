@@ -234,6 +234,7 @@ module HandlesUserBase
     allows_current_user_access_to? :access
   end
 
+  #
   # Simple wrapper around #valid? that ensures certain validation methods avoid running and breaking outside of
   # the time we actually need them to run (save and create).
   def check_valid?
@@ -260,6 +261,9 @@ module HandlesUserBase
     @marked_invalid = val
   end
 
+  #
+  # We allow a record to be marked as "validating", so that
+  # the #check_valid? method only runs when needed.
   def validating?
     @validating
   end
@@ -325,6 +329,16 @@ module HandlesUserBase
     item_type.ns_underscore
   end
 
+  #
+  # A record item is a polymorphic reference to a persisted record, directly
+  # from the current instance. This allows a single item to be referenced directly
+  # without the need to have an intermediate model reference record.
+  # The referenced record is referenced through the attribute pair
+  # *record_id* and *record_type*.
+  # Unless the argument *no_exception* is true, the user must have access authorization
+  # to the target record, otherwise an exception will be raised.
+  # @param [true | false] no_exception
+  # @return [UserBase]
   def record_item(no_exception: false)
     unless respond_to?(:record_type) && respond_to?(:record_id)
       raise FphsException, 'Does not have a record_type or record_id attribute'
@@ -366,7 +380,7 @@ module HandlesUserBase
   # Return all the objects that refer to this item through model references
   # @return [Array{UserBase}]
   def referenced_from
-    return @referenced_from unless @referenced_from.nil?
+    return @referenced_from if @referenced_from
 
     @referenced_from = ModelReference.find_where_referenced_from self
   end
@@ -378,8 +392,10 @@ module HandlesUserBase
     return @referring_record == :nil ? nil : @referring_record unless @referring_record.nil?
 
     res = referenced_from
-    @referring_record = res.first&.from_record
-    return @referring_record if @referring_record && res.length == 1
+    if res.length == 1
+      @referring_record = res.first&.from_record
+      return @referring_record if @referring_record
+    end
 
     @referring_record = :nil
     nil
@@ -667,12 +683,23 @@ module HandlesUserBase
   # Check if the record can be saved (based on editable and creatable rules) and if not, raise an exception
   def check_can_save
     if persisted? && !can_edit?
-      raise FphsException,
-            "This item is not editable (#{respond_to?(:human_name) ? human_name : self.class.name}) #{id}"
+      msg = if Rails.env.test?
+              "This item is not editable (#{respond_to?(:human_name) ? human_name : self.class.name}) #{id}" \
+              " - #{current_user.email} - #{current_user.app_type&.name}"
+            else
+              "This item is not editable (#{respond_to?(:human_name) ? human_name : self.class.name}) #{id}"
+            end
+      raise FphsException, msg
     end
 
     if !persisted? && !can_create?
-      raise FphsException, "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name})"
+      msg = if Rails.env.test?
+              "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name})" \
+              " - #{current_user.email} - #{current_user.app_type&.name}"
+            else
+              "This item can not be created (#{respond_to?(:human_name) ? human_name : self.class.name})"
+            end
+      raise FphsException, msg
     end
   end
 

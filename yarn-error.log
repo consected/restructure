@@ -2,7 +2,7 @@ Arguments:
   /home/phil/.nvm/versions/node/v15.8.0/bin/node /usr/share/yarn/bin/yarn.js install --no-progress
 
 PATH: 
-  /home/phil/.rbenv/versions/2.6.6/lib/ruby/gems/2.6.0/bin:/home/phil/.rbenv/versions/2.6.6/bin:/home/phil/.rbenv/libexec:/home/phil/.rbenv/plugins/ruby-build/bin:/home/phil/anaconda3/bin:/home/phil/anaconda3/condabin:/home/phil/.nvm/versions/node/v15.8.0/bin:/home/phil/node-v12.16.1-linux-x64/bin:/usr/local/cuda-10.0/bin:/home/phil/.pyenv/plugins/pyenv-virtualenv/shims:/home/phil/.pyenv/shims:/home/phil/.pyenv/bin:/home/phil/.rbenv/shims:/home/phil/.local/bin:/home/phil/.rbenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/local/go/bin:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin
+  /home/phil/NetBeansProjects/fphs/zeus-baseline/vendor/bundle/ruby/2.7.0/bin:/home/phil/.rbenv/versions/2.7.3/bin:/home/phil/.rbenv/libexec:/home/phil/.rbenv/plugins/ruby-build/bin:/home/phil/anaconda3/bin:/home/phil/.nvm/versions/node/v15.8.0/bin:/home/phil/node-v12.16.1-linux-x64/bin:/usr/local/cuda-10.0/bin:/home/phil/.pyenv/plugins/pyenv-virtualenv/shims:/home/phil/.pyenv/shims:/home/phil/.pyenv/bin:/home/phil/.rbenv/shims:/home/phil/.local/bin:/home/phil/.rbenv/bin:/home/phil/anaconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/local/go/bin:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin
 
 Yarn version: 
   1.22.5
@@ -14,7 +14,7 @@ Platform:
   linux x64
 
 Trace: 
-  Error: ENOENT: no such file or directory, lstat '/home/phil/NetBeansProjects/fphs/zeus-baseline/node_modules/.bin'
+  Error: ENOENT: no such file or directory, lstat '/home/phil/NetBeansProjects/fphs/zeus-baseline/node_modules/blueimp-file-upload/node_modules/.bin'
 
 npm manifest: 
   {
@@ -38,6 +38,7 @@ npm manifest:
       "codemirror": "^5.58.2",
       "domador": "^2.4.4",
       "handlebars": "^4.7.6",
+      "highlightjs": "^9.16.2",
       "jquery-mask-plugin": "https://github.com/consected/jQuery-Mask-Plugin",
       "jquery-timepicker": "^1.3.3",
       "jquery.hotkeys": "https://github.com/consected/jquery.hotkeys",
@@ -45,10 +46,10 @@ npm manifest:
       "js-yaml": "^3.14.0",
       "megamark": "^3.3.0",
       "moment": "^2.29.1",
+      "sortablejs": "^1.13.0",
       "spark-md5": "^3.0.1",
       "tablesorter": "^2.31.3",
       "textarea-autogrow": "^1.0.0",
-      "turndown": "^7.0.0",
       "typeahead.js": "^0.11.1"
     }
   }
@@ -198,8 +199,8 @@ Lockfile:
       jquery ">=1.7.1 <4.0.0"
   
   "bootstrap-wysiwyg@https://github.com/consected/bootstrap-wysiwyg":
-    version "2.0.2"
-    resolved "https://github.com/consected/bootstrap-wysiwyg#709061b95343cc5a5d5ffda0f3387df7e16256ae"
+    version "2.0.4"
+    resolved "https://github.com/consected/bootstrap-wysiwyg#33c177d77517eb760846803a1ffd2859107edf63"
   
   caseless@~0.12.0:
     version "0.12.0"
@@ -235,9 +236,9 @@ Lockfile:
     integrity sha512-eVdrZJ2U5ISdObkgsi0od5vIJdLwq1P1Xa/Vj/mgxkMZf14DlgobfB6nrlFi3kW4kkvKLsKk4NDqZj1MU1DCpw==
   
   codemirror@^5.58.2:
-    version "5.59.4"
-    resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.59.4.tgz#bfc11c8ce32b04818e8d661bbd790a94f4b3a6f3"
-    integrity sha512-achw5JBgx8QPcACDDn+EUUXmCYzx/zxEtOGXyjvLEvYY8GleUrnfm5D+Zb+UjShHggXKDT9AXrbkBZX6a0YSQg==
+    version "5.60.0"
+    resolved "https://registry.yarnpkg.com/codemirror/-/codemirror-5.60.0.tgz#00a8cfd287d5d8737ceb73987f04aee2fe5860da"
+    integrity sha512-AEL7LhFOlxPlCL8IdTcJDblJm8yrAGib7I+DErJPdZd4l6imx8IMgKK3RblVgBQqz3TZJR4oknQ03bz+uNjBYA==
   
   color-convert@^1.9.3:
     version "1.9.3"
@@ -309,11 +310,6 @@ Lockfile:
     dependencies:
       jsdom "9.9.1"
       string.prototype.repeat "0.2.0"
-  
-  domino@^2.1.6:
-    version "2.1.6"
-    resolved "https://registry.yarnpkg.com/domino/-/domino-2.1.6.tgz#fe4ace4310526e5e7b9d12c7de01b7f485a57ffe"
-    integrity sha512-3VdM/SXBZX2omc9JF9nOPCtDaYQ67BGp5CoLpIQlO2KCAPETs8TcDHacF26jXadGbvUteZzRTeos2fhID5+ucQ==
   
   ecc-jsbn@~0.1.1:
     version "0.1.2"
@@ -450,6 +446,11 @@ Lockfile:
     version "8.4.0"
     resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-8.4.0.tgz#dc0d05b8dc9b110f13bce52cb96fd1e0c6bc791c"
     integrity sha1-3A0FuNybEQ8TvOUsuW/R4Ma8eRw=
+  
+  highlightjs@^9.16.2:
+    version "9.16.2"
+    resolved "https://registry.yarnpkg.com/highlightjs/-/highlightjs-9.16.2.tgz#07ea6cc7c93340fc440734fb7abf28558f1f0fe1"
+    integrity sha512-FK1vmMj8BbEipEy8DLIvp71t5UsC7n2D6En/UfM/91PCwmOpj6f2iu0Y0coRC62KSRHHC+dquM2xMULV/X7NFg==
   
   html-encoding-sniffer@^1.0.1:
     version "1.0.2"
@@ -635,17 +636,17 @@ Lockfile:
       markdown-it "5.1.0"
       sluggish "1.0.1"
   
-  mime-db@1.46.0:
-    version "1.46.0"
-    resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.46.0.tgz#6267748a7f799594de3cbc8cde91def349661cee"
-    integrity sha512-svXaP8UQRZ5K7or+ZmfNhg2xX3yKDMUzqadsSqi4NCH/KomcH75MAMYAGVlvXn4+b/xOPhS3I2uHKRUzvjY7BQ==
+  mime-db@1.47.0:
+    version "1.47.0"
+    resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.47.0.tgz#8cb313e59965d3c05cfbf898915a267af46a335c"
+    integrity sha512-QBmA/G2y+IfeS4oktet3qRZ+P5kPhCKRXxXnQEudYqUaEioAU1/Lq2us3D/t1Jfo4hE9REQPrbB7K5sOczJVIw==
   
   mime-types@^2.1.12, mime-types@~2.1.19:
-    version "2.1.29"
-    resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.29.tgz#1d4ab77da64b91f5f72489df29236563754bb1b2"
-    integrity sha512-Y/jMt/S5sR9OaqteJtslsFZKWOIIqMACsJSiHghlCAyhf7jfVYjKBmLiX8OgpWeW+fjJ2b+Az69aPFPkUOY6xQ==
+    version "2.1.30"
+    resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.30.tgz#6e7be8b4c479825f85ed6326695db73f9305d62d"
+    integrity sha512-crmjA4bLtR8m9qLpHvgxSChT+XoSlZi8J4n/aIdn3z92e/U47Z0V/yl+Wh9W046GgFVAmoNR/fmdbZYcSSIUeg==
     dependencies:
-      mime-db "1.46.0"
+      mime-db "1.47.0"
   
   minimist@^1.2.5:
     version "1.2.5"
@@ -760,6 +761,11 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/sluggish/-/sluggish-1.0.1.tgz#141ff9799827aa55a05c56cae3f002899c509e16"
     integrity sha1-FB/5eZgnqlWgXFbK4/ACiZxQnhY=
   
+  sortablejs@^1.13.0:
+    version "1.13.0"
+    resolved "https://registry.yarnpkg.com/sortablejs/-/sortablejs-1.13.0.tgz#3ab2473f8c69ca63569e80b1cd1b5669b51269e9"
+    integrity sha512-RBJirPY0spWCrU5yCmWM1eFs/XgX2J5c6b275/YyxFRgnzPhKl/TDeU2hNR8Dt7ITq66NRPM4UlOt+e5O4CFHg==
+  
   source-map@^0.6.1, source-map@~0.6.1:
     version "0.6.1"
     resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
@@ -832,13 +838,6 @@ Lockfile:
     dependencies:
       safe-buffer "^5.0.1"
   
-  turndown@^7.0.0:
-    version "7.0.0"
-    resolved "https://registry.yarnpkg.com/turndown/-/turndown-7.0.0.tgz#19b2a6a2d1d700387a1e07665414e4af4fec5225"
-    integrity sha512-G1FfxfR0mUNMeGjszLYl3kxtopC4O9DRRiMlMDDVHvU1jaBkGFg4qxIyjIk2aiKLHyDyZvZyu4qBO2guuYBy3Q==
-    dependencies:
-      domino "^2.1.6"
-  
   tweetnacl@^0.14.3, tweetnacl@~0.14.0:
     version "0.14.5"
     resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
@@ -869,9 +868,9 @@ Lockfile:
     integrity sha1-7aESHR/blhVO1v3oJHu724MzCMo=
   
   uglify-js@^3.1.4:
-    version "3.13.1"
-    resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.13.1.tgz#2749d4b8b5b7d67460b4a418023ff73c3fefa60a"
-    integrity sha512-EWhx3fHy3M9JbaeTnO+rEqzCe1wtyQClv6q3YWq0voOj4E+bMZBErVS1GAHPDiRGONYq34M1/d8KuQMgvi6Gjw==
+    version "3.13.4"
+    resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.13.4.tgz#592588bb9f47ae03b24916e2471218d914955574"
+    integrity sha512-kv7fCkIXyQIilD5/yQy8O+uagsYIOt5cZvs890W40/e/rvjMSzJw81o9Bg0tkURxzZBROtDQhW2LFjOGoK3RZw==
   
   uri-js@^4.2.2:
     version "4.4.1"
