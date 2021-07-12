@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module NfsStore
   class ChunkController < FsBaseController
     layout nil
@@ -12,12 +14,11 @@ module NfsStore
 
       unless Upload.filters_allow_upload? file_name, relative_path, @activity_log
         render json: {
-          message: "The filters do not allow upload of this file. Ensure the file is named correctly.",
-          valid_filters: Upload.valid_filters(@activity_log),
+          message: 'The filters do not allow upload of this file. Ensure the file is named correctly.',
+          valid_filters: Upload.valid_filters(@activity_log)
         }, status: 403
         return
       end
-
 
       result = 'not found'
       begin
@@ -44,7 +45,6 @@ module NfsStore
     end
 
     def create
-
       chunk = params[:upload]
 
       @upload = Upload.init content_type: chunk.content_type,
@@ -55,52 +55,42 @@ module NfsStore
                             relative_path: params[:relative_path],
                             upload_set: params[:upload_set]
 
-      if @upload
-        @master = @upload.container.master
-        @id = @upload.container.id
-        @upload.consume_chunk upload: chunk, headers: request.headers, chunk_hash: params[:chunk_hash]
-      else
-        raise FsException::Upload.new "Upload could not be initialized"
-      end
+      raise FsException::Upload, 'Upload could not be initialized' unless @upload
+
+      @master = @upload.container.master
+      @id = @upload.container.id
+      @upload.consume_chunk upload: chunk, headers: request.headers, chunk_hash: params[:chunk_hash]
 
       respond_to do |format|
-        if @upload && @upload.save
-          format.html {
-
-            render :json => [@upload.to_jq_upload].to_json,
-            :content_type => 'text/html',
-            :layout => false
-          }
-          format.json {
-
-            render json: {file: @upload.to_jq_upload}, status: :created
-          }
+        if @upload&.save
+          format.html do
+            render json: [@upload.to_jq_upload].to_json,
+                   content_type: 'text/html',
+                   layout: false
+          end
+          format.json do
+            render json: { file: @upload.to_jq_upload }, status: :created
+          end
         else
-          errors = @upload ? @upload.errors : {upload: 'not initialized'}
+          errors = @upload ? @upload.errors : { upload: 'not initialized' }
           response.headers['X-Upload-Errors'] = errors.to_json
-          format.html { render action: "new" }
-          format.json { render json: errors,  status: :unprocessable_entity }
+          format.html { render action: 'new' }
+          format.json { render json: errors, status: :unprocessable_entity }
         end
       end
     end
 
     def update
-
       return not_found unless @container
 
       act = params[:do]
+      ui = params[:uploaded_ids]
 
-      if act == 'done'
-        ui = params[:uploaded_ids]
-        return bad_request if ui.blank?
+      return not_authorized unless act == 'done'
+      return bad_request if ui.blank?
 
-        uis = ui.split(',').map(&:to_i)
-
-        @container.upload_done uis
-      else
-        return not_authorized
-      end
-
+      uis = ui.split(',').map(&:to_i)
+      @container.upload_done uis
       render json: {
         result: 'done'
       }
@@ -108,14 +98,12 @@ module NfsStore
 
     private
 
+    def no_action_log
+      action_name == 'show' && !@upload
+    end
 
-      def no_action_log
-        action_name == 'show' && !@upload
-      end
-
-      def secure_params
-        params
-      end
-
+    def secure_params
+      params
+    end
   end
 end
