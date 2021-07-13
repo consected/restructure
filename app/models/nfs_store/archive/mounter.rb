@@ -42,7 +42,7 @@ module NfsStore
             nil
           end
 
-          if (td && td < ProcessingRetryTime) || mounter.archive_extracted? || sf.last_process_name_run == '_all_done_'
+          if (td && td < ProcessingRetryTime) || mounter.archive_extracted? # || sf.last_process_name_run == '_all_done_'
             next
           end
 
