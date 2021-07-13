@@ -37,6 +37,7 @@ gem 'syslog-logger'
 group :development do
   gem 'flog'
   gem 'listen'
+  gem 'memory_profiler'
   gem 'rack-mini-profiler'
   gem 'solargraph'
   gem 'web-console'
