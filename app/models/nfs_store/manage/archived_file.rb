@@ -7,7 +7,9 @@ module NfsStore
 
       include HandlesContainerFile
 
-      belongs_to :stored_file, class_name: 'NfsStore::Manage::StoredFile', foreign_key: 'nfs_store_stored_file_id'
+      belongs_to :stored_file, class_name: 'NfsStore::Manage::StoredFile', 
+                               foreign_key: 'nfs_store_stored_file_id', 
+                               optional: true
 
       # Analyze the file to complete its ArchivedFile attributes
       def analyze_file!
