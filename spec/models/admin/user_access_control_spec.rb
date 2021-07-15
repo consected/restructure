@@ -7,7 +7,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
   include PlayerInfoSupport
 
   OtherRoleName = 'other_test_role'
-  TestRoleName = 'test_role'
+  TestRoleNameUAC = 'test_role'
 
   it 'should not create default access controls for a new user' do
     3.times do
@@ -450,11 +450,11 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     # Create a role in another app to ensure that there is no leakage
     create_user_role OtherRoleName, app_type: app0, user: @user4
     create_user_role OtherRoleName, user: @user1
-    user_role1 = create_user_role TestRoleName, user: @user1
-    create_user_role TestRoleName, user: @user2
+    user_role1 = create_user_role TestRoleNameUAC, user: @user1
+    create_user_role TestRoleNameUAC, user: @user2
     # Admin::UserRole.create! current_admin: @admin, app_type: app0, role_name: OtherRoleName, user: @user4
-    # Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: TestRoleName, user: @user1
-    # Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: TestRoleName, user: @user2
+    # Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: TestRoleNameUAC, user: @user1
+    # Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: TestRoleNameUAC, user: @user2
     # Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: OtherRoleName, user: @user1
 
     res = Admin::UserAccessControl.where(app_type: @user1.app_type, resource_type: :table, resource_name: :player_infos)
@@ -486,7 +486,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     # Create a role based access control
     uac_test_role = Admin::UserAccessControl.create! app_type_id: @user1.app_type_id, access: :read, resource_type: :table, resource_name: :player_infos, current_admin: @admin,
-                                                     role_name: TestRoleName
+                                                     role_name: TestRoleNameUAC
 
     res = @user1.has_access_to? :create, :table, :player_infos
     expect(res).to be_truthy
@@ -632,11 +632,11 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     create_user
 
     Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :create, resource_type: :table, resource_name: :player_infos, current_admin: @admin,
-                                     role_name: TestRoleName
+                                     role_name: TestRoleNameUAC
 
     expect do
       Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: :table, resource_name: :player_infos, current_admin: @admin,
-                                       role_name: TestRoleName
+                                       role_name: TestRoleNameUAC
     end.to raise_error ActiveRecord::RecordInvalid
   end
 end

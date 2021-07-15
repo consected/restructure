@@ -33,11 +33,11 @@ class ApplicationController < ActionController::Base
 
     return true if defined?(ignore_temp_password_for) && ignore_temp_password_for.include?(action_name)
 
-    return true if controller_name.in?(%w[registrations sessions])
+    return true if controller_name.in?(['registrations', 'sessions'])
 
-    if current_user&.temp_password?
+    if current_user&.has_temp_password?
       redirect_to edit_user_registration_path
-    elsif current_admin&.temp_password?
+    elsif current_admin&.has_temp_password?
       redirect_to edit_admin_registration_path
     end
 
