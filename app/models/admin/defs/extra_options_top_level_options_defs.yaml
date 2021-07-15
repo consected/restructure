@@ -1,0 +1,25 @@
+# Top Level Options
+
+# To include Config Library content anywhere within the configuration,
+# add the following line (including the comment # symbol)
+# The category and name must match one of the Config Library entries
+# @library category name
+
+_comments: 
+  'table': describe the table
+  'fields': 
+    'field1': describe the field
+    'field2': ...
+  
+
+_configurations: 
+  secondary_key: field name to use as a secondary key to lookup items
+
+_definitions: 
+  reusable_key: |
+    &anchor reusable objects for substitution in definitions
+
+_default:
+  key1: applied to all activity definitions
+  key2: applied to all activity definitions
+  

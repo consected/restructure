@@ -24,9 +24,78 @@ body {
   }
 }
 
-body.status-compiling {
+body#body-top {
   filter: grayscale(100%);
   opacity: 0.2;
+}
+
+body#body-top:after {
+  content: "loading...";
+  display: block;
+  position: fixed;
+  top: 45vh;
+  left: 0;
+  text-align: center;
+  width: 100vw;
+  color: black;
+  font-size: 96px;
+  z-index: 600000;
+}
+
+body#body-top.initial-compiling:after {
+  opacity: 1;
+
+  transition: opacity 1s ease;
+  animation-name: fadeInTextOpacity;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in;
+  animation-duration: 1s;
+}
+
+body#body-top.status-compiled,
+body#body-top.sessions {
+  filter: none;
+  opacity: 1;
+  transition: filter 0.5s ease;
+
+  animation-name: fadeInOpacity;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in;
+  animation-duration: 0.5s;
+
+  &:after {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 500ms, opacity 500ms;
+  }
+}
+
+body#body-top.page-transition {
+  filter: grayscale(100%);
+
+  opacity: 0.2;
+  transition: opacity 500ms, filter 0.5s ease;
+}
+
+@keyframes fadeInOpacity {
+  0% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInTextOpacity {
+  0% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 body.page-loading {
@@ -592,4 +661,9 @@ button.btn.hamburger {
 
 code {
   color: rgb(109, 0, 0);
+}
+
+.mono {
+  font-family: monospace;
+  font-size: 14px;
 }

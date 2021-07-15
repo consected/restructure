@@ -35,7 +35,7 @@ ul.admin-tag-list {
 
 .al-options-ref-block {
   width: 800px;
-  height: 80vh;
+  height: auto;
 }
 
 .al-options-ref-textarea-block {
@@ -60,5 +60,12 @@ ul.admin-tag-list {
   border-top: 0;
   max-height: 100%;
   overflow: auto;
-  height: 77vh;
+  height: auto;
+}
+
+.al-form-info {
+  max-height: 111vh;
+  overflow-y: auto;
+  width: auto;
+  flex-shrink: 0;
 }

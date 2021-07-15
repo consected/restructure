@@ -2,25 +2,25 @@
 
 class SaveTriggers::UpdateThis < SaveTriggers::SaveTriggersBase
   def self.config_def(if_extras: {})
-    [
-      {
-        this_1: {
-          if: if_extras,
-          first: 'update the current object. Note that any reference updates may not be reflected, so take care using referenced data',
-          force_not_editable_save: 'true allows the update to succeed even if the referenced item is set as not_editable',
-          with: {
-            field_name: 'now()',
-            field_name_2: 'literal value',
-            field_name_3: {
-              this: 'field_name'
-            },
-            field_name_4: {
-              reference_name: 'field_name'
-            }
-          }
-        }
-      }
-    ]
+    # [
+    #   {
+    #     this_1: {
+    #       if: if_extras,
+    #       first: 'update the current object. Note that any reference updates may not be reflected, so take care using referenced data',
+    #       force_not_editable_save: 'true allows the update to succeed even if the referenced item is set as not_editable',
+    #       with: {
+    #         field_name: 'now()',
+    #         field_name_2: 'literal value',
+    #         field_name_3: {
+    #           this: 'field_name'
+    #         },
+    #         field_name_4: {
+    #           reference_name: 'field_name'
+    #         }
+    #       }
+    #     }
+    #   }
+    # ]
   end
 
   def initialize(config, item)
@@ -62,7 +62,7 @@ class SaveTriggers::UpdateThis < SaveTriggers::SaveTriggersBase
         disabled = res._disabled
         @item.transaction do
           res.force_save! if config[:force_not_editable_save]
-          res.update! vals.merge(current_user: @item.user)
+          res.update! vals.merge(current_user: @item.current_user || @item.user)
         end
         res._created = created
         res._updated = updated

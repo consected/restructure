@@ -7,6 +7,7 @@ class Admin::ServerInfoController < AdminController
     si = Admin::ServerInfo.new(current_admin)
 
     @app_settings = si.app_settings
+    @nfs_store_settings = si.nfs_store_settings
     @db_settings = si.db_settings
     @passenger_stats = si.passenger_status
     @passenger_memory_stats = si.passenger_memory_stats

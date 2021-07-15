@@ -8,9 +8,9 @@ class ExternalIdentifier < ActiveRecord::Base
 
   DefaultRange = (1..9_999_999_999).freeze
 
-  validates :name, presence: { scope: :active }
-  validates :label, presence: { scope: :active }
-  validates :external_id_attribute, presence: { scope: :active }
+  validates :name, presence: { scope: :active, message: "can't be blank" }
+  validates :label, presence: { scope: :active, message: "can't be blank" }
+  validates :external_id_attribute, presence: { scope: :active, message: "can't be blank" }
   validates :min_id, presence: true, numericality: { greater_than_or_equal_to: 0 }, unless: :alphanumeric?
   validates :max_id, presence: true, numericality: { greater_than_or_equal_to: 0 }, unless: :alphanumeric?
   validate :name_format_correct

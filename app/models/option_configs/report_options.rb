@@ -8,7 +8,6 @@ module OptionConfigs
   # @see OptionConfigs::AttrDefs::Report
   class ReportOptions < BaseOptions
     include OptionsHandler
-    include OptionConfigs::AttrDefs::Report
 
     configure :view_options, with: %i[hide_table_names
                                       hide_field_names_with_comments
@@ -35,6 +34,10 @@ module OptionConfigs
     # @return [String] options text
     def config_text
       owner.options
+    end
+
+    def config_text=(value)
+      owner.options = value
     end
 
     #

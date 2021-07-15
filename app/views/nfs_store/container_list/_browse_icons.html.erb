@@ -4,6 +4,7 @@
        id="container-browser-<%=@container.id%>"  
        data-container-writable="<%= @container.writable? %>" 
        data-container-readable="<%= @container.readable? %>" 
+       data-can-submit-download-or-view="<%= @container.can_download_or_view? %>" 
        data-can-submit-download="<%= @container.can_download? %>" 
        data-can-submit-trash="<%= @container.can_send_to_trash? %>" 
        data-can-submit-move-files="<%= @container.can_move_files? %>" 

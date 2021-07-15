@@ -4,8 +4,6 @@ module Redcap
   #
   # Job to capture the REDCap project's records
   class CaptureRecordsJob < RedcapJob
-    queue_as :redcap
-
     #
     # Capture the REDCap records for the configured project admin.
     # The records are stored directly to the specified model.
@@ -16,14 +14,23 @@ module Redcap
     def perform(project_admin, class_name)
       setup_with project_admin
 
-      unless project_admin&.dynamic_storage&.dynamic_model_ready?
+      unless project_admin&.dynamic_model_ready?
         raise FphsException, "Data Model not ready for table: #{project_admin.dynamic_model_table}"
+      end
+
+      unless project_admin&.storage_and_model_fields_match?
+        status_already_set = true
+        project_admin.update_status(:changes_detected)
+        raise FphsException, "Data Model table fields don't match the data dictionary: " \
+                             "#{project_admin.dynamic_model_table}"
       end
 
       dr = Redcap::DataRecords.new(project_admin, class_name)
       dr.retrieve_validate_store
+      project_admin.update_status(:manual_run_successful)
     rescue StandardError => e
       create_failure_record(e, 'capture records job', project_admin)
+      project_admin.update_status(:manual_run_failed) unless status_already_set
       raise
     end
   end

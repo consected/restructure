@@ -342,7 +342,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
   def check_creatable?
     handle_extra_log_type if action_name == 'new'
-    return if object_instance.allows_current_user_access_to? :create
+    return if object_instance.allows_current_user_access_to?(:create) || current_admin_sample
 
     not_creatable
     nil

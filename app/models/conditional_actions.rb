@@ -47,7 +47,16 @@ class ConditionalActions
     end
   end
 
-  # Calculate the save actions to return for the front end to process
+  #
+  # Calculate the save actions to return, for the front end to process
+  # or backend triggers to handle.
+  # The type being assessed is purely based on the config the ConditionalActions
+  # is instantiated with. For example, the following will assess save_trigger options:
+  #
+  #     save_trigger = obj.extra_options.save_trigger
+  #     ca = ConditionalActions.new save_trigger, obj
+  #     res = ca.calc_save_option_if
+  #
   # Returns a set of results like:
   # {
   #   on_save: { action_name: <config hash or string>, ... },
@@ -56,9 +65,7 @@ class ConditionalActions
   # }
   # Items that either have no 'if' condition, or are true are kept.
   # Conditional failures are not returned.
-
-  # Note that this is not just used by save_action, but also save_trigger and others
-  def calc_save_action_if
+  def calc_save_option_if
     sa = @action_conf
 
     if sa.is_a? Hash

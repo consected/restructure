@@ -17,8 +17,10 @@ module NfsStore
     # @return [NfsStore::Manage::Container]
     def create_file_store
       master.current_user = file_store_user
+
+      safe_name = name.gsub('/', '_')
       container = NfsStore::Manage::Container.create_in_current_app user: file_store_user,
-                                                                    name: name,
+                                                                    name: safe_name,
                                                                     extra_params: {
                                                                       master: master,
                                                                       create_with_role: nfs_role

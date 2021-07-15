@@ -141,7 +141,7 @@ li.list-group-item {
     display: none;
   }
 
-  &:not(.caption-before, .notes-block) {
+  &:not(.caption-before, .notes-block, .dialog-before) {
     strong {
       text-transform: capitalize;
       text-transform: none;
@@ -992,6 +992,24 @@ li.list-group-item.is_external_id_item {
       color: rgb(51, 122, 183);
     }
   }
+}
+
+.label-no-create-container {
+  text-align: center;
+  width: auto;
+
+  .external-identifier-label-no-create {
+    background: rgb(172, 172, 172);
+    padding: 0.5em;
+    color: white;
+    border-radius: 3px;
+  }
+}
+
+.orientation-horizontal .label-no-create-container {
+  text-align: left;
+  // display: inline-block;
+  width: auto;
 }
 
 .orientation-horizontal .new-button-container {

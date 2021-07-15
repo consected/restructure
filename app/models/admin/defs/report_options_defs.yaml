@@ -1,0 +1,55 @@
+#
+# Report Options
+view_options:
+  hide_table_names:
+  humanize_column_names:
+  hide_result_count:
+  hide_export_buttons:
+  hide_criteria_panel:
+  prevent_collapse_for_list:
+  hide_field_names_with_comments:
+  show_column_comments: # true or array
+    - schema.table
+    - schema.other_table
+  corresponding_data_dic:
+  view_as:
+  search_button_label:
+  report_auto_submit_on_change:
+  no_results_scroll:
+
+list_options:
+  hide_in_list:
+  list_description:
+
+view_css:
+  classes:
+    a_class_name:
+      min-width: 100%
+      color: green
+    another_class.subclass:
+      display: none
+  selectors:
+    '#element-id':
+      font-weight: bold
+      font-size: 200%
+    'p > span':
+      font-decoration: underscore
+
+
+component:
+  options:
+
+column_options:
+  tags: # HTML tag to use for specified column elements
+    column_name: pre
+    column_name_2: code
+  classes: # List of CSS classes to add to each specified column element
+    column_name:
+      - class_1
+      - class_2
+    column_name_2:
+  hide: # Hide the column from results
+    column_name: true
+  show_as: # Special ways for showing specified columns
+    column_name: url
+

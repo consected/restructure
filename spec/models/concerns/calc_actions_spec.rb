@@ -2307,6 +2307,101 @@ EOF_YAML
     expect(res.calc_action_if).to be false
   end
 
+  it 'checks if all attributes had a certain value before changes were saved' do
+    al_changed = create_item
+    al_changed.master_id = @al.master_id
+    al_changed.select_who = 'testselect'
+    al_changed.force_save!
+    al_changed.save!
+
+    al_changed.master_id = @al.master_id
+    al_changed.select_who += '-alt'
+    # al_changed.force_save!
+    al_changed.save!
+
+    expect(al_changed.attribute_before_last_save('select_who')).to eq 'testselect'
+
+    conf = {
+      all: {
+        this: {
+          select_who: 'testselect-alt',
+          user_id: @al.user_id,
+          previous_value_of_select_who: 'testselect'
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, al_changed
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        this: {
+          select_who: 'testselect-alt',
+          user_id: @al.user_id,
+          previous_value_of_select_who: 'testselect-alt'
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, al_changed
+    expect(res.calc_action_if).to be false
+
+    al_changed.master_id = @al.master_id
+    al_changed.select_who = nil
+    # al_changed.force_save!
+    al_changed.save!
+
+    conf = {
+      all: {
+        this: {
+          select_who: nil,
+          user_id: @al.user_id,
+          previous_value_of_select_who: 'testselect-alt'
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, al_changed
+    expect(res.calc_action_if).to be true
+
+    al_changed.master_id = @al.master_id
+    al_changed.select_who = 'newval'
+    # al_changed.force_save!
+    al_changed.save!
+
+    conf = {
+      all: {
+        this: {
+          select_who: 'newval',
+          user_id: @al.user_id,
+          previous_value_of_select_who: nil
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, al_changed
+    expect(res.calc_action_if).to be true
+
+    al_changed.master_id = @al.master_id
+    al_changed.select_who = 'newval2'
+    # al_changed.force_save!
+    al_changed.save!
+
+    conf = {
+      all: {
+        this: {
+          select_who: 'newval2',
+          user_id: @al.user_id,
+          previous_value_of_select_who: 'return_value'
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, al_changed
+    expect(res.get_this_val).to eq 'newval'
+  end
+
   it 'handles special cases' do
     junk_master = Master.create! current_user: @user
     new_al0 = create_item

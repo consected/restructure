@@ -504,7 +504,8 @@ module CalcActions
           # Simply handle the comparison, and return a value or result instance if requested
 
           # Get the value
-          this_val = in_instance.attributes[field_name.to_s]
+          this_val = attribute_from_instance(in_instance, field_name)
+
           res &&= if expected_val.is_a? Array
                     # Since we have expected value as an array, simply see if it includes the value we found
                     expected_val.include?(this_val)
@@ -548,11 +549,19 @@ module CalcActions
   #
   # Get an attribute from an instance, and ensure that a blank is
   # converted to nil if the type is not a string
+  # If the attribute name starts with 'previous_value_of_' and the result
+  # was not returned from the current attribute values, attempt to get the
+  # result from the model's #previous_changes hash of changes.
   # @param [UserBase] from_instance
   # @param [String|Symbol] attr_name
   # @return [Object] resulting value
   def attribute_from_instance(from_instance, attr_name)
     val = from_instance.attributes[attr_name.to_s]
+    if val.blank? && attr_name.to_s.start_with?('previous_value_of_') && from_instance.respond_to?(:previous_changes)
+      real_attr_name = attr_name.to_s.sub(/^previous_value_of_/, '')
+      val = from_instance.previous_changes[real_attr_name]&.first
+    end
+
     val = nil if val.blank? && from_instance.type_for_attribute(attr_name).type != :string
     val
   end

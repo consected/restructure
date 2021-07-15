@@ -227,12 +227,12 @@ class Master < ActiveRecord::Base
   # @param [User] cu - current user
   # @return [User]
   def current_user=(cu)
-    if cu.is_a? User
+    if cu.is_a?(User)
       @current_user = cu
-    elsif cu.is_a? Integer
+    elsif cu.is_a?(Integer)
       @current_user = User.find cu
     else
-      raise "Attempting to set current_user with non user: #{cu}"
+      raise "Attempting to set current_user with non user: #{cu} #{cu.class.name} #{cu.class.__id__} #{User.__id__}"
     end
   end
 
@@ -370,8 +370,17 @@ class Master < ActiveRecord::Base
 
   #
   # Memoized count of associated tracker records
+  # NOTE: we selectively use #length rather than #count
+  # if we have already preloaded the trackers
+  # since we don't want to run individual queries for each item
   def trackers_length
-    @trackers_length ||= trackers.count
+    return @trackers_length if @trackers_length
+
+    @trackers_length = if association(:trackers).loaded?
+                         trackers.length
+                       else
+                         trackers.count
+                       end
   end
 
   #

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Admin::UserAccessControl < ActiveRecord::Base
+class Admin::UserAccessControl < Admin::AdminBase
   self.table_name = 'user_access_controls'
 
   include AdminHandler
@@ -9,21 +9,23 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
   belongs_to :user, optional: true
 
-  validate :correct_access
-  after_save :invalidate_cache
+  validate :correct_access_valid?
 
   attr_accessor :allow_bad_resource_name
 
+  #
+  # Valid resource types
+  # NOTE: external_id_assignments is deprecated and should not be used
   def self.resource_types
     %i[table general limited_access report activity_log_type external_id_assignments]
   end
 
+  #
   # access levels provide a distinct scale of control for each resource type
   # for a specific named resource a user is only assigned a single access level
   # For example, on a table, a user is able to only read the table if he has :read, :update or :create
   # Another user may read or update the table if she has :update, or :create
   # A user may only create records on a table if she has :create
-
   def self.access_levels
     {
       table: [nil, :see_presence, :read, :update, :create],
@@ -35,24 +37,15 @@ class Admin::UserAccessControl < ActiveRecord::Base
     }
   end
 
-  def self.general_resource_names
-    %w[
-      app_type create_master
-      export_csv export_json view_reports view_report_not_list view_external_links
-      edit_report_data create_report_data import_csv
-      print
-      download_files view_files_as_image view_files_as_html send_files_to_trash move_files user_file_actions
-      view_dashboards view_pages
-      view_data_reference
-    ]
-  end
-
+  #
+  # Check an access level is valid for the specified resource type
   def self.valid_access_level?(on_resource_type, can_perform)
     can_perform = can_perform.to_sym if can_perform.respond_to? :to_sym
     res = access_levels[on_resource_type.to_sym]
     res&.include? can_perform
   end
 
+  #
   # Scope result of a query to only return valid resources, not those that no longer exist
   def self.valid_resources
     # Return if everything is not setup yet
@@ -72,6 +65,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
     end
   end
 
+  #
   # combo levels provide a convenient way to check for common access control patterns.
   # Can a user access a resource? Yes, if they have any level of read or above
   # Can a user edit a resource? Yes, if they have any level of update or above
@@ -96,28 +90,26 @@ class Admin::UserAccessControl < ActiveRecord::Base
     }
   end
 
+  #
+  # List of resource name for the specified resource type
+  # Provide both forms of identifier for the reports, to allow deprecated
+  # app configurations to continue working
+  # @param [String] resource_type
+  # @return [Array{String}]
   def self.resource_names_for(resource_type)
-    if resource_type == :table
-      (Master.get_all_associations +
-        ['item_flags'] +
-        ActivityLog.active.map(&:resource_name) +
-        DynamicModel.active.map(&:resource_name) +
-        ExternalIdentifier.active.map(&:resource_name) +
-        ItemFlag.active_resource_names
-      ).uniq
-    elsif resource_type == :general
-      general_resource_names
-    elsif %i[external_id_assignments limited_access].include?(resource_type)
-      ExternalIdentifier.active.map(&:resource_name) + DynamicModel.active.map(&:resource_name)
-    elsif resource_type == :report
-      Report.active.map(&:alt_resource_name) + Report.active.map(&:name) + ['_all_reports_']
-    elsif resource_type == :activity_log_type
-      ActivityLog.all_option_configs_resource_names
-    else
-      []
+    if resource_type == :report
+      active_reports = Report.active
+      return active_reports.map(&:alt_resource_name) + active_reports.map(&:name) + ['_all_reports_']
     end
+
+    Resources::UserAccessControl.resource_names_for(resource_type)
   end
 
+  #
+  # Is the combination access level valid for the resource type?
+  # @param [String | Symbol] on_resource_type
+  # @param [String | Symbol | Array] can_perform - will exit immediately with an Array
+  # @return [Boolean]
   def self.valid_combo_level?(on_resource_type, can_perform)
     return if can_perform.nil? || can_perform.is_a?(Array)
 
@@ -126,17 +118,9 @@ class Admin::UserAccessControl < ActiveRecord::Base
     res[can_perform] if res
   end
 
-  def self.all_resource_names
-    a = []
-    resource_names = {}
-    resource_types.each do |r|
-      rn = resource_names[r]
-      rn ||= resource_names[r] = resource_names_for(r)
-      a += rn
-    end
-    a
-  end
-
+  #
+  # Hash of resource names keyed by resource type
+  # @return [Hash]
   def self.resource_names_by_type
     rn = {}
     resource_types.each do |k|
@@ -145,26 +129,63 @@ class Admin::UserAccessControl < ActiveRecord::Base
     rn
   end
 
+  #
+  # Currently unused
   def self.options
     nil
   end
 
+  #
   # Find out if the user can perform a specific action on a named resource type in his current app type
   # Optionally provide can_perform=nil to find a record for any access level or
   # an array to check for multiple possible options
   # If it is necessary to check for access to a resource on an app type that is not the user's current one,
   # or the user is nil, specify the alt_app_type_id
   # Similarly, an alt_role_name can be specified
-  #
-  def self.access_for?(user, can_perform, on_resource_type, named, with_options = nil, alt_app_type_id: nil, alt_role_name: nil, add_conditions: nil)
+  # @param [User] user
+  # @param [nil | Array | Symbol] can_perform - access level (Array or Symbol) or combo access level (Symbol)
+  # @param [Symbol | String] on_resource_type - valid resource type
+  # @param [Symbol | String] named - resource name
+  # @param [nil] with_options - not used - will raise an exception if set
+  # @param [Admin::AppType | Integer] alt_app_type_id - app type or ID for the app type to
+  #                                                     apply to if the user does not have a current app_type set
+  # @param [String] alt_role_name - for an Admin::UserRole when the role control is to override the default controls
+  # @param [Hash] add_conditions - additional conditions to apply to scoped user and roles
+  # @return [Admin::UserAccessControl | nil]
+  def self.access_for?(user, can_perform, on_resource_type, named, with_options = nil,
+                       alt_app_type_id: nil, alt_role_name: nil, add_conditions: nil)
     raise FphsException, 'Options can not be added to access_for?' if with_options
 
-    app_type_id = alt_app_type_id || user&.app_type_id
+    app_type_id = alt_app_type_id.is_a?(Admin::AppType) ? alt_app_type_id.id : alt_app_type_id
+    app_type_id ||= user&.app_type_id
+    cache_key = "#{user&.id}-#{can_perform}-#{on_resource_type}-#{named}-#{app_type_id}-#{alt_role_name}-#{add_conditions}"
+    res = Rails.cache.fetch(cache_key) do
+      evaluate_access_for(user, can_perform, on_resource_type, named, app_type_id,
+                          alt_role_name: alt_role_name,
+                          add_conditions: add_conditions)
+    end
+
+    return unless res
+
+    find(res)
+  end
+
+  # @param [User] user
+  # @param [nil | Array | Symbol] can_perform - access level (Array or Symbol) or combo access level (Symbol)
+  # @param [Symbol | String] on_resource_type - valid resource type
+  # @param [Symbol | String] named - resource name
+  # @param [Admin::AppType | Integer] alt_app_type_id - app type or ID for the app type to
+  #                                                     apply to if the user does not have a current app_type set
+  # @param [String] alt_role_name - for an Admin::UserRole when the role control is to override the default controls
+  # @param [Hash] add_conditions - additional conditions to apply to scoped user and roles
+  # @return [id | nil] - id of the UserAccessControl
+  def self.evaluate_access_for(user, can_perform, on_resource_type, named, app_type_id,
+                               alt_role_name: nil, add_conditions: nil)
 
     if can_perform
-      unless can_perform.is_a?(Array) || valid_access_level?(on_resource_type,
-                                                             can_perform) || valid_combo_level?(on_resource_type,
-                                                                                                can_perform)
+      unless can_perform.is_a?(Array) ||
+             valid_access_level?(on_resource_type, can_perform) ||
+             valid_combo_level?(on_resource_type, can_perform)
         raise FphsException, "Access level #{can_perform} does not exist for resource type #{on_resource_type}"
       end
 
@@ -190,30 +211,14 @@ class Admin::UserAccessControl < ActiveRecord::Base
       return nil unless res_access.in?(can_perform)
     end
 
-    res
+    res&.id
   end
 
-  # Create all possible controls on the specified app type
-  # The default access is nil to avoid adding new resources to existing apps by accident
-  def self.create_all_for(app_type, admin, default_access = nil)
-    rt = :table
-    resource_names_for(rt).each do |rn|
-      res = app_type.user_access_controls.build resource_name: rn, resource_type: rt, access: default_access,
-                                                current_admin: admin, user_id: nil
-      res.save! if app_type.persisted?
-    end
-  end
-
-  # Add a new resource for all configured app types
-  # Make its default access nil to avoid exposing it to existing apps by accident
-  def self.create_control_for_all_apps(admin, resource_type, resource_name, default_access: nil, disabled: nil)
-    Admin::AppType.active.all.each do |app_type|
-      # Fails quietly if the item already exists
-      Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: resource_type,
-                                      resource_name: resource_name, access: default_access, current_admin: admin)
-    end
-  end
-
+  #
+  # Create a user access control with a template role, to
+  # ensure that an item is correctly exported from an app type, even
+  # if no real end users or roles have been applied to it.
+  # Will update an existing user access control if it already exists.
   def self.create_template_control(admin, app_type, resource_type, resource_name, default_access: :read, disabled: nil)
     # Fails quietly if the item already exists
     Admin::UserRole.create(role_name: Settings::AppTemplateRole, app_type: app_type, user: User.template_user,
@@ -231,8 +236,9 @@ class Admin::UserAccessControl < ActiveRecord::Base
     end
   end
 
+  #
   # Check which tables a user can view in the current app type, or an alternative app type if specified
-  def self.view_tables?(user, alt_app_type_id: nil)
+  def self.viewable_tables(user, alt_app_type_id: nil)
     view = {}
     resource_names_for(:table).each do |r|
       view[r.to_sym] = !!access_for?(user, :access, :table, r, alt_app_type_id: alt_app_type_id)
@@ -241,8 +247,10 @@ class Admin::UserAccessControl < ActiveRecord::Base
     view
   end
 
+  #
   # Get list of controls for the external_id_assignments / limited_access type in the user's current app.
-  # Get both the user's override, if it exists, and the default for each resource, which we then filter down to the actual access control
+  # Get both the user's override, if it exists, and the default for each resource,
+  # which we then filter down to the actual access control
   # If there are no restrictions for this user in this app, just return nil
   def self.limited_access_restrictions(user)
     primary_conditions = { resource_type: %i[external_id_assignments limited_access] }
@@ -277,17 +285,10 @@ class Admin::UserAccessControl < ActiveRecord::Base
     res
   end
 
-  def self.latest_update
-    return @latest_update if @latest_update
-
-    obj = reorder('').order(Arel.sql('coalesce(updated_at, created_at) desc nulls last')).first
-    @latest_update = obj&.updated_at || obj&.created_at
-  end
-
-  def self.reset_latest_update
-    @latest_update = nil
-  end
-
+  #
+  # Check if a resource name is bad.
+  # For example, the resource definition may have been disabled since the access was set up,
+  # so although originally valid, the resource name is no longer valid.
   def bad_resource_name(cache_resource_names_for_type = nil)
     return if disabled
     return true if !respond_to?(:resource_name) || resource_name.nil? || resource_type.nil?
@@ -298,7 +299,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
                                self.class.resource_names_for(resource_type.to_sym)
                              end
 
-    !resource_name_for_type.include?(resource_name.to_s)
+    !resource_name_for_type&.include?(resource_name.to_s)
   end
 
   private
@@ -312,7 +313,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
   # - the resource name if not a valid resource for the resource type
   # - another user access control with this user, resource name & type, role name and app type
   #   does not already exist
-  def correct_access
+  def correct_access_valid?
     self.access = nil if access.blank?
     if disabled
       true
@@ -339,15 +340,5 @@ class Admin::UserAccessControl < ActiveRecord::Base
         end
       end
     end
-  end
-
-  def invalidate_cache
-    logger.info "User Access Control added or updated (#{self.class.name}). Invalidating cache."
-
-    # Allows caching in other classes to reset
-    self.class.reset_latest_update
-
-    # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
-    Rails.cache.clear
   end
 end

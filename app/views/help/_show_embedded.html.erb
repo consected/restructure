@@ -1,12 +1,10 @@
 <div>
   <div class="help-view-doc" data-result="help-doc-content-result">
+    <div class="help-doc-header">
+      <%= render partial: 'help/home_link' %>
+    </div>
     <div class="help-embedded-content">
-      <%= render partial: 'help/view_doc', 
-            locals: { 
-              library: library,
-              section: section, 
-              subsection: subsection
-            } %>
+      <%= @view_doc %>            
     </div>
     <%= render partial: 'help/footer' %>
   </div>

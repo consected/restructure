@@ -7,6 +7,7 @@ _fpa.postprocessors_admin = {
     $('tr.new-record').before($('tr.admin-list-item').first());
 
     $('.saved-row').removeClass('saved-row');
+    $('.edit-as-custom-setup').removeClass('edit-as-custom-setup');
     _fpa.form_utils.format_block(block);
     block.find('#admin-edit-cancel').click(function (ev) {
       ev.preventDefault();
@@ -26,27 +27,30 @@ _fpa.postprocessors_admin = {
     // For the selection of resource types / names in user access control form
     var res_type_change = function ($el) {
       var val = $el.val();
-      $('#admin_user_access_control_resource_name optgroup[label], #admin_user_access_control_access optgroup[label]').hide();
-      $('#admin_user_access_control_resource_name optgroup[label="' + val + '"], #admin_user_access_control_access optgroup[label="' + val + '"]').show();
-      if (val == 'activity_log_type') {
-        var url = new URL(window.location.href);
+      $('#admin_user_access_control_resource_name').attr('data-big-select-subtype', val)
 
-        var p = url.searchParams.get('filter[resource_name]')
-        var opts = $('#admin_user_access_control_resource_name optgroup[label="' + val + '"] option');
-        opts.show();
-        if (p) {
-          ps = p.replace('__%', '');
-          if (ps != p) {
-            opts.each(function () {
-              var h = $(this).val();
-              if (h.indexOf(ps) < 0) {
-                $(this).hide();
-              }
-            });
-          }
-        }
-      }
+      $('#admin_user_access_control_access optgroup[label]').hide();
+      $('#admin_user_access_control_access optgroup[label="' + val + '"]').show();
+      //   if (val == 'activity_log_type') {
+      //     var url = new URL(window.location.href);
+
+      //     var p = url.searchParams.get('filter[resource_name]')
+      //     var opts = $('#admin_user_access_control_resource_name optgroup[label="' + val + '"] option');
+      //     opts.show();
+      //     if (p) {
+      //       ps = p.replace('__%', '');
+      //       if (ps != p) {
+      //         opts.each(function () {
+      //           var h = $(this).val();
+      //           if (h.indexOf(ps) < 0) {
+      //             $(this).hide();
+      //           }
+      //         });
+      //       }
+      //     }
+      //   }
     };
+
     res_type_change($('#admin_user_access_control_resource_type'));
     block.on('change', '#admin_user_access_control_resource_type', function () {
       res_type_change($(this));
@@ -152,17 +156,36 @@ _fpa.postprocessors_admin = {
 
     window.setTimeout(function () {
       // Handle auto opening of links in tab panels
-      block.find('[data-toggle="tab"]').not('.attached-tab-show').on('show.bs.tab', function () {
-        $($(this).attr('href')).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+      block.find('[data-toggle="tab"]').on('show.bs.tab', function () {
+        $($(this).attr('href')).find('a.on-show-auto-click').not('.auto-clicked').addClass('auto-clicked').click();
       }).addClass('attached-tab-show');
 
       // Handle auto opening of links in tab panels when the initial panel is already open
       block.find('[data-toggle="tab"][aria-expanded="true"]').not('.attached-tab-init').each(function () {
-        $($(this).attr('href')).find('a.on-show-auto-click').not('auto-clicked').addClass('auto-clicked').click();
+        $($(this).attr('href')).find('a.on-show-auto-click').not('.auto-clicked').addClass('auto-clicked').click();
       }).addClass('attached-tab-init')
     }, 100);
 
+
+    // Handle big-select fields
+
+    block.find('.use-big-select').each(function () {
+      var label = $(`label[for="${$(this).attr('id')}"]`).html();
+      $.big_select($(this),
+        $('#primary-modal .modal-body'),
+        $(this)[0].big_select_hash,
+        function () { _fpa.show_modal('', label); },
+        function () { _fpa.hide_modal(); }
+      );
+
+    })
+
     _fpa.form_utils.on_open_click(block);
+    _fpa.form_utils.setup_drag_and_drop(block);
+
+    if (block.find('.admin-edit-form .edit_dynamic_model').length === 1) {
+      _admin.handle_admin_dynamic_model(block);
+    };
 
   },
 

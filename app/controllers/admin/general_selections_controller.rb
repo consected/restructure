@@ -16,7 +16,7 @@ class Admin::GeneralSelectionsController < AdminController
   end
 
   def default_index_order
-    { updated_at: :desc }
+    { item_type: :asc, value: :asc }
   end
 
   private

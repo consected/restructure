@@ -29,17 +29,22 @@ _fpa = {
     try {
       var $block = $(block);
 
+
+      var do_action = function ($block) {
+        $block.addClass('ajax-running').removeClass('ajax-canceled');
+        var bclicked = $block.data('button_clicked');
+        if (bclicked) bclicked.addClass('ajax-clicked-running');
+        var d = _fpa.result_target(block);
+        if (d) $(d).addClass('ajax-running');
+      }
+
+      do_action($block);
       // data-working-target attribute allows us to indicate
       // a specific element is the target and is loading,
       // rather than the link or button we clicked.
       var alt_target = $block.attr('data-working-target')
-      $block = $(alt_target) || $block;
+      if (alt_target) do_action($(alt_target));
 
-      $block.addClass('ajax-running').removeClass('ajax-canceled');
-      var bclicked = $block.data('button_clicked');
-      if (bclicked) bclicked.addClass('ajax-clicked-running');
-      var d = _fpa.result_target(block);
-      if (d) $(d).addClass('ajax-running');
     } catch (err) { }
   },
   ajax_done: function (block) {
@@ -47,18 +52,22 @@ _fpa = {
       var $block = $(block);
 
 
+      var do_action = function ($block) {
+        $block.removeClass('ajax-running').removeClass('ajax-canceled');
+        var bclicked = $block.data('button_clicked');
+        if (bclicked) bclicked.removeClass('ajax-clicked-running').blur();
+        $block.data('button_clicked', null);
+        var d = _fpa.result_target(block);
+        if (d) $(d).removeClass('ajax-running').removeClass('ajax-canceled');
+      }
+
+      do_action($block);
       // data-working-target attribute allows us to indicate
       // a specific element is the target and is loading,
       // rather than the link or button we clicked.
       var alt_target = $block.attr('data-working-target')
-      $block = $(alt_target) || $block;
+      if (alt_target) do_action($(alt_target));
 
-      $block.removeClass('ajax-running').removeClass('ajax-canceled');
-      var bclicked = $block.data('button_clicked');
-      if (bclicked) bclicked.removeClass('ajax-clicked-running').blur();
-      $block.data('button_clicked', null);
-      var d = _fpa.result_target(block);
-      if (d) $(d).removeClass('ajax-running').removeClass('ajax-canceled');
     } catch (err) { }
     _fpa.remote_request = null;
     _fpa.state.search_running = false;
@@ -96,7 +105,7 @@ _fpa = {
       _fpa.templates[id] = Handlebars.compile(source, _fpa.HandlebarsCompileOptions);
 
     });
-    $('body').removeClass('status-compiling');
+    $('body').removeClass('status-compiling initial-compiling').addClass('status-compiled');
   },
 
   send_ajax_request: function (url, options) {
@@ -774,6 +783,7 @@ _fpa = {
               }
             }
           }
+          $('.view-template-created').removeClass('view-template-created');
 
         });
 
@@ -1006,6 +1016,15 @@ _fpa = {
     pm.modal('show');
 
     return pm;
+  },
+
+  hide_modal: function () {
+    var pm = $('#primary-modal');
+    var t = pm.find('.modal-title');
+    var m = pm.find('.modal-body');
+    t.html('');
+    m.html('');
+    pm.modal('hide');
   },
 
   get_item_by: function (attr, obj, evid) {

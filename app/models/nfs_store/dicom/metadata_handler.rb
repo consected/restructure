@@ -25,7 +25,8 @@ module NfsStore
           mh = new(file_path: full_path)
           metadata = mh.extract_metadata
           unless metadata.nil? || metadata.is_a?(Hash)
-            raise NfsStore::FsExceptionHandler::FsException, "metadata #{metadata.class} is an invalid type after extraction"
+            raise NfsStore::FsExceptionHandler::FsException,
+                  "metadata #{metadata.class} is an invalid type after extraction"
           end
         rescue StandardError => e
           metadata = {
@@ -38,8 +39,15 @@ module NfsStore
       end
 
       def extract_metadata
-        raise FsException::Action, 'No file path for Dicom to extract metadata from' unless file_path
-        raise FsException::Action, 'File does not exist for Dicom to extract metadata from' unless File.exist? file_path
+        unless file_path
+          raise FsException::Action, 'No file path for Dicom to extract metadata from. ' \
+                                     "User: #{container_file.current_user&.email} " \
+                                     "User roles: #{container_file.current_user_role_names}"
+        end
+
+        unless File.exist? file_path
+          raise FsException::Action, "File does not exist for Dicom to extract metadata from. #{file_path}"
+        end
 
         Rails.logger.info "Retrieving file for DICOM metadata processing: #{file_path}"
 

@@ -11,9 +11,13 @@ class HelpController < ApplicationController
 
   helper_method :library, :section, :subsection
 
+  include HelpHelper
+
   #
   # Show the default help page for the current authentication or guest
   def index
+    return not_found unless request.format.to_sym.in?(%i[html md]) || !request.path.include?('.')
+
     redirect_to help_page_path(library: library,
                                section: index_section,
                                subsection: index_subsection,
@@ -25,10 +29,21 @@ class HelpController < ApplicationController
   def show
     redirect_to help_index_path if library.blank? || section.blank? || subsection.blank?
 
+    return not_found unless request.format.to_sym.in?(%i[html md]) || !request.path.include?('.')
+
+    begin
+      @view_doc = view_doc library,
+                           section,
+                           subsection
+    rescue StandardError
+      @view_doc = view_doc_in_wrapper('<h1>Page Not Found</h1>', library, section)
+      @result_status = 404
+    end
+
     if display_embedded?
       render partial: 'help/show_embedded'
     else
-      render 'help/show'
+      render 'help/show', status: @result_status
     end
   end
 
@@ -91,7 +106,7 @@ class HelpController < ApplicationController
   # or the :id param
   # @return [String]
   def subsection
-    clean_path(params[:subsection] || params[:id])
+    clean_path((params[:subsection] || params[:id]).sub(/\.md$/, ''))
   end
 
   #

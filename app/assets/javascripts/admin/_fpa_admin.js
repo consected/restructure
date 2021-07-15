@@ -4,6 +4,7 @@ _fpa.admin = {
 
     if (!block) block = $('.admin-result-index');
 
+    _fpa.admin.handle_filter_selections(block);
 
 
     setTimeout(function () {
@@ -65,8 +66,16 @@ _fpa.admin = {
     code_el.CodeMirror = cm;
     cm.refresh();
 
-  }
+  },
 
+  handle_filter_selections: function (block) {
+    $('#filter-accordion .panel').each(function () {
+      var selected = $(this).find('.panel-body a.btn-primary').html();
+      var headspace = $(this).find('.panel-heading .panel-title .sel-headspace');
+
+      headspace.html(selected);
+    })
+  },
 
 
 };

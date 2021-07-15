@@ -75,8 +75,17 @@ module MasterSupport
     valid_attribs
   end
 
+  def let_user_create_master(user = nil)
+    user ||= @user
+    return if user.can? :create_master
+
+    Admin::UserAccessControl.create!(app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: user)
+
+    expect(user.can?(:create_master)).to be_truthy
+  end
+
   def create_master(user = nil, att = nil)
-    user ||= @user || create_user
+    user ||= @user || create_user.first
 
     user.app_type ||= Admin::AppType.active.first
 
@@ -87,7 +96,7 @@ module MasterSupport
     master.save!
 
     setup_access
-    setup_access :trackers
+    setup_access :trackers unless user.has_access_to? :create, :table, :trackers
 
     @master_id = master.id
     @master = master

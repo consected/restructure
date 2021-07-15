@@ -37,7 +37,7 @@ module Messaging
     before_save :set_from_email_address
 
     scope :unhandled, -> { where status: nil }
-    scope :limited_index, -> { limit 20 }
+    scope :limited_index, -> { limit 50 }
 
     attr_accessor :generated_text, :disabled, :admin_id, :for_item, :on_complete_config
     attr_writer :extra_substitutions_data
@@ -326,8 +326,9 @@ module Messaging
           self.item = record_item || list_item
           # Set the data to nil to ensure template generation uses the item
           self.data = nil
-          # Force a current user to be the last user if one is not set
-          item.current_user ||= for_item&.user || user
+          # Force a current user to be the batch user, so that a single user can be set for access to any
+          # external IDs, associated tables, etc, required for data substitutions.
+          item.current_user = batch_user
           pn = Formatter::Phone.format list_item.data,
                                        format: :unformatted,
                                        default_country_code: rec[:default_country_code]
@@ -445,6 +446,14 @@ module Messaging
 
       for_item.current_user = for_item.user
       OptionConfigs::ActivityLogOptions.calc_save_triggers for_item, on_complete_config
+    end
+
+    def batch_user
+      return @batch_user if @batch_user
+
+      @batch_user = User.batch_user
+      @batch_user.app_type = Settings.bulk_msg_app
+      @batch_user
     end
 
     #

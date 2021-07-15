@@ -16,22 +16,30 @@ RSpec.describe Redcap::DataRecords, type: :model do
     reset_mocks
 
     mock_full_requests
-    `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_full_rc*.rb`
+    `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_full_*.rb`
 
     tn = "redcap_test.test_full_rc#{rand 100_000_000_000_000}_recs"
     @project_admin = rc = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url('full'), api_key: @project[:api_key], study: 'Q3',
                                                        current_admin: @admin, dynamic_model_table: tn
 
+    rc.force_refresh = true
+    rc.update!(updated_at: DateTime.now)
     @dm = rc.dynamic_storage.dynamic_model
-    expect(rc.dynamic_storage.dynamic_model_ready?).to be_truthy
+
+    expect(rc.dynamic_model_ready?).to be_truthy
     @dmcn = @dm.implementation_class.name
 
     tn = "redcap_test.test_full_sf_rc#{rand 100_000_000_000_000}_recs"
     @project_admin_sf = rc_sf = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url('full'), api_key: @project[:api_key], study: 'Q4',
-                                                             current_admin: @admin, dynamic_model_table: tn, records_request_options: { exportSurveyFields: true }
+                                                             current_admin: @admin, dynamic_model_table: tn,
+                                                             use_hash_config: {
+                                                               records_request_options: { exportSurveyFields: true }
+                                                             }
 
+    rc_sf.force_refresh = true
+    rc_sf.update!(updated_at: DateTime.now)
     @dm_sf = rc_sf.dynamic_storage.dynamic_model
-    expect(rc_sf.dynamic_storage.dynamic_model_ready?).to be_truthy
+    expect(rc_sf.dynamic_model_ready?).to be_truthy
     @dmcn_sf = @dm_sf.implementation_class.name
   end
 

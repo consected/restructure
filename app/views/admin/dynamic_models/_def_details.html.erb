@@ -1,19 +1,28 @@
 <div class="dynamic-details-section">
+<% if object_instance.persisted? %>
   <label>item type name</label>
   <p class="dynamic-item-type">
   <%= object_instance.full_item_type_name %>
   </p>
 
   <p>
-    <%= link_to 'search table data', "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&table_name=#{object_instance.table_name}", target: '_blank' %>
+    <%= link_to link_label_open_in_new('search table data'), "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.table_name}", 
+                target: '_blank' %>
   </p>
-
+<% else %>
+  <p>
+  <label>not yet saved</label>
+  </p>
+<% end %>
   <label>fields</label>
+<% if object_instance.persisted? && object_instance.enabled?%>
   <p><%=object_instance.all_implementation_fields.length%> fields</p>
-  <p class="dynamic-field-list">
-  <code><%= object_instance.all_implementation_fields.join("</code> <code>").html_safe %></code>
-  </p>
+<% end %>
+  <ul class="activity-list">
+    <%= sortable_block "#dynamic_model_field_list", "li" %>
+  </ul>
 </div>
+<% if object_instance.persisted? && object_instance.enabled? %>
 <div class="dynamic-list-section">
   <label>activities</label>
   <ul class="activity-list">
@@ -23,17 +32,4 @@
   </ul>
   <div id="dynamic-list-detail" class="dynamic-list-detail"></div>
 </div>
-<div class="dynamic-config-section">
-  <label>configurations</label>
-  <p><i>Table key name</i> 
-   is the field used to uniquely identify a record when retrieving it to be viewed or edited. It may be unrelated to the relationship between this item and a master record. Typically blank.
-  </p>
-  <p><i>Primary key name</i> 
-   is the field that a master record may use to reference this record. Typically <code>id</code>
-  </p>
-  <p><i>Foreign key name</i> 
-   is the field used to match with a master record. Typically this is <code>master_id</code>, but may be one of the other fields on that table. 
-   If blank, then there is no connection to master records, but the table can be used for 
-   lookups in forms using a field <i>select_record_from_table_...</i>
-  </p>
-</div>
+<% end %>

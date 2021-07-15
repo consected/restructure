@@ -41,7 +41,7 @@ module NavHandler
                            extras: { id: 'print-action', class: 'print-action-button' } }
       end
       if admin_view || current_user.can?(:import_csv)
-        @primary_navs << { label: 'Import CSV', url: '/imports', route: 'imports#index' }
+        @primary_navs << { label: 'Import CSV', url: imports_imports_path, route: 'imports#index' }
       end
 
     end

@@ -63,11 +63,11 @@ module NfsStore
         # Check if a different file with this name has already been uploaded
         conditions.delete :file_hash
         upload = Upload.where(conditions).order(id: :desc).first
-        if upload
-          raise FsException::FilenameExists, 'A different file with this name already exists. Either rename the file or upload it inside a folder.'
-        else
-          return
-        end
+        return unless upload && file_matching_path
+
+        raise FsException::FilenameExists,
+              'A different file with this name already exists. Either rename the file or upload it inside a folder.'
+
       end
 
       # It is necessary to loosely check the stored files if no upload was found, or a completed upload was found
@@ -91,7 +91,7 @@ module NfsStore
     # @param content_type [String] MIME type for the file
     # @param user [User] the current user performing the upload
     # @return [Upload] the existing or new Upload object
-    def self.init(container_id:, file_hash:, file_name:, content_type:, user:, relative_path: nil, upload_set:)
+    def self.init(container_id:, file_hash:, file_name:, content_type:, user:, upload_set:, relative_path: nil)
       container = Browse.open_container(id: container_id, user: user)
       #  Ensure the relative path is nil in case it is just an empty string
       relative_path = nil if relative_path.blank? || relative_path == '.'
@@ -102,7 +102,8 @@ module NfsStore
         Rails.logger.info 'Continuing with a new upload by resetting incomplete chunk files'
         # Cleanup happens in #initialize
       end
-      me ||= Upload.new(container: container, file_hash: file_hash, file_name: file_name, content_type: content_type, user: user, path: relative_path, upload_set: upload_set)
+      me ||= Upload.new(container: container, file_hash: file_hash, file_name: file_name, content_type: content_type,
+                        user: user, path: relative_path, upload_set: upload_set)
 
       me.container.current_user = user if me
 
@@ -151,20 +152,19 @@ module NfsStore
 
         tmp_file_size = total_upload_size
 
-        if tmp_file_size == 0
-          raise FsException::Upload, 'Stored file has length zero. This is not correct.'
-          return
-        end
+        raise FsException::Upload, 'Stored file has length zero. This is not correct.' if tmp_file_size == 0
 
         # Either a content range was not specified, or it was and indicates this is the last chunk
-        # The content length we were told to expect comes from the content-length header if no content-range was specified
+        # The content length we were told to expect comes from the content-length
+        # header if no content-range was specified
         cl = (cr ? cr[:total] : @upload.size)
 
         @content_length_match = (cl == tmp_file_size)
 
         unless @content_length_match
           Rails.logger.error "Content length mismatch: #{cl} == #{tmp_file_size} || #{cr} #{@upload.size}"
-          raise FsException::Upload, 'Content that we received did not match the length we were told to expect. The upload failed.'
+          raise FsException::Upload,
+                'Content that we received did not match the length we were told to expect. The upload failed.'
         end
 
         self.file_size = tmp_file_size
@@ -175,7 +175,9 @@ module NfsStore
         @final_hash_match = (file_hash == final_hash)
 
         unless @final_hash_match
-          raise FsException::Upload, 'The MD5 hash used to check the file consistency did not match what we were told to expect. The upload failed.'
+          raise FsException::Upload,
+                'The MD5 hash used to check the file consistency did not match ' \
+                'what we were told to expect. The upload failed.'
         end
 
         @ready_to_finalize = true
@@ -284,7 +286,7 @@ module NfsStore
     # @return [String] the long filename representing the unique chunk filename
     def chunk_filename(num)
       str = if num.is_a? Integer
-              "000000000000000#{num}"[-12..-1]
+              "000000000000000#{num}"[-12..]
             else
               num
             end
@@ -351,7 +353,8 @@ module NfsStore
     end
 
     # Cleanup all chunk files.
-    # @param not_final [Boolean] sets whether the 'final' temp file should also be cleaned up, or just the intermediate chunks.
+    # @param not_final [Boolean] sets whether the 'final' temp file should also
+    #                            be cleaned up, or just the intermediate chunks.
     #   Default: false, cleans up the final file too
     def cleanup_chunk_files(not_final: false)
       each_chunk_file_path do |path|
@@ -380,7 +383,9 @@ module NfsStore
       end
 
       unless @chunk_hash_match
-        errors.add :chunk_hash, "of this chunk does not match the MD5 hash the client calculated. This chunk didn't transfer correctly."
+        errors.add :chunk_hash,
+                   'of this chunk does not match the MD5 hash the ' \
+                   "client calculated. This chunk didn't transfer correctly."
         return
       end
       @chunk_hash_match
@@ -408,7 +413,8 @@ module NfsStore
     # Validates the content length for the completed file matches the header specification
     def content_length_match
       unless @content_length_match || !self.completed
-        errors.add :content_length, 'of the file does not match the content length we were told to expect by the client.'
+        errors.add :content_length,
+                   'of the file does not match the content length we were told to expect by the client.'
       end
       @content_length_match
     end
@@ -416,7 +422,8 @@ module NfsStore
     # Validates that the final file MD5 hash matches the hash specified by the client
     def final_hash_match
       unless @final_hash_match
-        errors.add :file_hash, "of the file does not match the MD5 hash the client calculated. Something didn't transfer correctly."
+        errors.add :file_hash,
+                   "of the file does not match the MD5 hash the client calculated. Something didn't transfer correctly."
       end
       @final_hash_match
     end

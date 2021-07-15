@@ -3,7 +3,7 @@
 module SecureView
   class BasePreviewer
     DefaultResolution = 150
-    DocumentExtensions = %w[doc docx odt html rtf html md].freeze
+    DocumentExtensions = %w[doc docx odt html rtf html md txt].freeze
     SpreadsheetExtensions = %w[xls xlsx ods csv].freeze
     PresentationExtensions = %w[ppt pptx odp odg].freeze
     OfficeDocTypesTo = %w[html pdf].freeze
@@ -31,7 +31,7 @@ module SecureView
     end
 
     def previewable?
-      !!(document? || spreadsheet? || presentation? || pdf? || viewable_image?)
+      !!(document? || spreadsheet? || presentation? || pdf? || viewable_image? || text?)
     end
 
     def self.open_tempfile(&block)
@@ -39,7 +39,11 @@ module SecureView
     end
 
     def self.change_extension(path, to_ext)
-      (path.split('.')[0..-2] + [to_ext]).join('.')
+      if path.include? '.'
+        (path.split('.')[0..-2] + [to_ext]).join('.')
+      else
+        "#{path}.#{to_ext}"
+      end
     end
 
     # Check if pdftoppm exists at the configured path
@@ -148,6 +152,10 @@ module SecureView
 
     def html?
       mime_type == MIME::Type.new('text/html')
+    end
+
+    def text?
+      mime_type == MIME::Type.new('text/plain')
     end
 
     def spreadsheet?

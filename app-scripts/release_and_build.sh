@@ -3,6 +3,8 @@
 echo "Starting release and build"
 CURRDIR="$(pwd)"
 
+export GIT_MERGE_AUTOEDIT=no
+
 ONDEVELOP="$(git branch | grep '* develop')"
 if [ -z "${ONDEVELOP}" ]; then
   echo "Must be on develop branch to get started"

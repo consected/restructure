@@ -23,15 +23,18 @@
   </div>
   <div class="form-group">
     <%= f.label :resource_type %>
-    <%= f.select :resource_type, Admin::UserAccessControl.resource_types %>
+    <%= f.select :resource_type, Admin::UserAccessControl.resource_types, include_blank: true %>
   </div>
   <div class="form-group">
     <%= f.label :resource_name %>
     <%
-      select_item_type = {}
-      select_item_type[:selected] = filter_params_hash.first.last if filter_params_hash&.first&.first == 'resource_name'  && object_instance.resource_name.blank?
+      object_instance.resource_name = filter_params_hash.first.last if filter_params_hash&.first&.first == 'resource_name'  && object_instance.resource_name.blank?
     %>
-    <%= f.select :resource_name, Admin::UserAccessControl.resource_names_by_type, select_item_type %>
+    <%= big_select_field(f, :resource_name, Resources::UserAccessControl.resource_descriptions_for(:general), subtype: :general) %>
+    <%= big_select_field_data(:admin_user_access_control_resource_name, :table, Resources::UserAccessControl.resource_descriptions_for(:table)) %>
+    <%= big_select_field_data(:admin_user_access_control_resource_name, :report, Resources::UserAccessControl.resource_descriptions_for(:report)) %>
+    <%= big_select_field_data(:admin_user_access_control_resource_name, :activity_log_type, Resources::UserAccessControl.resource_descriptions_for(:activity_log_type)) %>            
+    <%= big_select_field_data(:admin_user_access_control_resource_name, :limited_access, Resources::UserAccessControl.resource_descriptions_for(:limited_access)) %>
   </div>
   <div class="form-group">
     <%= f.label :access %>
@@ -39,10 +42,6 @@
     accesses = Admin::UserAccessControl.access_levels
     %>
     <%= f.select :access, accesses%>
-  </div>
-  <div class="form-group">
-    <%= f.label :options %>
-    <%= f.text_field :options %>
   </div>
   <div class="form-group">
     <%= f.check_box :disabled %>

@@ -43,8 +43,7 @@ module NfsStore
       # Container-specific sub directory to place container directory into
       # @return [nil | String] set to a sub path string such as 'holder123' or 'parentdir/holder123'
       def parent_sub_dir
-        upsd = Filesystem.use_parent_sub_dir
-        return unless upsd
+        return unless Filesystem.use_parent_sub_dir
 
         setting = Admin::AppConfiguration.find_default_app_config(app_type_id, 'filestore directory id')
         if setting
@@ -245,11 +244,18 @@ module NfsStore
         !!res
       end
 
+      def can_download_or_view?
+        return @can_download_or_view unless @can_download_or_view.nil?
+
+        cu = current_user
+        @can_download_or_view = !!(!!(cu.can?(:download_files) || cu.can?(:view_files_as_html) || cu.can?(:view_files_as_image)))
+      end
+
       def can_download?
         return @can_download unless @can_download.nil?
 
         cu = current_user
-        @can_download = !!(!!(cu.can?(:download_files) || cu.can?(:view_files_as_html) || cu.can?(:view_files_as_image)))
+        @can_download = !!cu.can?(:download_files)
       end
 
       def can_send_to_trash?
@@ -292,7 +298,9 @@ module NfsStore
 
           p = path_for role_name: role_name
           # Don't use Regex - it breaks if there are special characters
-          all_files += Dir.glob("#{p}/**/*").reject { |f| Pathname.new(f).directory? }.map { |f| f.sub("#{p}/", '').sub(p, '') }
+          all_files += Dir.glob("#{p}/**/*").reject do |f|
+                         Pathname.new(f).directory?
+                       end.map { |f| f.sub("#{p}/", '').sub(p, '') }
         end
 
         all_files.uniq

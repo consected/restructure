@@ -3,9 +3,13 @@
     <h1>Server Information</h1>
   </div>
   <div class="row">
-      <h2>Restart Server and Clear Memcached</h2>
+      <h2>Restart Server, DelayedJob and Clear Memcached</h2>
       <%= form_tag(admin_app_types_restart_server_url, remote: true) do %>
         <%= submit_tag "Restart server" %>
+      <% end %>
+      <h2>Restart DelayedJob</h2>
+      <%= form_tag(admin_app_types_restart_delayed_job_url, remote: true) do %>
+        <%= submit_tag "Restart DelayedJob" %>
       <% end %>
   </div>
 
@@ -18,6 +22,12 @@
     <%= render partial: 'admin/server_info/view_settings', locals: {settings: @db_settings} %>
   </div>
   <div class="row">  
+    <h2>NfsStore Settings</h2>
+    <%= render partial: 'admin/server_info/view_settings', locals: {settings: @nfs_store_settings} %>
+  </div>  
+
+  <% if @server_type == :passenger %>
+  <div class="row">  
     <h2>Passenger Status</h2>
     <pre><%=@passenger_status%></pre>
   </div>
@@ -25,6 +35,8 @@
     <h2>Passenger Memory Stats</h2>
     <pre><%=@passenger_memory_stats%></pre>
   </div>
+  <% end %>
+
   <div class="row">  
     <h2>Processes</h2>
     <pre><%=@processes%></pre>

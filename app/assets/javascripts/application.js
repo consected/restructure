@@ -46,6 +46,7 @@
 // For nfs_store MD5 support
 //= require spark-md5/spark-md5
 
-
+//= require highlightjs/highlight.pack.js
+//= require ./big_select/big_select.js
 
 //= require_tree ./app

@@ -4,6 +4,9 @@ class Settings
   DefaultMigrationSchema = 'ml_app'
   DefaultSchemaOwner = 'fphs'
 
+  # Does not set the prefix, just specifies what we search by in jobs
+  GlobalIdPrefix = 'fpa1'
+
   StartYearRange = (1900..(Date.current.year)).freeze
   EndYearRange = (1900..(Date.current.year)).freeze
   AgeRange = (1..150).freeze
@@ -33,7 +36,9 @@ class Settings
   # a verified domain name.
   NotificationsFromEmail = ENV['FPHS_FROM_EMAIL']
   # Email address for admin contact
-  AdminEmail = ENV['FPHS_ADMIN_EMAIL']
+  AdminEmail = ENV['FPHS_ADMIN_EMAIL'] || 'admin@restructure'
+  # Email address that identifies the batch user profile. Defaults to the user that matches the AdminEmail
+  BatchUserEmail = ENV['FPHS_BATCH_USER_EMAIL'] || AdminEmail
 
   # Set the max number of recipients for a message, to avoid an unexpected nasty error spamming the whole organization
   MaxNotificationRecipients = ENV['FPHS_MAX_NOTIFY_RECIPS']&.to_i || 200
@@ -138,8 +143,9 @@ class Settings
   DefaultShortLinkLogS3Bucket = ENV['FPHS_SHORTLINK_LOG_BUCKET'] || (Rails.env.production? ? 'url-shortener-logs.fphs' : 'test-fphs-url-shortener-logs')
   LogBucketPrefix = 'access/'
 
-  # Default table names for the primary CRM (Zeus) app
+  # Default table names (and associated configs) for the primary CRM (Zeus) app
   DefaultSubjectInfoTableName = 'player_infos'
+  BestAccuracyScore = 12
   DefaultSecondaryInfoTableName = 'pro_infos'
   DefaultContactInfoTableName = 'player_contacts'
   DefaultAddressInfoTableName = 'addresses'
@@ -157,5 +163,13 @@ class Settings
 
   # Redcap records request options - additional request parameters to add / override the payload
   # to a records request.
-  RedcapRecordsRequestOptions = Rails.env.production? ? { exportSurveyFields: true } : nil
+  # Hash of options are:
+  # {
+  #    returnMetadataOnly: false,
+  #    exportSurveyFields: true,
+  #    exportDataAccessGroups: true,
+  #    returnFormat: 'json'
+  # }
+  RedcapRecordsRequestOptions = Rails.env.test? ? nil : { exportSurveyFields: true }
+  RedcapMetadataRequestOptions = nil
 end

@@ -17,6 +17,7 @@ module Redcap
       self.unchanged_ids = []
       self.errors = []
       self.current_admin = project_admin.admin
+      self.project_admin.current_admin = current_admin
       self.retrieved_files = {}
       self.upserted_records = []
       self.imported_files = []
@@ -28,7 +29,12 @@ module Redcap
     # @param [Redcap::ProjectAdmin] project_admin
     # @param [String] class_name - the class name for the model to store to
     def request_records
+      jobclass = Redcap::CaptureRecordsJob
+      jobs = ProjectAdmin.existing_jobs(jobclass, project_admin)
+      return if jobs.count > 0
+
       Redcap::CaptureRecordsJob.perform_later(project_admin, class_name)
+      project_admin.record_job_request('setup job: store records')
     end
 
     #
@@ -45,7 +51,7 @@ module Redcap
     # This is only intended to be called from a background job.
     # @return [Array{Hash}]
     def retrieve
-      self.records = project_admin.api_client.records request_options: project_admin.records_request_options
+      self.records = project_admin.api_client.records
     end
 
     #
@@ -80,13 +86,20 @@ module Redcap
                              "#{missing_fields.join(' ')}"
       end
 
+      # We have to ignore fields named <form>_timestamp when checking
+      # for completeness of the retrieved records, since the API offers
+      # no way of recognizing which forms have surveys available and would
+      # therefore return a _timestamp field when completed.
+      timestamp_fields = project_admin.redcap_data_dictionary.form_names.map { |f| "#{f}_timestamp".to_sym }
+      expected_minus_form_timestamps = all_expected_fields.keys - timestamp_fields
       records.each do |r|
-        next if r.keys.sort == all_expected_fields.keys.sort
+        actual_fields_minus_timestamps = r.keys - timestamp_fields
+        next if actual_fields_minus_timestamps.sort == expected_minus_form_timestamps.sort
 
         raise FphsException,
               "Redcap::DataRecords retrieved record fields don't match the data dictionary:\n" \
-              "[#{r.keys.sort.join(' ')}]\nshould match the data dictionary\n" \
-              "[#{all_expected_fields.keys.sort.join(' ')}]"
+              "missing: #{(expected_minus_form_timestamps - actual_fields_minus_timestamps).sort.join(' ')}\n" \
+              "additional: #{(actual_fields_minus_timestamps - expected_minus_form_timestamps).sort.join(' ')}"
       end
 
       if records.length < existing_records_length
@@ -140,12 +153,7 @@ module Redcap
         imported_files: imported_files.map { |i| "#{i.path}/#{i.file_name}" }
       }
 
-      ClientRequest.create! current_admin: current_admin,
-                            action: 'store records',
-                            server_url: project_admin.server_url,
-                            name: project_admin.name,
-                            redcap_project_admin: project_admin,
-                            result: result
+      project_admin.record_job_request('store records', result: result)
     end
 
     #

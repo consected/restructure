@@ -1,6 +1,6 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">
-    <h1>Reports</h1>
+    <%= show_admin_heading %>
     <p>
       <%= show_filters %>
     </p>
@@ -16,12 +16,11 @@
       <th class="no-sort"></th>
       <th>Name</th>
       <th>Category</th>
-      <th>Description</th>
 
       <th>Report Type</th>
       <th>Auto</th>
       <th>Searchable</th>
-      <th>Admin</th>
+      <th>Description</th>
       <th class="no-sort"></th>
     </tr>
   </thead>
@@ -36,13 +35,11 @@
         <td><%= link_to  list_item.name, report_path(list_item.id), target: 'report', title: 'opens in a new window' %></td>
         <td><%= list_item.item_type %></td>
 
-        <td><%= list_item.description %></td>
-
         <td><%= list_item.report_type %></td>
         <td><%= list_item.auto %></td>
         <td><%= list_item.searchable %></td>
-        <td><%= list_item.admin_name %></td>
 
+        <td><pre class="shrinkable-block"><%= list_item.description %></pre></td>
 
       </tr>
     <% end %>

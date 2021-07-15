@@ -16,9 +16,6 @@ module Dynamic
       after_initialize :set_action_when
       after_initialize :format_sync_fields
 
-      # Ensure that referenced items have also saved
-      before_save :handle_before_save_triggers
-
       # don't validate the association with the parent item_data
       # blank activity logs do not have one
       # validates parent_type, presence: true
@@ -26,9 +23,6 @@ module Dynamic
       validates :master_id, presence: true
 
       after_save :sync_tracker
-
-      # Ensure that referenced items have also saved
-      after_commit :handle_save_triggers
 
       attr_writer :alt_order
     end
@@ -402,16 +396,6 @@ module Dynamic
     # Check for new records, and work from there.
     def check_for_notification_records
       Messaging::MessageNotification.handle_notification_records self
-    end
-
-    def handle_save_triggers
-      extra_log_type_config&.calc_save_trigger_if self
-      true
-    end
-
-    def handle_before_save_triggers
-      extra_log_type_config&.calc_save_trigger_if self, alt_on: :before_save
-      true
     end
   end
 end

@@ -128,7 +128,8 @@ module NfsStore
       ext_path_str = nil
       ext_path_str = File.join(ext_path) unless ext_path.empty?
 
-      if !no_access_check && !Manage::Filesystem.test_dir(role_name, container, :read, extra_path: ext_path_str, file_name: file_name)
+      if !no_access_check && !Manage::Filesystem.test_dir(role_name, container, :read, extra_path: ext_path_str,
+                                                                                       file_name: file_name)
         Rails.logger.warn "Role #{role_name} can not access #{container} extra_path: #{ext_path_str}, file_name: #{file_name}"
         return nil
       end
@@ -157,10 +158,18 @@ module NfsStore
       res = (res.id != id) || (respond_to?(:completed) && completed) if res
       @file_uniqueness = !res
       unless @file_uniqueness
-        errors.add 'file', 'indicates that a file with this content has already been stored in this container. Duplicate files can not be stored.'
+        errors.add 'file',
+                   'indicates that a file with this content has already been stored in this container. Duplicate files can not be stored.'
         return false
       end
       @file_uniqueness
+    end
+
+    #
+    # Simply look for stored files that have file_name and path that matches the current file.
+    # @return [Boolean]
+    def file_matching_path
+      !!container.stored_files.where(file_name: file_name, path: path).first
     end
 
     def clean_path

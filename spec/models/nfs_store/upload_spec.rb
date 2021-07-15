@@ -147,4 +147,34 @@ RSpec.describe NfsStore::Upload, type: :model do
       expect(res.first).to eq u1
     end
   end
+
+  it 'prevents duplicate uploads from progressing' do
+    file_name = 'test-dup.txt'
+    alt_file_name = 'alt-test-dup.txt'
+    upload_file file_name, 'text content'
+
+    expect do
+      upload_file file_name, 'text content diff'
+    end.to raise_error FsException::Upload
+
+    expect do
+      upload_file alt_file_name, 'text content diff'
+    end.not_to raise_error
+  end
+
+  it 'allows duplicate uploads if the stored file was trashed' do
+    file_name = 'test-dup.txt'
+    alt_file_name = 'alt-test-dup.txt'
+    upload_file file_name, 'text content'
+
+    expect do
+      upload_file file_name, 'text content diff'
+    end.to raise_error FsException::Upload
+
+    @container.stored_files.last.move_to_trash!
+
+    expect do
+      upload_file file_name, 'text content diff'
+    end.not_to raise_error
+  end
 end

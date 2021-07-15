@@ -86,15 +86,16 @@ module Formatter
       first_format_directive = tag_split[1]
       this_ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
 
-      unless d.is_a?(Hash) && (d&.key?(tag_name) || d&.key?(tag_name.to_sym)) || tag.start_with?('embedded_report_')
-        if ignore_missing || this_ignore_missing
-          d = {}
-          missing = true
-        else
+      unless d.is_a?(Hash) && (d&.key?(tag_name.to_s) || d&.key?(tag_name.to_sym)) ||
+             tag.start_with?('embedded_report_')
+        unless ignore_missing || this_ignore_missing
           raise FphsException,
                 "Data (#{d.class.name}) does not contain the tag '#{tag_name}'" \
                  "or :#{tag_name} for #{tagpair}\n#{d || 'data is empty'}"
         end
+
+        d = {}
+        missing = true
       end
 
       tag_value = if missing
@@ -135,7 +136,7 @@ module Formatter
       return text unless text.is_a? String
 
       has_html = !text.scan(HtmlRegEx).empty?
-      text = Kramdown::Document.new(text).to_html.html_safe unless has_html
+      text = Kramdown::Document.new(text, input: 'GFM', hard_wrap: false).to_html.html_safe unless has_html
 
       text
     end

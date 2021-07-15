@@ -4,8 +4,6 @@ module Redcap
   #
   # Job to capture a project archive XML file in the background
   class CaptureProjectArchiveJob < RedcapJob
-    queue_as :default
-
     #
     # Download the full XML project archive, and store it to the file_store container.
     # The stored file record is returned if successful.
@@ -32,6 +30,7 @@ module Redcap
                                    replace: true)
     rescue StandardError => e
       create_failure_record(e, 'capture project archive job', project_admin)
+      project_admin.update_status(:request_failed)
 
       raise
     ensure

@@ -10,6 +10,11 @@
   _fpa.state.current_user_roles = <%= current_user.app_type ? current_user.role_names.to_json.html_safe : [] %>;
   _fpa.state.crosswalk_attrs = <%= Master.crosswalk_attrs.to_json.html_safe %>;
   _fpa.state.alternative_id_fields = <%= Master.alternative_id_fields.to_json.html_safe %>;
+  _fpa.state.user_can = {
+    download_files: <%=!!current_user.can?(:download_files)%>,
+    view_files_as_image: <%=!!current_user.can?(:view_files_as_image)%>,
+    view_files_as_html: <%=!!current_user.can?(:view_files_as_html)%>,
+  }
   <% end %>
   _fpa.loaded.preload();
 

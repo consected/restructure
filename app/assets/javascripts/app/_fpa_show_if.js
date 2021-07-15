@@ -16,7 +16,7 @@ _fpa.show_if.methods = {
 
     var item_key = data.item_type;
     var form_key = data.full_option_type;
-    var def_version = block.attr('data-def-version');
+    var def_version = data.def_version || block.attr('data-def-version');
     var vdef_version = 'v';
     if (def_version) vdef_version += def_version;
 

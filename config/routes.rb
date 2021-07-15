@@ -8,10 +8,10 @@ Rails.application.routes.draw do
   get '/content/:id/:master_id/:secondary_key', to: 'page_layouts#show_content'
   get '/content/:id/:master_type/:master_id/:secondary_key', to: 'page_layouts#show_content'
 
-  get '/help/:library/:section/:subsection', to: 'help#show', as: 'help_page'
-  get '/help/:library/:section/:id', to: 'help#show', as: 'help'
-  get '/help/:library', to: 'help#index', as: 'help_library_home'
   get '/help/:library/:section/images/:image_name', to: 'help#image', as: 'help_image'
+  get '/help/:library/:section/:subsection', to: 'help#show', as: 'help_page', constraints: { subsection: /.+(\.md|\.jpg\.png)?/ }
+  get '/help/:library/:section/:id', to: 'help#show', as: 'help', constraints: { id: /.+(\.md|\.jpg\.png)?/ }
+  get '/help/:library', to: 'help#index', as: 'help_library_home'
 
   resources :help, only: %i[index]
 
@@ -24,8 +24,6 @@ Rails.application.routes.draw do
   end
 
   resources :client_logs, only: [:create]
-
-  resources :imports
 
   namespace :admin do
     resources :external_identifiers, except: %i[show destroy]
@@ -51,7 +49,9 @@ Rails.application.routes.draw do
     resources :app_types, except: [:destroy]
     post 'app_types/upload', to: 'app_types#upload'
     post 'app_types/restart_server', to: 'app_types#restart_server'
+    post 'app_types/restart_delayed_job', to: 'app_types#restart_delayed_job'
 
+    resources :role_descriptions, except: %i[show destroy]
     resources :user_roles, except: %i[show destroy]
     post 'user_roles/copy_user_roles', to: 'user_roles#copy_user_roles'
     resources :page_layouts, except: %i[show destroy]
@@ -71,13 +71,23 @@ Rails.application.routes.draw do
     end
   end
 
-  # get 'redcap/project_admins/:id/request_records' => 'redcap/project_admins#request_records'
+  namespace :imports do
+    resources :model_generators do
+      member do
+        post :analyze_csv
+        post :create_model
+      end
+    end
+    resources :model_generators, except: %i[destroy]
+    resources :imports
+  end
+
   namespace :redcap do
-    resources :project_admins, except: %i[show destroy]
-    resources :project_admins do
+    resources :project_admins, except: %i[show destroy] do
       member do
         post :request_records
         post :request_archive
+        post :force_reconfig
       end
     end
     resources :data_dictionaries, except: %i[show destroy]

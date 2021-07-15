@@ -494,3 +494,85 @@ _fpa.utils.calc_field = function (field_name_sym, form_object_item_type_us) {
   }
 
 };
+
+// Convert HTML to markdown.
+// Cleanup the HTML, removing all attributes on every element
+// Remove common elements that we don't want in the output
+// Ensure every table cell is also converted to pure markdown without HTML
+// Keep all links inline
+// Pass the html as {html: '<markup>...'} so it can be updated
+// The function returns the text markdown
+_fpa.utils.html_to_markdown = function (obj) {
+
+  var $html = $('<div>' + obj.html + '</div>');
+
+  $html.find('style').remove();
+
+  $html.find('*')
+    .not('div, p, h1, h2, h3, h4, i, b, strong, em, u, li, ol, ul, table, tr, td, thead, th, tbody, code, pre, img, a, br, sup')
+    .contents()
+    .unwrap().wrap('');
+
+
+
+  $html.find('*').each(function () {
+    // Remove unnecessary newlines
+    var newtxt = $(this).html().replace(/\n/g, ' ');
+    $(this).html(newtxt);
+  });
+
+  $html.find('*').each(function () {
+    var attributes = $.map(this.attributes, function (item) {
+      return item.name;
+    });
+
+    var not_attr = null;
+    var $el = $(this);
+    var el = $el[0];
+    if (el.tagName == 'A')
+      not_attr = ['href', 'title'];
+    else if (el.tagName == 'IMG')
+      not_attr = ['src', 'title'];
+
+    // now use jQuery to remove the attributes
+    $.each(attributes, function (i, item) {
+      if (!not_attr || not_attr.indexOf(item.toLowerCase()) < 0)
+        $el.removeAttr(item);
+    });
+  });
+
+  // Add a header to each table if necessary
+  $html.find('table').each(function () {
+    var table = $(this)
+    if (table.find('thead').length === 0) {
+      var first_row = table.find('tr').first();
+      var headers = first_row.find('td');
+      var thead_html = $('<thead><tr></tr></thead>')
+      var thead_tr = thead_html.find('tr');
+      headers.each(function () {
+        var th = "<th>" + $(this).html() + "</th>";
+        thead_tr.append(th);
+      });
+
+      first_row.remove()
+      table.prepend(thead_html)
+    }
+  }).addClass('table')
+
+  $html.find('td,th').each(function () {
+    $(this).find('p, h1, h2, h3, h4').contents()
+      .unwrap().append('<br/>')
+  });
+
+  obj.html = $html.html();
+
+  var txt = domador(obj.html, { inline: true });
+
+  // Clean the text to remove
+  // any number of hash or asterisk symbols followed by 
+  // one or more spaces
+  // txt = txt.replace(/\]\(/g, ']\\(');
+  txt = txt.replace(/(^|\n)(#|\*)+ *\n/g, '');
+
+  return txt;
+}

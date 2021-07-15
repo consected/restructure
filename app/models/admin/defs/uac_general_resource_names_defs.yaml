@@ -1,0 +1,84 @@
+App Access:
+
+  app_type: |
+    Access to the app for any purpose. Without access to an app, any
+    other *User Access Controls* are ignored.
+
+Common Features:
+
+  create_master: |
+    Enable a new master record to be created.
+
+  export_csv: |
+    Within searches or reports, allow the results to be exported as a CSV file.
+
+  export_json: |
+    Within searches or reports, allow the results to be exported as a JSON file.
+
+  import_csv:
+    Provide access to the *Import CSV* features. Tables that are to be imported into must also 
+    have *create* access specified.
+
+  print:
+    Enable a *Print* menu item, allowing the current master record(s) to be printed in a meaningful format.
+
+  view_dashboards:
+    Provide access to a list of all app dashboards.
+
+  view_pages:
+    Editable content delivered as Intranet-style pages can be viewed.
+
+  view_data_reference:
+    The full app server data reference can be viewed.
+
+
+Reports:
+
+  view_reports: |
+    Allow a list of available reports to be viewed, typically accessed from a 
+    *Reports* menu item. The reports listed are controlled by *report* type *User Access Controls*.
+
+    Without this access, no reports can be viewed unless the *view_report_not_list* item is granted. 
+
+  view_report_not_list: |
+    Allow individual reports to be viewed, without being able to see a list of reports.
+    The accessible reports are controlled by *report* type *User Access Controls*.
+
+    Links to the reports must be provided by an admin as menu items, or within other configurations. 
+      
+  edit_report_data: |
+    Allow reports that have been set up to provide editable data, to be edited. Otherwise the user
+    will only be able to view the report data.
+
+  create_report_data: |
+    Allow reports that have been set up to provide editable data, to 
+    be have new records created. Otherwise the user
+    will only be able to view the report data, or edit it if *edit_report_data* has been specified.
+
+  view_external_links: |
+    The *external links* tab panel in a master record can only be viewed
+    if granted.
+
+Filestore Browsing and Files:
+
+  download_files: |
+    Allow files in an accessible filestore container to be downloaded.
+    
+  view_files_as_image: |
+    Enable the in-browser viewer, and allow files to be viewed as a rendered image,
+    even if they are not authorized to be downloaded.
+
+  view_files_as_html:
+    Enable the in-browser viewer, and allow files to be viewed as an HTML rendition,
+    even if they are not authorized to be downloaded.
+
+  send_files_to_trash:
+    Enable *send to trash* within the file browser actions menu.
+
+  move_files:
+    Enable *move* within the file browser actions menu.
+
+  user_file_actions:
+    Enable specific actions configured by the Filestore app admin.
+
+

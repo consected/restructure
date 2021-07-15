@@ -54,7 +54,7 @@ RSpec.describe NfsStore::Scripted::ScriptHandler, type: :model do
 
   it 'runs an R script based on a configuration' do
     res = system('which Rscript > /dev/null 2>&1')
-    return unless res
+    expect(res).to be_truthy
 
     config = {
       script_filename: 'sample-rscript.r',

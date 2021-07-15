@@ -45,7 +45,7 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
 
     all_rf = dd.all_retrievable_fields
 
-    db_configs = ds.db_configs
+    db_configs = ds.send :db_configs
     expect(db_configs).to be_a Hash
     expect(db_configs.keys).to eq all_rf.keys
     expect(db_configs).to eq(

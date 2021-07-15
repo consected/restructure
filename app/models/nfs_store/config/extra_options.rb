@@ -13,10 +13,10 @@ module NfsStore
       end
 
       def self.config_def(if_extras: {})
-        {
-          pipeline: pipeline_config,
-          user_file_actions: UserFileActionsExtraOptions.config_def
-        }
+        # {
+        #   pipeline: pipeline_config,
+        # user_file_actions: UserFileActionsExtraOptions.config_def
+        # }
       end
 
       def initialize(config, item)

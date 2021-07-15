@@ -10,7 +10,7 @@ module ActiveRecord
                       :field_opts, :owner, :history_table_id_attr,
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
                       :table_comment, :fields_comments, :db_configs, :mode, :no_master_association,
-                      :requested_action
+                      :requested_action, :resource_type, :prev_table_name
       end
 
       def force_rollback
@@ -61,6 +61,7 @@ module ActiveRecord
 
       def create_or_update_activity_log_tables
         self.requested_action = :create_or_update
+        self.resource_type = :activity_log
 
         if table_exists
           update_fields
@@ -125,6 +126,8 @@ module ActiveRecord
 
       def create_or_update_dynamic_model_tables
         self.requested_action = :create_or_update
+        self.resource_type = :dynamic_model
+
         if table_exists
           update_fields
         else
@@ -186,6 +189,8 @@ module ActiveRecord
 
       def create_or_update_external_identifier_tables(id_field, id_field_type = :bigint)
         self.requested_action = :create_or_update
+        self.resource_type = :external_identifier
+
         if table_exists
           update_fields
         else
@@ -257,11 +262,11 @@ module ActiveRecord
         reversible do |dir|
           dir.up do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute "DROP FUNCTION #{calc_trigger_fn_name(prev_table_name)}"
+            ActiveRecord::Base.connection.execute "DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE"
           end
           dir.down do
             puts "-- drop function #{trigger_fn_name}"
-            ActiveRecord::Base.connection.execute "DROP FUNCTION #{calc_trigger_fn_name(table_name)}"
+            ActiveRecord::Base.connection.execute "DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE"
           end
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
@@ -369,6 +374,7 @@ module ActiveRecord
 
           remove_reference "#{schema}.#{table_name}", :master
           remove_reference "#{schema}.#{history_table_name}", :master
+          skip_master = true
 
         elsif !no_master_association && !reverting? && !col_names.include?('master_id')
           add_reference "#{schema}.#{table_name}", :master,
@@ -381,6 +387,7 @@ module ActiveRecord
                           name: "#{rand_id}_history_master_id"
                         },
                         foreign_key: true
+          skip_master = true
         end
 
         added.each do |c|
@@ -414,12 +421,12 @@ module ActiveRecord
           # or if migrating up, skip this one unless the col name exists in the table
           next unless reverting? && !c.in?(col_names) || !reverting? && c.in?(col_names)
 
+          # Special case
+
+          next if skip_master && c.to_sym == :master_id
+
           if fdef == :references
-            begin
-              remove_reference "#{schema}.#{table_name}", c, options
-            rescue StandardError, ActiveRecord::StatementInvalid
-              nil
-            end
+            remove_reference "#{schema}.#{table_name}", c, options
           else
             remove_column "#{schema}.#{table_name}", c, fdef
           end
@@ -486,12 +493,15 @@ module ActiveRecord
       protected
 
       def ignore_fields
-        /^placeholder_|^embedded_report_|^tracker_history_id$/
+        /^placeholder_|^embedded_report_|^tracker_history_id$|^id$/
       end
 
       def standard_columns
-        pset = %w[id created_at updated_at contactid user_id master_id
-                  extra_log_type admin_id tracker_history_id]
+        pset = %w[id created_at updated_at contactid user_id tracker_history_id]
+        pset += %w[master_id extra_log_type] if resource_type == :activity_log
+        pset += %w[master_id admin_id] if resource_type == :external_identifier
+        pset += %w[master_id] if resource_type == :dynamic_model && !no_master_association
+
         pset += ["#{table_name.singularize}_table_id", history_table_id_attr.to_s]
         pset
       end

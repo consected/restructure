@@ -4,7 +4,7 @@ module ViewHandlers
   module Subject
     extend ActiveSupport::Concern
 
-    BestAccuracyScore = 12
+    BestAccuracyScore = Settings::BestAccuracyScore
 
     included do
       validate :dates_sensible
