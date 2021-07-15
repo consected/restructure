@@ -7,6 +7,11 @@ if [ -z "$1" ]; then
 fi
 
 DEST="$1"
+if [ ! -d ${DEST} ]; then
+  echo "Destination directory '${DEST}' does not exist"
+  exit 2
+fi
+
 EXCLUDE='database.yml favicon.png structure.sql'
 
 cd $(dirname $0)/..
@@ -42,6 +47,9 @@ for FROM in \
 done
 
 # Removed db/structure.sql
+
+rm -rf ${DEST}/log
+rm -rf ${DEST}/tmp
 
 mkdir -p ${DEST}/log
 mkdir -p ${DEST}/tmp
