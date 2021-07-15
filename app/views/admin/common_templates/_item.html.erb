@@ -1,11 +1,14 @@
 <%
   num_fields = 1
   found_options = false
-  index_params.each do |p|
-    is_options_field = p.to_s.end_with?('options') || p.to_s.end_with?('template')
-    unless found_options
-      num_fields += 1
-      found_options = p if is_options_field
+
+  unless no_options_field
+    index_params.each do |p|
+      is_options_field = p.to_s.end_with?('options') || p.to_s.end_with?('template')
+      unless found_options
+        num_fields += 1
+        found_options = p if is_options_field
+      end
     end
   end
 %>

@@ -72,6 +72,7 @@ describe 'user and admin authentication' do
                            admin/app_types admin/user_access_controls
                            admin/app_configurations admin/message_notifications admin/message_templates
                            admin/job_reviews admin/page_layouts admin/user_roles admin/nfs_store/filter/filters
+                           admin/role_descriptions
                            users/contact_infos admin/config_libraries admin/server_info
                            redcap/project_admins redcap/client_requests redcap/data_dictionaries]
 
