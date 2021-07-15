@@ -103,6 +103,7 @@ module NfsStore
         container_files.each do |container_file|
           next unless container_file.respond_to? :last_process_name_run=
 
+          # @todo handle the case where the user that stored this is no longer active in the system
           container_file.current_user = container_file.user
           container_file.last_process_name_run = name
           container_file.save!
