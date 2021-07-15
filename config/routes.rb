@@ -51,6 +51,7 @@ Rails.application.routes.draw do
     post 'app_types/restart_server', to: 'app_types#restart_server'
     post 'app_types/restart_delayed_job', to: 'app_types#restart_delayed_job'
 
+    resources :role_descriptions, except: %i[show destroy]
     resources :user_roles, except: %i[show destroy]
     post 'user_roles/copy_user_roles', to: 'user_roles#copy_user_roles'
     resources :page_layouts, except: %i[show destroy]
