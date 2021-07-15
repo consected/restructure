@@ -25,7 +25,7 @@ class Admin::RoleDescriptionsController < AdminController
   def extra_field_attributes
     {
       app_type_id: {
-        'data-filters-select': '#admin_role_description_role_name'
+        'data-filters-select': '#admin_role_description_role_name,#admin_role_description_role_template'
       }
     }
   end
@@ -51,6 +51,11 @@ class Admin::RoleDescriptionsController < AdminController
   private
 
   def permitted_params
-    %i[app_type_id role_name role_template name description disabled]
+    %i[app_type_id role_name role_template disabled name description]
+  end
+
+  # The role_template field should not be shown as a multiline code block in the index view
+  def no_options_field
+    true
   end
 end

@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 class Admin::RoleDescription < Admin::AdminBase
-  self.table_name = 'user_descriptions'
+  self.table_name = 'role_descriptions'
 
   include AdminHandler
   include AppTyped
 
   validates :role_name, presence: true, unless: -> { role_template.present? }
   validates :role_template, presence: true, unless: -> { role_name.present? }
+  validate :must_be_unique
 
   def self.no_downcase_attributes
     [:name]
@@ -48,5 +49,21 @@ class Admin::RoleDescription < Admin::AdminBase
     end
 
     items
+  end
+
+  private
+
+  #
+  # Validation for uniqueness
+  def must_be_unique
+    if role_template.present? && self.class.active.where(app_type_id: app_type_id, role_template: role_template).first
+      errors.add :role_template, 'already exists'
+    end
+
+    if role_name.present? && self.class.active.where(app_type_id: app_type_id, role_name: role_name).first
+      errors.add :role_name, 'already exists'
+    end
+
+    true
   end
 end
