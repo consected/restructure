@@ -40,7 +40,7 @@ module NfsStore
       end
 
       def self.retrieval_type
-        name.demodulize.underscore.to_sym
+        @retrieval_type ||= name.demodulize.underscore.to_sym
       end
 
       def self.no_downcase_attributes

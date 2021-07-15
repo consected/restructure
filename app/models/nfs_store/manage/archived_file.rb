@@ -7,7 +7,9 @@ module NfsStore
 
       include HandlesContainerFile
 
-      belongs_to :stored_file, class_name: 'NfsStore::Manage::StoredFile', foreign_key: 'nfs_store_stored_file_id'
+      belongs_to :stored_file, class_name: 'NfsStore::Manage::StoredFile', 
+                               foreign_key: 'nfs_store_stored_file_id', 
+                               optional: true
 
       # Analyze the file to complete its ArchivedFile attributes
       def analyze_file!
@@ -21,20 +23,23 @@ module NfsStore
         super(rp)
       end
 
-      # Has the archive been extracted and stored to the DB?
+      # Has the archive been extracted and stored to the DB (but not subsequently been trashed)?
       # @param container [NfsStore::Manage::Container] the container holding the archive
       # @param archive_path [String] the relative path (from the container) to the archive if it is not in the root
       # @param archive_file_name [String] the file name of the archive file
       # @return [Boolean] true if the archive has been extracted leading to at least one entry in the database
       def self.extracted?(container = nil, archive_path = nil, archive_file_name = nil, stored_file: nil)
         if stored_file
-          !!stored_file.archived_files.first
+          af = stored_file.archived_files.last
+          return unless af
+
+          !ContainerFile.trash_path?(af.path)
         elsif !(container || archive_path || archive_file_name)
           raise FsException::Archive, "Can't check if a file is extracted with no parameters"
         else
           archive_file_parts = []
-          archive_file_parts << archive_path if archive_path
-          archive_file_parts << archive_file_name
+          archive_file_parts << archive_path.to_s if archive_path
+          archive_file_parts << archive_file_name.to_s
           archive_file = File.join(archive_file_parts)
           !!where(container: container, archive_file: archive_file).first
         end
@@ -54,7 +59,9 @@ module NfsStore
         path_for role_name: current_role_name
       end
 
-      # File path relative to the container, returning results based on multiple options
+      # File path relative to the container, returning results based on multiple options.
+      # NOTE: we use a lot of #to_s calls in here to avoid holding unnecessary references to objects
+      # especially in a large container lists. This appears to help memory cleanup significantly
       # @param no_filename [Boolean] default (falsey) the filename is returned, otherwise (true) it is not
       # @param final_slash [Boolean] default (falsey) the final slash is not included on a directory path,
       #     otherwise (true) the final slash is included
@@ -66,15 +73,15 @@ module NfsStore
         parts = []
         parts << '.' if leading_dot
         if use_archive_file_name && archive_file.present?
-          parts << archive_file
+          parts << archive_file.to_s
         elsif archive_mount_name.present?
-          parts << archive_mount_name
+          parts << archive_mount_name.to_s
         end
-        parts << path unless path.blank?
-        parts << file_name unless no_filename
+        parts << path.to_s unless path.blank?
+        parts << file_name.to_s unless no_filename
         res = File.join parts
         res += '/' if final_slash && res.present?
-        res
+        res.to_s
       end
 
       # It is possible that repeated or overlapping background processes lead to double entries in the archive_files
