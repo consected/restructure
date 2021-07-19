@@ -126,7 +126,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
 
     dij = NfsStore::Process::DicomDeidentifyJob.new
 
-    dij.perform(sf)
+    dij.perform(sf, @user.app_type_id)
 
     # Brute force reload the file
     sf = sf.class.find(sf.id)
@@ -157,7 +157,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
 
     dij = NfsStore::Process::DicomDeidentifyJob.new
 
-    dij.perform(sf)
+    dij.perform(sf, @user.app_type_id)
 
     # Brute force reload the file
     sf = sf.class.find(sf.id)
@@ -190,7 +190,7 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
 
     dij = NfsStore::Process::DicomDeidentifyJob.new
 
-    dij.perform(sf)
+    dij.perform(sf, @user.app_type_id)
 
     # Brute force reload the file
     sf = sf.class.find(sf.id)
@@ -212,5 +212,63 @@ RSpec.describe NfsStore::Process::DicomDeidentifyJob, type: :model do
 
     expect(file_metadata["Patient's Name"]).to eq 'moved'
     expect(file_metadata['Patient ID']).to eq 'moved again'
+  end
+
+  # The configuration for the pipeline is set in NfsStoreSupport::setup_nfs_store
+  it 'runs a dicom_deidentify job even if the original user has been disabled' do
+    f = 'make_copy_2.dcm'
+    dicom_content = File.read(dicom_file_path(f))
+    @make_copy_2_file = upload_file(f, dicom_content)
+
+    ul = @make_copy_2_file
+    sf = ul.stored_file
+
+    sf.current_user = @user
+    app_type_id = @user.app_type_id
+    expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id)).to be_truthy
+
+    expect(sf.container.parent_item).to be_a ActivityLog::PlayerContactPhone
+
+    # Get the original metadata
+    fs_path, = sf.file_path_and_role_name
+    dcm = DICOM::DObject.read(fs_path)
+    file_metadata = dcm.to_hash
+
+    expect(file_metadata["Patient's Name"]).not_to be_blank
+    expect(file_metadata['Patient ID']).not_to be_blank
+
+    # Disable the current user
+    @user.update!(disabled: true, current_admin: @admin)
+
+    expect(sf.current_user.disabled).to be true
+    # Brute force reload the file
+    sf = sf.class.find(sf.id)
+    sf.current_user = @user
+
+    dij = NfsStore::Process::DicomDeidentifyJob.new
+
+    dij.perform(sf, @user.app_type_id, nil, use_pipeline: { user_file_actions: 'disable_check' })
+
+    @user.update!(disabled: false, current_admin: @admin)
+    enable_user_app_access(@app_type.name, @user)
+
+    @user.update!(app_type_id: app_type_id, current_admin: @admin)
+    expect(@user.app_type_id).to eq app_type_id
+
+    expect(@user.user_roles.pluck(:role_name)).to include 'nfs_store group 600'
+
+    # Brute force reload the file
+    sf = sf.class.find(sf.id)
+    sf.current_user = @user
+    fs_path, = sf.file_path_and_role_name
+
+    expect(fs_path).to be_present
+
+    dcm = DICOM::DObject.read(fs_path)
+    file_metadata = dcm.to_hash
+
+    expect(file_metadata["Patient's Name"]).to eq 'new value'
+    expect(file_metadata['Patient ID']).to eq 'another tagval'
+    expect(file_metadata.keys).not_to include "Patient's Age"
   end
 end

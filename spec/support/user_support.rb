@@ -120,8 +120,9 @@ module UserSupport
 
     if user && access && resource_name != :app_type
       check_access = (access == :see_presence ? access : :access)
-      expect(user.has_access_to?(check_access, resource_type, resource_name)).to be_truthy,
-                                                                                 "Newly created User Access Control not working as expected: #{check_access}, #{resource_type}, #{resource_name}"
+      res = user.has_access_to?(check_access, resource_type, resource_name)
+      expect(res).to be_truthy,
+                     "Newly created User Access Control not working as expected: #{check_access}, #{resource_type}, #{resource_name}"
     end
 
     uac
