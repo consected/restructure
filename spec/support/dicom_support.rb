@@ -101,6 +101,18 @@ module DicomSupport
             pipeline:
               - rerun_all:
 
+          - name: Check File Handling for Disabled User
+            id: disable_check
+            pipeline:
+              - dicom_deidentify:
+                - file_filters: make_copy_2.dcm
+                  recursive: true
+                  new_path: copied-file-2
+                  set_tags:
+                    '0010,0010': moved 2
+                    '0010,0020': moved 2 again
+
+
         pipeline:
           - mount_archive:
           - index_files:

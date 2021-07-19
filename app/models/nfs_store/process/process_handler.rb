@@ -98,7 +98,11 @@ module NfsStore
         puts "Job Running: (#{name}) of (#{job_list})" unless Rails.env.test?
         Rails.logger.info "Job Running: (#{name}) of (#{job_list})"
 
-        self.class.job_class(name).perform_later container_files, parent_item, call_options
+        self.container_files = [container_files] if container_files.is_a? NfsStore::Manage::ContainerFile
+        cf = container_files.first
+        in_app_type_id = (cf.current_user || cf.user)&.app_type_id
+
+        self.class.job_class(name).perform_later container_files, in_app_type_id, parent_item, call_options
 
         container_files.each do |container_file|
           next unless container_file.respond_to? :last_process_name_run=
