@@ -38,6 +38,21 @@ module NfsStore
         job_call_options[:do_not_run_job_after]
       end
 
+      def setup_container_file_current_user(container_file, in_app_type_id)
+        user = container_file.user
+        if user.disabled
+          orig_user = user
+          user = User.use_batch_user(in_app_type_id)
+          has_nfs_role = user.user_roles.pluck(:role_name).find { |r| r.start_with? 'nfs_store group ' }
+          unless has_nfs_role
+            raise FsException::Action,
+                  "Job container file user (#{orig_user.id}) is disabled and batch user does not have an " \
+                  "nfs_store group role in the current app: #{user.app_type_id}"
+          end
+        end
+        container_file.current_user = user
+      end
+
       #
       # Handle flow control through enqueue callbacks
       # @param [String] name is the name of the job

@@ -23,7 +23,7 @@ module NfsStore
       # rules to the file, replacing it in the underlying storage and updating the
       # appropriate record attributes.
       # @param [NfsStore::Manage::ArchivedFile | NfsStore::Manage::StoredFile] container_file
-      def perform(container_files, activity_log = nil, call_options = {})
+      def perform(container_files, in_app_type_id, activity_log = nil, call_options = {})
         log 'Running Scripted Job'
 
         container_files = [container_files] if container_files.is_a? NfsStore::Manage::ContainerFile
@@ -39,6 +39,8 @@ module NfsStore
             next
           end
 
+          c_user = setup_container_file_current_user(container_file, in_app_type_id)
+
           # Run through each config
           configs.each do |config|
             # Get scopes that can filter files to be deidentified
@@ -47,7 +49,6 @@ module NfsStore
 
             if container_file.is_a? NfsStore::Manage::ArchivedFile
               # For an archive, get the list of files based on the archived files filter
-              c_user = container_file.current_user = container_file.user
               archived_files = filtered_files[:archived_files].where(id: container_file.id)
 
               # Each file is deidentified in turn

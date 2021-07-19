@@ -15,7 +15,7 @@ module NfsStore
       def self.extract_metadata_from(container_file)
         return if container_file.content_type.blank?
 
-        container_file.current_user = container_file.user
+        container_file.current_user ||= container_file.user
         full_path = container_file.retrieval_path
 
         begin

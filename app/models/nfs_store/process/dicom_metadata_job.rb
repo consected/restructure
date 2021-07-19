@@ -14,18 +14,19 @@ module NfsStore
                               )
                             }
 
-      def perform(container_files, activity_log = nil, _options = {})
-        log "Extracting DICOM metadata"
+      def perform(container_files, in_app_type_id, activity_log = nil, _options = {})
+        log 'Extracting DICOM metadata'
 
         container_files = [container_files] if container_files.is_a? NfsStore::Manage::ContainerFile
 
         container_files.each do |container_file|
           container_file.container.parent_item ||= activity_log
+          c_user = setup_container_file_current_user(container_file, in_app_type_id)
 
           if container_file.is_archive?
-            container_file.current_user = container_file.user
             afs = container_file.archived_files.all
             afs.each do |af|
+              af.current_user = c_user
               NfsStore::Dicom::MetadataHandler.extract_metadata_from af
             end
           else

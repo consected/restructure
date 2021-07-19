@@ -72,7 +72,8 @@ RSpec.describe NfsStore::Process::ScriptedJob, type: :model do
 
     dij = NfsStore::Process::ScriptedJob.new
 
-    dij.perform(sf)
+    curr_app = ul.stored_file.current_user.app_type_id
+    dij.perform(sf, curr_app)
 
     content = File.read(sf.retrieval_path)
     expect(content).to eq "This is other content for the file\n"
