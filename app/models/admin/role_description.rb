@@ -18,11 +18,13 @@ class Admin::RoleDescription < Admin::AdminBase
   # Get role names from, either unfiltered, or from a previous scope
   # @return [Array{String}] list of string role names
   def self.user_role_names
-    Admin::UserRole.role_names_by_app_name conditions: { app_types: { id: Settings::OnlyLoadAppTypes } }
+    conditions = { conditions: { app_types: { id: Settings::OnlyLoadAppTypes } } } if Settings::OnlyLoadAppTypes
+    Admin::UserRole.role_names_by_app_name(conditions)
   end
 
   def self.role_names_by_app_name
-    Admin::UserRole.role_names_by_app_name conditions: { app_types: { id: Settings::OnlyLoadAppTypes } }
+    conditions = { conditions: { app_types: { id: Settings::OnlyLoadAppTypes } } } if Settings::OnlyLoadAppTypes
+    Admin::UserRole.role_names_by_app_name(conditions)
   end
 
   #
