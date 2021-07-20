@@ -78,6 +78,41 @@ RSpec.describe NfsStore::Archive::Mounter, type: :model do
     expect(res).to be_truthy
   end
 
+  it 'handles split zip files' do
+    tmpzipdir = Dir.mktmpdir
+    f = 'split.zip'
+    archive_path = dicom_file_path(f)
+
+    # Start by successfully extracting the file using the bash script
+    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+    res = Kernel.system(*cmd)
+    expect(res).to be_truthy
+  end
+
+  it 'indicates a failure if a zip is broken' do
+    # Start by testing a file that has a changed byte
+    tmpzipdir = Dir.mktmpdir
+    f = 'broken.zip'
+    archive_path = dicom_file_path(f)
+
+    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+    res = Kernel.system(*cmd)
+    expect(res).to be_falsey
+
+    # If a split zip file is missing a part, fail
+    tmpzipdir = Dir.mktmpdir
+    f = 'broken-split.zip'
+    archive_path = dicom_file_path(f)
+
+    # Start by successfully extracting the file using the bash script
+    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+    res = Kernel.system(*cmd)
+    expect(res).to be_falsey
+
+    
+  end
+
+
   it 'uploads a file that is archive format but does nothing if it is marked with status "in process"' do
     sf = @zip_file.stored_file
     mounter = NfsStore::Archive::Mounter.new
