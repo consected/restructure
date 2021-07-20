@@ -132,7 +132,7 @@ RSpec.describe NfsStore::Scripted::ScriptHandler, type: :model do
       args: %w[first container_file_path third]
     }
 
-    cf = double('NfsStore::Manage::ContainerFile', user: 1, user_id: 1, retrieval_path: '/a/madeup/path', 'current_user=': nil)
+    cf = double('NfsStore::Manage::ContainerFile', user: 1, user_id: 1, retrieval_path: '/a/madeup/path', current_user: nil, 'current_user=': nil)
     res = NfsStore::Scripted::ScriptHandler.run_script cf, config
     expect(res).to be true
   end
@@ -153,15 +153,22 @@ RSpec.describe NfsStore::Scripted::ScriptHandler, type: :model do
                   email: 'test@rspec',
                   user_preference: user_preference,
                   contact_info: nil,
+                  app_type: nil,
+                  'app_type=': nil,
+                  app_type_id: nil,
+                  'app_type_id=': nil,
                   attributes: {
                     id: 1,
-                    email: 'test@rspec'
+                    email: 'test@rspec',
+                    app_type_id: 1
                   })
 
     cf = double('NfsStore::Manage::ContainerFile',
                 user: user,
                 user_id: 1,
-                retrieval_path: '/a/madeup/path', 'current_user=': nil,
+                retrieval_path: '/a/madeup/path',
+                'current_user=': nil,
+                current_user: user,
                 attributes: {
                   master_id: -1,
                   user_id: 1,
@@ -209,10 +216,12 @@ RSpec.describe NfsStore::Scripted::ScriptHandler, type: :model do
     expect(fe).to be_truthy
 
     # Try a file in a different path
-    cf = c.stored_files[1]
+    cf = c.stored_files.select { |sf| sf.file_name.end_with? '.dcm' }[1]
     new_path = 'test_path'
     cf.move_to new_path
     sh = NfsStore::Scripted::ScriptHandler.new(config)
+
+    expect(c.stored_files.where(path: new_path, file_name: 'newfile1.txt').first).to be nil
 
     exit_res = sh.run_script cf
     expect(exit_res).to be true

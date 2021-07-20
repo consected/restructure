@@ -99,19 +99,10 @@ module NfsStore
         Rails.logger.info "Job Running: (#{name}) of (#{job_list})"
 
         self.container_files = [container_files] if container_files.is_a? NfsStore::Manage::ContainerFile
-        cf = container_files.first
-        in_app_type_id = (cf.current_user || cf.user)&.app_type_id
 
-        self.class.job_class(name).perform_later container_files, in_app_type_id, parent_item, call_options
+        self.class.job_class(name).perform_later container_files, app_type_id_for_file_user, parent_item, call_options
 
-        container_files.each do |container_file|
-          next unless container_file.respond_to? :last_process_name_run=
-
-          # @todo handle the case where the user that stored this is no longer active in the system
-          container_file.current_user = container_file.user
-          container_file.last_process_name_run = name
-          container_file.save!
-        end
+        set_container_file_statuses name
       end
 
       # Run the next job in the job_list
@@ -120,14 +111,7 @@ module NfsStore
         next_name = next_job_after current_name
 
         unless next_name
-          container_files.each do |container_file|
-            next unless container_file.respond_to? :last_process_name_run=
-
-            container_file.current_user = container_file.user
-            container_file.last_process_name_run = LastProcessAllDone
-            container_file.save!
-          end
-
+          set_container_file_statuses LastProcessAllDone
           clear_processing_flags
           return
         end
@@ -144,6 +128,21 @@ module NfsStore
 
         job_list[i + 1]
       end
+
+      #
+      # Set the status of #last_process_name_run to *name*
+      # for all container files
+      # rubocop:disable Style/AccessorMethodName
+      def set_container_file_statuses(name)
+        container_files.each do |container_file|
+          next unless container_file.respond_to? :last_process_name_run=
+
+          setup_container_file_current_user(container_file)
+          container_file.last_process_name_run = name
+          container_file.save!
+        end
+      end
+      # rubocop:enable Style/AccessorMethodName
 
       def self.job_class(name)
         classname = "#{name}_job".camelize
@@ -198,6 +197,39 @@ module NfsStore
 
         ufa = NfsStore::Config::UserFileActionsExtraOptions.user_file_action_item(user_file_actions, action_name)
         ufa[:pipeline] if ufa
+      end
+
+      #
+      # Assume that all #container_files are related - get the first and use it to
+      # lookup the current user or saved user for the file and its Admin::AppType #id
+      def app_type_id_for_file_user
+        cf = container_files.first
+        (cf.current_user || cf.user)&.app_type_id
+      end
+
+      # @see ProcessHandler#setup_container_file_current_user
+      def setup_container_file_current_user(container_file)
+        self.class.setup_container_file_current_user(container_file, app_type_id_for_file_user)
+      end
+
+      #
+      # Set the current_user in the supplied container_file. If the #user of the container_file
+      # is no longer active, use the Batch User instead, setting it to the in_app_type_id app
+      # @param [NfsStore::Manage::ContainerFile] container_file
+      # @param [Integer] in_app_type_id - id of the Admin::AppType for the Batch User if needed
+      def self.setup_container_file_current_user(container_file, in_app_type_id)
+        user = container_file.user
+        if user.disabled
+          orig_user = user
+          user = User.use_batch_user(in_app_type_id)
+          has_nfs_role = user.user_roles.pluck(:role_name).find { |r| r.start_with? 'nfs_store group ' }
+          unless has_nfs_role
+            raise FsException::Action,
+                  "Job container file user (#{orig_user.id}) is disabled and batch user does not have an " \
+                  "nfs_store group role in the current app: #{user.app_type_id}"
+          end
+        end
+        container_file.current_user = user
       end
     end
   end

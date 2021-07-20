@@ -57,6 +57,8 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
 
   it 'runs a single job outside of the pipeline' do
     f = 'make_copy.dcm'
+    expect(@container.stored_files.where(file_name: f).first).to be nil
+
     dicom_content = File.read(dicom_file_path(f))
     @make_copy_file = upload_file(f, dicom_content)
 

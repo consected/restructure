@@ -51,6 +51,33 @@ RSpec.describe NfsStore::Archive::Mounter, type: :model do
     expect(mounter.archive_file_count).to eq 11
   end
 
+  it 'indicates a failure if the incorrect number of files are extracted' do
+    tmpzipdir = Dir.mktmpdir
+    f = 'dicoms.zip'
+    archive_path = dicom_file_path(f)
+
+    # Start by successfully extracting the file using the bash script
+    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+    res = Kernel.system(*cmd)
+    expect(res).to be_truthy
+
+    FileUtils.rm_f File.join(tmpzipdir, '000005.dcm')
+
+    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+    res = Kernel.system(*cmd)
+    expect(res).to be_falsey
+
+    # Now remove all files but leave the directory
+    10.times do |i|
+      FileUtils.rm_f File.join(tmpzipdir, "00000#{i}.dcm")
+    end
+    FileUtils.rm_f File.join(tmpzipdir, '000010.dcm')
+
+    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+    res = Kernel.system(*cmd)
+    expect(res).to be_truthy
+  end
+
   it 'uploads a file that is archive format but does nothing if it is marked with status "in process"' do
     sf = @zip_file.stored_file
     mounter = NfsStore::Archive::Mounter.new

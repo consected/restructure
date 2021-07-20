@@ -21,7 +21,7 @@ module NfsStore
       # Simply return the appropriate call_options from the job
       # @return [Hash]
       def job_call_options
-        job.arguments[2]
+        job.arguments[3]
       end
 
       #
@@ -38,19 +38,14 @@ module NfsStore
         job_call_options[:do_not_run_job_after]
       end
 
+      #
+      # Set the current_user in the supplied container_file. If the #user of the container_file
+      # is no longer active, use the Batch User instead, setting it to the in_app_type_id app
+      # @see ProcessHandler#setup_container_file_current_user
+      # @param [NfsStore::Manage::ContainerFile] container_file
+      # @param [Integer] in_app_type_id - id of the Admin::AppType for the Batch User if needed
       def setup_container_file_current_user(container_file, in_app_type_id)
-        user = container_file.user
-        if user.disabled
-          orig_user = user
-          user = User.use_batch_user(in_app_type_id)
-          has_nfs_role = user.user_roles.pluck(:role_name).find { |r| r.start_with? 'nfs_store group ' }
-          unless has_nfs_role
-            raise FsException::Action,
-                  "Job container file user (#{orig_user.id}) is disabled and batch user does not have an " \
-                  "nfs_store group role in the current app: #{user.app_type_id}"
-          end
-        end
-        container_file.current_user = user
+        ProcessHandler.setup_container_file_current_user(container_file, in_app_type_id)
       end
 
       #

@@ -190,7 +190,7 @@ module NfsStore
           tmpzipdir = "#{dir}/zip"
           FileUtils.mkdir_p tmpzipdir
 
-          cmd = ['unzip', archive_path, '-d', tmpzipdir]
+          cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
           res = Kernel.system(*cmd)
           raise FsException::Action, "Failed to unzip the archive file: #{archive_path}" unless res
 
