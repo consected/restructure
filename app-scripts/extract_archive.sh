@@ -9,11 +9,11 @@ if [ -z "${archive_path}" ] || [ -z "${tmpzipdir}" ]; then
   exit 3
 fi
 
-tmpres=/tmp/$(mktemp nfs-store-unzipresXXXXXXX)
+tmpres=$(mktemp /tmp/nfs-store-unzip-res-XXXXXXX)
 unzip -n "${archive_path}" -d "${tmpzipdir}" > "${tmpres}"
 
 if [ $? != 0 ]; then
-  rm -f ${tempres}
+  rm -f "${tempres}"
   echo >&2 "Failed unzip -n '${archive_path}' -d '${tmpzipdir}'"
   exit 1
 fi
