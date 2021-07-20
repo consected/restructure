@@ -53,7 +53,7 @@ module NfsStore
       # @return [Boolean] result success
       def run_script(container_file)
         # Ensure the permissions allow the script to run successfully
-        container_file.current_user = container_file.user if container_file
+        container_file.current_user ||= container_file.user if container_file
         self.container_file = container_file
 
         cmd = []
