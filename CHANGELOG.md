@@ -20,6 +20,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 ## Unreleased
 
 
+## [7.4.34] - 2021-07-20
+
+
 ## [7.4.33] - 2021-07-20
 
 
