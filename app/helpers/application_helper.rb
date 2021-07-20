@@ -1,32 +1,47 @@
 # frozen_string_literal: true
 
 module ApplicationHelper
+  #
+  # Hyphenated name (singular) of the current controller
   def hyphenated_name
     controller_name.singularize.hyphenate
   end
 
+  #
+  # Current email is the user or admin if the user is not logged in
   def current_email
     return nil unless current_user || current_admin
 
     (current_user || current_admin).email
   end
 
+  #
+  # App environment name for body class attribute
   def env_name
     Settings::EnvironmentName.gsub(' ', '_').underscore.downcase
   end
 
+  #
+  # An admin_page or user_page class to add to a body class attribute
   def admin_or_user_class
     request.path.start_with?('/admin/') ? 'admin_page' : 'user_page'
   end
 
+  #
+  # class name for the body class attribute
   def current_app_type_id_class
     "app-type-id-#{current_user.app_type_id}" if current_user
   end
 
+  #
+  # 'class=""' attribute to add to the main body tag
   def body_classes
-    " class=\"#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class} initial-compiling \"".html_safe
+    class_list = "#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class}"
+    " class=\"#{class_list} initial-compiling \"".html_safe
   end
 
+  #
+  # Block cancel button for a common template
   def common_inline_cancel_button(class_extras = nil, link_text = nil)
     path_pref = "/masters/#{object_instance.master_id}" unless object_instance.class.no_master_association
 
@@ -39,40 +54,61 @@ module ApplicationHelper
     button_class = 'glyphicon glyphicon-remove-sign'
     class_extras ||= 'pull-right' unless link_text
 
-    "<a class=\"show-entity show-#{hyphenated_name} #{class_extras} #{link_text ? '' : button_class}\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{hyphenated_name}-id=\"#{object_instance.id}\" data-result-target=\"##{hyphenated_name}-#{@master&.id}-#{@id}\" data-template=\"#{hyphenated_name}-result-template\" >#{link_text}</a>".html_safe
+    <<~END_HTML
+      <a class="show-entity show-#{hyphenated_name} #{class_extras} #{link_text ? '' : button_class}" title="cancel" href="#{cancel_href}" data-remote="true" data-#{hyphenated_name}-id="#{object_instance.id}" data-result-target="##{hyphenated_name}-#{@master&.id}-#{@id}" data-template="#{hyphenated_name}-result-template" >#{link_text}</a>
+    END_HTML
+      .html_safe
   end
 
+  #
+  # Generate the edit form id for a common template
   def common_edit_form_id
     "#{hyphenated_name}-edit-form-#{@master&.id}-#{@id}"
   end
 
+  #
+  # Options to pass to an edit form for a common template
   def common_edit_form_hash(extras = {})
     res = extras.dup
 
     res[:remote] = true
     res[:html] ||= {}
-    res[:html].merge!('data-result-target' => "##{hyphenated_name}-#{@master&.id}-#{@id}, [form-res-id='#{hyphenated_name}-#{@master&.id}-#{@id}']", 'data-template' => "#{hyphenated_name}-result-template")
+    res[:html].merge!(
+      'data-result-target' => "##{hyphenated_name}-#{@master&.id}-#{@id}, " \
+                              "[form-res-id='#{hyphenated_name}-#{@master&.id}-#{@id}']",
+      'data-template' => "#{hyphenated_name}-result-template"
+    )
     res
   end
 
+  #
+  # Options to pass to an edit form
   def edit_form_hash(extras = {})
     send("#{edit_form_helper_prefix}_edit_form_hash", extras)
   end
 
+  #
+  # Generate the edit form id
   def edit_form_id
     send("#{edit_form_helper_prefix}_edit_form_id")
   end
 
+  #
+  # Cancel button for a block
   def inline_cancel_button(class_extras = nil, link_text = nil)
     send("#{edit_form_helper_prefix}_inline_cancel_button", class_extras, link_text)
   end
 
+  #
+  # Edit icons to appear for each index item
   def admin_edit_controls
-    "<div class=\"admin-edit-controls\">
+    <<~END_HTML
+      <div class="admin-edit-controls">
         #{link_to 'cancel', url_for(action: :edit)}
         #{link_to 'admin menu', '/'}
-        </div>
-      ".html_safe
+      </div>
+    END_HTML
+      .html_safe
   end
 
   #
@@ -93,12 +129,25 @@ module ApplicationHelper
     dmsg = Formatter::DialogTemplate.generate_message(dname, object_instance)
     id = "dialog-#{dname}-#{dlabel}".gsub(' ', '-')
     if strip_tags(dmsg).length <= 100 || dlabel.blank?
-      "<div class='in-form-dialog collapse' id='#{id}'>#{dmsg}</div><div class='dialog-btn-container'><p>#{dmsg}</p></div>".html_safe
+      <<~END_HTML
+        <div class="in-form-dialog collapse" id="#{id}">#{dmsg}</div><div class="dialog-btn-container"><p>#{dmsg}</p></div>
+      END_HTML
+        .html_safe
     else
-      "<div class='in-form-dialog collapse' id='#{id}'>#{dmsg}</div><div class='dialog-btn-container'><p>#{strip_tags dmsg[0..100]}...</p><a class='btn btn-default in-form-dialog-btn' onclick=\"$('.in-form-dialog').collapse('hide'); $('.dialog-btn-container').show(); $('##{id}').collapse('show'); $(this).parents('.dialog-btn-container').hide();\">#{dlabel}</a></div>".html_safe
+      <<~END_HTML
+        <div class="in-form-dialog collapse" id="#{id}">#{dmsg}</div>
+        <div class="dialog-btn-container">
+          <p>#{strip_tags dmsg[0..100]}...</p>
+          <a class="btn btn-default in-form-dialog-btn"
+             onclick="$('.in-form-dialog').collapse('hide'); $('.dialog-btn-container').show(); $('##{id}').collapse('show'); $(this).parents('.dialog-btn-container').hide();"
+          >#{dlabel}</a></div>
+      END_HTML
+        .html_safe
     end
   end
 
+  #
+  # Generate the caption to appear before a field, based on the dynamic extra options
   def show_caption_before(key, captions, mode = :edit)
     return unless captions && captions[key]
 
@@ -110,6 +159,8 @@ module ApplicationHelper
     caption.html_safe
   end
 
+  #
+  # Present the field label for the specified key, based on the dynamic extra options
   def label_for(key, labels, remove = nil, force_default: nil)
     res = labels && labels[key]
     return res if res
@@ -121,6 +172,8 @@ module ApplicationHelper
     t("field_names.#{key}", default: key.humanize).capitalize
   end
 
+  #
+  # A standard set of block size classes for different block styles
   def layout_item_block_sizes
     {
       narrow: 'col-md-6 col-lg-4',
@@ -130,30 +183,55 @@ module ApplicationHelper
     }
   end
 
+  #
+  # Cache key for pregenerated partials
   def partial_cache_key(partial)
     u = current_user || current_admin
-    apptype = u&.app_type_id if u.is_a? User
+    auth_type = u.class.name
+    if u.is_a? User
+      apptype = u.app_type_id
+      userrole = Admin::UserRole.where(app_type_id: apptype)
+                                .reorder(updated_at: :desc)
+                                .limit(1)
+                                .first&.updated_at.to_i.to_s
+
+      uac = Admin::UserAccessControl.where(app_type_id: apptype)
+                                    .reorder(updated_at: :desc)
+                                    .limit(1)
+                                    .first&.updated_at.to_i.to_s
+    end
 
     unless @item_updates
-      cs = [Admin::UserAccessControl, Admin::UserRole, Admin::MessageTemplate, DynamicModel, ActivityLog, ExternalIdentifier, Admin::ConfigLibrary, Admin::PageLayout]
+      cs = [Admin::MessageTemplate,
+            DynamicModel, ActivityLog, ExternalIdentifier,
+            Admin::ConfigLibrary, Admin::PageLayout]
       @item_updates = cs.map { |c| c.reorder(updated_at: :desc).limit(1).first&.updated_at.to_i.to_s }.join('-')
     end
 
-    "#{partial}-partial2-#{Application.server_cache_version}-#{u.class.name}-#{u&.id}-#{apptype}-#{@item_updates}"
+    ver = Application.server_cache_version
+    "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{apptype}-#{@item_updates}-#{userrole}-#{uac}"
   end
 
+  #
+  # Generate a checksum version for the partial cache key
   def template_version
     Digest::SHA256.hexdigest partial_cache_key(:loaded)
   end
 
-  def markdown_to_html(md)
-    Kramdown::Document.new(md).to_html.html_safe if md
+  #
+  # Convert markdown text to html that can be used
+  def markdown_to_html(md_text)
+    Kramdown::Document.new(md_text).to_html.html_safe if md_text
   end
 
+  #
+  # Generate a label with icon attached that indicates a link will open in a new window
   def link_label_open_in_new(label)
     "#{label} <i class=\"glyphicon glyphicon-new-window\"></i>".html_safe
   end
 
+  #
+  # Format the *date_time* according to the current user's timezone and preferences
   def current_user_date_time(date_time)
     return unless date_time
 
