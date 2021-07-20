@@ -46,6 +46,7 @@ describe 'Register an incoming call', driver: :app_firefox_driver do
     setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: @user
 
     expect(@user.has_access_to?(:access, :table, :player_contacts)).to be_truthy
+    @app_type = @user.app_type
     expect(ActivityLog.model_names).to include 'player_contact_phone'
 
     expect(@user.has_access_to?(:access, :table, :activity_log__player_contact_phones)).to be_truthy
@@ -58,6 +59,7 @@ describe 'Register an incoming call', driver: :app_firefox_driver do
   before :example do
     ensure_user_matches_login_email
     user_logs_in
+    expect(User.find(@user.id).app_type_id).to eq @app_type.id
     expect(@user.has_access_to?(:access, :table, :player_contacts)).to be_truthy
   end
 

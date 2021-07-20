@@ -20,7 +20,8 @@ module NfsStoreSupport
     create_user_role default_role, user: @user, app_type: @app_type
     create_user_role 'nfs_store group 600', user: @user, app_type: @app_type
 
-    enable_user_app_access(@app_type.name, User.batch_user)
+    enable_user_app_access(@app_type, User.batch_user)
+    User.use_batch_user @app_type
     expect(User.batch_user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id)).to be_truthy
     batch_user = User.use_batch_user @app_type.id
 
