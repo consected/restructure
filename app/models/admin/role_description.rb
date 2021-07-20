@@ -36,12 +36,18 @@ class Admin::RoleDescription < Admin::AdminBase
           '(users.disabled is null or users.disabled = false) AND ' \
           "users.email LIKE '%@template' AND users.email <> 'template@template'"
 
-    Admin::UserRole
+    res = Admin::UserRole
       .joins(:user, :app_type)
       .includes(:user, :app_type)
       .where(condsql)
-      .where(app_types: { id: Settings::OnlyLoadAppTypes })
-      .each do |r|
+    
+      res = if Settings::OnlyLoadAppTypes
+              res.where(app_types: { id: Settings::OnlyLoadAppTypes })
+            else
+              res.where.not(app_types: { id: nil })
+            end
+
+      res = res.each do |r|
       k = "#{r.app_type_id}/#{r.app_type.name}"
       if items[k]
         items[k] << r.user.email unless items[k].include?(r.user.email)
