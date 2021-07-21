@@ -13,6 +13,7 @@ single_zip_path=$(mktemp /tmp/nfs-store-unzip-single-XXXXXXX)
 tmpres=$(mktemp /tmp/nfs-store-unzip-res-XXXXXXX)
 
 rm -f ${single_zip_path}
+cd "$(dirname "${archive_path}")"
 
 # Join split files to a single file in the temp directory
 zip -q -s 0 "${archive_path}" -O "${single_zip_path}"
