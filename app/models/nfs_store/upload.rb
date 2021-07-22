@@ -63,7 +63,7 @@ module NfsStore
         # Check if a different file with this name has already been uploaded
         conditions.delete :file_hash
         upload = Upload.where(conditions).order(id: :desc).first
-        return unless upload && file_matching_path
+        return unless upload&.file_matching_path
 
         raise FsException::FilenameExists,
               'A different file with this name already exists. Either rename the file or upload it inside a folder.'
