@@ -113,6 +113,7 @@ module NfsStore
       def failed_archive_flag_path
         "#{archive_path}#{FailedArchiveSuffix}"
       end
+
       #
       # An extract is marked as being in progress with a flag file in the root directory,
       # named with the stored file name and a special extension.
@@ -139,6 +140,7 @@ module NfsStore
       end
 
       def extract_failed!
+        extract_completed!
         FileUtils.touch(failed_archive_flag_path)
       end
 
@@ -182,12 +184,12 @@ module NfsStore
         res = true
         return :not_archive unless has_archive_extension?
         return if extract_in_progress?
-        
+
         extract_in_progress!
         pn = Pathname.new(mounted_path)
         Dir.rmdir mounted_path if pn.exist? && pn.empty?
         return :non_empty_dir_already_exists if pn.exist?
-        
+
         unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
           extract_failed!
           raise FsException::Filesystem,
@@ -206,8 +208,8 @@ module NfsStore
         res = Kernel.system(*cmd)
         unless res
           extract_failed!
-          puts "Failed to unzip the archive file: #{archive_path}" 
-          raise FsException::Action, "Failed to unzip the archive file: #{archive_path}" 
+          puts "Failed to unzip the archive file: #{archive_path}"
+          raise FsException::Action, "Failed to unzip the archive file: #{archive_path}"
         end
 
         FileUtils.chown_R nil, stored_file.current_gid.to_i, tmpzipdir

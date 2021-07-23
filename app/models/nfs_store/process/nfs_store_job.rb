@@ -87,12 +87,12 @@ module NfsStore
           next if do_not_run_job_after?
 
           job_process_handler.run_next_job_after name
-        rescue
-          puts "Job #{name} failed for file #{job_container_file.id} : #{e} : #{job}" unless Rails.env.test?
+        rescue Exception, StandardError, FsException, FphsException => e
+          puts "Job #{name} failed for file #{job_container_file} : #{e} : #{job}" unless Rails.env.test?
           NfsStore::Process::ProcessHandler.set_container_file_statuses "failed: #{name}", job_container_file
+          job_process_handler.clear_processing_flags
           raise
         end
-
       end
     end
   end
