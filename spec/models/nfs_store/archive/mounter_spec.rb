@@ -37,7 +37,7 @@ RSpec.describe NfsStore::Archive::Mounter, type: :model do
   it 'uploads a file that is not an archive format and ignores it' do
     sf = @uploaded_files.first.stored_file
     expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be false
-    expect(NfsStore::Archive::Mounter.mount(sf)).to be_nil
+    expect(NfsStore::Archive::Mounter.mount(sf)).to eq :not_archive
   end
 
   it 'uploads a file that is archive format and extracts it' do

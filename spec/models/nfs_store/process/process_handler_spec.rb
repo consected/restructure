@@ -72,6 +72,29 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
     expect(sf.last_process_name_run.to_s).to eq name
   end
 
+  it 'runs a single job that fails and is handled appropriately' do
+
+    f = 'bad.dcm'
+    expect(@container.stored_files.where(file_name: f).first).to be nil
+
+    dicom_content = File.read(dicom_file_path(f))
+    bad_file = upload_file(f, dicom_content)
+
+    ul = bad_file
+    sf = ul.stored_file
+    sf.current_user = @user
+
+    name = 'test_failure'
+    
+    expect {
+      NfsStore::Process::ProcessHandler.new(sf, do_not_run_job_after: true).run(name)
+    }.to raise_error 'forced failure'
+
+    sf = NfsStore::Manage::StoredFile.find sf.id
+    expect(sf.last_process_name_run.to_s).to eq "failed: #{name}"
+  end
+
+
   it 'runs user_file_actions pipeline' do
     f = '000000.dcm'
     dicom_content = File.read(dicom_file_path(f))

@@ -134,11 +134,16 @@ module NfsStore
       # for all container files
       # rubocop:disable Style/AccessorMethodName
       def set_container_file_statuses(name)
+        self.class.set_container_file_statuses(name, container_files)
+      end
+
+      def self.set_container_file_statuses(name, container_files)
         container_files.each do |container_file|
           next unless container_file.respond_to? :last_process_name_run=
 
-          setup_container_file_current_user(container_file)
           container_file.last_process_name_run = name
+          container_file.current_user = container_file.user
+          container_file.force_save!
           container_file.save!
         end
       end
