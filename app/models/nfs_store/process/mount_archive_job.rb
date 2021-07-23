@@ -13,7 +13,6 @@ module NfsStore
                             }
 
       def perform(container_files, in_app_type_id, activity_log = nil, _options = {})
-        
         container_files = [container_files] if container_files.is_a? NfsStore::Manage::ContainerFile
         log "Mounting archive file #{container_files&.first&.id}"
 
@@ -25,7 +24,7 @@ module NfsStore
             prevent_next_job!
             break
           end
-          puts "Succesfful mount: #{res}"
+          puts "Successful mount: #{res}"
         end
       end
     end
