@@ -13,14 +13,18 @@ module NfsStore
                             }
 
       def perform(container_files, in_app_type_id, activity_log = nil, _options = {})
-        log 'Mounting archive file'
-
         container_files = [container_files] if container_files.is_a? NfsStore::Manage::ContainerFile
+        log "Mounting archive file #{container_files&.first&.id}"
 
         container_files.each do |container_file|
           container_file.container.parent_item ||= activity_log
           setup_container_file_current_user(container_file, in_app_type_id)
-          NfsStore::Archive::Mounter.mount container_file
+          res = NfsStore::Archive::Mounter.mount container_file
+          unless res
+            prevent_next_job!
+            break
+          end
+          puts "Successful mount: #{res}"
         end
       end
     end
