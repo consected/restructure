@@ -116,6 +116,13 @@ module NfsStore
       !file_uniqueness
     end
 
+    #
+    # Simply look for stored files that have file_name and path that matches the current file.
+    # @return [Boolean]
+    def file_matching_path
+      !!container.stored_files.where(file_name: file_name, path: path).first
+    end
+
     private
 
     def path_for(role_name: nil)
@@ -163,13 +170,6 @@ module NfsStore
         return false
       end
       @file_uniqueness
-    end
-
-    #
-    # Simply look for stored files that have file_name and path that matches the current file.
-    # @return [Boolean]
-    def file_matching_path
-      !!container.stored_files.where(file_name: file_name, path: path).first
     end
 
     def clean_path
