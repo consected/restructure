@@ -136,9 +136,16 @@
                 col = col.to_json if col.is_a?(Hash)
                 col_tag ||= 'pre' if got_nl
                 
+                add_class = if col_tag == 'pre' && l > 4
+                  'expandable'
+                end
+
                 case show_as[col_name] 
                 when 'div'
                   col_tag = 'div' 
+                when 'fixed-pre'
+                  col_tag = 'pre'
+                  add_class = ''    
                 when 'checkbox'
                   col_tag = 'div'   
                   col = if col
@@ -163,6 +170,22 @@
                       "<div class=\"report-option-items\"><div><strong>#{citem.first}</strong>&nbsp;<span>#{citem.last}</span></div></div>"
                     end.join("").html_safe
                   end
+                when 'list'
+                  col_tag = 'ul'
+                  
+                  if col.is_a?(String)
+                    if col.present?
+                      col = JSON.parse(col) 
+                    else
+                      col = nil
+                    end
+                  end
+                  
+                  if col
+                    col = col.map do |citem|
+                      "<li class=\"report-list-items\">#{citem}</li>"
+                    end.join("").html_safe
+                  end
                 when 'url'
                   if col.present?
                     col_url_parts = col&.scan(/^\[([\w\s\d]+)\]\((.+)\)$/)
@@ -173,7 +196,7 @@
                 col_tag = show_as[col_name] if show_as[col_name].present? 
                 end
                 
-            %><% if col_tag%><<%=col_tag%> class="<% if l > 4%>expandable<% end %>"><% end %><%= col %><% if col_tag %></<%=col_tag%>><% end %></td>
+            %><% if col_tag%><<%=col_tag%> class="<%=add_class%>"><% end %><%= col %><% if col_tag %></<%=col_tag%>><% end %></td>
           <%  
               end
               i += 1
