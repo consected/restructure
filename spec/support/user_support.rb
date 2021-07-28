@@ -91,17 +91,35 @@ module UserSupport
     "#{UserPrefix}#{part}@#{UserDomain}"
   end
 
-  def enable_user_app_access(app_name, user = nil)
-    @user.app_type = Admin::AppType.where(name: app_name).first
-    setup_access :app_type, resource_type: :general, access: :read, user: user
+  #
+  # Enable access to an app type for a user (or default @user)
+  # @param [String | Integer | Admin::AppType] app_type - name, id or AppType
+  # @param [User] user - optional user or default will be @user
+  # @return [Admin::UserAccessControl]
+  def enable_user_app_access(app_type, user = nil)
+    user ||= @user
+
+    case app_type
+    when String
+      app_type = Admin::AppType.where(name: app_type).first
+    when Integer
+      app_type = Admin::AppType.find(app_type)
+    end
+
+    res = user.has_access_to?(:access, :general, :app_type, alt_app_type_id: app_type.id)
+    return res if res
+
+    res = setup_access :app_type, resource_type: :general, access: :read, user: user, app_type: app_type
+    expect(user.has_access_to?(:access, :general, :app_type, alt_app_type_id: app_type.id))
+    res
   end
 
-  def setup_access(resource_name = nil, resource_type: :table, access: :create, user: nil)
+  def setup_access(resource_name = nil, resource_type: :table, access: :create, user: nil, app_type: nil)
     return if @path_prefix == '/admin'
 
     resource_name ||= objects_symbol
 
-    app_type = @user.app_type
+    app_type ||= @user.app_type
 
     uac = Admin::UserAccessControl.where(app_type: app_type, resource_type: resource_type, resource_name: resource_name)
     uac = uac.where(user: user) if user
@@ -120,8 +138,9 @@ module UserSupport
 
     if user && access && resource_name != :app_type
       check_access = (access == :see_presence ? access : :access)
-      expect(user.has_access_to?(check_access, resource_type, resource_name)).to be_truthy,
-                                                                                 "Newly created User Access Control not working as expected: #{check_access}, #{resource_type}, #{resource_name}"
+      res = user.has_access_to?(check_access, resource_type, resource_name)
+      expect(res).to be_truthy,
+                     "Newly created User Access Control not working as expected: #{check_access}, #{resource_type}, #{resource_name}"
     end
 
     uac

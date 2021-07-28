@@ -51,7 +51,10 @@ class User < ActiveRecord::Base
     bu = batch_user
     return unless bu
 
-    bu.update(app_type: with_app)
+    raise FphsException, 'use_batch_user must specify an app' unless with_app
+
+    with_app = with_app.id if with_app.is_a? Admin::AppType
+    bu.update(app_type_id: with_app)
     bu
   end
 

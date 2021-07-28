@@ -1,25 +1,67 @@
 #
 # Report Options
 view_options:
-  hide_table_names:
-  humanize_column_names:
-  hide_result_count:
-  hide_export_buttons:
-  hide_criteria_panel:
-  prevent_collapse_for_list:
-  hide_field_names_with_comments:
-  show_column_comments: # true or array
-    - schema.table
-    - schema.other_table
-  corresponding_data_dic:
-  view_as:
-  search_button_label:
-  report_auto_submit_on_change:
-  no_results_scroll:
+  hide_table_names: false (default) | true
+  # hide table names that appear below field names
+
+  humanize_column_names: false (default) | true
+  # make column names into a friendly human form
+  # (remove underscores and capitalize words)
+
+  hide_result_count: false (default) | true
+  # Don't show the record count below the search form when
+  # results are returned
+
+  hide_export_buttons: false (default) | true
+  # Don't show the export (csv, json) buttons even if a
+  # user is authorized to export in those formats
+
+  hide_criteria_panel: false (default) | true
+  # Don't show the search criteria panel
+    
+  prevent_collapse_for_list: false (default) | true
+  # For search results showing full master records,
+  # prevent each item from collapsing
+
+  hide_field_names_with_comments: false (default) | true
+  # Don't show field names if there is a comment on the field
+
+  show_column_comments: true | <array>
+  # Show column comments:
+  #   true: for the whole set of results across
+  #   array of schema.table names: for specific tables in the results
+  #     formatted like this:
+  #     - schema.table
+  #     - schema.other_table
+
+  corresponding_data_dic: <string>
+  # Force the use of a specific data dictionary for column labels
+  
+  view_as: <string>
+  # View the results as one of:
+  #   table (default)
+  #   list
+  #   chart
+  #   calendar
+
+  search_button_label: <string>
+  # Label to show on the search button
+
+  report_auto_submit_on_change: false (default) | true
+  # Auto submit a search on change of a criteria field
+
+  no_results_scroll: false (default) | true
+  # Prevent scrolling of the page directly to search results
+  # if a result is returned
 
 list_options:
-  hide_in_list:
-  list_description:
+  hide_in_list: false (default) | true
+  # Hide this report in the list of available reports, but still
+  # allow it to be run
+
+  list_description: <string>
+  # Markdown formatted description to appear in the list of available reports,
+  # allowing the main description field to appear just in the search criteria form
 
 view_css:
   classes:

@@ -17,6 +17,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
   end
 
   it 'has a valid model to store records to, which must be a subclass of Dynamic::DynamicModelBase' do
+    setup_file_fields
     dm = DynamicModel.active.where(category: 'redcap').first.implementation_class
     expect(dm < Dynamic::DynamicModelBase).to be true
 

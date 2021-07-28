@@ -16,8 +16,26 @@ module NfsStoreSupport
     @trash_pc = create_item(data: rand(10_000_000_000_000_000), rank: 0)
 
     @app_type = @user.app_type
+    expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id)).to be_truthy
     create_user_role default_role, user: @user, app_type: @app_type
     create_user_role 'nfs_store group 600', user: @user, app_type: @app_type
+
+    enable_user_app_access(@app_type, User.batch_user)
+    User.use_batch_user @app_type
+    expect(User.batch_user.has_access_to?(:access, :general, :app_type, alt_app_type_id: @app_type.id)).to be_truthy
+    batch_user = User.use_batch_user @app_type.id
+
+    begin
+      create_user_role default_role, user: batch_user, app_type: @app_type
+    rescue StandardError
+      nil
+    end
+
+    begin
+      create_user_role 'nfs_store group 600', user: batch_user, app_type: @app_type
+    rescue StandardError
+      nil
+    end
 
     if clean_files
       test_dir = File.join(
@@ -142,26 +160,29 @@ ENDDEF
     @aldef.option_configs(force: true)
     ActivityLog::PlayerContactPhone.definition.option_configs(force: true)
 
-    finalize_al_setup
+    finalize_al_setup user: @user
+    finalize_al_setup user: batch_user, skip_al_setup: true
   end
 
-  def finalize_al_setup(activity: nil)
+  def finalize_al_setup(activity: nil, user: nil, skip_al_setup: nil)
+    user ||= @user
     activity ||= :step_1
     @resource_name = ActivityLog::PlayerContactPhone.definition.option_type_config_for(activity).resource_name
 
-    setup_access 'activity_log__player_contact_phones', user: @user
-    setup_access @resource_name, resource_type: :activity_log_type, user: @user
-    setup_access "activity_log__player_contact_phone__#{activity}".to_sym, resource_type: :activity_log_type, user: @user
+    setup_access 'activity_log__player_contact_phones', user: user
+    setup_access @resource_name, resource_type: :activity_log_type, user: user
+    setup_access "activity_log__player_contact_phone__#{activity}".to_sym, resource_type: :activity_log_type, user: user
 
-    setup_access 'nfs_store__manage__containers', user: @user
-    setup_access 'nfs_store__manage__stored_files', user: @user
-    setup_access 'nfs_store__manage__archived_files', user: @user
-    setup_access :download_files, resource_type: :general, access: :read, user: @user
+    setup_access 'nfs_store__manage__containers', user: user
+    setup_access 'nfs_store__manage__stored_files', user: user
+    setup_access 'nfs_store__manage__archived_files', user: user
+    setup_access :download_files, resource_type: :general, access: :read, user: user
+
+    return if @user.id == User.batch_user.id || skip_al_setup
 
     basedir = NfsStore::Manage::Filesystem.temp_directory
     FileUtils.mkdir_p File.join(basedir, 'gid600', "app-type-#{@app_type.id}", 'containers')
-
-    @player_contact.master.current_user = @user
+    @player_contact.master.current_user = user
 
     # Make sure the tests will run cleanly
     mrs = ModelReference.all

@@ -6,6 +6,7 @@ module NfsStore
       ArchiveExtensions = ['.zip', '.tar', '.gz', '.bz2', '.7z'].freeze
       ArchiveMountSuffix = '.__mounted-archive__'
       ProcessingArchiveSuffix = '.__processing-archive__'
+      FailedArchiveSuffix = '.__failed-archive__'
       ProcessingIndexSuffix = '.__processing-index__'
       MountPerms = '227'
       ExtractionTimeout = 1800
@@ -47,6 +48,7 @@ module NfsStore
           end
 
           puts 'Retrying extract and indexing'
+          # Remove the existing flags before restarting
           mounter.extract_completed!
           mounter.index_completed!
           sf.process_new_file
@@ -105,6 +107,13 @@ module NfsStore
         "#{archive_path}#{ProcessingArchiveSuffix}"
       end
 
+      # Filename of the flag used to indicate an archive extract failed
+      # @param archive_file_name [String] the file name of the archive file to be mounted
+      # @return [String] the flag filename
+      def failed_archive_flag_path
+        "#{archive_path}#{FailedArchiveSuffix}"
+      end
+
       #
       # An extract is marked as being in progress with a flag file in the root directory,
       # named with the stored file name and a special extension.
@@ -128,6 +137,11 @@ module NfsStore
 
       def extract_in_progress!
         FileUtils.touch(processing_archive_flag_path)
+      end
+
+      def extract_failed!
+        extract_completed!
+        FileUtils.touch(failed_archive_flag_path)
       end
 
       def extract_completed!
@@ -168,53 +182,57 @@ module NfsStore
       # unzip -v zipname.zip | grep 'Defl:N' | wc -l
       def mount
         res = true
-        return unless has_archive_extension?
+        return :not_archive unless has_archive_extension?
         return if extract_in_progress?
 
         extract_in_progress!
-
         pn = Pathname.new(mounted_path)
         Dir.rmdir mounted_path if pn.exist? && pn.empty?
+        return :non_empty_dir_already_exists if pn.exist?
 
-        unless pn.exist?
-          unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
-            raise FsException::Filesystem,
-                  "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}"
-          end
+        unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
+          extract_failed!
+          raise FsException::Filesystem,
+                "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}"
+        end
 
-          tpn = Pathname.new(temp_mounted_path)
-          FileUtils.rm_rf temp_mounted_path if tpn.exist?
-          dir = File.join(Manage::Filesystem.temp_directory, "__filestore__#{SecureRandom.hex}")
-          FileUtils.mkdir_p dir
+        tpn = Pathname.new(temp_mounted_path)
+        FileUtils.rm_rf temp_mounted_path if tpn.exist?
+        dir = File.join(Manage::Filesystem.temp_directory, "__filestore__#{SecureRandom.hex}")
+        FileUtils.mkdir_p dir
 
-          tmpzipdir = "#{dir}/zip"
-          FileUtils.mkdir_p tmpzipdir
+        tmpzipdir = "#{dir}/zip"
+        FileUtils.mkdir_p tmpzipdir
 
-          cmd = ['unzip', archive_path, '-d', tmpzipdir]
-          res = Kernel.system(*cmd)
-          raise FsException::Action, "Failed to unzip the archive file: #{archive_path}" unless res
+        cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+        res = Kernel.system(*cmd)
+        unless res
+          extract_failed!
+          puts "Failed to unzip the archive file: #{archive_path}"
+          raise FsException::Action, "Failed to unzip the archive file: #{archive_path}"
+        end
 
-          FileUtils.chown_R nil, stored_file.current_gid.to_i, tmpzipdir
-          FileUtils.cp_r tmpzipdir, temp_mounted_path
+        FileUtils.chown_R nil, stored_file.current_gid.to_i, tmpzipdir
+        FileUtils.cp_r tmpzipdir, temp_mounted_path
 
+        begin
+          FileUtils.mv temp_mounted_path, mounted_path
+          FileUtils.rm_rf dir
+        rescue StandardError => e
+          extract_failed!
           begin
-            FileUtils.mv temp_mounted_path, mounted_path
-            FileUtils.rm_rf dir
-          rescue StandardError => e
-            extract_completed!
-            begin
-              FileUtils.rm_rf temp_mounted_path
-              FileUtils.rm_rf mounted_path
-            rescue StandardError => e2
-              raise FsException::Action,
-                    "Failed to move the extracted archive files and remove the mounted path for: #{archive_path}\n" \
-                    "#{e}\n#{e2}"
-            end
-            raise FsException::Action, "Failed to move the extracted archive files: #{archive_path}\n#{e}"
+            FileUtils.rm_rf temp_mounted_path
+            FileUtils.rm_rf mounted_path
+          rescue StandardError => e2
+            raise FsException::Action,
+                  "Failed to move the extracted archive files and remove the mounted path for: #{archive_path}\n" \
+                  "#{e}\n#{e2}"
           end
+          raise FsException::Action, "Failed to move the extracted archive files: #{archive_path}\n#{e}"
         end
 
         extract_completed! if res
+        res
       end
 
       #

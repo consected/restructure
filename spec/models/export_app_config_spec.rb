@@ -200,8 +200,9 @@ RSpec.describe 'Export an app configuration', type: :model do
     @user.app_type = res
     @user.save!
     app_type = res
-
-    expect(@user.has_access_to?(:create, :table, :player_infos)).to be_truthy
+    expect(User.find(@user.id).app_type_id).to eq app_type.id
+    expect(@user.has_access_to?(:access, :general, :app_type, alt_app_type_id: app_type.id))
+    expect(@user.has_access_to?(:read, :table, :player_infos)).to be_truthy
 
     expect(ExternalIdentifier.where(name: 'bhs_assignments').first).to be_a ExternalIdentifier
     a = Admin::UserAccessControl.where app_type: app_type, resource_type: :table, resource_name: :bhs_assignments

@@ -18,7 +18,7 @@ module NfsStore
       #      delete_tags: ["0020,0080"]
       #    }
       def self.deidentify_file(container_file, config)
-        container_file.current_user = container_file.user
+        container_file.current_user ||= container_file.user
         return if container_file.content_type.blank?
 
         full_path = container_file.retrieval_path
@@ -46,7 +46,8 @@ module NfsStore
 
           # Specifically create a stored file, even if the original was an archived file
           # since we want it to be stored independently of the original archive
-          container_file = NfsStore::Manage::StoredFile.store_new_file(new_tmp_image_path, container_file.container, attrs)
+          container_file = NfsStore::Manage::StoredFile.store_new_file(new_tmp_image_path, container_file.container,
+                                                                       attrs)
         else
           container_file.replace_file! new_tmp_image_path
         end

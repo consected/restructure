@@ -100,10 +100,10 @@ RSpec.describe NfsStore::Upload, type: :model do
       files << create_stored_file('.', 'abc_2 is a test')
 
       f0 = create_filter('^/abc_')
-      f = create_filter('^/fabc')
-      f = create_filter('^fdir\/')
-      f = create_filter('^/fghi')
-      f = create_filter('^fid\/{{id}} - id file')
+      create_filter('^/fabc')
+      create_filter('^fdir\/')
+      create_filter('^/fghi')
+      create_filter('^fid\/{{id}} - id file')
 
       @container.previous_upload_stored_file_ids = files.map(&:id)
 
@@ -122,7 +122,7 @@ RSpec.describe NfsStore::Upload, type: :model do
       u1 = @other_users[1]
 
       f1 = create_filter('^/abc_', user: u0)
-      f2 = create_filter('^/abc_', user: u1)
+      create_filter('^/abc_', user: u1)
 
       res = @container.filter_notifications(@other_users + [@user])
 
@@ -164,7 +164,6 @@ RSpec.describe NfsStore::Upload, type: :model do
 
   it 'allows duplicate uploads if the stored file was trashed' do
     file_name = 'test-dup.txt'
-    alt_file_name = 'alt-test-dup.txt'
     upload_file file_name, 'text content'
 
     expect do
