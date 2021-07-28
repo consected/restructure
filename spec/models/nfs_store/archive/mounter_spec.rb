@@ -37,7 +37,7 @@ RSpec.describe NfsStore::Archive::Mounter, type: :model do
   it 'uploads a file that is not an archive format and ignores it' do
     sf = @uploaded_files.first.stored_file
     expect(NfsStore::Archive::Mounter.has_archive_extension?(sf)).to be false
-    expect(NfsStore::Archive::Mounter.mount(sf)).to be_nil
+    expect(NfsStore::Archive::Mounter.mount(sf)).to eq :not_archive
   end
 
   it 'uploads a file that is archive format and extracts it' do
@@ -50,6 +50,68 @@ RSpec.describe NfsStore::Archive::Mounter, type: :model do
     expect(mounter.mount).to be_truthy
     expect(mounter.archive_file_count).to eq 11
   end
+
+  it 'indicates a failure if the incorrect number of files are extracted' do
+    tmpzipdir = Dir.mktmpdir
+    f = 'dicoms.zip'
+    archive_path = dicom_file_path(f)
+
+    # Start by successfully extracting the file using the bash script
+    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+    res = Kernel.system(*cmd)
+    expect(res).to be_truthy
+
+    FileUtils.rm_f File.join(tmpzipdir, '000005.dcm')
+
+    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+    res = Kernel.system(*cmd)
+    expect(res).to be_falsey
+
+    # Now remove all files but leave the directory
+    10.times do |i|
+      FileUtils.rm_f File.join(tmpzipdir, "00000#{i}.dcm")
+    end
+    FileUtils.rm_f File.join(tmpzipdir, '000010.dcm')
+
+    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+    res = Kernel.system(*cmd)
+    expect(res).to be_truthy
+  end
+
+  it 'handles split zip files' do
+    tmpzipdir = Dir.mktmpdir
+    f = 'split.zip'
+    archive_path = dicom_file_path(f)
+
+    # Start by successfully extracting the file using the bash script
+    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+    res = Kernel.system(*cmd)
+    expect(res).to be_truthy
+  end
+
+  it 'indicates a failure if a zip is broken' do
+    # Start by testing a file that has a changed byte
+    tmpzipdir = Dir.mktmpdir
+    f = 'broken.zip'
+    archive_path = dicom_file_path(f)
+
+    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+    res = Kernel.system(*cmd)
+    expect(res).to be_falsey
+
+    # If a split zip file is missing a part, fail
+    tmpzipdir = Dir.mktmpdir
+    f = 'broken-split.zip'
+    archive_path = dicom_file_path(f)
+
+    # Start by successfully extracting the file using the bash script
+    cmd = ['app-scripts/extract_archive.sh', archive_path, tmpzipdir]
+    res = Kernel.system(*cmd)
+    expect(res).to be_falsey
+
+    
+  end
+
 
   it 'uploads a file that is archive format but does nothing if it is marked with status "in process"' do
     sf = @zip_file.stored_file

@@ -10,5 +10,13 @@ module UserRoleHandler
     has_many :user_roles,
              ->(user) { user_app_type(user) },
              autosave: true, class_name: 'Admin::UserRole'
+
+    after_save :clear_assoc_cache
+  end
+
+  def clear_assoc_cache
+    user_roles.reset
+    Admin::UserRole.user_app_type(self).reset
+    clear_role_names!
   end
 end

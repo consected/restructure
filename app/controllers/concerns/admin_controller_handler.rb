@@ -11,7 +11,8 @@ module AdminControllerHandler
     helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance,
                   :objects_instance, :human_name, :no_edit, :primary_model,
                   :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?,
-                  :help_section, :help_subsection, :title, :no_create, :show_head_info, :view_folder
+                  :help_section, :help_subsection, :title, :no_create, :show_head_info, :view_folder,
+                  :no_options_field
   end
 
   def index
@@ -317,6 +318,13 @@ module AdminControllerHandler
   #
   # Should a head info partial be shown?
   def show_head_info
+    false
+  end
+
+  #
+  # Overridable method, ensuring that index view doesn't mistake a field
+  # ending with "options" or "template" as a multiline code block
+  def no_options_field
     false
   end
 end

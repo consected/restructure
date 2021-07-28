@@ -91,3 +91,11 @@ a.collapsed > .caret {
 #admin_user_access_control_resource_name {
   width: 30em;
 }
+
+#admin_role_description_name {
+  width: 30em;
+}
+
+.form-group[data-out-attr-name="name"] {
+  display: block;
+}

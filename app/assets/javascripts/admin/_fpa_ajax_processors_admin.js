@@ -58,27 +58,34 @@ _fpa.postprocessors_admin = {
 
     block.find('select[data-filters-select]').not('.filters-select-attached').each(function () {
       var $el = $(this);
-      var filter_sel = $el.attr('data-filters-select');
+      var filter_sel_attr = $el.attr('data-filters-select');
+      var filter_sels = filter_sel_attr.split(',');
       $el.on('change', function () {
         var val = $el.val();
-        $(filter_sel + ' optgroup[data-group-num]').hide();
-        $(filter_sel + ' optgroup[data-group-num="' + val + '"]').show();
+        for (var i in filter_sels) {
+          var filter_sel = filter_sels[i];
+          $(filter_sel + ' optgroup[data-group-num]').hide();
+          $(filter_sel + ' optgroup[data-group-num="' + val + '"]').show();
+        }
       });
 
-      var val = $el.val();
-      $(filter_sel + ' optgroup[label]').each(function () {
-        if (!$(this).attr('data-group-num')) {
-          var l = $(this).attr('label');
-          var ls = l.split('/', 2);
-          var last = ls.length - 1;
-          var first = 0;
-          $(this).attr('label', ls[last]);
-          $(this).attr('data-group-num', ls[first]);
-        }
+      for (var i in filter_sels) {
+        var filter_sel = filter_sels[i];
 
-      }).hide();
-      $(filter_sel + ' optgroup[data-group-num="' + val + '"]').show();
+        var val = $el.val();
+        $(filter_sel + ' optgroup[label]').each(function () {
+          if (!$(this).attr('data-group-num')) {
+            var l = $(this).attr('label');
+            var ls = l.split('/', 2);
+            var last = ls.length - 1;
+            var first = 0;
+            $(this).attr('label', ls[last]);
+            $(this).attr('data-group-num', ls[first]);
+          }
 
+        }).hide();
+        $(filter_sel + ' optgroup[data-group-num="' + val + '"]').show();
+      }
     }).addClass('filters-select-attached');
 
     block.find('#admin_user_role_role_name').not('.added-user-role-typeahead').each(function () {

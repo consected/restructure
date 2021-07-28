@@ -355,10 +355,11 @@ module Redcap
                                             options: options
     end
 
-    def setup_file_fields
+    def setup_file_fields(alt_name = nil)
       mock_file_field_requests
 
-      tn = 'redcap_test.test_file_field_recs'
+      tn = alt_name || 'redcap_test.test_file_field_recs'
+
       @project_admin = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url('file_field'), api_key: @project[:api_key], study: 'Q3',
                                                     current_admin: @admin, dynamic_model_table: tn
     end

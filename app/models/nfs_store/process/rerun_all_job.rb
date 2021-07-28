@@ -13,14 +13,14 @@ module NfsStore
       # Perform the job (called in the background from ActiveJob),
       # to trigger all jobs to run again.
       # @param [NfsStore::Manage::ArchivedFile | NfsStore::Manage::StoredFile] container_file
-      def perform(container_files, _activity_log = nil, _call_options = {})
+      def perform(container_files, in_app_type_id, _activity_log = nil, _call_options = {})
         log 'Rerun all file jobs'
 
         container_files = [container_files] if container_files.is_a? NfsStore::Manage::ContainerFile
 
         container_files.each do |container_file|
-          container = container_file.container
-          container_file.current_user = container_file.user
+          container_file.container
+          setup_container_file_current_user(container_file, in_app_type_id)
 
           if container_file.respond_to? :last_process_name_run
             container_file.last_process_name_run = nil

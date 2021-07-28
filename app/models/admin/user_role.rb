@@ -60,8 +60,10 @@ class Admin::UserRole < Admin::AdminBase
 
   # Get roles names in a hash, keyed by the "app.id/app.name". May be filtered by a previous scope
   # @return [Hash] hash with string keys of app names and values as arrays of role names for each
-  def self.role_names_by_app_name
+  def self.role_names_by_app_name(conditions: nil)
     res = select(:role_name, :app_type_id).distinct.includes(:app_type).order(role_name: :asc)
+    res = res.where(conditions) if conditions
+
     items = {}
     res.each do |role|
       m = role.app_type

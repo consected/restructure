@@ -59,7 +59,7 @@ RSpec.describe NfsStore::Process::RerunAllJob, type: :model do
 
     dij = NfsStore::Process::RerunAllJob.new
 
-    dij.perform(sf)
+    dij.perform(sf, @user.app_type_id)
 
     # Brute force reload the file
     sf = sf.class.find(sf.id)

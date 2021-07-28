@@ -6,7 +6,7 @@ class CreateUserDescriptions < ActiveRecord::Migration[5.2]
   include ActiveRecord::Migration::SqlHelpers
 
   def change
-    create_table :user_descriptions do |t|
+    create_table :role_descriptions do |t|
       t.belongs_to :app_type, foreign_key: true
       t.string :role_name
       t.string :role_template
@@ -17,9 +17,9 @@ class CreateUserDescriptions < ActiveRecord::Migration[5.2]
       t.timestamps
     end
 
-    create_table :user_description_history do |t|
-      t.belongs_to :user_description, foreign_key: true,
-                                      index: { name: 'idx_h_on_user_descriptions_id' }
+    create_table :role_description_history do |t|
+      t.belongs_to :role_description, foreign_key: true,
+                                      index: { name: 'idx_h_on_role_descriptions_id' }
 
       t.belongs_to :app_type, foreign_key: true
       t.string :role_name
@@ -32,7 +32,7 @@ class CreateUserDescriptions < ActiveRecord::Migration[5.2]
     end
 
     create_general_admin_history_trigger('ml_app',
-                                         :user_descriptions,
+                                         :role_descriptions,
                                          %i[
                                            app_type_id role_name role_template name description
                                          ])
