@@ -364,6 +364,60 @@ CREATE FUNCTION ml_app.current_user_id() RETURNS integer
     $$;
 
 
+--
+-- Name: datadic_choice_history_upd(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.datadic_choice_history_upd() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO datadic_choice_history (
+    source_name, source_type, form_name, field_name, value, label, redcap_data_dictionary_id,
+    disabled,
+    admin_id,
+    created_at,
+    updated_at,
+    datadic_choice_id)
+  SELECT
+    NEW.source_name, NEW.source_type, NEW.form_name, NEW.field_name, NEW.value, NEW.label, NEW.redcap_data_dictionary_id,
+    NEW.disabled,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: datadic_variable_history_upd(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.datadic_variable_history_upd() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO datadic_variable_history (
+    study, source_name, source_type, domain, form_name, variable_name, variable_type, presentation_type, label, label_note, annotation, is_required, valid_type, valid_min, valid_max, multi_valid_choices, is_identifier, is_derived_var, multi_derived_from_id, doc_url, target_type, owner_email, classification, other_classification, multi_timepoints, equivalent_to_id, storage_type, db_or_fs, schema_or_path, table_or_file, storage_varname, redcap_data_dictionary_id, position, section_id, sub_section_id, title,
+    disabled,
+    admin_id,
+    created_at,
+    updated_at,
+    datadic_variable_id)
+  SELECT
+    NEW.study, NEW.source_name, NEW.source_type, NEW.domain, NEW.form_name, NEW.variable_name, NEW.variable_type, NEW.presentation_type, NEW.label, NEW.label_note, NEW.annotation, NEW.is_required, NEW.valid_type, NEW.valid_min, NEW.valid_max, NEW.multi_valid_choices, NEW.is_identifier, NEW.is_derived_var, NEW.multi_derived_from_id, NEW.doc_url, NEW.target_type, NEW.owner_email, NEW.classification, NEW.other_classification, NEW.multi_timepoints, NEW.equivalent_to_id, NEW.storage_type, NEW.db_or_fs, NEW.schema_or_path, NEW.table_or_file, NEW.storage_varname, NEW.redcap_data_dictionary_id, NEW.position, NEW.section_id, NEW.sub_section_id, NEW.title,
+    NEW.disabled,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -2302,6 +2356,60 @@ CREATE FUNCTION ml_app.log_user_update() RETURNS trigger
 
 
 --
+-- Name: redcap_data_dictionary_history_upd(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.redcap_data_dictionary_history_upd() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO redcap_data_dictionary_history (
+    redcap_project_admin_id, field_count, captured_metadata,
+    disabled,
+    admin_id,
+    created_at,
+    updated_at,
+    redcap_data_dictionary_id)
+  SELECT
+    NEW.redcap_project_admin_id, NEW.field_count, NEW.captured_metadata,
+    NEW.disabled,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: redcap_project_admin_history_upd(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.redcap_project_admin_history_upd() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO redcap_project_admin_history (
+    name, api_key, server_url, captured_project_info, study, transfer_mode, frequency, status, post_transfer_pipeline, notes, dynamic_model_table,
+    disabled,
+    admin_id,
+    created_at,
+    updated_at,
+    redcap_project_admin_id)
+  SELECT
+    NEW.name, NEW.api_key, NEW.server_url, NEW.captured_project_info, NEW.study, NEW.transfer_mode, NEW.frequency, NEW.status, NEW.post_transfer_pipeline, NEW.notes, NEW.dynamic_model_table,
+    NEW.disabled,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: tracker_upsert(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -2498,6 +2606,33 @@ CREATE FUNCTION ml_app.update_player_contact_ranks(set_master_id integer, set_re
           RETURN 1;
         END;
     $$;
+
+
+--
+-- Name: user_description_history_upd(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.user_description_history_upd() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO user_description_history (
+    app_type_id, role_name, role_template, name, description,
+    disabled,
+    admin_id,
+    created_at,
+    updated_at,
+    user_description_id)
+  SELECT
+    NEW.app_type_id, NEW.role_name, NEW.role_template, NEW.name, NEW.description,
+    NEW.disabled,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -3752,6 +3887,41 @@ ALTER SEQUENCE ml_app.imports_id_seq OWNED BY ml_app.imports.id;
 
 
 --
+-- Name: imports_model_generators; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.imports_model_generators (
+    id bigint NOT NULL,
+    name character varying,
+    dynamic_model_table character varying,
+    options json,
+    description character varying,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: imports_model_generators_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.imports_model_generators_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: imports_model_generators_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.imports_model_generators_id_seq OWNED BY ml_app.imports_model_generators.id;
+
+
+--
 -- Name: item_flag_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -4392,7 +4562,8 @@ CREATE TABLE ml_app.nfs_store_imports (
     user_id integer,
     nfs_store_container_id integer,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    path character varying
 );
 
 
@@ -5377,6 +5548,38 @@ CREATE TABLE ml_app.schema_migrations (
 
 
 --
+-- Name: sessions; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.sessions (
+    id bigint NOT NULL,
+    session_id character varying NOT NULL,
+    data text,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: sessions_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.sessions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sessions_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.sessions_id_seq OWNED BY ml_app.sessions.id;
+
+
+--
 -- Name: smback; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -5717,6 +5920,81 @@ CREATE SEQUENCE ml_app.user_authorizations_id_seq
 --
 
 ALTER SEQUENCE ml_app.user_authorizations_id_seq OWNED BY ml_app.user_authorizations.id;
+
+
+--
+-- Name: user_description_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.user_description_history (
+    id bigint NOT NULL,
+    user_description_id bigint,
+    app_type_id bigint,
+    role_name character varying,
+    role_template character varying,
+    name character varying,
+    description character varying,
+    disabled boolean,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: user_description_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.user_description_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_description_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.user_description_history_id_seq OWNED BY ml_app.user_description_history.id;
+
+
+--
+-- Name: user_descriptions; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.user_descriptions (
+    id bigint NOT NULL,
+    app_type_id bigint,
+    role_name character varying,
+    role_template character varying,
+    name character varying,
+    description character varying,
+    disabled boolean,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: user_descriptions_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.user_descriptions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_descriptions_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.user_descriptions_id_seq OWNED BY ml_app.user_descriptions.id;
 
 
 --
@@ -6149,6 +6427,13 @@ ALTER TABLE ONLY ml_app.imports ALTER COLUMN id SET DEFAULT nextval('ml_app.impo
 
 
 --
+-- Name: imports_model_generators id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.imports_model_generators ALTER COLUMN id SET DEFAULT nextval('ml_app.imports_model_generators_id_seq'::regclass);
+
+
+--
 -- Name: item_flag_history id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
@@ -6443,6 +6728,13 @@ ALTER TABLE ONLY ml_app.scantrons ALTER COLUMN id SET DEFAULT nextval('ml_app.sc
 
 
 --
+-- Name: sessions id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.sessions ALTER COLUMN id SET DEFAULT nextval('ml_app.sessions_id_seq'::regclass);
+
+
+--
 -- Name: sub_process_history id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
@@ -6503,6 +6795,20 @@ ALTER TABLE ONLY ml_app.user_authorization_history ALTER COLUMN id SET DEFAULT n
 --
 
 ALTER TABLE ONLY ml_app.user_authorizations ALTER COLUMN id SET DEFAULT nextval('ml_app.user_authorizations_id_seq'::regclass);
+
+
+--
+-- Name: user_description_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_description_history ALTER COLUMN id SET DEFAULT nextval('ml_app.user_description_history_id_seq'::regclass);
+
+
+--
+-- Name: user_descriptions id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_descriptions ALTER COLUMN id SET DEFAULT nextval('ml_app.user_descriptions_id_seq'::regclass);
 
 
 --
@@ -6778,6 +7084,14 @@ ALTER TABLE ONLY ml_app.general_selection_history
 
 ALTER TABLE ONLY ml_app.general_selections
     ADD CONSTRAINT general_selections_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: imports_model_generators imports_model_generators_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.imports_model_generators
+    ADD CONSTRAINT imports_model_generators_pkey PRIMARY KEY (id);
 
 
 --
@@ -7125,6 +7439,14 @@ ALTER TABLE ONLY ml_app.scantrons
 
 
 --
+-- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.sessions
+    ADD CONSTRAINT sessions_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: sub_process_history sub_process_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -7229,6 +7551,22 @@ ALTER TABLE ONLY ml_app.user_authorizations
 
 
 --
+-- Name: user_description_history user_description_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_description_history
+    ADD CONSTRAINT user_description_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_descriptions user_descriptions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_descriptions
+    ADD CONSTRAINT user_descriptions_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: user_history user_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -7273,6 +7611,13 @@ ALTER TABLE ONLY ml_app.users
 --
 
 CREATE INDEX delayed_jobs_priority ON ml_app.delayed_jobs USING btree (priority, run_at);
+
+
+--
+-- Name: idx_h_on_user_descriptions_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX idx_h_on_user_descriptions_id ON ml_app.user_description_history USING btree (user_description_id);
 
 
 --
@@ -7588,6 +7933,13 @@ CREATE INDEX index_general_selection_history_on_general_selection_id ON ml_app.g
 --
 
 CREATE INDEX index_general_selections_on_admin_id ON ml_app.general_selections USING btree (admin_id);
+
+
+--
+-- Name: index_imports_model_generators_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_imports_model_generators_on_admin_id ON ml_app.imports_model_generators USING btree (admin_id);
 
 
 --
@@ -8109,6 +8461,20 @@ CREATE INDEX index_scantrons_on_user_id ON ml_app.scantrons USING btree (user_id
 
 
 --
+-- Name: index_sessions_on_session_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE UNIQUE INDEX index_sessions_on_session_id ON ml_app.sessions USING btree (session_id);
+
+
+--
+-- Name: index_sessions_on_updated_at; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_sessions_on_updated_at ON ml_app.sessions USING btree (updated_at);
+
+
+--
 -- Name: index_sub_process_history_on_sub_process_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -8253,6 +8619,34 @@ CREATE INDEX index_user_action_logs_on_user_id ON ml_app.user_action_logs USING 
 --
 
 CREATE INDEX index_user_authorization_history_on_user_authorization_id ON ml_app.user_authorization_history USING btree (user_authorization_id);
+
+
+--
+-- Name: index_user_description_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_user_description_history_on_admin_id ON ml_app.user_description_history USING btree (admin_id);
+
+
+--
+-- Name: index_user_description_history_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_user_description_history_on_app_type_id ON ml_app.user_description_history USING btree (app_type_id);
+
+
+--
+-- Name: index_user_descriptions_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_user_descriptions_on_admin_id ON ml_app.user_descriptions USING btree (admin_id);
+
+
+--
+-- Name: index_user_descriptions_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_user_descriptions_on_app_type_id ON ml_app.user_descriptions USING btree (app_type_id);
 
 
 --
@@ -8596,6 +8990,20 @@ CREATE TRIGGER item_flag_name_history_insert AFTER INSERT ON ml_app.item_flag_na
 --
 
 CREATE TRIGGER item_flag_name_history_update AFTER UPDATE ON ml_app.item_flag_names FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_item_flag_name_update();
+
+
+--
+-- Name: user_descriptions log_user_description_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_user_description_history_insert AFTER INSERT ON ml_app.user_descriptions FOR EACH ROW EXECUTE PROCEDURE ml_app.user_description_history_upd();
+
+
+--
+-- Name: user_descriptions log_user_description_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_user_description_history_update AFTER UPDATE ON ml_app.user_descriptions FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.user_description_history_upd();
 
 
 --
@@ -9464,6 +9872,14 @@ ALTER TABLE ONLY ml_app.nfs_store_archived_files
 
 
 --
+-- Name: user_description_history fk_rails_2cf2ce330f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_description_history
+    ADD CONSTRAINT fk_rails_2cf2ce330f FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
 -- Name: model_references fk_rails_2d8072edea; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -9616,6 +10032,14 @@ ALTER TABLE ONLY ml_app.protocol_events
 
 
 --
+-- Name: user_descriptions fk_rails_5a9926bbe8; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_descriptions
+    ADD CONSTRAINT fk_rails_5a9926bbe8 FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
+
+
+--
 -- Name: external_identifier_history fk_rails_5b0628cf42; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -9760,6 +10184,14 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
+-- Name: user_description_history fk_rails_864938f733; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_description_history
+    ADD CONSTRAINT fk_rails_864938f733 FOREIGN KEY (user_description_id) REFERENCES ml_app.user_descriptions(id);
+
+
+--
 -- Name: pro_infos fk_rails_86cecb1e36; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -9781,6 +10213,14 @@ ALTER TABLE ONLY ml_app.config_library_history
 
 ALTER TABLE ONLY ml_app.app_types
     ADD CONSTRAINT fk_rails_8be93bcf4b FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: user_description_history fk_rails_8f99de6d81; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_description_history
+    ADD CONSTRAINT fk_rails_8f99de6d81 FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
 
 
 --
@@ -9904,6 +10344,14 @@ ALTER TABLE ONLY ml_app.trackers
 
 
 --
+-- Name: imports_model_generators fk_rails_bd9f10d2c7; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.imports_model_generators
+    ADD CONSTRAINT fk_rails_bd9f10d2c7 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
 -- Name: nfs_store_uploads fk_rails_bdb308087e; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -9981,6 +10429,14 @@ ALTER TABLE ONLY ml_app.nfs_store_downloads
 
 ALTER TABLE ONLY ml_app.user_action_logs
     ADD CONSTRAINT fk_rails_cfc9dc539f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: user_descriptions fk_rails_d15f63d454; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_descriptions
+    ADD CONSTRAINT fk_rails_d15f63d454 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
