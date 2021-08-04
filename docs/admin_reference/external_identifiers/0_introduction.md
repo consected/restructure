@@ -14,4 +14,4 @@ Administration is provided in [External Identifiers](/admin/external_identifiers
 
 ## Contents
 
-[Detailed Options](detailed_options.md)
+[Detailed Options](detailed_options)
