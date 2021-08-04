@@ -1,7 +1,7 @@
 class AppControl
   @@currently_defining_models = false
 
-  def self.restart_server(not_delayed_job: nil)
+  def self.restart_server(not_delayed_job: nil, not_memcached: nil)
     if Rails.env.production?
       pid = spawn('app-scripts/restart_app_server.sh')
       Process.detach(pid)
@@ -10,6 +10,7 @@ class AppControl
       Rails.reload! if Rails.respond_to? :reload!
     end
     restart_delayed_job unless not_delayed_job
+    restart_memcached unless not_memcached
   rescue StandardError => e
     Rails.logger.warn "Failed to restart server: #{e.inspect}"
   end
@@ -19,6 +20,13 @@ class AppControl
     Process.detach(pid)
   rescue StandardError => e
     Rails.logger.warn "Failed to restart DelayedJob: #{e.inspect}"
+  end
+
+  def self.restart_memcached
+    pid = spawn('app-scripts/restart_memcached.sh')
+    Process.detach(pid)
+  rescue StandardError => e
+    Rails.logger.warn "Failed to restart Memcached: #{e.inspect}"
   end
 
   def self.define_models
