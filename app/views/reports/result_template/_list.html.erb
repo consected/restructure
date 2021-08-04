@@ -74,7 +74,7 @@
                   got_nl = nil
                 end
                 
-            %><% if got_nl || col_tag%><<%=col_tag%> class="<% if l > 4%>expandable<% end %>"><% end %><%= col %><% if got_nl%></<%=col_tag%>><% end %></div>
+            %><% if got_nl || col_tag%><<%=col_tag%> class="<% if l > 4%>expandable<% end %>"><% end %><%= col %><% if got_nl || col_tag%></<%=col_tag%>><% end %></div>
           <%  
               end
               i += 1

@@ -116,10 +116,7 @@ module Dynamic
       dopt = option_type_config
       return unless dopt&.view_options
 
-      # Prevent recursion in the creation of the data attribute with substitution
-      return if @processing_data
-
-      da = dopt.view_options[:data_attribute]
+      da = data_attribute_name
 
       if da
         @processing_data = true
@@ -128,10 +125,23 @@ module Dynamic
         n = if attribute_names.include? 'data'
               attributes['data']
             else
-              dopt.label || option_type.to_s.humanize
+              dopt&.label || option_type.to_s.humanize
             end
         n.to_s
       end
+    end
+
+    #
+    # Return the data_attribute as defined in the options, or nil if there is nothing defined
+    # @return [String | nil]
+    def data_attribute_name
+      dopt = option_type_config
+      return unless dopt&.view_options
+
+      # Prevent recursion in the creation of the data attribute with substitution
+      return if @processing_data
+
+      dopt.view_options[:data_attribute]
     end
 
     # @return [Boolean | nil] returns true or false based on the result of a conditional calculation,

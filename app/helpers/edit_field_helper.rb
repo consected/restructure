@@ -23,7 +23,9 @@ module EditFieldHelper
         # When they provide dynamically generated rec_type associations in their setup the associations won't exist
         # Just touch the base class to get it set up, and the dynamic associations to be configured.
         ucn.camelize.constantize
-        reslist = form_object_instance.master.send(assoc_or_class_name.pluralize).where(rec_type: assoc_or_class_name.sub(/^#{ucn}_/, ''))
+        reslist = form_object_instance.master
+                                      .send(assoc_or_class_name.pluralize)
+                                      .where(rec_type: assoc_or_class_name.sub(/^#{ucn}_/, ''))
         break
       end
     end
@@ -34,8 +36,11 @@ module EditFieldHelper
         reslist = reslist.unscope(:order).order(rank: :desc)
         reslist_data = reslist.all.map { |i| ["#{i.data} [#{i.rank_name}]", i.data] }
       else
-        reslist = reslist.unscope(:order).order(data: :asc)
-        reslist_data = reslist.all.map { |i| [i.data, i.data] }
+        # NOTE: we sort rather than SQL order, since data may be dynamically generated
+        # and there may not actually be a data field for SQL to sort on
+        reslist_data = reslist.all
+                              .map { |i| [i.data, i.data] }
+                              .sort { |x, y| x.first <=> y.first }
       end
 
       human_name = cl.human_name
