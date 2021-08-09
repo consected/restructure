@@ -979,6 +979,79 @@ ALTER SEQUENCE ref_data.redcap_project_admins_id_seq OWNED BY ref_data.redcap_pr
 
 
 --
+-- Name: redcap_project_user_history; Type: TABLE; Schema: ref_data; Owner: -
+--
+
+CREATE TABLE ref_data.redcap_project_user_history (
+    id bigint NOT NULL,
+    redcap_project_user_id bigint,
+    redcap_project_admin_id bigint,
+    username character varying,
+    email character varying,
+    expiration character varying,
+    disabled boolean,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: redcap_project_user_history_id_seq; Type: SEQUENCE; Schema: ref_data; Owner: -
+--
+
+CREATE SEQUENCE ref_data.redcap_project_user_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: redcap_project_user_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ref_data; Owner: -
+--
+
+ALTER SEQUENCE ref_data.redcap_project_user_history_id_seq OWNED BY ref_data.redcap_project_user_history.id;
+
+
+--
+-- Name: redcap_project_users; Type: TABLE; Schema: ref_data; Owner: -
+--
+
+CREATE TABLE ref_data.redcap_project_users (
+    id bigint NOT NULL,
+    redcap_project_admin_id bigint,
+    username character varying,
+    email character varying,
+    expiration character varying,
+    disabled boolean,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: redcap_project_users_id_seq; Type: SEQUENCE; Schema: ref_data; Owner: -
+--
+
+CREATE SEQUENCE ref_data.redcap_project_users_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: redcap_project_users_id_seq; Type: SEQUENCE OWNED BY; Schema: ref_data; Owner: -
+--
+
+ALTER SEQUENCE ref_data.redcap_project_users_id_seq OWNED BY ref_data.redcap_project_users.id;
+
+
+--
 -- Name: datadic_choice_history id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
@@ -1039,6 +1112,20 @@ ALTER TABLE ONLY ref_data.redcap_project_admin_history ALTER COLUMN id SET DEFAU
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_admins ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_project_admins_id_seq'::regclass);
+
+
+--
+-- Name: redcap_project_user_history id; Type: DEFAULT; Schema: ref_data; Owner: -
+--
+
+ALTER TABLE ONLY ref_data.redcap_project_user_history ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_project_user_history_id_seq'::regclass);
+
+
+--
+-- Name: redcap_project_users id; Type: DEFAULT; Schema: ref_data; Owner: -
+--
+
+ALTER TABLE ONLY ref_data.redcap_project_users ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_project_users_id_seq'::regclass);
 
 
 --
@@ -1114,6 +1201,22 @@ ALTER TABLE ONLY ref_data.redcap_project_admins
 
 
 --
+-- Name: redcap_project_user_history redcap_project_user_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+--
+
+ALTER TABLE ONLY ref_data.redcap_project_user_history
+    ADD CONSTRAINT redcap_project_user_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: redcap_project_users redcap_project_users_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+--
+
+ALTER TABLE ONLY ref_data.redcap_project_users
+    ADD CONSTRAINT redcap_project_users_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: idx_dch_on_redcap_dd_id; Type: INDEX; Schema: ref_data; Owner: -
 --
 
@@ -1149,10 +1252,24 @@ CREATE INDEX idx_h_on_datadic_variable_id ON ref_data.datadic_variable_history U
 
 
 --
+-- Name: idx_h_on_proj_admin_id; Type: INDEX; Schema: ref_data; Owner: -
+--
+
+CREATE INDEX idx_h_on_proj_admin_id ON ref_data.redcap_project_user_history USING btree (redcap_project_admin_id);
+
+
+--
 -- Name: idx_h_on_redcap_admin_id; Type: INDEX; Schema: ref_data; Owner: -
 --
 
 CREATE INDEX idx_h_on_redcap_admin_id ON ref_data.redcap_data_dictionary_history USING btree (redcap_project_admin_id);
+
+
+--
+-- Name: idx_h_on_redcap_project_user_id; Type: INDEX; Schema: ref_data; Owner: -
+--
+
+CREATE INDEX idx_h_on_redcap_project_user_id ON ref_data.redcap_project_user_history USING btree (redcap_project_user_id);
 
 
 --
@@ -1268,6 +1385,27 @@ CREATE INDEX "index_ref_data.redcap_project_admins_on_admin_id" ON ref_data.redc
 
 
 --
+-- Name: index_ref_data.redcap_project_user_history_on_admin_id; Type: INDEX; Schema: ref_data; Owner: -
+--
+
+CREATE INDEX "index_ref_data.redcap_project_user_history_on_admin_id" ON ref_data.redcap_project_user_history USING btree (admin_id);
+
+
+--
+-- Name: index_ref_data.redcap_project_users_on_admin_id; Type: INDEX; Schema: ref_data; Owner: -
+--
+
+CREATE INDEX "index_ref_data.redcap_project_users_on_admin_id" ON ref_data.redcap_project_users USING btree (admin_id);
+
+
+--
+-- Name: index_ref_data.redcap_project_users_on_redcap_project_admin_id; Type: INDEX; Schema: ref_data; Owner: -
+--
+
+CREATE INDEX "index_ref_data.redcap_project_users_on_redcap_project_admin_id" ON ref_data.redcap_project_users USING btree (redcap_project_admin_id);
+
+
+--
 -- Name: datadic_choices log_datadic_choice_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
@@ -1324,6 +1462,20 @@ CREATE TRIGGER log_redcap_project_admin_history_update AFTER UPDATE ON ref_data.
 
 
 --
+-- Name: redcap_project_users log_redcap_project_user_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
+--
+
+CREATE TRIGGER log_redcap_project_user_history_insert AFTER INSERT ON ref_data.redcap_project_users FOR EACH ROW EXECUTE PROCEDURE ml_app.redcap_project_user_history_upd();
+
+
+--
+-- Name: redcap_project_users log_redcap_project_user_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
+--
+
+CREATE TRIGGER log_redcap_project_user_history_update AFTER UPDATE ON ref_data.redcap_project_users FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.redcap_project_user_history_upd();
+
+
+--
 -- Name: datadic_variables fk_rails_029902d3e3; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
@@ -1369,6 +1521,14 @@ ALTER TABLE ONLY ref_data.redcap_client_requests
 
 ALTER TABLE ONLY ref_data.datadic_variables
     ADD CONSTRAINT fk_rails_34eadb0aee FOREIGN KEY (equivalent_to_id) REFERENCES ref_data.datadic_variables(id);
+
+
+--
+-- Name: redcap_project_users fk_rails_38d0954914; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+--
+
+ALTER TABLE ONLY ref_data.redcap_project_users
+    ADD CONSTRAINT fk_rails_38d0954914 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
@@ -1428,11 +1588,43 @@ ALTER TABLE ONLY ref_data.datadic_variable_history
 
 
 --
+-- Name: redcap_project_user_history fk_rails_7ba2e90d7d; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+--
+
+ALTER TABLE ONLY ref_data.redcap_project_user_history
+    ADD CONSTRAINT fk_rails_7ba2e90d7d FOREIGN KEY (redcap_project_user_id) REFERENCES ref_data.redcap_project_users(id);
+
+
+--
+-- Name: redcap_project_user_history fk_rails_89af917107; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+--
+
+ALTER TABLE ONLY ref_data.redcap_project_user_history
+    ADD CONSTRAINT fk_rails_89af917107 FOREIGN KEY (redcap_project_admin_id) REFERENCES ref_data.redcap_project_admins(id);
+
+
+--
 -- Name: redcap_data_dictionary_history fk_rails_9a6eca0fe7; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
     ADD CONSTRAINT fk_rails_9a6eca0fe7 FOREIGN KEY (redcap_project_admin_id) REFERENCES ref_data.redcap_project_admins(id);
+
+
+--
+-- Name: redcap_project_user_history fk_rails_a0bf0fdddb; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+--
+
+ALTER TABLE ONLY ref_data.redcap_project_user_history
+    ADD CONSTRAINT fk_rails_a0bf0fdddb FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: redcap_project_users fk_rails_a6952cc0e8; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+--
+
+ALTER TABLE ONLY ref_data.redcap_project_users
+    ADD CONSTRAINT fk_rails_a6952cc0e8 FOREIGN KEY (redcap_project_admin_id) REFERENCES ref_data.redcap_project_admins(id);
 
 
 --
