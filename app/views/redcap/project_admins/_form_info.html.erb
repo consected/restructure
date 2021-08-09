@@ -7,6 +7,7 @@
     <li role="presentation" class=""><a href="#def-requests-block" aria-controls="def-requests-block" role="tab" data-toggle="tab">Requests</a></li>
     <%= render partial: 'redcap/data_dictionaries/tabs', locals: { no_active: true } %>
     <li role="presentation" class=""><a href="#def-files-block" aria-controls="def-files-block" role="tab" data-toggle="tab">Files</a></li>
+    <li role="presentation" class=""><a href="#def-users-block" aria-controls="def-users-block" role="tab" data-toggle="tab">Users</a></li>
   </ul>
 
   <!-- Tab panes -->
@@ -29,5 +30,8 @@
       <%= render partial: 'redcap/project_admins/files_block', locals: {object_instance: object_instance} %>
     </div>
 
+    <div role="tabpanel" class="tab-pane" id="def-users-block">
+      <%= render partial: 'redcap/project_admins/users_block', locals: {object_instance: object_instance} %>
+    </div>
   </div>
 </div>

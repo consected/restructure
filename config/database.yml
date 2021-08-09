@@ -19,7 +19,7 @@ default: &default
 development:
   <<: *default
   database: <%= ENV['FPHS_POSTGRESQL_DATABASE'].present? ? ENV['FPHS_POSTGRESQL_DATABASE'] : 'fpa_development' %>
-  schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA'].present? ? ENV['FPHS_POSTGRESQL_SCHEMA'] : 'ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests,femfl,pitt_bhi,q1,q2,environments,ref_data,study_info,femfl,ref_data,redcap,dynamic' %>
+  schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA'].present? ? ENV['FPHS_POSTGRESQL_SCHEMA'] : 'ml_app,ipa_ops,ipa_files,testmybrain,persnet,bulk_msg,tbs,sleep,grit,data_requests,femfl,pitt_bhi,q1,q2,environments,ref_data,study_info,femfl,ref_data,redcap,dynamic,organization' %>
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -32,8 +32,3 @@ test: &test
 production:
   <<: *default
 
-ipa_test:
-  <<: *default
-  username: fphs
-  database: fpa_ipa_test
-  schema_search_path: 'ml_app,ipa_ops'

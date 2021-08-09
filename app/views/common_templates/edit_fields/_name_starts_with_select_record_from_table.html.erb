@@ -10,10 +10,9 @@ if cl.attribute_names.include?('rank')
   reslist = reslist.order(rank: :desc)
   reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
 elsif cl.attribute_names.include?('rank')
-  reslist = reslist.order(data: :asc)
-  reslist = reslist.all.map{|i| [i.data, i.data]}
+  reslist = reslist.all.map{|i| [i.data, i.data]}.sort { |x, y| x.first <=> y.first }
 else
-  reslist = reslist.all.map{|i| [i.data, i.data]}
+  reslist = reslist.all.map{|i| [i.data, i.data]}.sort { |x, y| x.first <=> y.first }
 end
 
 unless rl

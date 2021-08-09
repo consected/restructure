@@ -18,31 +18,31 @@ export FILESTORE_CONFIG_SKIP=true
 
 if [ "$TEMP_ENV" == 'athena-production' ]; then
   TEMP_DBNAME=fphs
-  DB_SEARCH_PATH='ml_app,data_requests,ipa_ops,q1,q2,study_info,ref_data,dynamic'
+  DB_SEARCH_PATH='ml_app,data_requests,ipa_ops,q1,q2,study_info,ref_data,dynamic,organization'
   TEMP_HOSTNAME='fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
 if [ "$TEMP_ENV" == 'filestore-production' ]; then
   TEMP_DBNAME=fphs
-  DB_SEARCH_PATH='filestore,filestore_admin,ipa_ops,ml_app,ref_data,dynamic'
+  DB_SEARCH_PATH='filestore,filestore_admin,ipa_ops,ml_app,ref_data,dynamic,organization'
   TEMP_HOSTNAME='fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
 if [ "$TEMP_ENV" == 'zeus-production' ]; then
   TEMP_DBNAME=fphs
   DB_SEARCH_PATH='ml_app,ref_data,dynamic'
-  TEMP_HOSTNAME='fphs-zeus-db-prod01.cqtftnqosfiy.us-east-1.rds.amazonaws.com'
+  TEMP_HOSTNAME='fphs-zeus-db-prod01.cqtftnqosfiy.us-east-1.rds.amazonaws.com,organization'
 fi
 
 if [ "$TEMP_ENV" == 'athena-stage' ]; then
   TEMP_DBNAME=fphs_sleep_test
-  DB_SEARCH_PATH='filestore,filestore_admin,ml_app,ref_data,dynamic'
+  DB_SEARCH_PATH='filestore,filestore_admin,ml_app,ref_data,dynamic,organization'
   TEMP_HOSTNAME='fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
 if [ "$TEMP_ENV" == 'athena-demo' ]; then
   TEMP_DBNAME=ebdb
-  DB_SEARCH_PATH='ml_app,data_requests,ipa_ops,q1,q2,study_info,ref_data,dynamic'
+  DB_SEARCH_PATH='ml_app,data_requests,ipa_ops,q1,q2,study_info,ref_data,dynamic,organization'
   TEMP_HOSTNAME='fphs-aws-db-dev01.c9dljdsduksr.us-east-1.rds.amazonaws.com'
 fi
 
