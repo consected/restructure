@@ -47,6 +47,13 @@ module Redcap
     end
 
     #
+    # Get the project users
+    # @return [Hash] hash with symbolized keys
+    def project_users
+      request :user
+    end
+
+    #
     # Get the project archive XML file, including study fields.
     # Return a temp file result.
     # @return [File] - temp file result

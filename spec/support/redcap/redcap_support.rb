@@ -38,6 +38,7 @@ module Redcap
         stub_request_project project[:server_url], project[:api_key]
         stub_request_metadata project[:server_url], project[:api_key]
         stub_request_records project[:server_url], project[:api_key]
+        stub_request_project_users project[:server_url], project[:api_key]
       end
     end
 
@@ -49,6 +50,7 @@ module Redcap
       stub_request_full_project server_url('full'), @project[:api_key]
       stub_request_full_metadata server_url('full'), @project[:api_key]
       stub_request_full_records server_url('full'), @project[:api_key]
+      stub_request_full_project_users server_url('full'), @project[:api_key]
     end
 
     def mock_file_field_requests
@@ -142,6 +144,45 @@ module Redcap
 
         )
         .to_return(status: 200, body: metadata_full_response, headers: {})
+    end
+
+    def stub_request_full_project_users(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'content' => 'user',
+            'format' => 'json',
+            'token' => api_key
+          }
+
+        )
+        .to_return(status: 200, body: project_users_full_response, headers: {})
+    end
+
+    def stub_request_project_users(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'content' => 'user',
+            'format' => 'json',
+            'token' => api_key
+          }
+
+        )
+        .to_return(status: 200, body: project_users_full_response, headers: {})
+    end
+
+    def stub_request_project_users_updated(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'content' => 'user',
+            'format' => 'json',
+            'token' => api_key
+          }
+
+        )
+        .to_return(status: 200, body: project_users_updated_response, headers: {})
     end
 
     def stub_request_full_records(server_url, api_key)
@@ -257,6 +298,14 @@ module Redcap
 
     def metadata_full_response
       File.read('spec/fixtures/redcap/full_metadata.json')
+    end
+
+    def project_users_full_response
+      File.read('spec/fixtures/redcap/full_project_users.json')
+    end
+
+    def project_users_updated_response
+      File.read('spec/fixtures/redcap/full_project_users_updated.json')
     end
 
     def data_full_response(suffix = nil)
