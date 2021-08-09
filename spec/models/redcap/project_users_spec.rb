@@ -14,6 +14,7 @@ RSpec.describe Redcap::ProjectUsers, type: :model do
     @projects = setup_redcap_project_admin_configs
     @project = @projects.first
     reset_mocks
+    Redcap::ProjectUser.update_all(redcap_project_admin_id: nil)
   end
 
   it 'retrieves records from REDCap immediately' do

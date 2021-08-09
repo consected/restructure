@@ -104,7 +104,7 @@ module Redcap
     # @return [Integer | false | nil]
     def create_or_update(record)
       username = record[:username]
-      existing_record = ProjectUser.where(username: username).first
+      existing_record = project_admin.redcap_project_users.where(username: username).first
 
       if existing_record
         # Check if there is an exact match for the record. If so, we are done
