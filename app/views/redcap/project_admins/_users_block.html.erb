@@ -9,11 +9,11 @@
   <th>Expiration</th>
   </tr></thead>
   <tbody>
-    <% object_instance.redcap_project_users.each do |pu| %>
-      <tr>
-      <td><%= pu.username %></td>
-      <td><%= pu.email %></td>
-      <td><%= pu.expiration %></td>
+    <% object_instance.redcap_project_users.each do |list_item| %>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+      <td><%= list_item.username %></td>
+      <td><%= list_item.email %></td>
+      <td><%= list_item.expiration %></td>
       </tr>
     <% end %>
   </tbody>
