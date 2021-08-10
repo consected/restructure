@@ -185,6 +185,19 @@ module Redcap
         .to_return(status: 200, body: project_users_updated_response, headers: {})
     end
 
+    def stub_request_project_users_deleted(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'content' => 'user',
+            'format' => 'json',
+            'token' => api_key
+          }
+
+        )
+        .to_return(status: 200, body: project_users_deleted_response, headers: {})
+    end
+
     def stub_request_full_records(server_url, api_key)
       stub_request(:post, server_url)
         .with(
@@ -306,6 +319,10 @@ module Redcap
 
     def project_users_updated_response
       File.read('spec/fixtures/redcap/full_project_users_updated.json')
+    end
+
+    def project_users_deleted_response
+      File.read('spec/fixtures/redcap/full_project_users_deleted.json')
     end
 
     def data_full_response(suffix = nil)

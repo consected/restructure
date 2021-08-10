@@ -53,6 +53,7 @@ RSpec.describe Redcap::ProjectUsers, type: :model do
     expect(dr.errors).to be_empty
     expect(dr.created_usernames.sort).to eq %w[d20 h16 j86 p106].sort
     expect(dr.updated_usernames).to be_empty
+    expect(dr.disabled_usernames).to be_empty
   end
 
   it 'does nothing if the records all match' do
@@ -68,6 +69,7 @@ RSpec.describe Redcap::ProjectUsers, type: :model do
     expect(dr.errors).to be_empty
     expect(dr.created_usernames.sort).to eq %w[d20 h16 j86 p106].sort
     expect(dr.updated_usernames).to be_empty
+    expect(dr.disabled_usernames).to be_empty
 
     dr = Redcap::ProjectUsers.new(rc)
     dr.retrieve
@@ -78,6 +80,7 @@ RSpec.describe Redcap::ProjectUsers, type: :model do
     expect(dr.errors).to be_empty
     expect(dr.created_usernames.sort).to be_empty
     expect(dr.updated_usernames).to be_empty
+    expect(dr.disabled_usernames).to be_empty
   end
 
   it 'does updates on records that have changed' do
@@ -93,6 +96,7 @@ RSpec.describe Redcap::ProjectUsers, type: :model do
     expect(dr.errors).to be_empty
     expect(dr.created_usernames.sort).to eq %w[d20 h16 j86 p106].sort
     expect(dr.updated_usernames).to be_empty
+    expect(dr.disabled_usernames).to be_empty
 
     WebMock.reset!
     rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
@@ -109,5 +113,40 @@ RSpec.describe Redcap::ProjectUsers, type: :model do
     expect(dr.errors).to be_empty
     expect(dr.created_usernames.sort).to be_empty
     expect(dr.updated_usernames.sort).to eq %w[h16 j86].sort
+    expect(dr.disabled_usernames).to be_empty
+  end
+
+  it 'does disables removed users' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+    dr = Redcap::ProjectUsers.new(rc)
+
+    dr.retrieve
+    expect { dr.validate }.not_to raise_error
+
+    dr.store
+
+    expect(dr.errors).to be_empty
+    expect(dr.created_usernames.sort).to eq %w[d20 h16 j86 p106].sort
+    expect(dr.updated_usernames).to be_empty
+    expect(dr.disabled_usernames).to be_empty
+
+    WebMock.reset!
+    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+
+    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+
+    stub_request_project_users_deleted @project[:server_url], @project[:api_key]
+
+    dr = Redcap::ProjectUsers.new(rc)
+    dr.retrieve
+    expect { dr.validate }.not_to raise_error
+    dr.store
+
+    expect(dr.errors).to be_empty
+    expect(dr.created_usernames.sort).to be_empty
+    expect(dr.unchanged_usernames.sort).to eq %w[d20].sort
+    expect(dr.updated_usernames).to eq %w[j86]
+    expect(dr.disabled_usernames.sort).to eq %w[h16 p106].sort
   end
 end

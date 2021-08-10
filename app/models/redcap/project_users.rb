@@ -4,13 +4,15 @@ module Redcap
   #
   # Handle retrieved user records
   class ProjectUsers
-    attr_accessor :project_admin, :records, :errors, :created_usernames, :updated_usernames, :unchanged_usernames,
+    attr_accessor :project_admin, :records, :errors, :created_usernames, :updated_usernames,
+                  :unchanged_usernames, :disabled_usernames,
                   :current_admin, :upserted_records
 
     def initialize(project_admin)
       super()
       self.project_admin = project_admin
       self.updated_usernames = []
+      self.disabled_usernames = []
       self.created_usernames = []
       self.unchanged_usernames = []
       self.errors = []
@@ -72,8 +74,7 @@ module Redcap
     # Error will appear in #errors
     # IDs of created items will appear in #created_usernames
     # IDs of updated items will appear in #updated_usernames
-    # For each updated or created record, also download the file fields to the
-    # associated file store
+    # IDs of disabled items will appear in #disabled_usernames
     def store
       upserts = []
 
@@ -82,10 +83,21 @@ module Redcap
         upserts << res if res
       end
 
+      unless errors.present?
+        handled_updates = created_usernames + updated_usernames + unchanged_usernames
+
+        all_disabled = project_admin.redcap_project_users.active
+                                    .where.not(username: handled_updates)
+
+        self.disabled_usernames = all_disabled.pluck(:username)
+        all_disabled.update_all(disabled: true, admin_id: current_admin)
+      end
+
       result = {
         created_usernames: created_usernames,
         updated_usernames: updated_usernames,
         unchanged_usernames: unchanged_usernames,
+        disabled_usernames: disabled_usernames,
         errors: errors
       }
 
@@ -104,7 +116,7 @@ module Redcap
     # @return [Integer | false | nil]
     def create_or_update(record)
       username = record[:username]
-      existing_record = project_admin.redcap_project_users.where(username: username).first
+      existing_record = project_admin.redcap_project_users.active.where(username: username).first
 
       if existing_record
         # Check if there is an exact match for the record. If so, we are done
