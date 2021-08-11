@@ -14,13 +14,13 @@ class PageLayoutsController < ApplicationController
   end
 
   def show
-    render :show
+    render :show unless performed?
   end
 
   def show_content
     params[:filters] = params
     set_page_filters
-    render :show
+    render :show unless performed?
   end
 
   private
@@ -32,7 +32,6 @@ class PageLayoutsController < ApplicationController
     return true if current_user.can?(:view_dashboards)
 
     not_authorized
-    throw(:abort)
   end
 
   #
@@ -41,7 +40,6 @@ class PageLayoutsController < ApplicationController
     return true if current_user.can?(:view_dashboards) || current_user.can?(:view_pages)
 
     not_authorized
-    throw(:abort)
   end
 
   def active_layouts
