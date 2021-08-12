@@ -24,87 +24,122 @@ module ReportsHelper
             class: 'btn btn-default glyphicon glyphicon-remove report-edit-cancel'
   end
 
-  def report_field(name, type, value, options = {})
-    use_dropdown = nil
+  #
+  # Show a report criteria field
+  def report_criteria_field(name, config, value, options = {})
+    return nil if config.is_a? String
 
-    return nil if type.is_a? String
-
-    if type.is_a? Hash
-      type_string = type.first.first
-      type_val = type.first.last || {}
-      if type_string == 'config_selector'
-        use_dropdown = true
-      else
-        c = begin
-          Classification.const_get(type_string.to_s.classify)
-        rescue StandardError
-          nil
-        end
-      end
+    unless config.is_a? OptionConfigs::SearchAttributesConfig::NamedConfiguration
+      raise FphsException, "Bad report field config configured: #{config}"
     end
 
-    value ||= FieldDefaults.calculate_default(@report, type_val['default'], type_string)
-
-    if c.respond_to?(:all_name_value_enable_flagged)
-      if type_val['item_type'] == 'all'
-        type_filter = nil
-      elsif type_val['item_type']
-        type_filter = { item_type: type_val['item_type'] }
-
-      elsif type_val['conditions']
-        type_filter = type_val['conditions']
-      end
-
-      if type_val.key? 'disabled'
-        type_filter ||= {}
-        type_filter[:disabled] = false
-      end
-
-      unless @report_page
-        type_filter ||= {}
-        type_filter[:disabled] = false
-      end
-      use_dropdown = options_for_select(c.all_name_value_enable_flagged(type_filter), value)
-    elsif use_dropdown
-      use_dropdown = options_for_select(type_val['selections'] || [], value)
-    end
-
-    main_field = if type_val['label']
-                   label_tag type_val['label']
-                 else
-                   label_tag name
-                 end
-
-    if type_val['multiple'] == 'multiple' || type_val['multiple'] == 'multiple-regex'
-      if use_dropdown
-        options.merge!(multiple: true)
-        main_field += select_tag("search_attrs[#{name}]", use_dropdown, options)
-      else
-        options.merge!(
-          type: type_string,
-          class: 'form-control no-auto-submit multivalue-field-single',
-          data: { attribute: name },
-          placeholder: '(single value)'
-        )
-
-        main_field += text_field_tag("multiple_attrs[#{name}]", '', options)
-        main_field += link_to('+', "add_multiple_attrs[#{name}]", data: { attribute: name },
-                                                                  class: 'btn btn-default add-btn multivalue-field-add',
-                                                                  title: 'add to search')
-        v = value
-        v = value.join("\n") if value.is_a? Array
-        main_field += text_area_tag("search_attrs[#{name}]", v, class: 'auto-grow multivalue-field-vals',
-                                                                placeholder: '(multiple values on separate lines)')
-
-      end
-    elsif use_dropdown
-      options.merge!(include_blank: 'select')
-      main_field += select_tag("search_attrs[#{name}]", use_dropdown, options)
-    else
-      options.merge!(type: type_string, class: 'form-control')
-      main_field += text_field_tag("search_attrs[#{name}]", value, options)
-    end
+    value ||= report_field_default config
+    main_field = label_tag(config.label || name)
+    main_field += report_criteria_multiple_field(name, config, value, options) ||
+                  report_criteria_dropdown_field(name, config, value, options) ||
+                  report_criteria_text_field(name, config, value, options)
 
     main_field
+  end
+
+  private
+
+  #
+  # Get the report field default value from the configuration
+  # @param [OptionConfigs::SearchAttributesConfig::NamedConfiguration] config
+  # @return [Object]
+  def report_field_default(config)
+    FieldDefaults.calculate_default(@report, config.default, config.type)
+  end
+
+  #
+  # Set up the options for a select field, if the config says this is a select field,
+  # otherwise return nil
+  # @param [OptionConfigs::SearchAttributesConfig::NamedConfiguration] config
+  # @param [Object] value - the field value
+  # @return [#options_for_select | nil]
+  def report_criteria_use_dropdown_options(config, value)
+    classification_class = Classification.get_classification_type_by name: config.type
+
+    if classification_class.respond_to?(:all_name_value_enable_flagged)
+      if config.item_type == 'all'
+        type_filter = nil
+      elsif config.item_type
+        type_filter = { item_type: config.item_type }
+      elsif config.conditions
+        type_filter = config.conditions
+      end
+
+      if config.disabled || !@report_page
+        type_filter ||= {}
+        type_filter[:disabled] = false
+      end
+
+      options_for_select(classification_class.all_name_value_enable_flagged(type_filter), value)
+    elsif config.type == 'config_selector'
+      options_for_select(config.selections || [], value)
+    end
+  end
+
+  #
+  # The markup for a multiple entry field, or nil if this is not a multiple entry field
+  # @param [String | Symbol] name - HTML field name
+  # @param [OptionConfigs::SearchAttributesConfig::NamedConfiguration] config
+  # @param [Object] value - the field value
+  # @param [Hash] options - field options
+  # @return [String | nil]
+  def report_criteria_multiple_field(name, config, value, options)
+    return unless config.multiple == 'multiple' || config.multiple == 'multiple-regex'
+
+    use_dropdown = report_criteria_use_dropdown_options(config, value)
+    if use_dropdown
+      options.merge!(multiple: true)
+      main_field = select_tag("search_attrs[#{name}]", use_dropdown, options)
+    else
+      options.merge!(
+        type: config.type,
+        class: 'form-control no-auto-submit multivalue-field-single',
+        data: { attribute: name },
+        placeholder: '(single value)'
+      )
+
+      main_field = text_field_tag("multiple_attrs[#{name}]", '', options)
+      main_field += link_to('+', "add_multiple_attrs[#{name}]", data: { attribute: name },
+                                                                class: 'btn btn-default add-btn multivalue-field-add',
+                                                                title: 'add to search')
+      v = value
+      v = value.join("\n") if value.is_a? Array
+      main_field += text_area_tag("search_attrs[#{name}]", v, class: 'auto-grow multivalue-field-vals',
+                                                              placeholder: '(multiple values on separate lines)')
+
+    end
+    main_field
+  end
+
+  #
+  # The markup for a single dropdown field, or nil if this is not a single dropdown field
+  # @param [String | Symbol] name - HTML field name
+  # @param [OptionConfigs::SearchAttributesConfig::NamedConfiguration] config
+  # @param [Object] value - the field value
+  # @param [Hash] options - field options
+  # @return [String | nil]
+  def report_criteria_dropdown_field(name, config, value, options)
+    use_dropdown = report_criteria_use_dropdown_options(config, value)
+    return unless use_dropdown
+
+    options.merge!(include_blank: 'select')
+    select_tag("search_attrs[#{name}]", use_dropdown, options)
+  end
+
+  #
+  # The markup for a simple text field, which has an HTML5 type matching the config type
+  # @param [String | Symbol] name - HTML field name
+  # @param [OptionConfigs::SearchAttributesConfig::NamedConfiguration] config
+  # @param [Object] value - the field value
+  # @param [Hash] options - field options
+  # @return [String | nil]
+  def report_criteria_text_field(name, config, value, options)
+    options.merge!(type: config.type, class: 'form-control')
+    text_field_tag("search_attrs[#{name}]", value, options)
   end
 end
