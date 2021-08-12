@@ -47,8 +47,6 @@
   </div>
   <div class="form-group form-actions clearfix">
     <%= f.submit :search, class: "btn btn-default btn-sm pull-right auto-submitter" %>
-    <%= f.submit "csv", name: :format, value: "csv", class: "btn btn-default pull-right btn-sm btn-csv" if current_user.can? :export_csv %>
-    <%= f.submit "json", id: "submit_query_to_json", name: :format, value: "json", class: "btn btn-default btn-sm  target_new_window pull-right" if current_user.can? :export_json %>
 
     <span id="search_count_simple" class="search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>
   </div>

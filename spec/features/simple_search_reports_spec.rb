@@ -71,10 +71,10 @@ describe 'simple search reports', js: true, driver: :app_firefox_driver do
       has_css? '.btn-csv'
     end
 
-    within '#simple_search_master' do
-      click_button 'csv'
-      sleep 2
-    end
+    # within '#simple_search_master' do
+    #   click_button 'csv'
+    #   sleep 2
+    # end
 
     # If there is an alert it is possibly because there are no results to export.
     # Check this is not the case
@@ -85,7 +85,7 @@ describe 'simple search reports', js: true, driver: :app_firefox_driver do
       sleep 1
       click_button 'search'
       sleep 5
-      click_button 'csv'
+      # click_button 'csv'
     end
 
     expect(page).to have_css('.alert')

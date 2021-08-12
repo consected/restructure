@@ -155,7 +155,7 @@ RSpec.describe ItemFlagsController, type: :controller do
         list_invalid_attributes.each do |inv|
           post :create, params: inv
           expect(response).to have_http_status(422), "expected #{response.status} to be 422 with data #{inv}"
-          expect(response.body).to eq 'The request failed to validate'
+          expect(flash[:danger]).to match('The request failed to validate')
         end
       end
     end

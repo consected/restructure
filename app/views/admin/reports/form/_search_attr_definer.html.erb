@@ -115,6 +115,7 @@ field2 (any of):
     <div class="col-sm-24" id="search_attr_definer2">
       <div class="" style="text-align: left;">
         <%= f.label :search_attributes%>
+        <ul class="admin-tag-list" id="search_attr_item_list"></ul>
         <div class="report-admin-search-attr-yaml-editor" >
           <%= f.text_area  :search_attrs, class: "report-admin-search-attr-final-config code-editor code-editor-yml", data: {code_editor_type: "yaml"}%>
         </div>

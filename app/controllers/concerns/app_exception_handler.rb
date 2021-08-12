@@ -26,19 +26,30 @@ module AppExceptionHandler
 
   protected
 
+  #
+  # General method for showing errors, either as plain text or as an error page
+  def show_error(title, status, text: nil, flash_level: nil)
+    text = text[0..2000] if text
+    flash_level ||= :danger
+    flash[flash_level] = title
+    if request.format == :html
+      @error_title = title
+      render 'layouts/error_page', status: status, locals: { text: text }
+    else
+      render plain: title, status: status
+    end
+  end
+
   def not_authorized
-    flash[:danger] = 'You are not authorized to perform the requested action'
-    render plain: flash[:danger], status: :unauthorized
+    show_error 'You are not authorized to perform the requested action', :unauthorized
   end
 
   def not_editable
-    flash[:danger] = "This item can't be edited"
-    render plain: flash[:danger], status: 401
+    show_error "This item can't be edited", 401
   end
 
   def not_creatable
-    flash[:danger] = "This item can't be created"
-    render plain: flash[:danger], status: 403
+    show_error "This item can't be created", 403
   end
 
   def not_found
@@ -47,18 +58,15 @@ module AppExceptionHandler
   end
 
   def bad_request
-    flash[:danger] = 'The request failed to validate'
-    render plain: flash[:danger], status: 422
+    show_error 'The request failed to validate', 422
   end
 
   def unexpected_error(msg)
-    flash[:danger] = "An error occurred: #{msg}"[0..2000]
-    render plain: flash[:danger], status: 400
+    show_error 'An error occurred', 400, text: msg
   end
 
   def general_error(msg, level = :info)
-    flash[level] = "Error: #{msg}"[0..2000]
-    render plain: flash[level], status: 400
+    show_error 'Error', 400, text: msg, flash_level: level
   end
 
   def db_unique_violation(error)

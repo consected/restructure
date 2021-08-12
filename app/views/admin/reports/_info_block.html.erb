@@ -1,5 +1,4 @@
 <div class="admin-options-block-outer">
-
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#report-def" aria-controls="report-def" role="tab" data-toggle="tab" aria-expanded="true">Definition</a></li>
@@ -9,11 +8,10 @@
     <li role="presentation"><a href="#selection-options" aria-controls="selection-options" role="tab" data-toggle="tab">Selection Options</a></li>
     <li role="presentation"><a href="#flags" aria-controls="flags" role="tab" data-toggle="tab">Flags</a></li>
     <li role="presentation"><a href="#subject-accuracy" aria-controls="subject-accuracy" role="tab" data-toggle="tab">Subject Accuracy</a></li>
+    <li role="presentation"><a href="#user-access-controls" aria-controls="user-access-controls" role="tab" data-toggle="tab">User Access Controls</a></li>
   </ul>
-
   <!-- Tab panes -->
   <div class="tab-content">
-
     <div role="tabpanel" class="tab-pane active" id="report-def">
       <h4>Defintion</h4>
       <%= render partial: 'def_block'%>
@@ -21,13 +19,13 @@
     <div role="tabpanel" class="tab-pane" id="data-dicts">
       <h4>Data Dictionaries</h4>
       <div id="data-dic-block-container" data-subscription="data-dic-block">
-      <%= link_to "loading...", admin_reference_data_url(type: :data_dic), remote: true, class: 'on-show-auto-click' %>
-      </div>      
+        <%= link_to "loading...", admin_reference_data_url(type: :data_dic), remote: true, class: 'on-show-auto-click' %>
+      </div>
     </div>
     <div role="tabpanel" class="tab-pane" id="tables">
       <h4>Tables</h4>
       <div id="table-list-block-container" data-subscription="table-list-block" data-preprocessor="ref_data_table_list_block">
-      <%= link_to "loading...", admin_reference_data_url(type: :table_list), remote: true, class: 'on-show-auto-click' %>
+        <%= link_to "loading...", admin_reference_data_url(type: :table_list), remote: true, class: 'on-show-auto-click' %>
       </div>
     </div>
     <div role="tabpanel" class="tab-pane" id="protocol_events">
@@ -46,6 +44,8 @@
       <h4>Accuracy Score (subject rank)</h4>
       <%= render partial: 'admin/reference_data/accuracy_score_block'%>
     </div>
-
+    <div role="tabpanel" class="tab-pane  on-open-click" id="user-access-controls">
+      <%= render partial: 'admin/reports/form/uac_panel' %>
+    </div>
   </div>
 </div>
