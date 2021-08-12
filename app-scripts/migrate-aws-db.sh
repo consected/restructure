@@ -33,11 +33,11 @@ echo
 
 echo "Specify the schema name (leave blank to migrate the main schema)"
 read SCHEMA_NAME
-
+BASE_SCHEMA_PATH='ml_app,ref_data,dynamic'
 if [ "$SCHEMA_NAME" ]; then
-  DB_SCHEMA="ml_app,${SCHEMA_NAME}"
+  DB_SCHEMA="${BASE_SCHEMA_PATH},${SCHEMA_NAME}"
 else
-  DB_SCHEMA=ml_app
+  DB_SCHEMA=${BASE_SCHEMA_PATH}
 fi
 
 echo
@@ -70,6 +70,7 @@ FPHS_POSTGRESQL_PORT=5432 \
 FPHS_RAILS_SECRET_KEY_BASE=temprake1238761826381263ksjafhkjahkjfhjkshfahasjkrywuieryiweh \
 FPHS_RAILS_DEVISE_SECRET_KEY=temprake1238761826381263ksjafhkjahkjfhjkshfahasjkrywuieryiweh \
 FPHS_POSTGRESQL_PASSWORD="$TEMP_DB_PW" \
+FPHS_LOAD_APP_TYPES=1 \
 rake db:migrate
 
 
