@@ -87,6 +87,7 @@ Rails.application.routes.draw do
       member do
         post :request_records
         post :request_archive
+        post :request_users
         post :force_reconfig
       end
     end

@@ -81,6 +81,12 @@ every <%= object_instance.frequency %> - next run at
           method: :post, 
           remote: true, 
           class: 'btn btn-warning btn-sm' %></p>
+
+  <p><%= link_to 'retrieve user list', request_users_redcap_project_admin_path(id: object_instance.id), 
+          method: :post, 
+          remote: true, 
+          class: 'btn btn-warning btn-sm' %></p>
+
 <% end %>
 
 <% if object_instance.dynamic_model_ready? && object_instance.file_store %>
