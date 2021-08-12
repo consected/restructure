@@ -10,7 +10,9 @@ class PageLayoutsController < ApplicationController
   attr_accessor :object_instance, :objects_instance
 
   def index
-    self.objects_instance = @page_layouts = Admin::PageLayout.app_standalone_layouts(current_user.app_type_id)
+    self.objects_instance = @page_layouts =
+      Admin::PageLayout.app_standalone_layouts(current_user.app_type_id)
+                       .order(panel_position: :asc)
   end
 
   def show
