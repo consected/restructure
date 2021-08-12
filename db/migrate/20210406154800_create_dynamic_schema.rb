@@ -4,7 +4,7 @@ class CreateDynamicSchema < ActiveRecord::Migration[5.2]
 
   def change
     self.schema = 'dynamic'
-    self.owner = 'fphs'
+    self.owner = 'restradmin'
     create_schema
   end
 end

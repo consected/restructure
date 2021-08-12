@@ -2,7 +2,7 @@
 
 class Settings
   DefaultMigrationSchema = 'ml_app'
-  DefaultSchemaOwner = 'fphs'
+  DefaultSchemaOwner = 'restradmin'
 
   # Does not set the prefix, just specifies what we search by in jobs
   GlobalIdPrefix = 'fpa1'

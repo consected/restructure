@@ -7,7 +7,7 @@ class CreateRedcapProjectAdmins < ActiveRecord::Migration[5.2]
 
   def change
     self.schema = 'ref_data'
-    self.owner = 'fphs'
+    self.owner = 'restradmin'
     create_schema
 
     table_comment = 'Redcap project administration'
