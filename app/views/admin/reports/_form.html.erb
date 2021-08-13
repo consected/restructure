@@ -14,6 +14,7 @@
           <%= render partial: 'admin/reports/form/sql_block', locals: {f: f} %>
           <div class="report-admin-submit-block">
             <a href="#report-admin-search-attr-add-block" class="collapsed btn btn-default" data-toggle="collapse"><span class="caret"></span> Add Attribute</a>
+            <a href="#search_attr_definer_config" class="collapsed btn btn-default" data-toggle="collapse"><span class="caret"></span> Attribute Configuration</a>
             <%= link_to link_label_open_in_new('test report'), @report, target: 'testreport', class: 'btn btn-default pull-right admin-test-report-btn' if @report.id %>
             <%= f.submit class: "btn btn-primary pull-right" %>
           </div>

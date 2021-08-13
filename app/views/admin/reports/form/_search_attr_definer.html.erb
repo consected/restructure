@@ -1,19 +1,21 @@
 <div class="report-admin-search-attr-block form-inline">
   <div class="row" id="search_attr_definer">
-    <div class="col-sm-24" style="text-align: left;">
+    <div class="col-sm-24" style="text-align: left;" id="search_attr_definer_form">
+      <%= f.label :search_attributes%>
+      <ul class="admin-tag-list" id="search_attr_item_list"></ul>
       <div id="report-admin-search-attr-add-block" class="collapse well">
         <div class="report-admin-subblock">
           <div class="report-admin-sb-item">name</div>
-          <div class="report-admin-sb-field-block"><input id="search_attrs_name" /></div>
+          <div class="report-admin-sb-field-block"><input id="search_attrs_name" data-attr-el="name" /></div>
         </div>
         <div class="report-admin-subblock">
           <div class="report-admin-sb-item">label (optional)</div>
-          <div class="report-admin-sb-field-block"><input id="search_attrs_label" /></div>
+          <div class="report-admin-sb-field-block"><input id="search_attrs_label" data-attr-el="label" /></div>
         </div>
         <div class="report-admin-subblock">
           <div class="report-admin-sb-item">type</div>
           <div class="report-admin-sb-field-block">
-            <select id="search_attrs_type">
+            <select id="search_attrs_type" data-attr-el="type">
               <option value="number">number</option>
               <option value="text">text</option>
               <option value="date">date</option>
@@ -33,7 +35,7 @@
           <div class="report-admin-subblock">
             <div class="report-admin-sb-item">filter dropdown</div>
             <div class="report-admin-sb-field-block">
-              <select id="search_attrs_filter">
+              <select id="search_attrs_filter" data-attr-el="filter">
                 <option value="all">all</option>
                 <% Classification::GeneralSelection.item_types.dup.each do |i|%>
                   <option value="item_type: <%=i%>">item_type: <%=i%></option>
@@ -44,20 +46,20 @@
           <div class="report-admin-subblock">
             <div class="report-admin-sb-item">prevent disabled entries</div>
             <div class="report-admin-sb-field-block">
-              <input type="checkbox" id="search_no_disabled"/>
+              <input type="checkbox" id="search_no_disabled" data-attr-el="no_disabled"/>
             </div>
           </div>
         </div>
         <div class="report-admin-subblock">
           <div class="report-admin-sb-item">hide field</div>
           <div class="report-admin-sb-field-block">
-            <input type="checkbox" id="search_hidden_field"/>
+            <input type="checkbox" id="search_hidden_field" data-attr-el="hidden"/>
           </div>
         </div>
         <div class="report-admin-subblock">
           <div class="report-admin-sb-item">single or multiple values</div>
           <div class="report-admin-sb-field-block">
-            <select id="search_attrs_multi">
+            <select id="search_attrs_multi" data-attr-el="multiple">
               <option value="single">single</option>
               <option value="multiple">multiple (in)</option>
               <option value="multiple-regex">multiple (regex)</option>
@@ -70,7 +72,7 @@
             <p class="help-block">A label is shown in the dropdown and the corresponding value is used in the query.</p>
             <div class="report-admin-sb-field-block">
               <div class="report-admin-search-attr-yaml-editor" >
-                <textarea id="search_attrs_config_selections" class="extra-help-info" data-code-editor-type="yaml"></textarea>
+                <textarea id="search_attrs_config_selections" class="extra-help-info" data-code-editor-type="yaml" data-attr-el="selections"></textarea>
               </div>
               <p class="help-block">add one line per option:</p>
               <pre class="help-block"><code>label 1: value 1
@@ -84,7 +86,7 @@ label 2: value 2</code></pre>
             <p class="help-block">Conditions will be applied to the search for the list of selections.</p>
             <div class="report-admin-sb-field-block">
               <div class="report-admin-search-attr-yaml-editor" >
-                <textarea id="search_attrs_conditions" class="extra-help-info" data-code-editor-type="yaml"></textarea>
+                <textarea id="search_attrs_conditions" class="extra-help-info" data-code-editor-type="yaml" data-attr-el="conditions"></textarea>
               </div>
               <p class="help-block">add one line per option:</p>
               <pre class="help-block"><code>field (equals): value 1
@@ -98,7 +100,7 @@ field2 (any of):
           <div class="report-admin-sb-item">default</div>
           <p class="help-block">Set the default value of an attribute. If the query is run automatically then the default value will be used.</p>
           <div class="report-admin-sb-field-block">
-            <textarea id="search_attrs_default"></textarea>
+            <textarea id="search_attrs_default" data-attr-el="default"></textarea>
             <p class="help-block">Enter literal values; 'current_user' for the current user; 'now' for today; or calculate a date with (+/-)n days|day |weeks|week |months|month |years|year. For example: -5 days, -1 year, +5 months, +2 weeks.</p>
             <p class="help-block">For multiple values, enter each value on a new line.</p>
           </div>
@@ -112,10 +114,9 @@ field2 (any of):
         </div>
       </div>
     </div>
-    <div class="col-sm-24" id="search_attr_definer2">
+    <div class="col-sm-24 collapse" id="search_attr_definer_config">
       <div class="" style="text-align: left;">
-        <%= f.label :search_attributes%>
-        <ul class="admin-tag-list" id="search_attr_item_list"></ul>
+        <%= f.label :attributes_configuration%>
         <div class="report-admin-search-attr-yaml-editor" >
           <%= f.text_area  :search_attrs, class: "report-admin-search-attr-final-config code-editor code-editor-yml", data: {code_editor_type: "yaml"}%>
         </div>
