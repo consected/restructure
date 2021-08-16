@@ -93,6 +93,14 @@ Rails.application.routes.draw do
     end
     resources :data_dictionaries, except: %i[show destroy]
     resources :client_requests, except: %i[edit show destroy]
+
+    resources :project_user_requests, except: %i[show destroy] do
+      member do
+        post :request_records
+        post :request_archive
+        post :request_users
+      end
+    end
   end
 
   namespace :users do

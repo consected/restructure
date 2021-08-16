@@ -82,3 +82,8 @@ Filestore Browsing and Files:
     Enable specific actions configured by the Filestore app admin.
 
 
+REDCap:
+  
+  redcap_pull_request: |
+    Allow user with a matching admin to trigger a REDCap data pull, when not authenticated as
+    the admin account. Typically used for APIs.

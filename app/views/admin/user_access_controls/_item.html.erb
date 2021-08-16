@@ -1,8 +1,12 @@
 <tr class="admin-list-item <%=list_item.disabled ? 'disabled-result' : ''%> <%= list_item.persisted? ? '' : 'new-record hidden'%> <%= action_name.in?(['create', 'update']) ? 'saved-row postprocessed-scroll-here' : ''%>" id="admin-item-<%=list_item.id%>" data-result-position="<%= list_item.persisted? ? 'replace' : 'after'%>" data-preprocessor="admin_result">
-  <% unless view_embedded? %><td><%= admin_edit_btn list_item.id%> &nbsp; <%= admin_edit_btn list_item.id, copy: list_item%> </td><% end %>
-  <% unless hide_app_type? %><td><%= @app_type_names ? @app_type_names[list_item.app_type_id.to_s] : list_item.app_type&.name %></td><% end %>
+  <% unless view_embedded? %>
+    <td><%= admin_edit_btn list_item.id%> &nbsp; <%= admin_edit_btn list_item.id, copy: list_item%> </td>
+  <% end %>
+  <% unless hide_app_type? %>
+    <td><%= @app_type_names ? @app_type_names[list_item.app_type_id.to_s] : list_item.app_type&.name %></td>
+  <% end %>
   <td><%= @user_emails ? @user_emails[list_item.user_id.to_s] : list_item.user&.email%></td>
-  <td><%= list_item.role_name %></td>
+  <td><%= link_to list_item.role_name, admin_user_roles_path(filter: {role_name: list_item.role_name}) if list_item.role_name%></td>
   <td><%= list_item.access %></td>
   <td><%= list_item.resource_type %></td>
   <td><%= list_item.bad_resource_name(@resource_names_for_type) ? '<strong>BAD RESOURCE NAME</strong>'.html_safe : '' %> <%= list_item.resource_name %></td>
