@@ -31,24 +31,6 @@ _fpa.postprocessors_admin = {
 
       $('#admin_user_access_control_access optgroup[label]').hide();
       $('#admin_user_access_control_access optgroup[label="' + val + '"]').show();
-      //   if (val == 'activity_log_type') {
-      //     var url = new URL(window.location.href);
-
-      //     var p = url.searchParams.get('filter[resource_name]')
-      //     var opts = $('#admin_user_access_control_resource_name optgroup[label="' + val + '"] option');
-      //     opts.show();
-      //     if (p) {
-      //       ps = p.replace('__%', '');
-      //       if (ps != p) {
-      //         opts.each(function () {
-      //           var h = $(this).val();
-      //           if (h.indexOf(ps) < 0) {
-      //             $(this).hide();
-      //           }
-      //         });
-      //       }
-      //     }
-      //   }
     };
 
     res_type_change($('#admin_user_access_control_resource_type'));
@@ -140,18 +122,6 @@ _fpa.postprocessors_admin = {
         ehi.addClass('code-extra-help-info-formatted-in-tab')
       }
     })
-
-    // $('.has-editor[data-toggle="collapse"]').filter(':visible').each(function () {
-    //   var el = $($(this).attr('href'));
-
-    //   el.on('shown.bs.collapse', function () {
-    //     var ehi = $(this).find('.extra-help-info').not('.code-extra-help-info-formatted-in-collapse, .code-extra-help-info-formatted-in-tab').filter(':visible');
-    //     ehi.each(function () {
-    //       _fpa.admin.setup_yaml_editor($(this));
-    //       ehi.addClass('code-extra-help-info-formatted-in-collapse code-extra-help-info-formatted-in-tab')
-    //     });
-    //   })
-    // });
 
     $('.collapse.has-editor').on('shown.bs.collapse', function () {
       var ehi = $(this).find('.extra-help-info').not('.code-extra-help-info-formatted-in-collapse, .code-extra-help-info-formatted-in-tab').filter(':visible');
