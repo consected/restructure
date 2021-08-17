@@ -20,7 +20,16 @@ class ReportSearchAttrs {
   load_items(text) {
     if (!text) return
 
-    this.items_config = jsyaml.load(text)
+    try {
+      this.items_config = jsyaml.load(text)
+    }
+    catch (err) {
+      window.setTimeout(() => {
+        _fpa.flash_notice('Error in search attributes configuration YAML. View the attribute configuration to correct it. ' + err.message, 'warning');
+      }, 1000)
+    }
+
+    if (!this.items_config) return
 
     Object.entries(this.items_config).forEach(([name, hash]) => {
       this.add_item_hash(name, hash)
@@ -74,7 +83,17 @@ class ReportSearchAttr {
 
   load_value_hash(val) {
     if (!val) return
-    return jsyaml.load(val)
+    try {
+      var res = jsyaml.load(val)
+    }
+    catch (err) {
+      window.setTimeout(() => {
+        _fpa.flash_notice('Error in search attributes configuration value YAML. View the configuration fields to correct it. ' + err.message, 'warning');
+      }, 1000)
+      throw err
+    }
+
+    return res
   }
 
   load_value_list(val) {
