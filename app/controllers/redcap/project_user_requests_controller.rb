@@ -58,30 +58,33 @@ class Redcap::ProjectUserRequestsController < UserBaseController
 
     return not_authorized unless current_user.can? :redcap_pull_request
 
-    @redcap__project_admin.current_admin = current_user.matching_admin
+    ma = current_user.matching_admin
+    raise FphsException, "Current user #{current_user.email} requires a matching admin" unless ma
+
+    @redcap__project_admin.current_admin = ma
   end
 
   #
   # Set the Redcap project admin instance, from the first to match:
   #  - integer ID
-  #  - data collection instrument ID
+  #  - id ==  instrument: data collection instrument ID in param[:instrument]
   #  - project name
   # The id param is used in all cases, checking if the id is an integer or a string
   def set_instance_from_id
     pid = params[:id]
     if pid.to_i.to_s == pid
       @redcap__project_admin = Redcap::ProjectAdmin.active.find(pid)
+    elsif pid == 'instrument'
+      # Find a matching data collection instrument by name and if found look up the project admin
+      instrument = params[:instrument]
+      @redcap__project_admin = Redcap::DataCollectionInstrument.active
+                                                               .where(name: instrument)
+                                                               .first&.redcap_project_admin
     else
-      # Find a matching data collection instrument by name
-      dci = Redcap::DataCollectionInstrument.active.where(name: pid).first&.redcap_project_admin_id
-      @redcap__project_admin = if dci
-                                 # Instrument matches, so find the project admin instance
-                                 Redcap::ProjectAdmin.active.find(dci)
-                               else
-                                 # No instrument matched, so try the project by name instead
-                                 Redcap::ProjectAdmin.active.find_by_name(pid)
-                               end
+      # Try the project by name instead
+      @redcap__project_admin = Redcap::ProjectAdmin.active.find_by_name(pid)
     end
+
     @id = @redcap__project_admin.id
     @redcap__project_admin.current_admin = upgrade_user_to_admin
 

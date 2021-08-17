@@ -19,7 +19,7 @@ if [ "$DEBUG" ]; then
   echo "Getting redcap pull request results"
 fi
 
-results="$(curl -XPOST "${app_server}/redcap/project_user_requests/${redcap_project}/request_records.json?use_app_type=${app_type}&user_email=${app_user_email}&user_token=${app_user_token}")"
+results="$(curl -XPOST "${app_server}/redcap/project_user_requests/instrument/request_records.json?instrument=${redcap_project}&use_app_type=${app_type}&user_email=${app_user_email}&user_token=${app_user_token}")"
 
 if [ "$DEBUG" ]; then
   echo ${results}
