@@ -18,7 +18,7 @@ module ActiveRecord
 
         <<~DO_TEXT
 
-          CREATE OR REPLACE FUNCTION #{trigger_fn_name} ()
+          CREATE OR REPLACE FUNCTION #{schema}.#{trigger_fn_name} ()
             RETURNS TRIGGER
             LANGUAGE plpgsql
             AS $$

@@ -80,6 +80,14 @@ module Redcap
     end
 
     #
+    # Get the project instrument results (data collection instruments)
+    # @return [Array{Hash}] hash with symbolized keys
+    def instruments(request_options: nil)
+      request_options ||= metadata_request_options
+      request :instrument, request_options: request_options
+    end
+
+    #
     # Get the data records for the project
     # @return [Array{Hash}] hash with symbolized keys
     def records(request_options: nil)

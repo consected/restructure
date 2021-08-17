@@ -48,51 +48,6 @@ describe 'simple search reports', js: true, driver: :app_firefox_driver do
     login
   end
 
-  it 'should export CSV for a simple search' do
-    visit '/masters/search'
-    user = User.where(email: @good_email).first
-    expect(user.can?(:export_csv)).to be_truthy
-
-    pl = player_list.first
-
-    expect(PlayerInfo.where(last_name: pl[:last_name]).first).not_to be nil
-
-    within '#simple_search_master' do
-      fill_in 'Last name', with: pl[:last_name]
-      sleep 1
-      click_button 'search'
-    end
-
-    expect(page).to have_css('#master_results_block')
-
-    expect(page).to have_css('#expand-simple-form')
-    if has_css?('#expand-simple-form.collapse')
-      click_button '#expand-simple-form.collapse'
-      has_css? '.btn-csv'
-    end
-
-    # within '#simple_search_master' do
-    #   click_button 'csv'
-    #   sleep 2
-    # end
-
-    # If there is an alert it is possibly because there are no results to export.
-    # Check this is not the case
-    expect(page).not_to have_css('.alert')
-
-    within '#simple_search_master' do
-      fill_in 'Last name', with: ''
-      sleep 1
-      click_button 'search'
-      sleep 5
-      # click_button 'csv'
-    end
-
-    expect(page).to have_css('.alert')
-
-    expect(find('.alert').text).to match(/no results to export/)
-  end
-
   after(:all) do
   end
 end

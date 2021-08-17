@@ -35,6 +35,12 @@ class User < ActiveRecord::Base
     where(email: Settings::TemplateUserEmail).first
   end
 
+  # Get the admin that corresponds to this user
+  # @return [Admin | nil]
+  def matching_admin
+    Admin.active.where(email: email).first
+  end
+
   #
   # The batch_user is the User instance for the user specified in Settings::BatchUserEmail
   def self.batch_user

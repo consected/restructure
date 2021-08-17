@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/consected/redcap.git
-  revision: 02703a992d6cb36e6c0e9a25db87230a74b0b817
+  revision: 6eca1ed40121095cbc4c1ee508f27aafdccdbca8
   specs:
     redcap (0.3.5)
       dotenv

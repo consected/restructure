@@ -37,10 +37,10 @@
 //= require codemirror/mode/javascript/javascript
 //= require codemirror/mode/htmlembedded/htmlembedded
 //= require codemirror/mode/htmlmixed/htmlmixed
-//   For codemirror:
+//   For codemirror and admin config handling:
 //= require js-yaml/dist/js-yaml 
 //
 //= require sortablejs/Sortable.js
 //
-// All other required codemirror components
+// All other required admin components
 //= require_tree ./admin
