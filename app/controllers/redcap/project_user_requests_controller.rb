@@ -62,15 +62,26 @@ class Redcap::ProjectUserRequestsController < UserBaseController
   end
 
   #
-  # Set the Redcap project admin instance, from either an integer ID, or by its name.
-  # The id param is used in both cases, checking if the id is an integer or a string
+  # Set the Redcap project admin instance, from the first to match:
+  #  - integer ID
+  #  - data collection instrument ID
+  #  - project name
+  # The id param is used in all cases, checking if the id is an integer or a string
   def set_instance_from_id
     pid = params[:id]
-    @redcap__project_admin = if pid.to_i.to_s == pid
-                               Redcap::ProjectAdmin.active.find(pid)
-                             else
-                               Redcap::ProjectAdmin.active.find_by_name(pid)
-                             end
+    if pid.to_i.to_s == pid
+      @redcap__project_admin = Redcap::ProjectAdmin.active.find(pid)
+    else
+      # Find a matching data collection instrument by name
+      dci = Redcap::DataCollectionInstrument.active.where(name: pid).first&.redcap_project_admin_id
+      @redcap__project_admin = if dci
+                                 # Instrument matches, so find the project admin instance
+                                 Redcap::ProjectAdmin.active.find(dci)
+                               else
+                                 # No instrument matched, so try the project by name instead
+                                 Redcap::ProjectAdmin.active.find_by_name(pid)
+                               end
+    end
     @id = @redcap__project_admin.id
     @redcap__project_admin.current_admin = upgrade_user_to_admin
 

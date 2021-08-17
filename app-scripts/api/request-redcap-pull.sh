@@ -7,7 +7,7 @@ app_server="https://server.tld" \\
 app_user_email=redcap_det@local \\
 app_user_token=<reset password to get a new token> \\
 app_type=63 \\
-redcap_project='q2_demo' \\
+redcap_project='<id, project name or instrument name>' \\
 app-scripts/api/request-redcap-pull.sh
 
 Set DEBUG environment variable to any value to get full debug messages and JSON results

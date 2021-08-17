@@ -88,6 +88,7 @@ Rails.application.routes.draw do
         post :request_records
         post :request_archive
         post :request_users
+        post :request_data_collection_instruments
         post :force_reconfig
       end
     end

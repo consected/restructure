@@ -60,6 +60,11 @@ module Redcap
              foreign_key: :redcap_project_admin_id,
              inverse_of: :redcap_project_admin
 
+    has_many :redcap_data_collection_instruments,
+             class_name: 'Redcap::DataCollectionInstrument',
+             foreign_key: :redcap_project_admin_id,
+             inverse_of: :redcap_project_admin
+
     has_many :redcap_client_requests,
              class_name: 'Redcap::ClientRequest',
              foreign_key: :redcap_project_admin_id,
@@ -142,6 +147,18 @@ module Redcap
                                                  force_refresh
                                                )
                                            }
+
+    after_save :request_data_collection_instruments, if: lambda {
+                                                           return false if disabled
+
+                                                           api_key.present? &&
+                                                             (
+                                                               saved_change_to_server_url? ||
+                                                               saved_change_to_api_key? ||
+                                                               saved_change_to_name? ||
+                                                               force_refresh
+                                                             )
+                                                         }
 
     after_save :setup_dynamic_model, if: lambda {
                                            return false if disabled
@@ -252,6 +269,13 @@ module Redcap
     def capture_project_users
       pu = ProjectUsers.new self
       pu.request_users
+    end
+
+    #
+    # Store the data dictionary metadata from Redcap for future reference
+    # Calls a delayed job to actually do the work
+    def request_data_collection_instruments
+      Redcap::DataCollectionInstrument.capture_data_collection_instruments(self)
     end
 
     #
