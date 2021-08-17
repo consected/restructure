@@ -21,6 +21,10 @@ ul.admin-tag-list {
   }
 }
 
+.admin-tag-list.selectable li:hover {
+  cursor: pointer;
+}
+
 .al-details-section {
   padding: 0 10px;
 
