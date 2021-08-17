@@ -41,6 +41,9 @@ module Redcap
       # Schedule an update of the project users in the background
       project_admin.capture_project_users
 
+      # Schedule an update of the data collection instruments list in the background
+      project_admin.request_data_collection_instruments
+
       dr = Redcap::DataRecords.new(project_admin, class_name)
       dr.retrieve_validate_store
       project_admin.update_status(:scheduled_run_successful)
