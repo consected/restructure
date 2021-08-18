@@ -7,7 +7,8 @@ app_server="https://server.tld" \\
 app_user_email=redcap_det@local \\
 app_user_token=<reset password to get a new token> \\
 app_type=63 \\
-redcap_project='<id, project name or instrument name>' \\
+id='<id, project name or "project_id">'
+redcap_project='<redcap project_id>' \\
 app-scripts/api/request-redcap-pull.sh
 
 Set DEBUG environment variable to any value to get full debug messages and JSON results
@@ -15,11 +16,14 @@ EOF
   exit
 fi
 
+url="${app_server}/redcap/project_user_requests/${id}/request_records.json?project_id=${redcap_project}&use_app_type=${app_type}&user_email=${app_user_email}&user_token=${app_user_token}"
+
 if [ "$DEBUG" ]; then
   echo "Getting redcap pull request results"
+  echo ${url}
 fi
 
-results="$(curl -XPOST "${app_server}/redcap/project_user_requests/instrument/request_records.json?instrument=${redcap_project}&use_app_type=${app_type}&user_email=${app_user_email}&user_token=${app_user_token}")"
+results="$(curl -XPOST ${url})"
 
 if [ "$DEBUG" ]; then
   echo ${results}

@@ -67,23 +67,29 @@ class Redcap::ProjectUserRequestsController < UserBaseController
   #
   # Set the Redcap project admin instance, from the first to match:
   #  - integer ID
-  #  - id ==  instrument: data collection instrument ID in param[:instrument]
-  #  - project name
+  #  - id == project_id: REDCap project ID in param[:project_id]
+  #  - id == project_name: project name in param[:project_name]
   # The id param is used in all cases, checking if the id is an integer or a string
   def set_instance_from_id
     pid = params[:id]
+    project_id = params[:project_id]
+    project_name = params[:project_name]
     if pid.to_i.to_s == pid
       @redcap__project_admin = Redcap::ProjectAdmin.active.find(pid)
-    elsif pid == 'instrument'
+    elsif pid == 'project_id'
       # Find a matching data collection instrument by name and if found look up the project admin
-      instrument = params[:instrument]
-      @redcap__project_admin = Redcap::DataCollectionInstrument.active
-                                                               .where(name: instrument)
-                                                               .first&.redcap_project_admin
-    else
+      @redcap__project_admin = Redcap::ProjectAdmin
+                               .active
+                               .where("captured_project_info ->> 'project_id' = ?", project_id.to_s)
+                               .reorder('')
+                               .order(updated_at: :desc)
+                               .first
+    elsif pid == 'project_name'
       # Try the project by name instead
-      @redcap__project_admin = Redcap::ProjectAdmin.active.find_by_name(pid)
+      @redcap__project_admin = Redcap::ProjectAdmin.active.find_by_name(project_name)
     end
+
+    raise FphsException, 'no matching project found' unless @redcap__project_admin
 
     @id = @redcap__project_admin.id
     @redcap__project_admin.current_admin = upgrade_user_to_admin
