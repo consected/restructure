@@ -73,6 +73,7 @@ class Redcap::ProjectUserRequestsController < UserBaseController
   def set_instance_from_id
     pid = params[:id]
     project_id = params[:project_id]
+    server_url = params[:server_url]
     project_name = params[:project_name]
     if pid.to_i.to_s == pid
       @redcap__project_admin = Redcap::ProjectAdmin.active.find(pid)
@@ -81,6 +82,7 @@ class Redcap::ProjectUserRequestsController < UserBaseController
       @redcap__project_admin = Redcap::ProjectAdmin
                                .active
                                .where("captured_project_info ->> 'project_id' = ?", project_id.to_s)
+                               .where(server_url: server_url)
                                .reorder('')
                                .order(updated_at: :desc)
                                .first
