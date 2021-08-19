@@ -1,38 +1,35 @@
 <h3><%= object_instance.name %></h3>
-
-<h4>dynamic model</h4> 
+<h4>dynamic model</h4>
 <% if !object_instance.persisted? %>
-  <p>Enter the key fields, then save. When saved, upload a sample CSV file to generate a model database table.</p>
+  <p>Enter the <b>Name</b> and <b>Dynamic model table</b>, then save. When saved, upload a sample CSV file to generate a model database table.</p>
 <% elsif @dynamic_model %>
   <div class="dynamic-details-section">
     <label>table</label>
     <% if object_instance.dynamic_model_def_current? %>
-    <% rpath = report_path('reference_data__table_data', 
+      <% rpath = report_path('reference_data__table_data', 
                                           table_name: @dynamic_model.table_name, 
                                           schema_name: @dynamic_model.schema_name, 
                                           search_attrs: { no_run: true }
                                         ) 
       nipath = new_imports_import_path(primary_table: @dynamic_model.full_item_types_name)                                    
     %>
-    <p class="dynamic-item-type mono"><%= @dynamic_model.schema_name %>.<%= @dynamic_model.table_name 
+      <p class="dynamic-item-type mono"><%= @dynamic_model.schema_name %>.<%= @dynamic_model.table_name 
     %>&nbsp;<%= link_to '', rpath, target: '_blank', class: 'glyphicon glyphicon-search' %>
-    </p>
-
-    <p><%= link_to link_label_open_in_new('import data to table'), nipath %>&nbsp;<%= link_to '', nipath, target: '_blank' %>
-    </p>
-
-    <div class="dynamic-details-fields">
-      <label>fields</label>
-      <% num_fields = @dynamic_model.all_implementation_fields.length%>
-      <p><%= num_fields %> user data <%= "fields".pluralize(num_fields) %></p>
-      <p class="dynamic-field-list">
-      <code><%= object_instance.dynamic_model_columns
+      </p>
+      <p><%= link_to link_label_open_in_new('import data to table'), nipath %>&nbsp;<%= link_to '', nipath, target: '_blank' %>
+      </p>
+      <div class="dynamic-details-fields">
+        <label>fields</label>
+        <% num_fields = @dynamic_model.all_implementation_fields.length%>
+        <p><%= num_fields %> user data <%= "fields".pluralize(num_fields) %></p>
+        <p class="dynamic-field-list">
+          <code><%= object_instance.dynamic_model_columns
                   .map {|h| "<b>#{h.name}</b>&nbsp;#{h.type}".html_safe}
                   .join("</code> <code>")
                   .html_safe %></code>
-      </p>
-    </div>
-    <% end %>    
+        </p>
+      </div>
+    <% end %>
   </div>
   <div class="dynamic-details-upload">
     <% if params[:from_upload] == 'true' %>
@@ -43,19 +40,17 @@
       <p class="upload-result">The current configuration has not been used to update the dynamic model table definition.</p>
       <p><%= link_to 'update dynamic model', create_model_imports_model_generator_path(object_instance), method: :post, remote: true, class: 'btn btn-primary' %></p>
       <p><i>or...</i></p>
-
     <% else %>
       <p class="upload-result">Upload a sample CSV file to alter the existing model database table</p>
     <% end %>
-
-<% else %>
-  <div class="dynamic-details-upload">
-    <% if object_instance.field_types.present? %>
-      <p class="upload-result">Upload complete. Verify the field configurations. Then create the dynamic model table or upload another CSV file to update the definition.</p>
-      <p><%= link_to 'create dynamic model', create_model_imports_model_generator_path(object_instance), method: :post, remote: true, class: 'btn btn-primary' %></p>
-    <% else %>
-      <p>Not yet defined. Upload a sample CSV file to generate a model database table</p>
-    <% end %>
-<% end%>
+  <% else %>
+    <div class="dynamic-details-upload">
+      <% if object_instance.field_types.present? %>
+        <p class="upload-result">Upload complete. Verify the field configurations. Then create the dynamic model table or upload another CSV file to update the definition.</p>
+        <p><%= link_to 'create dynamic model', create_model_imports_model_generator_path(object_instance), method: :post, remote: true, class: 'btn btn-primary' %></p>
+      <% else %>
+        <p>Not yet defined. Upload a sample CSV file to generate a model database table</p>
+      <% end %>
+    <% end%>
     <%= render partial: 'imports/model_generators/upload_form', locals: {object_instance: object_instance} %>
   </div>
