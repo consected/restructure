@@ -97,7 +97,7 @@
   # Handle Brakeman issue with using column type directly to generate partial path
   unless got
 
-    valid_col_types = [:boolean, :integer]
+    valid_col_types = [:boolean, :integer, :datetime]
     ct = valid_col_types.select {|c| c == column_type.to_sym }.first
 
     match_name = "column_type_#{ct}"
