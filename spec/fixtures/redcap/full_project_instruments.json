@@ -1,0 +1,14 @@
+[
+  {
+    "instrument_name": "q2_survey",
+    "instrument_label": "q2_survey"
+  },
+  {
+    "instrument_name": "test",
+    "instrument_label": "test"
+  },
+  {
+    "instrument_name": "non_survey",
+    "instrument_label": "non_survey"
+  }
+]
