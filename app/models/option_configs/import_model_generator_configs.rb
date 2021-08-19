@@ -9,7 +9,7 @@ module OptionConfigs
     include OptionsHandler
 
     # Fields hash of FieldConfiguration
-    configure_hash :fields, with: %i[type label caption comment]
+    configure_hash :fields, with: %i[type label caption comment no_downcase]
 
     #
     # Set up the fields configuration from the CSV field types hash

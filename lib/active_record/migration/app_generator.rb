@@ -308,11 +308,30 @@ module ActiveRecord
         new_colnames = fields.map(&:to_s) - standard_columns
         added = (new_colnames - old_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
         removed = (old_colnames - new_colnames - [belongs_to_model_field]).reject { |a| a.to_s.index(ignore_fields) }
+
+        changed = {}
+        db_configs.each do |k, v|
+          current_type = cols.find { |c| c.name == k.to_s }.type
+          next unless v[:type] && current_type
+
+          expected_type = (v[:type]&.to_sym || :string)
+          changed[k.to_s] = expected_type if current_type != expected_type
+        end
+
         added_history = (new_colnames - old_history_colnames - [belongs_to_model_field]).reject do |a|
           a.to_s.index(ignore_fields)
         end
         removed_history = (old_history_colnames - new_colnames - [belongs_to_model_field]).reject do |a|
           a.to_s.index(ignore_fields)
+        end
+
+        changed_history = {}
+        db_configs.each do |k, v|
+          current_type = history_cols.find { |c| c.name == k.to_s }.type
+          next unless v[:type] && current_type
+
+          expected_type = (v[:type]&.to_sym || :string)
+          changed_history[k.to_s] = expected_type if current_type != expected_type
         end
 
         idx = added.index('created_by_user_id')
@@ -335,8 +354,10 @@ module ActiveRecord
           puts 'Migrate'
           puts "Adding: #{added -= col_names}"
           puts "Removing: #{removed &= col_names}"
+          puts "Changing: #{changed}"
           puts "Adding (history): #{added_history -= history_col_names}" if history_table_exists
           puts "Removing (history): #{removed_history &= history_col_names}" if history_table_exists
+          puts "Changing (history): #{changed_history}"
         end
 
         if Rails.env.production? && (removed.present? || removed_history.present?) && ENV['ALLOW_DROP_COLUMNS'] != 'true'
@@ -349,7 +370,7 @@ module ActiveRecord
 
         self.fields_comments ||= {}
         commented_colnames = fields_comments.keys.map(&:to_s)
-        changed = commented_colnames - added - removed
+        changed_comments = commented_colnames - added - removed
 
         # Skip updates to missing history tables
         unless history_table_exists
@@ -476,7 +497,19 @@ module ActiveRecord
           end
         end
 
-        changed.each do |c|
+        changed.each do |k, v|
+          v = :timestamp if v == :datetime
+          change_type = "#{v} using #{k}::#{v}"
+          change_column "#{schema}.#{table_name}", k, change_type
+        end
+
+        changed_history.each do |k, v|
+          v = :timestamp if v == :datetime
+          change_type = "#{v} using #{k}::#{v}"
+          change_column "#{schema}.#{table_name}", k, change_type
+        end
+
+        changed_comments.each do |c|
           next unless fields_comments.key?(c.to_sym)
 
           col = cols.select { |csel| csel.name == c }.first
