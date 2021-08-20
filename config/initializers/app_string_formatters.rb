@@ -48,6 +48,19 @@ module StringExtensions
   rescue ArgumentError
     nil
   end
+
+  #
+  # Alternative to titleize, to allow it to handle acronyms
+  # We avoid using inflector, since it breaks classify and camelize, used
+  # for class name handling across the app
+  # @return [String]
+  def captionize
+    res = titleize
+    Settings::CaptionAcronyms.each do |acronym|
+      res = res.gsub(/(?<![\w\d])(#{acronym})(?![\w\d])/i, acronym)
+    end
+    res
+  end
 end
 
 class String

@@ -12,8 +12,9 @@ end
 #   inflect.uncountable %w( fish sheep )
 # end
 
-acronymns = %w[IPA PI BHS]
-# These inflection rules are supported but not enabled by default:
-ActiveSupport::Inflector.inflections(:en) do |inflect|
-  acronymns.each { |a| inflect.acronym a }
-end
+# Do not use acronym inflector, since it will break our expectations
+# around classify and camelize. Instead, use Settings::CaptionAcronymns,
+# which will be enforced for titleize only
+
+# ActiveSupport::Inflector.inflections(:en) do |inflect|
+# end
