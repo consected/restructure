@@ -187,6 +187,8 @@ module Redcap
         .to_return(status: 200, body: project_instruments_full_response, headers: {})
     end
 
+    alias stub_request_full_instruments stub_request_instruments
+
     def stub_request_project_users_updated(server_url, api_key)
       stub_request(:post, server_url)
         .with(
