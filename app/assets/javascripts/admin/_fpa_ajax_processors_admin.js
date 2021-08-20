@@ -14,6 +14,18 @@ _fpa.postprocessors_admin = {
       block.html('');
     });
 
+    block.find('input#external_identifier_name').not('.name-click-setup').on('change blur', function () {
+      console.log('sss')
+      var val = $(this).val();
+      var $id_field = block.find('input#external_identifier_external_id_attribute');
+      var id_val = $id_field.val();
+
+      if (id_val || !val) return;
+
+      id_val = `${val.singularize().underscore()}_ext_id`
+      $id_field.val(id_val);
+    }).addClass('name-click-setup');
+
     if (block.find('.admin-edit-form.admin-report').length === 1) {
       _admin.handle_admin_report_config(block);
     };
