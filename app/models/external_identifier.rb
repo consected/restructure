@@ -7,6 +7,7 @@ class ExternalIdentifier < ActiveRecord::Base
   include AdminHandler
 
   DefaultRange = (1..9_999_999_999).freeze
+  ReportItemType = 'External ID Usage'
 
   validates :name, presence: { scope: :active, message: "can't be blank" }
   validates :label, presence: { scope: :active, message: "can't be blank" }
@@ -88,12 +89,20 @@ class ExternalIdentifier < ActiveRecord::Base
     end
   end
 
+  #
+  # Lookup the external identifier report based on its type
+  # @param [String] rep_type - one of the possible external ID report types
+  # @return [Report | nil]
   def usage_report(rep_type)
-    Report.active.where(name: usage_report_name(rep_type)).first
+    rep_name = usage_report_name(rep_type)
+    item_type = ReportItemType
+    short_name = Report.gen_short_name(rep_name)
+    arn = Report.alt_resource_name(item_type, short_name)
+    Report.active.find_by_alt_resource_name(arn, true)
   end
 
   def usage_report_name(rep_type)
-    "#{name.humanize.titleize} #{rep_type}"
+    "#{name.humanize.captionize} #{rep_type}"
   end
 
   # Set up an association to this class on the Master
@@ -107,8 +116,10 @@ class ExternalIdentifier < ActiveRecord::Base
     # Define the association
 
     if pregenerate_ids
-      # Some implementations, like Sage Assignments need a special build, which handles the allocation of an existing item from the table
-      # when an instance is created. Within the structure we have, it is necessary to override the master.sage_assignments.build
+      # Some implementations, like Sage Assignments need a special build,
+      # which handles the allocation of an existing item from the table
+      # when an instance is created. Within the structure we have,
+      # it is necessary to override the master.sage_assignments.build
       # method to ensure everything works as expected
       # Pass the new build method in to make the association build work
 
@@ -141,10 +152,13 @@ class ExternalIdentifier < ActiveRecord::Base
   end
 
   def generate_model
-    logger.info "---------------------------------------------------------------------------
-************** GENERATING ExternalIdentifier MODEL #{name} ****************
----------------------------------------------------------------------------"
-
+    logger.info(
+      <<~END_INTRO
+        ---------------------------------------------------------------------------
+        ************** GENERATING ExternalIdentifier MODEL #{name} ****************
+        ---------------------------------------------------------------------------
+      END_INTRO
+    )
     klass = Object
     failed = false
     @regenerate = nil
@@ -194,7 +208,8 @@ class ExternalIdentifier < ActiveRecord::Base
         begin
           # This may fail if an underlying dependent class (parent class) has been redefined by
           # another dynamic implementation, such as external identifier
-          if implementation_class_defined?(klass, fail_without_exception: true, fail_without_exception_newable_result: true)
+          if implementation_class_defined?(klass, fail_without_exception: true,
+                                                  fail_without_exception_newable_result: true)
             klass.send(:remove_const, model_class_name)
           end
         rescue StandardError => e
@@ -254,12 +269,11 @@ class ExternalIdentifier < ActiveRecord::Base
   def implementation_table_tests
     return if name.blank? || external_id_attribute.blank?
 
-    if ActiveRecord::Base.connection.table_exists? name
-      # Check for the actual database columns, since the class has not been created yet, and will not be until after_commit
-      unless ActiveRecord::Base.connection.columns(name).map(&:name).include?(external_id_attribute.to_s)
-        raise FphsException, "external_id_attribute does not exist as an attribute (named #{external_id_attribute}) in the table #{name}"
-      end
-    end
+    return unless Admin::MigrationGenerator.table_or_view_exists?(name) &&
+                  !Admin::MigrationGenerator.table_column_names(name).include?(external_id_attribute.to_s)
+
+    raise FphsException,
+          "external_id_attribute does not exist as an attribute (named #{external_id_attribute}) in the table #{name}"
   end
 
   def generator_script(version, mode = 'create')
@@ -312,13 +326,18 @@ class ExternalIdentifier < ActiveRecord::Base
     unless name.to_sym == model_association_name
       errors.add :name, 'not acceptable - must be plural and avoid numbers after underscores in names'
     end
+
     # Unfortunately we have clash in the existing scantrons naming. Ignore this case and work around as necessary.
-    if (external_id_attribute == "#{name.singularize}_id" || external_id_attribute == 'external_id') && name.downcase != 'scantrons'
-      errors.add :external_id_attribute, "must not be named #{external_id_attribute} or external_id. Consider using the name '#{name.singularize}_ext_id'"
+    if (external_id_attribute == "#{name.singularize}_id" || external_id_attribute == 'external_id') &&
+       name.downcase != 'scantrons'
+      errors.add :external_id_attribute,
+                 "must not be named #{external_id_attribute} or external_id. " \
+                 "Consider using the name '#{name.singularize}_ext_id'"
     end
-    unless external_id_attribute.end_with? 'id'
-      errors.add :external_id_attribute, "must end in '_id'. Consider using the name '#{name.singularize}_ext_id'"
-    end
+
+    return if external_id_attribute.end_with? 'id'
+
+    errors.add :external_id_attribute, "must end in '_id'. Consider using the name '#{name.singularize}_ext_id'"
   end
 
   def config_uniqueness
@@ -329,53 +348,64 @@ class ExternalIdentifier < ActiveRecord::Base
   end
 
   def generate_usage_reports
-    if !disabled && errors.empty?
-      r = usage_report('Assigned')
-      unless r
-        Report.create! name: usage_report_name('Assigned'),
-                       item_type: 'External ID Usage',
-                       report_type: 'regular_report',
-                       auto: false,
-                       searchable: false,
-                       current_admin: admin,
-                       position: 100,
-                       sql: "select id, #{external_id_attribute}, master_id, user_id from #{name} where master_id is not null"
-      end
+    return unless !disabled && errors.empty?
 
-      r = usage_report('Search')
-      unless r
-        Report.create! name: usage_report_name('Search'),
-                       item_type: 'External ID Search',
-                       report_type: 'search',
-                       auto: false,
-                       searchable: true,
-                       current_admin: admin,
-                       position: 100,
-                       sql: "select * from #{name} where #{external_id_attribute} = :#{external_id_attribute}",
-                       search_attrs: "
-#{external_id_attribute}:
-  number:
-    all: true
-    multiple: single
-"
-      end
+    r = usage_report('Assigned')
+    unless r
+      sql = <<~END_SQL
+        select id, #{external_id_attribute}, master_id, user_id from #{name} where master_id is not null
+      END_SQL
 
-      if pregenerate_ids?
-        r = usage_report('Unassigned')
-        unless r
-          Report.create! name: usage_report_name('Unassigned'),
-                         item_type: 'External ID Usage',
-                         report_type: 'regular_report',
-                         auto: false,
-                         searchable: false,
-                         current_admin: admin,
-                         position: 100,
-                         sql: "select id, #{external_id_attribute} from #{name} where master_id is null"
-        end
-      end
+      Report.create! name: usage_report_name('Assigned'),
+                     item_type: ReportItemType,
+                     report_type: 'regular_report',
+                     auto: false,
+                     searchable: false,
+                     current_admin: admin,
+                     position: 100,
+                     sql: sql
     end
+
+    r = usage_report('Search')
+    unless r
+      sql = <<~END_SQL
+        select * from #{name} where #{external_id_attribute} = :#{external_id_attribute}
+      END_SQL
+
+      sa = <<~END_SA
+        #{external_id_attribute}:
+          number:
+            all: true
+            multiple: single
+      END_SA
+
+      Report.create! name: usage_report_name('Search'),
+                     item_type: ReportItemType,
+                     report_type: 'search',
+                     auto: false,
+                     searchable: true,
+                     current_admin: admin,
+                     position: 100,
+                     sql: sql,
+                     search_attrs: sa
+    end
+
+    return unless pregenerate_ids?
+
+    r = usage_report('Unassigned')
+    return if r
+
+    sql = <<~END_SQL
+      select id, #{external_id_attribute} from #{name} where master_id is null
+    END_SQL
+
+    Report.create! name: usage_report_name('Unassigned'),
+                   item_type: ReportItemType,
+                   report_type: 'regular_report',
+                   auto: false,
+                   searchable: false,
+                   current_admin: admin,
+                   position: 100,
+                   sql: sql
   end
 end
-
-# Force the initialization. Do this here, rather than an initializer, since forces a reload if rails reloads classes in development mode.
-# ExternalIdentifier.define_models
