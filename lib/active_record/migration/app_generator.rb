@@ -498,13 +498,13 @@ module ActiveRecord
         end
 
         changed.each do |k, v|
-          v = :timestamp if v == :datetime
+          v = map_migration_type_to_db_type(v)
           change_type = "#{v} using #{k}::#{v}"
           change_column "#{schema}.#{table_name}", k, change_type
         end
 
         changed_history.each do |k, v|
-          v = :timestamp if v == :datetime
+          v = map_migration_type_to_db_type(v)
           change_type = "#{v} using #{k}::#{v}"
           change_column "#{schema}.#{table_name}", k, change_type
         end
@@ -524,6 +524,24 @@ module ActiveRecord
       end
 
       protected
+
+      #
+      # Map migration type (symbol) to a real database type
+      # to be used in SQL (such as alter table alter column DDL)
+      # @param [Symbol] mig_type
+      # @return [String]
+      def map_migration_type_to_db_type(mig_type)
+        case mig_type
+        when :datetime
+          'timestamp'
+        when :string
+          'varchar'
+        when :references
+          'integer'
+        else
+          mig_type.to_s
+        end
+      end
 
       def ignore_fields
         /^placeholder_|^embedded_report_|^tracker_history_id$|^id$/

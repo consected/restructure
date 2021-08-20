@@ -51,8 +51,9 @@ module Dynamic
       # Return if there is nothing to update
       return unless migration_generator.migration_update_table || saved_change_to_table_name?
 
-      gs = generator_script(migration_generator.migration_version, 'update')
-      fn = migration_generator.write_db_migration gs, table_name, migration_generator.migration_version, mode: 'update'
+      mode = 'update'
+      gs = generator_script(migration_generator.migration_version, mode)
+      fn = migration_generator.write_db_migration gs, table_name, migration_generator.migration_version, mode: mode
       @do_migration = fn
     end
 
@@ -64,9 +65,10 @@ module Dynamic
       # Force re-parsing of the option configs, to ensure comments are correctly handled
       option_configs(force: true)
       mg = migration_generator(force_reset: true)
-      gs = generator_script(mg.migration_version, mode = 'create_or_update')
+      mode = 'create_or_update'
+      gs = generator_script(mg.migration_version, mode)
 
-      mg.write_db_migration(gs, table_name, mg.migration_version, mode: 'create_or_update', export_type: export_type)
+      mg.write_db_migration(gs, table_name, mg.migration_version, mode: mode, export_type: export_type)
     end
 
     # Run a generated migration triggered after_save

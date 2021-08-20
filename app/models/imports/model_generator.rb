@@ -163,7 +163,6 @@ module Imports
 
       # Check downcase is configured to match the dynamic model
       dynamic_model.default_options.field_options.each do |k, v|
-        k = k.to_s
         unless config_fields.key?(k) && !!config_fields[k].no_downcase == !!v[:no_downcase]
           res = false
           break
