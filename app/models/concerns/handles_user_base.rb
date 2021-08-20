@@ -102,7 +102,7 @@ module HandlesUserBase
         cn = cn.split('::').last
       end
 
-      cn.underscore.humanize.titleize
+      cn.underscore.humanize.captionize
     end
 
     #
@@ -275,7 +275,7 @@ module HandlesUserBase
   # Provide a modified human name for an instance
   def human_name
     if respond_to?(:rec_type) && rec_type
-      rec_type.underscore.humanize.titleize
+      rec_type.underscore.humanize.captionize
     else
       self.class.human_name
     end

@@ -72,7 +72,7 @@ class Report < ActiveRecord::Base
   # acts as the divider between item_type "category" and short_name
   # @param csn [String] must match the pattern yyy__zzz
   # @return [Report] or raises an exception if not found
-  def self.find_by_alt_resource_name(csn)
+  def self.find_by_alt_resource_name(csn, nil_for_no_match = nil)
     parts = csn.split('__')
     raise FphsException, 'Bad item_type__short_name identifier' unless parts.length == 2
 
@@ -80,7 +80,7 @@ class Report < ActiveRecord::Base
     # Allow hyphenated categories to be matched with underscores
     its = [i, i.gsub('_', '-'), i.gsub('_', ' ')].uniq
     res = where(item_type: its, short_name: parts.last).first
-    raise ActiveRecord::RecordNotFound unless res
+    raise ActiveRecord::RecordNotFound unless res || nil_for_no_match
 
     res
   end
@@ -193,7 +193,11 @@ class Report < ActiveRecord::Base
   end
 
   def gen_short_name
-    self.short_name = name.downcase.id_underscore.gsub(/__+/, '_') if short_name.blank?
+    self.short_name = self.class.gen_short_name(name) if short_name.blank?
+  end
+
+  def self.gen_short_name(name)
+    name.downcase.id_underscore.gsub(/__+/, '_')
   end
 
   private
