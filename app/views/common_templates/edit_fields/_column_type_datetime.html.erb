@@ -1,0 +1,13 @@
+<%= form.label field_name_sym, label_for(field_name_sym, labels) %>
+<% 
+options = field_options_for(form_object_instance, field_name_sym) 
+val = form_object_instance[field_name]&.utc
+
+val_date = val&.strftime('%Y-%m-%d')
+val_time = val&.strftime('%H:%M:%S')
+%>
+<span class="field-datetime-combo">
+  <%= form.hidden_field field_name_sym, options.merge({ data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}) %>
+  <%= date_field_tag "_date__#{field_name_sym}", val_date, class: "date-entry" %>
+  <%= text_field_tag "_time__#{field_name_sym}", val_time, class: "time-entry" %>
+</span>

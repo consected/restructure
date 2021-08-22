@@ -1,0 +1,15 @@
+<div class="report-admin-description-block">
+  <%= f.label :description %>
+  <%= render partial: 'common_templates/markdown_editor/show_editor', 
+              locals: { 
+                editor_format: 'markdown', 
+                editor_id: "report-admin-description--#{object_instance.id}",
+                form: f,
+                field_options: {
+                  config: { toolbar_type: 'advanced' }
+                },
+                form_object_instance: object_instance, 
+                field_name_sym: :description,
+                form_object_item_type_us: 'admin__report' 
+              } %>
+</div>

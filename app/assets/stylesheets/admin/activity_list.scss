@@ -5,6 +5,7 @@
 ul.activity-list,
 ul.admin-tag-list {
   padding-left: 0;
+  text-align: left;
 
   li {
     padding: 3px 5px;
@@ -18,6 +19,10 @@ ul.admin-tag-list {
     font-family: monospace;
     font-size: 12px;
   }
+}
+
+.admin-tag-list.selectable li:hover {
+  cursor: pointer;
 }
 
 .al-details-section {

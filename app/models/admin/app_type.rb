@@ -11,6 +11,7 @@ class Admin::AppType < Admin::AdminBase
   has_many :app_configurations, -> { order id: :asc }, autosave: true, class_name: 'Admin::AppConfiguration'
   has_many :page_layouts, -> { order id: :asc }, autosave: true, class_name: 'Admin::PageLayout'
   has_many :user_roles, -> { order id: :asc }, autosave: true, class_name: 'Admin::UserRole'
+  has_many :role_descriptions, -> { order id: :asc }, autosave: true, class_name: 'Admin::RoleDescription'
   has_many :nfs_store_filters, -> { order id: :asc }, autosave: true, class_name: 'NfsStore::Filter::Filter'
   has_many :protocols, -> { order id: :asc }, autosave: true, class_name: 'Classification::Protocol'
 

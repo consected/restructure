@@ -1,0 +1,20 @@
+<% if @click_to_search %> <span></span><%end%>
+<% if @report.report_type == 'search' 
+      if  !(@report.editable_data? || !@report_criteria) %>
+      <%= submit_tag :search, value: :search, class: "#{@btn_class} #{@hidden_class} #{@auto_submitter_class} #{@auto_run_class}" %>
+      <%= button_tag (@view_options.search_button_label || 'table'), name: 'commit', value: 'table', type: 'submit', class: "#{@btn_class}"  unless @view_context==:search %>
+  <% end %>
+<% else %>
+  <% unless @view_context==:search %>
+    <%= button_tag (embedded_report ? :list :  (@view_options.search_button_label || :table) ), 
+          name: 'commit', 
+          value: 'table', 
+          type: 'submit', 
+          class: "#{@btn_class} #{(!@report_page || @view_options.report_auto_submit_on_change) ? 'auto-submitter' : ''} #{ @report.auto ? 'auto-run' : ''}", 
+          id: "report-form-submit-btn"
+    %>
+  <% end %>
+  <% if @report_page && @report.searchable && @view_context!=:search %>
+    <%= submit_tag 'auto-submitter', class: "hidden auto-submitter", id: "report-form-auto-submitter-btn" %>
+  <% end %>
+<% end %>

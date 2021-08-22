@@ -119,7 +119,7 @@ module Dynamic
       end
 
       def label
-        @label ||= definition.label || name.underscore.humanize.titleize
+        @label ||= definition.label || name.underscore.humanize.captionize
       end
 
       # For external ID models that require an auto-generated or auto-assigned (from an existing list) ID,

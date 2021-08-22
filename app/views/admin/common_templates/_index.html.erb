@@ -16,7 +16,7 @@
           <th class="no-sort"></th>
           <%
           index_params.each do |p|
-            is_options_field = p.to_s.end_with?('options') || p.to_s.end_with?('template')
+            is_options_field = (p.to_s.end_with?('options') || p.to_s.end_with?('template')) && !respond_to?("#{p}_options")
           %>
           <% unless is_options_field %>
             <th><%= p.to_s.humanize %></th>

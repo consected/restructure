@@ -248,8 +248,6 @@
 
   <div class="form-group form-actions clearfix">
     <%= f_main.submit :search, class: "btn btn-default btn-sm pull-right auto-submitter" %>
-    <%= f_main.submit "csv", name: :format, value: "csv", class: "btn btn-default pull-right btn-sm " if current_user.can? :export_csv%>
-    <%= f_main.submit "json", name: :format, value: "json", class: "btn btn-default btn-sm  target_new_window pull-right" if current_user.can? :export_json%>
 
     <span id="search_count" class="search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>
   </div>

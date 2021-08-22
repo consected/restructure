@@ -3,7 +3,7 @@
 sleep 2
 
 if [ ! -f '/opt/elasticbeanstalk/bin/get-config' ]; then
-  touch /tmp/restart.txt
+  touch tmp/restart.txt
   exit 'Done'
 fi
 

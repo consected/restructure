@@ -1,0 +1,8 @@
+<div class="report-admin-sql-block">
+  <%= f.label :sql %>
+  <div class="report-admin-sql-block-inner">
+    <%= f.text_area :sql, style: "width: 99%; height: 270px; font-family: monospace;", 
+                              class: "code-editor code-editor-#{editor_code_type}", 
+                              data: {code_editor_type: editor_code_type} %>
+  </div>
+</div>

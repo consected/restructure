@@ -47,4 +47,10 @@ class Admin::ExternalIdentifiersController < AdminController
   def filters_on
     %i[category name]
   end
+
+  def admin_labels
+    {
+      name: 'Table name'
+    }
+  end
 end

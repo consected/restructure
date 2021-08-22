@@ -612,6 +612,12 @@ module Dynamic
     end
 
     #
+    # Database table column definitions
+    def table_columns
+      ActiveRecord::Base.connection.columns(table_name)
+    end
+
+    #
     # Check if the implementation class has been correctly defined
     # This checks that the underlying database table has been created.
     # If the table is not available, (and we are in the development environment)

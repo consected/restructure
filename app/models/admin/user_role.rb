@@ -1,5 +1,16 @@
 # frozen_string_literal: true
 
+# User roles provide an app specific mechanism for granting users permissions to
+# data and functionality, by assigning users to individual roles. These roles may be
+# used by User Access Controls to grant permissions more simply than repetitively assigning
+# individual access controls to users.
+#
+# Roles may be grouped into templates by assigning user roles to template users
+# with usernames of the form *<template-name>@template*. These template users will be transferred
+# in an app type export, making transfer between environments easier. They may also be used to copy
+# a base set of roles to a new user, using the UI.
+#
+# Description / documentation of roles and templates is handled by the RoleDescriptions class.
 class Admin::UserRole < Admin::AdminBase
   self.table_name = 'user_roles'
 
