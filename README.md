@@ -18,7 +18,7 @@ The **ReStructure** open-source project is maintained by [Consected](https://www
 
 If you find a bug, please add an issue with details of how to reproduce it. If you find a security issue, please add an issue indicating that there is a security issue (but don't share the full details) and also email admin@consected.com with a clear subject line that this is a security issue related to the ReStructure project, and full details of the issue.
 
-Contributions from the community are welcomed if they fit the overall approach of the project. Small requests for changes and new functionality may be considered, but please remember that this project is free software managed by volunteers. Although Harvard has donated the platform as open source software, the development of new features within Harvard are exclusively to support the *Football Players Health Study*.
+Contributions from the community are welcomed if they fit the overall approach of the project. Small requests for changes and new functionality may be considered, but please remember that this project is free software managed by volunteers. Although Harvard has donated the platform as open source software, the development of new features within Harvard are exclusively to support the _Football Players Health Study_.
 
 Developers should bear in mind that the platform has been developed over many years, built with features being added in very rapid, and sometimes time-pressured sprints. Code is not always as well structured or documented as we would like, and occasionally may include incomplete features. The aim of the contributors is to improve this with a minimum of breaking changes. See [Future development themes](#future development themes) for the themes we have in mind.
 
@@ -87,13 +87,13 @@ The design provides a clear separation between external or static data captured 
 
 ## Technology
 
-The **ReStructure** application is a complete *Ruby on Rails* 5 application with a single-page application Javascript front end, running against a *PostgreSQL* database. A full end-user UI follows the application configurations, a configurable API is available, and an admin UI provides access to all configuration options, with all settings saved in the database.
+The **ReStructure** application is a complete _Ruby on Rails_ 5 application with a single-page application Javascript front end, running against a _PostgreSQL_ database. A full end-user UI follows the application configurations, a configurable API is available, and an admin UI provides access to all configuration options, with all settings saved in the database.
 
 The database design follows common Rails conventions, with an easily understandable relational database model. As new configurations are made, new database table migrations are generated automatically, allowing rapid development, and clean deployment to production. PostgreSQL is the only supported database.
 
-The default application server is *Passenger*, although *Puma* is used in development and may be selected for production.
+The default application server is _Passenger_, although _Puma_ is used in development and may be selected for production.
 
-*Memcached* provides caching of performance and to relieve the load on the application server and database. Central or individual app-server caches may be used.
+_Memcached_ provides caching of performance and to relieve the load on the application server and database. Central or individual app-server caches may be used.
 
 Authentication is provided by [Devise](https://github.com/heartcombo/devise), with optional two-factor authentication [devise-two-factor](https://github.com/tinfoil/devise-two-factor). End-user and admin profiles are managed separately. API tokens are optionally available for user profiles, to allow integration or disparate systems, provided by [Simple Token Athentication](https://github.com/philayres/simple_token_authentication.git).
 
@@ -113,6 +113,7 @@ Then set up the database.
     git clone https://github.com/consected/restructure.git
     git clone https://github.com/consected/restructure-build.git
     git clone https://github.com/consected/restructure-apps.git
+    git clone https://github.com/consected/restructure-docs.git
     DB_USER=$(whoami)
     sudo -u postgres psql -c "create database restr_development owner ${DB_USER};"
 
@@ -137,7 +138,7 @@ Set up a new admin user:
 
     RAILS_ENV=development app-scripts/add_admin.sh <email address>
 
-*Record the password that is returned.*
+_Record the password that is returned._
 
 Run the server:
 
@@ -147,11 +148,11 @@ Go to [http://localhost:3000/admins/sign_in?secure_entry=access-admin](http://lo
 
 Login with the admin username and the password that was returned previously.
 
-In the admin panel, go to the link *Usernames & Passwords*.
+In the admin panel, go to the link _Usernames & Passwords_.
 Click the button **+ Manage user** to add a user, enter the email **test@test**
 and be sure to record the password that is generated.
 
-Click **admin menu** button, click *App Types* link, then in the *Upload a configuration file* block,
+Click **admin menu** button, click _App Types_ link, then in the _Upload a configuration file_ block,
 choose the file `db/dumps/zeus_config.yaml` then click the **Save Changes** button.
 
 Assuming this was successful, logout of the admin panel.
@@ -181,11 +182,11 @@ To clean all data, including admins and user, run:
 The project uses [git-flow](https://skoch.github.io/Git-Workflow/) to organize releases, but there is no requirement to use it
 during regular development.
 
-Just know that active development should be within its own branch, which will be merged back into the *develop* for integration.
+Just know that active development should be within its own branch, which will be merged back into the _develop_ for integration.
 
-The *new-master* branch contains tagged versions that represent viable production releases.
+The _new-master_ branch contains tagged versions that represent viable production releases.
 
-For release and builds, the *git-flow* CLI is used by the release tools, so it is worth getting it set up.
+For release and builds, the _git-flow_ CLI is used by the release tools, so it is worth getting it set up.
 
 `git flow init` answers the following questions:
 
@@ -202,12 +203,12 @@ For release and builds, the *git-flow* CLI is used by the release tools, so it i
 
 Deployment to any environment that supports Rails should be reasonably easy. To build a self-contained package of gems and Javascript components, a separate repo is provided: [restructure-build](https://github.com/consected/restructure-build). This provides a Docker container, based on CentOS, that sets up a full Rails and PostgreSQL environment. It builds production packages for gems and Yarn Javascript packages.
 
-To build, simple clone *restructure-build* to the same parent directory as the **ReStructure** project.
+To build, simple clone _restructure-build_ to the same parent directory as the **ReStructure** project.
 
 Ensure that you have [git-flow](https://skoch.github.io/Git-Workflow/) installed and initialized - [see Branches and git-flow](#branches-and-git-flow)
 
 Then from `ReStructure` run
-  
+
      app-scripts/release_and_build.sh
 
 ## Testing
@@ -226,7 +227,7 @@ On well secured AWS accounts, you may have MFA configured. Either setup your cre
 `aws_access_key_id` and `aws_secret_access_key` for these, or alternatively don't attempt to authenticate (and accept certain tests will fail.)
 The environment variable `IGNORE_MFA=true` prevents AWS multifactor authentication blocking the startup of the tests.
 
-For faster testing, *parallel_tests* provides parallelization of Rspec, although does introduce some quirks into the testing, with false positives appearing. Better structuring of the spec tests will eventually resolve this, but in the meantime a few focused singular rspec calls will validate those that fail.
+For faster testing, _parallel_tests_ provides parallelization of Rspec, although does introduce some quirks into the testing, with false positives appearing. Better structuring of the spec tests will eventually resolve this, but in the meantime a few focused singular rspec calls will validate those that fail.
 
 Assuming you have an 8 core computer, the following will create 8 test databases:
 
@@ -285,20 +286,20 @@ permitted provided that the following
 conditions are met:
 
 1. Redistributions of source code must retain
-the above copyright notice, this list of
-conditions and the following disclaimer.
+   the above copyright notice, this list of
+   conditions and the following disclaimer.
 
 2. Redistributions in binary form must
-reproduce the above copyright notice, this
-list of conditions and the following
-disclaimer in the documentation and/or other
-materials provided with the distribution.
+   reproduce the above copyright notice, this
+   list of conditions and the following
+   disclaimer in the documentation and/or other
+   materials provided with the distribution.
 
 3. Neither the name of the copyright holder
-nor the names of its contributors may be used
-to endorse or promote products derived from
-this software without specific prior written
-permission.
+   nor the names of its contributors may be used
+   to endorse or promote products derived from
+   this software without specific prior written
+   permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT
 HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
