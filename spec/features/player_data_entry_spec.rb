@@ -216,7 +216,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
 
     expect(page).to have_css('li.list-group-item.player-info-college')
     t = find('li.list-group-item.player-info-college strong').text
-    expect(t).to eq college.titleize
+    expect(t).to eq college.captionize
   end
 
   def search_dob(m, d, y)

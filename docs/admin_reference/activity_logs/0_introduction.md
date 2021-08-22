@@ -13,4 +13,4 @@ Administration is provided in [Activity Logs](/admin/activity_logs)
 
 ## Contents
 
-[Detailed Options](detailed_options.md)
+[Detailed Options](detailed_options)

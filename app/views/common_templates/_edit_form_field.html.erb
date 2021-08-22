@@ -30,8 +30,8 @@
     if resname
       partial_fn = "common_templates/edit_fields/#{resname}"
     %>
-      <%= render partial: partial_fn, locals: local_vars[:locals] %>
-      <%
+<%= render partial: partial_fn, locals: local_vars[:locals] %>
+<%
       got = true
     end
   end
@@ -42,8 +42,8 @@
       if curr_field_name.start_with?("#{sw}_") && f_names.include?(match_name)
         partial_fn = "common_templates/edit_fields/#{match_name}"
       %>
-        <%= render partial: partial_fn, locals: local_vars[:locals] %>
-        <%
+<%= render partial: partial_fn, locals: local_vars[:locals] %>
+<%
         got = true
         break
       end
@@ -56,8 +56,8 @@
       if curr_field_name.end_with?("_#{ew}") && f_names.include?(match_name)
         partial_fn = "common_templates/edit_fields/#{match_name}"
       %>
-        <%= render partial: partial_fn, locals: local_vars[:locals] %>
-        <%
+<%= render partial: partial_fn, locals: local_vars[:locals] %>
+<%
         got = true
         break
       end
@@ -66,8 +66,8 @@
 
   unless got
     if respond_to?("#{curr_field_name}_options") %>
-      <%= render partial: "common_templates/edit_fields/respond_to_options", locals: local_vars[:locals] %>
-    <%
+  <%= render partial: "common_templates/edit_fields/respond_to_options", locals: local_vars[:locals] %>
+  <%
       got = true
     end
   end
@@ -80,7 +80,7 @@
     gs_exists = @gs_exists[ckey]
 
     if gs_exists %>
-      <%= render partial: "common_templates/edit_fields/is_general_selection", locals: local_vars[:locals] %>
+    <%= render partial: "common_templates/edit_fields/is_general_selection", locals: local_vars[:locals] %>
     <%
       got = true
     end
@@ -89,7 +89,7 @@
   unless got
     if form_object_instance.model_data_type == :external_identifier %>
       <%= render partial: "common_templates/edit_fields/is_external_id", locals: local_vars[:locals] unless @already_shown_external_id%>
-    <%
+      <%
       @already_shown_external_id = true
       got = true
     end
@@ -97,7 +97,7 @@
   # Handle Brakeman issue with using column type directly to generate partial path
   unless got
 
-    valid_col_types = [:boolean, :integer]
+    valid_col_types = [:boolean, :integer, :datetime]
     ct = valid_col_types.select {|c| c == column_type.to_sym }.first
 
     match_name = "column_type_#{ct}"
@@ -112,8 +112,8 @@
   end
 
   unless got %>
-    <%= render partial: "common_templates/edit_fields/default", locals: local_vars[:locals] %>
-  <%
+        <%= render partial: "common_templates/edit_fields/default", locals: local_vars[:locals] %>
+        <%
     got = true
   end
 
@@ -121,16 +121,13 @@
     cw = opt[:calculate_with]
     if cw
       %>
-<script>
-
-  _fpa.calculate_with = _fpa.calculate_with || {};
-  var cwdef = _fpa.calculate_with['<%=field_name_sym%>'] = <%=cw.to_json.html_safe%>;
-
-  _fpa.utils.calc_field('<%=field_name_sym%>', '<%= form_object_item_type_us%>');
-
-
-</script>
-      <%
+        <script>
+          _fpa.calculate_with = _fpa.calculate_with || {};
+          var cwdef = _fpa.calculate_with['<%=field_name_sym%>'] = <%=cw.to_json.html_safe%>;
+          
+          _fpa.utils.calc_field('<%=field_name_sym%>', '<%= form_object_item_type_us%>');
+        </script>
+        <%
     end
 
   end

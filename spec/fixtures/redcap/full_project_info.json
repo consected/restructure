@@ -1,3 +1,25 @@
-{
-  "note": "Removed - should be updated to us standard Redcap demo projects"
-}
+      {
+        "project_id": "77",
+        "project_title": "q2_demo",
+        "creation_time": "2019-01-17 14: 02: 14",
+        "production_time": "",
+        "in_production": "0",
+        "project_language": "English",
+        "purpose": "2",
+        "purpose_other": "5",
+        "project_notes": "Demo project for the Q2 survey (03/15/2019)",
+        "custom_record_label": "[redcap_survey_identifier]",
+        "secondary_unique_field": "",
+        "is_longitudinal": 0,
+        "surveys_enabled": "1",
+        "scheduling_enabled": "0",
+        "record_autonumbering_enabled": "1",
+        "randomization_enabled": "0",
+        "ddp_enabled": "0",
+        "project_irb_number": "",
+        "project_grant_number": "",
+        "project_pi_firstname": "",
+        "project_pi_lastname": "",
+        "display_today_now_button": "1",
+        "has_repeating_instruments_or_events": 0
+      }

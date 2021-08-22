@@ -8,12 +8,12 @@ class Admin::PageLayout < Admin::AdminBase
   include AdminHandler
   include AppTyped
   include OptionsHandler
+  include PositionHandler
 
   validates :layout_name, presence: { scope: :active, message: "can't be blank" }
   validates :panel_name, presence: { scope: :active, message: "can't be blank" },
                          uniqueness: { scope: %i[app_type_id layout_name], message: "can't be already present" }
   validates :panel_label, presence: { scope: :active, message: "can't be blank" }
-  before_save :set_position
 
   # @attr [String] layout_name - the role of the definition
   #   - master - a standard master result panel, laid out according to
@@ -146,31 +146,15 @@ class Admin::PageLayout < Admin::AdminBase
     Admin::PageLayout.active.showable.where(app_type_id: app_type_id)
   end
 
-  def standalone?
-    layout_name == 'standalone'
+  def self.position_attribute
+    :panel_position
   end
 
-  protected
+  def position_group
+    { app_type_id: app_type_id, layout_name: layout_name }
+  end
 
-  # Force a sensible position in the list, and shuffle items down if necessary
-  def set_position
-    return if disabled
-
-    if panel_position.nil?
-      max_pos = self.class.active
-                    .where(app_type_id: app_type_id, layout_name: layout_name)
-                    .order(panel_position: :desc)
-                    .limit(1)
-                    .pluck(:panel_position)
-                    .first
-      self.panel_position = (max_pos || 0) + 1
-    else
-      panels = self.class.active.where(app_type_id: app_type_id, layout_name: layout_name).order(panel_position: :asc)
-      pos = panel_position + 1
-      panels.where('id <> ? AND panel_position >= ?', id, panel_position).each do |p|
-        p.update! panel_position: pos, current_admin: admin if p.panel_position != pos
-        pos += 1
-      end
-    end
+  def standalone?
+    layout_name == 'standalone'
   end
 end

@@ -7,79 +7,20 @@
       <%= render partial: 'admin_handler/form_errors' %>
       <div class="row">
         <div class="col-sm-12" style="text-align: left">
-          <div class="form-inline">
-            <div class="form-group">
-              <%= f.label :name %>
-              <%= f.text_field :name %>
-            </div>
-            <div class="form-group">
-              <%= f.label :short_name %>
-              <%= f.text_field :short_name %>
-            </div>
-            <div class="form-group">
-              <%= f.label :category %>
-              <%= f.text_field :item_type %>
-            </div>
-            <div class="form-group">
-              <%= f.label :report_type %>
-              <%= f.select :report_type, Report::ReportTypes, include_blank: '-select-' %>
-            </div>
-            <div class="form-group">
-              <%= f.label :position %>
-              <%= f.text_field :position, type: :number%>
-            </div>
-            <br/>
-            <div class="form-group">
-              <%= f.check_box :auto %>
-              <%= f.label :run_automatically %>
-            </div>
-            <div class="form-group">
-              <%= f.check_box :searchable %>
-              <%= f.label :searchable %>
-            </div>
-            <div class="form-group">
-              <%= f.check_box :disabled %>
-              <%= f.label :disable %>
-            </div>
-          </div>
-          <%= render partial: 'edit_table_block', locals: {f: f} %>
-          <div class="report-admin-description-block">
-            <%= f.label :description %>
-            <%= render partial: 'common_templates/markdown_editor/show_editor', 
-                       locals: { 
-                          editor_format: 'markdown', 
-                          editor_id: "report-admin-description--#{object_instance.id}",
-                          form: f,
-                          field_options: {
-                            config: { toolbar_type: 'advanced' }
-                          },
-                          form_object_instance: object_instance, 
-                          field_name_sym: :description,
-                          form_object_item_type_us: 'admin__report' 
-                       } %>
-          </div>
-          <div class="report-admin-options-block" data-out-attr-name="options" data-out-object-name="<%= object_instance.class.name.ns_underscore %>">
-            <label>Options</label>
-            <div class="report-admin-options-block-inner">
-              <%= f.text_area :options, class: "code-editor code-editor-yaml", data: {code_editor_type: 'yaml'}%>
-            </div>
-          </div>
-          <div class="report-admin-sql-block">
-            <%= f.label :sql %>
-            <div class="report-admin-sql-block-inner">
-              <%= f.text_area :sql, style: "width: 99%; height: 270px; font-family: monospace;", 
-                                class: "code-editor code-editor-#{editor_code_type}", 
-                                data: {code_editor_type: editor_code_type} %>
-            </div>
-          </div>
+          <%= render partial: 'admin/reports/form/fields', locals: {f: f} %>
+          <%= render partial: 'admin/reports/form/edit_table_block', locals: {f: f} %>
+          <%= render partial: 'admin/reports/form/description_block', locals: {f: f} %>
+          <%= render partial: 'admin/reports/form/options_block', locals: {f: f} %>
+          <%= render partial: 'admin/reports/form/sql_block', locals: {f: f} %>
           <div class="report-admin-submit-block">
             <a href="#report-admin-search-attr-add-block" class="collapsed btn btn-default" data-toggle="collapse"><span class="caret"></span> Add Attribute</a>
+            <a href="#search_attr_definer_config" class="collapsed btn btn-default" data-toggle="collapse"><span class="caret"></span> Attribute Configuration</a>
             <%= link_to link_label_open_in_new('test report'), @report, target: 'testreport', class: 'btn btn-default pull-right admin-test-report-btn' if @report.id %>
             <%= f.submit class: "btn btn-primary pull-right" %>
           </div>
-          <%= render partial: 'search_attr_definer', locals: {f: f} %>
+          <%= render partial: 'admin/reports/form/search_attr_definer', locals: {f: f} %>
         </div>
-        <%= render partial: 'reference_data_info_block', locals: {f: f} %>
+        <%= render partial: 'admin/reports/form/reference_data_info_block', locals: {f: f} %>
       </div>
       <p>&nbsp;</p>
       <div class="form-group">

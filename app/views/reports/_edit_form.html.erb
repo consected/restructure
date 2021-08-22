@@ -1,6 +1,6 @@
 <div class="data-results">
   <div data-result="report-edit-form-"  class="report-edit-form">
-<%
+    <%
   object_instance = @report_item
 
   unless defined? labels
@@ -10,20 +10,19 @@
   labels ||= {}
 
 %>
-<table>
-<%= form_for(object_instance, url: (object_instance.id ? url_for(controller: controller_name, action: :update, report_id: @report.id, id: object_instance.id) : url_for(controller: controller_name, action: :create, report_id: @report.id) ), class: "inline-form", remote: true, html: {'data-result-target' => '#report-edit-results', 'data-template' => "edit-report-result",  'data-object-id' => object_instance.id }) do |f| %>
-<tr id="report-item-edit-<%=object_instance.id%>" class="report-item-edit">
-  <%= render partial: 'form_errors' %>
-  <td class="report-el report-edit-btn-cell report-edit-btn-cell-editing">
-    <%= hidden_filter_fields %>
-    <%= report_edit_cancel %><button class="btn btn-primary report-edit-submit"><i class="glyphicon glyphicon-ok"></i></button>
-  </td>
-  <% if object_instance.respond_to?(:id) %>
-   <td class="report-el report-el-object-id"><%= object_instance.id %></td>
-  <% end %>
-  <% (@report.all_configured_edit_fields - [:id]).each do |field_name_sym| %>
-
-        <%
+    <table>
+      <%= form_for(object_instance, url: (object_instance.id ? url_for(controller: controller_name, action: :update, report_id: @report.id, id: object_instance.id) : url_for(controller: controller_name, action: :create, report_id: @report.id) ), class: "inline-form", remote: true, html: {'data-result-target' => '#report-edit-results', 'data-template' => "edit-report-result",  'data-object-id' => object_instance.id }) do |f| %>
+        <tr id="report-item-edit-<%=object_instance.id%>" class="report-item-edit">
+          <%= render partial: 'form_errors' %>
+          <td class="report-el report-edit-btn-cell report-edit-btn-cell-editing">
+            <%= hidden_filter_fields %>
+            <%= report_edit_cancel %><button class="btn btn-primary report-edit-submit"><i class="glyphicon glyphicon-ok"></i></button>
+          </td>
+          <% if object_instance.respond_to?(:id) %>
+            <td class="report-el report-el-object-id"><%= object_instance.id %></td>
+          <% end %>
+          <% (@report.all_configured_edit_fields - [:id]).each do |field_name_sym| %>
+            <%
           form_object_instance = object_instance
           form_object_item_type_us = form_object_instance.item_type_us
           label_redefined = false
@@ -57,21 +56,19 @@
             label_redefined = true
           end
         %>
-        <% if @report.edit_fields.include?(field_name_sym) %>
-        <td class="report-el">
-          <%= render partial: 'common_templates/edit_form_field', locals: local_vars[:locals] %>
-        </td>
-        <% else%>
-        <td class="report-el report-el-disabled">
-          &nbsp;
-        </td>
-        <% end %>
-
-
-  <% end %>
-</tr>
-<% end %>
-</table>
-      <div id="report-edit-results" data-template="edit-report-result"></div>
+            <% if @report.edit_fields.include?(field_name_sym) %>
+              <td class="report-el">
+                <%= render partial: 'common_templates/edit_form_field', locals: local_vars[:locals] %>
+              </td>
+            <% else%>
+              <td class="report-el report-el-disabled">
+                &nbsp;
+              </td>
+            <% end %>
+          <% end %>
+        </tr>
+      <% end %>
+    </table>
+    <div id="report-edit-results" data-template="edit-report-result"></div>
   </div>
 </div>

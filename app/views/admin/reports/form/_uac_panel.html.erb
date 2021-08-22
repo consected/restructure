@@ -1,0 +1,17 @@
+<div id="user-access-controls-embedded">
+  <h4>User Access Controls for Report</h4>
+  <% if object_instance.persisted? && object_instance.enabled?%>
+    <div class="admin-result-index" id="embedded-dynamic-uac-embedded">
+      <%= link_to "Load", admin_user_access_controls_path(
+                          filter: { resource_name: "#{object_instance.alt_resource_name}", resource_type: "report", app_type_id: '' }, 
+                          view_as: 'simple-embedded', readonly: true), 
+                          'data-remote': true,
+                          'data-target-force': true,
+                          'data-target': '#embedded-dynamic-uac-embedded'
+                          %>
+    </div>
+    <p>
+      <%= link_to "View all", admin_user_access_controls_path(filter: { resource_name: "#{object_instance.alt_resource_name}", resource_type: "report", app_type_id: '' }), target: '_blank' %>
+    </p>
+  <% end %>
+</div>

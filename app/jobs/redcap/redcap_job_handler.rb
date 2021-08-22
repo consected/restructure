@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+# Common handler for Recap jobs, setting up the project admin record related
+# to the job and handling error reporting
 module Redcap
   module RedcapJobHandler
     def setup_with(project_admin, current_admin: nil)

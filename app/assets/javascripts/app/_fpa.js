@@ -903,7 +903,11 @@ _fpa = {
             msg += format_message(j);
           }
           else {
-            var msg = "<p>Could not complete action. Please <a href=\"#\" onclick=\"window.location.reload(); return false;\">refresh the page</a> and try again.</p>";
+            j = xhr.responseText;
+            if (j)
+              var msg = "<div>" + j + "</div>";
+            else
+              var msg = "<p>Could not complete action. Please <a href=\"#\" onclick=\"window.location.reload(); return false;\">refresh the page</a> and try again.</p>";
           }
 
           _fpa.flash_notice(msg, 'warning');

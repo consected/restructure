@@ -154,7 +154,7 @@ _fpa.form_utils = {
       dates.each(function () {
         var v = $(this).val();
         if (v || v != '') {
-          var res = _fpa.utils.parseLocaleDate(v).asYMD();
+          var res = _fpa.form_utils.locale_date_to_iso(v);
           if (res) {
             $(this).val(res);
           }
@@ -162,6 +162,20 @@ _fpa.form_utils = {
         }
       }).removeClass('date-is-local');
     }
+  },
+
+  locale_date_to_iso(v) {
+    if (!v) return;
+
+    return _fpa.utils.parseLocaleDate(v).asYMD();
+  },
+
+  locale_datetime_to_iso(v) {
+    if (!v) return;
+
+    var d = Date.parse(v);
+    var d2 = new Date(d);
+    return d2.toISOString();
   },
 
   data_from_form: function (block) {
@@ -1268,6 +1282,41 @@ _fpa.form_utils = {
       $(this).mask('09\/09\/0000', { translation: _fpa.masker.translation, placeholder: "__/__/____" });
       $(this).addClass('attached-datepicker date-is-local');
     });
+
+    block.find('.field-datetime-combo').not('.datetime-setup').each(function () {
+      var de = $(this).find('.date-entry');
+      var te = $(this).find('.time-entry');
+      var he = $(this).find('input[type="hidden"]');
+
+      var dres = null;
+      var tres = null;
+
+      de.on('blur change', function () {
+        set_hidden_field();
+      })
+
+      te.on('blur change', function () {
+        set_hidden_field();
+      })
+
+      var set_hidden_field = function () {
+        tres = te.val();
+        dres = de.val();
+
+        if (dres) {
+          var text = `${dres} ${tres || ''}`
+          text = _fpa.form_utils.locale_datetime_to_iso(text);
+        }
+        else {
+          var text = ''
+        }
+        he.val(text);
+      };
+
+      set_hidden_field();
+
+    }).addClass('datetime-setup');
+
 
   },
 

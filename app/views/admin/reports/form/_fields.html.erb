@@ -1,0 +1,35 @@
+<div class="form-inline">
+  <div class="form-group">
+    <%= f.label :name %>
+    <%= f.text_field :name %>
+  </div>
+  <div class="form-group">
+    <%= f.label :short_name %>
+    <%= f.text_field :short_name %>
+  </div>
+  <div class="form-group">
+    <%= f.label :category %>
+    <%= f.text_field :item_type %>
+  </div>
+  <div class="form-group">
+    <%= f.label :report_type %>
+    <%= f.select :report_type, Report::ReportTypes, include_blank: '-select-' %>
+  </div>
+  <div class="form-group">
+    <%= f.label :position %>
+    <%= f.text_field :position, type: :number%>
+  </div>
+  <br/>
+  <div class="form-group">
+    <%= f.check_box :auto %>
+    <%= f.label :run_automatically %>
+  </div>
+  <div class="form-group">
+    <%= f.check_box :searchable %>
+    <%= f.label :searchable %>
+  </div>
+  <div class="form-group">
+    <%= f.check_box :disabled %>
+    <%= f.label :disable %>
+  </div>
+</div>

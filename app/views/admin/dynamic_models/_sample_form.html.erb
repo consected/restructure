@@ -7,7 +7,7 @@
   url_pre = "/masters/#{admin_master}" unless object_instance.implementation_class.no_master_association
 %>
 <p>
-<%= link_to 'refresh', "#{url_pre}/#{object_instance.implementation_class.to_s.underscore.pluralize}/new?admin_sample=true", 
+  <%= link_to 'refresh', "#{url_pre}/#{object_instance.implementation_class.to_s.underscore.pluralize}/new?admin_sample=true", 
     data: {
       remote: true, 
       target: "##{object_instance.resource_name.hyphenate}-#{admin_master}-",
@@ -21,20 +21,20 @@
   id="<%= "#{object_instance.resource_name.hyphenate}-#{admin_master}-" %>" 
   data-subscription="<%= "#{object_instance.implementation_model_name.hyphenate}-edit-form-#{admin_master}-" %>"
 >
-loading...
+  loading...
 </div>
 <% # Reload the captions and show_if definitions 
 
   begin
 %>
-<%= render partial: 'dynamic_models/common_search_results_template_item', 
+  <%= render partial: 'dynamic_models/common_search_results_template_item', 
            locals: { 
              def_record: object_instance,
              option_type_config: object_instance.default_options
            } %>
-<% rescue StandardError => e %>
-<p><i>Error preparing sample form: <%= e %></i></p>
+  <% rescue StandardError => e %>
+  <p><i>Error preparing sample form: <%= e %></i></p>
 <% end
 else %>
-<p><i>Save configuration to see sample</i></p>
+  <p><i>Save configuration to see sample</i></p>
 <% end %>

@@ -187,8 +187,14 @@ module Dynamic
       @caption_before = {}
       return unless respond_to?(:fields) && fields
 
-      fields.each_key do |name, config|
-        @caption_before[name] = config[:caption]
+      fields.each do |name, config|
+        @caption_before[name] = if config.is_a? String
+                                  config
+                                elsif config.respond_to?(:caption)
+                                  config.caption
+                                else
+                                  config[:caption]
+                                end
       end
 
       @caption_before
