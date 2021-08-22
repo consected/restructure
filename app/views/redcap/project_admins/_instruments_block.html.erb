@@ -1,0 +1,21 @@
+<h4>Data Collection Instruments</h4>
+<% if object_instance.captured_project_info.present?%>
+  <div class="admin-options-ref-instruments-block">
+    <table class="table admin-list">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Label</th>
+        </tr>
+      </thead>
+      <% object_instance.redcap_data_collection_instruments.each do |list_item| %>
+        <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+          <td><%=list_item.name%></td>
+          <td><%=list_item.label%></td>
+        </tr>
+      <% end%>
+    </table>
+  </div>
+<% else %>
+  <p>Project Info Metadata not yet retrieved</p>
+<% end %>

@@ -12,7 +12,7 @@ As root, change to the app directory. On AWS this is:
 
 To add a new user, or reset the password and unlock an existing user
 
-    fphs-scripts/add_admin.sh email@domain.edu
+    fphs-scripts/add_admin.sh email@hms.harvard.edu
 
 ---
 
@@ -22,6 +22,6 @@ To add a new user, or reset the password and unlock an existing user
 
 To reset the two factor authentication secret as well as resetting the password:
 
-    reset_secret=yes fphs-scripts/add_admin.sh email@domain.edu
+    reset_secret=yes fphs-scripts/add_admin.sh email@hms.harvard.edu
 
 The first login after a new admin has been created, or a two factor authentication secret has been reset, the admin user will be presented with a barcode to setup an Authenticator app.

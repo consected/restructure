@@ -1,4 +1,4 @@
-<div class="reports-index">
+<div class="reports-index" data-admin-type="<%=controller_name.ns_underscore%>">
   <div class="data-results col-md-offset-1 col-md-22 col-lg-offset-2 col-lg-20" data-subscription="admin-list">
     <div data-result="admin-list">
       <h1><%= app_config_text :reports_list_title, 'Reports' %></h1>
@@ -7,7 +7,6 @@
     num_cats = @reports.pluck(:category).uniq.length
   %>
       <%= show_filters unless num_cats <= 1 %>
-
       <%= render partial: 'reports/index' %>
     </div>
   </div>

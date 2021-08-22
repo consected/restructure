@@ -46,15 +46,15 @@ RSpec.describe Imports::ModelGenerator, type: :model do
     expect(new_config).to be_a Hash
     expect(new_config).to eq(
       fields: {
-        a_string: { caption: nil, comment: nil, label: nil, type: :string },
-        a_int: { caption: nil, comment: nil, label: nil, type: :integer },
-        a_float: { caption: nil, comment: nil, label: nil, type: :float },
-        a_date: { caption: nil, comment: nil, label: nil,  type: :date },
-        a_time: { caption: nil, comment: nil, label: nil,  type: :datetime },
-        a_mixed_string: { caption: nil, comment: nil, label: nil, type: :string },
-        a_boolean: { caption: nil, comment: nil, label: nil,  type: :boolean },
-        a_unknown: { caption: nil, comment: nil, label: nil,  type: :string },
-        a_string2: { caption: nil, comment: nil, label: nil,  type: :string }
+        a_string: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string },
+        a_int: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :integer },
+        a_float: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :float },
+        a_date: { caption: nil, comment: nil, label: nil, no_downcase: nil,  type: :date },
+        a_time: { caption: nil, comment: nil, label: nil, no_downcase: nil,  type: :datetime },
+        a_mixed_string: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string },
+        a_boolean: { caption: nil, comment: nil, label: nil, no_downcase: nil,  type: :boolean },
+        a_unknown: { caption: nil, comment: nil, label: nil, no_downcase: nil,  type: :string },
+        a_string2: { caption: nil, comment: nil, label: nil, no_downcase: nil,  type: :string }
       }
     )
 
@@ -67,61 +67,70 @@ RSpec.describe Imports::ModelGenerator, type: :model do
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_int:
           type: integer
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_float:
           type: float
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_date:
           type: date
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_time:
           type: datetime
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_mixed_string:
           type: string
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_boolean:
           type: boolean
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_unknown:
           type: string
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_string2:
           type: string
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
     END_TEXT
 
     mg.generator_config.fields[:a_time].caption = 'A time field'
     new_config = mg.generator_config.send(:options_to_config_hash).deep_symbolize_keys
     expect(new_config).to eq(
       fields: {
-        a_string: { caption: nil, comment: nil, label: nil, type: :string },
-        a_int: { caption: nil, comment: nil, label: nil, type: :integer },
-        a_float: { caption: nil, comment: nil, label: nil, type: :float },
-        a_date: { caption: nil, comment: nil, label: nil,  type: :date },
-        a_time: { caption: nil, comment: nil, label: nil,  type: :datetime, caption: 'A time field' },
-        a_mixed_string: { caption: nil, comment: nil, label: nil, type: :string },
-        a_boolean: { caption: nil, comment: nil, label: nil,  type: :boolean },
-        a_unknown: { caption: nil, comment: nil, label: nil,  type: :string },
-        a_string2: { caption: nil, comment: nil, label: nil,  type: :string }
+        a_string: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string },
+        a_int: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :integer },
+        a_float: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :float },
+        a_date: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :date },
+        a_time: { comment: nil, label: nil, no_downcase: nil, type: :datetime, caption: 'A time field' },
+        a_mixed_string: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string },
+        a_boolean: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :boolean },
+        a_unknown: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string },
+        a_string2: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string }
       }
     )
 
@@ -137,46 +146,55 @@ RSpec.describe Imports::ModelGenerator, type: :model do
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_int:
           type: integer
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_float:
           type: float
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_date:
           type: date
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_time:
           type: datetime
           label:#{' '}
           caption: A time field
           comment:#{' '}
+          no_downcase:#{' '}
         a_mixed_string:
           type: string
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_boolean:
           type: boolean
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_unknown:
           type: string
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
         a_string2:
           type: string
           label:#{' '}
           caption:#{' '}
           comment:#{' '}
+          no_downcase:#{' '}
     END_TEXT
 
     expect(mg.options).to eq updated_yaml

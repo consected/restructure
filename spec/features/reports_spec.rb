@@ -44,7 +44,172 @@ describe 'reports', js: true, driver: :app_firefox_driver do
 
     Report.active.where('id != :id', id: r.id).update_all(disabled: true, admin_id: @admin.id)
 
+    create_report_with_all_criteria_fields
+
     @report = r
+  end
+
+  def create_report_with_all_criteria_fields
+    sql = 'select * from masters limit 1;'
+    search_attrs = <<~END_CONFIG
+
+
+      number_field:
+        number:
+          all: true
+          multiple: single
+          disabled: false
+
+      numbers_field:
+        number:
+          all: true
+          multiple: multiple
+          disabled: false
+
+      text_field:
+        text:
+          all: true
+          multiple: single
+          disabled: false
+
+      texts_field:
+        text:
+          all: true
+          multiple: multiple
+          disabled: false
+
+      date_field:
+        date:
+          all: true
+          multiple: single
+          disabled: false
+
+      dates_field:
+        date:
+          all: true
+          multiple: multiple
+          disabled: false
+
+      state_field:
+        address_state:
+          all: true
+          multiple: single
+          disabled: false
+
+      states_field:
+        address_state:
+          all: true
+          multiple: multiple
+          disabled: false
+
+      accuracy_field:
+        accuracy_score:
+          all: true
+          multiple: single
+          disabled: false
+
+      accuracys_field:
+        accuracy_score:
+          all: true
+          multiple: multiple
+          disabled: false
+
+      gs_field:
+        general_selection:
+          all: true
+          multiple: single
+          disabled: false
+
+      gss_field:
+        general_selection:
+          all: true
+          multiple: multiple
+          disabled: false
+
+      config_field:
+        config_selector:
+          all: true
+          multiple: single
+          disabled: false
+          selections:
+            a: a
+            b: b
+
+      configs_field:
+        config_selector:
+          all: true
+          multiple: multiple
+          disabled: false
+          selections:
+            a: a
+            b: b
+
+      protocol_field:
+        protocol:
+          all: true
+          multiple: single
+          disabled: false
+
+      protocols_field:
+        protocol:
+          all: true
+          multiple: multiple
+          disabled: false
+
+      ts_field:
+        sub_process:
+          all: true
+          multiple: single
+          disabled: false
+
+      tss_field:
+        sub_process:
+          all: true
+          multiple: multiple
+          disabled: false
+
+      tm_field:
+        protocol_event:
+          all: true
+          multiple: single
+          disabled: false
+
+      tms_field:
+        protocol_event:
+          all: true
+          multiple: multiple
+          disabled: false
+
+      flag_field:
+        item_flag_name:
+          all: true
+          multiple: single
+          disabled: false
+
+      flags_field:
+        item_flag_name:
+          all: true
+          multiple: multiple
+          disabled: false
+
+      username_field:
+        user:
+          all: true
+          multiple: single
+          disabled: false
+
+      usernames_field:
+        user:
+          all: true
+          multiple: multiple
+          disabled: false
+
+    END_CONFIG
+
+    @criteria_field_report = Report.create(current_admin: @admin,
+                                           name: 'Criteria Fields', description: '', sql: sql, search_attrs: search_attrs,
+                                           disabled: false, report_type: 'regular_report', auto: false, searchable: false,
+                                           position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
   end
 
   before :each do
@@ -62,10 +227,11 @@ describe 'reports', js: true, driver: :app_firefox_driver do
     expect(page).to have_css('.data-results table.tablesorter tr[data-report-id]')
   end
 
-  def open_report(id)
+  def open_report(id, name = nil)
+    name ||= 'Item Flags types'
     expect(page).to have_css(".data-results table.tablesorter tr[data-report-id='#{id}']")
     within ".data-results table.tablesorter tr[data-report-id='#{id}']" do
-      click_link 'Item Flags types'
+      click_link name
     end
     has_css? '.status-compiled'
   end
@@ -151,5 +317,15 @@ describe 'reports', js: true, driver: :app_firefox_driver do
     end
 
     expect(page).not_to have_css('.alert')
+  end
+
+  it 'has many criteria field types' do
+    get_list
+    open_report @criteria_field_report.id, 'Criteria Fields'
+    expect(page).to have_css('.report-criteria')
+
+    within '#report_query_form' do
+      click_button 'table'
+    end
   end
 end

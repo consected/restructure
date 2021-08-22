@@ -87,11 +87,21 @@ Rails.application.routes.draw do
       member do
         post :request_records
         post :request_archive
+        post :request_users
+        post :request_data_collection_instruments
         post :force_reconfig
       end
     end
     resources :data_dictionaries, except: %i[show destroy]
     resources :client_requests, except: %i[edit show destroy]
+
+    resources :project_user_requests, except: %i[show destroy] do
+      member do
+        post :request_records
+        post :request_archive
+        post :request_users
+      end
+    end
   end
 
   namespace :users do

@@ -49,7 +49,7 @@ RSpec.describe Report, type: :model do
     expect(first_rep.item_type).to be_present
 
     # check downcasing of category in the DB
-    first_rep.item_type = first_rep.item_type.titleize
+    first_rep.item_type = first_rep.item_type.captionize
     first_rep.current_admin = @admin
     first_rep.save!
     first_rep = first_rep.reload

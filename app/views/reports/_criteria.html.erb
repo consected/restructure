@@ -1,83 +1,36 @@
 <%
-click_to_search = @report_page #&& @report.report_type  == 'search'
-btn = !click_to_search && !embedded_report ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
-view_options = @report.report_options.view_options
+@click_to_search = @report_page
+@btn_class = !@click_to_search && !embedded_report ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
+@view_options = @report.report_options.view_options
+@hidden_class = !@report_criteria && @report.auto ? 'hidden' : ''
+@auto_submitter_class = !@report_page ? 'auto-submitter' : ''
+@auto_run_class = !@report_page && @report.auto ? 'auto-run' : ''
 %>
 <div>
-  <%= form_tag report_path(@report.id), method: :get, class: 'form-formatted search_report', id: "report_query_form", data: {result_target: "##{@results_target}", preprocessor: 'reports_result'}, remote: true do %>
+  <%= form_tag report_path(@report.id), 
+        method: :get, 
+        class: 'form-formatted search_report', 
+        id: "report_query_form", 
+        data: { result_target: "##{@results_target}", preprocessor: 'reports_result' }, 
+        remote: true do 
+  %>
     <% if @report.uses_table_subs? %>
       <%= hidden_field_tag :table_name, params[:table_name]%>
       <%= hidden_field_tag :schema_name, params[:schema_name]%>
       <%= hidden_field_tag :table_fields, params[:table_fields]%>
     <% end %>
-    <% if @runner.previous_filtering&.filter_previous_clause? && @report_page && @runner.previous_filtering&.filtering_list%>
-      <div class="row">
-        <div class="form-group">
-          <%
-                  fp = false
-                  if @runner.search_attr_values.is_a?(Hash) && 
-                      @runner.search_attr_values.present? && 
-                      @runner.previous_filtering.requested
-                    fp = "true"
-                  end
-                %>
-          <%= check_box_tag "search_attrs[_filter_previous_]", 'true', fp, style: 'display: inline; width: 2em; vertical-align: bottom;' %>
-          <%= label_tag 'filter previous results' %>
-        </div>
-        <div id="filter_on_block"></div>
-      </div>
-    <%end %>
+    <%= render partial: 'reports/criteria/previous_filtering_block' %>
     <div class="row report-criteria-fields">
-      <% i = 0
-                @report.search_attributes.each do |name, type|
-
-                  pattern = nil
-                  e = ExternalIdentifier.active.where(external_id_attribute: name).first
-                  pattern = e.external_id_edit_pattern if e && !e.blank?
-                  field_val = @runner.search_attr_values[name]
-                  type_val = type.first.last || {}
-                  field_hidden = type_val['hidden']
-              %>
-      <% if i > 0 && i % 4 == 0 %></div>
-      <div class="row"><%end%>
-      <div class="col-md-8 col-lg-6 <%= field_hidden ? 'hidden' : '' %>" style="padding-bottom: 1em;">
-        <%= report_field name, type, field_val, pattern: pattern %>
-      </div>
-      <% i += 1
-                 end%>
-      <% if @report.editable_data? || !@report_criteria  %>
-        <div class="col-md-2 col-lg-2 <%=!@report_criteria && @report.auto ? 'hidden' : ''%>" style="padding-bottom: 1em;">
-          <label>&nbsp;</label>
-          <div>
-            <%= submit_tag :search, value: :search, class: "btn btn-default #{!@report_criteria && @report.auto ? 'hidden' : ''} #{!@report_page ? 'auto-submitter' : ''} #{!@report_page && @report.auto ? 'auto-run' : ''}" if @report.report_type == 'search'  %>
-          </div>
-        </div>
-      <% end %>
+      <%= render partial: 'reports/criteria/fields' %>
+      <%= render partial: 'reports/criteria/inline_search_button_block' %>
     </div>
     <div class="form-group form-actions clearfix" style="border-color: transparent;">
       <%= hidden_field_tag  "search_attrs[#{Reports::Runner::ReportIdAttribName}]", ''%>
       <%= hidden_field_tag  "part", '', id: nil%>
       <%= hidden_field_tag  "embed", embedded_report, id: nil%>
-      <% if click_to_search %> <span></span><%end%>
-      <% if @report.report_type == 'search' && !(@report.editable_data? || !@report_criteria) %>
-        <%= submit_tag :search, value: :search, class: "#{btn} #{!@report_criteria && @report.auto ? 'hidden' : ''} #{!@report_page ? 'auto-submitter' : ''} #{!@report_page && @report.auto ? 'auto-run' : ''}" %>
-        <%= button_tag (view_options.search_button_label || 'table'), name: 'commit', value: 'table', type: 'submit', class: "#{btn}"  unless @view_context==:search %>
-      <% else %>
-        <%= button_tag (embedded_report ? :list :  (view_options.search_button_label || :table) ), name: 'commit', value: 'table', type: 'submit', class: "#{btn} #{(!@report_page || view_options.report_auto_submit_on_change) ? 'auto-submitter' : ''} #{ @report.auto ? 'auto-run' : ''}", id: "report-form-submit-btn"  unless @view_context==:search %>
-        <% if @report_page && @report.searchable && @view_context!=:search %>
-          <%= submit_tag 'auto-submitter', class: "hidden auto-submitter", id: "report-form-auto-submitter-btn" %>
-        <% end %>
-      <% end %>
-      <% unless @report.editable_data? || embedded_report %>
-        <%= submit_tag :count, class: "#{btn}" unless @report.report_type == 'count' || @view_context==:search || view_options.hide_result_count %>
-        <% unless view_options.hide_export_buttons %>
-          <%= submit_tag "csv", name: :format, value: "csv", class: "#{btn}" if current_admin || current_user && current_user.can?(:export_csv) %>
-          <%= submit_tag "json", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" if current_admin || current_user && current_user.can?(:export_json) %>
-        <% end %>
-      <% end %>
-      <% if @report.report_type != 'count' && !view_options.hide_result_count%>
-        <span class="search_count_reports search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>
-      <%end%>
+      <%= render partial: 'reports/criteria/search_buttons_block' %>
+      <%= render partial: 'reports/criteria/export_submit_button_block' %>
+      <%= render partial: 'reports/criteria/count_block' %>
     </div>
   <%end%>
   <%=link_to 'get_filter_previous', report_path(id: @report.id, get_filter_previous: 'true', format: :html), id: 'get_filter_previous', remote: true, data: {result_target: '#filter_on_block'}, class: 'hidden' %>

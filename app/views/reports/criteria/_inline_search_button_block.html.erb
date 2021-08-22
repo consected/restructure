@@ -1,0 +1,15 @@
+<% if @report.editable_data? || !@report_criteria  %>
+  <div class="col-md-2 col-lg-2 <%=!@report_criteria && @report.auto ? 'hidden' : ''%>" style="padding-bottom: 1em;">
+    <label>&nbsp;</label>
+    <div>
+      <% 
+        if @report.report_type == 'search' 
+      %>
+        <%= submit_tag :search, 
+                      value: :search, 
+                      class: "btn btn-default #{@hidden_class} #{@auto_submitter_class} #{@auto_run_class}"  
+        %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

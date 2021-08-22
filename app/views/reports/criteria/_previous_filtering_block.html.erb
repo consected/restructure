@@ -1,0 +1,17 @@
+    <% if @runner.previous_filtering&.filter_previous_clause? && @report_page && @runner.previous_filtering&.filtering_list%>
+      <div class="row">
+        <div class="form-group">
+          <%
+            fp = false
+            if @runner.search_attr_values.is_a?(Hash) && 
+                @runner.search_attr_values.present? && 
+                @runner.previous_filtering.requested
+              fp = "true"
+            end
+          %>
+          <%= check_box_tag "search_attrs[_filter_previous_]", 'true', fp, style: 'display: inline; width: 2em; vertical-align: bottom;' %>
+          <%= label_tag 'filter previous results' %>
+        </div>
+        <div id="filter_on_block"></div>
+      </div>
+    <%end %>

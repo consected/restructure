@@ -97,4 +97,18 @@ RSpec.describe Redcap::ApiClient, type: :model do
     res = pc.project_archive
     expect(res).to be_a Tempfile
   end
+
+  it 'pulls the users for the project' do
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    pc = rc.api_client
+
+    res = pc.project_users
+    expect(res).to be_a Array
+    expect(res.first).to be_a Hash
+    expect(res.first.keys).to be_present
+    expect(res.first.keys.first).to be_a Symbol
+    expect(res[0][:username]).to eq 'd20'
+  end
 end

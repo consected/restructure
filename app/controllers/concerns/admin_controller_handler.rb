@@ -12,7 +12,7 @@ module AdminControllerHandler
                   :objects_instance, :human_name, :no_edit, :primary_model,
                   :view_path, :extra_field_attributes, :admin_links, :view_embedded?, :hide_app_type?,
                   :help_section, :help_subsection, :title, :no_create, :show_head_info, :view_folder,
-                  :no_options_field
+                  :no_options_field, :admin_labels
   end
 
   def index
@@ -124,6 +124,12 @@ module AdminControllerHandler
     []
   end
 
+  #
+  # Alternative labels to use for admin form fields
+  def admin_labels
+    {}
+  end
+
   def index_params
     permitted_params + [:admin_id] - [:disabled]
   end
@@ -191,7 +197,7 @@ module AdminControllerHandler
   end
 
   def title
-    object_name.pluralize.split('__').map { |t| t.humanize.titleize }.join(': ')
+    object_name.pluralize.split('__').map { |t| t.humanize.captionize }.join(': ')
   end
 
   #

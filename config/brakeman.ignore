@@ -95,7 +95,7 @@
           "type": "controller",
           "class": "PageLayoutsController",
           "method": "show",
-          "line": 17,
+          "line": 19,
           "file": "app/controllers/page_layouts_controller.rb",
           "rendered": {
             "name": "page_layouts/show",
@@ -129,6 +129,26 @@
       },
       "user_input": null,
       "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "4c69ea9625a2d3b7118f4ca37e0b27ce844adf6486ebc03971da5b655c20ccbe",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/concerns/position_handler.rb",
+      "line": 47,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "self.class.active.where(position_group).where.not(:id => id).where(\"#{self.class.position_attribute.to_s} >= ?\", attributes[self.class.position_attribute.to_s])",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "PositionHandler",
+        "method": "set_position"
+      },
+      "user_input": "self.class.position_attribute",
+      "confidence": "Weak",
       "note": ""
     },
     {
@@ -453,6 +473,6 @@
       "note": ""
     }
   ],
-  "updated": "2021-07-20 09:07:31 +0100",
+  "updated": "2021-08-12 10:10:26 +0100",
   "brakeman_version": "5.1.1"
 }

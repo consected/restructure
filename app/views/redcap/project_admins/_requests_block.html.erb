@@ -2,7 +2,7 @@
 
 <table class="table"><thead><tr><th>action</th><th>admin</th><th>created</th><th>result</th></tr></thead>
 <tbody>
-<% object_instance.redcap_client_requests.order(id: :desc).limit(5).each do |cr| %>
+<% object_instance.redcap_client_requests.order(id: :desc).limit(10).each do |cr| %>
   <tr>
   <td><%= cr.action %></td>
   

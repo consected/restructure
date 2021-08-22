@@ -24,7 +24,9 @@ module FieldMeaningsHelper
   end
 
   def form_field_label(form, key)
-    res = form.label key
+    label = admin_labels[key.to_sym] || key.to_s.humanize
+
+    res = form.label key, label
     return res unless field_meanings
 
     meaning = field_meaning_for_key(key)
@@ -40,7 +42,7 @@ module FieldMeaningsHelper
     END_HTML
                 .html_safe
 
-    safe_key = h(key.to_s.humanize)
+    safe_key = h(label)
     form.label key, "#{safe_key} #{info_sign}".html_safe
   end
 

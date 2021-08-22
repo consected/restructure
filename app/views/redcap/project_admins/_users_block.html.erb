@@ -1,0 +1,24 @@
+
+<h4>REDCap Users</h4>
+<% if object_instance.captured_project_info.present?%>
+  <div class="admin-options-ref-users-block">
+  <table class="table tablesorter admin-list">
+  <thead><tr>
+  <th>Username</th>
+  <th>Email</th>
+  <th>Expiration</th>
+  </tr></thead>
+  <tbody>
+    <% object_instance.redcap_project_users.each do |list_item| %>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+      <td><%= list_item.username %></td>
+      <td><%= list_item.email %></td>
+      <td><%= list_item.expiration %></td>
+      </tr>
+    <% end %>
+  </tbody>
+  </table>
+  </div>
+<% else %>
+  <p>Project Info Metadata not yet retrieved</p>
+<% end %>

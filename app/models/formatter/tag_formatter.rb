@@ -49,7 +49,7 @@ module Formatter
     end
 
     def self.titleize(res, _orig_val)
-      res.titleize
+      res.captionize
     end
 
     def self.uppercase(res, _orig_val)

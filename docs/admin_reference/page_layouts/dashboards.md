@@ -29,3 +29,6 @@ Pages are accessed through links like this: `/page_layouts/[panel name]` by user
               classes: col-md-10
               report:
                 id: zeus-charts__study_completers_over_time_chart
+                defaults:
+                  from_date: 2019-01-01
+                  to_date: 2021-12-31

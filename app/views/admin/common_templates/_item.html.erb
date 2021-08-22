@@ -30,7 +30,9 @@
         list_val = list_item.send(p)
     %>
 
-    <% if p.to_s.end_with?('options') || p.to_s.end_with?('template') %>
+    <% if respond_to?("#{p}_options") %>
+      <td class="admin-field-<%=p%>"><%= list_val %></td>
+    <% elsif p.to_s.end_with?('options') || p.to_s.end_with?('template') %>
     <% elsif test_assoc && list_item.respond_to?(test_assoc) %>
       <td class="admin-field-<%=p%>"><%= list_item.send(test_assoc).to_s %></td>
     <% elsif test_assoc_ids && list_item.respond_to?(test_assoc_ids) %>

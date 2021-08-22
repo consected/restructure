@@ -1,8 +1,8 @@
 <%
- text = '' unless defined? text
+ text = '&nbsp;'.html_safe unless defined?( text) && text.present?
 %>
 <div class="container well">
-  <h1>Unexpected Error</h1>
+  <h1><%= @error_title || 'Unexpected Error' %></h1>
   <p class="">
     <%= text %>
   </p>

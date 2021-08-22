@@ -243,7 +243,7 @@ class Admin::MigrationGenerator
   def fields_comments_changes
     begin
       cols = if self.class.table_or_view_exists?(table_name)
-               ActiveRecord::Base.connection.columns(table_name)
+               table_columns
              else
                migration_fields_array
              end
@@ -262,6 +262,10 @@ class Admin::MigrationGenerator
     new_comments
   end
 
+  def table_columns
+    ActiveRecord::Base.connection.columns(table_name)
+  end
+
   def field_changes
     table_name = if table_name_changed
                    prev_table_name
@@ -270,7 +274,7 @@ class Admin::MigrationGenerator
                  end
 
     begin
-      cols = ActiveRecord::Base.connection.columns(table_name)
+      cols = table_columns
       old_colnames = cols.map(&:name) - standard_columns
       old_colnames = old_colnames.reject { |f| f.index(/^embedded_report_|^placeholder_/) }
     rescue StandardError
@@ -282,12 +286,21 @@ class Admin::MigrationGenerator
 
     added = new_colnames - old_colnames
     removed = old_colnames - new_colnames
+    changed = {}
+    db_configs.each do |k, v|
+      current_type = cols.find { |c| c.name == k.to_s }.type
+      next unless v[:type] && current_type
+
+      expected_type = v[:type]&.to_sym
+      changed[k.to_s] = expected_type if current_type != expected_type
+    end
+
     if belongs_to_model
       belongs_to_model_id = "#{belongs_to_model}_id"
       removed -= [belongs_to_model_id]
     end
 
-    [added, removed, old_colnames]
+    [added, removed, changed, old_colnames]
   end
 
   def table_name_changed
@@ -295,14 +308,15 @@ class Admin::MigrationGenerator
   end
 
   def migration_update_table
-    added, removed, prev_fields = field_changes
+    added, removed, changed, prev_fields = field_changes
 
     if table_comments
       new_table_comment = table_comment_changes
       new_fields_comments = fields_comments_changes
     end
 
-    unless added.present? || removed.present? || new_table_comment || new_fields_comments.present? || table_name_changed
+    unless added.present? || removed.present? || changed.present? ||
+           new_table_comment || new_fields_comments.present? || table_name_changed
       return
     end
 
@@ -314,6 +328,7 @@ class Admin::MigrationGenerator
           self.prev_fields = %i[#{prev_fields.join(' ')}]
           \# added: #{added}
           \# removed: #{removed}
+          \# changed type: #{changed}
       #{new_table_comment ? "    \# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
       #{new_fields_comments.present? ? "    \# new fields comments: #{new_fields_comments.keys}" : ''}
           update_fields
