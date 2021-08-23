@@ -44,7 +44,7 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
   end
 
   it 'defines a custom pipeline' do
-    dicom_content = File.read Rails.root.join('docs', 'dicom1.dcm')
+    dicom_content = File.read Rails.root.join('spec', 'fixtures', 'files', 'dicom', 'dicom1.dcm')
     ul = upload_file 'dicom1.dcm', dicom_content
     sf = ul.stored_file
 
