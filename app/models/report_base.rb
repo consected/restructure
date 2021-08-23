@@ -1,22 +1,20 @@
 class ReportBase < ActiveRecord::Base
-
   self.abstract_class = true
   # Provide a modified human name for an instance
   def human_name
-
-    if respond_to?(:rec_type) && self.rec_type
-      rec_type.underscore.humanize.titleize
+    if respond_to?(:rec_type) && rec_type
+      rec_type.underscore.humanize.captionize
     else
       self.class.human_name
     end
   end
 
-  def self.definition= d
-    @definition = d
+  class << self
+    attr_writer :definition
   end
 
-  def self.definition
-    @definition
+  class << self
+    attr_reader :definition
   end
 
   def definition
@@ -24,14 +22,14 @@ class ReportBase < ActiveRecord::Base
   end
 
   def self.human_name
-    cn = self.name
+    cn = name
 
     cn = cn.split('::').last
-    cn.underscore.humanize.titleize
+    cn.underscore.humanize.captionize
   end
 
   def item_type_us
-    self.item_type.ns_underscore
+    item_type.ns_underscore
   end
 
   def item_type
@@ -41,5 +39,4 @@ class ReportBase < ActiveRecord::Base
   def model_data_type
     :report
   end
-
 end

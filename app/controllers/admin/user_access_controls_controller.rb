@@ -33,7 +33,7 @@ class Admin::UserAccessControlsController < AdminController
   end
 
   def has_access_levels
-    UserAccessControls.access_levels.map { |m| [m.to_s.titleize, m] }
+    UserAccessControls.access_levels.map { |m| [m.to_s.captionize, m] }
   end
 
   def user_id_options

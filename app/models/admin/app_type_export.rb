@@ -17,9 +17,10 @@ module Admin::AppTypeExport
 
     export_migrations if Settings::AllowDynamicMigrations
 
-    if format == :json
+    case format
+    when :json
       JSON.pretty_generate(JSON.parse(to_json))
-    elsif format == :yaml
+    when :yaml
       YAML.dump(JSON.parse(to_json))
     end
   end
@@ -39,6 +40,7 @@ module Admin::AppTypeExport
     options[:methods] << :associated_general_selections
     options[:methods] << :page_layouts
     options[:methods] << :user_roles
+    options[:methods] << :role_descriptions
     options[:methods] << :associated_message_templates
     options[:methods] << :associated_config_libraries
     options[:methods] << :associated_protocols
@@ -92,26 +94,18 @@ module Admin::AppTypeExport
 
     dir = migration_generator.db_migration_dirname(dir_suffix)
 
-    unless dir.in? @exported_dirnames
-      # Clean the export directory
-      FileUtils.rm_rf dir
-      @exported_dirnames << dir
-    end
+    return if dir.in? @exported_dirnames
+
+    # Clean the export directory
+    FileUtils.rm_rf dir
+    @exported_dirnames << dir
   end
 
   #
   # Check dynamic types and raise exceptions if there are issues
   def force_validations!
-    valid_associated_activity_logs.each do |a|
-      a.force_option_config_parse
-    end
-
-    associated_dynamic_models.each do |a|
-      a.force_option_config_parse
-    end
-
-    associated_external_identifiers.each do |a|
-      a.force_option_config_parse
-    end
+    valid_associated_activity_logs.each(&:force_option_config_parse)
+    associated_dynamic_models.each(&:force_option_config_parse)
+    associated_external_identifiers.each(&:force_option_config_parse)
   end
 end

@@ -175,7 +175,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
 
     have_css "##{h}.tracker-block.collapse.in"
     expect(page).not_to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: protocol.name
-    expect(page).not_to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: sp.name.titleize
+    expect(page).not_to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: sp.name.captionize
 
     sleep 2.5
     # Now add a new tracker item
@@ -262,7 +262,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
 
     find 'tbody.tracker-history.collapse.in', wait: 5
 
-    expect(page).to have_css 'tbody.tracker-history .tracker-history-event_name', text: pe_orig.name.titleize
+    expect(page).to have_css 'tbody.tracker-history .tracker-history-event_name', text: pe_orig.name.captionize
     expect(page).to have_css 'tbody.tracker-history .tracker-history span.record-meta', text: @user.email.to_s
 
     # Search for the player by current Classification::Protocol, subprocess and event

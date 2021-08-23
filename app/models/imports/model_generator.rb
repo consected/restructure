@@ -139,15 +139,17 @@ module Imports
     #   record.type
     # @return [Array]
     def dynamic_model_columns
-      @dynamic_model_columns ||= ActiveRecord::Base.connection.columns(dynamic_model.table_name)
+      @dynamic_model_columns ||= dynamic_model.table_columns
     end
 
     #
-    # Does the current dynamic model definition match the field types configuration?
+    # Does the current dynamic model definition match the import fields configuration?
     # @return [Boolean | nil]
     def dynamic_model_def_current?
+      # Check all columns are set
       return unless (dynamic_model_columns.map(&:name) - self.class.core_field_names).length == field_types.length
 
+      # Check columns have the correct type
       res = true
       field_types.each do |k, v|
         v = :integer if v == :references
@@ -157,6 +159,29 @@ module Imports
         end
       end
 
+      return res unless res
+
+      # Check downcase is configured to match the dynamic model
+      dynamic_model.default_options.field_options.each do |k, v|
+        unless config_fields.key?(k) && !!config_fields[k].no_downcase == !!v[:no_downcase]
+          res = false
+          break
+        end
+      end
+
+      return res unless res
+
+      # Check downcase is configured to match the dynamic model
+      dmc = dynamic_model.default_options.caption_before
+      config_fields.each do |k, v|
+        k = k.to_sym
+        text = Formatter::Substitution.text_to_html(v.caption)
+        curr_text = dmc[k] && dmc[k][:caption]
+        unless text == curr_text
+          res = false
+          break
+        end
+      end
       res
     end
 
@@ -183,12 +208,29 @@ module Imports
       generator_config.update_options
     end
 
+    #
+    # All configured fields for the import generator
+    def config_fields
+      @config_fields ||= generator_config.fields
+    end
+
+    def fields
+      config_fields
+    end
+
     def disabled
       false
     end
 
     def disabled=(value)
       # ignore
+    end
+
+    #
+    # Standard model method that states if a field should not be downcased when stored.
+    # The dynamic model definition uses this to set up its configuration
+    def no_downcase_field(name)
+      config_fields[name].no_downcase
     end
 
     def add_user_access_control
