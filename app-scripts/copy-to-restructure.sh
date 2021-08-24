@@ -26,7 +26,7 @@ for FROM in app bin config db/migrate db/seeds db/table_generators db/app_migrat
   vendor/assets/images vendor/assets/javascripts vendor/assets/stylesheets; do
   mkdir -p "${DEST}/${FROM}"
   echo "${FROM}"
-  rsync -crv  --exclude="${EXCLUDE}" "${FROM}/" "${DEST}/${FROM}"/
+  rsync -crv --delete  --exclude="${EXCLUDE}" "${FROM}/" "${DEST}/${FROM}"/
 done
 
 mkdir -p ${DEST}/docs
