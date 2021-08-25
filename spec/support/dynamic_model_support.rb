@@ -30,4 +30,34 @@ module DynamicModelSupport
     setup_access :dynamic_model__test_created_by_recs, user: @user0
     dm
   end
+
+  def generate_test_dynamic_view
+    create_user
+    setup_access :masters, user: @user
+    @master = Master.create! current_user: @user
+    @master.current_user = @user
+
+    yaml = <<~YAML
+      _configurations:
+        view_sql: |
+          select
+            id,
+            master_id,
+            first_name,
+            last_name
+          from player_infos
+    YAML
+
+    dm = DynamicModel.create!(
+      current_admin: @admin,
+      name: 'test view',
+      table_name: 'test_views',
+      primary_key_name: :id,
+      foreign_key_name: :master_id,
+      category: :test,
+      options: yaml,
+      schema_name: 'dynamic_test'
+    )
+
+  end
 end

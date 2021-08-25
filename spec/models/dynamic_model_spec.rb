@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require './db/table_generators/dynamic_models_table.rb'
+require './db/table_generators/dynamic_models_table'
 
 # Dynamic model implementation description using both imported apps and direct configurations
 RSpec.describe 'Dynamic Model implementation', type: :model do
@@ -10,6 +10,13 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
   include PlayerContactSupport
   include BulkMsgSupport
   include DynamicModelSupport
+
+  before :all do
+    expect(Admin::MigrationGenerator.view_definition 'dynamic_test','test_views').to be nil
+    generate_test_dynamic_view
+  rescue StandardError => e
+    puts e
+  end
 
   before :example do
     # Seeds.setup
@@ -82,5 +89,9 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
 
     expect(rec).to respond_to :created_by_user_name
     expect(rec.created_by_user_name).to eq @user.email
+  end
+
+  it 'creates a view using supplied SQL' do
+    Admin::MigrationGenerator.view_definition 'dynamic_test','test_views'
   end
 end

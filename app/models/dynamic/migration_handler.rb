@@ -34,6 +34,19 @@ module Dynamic
       run_migration
     end
 
+    #
+    # Check if the _configurations: view_sql: value has changed
+    # in the last save
+    def view_sql_changed?
+      options_attr_name = self.class.option_configs_attr.to_s
+      v1 = attribute_before_last_save(options_attr_name)
+      v2 = attributes[options_attr_name]
+      v1def = YAML.safe_load(v1, [], [], true)
+      v2def = YAML.safe_load(v2, [], [], true)
+      (v1def['_configurations'] && v1def['_configurations']['view_sql']) !=
+        (v2def['_configurations'] && v2def['_configurations']['view_sql'])
+    end
+
     # Generate a migration triggered after_save.
     def generate_migration
       # Re-enabling an item requires it to be created
@@ -49,7 +62,9 @@ module Dynamic
       option_configs(force: true)
 
       # Return if there is nothing to update
-      return unless migration_generator.migration_update_table || saved_change_to_table_name?
+      return unless (!config_view_sql && migration_generator.migration_update_table) ||
+                    (config_view_sql && view_sql_changed?) ||
+                    saved_change_to_table_name?
 
       mode = 'update'
       gs = generator_script(migration_generator.migration_version, mode)
@@ -95,6 +110,18 @@ module Dynamic
       Admin::MigrationGenerator.current_search_paths.first
     end
 
+    #
+    # The value
+    #   _configurations:
+    #     view_sql:
+    # @return [String | nil]
+    def config_view_sql
+      return @config_view_sql if @config_view_sql
+
+      option_configs
+      @config_view_sql = configurations && configurations[:view_sql]
+    end
+
     # Set up and memoize a migration generator to be used for all DB and migration
     # related actions
     def migration_generator(force_reset: nil)
@@ -108,14 +135,15 @@ module Dynamic
       @migration_generator =
         Admin::MigrationGenerator.new(
           db_migration_schema,
-          table_name,
-          all_implementation_fields(ignore_errors: false),
-          table_comments,
-          implementation_no_master_association,
-          table_name_before_last_save,
-          btm,
-          db_configs,
-          self.class.name.underscore.to_sym,
+          table_name: table_name,
+          all_implementation_fields: all_implementation_fields(ignore_errors: false),
+          table_comments: table_comments,
+          no_master_association: implementation_no_master_association,
+          prev_table_name: table_name_before_last_save,
+          belongs_to_model: btm,
+          db_configs: db_configs,
+          view_sql: config_view_sql,
+          resource_type: self.class.name.underscore.to_sym,
           allow_migrations: allow_migrations
         )
     end

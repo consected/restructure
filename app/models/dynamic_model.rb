@@ -289,12 +289,16 @@ class DynamicModel < ActiveRecord::Base
 
   def generator_script(version, mode = 'create')
     cname = "#{mode}_#{table_name}_#{version}".camelize
+    view_sql = configurations && configurations[:view_sql]
+    table_or_view = view_sql ? 'view' : 'tables'
     do_create_or_update = if mode == 'create'
-                            'create_dynamic_model_tables'
+                            "create_dynamic_model_#{table_or_view}"
                           elsif mode == 'create_or_update'
-                            'create_or_update_dynamic_model_tables'
-                          else
+                            "create_or_update_dynamic_model_#{table_or_view}"
+                          elsif table_or_view == 'tables'
                             migration_generator.migration_update_table
+                          else
+                            migration_generator.migration_update_view
                           end
 
     <<~CONTENT
@@ -306,7 +310,7 @@ class DynamicModel < ActiveRecord::Base
           #{migration_generator.migration_set_attribs}
 
           #{do_create_or_update}
-          create_dynamic_model_trigger
+          #{table_or_view == 'table' ? 'create_dynamic_model_trigger' : ''}
         end
       end
     CONTENT
