@@ -2,7 +2,7 @@
   <div class="table-list-block" style="text-align: left" data-result="table-list-block">
     <div class="row">
       <div class="form-group col-md-8">
-        <%= select_tag 'primary_tables_schema_select', options_for_select(Admin::MigrationGenerator.current_search_paths.uniq.sort), prompt: '-- select schema --', class: 'form-control input-sm ff'  %>
+        <%= select_tag 'primary_tables_schema_select', options_for_select(@schemas), prompt: '-- select schema --', class: 'form-control input-sm ff'  %>
       </div>
       <div class="form-group col-md-8">
         <label class="">
@@ -10,25 +10,12 @@
         </label>
       </div>
     </div>
-    <ul id="table-list" style="overflow: auto; background-color: white; height: 0;">
-      <%  
-      can_view_table_data = current_admin || current_user.has_access_to?( :read, :report, :reference_data__table_data)
-      table_info = Admin::MigrationGenerator.tables_and_views
-
-      table_info.each do |table|       
-        table_name = table['table_name']
-        schema_name = table['schema_name']
-        history_table = table_name.end_with? '_history'
-        table_comment = Admin::MigrationGenerator.table_comment(table_name, schema_name)
-      %>
-      <%= render partial: 'table_part', locals: {
-        table_name: table_name,
-        schema_name: schema_name,
-        history_table: history_table,
-        table_comment: table_comment,
-        can_view_table_data: can_view_table_data,
-      } %>
-    <% end %>
-  </ul>
+    <% 
+      @schemas.each do |schema_name| 
+    %>
+    <ul id="table-list-<%= schema_name %>" class="table-list collapse" data-schema-name="<%= schema_name %>">
+      ...
+    </ul>
+  <% end %>
 </div>
 </div>

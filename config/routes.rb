@@ -69,6 +69,7 @@ Rails.application.routes.draw do
       member do
         get :table_list
         get :table_list_columns
+        get :table_list_tables
         get :data_dic
       end
     end
