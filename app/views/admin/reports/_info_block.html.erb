@@ -19,13 +19,13 @@
     <div role="tabpanel" class="tab-pane" id="data-dicts">
       <h4>Data Dictionaries</h4>
       <div id="data-dic-block-container" data-subscription="data-dic-block">
-        <%= link_to "loading...", admin_reference_data_url(type: :data_dic), remote: true, class: 'on-show-auto-click' %>
+        <%= link_to "loading...", data_dic_admin_reference_data_url, remote: true, class: 'on-show-auto-click' %>
       </div>
     </div>
     <div role="tabpanel" class="tab-pane" id="tables">
       <h4>Tables</h4>
       <div id="table-list-block-container" data-subscription="table-list-block" data-preprocessor="ref_data_table_list_block">
-        <%= link_to "loading...", admin_reference_data_url(type: :table_list), remote: true, class: 'on-show-auto-click' %>
+        <%= link_to "loading...", table_list_admin_reference_data_url, remote: true, class: 'on-show-auto-click' %>
       </div>
     </div>
     <div role="tabpanel" class="tab-pane" id="protocol_events">
