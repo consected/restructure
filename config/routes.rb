@@ -64,6 +64,16 @@ Rails.application.routes.draw do
     resources :protocol_events, except: %i[show destroy]
     resources :sub_processes, except: %i[show destroy]
 
+    get :reference_data, to: 'reference_data#index'
+    resource :reference_data do
+      member do
+        get :table_list
+        get :data_dic
+      end
+    end
+  
+  
+
     namespace :nfs_store do
       namespace :filter do
         resources :filters, except: %i[show destroy]
@@ -108,7 +118,6 @@ Rails.application.routes.draw do
     resources :contact_infos, except: %i[show destroy]
   end
 
-  get 'admin/reference_data' => 'pages#reference_data'
   get 'pages/home' => 'pages#home'
   resources :pages, only: %i[index show] do
     member do

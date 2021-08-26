@@ -2,7 +2,7 @@
   <div class="table-list-block" style="text-align: left" data-result="table-list-block">
     <div class="row">
       <div class="form-group col-md-8">
-        <%= select_tag 'primary_tables_schema_select', options_for_select(Admin::MigrationGenerator.current_search_paths), prompt: '-- select schema --', class: 'form-control input-sm ff'  %>
+        <%= select_tag 'primary_tables_schema_select', options_for_select(Admin::MigrationGenerator.current_search_paths.sort), prompt: '-- select schema --', class: 'form-control input-sm ff'  %>
       </div>
       <div class="form-group col-md-8">
         <label class="">
