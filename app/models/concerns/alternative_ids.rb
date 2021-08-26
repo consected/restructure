@@ -9,7 +9,6 @@ module AlternativeIds
   extend ActiveSupport::Concern
 
   included do
-    @external_id_matching_fields = nil
   end
 
   class_methods do
@@ -38,36 +37,75 @@ module AlternativeIds
     end
 
     #
-    # Get (and memoize) the list of external identifier ID attributes (as symbols)
+    # Get the list of external identifier ID attributes (as symbols)
     # Filter the results based on user access controls if access_by is supplied.
+    # This relies on already memoized data
     # @param [User | nil] access_by - the current user making the request or nil to ignore access controls
     # @return [Array{Symbol}] array of symbols representing the id field names
     def external_id_matching_fields(access_by: nil)
-      results =
-        @external_id_matching_fields ||= ExternalIdentifier
-                                         .active_model_configurations
-                                         .pluck(:external_id_attribute, :name)
+      results = if access_by
+                  external_id_definitions_access_by(access_by)
+                else
+                  external_id_definitions
+                end
 
-      if access_by
-        key = access_by_key(access_by)
-        if @external_id_matching_fields_access_by&.key?(key)
-          results = @external_id_matching_fields_access_by[key]
-        else
-          @external_id_matching_fields_access_by ||= {}
-          results = @external_id_matching_fields
-                    .select { |e| access_by.has_access_to?(:access, :table, e.last) }
+      results.keys
+    end
 
-          @external_id_matching_fields_access_by[key] = results
-        end
+    #
+    # Memoize a hash of the full set of active external identifier definitions
+    # keyed by the alternative id attribute (as a symbol)
+    # @return [Hash{Symbol => ExternalIdentifier}]
+    def external_id_definitions
+      return @external_id_definitions if @external_id_definitions
+
+      @external_id_definitions = {}
+      recs = ExternalIdentifier.active_model_configurations
+      recs.each do |e|
+        @external_id_definitions[e.external_id_attribute.to_sym] = e
       end
 
-      results.map { |a| a.first.to_sym }
+      @external_id_definitions
+    end
+
+    #
+    # Memoize a hash of active external identifier definitions accessible by user
+    # The hash result is keyed by the alternative id attribute (as a symbol)
+    # @return [Hash{Symbol => ExternalIdentifier}]
+    def external_id_definitions_access_by(access_by)
+      key = access_by_key(access_by)
+      if @external_id_definitions_access_by&.key?(key)
+        user_results = @external_id_definitions_access_by[key]
+      else
+        @external_id_definitions_access_by ||= {}
+        user_results = external_id_definitions.filter { |_k, v| access_by.has_access_to?(:access, :table, v.name) }
+        @external_id_definitions_access_by[key] = user_results
+      end
+      user_results
+    end
+
+    #
+    # Get the ExternalIdentifer definition for the named external_id_attribute
+    # Returns nil if not matched
+    # @param [String | Symbol] field_name
+    # @param [User | nil] access_by
+    # @return [ExternalIdentifier | nil]
+    def external_id_definition(attr_name, access_by: nil)
+      attr_name = attr_name.to_sym
+
+      results = if access_by
+                  external_id_definitions_access_by(access_by)
+                else
+                  external_id_definitions
+                end
+
+      results[attr_name]
     end
 
     # Force a reset of the external fields, allowing new definitions to appear
     def reset_external_id_matching_fields!
-      @external_id_matching_fields = nil
-      @external_id_matching_fields_access_by = nil
+      @external_id_definitions_access_by = nil
+      @external_id_definitions = nil
     end
 
     # Generate an instance method that allow easy access to alternative_id values
@@ -105,40 +143,6 @@ module AlternativeIds
     def alternative_id?(attr_name, access_by: nil)
       attr_name = attr_name.to_sym
       alternative_id_fields(access_by: access_by).include?(attr_name)
-    end
-
-    #
-    # Get the ExternalIdentifer definition for the named external_id_attribute
-    # Returns nil if not matched
-    # @param [String | Symbol] field_name
-    # @return [ExternalIdentifier | nil]
-    def external_id_definition(attr_name, access_by: nil)
-      attr_name = attr_name.to_sym
-      unless @external_id_definition
-        recs = ExternalIdentifier
-               .active
-
-        @external_id_definition = {}
-        recs.each do |e|
-          @external_id_definition[e.external_id_attribute.to_sym] = e
-        end
-      end
-
-      result = @external_id_definition[attr_name]
-
-      if access_by
-        key = access_by_key(access_by)
-        if @external_id_definition_access_by&.key?(key)
-          user_results = @external_id_definition_access_by[key]
-        else
-          @external_id_definition_access_by ||= {}
-          user_results = @external_id_definition.filter { |_k, v| access_by.has_access_to?(:access, :table, v.name) }
-          @external_id_definition_access_by[key] = user_results
-        end
-        result = user_results[attr_name]
-      end
-
-      result
     end
 
     #
@@ -243,7 +247,10 @@ module AlternativeIds
     return @alternative_id_value[field_name] if self.class.crosswalk_attr?(field_name, access_by: current_user)
 
     ext_id = self.class.external_id_definition(field_name, access_by: current_user)
-    raise(FphsException, "External ID definition is not active for #{field_name}") unless ext_id
+    unless ext_id
+      raise(FphsException,
+            "External ID definition is not active for #{field_name}. Key: #{self.class.access_by_key(current_user)}")
+    end
 
     @alternative_id_value[field_name] = self.class.external_id?(field_name, access_by: current_user)
     return unless @alternative_id_value[field_name]
