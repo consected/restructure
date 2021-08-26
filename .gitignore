@@ -73,3 +73,4 @@ db/demo-data.sql
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+credentials.yml

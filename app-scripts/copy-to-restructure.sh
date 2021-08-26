@@ -12,7 +12,7 @@ if [ ! -d ${DEST} ]; then
   exit 2
 fi
 
-EXCLUDE='database.yml favicon.png structure.sql'
+EXCLUDE='database.yml favicon.png structure.sql .git'
 
 cd $(dirname $0)/..
 
@@ -24,8 +24,9 @@ for FROM in app bin config db/migrate db/seeds db/table_generators db/app_migrat
   lib public/fonts public/app_specific/data_requests script spec \
   docs/admin_reference docs/user_reference docs/dev_reference docs/app_reference/zeus \
   vendor/assets/images vendor/assets/javascripts vendor/assets/stylesheets; do
-  mkdir -p ${DEST}/${FROM}
-  rsync -av --update --exclude="${EXCLUDE}" ${FROM}/ ${DEST}/${FROM}/
+  mkdir -p "${DEST}/${FROM}"
+  echo "${FROM}"
+  rsync -crv --delete  --exclude="${EXCLUDE}" "${FROM}/" "${DEST}/${FROM}"/
 done
 
 mkdir -p ${DEST}/docs
@@ -43,7 +44,8 @@ for FROM in \
   public/app_specific/app_data_requests.css \
   .gitignore .rspec_parallel .rubocop.yml .ruby-version .solargraph.yml config.ru \
   Gemfile* Rakefile vendor/assets/config.json; do
-  cp -u ${FROM} ${DEST}/${FROM}
+  echo "${FROM}"
+  cp -f "${FROM}" "${DEST}/${FROM}"
 done
 
 # Removed db/structure.sql
@@ -57,3 +59,5 @@ mkdir -p ${DEST}/tmp
 cd ${DEST}
 
 grep --recursive harvard.edu *
+grep --recursive partners.edu *
+grep --recursive mgb.edu *

@@ -4,7 +4,7 @@ class Admin::MigrationGenerator
 
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
                 :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
-                :allow_migrations, :db_configs, :resource_type
+                :allow_migrations, :db_configs, :resource_type, :view_sql
 
   #
   # Simply return the current connection
@@ -196,9 +196,10 @@ class Admin::MigrationGenerator
     connection.columns(table_name).map(&:name)
   end
 
-  def initialize(db_migration_schema, table_name = nil, all_implementation_fields = nil, table_comments = nil,
-                 no_master_association = nil, prev_table_name = nil, belongs_to_model = nil, db_configs = nil,
-                 resource_type = nil,
+  def initialize(db_migration_schema, table_name: nil, all_implementation_fields: nil, table_comments: nil,
+                 no_master_association: nil, prev_table_name: nil, belongs_to_model: nil, db_configs: nil,
+                 resource_type: nil,
+                 view_sql: nil,
                  allow_migrations: nil)
     self.db_migration_schema = db_migration_schema
     self.table_name = table_name
@@ -209,6 +210,7 @@ class Admin::MigrationGenerator
     self.no_master_association = no_master_association
     self.belongs_to_model = belongs_to_model
     self.db_configs = db_configs
+    self.view_sql = view_sql
 
     self.allow_migrations = allow_migrations
     self.allow_migrations = Settings::AllowDynamicMigrations if allow_migrations.nil?
@@ -260,6 +262,31 @@ class Admin::MigrationGenerator
     end
 
     new_comments
+  end
+
+  #
+  # Get the SELECT definition of a view from Postgres,
+  # or nil if the view doesn't exist
+  # @param [String] schema
+  # @param [String] view_name
+  # @return [String | nil]
+  def self.view_definition schema, view_name
+    return unless view_exists?(view_name)
+
+    sql = <<~SQL
+      select definition
+      from pg_views
+      where viewname = $1 and schemaname = $2;
+    SQL
+
+    type  = ActiveModel::Type::String.new
+    binds = [
+      ActiveRecord::Relation::QueryAttribute.new('viewname', view_name, type),
+      ActiveRecord::Relation::QueryAttribute.new('schemaname', schema, type)
+    ]
+
+    res = connection.exec_query sql, 'SQL', binds
+    res.first && res.first['definition']
   end
 
   def table_columns
@@ -335,6 +362,26 @@ class Admin::MigrationGenerator
     ARCONTENT
   end
 
+  def migration_update_view
+    added, removed, changed, prev_fields = field_changes
+
+    if table_comments
+      new_table_comment = table_comment_changes
+      new_fields_comments = fields_comments_changes
+    end
+
+    new_fields_comments ||= {}
+
+    <<~ARCONTENT
+      #{table_name_changed ? "    self.prev_table_name = '#{prev_table_name}'" : ''}
+      #{table_name_changed ? '    update_table_name' : ''}
+          self.prev_fields = %i[#{prev_fields.join(' ')}]
+      #{new_table_comment ? "    \# new table comment: #{new_table_comment.gsub("\n", '\n')}" : ''}
+      #{new_fields_comments.present? ? "    \# new fields comments: #{new_fields_comments.keys}" : ''}
+          create_or_update_dynamic_model_view
+    ARCONTENT
+  end
+
   def migration_fields_array
     fields = all_implementation_fields
     fields.reject { |f| f.index(/^embedded_report_|^placeholder_/) }
@@ -342,8 +389,14 @@ class Admin::MigrationGenerator
 
   def migration_set_attribs
     tcs = table_comments || {}
+    view_sql_text = <<~VSTEXT
+      self.view_sql = <<~VIEWSQL
+        #{view_sql}
+      VIEWSQL
+    VSTEXT
+
     <<~SETATRRIBS
-      self.schema = '#{db_migration_schema}'
+          self.schema = '#{db_migration_schema}'
           self.table_name = '#{table_name}'
           self.fields = %i[#{migration_fields_array.join(' ')}]
           self.table_comment = '#{tcs[:table]}'
@@ -351,6 +404,7 @@ class Admin::MigrationGenerator
           self.db_configs = #{(db_configs || {}).to_json}
           self.no_master_association = #{!!no_master_association}
           self.resource_type = :#{resource_type}
+      #{view_sql_text}
     SETATRRIBS
   end
 
