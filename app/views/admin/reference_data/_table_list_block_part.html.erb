@@ -2,7 +2,7 @@
   <div class="table-list-block" style="text-align: left" data-result="table-list-block">
     <div class="row">
       <div class="form-group col-md-8">
-        <%= select_tag 'primary_tables_schema_select', options_for_select(Admin::MigrationGenerator.current_search_paths.sort), prompt: '-- select schema --', class: 'form-control input-sm ff'  %>
+        <%= select_tag 'primary_tables_schema_select', options_for_select(Admin::MigrationGenerator.current_search_paths.uniq.sort), prompt: '-- select schema --', class: 'form-control input-sm ff'  %>
       </div>
       <div class="form-group col-md-8">
         <label class="">
@@ -12,51 +12,23 @@
     </div>
     <ul id="table-list" style="overflow: auto; background-color: white; height: 0;">
       <%  
-        can_view_table_data = current_admin || current_user.has_access_to?( :read, :report, :reference_data__table_data)
-        table_info = Admin::MigrationGenerator.tables_and_views
-        cn = Admin::MigrationGenerator.connection
-        column_comments = Admin::MigrationGenerator.column_comments
-        column_fks = Admin::MigrationGenerator.foreign_keys
+      can_view_table_data = current_admin || current_user.has_access_to?( :read, :report, :reference_data__table_data)
+      table_info = Admin::MigrationGenerator.tables_and_views
 
-        table_info.each do |table|       
-          table_name = table['table_name']
-          schema_name = table['schema_name']
-          history_table = table_name.end_with? '_history'
-          table_comment = Admin::MigrationGenerator.table_comment(table_name, schema_name)
-        %>
-      <li id="t-<%=table_name%>" data-schema="<%=schema_name%>" class="ref-table-item <%=history_table ? 'history-table' : 'regular-table' %>">
-        <a href="#tblock-<%=schema_name%>-<%=table_name%>" data-toggle="collapse" class="table-name-collapser collapsed"><%= table_name  %></a>
-        <%= link_to '', report_path('reference_data__table_data', 
-                                          table_name: table_name, 
-                                          schema_name: schema_name, 
-                                          search_attrs: { no_run: true }
-                                        ), 
-                                        target: '_blank', class: 'glyphicon glyphicon-search' if can_view_table_data %>
-        <% if table_comment %>
-          <div class="table-comment help-block"><%= table_comment %></div>
-        <% end %>
-      </li>
-      <ul id="tblock-<%=schema_name%>-<%=table_name%>" class="collapse ref-tblock">
-        <% cn.columns(table_name).each  do |c| 
-              column_name = c.name
-              column_comment = column_comments.find {|cs| cs['schema_name'] == schema_name && cs['table_name'] == table_name && cs['column_name'] == column_name }
-              column_comment = column_comment['column_comment'] if column_comment
-            
-              column_fk = column_fks.find {|cfk| cfk['source_schema'] == schema_name && cfk['source_table'] == table_name && cfk['source_column'] == column_name}
-              column_fk = "#{column_fk['target_schema']}.#{column_fk['target_table']} (#{column_fk['target_column']})" if column_fk
-          %>
-        <li id="table-<%= column_name %>" class="ref-table-col-item">
-          <span><%= column_name %></span> <span class="ref-table-column-name"><%=c.type.to_s%></span>
-          <% if column_fk %>
-            <span class="column-fk"><i class="glyphicon glyphicon-link"></i><%= column_fk %></span>
-          <% end %>
-          <% if column_comment %>
-            <div class="column-comment help-block"><%= column_comment %></div>
-          <% end %>
-        </li>
-      <% end %>
-    </ul>
-  <%  end %>
-</ul>
+      table_info.each do |table|       
+        table_name = table['table_name']
+        schema_name = table['schema_name']
+        history_table = table_name.end_with? '_history'
+        table_comment = Admin::MigrationGenerator.table_comment(table_name, schema_name)
+      %>
+      <%= render partial: 'table_part', locals: {
+        table_name: table_name,
+        schema_name: schema_name,
+        history_table: history_table,
+        table_comment: table_comment,
+        can_view_table_data: can_view_table_data,
+      } %>
+    <% end %>
+  </ul>
 </div>
 </div>

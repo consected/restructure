@@ -68,11 +68,10 @@ Rails.application.routes.draw do
     resource :reference_data do
       member do
         get :table_list
+        get :table_list_columns
         get :data_dic
       end
     end
-  
-  
 
     namespace :nfs_store do
       namespace :filter do

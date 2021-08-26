@@ -1,12 +1,15 @@
 <%
-part = nil
-cache_res = Rails.cache.fetch(:info_block_table_list) do 
-  part = render partial: 'admin/reference_data/table_list_block_part'
+  part = nil
+
+  pkc = partial_cache_key(:info_block_table_list)
+  Rails.cache.delete pkc
+  cache_res = Rails.cache.fetch(pkc) do 
+    part = render partial: 'admin/reference_data/table_list_block_part'
     ActiveSupport::Gzip.compress(part)
   end
 
   if Rails.configuration.action_controller.perform_caching == false
-    Rails.cache.delete partial_cache_key(:info_block_table_list)
+    Rails.cache.delete pkc
   end
 %>
 <%= part || ActiveSupport::Gzip.decompress(cache_res).html_safe %>

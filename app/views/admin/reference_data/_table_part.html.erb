@@ -1,0 +1,15 @@
+<li id="t-<%=table_name%>" data-schema="<%=schema_name%>" class="ref-table-item <%=history_table ? 'history-table' : 'regular-table' %>">
+  <a href="#tblock-<%=schema_name%>-<%=table_name%>" data-toggle="collapse" class="table-name-collapser collapsed"><%= table_name  %></a>
+  <%= link_to '', report_path('reference_data__table_data', 
+                                          table_name: table_name, 
+                                          schema_name: schema_name, 
+                                          search_attrs: { no_run: true }
+                                        ), 
+                                        target: '_blank', class: 'glyphicon glyphicon-search' if can_view_table_data %>
+  <% if table_comment %>
+    <div class="table-comment help-block"><%= table_comment %></div>
+  <% end %>
+</li>
+<ul id="tblock-<%=schema_name%>-<%=table_name%>" class="collapse ref-tblock" data-schema-name="<%=schema_name%>" data-table-name="<%=table_name%>">
+  ...
+</ul>
