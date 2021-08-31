@@ -21,9 +21,9 @@
 %>
 <li class="container-folder container-folder-<%= is_archive ? 'is' : 'not' %>-archive">
   <input type="checkbox" class="container-folder-selector ff" data-folder-path="<%= folder.join('/')%>" title="select all items in folder &amp; subfolders"/>
-  <span class="folder-icon <%= is_archive ? 'is' : 'not' %>-archive glyphicon <%= folder_icon_class %>" title="expand folder" data-toggle="collapse" href="#<%= item_id %>" aria-expanded="true" aria-controls="<%= item_id %>"></span>&nbsp;
-  <%= show_folder_name %><% if is_archive %> <span class="file-archive-tag">(archive files)</span><% end %>
+<span class="folder-icon <%= is_archive ? 'is' : 'not' %>-archive glyphicon <%= folder_icon_class %>" title="expand folder" data-toggle="collapse" href="#<%= item_id %>" aria-expanded="true" aria-controls="<%= item_id %>"></span>&nbsp;
+<%= show_folder_name %><% if is_archive %> <span class="file-archive-tag">(archive files)</span><% end %>
 </li>
 <ul class="container-folder-items collapse <%= folder_name == '.' ? 'in' : ''%>" data-folder-items="<%= folder.join('/')%>" id="<%= item_id %>">
-  <%= render partial: 'browse_list_folders', locals: {form: form, downloads: folder_downloads, level: level + 1, folder: folder} %>
+  <%= render partial: 'nfs_store/container_list/browse_list_folders', locals: {downloads: folder_downloads, level: level + 1, folder: folder} %>
 </ul>

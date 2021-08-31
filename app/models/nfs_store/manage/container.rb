@@ -286,7 +286,8 @@ module NfsStore
         super
       end
 
-      # List all the filesystem files in the container directory and sub-directories including files in the mounted archives too.
+      # List all the filesystem files in the container directory and sub-directories
+      # including files in the mounted archives too.
       # It excludes .trash paths and hidden (dot) paths and files
       # Iterates through all the roles that the current user has, building a complete, unique set of files based on the
       # appropriate group file permissions for each role.
@@ -298,9 +299,11 @@ module NfsStore
 
           p = path_for role_name: role_name
           # Don't use Regex - it breaks if there are special characters
-          all_files += Dir.glob("#{p}/**/*").reject do |f|
-                         Pathname.new(f).directory?
-                       end.map { |f| f.sub("#{p}/", '').sub(p, '') }
+          paths = Dir.glob("#{p}/**/*").reject do |f|
+            Pathname.new(f).directory?
+          end
+
+          all_files += paths.map { |f| f.sub("#{p}/", '').sub(p, '') }
         end
 
         all_files.uniq
