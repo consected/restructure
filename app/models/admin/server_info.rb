@@ -70,19 +70,19 @@ class Admin::ServerInfo
 
   def passenger_status
     IO.popen('passenger-status').read
-  rescue StandardError => e
+  rescue StandardError
     'not available'
   end
 
   def passenger_memory_stats
     IO.popen('passenger-memory-stats').read
-  rescue StandardError => e
+  rescue StandardError
     'not available'
   end
 
   def processes
-    IO.popen('ps aux --sort=-rss').read
-  rescue StandardError => e
+    IO.popen('top -b -n 1 -o +%MEM -c -w 512').read
+  rescue StandardError
     'not available'
   end
 

@@ -14,6 +14,7 @@ _comments:
 
 _configurations: 
   secondary_key: field name to use as a secondary key to lookup items
+  view_sql: define a view instead of a table to underpin this model
 
 _definitions: 
   reusable_key: |

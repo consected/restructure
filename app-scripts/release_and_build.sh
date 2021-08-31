@@ -18,6 +18,14 @@ if [ ! -z "${GITSTATUS}" ]; then
   exit 1
 fi
 
+git pull
+
+cl_not_ok=$(grep -Pzl '## Unreleased\n+##' CHANGELOG.md)
+if [ "${cl_not_ok}" ]; then
+  echo "CHANGELOG.md does not have anything entered for the Unreleased section. Edit and retry."
+  exit 2
+fi
+
 echo "Clean up assets before we start"
 FPHS_LOAD_APP_TYPES=1 bundle exec rake assets:clobber
 git commit public/assets -m "Cleanup"

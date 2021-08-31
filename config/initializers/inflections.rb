@@ -5,11 +5,11 @@
 # locales as you wish. All of these examples are active by default:
 ActiveSupport::Inflector.inflections(:en) do |inflect|
   # Allow status to be pluralized to statuses not stati
+  #   inflect.plural /^(ox)$/i, '\1en'
+  #   inflect.singular /^(ox)en/i, '\1'
+  #   inflect.irregular 'person', 'people'
+  inflect.uncountable %w( data )
 end
-#   inflect.plural /^(ox)$/i, '\1en'
-#   inflect.singular /^(ox)en/i, '\1'
-#   inflect.irregular 'person', 'people'
-#   inflect.uncountable %w( fish sheep )
 # end
 
 # Do not use acronym inflector, since it will break our expectations

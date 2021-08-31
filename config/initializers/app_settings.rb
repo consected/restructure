@@ -30,6 +30,11 @@ class Settings
     use_dictionary: !Rails.env.test?
   }.freeze
 
+  # Default logo filename. Can be overridden on an app by app basis with the "logo filename" app configuration.
+  # The logo file itself should be placed in `app/assets/images` or directly in `public/``. Alternatively, place it in
+  # `public/app_specific/<app folder>`` and use the appropriate relative path `/app_specific/<app folder>` in the config.
+  DefaultLogo = 'restructure-logo.svg'
+
   # Force a 'from email' address for notifications
   # If not set (nil), then the current user email address will be used,
   # which may fail on some email servers if the domain name does not match
