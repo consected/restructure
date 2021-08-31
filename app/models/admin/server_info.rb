@@ -81,7 +81,7 @@ class Admin::ServerInfo
   end
 
   def processes
-    IO.popen('ps aux --sort=-rss').read
+    IO.popen('top -b -n 1 -o +%MEM -c').read
   rescue StandardError => e
     'not available'
   end
