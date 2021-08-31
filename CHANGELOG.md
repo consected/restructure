@@ -19,6 +19,8 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Fixed] Version of nio4r gem conflicts with AWS Elastic Beanstalk
+
 ## [7.4.52] - 2021-08-31
 
 - [Changed][Filestore] Improvement to filestore browse performance with many files
