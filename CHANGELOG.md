@@ -19,9 +19,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
-- [Changed][Filestore] Improvement to filestore browse performance with many files
-
 ## [7.4.52] - 2021-08-31
+
+- [Changed][Filestore] Improvement to filestore browse performance with many files
 
 ## [7.4.51] - 2021-08-26
 
