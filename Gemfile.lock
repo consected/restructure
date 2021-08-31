@@ -230,7 +230,7 @@ GEM
     minitest (5.14.4)
     multi_json (1.15.0)
     netrc (0.11.0)
-    nio4r (2.5.8)
+    nio4r (2.5.7)
     nokogiri (1.11.5)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
@@ -470,6 +470,7 @@ DEPENDENCIES
   listen
   memory_profiler
   mime-types
+  nio4r (= 2.5.7)
   nokogiri (= 1.11.5)
   parallel_tests
   pg (~> 0.15)
