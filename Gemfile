@@ -41,6 +41,7 @@ group :development do
   gem 'memory_profiler'
   gem 'rack-mini-profiler'
   gem 'solargraph'
+  gem 'solargraph-rails', '~> 0.2.0'
   gem 'web-console'
 end
 
