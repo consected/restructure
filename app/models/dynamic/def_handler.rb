@@ -341,7 +341,7 @@ module Dynamic
     # Array of option config names (strings)
     # @return [Array]
     def option_configs_names
-      option_configs.map(&:name)
+      option_configs&.map(&:name)
     end
 
     #

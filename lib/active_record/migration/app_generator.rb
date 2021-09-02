@@ -309,7 +309,7 @@ module ActiveRecord
 
       def update_fields
         self.mode = :update
-
+        self.db_configs ||= {}
         old_table_comment = ActiveRecord::Base.connection.table_comment(table_name)
 
         belongs_to_model_field = "#{belongs_to_model}_id" if belongs_to_model
@@ -621,6 +621,7 @@ module ActiveRecord
 
       def setup_fields(handle_fields = nil)
         self.fields_comments ||= {}
+
         return if field_opts && !handle_fields
 
         handle_fields ||= self.fields
@@ -631,6 +632,7 @@ module ActiveRecord
         self.new_fields = fields.map { |f| "NEW.#{f}" }
         self.field_defs = {}
         self.field_opts = {}
+        self.db_configs = {}
 
         handle_fields.each do |attr_name|
           a = attr_name.to_s
