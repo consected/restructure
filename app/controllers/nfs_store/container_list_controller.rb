@@ -7,15 +7,25 @@ module NfsStore
     include MasterHandler
     include InNfsStoreContainer
 
-    ValidViewTypes = %w[list icons].freeze
-    DefaultViewType = 'list'.freeze
+    ValidViewTypes = %w[list icons json].freeze
+    DefaultViewType = 'json'.freeze
 
     def show
       view_type = params[:view_type]
 
       begin
         if @container.readable?
-          @downloads = Browse.list_files_from @container, activity_log: @activity_log
+          # Check if we should show flags for classifications on each of the types of container file
+          @allow_show_flags = {}
+          %i[stored_file archived_file].each do |rt|
+            full_name = "nfs_store__manage__#{rt}"
+            show_flag = !!Classification::ItemFlagName.enabled_for?(full_name, current_user)
+            @allow_show_flags[rt] = show_flag
+          end
+
+          # List types should we include flags for in the queries that return the stored_files and archived_files
+          show_flags_for = @allow_show_flags.filter { |_k, v| v }.keys.map { |i| i.to_s.pluralize.to_sym }
+          @downloads = Browse.list_files_from @container, activity_log: @activity_log, include_flags: show_flags_for
           # Prep a download object to allow selection of downloads in the browse list
           @download = Download.new container: @container, activity_log: @activity_log
         end
@@ -24,6 +34,24 @@ module NfsStore
       end
 
       view_type = ValidViewTypes.find { |vt| vt == view_type } || DefaultViewType
+
+      if view_type == 'json'
+        extras = {
+          except: %i[file_metadata last_process_name_run description updated_at created_at user_id file_hash
+                     content_type],
+          allow_show_flags: @allow_show_flags
+        }
+
+        render json: {
+          nfs_store_container: {
+            id: @container.id,
+            container_files: @downloads.as_json(extras),
+            item_type: 'nfs_store_container'
+          }
+        }
+        return
+      end
+
       render partial: "browse_#{view_type}"
     end
 

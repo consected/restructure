@@ -3,95 +3,138 @@
     acts = [:view_files_as_image, :view_files_as_html, :download_files]
     use_secure_view_actions = acts.select {|act| current_user.can?(act)}
 %>
-
 <script id="filestore-view-template"  type="text/x-handlebars-template" class="hidden handlebars-template">
-{{>filestore_common_template_view}}
+  {{>filestore_common_template_view}}
 </script>
-
 <script id="filestore_common_template_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
-
-<div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
-  <%= render partial: 'nfs_store/browse/browser_header', locals: { 
-        container_id: '{{to_record_id}}', 
-        container_name: '{{to_record_data}}', 
-        container_label: '{{to_record_label}}', 
-        activity_log_id: '{{from_record_id}}', 
-        activity_log_type: '{{from_record_type_us}}' 
-      } %>
-  <div class="upload-dropzone">
-
-    <div class="nfs-store-container-block" data-container-id="{{to_record_id}}" data-activity-log-id="{{from_record_id}}" data-activity-log-type="{{from_record_type_us}}">
-      <%= render partial: 'nfs_store/browse/show', locals: { 
-            container_id: '{{to_record_id}}', 
-            container_name: '{{to_record_data}}', 
-            activity_log_id: '{{from_record_id}}', 
-            activity_log_type: '{{from_record_type_us}}' 
-          } %>
-      <%= render partial: 'filestore/classification/block', locals: { 
-            container_id: '{{to_record_id}}', 
-            container_name: '{{to_record_data}}', 
-            activity_log_id: '{{from_record_id}}', 
-            activity_log_type: '{{from_record_type_us}}' 
-          } %>
-      <div class="browse-controls">
-        <div class="download-actions text-center">
-          {{#if to_record_editable}}
-          <%= render partial: 'nfs_store/browse/options_menu', locals: { 
-                container_id: '{{to_record_id}}', 
-                activity_log_id: '{{from_record_id}}', 
-                activity_log_type: '{{from_record_type_us}}', 
-                can_send_to_trash: true, 
-                can_move_files: true,
-                can_user_file_actions: true
-              } %>
-          {{/if}}
-          <%= render partial: 'nfs_store/browse/download_button', locals: { 
-                container_id: '{{to_record_id}}', 
-                activity_log_id: '{{from_record_id}}', 
-                activity_log_type: '{{from_record_type_us}}',
-                can_download: current_user.can?(:download_files)
-              } %>
-          {{#if to_record_editable}}
-          <%= render partial: 'nfs_store/uploader/add_files', locals: { 
-                container_id: '{{to_record_id}}', 
-                activity_log_id: '{{from_record_id}}', 
-                activity_log_type: '{{from_record_type_us}}', 
-                container_writable: true 
-              } %>
-          {{/if}}
+  <div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
+    <%= render partial: 'nfs_store/browse/browser_header', locals: {
+          container_id: '{{to_record_id}}',
+          container_name: '{{to_record_data}}',
+          container_label: '{{to_record_label}}',
+          activity_log_id: '{{from_record_id}}',
+          activity_log_type: '{{from_record_type_us}}'
+        } %>
+    <div class="upload-dropzone">
+  
+      <div class="nfs-store-container-block" data-container-id="{{to_record_id}}" data-activity-log-id="{{from_record_id}}" data-activity-log-type="{{from_record_type_us}}">
+        <%= render partial: 'nfs_store/browse/show', locals: { container_id: '{{to_record_id}}', level: 0, folder: '.' } %>
+  
+        <%= render partial: 'filestore/classification/block', locals: {
+              container_id: '{{to_record_id}}',
+              container_name: '{{to_record_data}}',
+              activity_log_id: '{{from_record_id}}',
+              activity_log_type: '{{from_record_type_us}}'
+            } %>
+        <div class="browse-controls">
+          <div class="download-actions text-center">
+            {{#if to_record_editable}}
+            <%= render partial: 'nfs_store/browse/options_menu', locals: {
+                  container_id: '{{to_record_id}}',
+                  activity_log_id: '{{from_record_id}}',
+                  activity_log_type: '{{from_record_type_us}}',
+                  can_send_to_trash: true,
+                  can_move_files: true,
+                  can_user_file_actions: true
+                } %>
+            {{/if}}
+            <%= render partial: 'nfs_store/browse/download_button', locals: {
+                  container_id: '{{to_record_id}}',
+                  activity_log_id: '{{from_record_id}}',
+                  activity_log_type: '{{from_record_type_us}}',
+                  can_download: current_user.can?(:download_files)
+                } %>
+            {{#if to_record_editable}}
+            <%= render partial: 'nfs_store/uploader/add_files', locals: {
+                  container_id: '{{to_record_id}}',
+                  activity_log_id: '{{from_record_id}}',
+                  activity_log_type: '{{from_record_type_us}}',
+                  container_writable: true
+                } %>
+            {{/if}}
+          </div>
         </div>
       </div>
+  
+      <div class="row">
+        <%= render partial: 'nfs_store/uploader/index' %>
+      </div>
+  
+      <div class="drop-info">drop files to upload</div>
     </div>
-
-    <div class="row">
-      <%= render partial: 'nfs_store/uploader/index' %>
-    </div>
-
-    <div class="drop-info">drop files to upload</div>
   </div>
-</div>
 </script>
-
-
 <script id="filestore_simple_template_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
-
-<div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
-    <%= link_to "", "/nfs_store/container_list/{{to_record_id}}?activity_log_id={{from_record_id}}&activity_log_type={{from_record_type_us}}&view_type=icons", class: "refresh-container-list glyphicon glyphicon-refresh hidden", title: "refresh list", data: { remote: "true", container_id: "{{to_record_id}}", activity_log_id: "{{from_record_id}}", activity_log_type: "{{from_record_type_us}}" } %>
-    <div class="nfs-store-container-block" data-container-id="{{to_record_id}}" data-activity-log-id="{{from_record_id}}" data-activity-log-type="{{from_record_type_us}}">
-      <%= render partial: 'nfs_store/browse/show', locals: { 
-            container_id: '{{to_record_id}}', 
-            container_name: '{{to_record_data}}', 
-            activity_log_id: '{{from_record_id}}', 
-            activity_log_type: '{{from_record_type_us}}'
-          } %>
-      <%= render partial: 'filestore/classification/block', locals: { 
-            container_id: '{{to_record_id}}', 
-            container_name: '{{to_record_data}}', 
-            activity_log_id: '{{from_record_id}}', 
-            activity_log_type: '{{from_record_type_us}}'
-          } %>
-      
+  <div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
+      <%= link_to "", "/nfs_store/container_list/{{to_record_id}}?activity_log_id={{from_record_id}}&activity_log_type={{from_record_type_us}}&view_type=icons", class: "refresh-container-list glyphicon glyphicon-refresh hidden", title: "refresh list", data: { remote: "true", container_id: "{{to_record_id}}", activity_log_id: "{{from_record_id}}", activity_log_type: "{{from_record_type_us}}" } %>
+      <div class="nfs-store-container-block" data-container-id="{{to_record_id}}" data-activity-log-id="{{from_record_id}}" data-activity-log-type="{{from_record_type_us}}">
+        <%= render partial: 'nfs_store/browse/show', locals: { container_id: '{{to_record_id}}', level: 0, folder: '.' } %>
+  
+        <%= render partial: 'filestore/classification/block', locals: {
+              container_id: '{{to_record_id}}',
+              container_name: '{{to_record_data}}',
+              activity_log_id: '{{from_record_id}}',
+              activity_log_type: '{{from_record_type_us}}'
+            } %>
+  
+    </div>
   </div>
-</div>
 </script>
-
+<script id="nfs-store-browse-json-results" type="text/x-handlebars-template" class="hidden handlebars-template">
+  <ul class="container-list-items">
+    <li class="container-folder root-folder">
+      <input type="checkbox" class="container-folder-selector ff" data-folder-path="." title="select all items in container"/>
+      <span class="folder-icon glyphicon glyphicon-folder-open"></span>&nbsp;
+      @download.container.name <span class="container-list-file-count">({{downloads.length}} file{{#if downloads.length}}s{{/if}})</span>
+  
+    </li>
+    <ul class="container-folder-items" data-folder-items=".">
+      {{>nfs_store_browse_json_folders curr_folder='.'}}
+    </ul>
+  
+  </ul>
+</script>
+<script id="nfs_store_browse_json_folders" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <div class="container-browser nfs-store-browse-json-results-block">
+  <%# <%
+  # Get a list of folder paths for this level (root to this level) - a set of the first element in the path
+  folders = downloads.map {|d| d.container_path(no_filename: true, leading_dot: true).split('/')[0..level+1]}.uniq.reject{|f| f == folder }.sort
+  current_downloads = downloads.select {|d| d.container_path(no_filename: true, leading_dot: true).split('/') == folder}
+   render partial: 'nfs_store/container_list/browse_list_entry', collection: current_downloads, as: :download, locals: {}
+   render partial: 'nfs_store/container_list/browse_list_folder', collection: folders, as: :folder, locals: {downloads: downloads, level: level}
+  %>
+  {{log this}}
+  
+  {{#each (lookup subfolders curr_folder)}}
+    {{log this}}
+    {{#with (lookup ../folder_info this)}}
+      {{log this}}
+      {{>nfs_store_browse_json_folder}}
+    {{/with}}
+  {{else}}
+    {{#with (lookup folder_info '.')}}
+      {{log this}}
+      {{>nfs_store_browse_json_folder}}
+    {{/with}}
+  {{/each}}
+  </div>
+</script>
+<script id="nfs_store_browse_json_folder"   type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{log this}}
+  
+    <li class="container-folder container-folder-{{#if is_archive}}is{{else}}not{{/if}}-archive">
+      <input type="checkbox" class="container-folder-selector ff" data-folder-path="{{folder}}" title="select all items in folder &amp; subfolders"/>
+    <span class="folder-icon {{#if is_archive}}is{{else}}not{{/if}}-archive glyphicon {{#is level '===' 0}}glyphicon-info-sign{{else}}glyphicon-folder-close{{/is}}"
+          title="expand folder"
+          data-toggle="collapse"
+          href="#{{../nfs_store_container.id}}--{{id_hyphenate folder}}"
+          aria-controls="{{../nfs_store_container.id}}--{{id_hyphenate folder}}"
+          aria-expanded="true"
+    ></span>&nbsp;
+    {{show_folder_name}}{{#if is_archive}} <span class="file-archive-tag">(archive files)</span>{{/if}}
+    </li>
+    <ul class="container-folder-items collapse {{#is folder_name '===' '.'}}in{{/is}}" data-folder-items="{{folder}}" id="{{../nfs_store_container.id}}--{{id_hyphenate folder}}">
+      <%#= render partial: 'nfs_store/container_list/browse_list_folders', locals: {downloads: folder_downloads, level: level + 1, folder: folder} %>
+      {{>nfs_store_browse_json_folders}}
+    </ul>
+</script>

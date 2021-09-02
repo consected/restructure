@@ -5,9 +5,11 @@ module NfsStore
     # List all the files in the specified container. This includes all
     # stored files, extracted archive files and those that are on the file system but do not have a
     # record entered in the database.
-    # @param container [NfsStore::Manage::Container] the container to list
+    # @param [NfsStore::Manage::Container] container the container to list
+    # @param [ActivityLog | nil] activity_log - optional activity log owner of the container
+    # @param [Array] | nil] include_flags - optional list of container file types to include item_flags for
     # @return [Array(ContainerFile)] list of ContainerFile subclass instances sorted by path
-    def self.list_files_from(container, activity_log: nil)
+    def self.list_files_from(container, activity_log: nil, include_flags: nil)
       unless container.exists?
         raise FsException::NotFound, "Container nfs_store storage is not found: #{container.name}"
       end
@@ -28,7 +30,7 @@ module NfsStore
 
       item_for_filter = activity_log || container
 
-      all_db_files = NfsStore::Filter::Filter.evaluate_container_files item_for_filter
+      all_db_files = NfsStore::Filter::Filter.evaluate_container_files item_for_filter, include_flags: include_flags
 
       # Get the filesystem files, so we can find out if any don't have DB records
       fs_files = container.list_fs_files

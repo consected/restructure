@@ -2,10 +2,9 @@
   <div class="container-block" data-container-id="<%=@container.id%>">
     <div class="row">
       <%= render partial: 'nfs_store/browse/browser_header', locals: { container_id: @container.id, container_name: @container.name, activity_log_id: @activity_log&.id } %>
-      <%= render partial: 'nfs_store/browse/show', locals: { container_id: @container.id, container_name: @container.name, container_writable: @container.writable? } %>
+      <%= render partial: 'nfs_store/browse/show', locals: { container_id: @container.id, level: 0, folder: '.' } %>
       <%= render partial: 'nfs_store/browse/show_classification_form', locals: { container_id: @container.id, container_name: @container.name, container_writable: @container.writable? } %>
     </div>
-
     <div class="row browse-controls">
       <div class="download-actions well">
         <%= render partial: 'nfs_store/browse/options_menu', locals: { 
@@ -19,11 +18,9 @@
       </div>
     </div>
   </div>
-
   <div class="row">
-  <%= render partial: 'nfs_store/uploader/index' %>
+    <%= render partial: 'nfs_store/uploader/index' %>
   </div>
-
   <div class="drop-info">drop files to upload</div>
 </div>
 <script>

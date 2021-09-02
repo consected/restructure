@@ -12,10 +12,6 @@
        data-can-submit-rename-folder="<%= @container.can_move_files? %>" 
        data-can-trigger-file-actions="<%= @container.can_user_file_actions? %>"
        data-result-target-for-child=""
-       data-sub-item="nfs_store_container" 
-       data-sub-id="<%=@container.id%>" 
-       data-template="nfs-store-browse-json-results" 
-       data-preprocessor="nfs_store_browse_json_results"        
   >
     <% if @directory_not_found %>
       <p>Storage has not been initialized. This container is not usable.</p>
@@ -33,7 +29,7 @@
               <%= @download.container.name %> <span class="container-list-file-count">(<%= "#{@downloads.length} #{"file".pluralize(@downloads.length)}" %>)</span>
             </li>
             <ul class="container-folder-items" data-folder-items=".">
-              <%= render partial: 'nfs_store/container_list/browse_list_folders', locals: {downloads: @downloads, level: 0, folder: ['.']} %>
+              <%= render partial: 'nfs_store/browse/show', locals: { container_id: @container.id, level: 0, folder: '.' } %>
             </ul>
           </ul>
           <%= form.hidden_field :activity_log_type, value: @activity_log.class.to_s.ns_underscore %>

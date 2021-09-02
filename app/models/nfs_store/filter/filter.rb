@@ -110,9 +110,13 @@ module NfsStore
       # @param item [ActivityLog|NfsStore::ManageContainer] container or activity log referencing the container
       # @param user [User|nil]
       # @return [Array] all matched records of StoredFile and ArchivedFile types
-      def self.evaluate_container_files(item, user: nil, alt_role: nil)
+      def self.evaluate_container_files(item, user: nil, alt_role: nil, include_flags: nil)
         res = evaluate_container_files_as_scopes item, user: user, alt_role: alt_role
         return [] unless res
+
+        include_flags&.each do |rt|
+          res[rt] = res[rt].includes(:item_flags)
+        end
 
         res[:stored_files] + res[:archived_files]
       end

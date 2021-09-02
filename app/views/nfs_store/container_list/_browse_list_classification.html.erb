@@ -20,7 +20,7 @@
 <a class="bem-meta-link" data-remote="true" data-container-id="null" data-toggle="scrollto-result" data-result-target-force="true" data-result-target="<%="[data-subscription='filestore-classification-#{retrieval_type_h}-edit-form--#{@container.id}']"%>" data-template="<%="filestore-classification-#{retrieval_type_h}-full-result-template"%>" href="<%=a_path%>">
   <span class="bem-classification-attrs">
     <span class="bem-class-title"><%= download.title.present? ? download.title : '(no title)'  %></span>
-    <span class="bem-class-file-metadata"><% if download.file_metadata_before_type_cast.present?  %>
+    <span class="bem-class-file-metadata"><% if download.file_metadata_present?  %>
         <i class="glyphicon glyphicon-list" title="has metadata extracted from the file content"></i>
       <% else %><i class="empty-glyphicon"></i>
       <% end %></span>

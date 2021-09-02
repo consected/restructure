@@ -45,12 +45,8 @@
         </span>
       </a>
       <% 
-      if @allow_show_flags.nil?
-        full_name = "nfs_store__manage__#{retrieval_type}"
-        @allow_show_flags = !!Classification::ItemFlagName.enabled_for?(full_name, current_user)
-      end
 
-      if @allow_show_flags 
+      if @allow_show_flags[retrieval_type]
 
            extras = {
              include: [:item_flag_name],
