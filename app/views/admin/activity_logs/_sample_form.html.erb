@@ -11,7 +11,7 @@
       data-result-target=<%="##{object_instance.resource_name.hyphenate}-#{admin_master}-"%>
       data-result-target-force="true"
 >
-<%= select_tag :extra_log_type, options_for_select(object_instance.option_configs_names) %>
+<%= select_tag :extra_log_type, options_for_select(object_instance.option_configs_names || []) %>
 <%= hidden_field_tag :admin_sample, 'true' %>
 <button>refresh</button>
 </form>

@@ -8,7 +8,7 @@ Users are provided access to login to the application server, and from here are 
 
 The common components of an app are:
 
-- [Login](login)
+- [Login](login.md)
 - Search and Work Queues
 - Participant Record
 - Reports
@@ -18,6 +18,6 @@ The common components of an app are:
 
 ---
 
-Additional information for your current app: [{{current_user_app_type_label}}](/help/app_reference/{{current_user_app_type_name::lowercase::id_underscore}}/0_introduction)
+Additional information for your current app: [{{current_user_app_type_label}}](../../app_reference/{{current_user_app_type_name::lowercase::id_underscore}}/0_introduction.md)
 
 ---

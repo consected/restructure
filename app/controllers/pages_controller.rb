@@ -45,19 +45,6 @@ class PagesController < ApplicationController
     end
   end
 
-  def reference_data
-    return not_authorized unless current_admin || current_user.can?(:view_data_reference)
-
-    case params[:type]
-    when 'table_list'
-      render partial: 'admin/reference_data/table_list_block'
-    when 'data_dic'
-      render partial: 'admin/reference_data/data_dic_block'
-    else
-      render 'admin/reference_data/index'
-    end
-  end
-
   private
 
   def no_action_log

@@ -15,15 +15,23 @@ module NfsStore
 
       validate :filter_is_valid
 
+      after_save :clear_memos
+
       #
       # Get the defined filters for this user (from role and user overrides) for the specified activity log.
       # It should be noted that a container can be referenced, and viewed, from within multiple activity logs.
       # This actually allows one extra log type to provide a view onto the container differently from another
       # for the same user and roles.
+      # We memoize the filter result for the user and role in the item, to avoid leaking memory long term,
+      # while still allowing a significant speedup by preventing unnecessary DB calls.
       # @param item [ActivityLog | NfsStore::Manage::Container] container or the activity log the container is within
       # @param user [User|nil] user that has filter definitions through role membership or user override
       # @return [Array] of filters
       def self.filters_for(item, user: nil, alt_role: nil)
+        key = "#{user&.id}-#{alt_role}-#{latest_filter_id}"
+        ivs = item.instance_variable_get(:@filters_for) || {}
+        return ivs[key] if ivs[key]
+
         user ||= item.current_user
 
         rn = if item.model_data_type == :activity_log
@@ -33,7 +41,10 @@ module NfsStore
              end
         fs = filters_for_resource_named rn, user, alt_role: alt_role
 
-        fs.map { |f| f.filter_for item }
+        res = ivs[key] = fs.map { |f| f.filter_for item }
+        item.instance_variable_set(:@filters_for, ivs)
+
+        res
       end
 
       #
@@ -51,6 +62,7 @@ module NfsStore
         where(primary_conditions).scope_user_and_role(user, nil, alt_role)
       end
 
+      #
       # List of resource names for definitions of filters
       # @return [Array] list of full activity_log__type and container resource names
       def self.resource_names
@@ -86,6 +98,7 @@ module NfsStore
         Formatter::Substitution.substitute filter, data: item, tag_subs: nil
       end
 
+      #
       # Evaluate a query directly in the database to produce a filtered set of records
       # Returns an array of results
       # NOTE: stored and archived files to be filtered against appear with an initial forward-slash (/)  character
@@ -104,6 +117,7 @@ module NfsStore
         res[:stored_files] + res[:archived_files]
       end
 
+      #
       # Evaluate a query directly in the database to produce a filtered set of records
       # Returns two scopes as a hash {stored_files: ActiveRecord::Relation, archived_files: ActiveRecord::Relation}
       # @param [ActivityLog|NfsStore::ManageContainer] item is a container or activity log referencing the container
@@ -147,6 +161,7 @@ module NfsStore
         { stored_files: sf, archived_files: af }
       end
 
+      #
       # Generate filters as SQL for use in reports
       # Handles substitutions {{...}} by allowing any character sequence to match
       # @return [String] SQL that can be used directly in a report for filtering results
@@ -156,7 +171,7 @@ module NfsStore
         end
 
         res_class = ActivityLog.activity_log_class_from_type(activity_log_resource_name)
-        extra_log_types = res_class.definition.option_configs_names
+        extra_log_types = res_class.definition.option_configs_names || []
 
         sql_sets = []
 
@@ -208,6 +223,23 @@ module NfsStore
       def self.evaluate_raw_filter(filter, text)
         re = Regexp.new filter
         re.match(text)
+      end
+
+      def clear_memos
+        self.class.reset_latest_filter_id
+      end
+
+      #
+      # Get the latest filter record id, to automatically handle memoization,
+      # storing it in a class instance variable
+      def self.latest_filter_id
+        @latest_filter_id ||= reorder('').order('coalesce(updated_at, created_at) desc, id desc').first&.id
+      end
+
+      #
+      # Reset the class instance variable storing the latest filter id
+      def self.reset_latest_filter_id
+        @latest_filter_id = nil
       end
 
       private

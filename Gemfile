@@ -23,6 +23,7 @@ gem 'jquery-rails'
 gem 'kramdown'
 gem 'kramdown-parser-gfm'
 gem 'mime-types'
+gem 'nio4r', '2.5.7'
 gem 'nokogiri', '1.11.5'
 gem 'pg', '~> 0.15'
 gem 'rails', '~> 5.0'
@@ -41,6 +42,7 @@ group :development do
   gem 'memory_profiler'
   gem 'rack-mini-profiler'
   gem 'solargraph'
+  gem 'solargraph-rails', '~> 0.2.0'
   gem 'web-console'
 end
 

@@ -16,4 +16,4 @@ Administrator profiles can not be re-enabled after having been previously disabl
 
 Some administration tasks, such as creation of new administrators and re-enabling previously disabled admins, can only be performed by users with access to the app server operating system.
 
-See [Create an admin user or reset an admin account](create_admin) for details
+See [Create an admin user or reset an admin account](create_admin.md) for details

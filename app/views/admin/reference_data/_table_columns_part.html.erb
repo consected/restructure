@@ -1,0 +1,18 @@
+<% @columns.each  do |c| 
+            column_name = c.name
+            column_comment = @column_comments.find {|cs| cs['schema_name'] == @schema_name && cs['table_name'] == @table_name && cs['column_name'] == column_name }
+            column_comment = column_comment['column_comment'] if column_comment
+          
+            column_fk = @column_fks.find {|cfk| cfk['source_schema'] == @schema_name && cfk['source_table'] == @table_name && cfk['source_column'] == column_name}
+            column_fk = "#{column_fk['target_schema']}.#{column_fk['target_table']} (#{column_fk['target_column']})" if column_fk
+          %>
+<li id="table-<%= column_name %>" class="ref-table-col-item">
+  <span><%= column_name %></span> <span class="ref-table-column-name"><%=c.type.to_s%></span>
+  <% if column_fk %>
+    <span class="column-fk"><i class="glyphicon glyphicon-link"></i><%= column_fk %></span>
+  <% end %>
+  <% if column_comment %>
+    <div class="column-comment help-block"><%= column_comment %></div>
+  <% end %>
+</li>
+<% end %>

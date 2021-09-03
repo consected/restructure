@@ -10,7 +10,7 @@ module ActiveRecord
                       :field_opts, :owner, :history_table_id_attr,
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
                       :table_comment, :fields_comments, :db_configs, :mode, :no_master_association,
-                      :requested_action, :resource_type, :prev_table_name
+                      :requested_action, :resource_type, :prev_table_name, :view_sql
       end
 
       def force_rollback
@@ -187,6 +187,28 @@ module ActiveRecord
         raise e unless force_rollback
       end
 
+      def create_or_update_dynamic_model_view
+        self.requested_action = :create_or_update
+        self.resource_type = :dynamic_model
+
+        create_dynamic_model_view
+      end
+
+      def create_dynamic_model_view
+        reversible do |dir|
+          dir.up do
+            puts "-- create or replace view #{schema}.#{table_name}"
+            ActiveRecord::Base.connection.execute dynamic_model_view_sql
+          end
+          dir.down do
+            puts "-- drop view #{schema}.#{table_name}"
+            ActiveRecord::Base.connection.execute reverse_dynamic_model_view_sql
+          end
+        end
+      rescue StandardError, ActiveRecord::StatementInvalid => e
+        raise e unless force_rollback
+      end
+
       def create_or_update_external_identifier_tables(id_field, id_field_type = :bigint)
         self.requested_action = :create_or_update
         self.resource_type = :external_identifier
@@ -287,7 +309,7 @@ module ActiveRecord
 
       def update_fields
         self.mode = :update
-
+        self.db_configs ||= {}
         old_table_comment = ActiveRecord::Base.connection.table_comment(table_name)
 
         belongs_to_model_field = "#{belongs_to_model}_id" if belongs_to_model
@@ -599,6 +621,7 @@ module ActiveRecord
 
       def setup_fields(handle_fields = nil)
         self.fields_comments ||= {}
+
         return if field_opts && !handle_fields
 
         handle_fields ||= self.fields
@@ -609,6 +632,7 @@ module ActiveRecord
         self.new_fields = fields.map { |f| "NEW.#{f}" }
         self.field_defs = {}
         self.field_opts = {}
+        self.db_configs ||= {}
 
         handle_fields.each do |attr_name|
           a = attr_name.to_s
@@ -751,6 +775,22 @@ module ActiveRecord
           activity_log_trigger_sql
         else
           "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+        end
+      end
+
+      def dynamic_model_view_sql
+        <<~DO_TEXT
+          DROP VIEW if exists #{schema}.#{table_name};
+          CREATE VIEW #{schema}.#{table_name} AS
+          #{view_sql};
+        DO_TEXT
+      end
+
+      def reverse_dynamic_model_view_sql
+        if updating?
+          dynamic_model_view_sql
+        else
+          "DROP VIEW #{schema}.#{table_name};"
         end
       end
 

@@ -14,9 +14,9 @@
        data-result-target-for-child=""
   >
     <% if @directory_not_found %>
-    <p>Storage has not been initialized. This container is not usable.</p>
+      <p>Storage has not been initialized. This container is not usable.</p>
     <% elsif !@container.readable? %>
-    <p>You do not have permission to read this container.</p>
+      <p>You do not have permission to read this container.</p>
     <% else %>
       <% if @downloads.length == 0 %>
         <p class="container_no_files no-container-list-items">No Files</p>
@@ -28,12 +28,10 @@
               <span class="folder-icon glyphicon glyphicon-folder-open"></span>&nbsp;
               <%= @download.container.name %> <span class="container-list-file-count">(<%= "#{@downloads.length} #{"file".pluralize(@downloads.length)}" %>)</span>
             </li>
-
             <ul class="container-folder-items" data-folder-items=".">
-              <%= render partial: 'browse_list_folders', locals: {form: form, downloads: @downloads, level: 0, folder: ['.']} %>
+              <%= render partial: 'nfs_store/container_list/browse_list_folders', locals: {downloads: @downloads, level: 0, folder: ['.']} %>
             </ul>
           </ul>
-
           <%= form.hidden_field :activity_log_type, value: @activity_log.class.to_s.ns_underscore %>
           <%= form.hidden_field :activity_log_id, value: @activity_log.id %>
           <%= form.hidden_field :container_id %>
