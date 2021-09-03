@@ -632,7 +632,7 @@ module ActiveRecord
         self.new_fields = fields.map { |f| "NEW.#{f}" }
         self.field_defs = {}
         self.field_opts = {}
-        self.db_configs = {}
+        self.db_configs ||= {}
 
         handle_fields.each do |attr_name|
           a = attr_name.to_s
