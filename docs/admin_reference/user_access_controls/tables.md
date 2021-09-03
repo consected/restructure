@@ -17,4 +17,4 @@ Users with *create* or *update* access on any table, must also have *create* acc
 
 ## Activity Log Tables
 
-A user that is intended to have access to activity log processes, must have appropriate access to the table holding the activity log data, in addition to the required [activity log type](activity_log_types) access definitions.
+A user that is intended to have access to activity log processes, must have appropriate access to the table holding the activity log data, in addition to the required [activity log type](activity_log_types.md) access definitions.

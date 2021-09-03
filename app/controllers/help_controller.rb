@@ -29,7 +29,7 @@ class HelpController < ApplicationController
   def show
     redirect_to help_index_path if library.blank? || section.blank? || subsection.blank?
 
-    return not_found unless request.format.to_sym.in?(%i[html md]) || !request.path.include?('.')
+    return not_found unless request.format.to_sym.in?(%i[html md js]) || !request.path.include?('.')
 
     begin
       @view_doc = view_doc library,

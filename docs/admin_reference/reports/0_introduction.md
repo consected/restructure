@@ -10,5 +10,5 @@ Administration is provided in [Admin: Reports](/admin/reports)
 
 ## Contents
 
-- [Detailed Options](detailed_options)
-- [File Filtering](file_filtering)
+- [Detailed Options](detailed_options.md)
+- [File Filtering](file_filtering.md)

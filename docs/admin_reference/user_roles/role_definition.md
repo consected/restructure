@@ -32,7 +32,7 @@ The names are formatted as `nfs_store group <group id>` - for example `nfs_store
 
 ## @template users
 
-To make it easier for app administrators to provision new users, template users with usernames like `<meaningful-name>@template` can be added through the [Usernames and Passwords](/help/admin_reference/users/user_profile_configuration), and subsequently assigned specific roles. A template user can then be copied to a new user, assigning all the template user's roles (within the selected app) to the new user. More details are provided in [Copying User Role Templates](copying_user_role_templates).
+To make it easier for app administrators to provision new users, template users with usernames like `<meaningful-name>@template` can be added through the [Usernames and Passwords](../users/user_profile_configuration.md), and subsequently assigned specific roles. A template user can then be copied to a new user, assigning all the template user's roles (within the selected app) to the new user. More details are provided in [Copying User Role Templates](copying_user_role_templates.md).
 
 Every new *role name* that is created within an app that didn't previously exist, will have an additional entry made with the assigned user `template@template`
 
