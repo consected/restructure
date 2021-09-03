@@ -317,7 +317,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
     set_item
 
-    unless etp.present? && @implementation_class && @implementation_class.definition.option_configs_names.include?(etp)
+    unless etp.present? && @implementation_class && @implementation_class.definition.option_configs_names&.include?(etp)
       return
     end
 

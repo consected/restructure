@@ -18,7 +18,7 @@
 <div class="dynamic-list-section">
   <label>activities</label>
   <ul class="activity-list">
-  <% object_instance.option_configs_names.each do |name| %>
+  <% object_instance.option_configs_names&.each do |name| %>
     <li><%=name%><%= object_instance.option_type_config_for(name) ? '' : "(invalid)" %></li>
   <% end %>
   </ul>
