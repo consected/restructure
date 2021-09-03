@@ -18,6 +18,9 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+
+## [8.0.15] - 2021-09-03
+
 - [Changed] Docs library to allow links to work within source (and github) as well as in app 
 
 ## [8.0.14] - 2021-08-23
