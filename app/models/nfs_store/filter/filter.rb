@@ -171,7 +171,7 @@ module NfsStore
         end
 
         res_class = ActivityLog.activity_log_class_from_type(activity_log_resource_name)
-        extra_log_types = res_class.definition.option_configs_names
+        extra_log_types = res_class.definition.option_configs_names || []
 
         sql_sets = []
 
