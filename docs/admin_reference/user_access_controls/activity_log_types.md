@@ -8,4 +8,4 @@ When selecting a *Process Activity* in the *Resource Name* field, all steps are 
 
 ## Activity Log Tables
 
-A user that is intended to have access to an *Activity Log Process* must have appropriate [table user access controls](tables) to the database table holding the *Activity Log* data, in addition to the individual *Process Steps*.
+A user that is intended to have access to an *Activity Log Process* must have appropriate [table user access controls](tables.md) to the database table holding the *Activity Log* data, in addition to the individual *Process Steps*.

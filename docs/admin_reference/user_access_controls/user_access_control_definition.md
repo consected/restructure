@@ -1,6 +1,6 @@
 # User Access Control Definition
 
-**User Access Controls** are defined to grant user access to specific resources based on the membership of a [User Role](/help/admin_reference/user_roles/0_introduction) or the assignment to the user directly. It is recommended that *User Roles* are used to assign *User Access Controls*, unless a very individual requirement for a single user is required.
+**User Access Controls** are defined to grant user access to specific resources based on the membership of a [User Role](../user_roles/0_introduction.md) or the assignment to the user directly. It is recommended that *User Roles* are used to assign *User Access Controls*, unless a very individual requirement for a single user is required.
 
 ## Role Naming for User Access Controls
 
@@ -20,11 +20,11 @@ Specifying a *User* directly in a *User Access Control* entry always overrides a
 
 The resources that are controlled by *User Access Controls* are:
 
-- [general](general_resources) (the ability to access an app, for example)
-- [tables](tables) (database tables)
-- [reports](reports) (search tabs, charts and dashboard components)
-- [activity log types](activity_log_types) (process steps)
-- [limited access](limited_access) (to master records having assigned external identifiers or other data items)
+- [general](general_resources.md) (the ability to access an app, for example)
+- [tables](tables.md) (database tables)
+- [reports](reports.md) (search tabs, charts and dashboard components)
+- [activity log types](activity_log_types.md) (process steps)
+- [limited access](limited_access.md) (to master records having assigned external identifiers or other data items)
 
 Each resource type has different access levels that can be assigned:
 

@@ -10,37 +10,37 @@ Administrators are a separate class of profile from regular app users. An admini
 
 ## Operating System Administrators
 
-Some administration tasks, such as creation of new administrators and re-enabling previously disabled admins, can only be performed by users with access to the app server operating system. Details are found in [Manage Administrators](/help/admin_reference/admins/0_introduction.md).
+Some administration tasks, such as creation of new administrators and re-enabling previously disabled admins, can only be performed by users with access to the app server operating system. Details are found in [Manage Administrators](../admins/0_introduction.md).
 
 ## Developers
 
-A separate developer's reference, including API samples, is available in the [Dev Reference](/help/dev_reference/main/README)
+A separate developer's reference, including API samples, is available in the [Dev Reference](/help/dev_reference/main/README.md)
 
 ## Contents
 
 ### Classifications
 
-- [Accuracy Scores](/help/admin_reference/accuracy_scores/0_introduction)
-- [Item Flags](/help/admin_reference/item_flag_names/0_introduction)
-- [General Selections / Drop Downs](/help/admin_reference/general_selections/0_introduction)
+- [Accuracy Scores](../accuracy_scores/0_introduction.md)
+- [Item Flags](../item_flag_names/0_introduction.md)
+- [General Selections / Drop Downs](../general_selections/0_introduction.md)
 
 ### App Configs
 
-- [Page Layouts](/help/admin_reference/page_layouts/0_introduction)
-- [App Configurations](/help/admin_reference/app_configurations/0_introduction)
+- [Page Layouts](../page_layouts/0_introduction.md)
+- [App Configurations](../app_configurations/0_introduction.md)
 
 ### Definitions
 
-- [Reports](/help/admin_reference/reports/0_introduction)
-- [External Identifiers](/help/admin_reference/external_identifiers/0_introduction)
-- [Dynamic Models](/help/admin_reference/dynamic_models/0_introduction)
-- [Activity Logs](/help/admin_reference/activity_logs/0_introduction)
+- [Reports](../reports/0_introduction.md)
+- [External Identifiers](../external_identifiers/0_introduction.md)
+- [Dynamic Models](../dynamic_models/0_introduction.md)
+- [Activity Logs](../activity_logs/0_introduction.md)
 
 ### Users and Access
 
-- [Users and Passwords](/help/admin_reference/users/0_introduction)
-- [Additional User Contact Info](/help/admin_reference/contact_infos/0_introduction)
-- [User Roles](/help/admin_reference/user_roles/0_introduction)
-- [User Access Controls](/help/admin_reference/user_access_controls/0_introduction)
-- [File Filters](/help/admin_reference/filters/0_introduction)
-- [Manage Administrators](/help/admin_reference/admins/0_introduction)
+- [Users and Passwords](../users/0_introduction.md)
+- [Additional User Contact Info](../contact_infos/0_introduction.md)
+- [User Roles](../user_roles/0_introduction.md)
+- [User Access Controls](../user_access_controls/0_introduction.md)
+- [File Filters](../filters/0_introduction.md)
+- [Manage Administrators](../admins/0_introduction.md)

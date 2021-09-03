@@ -12,7 +12,7 @@ Administration is provided in [Filestore: File Filters](/admin/nfs_store/filter/
 
 ## Configurations
 
-All filter use [Regular Expressions](regular_expressions) to match file paths.
+All filter use [Regular Expressions](regular_expressions.md) to match file paths.
 
 Containers with no filters defined (for the app, role or user) for the current user will always return no files.
 
