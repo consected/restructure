@@ -12,4 +12,4 @@ Administration is provided in [Dynamic Models](/admin/dynamic_models)
 
 ## Contents
 
-[Detailed Options](detailed_options)
+[Detailed Options](detailed_options.md)
