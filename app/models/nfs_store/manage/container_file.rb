@@ -99,9 +99,9 @@ module NfsStore
         extras[:methods] << :master_id
         extras[:methods] << :retrieval_type
         extras[:methods] << :mime_type_text
-        extras[:methods] << :file_metadata_present?
+        extras[:methods] << :file_metadata_present
         extras[:methods] << :container_dir_path
-        extras[:include] << :item_flags if allow_show_flags[retrieval_type]
+        extras[:include] << :item_flags if allow_show_flags && allow_show_flags[retrieval_type]
         # Call serializable_hash rather than super, to avoid GeneralDataConcerns processing more than we need
         serializable_hash(extras)
       end
@@ -365,6 +365,8 @@ module NfsStore
       def file_metadata_present?
         @file_metadata_present = !!file_metadata_before_type_cast.present? if @file_metadata_present.nil?
       end
+
+      alias file_metadata_present file_metadata_present?
 
       private
 

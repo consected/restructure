@@ -7,12 +7,26 @@ module NfsStore
     include MasterHandler
     include InNfsStoreContainer
 
-    ValidViewTypes = %w[list icons json].freeze
-    DefaultViewType = 'json'.freeze
+    ValidViewTypes = %w[list icons].freeze
+    DefaultViewType = 'list'.freeze
 
     def show
       view_type = params[:view_type]
 
+      begin
+        if @container.readable?
+          # Prep a download object to allow selection of downloads in the browse list
+          @download = Download.new container: @container, activity_log: @activity_log
+        end
+      rescue FsException::NotFound
+        @directory_not_found = true
+      end
+
+      view_type = ValidViewTypes.find { |vt| vt == view_type } || DefaultViewType
+      render partial: "browse_#{view_type}"
+    end
+
+    def content
       begin
         if @container.readable?
           # Check if we should show flags for classifications on each of the types of container file
@@ -33,26 +47,40 @@ module NfsStore
         @directory_not_found = true
       end
 
-      view_type = ValidViewTypes.find { |vt| vt == view_type } || DefaultViewType
+      extras = {
+        except: %i[file_metadata last_process_name_run description updated_at created_at user_id file_hash
+                   content_type],
+        allow_show_flags: @allow_show_flags
+      }
 
-      if view_type == 'json'
-        extras = {
-          except: %i[file_metadata last_process_name_run description updated_at created_at user_id file_hash
-                     content_type],
-          allow_show_flags: @allow_show_flags
-        }
-
-        render json: {
-          nfs_store_container: {
-            id: @container.id,
-            container_files: @downloads.as_json(extras),
-            item_type: 'nfs_store_container'
-          }
-        }
-        return
+      tfa = @container.user_file_actions_config&.map { |a| a[:id] }
+      ff = NfsStore::Filter::Filter.filters_for(@activity_log).uniq.sort.map do |f|
+        f.gsub('\.', '.').gsub('.*', '*').gsub('.+', '*').gsub(/^\*$/, '*.*').gsub('^/', '').gsub('^', '').gsub('$', '')
       end
 
-      render partial: "browse_#{view_type}"
+      render json: {
+        nfs_store_container: {
+          id: @container.id,
+          name: @container.name,
+          container_files: @downloads.as_json(extras),
+          item_type: 'nfs_store_container',
+          writeable: @container.writable?,
+          readable: @container.readable?,
+          can_download_or_view: @container.can_download_or_view?,
+          can_download: @container.can_download?,
+          can_send_to_trash: @container.can_send_to_trash?,
+          can_move_files: @container.can_move_files?,
+          can_rename_files: @container.can_move_files?,
+          can_rename_folders: @container.can_move_files?,
+          can_user_file_actions: @container.can_user_file_actions?,
+          parent_type: @activity_log.class.to_s.ns_underscore,
+          parent_id: @activity_log.id,
+          master_id: @activity_log.master_id,
+          trigger_file_action_ids: tfa,
+          directory_not_found: @directory_not_found,
+          filters_for: ff
+        }
+      }
     end
 
     protected

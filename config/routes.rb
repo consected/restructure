@@ -181,7 +181,11 @@ Rails.application.routes.draw do
   # mount NfsStore::Engine, at: "/nfs_store"
   namespace :nfs_store do
     resources :browse, only: :show
-    resources :container_list, only: :show
+    resources :container_list, only: [:show] do
+      member do
+        get :content
+      end
+    end
     resources :chunk, only: %i[create show update]
     post 'downloads/multi', to: 'downloads#multi'
     resources :downloads, only: %i[show create]

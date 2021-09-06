@@ -1,12 +1,13 @@
-<div data-sub-item="nfs_store_container" 
+<div class="container-browser-outer prevent-scroll" 
+     data-sub-item="nfs_store_container" 
      data-sub-id="<%=container_id%>" 
-     data-template="nfs-store-browse-json-results" 
-     data-preprocessor="nfs_store_browse_json_results"      
+     data-template="nfs-store-browse-list-results" 
+     data-preprocessor="filestore_browser_form"      
      data-container-id="<%=container_id%>"
-     class="container-browser-outer prevent-scroll" 
      data-folder="<%=folder%>"
      data-folder-level="<%=level%>"
 
 >
-  <div class="container-browser ajax-running"></div>
+  <div class="container-browser ajax-running">
+  </div>
 </div>

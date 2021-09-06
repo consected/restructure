@@ -1,5 +1,5 @@
 _fpa.preprocessors_nfs_store = {
-  nfs_store_browse_json_results: function (block, data) {
+  filestore_browser_form: function (block, data) {
     var downloads = data.nfs_store_container.container_files
     if (!downloads) return
 
@@ -68,6 +68,30 @@ _fpa.preprocessors_nfs_store = {
       }
     }
 
+    for (var i in downloads) {
+      var value = downloads[i]
+      if (value.id) {
+        value.edit_path = `/masters/${data.nfs_store_container.master_id}/filestore/classification/${data.nfs_store_container.id}?download_id=${value.id}&retrieval_type=${value.retrieval_type}`
+        value.filename_path = `/nfs_store/downloads/${data.nfs_store_container.id}?activity_log_id=${data.nfs_store_container.parent_id}&activity_log_type=${data.nfs_store_container.parent_type}&download_id=${value.id}&retrieval_type=${value.retrieval_type}`
+        value.file_size_mb = Math.floor(value.file_size / 1000000 * 10) / 10
+      }
+      else {
+
+        if (value.file_name.indexOf(/__$/) > 0) {
+          if (file_name.indexOf(/\.__processing - archive__$ /) > 0)
+            value.is_processing_arch = true
+          else if (file_name.indexOf(/\.__failed-archive__$ /) > 0)
+            value.is_failed_arch = true
+          else if (file_name.indexOf(/\.__processing - index__$ /) > 0)
+            value.is_processing_index = true
+          else if (file_name.indexOf(/\.__processing__$ /) > 0)
+            value.is_processing = true
+
+          value.file_name = file_name.replace(/(.+)\.__processing.*__$/, '$1$2')
+        }
+      }
+    }
+
     data.downloads = downloads
 
   }
@@ -101,12 +125,12 @@ _fpa.postprocessors_nfs_store = {
     }
   },
 
-  nfs_store_browse_json_results: function (block) {
-    console.log('nfs_store_browse_json_results')
-    _fpa.postprocessors_nfs_store.nfs_store_browse_list_results(block)
+  filestore_browser_form: function (block, data) {
+    console.log('filestore_browser_form')
+    _fpa.postprocessors_nfs_store.nfs_store_browse_list_results(block, data)
   },
 
-  nfs_store_browse_list_results: function (block) {
+  nfs_store_browse_list_results: function (block, data) {
     var container_block = block.parents('.nfs-store-container-block').first();
     container_block.fs_browser = _nfs_store.fs_browser;
     setTimeout(function () {
@@ -126,6 +150,8 @@ _fpa.postprocessors_nfs_store = {
       }
 
       _fpa.form_utils.format_block(block);
+
+      _fpa.postprocessors_nfs_store.handle_item_flags(block, data)
     }, 100);
   },
 
@@ -152,6 +178,41 @@ _fpa.postprocessors_nfs_store = {
     _fpa.form_utils.format_block(block);
     var container_id = data.nfs_store__manage__archived_file.nfs_store_container_id;
     $('[data-result="filestore-classification-archived-file-edit-form--' + container_id + '"]').remove();
+  },
+
+  handle_item_flags: function (block, data) {
+
+    block.find('.browse-entry-classifications').each(function () {
+      const id = $(this).attr('data-id')
+      if (id == null) return
+
+      const retrieval_type = $(this).attr('data-rt')
+      const download = data.downloads.filter((value, index, self) => {
+        value.id === +id
+      })[0]
+      if (!download) return
+
+      const item_flags = download.item_flags
+
+      if (!item_flags) return
+
+      var flag_data = {
+        item_flags: item_flags
+      };
+
+      if (flag_data.item_flags.length == 0) {
+        var res = '<span class="no-item-flags"></span>'
+      }
+      else {
+        flag_data.item_type = `nfs_store__manage__${retrieval_type}`;
+        flag_data.readonlyview = true;
+        var res = _fpa.partials.item_flag_container(flag_data);
+      }
+
+      var block = $(`<span class="bem-class-flags">${res}</span>`);
+      $(`#container-entry-${nfs_store_container_id}-${id}-${retrieval_type} .bem-class-title`).first().before(block);
+
+    })
   }
 
 };
