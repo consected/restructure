@@ -92,6 +92,9 @@ module NfsStore
       end
 
       def as_json(extras = {})
+        lr = extras.delete(:limited_results)
+        return super unless lr
+
         allow_show_flags = extras.delete(:allow_show_flags)
 
         extras[:methods] ||= []

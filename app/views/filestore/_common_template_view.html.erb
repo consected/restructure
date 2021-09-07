@@ -6,8 +6,6 @@
 <%= render partial: 'filestore/browse_list' %>
 
 <script id="filestore-browser-form"  type="text/x-handlebars-template" class="hidden handlebars-template">
-{{log this}}
-{{log ..}}
   <div>
   {{#with nfs_store_container}}
     <div data-result="nfs-store-container-list-items-{{id}}"
@@ -33,9 +31,10 @@
                 id="new_nfs_store_download" 
                 action="/nfs_store/downloads" 
                 accept-charset="UTF-8" 
-                method="post">
-            <input name="utf8" type="hidden" value="✓">
-            
+                method="post"
+                data-remote="true">
+            {{>ajax_form_fields}}
+
             {{#with ..}}
             {{>nfs_store_browse_list_results_part}}
             {{/with}}
@@ -68,7 +67,6 @@
 </script>
 
 <script id="filestore_valid_files"  type="text/x-handlebars-template" class="hidden handlebars-partial">
-{{log this}}
 {{#if writable}}
 <div class="nfs-store-valid-files panel">
   <div class="panel-header">
@@ -175,7 +173,7 @@
 
 <script id="filestore_simple_template_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
   <div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
-      <%= link_to "", "/nfs_store/container_list/{{to_record_id}}/content?activity_log_id={{from_record_id}}&activity_log_type={{from_record_type_us}}&view_type=icons", class: "refresh-container-list glyphicon glyphicon-refresh hidden", title: "refresh list", data: { remote: "true", container_id: "{{to_record_id}}", activity_log_id: "{{from_record_id}}", activity_log_type: "{{from_record_type_us}}" } %>
+      <%= link_to "", "/nfs_store/container_list/{{to_record_id}}?activity_log_id={{from_record_id}}&activity_log_type={{from_record_type_us}}&view_type=icons", class: "refresh-container-list glyphicon glyphicon-refresh hidden", title: "refresh list", data: { remote: "true", container_id: "{{to_record_id}}", activity_log_id: "{{from_record_id}}", activity_log_type: "{{from_record_type_us}}" } %>
       <div class="nfs-store-container-block" data-container-id="{{to_record_id}}" data-activity-log-id="{{from_record_id}}" data-activity-log-type="{{from_record_type_us}}">
         <%= render partial: 'nfs_store/browse/show', locals: { container_id: '{{to_record_id}}', level: 0, folder: '.' } %>
   

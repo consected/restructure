@@ -11,46 +11,20 @@ module NfsStore
     DefaultViewType = 'list'.freeze
 
     def show
+      setup_download_list
       view_type = params[:view_type]
-
-      begin
-        if @container.readable?
-          # Prep a download object to allow selection of downloads in the browse list
-          @download = Download.new container: @container, activity_log: @activity_log
-        end
-      rescue FsException::NotFound
-        @directory_not_found = true
-      end
-
       view_type = ValidViewTypes.find { |vt| vt == view_type } || DefaultViewType
       render partial: "browse_#{view_type}"
     end
 
     def content
-      begin
-        if @container.readable?
-          # Check if we should show flags for classifications on each of the types of container file
-          @allow_show_flags = {}
-          %i[stored_file archived_file].each do |rt|
-            full_name = "nfs_store__manage__#{rt}"
-            show_flag = !!Classification::ItemFlagName.enabled_for?(full_name, current_user)
-            @allow_show_flags[rt] = show_flag
-          end
-
-          # List types should we include flags for in the queries that return the stored_files and archived_files
-          show_flags_for = @allow_show_flags.filter { |_k, v| v }.keys.map { |i| i.to_s.pluralize.to_sym }
-          @downloads = Browse.list_files_from @container, activity_log: @activity_log, include_flags: show_flags_for
-          # Prep a download object to allow selection of downloads in the browse list
-          @download = Download.new container: @container, activity_log: @activity_log
-        end
-      rescue FsException::NotFound
-        @directory_not_found = true
-      end
+      setup_download_list
 
       extras = {
         except: %i[file_metadata last_process_name_run description updated_at created_at user_id file_hash
                    content_type],
-        allow_show_flags: @allow_show_flags
+        allow_show_flags: @allow_show_flags,
+        limited_results: true
       }
 
       tfa = @container.user_file_actions_config&.map { |a| a[:id] }
@@ -84,6 +58,29 @@ module NfsStore
     end
 
     protected
+
+    def setup_download_list
+      begin
+        if @container.readable?
+          # Check if we should show flags for classifications on each of the types of container file
+          @allow_show_flags = {}
+          %i[stored_file archived_file].each do |rt|
+            full_name = "nfs_store__manage__#{rt}"
+            show_flag = !!Classification::ItemFlagName.enabled_for?(full_name, current_user)
+            @allow_show_flags[rt] = show_flag
+          end
+
+          # List types should we include flags for in the queries that return the stored_files and archived_files
+          show_flags_for = @allow_show_flags.filter { |_k, v| v }.keys.map { |i| i.to_s.pluralize.to_sym }
+          @downloads = Browse.list_files_from @container, activity_log: @activity_log, include_flags: show_flags_for
+          # Prep a download object to allow selection of downloads in the browse list
+          @download = Download.new container: @container, activity_log: @activity_log
+        end
+      rescue FsException::NotFound
+        @directory_not_found = true
+      end
+
+    end
 
     # return the class for the current item
     # handles namespace if the item is like an ActivityLog:Something

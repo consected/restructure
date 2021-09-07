@@ -3,5 +3,5 @@
   folders = downloads.map {|d| d.container_path(no_filename: true, leading_dot: true).split('/')[0..level+1]}.uniq.reject{|f| f == folder }.sort
   current_downloads = downloads.select {|d| d.container_path(no_filename: true, leading_dot: true).split('/') == folder}
 %>
-<%= render partial: 'browse_icons_entry', collection: current_downloads, as: :download, locals: {} %>
-<%= render partial: 'browse_icons_folder', collection: folders, as: :folder, locals: {downloads: downloads, level: level} %>
+<%= render partial: 'browse_icons_entry', collection: current_downloads, as: :download, locals: {form: form} %>
+<%= render partial: 'browse_icons_folder', collection: folders, as: :folder, locals: {form: form, downloads: downloads, level: level} %>

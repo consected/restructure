@@ -16,7 +16,8 @@ _fpa = {
   remote_request: null,
   remote_request_block: null,
 
-  non_versioned_template_types: ['trackers', 'player_infos', 'pro_infos', 'addresses', 'player_contacts'],
+  non_versioned_template_types: ['trackers', 'player_infos', 'pro_infos', 'addresses', 'player_contacts',
+                                'nfs_store/manage/stored_files', 'nfs_store/manage/archived_files', 'nfs_store_containers'],
 
   HandlebarsCompileOptions: { preventIndent: true },
 

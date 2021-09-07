@@ -1,4 +1,6 @@
 _fpa.preprocessors_nfs_store = {
+  // Preprocess data for a filestore browser form,
+  // listing downloads
   filestore_browser_form: function (block, data) {
     var downloads = data.nfs_store_container.container_files
     if (!downloads) return
@@ -14,8 +16,9 @@ _fpa.preprocessors_nfs_store = {
     // if they contain no files. These will be added in a moment.
     data.folders = downloads.map((self) => {
       // Get a list of folder paths for this level(root to this level) - a set of the first element in the path
-      var fname = self.container_dir_path.split('/').slice(0, -1).join('/') || '.'
-      data.folder_entries[fname] = self
+      var fname = self.container_dir_path || '.'
+      data.folder_entries[fname] = data.folder_entries[fname] || []
+      data.folder_entries[fname].push(self)
       return fname
     }).filter((value, index, self) => {
       return self.indexOf(value) === index //&& value !== folder
@@ -25,8 +28,8 @@ _fpa.preprocessors_nfs_store = {
     for (var i in data.folders) {
       var fsplit = data.folders[i].split('/')
       var flen = fsplit.length
-      for (var j = 2; j < flen; j++) {
-        var newf = fsplit.slice(0, flen - 1).join('/')
+      for (var j = 1; j < flen; j++) {
+        var newf = fsplit.slice(0, j).join('/')
         if (data.folders.indexOf(newf) < 0) {
           data.folders.push(newf)
           data.folder_entries[newf] = []
@@ -59,11 +62,11 @@ _fpa.preprocessors_nfs_store = {
         folder: curr_folder,
         folder_name: folder_name,
         level: fsplit.length - 1,
-        show_folder_name: curr_folder == '.' ? 'file status' : folder_name
+        show_folder_name: folder_name == '.' ? 'file status' : folder_name
       }
 
-      if (curr_folder.indexOf(/\.__mounted - archive__$ /) >= 0) {
-        data.folder_info[curr_folder].show_folder_name = curr_folder.replace(/\.__mounted-archive__$/, '')
+      if (folder_name.endsWith('.__mounted-archive__')) {
+        data.folder_info[curr_folder].show_folder_name = folder_name.replace(/\.__mounted-archive__$/, '')
         data.folder_info[curr_folder].is_archive = true
       }
     }
@@ -77,17 +80,17 @@ _fpa.preprocessors_nfs_store = {
       }
       else {
 
-        if (value.file_name.indexOf(/__$/) > 0) {
-          if (file_name.indexOf(/\.__processing - archive__$ /) > 0)
+        if (value.file_name.endsWith('__')) {
+          if (value.file_name.match(/\.__processing-archive__$/))
             value.is_processing_arch = true
-          else if (file_name.indexOf(/\.__failed-archive__$ /) > 0)
+          else if (value.file_name.match(/\.__failed-archive__$/))
             value.is_failed_arch = true
-          else if (file_name.indexOf(/\.__processing - index__$ /) > 0)
+          else if (value.file_name.match(/\.__processing-index__$/))
             value.is_processing_index = true
-          else if (file_name.indexOf(/\.__processing__$ /) > 0)
+          else if (value.file_name.match(/\.__processing__$/))
             value.is_processing = true
 
-          value.file_name = file_name.replace(/(.+)\.__processing.*__$/, '$1$2')
+          value.file_name = value.file_name.replace(/(.+)\.__processing.*__$/, '$1')
         }
       }
     }

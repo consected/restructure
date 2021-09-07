@@ -4,8 +4,8 @@
        id="container-browser-<%=@container.id%>"  
        data-container-writable="<%= @container.writable? %>" 
        data-container-readable="<%= @container.readable? %>" 
-       data-can-submit-download-or-view="<%= @container.can_download_or_view? %>" 
        data-can-submit-download="<%= @container.can_download? %>" 
+       data-can-submit-download-or-view="<%= @container.can_download_or_view? %>"
        data-can-submit-trash="<%= @container.can_send_to_trash? %>" 
        data-can-submit-move-files="<%= @container.can_move_files? %>" 
        data-can-submit-rename-file="<%= @container.can_move_files? %>" 
@@ -25,7 +25,7 @@
           <ul class="container-icons-items">
             
             <ul class="container-icons-folder-items" data-folder-items=".">
-              <%= render partial: 'browse_icons_folders', locals: {downloads: @downloads, level: 0, folder: ['.']} %>
+              <%= render partial: 'browse_icons_folders', locals: {form: form, downloads: @downloads, level: 0, folder: ['.']} %>
             </ul>
           </ul>
 

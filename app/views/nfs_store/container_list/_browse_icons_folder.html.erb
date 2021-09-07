@@ -30,7 +30,7 @@
 </span>
 </li>
 <ul class="container-folder-items container-icons-folder-items collapse <%= folder_name == '.' ? 'in' : ''%>" data-folder-items="<%= folder.join('/')%>" id="<%= item_id %>">
-  <%= render partial: 'browse_icons_folders', locals: {downloads: folder_downloads, level: level + 1, folder: folder} %>
+  <%= render partial: 'browse_icons_folders', locals: {form: form, downloads: folder_downloads, level: level + 1, folder: folder} %>
 </ul>
 <%
   end 

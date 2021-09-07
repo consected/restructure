@@ -3,6 +3,11 @@
 <%= render partial: 'common_templates/common_template_references' %>
 <%= render partial: 'common_templates/common_template_list' %>
 
+<script id="ajax_form_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <input name="utf8" type="hidden" value="✓">
+  <input name="authenticity_token" type="hidden" class="set-auth-token" value="" />
+</script>
+
 <script id="rank_button" type="text/x-handlebars-template" class="hidden handlebars-partial">
 <span class="pull-right label label-info general-rank-{{rank}} {{name_h}}-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
 </script>
