@@ -44,7 +44,7 @@
       {{#is folder '!==' './.'}}
       <input type="checkbox" class="container-folder-selector ff" data-folder-path="{{folder}}" title="select all items in folder &amp; subfolders"/>
       {{/is}}
-      <span class="folder-icon {{#if is_archive}}is{{else}}not{{/if}}-archive glyphicon {{#is level '===' 0}}glyphicon-info-sign{{else}}glyphicon-folder-close{{/is}}"
+      <span class="folder-icon {{#if is_archive}}is{{else}}not{{/if}}-archive glyphicon {{#is folder '===' './.'}}glyphicon-info-sign{{else}}glyphicon-folder-close{{/is}}"
             title="expand folder"
             data-toggle="collapse"
             href="#{{container_id}}--{{id_hyphenate folder}}"
