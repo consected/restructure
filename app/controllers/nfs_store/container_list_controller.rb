@@ -12,17 +12,23 @@ module NfsStore
 
     def show
       setup_download_list
-      view_type = params[:view_type]
-      view_type = ValidViewTypes.find { |vt| vt == view_type } || DefaultViewType
       render partial: "browse_#{view_type}"
     end
 
     def content
       setup_download_list
 
+      except_list = case view_type
+      when 'icons'
+        %i[file_metadata last_process_name_run updated_at created_at user_id file_hash
+          content_type]
+      else
+        %i[file_metadata last_process_name_run description updated_at created_at user_id file_hash
+          content_type]
+      end
+
       extras = {
-        except: %i[file_metadata last_process_name_run description updated_at created_at user_id file_hash
-                   content_type],
+        except: except_list,
         allow_show_flags: @allow_show_flags,
         limited_results: true
       }
@@ -59,6 +65,15 @@ module NfsStore
 
     protected
 
+    #
+    # Type of filestore browser requested
+    def view_type
+      @view_type = ValidViewTypes.find { |vt| vt == params[:view_type] } || DefaultViewType
+    end
+
+    #
+    # Setup the list of download file items, handling item flags if needed.
+    # Also add a @download object, required to build the download selection form.
     def setup_download_list
       begin
         if @container.readable?

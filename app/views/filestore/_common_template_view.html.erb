@@ -1,9 +1,28 @@
 <%
+  # Templates to support filestore browser. The view_type will decide the actual browser displayed
+
     use_secure_view_actions = []
     acts = [:view_files_as_image, :view_files_as_html, :download_files]
     use_secure_view_actions = acts.select {|act| current_user.can?(act)}
 %>
-<%= render partial: 'filestore/browse_list' %>
+<%= render partial: 'filestore/browse_list_templates' %>
+<%= render partial: 'filestore/browse_icons_templates' %>
+
+<%#
+  # Primary template for viewing a full filestore browser. 
+  # called by model references to view browser within an activity log
+  # and admin pages.
+%>
+<script id="filestore-view-template"  type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{# if view_type '===' 'icons'}}
+    {{>filestore_simple_template_view}}
+  {{else if view_type '===' 'list'}}
+    {{>filestore_common_template_view}}
+  {{else}}
+    {{>filestore_common_template_view}}
+  {{/if}}
+</script>
+
 
 <script id="filestore-browser-form"  type="text/x-handlebars-template" class="hidden handlebars-template">
   <div>
@@ -100,17 +119,12 @@
        data-container-id="{{container_id}}"
        data-folder="{{folder}}"
        data-folder-level="{{level}}"
-       <%# data-preprocessor="nfs-store-browse-list-results" %>
-
   >
     <div class="container-browser ajax-running"></div>
   </div>
 </script>
 
 
-<script id="filestore-view-template"  type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{>filestore_common_template_view}}
-</script>
 <script id="filestore_common_template_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
   <div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
     <%= render partial: 'nfs_store/browse/browser_header', locals: {
@@ -173,9 +187,21 @@
 
 <script id="filestore_simple_template_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
   <div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
-      <%= link_to "", "/nfs_store/container_list/{{to_record_id}}?activity_log_id={{from_record_id}}&activity_log_type={{from_record_type_us}}&view_type=icons", class: "refresh-container-list glyphicon glyphicon-refresh hidden", title: "refresh list", data: { remote: "true", container_id: "{{to_record_id}}", activity_log_id: "{{from_record_id}}", activity_log_type: "{{from_record_type_us}}" } %>
+      <%= link_to "", "/nfs_store/container_list/{{to_record_id}}/content?activity_log_id={{from_record_id}}&activity_log_type={{from_record_type_us}}&view_type=icons", class: "refresh-container-list glyphicon glyphicon-refresh hidden", title: "refresh list", data: { remote: "true", container_id: "{{to_record_id}}", activity_log_id: "{{from_record_id}}", activity_log_type: "{{from_record_type_us}}" } %>
       <div class="nfs-store-container-block" data-container-id="{{to_record_id}}" data-activity-log-id="{{from_record_id}}" data-activity-log-type="{{from_record_type_us}}">
-        <%= render partial: 'nfs_store/browse/show', locals: { container_id: '{{to_record_id}}', level: 0, folder: '.' } %>
+        
+        <div class="container-browser-outer container-browser-icons-outer prevent-scroll" 
+            data-sub-item="nfs_store_container" 
+            data-sub-id="{{to_record_id}}" 
+            data-template="nfs-store-browse-icons-results" 
+            data-preprocessor="filestore_browser_form"      
+            data-container-id="{{to_record_id}}"
+            data-folder="."
+            data-folder-level="0"
+            data-subscription="nfs-store-container-icons-items-{{to_record_id}}"
+        >
+          <div class="container-icons-browser ajax-running"></div>
+        </div>
   
         <%= render partial: 'filestore/classification/block', locals: {
               container_id: '{{to_record_id}}',
