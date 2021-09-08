@@ -34,15 +34,16 @@ module NfsStore
       }
 
       tfa = @container.user_file_actions_config&.map { |a| a[:id] }
-      ff = NfsStore::Filter::Filter.filters_for(@activity_log).uniq.sort.map do |f|
-        f.gsub('\.', '.').gsub('.*', '*').gsub('.+', '*').gsub(/^\*$/, '*.*').gsub('^/', '').gsub('^', '').gsub('$', '')
-      end
+
+      ff = NfsStore::Filter::Filter.human_filters_for(@activity_log)
+      
+      dl_json = @downloads.as_json(extras)
 
       render json: {
         nfs_store_container: {
           id: @container.id,
           name: @container.name,
-          container_files: @downloads.as_json(extras),
+          container_files: dl_json,
           item_type: 'nfs_store_container',
           writeable: @container.writable?,
           readable: @container.readable?,
