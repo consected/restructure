@@ -19,6 +19,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+
+## [7.4.55] - 2021-09-09
+
 - [Changed] [Filestore] reworked browser to use JSON api and improve performance
 
 ## [7.4.53] - 2021-08-31
