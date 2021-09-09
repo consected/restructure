@@ -533,6 +533,10 @@
     return megamark(obj);
   });
 
+  Handlebars.registerHelper('json_stringify', function (obj) {
+    return JSON.stringify(obj);
+  });
+
   Handlebars.registerHelper('pretty_print', function (obj) {
     return JSON.stringify(obj, null, 2);
   });

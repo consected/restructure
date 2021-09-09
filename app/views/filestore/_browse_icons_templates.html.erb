@@ -1,0 +1,122 @@
+<%# Templates to support view type: 'icons' browser %>
+
+<script id="nfs-store-browse-icons-results" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{>nfs_store_browse_icons_results_part}}
+</script>
+
+<script id="nfs_store_browse_icons_results_part" type="text/x-handlebars-template" class="hidden handlebars-partial">
+
+
+  <ul class="container-icons-items">
+    <ul class="container-icons-folder-items" data-folder-items=".">
+      {{>nfs_store_browse_icons_folders curr_folder='.'}}
+    </ul>
+  
+  </ul>
+</script>
+
+<script id="nfs_store_browse_icons_folders" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  
+  {{#with @root}}
+  
+    {{#each (lookup folder_entries ../curr_folder)}}
+      {{>nfs_store_browse_icons_entry}}
+    {{/each}}    
+
+    {{#each (lookup subfolders ../curr_folder)}}  
+      {{#with (lookup ../folder_info this)}}        
+        {{>nfs_store_browse_icons_folder container_id=../../nfs_store_container.id}}
+      {{/with}}
+    {{/each}}
+  {{/with}} 
+</script>
+
+
+<script id="nfs_store_browse_icons_folder"   type="text/x-handlebars-template" class="hidden handlebars-partial">
+  
+  
+    {{#is folder '!==' './.'}}
+    <li class="container-folder container-icons-folder container-icons-folder-{{#if is_archive}}is{{else}}not{{/if}}-archive">
+      <span class="cif-inner">
+        <input type="checkbox" class="container-folder-selector ff" data-folder-path="{{folder}}" title="select all items in folder &amp; subfolders"/>      
+      <span class="folder-icon {{#if is_archive}}is{{else}}not{{/if}}-archive glyphicon {{#is level '===' 0}}glyphicon-folder-close{{/is}}"
+            title="expand folder"
+            data-toggle="collapse"
+            href="#{{container_id}}--{{id_hyphenate folder}}"
+            aria-controls="{{container_id}}--{{id_hyphenate folder}}"
+            aria-expanded="true"
+      ></span>&nbsp;
+      {{show_folder_name}}{{#if is_archive}} <span class="file-archive-tag">(archive files)</span>{{/if}}
+    </li>
+    <ul class="container-folder-items  container-icons-folder-items collapse {{#is folder_name '===' '.'}}in{{/is}}" data-folder-items="{{folder}}" id="{{container_id}}--{{id_hyphenate folder}}">
+      {{>nfs_store_browse_icons_folders curr_folder=folder}}
+    </ul>
+    {{/is}}
+</script>
+
+
+<script id="nfs_store_browse_icons_entry" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <li class="container-icons-entry" id="container-entry-{{nfs_store_container_id}}-{{id}}-{{retrieval_type}}" data-retrieval-type="{{retrieval_type}}" data-download-id="{{id}}">
+    {{#if id}}
+      <input type="checkbox" 
+             id="nfs_store_download-selected_items-{{id}}-{{retrieval_type}}"
+             name="nfs_store_download[selected_items][]"
+             title="select item for download"
+             class="ff"
+             value="{&quot;id&quot;: {{id}}, &quot;retrieval_type&quot;: &quot;{{retrieval_type}}&quot;}"
+      >        
+    {{else}}
+      <span class="file-entry-not-downloadable">&nbsp;&nbsp;</span>
+    {{/if}}
+    {{#if id}}
+
+
+      <a href="{{filename_path}}" 
+         class="browse-icon"
+         disabled="{{not ../can_download_or_view}}" 
+         title="{{file_name}}"
+         target="_blank"
+      >
+        <img src="{{filename_path}}&secure_view[page]=1&secure_view[do]=convert_to&secure_view[preview_as]=icon" class="browse-icon-img" draggable="false" id="icon-img-{{id}}"/>
+      </a>
+      <a class="browse-entry-classifications" href="{{filename_path}}" target="_blank" data-id="{{id}}" data-rt="{{retrieval_type}}">        
+        <span class="bem-classification-attrs">
+          <span class="bem-class-title">{{title}}</span>
+          <span class="bem-class-description">{{description}}</span>
+        </span>
+      </a>        
+
+      <a href="{{filename_path}}" 
+          class="browse-filename"
+          disabled="{{not ../can_download_or_view}}" 
+          title="{{#unless ../can_download_or_view}}not authorized to download{{/unless}}"
+          target="_blank">{{file_name}}</a>
+
+      <span class="browse-entry-meta">
+        <span class="bem-mime-type">{{mime_type_text}}</span>
+        <span class="bem-mime-type">{{file_size_mb}} MB</span>
+        <span class="bem-mod-date" data-format-date-local="{{#if file_updated_at}}true{{/if}}">{{#if file_updated_at}}{{file_updated_at}}{{else}}(no date){{/if}}</span>
+      </span>
+
+
+
+    {{else}}
+      <span class="hidden">
+      <span class="browse-filename missing-db-entry">{{file_name}}
+        {{#if is_processing}}
+          <span class="file-processing-tag">(processing upload...)</span>
+        {{else if is_processing_arch}}
+          <span class="file-processing-tag">(processing archive...)</span>
+        {{else if is_failed_arch }}
+          <span class="file-processing-tag">(failed processing archive...)</span>
+        {{else if is_processing_index}}
+          <span class="file-processing-tag">(processing index...)</span>
+        {{/if}}
+      </span>
+      <span class="browse-entry-meta missing-db-entry"></span>
+      <span class="browse-entry-classifications missing-db-entry"></span>
+      </span>
+    {{/if}}
+  </li>
+
+</script>

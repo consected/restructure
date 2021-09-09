@@ -52,7 +52,7 @@ module NfsStore
           container_file.replace_file! new_tmp_image_path
         end
 
-        if container_file.file_metadata_before_type_cast.present?
+        if container_file.file_metadata_present?
           # There is existing metadata stored. Bring it up to date based on the updated file
           NfsStore::Dicom::MetadataHandler.extract_metadata_from(container_file)
         end

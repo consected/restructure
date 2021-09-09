@@ -157,6 +157,7 @@ module GeneralDataConcerns
 
       extras[:include] ||= {}
       extras[:methods] ||= []
+      extras[:methods] << :master_id if respond_to? :master_id
       extras[:methods] << :item_id if respond_to? :item_id
       extras[:methods] << :item_type if respond_to? :item_type
       extras[:methods] << :full_item_type if respond_to? :full_item_type
