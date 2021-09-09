@@ -16,4 +16,4 @@ Administration is provided in [Admin: User Access Controls](/admin/user_access_c
 
 ## Contents
 
-- [User Access Control Definition](user_access_control_definition)
+- [User Access Control Definition](user_access_control_definition.md)

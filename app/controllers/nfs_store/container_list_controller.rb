@@ -11,11 +11,84 @@ module NfsStore
     DefaultViewType = 'list'.freeze
 
     def show
-      view_type = params[:view_type]
+      setup_download_list
+      render partial: "browse_#{view_type}"
+    end
 
+    def content
+      setup_download_list
+
+      except_list = case view_type
+      when 'icons'
+        %i[file_metadata last_process_name_run updated_at created_at user_id file_hash
+          content_type]
+      else
+        %i[file_metadata last_process_name_run description updated_at created_at user_id file_hash
+          content_type]
+      end
+
+      extras = {
+        except: except_list,
+        allow_show_flags: @allow_show_flags,
+        limited_results: true
+      }
+
+      tfa = @container.user_file_actions_config&.map { |a| a[:id] }
+
+      ff = NfsStore::Filter::Filter.human_filters_for(@activity_log)
+      
+      dl_json = @downloads.as_json(extras)
+
+      render json: {
+        nfs_store_container: {
+          id: @container.id,
+          name: @container.name,
+          container_files: dl_json,
+          item_type: 'nfs_store_container',
+          writeable: @container.writable?,
+          readable: @container.readable?,
+          can_download_or_view: @container.can_download_or_view?,
+          can_download: @container.can_download?,
+          can_send_to_trash: @container.can_send_to_trash?,
+          can_move_files: @container.can_move_files?,
+          can_rename_files: @container.can_move_files?,
+          can_rename_folders: @container.can_move_files?,
+          can_user_file_actions: @container.can_user_file_actions?,
+          parent_type: @activity_log.class.to_s.ns_underscore,
+          parent_id: @activity_log.id,
+          master_id: @activity_log.master_id,
+          trigger_file_action_ids: tfa,
+          directory_not_found: @directory_not_found,
+          filters_for: ff
+        }
+      }
+    end
+
+    protected
+
+    #
+    # Type of filestore browser requested
+    def view_type
+      @view_type = ValidViewTypes.find { |vt| vt == params[:view_type] } || DefaultViewType
+    end
+
+    #
+    # Setup the list of download file items, handling item flags if needed.
+    # Also add a @download object, required to build the download selection form.
+    def setup_download_list
       begin
         if @container.readable?
-          @downloads = Browse.list_files_from @container, activity_log: @activity_log
+          # Check if we should show flags for classifications on each of the types of container file
+          @allow_show_flags = {}
+          %i[stored_file archived_file].each do |rt|
+            full_name = "nfs_store__manage__#{rt}"
+            show_flag = !!Classification::ItemFlagName.enabled_for?(full_name, current_user)
+            @allow_show_flags[rt] = show_flag
+          end
+
+          # List types should we include flags for in the queries that return the stored_files and archived_files
+          show_flags_for = @allow_show_flags.filter { |_k, v| v }.keys.map { |i| i.to_s.pluralize.to_sym }
+          @downloads = Browse.list_files_from @container, activity_log: @activity_log, include_flags: show_flags_for
           # Prep a download object to allow selection of downloads in the browse list
           @download = Download.new container: @container, activity_log: @activity_log
         end
@@ -23,11 +96,7 @@ module NfsStore
         @directory_not_found = true
       end
 
-      view_type = ValidViewTypes.find { |vt| vt == view_type } || DefaultViewType
-      render partial: "browse_#{view_type}"
     end
-
-    protected
 
     # return the class for the current item
     # handles namespace if the item is like an ActivityLog:Something

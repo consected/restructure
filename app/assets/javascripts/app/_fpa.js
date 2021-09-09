@@ -16,7 +16,8 @@ _fpa = {
   remote_request: null,
   remote_request_block: null,
 
-  non_versioned_template_types: ['trackers', 'player_infos', 'pro_infos', 'addresses', 'player_contacts'],
+  non_versioned_template_types: ['trackers', 'player_infos', 'pro_infos', 'addresses', 'player_contacts',
+                                'nfs_store/manage/stored_files', 'nfs_store/manage/archived_files', 'nfs_store_containers'],
 
   HandlebarsCompileOptions: { preventIndent: true },
 
@@ -145,13 +146,14 @@ _fpa = {
   // data - data context for handlebars
   // options  - currently options.position  =  null, 'before' or 'after'
   // before or after will place the result before or after the block (and empty the block)
+  // alt_preprocessor - alternative preprocessor function to use if the template name doesn't work
   // The exception to the positioning of 'before' and 'after' is that if
   // the rendered template html has an id for its root element
   // that already exists on the page, the result will replace that existing element.
   // This maintains the integrity of ids in the DOM, and prevents the need to handle specific
   // replace functionality within preprocessors
   // The function returns a promise, resolved when then template has been fully prepared and rendered
-  view_template: function (block, template_name, data, options) {
+  view_template: function (block, template_name, data, options, alt_preprocessor) {
 
     return new Promise(function (resolve, reject) {
 
@@ -165,7 +167,7 @@ _fpa = {
       }
 
       _fpa.prepare_template(block, template_name, data, options);
-      _fpa.do_preprocessors(template_name, block, data);
+      _fpa.do_preprocessors(template_name, block, data, alt_preprocessor);
       _fpa.form_utils.get_general_selections(data);
       _fpa.prepare_template_configs(data).then(function () {
         _fpa.render_template(block, template_name, data, options);
@@ -397,7 +399,13 @@ _fpa = {
     }
   },
 
-  do_preprocessors: function (pre, block, data) {
+  // Run preprocessing function
+  // Use the *pre* argument as the primary function name to use
+  // If not found using this, and alt_preprocessor is specified, try this instead
+  // Finally, run the default preprocessor, indicating if either pre or alt_
+  // preprocessors were run, allowing the default preprocessor 
+  // logic to selectively run some or all of the functionality.
+  do_preprocessors: function (pre, block, data, alt_preprocessor) {
     var procfound = false;
     if (pre) {
       pre = pre.replace(/-/g, '_');
@@ -406,6 +414,15 @@ _fpa = {
         procfound = true;
       }
     }
+
+    if(!procfound && alt_preprocessor) {
+      alt_preprocessor = alt_preprocessor.replace(/-/g, '_');
+      if (_fpa.preprocessors[alt_preprocessor]) {
+        _fpa.preprocessors[alt_preprocessor](block, data);
+        procfound = true;
+      }
+    }
+
     _fpa.preprocessors.default(block, data, procfound);
   },
 
@@ -660,7 +677,9 @@ _fpa = {
 
             if (!tname)
               console.log("Warning: data-template for this triggering element was not found");
-            var prom = _fpa.view_template($this, tname, target_data, options);
+
+            var pre = $(this).attr('data-preprocessor');
+            var prom = _fpa.view_template($this, tname, target_data, options, pre);
             prep_template_promises.push(prom);
             prom.then(function () {
               _fpa.try_app_post_callback($this);
@@ -771,9 +790,10 @@ _fpa = {
                   // we can't overwrite a block previously processed in this request)
                   if (use_data) {
                     var dt = $this.attr('data-template');
+                    var pre = $(this).attr('data-preprocessor');
                     if (!dt)
                       console.log('WARN: no data-template template name found');
-                    var prom = _fpa.view_template($this, dt, use_data);
+                    var prom = _fpa.view_template($this, dt, use_data, null, pre);
                     prom.then(function () {
                       _fpa.try_app_post_callback($this);
                     })
