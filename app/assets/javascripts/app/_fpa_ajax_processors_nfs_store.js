@@ -10,6 +10,19 @@ _fpa.preprocessors_nfs_store = {
 
     data.folder_entries = {}
 
+    const archive_suffix = '.__mounted-archive__'
+
+    // Setup container_dir_path in downloads
+    for (var i in downloads) {
+      var value = downloads[i]
+
+      var dp = ['.']
+      if(value.archive_file) dp.push(`${value.archive_file}${archive_suffix}`)
+      if(value.path) dp.push(value.path)
+      value.container_dir_path = dp.join('/')
+    }
+
+
     // Get a list of folders that have files in them, storing a list of folders and
     // a hash of folder entries.
     // Bear in mind that the list of folders may miss some of the intermediate folders
