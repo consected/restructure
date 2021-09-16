@@ -1,0 +1,9 @@
+.use-config-layout {
+
+  &.cl-default-layout-columns {
+    .list-group {
+      display: flex;
+    }
+  }
+
+}

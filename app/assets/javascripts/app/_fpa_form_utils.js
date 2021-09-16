@@ -1989,6 +1989,36 @@ _fpa.form_utils = {
     $('input.set-auth-token[type="hidden"]').val(csrf_token)
   },
 
+
+  use_config_layout: function (block) {
+    console.log('use config layout')
+
+    if (block.hasClass('use-config-layout')) {
+      var dl = block.find('.result-field-container[data-field-name="default_layout"]').attr('data-field-val')
+      dl = dl || 'rows'
+      block.addClass(`cl-default-layout-${dl}`)
+      var $mre  = block.find('.mr-expander')
+      $mre.click()
+      $mre.parents('.rr-mr').hide()
+    }
+
+    if (block.parents('.use-config-layout')) {
+      var $mr = block.parents('.model-reference-result').first()
+      
+      var wv = block.find('.result-field-container[data-field-name="block_width"]').attr('data-field-val')
+      if (wv == null) wv = block.find('.edit-field-container [data-attr-name="block_width"]').val()
+      if (wv == null) wv = '100%' 
+      
+      var pn = block.find('.result-field-container[data-field-name="position_number"]').attr('data-field-val')
+      if (pn == null) pn = block.find('.edit-field-container [data-attr-name="position_number"]').val()
+      if (pn == null) pn = 100000
+      $mr.css({width: wv, order: pn})
+    }
+
+
+
+  },
+
   // Run through all the general formatters for a new block to show nicely
   format_block: function (block) {
 
@@ -2025,6 +2055,8 @@ _fpa.form_utils = {
     _fpa.form_utils.hide_empty_blocks(block);
     // Not currently used or tested.
     // _fpa.form_utils.setup_form_filtered_select(block);
+    _fpa.form_utils.use_config_layout(block);
+
 
     _fpa.form_utils.setup_error_clear(block);
     _fpa.form_utils.resize_children(block);

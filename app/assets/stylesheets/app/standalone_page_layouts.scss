@@ -150,6 +150,11 @@ div.reset-row,
       width: auto;
       float: none;
     }
+
+    .page-item-container {
+      display: block;
+    }
+
   }
   .default-layout-columns,
   .default-layout-one-column,
@@ -233,7 +238,7 @@ div.reset-row,
   .standalone-page-design .custom-editor-viewer,
   .default-layout-columns .embedded-items-item,
   .common-template-item div.browse-container {
-    margin: 0.4em 1.7em 1.5em;
+    padding: 0.4em 1.7em 1.5em;
     h1,
     h2,
     h3,
