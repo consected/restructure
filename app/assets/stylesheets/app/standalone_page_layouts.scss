@@ -1,10 +1,3 @@
-div.row .common-template-item.standalone-page-design {
-  margin: 0 7%;
-  width: auto;
-  float: none;
-  padding: 0.4em 1.7em 1.5em;
-}
-
 div.reset-row,
 .standalone-page-design .custom-editor,
 .standalone-page-design .custom-editor-viewer {
@@ -158,10 +151,9 @@ div.reset-row,
       float: none;
     }
 
-    .page-item-container {
-      display: block;
-    }
-
+    // .page-item-container {
+    //   display: block;
+    // }
   }
   .default-layout-columns,
   .default-layout-one-column,
