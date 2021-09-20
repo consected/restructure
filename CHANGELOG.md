@@ -19,9 +19,15 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+
+## [7.4.59] - 2021-09-20
+
+<<<<<<< HEAD
 - [Fixed] Study Info app authoring and display
 - [Added] Model references disabled when to_record is disabled
 - [Fixed] Calculation around boolean fields
+=======
+>>>>>>> 4ebbe708fba37c1cb2670bfbece6325dd7387916
 
 ## [7.4.58] - 2021-09-20
 
