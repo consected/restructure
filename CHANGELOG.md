@@ -22,6 +22,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 - [Changed] Study Info app to provide a better authoring experience
 - [Changed] processing scripts to allow for app-specfic scripts to be loaded
 
+## [7.4.57] - 2021-09-20
+
+
 ## [7.4.56] - 2021-09-09
 
 ## [7.4.55] - 2021-09-09
