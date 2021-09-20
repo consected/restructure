@@ -255,12 +255,20 @@ class ModelReference < ActiveRecord::Base
   end
 
   #
+  # Find the model references that point to the to_item
+  # @param [UserBase] to_item
+  # @return [ActiveRecord::Relation]
+  def self.find_references_to(to_item)
+    cond = { to_record_type: to_item.class.name, to_record_id: to_item.id }
+    ModelReference.where cond
+  end
+
+  #
   # Return all the objects that refer to the to_item through model references
   # @param [UserBase] to_item
   # @return [Array{UserBase}]
   def self.find_where_referenced_from(to_item)
-    cond = { to_record_type: to_item.class.name, to_record_id: to_item.id }
-    res = ModelReference.where cond
+    res = find_references_to(to_item)
     # Set the current user, so that access controls can be correctly applied
     mu = if to_item.respond_to? :master_user
            to_item.master_user
