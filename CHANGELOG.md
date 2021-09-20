@@ -19,9 +19,10 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Changed] Study Info app to provide a better authoring experience
+- [Changed] processing scripts to allow for app-specfic scripts to be loaded
 
 ## [7.4.56] - 2021-09-09
-
 
 ## [7.4.55] - 2021-09-09
 
@@ -32,7 +33,6 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 - [Fixed] Version of nio4r gem conflicts with AWS Elastic Beanstalk
 
 ## [7.4.52] - 2021-08-31
-
 
 ## [7.4.51] - 2021-08-26
 
