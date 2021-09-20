@@ -1989,6 +1989,7 @@ _fpa.form_utils = {
     $('input.set-auth-token[type="hidden"]').val(csrf_token)
   },
 
+
   // Run through all the general formatters for a new block to show nicely
   format_block: function (block) {
 

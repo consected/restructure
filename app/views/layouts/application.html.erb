@@ -3,15 +3,21 @@
 <head>
   <title><%= Settings::PageTitle %></title>
   <%= stylesheet_link_tag    'application', media: 'all' %>
-  <%
-  if current_user && current_user.app_type_id && current_user&.app_type&.name
-    fn = "app_#{current_user.app_type.name.id_underscore}.css"
-    if Rails.root.join("public", "app_specific", fn).exist? %>
+  <% if current_user&.app_type&.name
+       fn = "app_#{current_user.app_type.name.id_underscore}.css"
+       if Rails.root.join("public", "app_specific", fn).exist? %>
   <link rel="stylesheet" media="all" href="/app_specific/<%=fn%>">
-  <% end %>
-  <% end %>
+  <%   end 
+     end %>
 
   <%= javascript_include_tag 'application' %>
+
+  <% if current_user&.app_type&.name
+       fn = "app_#{current_user.app_type.name.id_underscore}.js"
+       if Rails.root.join("public", "app_specific", fn).exist? %>
+  <script src="/app_specific/<%=fn%>" ></script>
+  <%   end 
+     end %>
 
   <script>
   window.onerror = function(message, source, lineno, colno, error) {

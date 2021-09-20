@@ -242,6 +242,7 @@ a.glyphicon.edit-entity.edit-tracker {
   margin-top: 0;
 }
 
+.show-entity,
 .edit-entity {
   margin-top: -6px;
   margin-right: -10px;
@@ -389,6 +390,7 @@ li.list-group-item.record-meta {
   color: #aaa;
   font-size: 95%;
   border-bottom: 0;
+  width: 100%;
 }
 
 li.list-group-item.compact-heading small {

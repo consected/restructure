@@ -207,7 +207,7 @@
       </li>
   {{else is this_value '===' null}}
   {{else}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase') }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase') }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{/is}}
   {{#if show_item_type_flags_after}}
   {{#is key item_flags_after}}

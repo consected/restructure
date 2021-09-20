@@ -11,6 +11,30 @@
   font-size: 16px;
 }
 
+.activity-logs-generic-block .common-template-item.activity-log--study-info-part-page-item {
+  max-height: 171px;
+  min-height: 0 !important;
+  overflow: hidden;
+}
+
+.activity-logs-generic-block .common-template-item.activity-log--study-info-part-page-item.page-was-expanded {
+  max-height: none;
+  overflow: hidden;
+}
+
+.activity-logs-generic-block .model-reference-result {
+  order: 10000;
+}
+
+.dynamic-show-label {
+  float: left !important;
+  padding-right: 10px;
+}
+
+.embedded-items-item.full-width {
+  width: 100% !important;
+}
+
 .footer li {
   list-style: none;
   list-style-position: none;
@@ -19,4 +43,51 @@
 
 .model-reference-disabled {
   display: none;
+}
+
+.list-group-item.results-caption-before.dynamic-model--study-page-section-title,
+.list-group-item.results-caption-before.dynamic-model--study-page-section-content,
+.list-group-item.results-caption-before.dynamic-model--study-page-section-position_number,
+.list-group-item.result-field-container.dynamic-model--study-page-section-position_number,
+.list-group-item.results-caption-before.dynamic-model--study-page-section-block_width,
+.list-group-item.result-field-container.dynamic-model--study-page-section-block_width,
+.list-group-item.results-caption-before.dynamic-model--study-page-section-extra_classes,
+.list-group-item.result-field-container.dynamic-model--study-page-section-extra_classes,
+.list-group-item.results-caption-before.dynamic-model--study-page-section-tag_select_allow_roles_access,
+.list-group-item.result-field-container.dynamic-model--study-page-section-tag_select_allow_roles_access {
+  display: none;
+}
+
+li.list-group-item.results-caption-before.activity-log--study-info-part-page-description {
+  display: none;
+}
+
+.list-group-item.caption-before.dynamic-model--study-page-section-title,
+.list-group-item.caption-before.dynamic-model--study-page-section-content {
+  display: none;
+}
+
+#master_results_block form .edit-field-container input,
+#master_results_block form .edit-field-container select {
+  padding: 0 4px;
+  line-height: 1.2em;
+  height: 1em;
+  border: 0;
+  box-shadow: none;
+  font-size: 18px;
+  appearance: none;
+}
+
+input#dynamic_model_study_page_section_title {
+  font-weight: bold;
+}
+
+input.form-control,
+select.form-control {
+  background-color: rgb(255 246 226) !important;
+}
+
+input.form-control.has-value,
+select.form-control.has-value {
+  background-color: rgb(255 246 226) !important;
 }

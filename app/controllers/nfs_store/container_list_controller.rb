@@ -21,10 +21,10 @@ module NfsStore
       except_list = case view_type
       when 'icons'
         %i[file_metadata last_process_name_run updated_at created_at user_id file_hash
-          content_type]
+          content_type nfs_store_stored_file_id]
       else
         %i[file_metadata last_process_name_run description updated_at created_at user_id file_hash
-          content_type]
+          content_type nfs_store_stored_file_id]
       end
 
       extras = {
