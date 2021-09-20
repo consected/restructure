@@ -22,7 +22,7 @@
   overflow: hidden;
 }
 
-.use-config-layout .activity-logs-generic-block .model-reference-result {
+.activity-logs-generic-block .use-config-layout .model-reference-result {
   order: 10000;
 }
 

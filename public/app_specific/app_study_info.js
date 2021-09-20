@@ -17,9 +17,13 @@ _fpa.app_specific = class {
     // Process any blocks it contains that have the class use-config-layout
     // which is typical when loading a list of pages
     block.find('.use-config-layout').each(function () {
-      var block_processor = new _fpa.app_specific($(this), this.data)
+      var block_processor = new _fpa.app_specific($(this))
       block_processor.reformat_page()
       block_processor.handle_part()
+      $(this).find('.embedded-items-item').each(function () {
+        block_processor.adjust_style($(this))
+      })
+
     })
 
   }
@@ -49,28 +53,45 @@ _fpa.app_specific = class {
     if (!$outer.length) return
 
     var $mr = block.parents('.model-reference-result').first()
-    if (!$mr.length || $mr.hasClass('done-use-config-layout')) return
 
-    var wv = $mr.find('.result-field-container[data-field-name="block_width"]').attr('data-field-val')
-    if (!wv) wv = $mr.find('.edit-field-container [data-attr-name="block_width"]').val()
-    if (!wv) wv = '100%'
-
-    var pn = $mr.find('.result-field-container[data-field-name="position_number"]').attr('data-field-val')
-    if (!pn) pn = $mr.find('.edit-field-container [data-attr-name="position_number"]').val()
-    if (!pn) pn = 0
-
-    pn = parseInt(pn) + 1000
-    $mr.css({ width: wv, order: pn })
-    $mr.addClass('done-use-config-layout')
+    this.adjust_style($mr)
 
   }
 
+  adjust_style($embedded_block) {
+    if (!$embedded_block.length || $embedded_block.hasClass('done-use-config-layout')) return
+
+    var wv = $embedded_block.find('.result-field-container[data-field-name="block_width"]').attr('data-field-val')
+    if (!wv) wv = $embedded_block.find('.edit-field-container [data-attr-name="block_width"]').val()
+    if (!wv && this.default_layout() == 'rows') wv = '100%'
+
+    var pn = $embedded_block.find('.result-field-container[data-field-name="position_number"]').attr('data-field-val')
+    if (!pn) pn = $embedded_block.find('.edit-field-container [data-attr-name="position_number"]').val()
+    if (!pn) pn = 1000
+
+    pn = parseInt(pn) + 1000
+    $embedded_block.css({ width: wv, order: pn })
+    $embedded_block.addClass('done-use-config-layout')
+  }
+
   // Add a class representing the layout based on the field default_layout
-  add_layout_class() {
-    var dl = this.block.find('.result-field-container[data-field-name="default_layout"]').attr('data-field-val')
-    if (dl) {
-      this.block.addClass(`cl-default-layout-${dl}`)
+  add_layout_class(def_layout) {
+    var def_layout = this.default_layout()
+    if (def_layout) {
+      this.block.addClass(`cl-default-layout-${def_layout}`)
     }
+  }
+
+  default_layout() {
+    if (this.block.hasClass('use-config-layout'))
+      var $main_block = this.block
+    else
+      var $main_block = this.block.parents('.use-config-layout').first()
+
+    var res = $main_block.find('.result-field-container[data-field-name="default_layout"]').attr('data-field-val')
+    if (!res) res = $main_block.attr('data-default-layout')
+
+    return res
   }
 
   // Load the referenced parts automatically if they haven't already been marked as opened

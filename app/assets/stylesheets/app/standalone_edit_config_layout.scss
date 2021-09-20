@@ -1,30 +1,32 @@
-.use-config-layout {
-  &.cl-default-layout-columns {
-    .list-group {
-      display: flex;
+.activity-logs-generic-block {
+  .use-config-layout {
+    &.cl-default-layout-columns {
+      .list-group {
+        display: flex;
+      }
     }
   }
-}
 
-div.row .standalone-page-design.common-template-item {
-  margin: 0 7%;
-  width: auto;
-  float: none;
-  padding: 0.4em 1.7em 1.5em;
-}
+  div.row .standalone-page-design.common-template-item {
+    margin: 0 7%;
+    width: auto;
+    float: none;
+    padding: 0.4em 1.7em 1.5em;
+  }
 
-div.row .standalone-page-design.common-template-item.cl-default-layout-columns {
-  margin: 0 7%;
-  width: auto;
-  float: none;
-}
+  div.row .standalone-page-design.common-template-item.cl-default-layout-columns {
+    margin: 0 7%;
+    width: auto;
+    float: none;
+  }
 
-div.row .standalone-page-design.common-template-item.cl-default-layout-rows {
-  margin: 0 14%;
-  width: auto;
-  float: none;
-}
+  div.row .standalone-page-design.common-template-item.cl-default-layout-rows {
+    margin: 0 14%;
+    width: auto;
+    float: none;
+  }
 
-div.row .standalone-page-design.common-template-item.cl-default-layout-rows .page-item-container {
-  display: block;
+  div.row .standalone-page-design.common-template-item.cl-default-layout-rows .page-item-container {
+    display: block;
+  }
 }
