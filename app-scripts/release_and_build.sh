@@ -53,7 +53,7 @@ fi
 
 if [ -z "${RELEASESTARTED}" ]; then
   echo "Starting git-flow release"
-  git flow release start -m 'Start' ${NEWVER}
+  git flow release start ${NEWVER}
   RES=$?
   if [ "$RES" != "0" ]; then
     echo $RES
