@@ -158,10 +158,18 @@ module OptionConfigs
       ca.calc_save_option_if
     end
 
+    #
+    # Get the model reference configuration hash, based on the to_record.
+    # For flexibility, this may be keyed with a singular or plural key that is one of:
+    # the full activity log with extra log type (for example activity_log__player_contact_step_1)
+    # the database table name (for example activity_log_player_contacts)
+    # the model resource name (for example activity_log__player_contact)
     def model_reference_config(model_reference)
       return unless references
 
-      references[model_reference.to_record_result_key.to_sym] || references[model_reference.to_record.class.table_name.singularize.to_sym]
+      references[model_reference.to_record_result_key.to_sym] ||
+        references[model_reference.to_record.class.table_name.singularize.to_sym] ||
+        references[model_reference.to_record.class.name.ns_underscore.singularize.to_sym]
     end
 
     class << self
