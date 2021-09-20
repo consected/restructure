@@ -22,7 +22,7 @@
   overflow: hidden;
 }
 
-.use-config-layout .activity-logs-generic-block .model-reference-result {
+.activity-logs-generic-block .use-config-layout .model-reference-result {
   order: 10000;
 }
 
@@ -78,8 +78,9 @@ li.list-group-item.results-caption-before.activity-log--study-info-part-page-des
   appearance: none;
 }
 
-input#dynamic_model_study_page_section_title {
-  font-weight: bold;
+#master_results_block form .edit-field-container input[type="checkbox"] {
+  appearance: auto;
+  min-width: 1em;
 }
 
 input.form-control,

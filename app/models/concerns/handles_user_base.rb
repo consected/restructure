@@ -777,9 +777,14 @@ module HandlesUserBase
   end
 
   #
-  # Set a flag if the record was disabled and cancel an associated background job if there is one
+  # Set a flag if the record was disabled,
+  # cancel an associated background job if there is one
+  # and disable any model references that were pointing to this item
   def handle_disabled
     @was_disabled = true
     cancel_associated_job!
+
+    refs_pointing_to_self = ModelReference.find_references_to(self)
+    refs_pointing_to_self.update_all(disabled: true)
   end
 end

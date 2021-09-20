@@ -562,7 +562,9 @@ module CalcActions
       val = from_instance.previous_changes[real_attr_name]&.first
     end
 
-    val = nil if val.blank? && from_instance.type_for_attribute(attr_name).type != :string
+    attr_type = from_instance.type_for_attribute(attr_name).type
+    val = nil if val.blank? && attr_type != :string
+    val = false if val.nil? && attr_type == :boolean
     val
   end
 

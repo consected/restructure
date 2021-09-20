@@ -60,7 +60,7 @@ if [ -z "${RELEASESTARTED}" ]; then
     exit
   fi
   git push --set-upstream origin release/${NEWVER}
-  git flow release finish ${NEWVER}
+  git flow release finish -m 'Release' ${NEWVER}
 else
   echo "Release already started. Checking out and continuing"
   git checkout new-master && git pull && git merge develop
