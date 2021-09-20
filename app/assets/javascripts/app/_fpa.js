@@ -12,6 +12,7 @@ _fpa = {
   },
 
   view_handlers: {},
+  app_specific: {},
   version: '0',
   remote_request: null,
   remote_request_block: null,
@@ -415,12 +416,16 @@ _fpa = {
       }
     }
 
-    if(!procfound && alt_preprocessor) {
+    if (!procfound && alt_preprocessor) {
       alt_preprocessor = alt_preprocessor.replace(/-/g, '_');
       if (_fpa.preprocessors[alt_preprocessor]) {
         _fpa.preprocessors[alt_preprocessor](block, data);
         procfound = true;
       }
+    }
+
+    if (_fpa.app_specific.preprocessor) {
+      _fpa.app_specific.preprocessor(block, data);
     }
 
     _fpa.preprocessors.default(block, data, procfound);
@@ -435,6 +440,11 @@ _fpa = {
         procfound = true;
       }
     }
+
+    if (_fpa.app_specific.postprocessor) {
+      _fpa.app_specific.postprocessor(block, data);
+    }
+
     _fpa.postprocessors.default(block, data, procfound);
   },
 
