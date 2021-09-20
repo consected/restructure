@@ -17,9 +17,13 @@
   overflow: hidden;
 }
 
-.activity-logs-generic-block .common-template-item.activity-log--study-info-part-page-item.user-selected {
+.activity-logs-generic-block .common-template-item.activity-log--study-info-part-page-item.page-was-expanded {
   max-height: none;
   overflow: hidden;
+}
+
+.activity-logs-generic-block .model-reference-result {
+  order: 10000;
 }
 
 .dynamic-show-label {
