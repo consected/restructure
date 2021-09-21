@@ -19,6 +19,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+
+## [7.4.61] - 2021-09-21
+
 - [Added] Small change to Study Info authoring display to style with extra classes
 
 ## [7.4.59] - 2021-09-20
