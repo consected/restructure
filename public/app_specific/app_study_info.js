@@ -61,17 +61,28 @@ _fpa.app_specific = class {
   adjust_style($embedded_block) {
     if (!$embedded_block.length || $embedded_block.hasClass('done-use-config-layout')) return
 
-    var wv = $embedded_block.find('.result-field-container[data-field-name="block_width"]').attr('data-field-val')
-    if (!wv) wv = $embedded_block.find('.edit-field-container [data-attr-name="block_width"]').val()
+    var wv = this.get_part_setting($embedded_block, "block_width")
     if (!wv && this.default_layout() == 'rows') wv = '100%'
 
-    var pn = $embedded_block.find('.result-field-container[data-field-name="position_number"]').attr('data-field-val')
-    if (!pn) pn = $embedded_block.find('.edit-field-container [data-attr-name="position_number"]').val()
+    var pn = this.get_part_setting($embedded_block, "position_number")
     if (!pn) pn = 1000
 
     pn = parseInt(pn) + 1000
     $embedded_block.css({ width: wv, order: pn })
+
+    if (this.is_author_mode()) {
+      var ec = this.get_part_setting($embedded_block, "extra_classes")
+      if (ec) $embedded_block.addClass(ec)
+    }
+
+
     $embedded_block.addClass('done-use-config-layout')
+  }
+
+  get_part_setting($embedded_block, name) {
+    var val = $embedded_block.find(`.result-field-container[data-field-name="${name}"]`).attr('data-field-val')
+    if (!val) val = $embedded_block.find(`.edit-field-container [data-attr-name="${{ name }}"]`).val()
+    return val
   }
 
   // Add a class representing the layout based on the field default_layout
