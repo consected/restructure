@@ -19,6 +19,8 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Added] Small change to Study Info authoring display to style with extra classes
+
 ## [7.4.59] - 2021-09-20
 
 - [Fixed] Study Info app authoring and display
