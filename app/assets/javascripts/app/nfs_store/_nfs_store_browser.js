@@ -25,12 +25,16 @@ _nfs_store.fs_browser = function ($outer) {
     if (!disable) {
       disable = total_checked != 1;
       disable_submit_type('rename-file', $this, disable);
+      disable_trigger_file_actions($this, disable);
       disable = total_checked_folders != 1;
       disable_submit_type('rename-folder', $this, disable);
+      disable = total_checked == 0;
+      disable_trigger_file_actions($this, disable);
     }
     else {
       disable_submit_type('rename-file', $this, disable);
       disable_submit_type('rename-folder', $this, disable);
+      disable_trigger_file_actions($this, disable);
     }
 
   };
@@ -46,6 +50,24 @@ _nfs_store.fs_browser = function ($outer) {
 
     $('#container-browse-' + name + '-' + container_id).attr('disabled', disval);
     $('#container-browse-' + name + '-in-form-' + container_id).attr('disabled', disval);
+  };
+
+  var disable_trigger_file_actions = function ($this, disable) {
+
+    $(`[data-target-browser="#container-browser-${container_id}"][data-can-trigger-actions]`).each(function () {
+      var name = $(this).attr('data-trigger-file-action');
+
+      if (!disable) {
+        var can = $(this).attr('data-can-trigger-actions') == "true";
+        disable = !can;
+      }
+
+      var disval = disable ? 'disabled' : null;
+
+      $(this).attr('disabled', disval);
+      $(`#container-browse-trigger-file-action-${name}-in-form-${container_id}`).attr('disabled', disval);
+    })
+
   };
 
   var set_submit_download_caption = function ($this, caption) {

@@ -5,12 +5,15 @@
     <li><a href="#" id="container-browse-move-files-<%=container_id%>" class="container-browse-move-files" data-target-browser="#container-browser-<%=container_id%>" data-can-move-files="<%=can_move_files%>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Move Files</a></li>
     <li><a href="#" id="container-browse-rename-file-<%=container_id%>" class="container-browse-rename-file" data-target-browser="#container-browser-<%=container_id%>" data-can-rename-file="<%=can_move_files%>">Rename file</a></li>
     {{#each (fpa_state_item 'template_config' name  'v' 'user_file_actions')}}
+    {{log this}}
+    {{#with ..}}
     <li><a href="#" 
-           id="container-browse-trigger-file-action-{{id}}-<%=container_id%>" 
+           id="container-browse-trigger-file-action-{{../id}}-<%=container_id%>" 
            class="container-browse-trigger-file-action" 
            data-target-browser="#container-browser-<%=container_id%>" 
-           data-trigger-file-action="{{id}}"
-           data-can-trigger-actions="<%=can_user_file_actions%>">{{name}}</a></li>
+           data-trigger-file-action="{{../id}}"
+           data-can-trigger-actions="<%=can_user_file_actions%>">{{../name}}</a></li>
+    {{/with}}
     {{/each}}
   </ul>
 </span>
