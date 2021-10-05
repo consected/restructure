@@ -17,8 +17,10 @@ module NfsStore
         raise FsException::NoAccess, 'User does not have access to this container'
       end
 
+      orig_user = container.current_user
       # Make sure the archive files are mounted (this is idempotent), but not immediate
       Archive::Mounter.mount_all container.stored_files
+      container.current_user = orig_user
 
       unless activity_log
         res = ModelReference.find_where_referenced_from(container).first

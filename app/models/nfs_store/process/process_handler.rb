@@ -230,8 +230,8 @@ module NfsStore
           has_nfs_role = user.user_roles.pluck(:role_name).find { |r| r.start_with? 'nfs_store group ' }
           unless has_nfs_role
             raise FsException::Action,
-                  "Job container file user (#{orig_user.id}) is disabled and batch user does not have an " \
-                  "nfs_store group role in the current app: #{user.app_type_id}"
+                  "Job container file user (#{orig_user.id}) is disabled and batch user (#{User.batch_user}) does not have an " \
+                  "nfs_store group role in the current app: #{user.app_type_id} || #{in_app_type_id}"
           end
         end
         container_file.current_user = user
