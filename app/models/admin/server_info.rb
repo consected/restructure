@@ -6,7 +6,7 @@ class Admin::ServerInfo
     OnlyLoadAppTypes
     DefaultMigrationSchema DefaultSchemaOwner StartYearRange EndYearRange AgeRange CareerYearsRange
     UserTimeout AdminTimeout OsWordsFile PasswordEntropyConfig
-    NotificationsFromEmail AdminEmail TwoFactorAuthDisabled TwoFactorAuthIssuer TwoFactorAuthDrift
+    NotificationsFromEmail AdminEmail BatchUserEmail TwoFactorAuthDisabled TwoFactorAuthIssuer TwoFactorAuthDrift
     CheckPrevPasswords PasswordAgeLimit PasswordReminderDays PasswordMaxAttempts PasswordUnlockStrategy
     LoginIssuesUrl LoginMessage
     SearchResultsLimit
