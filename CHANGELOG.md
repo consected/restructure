@@ -19,6 +19,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Fixed] [Filestore] file trigger action not working
+- [Fixed] [Filestore] incorrect current user being used in certain cases preventing browser viewing
+- [Fixed] [Filestore] loop related to unzipping when .z0n parts are missing
 
 ## [7.4.61] - 2021-09-21
 
