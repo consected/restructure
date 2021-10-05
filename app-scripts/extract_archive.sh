@@ -17,7 +17,12 @@ rm -f ${single_zip_path}
 cd "$(dirname "${archive_path}")"
 
 # Join split files to a single file in the temp directory
-zip -q -s 0 "${archive_fn}" -O "${single_zip_path}"
+# We send a 'q' to stdin just in case there is a prompt for a missing split file,
+# which seems to force an infinite loop
+zip -q -s 0 "${archive_fn}" -O "${single_zip_path}" << EOF
+q
+EOF
+
 if [ $? != 0 ]; then
   rm -f "${single_zip_path}"
   echo >&2 "Failed zip -q -s 0 '${archive_fn}' -O '${single_zip_path}' ---- in $(pwd)"
