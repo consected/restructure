@@ -18,6 +18,12 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Added] Model references disabled when to_record is disabled
+- [Changed] Study Info app to provide a better authoring experience
+- [Changed] processing scripts to allow for app-specfic scripts to be loaded
+- [Changed] [Filestore] reworked browser to use JSON api and improve performance
+- [Fixed] [Filestore] loop related to unzipping when .z0n parts are missing
+- [Fixed] Calculation around boolean fields
 
 ## [8.0.15] - 2021-09-03
 

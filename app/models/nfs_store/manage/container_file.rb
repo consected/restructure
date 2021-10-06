@@ -83,10 +83,28 @@ module NfsStore
         f_path.blank? ? TrashPath : File.join(TrashPath, f_path)
       end
 
+      def retrieval_type
+        self.class.retrieval_type
+      end
+
+      def container_dir_path
+        container_path(no_filename: true, leading_dot: true)
+      end
+
       def as_json(extras = {})
+        lr = extras.delete(:limited_results)
+        return super unless lr
+
+        allow_show_flags = extras.delete(:allow_show_flags)
+
         extras[:methods] ||= []
-        extras[:methods] << :master_id
-        super
+        extras[:include] ||= []
+        extras[:methods] << :retrieval_type
+        extras[:methods] << :mime_type_text
+        extras[:methods] << :file_metadata_present
+        extras[:include] << :item_flags if allow_show_flags && allow_show_flags[retrieval_type]
+        # Call serializable_hash rather than super, to avoid GeneralDataConcerns processing more than we need
+        serializable_hash(extras)
       end
 
       # Store a new file from a temp file, into a container, with a full set of attributes
@@ -214,7 +232,8 @@ module NfsStore
           next unless Filesystem.test_dir role_name, container, :write
 
           # If a path is set, ensure we can make a directory for it if one doesn't exist
-          unless path.blank? || Filesystem.test_dir(role_name, container, :mkdir, extra_path: container_path(no_filename: true), ok_if_exists: true)
+          unless path.blank? || Filesystem.test_dir(role_name, container, :mkdir,
+                                                    extra_path: container_path(no_filename: true), ok_if_exists: true)
             next
           end
 
@@ -284,7 +303,8 @@ module NfsStore
 
           trash_file_path = Filesystem.nfs_store_path(role_name, container, new_trash_path, file_name)
           unless File.exist?(trash_file_path)
-            raise FsException::Action, "Replacing file did not move the actual file to the trash filesystem location: #{trash_file_path}"
+            raise FsException::Action,
+                  "Replacing file did not move the actual file to the trash filesystem location: #{trash_file_path}"
           end
 
           # Resetting file name and generating new hash, mime type, etc
@@ -293,7 +313,8 @@ module NfsStore
           self.archive_file = orig_archive_file if respond_to? :archive_file
           self.valid_path_change = true
 
-          rep_fs_path = Filesystem.nfs_store_path(role_name, container, path, file_name, archive_file: orig_archive_file)
+          rep_fs_path = Filesystem.nfs_store_path(role_name, container, path, file_name,
+                                                  archive_file: orig_archive_file)
           unless rep_fs_path == orig_fs_path
             raise FsException::Action, "Replacement file targeting wrong location: #{rep_fs_path}"
           end
@@ -337,6 +358,16 @@ module NfsStore
 
         md5_digest.hexdigest
       end
+
+      #
+      # Is a value set in the file_metadata field?
+      # Avoids deserializing the JSON
+      # @return [true | false]
+      def file_metadata_present?
+        @file_metadata_present = !!file_metadata_before_type_cast.present? if @file_metadata_present.nil?
+      end
+
+      alias file_metadata_present file_metadata_present?
 
       private
 

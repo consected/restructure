@@ -106,7 +106,12 @@
       name: message template name
       label: show dialog button label
   creatable_if: 'ref: ** conditions reference **'
-  editable_if: 'ref: ** conditions reference **'
+  editable_if: |
+    'ref: ** conditions reference **'
+
+    NOTE: if not defined, the default is to only allow an item to be editable if it is the most recently created or
+    item in the list. If you want items to be always editable, use *always: true*
+
   showable_if: 'ref: ** conditions reference **'
   add_reference_if: 'ref: ** conditions reference **'
   valid_if:

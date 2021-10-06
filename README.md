@@ -64,7 +64,7 @@ Rather than disparate systems generating flat files of data (for example REDCap)
 
 ### File management
 
-Regular desktop files and sequences of MRI images can be rapidly captured into the system, through the user interface or via programmatic APIs (allowing automated submission from other locations)
+Regular desktop files and sequences of MRI images can be rapidly captured into the system, through the user interface or via programmatic APIs (allowing automated submission from other locations) as an alternative to more complex XNAT servers or separate electronic document and records management systems (EDRMS)
 
 ### Dashboards and reports
 
