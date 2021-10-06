@@ -18,6 +18,9 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+
+## [8.0.16] - 2021-10-06
+
 - [Added] Model references disabled when to_record is disabled
 - [Changed] Study Info app to provide a better authoring experience
 - [Changed] processing scripts to allow for app-specfic scripts to be loaded
