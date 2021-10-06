@@ -1,97 +1,215 @@
 <%
+  # Templates to support filestore browser. The view_type will decide the actual browser displayed
+
     use_secure_view_actions = []
     acts = [:view_files_as_image, :view_files_as_html, :download_files]
     use_secure_view_actions = acts.select {|act| current_user.can?(act)}
 %>
+<%= render partial: 'filestore/browse_list_templates' %>
+<%= render partial: 'filestore/browse_icons_templates' %>
 
+<%#
+  # Primary template for viewing a full filestore browser. 
+  # called by model references to view browser within an activity log
+  # and admin pages.
+%>
 <script id="filestore-view-template"  type="text/x-handlebars-template" class="hidden handlebars-template">
-{{>filestore_common_template_view}}
+  {{# if view_type '===' 'icons'}}
+    {{>filestore_simple_template_view}}
+  {{else if view_type '===' 'list'}}
+    {{>filestore_common_template_view}}
+  {{else}}
+    {{>filestore_common_template_view}}
+  {{/if}}
 </script>
 
-<script id="filestore_common_template_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
 
-<div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
-  <%= render partial: 'nfs_store/browse/browser_header', locals: { 
-        container_id: '{{to_record_id}}', 
-        container_name: '{{to_record_data}}', 
-        container_label: '{{to_record_label}}', 
-        activity_log_id: '{{from_record_id}}', 
-        activity_log_type: '{{from_record_type_us}}' 
-      } %>
-  <div class="upload-dropzone">
+<script id="filestore-browser-form"  type="text/x-handlebars-template" class="hidden handlebars-template">
+  <div>
+  {{#with nfs_store_container}}
+    <div data-result="nfs-store-container-list-items-{{id}}"
+        class="container-browser browser-hide-meta browser-hide-classifications"
+        id="container-browser-{{id}}"
+        data-container-writable="{{writable}}"
+        data-container-readable="{{readable}}"
+        data-can-submit-download-or-view="{{can_download_or_view}}"
+        data-can-submit-download="{{can_download}}"
+        data-can-submit-trash="{{can_send_to_trash}}"
+        data-can-submit-move-files="{{can_move_files}}"
+        data-can-submit-rename-file="{{can_rename_files}}"
+        data-can-submit-rename-folder="{{can_rename_folders}}"
+        data-can-trigger-file-actions="{{can_user_file_actions}}"
+        data-result-target-for-child=""
+    >
+      {{#if directory_not_found}}
+        <p>Storage has not been initialized. This container is not usable.
+      {{else if (not readable)}}
+        <p>You do not have permission to read this container.</p>
+      {{else}}
+          <form class="new_nfs_store_download form-inline" 
+                id="new_nfs_store_download" 
+                action="/nfs_store/downloads" 
+                accept-charset="UTF-8" 
+                method="post"
+                data-remote="true">
+            {{>ajax_form_fields}}
 
-    <div class="nfs-store-container-block" data-container-id="{{to_record_id}}" data-activity-log-id="{{from_record_id}}" data-activity-log-type="{{from_record_type_us}}">
-      <%= render partial: 'nfs_store/browse/show', locals: { 
-            container_id: '{{to_record_id}}', 
-            container_name: '{{to_record_data}}', 
-            activity_log_id: '{{from_record_id}}', 
-            activity_log_type: '{{from_record_type_us}}' 
-          } %>
-      <%= render partial: 'filestore/classification/block', locals: { 
-            container_id: '{{to_record_id}}', 
-            container_name: '{{to_record_data}}', 
-            activity_log_id: '{{from_record_id}}', 
-            activity_log_type: '{{from_record_type_us}}' 
-          } %>
-      <div class="browse-controls">
-        <div class="download-actions text-center">
-          {{#if to_record_editable}}
-          <%= render partial: 'nfs_store/browse/options_menu', locals: { 
-                container_id: '{{to_record_id}}', 
-                activity_log_id: '{{from_record_id}}', 
-                activity_log_type: '{{from_record_type_us}}', 
-                can_send_to_trash: true, 
-                can_move_files: true,
-                can_user_file_actions: true
-              } %>
-          {{/if}}
-          <%= render partial: 'nfs_store/browse/download_button', locals: { 
-                container_id: '{{to_record_id}}', 
-                activity_log_id: '{{from_record_id}}', 
-                activity_log_type: '{{from_record_type_us}}',
-                can_download: current_user.can?(:download_files)
-              } %>
-          {{#if to_record_editable}}
-          <%= render partial: 'nfs_store/uploader/add_files', locals: { 
-                container_id: '{{to_record_id}}', 
-                activity_log_id: '{{from_record_id}}', 
-                activity_log_type: '{{from_record_type_us}}', 
-                container_writable: true 
-              } %>
-          {{/if}}
-        </div>
-      </div>
+            {{#with ..}}
+            {{>nfs_store_browse_list_results_part}}
+            {{/with}}
+            <input name="nfs_store_download[activity_log_type]" type="hidden" value="{{parent_type}}">
+            <input name="nfs_store_download[activity_log_id]" type="hidden" value="{{parent_id}}">
+            <input name="nfs_store_download[container_id]" type="hidden" value="{{id}}">
+            
+            
+            <div class="extra_params"></div>
+            <input type="submit" name="commit" value="Download" id="container-browse-download-in-form-{{id}}" class="hidden has-value attached-has-value" data-disable-with="select files to download" disabled="disabled">
+            <input type="submit" name="commit" value="Trash" id="container-browse-trash-in-form-{{id}}" class="hidden has-value attached-has-value" data-disable-with="select files to send to trash" disabled="disabled">
+            <input type="submit" name="commit" value="Move Files" id="container-browse-move-files-in-form-{{id}}" class="hidden has-value attached-has-value" data-disable-with="select files to move" disabled="disabled">
+            <input type="submit" name="commit" value="Rename File" id="container-browse-rename-file-in-form-{{id}}" class="hidden has-value attached-has-value" data-disable-with="select file to rename" disabled="disabled">
+            <input type="submit" name="commit" value="Rename Folder" id="container-browse-rename-folder-in-form-{{id}}" class="hidden has-value attached-has-value" data-disable-with="select folder to rename" disabled="disabled">
+
+            {{#each trigger_file_action_ids}}
+              <input type="submit" name="commit" value="Trigger File Action: {{this}}"
+                     id="container-browse-trigger-file-action-{{this}}-in-form-{{../id}}",
+                     class="hidden container-browse-trigger-file-action-in-form",
+                     data-disable-with="select files"
+                     data-trigger-file-action="{{this}}" } %>
+            {{/each}}
+          </form>
+        
+        {{>filestore_valid_files container_id=id}}
+      {{/if}}
     </div>
+  {{/with}}
+  </div>
+</script>
 
-    <div class="row">
-      <%= render partial: 'nfs_store/uploader/index' %>
-    </div>
-
-    <div class="drop-info">drop files to upload</div>
+<script id="filestore_valid_files"  type="text/x-handlebars-template" class="hidden handlebars-partial">
+{{#if writable}}
+<div class="nfs-store-valid-files panel">
+  <div class="panel-header">
+    <a data-toggle-caret="true" 
+       data-toggle="collapse" 
+       class="glyphicon glyphicon-triangle-bottom" 
+       href="#valid-files-list-{{container_id}}" 
+       aria-expanded="false" 
+       aria-controls="valid-files-list-{{container_id}}"
+       role="button">
+    </a> 
+    valid upload files
+  </div>
+  <div id="valid-files-list-{{container_id}}" class="collapse">
+    <ul>
+      {{#each filters_for}}
+      <li>{{this}}</li>
+      {{/each}}
+    </ul>
   </div>
 </div>
+{{/if}}
+</script>
+
+
+<script id="filestore_browser_outer"  type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <div class="container-browser-outer prevent-scroll"
+       data-sub-item="nfs_store_container"
+       data-sub-id="{{container_id}}"
+       data-template="filestore-browser-form"
+       data-container-id="{{container_id}}"
+       data-folder="{{folder}}"
+       data-folder-level="{{level}}"
+  >
+    <div class="container-browser ajax-running"></div>
+  </div>
+</script>
+
+
+<script id="filestore_common_template_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
+    <%= render partial: 'nfs_store/browse/browser_header', locals: {
+          container_id: '{{to_record_id}}',
+          container_name: '{{to_record_data}}',
+          container_label: '{{to_record_label}}',
+          activity_log_id: '{{from_record_id}}',
+          activity_log_type: '{{from_record_type_us}}'
+        } %>
+    <div class="upload-dropzone">
+  
+      <div class="nfs-store-container-block" data-container-id="{{to_record_id}}" data-activity-log-id="{{from_record_id}}" data-activity-log-type="{{from_record_type_us}}">
+        {{>filestore_browser_outer container_id=to_record_id container_name=to_record_data level=0 folder='.' }}
+  
+        <%= render partial: 'filestore/classification/block', locals: {
+              container_id: '{{to_record_id}}',
+              container_name: '{{to_record_data}}',
+              activity_log_id: '{{from_record_id}}',
+              activity_log_type: '{{from_record_type_us}}'
+            } %>
+        <div class="browse-controls">
+          <div class="download-actions text-center">
+            {{#if to_record_editable}}
+            <%= render partial: 'nfs_store/browse/options_menu', locals: {
+                  container_id: '{{to_record_id}}',
+                  activity_log_id: '{{from_record_id}}',
+                  activity_log_type: '{{from_record_type_us}}',
+                  can_send_to_trash: true,
+                  can_move_files: true,
+                  can_user_file_actions: true
+                } %>
+            {{/if}}
+            <%= render partial: 'nfs_store/browse/download_button', locals: {
+                  container_id: '{{to_record_id}}',
+                  activity_log_id: '{{from_record_id}}',
+                  activity_log_type: '{{from_record_type_us}}',
+                  can_download: current_user.can?(:download_files)
+                } %>
+            {{#if to_record_editable}}
+            <%= render partial: 'nfs_store/uploader/add_files', locals: {
+                  container_id: '{{to_record_id}}',
+                  activity_log_id: '{{from_record_id}}',
+                  activity_log_type: '{{from_record_type_us}}',
+                  container_writable: true
+                } %>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+  
+      <div class="row">
+        <%= render partial: 'nfs_store/uploader/index' %>
+      </div>
+  
+      <div class="drop-info">drop files to upload</div>
+    </div>
+  </div>
 </script>
 
 
 <script id="filestore_simple_template_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
-
-<div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
-    <%= link_to "", "/nfs_store/container_list/{{to_record_id}}?activity_log_id={{from_record_id}}&activity_log_type={{from_record_type_us}}&view_type=icons", class: "refresh-container-list glyphicon glyphicon-refresh hidden", title: "refresh list", data: { remote: "true", container_id: "{{to_record_id}}", activity_log_id: "{{from_record_id}}", activity_log_type: "{{from_record_type_us}}" } %>
-    <div class="nfs-store-container-block" data-container-id="{{to_record_id}}" data-activity-log-id="{{from_record_id}}" data-activity-log-type="{{from_record_type_us}}">
-      <%= render partial: 'nfs_store/browse/show', locals: { 
-            container_id: '{{to_record_id}}', 
-            container_name: '{{to_record_data}}', 
-            activity_log_id: '{{from_record_id}}', 
-            activity_log_type: '{{from_record_type_us}}'
-          } %>
-      <%= render partial: 'filestore/classification/block', locals: { 
-            container_id: '{{to_record_id}}', 
-            container_name: '{{to_record_data}}', 
-            activity_log_id: '{{from_record_id}}', 
-            activity_log_type: '{{from_record_type_us}}'
-          } %>
-      
+  <div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
+      <%= link_to "", "/nfs_store/container_list/{{to_record_id}}/content?activity_log_id={{from_record_id}}&activity_log_type={{from_record_type_us}}&view_type=icons", class: "refresh-container-list glyphicon glyphicon-refresh hidden", title: "refresh list", data: { remote: "true", container_id: "{{to_record_id}}", activity_log_id: "{{from_record_id}}", activity_log_type: "{{from_record_type_us}}" } %>
+      <div class="nfs-store-container-block" data-container-id="{{to_record_id}}" data-activity-log-id="{{from_record_id}}" data-activity-log-type="{{from_record_type_us}}">
+        
+        <div class="container-browser-outer container-browser-icons-outer prevent-scroll" 
+            data-sub-item="nfs_store_container" 
+            data-sub-id="{{to_record_id}}" 
+            data-template="nfs-store-browse-icons-results" 
+            data-preprocessor="filestore_browser_form"      
+            data-container-id="{{to_record_id}}"
+            data-folder="."
+            data-folder-level="0"
+            data-subscription="nfs-store-container-icons-items-{{to_record_id}}"
+        >
+          <div class="container-icons-browser ajax-running"></div>
+        </div>
+  
+        <%= render partial: 'filestore/classification/block', locals: {
+              container_id: '{{to_record_id}}',
+              container_name: '{{to_record_data}}',
+              activity_log_id: '{{from_record_id}}',
+              activity_log_type: '{{from_record_type_us}}'
+            } %>
+  
+    </div>
   </div>
-</div>
 </script>
-
