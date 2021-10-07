@@ -12,7 +12,7 @@
    viewBox="0 0 449.41733 182.61418"
    stroke-miterlimit="10"
    id="svg26"
-   sodipodi:docname="restructure-logo.svg"
+   sodipodi:docname="restructure-logo-grey.svg"
    width="449.41733"
    height="182.61418"
    style="fill:none;stroke:none;stroke-linecap:square;stroke-miterlimit:10"
@@ -49,12 +49,12 @@
      fit-margin-right="0"
      fit-margin-bottom="0"
      inkscape:zoom="0.70625"
-     inkscape:cx="304.5218"
+     inkscape:cx="11.424455"
      inkscape:cy="-277.09677"
      inkscape:window-x="0"
      inkscape:window-y="27"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg26" />
+     inkscape:current-layer="g4590" />
   <clipPath
      id="p.0">
     <path
@@ -75,7 +75,7 @@
        d="M 3.664278,4.5252556 H 453.08161 V 187.13943 H 3.664278 Z"
        id="path7"
        inkscape:connector-curvature="0"
-       style="fill:#38761d;fill-rule:evenodd" />
+       style="fill:#808080;fill-rule:evenodd" />
     <path
        d="M 13.097348,10.336276 H 183.62759 V 180.86652 H 13.097348 Z"
        id="path9"
