@@ -19,7 +19,13 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+
+## [7.4.63] - 2021-10-07
+
+<<<<<<< HEAD
 - [Fixed] Embedded reports autorunning even if "run automatically" was not set
+=======
+>>>>>>> 278379a38e169f689876950e2362850240211f4b
 
 ## [7.4.62] - 2021-10-06
 
