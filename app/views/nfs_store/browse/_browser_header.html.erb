@@ -6,7 +6,7 @@
 <div class="container-heading-block">
   <h4 class="container-name"><%=container_label%></h4>
   <span class="container-id-label">ID <%=container_id%></span>
-  <%= link_to "", "/nfs_store/container_list/#{container_id}#{activity_log_id ? "?activity_log_id=#{activity_log_id}&activity_log_type=#{activity_log_type}" : ""}", class: "refresh-container-list glyphicon glyphicon-refresh", title: "refresh list", data: { remote: "true", container_id: container_id, activity_log_id: activity_log_id, activity_log_type: activity_log_type } %>
+  <%= link_to "", "/nfs_store/container_list/#{container_id}/content#{activity_log_id ? "?activity_log_id=#{activity_log_id}&activity_log_type=#{activity_log_type}" : ""}", class: "refresh-container-list glyphicon glyphicon-refresh", title: "refresh list", data: { remote: "true", container_id: container_id, activity_log_id: activity_log_id, activity_log_type: activity_log_type } %>
   <div class="container-meta-controls">
     <div class="button-radio no-details">
       <input type="radio" name="container-meta-controls-<%=container_id%>" id="container-meta-controls-<%=container_id%>-none" value="" class="ff" <% if app_config_text(:file_browser_default_view, 'no details') == 'no details' %>checked="checked"<% end %> /> <label for="container-meta-controls-<%=container_id%>-none">no details</label>

@@ -53,7 +53,7 @@ module TableGenerators
 
     item_type_id = "#{singular_name.sub('activity_log_', '')}_id"
 
-    if generate_table == :drop || generate_table == :drop_do
+    if %i[drop drop_do].include?(generate_table)
       sql = <<EOF
 
       DROP TABLE if exists #{singular_name}_history CASCADE;
@@ -73,7 +73,7 @@ EOF
         f = 'bigint' if a.end_with?('_id')
         if a == 'created_by_user_id'
           created_by = true
-          f = 'integer' 
+          f = 'integer'
         end
         f = 'date' if a.end_with?('_when')
         f = 'date' if a.end_with?('_date')
@@ -106,6 +106,7 @@ EOF
                   user_id integer,
                   created_at timestamp without time zone NOT NULL,
                   updated_at timestamp without time zone NOT NULL,
+                  disabled boolean default false,
                   #{singular_name}_id integer
               );
               CREATE TABLE #{name} (
@@ -116,7 +117,8 @@ EOF
                   extra_log_type varchar,
                   user_id integer,
                   created_at timestamp without time zone NOT NULL,
-                  updated_at timestamp without time zone NOT NULL
+                  updated_at timestamp without time zone NOT NULL,
+                  disabled boolean default false
               );
 
               CREATE FUNCTION log_#{singular_name}_update() RETURNS trigger
@@ -132,6 +134,7 @@ EOF
                               user_id,
                               created_at,
                               updated_at,
+                              disabled,
                               #{singular_name}_id
                               )
                           SELECT
@@ -142,6 +145,7 @@ EOF
                               NEW.user_id,
                               NEW.created_at,
                               NEW.updated_at,
+                              NEW.disabled,
                               NEW.id
                           ;
                           RETURN NEW;
@@ -210,7 +214,7 @@ EOF
 
               ALTER TABLE ONLY #{singular_name}_history
                   ADD CONSTRAINT fk_#{singular_name}_history_#{name} FOREIGN KEY (#{singular_name}_id) REFERENCES #{name}(id);
-              
+        #{'      '}
               #{created_by ? '' : '--'} ALTER TABLE ONLY #{singular_name}_history
               #{created_by ? '' : '--'}     ADD CONSTRAINT fk_#{singular_name}_history_cb_users FOREIGN KEY (created_by_user_id) REFERENCES users(id);
 
@@ -221,7 +225,7 @@ EOF
       EOF
     end
 
-    if generate_table == true || generate_table == :create_do || generate_table == :drop_do
+    if [true, :create_do, :drop_do].include?(generate_table)
       ActivityLog.connection.execute sql
     else
       sql = "
@@ -229,7 +233,7 @@ EOF
 #{sql}
       COMMIT;"
       puts sql
-      return sql
+      sql
     end
   end
 end

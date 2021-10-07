@@ -41,14 +41,16 @@ RELEASESTARTED="$(echo ${ALLTAGS} | grep ${NEWVER})"
 echo "Current version: ${CURRVER}"
 echo "Next version: ${NEWVER}"
 
-echo "Checking brakeman before we go through the whole process"
-bin/brakeman -q --summary > /tmp/fphs-brakeman-summary.txt
-if [ "$?" == 0 ]; then
-  echo "Brakeman OK"
-else
-  cat /tmp/fphs-brakeman-summary.txt
-  echo "Brakeman Failed"
-  exit 1
+if [ -z "${SKIP_BRAKEMAN}" ]; then
+  echo "Checking brakeman before we go through the whole process"
+  bin/brakeman -q --summary > /tmp/fphs-brakeman-summary.txt
+  if [ "$?" == 0 ]; then
+    echo "Brakeman OK"
+  else
+    cat /tmp/fphs-brakeman-summary.txt
+    echo "Brakeman Failed"
+    exit 1
+  fi
 fi
 
 if [ -z "${RELEASESTARTED}" ]; then
@@ -60,7 +62,7 @@ if [ -z "${RELEASESTARTED}" ]; then
     exit
   fi
   git push --set-upstream origin release/${NEWVER}
-  git flow release finish ${NEWVER}
+  git flow release finish -m 'Release' ${NEWVER}
 else
   echo "Release already started. Checking out and continuing"
   git checkout new-master && git pull && git merge develop

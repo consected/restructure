@@ -48,6 +48,16 @@ module NfsStore
       end
 
       #
+      # Get the "human" version of each of the filters returned by NfsStore::Filter::Filter.filters_for
+      # This is a rough approximation of what a user would expect to see as file wildcards
+      # @return [Array{String}]
+      def self.human_filters_for(item, user:nil, alt_role:nil)
+        filters_for(item).uniq.sort.map do |f|
+          f.gsub('\.', '.').gsub('.*', '*').gsub('.+', '*').gsub(/^\*$/, '*.*').gsub('^/', '').gsub('^', '').gsub('$', '')
+        end
+      end
+
+      #
       # Simply lookup the filters based on the resource name for the scoped user roles.
       # Basic function used by those that have activity log and other item instances, or just
       # naming in view templates
@@ -110,9 +120,13 @@ module NfsStore
       # @param item [ActivityLog|NfsStore::ManageContainer] container or activity log referencing the container
       # @param user [User|nil]
       # @return [Array] all matched records of StoredFile and ArchivedFile types
-      def self.evaluate_container_files(item, user: nil, alt_role: nil)
+      def self.evaluate_container_files(item, user: nil, alt_role: nil, include_flags: nil)
         res = evaluate_container_files_as_scopes item, user: user, alt_role: alt_role
         return [] unless res
+
+        include_flags&.each do |rt|
+          res[rt] = res[rt].includes(:item_flags)
+        end
 
         res[:stored_files] + res[:archived_files]
       end

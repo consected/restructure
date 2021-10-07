@@ -1984,6 +1984,12 @@ _fpa.form_utils = {
     });
   },
 
+  set_auth_tokens: function (block) {
+    var csrf_token = $('head meta[name="csrf-token"]').attr('content')
+    $('input.set-auth-token[type="hidden"]').val(csrf_token)
+  },
+
+
   // Run through all the general formatters for a new block to show nicely
   format_block: function (block) {
 
@@ -2026,6 +2032,7 @@ _fpa.form_utils = {
     _fpa.form_utils.setup_sub_lists(block);
     _fpa.form_utils.apply_view_handlers(block);
     _fpa.form_utils.setup_secure_view_links(block);
+    _fpa.form_utils.set_auth_tokens(block);
 
     block.removeClass('formatting-block');
   }

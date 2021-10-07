@@ -19,6 +19,15 @@ release will be created for any release tested in production, and may be marked 
 ## Unreleased
 
 
+## [8.0.16] - 2021-10-06
+
+- [Added] Model references disabled when to_record is disabled
+- [Changed] Study Info app to provide a better authoring experience
+- [Changed] processing scripts to allow for app-specfic scripts to be loaded
+- [Changed] [Filestore] reworked browser to use JSON api and improve performance
+- [Fixed] [Filestore] loop related to unzipping when .z0n parts are missing
+- [Fixed] Calculation around boolean fields
+
 ## [8.0.15] - 2021-09-03
 
 - [Changed] Docs library to allow links to work within source (and github) as well as in app 
