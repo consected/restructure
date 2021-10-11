@@ -294,6 +294,24 @@ div.reset-row,
       margin-left: 1.6em;
       overflow: visible;
     }
+
+    img {
+      background: silver;
+      height: 1em;
+      width: 1em;
+      border-radius: 50%;
+    }
+
+    img.loaded-image {
+      height: auto;
+      width: auto;
+      background: transparent;
+      border-radius: unset;
+    }
+
+    img.broken-image {
+      opacity: 0;
+    }
   }
 
   .edit-field-container .custom-editor {
