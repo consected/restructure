@@ -161,5 +161,15 @@ _fpa.loaded.default = function () {
     $('body').addClass('page-transition');
   }
 
+  // Prevent page change, especially with a back button...
+  // For example where a full screen overlay such as the secure viewer
+  // might lead users to use "back" rather than the in page close button
+  window.addEventListener('popstate', function (event) {
+    if (!$('body').hasClass('prevent-page-change')) return;
+
+    if (_fpa.page_transition_callback) _fpa.page_transition_callback();
+    history.pushState(null, null, document.referrer);
+  })
+
   $('body').removeClass('page-loading');
 };
