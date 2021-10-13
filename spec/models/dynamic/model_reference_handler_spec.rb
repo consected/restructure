@@ -6,7 +6,7 @@ AlNameGenTest = 'Gen Test ELT'
 # Use the activity log player contact phone activity log implementation,
 # since it includes the works_with concern
 
-RSpec.describe 'Activity Log extra types implementation', type: :model do
+RSpec.describe 'Model reference implementation', type: :model do
   def al_name
     AlNameGenTest
   end
@@ -18,12 +18,23 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
     SetupHelper.setup_al_gen_tests AlNameGenTest, 'elt', 'player_contact'
   end
 
+  def setup_option_config(position, label, fields)
+    c = @activity_log.option_configs[position]
+    expect(c.label).to eq label
+    expect(c.fields).to eq fields
+
+    setup_access c.resource_name, resource_type: :activity_log_type, user: @user
+  end
+
   before :each do
     create_admin
     create_user
     setup_access :player_contacts
+    setup_access :addresses
     setup_access :activity_log__player_contact_phones
-    create_item(data: rand(10_000_000_000_000_000), rank: 10)
+    @player_contact1 = create_item(data: rand(10_000_000_000_000_000), rank: 10)
+    @player_contact2 = create_item({ data: rand(10_000_000_000_000_000), rank: 10 }, @player_contact1.master)
+    @player_contact3 = create_item({ data: rand(10_000_000_000_000_000), rank: 10 }, @player_contact1.master)
 
     @activity_log = al = ActivityLog.active.where(name: al_name).first
     @working_data = '(111)222-3333 ext 7654321'
@@ -88,37 +99,108 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
             add: many
             also_disable_record: true
 
+      mr_creatables:
+        label: Creatables Test
+        fields:
+          - select_call_direction
+          - select_who
+        editable_if:
+          always: true
+        references:
+          player_contacts:
+            from: master
+            add: many
+            limit: 2
+          activity_log__player_contact_elt:
+            from: this
+            add: one_to_this
+            also_disable_record: true
+            add_with:
+              extra_log_type: mr_self_ref
+
+      mr_activity_selector:
+        label: Activity Selector
+        fields:
+          - select_call_direction
+          - select_who
+        editable_if:
+          always: true
+        references:
+          player_contacts:
+            from: master
+            add: many
+            limit: 2
+          activity_log__player_contact_elt:
+            from: this
+            add: many
+            also_disable_record: true
+            type_config:
+              activity_selector:
+                mr_showable_test: Showable Test
+                mr_simple_test: Simple Test
+                mr_creatables: Creatables
+
+      mr_creatable_master:
+        label: Creatable on Master Test
+        fields:
+          - select_call_direction
+          - select_who
+        editable_if:
+          always: true
+        references:
+          player_contacts:
+            from: master
+            add: many
+            limit: 2
+          activity_log__player_contact_elt:
+            from: this
+            add: one_to_master
+            also_disable_record: true
+            add_with:
+              extra_log_type: mr_self_ref
+
+
+      always_embed:
+        label: Always Embed
+        fields:
+          - select_call_direction
+          - select_who
+        editable_if:
+          always: true
+        view_options:
+          always_embed_reference: player_contact
+          always_embed_creatable_reference: address
+        references:
+          player_contact:
+            from: master
+            add: many
+            limit: 2
+          address:
+            from: this
+            add: many
+            also_disable_record: true
+
     END_DEF
 
     al.current_admin = @admin
-
     al.save!
-
     al = @activity_log
 
     c1 = al.option_configs.first
     expect(c1.label).to eq 'Step 1'
     expect(c1.fields).to eq %w[select_call_direction select_who]
-
-    c3 = al.option_configs[2]
-    expect(c3.label).to eq 'Reference Simple Test'
-    expect(c3.fields).to eq %w[select_call_direction select_who]
-
-    c4 = al.option_configs[3]
-    expect(c4.label).to eq 'Reference Showable Test'
-    expect(c4.fields).to eq %w[select_call_direction select_who]
-
-    c5 = al.option_configs[4]
-    expect(c5.label).to eq 'Reference Self Test'
-    expect(c5.fields).to eq %w[select_call_direction select_who disabled]
-
     setup_access al.resource_name, resource_type: :table, user: @user
-    setup_access c3.resource_name, resource_type: :activity_log_type, user: @user
-    setup_access c4.resource_name, resource_type: :activity_log_type, user: @user
-    setup_access c5.resource_name, resource_type: :activity_log_type, user: @user
+
+    setup_option_config 2, 'Reference Simple Test', %w[select_call_direction select_who]
+    setup_option_config 3, 'Reference Showable Test', %w[select_call_direction select_who]
+    setup_option_config 4, 'Reference Self Test', %w[select_call_direction select_who disabled]
+    setup_option_config 5, 'Creatables Test', %w[select_call_direction select_who]
+    setup_option_config 6, 'Activity Selector', %w[select_call_direction select_who]
+    setup_option_config 7, 'Creatable on Master Test', %w[select_call_direction select_who]
+    setup_option_config 8, 'Always Embed', %w[select_call_direction select_who]
   end
 
-  it 'saves data into an activity log record' do
+  it 'evaluates rules to optionally show references' do
     puts @activity_log.resource_name
 
     @player_contact.current_user = @user
@@ -172,8 +254,6 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
   end
 
   it 'handles disabling of references and referenced items' do
-    puts @activity_log.resource_name
-
     @player_contact.current_user = @user
     @player_contact.master.current_user = @user
 
@@ -215,5 +295,119 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
     mr_ref2.reload
     expect(referenced2.disabled).to be true
     expect(mr_ref2.disabled).to be true
+  end
+
+  it 'limits number of references that can be created' do
+    @player_contact.current_user = @user
+    @player_contact.master.current_user = @user
+
+    al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                        extra_log_type: 'mr_creatables',
+                                                                        select_who: 'abc')
+    al_simple.save!
+
+    cmrs = al_simple.creatable_model_references only_creatables: true
+    expect(cmrs.keys).to eq %i[activity_log__player_contact_elt_mr_self_ref player_contact]
+
+    res = ModelReference.create_from_master_with(al_simple.master, @player_contact1)
+    expect(res).to be_truthy
+    res = ModelReference.create_from_master_with(al_simple.master, @player_contact2)
+    expect(res).to be_truthy
+
+    # We have gone beyond the limit of 2. Fail.
+    cmrs = al_simple.creatable_model_references only_creatables: true, force_reload: true
+    expect(cmrs.keys).to eq %i[activity_log__player_contact_elt_mr_self_ref]
+    res = ModelReference.create_from_master_with(al_simple.master, @player_contact3)
+    # expect(res).to be_falsey
+    # @todo - we should enforce the limits in the actual creation. This will require some additional testing of\
+    #         apps to ensure we don't have automated actions that depend on this.
+
+    referenced = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
+                                                                           extra_log_type: 'mr_self_ref',
+                                                                           select_who: 'abc',
+                                                                           master: @player_contact.master)
+    mr_ref = ModelReference.create_with(al_simple, referenced)
+    expect(mr_ref).to be_truthy
+
+    cmrs = al_simple.creatable_model_references only_creatables: true, force_reload: true
+    expect(cmrs.keys).to be_empty
+    # We should only be able to add one to this item.
+    res = ModelReference.create_with(al_simple, referenced)
+    # expect(res).to be_falsey
+    res
+  end
+
+  it 'presents creatable references based on a activity_selector configuration' do
+    @player_contact.current_user = @user
+    @player_contact.master.current_user = @user
+
+    al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                        extra_log_type: 'mr_activity_selector',
+                                                                        select_who: 'abc')
+    al_simple.save!
+
+    cmrs = al_simple.creatable_model_references only_creatables: true
+    expect(cmrs.keys).to eq %i[activity_log__player_contact_elt_mr_showable_test
+                               activity_log__player_contact_elt_mr_simple_test
+                               activity_log__player_contact_elt_mr_creatables
+                               player_contact]
+    expect(cmrs[:activity_log__player_contact_elt_mr_showable_test][:activity_log__player_contact_elt][:ref_config][:label]).to eq 'Showable Test'
+    expect(cmrs[:activity_log__player_contact_elt_mr_simple_test][:activity_log__player_contact_elt][:ref_config][:label]).to eq 'Simple Test'
+    expect(cmrs[:activity_log__player_contact_elt_mr_creatables][:activity_log__player_contact_elt][:ref_config][:label]).to eq 'Creatables'
+  end
+
+  it 'handles model references created on a master' do
+    @player_contact.current_user = @user
+    @player_contact.master.current_user = @user
+
+    al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                        extra_log_type: 'mr_creatable_master',
+                                                                        select_who: 'abc')
+    al_simple.save!
+
+    referenced = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
+                                                                           extra_log_type: 'mr_self_ref',
+                                                                           select_who: 'abc',
+                                                                           master: @player_contact.master)
+
+    cmrs = al_simple.creatable_model_references only_creatables: true
+    expect(cmrs.keys).to eq %i[activity_log__player_contact_elt_mr_self_ref player_contact]
+    ModelReference.create_from_master_with(al_simple.master, referenced)
+    # We should not be able to create another, since this is set as one_to_master
+    cmrs = al_simple.creatable_model_references only_creatables: true, force_reload: true
+    expect(cmrs.keys).to eq %i[player_contact]
+  end
+
+  it 'always embeds defined references' do
+    @player_contact.current_user = @user
+    @player_contact.master.current_user = @user
+
+    al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                        extra_log_type: 'always_embed',
+                                                                        select_who: 'abc')
+    al_simple.save!
+
+    # Create a player contact reference to show embedded
+    ModelReference.create_with(al_simple, @player_contact3)
+
+    cmrs = al_simple.creatable_model_references only_creatables: true
+    expect(al_simple.always_embed_creatable_model_reference(cmrs).keys.first).to eq :address
+
+    # In view mode, expect the embedded item to be the the player contact
+    expect(al_simple.embedded_item).to be_a PlayerContact
+
+    al_simple.action_name = 'show'
+    al_simple.reset_model_references
+    expect(al_simple.embedded_item).to be_a PlayerContact
+
+    # In edit mode, continue to show player contact embedded
+    al_simple.action_name = 'show'
+    al_simple.reset_model_references
+    expect(al_simple.embedded_item).to be_a PlayerContact
+
+    # During new / create, show the other reference
+    al_simple.action_name = 'create'
+    al_simple.reset_model_references
+    expect(al_simple.embedded_item).to be_a Address
   end
 end

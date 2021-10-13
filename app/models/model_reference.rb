@@ -33,6 +33,7 @@ class ModelReference < ActiveRecord::Base
   validate :allows_create, if: -> { !persisted? }
 
   after_save :handle_disabled, if: -> { disabled }
+  after_save :reset_memos
   after_create :set_created
 
   attr_accessor :current_user, :force_create
@@ -633,6 +634,15 @@ class ModelReference < ActiveRecord::Base
 
     troc = to_record_options_config
     to_record.model_reference_disable if troc && troc[:also_disable_record]
+  end
+
+  #
+  # On save, reset the from_record's memos, if it is set. If we have created a record from a master
+  # then the caller will need to handle this itself.
+  def reset_memos
+    return unless from_record
+
+    from_record.reset_model_references
   end
 
   #
