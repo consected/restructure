@@ -80,7 +80,7 @@ module ActiveRecord
             t.belongs_to :master, index: { name: "#{rand_id}_master_id_idx" }, foreign_key: true
             t.belongs_to belongs_to_model,
                          index: { name: "#{rand_id}_id_idx" },
-                         foreign_key: { to_table: "#{schema}.#{belongs_to_model.pluralize}" }
+                         foreign_key: { to_table: belongs_to_model.pluralize.to_s }
             create_fields t
             t.string :extra_log_type
             t.references :user, index: { name: "#{rand_id}_user_id_idx" }, foreign_key: true
@@ -93,7 +93,7 @@ module ActiveRecord
             t.belongs_to :master, index: { name: "#{rand_id}_master_id_h_idx" }, foreign_key: true
             t.belongs_to belongs_to_model,
                          index: { name: "#{rand_id}_id_h_idx" },
-                         foreign_key: { to_table: "#{schema}.#{belongs_to_model.pluralize}" }
+                         foreign_key: { to_table: belongs_to_model.pluralize.to_s }
             create_fields t, true
             t.string :extra_log_type
             t.references :user, index: { name: "#{rand_id}_user_id_h_idx" }, foreign_key: true
