@@ -407,11 +407,20 @@ td .record-meta {
     table-layout: fixed;
 }*/
 
-tbody[data-tracker-protocol="alerts"] td,
-tr[data-tracker-protocol="alerts"] td,
 tbody[data-tracker-protocol="study"] td,
 tr[data-tracker-protocol="study"] td {
   background-color: #f4d9c0;
+}
+
+tbody[data-tracker-protocol="alerts"] td,
+tr[data-tracker-protocol="alerts"] td {
+  background-color: rgb(255, 172, 160);
+
+  &.tracker-record-meta .record-meta,
+  &.tracker-event_date .cell-holder,
+  &.tracker-notes .cell-holder {
+    color: gray;
+  }
 }
 
 .tracker-event,
