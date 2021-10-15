@@ -98,6 +98,7 @@ RSpec.describe 'Model references', type: :model do
 
     mr = ModelReference.create_from_master_with(al_simple.master, @player_contact)
     expect(ModelReference.last).to eq mr
+    expect(al_simple.model_references.first).to eq mr
 
     expect(mr.attributes.symbolize_keys.slice(:from_record_master_id, :from_record_id, :from_record_type)).to eq(
       from_record_master_id: @master.id,
@@ -121,6 +122,7 @@ RSpec.describe 'Model references', type: :model do
 
     mr = ModelReference.create_with(al_simple, @address)
     expect(ModelReference.last).to eq mr
+    expect(al_simple.model_references.first).to eq mr
 
     expect(mr.attributes.symbolize_keys.slice(:from_record_master_id, :from_record_id, :from_record_type)).to eq(
       from_record_master_id: @master.id,
@@ -133,5 +135,36 @@ RSpec.describe 'Model references', type: :model do
       to_record_id: @address.id,
       to_record_type: 'Address'
     )
+  end
+
+  it 'creates a multiple model reference records' do
+    @player_contact.current_user = @user
+    al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                        extra_log_type: 'mr_simple_test',
+                                                                        select_who: 'abc')
+    al_simple.save!
+
+    mr = ModelReference.create_from_master_with(al_simple.master, @player_contact)
+    expect(ModelReference.last).to eq mr
+    expect(al_simple.model_references.first).to eq mr
+
+    mr = ModelReference.create_with(al_simple, @address)
+    expect(ModelReference.last).to eq mr
+    # The model references are memoized in the instance. Adding a reference to a model instance does force
+    # the cache to be refreshed
+    expect(al_simple.model_references.first).to eq mr
+    expect(al_simple.model_references.length).to eq 2
+
+    mr = ModelReference.create_from_master_with(al_simple.master, @player_contact1)
+    expect(ModelReference.last).to eq mr
+    # The model references are memoized in the instance. Adding a reference to a master does not reset the
+    # cached values, so the #model_references call will not show the latest item
+    # Model references are returned grouped by model reference definition
+    # Therefore we have just added a new reference to the second group
+    expect(al_simple.model_references.length).to eq 2
+    # To handle this, the consumer must force a reload
+    al_simple.reset_model_references
+    expect(al_simple.model_references.length).to eq 3
+    expect(al_simple.model_references.select { |m| m.to_record_type == 'PlayerContact' }.first).to eq mr
   end
 end

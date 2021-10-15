@@ -48,70 +48,85 @@ module Dynamic
     #   the field values in the model_references table (not the target)
     # @param [Boolean] use_options_order_by - use the order_by settings for each reference configuration to order
     #   based on field values in the records pointed to
-    def model_references(reference_type: :references, active_only: false, ref_order: nil, use_options_order_by: false)
-      mr_key = { reference_type: reference_type, active_only: active_only,
-                 ref_order: ref_order, use_options_order_by: use_options_order_by }
-      @model_references ||= {}
-      return @model_references[mr_key] unless @model_references[mr_key].nil?
+    # @return [Array{ModelReference}]
+    def model_references(reference_type: :references, active_only: false, ref_order: nil, use_options_order_by: false, force_reload: nil)
+      clear_model_reference_memo if force_reload
 
-      use_options_order_by ||= @config_order_model_references
+      memoize_references({ reference_type: reference_type, active_only: active_only,
+                           ref_order: ref_order, use_options_order_by: use_options_order_by }) do
+        # NOTE: @config_order_model_references is set by GeneralDataConcerns#as_json to
+        #       provide a simple way to indicate model use_options_order_by should be true
+        #       for json generation
+        use_options_order_by ||= @config_order_model_references
 
-      res = []
-      case reference_type
-      when :references
-        refs = extra_log_type_config.references
-      when :e_sign
-        refs = extra_log_type_config.e_sign && extra_log_type_config.e_sign[:document_reference]
-      end
-
-      @model_references[mr_key] = res
-      return res unless extra_log_type_config && refs
-
-      refs.each do |_ref_key, refitem|
-        refitem.each do |ref_type, ref_config|
-          f = ref_config[:from]
-          without_reference = (ref_config[:without_reference] == true)
-
-          order_by = ref_config[:order_by] if use_options_order_by
-
-          pass_options = {
-            to_record_type: ref_type,
-            filter_by: ref_config[:filter_by],
-            without_reference: without_reference,
-            ref_order: ref_order,
-            active: active_only,
-            order_by: order_by
-          }
-
-          got = if f == 'this'
-                  ModelReference.find_references self, **pass_options
-                elsif f&.in?(%w[master any])
-                  ModelReference.find_references master, **pass_options
-                else
-                  msg = "Find references attempted without known :from key: #{f}"
-                  Rails.logger.warn msg
-                  raise FphsException, msg if Rails.env.development?
-
-                  nil
-                end
-
-          next unless got
-
-          got = got.to_a
-
-          # Filter out the items based on reference specific showable_if rules
-          if ref_config[:showable_if]
-            got.delete_if do |mr|
-              mr.to_record.current_user = current_user
-              self.reference = mr.to_record
-              !ref_config_performable?(:showable_if, ref_config)
-            end
-          end
-
-          res += got
+        res = []
+        case reference_type
+        when :references
+          refs = extra_log_type_config.references
+        when :e_sign
+          refs = extra_log_type_config.e_sign && extra_log_type_config.e_sign[:document_reference]
         end
+
+        break res unless extra_log_type_config && refs
+
+        refs.each do |_ref_key, refitem|
+          refitem.each do |ref_type, ref_config|
+            f = ref_config[:from]
+            without_reference = (ref_config[:without_reference] == true)
+
+            order_by = ref_config[:order_by] if use_options_order_by
+
+            pass_options = {
+              to_record_type: ref_type,
+              filter_by: ref_config[:filter_by],
+              without_reference: without_reference,
+              ref_order: ref_order,
+              active: active_only,
+              order_by: order_by
+            }
+
+            got = if f == 'this'
+                    ModelReference.find_references self, **pass_options
+                  elsif f&.in?(%w[master any])
+                    ModelReference.find_references master, **pass_options
+                  else
+                    msg = "Find references attempted without known :from key: #{f}"
+                    Rails.logger.warn msg
+                    raise FphsException, msg if Rails.env.development?
+
+                    nil
+                  end
+
+            next unless got
+
+            got = got.to_a
+
+            # Filter out the items based on reference specific showable_if rules
+            if ref_config[:showable_if]
+              got.delete_if do |mr|
+                mr.to_record.current_user = current_user
+                self.reference = mr.to_record
+                !ref_config_performable?(:showable_if, ref_config)
+              end
+            end
+
+            res += got
+          end
+        end
+        res
       end
-      @model_references[mr_key] = res
+    end
+
+    def memoize_references(memokey, &block)
+      # Check for a memoized result
+      @model_references ||= {}
+      return @model_references[memokey] unless @model_references[memokey].nil?
+
+      yield @model_references[memokey] = block.call
+    end
+
+    def clear_model_reference_memo
+      @creatable_model_references = nil
     end
 
     #
