@@ -306,6 +306,10 @@ a.close-entity {
   }
 }
 
+a.show-entity.show-tracker {
+  margin-right: 5px;
+}
+
 a.close-entity,
 a.glyphicon.glyphicon-remove-sign {
   background-color: #cc0000;
@@ -560,6 +564,10 @@ div.popover {
   max-height: 80vh;
   overflow: auto;
   height: auto;
+
+  h5 {
+    font-weight: bold;
+  }
 }
 
 .form-inline textarea.form-control {

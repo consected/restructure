@@ -706,6 +706,8 @@ _fpa = {
             }
             // Run through the top level of data to pick the keys to look for in element subscriptions
             for (var di in data) {
+              if (di == 'multiple_results') continue;
+
               if (data.hasOwnProperty(di)) {
                 var res = {};
                 var d = data[di];
