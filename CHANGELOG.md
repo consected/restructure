@@ -19,6 +19,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Changed] Handling of tracker "alerts" to work without tracker panel being actively displayed
+- [Changed] Browser back button in the secure viewer now just closes it
+
 ## [7.4.63] - 2021-10-07
 
 - [Fixed] Embedded reports autorunning even if "run automatically" was not set
