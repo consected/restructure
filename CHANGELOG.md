@@ -21,6 +21,7 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 - [Changed] Handling of tracker "alerts" to work without tracker panel being actively displayed
 - [Changed] Browser back button in the secure viewer now just closes it
+- [Changed] Gems updated, addressing Puma CVE and update to Dalli v3
 
 ## [7.4.63] - 2021-10-07
 
