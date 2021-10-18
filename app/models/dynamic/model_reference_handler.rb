@@ -26,8 +26,8 @@ module Dynamic
     end
 
     def reset_model_references
-      @model_references = {}
-      @embedded_item = nil
+      @model_references = nil
+      @embedded_items = nil
       @creatable_model_references = nil
       @always_embed_item = nil
     end
@@ -49,7 +49,8 @@ module Dynamic
     # @param [Boolean] use_options_order_by - use the order_by settings for each reference configuration to order
     #   based on field values in the records pointed to
     # @return [Array{ModelReference}]
-    def model_references(reference_type: :references, active_only: false, ref_order: nil, use_options_order_by: false, force_reload: nil)
+    def model_references(reference_type: :references, active_only: false, ref_order: nil, use_options_order_by: false,
+                         force_reload: nil)
       clear_model_reference_memo if force_reload
 
       memoize_references({ reference_type: reference_type, active_only: active_only,
@@ -60,56 +61,38 @@ module Dynamic
         use_options_order_by ||= @config_order_model_references
 
         res = []
-        case reference_type
-        when :references
-          refs = extra_log_type_config.references
-        when :e_sign
-          refs = extra_log_type_config.e_sign && extra_log_type_config.e_sign[:document_reference]
-        end
+        refs = references_config_for_type reference_type
 
-        break res unless extra_log_type_config && refs
+        break res unless refs
 
         refs.each do |_ref_key, refitem|
           refitem.each do |ref_type, ref_config|
-            f = ref_config[:from]
-            without_reference = (ref_config[:without_reference] == true)
-
-            order_by = ref_config[:order_by] if use_options_order_by
-
             pass_options = {
               to_record_type: ref_type,
               filter_by: ref_config[:filter_by],
-              without_reference: without_reference,
+              without_reference: (ref_config[:without_reference] == true),
               ref_order: ref_order,
               active: active_only,
-              order_by: order_by
+              order_by: (use_options_order_by && ref_config[:order_by])
             }
 
-            got = if f == 'this'
+            got = case ref_config[:from]
+                  when 'this'
                     ModelReference.find_references self, **pass_options
-                  elsif f&.in?(%w[master any])
+                  when 'master', 'any'
                     ModelReference.find_references master, **pass_options
                   else
-                    msg = "Find references attempted without known :from key: #{f}"
+                    msg = "Find references attempted without known :from key: #{ref_config[:from]}"
                     Rails.logger.warn msg
                     raise FphsException, msg if Rails.env.development?
 
-                    nil
+                    next
                   end
 
             next unless got
 
             got = got.to_a
-
-            # Filter out the items based on reference specific showable_if rules
-            if ref_config[:showable_if]
-              got.delete_if do |mr|
-                mr.to_record.current_user = current_user
-                self.reference = mr.to_record
-                !ref_config_performable?(:showable_if, ref_config)
-              end
-            end
-
+            filter_showable_references! got, ref_config
             res += got
           end
         end
@@ -120,13 +103,43 @@ module Dynamic
     def memoize_references(memokey, &block)
       # Check for a memoized result
       @model_references ||= {}
-      return @model_references[memokey] unless @model_references[memokey].nil?
+      return @model_references[memokey] if @model_references.key?(memokey)
 
       yield @model_references[memokey] = block.call
     end
 
     def clear_model_reference_memo
       @creatable_model_references = nil
+    end
+
+    #
+    # Gets the references configuration Hash for the specified reference_type
+    # @param [Symbol] reference_type - :references | :e_sign
+    # @return [Hash]
+    def references_config_for_type(reference_type)
+      return unless extra_log_type_config
+
+      case reference_type
+      when :references
+        extra_log_type_config.references
+      when :e_sign
+        extra_log_type_config.e_sign && extra_log_type_config.e_sign[:document_reference]
+      end
+    end
+
+    #
+    # Filter out the items based on reference specific showable_if rules.
+    # Deletes items directly from ref_list.
+    # @param [Array] ref_list - array of model reference results
+    # @param [Hash] ref_config - references configuration
+    def filter_showable_references!(ref_list, ref_config)
+      return unless ref_config[:showable_if]
+
+      ref_list.delete_if do |mr|
+        mr.to_record.current_user = current_user
+        self.reference = mr.to_record
+        !ref_config_performable?(:showable_if, ref_config)
+      end
     end
 
     #
@@ -229,8 +242,7 @@ module Dynamic
       # Check for a memoized result
       @creatable_model_references ||= {}
       memokey = "only_creatables_#{only_creatables}"
-      memores = @creatable_model_references[memokey]
-      return memores if memores
+      return @creatable_model_references[memokey] if @creatable_model_references.key?(memokey)
 
       yield @creatable_model_references[memokey] = block.call
     end
@@ -427,55 +439,63 @@ module Dynamic
     # @todo - refactor and add more comments to make it clearer what the logic is
     # @return [UserBase]
     def embedded_item
-      # Handle a symbol that indicates a previous run memoized the value, but was nil.
-      # Return nil, not the symbol.
-      return @embedded_item == :nil ? nil : @embedded_item unless @embedded_item.nil?
+      memoize_embedded_item do
+        res = nil
+        mrs = model_references
+        cmrs = creatable_model_references only_creatables: true
 
-      mrs = model_references
-      cmrs = creatable_model_references only_creatables: true
+        if embed_action_type == :creating && always_embed_creatable
+          # The current action is to display a new form or to create an item from a submitted form.
+          # If always_embed_creatable_reference: true has been specified, use this,
+          # unless the embeddable item is an activity log or is configured to not be viewable as embedded.
+          res = build_model_reference([always_embed_creatable.to_sym,
+                                       always_embed_creatable_model_reference(cmrs)])
+          res = nil if creatable_model_not_embeddable?(cmrs, res)
+        elsif (res = always_embed_item(mrs))
+        # Do nothing, we've found an embedded item that matches the configured type and set it in the condition above
+        elsif embed_action_type == :creating && cmrs.length == 1
+          # The current action is to display a new form or to create an item from a submitted form.
+          # and exactly one item is creatable.
+          # Build this creatable item, unless the target item is an activity log or is configured not to
+          # be viewable as embedded.
+          res = build_model_reference(cmrs.first)
+          res = nil if creatable_model_not_embeddable?(cmrs, res)
+        elsif embed_action_type == :creating && cmrs.length > 1
+          # If more than one item is creatable, don't use it
+          res = nil
+        elsif embed_action_type == :creating && cmrs.empty? && mrs.length == 1
+          # Nothing is creatable, but one reference item has been created. Use the existing one.
+          res = mrs.first.to_record
+        elsif (embed_action_type == :editing || embed_action_type == :viewing) && mrs.empty?
+          # If nothing has been embedded, there is nothing to show
+          res = nil
+        elsif embed_action_type == :editing && mrs.length == 1
+          # A referenced record exists - the form expects this to be embedded
+          # Therefore just use this existing item unless it is configured
+          # to not be viewed as embeddable
+          res = editable_model_not_embeddable?(mrs) ? nil : mrs.first.to_record
+        elsif embed_action_type == :viewing && mrs.length == 1 && cmrs.empty?
+          # A single referenced record exists and no more are creatable
+          # Therefore just use this existing item
+          res = mrs.first.to_record
+        end
 
-      if embed_action_type == :creating && always_embed_creatable
-        # The current action is to display a new form or to create an item from a submitted form.
-        # If always_embed_creatable_reference: true has been specified, use this,
-        # unless the embeddable item is an activity log or is configured to not be viewable as embedded.
-        @embedded_item = build_model_reference([always_embed_creatable.to_sym,
-                                                always_embed_creatable_model_reference(cmrs)])
-        @embedded_item = nil if creatable_model_not_embeddable?(cmrs)
-      elsif always_embed_item(mrs)
-      # Do nothing, we've found an embedded item that matches the configured type and set it in the test
-      elsif embed_action_type == :creating && cmrs.length == 1
-        # The current action is to display a new form or to create an item from a submitted form.
-        # and exactly one item is creatable.
-        # Build this creatable item, unless the target item is an activity log or is configured not to
-        # be viewable as embedded.
-        @embedded_item = build_model_reference(cmrs.first)
-        @embedded_item = nil if creatable_model_not_embeddable?(cmrs)
-      elsif embed_action_type == :creating && cmrs.length > 1
-        # If more than one item is creatable, don't use it
-        @embedded_item = nil
-      elsif embed_action_type == :creating && cmrs.empty? && mrs.length == 1
-        # Nothing is creatable, but one reference item has been created. Use the existing one.
-        @embedded_item = mrs.first.to_record
-      elsif (embed_action_type == :editing || embed_action_type == :viewing) && mrs.empty?
-        # If nothing has been embedded, there is nothing to show
-        @embedded_item = nil
-      elsif embed_action_type == :editing && mrs.length == 1
-        # A referenced record exists - the form expects this to be embedded
-        # Therefore just use this existing item unless it is configured
-        # to not be viewed as embeddable
-        @embedded_item = editable_model_not_embeddable?(mrs) ? nil : mrs.first.to_record
-      elsif embed_action_type == :viewing && mrs.length == 1 && cmrs.empty?
-        # A single referenced record exists and no more are creatable
-        # Therefore just use this existing item
-        @embedded_item = mrs.first.to_record
+        set_embedded_item_current_user(res)
+        res
       end
+    end
 
-      set_embedded_item_current_user
+    def memoize_embedded_item(&block)
+      # Check for a memoized result
+      @embedded_items ||= {}
+      memokey = "embedded_item_#{embed_action_type}"
+      return @embedded_items[memokey] if @embedded_items.key?(memokey)
 
-      # Handle memoization
-      res = @embedded_item
-      @embedded_item ||= :nil
-      res
+      yield @embedded_items[memokey] = block.call
+    end
+
+    def clear_embedded_item_memo
+      @embedded_items = nil
     end
 
     #
@@ -497,12 +517,12 @@ module Dynamic
     #
     # Get the model reference config, for the model that has
     # been specified to alway embed during creation.
-    # Raises and exception if there is a always_embed_creatable_reference setting
+    # Raises an exception if there is a always_embed_creatable_reference setting
     # but no corresponding model reference configuration was found
     # @param [Hash] cmrs - creatable model reference config
     # @return [Hash]
     def always_embed_creatable_model_reference(cmrs)
-      return unless always_embed_creatable
+      return {} unless always_embed_creatable
 
       @always_embed_creatable_model_reference = cmrs[always_embed_creatable.to_sym]
       return @always_embed_creatable_model_reference if @always_embed_creatable_model_reference
@@ -516,13 +536,15 @@ module Dynamic
     #
     # If a model reference is configured to to always be embedded
     # (view_options definition states always_embed_reference: matching_model_type)
-    # set the @embedded_item if a result was found and return true
     # @param [Hash] - set of model references from #model_references call
-    # @return [true | false]
+    # @return [truthy]
     def always_embed_item(mrs)
-      return @always_embed_item unless @always_embed_item.nil?
+      return @always_embed_item if @always_embed_item
+      return nil if @always_embed_item == false
 
       @always_embed_item = false
+      return unless extra_log_type_config&.view_options
+
       always_embed_reference = extra_log_type_config.view_options[:always_embed_reference]
       return unless always_embed_reference
 
@@ -534,8 +556,7 @@ module Dynamic
       # If a always_embed_reference was matched in the existing model references, use this as the embedded item.
       # It is possible that this will not have matched a record if no model reference of the required
       # type is in existence, so it could still be nil.
-      @embedded_item = always_embed.to_record
-      @always_embed_item = !!@embedded_item
+      @always_embed_item = always_embed.to_record
     end
 
     #
@@ -546,14 +567,14 @@ module Dynamic
 
     #
     # Set the current user for the embedded item
-    def set_embedded_item_current_user
-      return unless @embedded_item
+    def set_embedded_item_current_user(res)
+      return unless res
 
-      if @embedded_item.class.no_master_association
-        @embedded_item.current_user ||= master_user
+      if res.class.no_master_association
+        res.current_user ||= master_user
       else
-        @embedded_item.master ||= master
-        @embedded_item.master.current_user ||= master_user
+        res.master ||= master
+        res.master.current_user ||= master_user
       end
     end
 
@@ -565,8 +586,8 @@ module Dynamic
     # If not defined, it is considered embeddable.
     # @param [Hash] cmrs - result of #creatable_model_references
     # @return [true| nil]
-    def creatable_model_not_embeddable?(cmrs)
-      return true if @embedded_item.class.parent == ActivityLog
+    def creatable_model_not_embeddable?(cmrs, item)
+      return true if item.class.parent == ActivityLog
 
       cmrs.first.last.first.last[:ref_config][:view_as][:new].in?(NotEmbeddedOptions)
     rescue StandardError

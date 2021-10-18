@@ -180,6 +180,18 @@ RSpec.describe 'Model reference implementation', type: :model do
             add: many
             also_disable_record: true
 
+      avoid_missing:
+        label: Avoid Missing
+        fields:
+          - select_call_direction
+          - select_who
+        editable_if:
+          always: true
+        references:
+          player_contact:
+            from: this
+            add: many
+            limit: 2
     END_DEF
 
     al.current_admin = @admin
@@ -198,6 +210,7 @@ RSpec.describe 'Model reference implementation', type: :model do
     setup_option_config 6, 'Activity Selector', %w[select_call_direction select_who]
     setup_option_config 7, 'Creatable on Master Test', %w[select_call_direction select_who]
     setup_option_config 8, 'Always Embed', %w[select_call_direction select_who]
+    setup_option_config 9, 'Avoid Missing', %w[select_call_direction select_who]
   end
 
   it 'evaluates rules to optionally show references' do
@@ -409,5 +422,46 @@ RSpec.describe 'Model reference implementation', type: :model do
     al_simple.action_name = 'create'
     al_simple.reset_model_references
     expect(al_simple.embedded_item).to be_a Address
+  end
+
+  it 'handles embedded references without a view_options definition' do
+    @player_contact.current_user = @user
+    @player_contact.master.current_user = @user
+
+    al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                        extra_log_type: 'avoid_missing',
+                                                                        select_who: 'abc')
+    al_simple.save!
+
+    # In new / create mode, expect the embedded item to be the the player contact, since there are no other creatable references
+    al_simple.action_name = 'create'
+    al_simple.reset_model_references
+    expect(al_simple.embedded_item).to be_a PlayerContact
+
+    # Create a player contact reference to show embedded
+    ModelReference.create_with(al_simple, @player_contact3)
+
+    cmrs = al_simple.creatable_model_references only_creatables: true
+    expect(al_simple.always_embed_creatable_model_reference(cmrs).keys.first).to be nil
+
+    # In view mode, the player contact will not be embedded, since
+    # multiple may be created.
+    al_simple.action_name = 'show'
+    expect(al_simple.embedded_item).to be nil
+
+    # In edit mode, show the player contact embedded
+    al_simple.action_name = 'edit'
+    expect(al_simple.embedded_item).to be_a PlayerContact
+
+    # Create a second player contact reference - now they will not appear embedded when viewed
+    ModelReference.create_with(al_simple, @player_contact1)
+    expect(al_simple.model_references(force_reload: true).length).to eq 2
+
+    al_simple.action_name = 'show'
+    expect(al_simple.embedded_item).to be nil
+
+    # In edit mode, show the player contact embedded
+    al_simple.action_name = 'edit'
+    expect(al_simple.embedded_item).to be nil
   end
 end

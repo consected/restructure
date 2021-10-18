@@ -627,7 +627,6 @@ class ModelReference < ActiveRecord::Base
   #
   # Handles the situation when a model reference is disabled, checking the configuration
   # if the to-record should also be disabled, and if so disabling it.
-  # @return [<Type>] <description>
   def handle_disabled
     @was_updated = 'updated'
     return true unless saved_change_to_disabled?
@@ -642,7 +641,7 @@ class ModelReference < ActiveRecord::Base
   def reset_memos
     return unless from_record
 
-    from_record.reset_model_references
+    from_record.reset_model_references if from_record.respond_to?(:reset_model_references)
   end
 
   #
