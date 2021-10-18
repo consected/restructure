@@ -1989,6 +1989,14 @@ _fpa.form_utils = {
     $('input.set-auth-token[type="hidden"]').val(csrf_token)
   },
 
+  set_image_classes: function (block) {
+    block.find('img').on('error', function () {
+      $(this).addClass('broken-image')
+    }).on('load', function () {
+      $(this).addClass('loaded-image')
+    });
+  },
+
 
   // Run through all the general formatters for a new block to show nicely
   format_block: function (block) {
@@ -2033,6 +2041,7 @@ _fpa.form_utils = {
     _fpa.form_utils.apply_view_handlers(block);
     _fpa.form_utils.setup_secure_view_links(block);
     _fpa.form_utils.set_auth_tokens(block);
+    _fpa.form_utils.set_image_classes(block);
 
     block.removeClass('formatting-block');
   }
