@@ -105,7 +105,7 @@ module Dynamic
       @model_references ||= {}
       return @model_references[memokey] if @model_references.key?(memokey)
 
-      yield @model_references[memokey] = block.call
+      @model_references[memokey] = block.call
     end
 
     def clear_model_reference_memo
@@ -244,7 +244,7 @@ module Dynamic
       memokey = "only_creatables_#{only_creatables}"
       return @creatable_model_references[memokey] if @creatable_model_references.key?(memokey)
 
-      yield @creatable_model_references[memokey] = block.call
+      @creatable_model_references[memokey] = block.call
     end
 
     def clear_creatable_model_reference_memo
@@ -491,7 +491,7 @@ module Dynamic
       memokey = "embedded_item_#{embed_action_type}"
       return @embedded_items[memokey] if @embedded_items.key?(memokey)
 
-      yield @embedded_items[memokey] = block.call
+      @embedded_items[memokey] = block.call
     end
 
     def clear_embedded_item_memo

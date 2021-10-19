@@ -341,13 +341,14 @@ class ModelReference < ActiveRecord::Base
   #
   # @see ModelReference.record_type_to_ns_table_name
   # The result has double underscores removed, to truly represent a DB table name
+  # NOTE: it relies on the pluralization of the record type to be correct
   def self.record_type_to_table_name(record_type)
     record_type_to_ns_table_name(record_type).gsub('__', '_')
   end
 
   #
   # Convert a string, class or instance to a symbol association name
-  # The result if checked to ensure Master actually includes this association
+  # The result is checked to ensure Master actually includes this association
   # @param [Object] record_type - one of many representations
   # @return [Symbol | nil] - master association name as a symbol
   def self.record_type_to_assoc_sym(record_type)
