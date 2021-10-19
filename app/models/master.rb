@@ -504,25 +504,6 @@ class Master < ActiveRecord::Base
           methods: %i[def_version vdef_version]
         }
       end
-
-      tname = :tracker_histories
-      if current_user.has_access_to? :access, :table, tname
-        included_tables[:latest_tracker_history] = {
-          methods: %i[protocol_name protocol_position sub_process_name
-                      event_name user_name record_type_us record_type
-                      record_id event_description event_milestone
-                      def_version vdef_version]
-        }
-
-        included_tables[:tracker_notifications] = {
-          methods: %i[protocol_name protocol_position sub_process_name
-                      event_name user_name record_type_us record_type
-                      record_id event_description event_milestone
-                      def_version vdef_version]
-        }
-
-        extras[:methods] << :tracker_completions
-      end
     else
 
       include_item_flags = { include: [:item_flag_name], methods: %i[method_id item_type_us] }
@@ -572,25 +553,25 @@ class Master < ActiveRecord::Base
           }
         }
       end
+    end
 
-      tname = :tracker_histories
-      if current_user.has_access_to? :access, :table, tname
-        included_tables[:latest_tracker_history] = {
-          methods: %i[protocol_name protocol_position sub_process_name
-                      event_name user_name record_type_us record_type
-                      record_id event_description event_milestone
-                      def_version vdef_version]
-        }
+    tname = :tracker_histories
+    if current_user.has_access_to? :access, :table, tname
+      included_tables[:latest_tracker_history] = {
+        methods: %i[protocol_name protocol_position sub_process_name
+                    event_name user_name record_type_us record_type
+                    record_id event_description event_milestone
+                    def_version vdef_version]
+      }
 
-        included_tables[:tracker_notifications] = {
-          methods: %i[protocol_name protocol_position sub_process_name
-                      event_name user_name record_type_us record_type
-                      record_id event_description event_milestone
-                      def_version vdef_version]
-        }
+      included_tables[:tracker_notifications] = {
+        methods: %i[protocol_name protocol_position sub_process_name
+                    event_name user_name record_type_us record_type
+                    record_id event_description event_milestone
+                    def_version vdef_version]
+      }
 
-        extras[:methods] << :tracker_completions
-      end
+      extras[:methods] << :tracker_completions
     end
 
     extras.merge!(include: included_tables)
