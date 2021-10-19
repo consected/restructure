@@ -595,8 +595,8 @@ module Dynamic
                                                            disabled: disabled
         end
       rescue StandardError => e
-        raise FphsException, "A failure occurred creating user access control for app with: #{model_association_name}." \
-                             "\n#{e}"
+        raise FphsException,
+              "A failure occurred creating user access control for app with: #{model_association_name}.\n#{e}"
       end
     end
 

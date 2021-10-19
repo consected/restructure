@@ -4,7 +4,8 @@ class Admin::MigrationGenerator
 
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
                 :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
-                :allow_migrations, :db_configs, :resource_type, :view_sql
+                :allow_migrations, :db_configs, :resource_type, :view_sql, :all_referenced_tables,
+                :class_name
 
   #
   # Simply return the current connection
@@ -196,13 +197,16 @@ class Admin::MigrationGenerator
     connection.columns(table_name).map(&:name)
   end
 
-  def initialize(db_migration_schema, table_name: nil, all_implementation_fields: nil, table_comments: nil,
+  def initialize(db_migration_schema, table_name: nil, class_name: nil,
+                 all_implementation_fields: nil, table_comments: nil,
                  no_master_association: nil, prev_table_name: nil, belongs_to_model: nil, db_configs: nil,
                  resource_type: nil,
                  view_sql: nil,
-                 allow_migrations: nil)
+                 allow_migrations: nil,
+                 all_referenced_tables: nil)
     self.db_migration_schema = db_migration_schema
     self.table_name = table_name
+    self.class_name = class_name
     self.prev_table_name = prev_table_name
     self.resource_type = resource_type
     self.all_implementation_fields = all_implementation_fields
@@ -211,6 +215,7 @@ class Admin::MigrationGenerator
     self.belongs_to_model = belongs_to_model
     self.db_configs = db_configs
     self.view_sql = view_sql
+    self.all_referenced_tables = all_referenced_tables
 
     self.allow_migrations = allow_migrations
     self.allow_migrations = Settings::AllowDynamicMigrations if allow_migrations.nil?
@@ -270,7 +275,7 @@ class Admin::MigrationGenerator
   # @param [String] schema
   # @param [String] view_name
   # @return [String | nil]
-  def self.view_definition schema, view_name
+  def self.view_definition(schema, view_name)
     return unless view_exists?(view_name)
 
     sql = <<~SQL
@@ -395,17 +400,19 @@ class Admin::MigrationGenerator
       VIEWSQL
     VSTEXT
 
-    <<~SETATRRIBS
+    <<~SETATTRIBS
           self.schema = '#{db_migration_schema}'
           self.table_name = '#{table_name}'
+          self.class_name = '#{class_name}'
           self.fields = %i[#{migration_fields_array.join(' ')}]
           self.table_comment = '#{tcs[:table]}'
           self.fields_comments = #{(tcs[:fields] || {}).to_json}
           self.db_configs = #{(db_configs || {}).to_json}
           self.no_master_association = #{!!no_master_association}
           self.resource_type = :#{resource_type}
+          self.all_referenced_tables = #{(all_referenced_tables || []).to_a}
       #{view_sql_text}
-    SETATRRIBS
+    SETATTRIBS
   end
 
   # Write a schema-specific migration only if we are in a development mode

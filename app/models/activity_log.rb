@@ -161,13 +161,22 @@ class ActivityLog < ActiveRecord::Base
   # Get a complete list of all fields required to generate a table.
   # The individual field lists may overlap or be distinct. This gets us a usable list
   def all_implementation_fields(ignore_errors: true)
-    res = (view_attribute_list || []) + (view_blank_log_attribute_list || []) + OptionConfigs::ActivityLogOptions.fields_for_all_in(self)
+    res = (view_attribute_list || []) +
+          (view_blank_log_attribute_list || []) +
+          OptionConfigs::ActivityLogOptions.fields_for_all_in(self)
     res.uniq
   rescue FphsException => e
     raise e unless ignore_errors
 
     @extra_error = e
     []
+  end
+
+  # Get a complete set of all tables to be accessed by model reference configurations,
+  # with a value representing what they are associated from.
+  # @see OptionConfigs::ActivityLogOptions.referenced_tables_for_all_in
+  def all_referenced_tables
+    OptionConfigs::ActivityLogOptions.referenced_tables_for_all_in(self)
   end
 
   # The class that an activity log implementation belongs to
@@ -375,7 +384,6 @@ class ActivityLog < ActiveRecord::Base
         logger.info "Adding a new Activity sub process #{sp.id}"
       else
         sp = sps.first
-        # logger.info "Using the existing Activity sub process #{sp.id}"
       end
 
       # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
@@ -383,25 +391,23 @@ class ActivityLog < ActiveRecord::Base
       if pes.empty?
         pe = sp.protocol_events.create! name: name, current_admin: admin
         logger.info "Adding a new Activity protocol event #{pe.id}"
-      else
-        # logger.info "Using the existing Activity protocol event #{pes.first.id}"
       end
     end
     true
   end
 
   def check_item_type_and_rec_type
-    unless disabled
-      unless item_type_valid?
-        errors.add(:item_type,
-                   "#{item_type} is invalid. It must be one of " \
-                   "(#{self.class.use_with_class_names.join(', ')})")
-        return
-      end
-      unless rec_type_valid?
-        errors.add(:rec_type, "(#{rec_type}) invalid for the selected item type #{item_type}.")
-        nil
-      end
+    return if disabled
+
+    unless item_type_valid?
+      errors.add(:item_type,
+                 "#{item_type} is invalid. It must be one of " \
+                 "(#{self.class.use_with_class_names.join(', ')})")
+      return
+    end
+    unless rec_type_valid?
+      errors.add(:rec_type, "(#{rec_type}) invalid for the selected item type #{item_type}.")
+      nil
     end
   end
 
@@ -414,9 +420,11 @@ class ActivityLog < ActiveRecord::Base
 
   # Dynamically generate the model and controller for this activity log implementation
   def generate_model
-    logger.info "---------------------------------------------------------------------------
-************** GENERATING ActivityLog MODEL #{name} ****************
----------------------------------------------------------------------------"
+    logger.info <<~END_TEXT
+      ---------------------------------------------------------------------------
+      ************** GENERATING ActivityLog MODEL #{name} ****************
+      ---------------------------------------------------------------------------
+    END_TEXT
 
     klass = ::ActivityLog
     failed = false
@@ -457,9 +465,11 @@ class ActivityLog < ActiveRecord::Base
             klass.send(:remove_const, model_class_name)
           end
         rescue StandardError => e
-          logger.info '*************************************************************************************'
-          logger.info "Failed to remove the old definition of #{model_class_name}. #{e.inspect}"
-          logger.info '*************************************************************************************'
+          logger.info <<~END_TEXT
+            *************************************************************************************
+            Failed to remove the old definition of #{model_class_name}. #{e.inspect}
+            *************************************************************************************
+          END_TEXT
         end
 
         res = klass.const_set(model_class_name, a_new_class)
@@ -480,9 +490,11 @@ class ActivityLog < ActiveRecord::Base
           # another dynamic implementation, such as external identifier
           klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
         rescue StandardError => e
-          logger.info '*************************************************************************************'
-          logger.info "Failed to remove the old definition of #{c_name}. #{e.inspect}"
-          logger.info '*************************************************************************************'
+          logger.info <<~END_TEXT
+            *************************************************************************************
+            Failed to remove the old definition of #{c_name}. #{e.inspect}
+            *************************************************************************************
+          END_TEXT
         end
 
         res2 = klass.const_set(c_name, a_new_controller)
@@ -494,9 +506,11 @@ class ActivityLog < ActiveRecord::Base
       rescue StandardError => e
         failed = true
         puts "Failure creating activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
-        logger.info '*************************************************************************************'
-        logger.info "Failure creating activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
-        logger.info '*************************************************************************************'
+        logger.info <<~END_TEXT
+          *************************************************************************************
+          Failure creating activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}
+          *************************************************************************************
+        END_TEXT
       end
     end
 
@@ -506,9 +520,11 @@ class ActivityLog < ActiveRecord::Base
       # Check that the implementation has been successful
       unless implementation_class_defined?(klass, fail_without_exception: true)
         puts 'Failure checking activity log model definition.'
-        logger.info '*************************************************************************************'
-        logger.info 'Failure checking activity log model definition.'
-        logger.info '*************************************************************************************'
+        logger.info <<~END_TEXT
+          *************************************************************************************
+          Failure checking activity log model definition.
+          *************************************************************************************
+        END_TEXT
       end
     end
 
@@ -517,27 +533,27 @@ class ActivityLog < ActiveRecord::Base
 
   def generator_script(version, mode = 'create')
     cname = "#{mode}_#{table_name}_#{version}".camelize
-    do_create_or_update = if mode == 'create'
-                            'create_activity_log_tables'
-                          elsif mode == 'create_or_update'
-                            'create_or_update_activity_log_tables'
+    do_create_or_update = case mode
+                          when 'create' then 'create_activity_log_tables'
+                          when 'create_or_update' then 'create_or_update_activity_log_tables'
                           else
                             migration_generator.migration_update_table
                           end
 
     <<~CONTENT
-                  require 'active_record/migration/app_generator'
-                  class #{cname} < ActiveRecord::Migration[5.2]
-                    include ActiveRecord::Migration::AppGenerator
-      #{'      '}
-                    def change
-                      self.belongs_to_model = '#{item_type}'
-                      #{migration_generator.migration_set_attribs}
-            #{'          '}
-                      #{do_create_or_update}
-                      create_activity_log_trigger
-                    end
-                  end
+      require 'active_record/migration/app_generator'
+      class #{cname} < ActiveRecord::Migration[5.2]
+        include ActiveRecord::Migration::AppGenerator
+
+        def change
+          self.belongs_to_model = '#{item_type}'
+          #{migration_generator.migration_set_attribs}
+
+          #{do_create_or_update}
+          create_reference_views
+          create_activity_log_trigger
+        end
+      end
     CONTENT
   end
 

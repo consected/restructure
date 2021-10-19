@@ -10,7 +10,8 @@ module ActiveRecord
                       :field_opts, :owner, :history_table_id_attr,
                       :belongs_to_model, :history_table_name, :trigger_fn_name,
                       :table_comment, :fields_comments, :db_configs, :mode, :no_master_association,
-                      :requested_action, :resource_type, :prev_table_name, :view_sql
+                      :requested_action, :resource_type, :prev_table_name, :view_sql, :all_referenced_tables,
+                      :class_name
       end
 
       def force_rollback
@@ -105,6 +106,25 @@ module ActiveRecord
         end
       rescue StandardError, ActiveRecord::StatementInvalid => e
         raise e unless force_rollback
+      end
+
+      def create_reference_views
+        reversible do |dir|
+          dir.up do
+            all_referenced_tables.each do |ref_config|
+              to_table_name = ref_config[:to_table_name]
+              puts "-- create or replace reference view #{ref_view_name(to_table_name)}"
+              ActiveRecord::Base.connection.execute reference_view_sql(ref_config)
+            end
+          end
+          dir.down do
+            all_referenced_tables.each do |ref_config|
+              to_table_name = ref_config[:to_table_name]
+              puts "-- drop function #{ref_view_name(to_table_name)}"
+              ActiveRecord::Base.connection.execute reverse_reference_view_sql(ref_config)
+            end
+          end
+        end
       end
 
       def create_activity_log_trigger
@@ -775,6 +795,51 @@ module ActiveRecord
           activity_log_trigger_sql
         else
           "DROP FUNCTION #{trigger_fn_name}() CASCADE"
+        end
+      end
+
+      def ref_view_name(to_table_name)
+        tn = table_name.sub('activity_log_', 'al_')
+        ttn = to_table_name.sub('activity_log_', 'al_')
+        "#{ttn}_from_#{tn}"
+      end
+
+      def reference_view_sql(ref_config)
+        return if ref_config[:without_reference]
+
+        to_table_name = ref_config[:to_table_name]
+        to_schema_name = ref_config[:to_schema_name]
+        to_schema_table = [to_schema_name, to_table_name].compact.join('.')
+        to_model_class_name = ref_config[:to_model_class_name]
+        to_no_master = ref_config[:no_master_association]
+        from_what = ref_config[:from]
+        <<~DO_TEXT
+          DROP VIEW if exists #{schema}.#{ref_view_name(to_table_name)};
+          CREATE VIEW #{schema}.#{ref_view_name(to_table_name)} AS
+          select
+            dest.*,
+            mr.from_record_master_id,
+            mr.from_record_type, mr.from_record_id,
+            mr.id model_reference_id,
+            '#{to_schema_table}'::varchar from_table
+          from #{to_schema_table} dest
+          inner join model_references mr on
+            dest.id = mr.to_record_id and
+            #{to_no_master ? '' : 'dest.master_id = mr.to_record_master_id and'}
+            not coalesce (mr.disabled, false) and
+            #{from_what == 'this' ? "mr.from_record_type = '#{class_name}' and" : ''}
+            mr.to_record_type = '#{to_model_class_name}'
+          ;
+
+        DO_TEXT
+      end
+
+      def reverse_reference_view_sql(ref_config)
+        to_table_name = ref_config[:to_table_name]
+        if updating?
+          reference_view_sql(ref_config)
+        else
+          "DROP VIEW #{schema}.#{ref_view_name(to_table_name)};"
         end
       end
 

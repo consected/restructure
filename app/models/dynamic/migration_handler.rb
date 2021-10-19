@@ -132,10 +132,13 @@ module Dynamic
       # Ensure option_configs have been parsed
       option_configs
 
+      art = all_referenced_tables if respond_to?(:all_referenced_tables)
+
       @migration_generator =
         Admin::MigrationGenerator.new(
           db_migration_schema,
           table_name: table_name,
+          class_name: full_implementation_class_name,
           all_implementation_fields: all_implementation_fields(ignore_errors: false),
           table_comments: table_comments,
           no_master_association: implementation_no_master_association,
@@ -143,6 +146,7 @@ module Dynamic
           belongs_to_model: btm,
           db_configs: db_configs,
           view_sql: config_view_sql,
+          all_referenced_tables: art,
           resource_type: self.class.name.underscore.to_sym,
           allow_migrations: allow_migrations
         )
