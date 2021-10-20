@@ -586,7 +586,21 @@ class ActivityLog < ActiveRecord::Base
     embedded_report_fields = all_implementation_fields.select { |f| f.start_with? 'embedded_report_' }.map(&:to_sym)
     implementation_class.send :attr_accessor, *embedded_report_fields
   end
-end
 
-# Force the initialization. Do this here, rather than an initializer, since forces a reload if rails reloads classes in development mode.
-# ::ActivityLog.define_models
+  #
+  # Get a full list of reference_views
+  # @return [Array]
+  def all_reference_views
+    all_referenced_tables.map { |t| reference_view_name(t[:to_table_name]) }
+  end
+
+  #
+  # The name of a reference view for the target table
+  # @param [String] to_table_name
+  # @return [String]
+  def reference_view_name(to_table_name)
+    tn = table_name.sub('activity_log_', 'al_')
+    ttn = to_table_name.sub('activity_log_', 'al_')
+    "#{ttn}_from_#{tn}"
+  end
+end

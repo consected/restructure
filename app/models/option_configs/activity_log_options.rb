@@ -91,16 +91,24 @@ module OptionConfigs
               elt = conf[:add_with] && conf[:add_with][:extra_log_type]
               add_with_elt = nil
               add_with_elt = to_class.human_name_for(elt) if elt && to_class.respond_to?(:human_name_for)
-              refitem[mn][:to_record_label] = conf[:label] || add_with_elt || to_class&.human_name
-              if to_class&.respond_to?(:no_master_association)
+              refitem[mn][:to_record_label] = conf[:label] || add_with_elt || to_class.human_name
+
+              if to_class.respond_to?(:no_master_association)
                 refitem[mn][:no_master_association] = to_class.no_master_association
               end
-              refitem[mn][:to_model_name_us] = to_class&.to_s&.ns_underscore
-              refitem[mn][:to_model_class_name] = to_class&.to_s
-              refitem[mn][:to_table_name] = to_class&.table_name
+
+              refitem[mn][:to_model_name_us] = to_class.to_s&.ns_underscore
+              refitem[mn][:to_model_class_name] = to_class.to_s
+              refitem[mn][:to_table_name] = to_class.table_name
               tsn = nil
-              tsn = to_class.current_definition.schema_name if to_class.respond_to?(:current_definition)
-              refitem[mn][:to_schema_name] = tsn
+
+              if to_class.respond_to?(:definition)
+                cd = to_class.definition
+                tsn = cd.schema_name
+                tct = cd.class.to_s
+                refitem[mn][:to_schema_name] = tsn
+                refitem[mn][:to_class_type] = tct
+              end
             else
               bad_ref_items << mn
               Rails.logger.warn "extra log type reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}"
@@ -156,21 +164,16 @@ module OptionConfigs
 
     # Get a complete set of all tables to be accessed by model reference configurations,
     # with a value representing what they are associated from.
-    # Takes the form:
-    # {
-    #   table_name: this,
-    #   table_name2: master,
-    #   table_name3: any,
-    #   table_name4: without_reference
-    # }
     def self.referenced_tables_for_all_in(al_def)
       res = []
 
       al_def.option_configs.map(&:references).compact.each do |act_refs|
-        act_refs.each_value do |outer_config|
-          outer_config.each_value do |ref_config|
-            res << ref_config.slice(:to_table_name, :to_schema_name, :to_model_class_name,
-                                    :from, :without_reference, :no_master_association)
+        act_refs.each do |ref_name, outer_config|
+          outer_config.each do |full_name, ref_config|
+            details = ref_config.slice(:to_table_name, :to_schema_name, :to_model_class_name, :to_class_type,
+                                       :from, :without_reference, :no_master_association)
+            details.merge! reference_name: ref_name, full_ref_name: full_name
+            res << details
           end
         end
       end

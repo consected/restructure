@@ -78,6 +78,12 @@ module Dynamic
     end
 
     #
+    # Check if any of the reference views have not yet been defined
+    def reference_views_missing?
+      (all_reference_views - Admin::MigrationGenerator.tables_and_views.map { |ts| ts['table_name'] }).present?
+    end
+
+    #
     # Generate a migration triggered after_save.
     def generate_migration
       # Re-enabling an item requires it to be created
@@ -95,6 +101,7 @@ module Dynamic
       # Return if there is nothing to update
       return unless (!config_view_sql && migration_generator.migration_update_table) ||
                     (config_view_sql && view_sql_changed?) ||
+                    reference_views_missing? ||
                     saved_change_to_table_name?
 
       mode = 'update'

@@ -105,6 +105,16 @@ class DynamicModel < ActiveRecord::Base
   end
 
   #
+  # Full set of active table names
+  def self.table_names
+    active.select(:category)
+          .distinct(:table_name)
+          .unscope(:order)
+          .pluck(:table_name)
+          .sort
+  end
+
+  #
   # Generate the protocol / sub process  / protocol event entries that will be
   # used by implementations when updating and creating records, and subsequently tracking
   # those changes in the tracker history.
