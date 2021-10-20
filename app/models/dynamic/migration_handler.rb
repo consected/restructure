@@ -80,6 +80,8 @@ module Dynamic
     #
     # Check if any of the reference views have not yet been defined
     def reference_views_missing?
+      return unless respond_to? :all_reference_views
+
       (all_reference_views - Admin::MigrationGenerator.tables_and_views.map { |ts| ts['table_name'] }).present?
     end
 
