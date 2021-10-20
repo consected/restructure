@@ -46,7 +46,11 @@ Rails.application.routes.draw do
     resources :job_reviews, except: %i[show destroy]
     resources :server_info
 
-    resources :app_types, except: [:destroy]
+    resources :app_types, except: [:destroy] do
+      member do
+        get :export_migrations
+      end
+    end
     post 'app_types/upload', to: 'app_types#upload'
     post 'app_types/restart_server', to: 'app_types#restart_server'
     post 'app_types/restart_delayed_job', to: 'app_types#restart_delayed_job'
