@@ -287,35 +287,6 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
-  def generator_script(version, mode = 'create')
-    cname = "#{mode}_#{table_name}_#{version}".camelize
-    view_sql = configurations && configurations[:view_sql]
-    table_or_view = view_sql ? 'view' : 'tables'
-    do_create_or_update = if mode == 'create'
-                            "create_dynamic_model_#{table_or_view}"
-                          elsif mode == 'create_or_update'
-                            "create_or_update_dynamic_model_#{table_or_view}"
-                          elsif table_or_view == 'tables'
-                            migration_generator.migration_update_table
-                          else
-                            migration_generator.migration_update_view
-                          end
-
-    <<~CONTENT
-      require 'active_record/migration/app_generator'
-      class #{cname} < ActiveRecord::Migration[5.2]
-        include ActiveRecord::Migration::AppGenerator
-
-        def change
-          #{migration_generator.migration_set_attribs}
-
-          #{do_create_or_update}
-          #{table_or_view == 'table' ? 'create_dynamic_model_trigger' : ''}
-        end
-      end
-    CONTENT
-  end
-
   def table_name_ok
     if table_name.index(/_[0-9]/)
       errors.add :name, 'must not contain numbers preceded by an underscore.'

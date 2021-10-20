@@ -531,32 +531,6 @@ class ActivityLog < ActiveRecord::Base
     @regenerate = res
   end
 
-  def generator_script(version, mode = 'create')
-    cname = "#{mode}_#{table_name}_#{version}".camelize
-    do_create_or_update = case mode
-                          when 'create' then 'create_activity_log_tables'
-                          when 'create_or_update' then 'create_or_update_activity_log_tables'
-                          else
-                            migration_generator.migration_update_table
-                          end
-
-    <<~CONTENT
-      require 'active_record/migration/app_generator'
-      class #{cname} < ActiveRecord::Migration[5.2]
-        include ActiveRecord::Migration::AppGenerator
-
-        def change
-          self.belongs_to_model = '#{item_type}'
-          #{migration_generator.migration_set_attribs}
-
-          #{do_create_or_update}
-          create_reference_views
-          create_activity_log_trigger
-        end
-      end
-    CONTENT
-  end
-
   def item_type_exists
     return true unless errors.empty?
 

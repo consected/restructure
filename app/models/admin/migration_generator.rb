@@ -1,3 +1,8 @@
+# frozen_string_literal: true
+
+#
+# Provides database level functionality to support dynamic migration generation
+# and functions that are used to access features of the database across the application.
 class Admin::MigrationGenerator
   DefaultSchemaOwner = Settings::DefaultSchemaOwner
   DefaultMigrationSchema = Settings::DefaultMigrationSchema
@@ -6,6 +11,30 @@ class Admin::MigrationGenerator
                 :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
                 :allow_migrations, :db_configs, :resource_type, :view_sql, :all_referenced_tables,
                 :class_name
+
+  def initialize(db_migration_schema, table_name: nil, class_name: nil,
+                 all_implementation_fields: nil, table_comments: nil,
+                 no_master_association: nil, prev_table_name: nil, belongs_to_model: nil, db_configs: nil,
+                 resource_type: nil,
+                 view_sql: nil,
+                 allow_migrations: nil,
+                 all_referenced_tables: nil)
+    self.db_migration_schema = db_migration_schema
+    self.table_name = table_name
+    self.class_name = class_name
+    self.prev_table_name = prev_table_name
+    self.resource_type = resource_type
+    self.all_implementation_fields = all_implementation_fields
+    self.table_comments = table_comments
+    self.no_master_association = no_master_association
+    self.belongs_to_model = belongs_to_model
+    self.db_configs = db_configs
+    self.view_sql = view_sql
+    self.all_referenced_tables = all_referenced_tables
+    self.allow_migrations = allow_migrations
+    self.allow_migrations = Settings::AllowDynamicMigrations if allow_migrations.nil?
+    super()
+  end
 
   #
   # Simply return the current connection
@@ -62,11 +91,17 @@ class Admin::MigrationGenerator
     end
   end
 
+  #
   # Reset the memoized tables and views value
   def self.tables_and_views_reset!
     @tables_and_views = nil
   end
 
+  #
+  # Get the database comment for the table
+  # @param [String] table_name
+  # @param [String] schema_name - optional schema name
+  # @return [String]
   def self.table_comment(table_name, schema_name = nil)
     tn = []
     tn << schema_name if schema_name
@@ -75,6 +110,11 @@ class Admin::MigrationGenerator
     connection.table_comment(tn)
   end
 
+  #
+  # Get and cache database comments for all columns for all tables
+  # in the search path.
+  # Each entry is a Hash: { schema_name: , table_name: , column_name: , column_comment: }
+  # @return [Array{Hash}]
   def self.column_comments
     Rails.cache.fetch("db_column_comments-#{Application.version}") do
       res = connection.execute <<~END_SQL
@@ -102,8 +142,11 @@ class Admin::MigrationGenerator
   end
 
   #
-  # Returns a list of foreign key definitions
-  # @return [Array (Hash {constraint_name, source_schema, source_table, source_column, target_schema, target_table, target_column})]
+  # Returns a list of foreign key definitions for all tables in the search path.
+  # Returns an array of hashes that link source and target:
+  # { constraint_name: , source_schema: , source_table: , source_column: ,
+  #   target_schema: , target_table: , target_column: }
+  # @return [Array {Hash}]
   def self.foreign_keys
     Rails.cache.fetch("db_foreign_keys-#{Application.version}") do
       res = connection.execute <<~END_SQL
@@ -126,13 +169,21 @@ class Admin::MigrationGenerator
     end
   end
 
-  def self.data_dic(dd, nil_if_empty: false)
-    ddtab = tables_and_views.find { |tn| tn['table_name'] == "#{dd}_datadic" }
+  #
+  # Generate a data dictionary table name related to the provided table name
+  # and check if it exists.
+  # If it does, run a query to retrieve the full data dictionary content as an array,
+  # caching it for future use,
+  # @param [String] basename
+  # @param [true|false] nil_if_empty - return a nil result rather than empty array
+  # @return [Array{Hash}] - return results
+  def self.data_dic(basename, nil_if_empty: false)
+    ddtab = tables_and_views.find { |tn| tn['table_name'] == "#{basename}_datadic" }
     return unless ddtab
 
     ddtab = ddtab['table_name']
 
-    Rails.cache.fetch("db_data_dic-#{dd}-#{Application.version}") do
+    Rails.cache.fetch("db_data_dic-#{basename}-#{Application.version}") do
       res = connection.execute <<~END_SQL
         SELECT * FROM #{ddtab};
       END_SQL
@@ -197,37 +248,19 @@ class Admin::MigrationGenerator
     connection.columns(table_name).map(&:name)
   end
 
-  def initialize(db_migration_schema, table_name: nil, class_name: nil,
-                 all_implementation_fields: nil, table_comments: nil,
-                 no_master_association: nil, prev_table_name: nil, belongs_to_model: nil, db_configs: nil,
-                 resource_type: nil,
-                 view_sql: nil,
-                 allow_migrations: nil,
-                 all_referenced_tables: nil)
-    self.db_migration_schema = db_migration_schema
-    self.table_name = table_name
-    self.class_name = class_name
-    self.prev_table_name = prev_table_name
-    self.resource_type = resource_type
-    self.all_implementation_fields = all_implementation_fields
-    self.table_comments = table_comments
-    self.no_master_association = no_master_association
-    self.belongs_to_model = belongs_to_model
-    self.db_configs = db_configs
-    self.view_sql = view_sql
-    self.all_referenced_tables = all_referenced_tables
-
-    self.allow_migrations = allow_migrations
-    self.allow_migrations = Settings::AllowDynamicMigrations if allow_migrations.nil?
-    super()
-  end
-
+  #
+  # Create a migration to add a schema
+  # @param [String] export_type - a suffix to add to the migration name,
+  #                               such as 'app-export'
   def add_schema(export_type = nil)
     mig_text = schema_generator_script(db_migration_schema, 'create')
     write_db_migration mig_text, "#{db_migration_schema}_schema", export_type: export_type
   end
 
-  # Standard columns are used by migrations
+  #
+  # Standard columns are used when running migrations, to avoid user specified columns
+  # duplicating standard app columns for current table_name
+  # @return [Array]
   def standard_columns
     pset = %w[id created_at updated_at contactid user_id master_id
               extra_log_type admin_id]
@@ -235,6 +268,9 @@ class Admin::MigrationGenerator
     pset
   end
 
+  #
+  # Identify change to database table comment based on the current table_comments configuration
+  # @return [String|nil] - new comment, or nil if unchanged
   def table_comment_changes
     begin
       comment = ActiveRecord::Base.connection.table_comment(table_name)
@@ -247,6 +283,10 @@ class Admin::MigrationGenerator
     new_comment
   end
 
+  #
+  # Identify changes to database table column comments
+  # based on the current table_comments configuration
+  # @return [Array{Hash}] - array of only changed comments { col_name: new_comment }
   def fields_comments_changes
     begin
       cols = if self.class.table_or_view_exists?(table_name)
@@ -298,6 +338,10 @@ class Admin::MigrationGenerator
     ActiveRecord::Base.connection.columns(table_name)
   end
 
+  #
+  # Find field changes, returning an array of arrays:
+  # [ [added], [removed], [changed], [old_colnames] ]
+  # @return [Array]
   def field_changes
     table_name = if table_name_changed
                    prev_table_name
@@ -335,10 +379,16 @@ class Admin::MigrationGenerator
     [added, removed, changed, old_colnames]
   end
 
+  #
+  # Has the configured table name changed?
+  # @return [true|false]
   def table_name_changed
     prev_table_name && (prev_table_name != table_name)
   end
 
+  #
+  # Content for a migration file for a table update
+  # @return [String]
   def migration_update_table
     added, removed, changed, prev_fields = field_changes
 
@@ -367,8 +417,11 @@ class Admin::MigrationGenerator
     ARCONTENT
   end
 
+  #
+  # Content for a migration file for a view update
+  # @return [String]
   def migration_update_view
-    added, removed, changed, prev_fields = field_changes
+    _added, _removed, _changed, prev_fields = field_changes
 
     if table_comments
       new_table_comment = table_comment_changes
@@ -387,18 +440,27 @@ class Admin::MigrationGenerator
     ARCONTENT
   end
 
+  #
+  # All user defined fields expected by the dynamic definition
+  # @return [Array{String}]
   def migration_fields_array
     fields = all_implementation_fields
     fields.reject { |f| f.index(/^embedded_report_|^placeholder_/) }
   end
 
+  #
+  # Content representing the setting of key attributes for the migration
+  # @return [String]
   def migration_set_attribs
     tcs = table_comments || {}
-    view_sql_text = <<~VSTEXT
-      self.view_sql = <<~VIEWSQL
-        #{view_sql}
-      VIEWSQL
-    VSTEXT
+
+    if view_sql&.strip&.present?
+      view_sql_text = <<~VSTEXT
+        self.view_sql = <<~VIEWSQL
+          #{view_sql}
+        VIEWSQL
+      VSTEXT
+    end
 
     <<~SETATTRIBS
           self.schema = '#{db_migration_schema}'
@@ -415,6 +477,7 @@ class Admin::MigrationGenerator
     SETATTRIBS
   end
 
+  #
   # Write a schema-specific migration only if we are in a development mode
   # @param [String] mig_text - the migration text to be written
   # @param [String | Symbol] name - underscored model name
@@ -438,6 +501,7 @@ class Admin::MigrationGenerator
     filepath
   end
 
+  #
   # Does a previous table migration exist in the schema directory?
   # mode='*' for create or update
   # mode='create|update' for the appropriate type to check for
@@ -448,16 +512,24 @@ class Admin::MigrationGenerator
     Dir.glob(filepath).present?
   end
 
+  #
+  # Relative path to the migrations directory
+  # @param [String] export_type - suffix, for example 'app-export'
+  # @return [String]
   def db_migration_dirname(export_type = nil)
     dirname = "db/app_migrations/#{db_migration_schema}"
     dirname += "--#{export_type}" if export_type
     dirname
   end
 
+  #
+  # Relative path to the failed migrations directory
   def db_migration_failed_dirname
     'db/app_migrations/failed'
   end
 
+  #
+  # Run migrations in the current migration directory specified by #db_migration_dirname
   def run_migration
     return unless allow_migrations && db_migration_schema != DefaultMigrationSchema
 
@@ -485,12 +557,106 @@ class Admin::MigrationGenerator
     raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}"
   end
 
+  #
+  # Set a migration version timestamp
   def migration_version
     @migration_version ||= DateTime.now.to_i.to_s(36)
   end
 
+  #
+  # Run the appropriate generator script for this type of dynamic definition
+  # @param [Class|String] type - class or class name of dynamic definition
+  # @param [String|Symbol] mode
+  # @return [String] - generated content
+  def generator_script(type, mode = 'create')
+    send("generator_script_#{type.to_s.underscore}", migration_version, mode)
+  end
+
+  def generator_script_activity_log(version, mode = 'create')
+    cname = "#{mode}_#{table_name}_#{version}".camelize
+    do_create_or_update = case mode
+                          when 'create' then 'create_activity_log_tables'
+                          when 'create_or_update' then 'create_or_update_activity_log_tables'
+                          else
+                            migration_update_table
+                          end
+
+    <<~CONTENT
+      require 'active_record/migration/app_generator'
+      class #{cname} < ActiveRecord::Migration[5.2]
+        include ActiveRecord::Migration::AppGenerator
+
+        def change
+          self.belongs_to_model = '#{belongs_to_model}'
+          #{migration_set_attribs}
+
+          #{do_create_or_update}
+          create_reference_views
+          create_activity_log_trigger
+        end
+      end
+    CONTENT
+  end
+
+  def generator_script_dynamic_model(version, mode = 'create')
+    cname = "#{mode}_#{table_name}_#{version}".camelize
+    # view_sql = configurations && configurations[:view_sql]
+    table_or_view = view_sql ? 'view' : 'tables'
+    do_create_or_update = if mode == 'create'
+                            "create_dynamic_model_#{table_or_view}"
+                          elsif mode == 'create_or_update'
+                            "create_or_update_dynamic_model_#{table_or_view}"
+                          elsif table_or_view == 'tables'
+                            migration_update_table
+                          else
+                            migration_update_view
+                          end
+
+    <<~CONTENT
+      require 'active_record/migration/app_generator'
+      class #{cname} < ActiveRecord::Migration[5.2]
+        include ActiveRecord::Migration::AppGenerator
+
+        def change
+          #{migration_set_attribs}
+
+          #{do_create_or_update}
+          #{table_or_view == 'table' ? 'create_dynamic_model_trigger' : ''}
+        end
+      end
+    CONTENT
+  end
+
+  def generator_script_external_identifier(version, mode = 'create')
+    cname = "#{mode}_#{table_name}_#{version}".camelize
+    ftype = (alphanumeric? ? 'string' : 'bigint')
+    do_create_or_update = if mode == 'create'
+                            "create_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
+                          elsif mode == 'create_or_update'
+                            "create_or_update_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
+                          else
+                            migration_update_table
+                          end
+
+    <<~CONTENT
+      require 'active_record/migration/app_generator'
+      class #{cname} < ActiveRecord::Migration[5.2]
+        include ActiveRecord::Migration::AppGenerator
+
+        def change
+          #{migration_set_attribs}
+
+          #{do_create_or_update}
+          create_external_identifier_trigger :#{external_id_attribute}
+        end
+      end
+    CONTENT
+  end
+
   private
 
+  #
+  # Content for a migration to create a schema
   def schema_generator_script(schema_name, mode = 'create', owner: DefaultSchemaOwner)
     cname = "#{mode}_#{schema_name}_schema_#{migration_version}".camelize
 
