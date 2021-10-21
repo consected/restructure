@@ -63,7 +63,6 @@ module Dynamic
         }
       }.deep_stringify_keys!
 
-
       options = YAML.dump default_options
 
       foreign_key_name = 'master_id' if field_list.split.include?('master_id')
@@ -193,13 +192,7 @@ module Dynamic
       return unless respond_to?(:fields) && fields
 
       fields.each do |name, config|
-        @caption_before[name] = if config.is_a? String
-                                  config
-                                elsif config.respond_to?(:caption)
-                                  config.caption
-                                else
-                                  config[:caption]
-                                end
+        @caption_before[name] = config_value(config, :caption)
       end
 
       @caption_before
@@ -210,13 +203,7 @@ module Dynamic
       return unless respond_to?(:fields) && fields
 
       fields.each do |name, config|
-        @labels[name] = if config.is_a? String
-                                  config
-                                elsif config.respond_to?(:label)
-                                  config.label
-                                else
-                                  config[:label]
-                                end
+        @labels[name] = config_value(config, :label)
       end
 
       @labels
@@ -227,16 +214,20 @@ module Dynamic
       return unless respond_to?(:fields) && fields
 
       fields.each do |name, config|
-        @comments[name] = if config.is_a? String
-                                  config
-                                elsif config.respond_to?(:comment)
-                                  config.comment
-                                else
-                                  config[:comment]
-                                end
+        @comments[name] = config_value(config, :comment)
       end
 
       @comments
+    end
+
+    def config_value(key)
+      if config.is_a? String
+        config
+      elsif config.respond_to?(key)
+        config.send(key)
+      else
+        config[key]
+      end
     end
 
     #
