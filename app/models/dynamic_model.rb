@@ -12,6 +12,9 @@ class DynamicModel < ActiveRecord::Base
 
   validate :table_name_ok
   before_save :set_empty_field_list
+  before_save :set_empty_comments
+  before_create :set_keys_from_columns
+  before_create :set_field_types_from_columns
 
   attr_accessor :editable
 
@@ -313,9 +316,85 @@ class DynamicModel < ActiveRecord::Base
   end
 
   def default_field_list_array
-    implementation_class.attribute_names - StandardFields
+    return [] unless Admin::MigrationGenerator.table_exists? table_name
+
+    tc = Admin::MigrationGenerator.table_column_names(table_name)
+    tc - StandardFields
   rescue StandardError => e
     logger.warn "Failed to get the default_field_list_array, probably because the class is not available.\n#{e}"
     []
+  end
+
+  #
+  # before_save trigger forces the comments configuration to be set, based on
+  # database table comment and field comments
+  def set_empty_comments
+    return unless Admin::MigrationGenerator.table_exists? table_name
+
+    # Ensure the new options have reloaded
+    option_configs
+    # Get the table comments configurations
+    tc = table_comments || {}
+    return if tc.key?(:table) || tc.key?(:fields)
+
+    tc = {}
+    table_comment = Admin::MigrationGenerator.table_comment(table_name, schema_name)
+    # The table had a table comment
+    tc[:table] = table_comment if table_comment
+
+    column_comments = Admin::MigrationGenerator
+                      .column_comments
+                      .select { |c| c['schema_name'] == schema_name && c['table_name'] == table_name }
+
+    tc[:fields] = {}
+    # Check each each field for a comment in the database
+    field_list_array.each do |fname|
+      cc = column_comments.find { |c| c['column_name'] == fname }
+      next unless cc && cc['column_comment']
+
+      tc[:fields][fname] = cc['column_comment']
+    end
+
+    return unless tc[:table] || tc[:fields].present?
+
+    tc.stringify_keys!
+    top_options = YAML.dump('_comments' => tc)
+    self.options ||= ''
+    self.options = top_options + self.options
+  end
+
+  def set_keys_from_columns
+    return unless Admin::MigrationGenerator.table_exists? table_name
+
+    tc = Admin::MigrationGenerator.table_column_names(table_name)
+    self.primary_key_name = 'id' if tc.include?('id')
+    self.foreign_key_name = 'master_id' if tc.include?('master_id')
+  end
+
+  def set_field_types_from_columns
+    return unless Admin::MigrationGenerator.table_exists? table_name
+
+    return if default_options.db_configs.present?
+
+    db_configs = {}
+    table_columns.each do |col|
+      db_configs[col.name.to_s] = {
+        type: col.type.to_s
+      }
+    end
+
+    return if db_configs.empty?
+
+    db_configs.deep_stringify_keys!
+    hash = { '__dummy__default' => { 'db_configs' => db_configs } }
+    new_options = YAML.dump(hash)
+    self.options ||= ''
+    self.options += new_options
+    self.options = if options.index(/^default:\s*$/)
+                     options.gsub(/^---\n__dummy__default:\s*$/, '')
+                   else
+                     options.gsub(/^---\n__dummy__default:\s*$/, 'default:')
+                   end
+    self.options
   end
 end

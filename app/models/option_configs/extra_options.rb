@@ -228,7 +228,7 @@ module OptionConfigs
       ts = config_obj.table_comments && config_obj.table_comments[:table]
 
       new_tc = config_obj.name.underscore.humanize.captionize
-      if ts != new_tc
+      if ts.blank? # ts != new_tc
         # Set a default table comment value
         config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
       end
@@ -237,7 +237,7 @@ module OptionConfigs
       return unless default
 
       new_tc = default[:label] || config_obj.name.underscore.humanize.captionize
-      if ts != new_tc
+      if ts.blank? #ts != new_tc
         # Set the table comment from the config label if it was not set
         config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
       end
@@ -282,7 +282,7 @@ module OptionConfigs
         caption = caption&.strip
         next if caption.blank? || fs[k]&.strip == caption
 
-        fs[k] = v
+        fs[k] = v if fs[k].blank?
       end
 
       return unless fs.present?
