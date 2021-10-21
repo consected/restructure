@@ -163,6 +163,7 @@ module Imports
 
       # Check downcase is configured to match the dynamic model
       dynamic_model.default_options.field_options.each do |k, v|
+        k = k.to_s
         unless config_fields.key?(k) && !!config_fields[k].no_downcase == !!v[:no_downcase]
           res = false
           break
@@ -171,7 +172,23 @@ module Imports
 
       return res unless res
 
-      # Check downcase is configured to match the dynamic model
+      # Check comments are configured to match the dynamic model
+      fcs = dynamic_model.table_comments || {}
+      fcs = fcs[:original_fields] || fcs[:fields] || {}
+      config_fields.each do |k, v|
+        k = k.to_sym
+        text = v.comment
+        curr_text = fcs[k]
+        unless text == curr_text
+          res = false
+          break
+        end
+      end
+
+      return res unless res
+
+
+      # Check caption is configured to match the dynamic model
       dmc = dynamic_model.default_options.caption_before
       config_fields.each do |k, v|
         k = k.to_sym
@@ -182,6 +199,22 @@ module Imports
           break
         end
       end
+
+      return res unless res
+
+      # Check label is configured to match the dynamic model
+      dmc = dynamic_model.default_options.labels
+      config_fields.each do |k, v|
+        k = k.to_sym
+        text = v.label
+        curr_text = dmc[k]
+        unless text == curr_text
+          res = false
+          break
+        end
+      end
+
+
       res
     end
 
@@ -211,7 +244,7 @@ module Imports
     #
     # All configured fields for the import generator
     def config_fields
-      @config_fields ||= generator_config.fields
+      @config_fields ||= generator_config.fields.stringify_keys
     end
 
     def fields
@@ -230,7 +263,7 @@ module Imports
     # Standard model method that states if a field should not be downcased when stored.
     # The dynamic model definition uses this to set up its configuration
     def no_downcase_field(name)
-      config_fields[name].no_downcase
+      config_fields[name.to_s].no_downcase
     end
 
     def add_user_access_control

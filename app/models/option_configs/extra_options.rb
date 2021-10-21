@@ -244,6 +244,7 @@ module OptionConfigs
 
       # Get a hash of field comments to update
       fs = tc[:fields] || {}
+      original_fs = fs.dup
 
       ls = default[:labels] || {}
       cb = default[:caption_before] || {}
@@ -288,6 +289,9 @@ module OptionConfigs
 
       config_obj.table_comments ||= {}
       config_obj.table_comments[:fields] = fs
+      # Keep the original configuration available, to allow
+      # model generator comparisons
+      config_obj.table_comments[:original_fields] = original_fs
     end
 
     def self.configs_valid?(config_obj)

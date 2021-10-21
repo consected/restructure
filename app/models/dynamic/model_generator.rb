@@ -52,12 +52,17 @@ module Dynamic
       name = table_name.singularize
 
       default_options = {
+        _comments: {
+          fields: comments
+        },
         default: {
           db_configs: db_configs,
           field_options: field_options,
-          caption_before: caption_before
+          caption_before: caption_before,
+          labels: labels
         }
       }.deep_stringify_keys!
+
 
       options = YAML.dump default_options
 
@@ -198,6 +203,40 @@ module Dynamic
       end
 
       @caption_before
+    end
+
+    def labels
+      @labels = {}
+      return unless respond_to?(:fields) && fields
+
+      fields.each do |name, config|
+        @labels[name] = if config.is_a? String
+                                  config
+                                elsif config.respond_to?(:label)
+                                  config.label
+                                else
+                                  config[:label]
+                                end
+      end
+
+      @labels
+    end
+
+    def comments
+      @comments = {}
+      return unless respond_to?(:fields) && fields
+
+      fields.each do |name, config|
+        @comments[name] = if config.is_a? String
+                                  config
+                                elsif config.respond_to?(:comment)
+                                  config.comment
+                                else
+                                  config[:comment]
+                                end
+      end
+
+      @comments
     end
 
     #
