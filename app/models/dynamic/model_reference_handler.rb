@@ -28,6 +28,7 @@ module Dynamic
     def reset_model_references
       @model_references = nil
       @embedded_items = nil
+      @memoize_embedded_items = nil
       @creatable_model_references = nil
       @always_embed_item = nil
     end
@@ -487,15 +488,15 @@ module Dynamic
 
     def memoize_embedded_item(&block)
       # Check for a memoized result
-      @embedded_items ||= {}
+      @memoize_embedded_items ||= {}
       memokey = "embedded_item_#{embed_action_type}"
-      return @embedded_items[memokey] if @embedded_items.key?(memokey)
+      return @memoize_embedded_items[memokey] if @memoize_embedded_items.key?(memokey)
 
-      @embedded_items[memokey] = block.call
+      @memoize_embedded_items[memokey] = block.call
     end
 
     def clear_embedded_item_memo
-      @embedded_items = nil
+      @memoize_embedded_items = nil
     end
 
     #
