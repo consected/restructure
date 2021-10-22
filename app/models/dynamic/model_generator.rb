@@ -52,10 +52,14 @@ module Dynamic
       name = table_name.singularize
 
       default_options = {
+        _comments: {
+          fields: comments
+        },
         default: {
           db_configs: db_configs,
           field_options: field_options,
-          caption_before: caption_before
+          caption_before: caption_before,
+          labels: labels
         }
       }.deep_stringify_keys!
 
@@ -188,16 +192,42 @@ module Dynamic
       return unless respond_to?(:fields) && fields
 
       fields.each do |name, config|
-        @caption_before[name] = if config.is_a? String
-                                  config
-                                elsif config.respond_to?(:caption)
-                                  config.caption
-                                else
-                                  config[:caption]
-                                end
+        @caption_before[name] = config_value(config, :caption)
       end
 
       @caption_before
+    end
+
+    def labels
+      @labels = {}
+      return unless respond_to?(:fields) && fields
+
+      fields.each do |name, config|
+        @labels[name] = config_value(config, :label)
+      end
+
+      @labels
+    end
+
+    def comments
+      @comments = {}
+      return unless respond_to?(:fields) && fields
+
+      fields.each do |name, config|
+        @comments[name] = config_value(config, :comment)
+      end
+
+      @comments
+    end
+
+    def config_value(key)
+      if config.is_a? String
+        config
+      elsif config.respond_to?(key)
+        config.send(key)
+      else
+        config[key]
+      end
     end
 
     #

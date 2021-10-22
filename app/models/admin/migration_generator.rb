@@ -364,7 +364,7 @@ class Admin::MigrationGenerator
     removed = old_colnames - new_colnames
     changed = {}
     db_configs.each do |k, v|
-      current_type = cols.find { |c| c.name == k.to_s }.type
+      current_type = cols.find { |c| c.name == k.to_s }&.type
       next unless v[:type] && current_type
 
       expected_type = v[:type]&.to_sym
@@ -468,8 +468,8 @@ class Admin::MigrationGenerator
           self.class_name = '#{class_name}'
           self.fields = %i[#{migration_fields_array.join(' ')}]
           self.table_comment = '#{tcs[:table]}'
-          self.fields_comments = #{(tcs[:fields] || {}).to_json}
-          self.db_configs = #{(db_configs || {}).to_json}
+          self.fields_comments = #{(tcs[:fields] || {}).to_h}
+          self.db_configs = #{(db_configs || {}).to_h}
           self.no_master_association = #{!!no_master_association}
           self.resource_type = :#{resource_type}
           self.all_referenced_tables = #{(all_referenced_tables || []).to_a}

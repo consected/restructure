@@ -14,6 +14,10 @@ if [ -z "$MOUNTPOINT" ]; then
     MOUNTPOINT=/efs1
   else
     MOUNTPOINT=/home/$USER/dev-filestore
+    if [ ! -d ${MOUNTPOINT} ]; then
+      echo "MOUNTPOINT ${MOUNTPOINT} does not exist. Where is it?"
+      read -p 'MOUNTPOINT directory: ' MOUNTPOINT
+    fi
   fi
 fi
 

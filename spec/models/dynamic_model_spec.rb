@@ -12,7 +12,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
   include DynamicModelSupport
 
   before :all do
-    expect(Admin::MigrationGenerator.view_definition 'dynamic_test','test_views').to be nil
+    expect(Admin::MigrationGenerator.view_definition('dynamic_test', 'test_views')).to be nil
     generate_test_dynamic_view
   rescue StandardError => e
     puts e
@@ -92,6 +92,41 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
   end
 
   it 'creates a view using supplied SQL' do
-    Admin::MigrationGenerator.view_definition 'dynamic_test','test_views'
+    Admin::MigrationGenerator.view_definition 'dynamic_test', 'test_views'
+  end
+
+  it 'sets an initial config if the table already exists' do
+    unless Admin::MigrationGenerator.table_exists? 'test_created_by_recs'
+      TableGenerators.dynamic_models_table('test_created_by_recs', :create_do, 'test1', 'test2', 'created_by_user_id')
+    end
+
+    table_comment = 'a test table'
+    test2_comment = 'test2 column comment'
+
+    Admin::MigrationGenerator.connection.execute <<~END_SQL
+      comment on table test_created_by_recs is '#{table_comment}';
+      comment on column test_created_by_recs.test2 is '#{test2_comment}';
+    END_SQL
+
+    dm = DynamicModel.create! current_admin: @admin,
+                              name: 'test created by',
+                              table_name: 'test_created_by_recs',
+                              schema_name: 'ml_app',
+                              category: :test
+
+    dm.current_admin = @admin
+    dm.update_tracker_events
+
+    expect(dm).to be_a ::DynamicModel
+    # The field list has been set up
+    expect(dm.field_list).to eq 'test1 test2 created_by_user_id'
+    # The keys have been set up automatically
+    expect(dm.foreign_key_name).to eq 'master_id'
+    expect(dm.primary_key_name).to eq 'id'
+    # A baseline set of comments have been set up
+    tcs = dm.table_comments
+    # The default comment 'Dynamicmodel: Test Created By' should not be used
+    expect(tcs[:table]).to eq table_comment
+    expect(tcs[:fields][:test2]).to eq test2_comment
   end
 end

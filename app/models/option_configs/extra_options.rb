@@ -228,7 +228,7 @@ module OptionConfigs
       ts = config_obj.table_comments && config_obj.table_comments[:table]
 
       new_tc = config_obj.name.underscore.humanize.captionize
-      if ts != new_tc
+      if ts.blank? # ts != new_tc
         # Set a default table comment value
         config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
       end
@@ -237,13 +237,14 @@ module OptionConfigs
       return unless default
 
       new_tc = default[:label] || config_obj.name.underscore.humanize.captionize
-      if ts != new_tc
+      if ts.blank? #ts != new_tc
         # Set the table comment from the config label if it was not set
         config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
       end
 
       # Get a hash of field comments to update
       fs = tc[:fields] || {}
+      original_fs = fs.dup
 
       ls = default[:labels] || {}
       cb = default[:caption_before] || {}
@@ -281,13 +282,16 @@ module OptionConfigs
         caption = caption&.strip
         next if caption.blank? || fs[k]&.strip == caption
 
-        fs[k] = v
+        fs[k] = v if fs[k].blank?
       end
 
       return unless fs.present?
 
       config_obj.table_comments ||= {}
       config_obj.table_comments[:fields] = fs
+      # Keep the original configuration available, to allow
+      # model generator comparisons
+      config_obj.table_comments[:original_fields] = original_fs
     end
 
     def self.configs_valid?(config_obj)

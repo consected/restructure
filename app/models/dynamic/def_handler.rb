@@ -605,7 +605,7 @@ module Dynamic
     # cleaned up array of strings
     # The string is a space or comma separated list
     # @param [String] for_attrib string from an alternative attribute
-    # @return [Array] strings representing the list of fields
+    # @return [Array{String}] strings representing the list of fields
     def field_list_array(for_attrib: nil)
       for_attrib ||= field_list
       for_attrib.split(/[,\s]+/).map(&:strip).compact if for_attrib
