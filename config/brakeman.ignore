@@ -27,7 +27,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 42,
+      "line": 72,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"select table_schema \\\"schema_name\\\", table_name from information_schema.tables\\nwhere table_schema IN (#{quoted_schemas})\\nand table_catalog = '#{current_database}'\\nUNION\\nselect table_schema \\\"schema_name\\\", table_name from information_schema.views\\nwhere table_schema IN (#{quoted_schemas})\\nand table_catalog = '#{current_database}'\\norder by \\\"schema_name\\\", table_name\\n\")",
       "render_path": null,
@@ -67,7 +67,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 269,
+      "line": 317,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE\")",
       "render_path": null,
@@ -178,7 +178,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 92,
+      "line": 133,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"        SELECT\\n            cols.table_schema \\\"schema_name\\\",\\n            cols.table_name,\\n            cols.column_name,\\n            pg_catalog.col_description(c.oid, cols.ordinal_position::int) AS column_comment\\n        FROM\\n            information_schema.columns cols\\n        INNER JOIN pg_catalog.pg_class c\\n        ON\\n          c.oid = ('\\\"' || cols.table_name || '\\\"')::regclass::oid\\n          AND c.relname = cols.table_name\\n\\n        WHERE\\n            cols.table_catalog = '#{current_database}' AND\\n            cols.table_schema IN (#{quoted_schemas}) AND\\n            pg_catalog.col_description(c.oid, cols.ordinal_position::int) IS NOT NULL\\n        ;\\n\")",
       "render_path": null,
@@ -238,7 +238,7 @@
       "check_name": "FileAccess",
       "message": "Model attribute used in file name",
       "file": "app/models/admin/app_type_export.rb",
-      "line": 97,
+      "line": 100,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
       "code": "FileUtils.rm_rf(Admin::MigrationGenerator.new(default_schema_name).db_migration_dirname(\"app-export\"))",
       "render_path": null,
@@ -248,6 +248,26 @@
         "method": "clean_export_dir"
       },
       "user_input": "Admin::MigrationGenerator.new(default_schema_name).db_migration_dirname(\"app-export\")",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "8eedc4fdd3c7e0de98c4a99b7caceefbbf1c42df81010c9e9a86eedc0be5d094",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/admin/migration_generator.rb",
+      "line": 187,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "connection.execute(\"SELECT * FROM #{tables_and_views.find do\n (tn[\"table_name\"] == \"#{basename}_datadic\")\n end[\"table_name\"]};\\n\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::MigrationGenerator",
+        "method": "Admin::MigrationGenerator.data_dic"
+      },
+      "user_input": "tables_and_views.find do\n (tn[\"table_name\"] == \"#{basename}_datadic\")\n end[\"table_name\"]",
       "confidence": "Medium",
       "note": ""
     },
@@ -278,7 +298,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/model_reference.rb",
-      "line": 204,
+      "line": 205,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ModelReference.joins(\"INNER JOIN #{ModelReference.record_type_to_table_name(to_record_class_for_type(to_record_type).name.ns_underscore.pluralize)} ON model_references.to_record_id = #{ModelReference.record_type_to_table_name(to_record_class_for_type(to_record_type).name.ns_underscore.pluralize)}.id\")",
       "render_path": null,
@@ -318,7 +338,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 46,
+      "line": 53,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute((\"CREATE SCHEMA IF NOT EXISTS #{schema}\" + \" AUTHORIZATION #{owner}\"))",
       "render_path": null,
@@ -328,26 +348,6 @@
         "method": "create_schema"
       },
       "user_input": "owner",
-      "confidence": "Medium",
-      "note": ""
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "b5ca23a692c708464d98b505716492a64cbf8652957debca83fa28c816a14c96",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/admin/migration_generator.rb",
-      "line": 135,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "connection.execute(\"SELECT * FROM #{tables_and_views.find do\n (tn[\"table_name\"] == \"#{dd}_datadic\")\n end[\"table_name\"]};\\n\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Admin::MigrationGenerator",
-        "method": "Admin::MigrationGenerator.data_dic"
-      },
-      "user_input": "tables_and_views.find do\n (tn[\"table_name\"] == \"#{dd}_datadic\")\n end[\"table_name\"]",
       "confidence": "Medium",
       "note": ""
     },
@@ -398,7 +398,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 265,
+      "line": 313,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE\")",
       "render_path": null,
@@ -473,6 +473,6 @@
       "note": ""
     }
   ],
-  "updated": "2021-08-12 10:10:26 +0100",
+  "updated": "2021-10-21 19:38:21 +0100",
   "brakeman_version": "5.1.1"
 }
