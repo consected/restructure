@@ -31,7 +31,9 @@ module Dynamic
 
     included do
       attr_accessor :table_comments # comments from definition to be applied to DB table
-      attr_accessor :db_configs # field configurations from definition to be applied during creation
+      attr_accessor :db_columns # field configurations from definition to be applied during creation
+      alias_method :db_configs, :db_columns
+      alias_method :db_configs=, :db_columns=
       attr_writer :allow_migrations
 
       before_validation :init_schema_name
@@ -190,7 +192,7 @@ module Dynamic
           no_master_association: implementation_no_master_association,
           prev_table_name: table_name_before_last_save,
           belongs_to_model: btm,
-          db_configs: db_configs,
+          db_configs: db_columns,
           view_sql: config_view_sql,
           all_referenced_tables: art,
           resource_type: self.class.name.underscore.to_sym,

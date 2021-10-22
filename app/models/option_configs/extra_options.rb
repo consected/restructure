@@ -102,7 +102,7 @@ module OptionConfigs
       self.field_options = self.field_options.symbolize_keys
 
       self.db_configs ||= {}
-      config_obj.db_configs = self.db_configs = self.db_configs.symbolize_keys
+      config_obj.db_columns ||= self.db_configs = self.db_configs.symbolize_keys
 
       # Allow field_options.edit_as.alt_options to be an array
       self.field_options.each do |k, v|
@@ -192,6 +192,7 @@ module OptionConfigs
 
       config_obj.configurations = res.delete(:_configurations)
       config_obj.table_comments = res.delete(:_comments)
+      config_obj.db_columns = res.delete(:_db_columns)
 
       # Only run through additional processing of comments if the
       # configuration was just saved
@@ -237,7 +238,7 @@ module OptionConfigs
       return unless default
 
       new_tc = default[:label] || config_obj.name.underscore.humanize.captionize
-      if ts.blank? #ts != new_tc
+      if ts.blank? # ts != new_tc
         # Set the table comment from the config label if it was not set
         config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
       end

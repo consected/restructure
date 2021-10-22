@@ -128,5 +128,12 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
     # The default comment 'Dynamicmodel: Test Created By' should not be used
     expect(tcs[:table]).to eq table_comment
     expect(tcs[:fields][:test2]).to eq test2_comment
+
+    ol = dm.options.dup
+    # now update the config and check the options haven't changed again
+    dm.update!(name: 'updated test created by', current_admin: @admin)
+
+    dm.reload
+    expect(dm.options).to eq ol
   end
 end

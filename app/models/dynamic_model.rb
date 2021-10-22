@@ -357,10 +357,8 @@ class DynamicModel < ActiveRecord::Base
 
     return unless tc[:table] || tc[:fields].present?
 
-    tc.stringify_keys!
-    top_options = YAML.dump('_comments' => tc)
-    self.options ||= ''
-    self.options = top_options + self.options
+    hash = { '_comments' => tc }
+    prepend_to_options(hash)
   end
 
   def set_keys_from_columns
@@ -374,27 +372,27 @@ class DynamicModel < ActiveRecord::Base
   def set_field_types_from_columns
     return unless Admin::MigrationGenerator.table_exists? table_name
 
-    return if default_options.db_configs.present?
+    # Ensure the new options have reloaded
+    option_configs
+    return if db_columns.present?
 
-    db_configs = {}
+    dbc = {}
     table_columns.each do |col|
-      db_configs[col.name.to_s] = {
+      dbc[col.name.to_s] = {
         type: col.type.to_s
       }
     end
 
-    return if db_configs.empty?
+    return if dbc.empty?
 
-    db_configs.deep_stringify_keys!
-    hash = { '__dummy__default' => { 'db_configs' => db_configs } }
+    hash = { '_db_columns' => dbc }
+    prepend_to_options(hash)
+  end
+
+  def prepend_to_options(hash)
+    hash.deep_stringify_keys!
     new_options = YAML.dump(hash)
     self.options ||= ''
-    self.options += new_options
-    self.options = if options.index(/^default:\s*$/)
-                     options.gsub(/^---\n__dummy__default:\s*$/, '')
-                   else
-                     options.gsub(/^---\n__dummy__default:\s*$/, 'default:')
-                   end
-    self.options
+    self.options = self.options + new_options
   end
 end

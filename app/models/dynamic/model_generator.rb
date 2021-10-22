@@ -55,8 +55,8 @@ module Dynamic
         _comments: {
           fields: comments
         },
+        _db_columns: db_columns,
         default: {
-          db_configs: db_configs,
           field_options: field_options,
           caption_before: caption_before,
           labels: labels
@@ -148,7 +148,7 @@ module Dynamic
     # List of field names to be used in a dynamic model field list
     # @return [String]
     def field_list
-      @field_list ||= db_configs.keys.map(&:to_s).join(' ')
+      @field_list ||= db_columns.keys.map(&:to_s).join(' ')
     end
 
     private
@@ -160,19 +160,19 @@ module Dynamic
     end
 
     #
-    # Return db_configs to summarize the real field types and enable definition
+    # Return db_columns to summarize the real field types and enable definition
     # of a dynamic model
     # @return [Hash]
-    def db_configs
-      @db_configs = {}
+    def db_columns
+      @db_columns = {}
 
       field_types.each do |field_name, field_type|
-        @db_configs[field_name] = {
+        @db_columns[field_name] = {
           type: field_type.to_s
         }
       end
 
-      @db_configs
+      @db_columns
     end
 
     def field_options
