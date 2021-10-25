@@ -66,8 +66,11 @@ class Admin::AppTypesController < AdminController
     app_type = Admin::AppType.find(params[:id])
     app_type.current_admin = current_admin
 
+    atn = app_type.name
+    raise FphsException if atn.include?('.') || atn.include?('/') || atn.include?('~')
+
     send_file app_type.zip_app_export_migrations.path,
-              filename: "#{app_type.name}--#{Admin::AppType::AppExportDirSuffix}.zip"
+              filename: "#{atn}--#{Admin::AppType::AppExportDirSuffix}.zip"
   end
 
   protected
