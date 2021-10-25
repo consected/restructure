@@ -53,8 +53,10 @@ module Dynamic
 
       default_options = {
         _comments: {
+          table: table_comment_config,
           fields: comments
         },
+        _data_dictionary: data_dictionary_config,
         _db_columns: db_columns,
         default: {
           field_options: field_options,
@@ -220,7 +222,15 @@ module Dynamic
       @comments
     end
 
-    def config_value(key)
+    def data_dictionary_config
+      super&.to_h if defined?(super)
+    end
+
+    def table_comment_config
+      super if defined?(super)
+    end
+
+    def config_value(config, key)
       if config.is_a? String
         config
       elsif config.respond_to?(key)

@@ -39,6 +39,7 @@ module Imports
     def setup
       setup_generator self, dynamic_model_table
       self.field_types = {}
+      generator_config.setup_defaults
       generator_config.setup_field_types_from_config field_types
     rescue StandardError => e
       Rails.logger.warn e
@@ -174,7 +175,7 @@ module Imports
 
       # Check comments are configured to match the dynamic model
       fcs = dynamic_model.table_comments || {}
-      fcs = fcs[:original_fields] || fcs[:fields] || {}
+      fcs = fcs[:original_fields] || {}
       config_fields.each do |k, v|
         k = k.to_sym
         text = v.comment
@@ -186,7 +187,6 @@ module Imports
       end
 
       return res unless res
-
 
       # Check caption is configured to match the dynamic model
       dmc = dynamic_model.default_options.caption_before
@@ -213,7 +213,6 @@ module Imports
           break
         end
       end
-
 
       res
     end
@@ -249,6 +248,14 @@ module Imports
 
     def fields
       config_fields
+    end
+
+    def data_dictionary_config
+      generator_config.data_dictionary.to_h
+    end
+
+    def table_comment_config
+      generator_config.options&.table_comment
     end
 
     def disabled

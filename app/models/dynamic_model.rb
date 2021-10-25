@@ -16,6 +16,8 @@ class DynamicModel < ActiveRecord::Base
   before_create :set_keys_from_columns
   before_create :set_field_types_from_columns
 
+  after_save :setup_data_dictionary
+
   attr_accessor :editable
 
   def self.implementation_prefix
@@ -361,6 +363,12 @@ class DynamicModel < ActiveRecord::Base
     prepend_to_options(hash)
   end
 
+  #
+  # If we are creating a new dynamic model referring to a table that already exists,
+  # we can use the existence of certain DB columns to populate the dynamic model config.
+  # If the id column doesn't exist for example, perhaps it would make sense to use
+  # the actual primary key on the table. From an app perspective, id makes most sense when
+  # it exists.
   def set_keys_from_columns
     return unless Admin::MigrationGenerator.table_exists? table_name
 
@@ -369,6 +377,9 @@ class DynamicModel < ActiveRecord::Base
     self.foreign_key_name = 'master_id' if tc.include?('master_id')
   end
 
+  #
+  # If we are creating a new dynamic model referring to a table that already exists,
+  # setup the options YAML text with DB column types from the database.
   def set_field_types_from_columns
     return unless Admin::MigrationGenerator.table_exists? table_name
 
@@ -389,10 +400,29 @@ class DynamicModel < ActiveRecord::Base
     prepend_to_options(hash)
   end
 
+  #
+  # Add the hash to the start of the options text
+  # This really needs to be replaced with real configuration
+  # handling, but it works effectively when the configuration is new.
   def prepend_to_options(hash)
     hash.deep_stringify_keys!
-    new_options = YAML.dump(hash)
+    new_options = YAML.dump(hash).gsub(/^---/, "\n")
     self.options ||= ''
-    self.options = self.options + new_options
+    self.options = new_options + self.options
+  end
+
+  #
+  # Set up the data dictionary if a _data_dictionary: {study: } option has been specified
+  # This is run after_create
+  def setup_data_dictionary
+    return unless data_dictionary && data_dictionary[:study]
+
+    data_dictionary_handler.refresh_variables_records
+  end
+
+  #
+  # Produce a data dictionary handler
+  def data_dictionary_handler
+    @data_dictionary_handler ||= Dynamic::DataDictionary.new(self)
   end
 end

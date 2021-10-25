@@ -136,4 +136,40 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
     dm.reload
     expect(dm.options).to eq ol
   end
+
+  it 'sets up a data dictionary if the appropriate config is specified' do
+    unless Admin::MigrationGenerator.table_exists? 'test_created_by_recs'
+      TableGenerators.dynamic_models_table('test_created_by_recs', :create_do, 'test1', 'test2', 'created_by_user_id')
+    end
+
+    options = <<~END_OPTIONS
+      _data_dictionary:
+        study: Test Study
+        source_type: test database
+    END_OPTIONS
+
+    name = 'test created by 2'
+    res = Dynamic::DatadicVariable.find_by_identifiers source_name: name,
+                                                       source_type: 'test database',
+                                                       form_name: nil,
+                                                       variable_name: 'test1'
+
+    expect(res.first).to be nil
+
+    dm = DynamicModel.create! current_admin: @admin,
+                              name: name,
+                              table_name: 'test_created_by_recs',
+                              schema_name: 'ml_app',
+                              category: :test,
+                              options: options
+
+    expect(dm.data_dictionary_handler).not_to be nil
+
+    res = Dynamic::DatadicVariable.find_by_identifiers source_name: name,
+                                                       source_type: 'test database',
+                                                       form_name: nil,
+                                                       variable_name: 'test1'
+
+    expect(res.first).to be_a Datadic::Variable
+  end
 end

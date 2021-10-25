@@ -1,63 +1,66 @@
 # frozen_string_literal: true
 
 module Dynamic
+  #
+  # Provide data dictionary functionality to dynamic models.
   class DataDictionary
     include OptionsHandler
 
-    # Fields hash of Fields::Field
-    configure_hash :fields, with: %i[type label caption comment no_downcase]
-
-    attr_accessor :dynamic_model
+    attr_accessor :dynamic_model, :fields
 
     def initialize(dynamic_model)
-      @dynamic_model = dynamic_model
-
+      self.dynamic_model = dynamic_model
       setup_fields_from_config
     end
 
     def setup_fields_from_config
-      f = {
-        fields: {}
-      }
-      dynamic_model.table_columns.each do |col|
-        name = col.name
-        f[:fields][name] ||= {}
-        f[:fields][name].merge! field_config_for(col)
-      end
+      self.fields = {}
+      position = 0
 
-      setup_options_hash(f, :fields)
+      tcs = dynamic_model.table_columns
+      tcs.each do |col|
+        name = col.name
+        next unless name.in?(column_variable_names)
+
+        v = Dynamic::DatadicVariable.new(self, name, col.type, position: position)
+        fields[name] = v
+        position += 1
+      end
+    end
+
+    def column_variable_names
+      return @column_variable_names if @column_variable_names
+
+      dynamic_model.table_columns
+                   .map(&:name)
+                   .reject do |name|
+                     name.in?(self.class.core_field_names) || name.index(/^embedded_report_|^placeholder_/)
+                   end
     end
 
     def self.core_field_names
       %w[id user_id created_at updated_at disabled master_id]
     end
 
-    def default_options
-      dynamic_model.default_options
+    def dynamic_model_data_dictionary_config
+      dynamic_model.data_dictionary || {}
     end
 
-    def field_config_for(col)
-      name = col.name.to_sym
-      type = col.type.to_sym
-      type = :integer if type == :references
+    def source_default_config
+      return @source_default_config if @source_default_config
 
-      fcs = dynamic_model.table_comments || {}
-      # Comments will be in :original_fields if the config has been processed
-      # for saving, or :fields if not
-      fcs = fcs[:original_fields] || fcs[:fields] || {}
-      comment = fcs[name]
+      dmdd = dynamic_model_data_dictionary_config
 
-      dmc = default_options.caption_before || {}
-      caption = dmc.dig(name, :caption)
-
-      lab = default_options.labels || {}
-      label = lab[name]
-
-      {
-        type: type,
-        label: label,
-        caption: caption,
-        comment: comment
+      @source_default_config = {
+        study: dmdd[:study],
+        source_name: dmdd[:source_name] || dynamic_model.name,
+        source_type: dmdd[:source_type] || 'database',
+        form_name: dmdd[:form_name],
+        domain: dmdd[:domain] || dynamic_model.table_comments&.dig(:table),
+        storage_type: 'database',
+        db_or_fs: ActiveRecord::Base.connection_config[:database],
+        schema_or_path: dynamic_model.schema_name,
+        table_or_file: dynamic_model.table_name
       }
     end
 
@@ -65,17 +68,9 @@ module Dynamic
     # Datadic::Variable records need to be updated to match the new definition
     # if there have been changes, additions or deletions
     def refresh_variables_records
-      form.fields.each do |_k, field|
+      fields.each_value do |field|
         field.refresh_variable_record
       end
-    end
-
-    #
-    # Refresh variable records (Datadic::Variable) based on
-    # current definition.
-    # @see Redcap::DataDictionaries::FieldDatadicVariables#refresh_variable_record
-    def refresh_variable_record
-      FieldDatadicVariable.new(self).refresh_variable_record
     end
   end
 end

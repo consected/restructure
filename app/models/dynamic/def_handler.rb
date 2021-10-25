@@ -17,7 +17,7 @@ module Dynamic
       after_commit :restart_server, if: -> { @regenerate }
       after_commit :other_regenerate_actions
 
-      attr_accessor :configurations
+      attr_accessor :configurations, :data_dictionary
     end
 
     class_methods do

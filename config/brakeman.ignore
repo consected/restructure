@@ -232,26 +232,6 @@
       "note": ""
     },
     {
-      "warning_type": "File Access",
-      "warning_code": 16,
-      "fingerprint": "79bbbfcbfefe638e9c9e7edda0ea14d0cc2f4bcc59f54e4435b43bdfaa38b943",
-      "check_name": "FileAccess",
-      "message": "Model attribute used in file name",
-      "file": "app/models/admin/app_type_export.rb",
-      "line": 100,
-      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
-      "code": "FileUtils.rm_rf(Admin::MigrationGenerator.new(default_schema_name).db_migration_dirname(\"app-export\"))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Admin::AppTypeExport",
-        "method": "clean_export_dir"
-      },
-      "user_input": "Admin::MigrationGenerator.new(default_schema_name).db_migration_dirname(\"app-export\")",
-      "confidence": "Medium",
-      "note": ""
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "8eedc4fdd3c7e0de98c4a99b7caceefbbf1c42df81010c9e9a86eedc0be5d094",
@@ -348,6 +328,26 @@
         "method": "create_schema"
       },
       "user_input": "owner",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "c23788dfb502a2cd5958e20ed2c594f3c37257034edfbf7c9cc2e783311ace9e",
+      "check_name": "SendFile",
+      "message": "Model attribute used in file name",
+      "file": "app/controllers/admin/app_types_controller.rb",
+      "line": 72,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(Admin::AppType.find(params[:id]).zip_app_export_migrations.path, :filename => (\"#{Admin::AppType.find(params[:id]).name}--#{\"app-export\"}.zip\"))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::AppTypesController",
+        "method": "export_migrations"
+      },
+      "user_input": "Admin::AppType.find(params[:id]).zip_app_export_migrations.path",
       "confidence": "Medium",
       "note": ""
     },
@@ -473,6 +473,6 @@
       "note": ""
     }
   ],
-  "updated": "2021-10-21 19:38:21 +0100",
+  "updated": "2021-10-25 17:34:16 +0100",
   "brakeman_version": "5.1.1"
 }
