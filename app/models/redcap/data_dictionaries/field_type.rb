@@ -151,6 +151,11 @@ module Redcap
         real_type = VariableTypesToRealTypes[default_variable_type] || :to_s
         return nil if value.blank? && real_type != :to_s
 
+        if real_type == :to_time
+          vtime = value.to_time(:utc)
+          return Time.utc(2000, 1, 1, vtime.hour, vtime.min, vtime.sec)
+        end
+
         value.send(real_type)
       end
 
