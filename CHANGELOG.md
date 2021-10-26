@@ -20,6 +20,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 ## Unreleased
 
 
+## [7.4.65] - 2021-10-26
+
+
 ## [7.4.64] - 2021-10-18
 
 - [Changed] Handling of tracker "alerts" to work without tracker panel being actively displayed
