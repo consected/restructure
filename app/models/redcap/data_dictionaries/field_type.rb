@@ -145,13 +145,22 @@ module Redcap
       #
       # Use the real data type from the definition to cast the supplied value to the real data type.
       # We handle '' blank strings carefully, since we don't want blank being converted to numeric zero
-      # @param [String] value
+      # @param [Object] value
       # @return [Object]
       def cast_value_to_real(value)
         real_type = VariableTypesToRealTypes[default_variable_type] || :to_s
         return nil if value.blank? && real_type != :to_s
 
         value.send(real_type)
+      end
+
+      #
+      # Do the values from an existing record and a newly retrieved Redcap record match?
+      # @param [Object] new_value
+      # @param [Object] existing_value
+      # @return [true|false]
+      def values_match?(new_value, existing_value)
+        cast_value_to_real(new_value) == existing_value
       end
 
       #

@@ -33,6 +33,7 @@ class ModelReference < ActiveRecord::Base
   validate :allows_create, if: -> { !persisted? }
 
   after_save :handle_disabled, if: -> { disabled }
+  after_save :reset_memos
   after_create :set_created
 
   attr_accessor :current_user, :force_create
@@ -340,13 +341,14 @@ class ModelReference < ActiveRecord::Base
   #
   # @see ModelReference.record_type_to_ns_table_name
   # The result has double underscores removed, to truly represent a DB table name
+  # NOTE: it relies on the pluralization of the record type to be correct
   def self.record_type_to_table_name(record_type)
     record_type_to_ns_table_name(record_type).gsub('__', '_')
   end
 
   #
   # Convert a string, class or instance to a symbol association name
-  # The result if checked to ensure Master actually includes this association
+  # The result is checked to ensure Master actually includes this association
   # @param [Object] record_type - one of many representations
   # @return [Symbol | nil] - master association name as a symbol
   def self.record_type_to_assoc_sym(record_type)
@@ -626,13 +628,21 @@ class ModelReference < ActiveRecord::Base
   #
   # Handles the situation when a model reference is disabled, checking the configuration
   # if the to-record should also be disabled, and if so disabling it.
-  # @return [<Type>] <description>
   def handle_disabled
     @was_updated = 'updated'
     return true unless saved_change_to_disabled?
 
     troc = to_record_options_config
     to_record.model_reference_disable if troc && troc[:also_disable_record]
+  end
+
+  #
+  # On save, reset the from_record's memos, if it is set. If we have created a record from a master
+  # then the caller will need to handle this itself.
+  def reset_memos
+    return unless from_record
+
+    from_record.reset_model_references if from_record.respond_to?(:reset_model_references)
   end
 
   #

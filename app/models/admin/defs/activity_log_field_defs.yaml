@@ -1,0 +1,35 @@
+Name: |
+  visible name of the activity log
+
+Item type: |
+  the model type that this activity log belongs to
+
+Process name: |
+  technical name of the business process, specific to the *Item type*, allowing multiple
+  processes to be run against a single *Item type*. For example `session_tracker`
+
+Rec type: |
+  for an *Item type* that has a *rec_type* column, this can be used to limit the *rec_type* that 
+  this activity log belongs to.
+
+Schema name: |
+  the schema the database table belongs to.
+
+Action when attribute: |
+  the *Action when attribute* is the field name that records when the activity was performed. It defaults to 
+  `completed_when` if not specified, although more generally may be the `created_at` timestamp. This attribute
+  is used to sort activities chronologically.
+
+
+Hide item list panel: |
+  a list of records of the *Item type* within the current master are shown by default, for creating a new activity log.
+  When checked the list is not shown.
+
+Main log name: |
+  a visible name for the default activity, when relying on an *Item type* being selected from the side item list
+
+Main log field list: |
+  all non-standard fields defined for the *main log*
+
+
+Blank log name:

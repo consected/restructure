@@ -11,7 +11,7 @@
           <label><%=field.name%></label><p><%=field.label_plain%></p>
         </div>
         <div>
-          <% field.field_choices.choices(plain_text: true).each do |i| %>
+          <% field.field_choices_plain_text.each do |i| %>
           <div>
             <%= check_box_tag :dummy, value: i.first %> <%= i.last %>
           </div>

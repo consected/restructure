@@ -10,7 +10,14 @@ _comments:
   'fields': 
     'field1': describe the field
     'field2': ...
-  
+
+# NOTE: db_configs may be found within the default: options in older configurations.
+# Although not recommended, the old configuration will continue to work
+_db_columns:
+  field_name:
+    type: force the field type (string, datetime, date, integer, float, decimal)
+  field_name2:
+    type: ...  
 
 _configurations: 
   secondary_key: field name to use as a secondary key to lookup items

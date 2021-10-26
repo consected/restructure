@@ -15,12 +15,13 @@ class Admin::ActivityLogsController < AdminController
 
   def filters
     {
-      category: ActivityLog.pluck(:category).uniq.compact
+      category: ActivityLog.pluck(:category).uniq.compact,
+      table_name: ActivityLog.active.pluck(:table_name).uniq
     }
   end
 
   def filters_on
-    [:category]
+    %i[category table_name]
   end
 
   private

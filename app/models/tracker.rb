@@ -51,7 +51,7 @@ class Tracker < UserBase
 
   # _merged attribute is used to indicate if a tracker record was merged into an existing
   # record on creation
-  attr_accessor :_merged
+  attr_accessor :_merged, :saving_update
 
   # Avoids a lot of unnecessary database lookups
   def self.uses_item_flags?(_user)
@@ -131,10 +131,11 @@ class Tracker < UserBase
 
       kname = "#{k}_name".to_sym
 
-      if record.respond_to? kname
-        n = record.class.send("get_#{k}_name".to_s, tov)
+      get_name = "get_#{k}_name"
+      if record.respond_to?(kname) && record.class.respond_to?(get_name)
+        n = record.class.send(get_name, tov)
         tov = "(#{tov}) #{n}" unless n.is_a?(String) && tov.is_a?(String) && tov.downcase == n.downcase
-        n = record.class.send("get_#{k}_name".to_s, fromv)
+        n = record.class.send(get_name.to_s, fromv)
         fromv = "(#{fromv}) #{n}" unless n.is_a?(String) && fromv.is_a?(String) && fromv.downcase == n.downcase
       end
 
@@ -148,7 +149,19 @@ class Tracker < UserBase
     return nil if cp.blank?
 
     t.notes = cp
+    t.saving_update = true
     t.save
+  end
+
+  # Override HandlesUserBase#check_can_save to allow track_record_update
+  # to save without the user having create user access control on the Trackers table
+  def check_can_save
+    if saving_update
+      self.saving_update = false
+      return true
+    end
+
+    super
   end
 
   # Called by item flag controller to save the aggregate set of item_flag changes to the tracker

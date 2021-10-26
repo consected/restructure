@@ -33,12 +33,13 @@ RSpec.describe Admin::UserAccessControl, type: :model do
   end
 
   it 'should not create default access controls for a new app type' do
+    # But we will create a single entry under the default _app_ role for the app_type
     create_admin
     (1..3).each do |i|
       a = create_app_type name: "app#{i}", label: "app#{i}"
 
       res = Admin::UserAccessControl.where(app_type_id: a.id)
-      expect(res.length).to eq 0
+      expect(res.length).to eq 1
     end
   end
 

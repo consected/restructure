@@ -11,7 +11,12 @@ class DynamicModel < ActiveRecord::Base
   default_scope -> { order disabled: :asc, category: :asc, position: :asc, updated_at: :desc }
 
   validate :table_name_ok
-  before_save :set_empty_field_list
+  before_save :set_field_list_from_table
+  before_save :set_comments_from_table
+  before_create :set_keys_from_columns
+  before_create :set_field_types_from_columns
+
+  after_save :setup_data_dictionary
 
   attr_accessor :editable
 
@@ -102,6 +107,16 @@ class DynamicModel < ActiveRecord::Base
           .distinct(:category)
           .unscope(:order)
           .map { |s| s.category || 'default' }
+  end
+
+  #
+  # Full set of active table names
+  def self.table_names
+    active.select(:category)
+          .distinct(:table_name)
+          .unscope(:order)
+          .pluck(:table_name)
+          .sort
   end
 
   #
@@ -287,35 +302,6 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
-  def generator_script(version, mode = 'create')
-    cname = "#{mode}_#{table_name}_#{version}".camelize
-    view_sql = configurations && configurations[:view_sql]
-    table_or_view = view_sql ? 'view' : 'tables'
-    do_create_or_update = if mode == 'create'
-                            "create_dynamic_model_#{table_or_view}"
-                          elsif mode == 'create_or_update'
-                            "create_or_update_dynamic_model_#{table_or_view}"
-                          elsif table_or_view == 'tables'
-                            migration_generator.migration_update_table
-                          else
-                            migration_generator.migration_update_view
-                          end
-
-    <<~CONTENT
-      require 'active_record/migration/app_generator'
-      class #{cname} < ActiveRecord::Migration[5.2]
-        include ActiveRecord::Migration::AppGenerator
-
-        def change
-          #{migration_generator.migration_set_attribs}
-
-          #{do_create_or_update}
-          #{table_or_view == 'table' ? 'create_dynamic_model_trigger' : ''}
-        end
-      end
-    CONTENT
-  end
-
   def table_name_ok
     if table_name.index(/_[0-9]/)
       errors.add :name, 'must not contain numbers preceded by an underscore.'
@@ -327,14 +313,129 @@ class DynamicModel < ActiveRecord::Base
   #
   # before_save trigger forces the field list to be set, based on database fields
   # @return [String] - space separated field list
-  def set_empty_field_list
-    self.field_list = default_field_list_array.join(' ') if field_list.blank?
+  def set_field_list_from_table(force: nil)
+    self.field_list = default_field_list_array.join(' ') if force || field_list.blank?
   end
 
   def default_field_list_array
-    implementation_class.attribute_names - StandardFields
+    return [] unless Admin::MigrationGenerator.table_exists? table_name
+
+    tc = Admin::MigrationGenerator.table_column_names(table_name)
+    tc - StandardFields
   rescue StandardError => e
     logger.warn "Failed to get the default_field_list_array, probably because the class is not available.\n#{e}"
     []
+  end
+
+  #
+  # before_save trigger forces the comments configuration to be set, based on
+  # database table comment and field comments
+  def set_comments_from_table(force: nil)
+    return unless Admin::MigrationGenerator.table_exists? table_name
+
+    # Ensure the new options have reloaded
+    option_configs
+    # Get the table comments configurations
+    tc = table_comments || {}
+    return if !force && (tc.key?(:table) || tc.key?(:fields))
+
+    tc = {}
+    table_comment = Admin::MigrationGenerator.table_comment(table_name, schema_name)
+    # The table had a table comment
+    tc[:table] = table_comment if table_comment
+
+    column_comments = Admin::MigrationGenerator
+                      .column_comments
+                      .select { |c| c['schema_name'] == schema_name && c['table_name'] == table_name }
+
+    tc[:fields] = {}
+    # Check each each field for a comment in the database
+    field_list_array.each do |fname|
+      cc = column_comments.find { |c| c['column_name'] == fname }
+      next unless cc && cc['column_comment']
+
+      tc[:fields][fname] = cc['column_comment']
+    end
+
+    return unless tc[:table] || tc[:fields].present?
+
+    hash = { '_comments' => tc }
+    prepend_to_options(hash)
+  end
+
+  #
+  # If we are creating a new dynamic model referring to a table that already exists,
+  # we can use the existence of certain DB columns to populate the dynamic model config.
+  # If the id column doesn't exist for example, perhaps it would make sense to use
+  # the actual primary key on the table. From an app perspective, id makes most sense when
+  # it exists.
+  def set_keys_from_columns
+    return unless Admin::MigrationGenerator.table_exists? table_name
+
+    tc = Admin::MigrationGenerator.table_column_names(table_name)
+    self.primary_key_name = 'id' if tc.include?('id')
+    self.foreign_key_name = 'master_id' if tc.include?('master_id')
+  end
+
+  #
+  # If we are creating a new dynamic model referring to a table that already exists,
+  # setup the options YAML text with DB column types from the database.
+  def set_field_types_from_columns(force: nil)
+    return unless Admin::MigrationGenerator.table_exists? table_name
+
+    # Ensure the new options have reloaded
+    option_configs
+    return if !force && db_columns.present?
+
+    dbc = {}
+    table_columns.each do |col|
+      dbc[col.name.to_s] = {
+        type: col.type.to_s
+      }
+    end
+
+    return if dbc.empty?
+
+    hash = { '_db_columns' => dbc }
+    prepend_to_options(hash)
+  end
+
+  #
+  # Add the hash to the start of the options text
+  # This really needs to be replaced with real configuration
+  # handling, but it works effectively when the configuration is new.
+  def prepend_to_options(hash)
+    hash.deep_stringify_keys!
+    key = hash.keys.first
+    new_options = YAML.dump(hash).gsub(/^---/, '') + "\n"
+    self.options ||= ''
+    self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m, "#{new_options}\\3")
+    return if self.options.index(/^#{key}:/)
+
+    self.options = new_options + self.options
+  end
+
+  #
+  # Set up the data dictionary if a _data_dictionary: {study: } option has been specified
+  # This is run after_create
+  def setup_data_dictionary
+    return unless data_dictionary && data_dictionary[:study]
+
+    data_dictionary_handler.refresh_variables_records
+  end
+
+  #
+  # Produce a data dictionary handler
+  def data_dictionary_handler
+    @data_dictionary_handler ||= Dynamic::DataDictionary.new(self)
+  end
+
+  #
+  # After a migration, get updates to the configuration
+  def update_config_from_table
+    set_field_list_from_table force: true
+    set_comments_from_table force: true
+    set_field_types_from_columns force: true
+    option_configs
   end
 end

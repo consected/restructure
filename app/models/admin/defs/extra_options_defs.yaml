@@ -90,11 +90,6 @@
       use_app_type: |
         use the specified app type id or name instead of the user's current app type
         to filter protocol (and in the future other) selections
-  db_configs:
-    field_name:
-      type: force the field type (string, datetime, date, integer, float, decimal)
-    field_name2:
-      type: ...
   dialog_before:
     field_name:
       name: message template name

@@ -39,7 +39,7 @@ for FROM in \
   app-scripts/add_admin.sh app-scripts/api-get-container-id.sh app-scripts/parallel_test.sh \
   app-scripts/release_and_build.sh \
   app-scripts/setup_filestore_app.sh app-scripts/setup-dev-filestore.sh app-scripts/upload-to-filestore.sh \
-  app-scripts/upversion.rb app-scripts/validate_file_signature.sh \
+  app-scripts/upversion.rb app-scripts/validate_file_signature.sh \ app-scripts/extract_archive.sh \
   public/.gitignore public/*.html public/robots.txt \
   public/app_specific/app_data_requests.css \
   .gitignore .rspec_parallel .rubocop.yml .ruby-version .solargraph.yml config.ru \

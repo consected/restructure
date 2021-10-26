@@ -105,6 +105,15 @@ class Master < ActiveRecord::Base
            class_name: 'TrackerHistory',
            inverse_of: :master
 
+  has_many :tracker_notifications,
+           lambda {
+             joins(:protocol_event)
+               .where(protocol_events: { milestone: ['always-notify-user', 'override-alert'] })
+               .order(id: :desc)
+           },
+           class_name: 'TrackerHistory',
+           inverse_of: :master
+
   has_many :nfs_store__manage__containers,
            inverse_of: :master,
            class_name: 'NfsStore::Manage::Container'
@@ -495,7 +504,6 @@ class Master < ActiveRecord::Base
           methods: %i[def_version vdef_version]
         }
       end
-
     else
 
       include_item_flags = { include: [:item_flag_name], methods: %i[method_id item_type_us] }
@@ -545,18 +553,25 @@ class Master < ActiveRecord::Base
           }
         }
       end
+    end
 
-      tname = :tracker_histories
-      if current_user.has_access_to? :access, :table, tname
-        included_tables[:latest_tracker_history] = {
-          methods: %i[protocol_name protocol_position sub_process_name
-                      event_name user_name record_type_us record_type
-                      record_id event_description event_milestone
-                      def_version vdef_version]
-        }
+    tname = :tracker_histories
+    if current_user.has_access_to? :access, :table, tname
+      included_tables[:latest_tracker_history] = {
+        methods: %i[protocol_name protocol_position sub_process_name
+                    event_name user_name record_type_us record_type
+                    record_id event_description event_milestone
+                    def_version vdef_version]
+      }
 
-        extras[:methods] << :tracker_completions
-      end
+      included_tables[:tracker_notifications] = {
+        methods: %i[protocol_name protocol_position sub_process_name
+                    event_name user_name record_type_us record_type
+                    record_id event_description event_milestone
+                    def_version vdef_version]
+      }
+
+      extras[:methods] << :tracker_completions
     end
 
     extras.merge!(include: included_tables)

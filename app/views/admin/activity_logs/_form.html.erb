@@ -1,62 +1,68 @@
 <div class="data-results">
   <div data-result="admin-edit-form-"  class="admin-edit-form admin-flex-block">
-<%= form_for([:admin, object_instance], class: "inline-form", remote: true) do |f| %>
+<%= form_for([:admin, object_instance], class: "inline-form admin-edit-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
-    <%= f.label :name %>
+    <%= form_field_label f, :name %>
     <%= f.text_field :name %>
   </div>
   <div class="form-group">
-    <%= f.label :category %>
+    <%= form_field_label f, :category %>
     <%= f.text_field :category %>
   </div>
   <div class="form-group">
-    <%= f.label :item_type, 'data-add-icon' => 'info-sign', title: "#{object_instance.id ? 'item type for existing records can not be changed.' : 'Set item type'}" %>
+    <%= form_field_label f, :item_type %>
     <%= f.select :item_type, item_types_array, {}, disabled: !!object_instance.id  %>
   </div>
   <div class="form-group">
-    <%= f.label :process_name %>
+    <%= form_field_label f, :process_name %>
     <%= f.text_field :process_name %>
   </div>
   <div class="form-group">
-    <%= f.label :rec_type, 'data-add-icon' => 'info-sign', title: "#{object_instance.id ? 'record type for existing records can not be changed.' : 'Set record type (optional), for example: phone'}" %>
+    <%= form_field_label f, :rec_type %>
     <%= f.select :rec_type, general_selection("%_type", value: object_instance.rec_type, use_like: true), include_blank: true %>
   </div>
   <div class="form-group">
-    <%= f.label :schema_name %>
+    <%= form_field_label f, :schema_name %>
     <%= f.text_field :schema_name %>
   </div>
   <div class="form-group">
-    <%= f.label :action_when_attribute %>
+    <%= form_field_label f, :action_when_attribute %>
     <%= f.text_field :action_when_attribute %>
   </div>
   <div class="form-group">
-    <%= f.label :field_list %>
-    <%= f.text_field :field_list, class: 'wide-field' %>
-  </div>
-  <div class="form-group">
-    <%= f.label :main_log_name %>
-    <%= f.text_field :main_log_name %>
-  </div>
-  <div class="form-group">
-    <%= f.label :blank_log_field_list %>
-    <%= f.text_field :blank_log_field_list, class: 'wide-field' %>
-  </div>
-  <div class="form-group">
-    <%= f.label :blank_log_name %>
-    <%= f.text_field :blank_log_name %>
-  </div>
-  <div class="form-group">
-    <%= f.label :hide_item_list_panel %>
+    <%= form_field_label f, :hide_item_list_panel %>
     <%= f.check_box :hide_item_list_panel %>
   </div>
   <div class="form-group">
-    <%= f.label :disable %>
+    <%= form_field_label f, :disable %>
     <%= f.check_box :disabled %>
   </div>
-  <div class="main-options-block">
+  <p><a href="#trad_block" class="collapsed btn btn-default" data-toggle="collapse"><span class="caret"></span> Traditional Activity Log Fields</a>  </p>
+  
+  <div class="collapse well" id="trad_block">
     <div class="form-group">
-      <%= f.label :extra_log_types %><br>
+      <%= form_field_label f, :main_log_name %>
+      <%= f.text_field :main_log_name %>
+    </div>
+    <div class="form-group">
+      <%= form_field_label f, :field_list %>
+      <%= f.text_field :field_list, class: 'wide-field' %>
+    </div>
+    <hr/>  
+    <div class="form-group">
+      <%= form_field_label f, :blank_log_name %>
+      <%= f.text_field :blank_log_name %>
+    </div>
+    <div class="form-group">
+      <%= form_field_label f, :blank_log_field_list %>
+      <%= f.text_field :blank_log_field_list, class: 'wide-field' %>
+    </div>
+  </div>
+
+  <div class="main-options-block">
+    <%= form_field_label f, :activity_definitions %><br>
+    <div class="form-group">
       <div class="al-options-editor-block">
         <%= f.text_area :extra_log_types, class: "code-editor code-editor-#{editor_code_type}", data: {code_editor_type: editor_code_type} %>
       </div>
