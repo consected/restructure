@@ -11,8 +11,8 @@ class DynamicModel < ActiveRecord::Base
   default_scope -> { order disabled: :asc, category: :asc, position: :asc, updated_at: :desc }
 
   validate :table_name_ok
-  before_save :set_empty_field_list
-  before_save :set_empty_comments
+  before_save :set_field_list_from_table
+  before_save :set_comments_from_table
   before_create :set_keys_from_columns
   before_create :set_field_types_from_columns
 
@@ -313,8 +313,8 @@ class DynamicModel < ActiveRecord::Base
   #
   # before_save trigger forces the field list to be set, based on database fields
   # @return [String] - space separated field list
-  def set_empty_field_list
-    self.field_list = default_field_list_array.join(' ') if field_list.blank?
+  def set_field_list_from_table(force: nil)
+    self.field_list = default_field_list_array.join(' ') if force || field_list.blank?
   end
 
   def default_field_list_array
@@ -330,14 +330,14 @@ class DynamicModel < ActiveRecord::Base
   #
   # before_save trigger forces the comments configuration to be set, based on
   # database table comment and field comments
-  def set_empty_comments
+  def set_comments_from_table(force: nil)
     return unless Admin::MigrationGenerator.table_exists? table_name
 
     # Ensure the new options have reloaded
     option_configs
     # Get the table comments configurations
     tc = table_comments || {}
-    return if tc.key?(:table) || tc.key?(:fields)
+    return if !force && (tc.key?(:table) || tc.key?(:fields))
 
     tc = {}
     table_comment = Admin::MigrationGenerator.table_comment(table_name, schema_name)
@@ -380,12 +380,12 @@ class DynamicModel < ActiveRecord::Base
   #
   # If we are creating a new dynamic model referring to a table that already exists,
   # setup the options YAML text with DB column types from the database.
-  def set_field_types_from_columns
+  def set_field_types_from_columns(force: nil)
     return unless Admin::MigrationGenerator.table_exists? table_name
 
     # Ensure the new options have reloaded
     option_configs
-    return if db_columns.present?
+    return if !force && db_columns.present?
 
     dbc = {}
     table_columns.each do |col|
@@ -406,8 +406,12 @@ class DynamicModel < ActiveRecord::Base
   # handling, but it works effectively when the configuration is new.
   def prepend_to_options(hash)
     hash.deep_stringify_keys!
-    new_options = YAML.dump(hash).gsub(/^---/, "\n")
+    key = hash.keys.first
+    new_options = YAML.dump(hash).gsub(/^---/, '') + "\n"
     self.options ||= ''
+    self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m, "#{new_options}\\3")
+    return if self.options.index(/^#{key}:/)
+
     self.options = new_options + self.options
   end
 
@@ -424,5 +428,14 @@ class DynamicModel < ActiveRecord::Base
   # Produce a data dictionary handler
   def data_dictionary_handler
     @data_dictionary_handler ||= Dynamic::DataDictionary.new(self)
+  end
+
+  #
+  # After a migration, get updates to the configuration
+  def update_config_from_table
+    set_field_list_from_table force: true
+    set_comments_from_table force: true
+    set_field_types_from_columns force: true
+    option_configs
   end
 end

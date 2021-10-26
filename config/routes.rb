@@ -30,7 +30,11 @@ Rails.application.routes.draw do
     resources :reports, except: %i[show destroy]
     resources :config_libraries, except: %i[show destroy]
     resources :external_identifier_details, except: [:destroy]
-    resources :dynamic_models, except: %i[show destroy]
+    resources :dynamic_models, except: %i[show destroy] do
+      member do
+        post :update_config_from_table
+      end
+    end
     resources :user_access_controls, except: %i[show destroy]
     resources :external_links, except: %i[show destroy]
     resources :colleges, except: %i[show destroy]

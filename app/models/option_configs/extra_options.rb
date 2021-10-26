@@ -220,6 +220,9 @@ module OptionConfigs
       end
 
       configs
+    rescue FphsException => e
+      puts config_text if Rails.env.test? || Rails.env.development?
+      raise FphsException, e
     end
 
     #
