@@ -318,7 +318,7 @@ class DynamicModel < ActiveRecord::Base
   end
 
   def default_field_list_array
-    return [] unless Admin::MigrationGenerator.table_exists? table_name
+    return [] unless Admin::MigrationGenerator.table_or_view_exists? table_name
 
     tc = Admin::MigrationGenerator.table_column_names(table_name)
     tc - StandardFields

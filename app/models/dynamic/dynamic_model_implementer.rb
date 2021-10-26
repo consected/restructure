@@ -15,7 +15,14 @@ module Dynamic
       def final_setup
         Rails.logger.debug "Running final setup for #{name}"
         ro = result_order
-        ro = { primary_key => :desc } if result_order.blank?
+        if primary_key.present?
+          use_key = primary_key
+        elsif table_key.present?
+          use_key = table_key
+        else
+          return
+        end
+        ro = { use_key => :desc } if result_order.blank?
         default_scope -> { order ro }
       end
 
