@@ -23,12 +23,13 @@ class Admin::DynamicModelsController < AdminController
 
   def filters
     {
-      category: DynamicModel.categories
+      category: DynamicModel.categories,
+      table_name: DynamicModel.table_names
     }
   end
 
   def filters_on
-    [:category]
+    %i[category table_name]
   end
 
   def view_folder

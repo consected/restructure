@@ -17,7 +17,7 @@ module Dynamic
       after_commit :restart_server, if: -> { @regenerate }
       after_commit :other_regenerate_actions
 
-      attr_accessor :configurations
+      attr_accessor :configurations, :data_dictionary
     end
 
     class_methods do
@@ -595,8 +595,8 @@ module Dynamic
                                                            disabled: disabled
         end
       rescue StandardError => e
-        raise FphsException, "A failure occurred creating user access control for app with: #{model_association_name}." \
-                             "\n#{e}"
+        raise FphsException,
+              "A failure occurred creating user access control for app with: #{model_association_name}.\n#{e}"
       end
     end
 
@@ -605,7 +605,7 @@ module Dynamic
     # cleaned up array of strings
     # The string is a space or comma separated list
     # @param [String] for_attrib string from an alternative attribute
-    # @return [Array] strings representing the list of fields
+    # @return [Array{String}] strings representing the list of fields
     def field_list_array(for_attrib: nil)
       for_attrib ||= field_list
       for_attrib.split(/[,\s]+/).map(&:strip).compact if for_attrib

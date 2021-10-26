@@ -65,7 +65,7 @@ module Redcap
           text_validation_type_or_show_slider_number: 'completed timestamp',
           field_annotation: 'Timestamp if completed, or NULL if source was empty or set to "[not completed]"'
         }
-        Field.new(form, field_metadata)
+        Field.new(form, field_metadata, data_dictionary: form.data_dictionary)
       end
 
       #
@@ -89,7 +89,7 @@ module Redcap
           text_validation_type_or_show_slider_number: 'integer',
           field_annotation: 'Redcap values: 0 Incomplete, 1 Unverified, 2 Complete'
         }
-        Field.new(form, field_metadata)
+        Field.new(form, field_metadata, data_dictionary: form.data_dictionary)
       end
     end
   end

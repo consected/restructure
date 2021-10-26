@@ -1,7 +1,7 @@
 <table class="table">
   <thead><tr><th>Value</th><th>Label</th></thead>
   <tbody>
-  <% field.field_choices.choices(plain_text: true).each do |i| %>
+  <% field.field_choices_plain_text.each do |i| %>
     <tr><td><code class="code"><%= i.first %></code></td><td><%= i.last %></td></tr> 
   <% end%>
   </tbody>

@@ -214,7 +214,6 @@ module Redcap
     def create_or_update(record)
       record_id = record[record_id_field]
       existing_record = model.where(record_id_field => record_id).first
-
       if existing_record
 
         # Check if there is an exact match for the record. If so, we are done
@@ -305,18 +304,18 @@ module Redcap
     # converting a number 243.0 and 243 should be equivalent, but string comparisons
     # will fail.
     # @param [Dynamic::DynamicModelBase] existing_record
-    # @param [Hash{Symbol => String}] record
+    # @param [Hash{Symbol => String}] new_record
     # @return [true]
-    def record_matches_retrieved(existing_record, record)
-      check_rec = record.dup
-      attrs = existing_record.attributes.symbolize_keys.dup
-      attrs.slice!(*all_expected_fields.keys)
+    def record_matches_retrieved(existing_record, new_record)
+      new_attrs = new_record.dup
+      existing_attrs = existing_record.attributes.symbolize_keys.dup
+      existing_attrs.slice!(*all_expected_fields.keys)
 
-      check_rec.each do |field_name, value|
-        check_rec[field_name] = all_expected_fields[field_name].field_type.cast_value_to_real(value)
+      res = new_attrs.reject do |field_name, new_value|
+        all_expected_fields[field_name].field_type.values_match?(new_value, existing_attrs[field_name])
       end
 
-      check_rec == attrs
+      res.empty?
     end
   end
 end

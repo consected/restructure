@@ -276,32 +276,6 @@ class ExternalIdentifier < ActiveRecord::Base
           "external_id_attribute does not exist as an attribute (named #{external_id_attribute}) in the table #{name}"
   end
 
-  def generator_script(version, mode = 'create')
-    cname = "#{mode}_#{table_name}_#{version}".camelize
-    ftype = (alphanumeric? ? 'string' : 'bigint')
-    do_create_or_update = if mode == 'create'
-                            "create_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
-                          elsif mode == 'create_or_update'
-                            "create_or_update_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
-                          else
-                            migration_generator.migration_update_table
-                          end
-
-    <<~CONTENT
-      require 'active_record/migration/app_generator'
-      class #{cname} < ActiveRecord::Migration[5.2]
-        include ActiveRecord::Migration::AppGenerator
-
-        def change
-          #{migration_generator.migration_set_attribs}
-
-          #{do_create_or_update}
-          create_external_identifier_trigger :#{external_id_attribute}
-        end
-      end
-    CONTENT
-  end
-
   def field_list
     "#{external_id_attribute.to_sym} #{extra_fields}"
   end

@@ -102,7 +102,7 @@ module OptionConfigs
       self.field_options = self.field_options.symbolize_keys
 
       self.db_configs ||= {}
-      config_obj.db_configs = self.db_configs = self.db_configs.symbolize_keys
+      config_obj.db_columns ||= self.db_configs = self.db_configs.symbolize_keys
 
       # Allow field_options.edit_as.alt_options to be an array
       self.field_options.each do |k, v|
@@ -174,11 +174,15 @@ module OptionConfigs
         config_text = include_libraries(config_text)
         begin
           res = YAML.safe_load(config_text, [], [], true)
-        rescue Psych::SyntaxError => e
+        rescue Psych::SyntaxError, Psych::DisallowedClass => e
           linei = 0
           errtext = config_text.split(/\n/).map { |l| "#{linei += 1}: #{l}" }.join("\n")
           Rails.logger.warn e
           Rails.logger.warn errtext
+          if Rails.env.test? || Rails.env.development?
+            puts e
+            puts errtext
+          end
           raise e
         end
       else
@@ -192,10 +196,16 @@ module OptionConfigs
 
       config_obj.configurations = res.delete(:_configurations)
       config_obj.table_comments = res.delete(:_comments)
+      config_obj.db_columns = res.delete(:_db_columns)
+      config_obj.data_dictionary = res.delete(:_data_dictionary)
 
       # Only run through additional processing of comments if the
       # configuration was just saved
-      handle_table_comments config_obj, res if config_obj.saved_changes? || force_all
+      if config_obj.saved_changes? || force_all
+        handle_table_comments config_obj, res
+      elsif config_obj.table_comments
+        config_obj.table_comments[:original_fields] = config_obj.table_comments[:fields]
+      end
 
       res.delete_if { |k, _v| k.to_s.start_with? '_definitions' }
 
@@ -228,7 +238,7 @@ module OptionConfigs
       ts = config_obj.table_comments && config_obj.table_comments[:table]
 
       new_tc = config_obj.name.underscore.humanize.captionize
-      if ts != new_tc
+      if ts.blank? # ts != new_tc
         # Set a default table comment value
         config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
       end
@@ -237,13 +247,14 @@ module OptionConfigs
       return unless default
 
       new_tc = default[:label] || config_obj.name.underscore.humanize.captionize
-      if ts != new_tc
+      if ts.blank? # ts != new_tc
         # Set the table comment from the config label if it was not set
         config_obj.table_comments[:table] = "#{config_obj.class.name.humanize}: #{new_tc}"
       end
 
       # Get a hash of field comments to update
       fs = tc[:fields] || {}
+      original_fs = fs.dup
 
       ls = default[:labels] || {}
       cb = default[:caption_before] || {}
@@ -281,13 +292,16 @@ module OptionConfigs
         caption = caption&.strip
         next if caption.blank? || fs[k]&.strip == caption
 
-        fs[k] = v
+        fs[k] = v if fs[k].blank?
       end
 
       return unless fs.present?
 
       config_obj.table_comments ||= {}
       config_obj.table_comments[:fields] = fs
+      # Keep the original configuration available, to allow
+      # model generator comparisons
+      config_obj.table_comments[:original_fields] = original_fs
     end
 
     def self.configs_valid?(config_obj)
