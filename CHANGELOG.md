@@ -19,15 +19,16 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Changed] Allow dynamic model updates to add fields where there is no history table
+
+## [7.4.65] - 2021-10-26
+
 - [Added] Data dictionary handling for dynamic models and model generator
 - [Added] Refresh dynamic model configuration from table structure
 - [Added] Option to download app-export migrations from server as a zip
 - [Added] Automatic creation of reference views based on model reference configs
 - [Changed] Version of pg gem to avoid memory leaks
 - [Changed] Model reference refactoring
-
-## [7.4.65] - 2021-10-26
-
 
 ## [7.4.64] - 2021-10-18
 

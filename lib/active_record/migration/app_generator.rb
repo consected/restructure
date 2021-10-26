@@ -374,23 +374,29 @@ module ActiveRecord
         end
 
         changed_history = {}
-        db_configs.each do |k, v|
-          current_type = history_cols.find { |c| c.name == k.to_s }.type
-          next unless v[:type] && current_type
+        if history_table_exists
+          db_configs.each do |k, v|
+            current_type = history_cols.find { |c| c.name == k.to_s }.type
+            next unless v[:type] && current_type
 
-          expected_type = (v[:type]&.to_sym || :string)
-          changed_history[k.to_s] = expected_type if current_type != expected_type
+            expected_type = (v[:type]&.to_sym || :string)
+            changed_history[k.to_s] = expected_type if current_type != expected_type
+          end
         end
 
         idx = added.index('created_by_user_id')
         added[idx] = 'created_by_user' if idx
-        idx = added_history.index('created_by_user_id')
-        added_history[idx] = 'created_by_user' if idx
+        if history_table_exists
+          idx = added_history.index('created_by_user_id')
+          added_history[idx] = 'created_by_user' if idx
+        end
 
         idx = removed.index('created_by_user_id')
         removed[idx] = 'created_by_user' if idx
-        idx = removed_history.index('created_by_user_id')
-        removed_history[idx] = 'created_by_user' if idx
+        if history_table_exists
+          idx = removed_history.index('created_by_user_id')
+          removed_history[idx] = 'created_by_user' if idx
+        end
 
         if reverting?
           puts 'Rollback'
@@ -501,47 +507,49 @@ module ActiveRecord
           end
         end
 
-        added_history.each do |c|
-          options = field_opts[c.to_sym] || {}
-          comment = fields_comments[c.to_sym]
-          options[:comment] = comment if comment.present?
-          fdef = field_defs[c.to_sym]
+        if history_table_exists
+          added_history.each do |c|
+            options = field_opts[c.to_sym] || {}
+            comment = fields_comments[c.to_sym]
+            options[:comment] = comment if comment.present?
+            fdef = field_defs[c.to_sym]
 
-          # If we are rolling back, skip this one unless the col name exists in the table
-          # or if migrating up, skip this one unless the col name does not exist in the table
-          next unless reverting? && c.in?(history_col_names) || !reverting? && !c.in?(history_col_names)
+            # If we are rolling back, skip this one unless the col name exists in the table
+            # or if migrating up, skip this one unless the col name does not exist in the table
+            next unless reverting? && c.in?(history_col_names) || !reverting? && !c.in?(history_col_names)
 
-          if fdef == :references
-            options[:index][:name] += '_hist'
-            begin
-              add_reference "#{schema}.#{history_table_name}", c, options
-            rescue StandardError, ActiveRecord::StatementInvalid
-              nil
+            if fdef == :references
+              options[:index][:name] += '_hist'
+              begin
+                add_reference "#{schema}.#{history_table_name}", c, options
+              rescue StandardError, ActiveRecord::StatementInvalid
+                nil
+              end
+            else
+              add_column "#{schema}.#{history_table_name}", c, fdef, options
             end
-          else
-            add_column "#{schema}.#{history_table_name}", c, fdef, options
           end
-        end
 
-        removed_history.each do |c|
-          options = field_opts[c.to_sym] || {}
-          comment = fields_comments[c.to_sym]
-          options[:comment] = comment if comment.present?
-          fdef = field_defs[c.to_sym] || {}
+          removed_history.each do |c|
+            options = field_opts[c.to_sym] || {}
+            comment = fields_comments[c.to_sym]
+            options[:comment] = comment if comment.present?
+            fdef = field_defs[c.to_sym] || {}
 
-          # If we are rolling back, skip this one unless the col name does not exist in the table
-          # or if migrating up, skip this one unless the col name exists in the table
-          next unless reverting? && !c.in?(history_col_names) || !reverting? && c.in?(history_col_names)
+            # If we are rolling back, skip this one unless the col name does not exist in the table
+            # or if migrating up, skip this one unless the col name exists in the table
+            next unless reverting? && !c.in?(history_col_names) || !reverting? && c.in?(history_col_names)
 
-          if fdef == :references
-            options[:index][:name] += '_hist'
-            begin
-              remove_reference "#{schema}.#{history_table_name}", c, options if c.in? history_col_names
-            rescue StandardError, ActiveRecord::StatementInvalid
-              nil
+            if fdef == :references
+              options[:index][:name] += '_hist'
+              begin
+                remove_reference "#{schema}.#{history_table_name}", c, options if c.in? history_col_names
+              rescue StandardError, ActiveRecord::StatementInvalid
+                nil
+              end
+            elsif c.in? history_col_names
+              remove_column "#{schema}.#{history_table_name}", c, fdef
             end
-          elsif c.in? history_col_names
-            remove_column "#{schema}.#{history_table_name}", c, fdef
           end
         end
 
@@ -551,10 +559,12 @@ module ActiveRecord
           change_column "#{schema}.#{table_name}", k, change_type
         end
 
-        changed_history.each do |k, v|
-          v = map_migration_type_to_db_type(v)
-          change_type = "#{v} using #{k}::#{v}"
-          change_column "#{schema}.#{table_name}", k, change_type
+        if history_table_exists
+          changed_history.each do |k, v|
+            v = map_migration_type_to_db_type(v)
+            change_type = "#{v} using #{k}::#{v}"
+            change_column "#{schema}.#{table_name}", k, change_type
+          end
         end
 
         changed_comments.each do |c|
