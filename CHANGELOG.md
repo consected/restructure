@@ -20,6 +20,16 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 ## Unreleased
 
 
+## [7.4.69] - 2021-10-26
+
+- [Fixed] Fix issue with times in Redcap leading to constant updating of records
+
+## [7.4.68] - 2021-10-26
+
+
+## [7.4.68] - 2021-10-26
+
+
 ## [7.4.67] - 2021-10-26
 
 - [Changed] Bump version
