@@ -39,7 +39,6 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     dmdef = generate_test_dynamic_model
     @option_texts[1] = <<~END_CONFIG
 
-
       _db_columns:
         id:
           type: integer
