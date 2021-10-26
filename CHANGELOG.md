@@ -19,6 +19,12 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Added] Data dictionary handling for dynamic models and model generator
+- [Added] Refresh dynamic model configuration from table structure
+- [Added] Option to download app-export migrations from server as a zip
+- [Added] Automatic creation of reference views based on model reference configs
+- [Changed] Version of pg gem to avoid memory leaks
+- [Changed] Model reference refactoring
 
 ## [7.4.64] - 2021-10-18
 
@@ -67,7 +73,7 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## [7.4.51] - 2021-08-26
 
-- [Changed][Filestore] Improvement to filestore browse performance with many files
+- [Changed][filestore] Improvement to filestore browse performance with many files
 
 ## [7.4.51] - 2021-08-26
 
@@ -136,9 +142,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 ## [7.4.18] - 2021-05-27
 
 - [Changed] session storage from cookie based to ActiveRecord. Requires a DB migration to create the new ml_app.sessions table.
-  
+
   Version 7.4.17 tested and performed vulnerability scans against the new session storage to validate it.
-  
+
 ## [7.4.17] - 2021-05-27
 
 ## [7.4.17] - 2021-05-27
