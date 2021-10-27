@@ -19,6 +19,7 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Fixed] Ensure views initialize with dynamic models
 
 ## [7.4.69] - 2021-10-26
 
@@ -26,9 +27,7 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## [7.4.68] - 2021-10-26
 
-
 ## [7.4.68] - 2021-10-26
-
 
 ## [7.4.67] - 2021-10-26
 
@@ -48,7 +47,6 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 - [Changed] Model reference refactoring
 
 ## [7.4.65] - 2021-10-26
-
 
 ## [7.4.64] - 2021-10-18
 
