@@ -56,6 +56,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
           type: datetime
         updated_at:
           type: datetime
+
     END_CONFIG
 
     @def_updated_at[1] = dmdef.updated_at
