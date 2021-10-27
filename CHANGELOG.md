@@ -19,13 +19,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
-
 ## [7.4.70] - 2021-10-27
 
-<<<<<<< HEAD
 - [Fixed] Ensure views initialize with dynamic models
-=======
->>>>>>> a5c5b8913d64cc404d2683787874fb3018b737f2
 
 ## [7.4.69] - 2021-10-26
 
@@ -36,7 +32,6 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 ## [7.4.68] - 2021-10-26
 
 ## [7.4.68] - 2021-10-26
-
 
 ## [7.4.67] - 2021-10-26
 
