@@ -152,6 +152,14 @@ RSpec.describe Imports::ModelGenerator, type: :model do
 
     updated_yaml = <<~END_TEXT
       ---
+      data_dictionary:
+        study:#{' '}
+        source_name:#{' '}
+        source_type:#{' '}
+        domain:#{' '}
+        form_name:#{' '}
+      options:
+        table_comment: Test CSV
       fields:
         a_string:
           type: string

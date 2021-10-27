@@ -318,7 +318,7 @@ class DynamicModel < ActiveRecord::Base
   end
 
   def default_field_list_array
-    return [] unless Admin::MigrationGenerator.table_exists? table_name
+    return [] unless Admin::MigrationGenerator.table_or_view_exists? table_name
 
     tc = Admin::MigrationGenerator.table_column_names(table_name)
     tc - StandardFields
@@ -331,7 +331,7 @@ class DynamicModel < ActiveRecord::Base
   # before_save trigger forces the comments configuration to be set, based on
   # database table comment and field comments
   def set_comments_from_table(force: nil)
-    return unless Admin::MigrationGenerator.table_exists? table_name
+    return unless Admin::MigrationGenerator.table_or_view_exists? table_name
 
     # Ensure the new options have reloaded
     option_configs
@@ -370,7 +370,7 @@ class DynamicModel < ActiveRecord::Base
   # the actual primary key on the table. From an app perspective, id makes most sense when
   # it exists.
   def set_keys_from_columns
-    return unless Admin::MigrationGenerator.table_exists? table_name
+    return unless Admin::MigrationGenerator.table_or_view_exists? table_name
 
     tc = Admin::MigrationGenerator.table_column_names(table_name)
     self.primary_key_name = 'id' if tc.include?('id')
@@ -381,7 +381,7 @@ class DynamicModel < ActiveRecord::Base
   # If we are creating a new dynamic model referring to a table that already exists,
   # setup the options YAML text with DB column types from the database.
   def set_field_types_from_columns(force: nil)
-    return unless Admin::MigrationGenerator.table_exists? table_name
+    return unless Admin::MigrationGenerator.table_or_view_exists? table_name
 
     # Ensure the new options have reloaded
     option_configs
