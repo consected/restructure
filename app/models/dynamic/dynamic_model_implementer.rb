@@ -17,8 +17,6 @@ module Dynamic
         ro = result_order
         if primary_key.present?
           use_key = primary_key
-        elsif table_key.present?
-          use_key = table_key
         else
           return
         end
