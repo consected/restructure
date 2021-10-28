@@ -337,7 +337,6 @@ module ActiveRecord
       def update_fields
         self.mode = :update
         self.db_configs ||= {}
-        old_table_comment = ActiveRecord::Base.connection.table_comment(table_name)
 
         belongs_to_model_field = "#{belongs_to_model}_id" if belongs_to_model
 
@@ -430,10 +429,6 @@ module ActiveRecord
           puts 'HISTORY TABLE does not exist'
           added_history = []
           removed_history = []
-        end
-
-        if old_table_comment != table_comment && table_exists && !model_is_view
-          change_table_comment("#{schema}.#{table_name}", table_comment)
         end
 
         if belongs_to_model && !old_colnames.include?(belongs_to_model) && !col_names.include?(belongs_to_model_field)
@@ -572,7 +567,24 @@ module ActiveRecord
       end
 
       def change_comments
+        return unless table_exists
+
         setup_fields
+
+        old_table_comment = ActiveRecord::Base.connection.table_comment(table_name)
+
+        if old_table_comment != table_comment
+          if model_is_view
+            puts "Adding view comment: #{old_table_comment} != #{table_comment}"
+            ActiveRecord::Base.connection.execute <<~END_SQL
+              COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';
+            END_SQL
+          else
+            puts 'Adding table comment'
+            change_table_comment("#{schema}.#{table_name}", table_comment)
+          end
+        end
+
         self.fields_comments ||= {}
         commented_colnames = fields_comments.keys.map(&:to_s)
 
@@ -732,7 +744,7 @@ module ActiveRecord
         end
       end
 
-      def create_fields(tbl, history = false)
+      def create_fields(tbl, history = nil)
         field_defs.each do |attr_name, f|
           fopts = field_opts[attr_name]
           if fopts && fopts[:index]

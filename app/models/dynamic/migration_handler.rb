@@ -107,7 +107,7 @@ module Dynamic
                     (config_view_sql && view_sql_changed?) ||
                     (table_comments && (
                         migration_generator.table_comment_changes ||
-                        migration_generator.fields_comments_changes
+                        migration_generator.fields_comments_changes.present?
                       )
                     ) ||
                     reference_views_missing? ||
