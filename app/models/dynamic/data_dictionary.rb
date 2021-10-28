@@ -13,6 +13,8 @@ module Dynamic
       setup_fields_from_config
     end
 
+    #
+    # Set up the data dictionary variables using the dynamic model configuration
     def setup_fields_from_config
       self.fields = {}
       position = 0
@@ -22,12 +24,19 @@ module Dynamic
         name = col.name
         next unless name.in?(column_variable_names)
 
-        v = Dynamic::DatadicVariable.new(self, name, col.type, position: position)
+        v = Dynamic::DynamicModelField.new(self, name, col.type, position: position)
         fields[name] = v
         position += 1
       end
     end
 
+    #
+    # A full list of variable names.
+    # Uses the underlying table / view to get the database column definitions
+    # for name and type. The core field names, such as id and master_id are excluded,
+    # as are the placeholder_ and embedded_record_ prefixed fields, which do not
+    # have underlying database columns.
+    # @return [Array{String}]
     def column_variable_names
       return @column_variable_names if @column_variable_names
 
@@ -38,29 +47,41 @@ module Dynamic
                    end
     end
 
+    #
+    # Core field names to ignore when adding to the data dictionary
+    # @return [Array{String}]
     def self.core_field_names
       %w[id user_id created_at updated_at disabled master_id]
     end
 
+    #
+    # Shortcut to the dynamic model options configuration set with the key
+    # _data_dictionary: in the options text
+    # @return [Hash] - setting values with symbol keys
     def dynamic_model_data_dictionary_config
       dynamic_model.data_dictionary || {}
     end
 
-    def source_default_config
-      return @source_default_config if @source_default_config
+    #
+    # Set default values that will be used for all variables for this dynamic model.
+    # Pulls from the dynamic model _data_dictionary: options and the definition fields
+    # @return [Hash]
+    def default_config
+      return @default_config if @default_config
 
       dmdd = dynamic_model_data_dictionary_config
-
-      @source_default_config = {
+      @default_config = {
         study: dmdd[:study],
+        domain: dmdd[:domain],
         source_name: dmdd[:source_name] || dynamic_model.name,
         source_type: dmdd[:source_type] || 'database',
         form_name: dmdd[:form_name],
-        domain: dmdd[:domain] || dynamic_model.table_comments&.dig(:table),
         storage_type: 'database',
         db_or_fs: ActiveRecord::Base.connection_config[:database],
         schema_or_path: dynamic_model.schema_name,
-        table_or_file: dynamic_model.table_name
+        table_or_file: dynamic_model.table_name,
+        is_derived_var: dmdd[:is_derived_var],
+        owner_email: dmdd[:owner_email]
       }
     end
 

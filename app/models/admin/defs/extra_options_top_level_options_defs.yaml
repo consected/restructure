@@ -5,11 +5,11 @@
 # The category and name must match one of the Config Library entries
 # @library category name
 
-_comments: 
-  'table': describe the table
-  'fields': 
-    'field1': describe the field
-    'field2': ...
+_comments:
+  "table": describe the table
+  "fields":
+    "field1": describe the field
+    "field2": ...
 
 # NOTE: db_configs may be found within the default: options in older configurations.
 # Although not recommended, the old configuration will continue to work
@@ -17,17 +17,39 @@ _db_columns:
   field_name:
     type: force the field type (string, datetime, date, integer, float, decimal)
   field_name2:
-    type: ...  
+    type: ...
 
-_configurations: 
+_configurations:
   secondary_key: field name to use as a secondary key to lookup items
   view_sql: define a view instead of a table to underpin this model
 
-_definitions: 
+# To add a table or view to the data dictionary, add the _data_dictionary: with
+# the essential keys, study: and domain:, plus any others that are required.
+_data_dictionary:
+  # Required
+  study: the study name (case sensitive)
+  domain: domain for the data (case sensitive)
+  # Optional
+  source_name: defaults to the value set in the *name* field
+  source_type: defaults to **database**
+  form_name: optional, defaults to a blank value
+  storage_type: defaults to **database**
+  db_or_fs: defaults to current database name
+  schema_or_path: defaults to the value set in the *schema name* field
+  table_or_file: defaults to the value set in the *table name* field
+  is_derived_var: true | false (default to not set) if the variable is derived from other data
+  owner_email: email address of the owner of this data set
+
+  # Override any data dictionary values for each field
+  fields:
+    field_name:
+      attribute: override value
+      attribute2: override value
+
+_definitions:
   reusable_key: |
     &anchor reusable objects for substitution in definitions
 
 _default:
   key1: applied to all activity definitions
   key2: applied to all activity definitions
-  
