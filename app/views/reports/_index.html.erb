@@ -3,7 +3,7 @@ link_extras = {} unless defined? link_extras
 simple_view = false unless defined? simple_view
 
 link_extras ||= {}
-extra_params = {}
+extra_params = {} unless defined? extra_params
 extra_params[:embed] = true if link_extras[:data] && link_extras[:data][:remote]
 %>
 <table class="table tablesorter admin-list">
