@@ -46,6 +46,11 @@ _data_dictionary:
       attribute: override value
       attribute2: override value
 
+  # Optionally handle referencing underlying variables if for each derived variable in the set
+  derived_var_options:
+    ref_source_type: optionally provide a variable source type to ensure the item is related to
+    name_regex_replace: optionally replace parts of a variable name - for example "_etl$"
+
 _definitions:
   reusable_key: |
     &anchor reusable objects for substitution in definitions

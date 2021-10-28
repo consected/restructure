@@ -63,6 +63,20 @@ module Dynamic
     end
 
     #
+    # Study this data dictionary is set to store to
+    # @return [String] <description>
+    def study
+      dynamic_model_data_dictionary_config[:study]
+    end
+
+    #
+    # Domain this data dictionary is set to store to
+    # @return [String] <description>
+    def domain
+      dynamic_model_data_dictionary_config[:domain]
+    end
+
+    #
     # Set default values that will be used for all variables for this dynamic model.
     # Pulls from the dynamic model _data_dictionary: options and the definition fields
     # @return [Hash]
@@ -71,8 +85,8 @@ module Dynamic
 
       dmdd = dynamic_model_data_dictionary_config
       @default_config = {
-        study: dmdd[:study],
-        domain: dmdd[:domain],
+        study: study,
+        domain: domain,
         source_name: dmdd[:source_name] || dynamic_model.name,
         source_type: dmdd[:source_type] || 'database',
         form_name: dmdd[:form_name],
@@ -92,6 +106,64 @@ module Dynamic
       fields.each_value do |field|
         field.refresh_variable_record
       end
+
+      add_overlay_info
+    end
+
+    #
+    # After entering all the new or updated variables, perform a query to add in
+    # metadata for derived variables, relating them to the underlying variables
+    def add_overlay_info
+      table_name = dynamic_model.table_name
+      dv_opt = dynamic_model_data_dictionary_config[:derived_var_options]
+      return unless dv_opt
+
+      name_regex_replace = dv_opt[:name_regex_replace]
+      ref_source_type = dv_opt[:ref_source_type]
+
+      sql = <<~END_SQL
+        with matches as (
+          select distinct
+            derived.variable_name variable_name_d, refs.variable_name variable_name_r,
+            refs.position, array[refs.id] rid, refs.label, refs.title, refs.section_id
+          from ref_data.datadic_variables derived
+          inner join ref_data.datadic_variables refs on
+            refs.study = derived.study
+            and refs.domain = derived.domain
+            and coalesce(derived.is_derived_var, false)
+            and not coalesce(refs.is_derived_var, false)
+            and not coalesce(derived.disabled, false)
+            and not coalesce(refs.disabled, false)
+            and refs.table_or_file <> derived.table_or_file
+            and (
+              #{!ref_source_type} OR
+              refs.source_type = '#{ref_source_type}'
+            )
+            and (
+              #{!name_regex_replace} OR
+              regexp_replace(derived.variable_name, '#{name_regex_replace}', '') = refs.variable_name
+            )
+            and derived.study = '#{study}'
+            and derived.table_or_file ='#{table_name}'
+            and derived.domain = '#{domain}'
+          )
+        update ref_data.datadic_variables dv
+        set
+          label = matches.label,
+          position = matches.position,
+          multi_derived_from_id = rid,
+          title = matches.title,
+          section_id = matches.section_id
+        from matches
+        where
+          dv.study='#{study}'
+          and dv.domain = '#{domain}'
+          and dv.table_or_file ='#{table_name}'
+          and matches.variable_name_d = dv.variable_name
+      END_SQL
+
+      puts sql
+      Admin::MigrationGenerator.connection.execute sql
     end
   end
 end
