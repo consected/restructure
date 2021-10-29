@@ -43,6 +43,22 @@ module AdminHandler
     def reset_latest_update
       @latest_update = nil
     end
+
+    def resource_name
+      return super if defined? super
+
+      name.ns_underscore.pluralize
+    end
+
+    def human_name
+      name.underscore.humanize.titleize
+    end
+
+    #
+    # Save this model in the resources list
+    def add_model_to_list
+      Resources::Models.add self unless abstract_class
+    end
   end
 
   def init_vars_admin_handler

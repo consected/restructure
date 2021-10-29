@@ -545,6 +545,7 @@ module Dynamic
       self.class.models[tn] = m
       logger.info "Added new model #{tn}"
       self.class.model_names << tn unless self.class.model_names.include? tn
+      Resources::Models.add(m)
     end
 
     # Remove an item from the list of available dynamic classes
@@ -553,6 +554,7 @@ module Dynamic
       logger.info "Removed disabled model #{tn}"
       self.class.models.delete(tn)
       self.class.model_names.delete(tn)
+      Resources::Models.remove(resource_name: resource_name)
     end
 
     def remove_assoc_class(in_class_name)
