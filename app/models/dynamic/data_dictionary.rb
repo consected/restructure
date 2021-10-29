@@ -114,13 +114,16 @@ module Dynamic
     # After entering all the new or updated variables, perform a query to add in
     # metadata for derived variables, relating them to the underlying variables
     def add_overlay_info
-      table_name = dynamic_model.table_name
       dv_opt = dynamic_model_data_dictionary_config[:derived_var_options]
       return unless dv_opt
 
-      name_regex_replace = dv_opt[:name_regex_replace]
-      ref_source_type = dv_opt[:ref_source_type]
-      ref_source_domain = dv_opt[:ref_source_domain]
+      search_attr_values = {
+        table_name: dynamic_model.table_name,
+        study: study,
+        name_regex_replace: dv_opt[:name_regex_replace],
+        ref_source_type: dv_opt[:ref_source_type],
+        ref_source_domain: dv_opt[:ref_source_domain]
+      }
 
       sql = <<~END_SQL
         with matches as (
@@ -136,19 +139,19 @@ module Dynamic
             and not coalesce(refs.disabled, false)
             and refs.table_or_file <> derived.table_or_file
             and (
-              #{!ref_source_domain} AND refs.domain = derived.domain
-              OR refs.domain = '#{ref_source_domain}'
+              :ref_source_domain IS NULL AND refs.domain = derived.domain
+              OR refs.domain = :ref_source_domain
             )
             and (
-              #{!ref_source_type} OR
-              refs.source_type = '#{ref_source_type}'
+              :ref_source_type IS NULL OR
+              refs.source_type = :ref_source_type
             )
             and (
-              #{!name_regex_replace} OR
-              regexp_replace(derived.variable_name, '#{name_regex_replace}', '') = refs.variable_name
+              :name_regex_replace IS NULL OR
+              regexp_replace(derived.variable_name, :name_regex_replace, '') = refs.variable_name
             )
-            and derived.study = '#{study}'
-            and derived.table_or_file ='#{table_name}'
+            and derived.study = :study
+            and derived.table_or_file =:table_name
           )
         update ref_data.datadic_variables dv
         set
@@ -159,10 +162,12 @@ module Dynamic
           section_id = matches.section_id
         from matches
         where
-          dv.study='#{study}'
-          and dv.table_or_file ='#{table_name}'
+          dv.study=:study
+          and dv.table_or_file =:table_name
           and matches.variable_name_d = dv.variable_name
       END_SQL
+
+      sql = ActiveRecord::Base.send(:sanitize_sql_for_conditions, [sql, search_attr_values])
 
       puts sql
       Admin::MigrationGenerator.connection.execute sql
