@@ -114,6 +114,8 @@ module Dynamic
     # After entering all the new or updated variables, perform a query to add in
     # metadata for derived variables, relating them to the underlying variables
     def add_overlay_info
+      return if dynamic_model_data_dictionary_config[:prevent_update]
+
       dv_opt = dynamic_model_data_dictionary_config[:derived_var_options]
       return unless dv_opt
 
@@ -122,7 +124,8 @@ module Dynamic
         study: study,
         name_regex_replace: dv_opt[:name_regex_replace],
         ref_source_type: dv_opt[:ref_source_type],
-        ref_source_domain: dv_opt[:ref_source_domain]
+        ref_source_domain: dv_opt[:ref_source_domain],
+        current_admin_id: dynamic_model.current_admin.id
       }
 
       sql = <<~END_SQL
@@ -159,7 +162,9 @@ module Dynamic
           position = matches.position,
           multi_derived_from_id = rid,
           title = matches.title,
-          section_id = matches.section_id
+          section_id = matches.section_id,
+          updated_at = now(),
+          admin_id = :current_admin_id
         from matches
         where
           dv.study=:study

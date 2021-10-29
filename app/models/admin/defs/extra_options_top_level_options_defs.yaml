@@ -29,6 +29,10 @@ _data_dictionary:
   # Required
   study: the study name (case sensitive)
   domain: domain for the data (case sensitive)
+  # Important
+  prevent_update: |
+    **true** - prevents these options from making additional updates and 
+    potentially overwriting changes made outside of the dynamic model configuration
   # Optional
   source_name: defaults to the value set in the *name* field
   source_type: defaults to **database**

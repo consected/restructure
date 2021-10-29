@@ -433,6 +433,8 @@ class DynamicModel < ActiveRecord::Base
   def setup_data_dictionary
     return unless data_dictionary && data_dictionary[:study] && data_dictionary[:domain]
 
+    return if data_dictionary[:prevent_update]
+
     data_dictionary_handler.refresh_variables_records
   end
 
