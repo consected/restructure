@@ -48,7 +48,10 @@ _data_dictionary:
 
   # Optionally handle referencing underlying variables if for each derived variable in the set
   derived_var_options:
-    ref_source_type: optionally provide a variable source type to ensure the item is related to
+    ref_source_type: optionally provide a variable source type to match items to
+    ref_source_domain: |
+      optionally provide a domain to match items to, 
+      otherwise the domain of the matched item must match the new item
     name_regex_replace: optionally replace parts of a variable name - for example "_etl$"
 
 _definitions:

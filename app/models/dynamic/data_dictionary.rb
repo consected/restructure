@@ -120,6 +120,7 @@ module Dynamic
 
       name_regex_replace = dv_opt[:name_regex_replace]
       ref_source_type = dv_opt[:ref_source_type]
+      ref_source_domain = dv_opt[:ref_source_domain]
 
       sql = <<~END_SQL
         with matches as (
@@ -129,12 +130,15 @@ module Dynamic
           from ref_data.datadic_variables derived
           inner join ref_data.datadic_variables refs on
             refs.study = derived.study
-            and refs.domain = derived.domain
             and coalesce(derived.is_derived_var, false)
             and not coalesce(refs.is_derived_var, false)
             and not coalesce(derived.disabled, false)
             and not coalesce(refs.disabled, false)
             and refs.table_or_file <> derived.table_or_file
+            and (
+              #{!ref_source_domain} AND refs.domain = derived.domain
+              OR refs.domain = '#{ref_source_domain}'
+            )
             and (
               #{!ref_source_type} OR
               refs.source_type = '#{ref_source_type}'
@@ -145,7 +149,6 @@ module Dynamic
             )
             and derived.study = '#{study}'
             and derived.table_or_file ='#{table_name}'
-            and derived.domain = '#{domain}'
           )
         update ref_data.datadic_variables dv
         set
@@ -157,7 +160,6 @@ module Dynamic
         from matches
         where
           dv.study='#{study}'
-          and dv.domain = '#{domain}'
           and dv.table_or_file ='#{table_name}'
           and matches.variable_name_d = dv.variable_name
       END_SQL
