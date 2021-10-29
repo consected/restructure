@@ -7,7 +7,8 @@ module OptionConfigs
   #   report.search_attributes_config
   class SearchAttributesConfig < BaseConfiguration
     class NamedConfiguration < OptionConfigs::BaseNamedConfiguration
-      configure_attributes %i[name label type all item_type multiple default disabled hidden selections conditions]
+      configure_attributes %i[name label type all item_type multiple default disabled hidden selections conditions
+                              resource_name]
     end
 
     #
