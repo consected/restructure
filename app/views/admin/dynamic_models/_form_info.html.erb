@@ -4,6 +4,7 @@
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab">Details</a></li>
     <li role="presentation"><a href="#sample-form" aria-controls="sample-form" role="tab" data-toggle="tab">Sample Form</a></li>
+    <li role="presentation"><a href="#datadic" aria-controls="datadic" role="tab" data-toggle="tab">Data Dictionary</a></li>
     <li role="presentation"><a href="#user-access-controls" aria-controls="user-access-controls" role="tab" data-toggle="tab">User Access Controls</a></li>
   </ul>
 
@@ -13,12 +14,37 @@
     <div role="tabpanel" class="tab-pane active" id="def-details-block">
       <h4>Details</h4>
       <%= render partial: 'admin/dynamic_models/def_details', locals: {object_instance: object_instance} %>
+      <% if object_instance.persisted? %>
+      <h4>Actions</h4>
+      <p>Fields <%=object_instance.field_list_array.sort != object_instance.default_field_list_array.sort ? 'does not' : '' %> match table</p> 
+      <p>
+      <%= link_to 'Update Config from Table', 
+                  update_config_from_table_admin_dynamic_model_path(object_instance),
+                  class: 'btn btn-danger',
+                  remote: true, 
+                  method: :post 
+      %>
+      </p>
+      <% end %>
+      <%= %>
     </div>
     
     <div role="tabpanel" class="tab-pane" id="sample-form">
       <h4>Sample Form</h4>
       <%= render partial: 'sample_form', locals: {object_instance: object_instance} %>
     </div>
+
+    <div role="tabpanel" class="tab-pane" id="datadic">
+      <h4>Data Dictionary</h4>
+      <% if object_instance.data_dictionary %>
+      <label>study</label> <%=object_instance.data_dictionary[:study]%>
+      <label>domain</label> <%=object_instance.data_dictionary[:domain]%>
+      <%= render partial: 'data_dic_block', locals: {object_instance: object_instance} %>
+      <% else %>
+      <p>not configued</p>
+      <% end %>
+    </div>
+
 
     <div role="tabpanel" class="tab-pane  on-open-click" id="user-access-controls">
     <%= render partial: 'admin/dynamic_models/uac_panel', locals: {object_instance: object_instance} %>

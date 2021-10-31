@@ -19,6 +19,7 @@ class Admin::AppType < Admin::AdminBase
   validate :name_not_already_taken
   validates :label, presence: true
 
+  after_create :add_template_access
   after_create :setup_migrations
 
   attr_accessor :associated_external_identifier_names,
@@ -295,6 +296,13 @@ class Admin::AppType < Admin::AdminBase
     end
 
     ms.sort { |a, b| a.id <=> b.id }.uniq
+  end
+
+  def add_template_access
+    Admin::UserAccessControl.create!(role_name: Settings::AppTemplateRole, app_type: self,
+                                     resource_type: :general, resource_name: :app_type,
+                                     access: :read,
+                                     user: User.template_user, current_admin: current_admin)
   end
 
   def setup_migrations

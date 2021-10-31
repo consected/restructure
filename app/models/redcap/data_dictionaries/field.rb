@@ -29,7 +29,8 @@ module Redcap
       attr_accessor :def_metadata, :form, :name, :label, :label_note, :annotation, :is_required,
                     :valid_type, :valid_min, :valid_max, :is_identifier,
                     :storage_type, :db_or_fs, :schema_or_path, :table_or_file,
-                    :position, :section, :sub_section, :title
+                    :position, :section, :sub_section, :title, :form_name, :study,
+                    :is_derived_var, :owner_email
 
       attr_writer :data_dictionary
 
@@ -38,13 +39,16 @@ module Redcap
       # but some fields do not belong to a form, so a data_dictionary can be passed as an option instead
       # @param [Redcap::DataDictionaries::Form] form - nil if the field does not belong to a form
       # @param [Hash] field_metadata
-      # @param [Redcap::DataDictionary] data_dictionary - specific if form is nil
+      # @param [Redcap::DataDictionary] data_dictionary - required if form is nil
       # @param [Integer] position
-      def initialize(form, field_metadata, data_dictionary: nil, position: nil, section: nil, sub_section: nil)
+      def initialize(form, field_metadata, data_dictionary:, position: nil, section: nil, sub_section: nil)
         super()
 
         self.form = form
+        self.form_name = form&.name
+
         self.data_dictionary = data_dictionary
+        self.study = data_dictionary.study
 
         self.def_metadata = field_metadata.dup
         self.name = field_metadata[:field_name].to_sym
@@ -81,6 +85,13 @@ module Redcap
         @field_choices ||= FieldChoices.new(self)
       end
 
+      #
+      # Get the field choices as plain text for this field
+      # @return [Array{String}]
+      def field_choices_plain_text
+        field_choices.choices(plain_text: true)
+      end
+
       def to_s
         name.to_s
       end
@@ -107,6 +118,20 @@ module Redcap
       end
 
       #
+      # Quick way to get the field presentation type
+      # @return [String]
+      def presentation_type
+        field_type.presentation_type
+      end
+
+      #
+      # Quick way to get the default variable type for fields
+      # @return [String]
+      def default_variable_type
+        field_type.default_variable_type
+      end
+
+      #
       # Get an Hash of all field representations, keyed with the symbolized field name
       # for a form.
       # Each field has a position in the form, incrementing from 0.
@@ -127,7 +152,8 @@ module Redcap
           section = nil if field_metadata[:field_type] == 'descriptive'
           field = Field.new(in_form, field_metadata,
                             position: position,
-                            section: section)
+                            section: section,
+                            data_dictionary: in_form.data_dictionary)
           fields[field.name] = field
           section = field.name if field_metadata[:field_type] == 'descriptive'
           position += 1
@@ -185,6 +211,8 @@ module Redcap
       def data_dictionary
         @data_dictionary ||= form.data_dictionary
       end
+
+      alias owner data_dictionary
 
       def schema_and_table_name
         data_dictionary.redcap_project_admin.dynamic_storage&.schema_and_table_name || [nil, nil]

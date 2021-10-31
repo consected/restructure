@@ -8,8 +8,9 @@ module OptionConfigs
   class ImportModelGeneratorConfigs
     include OptionsHandler
 
-    # Fields hash of FieldConfiguration
     configure_hash :fields, with: %i[type label caption comment no_downcase]
+    configure :data_dictionary, with: %i[study source_name source_type domain form_name]
+    configure :options, with: %i[table_comment]
 
     #
     # Set up the fields configuration from the CSV field types hash
@@ -24,6 +25,10 @@ module OptionConfigs
       end
 
       setup_options_hash(f, :fields)
+    end
+
+    def setup_defaults
+      options.table_comment ||= owner.name
     end
 
     #

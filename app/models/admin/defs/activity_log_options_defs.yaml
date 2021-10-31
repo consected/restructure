@@ -15,10 +15,16 @@
         field_name: value to filter the referenced items by (may include { {substitution}}
       order_by:
         field_name: asc | desc
+      type_config:
+        activity_selector:
+          # use an activity selector to show the creatable extra log types
+          extra_log_type_key1: Label for button
+          extra_log_type_key2: Label for button
+          extra_log_type_key3: Label for button
       view_as:
         edit: hide|readonly|not_embedded|select_or_add
         show: hide|readonly|see_presence|filestore
-        new: outside_this|not_embedded|select_or_add|activity_selector
+        new: outside_this|not_embedded|select_or_add
         _notes_:
         - "*outside_this* presents a button that triggers a form outside of this container
           in the regular panel"

@@ -45,6 +45,8 @@ RSpec.describe Imports::ModelGenerator, type: :model do
     new_config = mg.generator_config.send(:options_to_config_hash)
     expect(new_config).to be_a Hash
     expect(new_config).to eq(
+      data_dictionary: { domain: nil, form_name: nil, source_name: nil, source_type: nil, study: nil },
+      options: { table_comment: 'Test CSV' },
       fields: {
         a_string: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string },
         a_int: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :integer },
@@ -61,6 +63,14 @@ RSpec.describe Imports::ModelGenerator, type: :model do
     new_yaml = mg.generator_config.send(:config_hash_to_yaml)
     expect(new_yaml).to eq <<~END_TEXT
       ---
+      data_dictionary:
+        study:#{' '}
+        source_name:#{' '}
+        source_type:#{' '}
+        domain:#{' '}
+        form_name:#{' '}
+      options:
+        table_comment: Test CSV
       fields:
         a_string:
           type: string
@@ -121,6 +131,7 @@ RSpec.describe Imports::ModelGenerator, type: :model do
     mg.generator_config.fields[:a_time].caption = 'A time field'
     new_config = mg.generator_config.send(:options_to_config_hash).deep_symbolize_keys
     expect(new_config).to eq(
+      data_dictionary: { domain: nil, form_name: nil, source_name: nil, source_type: nil, study: nil },
       fields: {
         a_string: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string },
         a_int: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :integer },
@@ -131,7 +142,8 @@ RSpec.describe Imports::ModelGenerator, type: :model do
         a_boolean: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :boolean },
         a_unknown: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string },
         a_string2: { caption: nil, comment: nil, label: nil, no_downcase: nil, type: :string }
-      }
+      },
+      options: { table_comment: 'Test CSV' }
     )
 
     expect(@admin).to be_a Admin
@@ -140,6 +152,14 @@ RSpec.describe Imports::ModelGenerator, type: :model do
 
     updated_yaml = <<~END_TEXT
       ---
+      data_dictionary:
+        study:#{' '}
+        source_name:#{' '}
+        source_type:#{' '}
+        domain:#{' '}
+        form_name:#{' '}
+      options:
+        table_comment: Test CSV
       fields:
         a_string:
           type: string

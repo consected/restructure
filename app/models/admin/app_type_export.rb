@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
+require_dependency 'zip'
+
 module Admin::AppTypeExport
   extend ActiveSupport::Concern
+
+  AppExportDirSuffix = 'app-export'
+  ZipTempFilePrefix = 'app-type-app-export'
 
   included do
     attr_accessor :import_results
@@ -52,6 +57,24 @@ module Admin::AppTypeExport
     super(options)
   end
 
+  # Create a zip file of "<app>--app-export" migration files
+  # @return [TempFile] zip file object
+  def zip_app_export_migrations
+    temp_file = Tempfile.new([ZipTempFilePrefix, '.zip'])
+    # This is the tricky part
+    # Initialize the temp file as a zip file
+    Zip::OutputStream.open(temp_file) { |zos| }
+
+    # Add files to the zip file as usual
+    Zip::File.open(temp_file.path, Zip::File::CREATE) do |zip|
+      Dir.glob("#{app_export_dir}/*.rb").each do |path|
+        filename = path.split('/').last
+        zip.add(filename, path)
+      end
+    end
+    temp_file
+  end
+
   protected
 
   #
@@ -62,7 +85,7 @@ module Admin::AppTypeExport
   def export_migrations
     clean_export_dir
     migration_generator = Admin::MigrationGenerator.new(default_schema_name)
-    migration_generator.add_schema 'app-export'
+    migration_generator.add_schema AppExportDirSuffix
 
     associated_dynamic_models.each do |dynamic_def|
       export_migration dynamic_def
@@ -82,18 +105,22 @@ module Admin::AppTypeExport
   # export directory if needed
   # @param [DynamicModel | ActivityLog | ExternalIdentifier] dynamic_def
   # @param [String] dir_suffix
-  def export_migration(dynamic_def, dir_suffix = 'app-export')
+  def export_migration(dynamic_def)
+    dir_suffix = AppExportDirSuffix
     dynamic_def.current_admin ||= current_admin
     dynamic_def.write_create_or_update_migration dir_suffix
   end
 
+  def app_export_dir
+    dir_suffix = AppExportDirSuffix
+    migration_generator = Admin::MigrationGenerator.new(default_schema_name)
+    dir = migration_generator.db_migration_dirname(dir_suffix)
+  end
+
   def clean_export_dir
     @exported_dirnames ||= []
-    dir_suffix = 'app-export'
-    migration_generator = Admin::MigrationGenerator.new(default_schema_name)
 
-    dir = migration_generator.db_migration_dirname(dir_suffix)
-
+    dir = app_export_dir
     return if dir.in? @exported_dirnames
 
     # Clean the export directory

@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# Report criteria can rely on resources that have not autoloaded. Just make sure
+require_dependency 'player_info'
+require_dependency 'pro_info'
+require_dependency 'player_contact'
+require_dependency 'address'
+require_dependency 'datadic/user_variable'
 class Report < ActiveRecord::Base
   include AdminHandler
   include SelectorCache

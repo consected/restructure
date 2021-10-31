@@ -41,6 +41,7 @@ module Resources
             Settings::DefaultSecondaryInfoTableName => 'Participant secondary info (associated indentifiable info)',
             Settings::DefaultContactInfoTableName => 'Participant contact info (email / phone)',
             Settings::DefaultAddressInfoTableName => 'Participant addresses',
+            'datadic_variables' => 'Data Dictionary variables',
             'trackers': 'Latest tracker entry per protocol',
             'tracker_histories': 'All tracker entries',
             'latest_tracker_history': 'Most recent tracker entry',

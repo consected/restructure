@@ -18,6 +18,23 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Added] Report criteria field type **select_from_model**
+- [Added] Derived variables in dynamic model data dictionary now update from their source variables
+- [Added] Enhancements to dynamic model definition panels, especially around data dictionary
+- [Fixed] DB comments now updating when a dynamic model is a view
+- [Fixed] Ensure views initialize with dynamic models
+- [Fixed] Fix issue with times in Redcap leading to constant updating of records
+- [Changed] Allow dynamic model updates to add fields where there is no history table
+- [Added] Data dictionary handling for dynamic models and model generator
+- [Added] Refresh dynamic model configuration from table structure
+- [Added] Option to download app-export migrations from server as a zip
+- [Added] Automatic creation of reference views based on model reference configs
+- [Changed] Version of pg gem to avoid memory leaks
+- [Changed] Model reference refactoring
+- [Changed] Handling of tracker "alerts" to work without tracker panel being actively displayed
+- [Changed] Browser back button in the secure viewer now just closes it
+- [Changed] Gems updated, addressing Puma CVE and update to Dalli v3
+- [Fixed] Embedded reports autorunning even if "run automatically" was not set
 
 ## [8.0.16] - 2021-10-06
 

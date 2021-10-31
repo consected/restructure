@@ -1,0 +1,37 @@
+<div>
+  <div class="ref-data-data-dic" data-result="data-dic-block">
+    <%
+        @no_create = true
+        @no_masters = true
+        @embedded_report = true
+
+        pm = @all_reports_for_user = Report.enabled #.for_user(current_user)
+        pm = pm.where(item_type: 'reference-data') #.where.not(short_name: 'table_data')
+
+        @reports = pm.order auto: :desc, report_type: :asc, position: :asc
+        @reports = @reports.reject { |r| r.report_options.list_options&.hide_in_list }
+      
+      %>
+    <%= render partial: 'reports/index', 
+                  locals: {
+                    simple_view: true,
+                    extra_params: {
+                      search_attrs: {
+                        study: object_instance.data_dictionary[:study],
+                        domain: object_instance.data_dictionary[:domain]
+                      }
+                    },
+                    link_extras: {
+                      data: {
+                        remote: "true", 
+                        preprocessor: "embedded_report",
+                        parent: "primary-modal",
+                        result_target: "#modal_results_block",
+                        target: "#modal_results_block",
+                        target_force: "true"
+                      }
+                    }
+                  }
+      %>
+  </div>
+</div>

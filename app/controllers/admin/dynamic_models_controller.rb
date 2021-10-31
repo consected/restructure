@@ -6,6 +6,14 @@ class Admin::DynamicModelsController < AdminController
   helper_method :view_folder
   after_action :routes_reload, only: %i[update create]
 
+  def update_config_from_table
+    set_instance_from_id
+    object_instance.current_admin = current_admin
+    object_instance.update_config_from_table
+    object_instance.save!
+    edit
+  end
+
   protected
 
   def routes_reload
@@ -23,12 +31,13 @@ class Admin::DynamicModelsController < AdminController
 
   def filters
     {
-      category: DynamicModel.categories
+      category: DynamicModel.categories,
+      table_name: DynamicModel.table_names
     }
   end
 
   def filters_on
-    [:category]
+    %i[category table_name]
   end
 
   def view_folder

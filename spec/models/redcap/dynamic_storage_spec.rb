@@ -35,7 +35,7 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
     reset_mocks
   end
 
-  it 'returns fields and db_configs to be used to defined fields for a dynamic model' do
+  it 'returns fields and db_columns to be used to defined fields for a dynamic model' do
     rc = Redcap::ProjectAdmin.active.first
     rc.current_admin = @admin
 
@@ -45,10 +45,10 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
 
     all_rf = dd.all_retrievable_fields
 
-    db_configs = ds.send :db_configs
-    expect(db_configs).to be_a Hash
-    expect(db_configs.keys).to eq all_rf.keys
-    expect(db_configs).to eq(
+    db_columns = ds.send :db_columns
+    expect(db_columns).to be_a Hash
+    expect(db_columns.keys).to eq all_rf.keys
+    expect(db_columns).to eq(
       record_id: { type: 'string' },
       dob: { type: 'date' },
       current_weight: { type: 'decimal' },

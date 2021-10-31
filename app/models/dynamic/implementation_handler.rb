@@ -208,8 +208,6 @@ module Dynamic
       @can_create = nil
       @can_add_reference = nil
       @can_edit = nil
-
-      option_type_config&.reset_calc_evaluations!(self)
     end
 
     #

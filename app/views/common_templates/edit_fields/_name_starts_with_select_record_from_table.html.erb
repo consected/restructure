@@ -8,11 +8,9 @@ cl = cn.camelize.constantize
 reslist = cl
 if cl.attribute_names.include?('rank')
   reslist = reslist.order(rank: :desc)
-  reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
-elsif cl.attribute_names.include?('rank')
-  reslist = reslist.all.map{|i| [i.data, i.data]}.sort { |x, y| x.first <=> y.first }
+  reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}.uniq
 else
-  reslist = reslist.all.map{|i| [i.data, i.data]}.sort { |x, y| x.first <=> y.first }
+  reslist = reslist.all.map{|i| [i.data, i.data]}.sort { |x, y| x.first <=> y.first }.uniq
 end
 
 unless rl
