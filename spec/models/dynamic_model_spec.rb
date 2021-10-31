@@ -215,6 +215,7 @@ RSpec.describe 'Dynamic Model implementation', type: :model do
     options = <<~END_OPTIONS
       _data_dictionary:
         study: Test Study
+        domain: Test
         source_type: test database
     END_OPTIONS
 
