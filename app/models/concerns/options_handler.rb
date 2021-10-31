@@ -128,6 +128,26 @@ module OptionsHandler
       config_item_names.each { |config_item_name| add_option_type(:simple, config_item_name) }
     end
 
+    #
+    # Class method for specifying a hash of configuration items
+    # This creates an accessor attribute in the main model instance which is populated
+    # when the configuration is loaded when the model is instantiated.
+    # A list of the simple attributes is available from #option_types_simple
+    # Allow config_item_names to be specified as an array of symbols or as individual args
+    #
+    # The hash can be initialized like this:
+    # f = {
+    #   fields: {
+    #     f1: {...},
+    #     f2: {...}
+    #   },
+    #   ...
+    # }
+    # setup_options_hash(f, :fields)
+    # It produces a class within the current class ...::Fields::Fields
+    #
+    # @param [Symbol] config_item_name - the name of the configuration item
+    # @param [Array{Symbol}] with - the child options this configuration item defines
     def configure_hash(config_item_name, with:)
       attr_accessor(config_item_name)
 

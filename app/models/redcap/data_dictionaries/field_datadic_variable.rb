@@ -3,143 +3,38 @@
 module Redcap
   module DataDictionaries
     #
-    # Store the field definition to a datadic variable
+    # Interface to methods for storign a field definition to a data dictionary
+    # as a Datadic::Variable record
+    # Called from Recap::DataDictionaries::Field, with matching attributes to pass through
+    # This class overrides some of the standard methods in Dynamic::DatadicVariableHandler
+    # to handle Redcap choice fields effectively
     class FieldDatadicVariable
       MatchingAttribs = %i[form name label label_note annotation is_required
                            valid_type valid_min valid_max is_identifier label_plain label_note_plain
-                           data_dictionary field_type field_choices
+                           owner field_type field_choices_plain_text
                            source_name checkbox_choice_fields
                            storage_type db_or_fs schema_or_path table_or_file
-                           position section sub_section title_plain].freeze
+                           position section sub_section title_plain
+                           presentation_type default_variable_type form_name study
+                           owner_email].freeze
 
-      attr_accessor(*MatchingAttribs)
+      include Dynamic::DatadicVariableHandler
 
-      def initialize(field)
-        MatchingAttribs.each do |m|
-          send("#{m}=", field.send(m))
-        end
+      def self.owner_identifier
+        :redcap_data_dictionary
       end
 
-      #
-      # Get the variable instance from the identifying information provided,
-      # by searching for the variable name within the set
-      # of variables for the specified form.
-      # @return [Datadic::Variable | nil]
-      def self.find_by_identifiers(source_name:,
-                                   form_name:,
-                                   variable_name:,
-                                   redcap_data_dictionary:,
-                                   source_type: :redcap)
-
-        Datadic::Variable.active.where(source_name: source_name,
-                                       source_type: source_type,
-                                       form_name: form_name,
-                                       variable_name: variable_name,
-                                       redcap_data_dictionary: redcap_data_dictionary)
+      def source_type
+        :redcap
       end
 
-      #
-      # Current admin to support updates
-      # @return [Admin]
-      def current_admin
-        data_dictionary.current_admin
+      def domain
+        form&.name || name
       end
 
-      #
-      # Get the variable instance from the variable name we have been provided,
-      # by searching for the variable name within the current set
-      # of variables for this form.
-      # @param [String | Symbol] var_name
-      # @return [Datadic::Variable | nil]
-      def id_from_name(var_name)
-        return unless var_name
-
-        identified_by = identifiers.dup
-        identified_by[:variable_name] = var_name
-        self.class.find_by_identifiers(**identified_by).first&.id
+      def is_derived_var
+        false
       end
-
-      #
-      # Map the REDCap field definition to a partial data dictionary definition
-      # @return [Hash]
-      def partial_datadic_definition
-        {
-          study: data_dictionary.study,
-          presentation_type: field_type.presentation_type,
-          label: label_plain,
-          label_note: label_note_plain,
-          annotation: annotation,
-          is_required: is_required,
-          valid_type: valid_type,
-          valid_min: valid_min,
-          valid_max: valid_max,
-          multi_valid_choices: field_choices.choices(plain_text: true),
-          is_identifier: is_identifier,
-          storage_type: storage_type,
-          db_or_fs: db_or_fs,
-          schema_or_path: schema_or_path,
-          table_or_file: table_or_file,
-          storage_varname: name,
-          position: position,
-          section_id: id_from_name(section),
-          sub_section_id: id_from_name(sub_section),
-          title: title_plain
-        }
-      end
-
-      def datadic_defaults
-        {
-          variable_type: field_type.default_variable_type
-        }
-      end
-
-      def identifiers
-        {
-          source_name: source_name,
-          source_type: :redcap,
-          form_name: form.name,
-          variable_name: name,
-          redcap_data_dictionary: data_dictionary
-        }
-      end
-
-      #
-      # Refresh variable records (Datadic::Variable) based on
-      # current definition. For this field representation we check for an existing record
-      # matching on the source, form and field. If one is there, we check if a partial definition
-      # is matched, the source (Redcap) definition of the data dictionary variable. If it
-      # is then nothing is changed. If there has been a change then we update with the changes
-      # from the Redcap definition. If there was no record, we create one, with the Redcap definition
-      # and some additional defaults.
-      # @return [Integer] - number of updates
-      def refresh_variable_record
-        updates = 0
-        stored_variables = Datadic::Variable.active.where(identifiers)
-
-        raise FphsException, "multiple variables found for #{identifiers.to_json}" if stored_variables.count > 1
-
-        if stored_variables.count == 1
-          # We found a corresponding variable record. Check if it needs to be updated
-          matched_stored_variable = stored_variables.where(partial_datadic_definition)
-
-          if matched_stored_variable.count.positive?
-            # This was found as a direct match. Nothing to do
-            nil
-          else
-            # No direct match found. Update the original items
-            variable_record_update(stored_variables.first)
-            updates += 1
-          end
-        else
-
-          variable_record_create
-          updates += 1
-        end
-
-        updates
-      end
-
-      private
 
       #
       # Create a new variable record definition.
@@ -156,21 +51,6 @@ module Redcap
             simple_variable_record_create checkbox_choice_overrides(fn, stored_variable)
           end
         end
-      end
-
-      #
-      # Create a single variable record definition, optionally overriding values
-      # @param [Hash | nil] with_overrides - hash of attributes to override the defaults with
-      # @return [Datadic::Variable] - created record
-      def simple_variable_record_create(with_overrides = nil)
-        data = partial_datadic_definition
-               .merge(identifiers)
-               .merge(datadic_defaults)
-               .merge(current_admin: current_admin)
-
-        data.merge!(with_overrides) if with_overrides
-
-        Datadic::Variable.create!(data)
       end
 
       #

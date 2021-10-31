@@ -23,26 +23,42 @@
 </div>
 <div class="activity-list-references">
   <label>references</label>
-  <ul class="activity-list">
-  <% show_refs = []
-     object_instance.option_configs.each do |oc| 
-       oc&.references&.each do |ref| %>
-    <li>
-    <%    got = ref.is_a?(Hash) ? ref.first.first : ref.first 
-          next unless got
-
-          got = got.to_s
-          unless show_refs.include?(got)
-            show_refs << got
-          end
-    %>
-    <%= got %>
-    </li>
-  <%  end 
-    end 
+  <ul class="al-reference-list">
+  <% shown_refs = []
+     object_instance.all_referenced_tables.each do |ref| 
   %>
+  <%  got = ref[:full_ref_name]
+      unless shown_refs.include?(got)
+        shown_refs << got
+        to_table_name = ref[:to_table_name]
+        view_name = object_instance.reference_view_name(to_table_name)
+        type = ref[:to_class_type]
+        link = case type  
+                when 'DynamicModel' then admin_dynamic_models_path(filter: { table_name: to_table_name, disabled: :enabled } )
+                when 'ActivityLog' then admin_activity_logs_path(filter: { table_name: to_table_name, disabled: :enabled } )
+                when 'ExternalIdentifier' then admin_external_identifiers_path(filter: { name: to_table_name, disabled: :enabled } )
+                end
+        if link
+  %>
+    <li>
+      <%= link_to(got, link, target: '_blank') %>
+      <ul>
+        <li>table: <%= to_table_name %></li>
+        <li>view: <%= link_to(view_name, report_path('reference_data__table_data', 
+                                          table_name: view_name, 
+                                          schema_name: object_instance.schema_name, 
+                                          search_attrs: { no_run: true }
+                                        ), 
+                                        target: '_blank', class: '') %></li>
+                                      
+      </ul>
+  <%    else %>
+    <%= got %>
+  <%    end %>
+    </li>
+    <%  end %>
+  <% end %>
   </ul>
-  <div id="activity-list-detail" class="activity-list-detail"></div>
 </div>
 <% else %>
   <label>not yet saved</label>

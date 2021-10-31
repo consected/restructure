@@ -9,6 +9,10 @@ RSpec.describe Admin::AppType, type: :model do
     create_admin
     app = Admin::AppType.create!(name: 'test', label: 'Test App', current_admin: @admin)
     expect(app).to be_a Admin::AppType
+
+    template_uac = Admin::UserAccessControl.last
+    expect(template_uac.app_type_id).to eq app.id
+    expect(template_uac.role_name).to eq '_app_'
   end
 
   it 'allows a user access to an app type' do

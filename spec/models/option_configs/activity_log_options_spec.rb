@@ -282,4 +282,54 @@ RSpec.describe 'Activity Log Options', type: :model do
       al.update! select_result: 'good'
     end.to raise_error FphsException
   end
+
+  it 'gets a full list of tables referenced by model references' do
+    @def_updated_at = []
+    @dyn_instances = []
+    @option_texts = []
+    @option_configs = []
+
+    # Setup a simple dynamic model definition without any extra options
+    dmdef = generate_test_activity_log
+    @option_texts[1] = nil
+
+    sleep 2 # ensure there are no timing issues
+    @option_texts[4] = <<~END_DEF
+      new_step:
+        label: New Step
+        caption_before:
+          all_fields: show before all fields
+          select_result: has a caption before select_result
+
+        editable_if:
+          all:
+            this:
+              select_result: 'bad'
+
+        references:
+          player_contact:
+            from: this
+          address:
+            from: master
+          activity_log__player_contact_email:
+            from: this
+          player_info:
+            from: master
+            without_reference: true
+    END_DEF
+    dmdef.update!(extra_log_types: @option_texts[4], current_admin: @admin)
+    refresh_step_access dmdef
+
+    res = dmdef.all_referenced_tables
+    expect(res.length).to eq 4
+    expect(res[0][:to_table_name]).to eq 'player_contacts'
+    expect(res[0][:from]).to eq 'this'
+    expect(res[1][:to_table_name]).to eq 'addresses'
+    expect(res[1][:from]).to eq 'master'
+    expect(res[2][:to_table_name]).to eq 'activity_log_player_contact_emails'
+    expect(res[2][:from]).to eq 'this'
+    expect(res[3][:to_table_name]).to eq 'player_infos'
+    expect(res[3][:from]).to eq 'master'
+    expect(res[3][:without_reference]).to eq true
+  end
 end

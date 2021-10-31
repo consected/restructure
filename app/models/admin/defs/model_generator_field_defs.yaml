@@ -1,0 +1,7 @@
+Name: |
+  Friendly name for the generator.
+
+Dynamic model table: |
+  Database table name to be created. If a specific schema is required, use `<schema>.<table name>`, otherwise the
+  default schema **dynamic** will be used.
+

@@ -39,7 +39,7 @@
 
     {{#is name '!==' full_name }}<div id="{{hyphenate full_name}}-{{../master_id}}-{{../id}}"> {{/is}}
     {{! If the orientation is vertical or blank}}
-    {{#is (or orientation 'vertical') 'vertical'}}
+    {{#is (or orientation 'vertical') '===' 'vertical'}}
       <div class="col-md-24 new-block{{#is name '!==' full_name }} new-before-parent{{/is}}" id="{{hyphenate name}}-{{../master_id}}-" data-subscription="{{hyphenate name}}-edit-form-{{../master_id}}-">
         {{#unless (pluralize full_name)}}
         <ul class="list-group">

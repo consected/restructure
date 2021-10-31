@@ -139,7 +139,7 @@ module MasterSearch
     # ORDER  BY t.ord
     original_length = @masters.count
 
-    @masters = @masters.preload(*preloadables)
+    @masters = @masters.preload(*preloadables) if preloadables.present?
 
     if @sort_by_ids&.present?
       sql = 'masters.id, array_position(array[?], masters.id) order_col'

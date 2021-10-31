@@ -78,6 +78,19 @@ module ReportsHelper
       options_for_select(classification_class.all_name_value_enable_flagged(type_filter), value)
     elsif config.type == 'config_selector'
       options_for_select(config.selections || [], value)
+    elsif config.type == 'select_from_model'
+      # Get the model by the configured resource name
+      resource_name = config.resource_name
+      res = Resources::Models.find_by(resource_name: resource_name)
+      raise FphsException, "No resource matches resource_name: #{resource_name}" unless res
+
+      # Use the configuration of selections to define which fields to pull as the options
+      # The selections configuration is "<label field>: <value field>"
+      # For example, for a data dictionary variable, this might be "study: study"
+      fields = (config.selections || { id: :id })
+      model = res[:model]
+      selections = model.active.distinct.pluck(*fields)
+      options_for_select(selections)
     end
   end
 
@@ -141,5 +154,13 @@ module ReportsHelper
   def report_criteria_text_field(name, config, value, options)
     options.merge!(type: config.type, class: 'form-control')
     text_field_tag("search_attrs[#{name}]", value, options)
+  end
+
+  #
+  # Options for select for a "select from model" resource names drop down
+  # @return [options_for_select]
+  def select_from_model_resource_name_options
+    res = Resources::Models.all.values.map { |r| ["#{r[:type]} - #{r[:model].human_name}", r[:resource_name]] }
+    options_for_select res
   end
 end

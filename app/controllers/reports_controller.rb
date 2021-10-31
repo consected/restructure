@@ -55,7 +55,7 @@ class ReportsController < UserBaseController
       return
     end
 
-    if params[:search_attrs] && !no_run
+    if params[:search_attrs] && !no_run && params[:commit].present?
       # Search attributes or data reference parameters have been provided
       # and the query should be run
       begin

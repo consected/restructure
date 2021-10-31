@@ -105,9 +105,10 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(v.sub_section_id).to be_nil
 
     inst = Redcap::DataDictionaries::FieldDatadicVariable.find_by_identifiers(source_name: v.source_name,
+                                                                              source_type: :redcap,
                                                                               form_name: v.form_name,
                                                                               variable_name: 'demog_outline',
-                                                                              redcap_data_dictionary: v.redcap_data_dictionary_id).first
+                                                                              owner: v.redcap_data_dictionary_id).first
 
     expect(inst.position).to eq 5
     expect(inst.id).to eq v.id
@@ -137,9 +138,10 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(v.sub_section_id).to be_nil
 
     inst = Redcap::DataDictionaries::FieldDatadicVariable.find_by_identifiers(source_name: v.source_name,
+                                                                              source_type: :redcap,
                                                                               form_name: v.form_name,
                                                                               variable_name: 'famedu_text',
-                                                                              redcap_data_dictionary: v.redcap_data_dictionary_id).first
+                                                                              owner: v.redcap_data_dictionary_id).first
 
     expect(inst.position).to eq 26
 

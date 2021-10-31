@@ -302,7 +302,7 @@ app_type:
     disabled: false
     created_at: '2021-02-19T15:46:55.261Z'
     updated_at: '2021-02-19T15:46:55.261Z'
-    user_email: phil_ayres@domain.edu
+    user_email: phil_ayres@restructure
   - id: 1197
     app_type_id: 63
     role_name: admin
@@ -338,7 +338,7 @@ app_type:
     disabled: false
     created_at: '2021-03-05T14:49:45.088Z'
     updated_at: '2021-03-05T14:49:45.088Z'
-    user_email: phil_ayres@domain.edu
+    user_email: phil_ayres@restructure
   associated_message_templates: []
   associated_config_libraries: []
   associated_protocols: []

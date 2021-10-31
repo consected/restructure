@@ -189,9 +189,7 @@ RSpec.describe 'Performance', type: :model do
 
     expect(JSON.parse(jt)['masters'].length).to be >= NumMasters
 
-    # The index style of as_json removes most of the junk from the result. latest_tracker_history is only
-    # returned when we get a non-index / full as_json
-    expect(JSON.parse(jt)['masters'][(NumMasters / 2).to_i]['latest_tracker_history']).to be nil
+    expect(JSON.parse(jt)['masters'][(NumMasters / 2).to_i]['latest_tracker_history'].length).to eq 1
   end
 
   it 'ensures that tracker history results are correct after applying more performant processing' do

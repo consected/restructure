@@ -5,8 +5,12 @@
   <%= object_instance.full_item_type_name %>
   </p>
 
+  <label>database <%= object_instance.table_or_view || 'not defined'%></label>
   <p>
-    <%= link_to link_label_open_in_new('search table data'), "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.table_name}", 
+    <code><%= [object_instance.schema_name, object_instance.table_name].compact.join('.') %></code>
+  </p>
+  <p>
+    <%= link_to link_label_open_in_new('search data'), "/reports/reference_data__table_data?schema_name=#{object_instance.schema_name}&search_attrs%5B_blank%5D=true&search_attrs%5Bno_run%5D=true&table_name=#{object_instance.table_name}", 
                 target: '_blank' %>
   </p>
 <% else %>

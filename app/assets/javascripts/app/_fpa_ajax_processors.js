@@ -231,7 +231,7 @@ _fpa.postprocessors = {
     _fpa.postprocessors.tracker_notes_handler(block);
     _fpa.postprocessors.tracker_item_link_hander(block);
 
-    // _fpa.postprocessors.tracker_events_handler(block);
+    _fpa.postprocessors.tracker_events_handler(block, data);
 
     _fpa.postprocessors.extras_panel_handler(block);
     block.addClass('loaded-master-main');
@@ -251,7 +251,7 @@ _fpa.postprocessors = {
     }
 
     if (data.masters && data.masters.length === 1) {
-      // _fpa.postprocessors.tracker_events_handler(block);
+      _fpa.postprocessors.tracker_events_handler(block, data);
       _fpa.postprocessors.extras_panel_handler(block);
     }
 
@@ -287,7 +287,7 @@ _fpa.postprocessors = {
         _fpa.postprocessors.tracker_notes_handler($(this));
         _fpa.postprocessors.tracker_item_link_hander($(this));
 
-        // _fpa.postprocessors.tracker_events_handler($(this));
+        _fpa.postprocessors.tracker_events_handler($(this), data);
 
         _fpa.postprocessors.extras_panel_handler($(this));
 

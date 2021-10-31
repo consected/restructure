@@ -18,9 +18,10 @@ _fpa = {
   remote_request_block: null,
 
   non_versioned_template_types: ['trackers', 'player_infos', 'pro_infos', 'addresses', 'player_contacts',
-                                'nfs_store/manage/stored_files', 'nfs_store/manage/archived_files', 'nfs_store_containers'],
+    'nfs_store/manage/stored_files', 'nfs_store/manage/archived_files', 'nfs_store_containers'],
 
   HandlebarsCompileOptions: { preventIndent: true },
+  page_transition_callback: null,
 
   result_target: function (block) {
     var d = $(block).attr('data-result-target');
@@ -705,6 +706,8 @@ _fpa = {
             }
             // Run through the top level of data to pick the keys to look for in element subscriptions
             for (var di in data) {
+              if (di == 'multiple_results') continue;
+
               if (data.hasOwnProperty(di)) {
                 var res = {};
                 var d = data[di];
@@ -1104,6 +1107,16 @@ _fpa = {
       }
     }
     return res;
+  },
+
+  catch_page_transition: function (callback) {
+    _fpa.page_transition_callback = callback;
+    $('body').addClass('prevent-page-change');
+  },
+
+  default_page_transition: function () {
+    _fpa.page_transition_callback = null;
+    $('body').removeClass('prevent-page-change');
   }
 
 };

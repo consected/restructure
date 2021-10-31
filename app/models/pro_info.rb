@@ -9,6 +9,8 @@ class ProInfo < UserBase
   # Handle special functionality and allow simple search and compound searches to function
   attr_accessor :enable_updates, :contact_data, :less_than_career_years, :more_than_career_years
 
+  add_model_to_list
+
   def data
     "#{first_name} #{last_name}"
   end
