@@ -18,6 +18,10 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Added] Add support for Redcap repeating instruments
+
+## Transfer from Harvard @7.4.70 - 2021-10-31
+
 - [Added] Report criteria field type **select_from_model**
 - [Added] Derived variables in dynamic model data dictionary now update from their source variables
 - [Added] Enhancements to dynamic model definition panels, especially around data dictionary
@@ -47,19 +51,15 @@ release will be created for any release tested in production, and may be marked 
 
 ## [8.0.15] - 2021-09-03
 
-- [Changed] Docs library to allow links to work within source (and github) as well as in app 
+- [Changed] Docs library to allow links to work within source (and github) as well as in app
 
 ## [8.0.14] - 2021-08-23
 
-
 ## [8.0.13] - 2021-08-23
-
 
 ## [8.0.12] - 2021-08-22
 
-
 ## [8.0.11] - 2021-08-12
-
 
 ## [8.0.7] - 2021-01-11
 
@@ -73,7 +73,7 @@ release will be created for any release tested in production, and may be marked 
 - [Added] activity_selector reference option
 - [Changed] app type refactoring and item flag name export / import
 - [Changed] item flag (name) improvements to guard against external data errors
-- [Changed] moved app configs and migrations to separate repo (https://github.com/consected/restructure-apps)
+- [Changed] moved app configs and migrations to separate repo (<https://github.com/consected/restructure-apps>)
 - [Changed] improved image previewing and icons
 - [Changed] bugfixes in editable report forms and model reference edit buttons
 - [Changed] model reference handling in views
