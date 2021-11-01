@@ -41,6 +41,12 @@ RELEASESTARTED="$(echo ${ALLTAGS} | grep ${NEWVER})"
 echo "Current version: ${CURRVER}"
 echo "Next version: ${NEWVER}"
 
+source ../restructure-build/shared/build-vars.sh
+if [ "$(cat .ruby-version)" != ${RUBY_V} ]; then
+  echo "Ruby versions don't match: $(cat .ruby-version) != ${RUBY_V}"
+  exit 7
+fi
+
 if [ -z "${SKIP_BRAKEMAN}" ]; then
   echo "Checking brakeman before we go through the whole process"
   bin/brakeman -q --summary > /tmp/fphs-brakeman-summary.txt
