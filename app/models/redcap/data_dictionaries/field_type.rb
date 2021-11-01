@@ -36,7 +36,8 @@ module Redcap
         descriptive: 'fixed caption',
         form_complete: 'redcap status', # This is not a real REDCap type, but is used as a lookup
         form_timestamp: 'redcap completion timestamp', # This is not a real REDCap type, but is used as a lookup
-        survey_identifier: 'survey identifier' # This is not a real REDCap type, but is used as a lookup
+        survey_identifier: 'survey identifier', # This is not a real REDCap type, but is used as a lookup
+        repeat: 'repeat instrument' # This is not a real REDCap type, but is used as a lookup
       }.freeze
 
       TextFieldToVariableTypes = {

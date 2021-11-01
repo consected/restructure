@@ -103,7 +103,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     dr.store
 
     expect(dr.errors).to be_empty
-    expect(dr.created_ids.sort).to eq %w[1 4 14 19 32].sort
+    expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
     expect(dr.updated_ids).to be_empty
   end
 
@@ -136,7 +136,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     dr.store
 
     expect(dr.errors).to be_empty
-    expect(dr.created_ids.sort).to eq %w[1 4 14 19 32].sort
+    expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
     expect(dr.updated_ids).to be_empty
 
     WebMock.reset!
@@ -168,7 +168,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     dr.store
 
     expect(dr.errors).to be_empty
-    expect(dr.created_ids.sort).to eq %w[1 4 14 19 32].sort
+    expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
     expect(dr.updated_ids).to be_empty
 
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
@@ -197,7 +197,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     dr.store
 
     expect(dr.errors).to be_empty
-    expect(dr.created_ids.sort).to eq %w[1 4 14 19 32].sort
+    expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19 32].sort
     expect(dr.updated_ids).to be_empty
 
     WebMock.reset!
@@ -213,8 +213,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
     dr.store
 
     expect(dr.errors).to be_empty
-    expect(dr.created_ids.sort).to be_empty
-    expect(dr.updated_ids.sort).to eq %w[1 4 14 19].sort
+    expect(dr.created_ids).to be_empty
+    expect(dr.updated_ids.map { |r| r[:record_id] }.sort).to eq %w[1 4 14 19].sort
   end
 
   it 'retrieves all records in the background' do

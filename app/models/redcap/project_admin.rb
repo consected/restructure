@@ -358,6 +358,15 @@ module Redcap
                                    result: result
     end
 
+    #
+    # Does the project have repeating instruments or events, based on the
+    # project metadata returned?
+    # @return [true | false]
+    def repeating_instruments?
+      captured_project_info &&
+        captured_project_info[:has_repeating_instruments_or_events] == 1
+    end
+
     private
 
     #
