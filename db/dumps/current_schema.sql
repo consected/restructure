@@ -25,33 +25,6 @@ CREATE SCHEMA ref_data;
 
 
 --
--- Name: log_redcap_user_status_recs_update(); Type: FUNCTION; Schema: ref_data; Owner: -
---
-
-CREATE FUNCTION ref_data.log_redcap_user_status_recs_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  INSERT INTO redcap_user_status_rec_history (
-    
-    username, first_name, last_name, email_address, administrator, users_sponsor, institution_id, comments, first_activity, last_activity, last_login, time_of_suspension, expiration_date,
-    user_id,
-    created_at,
-    updated_at,
-    redcap_user_status_rec_id)
-  SELECT
-    
-    NEW.username, NEW.first_name, NEW.last_name, NEW.email_address, NEW.administrator, NEW.users_sponsor, NEW.institution_id, NEW.comments, NEW.first_activity, NEW.last_activity, NEW.last_login, NEW.time_of_suspension, NEW.expiration_date,
-    NEW.user_id,
-    NEW.created_at,
-    NEW.updated_at,
-    NEW.id;
-  RETURN NEW;
-END;
-$$;
-
-
---
 -- Name: redcap_data_collection_instrument_history_upd(); Type: FUNCTION; Schema: ref_data; Owner: -
 --
 
@@ -527,7 +500,8 @@ CREATE TABLE ref_data.datadic_variables (
     section_id integer,
     sub_section_id integer,
     title character varying,
-    storage_varname character varying
+    storage_varname character varying,
+    user_id bigint
 );
 
 
@@ -570,7 +544,7 @@ COMMENT ON COLUMN ref_data.datadic_variables.form_name IS 'Form name (if the sou
 -- Name: COLUMN datadic_variables.variable_name; Type: COMMENT; Schema: ref_data; Owner: -
 --
 
-COMMENT ON COLUMN ref_data.datadic_variables.variable_name IS 'Variable name (as stored)';
+COMMENT ON COLUMN ref_data.datadic_variables.variable_name IS 'Variable name';
 
 
 --
@@ -1177,99 +1151,75 @@ ALTER SEQUENCE ref_data.redcap_project_users_id_seq OWNED BY ref_data.redcap_pro
 
 
 --
--- Name: redcap_user_status_rec_history; Type: TABLE; Schema: ref_data; Owner: -
+-- Name: view_study_datadic; Type: VIEW; Schema: ref_data; Owner: -
 --
 
-CREATE TABLE ref_data.redcap_user_status_rec_history (
-    id bigint NOT NULL,
-    username character varying,
-    first_name character varying,
-    last_name character varying,
-    email_address character varying,
-    administrator character varying,
-    users_sponsor character varying,
-    institution_id character varying,
-    comments character varying,
-    first_activity timestamp without time zone,
-    last_activity timestamp without time zone,
-    last_login timestamp without time zone,
-    time_of_suspension timestamp without time zone,
-    expiration_date timestamp without time zone,
-    user_id bigint,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    redcap_user_status_rec_id bigint
-);
-
-
---
--- Name: redcap_user_status_rec_history_id_seq; Type: SEQUENCE; Schema: ref_data; Owner: -
---
-
-CREATE SEQUENCE ref_data.redcap_user_status_rec_history_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: redcap_user_status_rec_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ref_data; Owner: -
---
-
-ALTER SEQUENCE ref_data.redcap_user_status_rec_history_id_seq OWNED BY ref_data.redcap_user_status_rec_history.id;
-
-
---
--- Name: redcap_user_status_recs; Type: TABLE; Schema: ref_data; Owner: -
---
-
-CREATE TABLE ref_data.redcap_user_status_recs (
-    id bigint NOT NULL,
-    username character varying,
-    first_name character varying,
-    last_name character varying,
-    email_address character varying,
-    administrator character varying,
-    users_sponsor character varying,
-    institution_id character varying,
-    comments character varying,
-    first_activity timestamp without time zone,
-    last_activity timestamp without time zone,
-    last_login timestamp without time zone,
-    time_of_suspension timestamp without time zone,
-    expiration_date timestamp without time zone,
-    user_id bigint,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: TABLE redcap_user_status_recs; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON TABLE ref_data.redcap_user_status_recs IS 'Dynamicmodel: Redcap User Status Rec';
-
-
---
--- Name: redcap_user_status_recs_id_seq; Type: SEQUENCE; Schema: ref_data; Owner: -
---
-
-CREATE SEQUENCE ref_data.redcap_user_status_recs_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: redcap_user_status_recs_id_seq; Type: SEQUENCE OWNED BY; Schema: ref_data; Owner: -
---
-
-ALTER SEQUENCE ref_data.redcap_user_status_recs_id_seq OWNED BY ref_data.redcap_user_status_recs.id;
+CREATE VIEW ref_data.view_study_datadic AS
+ SELECT DISTINCT a.id,
+    a.domain,
+        CASE
+            WHEN ((a.source_type)::text = 'redcap'::text) THEN (((((a.source_type)::text || '
+'::text) || (COALESCE(rpa.name, ''::character varying))::text) || '
+'::text) || (a.form_name)::text)
+            ELSE (((((a.source_type)::text || '
+'::text) || (a.source_name)::text) || '
+'::text) || (a.form_name)::text)
+        END AS "Source",
+        CASE
+            WHEN ((COALESCE(a.title, ''::character varying))::text <> ''::text) THEN a.title
+            WHEN ((COALESCE(sec.title, ''::character varying))::text <> ''::text) THEN sec.title
+            ELSE sec.label
+        END AS title,
+    a.variable_name,
+    a.label,
+    a.label_note,
+    a.variable_type,
+    a.valid_min,
+    a.valid_max,
+    a.multi_valid_choices,
+    a.target_type,
+    a.is_derived_var,
+    a.multi_derived_from_id,
+    a.source_name,
+    a.source_type,
+    a.form_name,
+    a.presentation_type,
+    a.is_required,
+    a.valid_type,
+    a.annotation,
+        CASE
+            WHEN (a.doc_url IS NOT NULL) THEN (('[documentation]('::text || (a.doc_url)::text) || ')'::text)
+            ELSE NULL::text
+        END AS doc_url,
+    a.is_identifier,
+    a.owner_email,
+    a.classification,
+    a.other_classification,
+    a.multi_timepoints,
+    ((((((((eq.variable_name)::text || ' in '::text) || (eq.study)::text) || ' '::text) || (eq.source_type)::text) || ' ('::text) || (eq.source_name)::text) || ')'::text) AS equivalent_to_id,
+    a.storage_type,
+    a.db_or_fs,
+    a.schema_or_path,
+        CASE
+            WHEN ((a.storage_type)::text = 'database'::text) THEN ((((((((('['::text || (a.table_or_file)::text) || '](/reports/reference_data__table_data'::text) || chr(63)) || 'search_attrs[_blank]=true&schema_name='::text) || (a.schema_or_path)::text) || '&table_name='::text) || (a.table_or_file)::text) || ')'::text))::character varying
+            ELSE a.table_or_file
+        END AS table_or_file,
+    a.storage_varname,
+    a.redcap_data_dictionary_id,
+    a.study,
+    a."position",
+    a.section_id,
+    a.created_at,
+    a.updated_at,
+    a.disabled,
+    a.admin_id
+   FROM ((((ref_data.datadic_variables a
+     LEFT JOIN ref_data.datadic_variables eq ON ((a.equivalent_to_id = eq.id)))
+     LEFT JOIN ref_data.datadic_variables sec ON ((a.section_id = sec.id)))
+     LEFT JOIN ref_data.redcap_data_dictionaries rdd ON ((a.redcap_data_dictionary_id = rdd.id)))
+     LEFT JOIN ref_data.redcap_project_admins rpa ON ((rdd.redcap_project_admin_id = rpa.id)))
+  WHERE ((NOT COALESCE(a.disabled, false)) AND (NOT (((a.variable_name)::text ~* '___'::text) AND ((a.variable_type)::text = ANY (ARRAY[('categorical'::character varying)::text, ('dichotomous item'::character varying)::text])) AND ((a.source_type)::text = 'redcap'::text))))
+  ORDER BY a."position", a.id;
 
 
 --
@@ -1361,20 +1311,6 @@ ALTER TABLE ONLY ref_data.redcap_project_user_history ALTER COLUMN id SET DEFAUL
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_users ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_project_users_id_seq'::regclass);
-
-
---
--- Name: redcap_user_status_rec_history id; Type: DEFAULT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.redcap_user_status_rec_history ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_user_status_rec_history_id_seq'::regclass);
-
-
---
--- Name: redcap_user_status_recs id; Type: DEFAULT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.redcap_user_status_recs ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_user_status_recs_id_seq'::regclass);
 
 
 --
@@ -1479,36 +1415,6 @@ ALTER TABLE ONLY ref_data.redcap_project_user_history
 
 ALTER TABLE ONLY ref_data.redcap_project_users
     ADD CONSTRAINT redcap_project_users_pkey PRIMARY KEY (id);
-
-
---
--- Name: redcap_user_status_rec_history redcap_user_status_rec_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.redcap_user_status_rec_history
-    ADD CONSTRAINT redcap_user_status_rec_history_pkey PRIMARY KEY (id);
-
-
---
--- Name: redcap_user_status_recs redcap_user_status_recs_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.redcap_user_status_recs
-    ADD CONSTRAINT redcap_user_status_recs_pkey PRIMARY KEY (id);
-
-
---
--- Name: 5de73de6_id_idx; Type: INDEX; Schema: ref_data; Owner: -
---
-
-CREATE INDEX "5de73de6_id_idx" ON ref_data.redcap_user_status_rec_history USING btree (redcap_user_status_rec_id);
-
-
---
--- Name: 5de73de6_user_idx; Type: INDEX; Schema: ref_data; Owner: -
---
-
-CREATE INDEX "5de73de6_user_idx" ON ref_data.redcap_user_status_rec_history USING btree (user_id);
 
 
 --
@@ -1631,6 +1537,13 @@ CREATE INDEX idx_rdcih_on_proj_admin_id ON ref_data.redcap_data_collection_instr
 
 
 --
+-- Name: index_datadic_variables_on_user_id; Type: INDEX; Schema: ref_data; Owner: -
+--
+
+CREATE INDEX index_datadic_variables_on_user_id ON ref_data.datadic_variables USING btree (user_id);
+
+
+--
 -- Name: index_ref_data.datadic_choice_history_on_admin_id; Type: INDEX; Schema: ref_data; Owner: -
 --
 
@@ -1736,13 +1649,6 @@ CREATE INDEX "index_ref_data.redcap_project_users_on_redcap_project_admin_id" ON
 
 
 --
--- Name: index_ref_data.redcap_user_status_recs_on_user_id; Type: INDEX; Schema: ref_data; Owner: -
---
-
-CREATE INDEX "index_ref_data.redcap_user_status_recs_on_user_id" ON ref_data.redcap_user_status_recs USING btree (user_id);
-
-
---
 -- Name: datadic_choices log_datadic_choice_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
@@ -1827,20 +1733,6 @@ CREATE TRIGGER log_redcap_project_user_history_update AFTER UPDATE ON ref_data.r
 
 
 --
--- Name: redcap_user_status_recs log_redcap_user_status_rec_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
---
-
-CREATE TRIGGER log_redcap_user_status_rec_history_insert AFTER INSERT ON ref_data.redcap_user_status_recs FOR EACH ROW EXECUTE PROCEDURE ref_data.log_redcap_user_status_recs_update();
-
-
---
--- Name: redcap_user_status_recs log_redcap_user_status_rec_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
---
-
-CREATE TRIGGER log_redcap_user_status_rec_history_update AFTER UPDATE ON ref_data.redcap_user_status_recs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ref_data.log_redcap_user_status_recs_update();
-
-
---
 -- Name: datadic_variables fk_rails_029902d3e3; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
@@ -1902,14 +1794,6 @@ ALTER TABLE ONLY ref_data.datadic_variables
 
 ALTER TABLE ONLY ref_data.redcap_project_users
     ADD CONSTRAINT fk_rails_38d0954914 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
-
-
---
--- Name: redcap_user_status_rec_history fk_rails_409869f35a; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.redcap_user_status_rec_history
-    ADD CONSTRAINT fk_rails_409869f35a FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -1985,14 +1869,6 @@ ALTER TABLE ONLY ref_data.redcap_project_user_history
 
 
 --
--- Name: redcap_user_status_rec_history fk_rails_7dcc3f7699; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.redcap_user_status_rec_history
-    ADD CONSTRAINT fk_rails_7dcc3f7699 FOREIGN KEY (redcap_user_status_rec_id) REFERENCES ref_data.redcap_user_status_recs(id);
-
-
---
 -- Name: redcap_project_user_history fk_rails_89af917107; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
@@ -2001,19 +1877,19 @@ ALTER TABLE ONLY ref_data.redcap_project_user_history
 
 
 --
+-- Name: datadic_variables fk_rails_8dc5a059ee; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+--
+
+ALTER TABLE ONLY ref_data.datadic_variables
+    ADD CONSTRAINT fk_rails_8dc5a059ee FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: redcap_data_dictionary_history fk_rails_9a6eca0fe7; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
     ADD CONSTRAINT fk_rails_9a6eca0fe7 FOREIGN KEY (redcap_project_admin_id) REFERENCES ref_data.redcap_project_admins(id);
-
-
---
--- Name: redcap_user_status_recs fk_rails_9c8b8f3760; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.redcap_user_status_recs
-    ADD CONSTRAINT fk_rails_9c8b8f3760 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
