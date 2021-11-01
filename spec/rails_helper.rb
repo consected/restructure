@@ -108,6 +108,8 @@ DROP SCHEMA IF EXISTS dynamic_test CASCADE;
 CREATE SCHEMA dynamic_test;
 '
 ActiveRecord::Base.connection.execute sql
+# We need to ensure that dynamic tables are in place before we setup dynamic models
+# in each example, otherwise the tests lock up.
 db_migration_dirname = Rails.root.join('spec/migrations')
 ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
 

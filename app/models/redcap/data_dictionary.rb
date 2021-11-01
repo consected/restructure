@@ -111,11 +111,9 @@ module Redcap
       all_rf = Redcap::DataDictionaries::Form.all_retrievable_fields(self)
 
       records_request_options = redcap_project_admin.records_request_options
-      if records_request_options&.exportSurveyFields
-        # Handle the redcap_survey_identifier field
-        f = Redcap::DataDictionaries::SpecialFields
-        all_rf[f.survey_identifier_field_name] = f.survey_identifier_field(self)
-      end
+      f = Redcap::DataDictionaries::SpecialFields
+      f.add_survey_identifier_field(all_rf, self) if records_request_options&.exportSurveyFields
+      f.add_repeat_instrument_fields(all_rf, self) if redcap_project_admin.repeating_instruments?
 
       all_rf
     end
@@ -125,6 +123,16 @@ module Redcap
     # @return [Symbol]
     def record_id_field
       all_fields.keys.first
+    end
+
+    #
+    # For repeating instruments, extra fields are required in addition to the #record_id_field
+    # to uniquely identify a record
+    # @return [Array{Symbol} | nil] <description>
+    def record_id_extra_fields
+      return %i[redcap_repeat_instrument redcap_repeat_instance] if redcap_project_admin.repeating_instruments?
+
+      nil
     end
 
     private
