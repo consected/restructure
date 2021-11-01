@@ -44,17 +44,28 @@ Now create a branch for the changes
 
 ```sh
 cd consected/restructure
+<<<<<<< HEAD
 git remote add upstream https://github.com/${PRIVATE_ORG}/restructure
+=======
+git remote add downstream https://github.com/${PRIVATE_ORG}/restructure
+>>>>>>> Add information on forking to a private repo
 ```
 
 Create a new branch on the public repo
 
     git checkout -b <branch name>
 
+<<<<<<< HEAD
 Rebase the branch of the private repo onto the new branch
 
     git fetch upstream
     git rebase upstream/develop
+=======
+Rebase the _develop_ branch of the private repo onto the new branch
+
+    git fetch downstream
+    git rebase downstream/develop
+>>>>>>> Add information on forking to a private repo
     git rebase develop
 
 Raise a PR on the public repo for the new branch
