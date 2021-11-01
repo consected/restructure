@@ -6,11 +6,18 @@ module Redcap
       projects = redcap_project_configs mocks: mocks
 
       Redcap::ProjectAdmin.update_all(disabled: true)
-
       projects.each do |p|
         if mocks
-          stub_request_project p[:server_url], p[:api_key]
-          stub_request_metadata p[:server_url], p[:api_key]
+          if p[:name].in?(['metadata'])
+            @project_admin_metadata = p
+            stub_request_repeat_instrument_field_project p[:server_url], p[:api_key]
+            stub_request_repeat_instrument_field_metadata p[:server_url], p[:api_key]
+          else
+            stub_request_project p[:server_url], p[:api_key]
+            stub_request_metadata p[:server_url], p[:api_key]
+          end
+          stub_request_project_users p[:server_url], p[:api_key]
+          stub_request_instruments p[:server_url], p[:api_key]
         end
 
         Redcap::ProjectAdmin.create! current_admin: @admin,
@@ -20,7 +27,7 @@ module Redcap
                                      server_url: p[:server_url]
       end
 
-      expect(Redcap::ProjectAdmin.active.count).to eq 1
+      expect(Redcap::ProjectAdmin.active.count).to eq 2
       projects
     end
 
@@ -47,6 +54,10 @@ module Redcap
       @project[:server_url] + "?v=get#{type}"
     end
 
+    def server_url_2(type)
+      @metadata_project[:server_url] + "?v=get#{type}"
+    end
+
     def mock_full_requests
       stub_request_full_project server_url('full'), @project[:api_key]
       stub_request_full_metadata server_url('full'), @project[:api_key]
@@ -61,6 +72,16 @@ module Redcap
       stub_request_file_field_records server_url('file_field'), @project[:api_key]
       stub_request_file server_url('file_field'), @project[:api_key]
       stub_request_project_xml server_url('file_field'), @project[:api_key]
+      stub_request_project_users server_url('file_field'), @project[:api_key]
+      stub_request_instruments server_url('file_field'), @project[:api_key]
+    end
+
+    def mock_repeat_instrument_field_requests
+      stub_request_repeat_instrument_field_project server_url_2('repeat_instrument'), @project_admin_metadata[:api_key]
+      stub_request_repeat_instrument_field_metadata server_url_2('repeat_instrument'), @project_admin_metadata[:api_key]
+      stub_request_repeat_instrument_field_records server_url_2('repeat_instrument'), @project_admin_metadata[:api_key]
+      stub_request_project_users server_url_2('repeat_instrument'), @project_admin_metadata[:api_key]
+      stub_request_instruments server_url_2('repeat_instrument'), @project_admin_metadata[:api_key]
     end
 
     # Get project configurations from encrypted credential storage
@@ -244,7 +265,6 @@ module Redcap
       stub_request(:post, server_url)
         .with(
           body: { 'content' => 'project', 'format' => 'json', 'token' => api_key }
-
         )
         .to_return(status: 200, body: project_admin_sample_response, headers: {})
     end
@@ -253,7 +273,6 @@ module Redcap
       stub_request(:post, server_url)
         .with(
           body: { 'content' => 'metadata', 'fields' => nil, 'format' => 'json', 'token' => api_key }
-
         )
         .to_return(status: 200, body: metadata_file_field_response, headers: {})
     end
@@ -265,7 +284,6 @@ module Redcap
             'token' => api_key,
             'content' => 'record',
             'format' => 'json'
-
           }
         )
         .to_return(status: 200, body: data_file_field_response, headers: {})
@@ -277,7 +295,6 @@ module Redcap
             'content' => 'record',
             'format' => 'json',
             'exportSurveyFields' => 'true'
-
           }
         )
         .to_return(status: 200, body: data_file_field_response('-survey-fields'), headers: {})
@@ -318,8 +335,40 @@ module Redcap
         .to_return(status: 200, body: body, headers: {})
     end
 
+    def stub_request_repeat_instrument_field_project(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: { 'content' => 'project', 'format' => 'json', 'token' => api_key }
+        )
+        .to_return(status: 200, body: project_admin_repeat_instrument_response, headers: {})
+    end
+
+    def stub_request_repeat_instrument_field_metadata(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: { 'content' => 'metadata', 'fields' => nil, 'format' => 'json', 'token' => api_key }
+        )
+        .to_return(status: 200, body: metadata_repeat_instrument_response, headers: {})
+    end
+
+    def stub_request_repeat_instrument_field_records(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'token' => api_key,
+            'content' => 'record',
+            'format' => 'json'
+          }
+        )
+        .to_return(status: 200, body: data_repeat_instrument_response, headers: {})
+    end
+
     def project_admin_sample_response
       File.read('spec/fixtures/redcap/full_project_info.json')
+    end
+
+    def project_admin_repeat_instrument_response
+      File.read('spec/fixtures/redcap/repeat_instrument_project_info.json')
     end
 
     def metadata_sample_response
@@ -328,6 +377,10 @@ module Redcap
 
     def metadata_full_response
       File.read('spec/fixtures/redcap/full_metadata.json')
+    end
+
+    def metadata_repeat_instrument_response
+      File.read('spec/fixtures/redcap/repeat_instrument_metadata.json')
     end
 
     def project_users_full_response
@@ -356,6 +409,10 @@ module Redcap
 
     def data_file_field_response(suffix = nil)
       File.read("spec/fixtures/redcap/file_field_records#{suffix}.json")
+    end
+
+    def data_repeat_instrument_response(suffix = nil)
+      File.read("spec/fixtures/redcap/repeat_instrument_records#{suffix}.json")
     end
 
     #
@@ -449,6 +506,16 @@ module Redcap
 
       @project_admin = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url('file_field'), api_key: @project[:api_key], study: 'Q3',
                                                     current_admin: @admin, dynamic_model_table: tn
+    end
+
+    def setup_repeat_instrument_fields(alt_name = nil)
+      mock_repeat_instrument_field_requests
+
+      tn = alt_name || 'test.test_repinst_field_recs'
+      name = @metadata_project[:name]
+      @project_admin_metadata = Redcap::ProjectAdmin.create! name: name, server_url: server_url_2('repeat_instrument'),
+                                                             api_key: @metadata_project[:api_key], study: 'Repeat',
+                                                             current_admin: @admin, dynamic_model_table: tn
     end
   end
 end
