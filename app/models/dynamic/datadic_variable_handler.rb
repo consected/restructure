@@ -46,6 +46,13 @@ module Dynamic
       end
     end
 
+    #
+    # Initialize the instance so that it can be stored to a Datadic::Variable.
+    # The MatchingAttribs are copied from the *field* instance passed to #new
+    # allowing each of the underlying values to be used.
+    # The *field* argument is typically a
+    # Redcap::DataDictionaries::Field - the metadata for a field retrieved from Redcap
+    # NOTE: this initialize method may be overidden
     def initialize(field)
       self.class::MatchingAttribs.each do |m|
         send("#{m}=", field.send(m))
@@ -80,6 +87,7 @@ module Dynamic
     def partial_datadic_definition
       {
         study: study,
+        domain: domain,
         presentation_type: presentation_type,
         label: label_plain,
         label_note: label_note_plain,
@@ -90,6 +98,8 @@ module Dynamic
         valid_max: valid_max,
         multi_valid_choices: field_choices_plain_text,
         is_identifier: is_identifier,
+        is_derived_var: is_derived_var,
+        owner_email: owner_email,
         storage_type: storage_type,
         db_or_fs: db_or_fs,
         schema_or_path: schema_or_path,

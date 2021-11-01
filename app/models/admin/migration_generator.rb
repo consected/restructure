@@ -269,14 +269,25 @@ class Admin::MigrationGenerator
   end
 
   #
-  # Identify change to database table comment based on the current table_comments configuration
+  # Get the table or view comment for the current table_name
+  # @return [String | nil]
+  def table_or_view_comment
+    if self.class.view_exists?(table_name)
+      res = self.class.connection.execute "select obj_description('#{table_name}'::regclass) c"
+      res[0]['c']
+    else
+      ActiveRecord::Base.connection.table_comment(table_name)
+    end
+  rescue StandardError
+    nil
+  end
+
+  #
+  # Identify change to database table or view comment based on the
+  # current table_comments configuration
   # @return [String|nil] - new comment, or nil if unchanged
   def table_comment_changes
-    begin
-      comment = ActiveRecord::Base.connection.table_comment(table_name)
-    rescue StandardError
-      nil
-    end
+    comment = table_or_view_comment
     new_comment = table_comments[:table]
     return unless comment != new_comment
 

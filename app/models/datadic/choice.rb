@@ -10,5 +10,15 @@ module Datadic
     self.table_name = 'datadic_choices'
 
     belongs_to :redcap_data_dictionary, class_name: 'Redcap::DataDictionary'
+
+    def self.human_name
+      'Data Dictionary Variable Choice'
+    end
+
+    def self.resource_category
+      :data_dictionary
+    end
+
+    add_model_to_list
   end
 end

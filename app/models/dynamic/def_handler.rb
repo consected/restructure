@@ -163,14 +163,14 @@ module Dynamic
       # Enable active configurations for the dynamic type
       # This checks that underlying tables are available, the implementation
       # class is defined, and then it adds associations to Master
-      # Both log an put any errors to stdout, since this may run in a migration
+      # Both log and put any errors to stdout, since this may run in a migration
       # and a log alone won't be visible to the end user
       # To ensure that the db migrations can run,
       # check for the existence of the appropriate admin table
       # before attempting to do anything. Otherwise Rake tasks fail and
       # the admin table can't be generated, preventing setup of the app.
       def enable_active_configurations
-        if Admin::MigrationGenerator.table_exists? table_name
+        if Admin::MigrationGenerator.table_or_view_exists? table_name
           active_model_configurations.each do |dm|
             klass = if dm.is_a? ExternalIdentifier
                       Object
@@ -545,6 +545,7 @@ module Dynamic
       self.class.models[tn] = m
       logger.info "Added new model #{tn}"
       self.class.model_names << tn unless self.class.model_names.include? tn
+      Resources::Models.add(m)
     end
 
     # Remove an item from the list of available dynamic classes
@@ -553,6 +554,7 @@ module Dynamic
       logger.info "Removed disabled model #{tn}"
       self.class.models.delete(tn)
       self.class.model_names.delete(tn)
+      Resources::Models.remove(resource_name: resource_name)
     end
 
     def remove_assoc_class(in_class_name)

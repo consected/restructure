@@ -4,13 +4,15 @@
     <%= f.text_field :name %>
   </div>
   <div class="form-group">
-    <%= f.label :short_name %>
-    <%= f.text_field :short_name %>
-  </div>
-  <div class="form-group">
     <%= f.label :category %>
     <%= f.text_field :item_type %>
   </div>
+  <% if @report.persisted? %>
+  <div class="form-group">
+    <%= f.label :short_name %>
+    <%= f.text_field :short_name %>
+  </div>
+  <% end %>
   <div class="form-group">
     <%= f.label :report_type %>
     <%= f.select :report_type, Report::ReportTypes, include_blank: '-select-' %>

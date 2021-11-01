@@ -29,7 +29,8 @@ module Redcap
       attr_accessor :def_metadata, :form, :name, :label, :label_note, :annotation, :is_required,
                     :valid_type, :valid_min, :valid_max, :is_identifier,
                     :storage_type, :db_or_fs, :schema_or_path, :table_or_file,
-                    :position, :section, :sub_section, :title, :form_name, :study
+                    :position, :section, :sub_section, :title, :form_name, :study,
+                    :is_derived_var, :owner_email
 
       attr_writer :data_dictionary
 
@@ -38,7 +39,7 @@ module Redcap
       # but some fields do not belong to a form, so a data_dictionary can be passed as an option instead
       # @param [Redcap::DataDictionaries::Form] form - nil if the field does not belong to a form
       # @param [Hash] field_metadata
-      # @param [Redcap::DataDictionary] data_dictionary - specific if form is nil
+      # @param [Redcap::DataDictionary] data_dictionary - required if form is nil
       # @param [Integer] position
       def initialize(form, field_metadata, data_dictionary:, position: nil, section: nil, sub_section: nil)
         super()

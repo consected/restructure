@@ -50,6 +50,8 @@ module HandlesUserBase
 
     # Setup alternative id field methods
     Master.setup_resource_alternative_id_fields self
+
+    add_model_to_list
   end
 
   class_methods do
@@ -165,6 +167,12 @@ module HandlesUserBase
     #
     # An overridable method for dynamic definitions
     def default_options; end
+
+    #
+    # Save this model in the resources list
+    def add_model_to_list
+      Resources::Models.add self unless abstract_class || instance_methods.include?(:add_model_to_list)
+    end
   end
 
   #

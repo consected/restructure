@@ -105,6 +105,11 @@ module Dynamic
       # Return if there is nothing to update
       return unless (!config_view_sql && migration_generator.migration_update_table) ||
                     (config_view_sql && view_sql_changed?) ||
+                    (table_comments && (
+                        migration_generator.table_comment_changes ||
+                        migration_generator.fields_comments_changes.present?
+                      )
+                    ) ||
                     reference_views_missing? ||
                     saved_change_to_table_name?
 

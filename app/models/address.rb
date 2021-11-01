@@ -10,6 +10,8 @@ class Address < UserBase
 
   before_save :handle_country
 
+  add_model_to_list
+
   def no_rec_type
     true
   end

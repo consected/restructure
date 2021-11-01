@@ -4,6 +4,7 @@
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#def-details-block" aria-controls="def-details-block" role="tab" data-toggle="tab">Details</a></li>
     <li role="presentation"><a href="#sample-form" aria-controls="sample-form" role="tab" data-toggle="tab">Sample Form</a></li>
+    <li role="presentation"><a href="#datadic" aria-controls="datadic" role="tab" data-toggle="tab">Data Dictionary</a></li>
     <li role="presentation"><a href="#user-access-controls" aria-controls="user-access-controls" role="tab" data-toggle="tab">User Access Controls</a></li>
   </ul>
 
@@ -32,6 +33,18 @@
       <h4>Sample Form</h4>
       <%= render partial: 'sample_form', locals: {object_instance: object_instance} %>
     </div>
+
+    <div role="tabpanel" class="tab-pane" id="datadic">
+      <h4>Data Dictionary</h4>
+      <% if object_instance.data_dictionary %>
+      <label>study</label> <%=object_instance.data_dictionary[:study]%>
+      <label>domain</label> <%=object_instance.data_dictionary[:domain]%>
+      <%= render partial: 'data_dic_block', locals: {object_instance: object_instance} %>
+      <% else %>
+      <p>not configued</p>
+      <% end %>
+    </div>
+
 
     <div role="tabpanel" class="tab-pane  on-open-click" id="user-access-controls">
     <%= render partial: 'admin/dynamic_models/uac_panel', locals: {object_instance: object_instance} %>

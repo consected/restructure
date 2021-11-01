@@ -38,8 +38,7 @@ RSpec.describe 'Dynamic Data Dictionary', type: :model do
     caption = 'Description'
     expected_caption = Formatter::Substitution.text_to_html(caption)
     dd = Dynamic::DataDictionary.new(@dmdef)
-    ddv = Dynamic::DatadicVariable.new(dd, col.name, col.type)
-    ddv.field_config
+    ddv = Dynamic::DynamicModelField.new(dd, col.name, col.type)
 
     expect(ddv.label_plain).to eq expected_caption
     expect(ddv.field_type).to eq type
@@ -48,7 +47,7 @@ RSpec.describe 'Dynamic Data Dictionary', type: :model do
   it 'defines all fields in the model' do
     dd = Dynamic::DataDictionary.new(@dmdef)
     expect(dd.fields).to be_a Hash
-    expect(dd.fields['ready']).to be_a Dynamic::DatadicVariable
+    expect(dd.fields['ready']).to be_a Dynamic::DynamicModelField
     expect(dd.fields['ready'].label_plain).to eq Formatter::Substitution.text_to_html('Ready to send?')
     expect(dd.fields['ready'].field_type).to eq :string
     expect(dd.fields['notes'].label_plain).to eq Formatter::Substitution.text_to_html('Description')
@@ -62,10 +61,10 @@ RSpec.describe 'Dynamic Data Dictionary', type: :model do
     dd = Dynamic::DataDictionary.new(@dmdef)
 
     expect(dd.dynamic_model_data_dictionary_config).to be_a Hash
-    expect(dd.source_default_config).to be_a Hash
-    expect(dd.source_default_config[:source_name]).to eq @dmdef.name
-    expect(dd.source_default_config[:source_type]).to eq 'operational database'
-    expect(dd.source_default_config[:domain]).to be nil
+    expect(dd.default_config).to be_a Hash
+    expect(dd.default_config[:source_name]).to eq @dmdef.name
+    expect(dd.default_config[:source_type]).to eq 'operational database'
+    expect(dd.default_config[:domain]).to be nil
 
     dd.refresh_variables_records
 

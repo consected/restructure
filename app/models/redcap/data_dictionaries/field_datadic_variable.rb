@@ -3,7 +3,11 @@
 module Redcap
   module DataDictionaries
     #
-    # Store the field definition to a datadic variable
+    # Interface to methods for storign a field definition to a data dictionary
+    # as a Datadic::Variable record
+    # Called from Recap::DataDictionaries::Field, with matching attributes to pass through
+    # This class overrides some of the standard methods in Dynamic::DatadicVariableHandler
+    # to handle Redcap choice fields effectively
     class FieldDatadicVariable
       MatchingAttribs = %i[form name label label_note annotation is_required
                            valid_type valid_min valid_max is_identifier label_plain label_note_plain
@@ -11,7 +15,8 @@ module Redcap
                            source_name checkbox_choice_fields
                            storage_type db_or_fs schema_or_path table_or_file
                            position section sub_section title_plain
-                           presentation_type default_variable_type form_name study].freeze
+                           presentation_type default_variable_type form_name study
+                           owner_email].freeze
 
       include Dynamic::DatadicVariableHandler
 
@@ -21,6 +26,14 @@ module Redcap
 
       def source_type
         :redcap
+      end
+
+      def domain
+        form&.name || name
+      end
+
+      def is_derived_var
+        false
       end
 
       #
