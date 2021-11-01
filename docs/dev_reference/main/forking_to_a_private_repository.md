@@ -38,9 +38,16 @@ Now create a branch for the changes
 
 ## Sending changes back upstream
 
-- Make sure you have pulled in the latest changes from the public repo into the private repo
-- Merge any pending pull requests into the _develop_ branch of the private repo
-- On the public repo, add the private repo as a new upstream remote
+Make sure you have pulled in the latest changes from the public repo into the private repo and merge any pending pull requests into the _develop_ branch of the private repo. At a minimum...
+
+```sh
+cd consected/restructure
+git checkout develop
+git pull
+
+```
+
+On the public repo, add the private repo as a new upstream remote
 
 ```sh
 cd consected/restructure
@@ -58,6 +65,10 @@ Rebase the _develop_ branch of the private repo onto the new branch
     git rebase develop
 
 Raise a PR on the public repo for the new branch
+
+Once the PR is complete, if there are no more changes expected from downstream
+
+    git remote remove downstream
 
 ---
 
