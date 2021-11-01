@@ -35,8 +35,30 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     @option_configs = []
 
     # Setup a simple dynamic model definition without any extra options
+    # It will gain db column configurations pulled from the table definition
     dmdef = generate_test_dynamic_model
-    @option_texts[1] = nil
+    @option_texts[1] = <<~END_CONFIG
+
+      _db_columns:
+        id:
+          type: integer
+        master_id:
+          type: integer
+        test1:
+          type: string
+        test2:
+          type: string
+        created_by_user_id:
+          type: integer
+        user_id:
+          type: integer
+        created_at:
+          type: datetime
+        updated_at:
+          type: datetime
+
+    END_CONFIG
+
     @def_updated_at[1] = dmdef.updated_at
 
     # The option_configs retrieved directly from the current definition are always the current version
@@ -48,7 +70,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     expect(@dyn_instances[1]).to be_a dynamic_type
 
     # The definition options should match the original
-    expect(@dyn_instances[1].current_definition.options).to eq @option_texts[1]
+    expect(@dyn_instances[1].current_definition.options.strip).to eq @option_texts[1].strip
     expect(@dyn_instances[1].current_definition.option_configs).to eq @option_configs[1]
 
     # The dynamic model instance should pull options that matches the original v1 options

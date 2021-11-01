@@ -12,6 +12,7 @@ class PlayerInfo < UserBase
 
   before_validation :prevent_user_changes, on: :update
   before_save :check_college
+  add_model_to_list
 
   def self.human_name
     'Person'
@@ -22,7 +23,8 @@ class PlayerInfo < UserBase
   end
 
   def self.permitted_params
-    %i[master_id first_name last_name middle_name nick_name birth_date death_date start_year end_year college source rank notes]
+    %i[master_id first_name last_name middle_name nick_name birth_date death_date start_year end_year college source
+       rank notes]
   end
 
   protected

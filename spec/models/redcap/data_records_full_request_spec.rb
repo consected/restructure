@@ -55,7 +55,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     dr.store
 
     expect(dr.errors).to be_empty
-    expect(dr.created_ids.sort).to eq (1..33).map(&:to_s).sort
+    expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq (1..33).map(&:to_s).sort
     expect(dr.updated_ids).to be_empty
 
     dr = Redcap::DataRecords.new(rc, @dmcn)
@@ -105,9 +105,10 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(v.sub_section_id).to be_nil
 
     inst = Redcap::DataDictionaries::FieldDatadicVariable.find_by_identifiers(source_name: v.source_name,
+                                                                              source_type: :redcap,
                                                                               form_name: v.form_name,
                                                                               variable_name: 'demog_outline',
-                                                                              redcap_data_dictionary: v.redcap_data_dictionary_id).first
+                                                                              owner: v.redcap_data_dictionary_id).first
 
     expect(inst.position).to eq 5
     expect(inst.id).to eq v.id
@@ -137,9 +138,10 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(v.sub_section_id).to be_nil
 
     inst = Redcap::DataDictionaries::FieldDatadicVariable.find_by_identifiers(source_name: v.source_name,
+                                                                              source_type: :redcap,
                                                                               form_name: v.form_name,
                                                                               variable_name: 'famedu_text',
-                                                                              redcap_data_dictionary: v.redcap_data_dictionary_id).first
+                                                                              owner: v.redcap_data_dictionary_id).first
 
     expect(inst.position).to eq 26
 
@@ -164,7 +166,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     dr.store
 
     expect(dr.errors).to be_empty
-    expect(dr.created_ids.sort).to eq (1..33).map(&:to_s).sort
+    expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq (1..33).map(&:to_s).sort
     expect(dr.updated_ids).to be_empty
 
     expect(@dm_sf.implementation_class.first.q2_survey_timestamp).to be_nil

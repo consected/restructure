@@ -1,0 +1,23 @@
+# Model Generator Options
+  options:
+    table_comment: Comment to add to the database describing the table / data set
+
+  # Information used to set up the data dictionary for this table.
+  # A data dictionary will only be set up if a `study:` entry is made
+  data_dictionary:
+    study: Specify a study name to appear in the data dictionary if this table is to be added automatically
+    source_name: Defaults to the model generator *name* if left empty
+    source_type: Defaults to **database** if left empty
+    domain: Specify a domain for the data set
+    form_name: If this represents data captured through a form, and this is different to the name, specify it
+
+  fields:
+    # The configuration for each field is automatically generated when the CSV file is uploaded
+    # If any of the options need to be change, do so before creating the Dynamic Model
+    <field name>:
+      type: string | integer | timestamp | date | boolean | decimal
+      label: Short name for forms (if caption is specified, skip this)
+      caption: A full form caption block to appear above the field, describing the field
+      comment: Database comment (if different from the caption)
+      no_downcase: true (set to true if a text field should not be automatically downcased on entry to the DB)
+      

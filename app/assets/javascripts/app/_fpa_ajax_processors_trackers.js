@@ -6,49 +6,65 @@ _fpa.postprocessors_trackers = {
                 t.trigger('click');
         }
     },
-    tracker_events_handler: function (block) {
-        // Open the tracker if it is currently not open
-        _fpa.postprocessors.tracker_opener(block);
-        // Show modal dialogs under certain conditions
+    // Show modal dialogs under certain conditions
+    // If an event milestone contains 'always-notify-user'
+    //   then when it appears in the
+    tracker_events_handler: function (block, data) {
         window.setTimeout(function () {
 
-            _fpa.set_definition('protocol_events', function () {
-                var pe = _fpa.cache('protocol_events');
-                var always_notify = true;
-                block.find('.tracker-event_name[data-event-id]').each(function () {
-                    var e = $(this);
-                    var evid = e.attr('data-event-id');
+            var always_notify = [];
+            var done_sp = [];
+            var desc = '';
+            var title;
+            var master = data.master || data.masters[0];
 
-                    var p = _fpa.get_item_by('id', pe, evid);
-                    if (always_notify && p && p.milestone) {
-                        if (p.milestone.indexOf('always-notify-user') >= 0) {
-                            _fpa.show_modal(p.description, p.name);
-                            always_notify = false;
-                        }
+            if (!master) return;
 
-                    }
-                });
+            var tns = master.tracker_notifications;
+            for (var k in tns) {
+                if (!tns.hasOwnProperty(k)) continue;
 
+                var p = tns[k];
+                if (!p || !p.event_milestone) continue;
+                if (done_sp.indexOf(p.sub_process_id) >= 0) continue;
 
-                block.find('.latest-tracker-history').each(function () {
-                    var t = $(this);
-                    var ml = t.attr('data-lth-event-milestone');
-                    if (ml && ml.indexOf('notify-user') >= 0) {
-                        var ev = t.attr('data-lth-event');
-                        var evid = t.attr('data-lth-event-id');
+                if (p.event_milestone.indexOf('override-alert') >= 0) {
+                    done_sp.push(p.sub_process_id);
+                }
+                else if (p.event_milestone.indexOf('always-notify-user') >= 0) {
+                    if (desc) desc = desc + '<hr/>';
+                    desc = desc + `<h5>${p.event_name}</h5><p>${p.event_description}</p>`
+                    always_notify.push(p.id);
+                    done_sp.push(p.sub_process_id);
+                }
+            }
 
+            var lth = master.latest_tracker_history;
+            for (var k in lth) {
+                if (!lth.hasOwnProperty(k)) continue;
 
-                        var p = _fpa.get_item_by('id', pe, evid);
+                var p = lth[k];
+                // Only show tracker events once
+                if (!p || !p.event_milestone) continue;
+                if (always_notify.indexOf(p.id) >= 0) continue;
+                if (done_sp.indexOf(p.sub_process_id) >= 0) continue;
 
-                        if (p && always_notify) {
-                            var prot = t.attr('data-lth-protocol');
-                            var proc = t.attr('data-lth-process');
-                            var title = prot + ' - ' + proc + ': ' + ev;
-                            _fpa.show_modal(p.description, title);
-                        }
-                    }
-                });
-            });
+                if (p.event_milestone.indexOf('override-alert') >= 0) {
+                    done_sp.push(p.sub_process_id);
+                }
+                else if (p.event_milestone.indexOf('notify-user') >= 0) {
+                    var title = `${p.protocol_name} - ${p.sub_process_name}: ${p.event_name}`;
+                    desc = desc + `<h5>${title}</h5><p>${p.event_description}</p>`
+                    always_notify.push(p.id);
+                    done_sp.push(p.sub_process_id);
+                }
+            }
+            if (always_notify.length > 0) {
+                title = 'Tracker Event Notification'
+                _fpa.show_modal(desc, title);
+                return;
+            }
+
         }, 500);
     },
 

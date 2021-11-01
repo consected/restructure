@@ -91,11 +91,24 @@ module OptionConfigs
               elt = conf[:add_with] && conf[:add_with][:extra_log_type]
               add_with_elt = nil
               add_with_elt = to_class.human_name_for(elt) if elt && to_class.respond_to?(:human_name_for)
-              refitem[mn][:to_record_label] = conf[:label] || add_with_elt || to_class&.human_name
-              if to_class&.respond_to?(:no_master_association)
+              refitem[mn][:to_record_label] = conf[:label] || add_with_elt || to_class.human_name
+
+              if to_class.respond_to?(:no_master_association)
                 refitem[mn][:no_master_association] = to_class.no_master_association
               end
-              refitem[mn][:to_model_name_us] = to_class&.to_s&.ns_underscore
+
+              refitem[mn][:to_model_name_us] = to_class.to_s&.ns_underscore
+              refitem[mn][:to_model_class_name] = to_class.to_s
+              refitem[mn][:to_table_name] = to_class.table_name
+              tsn = nil
+
+              if to_class.respond_to?(:definition)
+                cd = to_class.definition
+                tsn = cd.schema_name
+                tct = cd.class.to_s
+                refitem[mn][:to_schema_name] = tsn
+                refitem[mn][:to_class_type] = tct
+              end
             else
               bad_ref_items << mn
               Rails.logger.warn "extra log type reference for #{mn} does not exist as a class in #{name} / #{config_obj.name}"
@@ -138,16 +151,44 @@ module OptionConfigs
       end
     end
 
+    # A list of all fields defined within all the individual activity definitions. This does not include
+    # the field lists for the old-style primary and blank logs.
     def self.fields_for_all_in(al_def)
       al_def.option_configs.reject { |e| e.name.in?(%i[primary blank_log]) }.map(&:fields).reduce([], &:+).uniq
     rescue StandardError => e
-      raise FphsException,
-            "\nFailed to use the extra log options. It is likely that the 'fields:' attribute of one of the extra entries "\
-            "(not primary or blank) is missing or not formatted as expected, or an @library inclusion has an error. #{e}"
+      raise FphsException, <<~END_TEXT
+        Failed to use the extra log options. It is likely that the 'fields:' attribute of one of the activities
+        (not primary or blank) is missing or not formatted as expected, or a @library inclusion has an error. #{e}
+      END_TEXT
+    end
+
+    # Get a complete set of all tables to be accessed by model reference configurations,
+    # with a value representing what they are associated from.
+    def self.referenced_tables_for_all_in(al_def)
+      res = []
+
+      al_def.option_configs.map(&:references).compact.each do |act_refs|
+        act_refs.each do |ref_name, outer_config|
+          outer_config.each do |full_name, ref_config|
+            details = ref_config.slice(:to_table_name, :to_schema_name, :to_model_class_name, :to_class_type,
+                                       :from, :without_reference, :no_master_association)
+            details.merge! reference_name: ref_name, full_ref_name: full_name
+            res << details
+          end
+        end
+      end
+
+      res
+    rescue StandardError => e
+      raise FphsException, <<~END_TEXT
+        Failed to use the extra log options. It is likely that the 'references:' attribute of one of
+        activities is not formatted as expected, or a @library inclusion has an error. #{e}
+      END_TEXT
     end
 
     # Check if any of the configs were bad
     # This should be extended to provide additional checks when options are saved
+    # @todo - work out why the "raise" was disabled and whether it needs changing
     def self.raise_bad_configs(option_configs)
       bad_configs = option_configs.select { |c| c.bad_ref_items.present? }
       # raise FphsException, "Bad reference items: #{bad_configs.map(&:bad_ref_items)}" if bad_configs.present?

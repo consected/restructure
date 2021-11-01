@@ -30,7 +30,11 @@ Rails.application.routes.draw do
     resources :reports, except: %i[show destroy]
     resources :config_libraries, except: %i[show destroy]
     resources :external_identifier_details, except: [:destroy]
-    resources :dynamic_models, except: %i[show destroy]
+    resources :dynamic_models, except: %i[show destroy] do
+      member do
+        post :update_config_from_table
+      end
+    end
     resources :user_access_controls, except: %i[show destroy]
     resources :external_links, except: %i[show destroy]
     resources :colleges, except: %i[show destroy]
@@ -46,7 +50,11 @@ Rails.application.routes.draw do
     resources :job_reviews, except: %i[show destroy]
     resources :server_info
 
-    resources :app_types, except: [:destroy]
+    resources :app_types, except: [:destroy] do
+      member do
+        get :export_migrations
+      end
+    end
     post 'app_types/upload', to: 'app_types#upload'
     post 'app_types/restart_server', to: 'app_types#restart_server'
     post 'app_types/restart_delayed_job', to: 'app_types#restart_delayed_job'

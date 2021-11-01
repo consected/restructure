@@ -52,10 +52,16 @@ module Dynamic
       name = table_name.singularize
 
       default_options = {
+        _comments: {
+          table: table_comment_config,
+          fields: comments
+        },
+        _data_dictionary: data_dictionary_config,
+        _db_columns: db_columns,
         default: {
-          db_configs: db_configs,
           field_options: field_options,
-          caption_before: caption_before
+          caption_before: caption_before,
+          labels: labels
         }
       }.deep_stringify_keys!
 
@@ -144,7 +150,7 @@ module Dynamic
     # List of field names to be used in a dynamic model field list
     # @return [String]
     def field_list
-      @field_list ||= db_configs.keys.map(&:to_s).join(' ')
+      @field_list ||= db_columns.keys.map(&:to_s).join(' ')
     end
 
     private
@@ -156,19 +162,19 @@ module Dynamic
     end
 
     #
-    # Return db_configs to summarize the real field types and enable definition
+    # Return db_columns to summarize the real field types and enable definition
     # of a dynamic model
     # @return [Hash]
-    def db_configs
-      @db_configs = {}
+    def db_columns
+      @db_columns = {}
 
       field_types.each do |field_name, field_type|
-        @db_configs[field_name] = {
+        @db_columns[field_name] = {
           type: field_type.to_s
         }
       end
 
-      @db_configs
+      @db_columns
     end
 
     def field_options
@@ -188,16 +194,50 @@ module Dynamic
       return unless respond_to?(:fields) && fields
 
       fields.each do |name, config|
-        @caption_before[name] = if config.is_a? String
-                                  config
-                                elsif config.respond_to?(:caption)
-                                  config.caption
-                                else
-                                  config[:caption]
-                                end
+        @caption_before[name] = config_value(config, :caption)
       end
 
       @caption_before
+    end
+
+    def labels
+      @labels = {}
+      return unless respond_to?(:fields) && fields
+
+      fields.each do |name, config|
+        @labels[name] = config_value(config, :label)
+      end
+
+      @labels
+    end
+
+    def comments
+      @comments = {}
+      return unless respond_to?(:fields) && fields
+
+      fields.each do |name, config|
+        @comments[name] = config_value(config, :comment)
+      end
+
+      @comments
+    end
+
+    def data_dictionary_config
+      super&.to_h if defined?(super)
+    end
+
+    def table_comment_config
+      super if defined?(super)
+    end
+
+    def config_value(config, key)
+      if config.is_a? String
+        config
+      elsif config.respond_to?(key)
+        config.send(key)
+      else
+        config[key]
+      end
     end
 
     #

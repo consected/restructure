@@ -21,7 +21,7 @@ contains:
 # View options for the panel or standalone page
 view_options:
   add_item_label: contact             # button label for adding a resource
-  orientation: (vertical|horizontal)  # panel orientation for block lists
+  orientation: (columns|horizontal|vertical)  # panel orientation for block lists
   limit: (integer)                    # max number of items to show in panel
   initial_show: true|false            # initially open up a panel
   find_with: (msid|scantron_id|...)   # the alternative id (crosswalk or external id)

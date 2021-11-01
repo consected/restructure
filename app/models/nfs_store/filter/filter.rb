@@ -247,7 +247,7 @@ module NfsStore
       # Get the latest filter record id, to automatically handle memoization,
       # storing it in a class instance variable
       def self.latest_filter_id
-        @latest_filter_id ||= reorder('').order('coalesce(updated_at, created_at) desc, id desc').first&.id
+        @latest_filter_id ||= reorder('').order(Arel.sql('coalesce(updated_at, created_at) desc, id desc')).first&.id
       end
 
       #

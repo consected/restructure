@@ -56,7 +56,7 @@
   {{else is key 'includes' 'embedded_report_'}}
 
     <li class="{{> field_result_class}}" data-field-name="{{key}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
-      <a href="/reports/{{replace key 'embedded_report_' ''}}?embed=true&search_attrs[list_id]={{result_data.id}}" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="btn btn-sm btn-default glyphicon glyphicon-list" type="button" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true"></a>
+      <a href="/reports/{{replace key 'embedded_report_' ''}}?embed=true&search_attrs[list_id]={{result_data.id}}&search_attrs[no_run]=true" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="btn btn-sm btn-default glyphicon glyphicon-list" type="button" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true"></a>
     </span></strong></li>
   {{else is key 'includes' '_rank' }}
     {{#if hide_rank_badge }}

@@ -33,7 +33,7 @@
   </div>
   <div class="dynamic-details-upload">
     <% if params[:from_upload] == 'true' %>
-      <p class="upload-result">Upload complete. Verify the field configurations. Then create the dynamic model table or upload another CSV file to update the definition.</p>
+      <p class="upload-result">Upload complete. Verify the field configurations and save any changes. Then create the dynamic model table or upload another CSV file to update the definition.</p>
       <p><%= link_to 'update dynamic model', create_model_imports_model_generator_path(object_instance), method: :post, remote: true, class: 'btn btn-primary' %></p>
       <p><i>or...</i></p>
     <% elsif !object_instance.dynamic_model_def_current? %>
@@ -46,7 +46,7 @@
   <% else %>
     <div class="dynamic-details-upload">
       <% if object_instance.field_types.present? %>
-        <p class="upload-result">Upload complete. Verify the field configurations. Then create the dynamic model table or upload another CSV file to update the definition.</p>
+        <p class="upload-result">Upload complete. Verify the field configurations and save any changes. Then create the dynamic model table or upload another CSV file to update the definition.</p>
         <p><%= link_to 'create dynamic model', create_model_imports_model_generator_path(object_instance), method: :post, remote: true, class: 'btn btn-primary' %></p>
       <% else %>
         <p>Not yet defined. Upload a sample CSV file to generate a model database table</p>

@@ -36,7 +36,8 @@ module Redcap
         descriptive: 'fixed caption',
         form_complete: 'redcap status', # This is not a real REDCap type, but is used as a lookup
         form_timestamp: 'redcap completion timestamp', # This is not a real REDCap type, but is used as a lookup
-        survey_identifier: 'survey identifier' # This is not a real REDCap type, but is used as a lookup
+        survey_identifier: 'survey identifier', # This is not a real REDCap type, but is used as a lookup
+        repeat: 'repeat instrument' # This is not a real REDCap type, but is used as a lookup
       }.freeze
 
       TextFieldToVariableTypes = {
@@ -145,13 +146,27 @@ module Redcap
       #
       # Use the real data type from the definition to cast the supplied value to the real data type.
       # We handle '' blank strings carefully, since we don't want blank being converted to numeric zero
-      # @param [String] value
+      # @param [Object] value
       # @return [Object]
       def cast_value_to_real(value)
         real_type = VariableTypesToRealTypes[default_variable_type] || :to_s
         return nil if value.blank? && real_type != :to_s
 
+        if real_type == :to_time
+          vtime = value.to_time(:utc)
+          return Time.utc(2000, 1, 1, vtime.hour, vtime.min, vtime.sec)
+        end
+
         value.send(real_type)
+      end
+
+      #
+      # Do the values from an existing record and a newly retrieved Redcap record match?
+      # @param [Object] new_value
+      # @param [Object] existing_value
+      # @return [true|false]
+      def values_match?(new_value, existing_value)
+        cast_value_to_real(new_value) == existing_value
       end
 
       #

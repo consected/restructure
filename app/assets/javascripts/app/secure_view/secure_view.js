@@ -117,6 +117,7 @@ var SecureView = function () {
     this.$download_actions = $('.secure-download-actions');
 
     this.$loading_page_message.show();
+    _fpa.catch_page_transition(_this.close)
 
     if (!this.$body.hasClass('fixed-overlay')) {
       this.initial_html_overflow = this.$html[0].style.overflow;
@@ -583,6 +584,7 @@ var SecureView = function () {
       _this.$html.css({ overflow: _this.initial_html_overflow });
       _this.$body.css({ overflow: _this.initial_body_overflow }).removeClass('fixed-overlay');;
       $('.sv-selected').removeClass('sv-selected');
+      _fpa.default_page_transition();
     }
     _this.clear();
     _this.page_count = null;

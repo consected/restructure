@@ -184,6 +184,13 @@ module Redcap
     end
 
     #
+    # Extra fields used to uniquely identify a record (e.g. for repeat instruments)
+    # @return [Array{Symbol} | nil]
+    def record_id_extra_fields
+      data_dictionary.record_id_extra_fields
+    end
+
+    #
     # All fields expected to be retrieved from REDCap to be stored as a record
     # @return [Hash{Symbol => Redcap::DataDictionaries::Field}]
     def all_expected_fields
@@ -202,44 +209,60 @@ module Redcap
     end
 
     #
+    # Hash of fields that identify the current record. For classic instruments,
+    # this is simply a record id field. For repeating instruments, additional fields
+    # are required to uniquely identify the record.
+    # @param [Hash] record
+    # @return [Hash]
+    def record_identifiers(record)
+      rec_ids = { record_id_field => record[record_id_field] }
+
+      record_id_extra_fields&.each do |f|
+        rec_ids[f] = record[f]
+      end
+
+      rec_ids
+    end
+
+    #
     # Handle creation of new record if the record does not already exist based on its
     # record_id_field matching, update if it does exist and has new information, or
     # do nothing if it exists and is unchanged.
     # Validations are applied to creates and updates and errors are returned within an
     # errors array. Callbacks (dynamic save triggers) are fired.
-    # If an update or create is successful, return the record_id, if there is no change return false
+    # If an update or create is successful, return the record identifiers,
+    # if there is no change return false
     # and if there is any other result (an error) return nil.
     # @param [Hash] record
     # @return [Integer | false | nil]
     def create_or_update(record)
-      record_id = record[record_id_field]
-      existing_record = model.where(record_id_field => record_id).first
-
+      rec_ids = record_identifiers(record)
+      existing_record = model.where(rec_ids).first
       if existing_record
 
         # Check if there is an exact match for the record. If so, we are done
         if record_matches_retrieved(existing_record, record)
-          unchanged_ids << record_id
+          unchanged_ids << rec_ids
           return false
         end
 
         existing_record.force_save!
         if existing_record.update(record)
-          updated_ids << record_id
+          updated_ids << rec_ids
           upserted_records << existing_record
-          return record_id
+          return rec_ids
         else
-          errors << { id: record_id, errors: existing_record.errors, action: :update }
+          errors << { id: rec_ids, errors: existing_record.errors, action: :update }
         end
       else
         new_record = model.new(record)
         new_record.force_save!
         if new_record.save
-          created_ids << record_id
+          created_ids << rec_ids
           upserted_records << new_record
-          return record_id
+          return rec_ids
         else
-          errors << { id: record_id, errors: new_record.errors, action: :create }
+          errors << { id: rec_ids, errors: new_record.errors, action: :create }
         end
       end
 
@@ -305,18 +328,18 @@ module Redcap
     # converting a number 243.0 and 243 should be equivalent, but string comparisons
     # will fail.
     # @param [Dynamic::DynamicModelBase] existing_record
-    # @param [Hash{Symbol => String}] record
+    # @param [Hash{Symbol => String}] new_record
     # @return [true]
-    def record_matches_retrieved(existing_record, record)
-      check_rec = record.dup
-      attrs = existing_record.attributes.symbolize_keys.dup
-      attrs.slice!(*all_expected_fields.keys)
+    def record_matches_retrieved(existing_record, new_record)
+      new_attrs = new_record.dup
+      existing_attrs = existing_record.attributes.symbolize_keys.dup
+      existing_attrs.slice!(*all_expected_fields.keys)
 
-      check_rec.each do |field_name, value|
-        check_rec[field_name] = all_expected_fields[field_name].field_type.cast_value_to_real(value)
+      res = new_attrs.reject do |field_name, new_value|
+        all_expected_fields[field_name].field_type.values_match?(new_value, existing_attrs[field_name])
       end
 
-      check_rec == attrs
+      res.empty?
     end
   end
 end

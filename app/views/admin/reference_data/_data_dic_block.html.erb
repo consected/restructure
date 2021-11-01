@@ -5,7 +5,7 @@
         @no_masters = true
         @embedded_report = true
 
-        pm = @all_reports_for_user = Report.enabled.for_user(current_user)
+        pm = @all_reports_for_user = Report.enabled #.for_user(current_user)
         pm = pm.where(item_type: 'reference-data') #.where.not(short_name: 'table_data')
 
         @reports = pm.order auto: :desc, report_type: :asc, position: :asc

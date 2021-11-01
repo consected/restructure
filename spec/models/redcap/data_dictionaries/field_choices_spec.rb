@@ -38,7 +38,7 @@ RSpec.describe Redcap::DataDictionaries::FieldType, type: :model do
 
       expect(field.field_choices.choices).to be_present
 
-      field.field_choices.choices(plain_text: true).each do |choice|
+      field.field_choices_plain_text.each do |choice|
         label = choice.last
         value = choice.first
         attrs = base_attrs.merge(label: label, value: value)

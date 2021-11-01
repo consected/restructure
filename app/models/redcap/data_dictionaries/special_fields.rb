@@ -24,6 +24,23 @@ module Redcap
         fields[form_complete_field_name(in_form)] = form_complete_field(in_form)
       end
 
+      #
+      # Add redcap_repeat_instrument and redcap_repeat_instance fields to the hash of fields in this form
+      # @param [Hash] fields <description>
+      # @param [Redcap::DataDictionary] in_form
+      def self.add_repeat_instrument_fields(fields, data_dictionary)
+        fields[:redcap_repeat_instrument] = repeat_instrument_field(data_dictionary)
+        fields[:redcap_repeat_instance] = repeat_instance_field(data_dictionary)
+      end
+
+      #
+      # Add a survey identifier field to the hash of fields in this form
+      # @param [Hash] fields <description>
+      # @param [Redcap::DataDictionary] in_form
+      def self.add_survey_identifier_field(fields, data_dictionary)
+        fields[survey_identifier_field_name] = survey_identifier_field(data_dictionary)
+      end
+
       # The full record may have a redcap_survey_identifier field if project admin
       # attribute #records_request_options has exportSurveyFields: true
       # @return [Symbol]
@@ -65,7 +82,7 @@ module Redcap
           text_validation_type_or_show_slider_number: 'completed timestamp',
           field_annotation: 'Timestamp if completed, or NULL if source was empty or set to "[not completed]"'
         }
-        Field.new(form, field_metadata)
+        Field.new(form, field_metadata, data_dictionary: form.data_dictionary)
       end
 
       #
@@ -89,7 +106,33 @@ module Redcap
           text_validation_type_or_show_slider_number: 'integer',
           field_annotation: 'Redcap values: 0 Incomplete, 1 Unverified, 2 Complete'
         }
-        Field.new(form, field_metadata)
+        Field.new(form, field_metadata, data_dictionary: form.data_dictionary)
+      end
+
+      #
+      # A redcap_repeat_instrument field representation to support the extra field
+      # that Redcap adds for repeating instruments
+      # @param [Redcap::DataDictionaries::Form] form
+      # @return [Redcap::DataDictionary]
+      def self.repeat_instrument_field(data_dictionary)
+        field_metadata = {
+          field_name: :redcap_repeat_instrument,
+          field_type: 'repeat'
+        }
+        Field.new(nil, field_metadata, data_dictionary: data_dictionary)
+      end
+
+      #
+      # A redcap_repeat_instrument field representation to support the extra field
+      # that Redcap adds for repeating instruments
+      # @param [Redcap::DataDictionaries::Form] form
+      # @return [Redcap::DataDictionary]
+      def self.repeat_instance_field(data_dictionary)
+        field_metadata = {
+          field_name: :redcap_repeat_instance,
+          field_type: 'repeat'
+        }
+        Field.new(nil, field_metadata, data_dictionary: data_dictionary)
       end
     end
   end
