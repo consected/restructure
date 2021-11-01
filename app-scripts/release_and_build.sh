@@ -53,6 +53,13 @@ if [ -z "${SKIP_BRAKEMAN}" ]; then
   fi
 fi
 
+source ../restructure-build/shared/build-vars.sh
+
+if [ "$(cat .ruby-version)" != ${RUBY_V} ]; then
+  echo "Ruby versions don't match: $(cat .ruby-version) != ${RUBY_V}"
+  exit 7
+fi
+
 if [ -z "${RELEASESTARTED}" ]; then
   echo "Starting git-flow release"
   git flow release start ${NEWVER}
