@@ -18,6 +18,9 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+
+## [8.0.19] - 2021-11-01
+
 - [Added] Documentation for a private repository fork
 
 NOTE: this build is largely to test the new private repository is complete and can be built
