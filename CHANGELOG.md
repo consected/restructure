@@ -19,6 +19,12 @@ release will be created for any release tested in production, and may be marked 
 ## Unreleased
 
 - [Added] Add support for Redcap repeating instruments
+<<<<<<< HEAD
+=======
+
+## Transfer from Harvard @7.4.70 - 2021-10-31
+
+>>>>>>> Update CHANGELOG
 - [Added] Report criteria field type **select_from_model**
 - [Added] Derived variables in dynamic model data dictionary now update from their source variables
 - [Added] Enhancements to dynamic model definition panels, especially around data dictionary
