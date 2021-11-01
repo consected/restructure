@@ -18,6 +18,9 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+
+## [8.0.18] - 2021-11-01
+
 - [Added] Add support for Redcap repeating instruments
 
 ## Transfer from Harvard @7.4.70 - 2021-10-31

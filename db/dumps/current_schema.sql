@@ -527,7 +527,8 @@ CREATE TABLE ref_data.datadic_variables (
     section_id integer,
     sub_section_id integer,
     title character varying,
-    storage_varname character varying
+    storage_varname character varying,
+    user_id bigint
 );
 
 
@@ -1491,6 +1492,13 @@ CREATE INDEX idx_rdcih_on_proj_admin_id ON ref_data.redcap_data_collection_instr
 
 
 --
+-- Name: index_datadic_variables_on_user_id; Type: INDEX; Schema: ref_data; Owner: -
+--
+
+CREATE INDEX index_datadic_variables_on_user_id ON ref_data.datadic_variables USING btree (user_id);
+
+
+--
 -- Name: index_ref_data.datadic_choice_history_on_admin_id; Type: INDEX; Schema: ref_data; Owner: -
 --
 
@@ -1596,6 +1604,34 @@ CREATE INDEX "index_ref_data.redcap_project_users_on_redcap_project_admin_id" ON
 
 
 --
+-- Name: datadic_choices log_datadic_choice_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
+--
+
+CREATE TRIGGER log_datadic_choice_history_insert AFTER INSERT ON ref_data.datadic_choices FOR EACH ROW EXECUTE PROCEDURE ml_app.datadic_choice_history_upd();
+
+
+--
+-- Name: datadic_choices log_datadic_choice_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
+--
+
+CREATE TRIGGER log_datadic_choice_history_update AFTER UPDATE ON ref_data.datadic_choices FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.datadic_choice_history_upd();
+
+
+--
+-- Name: datadic_variables log_datadic_variable_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
+--
+
+CREATE TRIGGER log_datadic_variable_history_insert AFTER INSERT ON ref_data.datadic_variables FOR EACH ROW EXECUTE PROCEDURE ml_app.datadic_variable_history_upd();
+
+
+--
+-- Name: datadic_variables log_datadic_variable_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
+--
+
+CREATE TRIGGER log_datadic_variable_history_update AFTER UPDATE ON ref_data.datadic_variables FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.datadic_variable_history_upd();
+
+
+--
 -- Name: redcap_data_collection_instruments log_redcap_data_collection_instrument_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
@@ -1607,6 +1643,34 @@ CREATE TRIGGER log_redcap_data_collection_instrument_history_insert AFTER INSERT
 --
 
 CREATE TRIGGER log_redcap_data_collection_instrument_history_update AFTER UPDATE ON ref_data.redcap_data_collection_instruments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ref_data.redcap_data_collection_instrument_history_upd();
+
+
+--
+-- Name: redcap_data_dictionaries log_redcap_data_dictionary_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
+--
+
+CREATE TRIGGER log_redcap_data_dictionary_history_insert AFTER INSERT ON ref_data.redcap_data_dictionaries FOR EACH ROW EXECUTE PROCEDURE ml_app.redcap_data_dictionary_history_upd();
+
+
+--
+-- Name: redcap_data_dictionaries log_redcap_data_dictionary_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
+--
+
+CREATE TRIGGER log_redcap_data_dictionary_history_update AFTER UPDATE ON ref_data.redcap_data_dictionaries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.redcap_data_dictionary_history_upd();
+
+
+--
+-- Name: redcap_project_admins log_redcap_project_admin_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
+--
+
+CREATE TRIGGER log_redcap_project_admin_history_insert AFTER INSERT ON ref_data.redcap_project_admins FOR EACH ROW EXECUTE PROCEDURE ml_app.redcap_project_admin_history_upd();
+
+
+--
+-- Name: redcap_project_admins log_redcap_project_admin_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
+--
+
+CREATE TRIGGER log_redcap_project_admin_history_update AFTER UPDATE ON ref_data.redcap_project_admins FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.redcap_project_admin_history_upd();
 
 
 --
@@ -1765,6 +1829,14 @@ ALTER TABLE ONLY ref_data.redcap_project_user_history
 
 ALTER TABLE ONLY ref_data.redcap_project_user_history
     ADD CONSTRAINT fk_rails_89af917107 FOREIGN KEY (redcap_project_admin_id) REFERENCES ref_data.redcap_project_admins(id);
+
+
+--
+-- Name: datadic_variables fk_rails_8dc5a059ee; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+--
+
+ALTER TABLE ONLY ref_data.datadic_variables
+    ADD CONSTRAINT fk_rails_8dc5a059ee FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
