@@ -19,17 +19,13 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
-
 ## [7.4.71] - 2021-11-01
 
-<<<<<<< HEAD
 - [Added] Add support for Redcap repeating instruments - Transferred from upstream ReStructure
 - [Added] Report criteria field type **select_from_model**
 - [Added] Derived variables in dynamic model data dictionary now update from their source variables
 - [Added] Enhancements to dynamic model definition panels, especially around data dictionary
 - [Fixed] DB comments now updating when a dynamic model is a view
-=======
->>>>>>> 2b1e8d26acc71b91d069780d3a784b3749b907c5
 
 ## [7.4.70] - 2021-10-27
 
@@ -39,16 +35,12 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 - [Fixed] Fix issue with times in Redcap leading to constant updating of records
 
-<<<<<<< HEAD
-=======
 ## [7.4.68] - 2021-10-26
 
 ## [7.4.68] - 2021-10-26
 
 ## [7.4.68] - 2021-10-26
 
-
->>>>>>> 2b1e8d26acc71b91d069780d3a784b3749b907c5
 ## [7.4.67] - 2021-10-26
 
 - [Changed] Bump version
