@@ -1,5 +1,6 @@
 <h4>Files</h4>
 <div id="admin-filestore-block-<%= object_instance.id %>">
+</div>
 <% if object_instance&.file_store&.id %>
 <script> 
 window.setTimeout(function() {
@@ -17,5 +18,6 @@ window.setTimeout(function() {
 
 }, 500);
 </script>
+<% else %>
+<p>File store not configured</p>
 <% end %>
-</div>
