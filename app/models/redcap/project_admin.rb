@@ -168,6 +168,7 @@ module Redcap
                                              (
                                                !dynamic_model_ready? ||
                                                (saved_change_to_dynamic_model_table? && !dynamic_model_ready?) ||
+                                               data_dictionary_changed? ||
                                                force_refresh
                                              )
                                          }
@@ -194,6 +195,7 @@ module Redcap
                                                  returnFormat]
 
     configure :metadata_request_options, with: %i[returnFormat]
+    configure_attributes :data_dictionary_version
 
     #
     # Initialize with default request options for records and metadata
@@ -450,6 +452,24 @@ module Redcap
                     else
                       Statuses[:schedule_run_set_configured]
                     end
+    end
+
+    #
+    # Check if the data dictionary version has changed
+    # @return [true | false]
+    def data_dictionary_changed?
+      return false if data_dictionary_version == redcap_data_dictionary.captured_metadata_digest
+
+      set_data_dictionary_version
+      true
+    end
+
+    #
+    # Set the data dictionary version in the options without triggering any model callbacks
+    def set_data_dictionary_version
+      self.data_dictionary_version = redcap_data_dictionary.captured_metadata_digest
+      save_options
+      update_columns(options: options)
     end
   end
 end

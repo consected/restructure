@@ -57,6 +57,7 @@ class Redcap::ProjectAdminsController < AdminController
     set_instance_from_id
     @redcap__project_admin.current_admin ||= current_admin
     @redcap__project_admin.force_refresh = true
+    @redcap__project_admin.data_dictionary_version = nil
     @redcap__project_admin.update!(captured_project_info: nil, transfer_mode: 'none')
 
     msg = "Reconfiguration requested at #{DateTime.now}"
