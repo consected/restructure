@@ -6,6 +6,8 @@
       @rc_data_dictionary ||= object_instance if object_instance.is_a? Redcap::DataDictionary
 
       if @rc_data_dictionary
+
+        dynamic_model = @rc_data_dictionary.redcap_project_admin.dynamic_storage&.dynamic_model
     %>
 <div role="tabpanel" class="tab-pane <%= no_active ? '' : 'active'%>" id="def-dd-details-block">
   <h4>Data Dictionary Details</h4>
@@ -41,7 +43,11 @@
 </div>
 <div role="tabpanel" class="tab-pane" id="def-dd-sample-form">
   <h4>Sample Form</h4>
-  <%= render partial: 'admin/dynamic_models/sample_form', locals: { object_instance: @rc_data_dictionary.redcap_project_admin.dynamic_storage&.dynamic_model } %>
+  <% if dynamic_model %>
+    <%= render partial: 'admin/dynamic_models/sample_form', locals: { object_instance: dynamic_model } %>
+  <% else %>
+    <p>Complete set up of dynamic model to view the sample form</p>
+  <% end %>  
 </div>
 
 <% end %>
