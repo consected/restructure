@@ -150,7 +150,19 @@ module Dynamic
     # List of field names to be used in a dynamic model field list
     # @return [String]
     def field_list
-      @field_list ||= db_columns.keys.map(&:to_s).join(' ')
+      return @field_list if @field_list
+
+      fields = db_columns.keys.map(&:to_s)
+
+      if respond_to?(:placeholder_fields)
+        placeholder_fields.each do |before, placeholder|
+          i = fields.index(before)
+          i ||= 0
+          fields.insert(i, placeholder)
+        end
+      end
+
+      @field_list = fields.join(' ')
     end
 
     private
@@ -186,6 +198,26 @@ module Dynamic
         }
       end
 
+      fields.each do |field_name, config|
+        edit_field_type = config_value(config, :edit_field_type)
+        next unless edit_field_type
+
+        @field_options[field_name].merge! edit_as: {
+          field_type: "redcap_#{edit_field_type}"
+        }
+
+        edit_options = config_value(config, :edit_options)
+        next unless edit_options
+
+        @field_options[field_name][:edit_as].merge! alt_options: edit_options
+      end
+
+      # Set the record id field to be displayed fixed.
+      record_id_fn = field_types.keys.first
+      @field_options[record_id_fn][:edit_as] = {
+        field_type: "fixed_#{record_id_fn}"
+      }
+
       @field_options
     end
 
@@ -194,7 +226,11 @@ module Dynamic
       return unless respond_to?(:fields) && fields
 
       fields.each do |name, config|
-        @caption_before[name] = config_value(config, :caption)
+        html = config_value(config, :caption)
+        next unless html
+
+        html = Redcap::Utilities.html_to_markdown(html)
+        @caption_before[name] = html
       end
 
       @caption_before
@@ -205,7 +241,11 @@ module Dynamic
       return unless respond_to?(:fields) && fields
 
       fields.each do |name, config|
-        @labels[name] = config_value(config, :label)
+        html = config_value(config, :label)
+        next unless html
+
+        html = Redcap::Utilities.html_to_plain_text(html)
+        @labels[name] = html
       end
 
       @labels

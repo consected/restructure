@@ -39,4 +39,9 @@
     </div>
   <% end%>
 </div>
+<div role="tabpanel" class="tab-pane" id="def-dd-sample-form">
+  <h4>Sample Form</h4>
+  <%= render partial: 'admin/dynamic_models/sample_form', locals: { object_instance: @rc_data_dictionary.redcap_project_admin.dynamic_storage&.dynamic_model } %>
+</div>
+
 <% end %>

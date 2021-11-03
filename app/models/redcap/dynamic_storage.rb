@@ -56,6 +56,115 @@ module Redcap
     end
 
     #
+    # Configuration of fields used by the model generator
+    # @return [Hash{String => String}]
+    def fields
+      return @fields if @fields
+
+      @fields = {}
+      all_retrievable_fields = data_dictionary.all_retrievable_fields
+
+      data_dictionary.all_fields.each do |field_name, field|
+        if placeholder_fields.value?("placeholder_#{field_name}__title")
+          @fields["placeholder_#{field_name}__title"] = {
+            caption: field.title
+          }
+        end
+
+        if placeholder_fields.value?("placeholder_#{field_name}")
+          @fields["placeholder_#{field_name}"] = {
+            caption: field.label
+          }
+        elsif all_retrievable_fields.key?(field_name)
+          @fields[field_name] = {
+            caption: field.label
+          }
+
+          ### Handle field types and alt options
+
+          mvt = field.field_type.model_variable_type
+          @fields[field_name][:edit_field_type] = mvt if mvt
+
+          choices = field.field_choices.choices(plain_text: true, rails_format: true)
+          @fields[field_name][:edit_options] = choices.to_h if choices
+
+        end
+
+        next unless field.field_type.name == :checkbox
+
+        ccf = field.field_choices&.choices_plain_text
+        next unless ccf.present?
+
+        ccf.each do |arr|
+          fname = arr.first
+          label = arr.last
+          @fields[field.choice_field_name(fname)] = {
+            label: label
+          }
+        end
+      end
+
+      @fields
+    end
+
+    #
+    # Hash of placholder fields, where the key is the field it appears before,
+    # and the value is the placeholder field name
+    # @return [Hash{String => String}]
+    def placeholder_fields
+      return @placeholder_fields if @placeholder_fields
+
+      @placeholder_fields = {}
+      return {} unless data_dictionary&.all_fields
+
+      all_fields = data_dictionary.all_fields
+      all_retrievable_fields = data_dictionary.all_retrievable_fields
+
+      field_names = all_fields.keys
+      before_field = 'submit'
+
+      field_names.reverse_each do |field_name|
+        field = all_fields[field_name]
+
+        if !all_retrievable_fields.key?(field_name)
+          # This does not have a column in the database
+          # We add a placeholder field for the caption
+          # keeping the placeholder field name as a reference
+          # for the preceding field if it needs a reference
+          # for its position
+
+          # Multiple choice checkboxes are a special case, and we
+          # need to look up the first actual field, for this
+          # placeholder to appear in front of
+          if field.field_type.name == :checkbox
+            ccf = field.field_choices&.choices_values&.first
+            before_field = field.choice_field_name(ccf)
+          end
+
+          phname = "placeholder_#{field_name}"
+          @placeholder_fields[before_field.to_s] = phname
+          before_field = phname
+        else
+          # This has a real column in the database, so can be#
+          # used to reference the position of a preceding field
+          # No placeholder is required for the caption
+          before_field = field_name
+        end
+
+        next unless field.title.present?
+
+        # For a field that also has a title defined, add the title as a placeholder
+        # field above the current field.
+        phname = "placeholder_#{field_name}__title"
+        @placeholder_fields[before_field.to_s] = phname
+        # The preceding field will reference the new placeholder field if needed
+        before_field = phname
+      end
+
+      @placeholder_fields
+    end
+
+    #
     # Should a field prevent downcasing
     # @param [String | Symbol] field_name
     # @return [Boolean]
