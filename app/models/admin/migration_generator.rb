@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'timeout'
 #
 # Provides database level functionality to support dynamic migration generation
 # and functions that are used to access features of the database across the application.
@@ -546,16 +547,20 @@ class Admin::MigrationGenerator
     return unless allow_migrations && db_migration_schema != DefaultMigrationSchema
 
     puts "Running migration from #{db_migration_dirname}"
-    # Outside the current transaction
-    Thread.new do
-      ActiveRecord::Base.connection_pool.with_connection do
-        ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
-        # Don't dump until a build, otherwise differences in individual development environments
-        # force unnecessary and confusing commits
-        # pid = spawn('bin/rake db:structure:dump')
-        # Process.detach pid
-      end
-    end.join
+    Rails.logger.info "Running migration from #{db_migration_dirname}"
+
+    Timeout.timeout(30) do
+      # Outside the current transaction
+      Thread.new do
+        ActiveRecord::Base.connection_pool.with_connection do
+          ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+          # Don't dump until a build, otherwise differences in individual development environments
+          # force unnecessary and confusing commits
+          # pid = spawn('bin/rake db:structure:dump')
+          # Process.detach pid
+        end
+      end.join
+    end
 
     self.class.tables_and_views_reset!
 
