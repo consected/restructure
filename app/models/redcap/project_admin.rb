@@ -326,10 +326,9 @@ module Redcap
     # Update status in record immediately
     # @param [Symbol] key - status key from Statuses
     def update_status(key)
-      return if force_refresh # Failsafe to prevent infinite loops from callbacks
       return unless persisted?
 
-      update(status: Statuses[key])
+      update_columns(status: Statuses[key], updated_at: DateTime.now)
     end
 
     #
