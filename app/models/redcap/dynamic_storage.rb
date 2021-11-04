@@ -165,6 +165,44 @@ module Redcap
     end
 
     #
+    # Override default field options creation method, to include field_type and alt_options
+    # @return [Hash]
+    def field_options
+      @field_options = {}
+
+      field_types.each_key do |field_name|
+        @field_options[field_name] = {
+          no_downcase: no_downcase_field(field_name)
+        }
+      end
+
+      if respond_to?(:fields) && fields
+        fields.each do |field_name, config|
+          edit_field_type = config_value(config, :edit_field_type)
+          next unless edit_field_type
+
+          @field_options[field_name].merge! edit_as: {
+            field_type: "redcap_#{edit_field_type}"
+          }
+
+          edit_options = config_value(config, :edit_options)
+          next unless edit_options
+
+          @field_options[field_name][:edit_as].merge! alt_options: edit_options
+        end
+
+        # Set the record id field to be displayed fixed.
+        record_id_fn = field_types.keys.first
+        @field_options[record_id_fn][:edit_as] = {
+          field_type: "fixed_#{record_id_fn}"
+        }
+
+      end
+
+      @field_options
+    end
+
+    #
     # Should a field prevent downcasing
     # @param [String | Symbol] field_name
     # @return [Boolean]

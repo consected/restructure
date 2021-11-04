@@ -189,6 +189,9 @@ module Dynamic
       @db_columns
     end
 
+    #
+    # Setup field_options config with no_downcase
+    # @return [Hash]
     def field_options
       @field_options = {}
 
@@ -197,26 +200,6 @@ module Dynamic
           no_downcase: no_downcase_field(field_name)
         }
       end
-
-      fields.each do |field_name, config|
-        edit_field_type = config_value(config, :edit_field_type)
-        next unless edit_field_type
-
-        @field_options[field_name].merge! edit_as: {
-          field_type: "redcap_#{edit_field_type}"
-        }
-
-        edit_options = config_value(config, :edit_options)
-        next unless edit_options
-
-        @field_options[field_name][:edit_as].merge! alt_options: edit_options
-      end
-
-      # Set the record id field to be displayed fixed.
-      record_id_fn = field_types.keys.first
-      @field_options[record_id_fn][:edit_as] = {
-        field_type: "fixed_#{record_id_fn}"
-      }
 
       @field_options
     end
@@ -256,7 +239,10 @@ module Dynamic
       return unless respond_to?(:fields) && fields
 
       fields.each do |name, config|
-        @comments[name] = config_value(config, :comment)
+        next if name.to_s.index(/^embedded_report_|^placeholder_/)
+
+        res = config_value(config, :comment)
+        @comments[name] = res
       end
 
       @comments
