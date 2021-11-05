@@ -34,16 +34,10 @@ module ReportsTableHelper
   #
   # Generate the full table cell markup
   def report_table_result_cell(field_num, col_content)
-    col_name = report_column_name(field_num)
-    options = {
-      table_name: @runner.data_reference.table_name,
-      schema_name: @runner.data_reference.schema_name,
-      view_options: @view_options,
-      col_tags: @col_tags,
-      show_as: @show_as
-    }
-    cell = ReportsTableCell.new(field_num, col_content, col_name, options)
     orig_col_content = col_content
+    col_name = report_column_name(field_num)
+
+    cell = ReportsTableResultCell.new(col_content, col_name, @col_tags[col_name], @show_as[col_name])
     col_tag = cell.html_tag
     col_content = cell.view_content
     table_name = @result_tables[field_num]
@@ -64,28 +58,24 @@ module ReportsTableHelper
     res = <<~END_HTML
       <td data-col-type="#{col_name}"
           data-col-table="#{table_name}"
-          data-col-var-type="#{col_content.class.name}" #{time_attr}
+          data-col-var-type="#{orig_col_content.class.name}" #{time_attr}
           class="report-el #{extra_classes}">#{col_tag_start}#{col_content}#{col_tag_end}</td>
     END_HTML
 
     res.html_safe
   end
 
-  def report_table_header_cell(field_num, col_content)
+  def report_table_header_cell(field_num, header_content)
     col_name = report_column_name(field_num)
-    options = {
-      table_name: @runner.data_reference.table_name,
-      schema_name: @runner.data_reference.schema_name,
-      view_options: @view_options,
-      col_tags: @col_tags,
-      show_as: @show_as
-    }
-    cell = ReportsTableCell.new(field_num, col_content, col_name, options)
+    cell = ReportsTableHeaderCell.new(header_content,
+                                      table_name: @runner&.data_reference&.table_name,
+                                      schema_name: @runner&.data_reference&.schema_name,
+                                      view_options: @view_options)
 
     comment = cell.column_comment
     view_opt = @view_options
     unless view_opt.hide_field_names_with_comments && comment
-      new_col_content = view_opt.humanize_column_names ? col_content.humanize : col_content
+      new_col_content = view_opt.humanize_column_names ? header_content.humanize : header_content
       field_name = "<p class=\"table-header-col-type\">#{new_col_content}</p>"
     end
 
@@ -103,19 +93,24 @@ module ReportsTableHelper
       if comm_attrib_txt
         comm_attrib_tag = <<~END_HTML
           <div class="report-column-comment report-column-attribs">
-            #{comm_attrib_txt.html_safe}
+            #{comm_attrib_txt}
           </div>
         END_HTML
+        comm_attrib_tag = comm_attrib_tag.html_safe
       end
 
       col_comment = <<~END_HTML
         <p class="report-column-comment">#{comment}</p>
         #{comm_attrib_tag}
       END_HTML
+      col_comment = col_comment.html_safe
     end
 
+    extra_classes = @col_classes[col_name] || ''
+    extra_classes = "#{extra_classes} #{comment.present? ? 'has-comment' : 'no-comment'}"
+
     res = <<~END_HTML
-      <th title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{@col_content}" class="table-header #{@col_classes[col_name]} #{comment.present? ? 'has-comment' : 'no-comment'}">
+      <th title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{header_content}" class="table-header #{extra_classes}">
         #{field_name} #{show_table_name} #{col_comment}
       </th>
     END_HTML

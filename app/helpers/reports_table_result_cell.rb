@@ -1,0 +1,144 @@
+# frozen_string_literal: true
+
+#
+# A non-helper class to support ReportsTableHelper, without
+# polluting the global namespace
+class ReportsTableResultCell
+  attr_accessor :cell_content, :col_tag, :col_show_as, :col_name
+
+  def initialize(cell_content, col_name, col_tag, col_show_as)
+    self.cell_content = cell_content
+    self.col_name = col_name
+    self.col_tag = col_tag
+    self.col_show_as = col_show_as
+  end
+
+  #
+  # Alter the cell tag based on configurations
+  def html_tag
+    new_col_tag = col_tag || 'pre' if content_lines >= 1
+    return new_col_tag if col_show_as.blank?
+
+    mapping = {
+      'div' => 'div',
+      'fixed-pre' => 'pre',
+      'checkbox' => 'div',
+      'options' => 'div',
+      'list' => 'ul',
+      'url' => 'div'
+    }
+
+    mapping[col_show_as] || col_show_as
+  end
+
+  #
+  # Update the cell content based on the original type
+  # Will return an html_safe string, since additional html tags may be included.
+  # The original content will be appropriately escaped
+  def view_content
+    content_method = "cell_content_for_#{col_show_as}"
+    if respond_to? content_method
+      send(content_method)
+    elsif cell_content.is_a?(Hash)
+      html_escape cell_content.to_json
+    else
+      html_escape cell_content
+    end
+  end
+
+  def html_escape(str)
+    ERB::Util.html_escape str
+  end
+
+  #
+  # For "pre" strings with more than 4 lines, set the class as expandable,
+  # unless the configuration states it should be a *fixed-pre*
+  def expandable?
+    lines = content_lines
+    new_col_tag = col_tag || 'pre' if lines >= 1
+    res = true if new_col_tag == 'pre' && lines > 4
+    res = nil if col_show_as == 'fixed-pre'
+    res
+  end
+
+  #
+  # Count number of lines in the content if it is a String
+  def content_lines
+    l = cell_content&.scan("\n")&.length if cell_content.is_a?(String)
+    l || 0
+  end
+
+  #####
+  # Cell content rendering for different types of original content
+  #####
+
+  def cell_content_for_checkbox
+    cb = if cell_content
+           '<span class="glyphicon glyphicon-check val-true"></span>'
+         else
+           '<span class="val-false"></span>'
+         end
+
+    html = <<~END_HTML
+      <div class="report-cb-inner">#{cb}</div>
+    END_HTML
+
+    html.html_safe
+  end
+
+  def cell_content_for_options
+    return unless cell_content.present?
+
+    # We expect options to be a Hash or an Array (of [key, value] arrays)
+    # but if it is a String we'll assume it is JSON
+    opts = case cell_content
+           when Hash
+             cell_content
+           when Array
+             cell_content
+           when String
+             JSON.parse(cell_content)
+           end
+
+    return cell_content unless opts
+
+    opts.map do |citem|
+      <<~END_HTML
+        <div class="report-option-items"><div>
+          <strong>#{html_escape citem.first}</strong>&nbsp;<span>#{html_escape citem.last}</span>
+        </div></div>
+      END_HTML
+    end.join('').html_safe
+  end
+
+  def cell_content_for_list
+    return unless cell_content.present?
+
+    # We expect options to be an Array, but if it is a String we'll assume it is JSON
+    list = case cell_content
+           when Array
+             cell_content
+           when String
+             JSON.parse(cell_content)
+           end
+
+    return cell_content unless list
+
+    list.map do |citem|
+      <<~END_HTML
+        <li class="report-list-items">#{html_escape citem}</li>
+      END_HTML
+    end.join('').html_safe
+  end
+
+  def cell_content_for_url
+    return cell_content unless cell_content.present?
+
+    col_url_parts = cell_content&.scan(/^\[([\w\s\d]+)\]\((.+)\)$/)
+    html = <<~END_HTML
+      <a href="#{col_url_parts&.first&.last}" target="_blank">#{html_escape col_url_parts&.first&.first}</a>
+    END_HTML
+
+    html.html_safe
+  end
+end
