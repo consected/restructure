@@ -106,10 +106,11 @@ RSpec.describe Redcap::ProjectAdmin, type: :model do
     rc.current_admin = @admin
     rc.dynamic_model_table = 'test.test_file_field_sf_recs'
     rc.server_url = server_url('file_field')
+    rc.records_request_options.exportSurveyFields = true
     rc.save
 
     rc.dump_archive
 
-    expect(rc.file_store.stored_files.where(path: 'test_file_field_sf_recs/project').count).not_to eq 0
+    expect(rc.file_store.stored_files.where(path: 'test.test_file_field_sf_recs/project').count).not_to eq 0
   end
 end
