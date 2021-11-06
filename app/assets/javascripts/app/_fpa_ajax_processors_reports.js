@@ -10,7 +10,6 @@ _fpa.preprocessors_reports = {
     _fpa.show_modal(h, null, true);
   },
 
-
 };
 
 _fpa.postprocessors_reports = {
@@ -34,6 +33,21 @@ _fpa.postprocessors_reports = {
     _fpa.postprocessors_reports.reports_form(block, data);
     block.find('[type="submit"].auto-run').click();
 
+  },
+
+  report_embed_dynamic_block: function (block, data) {
+    var us_name = block.attr('data-model-name')
+    var hyph_name = us_name.hyphenate()
+    var id = block.attr('data-id')
+    var target_block = "report-result-embedded-block"
+    var html = $(`<div id="${target_block}-outer"><div id="${target_block}" class="common-template-item index-1" data-model-data-type="dynamic_model" data-subscription="${hyph_name}-edit-form--${id}" data-template="${hyph_name}-result-template" data-item-class="dynamic_model__${us_name}" data-sub-item="dynamic_model__${us_name}" data-sub-id="${id}" data-item-id="" data-preprocessor="${us_name}_edit_form"></div></div>`)
+    _fpa.show_modal(html, null, true)
+    window.setTimeout(function () {
+      $(block).contents().appendTo(`#${target_block}`)
+      window.setTimeout(function () {
+        _fpa.form_utils.resize_labels($(`#${target_block}`), null, true)
+      }, 100);
+    }, 20);
   },
 
   reports_form: function (block, data) {
