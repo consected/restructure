@@ -172,7 +172,7 @@ _fpa = {
       _fpa.do_preprocessors(template_name, block, data, alt_preprocessor);
       _fpa.form_utils.get_general_selections(data);
       _fpa.prepare_template_configs(data).then(function () {
-        _fpa.render_template(block, template_name, data, options);
+        _fpa.render_template(block, template_name, data, options, alt_preprocessor);
         resolve();
       });
     });
@@ -239,7 +239,6 @@ _fpa = {
         if (!data_array.hasOwnProperty(k)) continue;
 
         var data_item = data_array[k];
-        if (!data_item || !data_item.id || (!data.master_id && !data_item.master_id)) continue;
         data_master_id = data_master_id || data.master_id || data_item.master_id;
         // Prevent requesting the template for the same instance multiple times
         // We don't use the definition version here, since it is possible for different 
@@ -258,7 +257,12 @@ _fpa = {
         return;
       }
 
-      var url = "/masters/" + data_master_id + "/" + url_data_type + "/" + list_data_items.join(',') + "/template_config";
+      var url = '';
+      if (data_master_id) {
+        url = "/masters/" + data_master_id
+      }
+      url = url + "/" + url_data_type + "/" + list_data_items.join(',') + "/template_config";
+
       $.ajax(url, {
         success: function (data) {
           var temploc = $('#master-main-template').first();
@@ -284,7 +288,7 @@ _fpa = {
   },
 
   // Render a retrieved template using the appropriate data in the DOM
-  render_template: function (block, template_name, data, options) {
+  render_template: function (block, template_name, data, options, alt_preprocessor) {
 
     var template = options.template;
     var process_block = block;
@@ -360,7 +364,7 @@ _fpa = {
     // We handle the post processing in a timeout to give the UI the opportunity to render the
     // template, providing for a more responsive, less jerky experience.
     window.setTimeout(function () {
-      _fpa.do_postprocessors(template_name, process_block, data);
+      _fpa.do_postprocessors(template_name, process_block, data, alt_preprocessor);
       _fpa.reset_page_size();
       _fpa.ajax_done(block);
     }, 1);
@@ -432,12 +436,20 @@ _fpa = {
     _fpa.preprocessors.default(block, data, procfound);
   },
 
-  do_postprocessors: function (pre, block, data) {
+  do_postprocessors: function (pre, block, data, alt_processor) {
     var procfound = false;
     if (pre) {
       pre = pre.replace(/-/g, '_');
       if (_fpa.postprocessors[pre]) {
         _fpa.postprocessors[pre](block, data);
+        procfound = true;
+      }
+    }
+
+    if (!procfound && alt_processor) {
+      alt_processor = alt_processor.replace(/-/g, '_');
+      if (_fpa.postprocessors[alt_processor]) {
+        _fpa.postprocessors[alt_processor](block, data);
         procfound = true;
       }
     }
