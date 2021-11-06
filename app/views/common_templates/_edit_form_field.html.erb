@@ -23,6 +23,21 @@
 
   curr_field_name_sym = curr_field_name.to_sym
 
+
+  unless got
+    f_names.select {|fn| fn.start_with?('redcap_')}.map {|fn| fn.sub('redcap_', '')}.each do |ew|
+      match_name = "redcap_#{ew}"
+      if curr_field_name.end_with?("_#{ew}") && f_names.include?(match_name)
+        partial_fn = "common_templates/edit_fields/#{match_name}"
+      %>
+<%= render partial: partial_fn, locals: local_vars[:locals] %>
+<%
+        got = true
+        break
+      end
+    end
+  end
+
   unless got
     match_name = "name_is_#{curr_field_name_sym}"
     # Use a select rather than just includes? to ensure brakeman doesn't complain about params driving render paths

@@ -7,7 +7,7 @@ class Redcap::ProjectAdminsController < AdminController
   before_action :set_defaults
   before_action :setup_file_store, only: [:edit]
 
-  helper_method :transfer_mode_options, :notes_editor
+  helper_method :transfer_mode_options, :notes_editor, :hide_edit_fields
 
   def request_records
     set_instance_from_id
@@ -57,6 +57,7 @@ class Redcap::ProjectAdminsController < AdminController
     set_instance_from_id
     @redcap__project_admin.current_admin ||= current_admin
     @redcap__project_admin.force_refresh = true
+    @redcap__project_admin.data_dictionary_version = nil
     @redcap__project_admin.update!(captured_project_info: nil, transfer_mode: 'none')
 
     msg = "Reconfiguration requested at #{DateTime.now}"
@@ -90,6 +91,12 @@ class Redcap::ProjectAdminsController < AdminController
 
   def view_folder
     'admin/common_templates'
+  end
+
+  def hide_edit_fields
+    return [] if object_instance.persisted?
+
+    %i[dynamic_model_table transfer_mode frequency disabled]
   end
 
   def default_index_order

@@ -14,13 +14,13 @@
   # and admin pages.
 %>
 <script id="filestore-view-template"  type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{# if view_type '===' 'icons'}}
+  {{# is view_type '===' 'icons'}}
     {{>filestore_simple_template_view}}
-  {{else if view_type '===' 'list'}}
+  {{else is view_type '===' 'list'}}
     {{>filestore_common_template_view}}
   {{else}}
     {{>filestore_common_template_view}}
-  {{/if}}
+  {{/is}}
 </script>
 
 
