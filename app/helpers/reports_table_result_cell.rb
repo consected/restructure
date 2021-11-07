@@ -145,12 +145,12 @@ class ReportsTableResultCell
   def cell_content_for_embedded_block
     return cell_content unless cell_content.present?
 
-    id = 2
     url = cell_content
+    id = url.split('/').last
     hyph_name = url.split('/')[-2].hyphenate.singularize
 
     html = <<~END_HTML
-      <a class="report-embedded-block-link" title="open result" href="#{url}" data-remote="true" data-#{hyph_name}-id="#{id}" data-result-target="#report-result-embedded-block--#{id}" data-template="#{hyph_name}-result-template" data-result-target-force="true">[show]</a>
+      <a class="report-embedded-block-link glyphicon glyphicon-tasks" title="open result" href="#{url}" data-remote="true" data-#{hyph_name}-id="#{id}" data-result-target="#report-result-embedded-block--#{id}" data-template="#{hyph_name}-result-template" data-result-target-force="true"></a>
       <div id="report-result-embedded-block--#{id}" class="report-temp-embedded-block" data-preprocessor="report_embed_dynamic_block" data-model-name="#{hyph_name.underscore}" data-id="#{id}"><div>
     END_HTML
 
