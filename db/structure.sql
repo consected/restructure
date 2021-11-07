@@ -6714,7 +6714,8 @@ CREATE TABLE ref_data.datadic_variables (
     sub_section_id integer,
     title character varying,
     storage_varname character varying,
-    user_id bigint
+    user_id bigint,
+    contributor_type character varying
 );
 
 
@@ -6968,6 +6969,13 @@ COMMENT ON COLUMN ref_data.datadic_variables.title IS 'Section caption';
 --
 
 COMMENT ON COLUMN ref_data.datadic_variables.storage_varname IS 'Database field name, or variable name in data file';
+
+
+--
+-- Name: COLUMN datadic_variables.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.contributor_type IS 'Type of contributor this variable was provided by';
 
 
 --
@@ -12980,6 +12988,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20210712152134'),
 ('20210809151207'),
 ('20210816170804'),
-('20211031152538');
+('20211031152538'),
+('20211041105001');
 
 
