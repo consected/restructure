@@ -13,7 +13,7 @@ module DynamicModelSupport
   #
   def generate_test_dynamic_model
     unless Admin::MigrationGenerator.table_exists? 'test_created_by_recs'
-      TableGenerators.dynamic_models_table('test_created_by_recs', :create_do, 'test1', 'test2', 'created_by_user_id')
+      TableGenerators.dynamic_models_table('test_created_by_recs', :create_do, 'test1', 'test2', 'created_by_user_id', 'use_def_version_time')
     end
 
     setup_access :masters, user: @user
@@ -58,6 +58,5 @@ module DynamicModelSupport
       options: yaml,
       schema_name: 'dynamic_test'
     )
-
   end
 end
