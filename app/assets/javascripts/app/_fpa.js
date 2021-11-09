@@ -26,7 +26,7 @@ _fpa = {
     'nfs_store/manage/archived_files',
     'nfs_store_containers',
     'messages',
-    'masterss',
+    'masters',
     'search_actions',
   ],
 
@@ -227,7 +227,7 @@ _fpa = {
       var list_data_items = [];
       var list_data_item_state_ids = [];
 
-      if (_fpa.non_versioned_template_types.indexOf(url_data_type) >= 0) {
+      if (!url_data_type || _fpa.non_versioned_template_types.indexOf(url_data_type) >= 0) {
         resolve();
         return;
       }
@@ -260,6 +260,7 @@ _fpa = {
       if (data_master_id) {
         url = '/masters/' + data_master_id;
       }
+
       url = url + '/' + url_data_type + '/' + list_data_items.join(',') + '/template_config';
 
       $.ajax(url, {
