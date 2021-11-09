@@ -19,6 +19,13 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Added] Configuration of **\_constants** in extra options dynamic configuration
+- [Added] Redcap now sets up dynamic model field configurations to display captions, labels and correct field types in edit and view modes
+- [Added] Report results options added **embedded_block** to show dynamic models as forms from report resutls
+- [Added] Contributor field to data dictionary variable records, to accompany target field.
+- [Fixed] Template retrieval and post processing templates
+- [Changed] Report results table significantly refactored
+
 ## [7.4.71] - 2021-11-01
 
 - [Added] Add support for Redcap repeating instruments - Transferred from upstream ReStructure
