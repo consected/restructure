@@ -56,7 +56,7 @@ _fpa = {
       // rather than the link or button we clicked.
       var alt_target = $block.attr('data-working-target');
       if (alt_target) do_action($(alt_target));
-    } catch (err) {}
+    } catch (err) { }
   },
   ajax_done: function (block) {
     try {
@@ -77,7 +77,7 @@ _fpa = {
       // rather than the link or button we clicked.
       var alt_target = $block.attr('data-working-target');
       if (alt_target) do_action($(alt_target));
-    } catch (err) {}
+    } catch (err) { }
     _fpa.remote_request = null;
     _fpa.state.search_running = false;
   },
@@ -90,7 +90,7 @@ _fpa = {
       $block.data('button_clicked', null);
       var d = _fpa.result_target(block);
       if (d) $(d).removeClass('ajax-running').addClass('ajax-canceled');
-    } catch (err) {}
+    } catch (err) { }
     _fpa.remote_request = null;
     _fpa.state.search_running = false;
   },
@@ -238,7 +238,7 @@ _fpa = {
         if (!data_array.hasOwnProperty(k)) continue;
 
         var data_item = data_array[k];
-        data_master_id = data_master_id || data.master_id || data_item.master_id;
+        data_master_id = data_master_id || data && data.master_id || data_item && data_item.master_id;
         // Prevent requesting the template for the same instance multiple times
         // We don't use the definition version here, since it is possible for different
         // instances with the same definition version to return different results
@@ -366,11 +366,11 @@ _fpa = {
 
   // For certain layouts with clever fixed positioning requirements, allow the
   // page dimensions to be set after major changes to the page
-  reset_page_size: function () {},
+  reset_page_size: function () { },
 
   // Provide inheritance style functionality of javascript prototypes
   inherit_from: function (original_prototype, new_t) {
-    function F() {}
+    function F() { }
     F.prototype = original_prototype;
     $.extend(F.prototype, new_t);
     return F.prototype;
@@ -621,7 +621,7 @@ _fpa = {
               dataitem['_created'] ||
               dataitem['_merged'] ||
               $('[data-sub-item="' + item_key + '"], [data-sub-list="' + item_key + '"] [data-sub-item]').length ===
-                0 ||
+              0 ||
               $(this).parents('[data-result-target-for-child]').length > 0)
           ) {
             use_target = true;
@@ -700,12 +700,12 @@ _fpa = {
                   // Certain refinements to each of these are identified through additional markup, specified below
                   var targets = $(
                     '[data-sub-item="' +
-                      di +
-                      '"], [data-sub-list="' +
-                      di +
-                      '"] [data-sub-item], [data-item-class="' +
-                      di +
-                      '"]'
+                    di +
+                    '"], [data-sub-list="' +
+                    di +
+                    '"] [data-sub-item], [data-item-class="' +
+                    di +
+                    '"]'
                   );
 
                   res[di] = d;
