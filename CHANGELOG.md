@@ -19,6 +19,9 @@ release will be created for any release tested in production, and may be marked 
 ## Unreleased
 
 
+## [8.0.19] - 2021-11-10
+
+
 ## [8.0.18] - 2021-11-01
 
 - [Added] Add support for Redcap repeating instruments
