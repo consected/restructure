@@ -34,7 +34,7 @@
           column_type = :string
           column_type = col.type if col
 
-          local_vars = {locals: {
+          local_vars = {
             form: f,
             field_name_sym: field_name_sym,
             field_name: field_name,
@@ -44,9 +44,8 @@
             form_object_item_type_us: form_object_item_type_us,
             caption_before: {},
             labels: labels
-            }
           }
-          local_vars[:locals][:locals] = local_vars[:locals]
+          local_vars[:locals] = local_vars
 
           # One time only, redefine the label method for this specific form fields instance
           unless label_redefined
@@ -58,7 +57,7 @@
         %>
             <% if @report.edit_fields.include?(field_name_sym) %>
               <td class="report-el">
-                <%= render partial: 'common_templates/edit_form_field', locals: local_vars[:locals] %>
+                <%= edit_form_field(**local_vars) %>
               </td>
             <% else%>
               <td class="report-el report-el-disabled">

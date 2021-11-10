@@ -30,8 +30,9 @@ a.collapsed > .caret {
   background: white;
 }
 
-.form-group[data-out-attr-name="notes"] {
+.form-group[data-out-attr-name='notes'] {
   vertical-align: top;
+  display: block;
 }
 
 .admin-title {
@@ -64,8 +65,8 @@ a.collapsed > .caret {
     display: block;
   }
 
-  input[type="checkbox"] + label,
-  input[type="radio"] + label {
+  input[type='checkbox'] + label,
+  input[type='radio'] + label {
     display: inline-block;
   }
 }
@@ -75,7 +76,7 @@ a.collapsed > .caret {
   min-width: 400px;
 }
 
-.admin-edit-form .form-group[data-out-attr-name="description"] {
+.admin-edit-form .form-group[data-out-attr-name='description'] {
   display: block;
 }
 
@@ -96,6 +97,6 @@ a.collapsed > .caret {
   width: 30em;
 }
 
-.form-group[data-out-attr-name="name"] {
+.form-group[data-out-attr-name='name'] {
   display: block;
 }

@@ -108,7 +108,9 @@ module Dynamic
         position: position,
         section_id: id_from_name(section),
         sub_section_id: id_from_name(sub_section),
-        title: title_plain
+        title: title_plain,
+        target_type: respond_to?(:target_type) ? target_type : nil,
+        contributor_type: respond_to?(:contributor_type) ? contributor_type : nil
       }
     end
 

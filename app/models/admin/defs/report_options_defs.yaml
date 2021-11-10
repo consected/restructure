@@ -54,6 +54,9 @@ view_options:
   # Prevent scrolling of the page directly to search results
   # if a result is returned
 
+  show_all_booleans_as_checkboxed: false (default) | true
+  # Show all boolean type column cells as checkboxes
+
 list_options:
   hide_in_list: false (default) | true
   # Hide this report in the list of available reports, but still
@@ -93,5 +96,12 @@ column_options:
   hide: # Hide the column from results
     column_name: true
   show_as: # Special ways for showing specified columns
-    column_name: url
+    column_name: url | checkbox | options | list | embedded_block | fixed-pre
+    # show the result as a: 
+    # url - link to be opened in a new tab
+    # embedded_block - url linking to a dynamic model, to be opened in a modal popup for viewing or editing
+    # checkbox - checkbox for booleans (true | false | NULL) or integer fields (1 | 0 | NULL)
+    # options - pretty presentation of a hash of key: value pairs
+    # list - pretty presentation of a list (array)
+    # fixed-pre - fixed length (not dynamic expandable) preformatted text, where all spaces and linebreaks are observed
 

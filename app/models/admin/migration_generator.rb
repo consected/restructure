@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'timeout'
 #
 # Provides database level functionality to support dynamic migration generation
 # and functions that are used to access features of the database across the application.
@@ -379,6 +380,7 @@ class Admin::MigrationGenerator
       next unless v[:type] && current_type
 
       expected_type = v[:type]&.to_sym
+      current_type = :timestamp if current_type == :datetime
       changed[k.to_s] = expected_type if current_type != expected_type
     end
 
@@ -544,16 +546,21 @@ class Admin::MigrationGenerator
   def run_migration
     return unless allow_migrations && db_migration_schema != DefaultMigrationSchema
 
-    # Outside the current transaction
-    Thread.new do
-      ActiveRecord::Base.connection_pool.with_connection do
-        ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
-        # Don't dump until a build, otherwise differences in individual development environments
-        # force unnecessary and confusing commits
-        # pid = spawn('bin/rake db:structure:dump')
-        # Process.detach pid
-      end
-    end.join
+    puts "Running migration from #{db_migration_dirname}"
+    Rails.logger.info "Running migration from #{db_migration_dirname}"
+
+    Timeout.timeout(30) do
+      # Outside the current transaction
+      Thread.new do
+        ActiveRecord::Base.connection_pool.with_connection do
+          ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+          # Don't dump until a build, otherwise differences in individual development environments
+          # force unnecessary and confusing commits
+          # pid = spawn('bin/rake db:structure:dump')
+          # Process.detach pid
+        end
+      end.join
+    end
 
     self.class.tables_and_views_reset!
 
@@ -611,7 +618,7 @@ class Admin::MigrationGenerator
 
   def generator_script_dynamic_model(version, mode = 'create')
     cname = "#{mode}_#{table_name}_#{version}".camelize
-    # view_sql = configurations && configurations[:view_sql]
+
     table_or_view = view_sql ? 'view' : 'tables'
     do_create_or_update = if mode == 'create'
                             "create_dynamic_model_#{table_or_view}"
@@ -632,7 +639,7 @@ class Admin::MigrationGenerator
           #{migration_set_attribs}
 
           #{do_create_or_update}
-          #{table_or_view == 'table' ? 'create_dynamic_model_trigger' : ''}
+          #{table_or_view == 'tables' ? 'create_dynamic_model_trigger' : ''}
         end
       end
     CONTENT
