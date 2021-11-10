@@ -18,6 +18,9 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+
+## [8.0.20] - 2021-11-10
+
 ### Transfer from Harvard @7.4.72 - 2021-11-10
 
 - [Added] Report view_option for show_all_booleans_as_checkboxed

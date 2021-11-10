@@ -25,6 +25,60 @@ CREATE SCHEMA ref_data;
 
 
 --
+-- Name: datadic_choice_history_upd(); Type: FUNCTION; Schema: ref_data; Owner: -
+--
+
+CREATE FUNCTION ref_data.datadic_choice_history_upd() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO datadic_choice_history (
+    source_name, source_type, form_name, field_name, value, label, redcap_data_dictionary_id,
+    disabled,
+    admin_id,
+    created_at,
+    updated_at,
+    datadic_choice_id)
+  SELECT
+    NEW.source_name, NEW.source_type, NEW.form_name, NEW.field_name, NEW.value, NEW.label, NEW.redcap_data_dictionary_id,
+    NEW.disabled,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: datadic_variable_history_upd(); Type: FUNCTION; Schema: ref_data; Owner: -
+--
+
+CREATE FUNCTION ref_data.datadic_variable_history_upd() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO datadic_variable_history (
+    study, source_name, source_type, domain, form_name, variable_name, variable_type, presentation_type, label, label_note, annotation, is_required, valid_type, valid_min, valid_max, multi_valid_choices, is_identifier, is_derived_var, multi_derived_from_id, doc_url, target_type, owner_email, classification, other_classification, multi_timepoints, equivalent_to_id, storage_type, db_or_fs, schema_or_path, table_or_file, storage_varname, redcap_data_dictionary_id, position, section_id, sub_section_id, title,
+    disabled,
+    admin_id,
+    created_at,
+    updated_at,
+    datadic_variable_id)
+  SELECT
+    NEW.study, NEW.source_name, NEW.source_type, NEW.domain, NEW.form_name, NEW.variable_name, NEW.variable_type, NEW.presentation_type, NEW.label, NEW.label_note, NEW.annotation, NEW.is_required, NEW.valid_type, NEW.valid_min, NEW.valid_max, NEW.multi_valid_choices, NEW.is_identifier, NEW.is_derived_var, NEW.multi_derived_from_id, NEW.doc_url, NEW.target_type, NEW.owner_email, NEW.classification, NEW.other_classification, NEW.multi_timepoints, NEW.equivalent_to_id, NEW.storage_type, NEW.db_or_fs, NEW.schema_or_path, NEW.table_or_file, NEW.storage_varname, NEW.redcap_data_dictionary_id, NEW.position, NEW.section_id, NEW.sub_section_id, NEW.title,
+    NEW.disabled,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: redcap_data_collection_instrument_history_upd(); Type: FUNCTION; Schema: ref_data; Owner: -
 --
 
@@ -41,6 +95,60 @@ BEGIN
     redcap_data_collection_instrument_id)
   SELECT
     NEW.redcap_project_admin_id, NEW.name, NEW.label,
+    NEW.disabled,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: redcap_data_dictionary_history_upd(); Type: FUNCTION; Schema: ref_data; Owner: -
+--
+
+CREATE FUNCTION ref_data.redcap_data_dictionary_history_upd() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO redcap_data_dictionary_history (
+    redcap_project_admin_id, field_count, captured_metadata,
+    disabled,
+    admin_id,
+    created_at,
+    updated_at,
+    redcap_data_dictionary_id)
+  SELECT
+    NEW.redcap_project_admin_id, NEW.field_count, NEW.captured_metadata,
+    NEW.disabled,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: redcap_project_admin_history_upd(); Type: FUNCTION; Schema: ref_data; Owner: -
+--
+
+CREATE FUNCTION ref_data.redcap_project_admin_history_upd() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO redcap_project_admin_history (
+    name, api_key, server_url, captured_project_info, study, transfer_mode, frequency, status, post_transfer_pipeline, notes, dynamic_model_table,
+    disabled,
+    admin_id,
+    created_at,
+    updated_at,
+    redcap_project_admin_id)
+  SELECT
+    NEW.name, NEW.api_key, NEW.server_url, NEW.captured_project_info, NEW.study, NEW.transfer_mode, NEW.frequency, NEW.status, NEW.post_transfer_pipeline, NEW.notes, NEW.dynamic_model_table,
     NEW.disabled,
     NEW.admin_id,
     NEW.created_at,
@@ -528,7 +636,8 @@ CREATE TABLE ref_data.datadic_variables (
     sub_section_id integer,
     title character varying,
     storage_varname character varying,
-    user_id bigint
+    user_id bigint,
+    contributor_type character varying
 );
 
 
@@ -782,6 +891,13 @@ COMMENT ON COLUMN ref_data.datadic_variables.title IS 'Section caption';
 --
 
 COMMENT ON COLUMN ref_data.datadic_variables.storage_varname IS 'Database field name, or variable name in data file';
+
+
+--
+-- Name: COLUMN datadic_variables.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.contributor_type IS 'Type of contributor this variable was provided by';
 
 
 --
@@ -1607,28 +1723,28 @@ CREATE INDEX "index_ref_data.redcap_project_users_on_redcap_project_admin_id" ON
 -- Name: datadic_choices log_datadic_choice_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_datadic_choice_history_insert AFTER INSERT ON ref_data.datadic_choices FOR EACH ROW EXECUTE PROCEDURE ml_app.datadic_choice_history_upd();
+CREATE TRIGGER log_datadic_choice_history_insert AFTER INSERT ON ref_data.datadic_choices FOR EACH ROW EXECUTE PROCEDURE ref_data.datadic_choice_history_upd();
 
 
 --
 -- Name: datadic_choices log_datadic_choice_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_datadic_choice_history_update AFTER UPDATE ON ref_data.datadic_choices FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.datadic_choice_history_upd();
+CREATE TRIGGER log_datadic_choice_history_update AFTER UPDATE ON ref_data.datadic_choices FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ref_data.datadic_choice_history_upd();
 
 
 --
 -- Name: datadic_variables log_datadic_variable_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_datadic_variable_history_insert AFTER INSERT ON ref_data.datadic_variables FOR EACH ROW EXECUTE PROCEDURE ml_app.datadic_variable_history_upd();
+CREATE TRIGGER log_datadic_variable_history_insert AFTER INSERT ON ref_data.datadic_variables FOR EACH ROW EXECUTE PROCEDURE ref_data.datadic_variable_history_upd();
 
 
 --
 -- Name: datadic_variables log_datadic_variable_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_datadic_variable_history_update AFTER UPDATE ON ref_data.datadic_variables FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.datadic_variable_history_upd();
+CREATE TRIGGER log_datadic_variable_history_update AFTER UPDATE ON ref_data.datadic_variables FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ref_data.datadic_variable_history_upd();
 
 
 --
@@ -1649,28 +1765,28 @@ CREATE TRIGGER log_redcap_data_collection_instrument_history_update AFTER UPDATE
 -- Name: redcap_data_dictionaries log_redcap_data_dictionary_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_data_dictionary_history_insert AFTER INSERT ON ref_data.redcap_data_dictionaries FOR EACH ROW EXECUTE PROCEDURE ml_app.redcap_data_dictionary_history_upd();
+CREATE TRIGGER log_redcap_data_dictionary_history_insert AFTER INSERT ON ref_data.redcap_data_dictionaries FOR EACH ROW EXECUTE PROCEDURE ref_data.redcap_data_dictionary_history_upd();
 
 
 --
 -- Name: redcap_data_dictionaries log_redcap_data_dictionary_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_data_dictionary_history_update AFTER UPDATE ON ref_data.redcap_data_dictionaries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.redcap_data_dictionary_history_upd();
+CREATE TRIGGER log_redcap_data_dictionary_history_update AFTER UPDATE ON ref_data.redcap_data_dictionaries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ref_data.redcap_data_dictionary_history_upd();
 
 
 --
 -- Name: redcap_project_admins log_redcap_project_admin_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_project_admin_history_insert AFTER INSERT ON ref_data.redcap_project_admins FOR EACH ROW EXECUTE PROCEDURE ml_app.redcap_project_admin_history_upd();
+CREATE TRIGGER log_redcap_project_admin_history_insert AFTER INSERT ON ref_data.redcap_project_admins FOR EACH ROW EXECUTE PROCEDURE ref_data.redcap_project_admin_history_upd();
 
 
 --
 -- Name: redcap_project_admins log_redcap_project_admin_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_project_admin_history_update AFTER UPDATE ON ref_data.redcap_project_admins FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.redcap_project_admin_history_upd();
+CREATE TRIGGER log_redcap_project_admin_history_update AFTER UPDATE ON ref_data.redcap_project_admins FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ref_data.redcap_project_admin_history_upd();
 
 
 --
