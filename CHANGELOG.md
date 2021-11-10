@@ -33,6 +33,9 @@ release will be created for any release tested in production, and may be marked 
 - [Fixed] Template retrieval and post processing templates
 - [Changed] Report results table significantly refactored
 
+## [8.0.19] - 2021-11-10
+
+
 ## [8.0.18] - 2021-11-01
 
 - [Added] Add support for Redcap repeating instruments
