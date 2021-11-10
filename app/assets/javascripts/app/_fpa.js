@@ -27,6 +27,7 @@ _fpa = {
     'nfs_store_containers',
     'messages',
     'masters',
+    'masterss',
     'search_actions',
   ],
 
@@ -993,7 +994,7 @@ _fpa = {
   },
 
   // Show a bootstrap style modal dialog
-  show_modal: function (message, title, large) {
+  show_modal: function (message, title, large, add_class) {
     var pm = $('#primary-modal');
     var t = pm.find('.modal-title');
     var m = pm.find('.modal-body');
@@ -1003,12 +1004,19 @@ _fpa = {
     if (title) t.html(title);
     if (message) m.html(message);
 
+    // Reset the class to the original
+    $('.modal-dialog').prop('class', 'modal-dialog')
+
     if (large && large == 'md') $('.modal-dialog').removeClass('modal-lg').addClass('modal-md');
     else if (large) $('.modal-dialog').removeClass('modal-md').addClass('modal-lg');
     else $('.modal-dialog').removeClass('modal-lg').removeClass('modal-md');
 
+    if (add_class)
+      $('.modal-dialog').addClass(add_class);
+
     pm.on('hidden.bs.modal', function () {
       $('.modal-body').html('');
+      _fpa.utils.scrollTo(0, 0, 0, $('.modal-body'))
       var riomc = $('.refresh-item-on-modal-close').first();
       if (riomc.length) {
         riomc.parents('.common-template-item').last().find('a.refresh-item').click();
@@ -1018,6 +1026,10 @@ _fpa = {
 
     pm.modal('show');
 
+    pm.on('shown.bs.modal', function () {
+      _fpa.utils.scrollTo(0, 0, 0, $('.modal-body'))
+    })
+
     return pm;
   },
 
@@ -1025,6 +1037,8 @@ _fpa = {
     var pm = $('#primary-modal');
     var t = pm.find('.modal-title');
     var m = pm.find('.modal-body');
+    _fpa.utils.scrollTo(0, 0, 0, m);
+
     t.html('');
     m.html('');
     pm.modal('hide');
