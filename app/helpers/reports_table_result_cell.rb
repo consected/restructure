@@ -73,10 +73,19 @@ class ReportsTableResultCell
   #####
 
   def cell_content_for_checkbox
-    cb = if cell_content
-           '<span class="glyphicon glyphicon-check val-true"></span>'
+    cb = case cell_content
+         when nil
+           '<span class="report-val-not-answered"></span>'
+         when true
+           '<span class="glyphicon glyphicon-check report-val-checked"></span>'
+         when 1
+           '<span class="glyphicon glyphicon-check report-val-checked"></span>'
+         when false
+           '<span class="glyphicon glyphicon-unchecked report-val-unchecked"></span>'
+         when 0
+           '<span class="glyphicon glyphicon-unchecked report-val-unchecked"></span>'
          else
-           '<span class="val-false"></span>'
+           '<span class="report-val-not-answered"></span>'
          end
 
     html = <<~END_HTML

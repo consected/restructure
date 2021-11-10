@@ -37,6 +37,10 @@ module ReportsTableHelper
     orig_col_content = col_content
     col_name = report_column_name(field_num)
 
+    if @view_options.show_all_booleans_as_checkboxed && [true, false].include?(col_content)
+      @show_as[col_name] ||= 'checkbox'
+    end
+
     cell = ReportsTableResultCell.new(col_content, col_name, @col_tags[col_name], @show_as[col_name])
     col_tag = cell.html_tag
     col_content = cell.view_content

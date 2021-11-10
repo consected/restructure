@@ -16,7 +16,7 @@ module OptionConfigs
                                       hide_criteria_panel prevent_collapse_for_list
                                       show_column_comments corresponding_data_dic
                                       view_as search_button_label report_auto_submit_on_change
-                                      no_results_scroll]
+                                      no_results_scroll show_all_booleans_as_checkboxed]
     configure :list_options, with: %i[hide_in_list list_description]
     configure :view_css, with: %i[classes selectors]
     configure :component, with: [:options]

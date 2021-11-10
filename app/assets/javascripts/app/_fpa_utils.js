@@ -82,9 +82,16 @@ _fpa.utils.inViewport = function (el, topHalf) {
   return (rect.top >= 0 && rect.top <= $(window).height() / topHalf);
 };
 
-_fpa.utils.scrollTo = function (el, height, offset, container) {
+// Scroll the container to a position (in pixels), x-y position {left:250, top:"50px"}
+// or to a jQuery element $("#element")
+// See: https://github.com/flesler/jquery.scrollTo for more info
+// pos_or_el: position or element to scroll to
+// settings: duration in ms, or other settings, such as { axis: 'y' }
+// offset: offset to apply, especially if using an element to scroll to, a number or { left: 0, top: 300 }
+// container: the element to scroll
+_fpa.utils.scrollTo = function (pos_or_el, settings, offset, container) {
   container = container || $;
-  container.scrollTo(el, height, { offset: offset });
+  container.scrollTo(pos_or_el, settings, { offset: offset });
 };
 
 _fpa.utils.pluralize = function (str) {

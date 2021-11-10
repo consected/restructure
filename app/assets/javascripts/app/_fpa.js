@@ -26,6 +26,7 @@ _fpa = {
     'nfs_store/manage/archived_files',
     'nfs_store_containers',
     'messages',
+    'masters',
     'masterss',
     'search_actions',
   ],
@@ -56,7 +57,7 @@ _fpa = {
       // rather than the link or button we clicked.
       var alt_target = $block.attr('data-working-target');
       if (alt_target) do_action($(alt_target));
-    } catch (err) {}
+    } catch (err) { }
   },
   ajax_done: function (block) {
     try {
@@ -77,7 +78,7 @@ _fpa = {
       // rather than the link or button we clicked.
       var alt_target = $block.attr('data-working-target');
       if (alt_target) do_action($(alt_target));
-    } catch (err) {}
+    } catch (err) { }
     _fpa.remote_request = null;
     _fpa.state.search_running = false;
   },
@@ -90,7 +91,7 @@ _fpa = {
       $block.data('button_clicked', null);
       var d = _fpa.result_target(block);
       if (d) $(d).removeClass('ajax-running').addClass('ajax-canceled');
-    } catch (err) {}
+    } catch (err) { }
     _fpa.remote_request = null;
     _fpa.state.search_running = false;
   },
@@ -227,7 +228,7 @@ _fpa = {
       var list_data_items = [];
       var list_data_item_state_ids = [];
 
-      if (_fpa.non_versioned_template_types.indexOf(url_data_type) >= 0) {
+      if (!url_data_type || _fpa.non_versioned_template_types.indexOf(url_data_type) >= 0) {
         resolve();
         return;
       }
@@ -238,7 +239,7 @@ _fpa = {
         if (!data_array.hasOwnProperty(k)) continue;
 
         var data_item = data_array[k];
-        data_master_id = data_master_id || data.master_id || data_item.master_id;
+        data_master_id = data_master_id || data && data.master_id || data_item && data_item.master_id;
         // Prevent requesting the template for the same instance multiple times
         // We don't use the definition version here, since it is possible for different
         // instances with the same definition version to return different results
@@ -260,6 +261,7 @@ _fpa = {
       if (data_master_id) {
         url = '/masters/' + data_master_id;
       }
+
       url = url + '/' + url_data_type + '/' + list_data_items.join(',') + '/template_config';
 
       $.ajax(url, {
@@ -365,11 +367,11 @@ _fpa = {
 
   // For certain layouts with clever fixed positioning requirements, allow the
   // page dimensions to be set after major changes to the page
-  reset_page_size: function () {},
+  reset_page_size: function () { },
 
   // Provide inheritance style functionality of javascript prototypes
   inherit_from: function (original_prototype, new_t) {
-    function F() {}
+    function F() { }
     F.prototype = original_prototype;
     $.extend(F.prototype, new_t);
     return F.prototype;
@@ -620,7 +622,7 @@ _fpa = {
               dataitem['_created'] ||
               dataitem['_merged'] ||
               $('[data-sub-item="' + item_key + '"], [data-sub-list="' + item_key + '"] [data-sub-item]').length ===
-                0 ||
+              0 ||
               $(this).parents('[data-result-target-for-child]').length > 0)
           ) {
             use_target = true;
@@ -699,12 +701,12 @@ _fpa = {
                   // Certain refinements to each of these are identified through additional markup, specified below
                   var targets = $(
                     '[data-sub-item="' +
-                      di +
-                      '"], [data-sub-list="' +
-                      di +
-                      '"] [data-sub-item], [data-item-class="' +
-                      di +
-                      '"]'
+                    di +
+                    '"], [data-sub-list="' +
+                    di +
+                    '"] [data-sub-item], [data-item-class="' +
+                    di +
+                    '"]'
                   );
 
                   res[di] = d;
@@ -992,7 +994,7 @@ _fpa = {
   },
 
   // Show a bootstrap style modal dialog
-  show_modal: function (message, title, large) {
+  show_modal: function (message, title, large, add_class) {
     var pm = $('#primary-modal');
     var t = pm.find('.modal-title');
     var m = pm.find('.modal-body');
@@ -1002,12 +1004,19 @@ _fpa = {
     if (title) t.html(title);
     if (message) m.html(message);
 
+    // Reset the class to the original
+    $('.modal-dialog').prop('class', 'modal-dialog')
+
     if (large && large == 'md') $('.modal-dialog').removeClass('modal-lg').addClass('modal-md');
     else if (large) $('.modal-dialog').removeClass('modal-md').addClass('modal-lg');
     else $('.modal-dialog').removeClass('modal-lg').removeClass('modal-md');
 
+    if (add_class)
+      $('.modal-dialog').addClass(add_class);
+
     pm.on('hidden.bs.modal', function () {
       $('.modal-body').html('');
+      _fpa.utils.scrollTo(0, 0, 0, $('.modal-body'))
       var riomc = $('.refresh-item-on-modal-close').first();
       if (riomc.length) {
         riomc.parents('.common-template-item').last().find('a.refresh-item').click();
@@ -1017,6 +1026,10 @@ _fpa = {
 
     pm.modal('show');
 
+    pm.on('shown.bs.modal', function () {
+      _fpa.utils.scrollTo(0, 0, 0, $('.modal-body'))
+    })
+
     return pm;
   },
 
@@ -1024,6 +1037,8 @@ _fpa = {
     var pm = $('#primary-modal');
     var t = pm.find('.modal-title');
     var m = pm.find('.modal-body');
+    _fpa.utils.scrollTo(0, 0, 0, m);
+
     t.html('');
     m.html('');
     pm.modal('hide');
