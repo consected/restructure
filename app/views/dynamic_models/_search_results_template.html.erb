@@ -1,4 +1,6 @@
-<% DynamicModel.active_model_configurations.each do |m| %>
+<% DynamicModel.active_model_configurations.each do |m| 
+  next unless m.implementation_class_defined?(::DynamicModel, fail_without_exception: true)
+%>
   <%= render partial: 'dynamic_models/common_search_results_template_item', 
              locals: { 
                def_record: m,

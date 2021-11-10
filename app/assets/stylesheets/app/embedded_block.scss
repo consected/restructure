@@ -1,0 +1,49 @@
+.modal-dialog.modal-lg.embedded-dynamic-block {
+  .modal-header {
+    display: none;
+  }
+
+  .modal-content {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .modal-body {
+    padding: 0;
+  }
+
+  .modal-footer {
+    border-top: 0;
+  }
+
+  ul.list-group {
+    background: white;
+  }
+
+  .is-heading {
+    a.edit-entity {
+      position: fixed;
+      top: 10px;
+      right: 32px;
+      z-index: 100;
+    }
+  }
+
+  .edit-form-header {
+    a.show-entity {
+      position: fixed;
+      top: 10px;
+      right: 32px;
+      z-index: 100;
+    }
+  }
+
+  .submit-action-container input[type="submit"] {
+    position: fixed;
+    top: 4px;
+    right: 50px;
+    z-index: 100;
+  }
+}

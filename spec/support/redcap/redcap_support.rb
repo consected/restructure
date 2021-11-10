@@ -9,7 +9,7 @@ module Redcap
       projects.each do |p|
         if mocks
           if p[:name].in?(['metadata'])
-            @project_admin_metadata = p
+            @metadata_project = p
             stub_request_repeat_instrument_field_project p[:server_url], p[:api_key]
             stub_request_repeat_instrument_field_metadata p[:server_url], p[:api_key]
           else
@@ -77,11 +77,11 @@ module Redcap
     end
 
     def mock_repeat_instrument_field_requests
-      stub_request_repeat_instrument_field_project server_url_2('repeat_instrument'), @project_admin_metadata[:api_key]
-      stub_request_repeat_instrument_field_metadata server_url_2('repeat_instrument'), @project_admin_metadata[:api_key]
-      stub_request_repeat_instrument_field_records server_url_2('repeat_instrument'), @project_admin_metadata[:api_key]
-      stub_request_project_users server_url_2('repeat_instrument'), @project_admin_metadata[:api_key]
-      stub_request_instruments server_url_2('repeat_instrument'), @project_admin_metadata[:api_key]
+      stub_request_repeat_instrument_field_project server_url_2('repeat_instrument'), @metadata_project[:api_key]
+      stub_request_repeat_instrument_field_metadata server_url_2('repeat_instrument'), @metadata_project[:api_key]
+      stub_request_repeat_instrument_field_records server_url_2('repeat_instrument'), @metadata_project[:api_key]
+      stub_request_project_users server_url_2('repeat_instrument'), @metadata_project[:api_key]
+      stub_request_instruments server_url_2('repeat_instrument'), @metadata_project[:api_key]
     end
 
     # Get project configurations from encrypted credential storage
@@ -504,6 +504,9 @@ module Redcap
 
       tn = alt_name || 'redcap_test.test_file_field_recs'
 
+      @project_admin = Redcap::ProjectAdmin.where(name: @project[:name], study: 'Q3', dynamic_model_table: tn).first
+      return @project_admin if @project_admin
+
       @project_admin = Redcap::ProjectAdmin.create! name: @project[:name], server_url: server_url('file_field'), api_key: @project[:api_key], study: 'Q3',
                                                     current_admin: @admin, dynamic_model_table: tn
     end
@@ -513,6 +516,10 @@ module Redcap
 
       tn = alt_name || 'test.test_repinst_field_recs'
       name = @metadata_project[:name]
+
+      @project_admin_metadata = Redcap::ProjectAdmin.where(name: name, study: 'Repeat', dynamic_model_table: tn).first
+      return @project_admin_metadata if @project_admin_metadata
+
       @project_admin_metadata = Redcap::ProjectAdmin.create! name: name, server_url: server_url_2('repeat_instrument'),
                                                              api_key: @metadata_project[:api_key], study: 'Repeat',
                                                              current_admin: @admin, dynamic_model_table: tn

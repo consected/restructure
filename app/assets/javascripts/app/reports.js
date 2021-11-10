@@ -215,7 +215,7 @@ _fpa.reports = {
 
       var dct_json = $(this).html();
 
-      if (!dct_json || dct_json == '') return;
+      if (!dct_json || dct_json.trim() == '') return;
 
       var act_config = JSON.parse(dct_json);
 

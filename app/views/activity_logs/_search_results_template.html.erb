@@ -1,3 +1,5 @@
-<% ActivityLog.active_model_configurations.each do |m| %>
+<% ActivityLog.active_model_configurations.each do |m| 
+  next unless m.implementation_class_defined?(::ActivityLog, fail_without_exception: true)
+%>
 <%= render partial: 'activity_logs/search_results_template_item', locals: { def_record: m } %>
 <% end%>

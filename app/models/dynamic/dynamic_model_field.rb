@@ -24,7 +24,7 @@ module Dynamic
                          storage_type db_or_fs schema_or_path table_or_file
                          position section sub_section title_plain domain form_name study
                          source_type is_derived_var owner_email presentation_type
-                         default_variable_type].freeze
+                         default_variable_type target_type contributor_type].freeze
 
     attr_accessor :position, :name, :dynamic_model, :data_dictionary, *MatchingAttribs
 
