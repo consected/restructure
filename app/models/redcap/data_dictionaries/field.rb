@@ -202,7 +202,16 @@ module Redcap
       def checkbox_choice_fields
         return nil unless field_type.name == :checkbox
 
-        field_choices.choices_values.map { |v| "#{name}___#{v}".to_sym }
+        field_choices.choices_values.map { |v| choice_field_name(v).to_sym }
+      end
+
+      #
+      # Generate the field name for a checkbox choice from the
+      # root field name and the choice value
+      # @param [String] value
+      # @return [String]
+      def choice_field_name(value)
+        "#{name}___#{value}"
       end
 
       #

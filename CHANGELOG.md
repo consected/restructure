@@ -18,6 +18,23 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+### Transfer from Harvard @7.4.72 - 2021-11-10
+
+- [Added] Report view_option for show_all_booleans_as_checkboxed
+- [Added] use_def_version_time as an optional field to dynamic models to force definition version use for an instance
+- [Added] \_constants to extra options dynamic configuration
+- [Changed] Model block fields in view mode provide better checkboxes, radios and data/time handling
+
+### Transfer from Harvard @7.4.71 - 2021-11-09
+
+- [Added] Redcap now sets up dynamic model field configurations to display captions, labels and correct field types in edit and view modes
+- [Added] Report results options added **embedded_block** to show dynamic models as forms from report resutls
+- [Added] Contributor field to data dictionary variable records, to accompany target field.
+- [Fixed] Template retrieval and post processing templates
+- [Changed] Report results table significantly refactored
+
+## [8.0.19] - 2021-11-10
+
 
 ## [8.0.19] - 2021-11-01
 

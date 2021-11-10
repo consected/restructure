@@ -26,7 +26,7 @@ module OptionConfigs
         name: external_id_type.name.underscore,
         full_name: external_id_type.name.underscore,
         resource_name: def_record.resource_name,
-
+        implementation_class: def_record.implementation_class,
         model_data_type: :external_identifier,
         prevent_edit: external_id_type.prevent_edit? ||
           !(current_user.has_access_to? :edit, :table, plural_name),
@@ -50,7 +50,8 @@ module OptionConfigs
           attribute: external_id_type.external_id_attribute.to_s
         },
         orientation: 'vertical',
-        add_item_label: external_id_type.label
+        add_item_label: external_id_type.label,
+        column_defs: def_record.model_class&.columns_hash
       }
     end
 
@@ -86,7 +87,7 @@ module OptionConfigs
         name: def_record.implementation_model_name,
         full_name: "dynamic_model__#{def_record.implementation_model_name}",
         resource_name: def_record.resource_name,
-
+        implementation_class: def_record.implementation_class,
         model_data_type: :dynamic_model,
         prevent_edit: !(current_user.has_access_to? :edit, :table, def_record.full_item_type_name.pluralize),
         prevent_create: !(current_user.has_access_to? :create, :table, def_record.full_item_type_name.pluralize),
@@ -101,7 +102,8 @@ module OptionConfigs
         extra_class: view_options[:extra_class],
         template_class: nil,
         extra_data_attribs: field_list.include?('rec_type') ? [:rec_type] : nil,
-        extra_options_config: default_options
+        extra_options_config: default_options,
+        column_defs: def_record.implementation_class&.columns_hash
       }
     end
 

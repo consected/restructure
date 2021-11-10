@@ -1,2 +1,2 @@
 <%= form.label field_name_sym, label_for(field_name_sym, labels) %>
-<%= form.text_field :zip, zip_field_props.merge({ data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}) %>
+<%= form.text_field field_name_sym, zip_field_props.merge({ data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}) %>

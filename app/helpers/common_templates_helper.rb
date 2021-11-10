@@ -9,7 +9,14 @@ module CommonTemplatesHelper
     init.merge({ pattern: '\\d{5,5}(-\\d{4,4})?' })
   end
 
-  def field_options_for(form_object_instance, field_name_sym)
+  #
+  # Field options for the field, from the dynamic configuration.
+  # Use reset: true to clear the memo, which speeds up some large forms
+  # @return [Hash]
+  def field_options_for(form_object_instance, field_name_sym, reset: nil)
+    @field_options_for = nil if reset
+    return @field_options_for if @field_options_for
+
     if form_object_instance.respond_to?(:option_type_config) && form_object_instance.option_type_config
       fopt = form_object_instance.option_type_config.field_options[field_name_sym].dup
     end
@@ -27,7 +34,7 @@ module CommonTemplatesHelper
       fopt[:value] = fres
     end
 
-    fopt
+    @field_options_for = fopt
   end
 
   def general_selection_prefix_name(form_object_instance)

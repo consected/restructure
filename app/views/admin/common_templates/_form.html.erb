@@ -20,6 +20,8 @@
         col = object_instance.class.columns_hash[p.to_s]
         next unless col
         col_type = col.type
+
+        next if respond_to?(:hide_edit_fields) && hide_edit_fields.include?(p.to_sym)
       %>
       <div class="form-group" data-out-attr-name="<%= p %>" data-out-object-name="<%= object_instance.class.name.ns_underscore %>">
       <% if col_type == :boolean %>

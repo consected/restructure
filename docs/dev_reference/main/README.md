@@ -3,6 +3,7 @@
 ## General Information
 
 - ["Forking" to a Private Repository](forking_to_a_private_repository.md)
+- [Running **rspec** tests](running_rspec_tests.md)
 
 ## Samples
 
