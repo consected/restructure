@@ -59,11 +59,18 @@ class SaveTriggers::CreateMaster < SaveTriggers::SaveTriggersBase
         @item.master = @new_master
         @item.update_columns(master_id: new_master_id)
 
+        # Avoid embedded item treating this as though the item hasn't already been created,
+        # which would fail
+        @item.action_name = 'show'
+
         ei = @item.embedded_item
         if ei
           ei.master = @new_master
           ei.update_columns(master_id: new_master_id)
-          mr = @item.model_references.select { |mra| mra.to_record_type == ei.class.name && mra.to_record_id == ei.id }.first
+          mr = @item.model_references.first do |mra|
+            mra.to_record_type == ei.class.name && mra.to_record_id == ei.id
+          end
+
           mr.update_columns(from_record_master_id: new_master_id, to_record_master_id: new_master_id)
         end
 
