@@ -18,6 +18,9 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+
+## [8.0.21] - 2021-11-11
+
 - [Fixed] production environment use of encryption salt
 
 ## [8.0.20] - 2021-11-10
