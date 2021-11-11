@@ -27,7 +27,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 579,
+      "line": 580,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';\\n\")",
       "render_path": null,
@@ -47,7 +47,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 72,
+      "line": 74,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"select table_schema \\\"schema_name\\\", table_name from information_schema.tables\\nwhere table_schema IN (#{quoted_schemas})\\nand table_catalog = '#{current_database}'\\nUNION\\nselect table_schema \\\"schema_name\\\", table_name from information_schema.views\\nwhere table_schema IN (#{quoted_schemas})\\nand table_catalog = '#{current_database}'\\norder by \\\"schema_name\\\", table_name\\n\")",
       "render_path": null,
@@ -254,11 +254,31 @@
     {
       "warning_type": "SQL Injection",
       "warning_code": 0,
+      "fingerprint": "8aab190043a4006f4d50d665865d8a1a6f412f450c1dcaa0ada8c58202fb9b0e",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/admin/migration_generator.rb",
+      "line": 135,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "connection.execute(\"SELECT\\n    cols.table_schema \\\"schema_name\\\",\\n    cols.table_name,\\n    cols.column_name,\\n    pg_catalog.col_description(c.oid, cols.ordinal_position::int) AS column_comment\\nFROM\\n    information_schema.columns cols\\nINNER JOIN pg_catalog.pg_class c\\nON\\n  c.oid = ('\\\"' || cols.table_name || '\\\"')::regclass::oid\\n  AND c.relname = cols.table_name\\n\\nWHERE\\n    cols.table_catalog = '#{current_database}' AND\\n    cols.table_schema IN (#{quoted_schemas}) AND\\n    pg_catalog.col_description(c.oid, cols.ordinal_position::int) IS NOT NULL\\n;\\n\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::MigrationGenerator",
+        "method": "Admin::MigrationGenerator.column_comments"
+      },
+      "user_input": "current_database",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
       "fingerprint": "8eedc4fdd3c7e0de98c4a99b7caceefbbf1c42df81010c9e9a86eedc0be5d094",
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 187,
+      "line": 189,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"SELECT * FROM #{tables_and_views.find do\n (tn[\"table_name\"] == \"#{basename}_datadic\")\n end[\"table_name\"]};\\n\")",
       "render_path": null,
@@ -493,6 +513,6 @@
       "note": ""
     }
   ],
-  "updated": "2021-11-01 17:56:06 +0000",
-  "brakeman_version": "5.1.1"
+  "updated": "2021-11-11 13:20:55 +0000",
+  "brakeman_version": "5.1.2"
 }

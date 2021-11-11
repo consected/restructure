@@ -18,6 +18,7 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Fixed] - bugfixes
 
 ## [8.0.21] - 2021-11-11
 
@@ -39,8 +40,6 @@ release will be created for any release tested in production, and may be marked 
 - [Added] Contributor field to data dictionary variable records, to accompany target field.
 - [Fixed] Template retrieval and post processing templates
 - [Changed] Report results table significantly refactored
-
-## [8.0.19] - 2021-11-10
 
 ## [8.0.19] - 2021-11-01
 
