@@ -18,6 +18,7 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Fixed] form, credential and trigger bugs
 
 ## [8.0.20] - 2021-11-11
 
@@ -37,7 +38,6 @@ release will be created for any release tested in production, and may be marked 
 - [Changed] Report results table significantly refactored
 
 ## [8.0.19] - 2021-11-10
-
 
 ## [8.0.18] - 2021-11-01
 
