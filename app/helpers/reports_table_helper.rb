@@ -41,10 +41,11 @@ module ReportsTableHelper
       @show_as[col_name] ||= 'checkbox'
     end
 
-    cell = ReportsTableResultCell.new(col_content, col_name, @col_tags[col_name], @show_as[col_name])
+    table_name = @result_tables[field_num]
+
+    cell = ReportsTableResultCell.new(table_name, col_content, col_name, @col_tags[col_name], @show_as[col_name])
     col_tag = cell.html_tag
     col_content = cell.view_content
-    table_name = @result_tables[field_num]
 
     if col_tag.present?
       col_tag_start = "<#{col_tag} class=\"#{cell.expandable? ? 'expandable' : ''}\">"
