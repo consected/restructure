@@ -60,6 +60,48 @@ module Redcap
         'zipcode' => 'zipcode'
       }.freeze
 
+      # Map the field type to model edit field types
+      # nil indicates default handling
+      FieldToModelTypes = {
+        text: nil,
+        text_area: 'notes',
+        notes: 'notes',
+        calc: 'fixed',
+        dropdown: 'select',
+        radio: 'radio',
+        checkbox: nil, # boolean
+        checkbox_choice: nil, # boolean
+        yesno: 'yes_no',
+        truefalse: 'true_false',
+        file: 'file',
+        slider: nil, # integer
+        descriptive: nil,
+        form_complete: 'status', # This is not a real REDCap type, but is used as a lookup
+        form_timestamp: 'completion_timestamp', # This is not a real REDCap type, but is used as a lookup
+        survey_identifier: 'survey_identifier', # This is not a real REDCap type, but is used as a lookup
+        repeat: 'repeat_instrument' # This is not a real REDCap type, but is used as a lookup
+      }.freeze
+
+      TextFieldToModelTypes = {
+        'date_dmy' => nil,
+        'date_mdy' => nil,
+        'date_ymd' => nil,
+        'datetime_dmy' => nil,
+        'datetime_mdy' => nil,
+        'datetime_ymd' => nil,
+        'datetime_seconds_dmy' => nil,
+        'datetime_seconds_mdy' => nil,
+        'datetime_seconds_ymd' => nil,
+        'email' => 'email',
+        'integer' => nil,
+        'alpha_only' => 'alpha_only',
+        'number' => nil,
+        'phone' => 'phone',
+        'time' => nil,
+        'time_mm_ss' => 'time_mm_ss',
+        'zipcode' => 'zip'
+      }.freeze
+
       ValidVariableTypes = (FieldToVariableTypes.values + TextFieldToVariableTypes.values).uniq.freeze
 
       # Non-string real type conversions for variable types
@@ -111,6 +153,14 @@ module Redcap
           TextFieldToVariableTypes[text_validation_type] || 'plain text'
         else
           FieldToVariableTypes[name]
+        end
+      end
+
+      def model_variable_type
+        if name == :text
+          TextFieldToModelTypes[text_validation_type]
+        else
+          FieldToModelTypes[name]
         end
       end
 

@@ -1488,6 +1488,13 @@ _fpa.form_utils = {
       var d = _fpa.utils.YMDtoLocale(text);
       $(this).html(d);
     }).addClass('formatted-date-local')
+
+    block.find('[data-format-datetime-local="true"]').not('.formatted-datetime-local').each(function () {
+      var text = $(this).html();
+      text = text.replace(' UTC', 'Z').replace(' ', 'T');
+      var d = _fpa.utils.YMDtimeToLocale(text);
+      $(this).html(d);
+    }).addClass('formatted-datetime-local')
   },
 
   setup_drag_and_drop: function (block) {

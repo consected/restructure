@@ -1,5 +1,10 @@
 <% 
   mapped_vars = OptionConfigs::TemplateOptionMapping.activity_log_all_configs_mapping(def_record, current_user)
+
+  if def_record.implementation_class_defined?(::ActivityLog, fail_without_exception: true)
 %>
 <%= render partial: 'activity_logs/common_search_results_template', 
            locals: mapped_vars  if current_user.has_access_to?(:access, :table, def_record.full_item_type_name.pluralize) %>
+<% 
+  end
+%>

@@ -371,6 +371,9 @@ module Formatter
         item.latest_reference
       elsif an == 'first' && item.respond_to?(:first)
         item.first
+      elsif an == 'constants'
+        # Options constants
+        item.versioned_definition.options_constants&.dup if item.respond_to?(:versioned_definition)
       elsif an == 'app_protocols' && master.current_user
         Classification::Protocol
           .enabled

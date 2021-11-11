@@ -198,6 +198,7 @@ module OptionConfigs
       config_obj.table_comments = res.delete(:_comments)
       config_obj.db_columns = res.delete(:_db_columns)
       config_obj.data_dictionary = res.delete(:_data_dictionary)
+      config_obj.options_constants = res.delete(:_constants)
 
       # Only run through additional processing of comments if the
       # configuration was just saved

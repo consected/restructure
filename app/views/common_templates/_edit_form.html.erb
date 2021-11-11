@@ -220,7 +220,7 @@
               raise FphsException.new "Column #{field_name} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}" unless col
               column_type = col.type
             end
-            local_vars = {locals: {
+            local_vars =  {
               form: form,
               field_name_sym: field_name_sym,
               field_name: field_name,
@@ -232,9 +232,9 @@
               dialog_before: dialog_before,
               labels: labels,
               embedded: embedded
-              }
+              
             }
-            local_vars[:locals][:locals] = local_vars[:locals]
+            local_vars[:locals] = local_vars
 
             showed_caption_before = nil
           %>
@@ -255,9 +255,9 @@
             </li>
           <% end %>
 
-          <% rendered_field = render local_vars.merge(partial: 'common_templates/edit_form_field') %>
-          <li class="list-group-item edit-field-container <%= @matched_name %> <%= showed_caption_before ? 'showed-caption-before' : ''%> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-field-item' : ''%>">
-            <%= rendered_field %>
+
+          <li class="list-group-item edit-field-container column_type_<%= column_type %> <%= showed_caption_before ? 'showed-caption-before' : ''%> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-field-item' : ''%>">
+            <%= edit_form_field(**local_vars) %>
           </li>
 
           <%  if item_flags_after == field_name_sym && item_flags_array.length > 0 %>

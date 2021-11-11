@@ -135,6 +135,15 @@ module Redcap
       nil
     end
 
+    #
+    # Provide a 'version' string to allow us to check for changes.
+    # We have to sort the data by key, since it is arbitrary the order that is returned
+    # @return [String]
+    def captured_metadata_digest
+      txt = captured_metadata.map { |i| i.sort { |a, b| b.first <=> a.first } }.to_s
+      Digest::MD5.hexdigest(txt)
+    end
+
     private
 
     #

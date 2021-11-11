@@ -2,52 +2,8 @@
   @report = report if local_assigns[:report]
   @results = results if local_assigns[:results]
   @outer_block_id = outer_block_id if local_assigns[:outer_block_id]
-  column_options = @report.report_options.column_options
-  view_options = @report.report_options.view_options
-
-  col_classes = {}
-  col_tags = {}
-  col_hide = {}
-  show_as = {}
-
-  if column_options
-    column_options.classes&.each do |k,v|
-      col_classes[k] = v.is_a?(Array) ? v.join(' ') : v
-    end
-
-    column_options.tags&.each do |k,v|
-      col_tags[k] = v
-    end
-
-    column_options.hide&.each do |k,v|
-      col_hide[k] = v
-    end
-
-    column_options.show_as&.each do |k,v|
-      show_as[k] = v
-    end
-
-  end
-
-
-  show_col_comments = view_options&.show_column_comments
-
-  if show_col_comments.is_a? Array
-    schema_tables = show_col_comments
-  elsif show_col_comments
-    tn = @runner.data_reference.table_name
-    sn = @runner.data_reference.schema_name
-    schema_tables = ["#{sn}.#{tn}"]
-  end
-  if show_col_comments
-    tab_col_comments = Admin::MigrationGenerator.column_comments
-  end
-
-  if tn || view_options&.corresponding_data_dic
-    corr_data_dic = view_options&.corresponding_data_dic || tn&.sub("_data", '')
-    data_dic = Admin::MigrationGenerator.data_dic(corr_data_dic, nil_if_empty: true)
-  end
-
+  @result_tables = result_tables if local_assigns[:result_tables]
+  setup_column_options
 %>
 <div class="report-results-table-block" id="<%=@outer_block_id%>-table-block">
 
@@ -57,54 +13,15 @@
         <% if editable? %><th class="no-sort edit-button-column"></th><% end %>
         <%
           i = 0
+          hide_cols = []
 
-          table_names = result_tables.uniq
-          num_tables = table_names.length
-        %>
-        <% 
           @results.fields.each do |col|
-            unless col_hide[col]
-
-            if show_col_comments 
-              comment = tab_col_comments.find{|tc| "#{tc['schema_name']}.#{tc['table_name']}".in?(schema_tables)  && tc['column_name'] == col }
-              comment = comment['column_comment'] if comment
-            end
-            
-            if data_dic
-              comm_attrib = data_dic.find{|dd| dd['variable_name'] == col}
-            end
-
-            comm_attrib_txt = nil
-            if comm_attrib
-              comm_attrib = comm_attrib.dup 
-              domain = comm_attrib['domain']
-              fa = comm_attrib['field_attributes']
-              fn = comm_attrib['field_note']
-              
-              fa = fa.split(' | ').join("<br/>") +'<br/>' if fa.present?
-              fn = "(#{fn})" if fn.present?
-              
-              comm_attrib_txt = "<div><span class=\"domain\">#{domain}</span><br/><span>#{fa}</span>#{fn}</div>"
-            end
+            @col = col
+            hide_this = report_cell_hide?(i)
+            hide_cols << hide_this
+            unless hide_this
         %>
-          <th title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="<%=col%>" class="table-header <%= col_classes[@results.fields[i]] %> <%=comment.present? ? 'has-comment' : 'no-comment' %>">
-            <% unless view_options.hide_field_names_with_comments && comment %><p class="table-header-col-type"><%=view_options.humanize_column_names ? col.humanize : col%></p><% end %>
-            <% unless num_tables == 1 %>
-            <% unless view_options.hide_table_names %>
-            <p class="small report-table-name" title="<%=result_tables[i] %>"><%=result_tables[i] %></p>
-            <% end %>
-            <% end %>
-            <% if show_col_comments %>
-            <p class="report-column-comment">
-            <%= comment %>
-            </p>
-            <% if comm_attrib_txt %>
-            <div class="report-column-comment report-column-attribs">
-              <%= comm_attrib_txt.html_safe %>            
-            </div>
-            <% end %>
-            <% end %>
-          </th>
+        <%= report_table_header_cell(i, col) %>
         <%  
             end
             i += 1
@@ -121,109 +38,20 @@
          <% if editable? %>
          <td class="report-el report-edit-btn-cell"><%= report_edit_btn list_item[0]%> </td>
          <% end %>
-          <% i = 0 %>
-
-          <% 
+          <%
+            i = 0 
             list_item.each do |col| 
-              col_name = @results.fields[i]
-              unless col_hide[col_name]
+              unless hide_cols[i]
           %>
-          <td data-col-type="<%=@results.fields[i] %>" data-col-table="<%=result_tables[i] %>" data-col-var-type="<%=col.class.name%>" <% if col.class == Date || col.class == Time %> data-time-orig-val="<%=col.to_s%>" <% end %> class="report-el <%= @results.fields[i] == 'id' ? 'report-el-object-id' : '' %> <%= col_classes[@results.fields[i]] %>"><%
-                col_tag = col_tags[col_name] 
-                l = col&.scan("\n")&.length if col.is_a?(String)
-                l ||= 0
-                got_nl = (l >= 1)
-                col = col.to_json if col.is_a?(Hash)
-                col_tag ||= 'pre' if got_nl
-                
-                add_class = if col_tag == 'pre' && l > 4
-                  'expandable'
-                end
-
-                case show_as[col_name] 
-                when 'div'
-                  col_tag = 'div' 
-                when 'fixed-pre'
-                  col_tag = 'pre'
-                  add_class = ''    
-                when 'checkbox'
-                  col_tag = 'div'   
-                  col = if col
-                          "<span class=\"glyphicon glyphicon-check val-true\"></span>".html_safe  
-                        else
-                          "<span class=\"val-false\"></span>".html_safe  
-                        end
-                  col = "<div class=\"report-cb-inner\">#{col}</div>".html_safe
-                when 'options'
-                  col_tag = 'div'
-                  
-                  if col.is_a?(String)
-                    if col.present?
-                      col = JSON.parse(col) 
-                    else
-                      col = nil
-                    end
-                  end
-                  
-                  if col
-                    col = col.map do |citem|
-                      "<div class=\"report-option-items\"><div><strong>#{citem.first}</strong>&nbsp;<span>#{citem.last}</span></div></div>"
-                    end.join("").html_safe
-                  end
-                when 'list'
-                  col_tag = 'ul'
-                  
-                  if col.is_a?(String)
-                    if col.present?
-                      col = JSON.parse(col) 
-                    else
-                      col = nil
-                    end
-                  end
-                  
-                  if col
-                    col = col.map do |citem|
-                      "<li class=\"report-list-items\">#{citem}</li>"
-                    end.join("").html_safe
-                  end
-                when 'url'
-                  if col.present?
-                    col_url_parts = col&.scan(/^\[([\w\s\d]+)\]\((.+)\)$/)
-                    col = link_to(col_url_parts&.first&.first, col_url_parts&.first&.last, target: '_blank')
-                  end
-                  col_tag = 'div'
-                else
-                col_tag = show_as[col_name] if show_as[col_name].present? 
-                end
-                
-            %><% if col_tag%><<%=col_tag%> class="<%=add_class%>"><% end %><%= col %><% if col_tag %></<%=col_tag%>><% end %></td>
-          <%  
+            <%= report_table_result_cell(i, col)%>
+          <%
               end
               i += 1
             end 
           %>
         </tr>
       <% end %>
-      <tr class="<%= editable? ? '' : 'hidden' %>" id="report-item-new">
-
-        <% if editable? %>
-        <td class="report-el report-edit-btn-cell"><%= report_edit_btn 'new'%>
-          <% if creatable? %>
-            <div class="">
-              <%= link_to "", new_report_path(report_id: @report.id), remote: true, class: "btn btn-primary report-new-item-btn glyphicon glyphicon-plus", title: 'add new report item' %>
-            </div>
-          <% end %>
-        </td>
-        <% end %>
-        <% i = 0 %>
-
-        <% @results.fields.each do |field| %>
-          <td data-col-type="<%=field %>" data-col-table="<%=result_tables[i] %>" class="report-el-was-from-new report-el <%= field == 'id' ? 'report-el-object-id' : '' %>"></td>
-          <%  i += 1 %>
-        <% end %>
-
-        </tr>
-      </tr>
+      <%= render partial: 'reports/result_template/edit_row' %>
     </tbody>
   </table>
 </div>

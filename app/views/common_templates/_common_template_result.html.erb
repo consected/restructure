@@ -44,6 +44,11 @@
 <script id="common_template_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{# with (fpa_state_item 'template_config' (underscore name) vdef_version )}}
     {{> common_template_result_inner result_data=../result_data name=../name template_config=this _created=../_created vdef_version=../vdef_version}}
+  {{else}}
+    {{log 'template_config not found for the version information below'}}
+    {{log fpa_state_item 'template_config' (underscore name) vdef_version}}
+    {{log (fpa_state_item 'template_config' (underscore name) vdef_version)}}
+    {{log this}}
   {{/with}}
 </script>
 

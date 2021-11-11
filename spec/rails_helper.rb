@@ -102,16 +102,29 @@ Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 put_now 'Enforce migrations'
 ActiveRecord::Migration.maintain_test_schema!
 
-sql = 'DROP SCHEMA IF EXISTS redcap_test CASCADE;
-CREATE SCHEMA redcap_test;
-DROP SCHEMA IF EXISTS dynamic_test CASCADE;
-CREATE SCHEMA dynamic_test;
-'
+`mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
+
+sql = <<~END_SQL
+  DROP SCHEMA IF EXISTS redcap_test CASCADE;
+  CREATE SCHEMA redcap_test;
+  DROP SCHEMA IF EXISTS dynamic_test CASCADE;
+  CREATE SCHEMA dynamic_test;
+
+  -- Clean up the migrations that need to be rerun in redcap-test
+  delete from schema_migrations where version in (
+    '20211105105700',
+    '20211105105701',
+    '20211105105702'
+  );
+END_SQL
+
 ActiveRecord::Base.connection.execute sql
+
 # We need to ensure that dynamic tables are in place before we setup dynamic models
 # in each example, otherwise the tests lock up.
 db_migration_dirname = Rails.root.join('spec/migrations')
 ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+puts "Exists test_file_field_recs? > #{ActiveRecord::Base.connection.table_exists?('test_file_field_recs')}"
 
 RSpec.configure do |config|
   config.before(:suite) do

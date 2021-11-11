@@ -373,7 +373,7 @@ module MasterHandler
   def set_instance_list_from_id
     @id_list = params[:id].split(',')
     @instance_list = primary_model.where(id: @id_list)
-    @master.current_user = current_user
+    @master.current_user = current_user unless primary_model.no_master_association
   end
 
   #

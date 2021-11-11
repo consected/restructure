@@ -1,3 +1,7 @@
+<% if form_object_instance[field_name].is_a?( DateTime) || form_object_instance[field_name].is_a?(Time)%>
+  <%= render partial: "common_templates/edit_fields/column_type_datetime", locals: locals %>
+<% else %>
 <% options = field_options_for(form_object_instance, field_name_sym) %>
 <%= form.label field_name_sym, label_for(field_name_sym, labels) %>
 <%= form.date_field field_name_sym, options.merge({ data: {attr_name: field_name_sym, object_name: form_object_item_type_us}})  %>
+<% end %>
