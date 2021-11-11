@@ -14,6 +14,8 @@ module Utilities
   #
   class Encryption
     if Settings::EncryptionSecretKeyBase
+      raise FphsException, 'Settings::EncryptionSalt not set' unless Settings::EncryptionSalt
+
       KEY = ActiveSupport::KeyGenerator.new(
         Settings::EncryptionSecretKeyBase
       ).generate_key(
