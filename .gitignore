@@ -75,3 +75,6 @@ db/demo-data.sql
 # used for testing and the credentials are not real.
 # /config/master.key
 # credentials.yml
+
+# Ignore IDE configs
+.idea/
