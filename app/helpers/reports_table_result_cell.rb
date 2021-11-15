@@ -4,14 +4,15 @@
 # A non-helper class to support ReportsTableHelper, without
 # polluting the global namespace
 class ReportsTableResultCell
-  attr_accessor :cell_content, :col_tag, :col_show_as, :col_name, :table_name
+  attr_accessor :cell_content, :col_tag, :col_show_as, :col_name, :table_name, :selection_options
 
-  def initialize(table_name, cell_content, col_name, col_tag, col_show_as)
+  def initialize(table_name, cell_content, col_name, col_tag, col_show_as, selection_options)
     self.cell_content = cell_content
     self.col_name = col_name
     self.col_tag = col_tag
     self.col_show_as = col_show_as
     self.table_name = table_name
+    self.selection_options = selection_options
   end
 
   #
@@ -184,58 +185,8 @@ class ReportsTableResultCell
   def cell_content_for_choice_label
     return cell_content unless cell_content.present?
 
-    got = nil
-    if respond_to?("#{col_name}_options")
-      got = true
-      result = send("#{col_name}_options")
-    end
-
-    unless got
-
-      @gs_exists ||= {}
-      ckey = "#{table_name}--#{col_name}"
-      if @gs_exists[ckey].nil? && model_object
-        @gs_exists[ckey] =
-          !!Classification::GeneralSelection.exists_for?(model_object, col_name)
-      end
-      gs_exists = @gs_exists[ckey]
-
-      if gs_exists
-        @gs ||= {}
-        got = true
-
-        gs = if @gs.key?(ckey)
-               @gs[ckey]
-             else
-               general_selection_name = general_selection_prefix_name(model_object)
-               @gs[ckey] = general_selection("#{general_selection_name}_#{col_name}".to_sym,
-                                             return_all: true,
-                                             quiet_fail: true)
-             end
-        unless gs
-          raise FphsException,
-                "The general selection #{general_selection_name}_#{col_name_sym} has not been defined. " \
-                'Please inform the administrator of this error.'
-        end
-
-        result = gs.find { |r| r[1] == cell_content }
-      end
-    end
-
-    unless got || !model_object
-      @opts ||= {}
-      ckey = "#{table_name}--#{col_name}"
-      alt_options = if @opts.key? ckey
-                      @opts[ckey]
-                    else
-                      if model_object.respond_to?(:option_type_config) && model_object.option_type_config
-                        opt = model_object.option_type_config.field_options[col_name.to_sym]
-                      end
-
-                      @opts[ckey] = opt.dig(:edit_as, :alt_options).map { |k, v| [v.to_s, k] }.to_h
-                    end
-      result = alt_options[cell_content.to_s] if alt_options
-    end
+    result = selection_options.label_for col_name, cell_content
+    result = model_object.send("#{col_name}_options") if result.nil? && model_object.respond_to?("#{col_name}_options")
 
     result
   end

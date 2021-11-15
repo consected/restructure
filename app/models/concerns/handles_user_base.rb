@@ -134,6 +134,12 @@ module HandlesUserBase
       name.ns_underscore.pluralize
     end
 
+    # Returns the full model name, namespaced like 'module__class' if there is a namespace.
+    # otherwise it returns just the basic name
+    def item_type
+      name.singularize.ns_underscore
+    end
+
     #
     # Permitted parameters for strong param whitelist are generated based on
     # configured attributes, minus some standard fields
