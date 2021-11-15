@@ -41,10 +41,12 @@ module ReportsTableHelper
       @show_as[col_name] ||= 'checkbox'
     end
 
-    cell = ReportsTableResultCell.new(col_content, col_name, @col_tags[col_name], @show_as[col_name])
+    table_name = @result_tables[field_num]
+
+    cell = ReportsTableResultCell.new(table_name, col_content, col_name, @col_tags[col_name], @show_as[col_name],
+                                      selection_options_handler_for(table_name))
     col_tag = cell.html_tag
     col_content = cell.view_content
-    table_name = @result_tables[field_num]
 
     if col_tag.present?
       col_tag_start = "<#{col_tag} class=\"#{cell.expandable? ? 'expandable' : ''}\">"
@@ -129,5 +131,18 @@ module ReportsTableHelper
 
   def report_column_name(field_num)
     @results.fields[field_num]
+  end
+
+  #
+  # Returns a selection option handler set up for the specified table name
+  # Memoizes it, allowing the internal memoization of the handler object to function
+  # @param [String | Symbol] table_name
+  # @return [Classification::SelectionOptionsHandler]
+  def selection_options_handler_for(table_name)
+    table_name = table_name.to_s
+    @selection_options_for ||= {}
+    return @selection_options_for[table_name] if @selection_options_for.key?(table_name)
+
+    @selection_options_for[table_name] = Classification::SelectionOptionsHandler.new(table_name: table_name)
   end
 end

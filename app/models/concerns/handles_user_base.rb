@@ -14,6 +14,7 @@ module HandlesUserBase
     before_validation :force_write_user
 
     before_validation :downcase_attributes
+    before_validation :translate_fields_to_persistable
 
     before_create :write_created_by_user
 
@@ -120,6 +121,8 @@ module HandlesUserBase
       # Check at a table level that the user can access the resource
       named = if respond_to? :definition
                 definition.resource_name
+              elsif respond_to? :resource_name
+                resource_name
               else
                 name.ns_underscore.pluralize
               end
@@ -132,6 +135,12 @@ module HandlesUserBase
     # @return [String]
     def resource_name
       name.ns_underscore.pluralize
+    end
+
+    # Returns the full model name, namespaced like 'module__class' if there is a namespace.
+    # otherwise it returns just the basic name
+    def item_type
+      name.singularize.ns_underscore
     end
 
     #
@@ -794,5 +803,11 @@ module HandlesUserBase
 
     refs_pointing_to_self = ModelReference.find_references_to(self)
     refs_pointing_to_self.update_all(disabled: true)
+  end
+
+  #
+  # Fields with certain field_options: edit_as configurations need to be translated
+  def translate_fields_to_persistable
+    Dynamic::FieldEditAs::Handler.new(self).translate_to_persistable
   end
 end

@@ -18,6 +18,10 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+### Transfer from Harvard @7.4.71.1 - 2021-11-15
+
+- [Added] column option for "choice_label" and ensure it works for all types of display and editing
+- [Fixed] report edit forms and results format and submit dates correctly
 - [Fixed] form, credential and trigger bugs
 
 ## [8.0.21] - 2021-11-11
