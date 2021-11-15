@@ -46,8 +46,8 @@ _fpa.postprocessors_reports = {
       $(block).contents().appendTo(`#${target_block}`)
       window.setTimeout(function () {
         _fpa.form_utils.resize_labels($(`#${target_block}`), null, true)
-      }, 100);
-    }, 20);
+      }, 500);
+    }, 500);
   },
 
   reports_form: function (block, data) {
