@@ -47,9 +47,7 @@ module Formatter
         end
 
         res = if got
-                fs = Classification::GeneralSelection.field_selections_hashes
-                rn = "#{obj.resource_name}_#{i}".to_sym
-                item = fs[rn] && fs[rn][val] && fs[rn][val][:name]
+                item = Classification::SelectionOptionsHandler.label_for(obj, i, val)
                 item || formatter_do(val.class, val, current_user: obj.current_user)
               else
                 i

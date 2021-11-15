@@ -148,9 +148,7 @@ class ReportsController < UserBaseController
     return not_authorized unless @report.editable_data?
 
     if @report_item.update(secure_params)
-      # Need to update the master_id manually, since it could have been set by a trigger
-      res = @report_item.class.find(@report_item.id)
-      @report_item.master_id = res.master_id if res.respond_to?(:master_id) && res.master_id
+      refresh_updated_data
       render json: { report_item: @report_item }
     else
       logger.warn "Error updating #{@report_item}: #{@report_item.errors.inspect}"
@@ -161,10 +159,7 @@ class ReportsController < UserBaseController
 
   def create
     if @report_item.save
-      # Need to update the master_id manually, since it could have been set by a trigger
-      res = @report_item.class.find(@report_item.id)
-      @report_item.master_id = res.master_id if res.respond_to?(:master_id) && res.master_id
-
+      refresh_updated_data
       render json: { report_item: @report_item }
     else
       logger.warn "Error creating #{@report_item}: #{@report_item.errors.inspect}"
@@ -420,5 +415,34 @@ class ReportsController < UserBaseController
 
   def no_run
     @no_run ||= search_attrs_params_hash[:no_run] == 'true'
+  end
+
+  #
+  # Update the updated or created report item to ensure the response shows correctly,
+  # based on the user privileges and any selection options that need to be replaced
+  def refresh_updated_data
+    if @report_item.respond_to?(:master_id) && @report_item.respond_to?(:id)
+      # Need to update the master_id manually, since it could have been set by a trigger
+      res = @report_item.class.find(@report_item.id)
+      @report_item.master_id = res.master_id if res.master_id
+    end
+
+    # Run through each column option and handle those that request 'choice_label'
+    # to replace results that are selection based.
+    sa = @report.report_options.column_options.show_as
+    return unless sa
+
+    sa.each do |col_name, show_as|
+      cell_content = @report_item[col_name]
+      next unless cell_content && show_as == 'choice_label'
+
+      selection_options = helpers.selection_options_handler_for(@report_item.class.table_name)
+      result = selection_options.label_for col_name, cell_content
+      if result.nil? && @report_item.respond_to?("#{col_name}_options")
+        result = @report_item.send("#{col_name}_options")
+      end
+
+      @report_item[col_name] = result
+    end
   end
 end

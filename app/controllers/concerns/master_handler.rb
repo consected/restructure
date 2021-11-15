@@ -364,7 +364,7 @@ module MasterHandler
     return if canceled?
 
     set_object_instance primary_model.find(params[:id])
-    object_instance.master.current_user = current_user if object_instance.respond_to?(:master) && object_instance.master
+    object_instance.master.current_user = current_user unless primary_model.no_master_association
     @id = object_instance.id
   end
 

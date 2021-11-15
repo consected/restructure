@@ -25,13 +25,13 @@ module EditFormFieldHelper
     # Get the list of filenames for templates, making them into the matchers we wish to use.
     # Sort by length to ensure the more specific matchers appear before the less specific matchers.
     # For example 'name_starts_with_select_record_from' should be tested before 'name_starts_with_select'
-    f_names = @f_names ||= Dir.entries(Rails.root.join('app', 'views', 'common_templates',
-                                                       'edit_fields')).reject do |fn|
-                             fn.start_with?('.')
-                           end.map do |fn|
-                             fn[1..-10]
-                           end.sort do |a, b|
-      b.length <=> a.length
+    if @f_names
+      f_names = @f_names
+    else
+      efs = Dir.entries(Rails.root.join('app', 'views', 'common_templates', 'edit_fields'))
+      f_names = @f_names = efs.reject { |fn| fn.start_with?('.') }
+                              .map { |fn| fn[1..-10] }
+                              .sort { |a, b| b.length <=> a.length }
     end
 
     got = false
@@ -46,15 +46,12 @@ module EditFormFieldHelper
 
     curr_field_name_sym = curr_field_name.to_sym
 
-    unless got
-      f_names.select { |fn| fn.start_with?('redcap_') }.map { |fn| fn.sub('redcap_', '') }.each do |ew|
-        match_name = "redcap_#{ew}"
-        next unless curr_field_name.end_with?("_#{ew}") && f_names.include?(match_name)
-
-        partial_fn = "common_templates/edit_fields/#{match_name}"
-
+    if !got && curr_field_name.start_with?('redcap_')
+      # Use a select rather than just includes? to ensure brakeman doesn't complain about params driving render paths
+      resname = f_names.find { |f| f == curr_field_name }
+      if resname
+        partial_fn = "common_templates/edit_fields/#{resname}"
         got = render partial: partial_fn, locals: local_vars[:locals]
-        break
       end
     end
 
@@ -70,9 +67,9 @@ module EditFormFieldHelper
     end
 
     unless got
-      f_names.select do |fn|
-        fn.start_with?('name_starts_with_')
-      end.map { |fn| fn.sub('name_starts_with_', '') }.each do |sw|
+      f_names.select { |fn| fn.start_with?('name_starts_with_') }
+             .map { |fn| fn.sub('name_starts_with_', '') }
+             .each do |sw|
         match_name = "name_starts_with_#{sw}"
         next unless curr_field_name.start_with?("#{sw}_") && f_names.include?(match_name)
 

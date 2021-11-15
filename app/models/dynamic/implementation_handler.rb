@@ -124,15 +124,17 @@ module Dynamic
 
       if da
         @processing_data = true
-        Formatter::Formatters.format_data_attribute da, self, ignore_missing: :show_tag
-      else
-        n = if attribute_names.include? 'data'
+        res = Formatter::Formatters.format_data_attribute da, self, ignore_missing: :show_tag
+        @processing_data = false
+        return res
+      end
+
+      res = if attribute_names.include? 'data'
               attributes['data']
             else
               dopt&.label || option_type.to_s.humanize
             end
-        n.to_s
-      end
+      res.to_s
     end
 
     #
