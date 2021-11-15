@@ -529,7 +529,7 @@ module Dynamic
       return @always_embed_creatable_model_reference if @always_embed_creatable_model_reference
 
       raise FphsException,
-            'Creatable reference not found for always_embed_creatable_reference named ' \
+            'Creatable reference not found or not creatable for always_embed_creatable_reference named ' \
             "#{always_embed_creatable}" \
             "#{always_embed_creatable != always_embed_creatable.singularize ? ' Try singular version' : ''}"
     end

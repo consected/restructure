@@ -130,7 +130,21 @@ _fpa.form_utils = {
 
   // Called on form submit event for AJAX or page submissions, to ensure
   // all fields are appropriately handled
+  // In report edit forms, the input fields are outside the DOM block, but refer to the
+  // form using the "form" attribute, indicating they belong to it. Check for this
+  // and adjust the block to be formatted appropriately.
   on_form_submit: function (block) {
+
+    if (block && block.is('form')) {
+      var form_id = block.prop('id');
+      if (form_id) {
+        var inputs = $(`[form="${form_id}"]`).parent();
+        if (inputs.length) {
+          block = inputs;
+        }
+      }
+    }
+
     _fpa.form_utils.date_inputs_to_iso(block);
     _fpa.form_utils.unmask_inputs(block);
   },
