@@ -104,6 +104,10 @@ module SelectorCache
       end
     end
 
+    #
+    # Get the all enabled general selection data (optional conditions) as an array of results.
+    # @param [Hash | nil] conditions
+    # @return [Array{Hash}]
     def selector_collection(conditions = nil)
       ckey = "#{collection_cache_key}#{conditions}"
 

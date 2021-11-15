@@ -60,7 +60,7 @@ class ActivityLog < ActiveRecord::Base
   def self.all_valid_item_and_rec_types
     Classification::GeneralSelection
       .selector_collection(['item_type like ?', '%_type'])
-      .map { |i| [i.item_type.sub(/(_rec)?_type$/, '').singularize, i.value].join('_') } +
+      .map { |i| [i[:item_type].sub(/(_rec)?_type$/, '').singularize, i.value].join('_') } +
       use_with_class_names
   end
 

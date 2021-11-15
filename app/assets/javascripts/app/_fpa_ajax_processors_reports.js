@@ -213,27 +213,31 @@ _fpa.postprocessors_reports = {
     }, 50);
 
     window.setTimeout(function () {
-      $('td[data-col-type$="_when"], td[data-col-type$=" when"], td[data-col-type$="_date"], td[data-col-type$=" date"], td[data-col-type="date"], td[data-col-var-type="Date"]').not('.td-date-formatted, [data-col-var-type="Time"]').each(function () {
-        var d = null;
-        var val = $(this).html();
-        if (val == 'Invalid Date')
-          d = '';
-        else if (val && val != '')
-          d = _fpa.utils.YMDtoLocale(val);
-        $(this).html(d);
-      }).addClass('td-date-formatted');
-
-      $('td[data-col-type$="_at"], td[data-col-type$="_time"], td[data-col-type$=" time"], td[data-col-type$=" at"], td[data-col-var-type="Time"]').not('.td-time-formatted').each(function () {
-        var d = null;
-        var val = $(this).html();
-        if (val == 'Invalid Date')
-          d = '';
-        else if (val && val != '')
-          d = _fpa.utils.YMDtimeToLocale(val);
-        $(this).html(d);
-      }).addClass('td-time-formatted');
-
+      _fpa.postprocessors_reports.report_format_result_cells(block, data);
     }, 500);
+
+  },
+
+  report_format_result_cells: function (block, data) {
+    $('td[data-col-type$="_when"], td[data-col-type$=" when"], td[data-col-type$="_date"], td[data-col-type$=" date"], td[data-col-type="date"], td[data-col-var-type="Date"]').not('.td-date-formatted, [data-col-var-type="Time"]').each(function () {
+      var d = null;
+      var val = $(this).html();
+      if (val == 'Invalid Date')
+        d = '';
+      else if (val && val != '')
+        d = _fpa.utils.YMDtoLocale(val);
+      $(this).html(d);
+    }).addClass('td-date-formatted');
+
+    $('td[data-col-type$="_at"], td[data-col-type$="_time"], td[data-col-type$=" time"], td[data-col-type$=" at"], td[data-col-var-type="Time"]').not('.td-time-formatted').each(function () {
+      var d = null;
+      var val = $(this).html();
+      if (val == 'Invalid Date')
+        d = '';
+      else if (val && val != '')
+        d = _fpa.utils.YMDtimeToLocale(val);
+      $(this).html(d);
+    }).addClass('td-time-formatted');
 
   },
 
@@ -309,6 +313,12 @@ _fpa.postprocessors_reports = {
 
     $('tr#report-item-edit-' + id).remove();
     $('tr#report-item-new').show();
+
+    window.setTimeout(function () {
+      row.find('.td-time-formatted').removeClass('td-time-formatted');
+      row.find('.td-date-formatted').removeClass('td-date-formatted');
+      _fpa.postprocessors_reports.report_format_result_cells(row, data);
+    }, 50)
 
   }
 

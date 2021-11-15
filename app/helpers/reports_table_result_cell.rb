@@ -4,13 +4,15 @@
 # A non-helper class to support ReportsTableHelper, without
 # polluting the global namespace
 class ReportsTableResultCell
-  attr_accessor :cell_content, :col_tag, :col_show_as, :col_name
+  attr_accessor :cell_content, :col_tag, :col_show_as, :col_name, :table_name, :selection_options
 
-  def initialize(cell_content, col_name, col_tag, col_show_as)
+  def initialize(table_name, cell_content, col_name, col_tag, col_show_as, selection_options)
     self.cell_content = cell_content
     self.col_name = col_name
     self.col_tag = col_tag
     self.col_show_as = col_show_as
+    self.table_name = table_name
+    self.selection_options = selection_options
   end
 
   #
@@ -66,6 +68,13 @@ class ReportsTableResultCell
   def content_lines
     l = cell_content&.scan("\n")&.length if cell_content.is_a?(String)
     l || 0
+  end
+
+  def model_object
+    @model_object ||= {}
+    return @model_object[table_name] if @model_object.key? table_name
+
+    @model_object[table_name] = UserBase.class_from_table_name(table_name)&.new
   end
 
   #####
@@ -140,6 +149,10 @@ class ReportsTableResultCell
     end.join('').html_safe
   end
 
+  #
+  # Show the result as a link to be opened link to be opened in a new tab.
+  # The content should be formatted using Markdown format
+  #     [label for link](/url/path)
   def cell_content_for_url
     return cell_content unless cell_content.present?
 
@@ -164,5 +177,17 @@ class ReportsTableResultCell
     END_HTML
 
     html.html_safe
+  end
+
+  #
+  # Show the result as a the label from a choice, such as a general selection or the alt_options in a dynamic model
+  # @todo Refactor this
+  def cell_content_for_choice_label
+    return cell_content unless cell_content.present?
+
+    result = selection_options.label_for col_name, cell_content
+    result = model_object.send("#{col_name}_options") if result.nil? && model_object.respond_to?("#{col_name}_options")
+
+    result
   end
 end
