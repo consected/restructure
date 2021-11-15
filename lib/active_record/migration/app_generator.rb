@@ -376,7 +376,7 @@ module ActiveRecord
         changed_history = {}
         if history_table_exists
           db_configs.each do |k, v|
-            current_type = history_cols.find { |c| c.name == k.to_s }.type
+            current_type = history_cols.find { |c| c.name == k.to_s }&.type
             next unless v[:type] && current_type
 
             expected_type = (v[:type]&.to_sym || :string)

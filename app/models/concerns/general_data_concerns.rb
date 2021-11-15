@@ -98,6 +98,8 @@ module GeneralDataConcerns
   def tracker_histories
     return @memo_tracker_histories if @memo_tracker_histories
 
+    return unless respond_to? :master_id
+
     # Check for the existence of tracker_histories in the super class. If it
     # already exists, it is an association that we should not be overriding
     @memo_tracker_histories = if defined?(super)
@@ -113,7 +115,7 @@ module GeneralDataConcerns
 
   # look up the tracker_history item that corresponds to the latest tracker entry linked to this item
   def tracker_history
-    tracker_histories.last
+    tracker_histories&.last
   end
 
   def tracker_history_id
@@ -173,7 +175,7 @@ module GeneralDataConcerns
       extras[:methods] << :protocol_name if respond_to? :protocol_name
       extras[:methods] << :sub_process_name if respond_to? :sub_process_name
       extras[:methods] << :protocol_event_name if respond_to? :protocol_event_name
-      if !hide_tracker_panel && !is_a?(Tracker) && !is_a?(TrackerHistory) && (respond_to?(:tracker_history_id) || respond_to?(:tracker_history))
+      if !hide_tracker_panel && !is_a?(Tracker) && !is_a?(TrackerHistory) && (respond_to?(:tracker_histories) || respond_to?(:tracker_history))
         extras[:methods] << :tracker_history_id
         extras[:methods] << :tracker_histories if respond_to? :tracker_histories
       end
@@ -214,7 +216,7 @@ module GeneralDataConcerns
       extras[:methods] << :def_version
       extras[:methods] << :vdef_version
 
-      extras[:methods] << :ids if respond_to? :master
+      extras[:methods] << :ids if respond_to?(:master) && !self.class.no_master_association
 
     elsif allows_current_user_access_to?(:see_presence_or_access)
 
