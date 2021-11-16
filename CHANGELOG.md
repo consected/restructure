@@ -20,6 +20,9 @@ release will be created for any release tested in production, and may be marked 
 
 - Bump version
 
+## [8.0.23] - 2021-11-16
+
+
 ## [8.0.22] - 2021-11-15
 
 ### Transfer from Harvard @7.4.71.1 - 2021-11-15
