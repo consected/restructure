@@ -1,1 +1,41 @@
-<% raise FphsException.new "Bad action" %>
+<div class="col-md-8 col-md-offset-8 well">
+  <h2>New User Registration</h2>
+  <%= form_for(resource, as: resource_name, url: users_registrations_create_path) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <div class="field">
+      <%= f.label :email %><br />
+      <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
+      <%# should respond with error if uniqueness validator fails %>
+    </div>
+
+    <div class="field">
+      <%= f.label :first_name %><br />
+      <%= f.text_field :first_name %>
+      <%# should respond with error if presence validator fails %>
+    </div>
+
+    <div class="field">
+      <%= f.label :last_name %><br />
+      <%= f.text_field :last_name %>
+      <%# should respond with error if presence validator fails %>
+    </div>
+
+    <div class="form-group-non">
+      <%= f.label 'enter new password',  'data-add-icon' => 'info-sign', title: 'minimum 8 characters'  %><br />
+      <%= f.password_field :password, autocomplete: "new-password", class: "form-control", minlength: 8, pattern: ".{8,72}", required: true, title: 'minimum 8 characters'%>
+      <%# should respond with error if password validator fails %>
+    </div>
+
+    <div class="form-group-non">
+      <%= f.label :password_confirmation,  'data-add-icon' => 'info-sign', title: 'minimum 8 characters'  %><br />
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control", minlength: 8, pattern: ".{8,72}", required: true, title: 'minimum 8 characters'%>
+      <%# should respond with error if password validator fails %>
+    </div>
+
+    <div class="actions">
+      <%= f.submit "Sign up", class: "btn btn-primary" %>
+      <%= render "devise/shared/links" %>
+    </div>
+  <% end %>
+</div>

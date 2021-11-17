@@ -13,9 +13,9 @@ class User < ActiveRecord::Base
 
   # A configuration allows two factor authentication to be disabled for the app server
   if two_factor_auth_disabled
-    devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
+    devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable, :registerable
   else
-    devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable,
+    devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable, :registerable,
            otp_secret_encryption_key: otp_enc_key
   end
 
@@ -27,6 +27,8 @@ class User < ActiveRecord::Base
   default_scope -> { order email: :asc }
   scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPattern) }
   before_save :set_app_type
+
+  after_save :set_user_roles
 
   #
   # The template user is assigned to newly created roles to ensure they are exported
@@ -121,6 +123,11 @@ class User < ActiveRecord::Base
     !disabled ? super : :account_has_been_disabled
   end
 
+  def after_sign_up_path_for(resource)
+    #TODO where? go to login
+    super
+  end
+
   #
   # Simply return the email for the user if a string is requested
   # @return [String]
@@ -177,5 +184,9 @@ class User < ActiveRecord::Base
   # Ensure that the app type being set for the user is valid and accessible to him
   def set_app_type
     self.app_type_id = nil if app_type_id && !app_type_valid?
+  end
+
+  def set_user_roles
+
   end
 end
