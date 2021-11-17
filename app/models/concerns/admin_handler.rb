@@ -93,11 +93,13 @@ module AdminHandler
   end
 
   def admin=(_new_admin)
-    raise 'can not change admin'
+    raise 'can not change admin' if persisted?
+    super
   end
 
   def admin_id=(_new_admin)
-    raise 'can not change admin id'
+    raise 'can not change admin id' if persisted?
+    super
   end
 
   def current_admin=(new_admin)
