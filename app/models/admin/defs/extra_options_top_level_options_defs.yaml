@@ -25,6 +25,7 @@ _comments:
 _db_columns:
   field_name:
     type: force the field type (string, datetime, date, integer, float, decimal)
+    array: false (default) | true - optional flag to indicate if this is an array type column
   field_name2:
     type: ...
 

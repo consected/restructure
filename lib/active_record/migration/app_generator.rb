@@ -735,7 +735,9 @@ module ActiveRecord
             fopts[:comment] = comment
           end
 
-          if a.start_with?('tag_select') || a.start_with?('multi_')
+          if field_config.present? && field_config[:array]
+            fopts[:array] = field_config[:array]
+          elsif a.start_with?('tag_select') || a.start_with?('multi_')
             fopts ||= {}
             fopts[:array] = true
           end
