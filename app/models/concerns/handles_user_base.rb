@@ -120,6 +120,8 @@ module HandlesUserBase
       # Check at a table level that the user can access the resource
       named = if respond_to? :definition
                 definition.resource_name
+              elsif respond_to? :resource_name
+                resource_name
               else
                 name.ns_underscore.pluralize
               end
