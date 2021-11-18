@@ -19,6 +19,7 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Added] report view_as option to show results as a *transposed_table*
 
 ## [7.4.73] - 2021-11-18
 
