@@ -87,6 +87,7 @@ table.table.report-table {
 table.import-grid,
 table.table.report-table {
   th,
+  td.table-header,
   thead th.tablesorter-header {
     padding: 6px 8px 10px 8px;
     border: 1px solid silver;
@@ -221,6 +222,21 @@ table.table.report-table {
 
     a.btn {
       top: 0;
+    }
+  }
+}
+
+.transposed-table table.table.report-table {
+  td {
+    vertical-align: middle;
+  }
+
+  td.table-header {
+    font-weight: 700;
+    font-size: 14px;
+
+    p.table-header-col-type {
+      margin: 5px 0;
     }
   }
 }

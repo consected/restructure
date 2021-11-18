@@ -24,7 +24,7 @@
             hide_cols << hide_this
             unless hide_this
           %>
-          <%= report_table_header_cell(i, col) %>
+          <%= report_table_header_cell(i, col, 'td') %>
           <% list_item.each do |item| %>
             <%= report_table_result_cell(i, item.last) %>
           <%

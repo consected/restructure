@@ -19,6 +19,8 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Fixed] *transposed_table* not viewing correctly in emails
+
 ## [7.4.74] - 2021-11-18
 
 - [Added] report view_as option to show results as a *transposed_table*
