@@ -19,9 +19,17 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Added] handling of multi_editable_ field type configs for lists and choices in forms
+- [Added] column option for "choice_label" and ensure it works for all types of display and editing
+- [Fixed] report edit forms and results format and submit dates correctly
+- [Fixed] form, credential and trigger bugs
+- [Fixed] bugfixes
+
+### [7.4.71.1] - 2021-11-15
+
 - [Added] Configuration of **\_constants** in extra options dynamic configuration
 - [Added] Redcap now sets up dynamic model field configurations to display captions, labels and correct field types in edit and view modes
-- [Added] Report results options added **embedded_block** to show dynamic models as forms from report resutls
+- [Added] Report results options added **embedded_block** to show dynamic models as forms from report results
 - [Added] Contributor field to data dictionary variable records, to accompany target field.
 - [Fixed] Template retrieval and post processing templates
 - [Changed] Report results table significantly refactored
