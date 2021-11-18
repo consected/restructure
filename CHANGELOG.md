@@ -19,6 +19,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+
+## [7.4.73] - 2021-11-18
+
 - [Added] handling of multi_editable_ field type configs for lists and choices in forms
 - [Added] column option for "choice_label" and ensure it works for all types of display and editing
 - [Fixed] report edit forms and results format and submit dates correctly
