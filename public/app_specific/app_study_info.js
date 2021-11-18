@@ -1,5 +1,4 @@
 _fpa.app_specific = class {
-
   constructor(block, data) {
     this.block = block
     this.data = data
@@ -20,18 +19,16 @@ _fpa.app_specific = class {
       var block_processor = new _fpa.app_specific($(this))
       block_processor.reformat_page()
       block_processor.handle_part()
-      $(this).find('.embedded-items-item').each(function () {
-        block_processor.adjust_style($(this))
-      })
-
+      $(this)
+        .find('.embedded-items-item')
+        .each(function () {
+          block_processor.adjust_style($(this))
+        })
     })
-
   }
-
 
   // Reformat page if it has the class use-config-layout
   reformat_page() {
-
     if (!this.block.hasClass('use-config-layout')) return
 
     this.add_layout_class()
@@ -41,7 +38,6 @@ _fpa.app_specific = class {
     if (this.is_author_mode()) {
       this.add_expander_icon()
     }
-
   }
 
   // If the current block is a part of a page, handle its formatting
@@ -55,26 +51,24 @@ _fpa.app_specific = class {
     var $mr = block.parents('.model-reference-result').first()
 
     this.adjust_style($mr)
-
   }
 
   adjust_style($embedded_block) {
     if (!$embedded_block.length || $embedded_block.hasClass('done-use-config-layout')) return
 
-    var wv = this.get_part_setting($embedded_block, "block_width")
+    var wv = this.get_part_setting($embedded_block, 'block_width')
     if (!wv && this.default_layout() == 'rows') wv = '100%'
 
-    var pn = this.get_part_setting($embedded_block, "position_number")
+    var pn = this.get_part_setting($embedded_block, 'position_number')
     if (!pn) pn = 1000
 
     pn = parseInt(pn) + 1000
     $embedded_block.css({ width: wv, order: pn })
 
     if (this.is_author_mode()) {
-      var ec = this.get_part_setting($embedded_block, "extra_classes")
+      var ec = this.get_part_setting($embedded_block, 'extra_classes')
       if (ec) $embedded_block.addClass(ec)
     }
-
 
     $embedded_block.addClass('done-use-config-layout')
   }
@@ -94,10 +88,8 @@ _fpa.app_specific = class {
   }
 
   default_layout() {
-    if (this.block.hasClass('use-config-layout'))
-      var $main_block = this.block
-    else
-      var $main_block = this.block.parents('.use-config-layout').first()
+    if (this.block.hasClass('use-config-layout')) var $main_block = this.block
+    else var $main_block = this.block.parents('.use-config-layout').first()
 
     var res = $main_block.find('.result-field-container[data-field-name="default_layout"]').attr('data-field-val')
     if (!res) res = $main_block.attr('data-default-layout')
@@ -106,14 +98,19 @@ _fpa.app_specific = class {
   }
 
   // Load the referenced parts automatically if they haven't already been marked as opened
-  // Hide the reference links
+  // Don't hide the reference links, since we can't disable references without them, so just remove the
+  // toggle caret
   // Do nothing if the page was not previously expanded
   load_referenced_parts() {
     if (!this.was_page_expanded()) return
 
+    var $mre_active = this.block.find('.rr-mr').not('.model-reference-disabled').find('.mr-expander').not('.mr-opened')
+    //model-reference-disabled
+    $mre_active.click().addClass('mr-opened')
+
     var $mre = this.block.find('.mr-expander').not('.mr-opened')
-    $mre.click().addClass('mr-opened')
-    $mre.parents('.rr-mr').hide()
+    // Hide caret
+    $mre.parents('.rr-mr').find('.mr-expander').hide()
   }
 
   is_author_mode() {
@@ -133,12 +130,12 @@ _fpa.app_specific = class {
     if (block.find('.dynamic-show-label').length) return
 
     // Add the icon
-    block.find('.object-results-header .list-group-item-heading').before('<a class="dynamic-show-label glyphicon glyphicon-triangle-bottom"></a>')
-
+    block
+      .find('.object-results-header .list-group-item-heading')
+      .before('<a class="dynamic-show-label glyphicon glyphicon-triangle-bottom"></a>')
 
     // Add the click handler
     block.on('click', '.dynamic-show-label', function (e) {
-
       if ($(this).hasClass('glyphicon-triangle-bottom')) {
         // Not expanded
 
@@ -146,8 +143,7 @@ _fpa.app_specific = class {
         $(this).addClass('glyphicon-triangle-top')
         $(this).removeClass('glyphicon-triangle-bottom')
         processor.load_referenced_parts()
-      }
-      else {
+      } else {
         // Is expanded
         processor.block.removeClass('page-was-expanded')
         $(this).addClass('glyphicon-triangle-bottom')
@@ -160,6 +156,5 @@ _fpa.app_specific = class {
     block.on('click', '.edit-entity', function (e) {
       processor.block.addClass('page-was-expanded')
     })
-
   }
 }

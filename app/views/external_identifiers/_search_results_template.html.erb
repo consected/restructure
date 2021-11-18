@@ -1,4 +1,6 @@
-<% ExternalIdentifier.active_model_configurations.each do |m| %>
+<% ExternalIdentifier.active_model_configurations.each do |m| 
+  next unless m.implementation_class_defined?(::ExternalIdentifier, fail_without_exception: true)
+%>
   <%= render partial: 'external_identifiers/common_search_results_template_item', 
              locals: { 
                def_record: m,

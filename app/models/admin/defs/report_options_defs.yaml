@@ -54,6 +54,9 @@ view_options:
   # Prevent scrolling of the page directly to search results
   # if a result is returned
 
+  show_all_booleans_as_checkboxed: false (default) | true
+  # Show all boolean type column cells as checkboxes
+
 list_options:
   hide_in_list: false (default) | true
   # Hide this report in the list of available reports, but still
@@ -93,5 +96,25 @@ column_options:
   hide: # Hide the column from results
     column_name: true
   show_as: # Special ways for showing specified columns
-    column_name: url
+    column_name: url | checkbox | options | list | embedded_block | fixed-pre
+    # show the result as a: 
+    # url - link to be opened in a new tab
+    #   The content should be formatted using Markdown format
+    #       [label for link](/url/path)
+
+    # embedded_block - url linking to a dynamic model, to be opened in a modal popup for viewing or editing
+    #   A SQL field definition like this can be used:
+    #      '/dynamic_model/rc_q2_results/' || id::varchar "view results"
+    
+    # checkbox - checkbox shows as checked, unchecked or blank
+    #   booleans (true | false | NULL)
+    #   integer fields (1 | 0 | NULL)
+    
+    # choice_label - label from a choice, such as a general selection or the alt_options in a dynamic model
+    #   An automatic match will be made where to find the choice labels to show
+
+    # options - pretty presentation of a hash of {key: value} pairs
+    # list - pretty presentation of a list (array)
+    # fixed-pre - fixed length (not dynamic expandable) preformatted text, where all spaces and linebreaks are observed
+   
 

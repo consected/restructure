@@ -432,9 +432,10 @@ select.form-control.has-value {
 }
 
 .ajax-running {
-  -webkit-animation: working 1s ease-in-out infinite;
-  -moz-animation: working 1s ease-in-out infinite;
-  animation: working 1s ease-in-out infinite;
+  // -webkit-animation: working 1s ease-in-out infinite;
+  // -moz-animation: working 1s ease-in-out infinite;
+  // animation: working 1s ease-in-out infinite;
+  opacity: 0.3;
 }
 
 div.ajax-running {
@@ -674,4 +675,10 @@ code {
 .mono {
   font-family: monospace;
   font-size: 14px;
+}
+
+.report-temp-embedded-block {
+  max-height: 1px;
+  height: 1px;
+  overflow: hidden;
 }

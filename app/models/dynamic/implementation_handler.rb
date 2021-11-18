@@ -56,9 +56,13 @@ module Dynamic
       return @versioned_definition unless @versioned_definition.nil? ||
                                           @versioned_definition.def_version.nil? && id
 
-      return @versioned_definition = current_definition unless respond_to? :created_at
+      unless respond_to?(:use_def_version_time) || respond_to?(:created_at)
+        return @versioned_definition = current_definition
+      end
 
-      @versioned_definition = self.class.definition.versioned(created_at) || current_definition
+      version_at = use_def_version_time if respond_to?(:use_def_version_time)
+      version_at ||= created_at if respond_to?(:created_at)
+      @versioned_definition = self.class.definition.versioned(version_at) || current_definition
     end
 
     #
@@ -120,15 +124,17 @@ module Dynamic
 
       if da
         @processing_data = true
-        Formatter::Formatters.format_data_attribute da, self, ignore_missing: :show_tag
-      else
-        n = if attribute_names.include? 'data'
+        res = Formatter::Formatters.format_data_attribute da, self, ignore_missing: :show_tag
+        @processing_data = false
+        return res
+      end
+
+      res = if attribute_names.include? 'data'
               attributes['data']
             else
               dopt&.label || option_type.to_s.humanize
             end
-        n.to_s
-      end
+      res.to_s
     end
 
     #

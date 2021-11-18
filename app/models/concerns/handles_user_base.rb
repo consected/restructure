@@ -120,6 +120,8 @@ module HandlesUserBase
       # Check at a table level that the user can access the resource
       named = if respond_to? :definition
                 definition.resource_name
+              elsif respond_to? :resource_name
+                resource_name
               else
                 name.ns_underscore.pluralize
               end
@@ -132,6 +134,12 @@ module HandlesUserBase
     # @return [String]
     def resource_name
       name.ns_underscore.pluralize
+    end
+
+    # Returns the full model name, namespaced like 'module__class' if there is a namespace.
+    # otherwise it returns just the basic name
+    def item_type
+      name.singularize.ns_underscore
     end
 
     #

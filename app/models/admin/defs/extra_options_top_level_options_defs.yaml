@@ -5,17 +5,27 @@
 # The category and name must match one of the Config Library entries
 # @library category name
 
+# Any key: value pairs set here will be included in the object for use within
+# runtime { {constants.constant_name}} substitutions
+_contants:
+  constant_name: a value
+
+# Add table and field comments to the underlying database.
+# If not set here, defaults are added:
+#   table: a representation of the dynamic model, activity log or external identifier name
+#   field: *caption_before:* or *labels:* setting for the field, if present
 _comments:
-  "table": describe the table
-  "fields":
-    "field1": describe the field
-    "field2": ...
+  table: describe the table
+  fields:
+    field1: describe the field
+    field2: ...
 
 # NOTE: db_configs may be found within the default: options in older configurations.
 # Although not recommended, the old configuration will continue to work
 _db_columns:
   field_name:
     type: force the field type (string, datetime, date, integer, float, decimal)
+    array: false (default) | true - optional flag to indicate if this is an array type column
   field_name2:
     type: ...
 

@@ -48,5 +48,6 @@
 
 //= require highlightjs/highlight.pack.js
 //= require ./big_select/big_select.js
+//= require js-yaml/dist/js-yaml 
 
 //= require_tree ./app

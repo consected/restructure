@@ -50,6 +50,11 @@ RSpec.describe 'Dynamic Model Options', type: :model do
           type: string
         created_by_user_id:
           type: integer
+        use_def_version_time:
+          type: time
+        text_array:
+          type: string
+          array: true
         user_id:
           type: integer
         created_at:
@@ -97,6 +102,14 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     sleep 2 # ensure there are no timing issues
     @dyn_instances[2] = @master.dynamic_model__test_created_by_recs.create! test1: 'abc2'
 
+    # Generate an instance to always use the latest version
+    fixed_version = @master.dynamic_model__test_created_by_recs.create! test1: 'abc2', use_def_version_time: (DateTime.now + 99.years)
+
+    ###
+    # With a fixed version def *use_def_version_time* set, the correct version should be returned
+    fixed_opt = option_configs_comparable(fixed_version.versioned_definition.option_configs)
+    expect(fixed_opt).to eql option_configs_comparable(@option_configs[2])
+
     # The dynamic model instance should pull options that matches the original v1 options
     check_version 1
 
@@ -125,5 +138,9 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     check_version 3
     check_version 1
     check_version 2
+
+    ###
+    # With a fixed version def *use_def_version_time* set, the correct version should be returned
+    expect(option_configs_comparable(fixed_version.versioned_definition.option_configs)).to eql option_configs_comparable(@option_configs[3])
   end
 end

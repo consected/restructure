@@ -169,6 +169,10 @@
     extra_options_config = nil
   end
 
+  unless defined? implementation_class
+    implementation_class = nil
+  end
+
   field_options = extra_options_config&.field_options || {}
   if extra_options_config.respond_to?(:nfs_store) && extra_options_config&.nfs_store
     user_file_actions = extra_options_config&.nfs_store[:user_file_actions] 
@@ -223,8 +227,26 @@
     (works_with_rec_types_array||[]).each do |r|
       supports_activity_log &&= !!current_user.has_access_to?(:access, :table, [al_full_name, r].join('_').pluralize)
     end
+  end
+
+  field_edit_as_types = {}
+   
+  item_list.split(',').each do |f| 
+    v = field_options[f.to_sym]
+    val = nil
+    val = v[:edit_as] && v[:edit_as][:field_type] if v
+    val ||= f
+    field_edit_as_types[f] = val
+  end
 
 
+
+  # if field_options
+  #   field_options.each { |k, v| field_edit_as_types[k] = v[:edit_as] && v[:edit_as][:field_type] }
+  # end
+
+  if implementation_class
+    field_types = implementation_class.columns_hash.map { |k, v| [k, v.type.to_s] }.to_h
   end
 %>
 
@@ -278,6 +300,8 @@
     supports_activity_log: <%=!!supports_activity_log%>,
     extra_data_attribs: <%= extra_data_attribs.to_json.html_safe %>,
     field_options: <%= field_options.to_json&.html_safe %>,
+    field_edit_as_types: <%= field_edit_as_types.to_json&.html_safe %>, 
+    field_types: <%= field_types.to_json&.html_safe %>,
     user_file_actions: <%= user_file_actions.to_json&.html_safe %>
   }
 

@@ -19,17 +19,28 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Added] handling of multi_editable_ field type configs for lists and choices in forms
+- [Added] column option for "choice_label" and ensure it works for all types of display and editing
+- [Fixed] report edit forms and results format and submit dates correctly
+- [Fixed] form, credential and trigger bugs
+- [Fixed] bugfixes
+
+### [7.4.71.1] - 2021-11-15
+
+- [Added] Configuration of **\_constants** in extra options dynamic configuration
+- [Added] Redcap now sets up dynamic model field configurations to display captions, labels and correct field types in edit and view modes
+- [Added] Report results options added **embedded_block** to show dynamic models as forms from report results
+- [Added] Contributor field to data dictionary variable records, to accompany target field.
+- [Fixed] Template retrieval and post processing templates
+- [Changed] Report results table significantly refactored
 
 ## [7.4.71] - 2021-11-01
 
-<<<<<<< HEAD
 - [Added] Add support for Redcap repeating instruments - Transferred from upstream ReStructure
 - [Added] Report criteria field type **select_from_model**
 - [Added] Derived variables in dynamic model data dictionary now update from their source variables
 - [Added] Enhancements to dynamic model definition panels, especially around data dictionary
 - [Fixed] DB comments now updating when a dynamic model is a view
-=======
->>>>>>> 2b1e8d26acc71b91d069780d3a784b3749b907c5
 
 ## [7.4.70] - 2021-10-27
 
@@ -39,16 +50,12 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 - [Fixed] Fix issue with times in Redcap leading to constant updating of records
 
-<<<<<<< HEAD
-=======
 ## [7.4.68] - 2021-10-26
 
 ## [7.4.68] - 2021-10-26
 
 ## [7.4.68] - 2021-10-26
 
-
->>>>>>> 2b1e8d26acc71b91d069780d3a784b3749b907c5
 ## [7.4.67] - 2021-10-26
 
 - [Changed] Bump version

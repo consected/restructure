@@ -71,6 +71,7 @@ bin/rspec
 .vscode
 db/demo-data.sql
 
-# Ignore master key for decrypting credentials and more.
-/config/master.key
-credentials.yml
+# Don't ignore master key for decrypting credentials. It is only
+# used for testing and the credentials are not real.
+# /config/master.key
+# credentials.yml

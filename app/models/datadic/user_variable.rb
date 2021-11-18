@@ -13,12 +13,22 @@ module Datadic
     belongs_to :equivalent_to, class_name: 'Datadic::Variable', optional: true
     has_many :also_equivalent_to, class_name: 'Datadic::Variable', foreign_key: :equivalent_to_id
 
+    attr_accessor :current_user
+
     def self.human_name
       'Data Dictionary Variable'
     end
 
     def self.resource_category
       :data_dictionary
+    end
+
+    def self.no_master_association
+      true
+    end
+
+    def self.resource_name
+      :datadic_variables
     end
 
     add_model_to_list

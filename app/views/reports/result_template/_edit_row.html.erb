@@ -1,0 +1,20 @@
+<tr class="<%= editable? ? '' : 'hidden' %>" id="report-item-new">
+
+  <% if editable? %>
+  <td class="report-el report-edit-btn-cell"><%= report_edit_btn 'new'%>
+    <% if creatable? %>
+      <div class="">
+        <%= link_to "", new_report_path(report_id: @report.id), remote: true, class: "btn btn-primary report-new-item-btn glyphicon glyphicon-plus", title: 'add new report item' %>
+      </div>
+    <% end %>
+  </td>
+  <% end %>
+  <% i = 0 %>
+
+  <% @results.fields.each do |field| %>
+    <td data-col-type="<%=field %>" data-col-table="<%=@result_tables[i] %>" class="report-el-was-from-new report-el <%= field == 'id' ? 'report-el-object-id' : '' %>"></td>
+    <%  i += 1 %>
+  <% end %>
+
+  </tr>
+</tr>

@@ -14,6 +14,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     @projects = setup_redcap_project_admin_configs
     @project = @projects.first
     @metadata_project = @projects.find { |p| p[:name] == 'metadata' }
+    setup_repeat_instrument_fields
   end
 
   it 'cleanly handles repeat instrument fields in records' do
