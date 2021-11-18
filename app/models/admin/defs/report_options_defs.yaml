@@ -43,6 +43,7 @@ view_options:
   #   list
   #   chart
   #   calendar
+  #   transposed_table
 
   search_button_label: <string>
   # Label to show on the search button
