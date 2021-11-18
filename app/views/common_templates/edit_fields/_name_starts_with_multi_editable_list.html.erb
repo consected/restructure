@@ -22,5 +22,5 @@ html_options = {
   value: gs
 }
 %>
-<%= form.label field_name_sym, label_for(field_name_sym, labels), opt %>
+<%= form.label field_name_sym, label_for(field_name_sym, labels, /^multi_editable_list/), opt %>
 <%= form.text_area field_name_sym, html_options %>

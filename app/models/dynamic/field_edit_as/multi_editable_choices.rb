@@ -3,8 +3,8 @@
 module Dynamic
   module FieldEditAs
     #
-    # Handle translation of data for multi_editable field types
-    class MultiEditable
+    # Handle translation of data for multi_editable_choices field types
+    class MultiEditableChoices
       #
       # Get the persistable value for the provided saved_value
       # The incoming parameter is a YAML string. This provides a mechanism for passing

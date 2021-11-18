@@ -11,7 +11,7 @@ module Dynamic
     class Handler
       attr_accessor :object_instance, :params
 
-      TransformFieldTypes = %w[multi_editable_list multi_editable].freeze
+      TransformFieldTypes = %w[multi_editable_list multi_editable_choices].freeze
 
       #
       # Initialize with the object instance to be stored to, and the params from
@@ -35,7 +35,7 @@ module Dynamic
           next unless use
 
           value = params[field_name]
-          new_value = "dynamic/field_edit_as/#{use}".classify.constantize.persistable_value(value)
+          new_value = "dynamic/field_edit_as/#{use}".camelize.constantize.persistable_value(value)
 
           res[field_name] = new_value
         end
