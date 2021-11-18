@@ -19,7 +19,13 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+
+## [7.4.75] - 2021-11-18
+
+<<<<<<< HEAD
 - [Fixed] *transposed_table* not viewing correctly in emails
+=======
+>>>>>>> 30d9d6275a34e6d20e2be6de1a49da96a4588b7e
 
 ## [7.4.74] - 2021-11-18
 
