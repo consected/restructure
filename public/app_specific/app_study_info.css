@@ -11,6 +11,10 @@
   font-size: 16px;
 }
 
+.new-block {
+  float: none;
+}
+
 .activity-logs-generic-block .common-template-item.activity-log--study-info-part-page-item {
   max-height: 171px;
   min-height: 0 !important;
@@ -43,6 +47,10 @@
 
 .model-reference-disabled {
   display: none;
+}
+
+form .dynamic-model--study-page-section-content {
+  width: 100%;
 }
 
 .list-group-item.results-caption-before.dynamic-model--study-page-section-title,
