@@ -364,6 +364,7 @@ module ActiveRecord
 
           expected_type = (v[:type]&.to_sym || :string)
           current_type = :timestamp if current_type == :datetime
+          expected_type = :timestamp if expected_type == :datetime
           puts "Type change (#{k}): #{current_type} != #{expected_type}" if current_type != expected_type
           changed[k.to_s] = expected_type if current_type != expected_type
         end
@@ -383,6 +384,7 @@ module ActiveRecord
 
             expected_type = (v[:type]&.to_sym || :string)
             current_type = :timestamp if current_type == :datetime
+            expected_type = :timestamp if expected_type == :datetime
             puts "Type change (#{k}): #{current_type} != #{expected_type}" if current_type != expected_type
             changed_history[k.to_s] = expected_type if current_type != expected_type
           end
