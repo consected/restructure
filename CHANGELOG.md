@@ -19,13 +19,12 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Fixed] multiple bugfixes related to report criteria configuration and select_from_model
+- [Fixed] schema updated again for missing migration
 
 ## [7.4.76] - 2021-11-18
 
-<<<<<<< HEAD
 - [Fixed] *transposed_table* bad HTML markup
-=======
->>>>>>> 7cb6c6fdc0ab52b557b8329bcb9a2a4dfc38ece2
 
 ## [7.4.75] - 2021-11-18
 
