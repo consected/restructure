@@ -10,10 +10,17 @@ module Resources
       @@resources.sort_by { |_k, r| "#{r[:type]} - #{r[:human_name]}" }.to_h || {}
     end
 
-    def self.find_by(resource_name:)
+    def self.find_by(resource_name: nil, table_name: nil)
       @@resources ||= {}
 
-      @@resources[resource_name.to_sym]
+      if resource_name
+        @@resources[resource_name.to_sym]
+      elsif table_name
+        res = @@resources.filter { |_k, v| v[:table_name] == table_name }
+        return unless res
+
+        res.first.last
+      end
     end
 
     def self.add(model)
