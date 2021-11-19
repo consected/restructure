@@ -19,8 +19,14 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+
+## [7.4.77] - 2021-11-19
+
+<<<<<<< HEAD
 - [Fixed] multiple bugfixes related to report criteria configuration and select_from_model
 - [Fixed] schema updated again for missing migration
+=======
+>>>>>>> 7151fc46ea58da2565df974221d8ea5e8bd53c1c
 
 ## [7.4.76] - 2021-11-18
 
