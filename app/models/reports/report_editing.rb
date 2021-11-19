@@ -35,10 +35,11 @@ module Reports
     def edit_model_class
       return unless editable_data?
 
-      model_class_name = edit_model.camelize.classify
-      logger.info "Getting model class name: #{model_class_name}"
-      if Report.const_defined?(model_class_name)
-        Report.const_get(model_class_name)
+      res = Resources::Models.find_by(table_name: edit_model)
+      model_class = res[:model] if res
+
+      if model_class
+        model_class
       else
         obj_table_name = edit_model.downcase
         definition = self
@@ -46,6 +47,7 @@ module Reports
           self.table_name = obj_table_name
           self.definition = definition
         end
+        model_class_name = edit_model.camelize.classify
         Report.const_set(model_class_name, a_new_class)
       end
     end
