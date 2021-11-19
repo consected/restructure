@@ -35,7 +35,7 @@ module Reports
     def edit_model_class
       return unless editable_data?
 
-      model_class_name = edit_model.camelize.classify
+      model_class_name = Resources::Models.find_by(table_name: edit_model)[:class_name]
       logger.info "Getting model class name: #{model_class_name}"
       if Report.const_defined?(model_class_name)
         Report.const_get(model_class_name)
