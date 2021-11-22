@@ -182,4 +182,9 @@ class Settings
   # This array of acronyms will be enforced for titleize only, avoiding
   # existing expectations around class names being broken
   CaptionAcronyms = %w[IPA IPAs BHS PI PIs HMS FPHS].freeze
+
+  # Registration Settings
+  # Since passwords have generated upon user creation, we must suppress generating a password
+  # with the user (self) registration feature.
+  ALLOW_USERS_TO_REGISTER = ENV['ALLOW_USERS_TO_REGISTER']
 end
