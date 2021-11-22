@@ -26,13 +26,13 @@ module TableGenerators
     @implementation_table_name = name
     singular_name = singularize(name)
     created_by = nil
-    
+
     unless singular_name
       puts 'The provided table name does not appear to be pluralized'
       return
     end
 
-    if generate_table == :drop || generate_table == :drop_do
+    if %i[drop drop_do].include?(generate_table)
       sql = <<EOF
 
       DROP TABLE if exists #{singular_name}_history CASCADE;
@@ -52,7 +52,7 @@ EOF
         f = 'bigint' if a.end_with?('_id')
         if a == 'created_by_user_id'
           created_by = true
-          f = 'integer' 
+          f = 'integer'
         end
         f = 'date' if a.end_with?('_when')
         f = 'date' if a.end_with?('_date')
@@ -67,6 +67,7 @@ EOF
         f = 'integer' if a.start_with?('number_')
         f = 'integer' if a.end_with?('_number')
         f = 'integer' if a.end_with?('_timestamp')
+        f = 'varchar[]' if a.end_with?('_array')
         f += ','
         attrib_pair[a] = f
       end
@@ -188,7 +189,7 @@ EOF
       EOF
     end
 
-    if generate_table == true || generate_table == :create_do || generate_table == :drop_do
+    if [true, :create_do, :drop_do].include?(generate_table)
       ActiveRecord::Base.connection.execute sql
     else
       sql = "
@@ -196,7 +197,7 @@ EOF
 #{sql}
       COMMIT;"
       puts sql
-      return sql
+      sql
     end
   end
 end

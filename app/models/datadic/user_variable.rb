@@ -7,6 +7,11 @@ module Datadic
   # An equivalent class Variable provides admin access to the same table.
   class UserVariable < UserBase
     self.table_name = 'datadic_variables'
+
+    def self.no_master_association
+      true
+    end
+
     include UserHandler
 
     belongs_to :redcap_data_dictionary, class_name: 'Redcap::DataDictionary', optional: true
@@ -21,10 +26,6 @@ module Datadic
 
     def self.resource_category
       :data_dictionary
-    end
-
-    def self.no_master_association
-      true
     end
 
     def self.resource_name

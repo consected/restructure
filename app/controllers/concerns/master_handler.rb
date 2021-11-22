@@ -63,6 +63,7 @@ module MasterHandler
     do_show = false
     object_instance.transaction do
       set_additional_attributes object_instance
+      translate_params_to_persistable
       if object_instance.save
         reload_objects
         handle_additional_updates
@@ -94,6 +95,7 @@ module MasterHandler
   def update
     do_show = false
     object_instance.transaction do
+      translate_params_to_persistable
       if object_instance.update(secure_params)
         reload_objects
         handle_additional_updates
@@ -588,5 +590,17 @@ module MasterHandler
   # @return [Boolean]
   def current_admin_sample
     current_admin && params[:admin_sample] == 'true'
+  end
+
+  #
+  # Params with certain field_options: edit_as configurations need to be translated
+  # to allow them to be stored to the database. Strong parameters don't allow complex
+  # structures such as arrays of arrays, so the result is pushed directly into the @object_instance
+  # ready for #create or #update
+  def translate_params_to_persistable
+    rname = object_instance.class.name.underscore.gsub('/', '_')
+    obj_params = params[rname]
+    updated_params = Dynamic::FieldEditAs::Handler.new(object_instance, obj_params).translate_to_persistable
+    object_instance.assign_attributes updated_params
   end
 end

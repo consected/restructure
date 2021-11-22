@@ -1,0 +1,31 @@
+<%
+# Accept a list of entries, to be stored as an array in the database.
+# The data we send is a field containing a YAML string.
+# This provides a mechanism for passing an array or hash of data.
+# Accepted format is:
+#   Hash "key: value"
+
+fopt = field_options_for(form_object_instance, field_name_sym)
+
+alt_options = fopt[:edit_as] && fopt[:edit_as][:alt_options]
+opt = {}
+begin
+  data = form_object_instance[field_name_sym.to_s]&.to_h
+  data = data&.transform_values { |d| d.gsub("\n", ' ') }
+rescue StandardError
+  data = form_object_instance[field_name_sym.to_s]&.to_a
+  data = data&.map { |d| d.gsub("\n", ' ') }
+end
+data ||= ''
+
+gs = YAML.dump(data).gsub(/^---.*\n/, '') if data
+options = field_options_for(form_object_instance, field_name_sym)
+
+html_options = {
+  data: {attr_name: field_name_sym, object_name: form_object_item_type_us, code_editor_type: 'yaml'}, 
+  class: "code-editor code-editor-yaml",
+  value: gs
+}
+%>
+<%= form.label field_name_sym, label_for(field_name_sym, labels, /^multi_editable_choices/), opt %>
+<%= form.text_area field_name_sym, html_options %>
