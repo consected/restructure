@@ -232,8 +232,10 @@ module StandardAuthentication
 
   # Setup password for new user
   def setup_new_password
-    generate_password
-    @forced_password_reset = true
+    unless allow_users_to_register?
+      generate_password
+      @forced_password_reset = true
+    end
   end
 
   # Get the password word blacklist
@@ -386,5 +388,9 @@ module StandardAuthentication
 
     self.password_updated_at = (self.class.expire_password_after - self.class.remind_days_before).days.ago
     save
+  end
+
+  def allow_users_to_register?
+    @allow_users_to_register ||= Settings::ALLOW_USERS_TO_REGISTER
   end
 end
