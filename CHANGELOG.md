@@ -18,6 +18,9 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+
+## [8.0.22] - 2021-11-22
+
 - [Added] changes to allow report record edit and create to work with arbitrary models
 - [Added] report view_as option to show results as a *transposed_table*
 - [Added] handling of multi_editable_ field type configs for lists and choices in forms
@@ -35,6 +38,9 @@ release will be created for any release tested in production, and may be marked 
 - [Fixed] form, credential and trigger bugs
 
 ## [8.0.21] - 2021-11-11
+
+## [8.0.21] - 2021-11-11
+
 
 ## [8.0.20] - 2021-11-11
 
