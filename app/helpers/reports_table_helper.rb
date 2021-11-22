@@ -71,7 +71,8 @@ module ReportsTableHelper
     res.html_safe
   end
 
-  def report_table_header_cell(field_num, header_content)
+  def report_table_header_cell(field_num, header_content, alt_html_tag = nil)
+    alt_html_tag ||= 'th'
     col_name = report_column_name(field_num)
     cell = ReportsTableHeaderCell.new(header_content,
                                       table_name: @runner&.data_reference&.table_name,
@@ -116,9 +117,9 @@ module ReportsTableHelper
     extra_classes = "#{extra_classes} #{comment.present? ? 'has-comment' : 'no-comment'}"
 
     res = <<~END_HTML
-      <th title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{header_content}" class="table-header #{extra_classes}">
+      <#{alt_html_tag} title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{header_content}" class="table-header #{extra_classes}">
         #{field_name} #{show_table_name} #{col_comment}
-      </th>
+      </#{alt_html_tag}>
     END_HTML
 
     res.html_safe
