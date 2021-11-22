@@ -79,7 +79,9 @@
         <div class="report-admin-subblock">
           <div class="report-attr-config-selections collapse has-editor">
             <div class="report-admin-sb-item">config selections</div>
-            <p class="help-block">A label is shown in the dropdown and the corresponding value is used in the query.</p>
+            <p class="help-block config-selector-help for-config_selector collapse">A label is shown in the dropdown and the corresponding value is used in the query.</p>
+            <p class="help-block config-selector-help for-select_from_model collapse">Define which fields to pull from the table model as the options.
+              The selections configuration is "label_field: value_field". For example, for a data dictionary variable, this might be "study: study". For a person it may be "last_name: id".</p>
             <div class="report-admin-sb-field-block">
               <div class="report-admin-search-attr-yaml-editor" >
                 <textarea id="search_attrs_config_selections" class="extra-help-info" data-code-editor-type="yaml" data-attr-el="selections"></textarea>

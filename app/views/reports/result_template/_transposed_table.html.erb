@@ -1,0 +1,41 @@
+<%
+  @report = report if local_assigns[:report]
+  @results = results if local_assigns[:results]
+  @outer_block_id = outer_block_id if local_assigns[:outer_block_id]
+  @result_tables = result_tables if local_assigns[:result_tables]
+  setup_column_options
+%>
+<div class="report-results-table-block transposed-table" id="<%=@outer_block_id%>-table-block">
+
+  <table class="report-table table">
+    
+    <tbody>
+
+      <% 
+        @transposed_results = @results.to_a.map(&:to_a)&.transpose || []
+      
+          hide_cols ||= []
+          i = 0             
+          
+          @transposed_results.each do |list_item|
+
+            @col = col = @results.fields[i]
+            hide_this = report_cell_hide?(i)
+            hide_cols << hide_this
+            unless hide_this
+          %>
+        <tr>
+          <%= report_table_header_cell(i, col, 'td') %>
+          <% list_item.each do |item| %>
+            <%= report_table_result_cell(i, item.last) %>
+          <%
+            end
+            i += 1
+          end 
+          %>
+        </tr>
+      <% end %>
+
+    </tbody>
+  </table>
+</div>

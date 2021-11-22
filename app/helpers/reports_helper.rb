@@ -89,7 +89,10 @@ module ReportsHelper
       # For example, for a data dictionary variable, this might be "study: study"
       fields = (config.selections || { id: :id })
       model = res[:model]
-      selections = model.active.distinct.pluck(*fields)
+      order = { fields.keys.first => :asc }
+      selections = model
+      selections = selections.active if selections.respond_to? :active
+      selections = selections.distinct.reorder('').order(order).pluck(*fields)
       options_for_select(selections)
     end
   end
