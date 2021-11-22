@@ -19,6 +19,9 @@ release will be created for any release tested in production, and may be marked 
 ## Unreleased
 
 
+## [8.0.25] - 2021-11-22
+
+
 ## [8.0.24] - 2021-11-16
 
 - Bump version
