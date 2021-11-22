@@ -6,7 +6,7 @@
 # @library category name
 
 # Any key: value pairs set here will be included in the object for use within
-# runtime {{constants.constant_name}} substitutions
+# runtime { {constants.constant_name}} substitutions
 _contants:
   constant_name: a value
 
@@ -25,6 +25,7 @@ _comments:
 _db_columns:
   field_name:
     type: force the field type (string, datetime, date, integer, float, decimal)
+    array: false (default) | true - optional flag to indicate if this is an array type column
   field_name2:
     type: ...
 

@@ -18,9 +18,23 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Added] changes to allow report record edit and create to work with arbitrary models
+- [Added] report view_as option to show results as a *transposed_table*
+- [Added] handling of multi_editable_ field type configs for lists and choices in forms
+- [Added] column option for "choice_label" and ensure it works for all types of display and editing
+- [Fixed] multiple bugfixes related to report criteria configuration and select_from_model
+- [Fixed] report edit forms and results format and submit dates correctly
+- [Fixed] form, credential and trigger bugs
+- [Changed] updated to latest gems
+- [Fixed] bugfixes
+
+### Transfer from Harvard @7.4.71.1 - 2021-11-15
+
+- [Added] column option for "choice_label" and ensure it works for all types of display and editing
+- [Fixed] report edit forms and results format and submit dates correctly
+- [Fixed] form, credential and trigger bugs
 
 ## [8.0.21] - 2021-11-11
-
 
 ## [8.0.20] - 2021-11-11
 
@@ -40,7 +54,6 @@ release will be created for any release tested in production, and may be marked 
 - [Changed] Report results table significantly refactored
 
 ## [8.0.19] - 2021-11-10
-
 
 ## [8.0.18] - 2021-11-01
 
