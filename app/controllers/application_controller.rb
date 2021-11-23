@@ -13,14 +13,8 @@ class ApplicationController < ActionController::Base
   before_action :check_temp_passwords
   before_action :prevent_cache
   before_action :setup_navs
-  before_action :configure_permitted_parameters, if: :devise_controller?
 
   protected
-
-  def configure_permitted_parameters
-    # Permit the `subscribe_newsletter` parameter along with the other sign up parameters.
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:first_name, :last_name])
-  end
 
   def current_email
     return nil unless current_user || current_admin

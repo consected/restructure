@@ -4,6 +4,7 @@ class Admin < ActiveRecord::Base
   @admin_optional = true
 
   include AdminHandler
+  include RegistrationHandler
   include StandardAuthentication
 
   # A configuration allows two factor authentication to be disabled for the app server

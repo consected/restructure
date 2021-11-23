@@ -185,7 +185,7 @@ Rails.application.routes.draw do
     resources :registrations, only: [:new, :update]
     get '/users/registrations/new', to: 'devise/registrations#new'
     post '/users/registrations/update', to: 'devise/registrations#update'
-    post '/users/registrations/create', to: 'devise/registrations#create'
+    post '/users/registrations/create', to: 'users/registrations#create'
 
     get '/users/show_otp', to: 'devise/registrations#show_otp'
     post '/users/test_otp', to: 'devise/registrations#test_otp'
