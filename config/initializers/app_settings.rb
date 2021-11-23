@@ -187,4 +187,7 @@ class Settings
   # Since passwords have generated upon user creation, we must suppress generating a password
   # with the user (self) registration feature.
   ALLOW_USERS_TO_REGISTER = ENV['ALLOW_USERS_TO_REGISTER']
+  DEFAULT_ADMIN_TEMPLATE_EMAIL = ENV['DEFAULT_ADMIN_TEMPLATE_EMAIL']
+  DEFAULT_USER_TEMPLATE_EMAIL = ENV['DEFAULT_USER_TEMPLATE_EMAIL']
+
 end

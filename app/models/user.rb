@@ -5,6 +5,7 @@
 # with authorization models are handled through this model.
 class User < ActiveRecord::Base
   include AdminHandler
+  include RegistrationHandler
   include StandardAuthentication
   include UserAccessHandler
   include UserRoleHandler
@@ -28,7 +29,15 @@ class User < ActiveRecord::Base
   scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPattern) }
   before_save :set_app_type
 
-  after_save :set_user_roles
+  validates :first_name,
+            presence: {
+              if: -> { allow_users_to_register? }
+            }
+
+  validates :last_name,
+            presence: {
+              if: -> { allow_users_to_register? }
+            }
 
   #
   # The template user is assigned to newly created roles to ensure they are exported
@@ -124,7 +133,6 @@ class User < ActiveRecord::Base
   end
 
   def after_sign_up_path_for(resource)
-    #TODO where? go to login
     super
   end
 
@@ -186,7 +194,4 @@ class User < ActiveRecord::Base
     self.app_type_id = nil if app_type_id && !app_type_valid?
   end
 
-  def set_user_roles
-
-  end
 end

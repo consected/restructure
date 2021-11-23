@@ -390,7 +390,4 @@ module StandardAuthentication
     save
   end
 
-  def allow_users_to_register?
-    @allow_users_to_register ||= Settings::ALLOW_USERS_TO_REGISTER
-  end
 end
