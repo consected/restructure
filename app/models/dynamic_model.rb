@@ -404,6 +404,7 @@ class DynamicModel < ActiveRecord::Base
       dbc[col.name.to_s] = {
         type: col.type.to_s
       }
+      dbc[col.name.to_s][:array] = true if col.array?
     end
 
     return if dbc.empty?

@@ -47,13 +47,19 @@ class ReportSearchAttrsUi {
       if (search_attr_type == 'config_selector') {
         $('.report-attr-config-selections').collapse('show');
         $('.report-attr-select-from-model').collapse('hide');
+        $('.config-selector-help.for-config_selector').collapse('show');
+        $('.config-selector-help.for-select_from_model').collapse('hide');
         if (_this.ra_resource_name) _this.ra_resource_name.val('');
       } else if (search_attr_type == 'select_from_model') {
         $('.report-attr-config-selections').collapse('show');
         $('.report-attr-select-from-model').collapse('show');
+        $('.config-selector-help.for-config_selector').collapse('hide');
+        $('.config-selector-help.for-select_from_model').collapse('show');
       } else {
         $('.report-attr-config-selections').collapse('hide');
         $('.report-attr-select-from-model').collapse('hide');
+        $('.config-selector-help.for-config_selector').collapse('hide');
+        $('.config-selector-help.for-select_from_model').collapse('hide');
         if (_this.ra_config_selections) _this.ra_config_selections.setValue('');
         if (_this.ra_resource_name) _this.ra_resource_name.val('');
       }

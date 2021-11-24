@@ -363,6 +363,9 @@ module ActiveRecord
           next unless v[:type] && current_type
 
           expected_type = (v[:type]&.to_sym || :string)
+          current_type = :timestamp if current_type == :datetime
+          expected_type = :timestamp if expected_type == :datetime
+          puts "Type change (#{k}): #{current_type} != #{expected_type}" if current_type != expected_type
           changed[k.to_s] = expected_type if current_type != expected_type
         end
 
@@ -376,10 +379,13 @@ module ActiveRecord
         changed_history = {}
         if history_table_exists
           db_configs.each do |k, v|
-            current_type = history_cols.find { |c| c.name == k.to_s }.type
+            current_type = history_cols.find { |c| c.name == k.to_s }&.type
             next unless v[:type] && current_type
 
             expected_type = (v[:type]&.to_sym || :string)
+            current_type = :timestamp if current_type == :datetime
+            expected_type = :timestamp if expected_type == :datetime
+            puts "Type change (#{k}): #{current_type} != #{expected_type}" if current_type != expected_type
             changed_history[k.to_s] = expected_type if current_type != expected_type
           end
         end
@@ -735,7 +741,9 @@ module ActiveRecord
             fopts[:comment] = comment
           end
 
-          if a.start_with?('tag_select') || a.start_with?('multi_')
+          if field_config.present? && field_config[:array]
+            fopts[:array] = field_config[:array]
+          elsif a.start_with?('tag_select') || a.start_with?('multi_')
             fopts ||= {}
             fopts[:array] = true
           end

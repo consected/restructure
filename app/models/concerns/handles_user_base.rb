@@ -49,7 +49,7 @@ module HandlesUserBase
     attr_accessor :reference
 
     # Setup alternative id field methods
-    Master.setup_resource_alternative_id_fields self
+    Master.setup_resource_alternative_id_fields self unless no_master_association
 
     add_model_to_list
   end
@@ -120,6 +120,8 @@ module HandlesUserBase
       # Check at a table level that the user can access the resource
       named = if respond_to? :definition
                 definition.resource_name
+              elsif respond_to? :resource_name
+                resource_name
               else
                 name.ns_underscore.pluralize
               end
@@ -132,6 +134,12 @@ module HandlesUserBase
     # @return [String]
     def resource_name
       name.ns_underscore.pluralize
+    end
+
+    # Returns the full model name, namespaced like 'module__class' if there is a namespace.
+    # otherwise it returns just the basic name
+    def item_type
+      name.singularize.ns_underscore
     end
 
     #
@@ -611,6 +619,13 @@ module HandlesUserBase
   def force_write_user
     return true if no_user_validation
 
+    # Special handling for editable reports and dynamic models with no_master_association set
+    if respond_to?(:user_id) && respond_to?(:current_user) && (
+      !self.class.respond_to?(:no_master_association) || self.class.no_master_association
+    )
+      return write_attribute :user_id, current_user.id
+    end
+
     logger.debug "Forcing save of user in #{self}"
     return if respond_to?(:master) && !master
 
@@ -627,6 +642,14 @@ module HandlesUserBase
   # When creating, set the created_by_user_id attribute if it exists
   def write_created_by_user
     return true unless attribute_names.include? 'created_by_user_id'
+
+    # Special handling for editable reports and dynamic models with no_master_association set
+    if respond_to?(:user_id) && respond_to?(:current_user) && (
+      !self.class.respond_to?(:no_master_association) || self.class.no_master_association
+    )
+      write_attribute :created_by_user_id, current_user
+      return
+    end
 
     return if respond_to?(:master) && !master
 

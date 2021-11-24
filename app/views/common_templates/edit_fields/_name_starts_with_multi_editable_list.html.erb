@@ -1,0 +1,26 @@
+<%
+# Accept a list of entries, to be stored as an array in the database.
+# The data we send is array field containing a simple multiline string.
+# This provides a mechanism for passing a list of data.
+# Accepted format is a list where each entry is on its own line
+
+fopt = field_options_for(form_object_instance, field_name_sym)
+
+alt_options = fopt[:edit_as] && fopt[:edit_as][:alt_options]
+opt = {}
+begin
+  data = form_object_instance[field_name_sym.to_s]&.join("\n")
+rescue StandardError
+  data = form_object_instance[field_name_sym.to_s]
+end
+gs = data
+
+options = field_options_for(form_object_instance, field_name_sym)
+
+html_options = {
+  data: {attr_name: field_name_sym, object_name: form_object_item_type_us},
+  value: gs
+}
+%>
+<%= form.label field_name_sym, label_for(field_name_sym, labels, /^multi_editable_list/), opt %>
+<%= form.text_area field_name_sym, html_options %>
