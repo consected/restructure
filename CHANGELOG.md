@@ -18,6 +18,9 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+
+## [8.0.26] - 2021-11-24
+
 - [Added] better handling of report results list with full set of column types from the table
 - [Added] report edit and criteria select fields to use models more effectively and provide grouping
 - [Fixed] migrations with references that don't produce views
