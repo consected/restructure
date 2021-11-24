@@ -10480,6 +10480,13 @@ CREATE INDEX idx_rdcih_on_proj_admin_id ON ref_data.redcap_data_collection_instr
 
 
 --
+-- Name: index_datadic_variable_history_on_user_id; Type: INDEX; Schema: ref_data; Owner: -
+--
+
+CREATE INDEX index_datadic_variable_history_on_user_id ON ref_data.datadic_variable_history USING btree (user_id);
+
+
+--
 -- Name: index_datadic_variables_on_user_id; Type: INDEX; Schema: ref_data; Owner: -
 --
 
@@ -12881,6 +12888,14 @@ ALTER TABLE ONLY ref_data.datadic_variable_history
 
 
 --
+-- Name: fk_rails_ef47f37820; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+--
+
+ALTER TABLE ONLY ref_data.datadic_variable_history
+    ADD CONSTRAINT fk_rails_ef47f37820 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_f5497a3583; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
@@ -13220,6 +13235,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20211031152538'),
 ('20211041105001'),
 ('20211115141001'),
-('20211117180701');
+('20211117180701'),
+('20211124120038');
 
 
