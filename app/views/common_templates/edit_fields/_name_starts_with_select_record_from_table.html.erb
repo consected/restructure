@@ -4,14 +4,9 @@
 rlit = field_name.sub('select_record_from_table_', '').singularize
 cn = rl = rlit
 
-cl = cn.camelize.constantize
-reslist = cl
-if cl.attribute_names.include?('rank')
-  reslist = reslist.order(rank: :desc)
-  reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}.uniq
-else
-  reslist = reslist.all.map{|i| [i.data, i.data]}.sort { |x, y| x.first <=> y.first }.uniq
-end
+options = field_options_for(form_object_instance, field_name_sym)
+group_split_char = options.dig(:edit_as, :group_split_char) || '|'
+human_name, reslist = list_record_data_for_select(form_object_instance, rl, value_attr: :data, group_split_char: group_split_char)
 
 unless rl
   logger.warn "Failed to find valid class name for #{field_name_sym}"

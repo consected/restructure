@@ -3,13 +3,16 @@
 
 # optionally use another field type specification (allowing a field to be limited to a rec type for example)
 options = field_options_for(form_object_instance, field_name_sym)
-curr_field_name = options[:edit_as] && options[:edit_as][:field_type] || field_name
+curr_field_name = options.dig(:edit_as, :field_type) || field_name
+group_split_char = options.dig(:edit_as, :group_split_char) || '|'
 options[:include_blank] = true unless options.has_key?(:include_blank)
 
 assoc_or_class_name = curr_field_name.sub('select_record_from_', '').singularize
 
-human_name, reslist = list_record_data_for_select(form_object_instance, assoc_or_class_name)
-
+human_name, reslist = list_record_data_for_select(form_object_instance, assoc_or_class_name, value_attr: :id, group_split_char: group_split_char)
+unless human_name
+  logger.warn "Failed to find valid class name for #{field_name}"
+end
 %>
 <%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: human_name) %>
 <%= form.select field_name_sym, reslist, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>

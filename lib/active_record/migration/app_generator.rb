@@ -120,14 +120,20 @@ module ActiveRecord
             all_referenced_tables.each do |ref_config|
               to_table_name = ref_config[:to_table_name]
               puts "-- create or replace reference view #{ref_view_name(to_table_name)}"
-              ActiveRecord::Base.connection.execute reference_view_sql(ref_config)
+              refsql = reference_view_sql(ref_config)
+              next unless refsql
+
+              ActiveRecord::Base.connection.execute refsql
             end
           end
           dir.down do
             all_referenced_tables.each do |ref_config|
               to_table_name = ref_config[:to_table_name]
               puts "-- drop function #{ref_view_name(to_table_name)}"
-              ActiveRecord::Base.connection.execute reverse_reference_view_sql(ref_config)
+              refsql = reverse_reference_view_sql(ref_config)
+              next unless refsql
+
+              ActiveRecord::Base.connection.execute refsql
             end
           end
         end
@@ -363,6 +369,9 @@ module ActiveRecord
           next unless v[:type] && current_type
 
           expected_type = (v[:type]&.to_sym || :string)
+          current_type = :timestamp if current_type == :datetime
+          expected_type = :timestamp if expected_type == :datetime
+          puts "Type change (#{k}): #{current_type} != #{expected_type}" if current_type != expected_type
           changed[k.to_s] = expected_type if current_type != expected_type
         end
 
@@ -380,6 +389,9 @@ module ActiveRecord
             next unless v[:type] && current_type
 
             expected_type = (v[:type]&.to_sym || :string)
+            current_type = :timestamp if current_type == :datetime
+            expected_type = :timestamp if expected_type == :datetime
+            puts "Type change (#{k}): #{current_type} != #{expected_type}" if current_type != expected_type
             changed_history[k.to_s] = expected_type if current_type != expected_type
           end
         end
@@ -714,6 +726,8 @@ module ActiveRecord
             f = :time
           elsif a.index(/(?:_at)$/)
             f = :timestamp
+          elsif a.index(/^(?:select_record_id_from_)$/)
+            f = :integer
           elsif a.index(/^(?:select_)|^(?:notes|data)$|(?:_name)$/)
             f = :string
           elsif a.index(/^(?:is_|has_)|(?:_check|_bool)$/)
@@ -735,7 +749,9 @@ module ActiveRecord
             fopts[:comment] = comment
           end
 
-          if a.start_with?('tag_select') || a.start_with?('multi_')
+          if field_config.present? && field_config[:array]
+            fopts[:array] = field_config[:array]
+          elsif a.start_with?('tag_select') || a.start_with?('multi_')
             fopts ||= {}
             fopts[:array] = true
           end

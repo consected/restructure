@@ -52,6 +52,9 @@ RSpec.describe 'Dynamic Model Options', type: :model do
           type: integer
         use_def_version_time:
           type: time
+        text_array:
+          type: string
+          array: true
         user_id:
           type: integer
         created_at:

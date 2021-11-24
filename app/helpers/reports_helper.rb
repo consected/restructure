@@ -89,7 +89,29 @@ module ReportsHelper
       # For example, for a data dictionary variable, this might be "study: study"
       fields = (config.selections || { id: :id })
       model = res[:model]
-      selections = model.active.distinct.pluck(*fields)
+
+      label = fields.keys.first
+      value = fields.values.first
+
+      # Make sure we can't call any arbitrary method on the model
+      valid_attrs = model.attribute_names + ['data']
+      unless label.to_s.in?(valid_attrs) && value.to_s.in?(valid_attrs)
+        raise FphsException,
+              "Invalid attribute requested #{label}: #{value}"
+      end
+
+      selections = model
+      selections = selections.active if selections.respond_to? :active
+      # Map rather than pluck so we can get the data attribute successfully
+      selections = selections.distinct.reorder('')
+                             .map do |r|
+        [r.send(label), r.send(value)]
+      end
+      selections = selections.uniq.sort { |x, y| x.first <=> y.first }
+
+      got_bar = selections.find { |s| s.first.include?('|') }
+      return grouped_options_for_select(record_results_grouping(selections, '|')) if got_bar
+
       options_for_select(selections)
     end
   end
