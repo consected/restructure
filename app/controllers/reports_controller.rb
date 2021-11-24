@@ -371,6 +371,28 @@ class ReportsController < UserBaseController
 
   def permitted_params
     @permitted_params = @report.edit_fields
+
+    @permitted_params = refine_permitted_params(@permitted_params)
+  end
+
+  #
+  # Permitted parameters for strong param whitelist are generated based on
+  # the "edit field" configuration.
+  # Ensure that database columns that are defined as array type can receive
+  # arrays in the permitted params by checking the actual column definition
+  # and changing the permitted param to an array if necessary
+  # @param [Array] param_list - the standard list of params to allow
+  # @return [Array] the refined resulting permitted params definition
+  def refine_permitted_params(param_list)
+    res = param_list.dup
+
+    ms_keys = res.select { |a| report_model.columns_hash[a.to_s]&.array }
+    ms_keys.each do |k|
+      res.delete(k)
+      res << { k => [] }
+    end
+
+    res
   end
 
   def secure_params
