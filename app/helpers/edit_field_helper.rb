@@ -7,19 +7,63 @@ module EditFieldHelper
   # @param [String] assoc_or_class_name a master association name or an underscored class name to select from
   # @param [Symbol] value_attr names the attribute to be returned as the value of a selection - default :data
   # @return [Array(String, Array(Array, Array))] a human name string and a list of data from the matched records
-  def list_record_data_for_select(form_object_instance, assoc_or_class_name, value_attr: :data, group_split_char: nil)
+  def list_record_data_for_select(form_object_instance, assoc_or_class_name,
+                                  value_attr: :data, label_attr: :data, group_split_char: nil)
     cl, reslist = record_data_class_and_results(form_object_instance, assoc_or_class_name)
 
     if cl
       if cl.attribute_names.include?('rank')
         reslist = reslist.unscope(:order).order(rank: :desc)
-        reslist_data = reslist.all.map { |i| ["#{i.data} [#{i.rank_name}]", i.send(value_attr)] }
-      else
+        reslist_data = reslist.all.map { |i| ["#{i.send(label_attr)} [#{i.rank_name}]", i.send(value_attr)] }
+      elsif label_attr == :data || value_attr == :data
         # NOTE: we sort rather than SQL order, since data may be dynamically generated
         # and there may not actually be a data field for SQL to sort on
         reslist_data = reslist.all
-                              .map { |i| [i.data, i.send(value_attr)] }
+                              .map { |i| [i.send(label_attr), i.send(value_attr)] }
                               .sort { |x, y| x.first <=> y.first }
+      else
+        pluck_attrs =
+          if label_attr.is_a?(Array)
+            arr_label_attr = label_attr
+            do_subs_label = true
+            label_attr & cl.attribute_names
+          else
+            arr_label_attr = [label_attr]
+          end
+
+        pluck_attrs +=
+          if value_attr.is_a?(Array)
+            arr_value_attr = value_attr
+            do_subs_value = true
+            value_attr & cl.attribute_names
+          else
+            arr_value_attr = [value_attr]
+          end
+
+        sort_attr = pluck_attrs.first
+        pluck_attrs.uniq!
+
+        # Get the position of each attribute we expect to find in the results
+        if do_subs_label || do_subs_value
+          label_idx = arr_label_attr.map { |a| pluck_attrs.index(a) }
+          value_idx = arr_value_attr.map { |a| pluck_attrs.index(a) }
+        end
+
+        reslist_data = reslist.reorder('')
+                              .order(sort_attr => :asc)
+                              .pluck(*pluck_attrs)
+
+        if label_attr == value_attr
+          # Entries with a single result will be returned, rather than pairs of [label, value], so we need to fix it
+          reslist_data = reslist_data.map { |r| [r, r] }
+        end
+        if do_subs_label || do_subs_value
+          reslist_data = reslist_data.map do |r|
+            res_label = label_idx.map.with_index { |a, i| a ? r[a] : arr_label_attr[i] }.join(' ')
+            res_val = value_idx.map.with_index { |a, i| a ? r[a] : arr_value_attr[i] }.join(' ')
+            [res_label, res_val]
+          end
+        end
       end
 
       human_name = cl.human_name
@@ -67,14 +111,16 @@ module EditFieldHelper
 
       cl = reslist.first&.class
     else
-      # Just get the resource by its table name
-      cl = Resources::Models.find_by(table_name: assoc_name)
+      # Just get the resource by its resource name or alternatively its table name
+      cl = Resources::Models.find_by(resource_name: assoc_name) || Resources::Models.find_by(table_name: assoc_name)
+
       if cl
         cl = cl[:model]
         reslist = cl.all
-        reslist = reslist.active if reslist.respond_to?(:active)
       end
     end
+    reslist = reslist.active if reslist.respond_to?(:active)
+    reslist = reslist.distinct if reslist.respond_to?(:distinct)
 
     [cl, reslist]
   end
@@ -90,7 +136,7 @@ module EditFieldHelper
 
     grouped = {}
     reslist.each do |rec|
-      r = rec.first
+      r = rec.first || ''
       val = rec.last
 
       rs = r.split('|', 2)

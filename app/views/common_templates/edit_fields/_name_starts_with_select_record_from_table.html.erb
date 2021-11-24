@@ -1,18 +1,16 @@
 <%
 # Allow a 'data' selection to be made from a dynamic model table that is not tied to this master
 
-rlit = field_name.sub('select_record_from_table_', '').singularize
-cn = rl = rlit
-
 options = field_options_for(form_object_instance, field_name_sym)
 group_split_char = options.dig(:edit_as, :group_split_char) || '|'
-human_name, reslist = list_record_data_for_select(form_object_instance, rl, value_attr: :data, group_split_char: group_split_char)
+options[:include_blank] = true unless options.has_key?(:include_blank)
 
-unless rl
+assoc_or_class_name = field_name.sub('select_record_from_table_', '').singularize
+
+human_name, reslist = list_record_data_for_select(form_object_instance, assoc_or_class_name, value_attr: :data, group_split_char: group_split_char)
+unless human_name
   logger.warn "Failed to find valid class name for #{field_name_sym}"
 end
-options = field_options_for(form_object_instance, field_name_sym)
-options[:include_blank] = true unless options.has_key?(:include_blank)
 %>
-<%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: rl) %>
-<%= form.select field_name_sym, reslist, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}%>
+<%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: human_name) %>
+<%= form.select field_name_sym, reslist, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>

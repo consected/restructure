@@ -1,4 +1,4 @@
-$.big_select = function ($field, $target, full_hash, before, after) {
+$.big_select = function ($field, $target, full_hash, before, after, options) {
 
   var setup_with = function (hash, $target, selected_value) {
     var $outer = $target.append(`<div class="big-select"></div>`);
@@ -47,12 +47,22 @@ $.big_select = function ($field, $target, full_hash, before, after) {
 
   var append_item = function (k, val, selected_value, $container) {
     var selected_class = (selected_value == k) ? 'bsi-selected' : ''
-    var html = `
-    <div class="big-select-item ${selected_class}" data-bsi-key="${k}" id="big-select-item--${k}">
-      <div class="bsi--head">${k}</div>
-      <div class="bsi--body">${val}</div>
-    </div>
-    `
+
+    if (options.hide_key) {
+      var html = `
+      <div class="big-select-item ${selected_class}" data-bsi-key="${k}" id="big-select-item--${k}">
+        <div class="bsi--head">${val}</div>
+      </div>
+      `
+    }
+    else {
+      var html = `
+      <div class="big-select-item ${selected_class}" data-bsi-key="${k}" id="big-select-item--${k}">
+        <div class="bsi--head">${k}</div>
+        <div class="bsi--body">${val}</div>
+      </div>
+      `
+    }
     $container.append(html)
   }
 
@@ -63,6 +73,7 @@ $.big_select = function ($field, $target, full_hash, before, after) {
     var val = flat_hash[init_val]
     // $desc.attr('title', 'show definition')
     $desc.attr('data-content', val);
+    $field_overlay.val(val);
   }
 
 
@@ -101,14 +112,23 @@ $.big_select = function ($field, $target, full_hash, before, after) {
   var field_parent_id = $field_parent.prop('id')
   var $desc = $field_parent.find('.big-select-description')
 
-  $desc.popover({ trigger: 'click hover' });
+  options = options || {}
+  var field_id = $field.prop('id')
+  var field_overlay = `#${field_id}---overlay`
+  var $field_overlay = $(field_overlay)
+
+  if (!options.hide_popover) {
+    $desc.popover({ trigger: 'click hover' });
+  }
 
   var hash = set_hash(full_hash)
   set_info(init_val)
 
   $field.on('focus', function () {
     if (before) before()
-    $desc.popover('hide')
+    if (!options.hide_popover) {
+      $desc.popover('hide')
+    }
     hash = set_hash(full_hash)
     if (!hash) return
 

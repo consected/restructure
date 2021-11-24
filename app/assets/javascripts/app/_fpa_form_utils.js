@@ -192,6 +192,40 @@ _fpa.form_utils = {
     return d2.toISOString();
   },
 
+  // Handle big-select fields
+  setup_big_select_fields(block) {
+    block.find('.use-big-select').each(function () {
+      var label = '';
+      $.big_select($(this),
+        $('#primary-modal .modal-body'),
+        $(this)[0].big_select_hash,
+        function () { _fpa.show_modal('', label); },
+        function () { _fpa.hide_modal(); },
+        $(this)[0].big_select_options
+      );
+
+    })
+  },
+
+  setup_select_filtering(block) {
+    block.find('[data-select-filtering-target]').not('.done-select-filtering').each(function () {
+      var sf = $(this).attr('data-select-filtering-target');
+      var curr_el = $(this);
+      var val = curr_el.val();
+      _fpa.form_utils.select_filtering_changed(val, sf);
+      curr_el.on('change', function () {
+        _fpa.form_utils.select_filtering_changed($(this).val(), sf)
+      })
+    }).addClass('done-select-filtering');
+  },
+
+  select_filtering_changed(val, el) {
+    $(el).attr('data-big-select-subtype', val);
+    $(`${el} optgroup[label]`).hide();
+    $(`${el} optgroup[label="${val}"]`).show();
+  },
+
+
   data_from_form: function (block) {
     var form_els = block.find('[data-attr-name][data-object-name]');
     var form_data = {};
@@ -2063,6 +2097,8 @@ _fpa.form_utils = {
     _fpa.form_utils.setup_secure_view_links(block);
     _fpa.form_utils.set_auth_tokens(block);
     _fpa.form_utils.set_image_classes(block);
+    _fpa.form_utils.setup_big_select_fields(block);
+    _fpa.form_utils.setup_select_filtering(block);
 
     block.removeClass('formatting-block');
   }

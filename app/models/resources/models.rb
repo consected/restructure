@@ -17,7 +17,7 @@ module Resources
         @@resources[resource_name.to_sym]
       elsif table_name
         res = @@resources.filter { |_k, v| v[:table_name] == table_name }
-        return unless res
+        return unless res&.first
 
         res.first.last
       end

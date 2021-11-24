@@ -3,14 +3,54 @@
 rl = field_name.sub('select_record_id_from_', '').singularize
 
 options = field_options_for(form_object_instance, field_name_sym)
-group_split_char = options.dig(:edit_as, :group_split_char) || '|'
-human_name, reslist = list_record_data_for_select(form_object_instance, rl, value_attr: :id, group_split_char: group_split_char)
+group_split_char = options.dig(:edit_as, :group_split_char)
+label_attr = options.dig(:edit_as, :label_attr) || :data
+human_name, reslist = list_record_data_for_select(form_object_instance, rl, value_attr: :id, label_attr: label_attr, group_split_char: group_split_char)
 
 unless human_name
   logger.warn "Failed to find valid class name for #{field_name}"
 end
-options = field_options_for(form_object_instance, field_name_sym)
+
 options[:include_blank] = true unless options.has_key?(:include_blank)
+big_select = options.dig(:edit_as, :big_select)
+
+unless big_select
 %>
 <%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: rl) %>
 <%= form.select field_name_sym, reslist, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}%>
+<% else 
+  filtered = big_select[:filtered]
+%>
+<%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: rl) %>
+<%
+  if group_split_char
+    reslist.transform_values! do |v|
+      next unless v
+      
+      v.map {|r| [r[1], r[0]]}.to_h
+    end
+  else
+    reslist = reslist.map {|r| [r[1], r[0]]}.to_h
+  end
+
+  if filtered
+    not_done = true
+    field_id = "#{form.object_name}_#{field_name_sym}".to_sym
+
+    reslist.each do |k,v|
+      if not_done
+        not_done = false
+%>
+  <%= big_select_field(form, field_name_sym, v, subtype: k, options: big_select)%>
+<%    else %>
+  <%= big_select_field_data(field_id, k, v) %>
+<%    end%>
+<% 
+    end
+  else
+%>
+<%= big_select_field(form, field_name_sym, reslist)%>
+<% 
+  end
+end 
+%>
