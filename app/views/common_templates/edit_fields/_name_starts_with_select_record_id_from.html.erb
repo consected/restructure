@@ -1,6 +1,7 @@
 <%
 # Allow a 'data' selection to be made from a dynamic model table that is not tied to this master
-rl = field_name.sub('select_record_id_from_table_', '').singularize
+rl = field_name.sub('select_record_id_from_', '').singularize
+
 options = field_options_for(form_object_instance, field_name_sym)
 group_split_char = options.dig(:edit_as, :group_split_char) || '|'
 human_name, reslist = list_record_data_for_select(form_object_instance, rl, value_attr: :id, group_split_char: group_split_char)

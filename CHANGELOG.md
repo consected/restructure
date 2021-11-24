@@ -19,13 +19,15 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+### Transferred from ReStructure @ 8.0.26
+
+- [Added] better handling of report results list with full set of column types from the table
+- [Added] report edit and criteria select fields to use models more effectively and provide grouping
+- [Fixed] migrations with references that don't produce views
 
 ## [7.4.78] - 2021-11-19
 
-<<<<<<< HEAD
 - [Added] changes to allow report record edit and create to work with arbitrary models
-=======
->>>>>>> eb05516b27d56ee65993fdec3ea94f7d019879fd
 
 ## [7.4.77] - 2021-11-19
 
