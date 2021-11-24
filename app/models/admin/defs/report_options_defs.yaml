@@ -115,7 +115,8 @@ column_options:
     #   An automatic match will be made where to find the choice labels to show
 
     # options - pretty presentation of a hash of {key: value} pairs
-    # list - pretty presentation of a list (array)
+    # list - pretty presentation of a list (array) - bulletpoint default styling
+    # tags - alternative to the list, showing items a tag items
     # fixed-pre - fixed length (not dynamic expandable) preformatted text, where all spaces and linebreaks are observed
    
 

@@ -23,7 +23,7 @@ module Reports
       view.class_eval do
         include ApplicationHelper
         include ReportsHelper
-        include ReportsTableHelper
+        include ReportResults::ReportsTableHelper
       end
       view.render(partial: 'reports/result_template/table',
                   locals: {
