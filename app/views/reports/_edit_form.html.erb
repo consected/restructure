@@ -56,7 +56,7 @@
           end
         %>
             <% if @report.edit_fields.include?(field_name_sym) %>
-              <td class="report-el">
+              <td class="report-el report-el-edit-<%=field_name_sym%> report-el-edit-type-<%=column_type%>">
                 <%= edit_form_field(**local_vars) %>
               </td>
             <% else%>
