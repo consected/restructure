@@ -2,15 +2,25 @@
 # Allow a 'data' selection to be made from a dynamic model table that is not tied to this master
 
 options = field_options_for(form_object_instance, field_name_sym)
-group_split_char = options.dig(:edit_as, :group_split_char) || '|'
+group_split_char = options.dig(:edit_as, :group_split_char)
+value_attr = options.dig(:edit_as, :value_attr) || :data
+label_attr = options.dig(:edit_as, :label_attr) || :data
+big_select = options.dig(:edit_as, :big_select)
+sf_el = options.dig(:edit_as, :select_filtering_target)
 options[:include_blank] = true unless options.has_key?(:include_blank)
-
 assoc_or_class_name = field_name.sub('select_record_from_table_', '').singularize
 
-human_name, reslist = list_record_data_for_select(form_object_instance, assoc_or_class_name, value_attr: :data, group_split_char: group_split_char)
+human_name, reslist = list_record_data_for_select(form_object_instance, assoc_or_class_name, value_attr: value_attr, label_attr: label_attr, group_split_char: group_split_char)
 unless human_name
   logger.warn "Failed to find valid class name for #{field_name_sym}"
 end
+
+unless big_select
 %>
-<%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: human_name) %>
-<%= form.select field_name_sym, reslist, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
+<%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: assoc_or_class_name) %>
+<%= form.select field_name_sym, reslist, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us, select_filtering_target: sf_el}}%>
+<% else %>
+<%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: assoc_or_class_name) %>
+<% reslist = big_select_list_from_options(reslist, group_split_char) %>
+<%= big_select_field(form, field_name_sym, reslist, options: big_select) %>
+<% end %>

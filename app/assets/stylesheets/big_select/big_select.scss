@@ -58,6 +58,6 @@
   position: relative;
 }
 
-.big-select-overlay {
+.big-select-overlay[readonly] {
   background: white;
 }

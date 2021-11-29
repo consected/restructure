@@ -210,8 +210,13 @@ _fpa.form_utils = {
   setup_select_filtering(block) {
     block.find('[data-select-filtering-target]').not('.done-select-filtering').each(function () {
       var sf = $(this).attr('data-select-filtering-target');
+      var fn = $(this).attr('data-object-name').replace('__', '_');
       var curr_el = $(this);
       var val = curr_el.val();
+
+      // If an element id has not been specified, assume it is a field name and generate the element id
+      if (sf[0] != '#') sf = `#${fn}_${sf}`
+
       _fpa.form_utils.select_filtering_changed(val, sf);
       curr_el.on('change', function () {
         _fpa.form_utils.select_filtering_changed($(this).val(), sf)
