@@ -866,6 +866,10 @@ _fpa = {
             var res = {};
             res[di] = d;
             targets.each(function () {
+
+              // If a subscription was inside an element that has already been replaced, just return
+              if ($(this).parents('body').length === 0) return;
+
               var pre = $(this).attr('data-preprocessor');
               _fpa.do_preprocessors(pre, $(this), data);
               put_in_position($(this), d);
