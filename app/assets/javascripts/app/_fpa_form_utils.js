@@ -2072,7 +2072,8 @@ _fpa.form_utils = {
       block = block.parent();
     }
 
-    // add an indicator (mostly for testing) that lengthy formatting is happening
+    // add an indicator that lengthy formatting is happening
+    if (block.hasClass('formatting-block')) return;
     block.addClass('formatting-block');
 
     _fpa.form_utils.setup_chosen(block);

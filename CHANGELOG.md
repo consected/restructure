@@ -19,21 +19,18 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Changed] - bump version
 
 ## [7.4.80] - 2021-11-30
 
-<<<<<<< HEAD
+- [Changed] app-type import to prevent disabling user access controls if no config for valid_user_access_controls appear in the uploaded file
+- [Fixed] bugfixes
 
-## [7.4.79] - 2021-11-29
-
-<<<<<<< HEAD
-=======
 ## [7.4.79] - 2021-11-19
 
 - [Changed] big select updated to allow filters and work with dynamic models
 - [Changed] editable report lists can work without master_id
 
->>>>>>> 27f496cafa37999d1ef629c2756d876c9281981b
 ### Transferred from ReStructure @ 8.0.26
 
 - [Added] better handling of report results list with full set of column types from the table
@@ -42,16 +39,7 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## [7.4.78] - 2021-11-19
 
-=======
-
-## [7.4.78] - 2021-11-19
-
-<<<<<<< HEAD
->>>>>>> 8ee79eb7580975879d6786624b2de7c0312b8bd5
 - [Added] changes to allow report record edit and create to work with arbitrary models
-=======
->>>>>>> eb05516b27d56ee65993fdec3ea94f7d019879fd
-
 
 ## [7.4.77] - 2021-11-19
 
@@ -60,19 +48,19 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## [7.4.76] - 2021-11-18
 
-- [Fixed] *transposed_table* bad HTML markup
+- [Fixed] _transposed_table_ bad HTML markup
 
 ## [7.4.75] - 2021-11-18
 
-- [Fixed] *transposed_table* not viewing correctly in emails
+- [Fixed] _transposed_table_ not viewing correctly in emails
 
 ## [7.4.74] - 2021-11-18
 
-- [Added] report view_as option to show results as a *transposed_table*
+- [Added] report view*as option to show results as a \_transposed_table*
 
 ## [7.4.73] - 2021-11-18
 
-- [Added] handling of multi_editable_ field type configs for lists and choices in forms
+- [Added] handling of multi*editable* field type configs for lists and choices in forms
 - [Added] column option for "choice_label" and ensure it works for all types of display and editing
 - [Fixed] report edit forms and results format and submit dates correctly
 - [Fixed] form, credential and trigger bugs

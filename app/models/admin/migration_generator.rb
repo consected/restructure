@@ -11,7 +11,7 @@ class Admin::MigrationGenerator
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
                 :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
                 :allow_migrations, :db_configs, :resource_type, :view_sql, :all_referenced_tables,
-                :class_name
+                :class_name, :dynamic_def
 
   def initialize(db_migration_schema, table_name: nil, class_name: nil,
                  all_implementation_fields: nil, table_comments: nil,
@@ -19,7 +19,8 @@ class Admin::MigrationGenerator
                  resource_type: nil,
                  view_sql: nil,
                  allow_migrations: nil,
-                 all_referenced_tables: nil)
+                 all_referenced_tables: nil,
+                 dynamic_def: nil)
     self.db_migration_schema = db_migration_schema
     self.table_name = table_name
     self.class_name = class_name
@@ -32,6 +33,8 @@ class Admin::MigrationGenerator
     self.db_configs = db_configs
     self.view_sql = view_sql
     self.all_referenced_tables = all_referenced_tables
+    self.dynamic_def = dynamic_def
+
     self.allow_migrations = allow_migrations
     self.allow_migrations = Settings::AllowDynamicMigrations if allow_migrations.nil?
     super()
@@ -647,11 +650,11 @@ class Admin::MigrationGenerator
 
   def generator_script_external_identifier(version, mode = 'create')
     cname = "#{mode}_#{table_name}_#{version}".camelize
-    ftype = (alphanumeric? ? 'string' : 'bigint')
+    ftype = (dynamic_def.alphanumeric ? 'string' : 'bigint')
     do_create_or_update = if mode == 'create'
-                            "create_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
+                            "create_external_identifier_tables :#{dynamic_def.external_id_attribute}, :#{ftype}"
                           elsif mode == 'create_or_update'
-                            "create_or_update_external_identifier_tables :#{external_id_attribute}, :#{ftype}"
+                            "create_or_update_external_identifier_tables :#{dynamic_def.external_id_attribute}, :#{ftype}"
                           else
                             migration_update_table
                           end
@@ -665,7 +668,7 @@ class Admin::MigrationGenerator
           #{migration_set_attribs}
 
           #{do_create_or_update}
-          create_external_identifier_trigger :#{external_id_attribute}
+          create_external_identifier_trigger :#{dynamic_def.external_id_attribute}
         end
       end
     CONTENT

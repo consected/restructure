@@ -88,6 +88,7 @@ module GeneralDataConcerns
   end
 
   def source_name
+    return super if defined?(super) && !respond_to?(:source)
     return nil unless respond_to? :source
 
     self.class.get_source_name source
