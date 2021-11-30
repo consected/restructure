@@ -19,10 +19,18 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+
+## [7.4.81] - 2021-11-30
+
+<<<<<<< HEAD
 - [Changed] - bump version
 
 ## [7.4.80] - 2021-11-30
 
+=======
+## [7.4.80] - 2021-11-30
+
+>>>>>>> d68bcfdc202cc5256629c61ede8595cdebe2576d
 - [Changed] app-type import to prevent disabling user access controls if no config for valid_user_access_controls appear in the uploaded file
 - [Fixed] bugfixes
 
