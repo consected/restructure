@@ -20,9 +20,20 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 ## Unreleased
 
 
+## [7.4.80] - 2021-11-30
+
+<<<<<<< HEAD
+
 ## [7.4.79] - 2021-11-29
 
 <<<<<<< HEAD
+=======
+## [7.4.79] - 2021-11-19
+
+- [Changed] big select updated to allow filters and work with dynamic models
+- [Changed] editable report lists can work without master_id
+
+>>>>>>> 27f496cafa37999d1ef629c2756d876c9281981b
 ### Transferred from ReStructure @ 8.0.26
 
 - [Added] better handling of report results list with full set of column types from the table
@@ -40,6 +51,7 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 - [Added] changes to allow report record edit and create to work with arbitrary models
 =======
 >>>>>>> eb05516b27d56ee65993fdec3ea94f7d019879fd
+
 
 ## [7.4.77] - 2021-11-19
 
