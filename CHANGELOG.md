@@ -19,6 +19,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Changed] app-type import to prevent disabling user access controls if no config for valid_user_access_controls appear in the uploaded file
+- [Fixed] bugfixes
+
 ## [7.4.79] - 2021-11-19
 
 - [Changed] big select updated to allow filters and work with dynamic models
@@ -41,19 +44,19 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## [7.4.76] - 2021-11-18
 
-- [Fixed] *transposed_table* bad HTML markup
+- [Fixed] _transposed_table_ bad HTML markup
 
 ## [7.4.75] - 2021-11-18
 
-- [Fixed] *transposed_table* not viewing correctly in emails
+- [Fixed] _transposed_table_ not viewing correctly in emails
 
 ## [7.4.74] - 2021-11-18
 
-- [Added] report view_as option to show results as a *transposed_table*
+- [Added] report view*as option to show results as a \_transposed_table*
 
 ## [7.4.73] - 2021-11-18
 
-- [Added] handling of multi_editable_ field type configs for lists and choices in forms
+- [Added] handling of multi*editable* field type configs for lists and choices in forms
 - [Added] column option for "choice_label" and ensure it works for all types of display and editing
 - [Fixed] report edit forms and results format and submit dates correctly
 - [Fixed] form, credential and trigger bugs
