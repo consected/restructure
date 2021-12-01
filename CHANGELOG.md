@@ -19,6 +19,8 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Changed] - bump version
+
 ## [7.4.81] - 2021-11-30
 
 - [Changed] - bump version
