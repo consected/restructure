@@ -244,12 +244,14 @@ _fpa = {
         // We don't use the definition version here, since it is possible for different
         // instances with the same definition version to return different results
         // due to runtime model references returning results with different template versions
-        var did = url_data_type + '/' + data_item.id;
-        if (_fpa.state.template_config_versions[did]) continue;
+        if (data_item) {
+          var did = url_data_type + '/' + data_item.id;
+          if (_fpa.state.template_config_versions[did]) continue;
 
-        _fpa.state.template_config_versions[did] = true;
-        list_data_item_state_ids.push(did);
-        list_data_items.push(data_item.id);
+          _fpa.state.template_config_versions[did] = true;
+          list_data_item_state_ids.push(did);
+          list_data_items.push(data_item.id);
+        }
       }
       if (list_data_items.length == 0 || !list_data_items[0]) {
         console.log('no template configs to get');
