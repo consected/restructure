@@ -3,7 +3,7 @@
 module Dynamic
   module FieldEditAs
     #
-    # Handle field the translation of received parameters
+    # Handle the translation of received strong parameters
     # into persistable data according to specific {field_options: edit_as:} configurations
     # The translations are performed for the parameters with names containing
     # any one of the items in TransformFieldTypes.
@@ -11,7 +11,7 @@ module Dynamic
     class Handler
       attr_accessor :object_instance, :params
 
-      TransformFieldTypes = %w[multi_editable_list multi_editable_choices].freeze
+      TransformFieldTypes = %w[multi_editable_list multi_editable_choices col_type_json].freeze
 
       #
       # Initialize with the object instance to be stored to, and the params from
@@ -48,11 +48,18 @@ module Dynamic
       #
       # Return a hash of field_options: <field>: edit_as: field_type: <field type value> as
       # { <field>: <field type value> }
+      # The result uses column type for those that don't have a field_type specified
       # @return [Hash]
       def edit_as_field_types
         fo = object_instance.option_type_config&.field_options || {}
-
-        fo.transform_values { |v| v[:edit_as] && v[:edit_as][:field_type] }.delete_if { |_k, v| !v }
+        cols = object_instance.class.columns_hash
+        field_list = object_instance.attribute_names
+        field_list.map do |fn|
+          [
+            fn.to_sym,
+            fo.dig(fn.to_sym, :edit_as, :field_type) || "col_type_#{cols[fn].type}"
+          ]
+        end.to_h
       end
     end
   end

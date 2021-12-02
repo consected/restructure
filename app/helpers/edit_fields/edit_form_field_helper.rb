@@ -127,7 +127,7 @@ module EditFields
 
       unless got
         # Handle Brakeman issue with using column type directly to generate partial path
-        valid_col_types = %i[boolean integer decimal datetime date]
+        valid_col_types = %i[boolean integer decimal datetime date jsonb json]
         ct = valid_col_types.find { |c| c == column_type.to_sym }
 
         match_name = "column_type_#{ct}"
