@@ -37,7 +37,7 @@ module EditFields
         r = rec.first || ''
         val = rec.last
 
-        rs = r.split('|', 2)
+        rs = r.split(group_split_char, 2)
 
         if rs.length == 2
           group = rs.first.strip
