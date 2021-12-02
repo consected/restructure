@@ -19,46 +19,28 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
-
 ## [7.4.89] - 2021-12-02
 
-<<<<<<< HEAD
 - [Added] configure an alt_column_header for reports
 - [Added] allow substitutions in report descriptions and dashboard block headers
 - [Added] substitution add_edit_button_
 - [Added] disable dynamic definition versions based on app setting
-- [Added] hiding of dashboards in list 
+- [Added] hiding of dashboards in list
 - [Added] menu / title setting for dashboards (and reports)
 - [Fixed] substitutions in forms with no master
 - [Fixed] YAML/JSON field viewing and editing
 
 ## [7.4.88] - 2021-12-01
 
-=======
-
-## [7.4.88] - 2021-12-01
-
-
 ## [7.4.87] - 2021-12-01
 
->>>>>>> 8806910611c32804df2ee923bc47a624ecdd7dac
 - [Changed] - bump version
 
-<<<<<<< HEAD
-## [7.4.87] - 2021-12-01
-=======
 ## [7.4.86] - 2021-12-01
-<<<<<<< HEAD
-=======
-
 
 ## [7.4.85] - 2021-12-01
->>>>>>> d06df2cdc6612075229865fe8e8882f2a4c8efd2
->>>>>>> 85ce3e902db61fb99c5cc9277449e569c9725521
 
 - [Changed] - bump version
-
-## [7.4.85] - 2021-12-01
 
 ## [7.4.84] - 2021-12-01
 
@@ -76,17 +58,9 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## [7.4.83] - 2021-12-01
 
-## [7.4.82] - 2021-12-01
-
-## [7.4.81] - 2021-11-30
-
 - [Changed] - bump version
 
 ## [7.4.82] - 2021-12-01
-
-## [7.4.81] - 2021-11-30
-
-- [Changed] - bump version
 
 ## [7.4.81] - 2021-11-30
 
