@@ -80,7 +80,7 @@ RSpec.describe 'OptionsHandler', type: :model do
     expect(TestOptionsHandler::Test2Var1.new({})).not_to respond_to :test2_var2_a1
     expect(TestOptionsHandler::Test2Var1.new({})).not_to respond_to :test2_var2_a2
 
-    expect { TestOptionsHandler::Test2Var1.new(unknown: true) }.to raise_error(FphsException, 'Unrecognized configuration params: unknown')
+    expect { TestOptionsHandler::Test2Var1.new(unknown: true) }.to raise_error(FphsException, 'Unrecognized configuration params in TestOptionsHandler::Test2Var1: unknown')
 
     t = TestOptionsHandler.new use_hash_config: {
       test2_var1: {
