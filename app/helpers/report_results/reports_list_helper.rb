@@ -15,7 +15,7 @@ module ReportResults
       table_name = @result_tables[field_num]
 
       cell = ReportResults::ReportsListResultCell.new(table_name, col_content, col_name, @col_tags[col_name], @show_as[col_name],
-                                                       selection_options_handler_for(table_name))
+                                                      selection_options_handler_for(table_name))
       col_tag = cell.html_tag
       col_content = cell.view_content
 
@@ -32,16 +32,25 @@ module ReportResults
         time_attr = "data-time-orig-val=\"#{orig_col_content}\""
       end
 
+      header_content = alt_column_header(field_num) || @results.fields[field_num]
+      header_content = @view_options.humanize_column_names ? header_content.humanize : header_content
+      if header_content.present?
+        header_markup = <<~END_HTML
+          <span class="report-list-header-item">#{header_content}</span>
+        END_HTML
+      end
+
       res = <<~END_HTML
         <div data-col-type="#{col_name}"
             data-col-table="#{table_name}"
             data-col-var-type="#{orig_col_content.class.name}" #{time_attr}
-            class="report-list-el #{extra_classes}">#{col_tag_start}#{col_content}#{col_tag_end}</div>
+            class="report-list-el #{extra_classes}">
+          #{header_markup}
+          #{col_tag_start}#{col_content}#{col_tag_end}
+        </div>
       END_HTML
 
       res.html_safe
     end
-
-
   end
 end

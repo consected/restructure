@@ -23,12 +23,14 @@ class ExternalIdentifier::ExternalIdentifierController < UserBaseController
   # extra protection to avoid possible injection of an alternative value
   # when we should be using a generated ID.
   def secure_params
+    return @secure_params if @secure_params
+
     defn = implementation_class.definition
     field_list = [:master_id] + defn.field_list_array
 
     res = params.require(controller_name.singularize.to_sym).permit(field_list)
     res[implementation_class.external_id_attribute.to_sym] = nil if implementation_class.allow_to_generate_ids?
-    res
+    @secure_params = res
   end
 
   #

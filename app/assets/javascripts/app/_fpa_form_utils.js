@@ -590,7 +590,7 @@ _fpa.form_utils = {
       if (!res || res.length < 1) return;
 
       var new_data = {};
-      if (data && data.master_id) {
+      if (data && (data.master_id || data.vdef_version)) {
         var master_id = data.master_id;
         new_data = Object.assign({}, data);
         if (!new_data.user_preference) new_data.user_preference = _fpa.user_prefs;
@@ -692,7 +692,7 @@ _fpa.form_utils = {
       window.setTimeout(function () {
         var wmax = 0;
         // Get all the items that need resizing PLUS the caption-before each, allowing them to be excluded
-        var list_items = self.find('.list-group-item.result-field-container, .list-group-item.result-notes-container, .list-group-item.edit-field-container, .list-group-item.caption-before').not('.all-fields-caption');
+        var list_items = self.find('.list-group-item.result-field-container, .list-group-item.result-notes-container, .list-group-item.edit-field-container, .list-group-item.caption-before').not('.all-fields-caption, .force-no-caption-before');
 
         var prev_caption_before = false;
         list_items.each(function () {
@@ -1548,6 +1548,12 @@ _fpa.form_utils = {
       var d = _fpa.utils.YMDtimeToLocale(text);
       $(this).html(d);
     }).addClass('formatted-datetime-local')
+
+    var uc = block.find('.uncollapse-children');
+    uc.find('.collapse').collapse('show');
+    window.setTimeout(function () {
+      _fpa.form_utils.resize_labels(uc)
+    }, 200)
   },
 
   setup_drag_and_drop: function (block) {

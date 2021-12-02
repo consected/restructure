@@ -63,6 +63,9 @@ class Admin::PageLayout < Admin::AdminBase
   #   find_with: the alternative id (crosswalk or external id) to search for the master record with for standalone pages
   configure :view_options, with: %i[initial_show orientation add_item_label limit find_with]
 
+  # List options for dashboards list
+  configure :list_options, with: %i[hide_in_list]
+
   # Add a navigation (top menu bar) item as either a link or a list of resources (reports typically)
   # links: array of links
   #    - label: visible label

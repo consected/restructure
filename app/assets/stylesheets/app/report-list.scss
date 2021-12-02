@@ -35,4 +35,18 @@
     line-height: 1em;
     margin-bottom: 4px;
   }
+
+  .report-list-header-item {
+    color: gray;
+    display: inline-block;
+    margin-right: 1.4em;
+    min-width: 10em;
+  }
+
+  pre {
+    padding: 10px 0;
+    background: transparent;
+    border: 0;
+    font-family: sans-serif;
+  }
 }

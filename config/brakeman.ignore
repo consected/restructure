@@ -103,6 +103,47 @@
     {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
+      "fingerprint": "3d508682049f8dad841ce710eb4e1db274027235d85694e1f52614da7a49cd62",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/page_layouts/_show_row.html.erb",
+      "line": 100,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Formatter::Substitution.substitute(markdown_to_html((col[\"header\"] or \"\")), :data => ((Master.find_with({ :id => params[:filters][:master_id], :type => (((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_options.find_with or params[:filters][:master_type].hyphenate)) }, :access_by => current_user) or {})), :tag_subs => nil)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "PageLayoutsController",
+          "method": "show",
+          "line": 21,
+          "file": "app/controllers/page_layouts_controller.rb",
+          "rendered": {
+            "name": "page_layouts/show",
+            "file": "app/views/page_layouts/show.html.erb"
+          }
+        },
+        {
+          "type": "template",
+          "name": "page_layouts/show",
+          "line": 54,
+          "file": "app/views/page_layouts/show.html.erb",
+          "rendered": {
+            "name": "page_layouts/_show_row",
+            "file": "app/views/page_layouts/_show_row.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "page_layouts/_show_row"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
       "fingerprint": "4043158de8e943fbaaf39db923ffafff5f1c747067355597790d51d2d7978547",
       "check_name": "CrossSiteScripting",
       "message": "Unescaped parameter value",
@@ -115,7 +156,7 @@
           "type": "controller",
           "class": "PageLayoutsController",
           "method": "show",
-          "line": 19,
+          "line": 21,
           "file": "app/controllers/page_layouts_controller.rb",
           "rendered": {
             "name": "page_layouts/show",
@@ -412,6 +453,47 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "e3b82ffcac439486fbfec1551a1727f54ce1bde0a018e27089b04e2477cf4408",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/page_layouts/_show_row.html.erb",
+      "line": 109,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Formatter::Substitution.substitute(markdown_to_html((col[\"footer\"] or \"\")), :data => ((Master.find_with({ :id => params[:filters][:master_id], :type => (((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_options.find_with or params[:filters][:master_type].hyphenate)) }, :access_by => current_user) or {})), :tag_subs => nil)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "PageLayoutsController",
+          "method": "show",
+          "line": 21,
+          "file": "app/controllers/page_layouts_controller.rb",
+          "rendered": {
+            "name": "page_layouts/show",
+            "file": "app/views/page_layouts/show.html.erb"
+          }
+        },
+        {
+          "type": "template",
+          "name": "page_layouts/show",
+          "line": 54,
+          "file": "app/views/page_layouts/show.html.erb",
+          "rendered": {
+            "name": "page_layouts/_show_row",
+            "file": "app/views/page_layouts/_show_row.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "page_layouts/_show_row"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "e76fa00b707c077dca2724d24b6cfca0685ffc06df826578358d6eccbd8e6f61",
@@ -493,6 +575,6 @@
       "note": ""
     }
   ],
-  "updated": "2021-12-01 11:18:05 +0000",
+  "updated": "2021-12-02 20:19:58 +0000",
   "brakeman_version": "5.1.2"
 }

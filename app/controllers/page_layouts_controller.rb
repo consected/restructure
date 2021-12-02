@@ -13,6 +13,8 @@ class PageLayoutsController < ApplicationController
     self.objects_instance = @page_layouts =
       Admin::PageLayout.app_standalone_layouts(current_user.app_type_id)
                        .order(panel_position: :asc)
+
+    @page_layouts = @page_layouts.reject { |r| r.list_options.hide_in_list }
   end
 
   def show

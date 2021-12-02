@@ -177,7 +177,7 @@ module ReportResults
 
       html = <<~END_HTML
         <a class="report-embedded-block-link glyphicon glyphicon-tasks" title="open result" href="#{url}" data-remote="true" data-#{hyph_name}-id="#{id}" data-result-target="#report-result-embedded-block--#{id}" data-template="#{hyph_name}-result-template" data-result-target-force="true"></a>
-        <div id="report-result-embedded-block--#{id}" class="report-temp-embedded-block" data-preprocessor="report_embed_dynamic_block" data-model-name="#{hyph_name.underscore}" data-id="#{id}"><div>
+        <div id="report-result-embedded-block--#{id}" class="report-temp-embedded-block" data-preprocessor="report_embed_dynamic_block" data-model-name="#{hyph_name.underscore}" data-id="#{id}"></div>
       END_HTML
 
       html.html_safe

@@ -581,7 +581,7 @@ module MasterHandler
   end
 
   def secure_params
-    params.require(primary_params_name).permit(*permitted_params)
+    @secure_params ||= params.require(primary_params_name).permit(*permitted_params)
   end
 
   #
@@ -601,6 +601,10 @@ module MasterHandler
     rname = object_instance.class.name.underscore.gsub('/', '_')
     obj_params = params[rname]
     updated_params = Dynamic::FieldEditAs::Handler.new(object_instance, obj_params).translate_to_persistable
-    object_instance.assign_attributes updated_params
+    # We don't use #assign_attributes, since a Hash will be treated as an update of a nested object
+    updated_params.each do |k, v|
+      object_instance.send("#{k}=", v)
+      secure_params.delete k
+    end
   end
 end

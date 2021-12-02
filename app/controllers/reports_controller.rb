@@ -396,7 +396,7 @@ class ReportsController < UserBaseController
   end
 
   def secure_params
-    params.require(report_params_holder).permit(*permitted_params)
+    @secure_params ||= params.require(report_params_holder).permit(*permitted_params)
   end
 
   def set_editable_instance_from_id
