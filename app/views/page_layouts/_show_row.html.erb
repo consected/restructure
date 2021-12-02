@@ -76,7 +76,7 @@
       end
 
       
-      sub_data = @master || report || {}
+      sub_data = @master || {}
       
       col_label = Formatter::Substitution.substitute(col_label, data: sub_data, tag_subs: nil)
       col_header = markdown_to_html(col_header)
