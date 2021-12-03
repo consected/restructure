@@ -33,6 +33,7 @@
     <%= big_select_field(f, :resource_name, Resources::UserAccessControl.resource_descriptions_for(:general), subtype: :general) %>
     <%= big_select_field_data(:admin_user_access_control_resource_name, :table, Resources::UserAccessControl.resource_descriptions_for(:table)) %>
     <%= big_select_field_data(:admin_user_access_control_resource_name, :report, Resources::UserAccessControl.resource_descriptions_for(:report)) %>
+    <%= big_select_field_data(:admin_user_access_control_resource_name, :standalone_page, Resources::UserAccessControl.resource_descriptions_for(:standalone_page)) %>
     <%= big_select_field_data(:admin_user_access_control_resource_name, :activity_log_type, Resources::UserAccessControl.resource_descriptions_for(:activity_log_type)) %>            
     <%= big_select_field_data(:admin_user_access_control_resource_name, :limited_access, Resources::UserAccessControl.resource_descriptions_for(:limited_access)) %>
   </div>

@@ -139,12 +139,42 @@ class Admin::PageLayout < Admin::AdminBase
     true
   end
 
+  #
+  # Get dashboards that the user has access to in its current app
+  # @param [User] user
+  # @return [ActiveRecord::Relation] standalone page layouts
+  def self.standalone_pages_for_user(user)
+    if user.has_access_to?(:read, :standalone_page, :_all_standalone_pages_)
+      all
+    else
+      ns = []
+      all.each do |r|
+        ns << r.id if standalone_page_available_to_user r, user
+      end
+
+      where(id: ns)
+    end
+  end
+
+  #
+  # Does the user have access to show the standalone page?
+  # @param [Report] report
+  # @param [User] user
+  # @return [Boolean]
+  def self.standalone_page_available_to_user(page, user)
+    user.has_access_to?(:read, :standalone_page, page.panel_name)
+  end
+
+  #
   # Active standalone layouts for the specified app type
+  # @return [ActiveRecord::Relation] standalone page layouts
   def self.app_standalone_layouts(app_type_id)
     Admin::PageLayout.active.standalone.where(app_type_id: app_type_id)
   end
 
+  #
   # Active view or standalone layouts for the specified app type
+  # @return [ActiveRecord::Relation] all active layout types for app
   def self.app_show_layouts(app_type_id)
     Admin::PageLayout.active.showable.where(app_type_id: app_type_id)
   end
@@ -159,5 +189,15 @@ class Admin::PageLayout < Admin::AdminBase
 
   def standalone?
     layout_name == 'standalone'
+  end
+
+  #
+  # Equivalent to `HandlesUserBase#can_access?`
+  # A user can access a page layout if it is included as a named
+  # resource, or if _all_standalone_pages_ is specified
+  def can_access?(user)
+    return true if self.class.standalone_page_available_to_user self, user
+
+    user.has_access_to?(:read, :standalone_page, :_all_standalone_pages_)
   end
 end
