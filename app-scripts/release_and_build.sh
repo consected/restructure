@@ -20,6 +20,12 @@ fi
 
 git pull
 
+cl_ur=$(grep '## Unreleased' CHANGELOG.md)
+if [ -z "${cl_ur}" ]; then
+  echo "CHANGELOG.md does not have the section '## Unreleased'. Edit and retry."
+  exit 2
+fi
+
 cl_not_ok=$(grep -Pzl '## Unreleased\n+## ' CHANGELOG.md)
 if [ "${cl_not_ok}" ]; then
   echo "CHANGELOG.md does not have anything entered for the Unreleased section. Edit and retry."

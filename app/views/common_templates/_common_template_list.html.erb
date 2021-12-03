@@ -1,7 +1,7 @@
 <script id="common_template_list_new_button_container"  type="text/x-handlebars-template" class="hidden handlebars-partial">
   <div class="new-button-container">
     <div class="text-center">
-      <a href="/masters/{{master_id}}/{{pluralize name}}/new"
+      <a href="{{#if master_id}}/masters/{{master_id}}{{/if}}/{{pluralize name}}/new"
           data-toggle="scrollto-result"
           data-target="#{{hyphenate name}}-{{../master_id}}-" 
           data-remote="true"

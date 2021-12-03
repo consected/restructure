@@ -50,6 +50,8 @@ module ReportResults
                                                        schema_name: @runner&.data_reference&.schema_name,
                                                        view_options: @view_options)
 
+      header_content = alt_column_header(field_num) || header_content
+
       comment = cell.column_comment
       view_opt = @view_options
       unless view_opt.hide_field_names_with_comments && comment

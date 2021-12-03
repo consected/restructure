@@ -338,7 +338,7 @@ _fpa.reports = {
             sa = "";
 
             for (var i in data.search_attributes) {
-              if (data.search_attributes.hasOwnProperty(i) && i !== 'ids_filter_previous') {
+              if (data.search_attributes.hasOwnProperty(i) && i !== 'ids_filter_previous' && i !== '_use_defaults_') {
                 var d = data.search_attributes[i];
                 sa += '<div class="report-search-attr"><span class="attr-label">' + i + '</span><span class="attr-val">' + _fpa.utils.pretty_print(d, { return_string: true }) + '</span></div>';
               }

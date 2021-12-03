@@ -27,9 +27,11 @@ class DynamicModel::DynamicModelsController < UserBaseController
   # The secure parameters (key / value strong params) that can be used to
   # create or update instances
   def secure_params
+    return @secure_params if @secure_params
+
     @implementation_class = implementation_class
     resname = @implementation_class.name.ns_underscore.gsub('__', '_').singularize.to_sym
-    params.require(resname).permit(*permitted_params)
+    @secure_params = params.require(resname).permit(*permitted_params)
   end
 
   #

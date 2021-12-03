@@ -44,7 +44,10 @@ module OptionsHandler
       params = params.symbolize_keys
 
       unrecognized = params.keys - self.class.configure_with_items
-      raise FphsException, "Unrecognized configuration params: #{unrecognized.join(', ')}" if unrecognized.present?
+      if unrecognized.present?
+        raise FphsException,
+              "Unrecognized configuration params in #{self.class.name}: #{unrecognized.join(', ')}"
+      end
 
       init_with(params)
     end

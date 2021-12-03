@@ -10,12 +10,17 @@ class PageLayoutsController < ApplicationController
   attr_accessor :object_instance, :objects_instance
 
   def index
-    self.objects_instance = @page_layouts =
-      Admin::PageLayout.app_standalone_layouts(current_user.app_type_id)
-                       .order(panel_position: :asc)
+    pm = Admin::PageLayout.app_standalone_layouts(current_user.app_type_id)
+                          .standalone_pages_for_user(current_user)
+                          .order(panel_position: :asc)
+
+    self.objects_instance = @page_layouts = pm
+    @page_layouts = @page_layouts.reject { |r| r.list_options.hide_in_list }
   end
 
   def show
+    return not_authorized unless @page_layout.can_access?(current_user) || current_admin
+
     render :show unless performed?
   end
 

@@ -27,7 +27,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 586,
+      "line": 592,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';\\n\")",
       "render_path": null,
@@ -47,7 +47,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 74,
+      "line": 77,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"select table_schema \\\"schema_name\\\", table_name from information_schema.tables\\nwhere table_schema IN (#{quoted_schemas})\\nand table_catalog = '#{current_database}'\\nUNION\\nselect table_schema \\\"schema_name\\\", table_name from information_schema.views\\nwhere table_schema IN (#{quoted_schemas})\\nand table_catalog = '#{current_database}'\\norder by \\\"schema_name\\\", table_name\\n\")",
       "render_path": null,
@@ -87,7 +87,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 318,
+      "line": 324,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE\")",
       "render_path": null,
@@ -97,6 +97,47 @@
         "method": "update_table_name"
       },
       "user_input": "calc_trigger_fn_name(table_name)",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "3d508682049f8dad841ce710eb4e1db274027235d85694e1f52614da7a49cd62",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/page_layouts/_show_row.html.erb",
+      "line": 100,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Formatter::Substitution.substitute(markdown_to_html((col[\"header\"] or \"\")), :data => ((Master.find_with({ :id => params[:filters][:master_id], :type => (((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_options.find_with or params[:filters][:master_type].hyphenate)) }, :access_by => current_user) or {})), :tag_subs => nil)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "PageLayoutsController",
+          "method": "show",
+          "line": 21,
+          "file": "app/controllers/page_layouts_controller.rb",
+          "rendered": {
+            "name": "page_layouts/show",
+            "file": "app/views/page_layouts/show.html.erb"
+          }
+        },
+        {
+          "type": "template",
+          "name": "page_layouts/show",
+          "line": 54,
+          "file": "app/views/page_layouts/show.html.erb",
+          "rendered": {
+            "name": "page_layouts/_show_row",
+            "file": "app/views/page_layouts/_show_row.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "page_layouts/_show_row"
+      },
+      "user_input": null,
       "confidence": "Medium",
       "note": ""
     },
@@ -115,7 +156,7 @@
           "type": "controller",
           "class": "PageLayoutsController",
           "method": "show",
-          "line": 19,
+          "line": 21,
           "file": "app/controllers/page_layouts_controller.rb",
           "rendered": {
             "name": "page_layouts/show",
@@ -138,7 +179,7 @@
       "check_name": "MassAssignment",
       "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
       "file": "app/controllers/reports_controller.rb",
-      "line": 408,
+      "line": 430,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.require(:search_attrs).permit!",
       "render_path": null,
@@ -238,7 +279,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 135,
+      "line": 138,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"SELECT\\n    cols.table_schema \\\"schema_name\\\",\\n    cols.table_name,\\n    cols.column_name,\\n    pg_catalog.col_description(c.oid, cols.ordinal_position::int) AS column_comment\\nFROM\\n    information_schema.columns cols\\nINNER JOIN pg_catalog.pg_class c\\nON\\n  c.oid = ('\\\"' || cols.table_name || '\\\"')::regclass::oid\\n  AND c.relname = cols.table_name\\n\\nWHERE\\n    cols.table_catalog = '#{current_database}' AND\\n    cols.table_schema IN (#{quoted_schemas}) AND\\n    pg_catalog.col_description(c.oid, cols.ordinal_position::int) IS NOT NULL\\n;\\n\")",
       "render_path": null,
@@ -258,7 +299,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/admin/migration_generator.rb",
-      "line": 189,
+      "line": 192,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "connection.execute(\"SELECT * FROM #{tables_and_views.find do\n (tn[\"table_name\"] == \"#{basename}_datadic\")\n end[\"table_name\"]};\\n\")",
       "render_path": null,
@@ -412,13 +453,54 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "e3b82ffcac439486fbfec1551a1727f54ce1bde0a018e27089b04e2477cf4408",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/page_layouts/_show_row.html.erb",
+      "line": 109,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Formatter::Substitution.substitute(markdown_to_html((col[\"footer\"] or \"\")), :data => ((Master.find_with({ :id => params[:filters][:master_id], :type => (((active_layouts.find(params[:id]) or active_layouts.where(:panel_name => params[:id]).first).view_options.find_with or params[:filters][:master_type].hyphenate)) }, :access_by => current_user) or {})), :tag_subs => nil)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "PageLayoutsController",
+          "method": "show",
+          "line": 21,
+          "file": "app/controllers/page_layouts_controller.rb",
+          "rendered": {
+            "name": "page_layouts/show",
+            "file": "app/views/page_layouts/show.html.erb"
+          }
+        },
+        {
+          "type": "template",
+          "name": "page_layouts/show",
+          "line": 54,
+          "file": "app/views/page_layouts/show.html.erb",
+          "rendered": {
+            "name": "page_layouts/_show_row",
+            "file": "app/views/page_layouts/_show_row.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "page_layouts/_show_row"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "e76fa00b707c077dca2724d24b6cfca0685ffc06df826578358d6eccbd8e6f61",
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 314,
+      "line": 320,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE\")",
       "render_path": null,
@@ -493,6 +575,6 @@
       "note": ""
     }
   ],
-  "updated": "2021-11-22 09:04:28 +0000",
+  "updated": "2021-12-02 20:19:58 +0000",
   "brakeman_version": "5.1.2"
 }

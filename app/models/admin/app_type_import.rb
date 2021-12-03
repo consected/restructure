@@ -117,7 +117,11 @@ module Admin::AppTypeImport
 
       app_type = find(new_id)
       # Ensure only imported user access controls are retained
-      app_type.clean_user_access_controls id_list
+      # if the valid_user_access_controls key was actually in the imported file.
+      # If it wasn't present, the result was nil and we should skip this, since it
+      # indicates we don't want to make any changes
+
+      app_type.clean_user_access_controls id_list if results['app_type']['user_access_controls']
       app_type.reload
 
       [app_type, results]

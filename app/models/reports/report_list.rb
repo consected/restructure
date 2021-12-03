@@ -5,7 +5,7 @@ module Reports
   # The list storing the user's selections is a model having specific fields (and may be a dynamic model):
   #
   # - Primary key: id
-  # - Foreign key: master_id
+  # - Foreign key: master_id (optional)
   # - Source model name representing data being selected from: record_type
   # - Record ID in model selecting from: record_id
   # - List ID: an integer associating the request back to a specific user activity, grouping
@@ -201,6 +201,8 @@ module Reports
 
     # Set the master the record is from, (just assume it is the only one in the list)
     def from_master_id
+      return if list_class.no_master_association
+
       @from_master_id ||= items.map { |i| i['from_master_id'] }.first
       raise(FphsGeneralError, 'master id not specified') unless @from_master_id
 
@@ -231,7 +233,9 @@ module Reports
     def check_authorizations!
       raise FphsNotAuthorized unless can_create_in_list?
 
-      raise FphsNotAuthorized, 'Master does not allow user access' unless from_master.allows_user_access
+      unless list_class.no_master_association || from_master.allows_user_access
+        raise FphsNotAuthorized, 'Master does not allow user access'
+      end
 
       raise FphsNotAuthorized, "No access to #{source_type}" unless can_access_source_type?
 
@@ -295,7 +299,10 @@ module Reports
 
       @items_in_list = list_class.active.where(assoc_attr => list_id)
       # Refine results to include just the ids for this record type, if the record_type is used & available
-      @items_in_list = @items_in_list.where(record_type: source_type) if source_type.present? && uses_record_type?
+
+      if source_class && full_source_type_name.present? && uses_record_type?
+        @items_in_list = @items_in_list.where(record_type: full_source_type_name)
+      end
 
       @items_in_list
     end
@@ -322,7 +329,7 @@ module Reports
         matched_vals = item.attributes.slice(*matching_attribs)
         matched_vals[:record_id] = id
         matched_vals[:record_type] = full_source_type_name
-        matched_vals[:master_id] = from_master_id
+        matched_vals[:master_id] = from_master_id unless list_class.no_master_association
         matched_vals[assoc_attr] = list_id
         new_list_instance = list_class.new(matched_vals)
         new_list_instance.send :write_attribute, :user_id, current_user.id
