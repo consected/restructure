@@ -18,6 +18,8 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+## [8.0.23] - 2021-12-03
+
 ### Transfer from Harvard @7.4.90 - 2021-12-03
 
 - [Added] restrict access to standalone pages / dashboards with user access controls
@@ -36,9 +38,6 @@ release will be created for any release tested in production, and may be marked 
 - [Added] better handling of report results list with full set of column types from the table
 - [Added] report edit and criteria select fields to use models more effectively and provide grouping
 - [Fixed] migrations with references that don't produce views
-
-## [8.0.23] - 2021-12-03
-
 
 ## [8.0.22] - 2021-11-22
 
