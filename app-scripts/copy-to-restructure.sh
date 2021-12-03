@@ -6,6 +6,9 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+cd $(dirname $0)/..
+STARTDIR=$(pwd)
+
 DEST="$1"
 if [ ! -d ${DEST} ]; then
   echo "Destination directory '${DEST}' does not exist"
@@ -14,7 +17,13 @@ fi
 
 EXCLUDE='database.yml favicon.png structure.sql .git'
 
-cd $(dirname $0)/..
+cd ${DEST}
+git pull
+if [ $? != 0 ]; then
+  echo 'Failed to pull the destination repo.'
+fi
+
+cd ${STARTDIR}
 
 if [ -d public/assets ]; then
   bundle exec rake assets:clobber
