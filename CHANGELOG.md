@@ -19,11 +19,14 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Added] restrict access to standalone pages / dashboards with user access controls
+- [Fixed] rspec issues
+
 ## [7.4.89] - 2021-12-02
 
 - [Added] configure an alt_column_header for reports
 - [Added] allow substitutions in report descriptions and dashboard block headers
-- [Added] substitution add_edit_button_
+- [Added] substitution add*edit_button*
 - [Added] disable dynamic definition versions based on app setting
 - [Added] hiding of dashboards in list
 - [Added] menu / title setting for dashboards (and reports)
