@@ -44,3 +44,20 @@
     text-decoration: none;
   }
 }
+
+.big-select-use-overlay {
+  z-index: 100;
+  position: absolute;
+  opacity: 0 !important;
+  left: 0;
+  width: 100% !important;
+}
+
+.big-select-wrapper {
+  display: block;
+  position: relative;
+}
+
+.big-select-overlay[readonly] {
+  background: white;
+}

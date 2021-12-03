@@ -96,6 +96,9 @@ column_options:
     column_name_2:
   hide: # Hide the column from results
     column_name: true
+  alt_column_header: # Show a different label for the column. Use an empty string '' to hide it
+    column_name: Label
+
   show_as: # Special ways for showing specified columns
     column_name: url | checkbox | options | list | embedded_block | fixed-pre
     # show the result as a: 
@@ -115,7 +118,8 @@ column_options:
     #   An automatic match will be made where to find the choice labels to show
 
     # options - pretty presentation of a hash of {key: value} pairs
-    # list - pretty presentation of a list (array)
+    # list - pretty presentation of a list (array) - bulletpoint default styling
+    # tags - alternative to the list, showing items a tag items
     # fixed-pre - fixed length (not dynamic expandable) preformatted text, where all spaces and linebreaks are observed
    
 
