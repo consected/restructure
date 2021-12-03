@@ -6423,7 +6423,8 @@ CREATE TABLE ref_data.datadic_variable_history (
     storage_varname character varying,
     contributor_type character varying,
     n_for_timepoints jsonb,
-    notes character varying
+    notes character varying,
+    user_id bigint
 );
 
 
