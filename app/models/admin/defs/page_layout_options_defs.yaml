@@ -27,6 +27,11 @@ view_options:
   find_with: (msid|scantron_id|...)   # the alternative id (crosswalk or external id)
                                       # to search for the master record with for standalone pages
 
+list_options:
+  hide_in_list: false (default) | true
+  # Hide this page in the list of available dashboards, but still
+  # allow it to be run
+
 #
 # Add a navigation (top menu bar) item as either a link or a list of resources
 # Providing a resource name and type allows user access controls to be enforced

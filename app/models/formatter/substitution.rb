@@ -87,7 +87,7 @@ module Formatter
       this_ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
 
       unless d.is_a?(Hash) && (d&.key?(tag_name.to_s) || d&.key?(tag_name.to_sym)) ||
-             tag.start_with?('embedded_report_')
+             tag.start_with?('embedded_report_') || tag.start_with?('add_item_button_')
         unless ignore_missing || this_ignore_missing
           raise FphsException,
                 "Data (#{d.class.name}) does not contain the tag '#{tag_name}'" \
@@ -241,6 +241,7 @@ module Formatter
       current_user = data[:current_user_instance]
 
       return run_embedded_report tag, data if tag.start_with? 'embedded_report_'
+      return add_item_button tag, data if tag.start_with? 'add_item_button_'
 
       orig_val = data[tag] || data[tag.to_sym]
       res = orig_val || ''
@@ -260,20 +261,38 @@ module Formatter
       res
     end
 
-    def self.run_embedded_report(tag, data)
-      report_name = tag.sub('embedded_report_', '')
-      # Find the source item to call the report with
+    #
+    # Find the source item to call an embedded report or add an item with
+    def self.source_for(data)
       if data[:original_item].respond_to?(:referring_record) && data[:original_item].referring_record
         list_item = data[:original_item].referring_record
         list_id = list_item.id
+        list_master_id = list_item.master_id if list_item.respond_to?(:master_id)
       else
         list_item = data[:original_item]
         list_id = list_item[:id]
+        list_master_id = list_item[:master_id]
       end
+      [list_item, list_id, list_master_id]
+    end
 
+    def self.run_embedded_report(tag, data)
+      report_name = tag.sub('embedded_report_', '')
+      list_item, list_id, = source_for(data)
       list_type = list_item.class.name
 
       Reports::Template.embedded_report report_name, list_id, list_type
+    end
+
+    def self.add_item_button(tag, _data)
+      model_name = tag.sub('add_item_button_', '')
+
+      if model_name.start_with? 'to_master_'
+        _, _, add_to_master = source_for(data)
+        model_name = model_name.sub('to_master_', '')
+      end
+
+      Formatter::AddItemButton.markup model_name, add_to_master
     end
 
     # Associations that are allowable when getting model associations to resolve tags

@@ -1,21 +1,21 @@
 <%
-# Accept a list of entries, to be stored as an array in the database.
+# Accept a yaml document, stored as JSON(b) in the database.
 # The data we send is a field containing a YAML string.
-# This provides a mechanism for passing an array or hash of data.
-# Accepted format is:
-#   Hash "key: value"
+# This provides a mechanism for passing an hash of data.
+# Accepted format is any valid YAML hash or array
 # Translation of the YAML on receipt is handled by Default::FieldEditAs::Handler
 
 fopt = field_options_for(form_object_instance, field_name_sym)
 
-alt_options = fopt[:edit_as] && fopt[:edit_as][:alt_options]
 opt = {}
 begin
   data = form_object_instance[field_name_sym.to_s]&.to_h
-  data = data&.transform_values { |d| d.gsub("\n", ' ') }
 rescue StandardError
-  data = form_object_instance[field_name_sym.to_s]&.to_a
-  data = data&.map { |d| d.gsub("\n", ' ') }
+  begin
+    data = form_object_instance[field_name_sym.to_s]&.to_a
+  rescue StandardError
+    data = ''
+  end
 end
 data ||= ''
 
@@ -28,5 +28,5 @@ html_options = {
   value: gs
 }
 %>
-<%= form.label field_name_sym, label_for(field_name_sym, labels, /^multi_editable_choices/), opt %>
+<%= form.label field_name_sym, label_for(field_name_sym, labels), opt %>
 <%= form.text_area field_name_sym, html_options %>

@@ -57,6 +57,10 @@ master header title: |
   May include curly { { substitutions } }
 menu research label: |
   Label for "research" menu item, linking to user home page. Default "Research". Value "none" will hide the item
+menu dashboards label: |
+  Label for "dashboards" menu item. Default "Dashboards"
+menu reports label: |
+  Label for "reports" menu item. Default "Reports"
 notes field caption: |
   Caption that appears above default "notes" fields if not overridden by field options. Default "Notes"
 notes field format: |
@@ -70,6 +74,9 @@ open panels: |
 prevent reload master list: |
   If the user refreshes a page showing master records from a search, the list of previous master records 
   will be reloaded. This can be prevented, to avoid confusing results, by setting the value to any value
+dashboards list title: |
+  The title that appears at the top of the list of dashboards when the Dashboards menu item is clicked. 
+  Any value overrides the default "Dashboards"
 reports list title: |
   The title that appears at the top of the list of reports when the Reports menu item is clicked. 
   Any value overrides the default "Reports"

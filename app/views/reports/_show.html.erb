@@ -1,3 +1,10 @@
+<%
+  content = markdown_to_html @report.description
+  if content.present?
+    content = Formatter::Substitution.substitute( content, data: @report).html_safe
+  end
+
+%>
 <%= render partial: 'masters/modal_pi_search_results_template' %>
 <script id="edit-report-result" type="text/x-handlebars-template" class="hidden handlebars-template">
   <span>
@@ -19,7 +26,7 @@
         %>
         <%= table_comment %>
       <% end %>
-      <%= markdown_to_html @report.description %>
+      <%= content %>
       <p>&nbsp;</p>
       <%= render partial: 'criteria' %>
     </div>

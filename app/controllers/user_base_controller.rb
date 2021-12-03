@@ -58,4 +58,6 @@ class UserBaseController < ApplicationController
   include AppTypeChange
 
   before_action :authenticate_user!
+  # The #secure_params method is memoized. This can cause specs to fail since they reuse controllers
+  before_action -> { @secure_params = nil }
 end

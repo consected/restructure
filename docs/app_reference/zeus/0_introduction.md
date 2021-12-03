@@ -2,5 +2,5 @@
 
 ## Contents
 
-- [General application features](../../user_reference/main/README)
-- [Phone Log](phone_log)
+- [General application features](../../user_reference/main/README.md)
+- [Phone Log](phone_log.md)
