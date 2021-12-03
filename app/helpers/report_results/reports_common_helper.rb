@@ -9,6 +9,7 @@ module ReportResults
       @col_tags = {}
       @col_hide = {}
       @show_as = {}
+      @alt_column_header = {}
 
       @view_options = @report.report_options.view_options
 
@@ -30,6 +31,10 @@ module ReportResults
       column_options.show_as&.each do |k, v|
         @show_as[k] = v
       end
+
+      column_options.alt_column_header&.each do |k, v|
+        @alt_column_header[k] = v
+      end
     end
 
     def report_cell_hide?(field_num)
@@ -39,6 +44,11 @@ module ReportResults
 
     def report_column_name(field_num)
       @results.fields[field_num]
+    end
+
+    def alt_column_header(field_num)
+      col_name = report_column_name(field_num)
+      @alt_column_header[col_name]
     end
 
     #

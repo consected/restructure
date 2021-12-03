@@ -16,8 +16,30 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Changed] rebuild
+
 ## [8.0.27] - 2021-12-03
 
+### Transfer from Harvard @7.4.90 - 2021-12-03
+
+- [Added] restrict access to standalone pages / dashboards with user access controls
+- [Fixed] rspec issues
+- [Added] configure an alt_column_header for reports
+- [Added] allow substitutions in report descriptions and dashboard block headers
+- [Added] substitution add*edit_button*
+- [Added] disable dynamic definition versions based on app setting
+- [Added] hiding of dashboards in list
+- [Added] menu / title setting for dashboards (and reports)
+- [Fixed] substitutions in forms with no master
+- [Fixed] YAML/JSON field viewing and editing
+- [Changed] app-type import to prevent disabling user access controls if no config for valid_user_access_controls appear in the uploaded file
+- [Changed] big select updated to allow filters and work with dynamic models
+- [Changed] editable report lists can work without master_id
+- [Added] better handling of report results list with full set of column types from the table
+- [Added] report edit and criteria select fields to use models more effectively and provide grouping
+- [Fixed] migrations with references that don't produce views
 
 ## [8.0.26] - 2021-11-24
 
@@ -28,8 +50,8 @@ release will be created for any release tested in production, and may be marked 
 ## [8.0.25] - 2021-11-22
 
 - [Added] changes to allow report record edit and create to work with arbitrary models
-- [Added] report view_as option to show results as a *transposed_table*
-- [Added] handling of multi_editable_ field type configs for lists and choices in forms
+- [Added] report view*as option to show results as a \_transposed_table*
+- [Added] handling of multi*editable* field type configs for lists and choices in forms
 - [Added] column option for "choice_label" and ensure it works for all types of display and editing
 - [Fixed] multiple bugfixes related to report criteria configuration and select_from_model
 - [Fixed] report edit forms and results format and submit dates correctly

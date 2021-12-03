@@ -39,10 +39,11 @@ module Dynamic
     # and the current version of the definition is returned (self)
     # If the latest version returned is the current version, return nil and
     # let the caller decide what to do.
+    # Versioning can be disabled completely with Settings::DisableVDef (typically for development mode)
     # @param [Time | nil] current_at
     # @return [ActiveRecord::Base] defintion record
     def versioned(current_at)
-      return self unless current_at
+      return self if Settings::DisableVDef || !current_at
 
       # Add a second, to avoid rounding issues between Rails and DB
       current_at += 1.second

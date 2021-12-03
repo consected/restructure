@@ -22,7 +22,9 @@ module OptionConfigs
         newconf = {
           name: k,
           type: v.first.first
-        }.merge(v.first.last)
+        }
+
+        newconf.merge!(v.first.last) if v.first.last
         newconf = newconf.symbolize_keys
 
         configurations[k.to_sym] = NamedConfiguration.new self, use_hash_config: newconf

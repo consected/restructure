@@ -41,18 +41,18 @@ Rails.application.configure do
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = true
 
-  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.delivery_method = :test
 
-  config.action_mailer.smtp_settings = {
-    address: ENV['SMTP_SERVER'] || 'email-smtp.us-east-1.amazonaws.com',
-    port: ENV['SMTP_PORT'] || 465,
-    user_name: ENV['SMTP_USER_NAME'],
-    password: ENV['SMTP_PASSWORD'],
-    authentication: (ENV['SMTP_AUTHENTICATION_MODE'] || 'login').to_sym,
-    enable_starttls_auto: true,
-    # openssl_verify_mode: :peer,
-    tls: true
-  }
+  # config.action_mailer.smtp_settings = {
+  #   address: ENV['SMTP_SERVER'] || 'email-smtp.us-east-1.amazonaws.com',
+  #   port: ENV['SMTP_PORT'] || 465,
+  #   user_name: ENV['SMTP_USER_NAME'],
+  #   password: ENV['SMTP_PASSWORD'],
+  #   authentication: (ENV['SMTP_AUTHENTICATION_MODE'] || 'login').to_sym,
+  #   enable_starttls_auto: true,
+  #   # openssl_verify_mode: :peer,
+  #   tls: true
+  # }
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

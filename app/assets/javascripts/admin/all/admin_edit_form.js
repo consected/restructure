@@ -16,7 +16,7 @@ _fpa_admin.all.admin_edit_form = class {
     aef.setup_codemirror_editors()
     aef.setup_yaml_help_viewers()
     aef.setup_auto_loading_links()
-    aef.setup_big_select_fields()
+    _fpa.form_utils.setup_big_select_fields(aef.block)
     _fpa.form_utils.on_open_click(aef.block);
     _fpa.form_utils.setup_drag_and_drop(aef.block);
 
@@ -233,20 +233,5 @@ _fpa_admin.all.admin_edit_form = class {
 
   }
 
-  // Handle big-select fields
-  setup_big_select_fields() {
-    var block = this.block
-
-    block.find('.use-big-select').each(function () {
-      var label = $(`label[for="${$(this).attr('id')}"]`).html();
-      $.big_select($(this),
-        $('#primary-modal .modal-body'),
-        $(this)[0].big_select_hash,
-        function () { _fpa.show_modal('', label); },
-        function () { _fpa.hide_modal(); }
-      );
-
-    })
-  }
 
 }
