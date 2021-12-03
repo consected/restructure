@@ -24,6 +24,7 @@ describe 'reports', js: true, driver: :app_firefox_driver do
     Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :export_csv, current_admin: @admin, user: @user
 
     expect(@user.can?(:view_reports)).to be_truthy
+    expect(@user.can?(:export_csv)).to be_truthy
 
     Admin::UserAccessControl.create! user: @user, app_type: @user.app_type, access: :read, resource_type: :report, resource_name: :_all_reports_, current_admin: @admin
     expect(@user.has_access_to?(:read, :report, :_all_reports_)).to be_truthy
@@ -311,7 +312,10 @@ describe 'reports', js: true, driver: :app_firefox_driver do
     open_report @report.id
     expect(page).to have_css('.report-criteria')
 
+    expect(@user.can?(:export_csv)).to be_truthy
+    expect(page).not_to have_css('.alert')
     within '#report_query_form' do
+      sleep 2
       click_button 'csv'
       sleep 2
     end
