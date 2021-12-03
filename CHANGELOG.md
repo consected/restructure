@@ -19,6 +19,9 @@ release will be created for any release tested in production, and may be marked 
 ## Unreleased
 
 
+## [8.0.23] - 2021-12-03
+
+
 ## [8.0.22] - 2021-11-22
 
 - [Added] changes to allow report record edit and create to work with arbitrary models
