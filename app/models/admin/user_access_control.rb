@@ -17,7 +17,7 @@ class Admin::UserAccessControl < Admin::AdminBase
   # Valid resource types
   # NOTE: external_id_assignments is deprecated and should not be used
   def self.resource_types
-    %i[table general limited_access report activity_log_type external_id_assignments]
+    %i[table general limited_access report standalone_page activity_log_type external_id_assignments]
   end
 
   #
@@ -32,6 +32,7 @@ class Admin::UserAccessControl < Admin::AdminBase
       general: [nil, :read],
       limited_access: [nil, :limited],
       report: [nil, :read],
+      standalone_page: [nil, :read],
       activity_log_type: [nil, :see_presence, :read, :update, :create],
       external_id_assignments: [nil, :limited]
     }
@@ -80,6 +81,9 @@ class Admin::UserAccessControl < Admin::AdminBase
         access: [:read]
       },
       report: {
+        access: [:read]
+      },
+      standalone_page: {
         access: [:read]
       },
       activity_log_type: {

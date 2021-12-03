@@ -192,6 +192,7 @@ module Dynamic
           db_migration_schema,
           table_name: table_name,
           class_name: full_implementation_class_name,
+          dynamic_def: self,
           all_implementation_fields: all_implementation_fields(ignore_errors: false),
           table_comments: table_comments,
           no_master_association: implementation_no_master_association,

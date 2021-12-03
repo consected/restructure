@@ -86,6 +86,8 @@ module UserActionLogging
       ids = masters.map(&:id) if masters
     end
 
+    ids&.reject!(&:nil?)
+
     action = :index
     it = force_item_type || action_log_item_type
 

@@ -21,6 +21,11 @@
     height: 30vh;
     min-height: 200px;
   }
+
+  .report-results-table-block {
+    height: auto;
+    overflow: auto;
+  }
 }
 
 .standalone-page-col.ajax-running {

@@ -290,7 +290,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
   # The secure parameters (key / value strong params) that can be used to
   # create or update instances
   def secure_params
-    params.require(al_type.singularize.to_sym).permit(*permitted_params)
+    @secure_params ||= params.require(al_type.singularize.to_sym).permit(*permitted_params)
   end
 
   #
