@@ -80,6 +80,7 @@ module ReportsHelper
       options_for_select(config.selections || [], value)
     elsif config.type == 'select_from_model'
       # Get the model by the configured resource name
+      def_value = value
       resource_name = config.resource_name
       res = Resources::Models.find_by(resource_name: resource_name)
       raise FphsException, "No resource matches resource_name: #{resource_name}" unless res
@@ -126,9 +127,9 @@ module ReportsHelper
                              .sort { |x, y| x.first <=> y.first }
 
       got_bar = selections.find { |s| s.first.include?('|') }
-      return grouped_options_for_select(record_results_grouping(selections, '|')) if got_bar
+      return grouped_options_for_select(record_results_grouping(selections, '|'), def_value) if got_bar
 
-      options_for_select(selections)
+      options_for_select(selections, def_value)
     end
   end
 
