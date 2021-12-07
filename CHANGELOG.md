@@ -16,6 +16,14 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## [8.0.30] - 2021-12-07
+
+- [Fixed] scrolling issue with report result lists
+
+## [8.0.29] - 2021-12-07
+
+- [Fixed] report criteria select_from_model defaults
+
 ## [8.0.28] - 2021-12-03
 
 - [Changed] rebuild
