@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
 module NfsStore
+  
+  #
+  # Handle file download / view requests for single and multiple files.
+  # Additionally handle user "trigger" actions such as renaming and trashing files.
+  # Multi file downloads generate a zip file that is downloaded to the client.
+
   class DownloadsController < FsBaseController
     #
     # Actions that are valid to be called from a post (create) action
@@ -11,6 +17,8 @@ module NfsStore
 
     before_action :setup_selected_items, only: %i[create trash]
 
+    #
+    # Request download of a single file for download or view
     def show
       @download_id = params[:download_id].to_i
       retrieval_type = params[:retrieval_type]
@@ -39,6 +47,9 @@ module NfsStore
       end
     end
 
+    #
+    # Handle the request for a user action to be triggered, such as rename or trash a file
+    # or multiple files.
     def create
       do_action = @commit.split(':').first&.id_underscore
       do_action = ValidActions.select { |va| va == do_action&.to_sym }.first
@@ -49,6 +60,8 @@ module NfsStore
       end
     end
 
+    #
+    # Download multiple files as a zip file
     def multi
       selected_items = secure_params[:selected_items]
 
