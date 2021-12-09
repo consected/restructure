@@ -196,7 +196,11 @@ Rails.application.routes.draw do
     end
     resources :chunk, only: %i[create show update]
     post 'downloads/multi', to: 'downloads#multi'
-    resources :downloads, only: %i[show create]
+    resources :downloads, only: %i[show create] do
+      member do
+        get :search_doc
+      end
+    end
     resources :classification, only: %i[edit create]
   end
 

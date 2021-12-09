@@ -9,7 +9,7 @@ var SecureViewAppSpecific = function () {
 
     this.$show_files = $('#sv-extra-actions-show_files');
 
-    this.$show_files.not('.sv-added-click-ev').on('click', function(ev){
+    this.$show_files.not('.sv-added-click-ev').on('click', function (ev) {
       var $owner_el = _this.secure_view.$owner_el;
       var $el = $owner_el;
 
@@ -27,6 +27,22 @@ var SecureViewAppSpecific = function () {
       ev.preventDefault();
     }).addClass('sv-added-click-ev');
 
+    this.$search_doc = $('#sv-extra-actions-search_doc');
+    this.$search_doc.not('.sv-added-click-ev').on('click', function (ev) {
+      var $search_panel = _this.secure_view.$search_panel;
+
+      if ($search_panel.hasClass('sv-search-panel')) {
+        // The panel is shown - hide it
+        _this.close_search_panel();
+      }
+      else {
+        //  The panel is not shown - show it
+        _this.show_search_panel();
+      }
+      ev.preventDefault();
+    }).addClass('sv-added-click-ev');
+
+
     this.close_folder();
 
     return this;
@@ -34,6 +50,7 @@ var SecureViewAppSpecific = function () {
 
   this.close = function () {
     this.close_folder();
+    this.close_search_panel();
   }
 
   this.close_folder = function () {
@@ -43,6 +60,16 @@ var SecureViewAppSpecific = function () {
     this.$show_files.removeClass('glyphicon-folder-close');
     this.secure_view.$owner_el.find('a.refresh-container-list').attr('disabled', false);
 
+  }
+
+  this.show_search_panel = function () {
+    this.secure_view.$search_panel.addClass('sv-search-panel').animate({ width: '250px' });
+    this.secure_view.$search_results.html('');
+    this.secure_view.$search_form.find('[name="search_string"]').val('');
+  }
+
+  this.close_search_panel = function () {
+    this.secure_view.$search_panel.removeClass('sv-search-panel').animate({ width: '0' });
   }
 
 };

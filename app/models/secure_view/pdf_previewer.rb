@@ -1,8 +1,6 @@
-# Using Poppler Utils `sudo apt-get install poppler-utils`
-# Also install libreoffice
-#    libreoffice --headless --convert-to html '~/Downloads/mr_scans_full.xlsx'
-
 module SecureView
+  #
+  # Handle generation of PDFs to allow search of PDF and office documents
   class PDFPreviewer < BasePreviewer
     DefaultResolution = 150
     def self.file_type
@@ -11,24 +9,17 @@ module SecureView
 
     def initialize(options = {})
       super
-      office_docs_to :pdf unless pdf? || viewable_image?
-      dicom_to_jpg if viewable_dicom?
+      office_docs_to :pdf unless pdf?
+      # || viewable_image?
+      # dicom_to_jpg if viewable_dicom?
     end
 
-    # Return the page preview as a PNG format file
-    def preview(page)
-      if viewable_image? || viewable_dicom?
-        File.open(path) do |output|
-          res = { io: output, filename: output.path.to_s, disposition: 'inline' }
-          yield res
-        end
-      else
-        File.open(path) do |input|
-          self.class.draw_page_from(input, page) do |output|
-            res = { io: output, filename: "#{input.path}.png", content_type: :png }
-            yield res
-          end
-        end
+    # Return the page preview as a PDF format file
+    def preview(_page)
+      if pdf?
+        output = File.open(path).read
+        res = { io: output, filename: "#{path}.pdf" }
+        yield res
       end
     end
 
@@ -49,35 +40,17 @@ module SecureView
       end
     end
 
-    # Generate a command line and call the conversion
-    def self.draw_page_from(file, page, &block)
-      check_pdftoppm_exists!
-      draw SecureView::Config.pdftoppm_path, '-singlefile', '-r', resolution, '-jpeg', '-f', page, '-l', page, file.path, &block
-    end
-
-    # Convert a page using pdftoppm and ActiveStorage instrumentation, based on the command line specified
-    # Adapted from ActiveStorage Poppler previewer
-    #:doc:
-    def self.draw(*argv)
-      open_tempfile do |file|
-        instrument :preview, key: file.path do
-          capture(*argv, to: file)
-        end
-        yield file
-      end
-    end
-
-    # Instrument the conversion using ActiveSupport
-    def self.instrument(operation, payload = {}, &block)
-      ActiveSupport::Notifications.instrument "#{operation}.active_storage", payload, &block
-    end
-
-    # Get the results from the conversion
-    def self.capture(*argv, to:)
-      call_args = argv.map(&:to_s)
-      to.binmode
-      IO.popen(call_args, err: File::NULL) { |out| IO.copy_stream(out, to) }
-      to.rewind
+    #
+    # Search the currently PDF (or the original file converted to a PDF) for the
+    # exact search word or phrase
+    # Yields the block to allow streaming of results
+    # @param [String] search_string
+    # @param [Integer] guide to the number of results to return. This is not exact.
+    # @yield [Stdout] a streamed stdout from the pdfgrep program
+    def search(search_string, max_count: 210, &block)
+      max_count = max_count.to_i.to_s
+      cmd = ['pdfgrep', '-i', '--max-count', max_count, '-n', '-F', search_string, path]
+      IO.popen(cmd, &block)
     end
   end
 end
