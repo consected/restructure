@@ -3,6 +3,8 @@
 #    libreoffice --headless --convert-to html '~/Downloads/mr_scans_full.xlsx'
 
 module SecureView
+  #
+  # Handle generation of HTML to preview documents
   class HTMLPreviewer < BasePreviewer
     def self.file_type
       :html

@@ -5,6 +5,9 @@
 #    libreoffice --headless --convert-to html '~/Downloads/mr_scans_full.xlsx'
 #
 module SecureView
+  #
+  # Handle generation of images to preview documents
+  # Also generates icons
   class ImagePreviewer < BasePreviewer
     DefaultResolution = 150
 

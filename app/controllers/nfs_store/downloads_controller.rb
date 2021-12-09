@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module NfsStore
-  
   #
   # Handle file download / view requests for single and multiple files.
   # Additionally handle user "trigger" actions such as renaming and trashing files.
@@ -22,21 +21,10 @@ module NfsStore
     def show
       @download_id = params[:download_id].to_i
       retrieval_type = params[:retrieval_type]
-      FsException::Download.new 'id invalid' unless @download_id > 0
-      FsException::Download.new 'retrieval_type invalid' unless retrieval_type.present?
-      # Avoid brakeman issue
-      retrieval_type = NfsStore::Download::ValidRetrievalTypes.select { |r| r == retrieval_type.to_sym }.first
-
-      FsException::Download.new 'Invalid retreival type specified' unless Download.valid_retrieval_type? retrieval_type
-
-      @download = Download.new container: @container, activity_log: @activity_log
-      @master = @container.master
-      @id = @container.id
-
       for_action = :download
-      for_action = :download_or_view if params[:secure_view] && params[:secure_view][:preview_as].present?
-      retrieved_file = @download.retrieve_file_from @download_id, retrieval_type, for_action: for_action
-      FsException::NotFound.new 'Requested file not found' unless retrieved_file
+      for_action = :download_or_view if params.dig(:secure_view, :preview_as).present?
+      retrieved_file = retrieve_file(@download_id, retrieval_type, for_action: for_action)
+      raise FsException::NotFound, 'Requested file not found' unless retrieved_file
 
       @download.save!
       if use_secure_view && secure_view_do_what
@@ -94,6 +82,36 @@ module NfsStore
       else
         redirect_to nfs_store_browse_path(@container)
       end
+    end
+
+    #
+    # Search for string within a file, returning a live (streaming)
+    # result set.
+    # Future extension may allow search across multiple specified files.
+    def search_doc
+      @download_id = params[:download_id].to_i
+      retrieval_type = params[:retrieval_type]
+      search_string = params[:search_string]
+      path = retrieve_file(@download_id, retrieval_type)
+
+      retrieved_file = secure_view_setup_previewer(path, view_as: 'pdf')
+      raise FsException::NotFound, 'Requested file not found' unless retrieved_file
+
+      raise FsException::Action, 'No search string specified' if search_string.blank?
+
+      response.headers['Content-Type'] = 'text/event-stream'
+      response.headers['ETag'] = '0'
+      response.headers['Last-Modified'] = Time.now.httpdate
+
+      retrieved_file.search(search_string) do |stream|
+        data = stream.gets
+        while data
+          response.stream.write data
+          data = stream.gets
+        end
+      end
+    ensure
+      response.stream.close
     end
 
     private
@@ -162,7 +180,8 @@ module NfsStore
       end
 
       @selected_items_info = selected_items.map do |s|
-        h = JSON.parse(s); { id: h['id'].to_i, retrieval_type: h['retrieval_type'].to_sym }
+        h = JSON.parse(s)
+        { id: h['id'].to_i, retrieval_type: h['retrieval_type'].to_sym }
       end
     end
 
@@ -182,6 +201,29 @@ module NfsStore
       else
         redirect_to nfs_store_browse_path(@container)
       end
+    end
+
+    #
+    # Retrieve a file to be downloaded or searched, or retrieve a portion of a document
+    # for secure viewing, from the current container (@container) and master (@master)
+    # @param [Integer] download_id
+    # @param retrieval_type [Symbol] the type of object referencing the file
+    # @param [Symbol] for_action :download (default) or :download_view
+    # @return [String] filesystem path to the file to be retrieved
+    def retrieve_file(download_id, retrieval_type, for_action: :download)
+      raise FsException::Download, 'id invalid' unless download_id > 0
+      raise FsException::Download, 'retrieval_type invalid' unless retrieval_type.present?
+
+      # Avoid brakeman issue
+      retrieval_type = NfsStore::Download::ValidRetrievalTypes.find { |r| r == retrieval_type.to_sym }
+      unless Download.valid_retrieval_type? retrieval_type
+        raise FsException::Download, 'Invalid retreival type specified'
+      end
+
+      @download = Download.new container: @container, activity_log: @activity_log
+      @master = @container.master
+      @id = @container.id
+      @download.retrieve_file_from download_id, retrieval_type, for_action: for_action
     end
   end
 end
