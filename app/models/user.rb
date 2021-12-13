@@ -14,9 +14,9 @@ class User < ActiveRecord::Base
 
   # A configuration allows two factor authentication to be disabled for the app server
   if two_factor_auth_disabled
-    devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable, :registerable
+    devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable, :registerable, :confirmable
   else
-    devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable, :registerable,
+    devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable, :registerable, :confirmable,
            otp_secret_encryption_key: otp_enc_key
   end
 
@@ -132,10 +132,11 @@ class User < ActiveRecord::Base
     !disabled ? super : :account_has_been_disabled
   end
 
-  def after_sign_up_path_for(resource)
-    super
-  end
-
+  # By default, the user is redirected to the login page after registration.
+  # Uncomment if the path needs to change.
+  # def after_sign_up_path_for(resource)
+  #   super
+  # end
   #
   # Simply return the email for the user if a string is requested
   # @return [String]

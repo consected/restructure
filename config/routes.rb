@@ -183,7 +183,7 @@ Rails.application.routes.draw do
 
   devise_scope :user do
     namespace :users do
-      resources :registrations, only: [:new, :create]
+      (resources :registrations, only: %i[new create]) if Settings::AllowUsersToRegister
     end
     get '/users/show_otp', to: 'devise/registrations#show_otp'
     post '/users/test_otp', to: 'devise/registrations#test_otp'

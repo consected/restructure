@@ -23,11 +23,11 @@ module UserRoleHandler
   end
 
   def assign_roles_to_user
-    if self.allow_users_to_register?
-      template_user = RegistrationHandler.registration_template_user
-      template_user_roles = Admin::UserRole.active.where(user: template_user, app_type: Admin::AppType.active.all)
-      app_types = template_user_roles.map(&:app_type)
-      Admin::UserRole.copy_user_roles(template_user, self, app_types, current_admin)
-    end
+    return unless allow_users_to_register?
+
+    template_user = RegistrationHandler.registration_template_user
+    template_user_roles = Admin::UserRole.active.where(user: template_user, app_type: Admin::AppType.active.all)
+    app_types = template_user_roles.map(&:app_type)
+    Admin::UserRole.copy_user_roles(template_user, self, app_types, current_admin)
   end
 end
