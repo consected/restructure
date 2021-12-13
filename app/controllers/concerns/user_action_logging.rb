@@ -7,7 +7,8 @@ module UserActionLogging
     after_action :log_user_item_action, only: %i[show create update], unless: :canceled?
     after_action :log_user_index_action, only: [:index]
 
-    ExcludeClasses = %w(Devise::SessionsController
+    ExcludeClasses = %w(Devise::ConfirmationsController
+                        Devise::SessionsController
                         Devise::RegistrationsController
                         Users::RegistrationsController).freeze
   end
