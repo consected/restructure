@@ -207,7 +207,7 @@ _fpa.reports = {
 
     }).addClass('attached_report_chart');
 
-    block.find('[data-col-type^="select items:"]').not('.attached_report_select_items').each(function () {
+    block.find('.report-results-table-block td[data-col-type^="select items:"], .report-results-list-block div[data-col-type^="select items:"]').not('.attached_report_select_items').each(function () {
 
       dct = $(this).attr('data-col-type');
 
