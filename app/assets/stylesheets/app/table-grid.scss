@@ -321,6 +321,15 @@ table.table.report-table {
     }
   }
 
+  markdown {
+    margin: 1em 0;
+    display: block;
+  }
+
+  ul.report-inner-hash {
+    list-style: none;
+  }
+
   .expandable {
     max-height: 100px;
     padding-bottom: 20px;
