@@ -2,7 +2,7 @@
 <h2>Change Password for <%= resource_name.to_s.humanize %></h2>
 
 <%= form_for(resource, as: resource_name, url: send("#{resource_name}_registration_path", resource), html: { method: :put }) do |f| %>
-  <%= devise_error_messages! %>
+  <%= render "devise/shared/error_messages", resource: resource %>
 
   <div class="form-group-non">
     <%= f.label :email %><br />

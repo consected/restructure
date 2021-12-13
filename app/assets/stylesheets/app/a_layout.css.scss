@@ -27,54 +27,58 @@ body {
 body#body-top {
   filter: grayscale(100%);
   opacity: 0.2;
-}
-
-body#body-top:after {
-  content: "loading...";
-  display: block;
-  position: fixed;
-  top: 45vh;
-  left: 0;
-  text-align: center;
-  width: 100vw;
-  color: black;
-  font-size: 96px;
-  z-index: 600000;
-}
-
-body#body-top.initial-compiling:after {
-  opacity: 1;
-
-  transition: opacity 1s ease;
-  animation-name: fadeInTextOpacity;
-  animation-iteration-count: 1;
-  animation-timing-function: ease-in;
-  animation-duration: 1s;
-}
-
-body#body-top.status-compiled,
-body#body-top.sessions {
-  filter: none;
-  opacity: 1;
-  transition: filter 0.5s ease;
-
-  animation-name: fadeInOpacity;
-  animation-iteration-count: 1;
-  animation-timing-function: ease-in;
-  animation-duration: 0.5s;
 
   &:after {
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s linear 500ms, opacity 500ms;
+    content: "loading...";
+    display: block;
+    position: fixed;
+    top: 45vh;
+    left: 0;
+    text-align: center;
+    width: 100vw;
+    color: black;
+    font-size: 96px;
+    z-index: 600000;
   }
-}
+  &.initial-compiling:after {
+    opacity: 1;
 
-body#body-top.page-transition {
-  filter: grayscale(100%);
+    transition: opacity 1s ease;
+    animation-name: fadeInTextOpacity;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-duration: 1s;
+  }
 
-  opacity: 0.2;
-  transition: opacity 500ms, filter 0.5s ease;
+  // Any body classes that should hide the "loading..." overlay should be added here.
+  // .status-compiled is a flag class added dynamically by the end of the template compilation process.
+  // .sessions represents the Devise sessions controller (sign in)
+  // .registrations represents the Devise registrations controller (self registration)
+  &.status-compiled,
+  &.sessions,
+  &.registrations {
+    filter: none;
+    opacity: 1;
+    transition: filter 0.5s ease;
+
+    animation-name: fadeInOpacity;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-duration: 0.5s;
+
+    &:after {
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0s linear 500ms, opacity 500ms;
+    }
+  }
+
+  &.page-transition {
+    filter: grayscale(100%);
+
+    opacity: 0.2;
+    transition: opacity 500ms, filter 0.5s ease;
+  }
 }
 
 @keyframes fadeInOpacity {
