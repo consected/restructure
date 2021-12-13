@@ -64,6 +64,7 @@ module AdminHandler
   def init_vars_admin_handler
     instance_var_init :admin_set
     instance_var_init :current_admin
+    instance_var_init :current_admin_id
   end
 
   def setup_values
@@ -108,6 +109,11 @@ module AdminHandler
     @admin_set = true
     @current_admin = new_admin
     write_attribute(:admin_id, new_admin.id)
+  end
+
+  def current_admin_id=(new_admin_id)
+    new_admin = Admin.find_by(id: new_admin_id)
+    self.current_admin = new_admin
   end
 
   # Chainable function, allowing something like:
