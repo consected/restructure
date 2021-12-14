@@ -192,6 +192,39 @@ RSpec.describe 'Model reference implementation', type: :model do
             from: this
             add: many
             limit: 2
+
+      mr_showable_test2:
+        label: Reference Showable Test2
+        fields:
+          - select_call_direction
+          - select_who
+          - tag_select_allowed
+        references:
+          player_contacts:
+            from: master
+            add: many
+            showable_if:
+              any:
+                this:
+                  select_who:
+                    condition: '= ANY REV'
+                    value: current_user_role_names
+                user:
+                  role_name:
+                    - editor
+          mr_simple_tests:
+            from: master
+            add: many
+            showable_if:
+              any:
+                this:
+                  tag_select_allowed:
+                    condition: '&&'
+                    value: current_user_role_names
+                user:
+                  role_name:
+                    - editor
+
     END_DEF
 
     al.current_admin = @admin
@@ -211,6 +244,7 @@ RSpec.describe 'Model reference implementation', type: :model do
     setup_option_config 7, 'Creatable on Master Test', %w[select_call_direction select_who]
     setup_option_config 8, 'Always Embed', %w[select_call_direction select_who]
     setup_option_config 9, 'Avoid Missing', %w[select_call_direction select_who]
+    setup_option_config 10, 'Reference Showable Test2', %w[select_call_direction select_who tag_select_allowed]
   end
 
   it 'evaluates rules to optionally show references' do
@@ -264,6 +298,9 @@ RSpec.describe 'Model reference implementation', type: :model do
     al_showable.reset_model_references
     expect(al_showable.model_references.length).to eq 0
     expect(al_simple.model_references.length).to be > 0
+
+    res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
+    expect(res).to be_falsey
   end
 
   it 'handles disabling of references and referenced items' do
@@ -463,5 +500,88 @@ RSpec.describe 'Model reference implementation', type: :model do
     # In edit mode, show the player contact embedded
     al_simple.action_name = 'edit'
     expect(al_simple.embedded_item).to be nil
+  end
+
+  it 'evaluates rules to optionally show references' do
+    puts @activity_log.resource_name
+
+    @player_contact.current_user = @user
+
+    al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                        extra_log_type: 'mr_simple_test',
+                                                                        select_who: 'abc')
+    al_simple.save!
+
+    ModelReference.create_from_master_with(al_simple.master, @player_contact)
+
+    al_showable = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                          extra_log_type: 'mr_showable_test2',
+                                                                          select_who: 'xyz')
+    al_showable.save!
+
+    master = al_showable.master
+
+    # Simple always works
+    expect(al_simple.model_references.length).to be > 0
+    # Showable doesn't work initially because the reference data does not match
+    res = al_showable.model_references.length
+    expect(res).to eq 0
+
+    @user.user_roles.create!(app_type_id: @user.app_type_id, role_name: 'xyz', current_admin: @admin)
+
+    # Showable should now work, since the user roles matches on select_who
+
+    ref_config = al_showable.extra_log_type_config.references.first.last[:player_contact]
+    res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
+    expect(res).to be_truthy
+
+    # Second reference should not work, since the tag select field is empty
+    ref_config = al_showable.extra_log_type_config.references.first.last[:mr_simple_test]
+    res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
+    expect(res).to be_falsey
+
+    al_showable.reset_model_references
+
+    al_showable.update!(tag_select_allowed: ['abc'])
+    res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
+    expect(res).to be_falsey
+
+    al_showable.reset_model_references
+
+    al_showable.update!(tag_select_allowed: ['abc', 'sdfsdf'])
+    res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
+    expect(res).to be_falsey
+
+    al_showable.reset_model_references
+
+    ur = @user.user_roles.create!(app_type_id: @user.app_type_id, role_name: 'editor', current_admin: @admin)
+    res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
+    expect(res).to be_truthy
+
+    al_showable.reset_model_references
+    ur.update!(disabled: true)
+    expect(res).to be_falsey
+
+    al_showable.reset_model_references
+    expect(al_showable.model_references.length).to eq 0
+
+    al_showable.reset_model_references
+    al_showable.update!(tag_select_allowed: ['abc', 'xyz'])
+    res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
+    expect(res).to be_truthy
+
+    al_showable.reset_model_references
+    expect(al_showable.model_references.length).to eq 1
+    expect(al_simple.model_references.length).to be > 0
+
+    # Showable should now not work, since the current record does not match on select_who,
+    # even though the reference matches on data
+    al_showable.update! select_who: 'ghi'
+    al_showable.reset_model_references
+    expect(al_showable.model_references.length).to eq 0
+    expect(al_simple.model_references.length).to be > 0
+
+    res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
+    expect(res).to be_falsey
   end
 end
