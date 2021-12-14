@@ -3,10 +3,6 @@
 module RegistrationHandler
   extend ActiveSupport::Concern
 
-  included do
-    after_create :send_confirmation
-  end
-
   # @return [TrueClass, FalseClass]
   def allow_users_to_register?
     @allow_users_to_register ||= Settings::AllowUsersToRegister
@@ -25,9 +21,5 @@ module RegistrationHandler
   # @return User
   def self.registration_template_user
     User.find_by(email: Settings::DefaultUserTemplateEmail)
-  end
-
-  def send_confirmation
-    Users::Confirmations.notify(self) if allow_users_to_register?
   end
 end

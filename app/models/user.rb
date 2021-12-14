@@ -167,6 +167,13 @@ class User < ActiveRecord::Base
     Admin::AppType.all_available_to(self)
   end
 
+  def send_on_create_confirmation_instructions
+    return unless allow_users_to_register?
+
+    generate_confirmation_token! unless @raw_confirmation_token
+    Users::Confirmations.notify(self)
+  end
+
   protected
 
   # Override included functionality that ensures an administrator has been set
