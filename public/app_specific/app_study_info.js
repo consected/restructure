@@ -12,6 +12,7 @@ _fpa.app_specific = class {
     // Process the current block
     processor.reformat_page();
     processor.handle_part();
+    processor.handle_embedded_links();
 
     // Process any blocks it contains that have the class use-config-layout
     // which is typical when loading a list of pages
@@ -155,6 +156,38 @@ _fpa.app_specific = class {
 
     block.on('click', '.edit-entity', function (e) {
       processor.block.addClass('page-was-expanded');
+    });
+  }
+
+  handle_embedded_links() {
+    var processor = this;
+    var block = this.block;
+
+    block.find('a[href$="#page_embed"]').each(function () {
+      var url = $(this).attr('href').replace('#page_embed', '');
+      var url_split = url.split('/');
+      var id = url_split[url_split.length - 1].split('?')[0];
+      var hyph_name = url_split[url_split.length - 2].hyphenate().singularize();
+
+      $(this)
+        .attr('data-remote', true)
+        .attr('data-result-target-force', true)
+        .attr(`data-${hyph_name}-id`, id)
+        .attr('data-result-target', `#page-embedded-block--${id}`)
+        .attr('data-template', `${hyph_name}-result-template`);
+
+      var text = $(this).parents('.notes-text');
+      var html = text.html();
+
+      var new_div = `<div id="page-embedded-block--${id}"
+      class="page-embedded-block"
+      data-preprocessor="activity_log_edit_form"
+      data-model-name="${hyph_name.underscore()}" 
+      data-id="${id}"></div>
+      
+      `;
+
+      text.html(html.replace('{{page_embedded_block}}', new_div));
     });
   }
 };
