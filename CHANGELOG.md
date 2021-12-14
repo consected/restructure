@@ -19,6 +19,11 @@ The **Unreleased** section collects notes for unreleased changes and features, u
 
 ## Unreleased
 
+- [Added] PDF and office doc search (within a single document) in secure view
+- [Changed] report list functionality to results list view
+- [Fixed] embedded items not updating in activity logs, causing entered data to be lost
+- [Fixed] scrolling issue with report result lists (cherrypicked from upstream ReStructure)
+
 ## [7.4.90] - 2021-12-03
 
 - [Added] restrict access to standalone pages / dashboards with user access controls
