@@ -1028,6 +1028,9 @@ _fpa = {
         riomc.parents('.common-template-item').last().find('a.refresh-item').click();
         riomc.removeClass('refresh-item-on-modal-close');
       }
+      $('body').removeClass('table-results');
+      $('html').css({ overflow: 'auto' });
+      _fpa.reports.reset_window_scrolling();
     });
 
     pm.modal('show');

@@ -12,6 +12,10 @@ view_options:
   # Don't show the record count below the search form when
   # results are returned
 
+  hide_search_button: false (default) | true
+  # Don't show the report search button - the report will not be
+  # searchable unless it auto runs.
+
   hide_export_buttons: false (default) | true
   # Don't show the export (csv, json) buttons even if a
   # user is authorized to export in those formats
@@ -58,6 +62,9 @@ view_options:
   show_all_booleans_as_checkboxed: false (default) | true
   # Show all boolean type column cells as checkboxes
 
+  hide_list_labels_for_empty_content: false (default) | true
+  # In results viewed as a list, hide column labels if the content is blank
+
 list_options:
   hide_in_list: false (default) | true
   # Hide this report in the list of available reports, but still
@@ -96,10 +103,17 @@ column_options:
     column_name_2:
   hide: # Hide the column from results
     column_name: true
+  alt_column_header: # Show a different label for the column. Use an empty string '' to hide it
+    column_name: Label
+
   show_as: # Special ways for showing specified columns
     column_name: url | checkbox | options | list | embedded_block | fixed-pre
     # show the result as a: 
     # url - link to be opened in a new tab
+    #   The content should be formatted using Markdown format
+    #       [label for link](/url/path)
+
+    # embedded_report - url linking to a report, to be opened in a modal popup for viewing
     #   The content should be formatted using Markdown format
     #       [label for link](/url/path)
 
@@ -118,5 +132,5 @@ column_options:
     # list - pretty presentation of a list (array) - bulletpoint default styling
     # tags - alternative to the list, showing items a tag items
     # fixed-pre - fixed length (not dynamic expandable) preformatted text, where all spaces and linebreaks are observed
-   
+    # markdown - markdown text converted to HTML
 

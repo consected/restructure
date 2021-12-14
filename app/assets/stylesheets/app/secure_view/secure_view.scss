@@ -1,5 +1,4 @@
 .secure-view {
-
   position: fixed;
   height: 100vh;
   overflow: hidden;
@@ -18,7 +17,6 @@
     width: 100%;
     height: 47px;
     z-index: 200;
-
 
     .sv-control-block {
       display: inline-block;
@@ -40,9 +38,52 @@
     }
   }
 
+  #secure-view-search-panel {
+    width: 0;
+    max-width: 20vw;
+    height: auto;
+    top: 47px;
+    bottom: 0;
+    background-color: rgb(238, 238, 238);
+
+    z-index: 1000;
+    position: absolute;
+    padding: 0;
+    overflow: hidden;
+
+    .secure-view-search-block {
+      margin: 7px 0 0 7px;
+      height: auto;
+      overflow: hidden;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+    }
+
+    #secure-view-search-results {
+      margin: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      height: auto;
+      position: absolute;
+      top: 50px;
+      bottom: 0;
+      right: 0;
+      left: 3px;
+
+      a,
+      a:active,
+      a:link,
+      a:visited {
+        color: rgb(80, 80, 80);
+        font-size: 0.94em;
+      }
+    }
+  }
 
   .secure-view-pages-container {
-
     position: absolute;
     height: 100%;
     top: 0;
@@ -75,7 +116,6 @@
         overflow: hidden;
         display: block;
       }
-
     }
 
     .secure-view-page {
@@ -98,5 +138,4 @@
     padding-right: 0.25em;
     display: inline-block;
   }
-
 }

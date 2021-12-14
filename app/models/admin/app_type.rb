@@ -169,7 +169,7 @@ class Admin::AppType < Admin::AdminBase
             .uniq
     names = Report.active.map(&:alt_resource_name).uniq if names.include? '_all_reports_'
 
-    Report.active.where("(REGEXP_REPLACE(item_type, '( |-)', '_') || '__' || short_name) in (?)",
+    Report.active.where("(REGEXP_REPLACE(item_type, '( |-)', '_', 'g') || '__' || short_name) in (?)",
                         names).reorder('').order(id: :asc)
   end
 

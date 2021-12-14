@@ -55,7 +55,7 @@ class ReportsController < UserBaseController
       return
     end
 
-    if params[:search_attrs] && !no_run && params[:commit].present?
+    if params[:search_attrs] && !no_run && (params[:commit].present? || params[:format].present?)
       # Search attributes or data reference parameters have been provided
       # and the query should be run
       begin
@@ -85,20 +85,10 @@ class ReportsController < UserBaseController
           end
         end
         format.json do
-          render json: { results: @results, search_attributes: @runner.search_attr_values }
+          render_json
         end
         format.csv do
-          res_a = []
-
-          blank_value = nil
-          blank_value = '' if params[:csv_blank]
-
-          res_a << @results.fields.to_csv
-          @results.each_row do |row|
-            res_a << (row.collect { |val| val || blank_value }).to_csv
-          end
-
-          send_data res_a.join(''), filename: 'report.csv'
+          send_csv
         end
       end
 
@@ -121,13 +111,14 @@ class ReportsController < UserBaseController
               return unless show_authorized? == true
 
               @report_criteria = true
-
               show_report
             end
           end
           format.json do
-            render json: { results: @results,
-                           search_attributes: (@runner.search_attr_values || search_attrs_params_hash) }
+            render_json
+          end
+          format.csv do
+            send_csv
           end
         end
       rescue StandardError => e
@@ -466,5 +457,26 @@ class ReportsController < UserBaseController
 
       @report_item[col_name] = result
     end
+  end
+
+  def send_csv
+    res_a = []
+
+    blank_value = nil
+    blank_value = '' if params[:csv_blank]
+
+    if @results
+      res_a << @results.fields.to_csv
+      @results.each_row do |row|
+        res_a << (row.collect { |val| val || blank_value }).to_csv
+      end
+    end
+
+    send_data res_a.join(''), filename: 'report.csv'
+  end
+
+  def render_json
+    render json: { results: @results,
+                   search_attributes: @runner.search_attr_values }
   end
 end

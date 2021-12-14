@@ -249,7 +249,7 @@ module Reports
       assoc_item = assoc_class.where(id: list_id).first
       return if assoc_item
 
-      raise FphsGeneralError, "list id does not represent an associated list: #{list_id}"
+      raise FphsGeneralError, "list id does not represent an associated list: #{list_id} for #{assoc_class}"
     end
 
     def general_error(msg)

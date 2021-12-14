@@ -4,6 +4,7 @@
     content = Formatter::Substitution.substitute( content, data: @report).html_safe
   end
 
+  extra_classes = @report.report_options.view_options.hide_criteria_panel ? 'hidden' : ''
 %>
 <%= render partial: 'masters/modal_pi_search_results_template' %>
 <script id="edit-report-result" type="text/x-handlebars-template" class="hidden handlebars-template">
@@ -13,7 +14,7 @@
 <% if @report.editable_data? %>
   <span id="editable_data"></span>
 <% end %>
-<div class="report-criteria container-fluid" id="report-criteria-form">
+<div class="report-criteria container-fluid <%=extra_classes%>" id="report-criteria-form">
   <div class="row" data-result="#report-embedded">
     <div class="col-sm-22 col-sm-offset-1">
       <div class="well report-criteria-block">
@@ -25,13 +26,14 @@
             table_comment = Admin::MigrationGenerator.table_comment(@runner.data_reference.table_name, @runner.data_reference.schema_name)
         %>
         <%= table_comment %>
-      <% end %>
-      <%= content %>
-      <p>&nbsp;</p>
-      <%= render partial: 'criteria' %>
+        <% end %>
+        <div class="report-form-content">
+        <%= content %>
+        </div>      
+        <%= render partial: 'criteria' %>
+      </div>
     </div>
   </div>
-</div>
 </div>
 <div id="<%=@results_target%>" data-sub-item="masters" data-template="search-results-template" data-preprocessor="master_search_results" class="report-results-outer">
   <% if @results %>

@@ -457,10 +457,10 @@ module HandlesUserBase
   def embedded_item=(obj)
     if obj.is_a? UserBase
       @embedded_item = obj
-    elsif obj.is_a?(Hash) && @embedded_item
-      @embedded_item.master.current_user ||= master_user
-      @embedded_item.update obj
-      touch(time: @embedded_item.updated_at) if @embedded_item.updated_at_previously_changed?
+    elsif obj.is_a?(Hash) && embedded_item
+      embedded_item.master.current_user ||= master_user
+      embedded_item.update obj
+      touch(time: embedded_item.updated_at) if embedded_item.updated_at_previously_changed?
     end
   end
 
