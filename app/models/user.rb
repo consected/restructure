@@ -174,6 +174,14 @@ class User < ActiveRecord::Base
     Users::Confirmations.notify(self)
   end
 
+  def send_reset_password_instructions
+    return unless allow_users_to_register?
+
+    token = set_reset_password_token
+    Users::PasswordRecovery.notify(self)
+    token
+  end
+
   protected
 
   # Override included functionality that ensures an administrator has been set
