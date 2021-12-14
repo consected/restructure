@@ -13,6 +13,7 @@ class Admin::ServerInfo
     DefaultShortLinkS3Bucket DefaultShortLinkLogS3Bucket LogBucketPrefix ShortcodeLength
     DefaultSubjectInfoTableName DefaultSecondaryInfoTableName DefaultContactInfoTableName DefaultAddressInfoTableName
     ScriptedJobDirectory
+    AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail
   ].freeze
 
   NfsStoreSettingsVars = %w[
