@@ -21,8 +21,8 @@ Rails.application.config.to_prepare do
   # TODO: should I move to a more specifically named initializer?
   # Set up the Users::PasswordRecovery notifications by setting the class attributes
   Users::PasswordRecovery.password_recovery_defaults = {
-    content: 'server recover password',
-    layout: 'server recover password',
-    subject: 'Recover Password Notification'
+    content: 'server reset password instructions',
+    layout: 'server reset password instructions',
+    subject: 'Reset Password Instructions'
   }
 end
