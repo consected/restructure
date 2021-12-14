@@ -209,7 +209,7 @@ module ApplicationHelper
     end
 
     ver = Application.server_cache_version
-    "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{apptype}-#{@item_updates}-#{userrole}-#{uac}"
+    "#{partial}-partial2-#{ver}-#{auth_type}-#{u&.id}-#{u&.current_sign_in_at}-#{apptype}-#{@item_updates}-#{userrole}-#{uac}"
   end
 
   #
