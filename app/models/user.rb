@@ -13,12 +13,14 @@ class User < ActiveRecord::Base
   acts_as_token_authenticatable
 
   # A configuration allows two factor authentication to be disabled for the app server
+  supported_modules = %i[trackable timeoutable lockable validatable]
+  supported_modules.concat(%i[registerable confirmable recoverable]) if Settings::AllowUsersToRegister
   if two_factor_auth_disabled
-    devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable, :registerable, :confirmable
+    supported_modules << :database_authenticatable
   else
-    devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable, :registerable, :confirmable,
-           otp_secret_encryption_key: otp_enc_key
+    supported_modules.concat([:two_factor_authenticatable, { otp_secret_encryption_key: otp_enc_key }])
   end
+  devise(*supported_modules)
 
   belongs_to :admin
   has_one :contact_info, class_name: 'Users::ContactInfo', foreign_key: :user_id

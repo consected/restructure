@@ -3,7 +3,7 @@
 module Users
   class Reminders
     class << self
-      # Class attribute settings are set by the initializer app_settings_user_reminders.rb
+      # Class attribute settings are set by the initializer user_reminders.rb
       attr_accessor :password_expiration_defaults
     end
 
