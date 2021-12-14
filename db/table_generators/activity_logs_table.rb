@@ -84,6 +84,7 @@ EOF
         f = 'boolean' if a.end_with?('_check')
         f = 'varchar' if a == 'notes'
         f = 'varchar' if a.start_with?('select_')
+        f = 'varchar[]' if a.start_with?('tag_select_')
         f = 'integer' if a == 'age'
         f = 'integer' if a.start_with?('number_')
         f = 'integer' if a.end_with?('_number')

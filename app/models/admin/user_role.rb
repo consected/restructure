@@ -125,20 +125,24 @@ class Admin::UserRole < Admin::AdminBase
   # @param to_user [User] user to copy roles to
   # @param app_type [Admin::AppType] the app type the roles belong to.
   # @return [Array] array of Admin::UserRole instances created in the to_user
-  def self.copy_user_roles(from_user, to_user, app_type, current_admin)
-    raise FphsException, 'app_type must be specified and not nil to copy roles' unless app_type
+  def self.copy_user_roles(from_user, to_user, app_types, current_admin)
 
-    has_roles = Admin::UserRole.active_app_roles to_user, app_type: app_type
-    raise FphsException, "can not copy roles to a user with roles in this app #{app_type}" unless has_roles.empty?
+    raise FphsException, 'app_type must be specified and not nil to copy roles' if app_types.blank?
 
-    from_roles = Admin::UserRole.active_app_roles from_user, app_type: app_type
+    has_roles = Admin::UserRole.active_app_roles to_user, app_type: app_types
+    unless has_roles.empty?
+      message = app_types.is_a?(Array) ? "#{'s' unless app_types.one?}: #{app_types.join(', ')}" : ": #{app_types}"
+      raise FphsException, "can not copy roles to a user with roles in the following app#{ message }"
+    end
+
+    from_roles = Admin::UserRole.active_app_roles from_user, app_type: app_types
 
     to_roles = []
     from_roles.each do |r|
       new_role = {
         current_admin: current_admin,
         role_name: r.role_name,
-        app_type: app_type,
+        app_type: r.app_type,
         user: to_user
       }
       to_roles << create!(new_role)
