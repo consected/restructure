@@ -12,7 +12,7 @@ module Users
     # @return [HandlePasswordRecoveryNotificationJob]
     def self.notify(user)
       Rails.logger.info('Setting up the notification when a user tries to recover the password.')
-      HandlePasswordRecoveryNotificationJob.set(wait: 1.second).perform_now(user) unless Rails.env.development?
+      HandlePasswordRecoveryNotificationJob.perform_now(user) #unless Rails.env.development?
     end
 
   end

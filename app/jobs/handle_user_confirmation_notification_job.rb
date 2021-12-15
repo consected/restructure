@@ -1,15 +1,6 @@
 # frozen_string_literal: true
 
-# Handle the password expirations that have been scheduled for the future
-# when a new user was created or password was reset.
-# It is possible that a user will have reset their password since this original
-# job was created, so the job ensures that nothing is sent if the password is not
-# actually within the reminder period.
-# When sent, a reminder job will set up a new future reminder job, to provide a repeating
-# reminder on a set frequency, which will continue until:
-#   - the user resets their password
-#   - the password expires
-#   - the password will expire before the repeat reminder would be sent
+# Handle the user confirmation notification after a user registers
 class HandleUserConfirmationNotificationJob < ApplicationJob
   queue_as :default
 
@@ -24,7 +15,6 @@ class HandleUserConfirmationNotificationJob < ApplicationJob
 
     mn.handle_notification_now logger: Delayed::Worker.logger
 
-    Users::Confirmations.notify(user)
   end
 
   private
