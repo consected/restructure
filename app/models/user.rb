@@ -12,9 +12,10 @@ class User < ActiveRecord::Base
 
   acts_as_token_authenticatable
 
-  # A configuration allows two factor authentication to be disabled for the app server
+  # TODO: clean this up. Should this be moved to Settings?
   supported_modules = %i[trackable timeoutable lockable validatable]
   supported_modules.concat(%i[registerable confirmable recoverable]) if Settings::AllowUsersToRegister
+  # A configuration allows two factor authentication to be disabled for the app server
   if two_factor_auth_disabled
     supported_modules << :database_authenticatable
   else
