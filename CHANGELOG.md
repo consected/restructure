@@ -17,6 +17,10 @@ version has occurred.
 
 The **Unreleased** section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## Unreleased
+
+- [Fixed] multiple bugs
+
 ## [7.4.91] - 2021-12-03
 
 - [Added] PDF and office doc search (within a single document) in secure view
