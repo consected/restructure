@@ -15,9 +15,9 @@ In short this means that version numbers, visible here and on the login page of 
 app match, and have a predictable format indicating how much change from the previous
 version has occurred.
 
-The `## Unreleased` section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
+The `## [7.4.94] - 2021-12-17` section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
-## Unreleased
+## [7.4.93] - 2021-12-16
 
 - [Added] scripted job script for OCR
 - [Changed] scripted job for better job feedback and documentation
