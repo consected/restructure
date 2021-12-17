@@ -863,7 +863,8 @@ _fpa.form_utils = {
     if (block.hasClass('use-secure-view-on-links-setup')) return;
 
     var inner = block.find('a');
-    if (!_fpa.state.user_can.view_files_as_image) {
+    //For admins only, _fpa.state.user_can is undefined.
+    if (_fpa.state.user_can && !_fpa.state.user_can.view_files_as_image) {
       inner = block.find('.use-secure-view-on-links a')
     }
 
