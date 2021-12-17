@@ -67,6 +67,8 @@ module NfsStore
       def store_to_same_path_as_source
         path = container_file.path
         res = true
+        raise FsException::Action, 'no results returned to store' unless result
+
         result.each do |new_tmp_path|
           pn = Pathname.new(new_tmp_path)
           tmp_filename = pn.basename
@@ -86,6 +88,7 @@ module NfsStore
       # @return [Boolean] success
       def store_to_path
         res = true
+        raise FsException::Action, 'no results returned to store' unless result
 
         result.each do |new_tmp_path|
           attrs = {
