@@ -1,0 +1,73 @@
+#
+# Filestore Options definitions
+
+#
+# Filestore containers are set up with several activity log entries
+#   - a reference to the container
+#   - a save_triegger to create the container (and its reference)
+#   - optionally an nfs_store entry to define how the container responds to new uploads and user file actions
+#
+# Typically the references and save_trigger will be saved one time in the Config Library to be reusable
+#
+  references (for filestore):
+    nfs_store__manage__container:
+      from: this
+      add: one_to_this
+      view_as:
+        edit: hide
+        show: filestore
+        new: not_embedded
+      creatable_if:
+        never: true
+        
+  save_trigger (for filestore):
+    on_create_filestore_container:
+      create_filestore_container: 
+        name: general files
+        label: General Files
+        create_with_role: nfs_store group 600
+
+
+
+  nfs_store:
+    pipeline: # pipeline_config - a list of jobs to perform for new uploads
+      - mount_archive:
+      - index_files:
+
+      - dicom_deidentify:
+          - new_path: 'reidentified/{ {path}}'
+            recursive: true              
+            file_filters:
+                - '.*_MPRAGE_RMS_0.*'
+                - '.*_TOF_0.*'
+                - '.*_DTI_ADC_0.*'              
+            set_tags:
+              '0010,0010': '{ {player_infos.first_name::initial}}{ { player_infos.last_name::initial}}'
+              '0010,0020': '{ {player_infos.first_name::initial}}{ { player_infos.last_name::initial}}'
+              '0008,0020': '{ {parent_item.session_date::dicom_date}}'
+
+      - dicom_metadata: # run to reextract metadata from dicom files
+      - scripted:
+          - script_filename: ocr_pdf.sh
+            environment: # environment variables hash
+              varname: value
+            args:
+              - '--deskew'
+            fail_silently: # true | false
+            timeout: 3600 # seconds
+            on_success:
+              store_files: # one of the following options
+                to_same_path_as_source: true
+                to_path: string
+            file_filters:
+              - '\.pdf$'
+
+    # user_file_actions defines custom pipelines to perform if a user selects files 
+    # and clicks the action in the drop down
+    user_file_actions: 
+      - name: 'name to present to user'
+        id: '(optional) underscored identifier for the action'
+        pipeline: # a pipeline to perform, using the pipeline format described above
+          - rerun_all:
+
+        

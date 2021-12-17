@@ -29,18 +29,11 @@
         - "*outside_this* presents a button that triggers a form outside of this container
           in the regular panel"
   
+  #
+  # e-signed documents require a filestore setup too.
+  #
   e_sign:
     document_reference: !defs(save_triggers_create_reference_options_defs.yaml)
     title: 'title to appear at top of prepared document'
     intro: 'text to appear at top of prepared document'
   
-  nfs_store:
-    pipeline: pipeline_config,
-    user_file_actions:
-      - name: 'name to present to user'
-        id: '(optional) underscored identifier for the action'
-        pipeline: 
-          - _job_name: {}
-        
-
-          
