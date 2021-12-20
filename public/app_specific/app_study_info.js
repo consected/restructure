@@ -168,26 +168,34 @@ _fpa.app_specific = class {
       var url_split = url.split('/');
       var id = url_split[url_split.length - 1].split('?')[0];
       var hyph_name = url_split[url_split.length - 2].hyphenate().singularize();
+      var pre = 'common'
+      if (url_split[url_split.length - 3] == 'activity_log') {
+        hyph_name = `activity-log-${hyph_name}`;
+        pre = 'activity_log'
+      }
+
+      var block_id = `${hyph_name}--${id}`
 
       $(this)
         .attr('data-remote', true)
         .attr('data-result-target-force', true)
         .attr(`data-${hyph_name}-id`, id)
-        .attr('data-result-target', `#page-embedded-block--${id}`)
+        .attr('data-result-target', `#${block_id}`)
         .attr('data-template', `${hyph_name}-result-template`);
 
       var text = $(this).parents('.notes-text');
       var html = text.html();
+      if (!html) return;
 
-      var new_div = `<div id="page-embedded-block--${id}"
+      var new_div = `<div id="${block_id}"
       class="page-embedded-block"
-      data-preprocessor="activity_log_edit_form"
+      data-preprocessor="${pre}_edit_form"
       data-model-name="${hyph_name.underscore()}" 
-      data-id="${id}"></div>
-      
-      `;
+      data-id="${id}"
+      data-result-target-for-child="#${block_id}"></div>`;
 
-      text.html(html.replace('{{page_embedded_block}}', new_div));
+      var new_html = html.replace('{{page_embedded_block}}', new_div);
+      text.html(new_html);
     });
   }
 };
