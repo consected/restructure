@@ -18,6 +18,21 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+### Transfer from Harvard @7.4.94 - 2021-12-16
+
+- [Added] scripted job script for OCR
+- [Added] logic to avoid too many refreshes on browser
+- [Added] PDF and office doc search (within a single document) in secure view
+- [Changed] scripted job for better job feedback and documentation
+- [Changed] activity log documentation to improve filestore information
+- [Changed] report list functionality to results list view
+- [Fixed] embedded items not updating in activity logs, causing entered data to be lost
+- [Fixed] multiple bugs
+
+### Cherrypicked from Project Viva @8.0.30 - 2021-12-07
+
+- [Fixed] scrolling issue with report result lists
+
 ## [8.0.23] - 2021-12-03
 
 ### Transfer from Harvard @7.4.90 - 2021-12-03
