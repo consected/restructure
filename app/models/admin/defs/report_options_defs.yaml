@@ -81,6 +81,20 @@ view_css:
     'p > span':
       font-decoration: underscore
 
+criteria_css:
+  classes:
+    a_class_name:
+      min-width: 100%
+      color: green
+    another_class.subclass:
+      display: none
+  selectors:
+    '#element-id':
+      font-weight: bold
+      font-size: 200%
+    'p > span':
+      font-decoration: underscore
+
 
 component:
   options:

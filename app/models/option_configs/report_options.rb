@@ -19,6 +19,7 @@ module OptionConfigs
                                       no_results_scroll show_all_booleans_as_checkboxed]
     configure :list_options, with: %i[hide_in_list list_description]
     configure :view_css, with: %i[classes selectors]
+    configure :criteria_css, with: %i[classes selectors]
     configure :component, with: [:options]
     configure :column_options, with: %i[tags classes hide show_as alt_column_header]
 
