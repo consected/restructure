@@ -1,10 +1,28 @@
 /*@import url("https://fonts.googleapis.com/css2?family=Ubuntu&display=swap");*/
-@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400');
+@import url("https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400");
 .standalone-page-container,
 .standalone-page-design {
   /*font-family: "Ubuntu", sans-serif;*/
-  font-family: 'Titillium Web', sans-serif;
+  font-family: "Titillium Web", sans-serif;
   font-size: 16px;
+}
+
+.standalone-page-design .in-item-model-references.rr-mr {
+  display: none;
+}
+
+.standalone-page-design li.list-group-item.record-meta {
+  height: 1px;
+  min-height: 1px;
+  padding: 0;
+  display: block;
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.standalone-page-design .multi-model-reference-result {
+  border-right: 1px solid rgb(221, 221, 221);
 }
 
 .notes-text {
@@ -88,17 +106,51 @@ li.list-group-item.results-caption-before.activity-log--study-info-part-page-des
   appearance: none;
 }
 
-#master_results_block form .edit-field-container input[type='checkbox'] {
+#master_results_block form .edit-field-container input[type="checkbox"] {
   appearance: auto;
   min-width: 1em;
 }
 
 input.form-control,
 select.form-control {
-  background-color: rgb(255 246 226) !important;
+  background-color: rgb(255, 246, 226) !important;
 }
 
 input.form-control.has-value,
 select.form-control.has-value {
-  background-color: rgb(255 246 226) !important;
+  background-color: rgb(255, 246, 226) !important;
+}
+
+.page-embedded-block ul.list-group {
+  display: block;
+}
+
+.page-embedded-block ul.list-group .list-group-item {
+  margin-left: 0;
+  display: block;
+  overflow: hidden;
+}
+
+.page-embedded-block .list-group-item.caption-before {
+  display: block;
+}
+
+.page-embedded-block ul.list-group .list-group-item.record-meta {
+  display: none;
+}
+
+.page-embedded-block ul.list-group .list-group-item.edit-form-header {
+  display: none;
+}
+
+.page-embedded-block .list-group-item.result-field-container.has-caption-before {
+  width: 95%;
+}
+
+.page-embedded-block .list-group-item.result-field-container.has-caption-before strong {
+  vertical-align: middle;
+}
+
+.page-embedded-block .list-group-item.submit-action-container {
+  display: block;
 }
