@@ -18,6 +18,9 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+
+## [8.0.25] - 2021-12-20
+
 - [Bumped] version
 
 ## [8.0.24] - 2021-12-20
@@ -36,6 +39,9 @@ release will be created for any release tested in production, and may be marked 
 ### Cherrypicked from Project Viva @8.0.30 - 2021-12-07
 
 - [Fixed] scrolling issue with report result lists
+
+## [8.0.24] - 2021-12-20
+
 
 ## [8.0.23] - 2021-12-03
 
