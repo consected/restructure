@@ -19,6 +19,9 @@ release will be created for any release tested in production, and may be marked 
 ## Unreleased
 
 
+## [8.0.24] - 2021-12-20
+
+
 ## [8.0.23] - 2021-12-03
 
 
