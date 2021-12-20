@@ -13,7 +13,8 @@ module OptionConfigs
                              update_reference
                              create_filestore_container
                              update_this
-                             add_tracker].freeze
+                             add_tracker
+                             change_user_roles].freeze
 
       class_methods do
         #
