@@ -15,12 +15,6 @@
       col_block_id = "sp-col-#{col_id || col_label.id_underscore}"
       col_url = col['url']
 
-      if @master
-        col_label = Formatter::Substitution.substitute(col_label, data: @master, tag_subs: nil)
-        col_header = Formatter::Substitution.substitute(col_header, data: @master, tag_subs: nil)
-        col_footer = Formatter::Substitution.substitute(col_footer, data: @master, tag_subs: nil)
-      end
-
       unless col_url
         inner_rows = col['rows']
         if inner_rows
@@ -80,6 +74,16 @@
           end
         end
       end
+
+      
+      sub_data = @master || {}
+      
+      col_label = Formatter::Substitution.substitute(col_label, data: sub_data, tag_subs: nil)
+      col_header = markdown_to_html(col_header)
+      col_footer = markdown_to_html(col_footer)
+      col_header = Formatter::Substitution.substitute(col_header, data: sub_data, tag_subs: nil).html_safe
+      col_footer = Formatter::Substitution.substitute(col_footer, data: sub_data, tag_subs: nil).html_safe
+
   %>
     <% if inner_rows %>
     <div class="standalone-page-col-with-rows <%=col_classes%>" id="<%=col_block_id%>">
@@ -93,7 +97,7 @@
     <div class="standalone-page-col <%=col_classes%> ajax-running" id="<%=col_block_id%>" data-url="<%=col_url%>">
       <div class="sp-col-inner">
         <%if col_label.present? %><h2 class="sp-col-label"><%=col_label%></h2><% end %>
-        <% if col_header.present? %><div class="sp-col-header"><%= markdown_to_html(col_header)%></div><% end %>
+        <% if col_header.present? %><div class="sp-col-header"><%= col_header%></div><% end %>
         <div class="result-target result-target-<%=result_type%>">
           <% if resource %>
             <div id="<%= resource.hyphenate %>-<%=@master_id%>" class="no-table-results standalone-panel-generic-block <%= resource.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="<%=@master_id%>" data-sub-item="<%= resource %>" data-template="<%= resource.hyphenate %>-page-result-template">
@@ -102,7 +106,7 @@
             </div>
           <% end %>
         </div>
-        <% if col_footer.present? %><div class="sp-col-footer"><%= markdown_to_html(col_footer)%></div><% end %>
+        <% if col_footer.present? %><div class="sp-col-footer"><%= col_footer%></div><% end %>
       </div>
     </div>
     <% end %>

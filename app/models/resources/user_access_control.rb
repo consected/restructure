@@ -18,6 +18,8 @@ module Resources
         resource_descriptions_for_limited_access
       when :report
         resource_descriptions_for_report
+      when :standalone_page
+        resource_descriptions_for_standalone_page
       when :activity_log_type
         resource_descriptions_for_activity_log_type
       else
@@ -93,6 +95,20 @@ module Resources
           "report: #{cat&.present? && cat || '(no category)'}":
             rs.select { |r| r.item_type == cat }.map { |r| [r.alt_resource_name, r.name] }.to_h
         )
+      end
+
+      res
+    end
+
+    def self.resource_descriptions_for_standalone_page
+      res = {
+        'All': { '_all_standalone_pages_': 'All Standalone Pages' }
+      }
+
+      rs = Admin::PageLayout.active.standalone.reorder('').order(app_type_id: :asc, panel_name: :asc)
+      rs.each do |r|
+        res[r.app_type.label] ||= {}
+        res[r.app_type.label][r.panel_name] = r.panel_label
       end
 
       res

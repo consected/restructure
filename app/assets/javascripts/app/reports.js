@@ -207,13 +207,17 @@ _fpa.reports = {
 
     }).addClass('attached_report_chart');
 
-    block.find('td[data-col-type^="select items:"]').not('.attached_report_select_items').each(function () {
+    block.find('.report-results-table-block td[data-col-type^="select items:"], .report-results-list-block div[data-col-type^="select items:"]').not('.attached_report_select_items').each(function () {
 
       dct = $(this).attr('data-col-type');
 
       dct_parts = dct.split(':', 3);
 
-      var dct_json = $(this).html();
+      // If this is a list view, use the <rldata> element for content
+      var $el = $(this)
+      if ($el.find('rldata').length) $el = $el.find('rldata')
+
+      var dct_json = $el.html();
 
       if (!dct_json || dct_json.trim() == '') return;
 
@@ -228,7 +232,7 @@ _fpa.reports = {
 
       var new_html = $h;
 
-      $(this).html(new_html);
+      $el.html(new_html);
 
 
     }).addClass('attached_report_select_items');
@@ -266,7 +270,7 @@ _fpa.reports = {
     }
 
     var b = '<span class="report-files-actions"><input type="checkbox" id="report-select-all-files"><label for="report-select-all-files">select all</label></span><span class="report-files-actions-btn"><input id="submit-report-selections" type="submit" value="' + dct_action + '" class="btn btn-primary rep-sel-action-' + dct_action.replace(' ', '-') + '"/></span>'
-    var $t = $('table.report-table');
+    var $t = $('table.report-table, .report-list[data-results-count]');
     $f.insertBefore($t);
     $t.appendTo($('#itemselection-for-report'));
 
@@ -298,13 +302,15 @@ _fpa.reports = {
       }, 100);
     });
 
-    $t.find('thead th').each(function () {
+    var res = $t.find('thead th').each(function () {
       if ($(this).find('p:first').html() == dct) {
         $(this).addClass('no-sort');
         $(this).append(b);
       }
     });
 
+    if (res.length === 0)
+      $t.prepend(b);
 
   },
 
@@ -338,7 +344,7 @@ _fpa.reports = {
             sa = "";
 
             for (var i in data.search_attributes) {
-              if (data.search_attributes.hasOwnProperty(i) && i !== 'ids_filter_previous') {
+              if (data.search_attributes.hasOwnProperty(i) && i !== 'ids_filter_previous' && i !== '_use_defaults_') {
                 var d = data.search_attributes[i];
                 sa += '<div class="report-search-attr"><span class="attr-label">' + i + '</span><span class="attr-val">' + _fpa.utils.pretty_print(d, { return_string: true }) + '</span></div>';
               }

@@ -17,8 +17,8 @@ _fpa.preprocessors_nfs_store = {
       var value = downloads[i]
 
       var dp = ['.']
-      if(value.archive_file) dp.push(`${value.archive_file}${archive_suffix}`)
-      if(value.path) dp.push(value.path)
+      if (value.archive_file) dp.push(`${value.archive_file}${archive_suffix}`)
+      if (value.path) dp.push(value.path)
       value.container_dir_path = dp.join('/')
     }
 
@@ -135,6 +135,15 @@ _fpa.postprocessors_nfs_store = {
             var new_c = parseInt(req_count) + 1;
 
           $browse_container.attr('data-refresh-count', new_c);
+
+          // Only allow one refresh every 8 seconds (don't do 10, as this will conflict with the recurring refresh time)
+          // We can't do this on the refresh button itself, since the remote event is not easy to stop
+          var time = (new Date).getTime() / 1000;
+          var dt = $refresh_btn.attr('data-last-click-at');
+          if (dt && time - parseInt(dt) < 8) {
+            return;
+          }
+
           $refresh_btn.click();
         }
       }, 10000);

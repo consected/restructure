@@ -2,52 +2,14 @@
   @report = report if local_assigns[:report]
   @results = results if local_assigns[:results]
   @outer_block_id = outer_block_id if local_assigns[:outer_block_id]
-  column_options = @report.report_options.column_options
-
-  col_classes = {}
-  col_tags = {}
-  col_hide = {}
-  show_as = {}
-
-  if column_options
-    column_options.classes&.each do |k,v|
-      col_classes[k] = v.is_a?(Array) ? v.join(' ') : v
-    end
-
-    column_options.tags&.each do |k,v|
-      col_tags[k] = v
-    end
-
-    column_options.hide&.each do |k,v|
-      col_hide[k] = v
-    end
-
-    column_options.show_as&.each do |k,v|
-      show_as[k] = v
-    end
-
-  end
-
-
-  show_col_comments = @report.report_options.view_options&.show_column_comments
-  if show_col_comments
-    tn = @runner.data_reference.table_name
-    sn = @runner.data_reference.schema_name
-
-    tab_col_comments = Admin::MigrationGenerator.column_comments
-  end
-
-  if tn
-    corr_data_dic = @report.report_options.view_options&.corresponding_data_dic || tn&.sub("_data", '')
-    data_dic = Admin::MigrationGenerator.data_dic(corr_data_dic, nil_if_empty: divue)
-  end
-
+  @result_tables = result_tables if local_assigns[:result_tables]
+  setup_column_options
 %>
-<div class="report-results-list-block" id="<%=@outer_block_id%>-table-block">
+<div class="report-results-list-block no-table-results" id="<%=@outer_block_id%>-table-block">
   <div class="report-list" data-results-count="<%=@results.count%>">
     <div>
       <% @results.each_row do |list_item| %>
-        <div class="report-list-result" id="report-item-<%=list_item[0]%>">
+        <div class="report-list-result" id="report-item-<%=list_item[0].to_s.id_underscore%>">
           <% if editable? %>
             <div class="report-list-el report-edit-btn-cell"><%= report_edit_btn list_item[0]%> </div>
           <% end %>
@@ -55,26 +17,9 @@
           <% 
             list_item.each do |col| 
               col_name = @results.fields[i]
-              unless col_hide[col_name]
+              unless @col_hide[col_name]
           %>
-          <div data-col-type="<%=@results.fields[i] %>" data-col-table="<%=result_tables[i] %>" class="report-list-el <%= @results.fields[i] == 'id' ? 'report-el-object-id' : '' %> <%= col_classes[@results.fields[i]] %>"><%
-                col_tag = col_tags[col_name] 
-                l = col&.scan("\n")&.length if col.is_a?(String)
-                l ||= 0
-                got_nl = (l >= 1)
-                col = col.to_json if col.is_a?(Hash)
-                col_tag ||= 'pre' if got_nl
-
-                col_tag = 'div' if show_as[col_name] == 'div'
-
-                if show_as[col_name] == 'url'
-                  col_url_parts = col&.scan(/^\[([\w\s\d]+)\]\((.+)\)$/)
-                  col = link_to(col_url_parts&.first&.first, col_url_parts&.first&.last, target: '_blank')
-                  col_tag = nil
-                  got_nl = nil
-                end
-                
-            %><% if got_nl || col_tag%><<%=col_tag%> class="<% if l > 4%>expandable<% end %>"><% end %><%= col %><% if got_nl || col_tag%></<%=col_tag%>><% end %></div>
+          <%= report_list_result_cell(i, col) %>                         
           <%  
               end
               i += 1

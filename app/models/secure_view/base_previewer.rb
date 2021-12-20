@@ -9,7 +9,7 @@ module SecureView
     OfficeDocTypesTo = %w[html pdf].freeze
 
     class << self
-      attr_accessor :pdftoppm_exists, :libreoffice_exists, :dcmj2pnm_exists
+      attr_accessor :pdftoppm_exists, :libreoffice_exists, :dcmj2pnm_exists, :pdfgrep_exists
     end
 
     attr_accessor :path, :temp_dir, :orig_path, :view_type
@@ -72,6 +72,12 @@ module SecureView
       @netpbm_exists = !!system(SecureView::Config.netpbm_path, '--version', out: File::NULL, err: File::NULL)
     end
 
+    def self.pdfgrep_exists?
+      return @pdfgrep_exists unless @pdfgrep_exists.nil?
+
+      @pdfgrep_exists = !!system(SecureView::Config.pdfgrep_path, '--version', out: File::NULL, err: File::NULL)
+    end
+
     # Raise an error unless pdftoppm exists. Assume that other pdf utils are correctly accessible based on this
     def self.check_pdftoppm_exists!
       return true if pdftoppm_exists?
@@ -91,6 +97,12 @@ module SecureView
       return true if libreoffice_exists?
 
       raise ConfigException, "libreoffice does not exist at path specified: #{SecureView::Config.libreoffice_path}"
+    end
+
+    def self.check_pdfgrep_exists!
+      return true if pdfgrep_exists?
+
+      raise ConfigException, "pdfgrep does not exist at path specified: #{SecureView::Config.pdfgrep_path}"
     end
 
     def file_cache_path(type)

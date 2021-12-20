@@ -80,6 +80,8 @@ module ReportsHelper
       options_for_select(config.selections || [], value)
     elsif config.type == 'select_from_model'
       # Get the model by the configured resource name
+
+      def_value = value
       resource_name = config.resource_name
       res = Resources::Models.find_by(resource_name: resource_name)
       raise FphsException, "No resource matches resource_name: #{resource_name}" unless res
@@ -89,11 +91,46 @@ module ReportsHelper
       # For example, for a data dictionary variable, this might be "study: study"
       fields = (config.selections || { id: :id })
       model = res[:model]
-      order = { fields.keys.first => :asc }
+
+      label = fields.keys.first
+      value = fields.values.first
+
+      # Make sure we can't call any arbitrary method on the model
+      valid_attrs = model.attribute_names + ['data']
+      unless label.to_s.in?(valid_attrs) && value.to_s.in?(valid_attrs)
+        raise FphsException,
+              "Invalid attribute requested #{label}: #{value}"
+      end
+
       selections = model
       selections = selections.active if selections.respond_to? :active
-      selections = selections.distinct.reorder('').order(order).pluck(*fields)
-      options_for_select(selections)
+
+      selections = if label.to_s == 'data' || value.to_s == 'data'
+                     # Map rather than pluck so we can get the data attribute successfully
+                     selections.distinct.reorder('')
+                               .map do |r|
+                       [r.send(label), r.send(value)]
+                     end
+                   else
+                     selections.distinct.reorder('').pluck(label, value)
+                   end
+
+      # NOTE: #uniq is called twice below on purpose, first to hugely limit large tables,
+      # then second to merge what were previously nils that have become empty strings,
+      # with the values that were actually empty strings
+      selections = selections.uniq
+
+      # Handle pluck returning only a single value for each result if the same
+      # attribute for label and value are specified
+      selections = selections.map { |a| [a, a] } unless selections.first.is_a?(Array)
+      selections = selections.map { |a| [a.first.to_s, a.last.to_s] }
+                             .uniq
+                             .sort { |x, y| x.first <=> y.first }
+
+      got_bar = selections.find { |s| s.first.include?('|') }
+      return grouped_options_for_select(record_results_grouping(selections, '|'), def_value) if got_bar
+
+      options_for_select(selections, def_value)
     end
   end
 

@@ -55,7 +55,7 @@ class ReportsController < UserBaseController
       return
     end
 
-    if params[:search_attrs] && !no_run && params[:commit].present?
+    if params[:search_attrs] && !no_run && (params[:commit].present? || params[:format].present?)
       # Search attributes or data reference parameters have been provided
       # and the query should be run
       begin
@@ -85,20 +85,10 @@ class ReportsController < UserBaseController
           end
         end
         format.json do
-          render json: { results: @results, search_attributes: @runner.search_attr_values }
+          render_json
         end
         format.csv do
-          res_a = []
-
-          blank_value = nil
-          blank_value = '' if params[:csv_blank]
-
-          res_a << @results.fields.to_csv
-          @results.each_row do |row|
-            res_a << (row.collect { |val| val || blank_value }).to_csv
-          end
-
-          send_data res_a.join(''), filename: 'report.csv'
+          send_csv
         end
       end
 
@@ -121,13 +111,14 @@ class ReportsController < UserBaseController
               return unless show_authorized? == true
 
               @report_criteria = true
-
               show_report
             end
           end
           format.json do
-            render json: { results: @results,
-                           search_attributes: (@runner.search_attr_values || search_attrs_params_hash) }
+            render_json
+          end
+          format.csv do
+            send_csv
           end
         end
       rescue StandardError => e
@@ -371,10 +362,32 @@ class ReportsController < UserBaseController
 
   def permitted_params
     @permitted_params = @report.edit_fields
+
+    @permitted_params = refine_permitted_params(@permitted_params)
+  end
+
+  #
+  # Permitted parameters for strong param whitelist are generated based on
+  # the "edit field" configuration.
+  # Ensure that database columns that are defined as array type can receive
+  # arrays in the permitted params by checking the actual column definition
+  # and changing the permitted param to an array if necessary
+  # @param [Array] param_list - the standard list of params to allow
+  # @return [Array] the refined resulting permitted params definition
+  def refine_permitted_params(param_list)
+    res = param_list.dup
+
+    ms_keys = res.select { |a| report_model.columns_hash[a.to_s]&.array }
+    ms_keys.each do |k|
+      res.delete(k)
+      res << { k => [] }
+    end
+
+    res
   end
 
   def secure_params
-    params.require(report_params_holder).permit(*permitted_params)
+    @secure_params ||= params.require(report_params_holder).permit(*permitted_params)
   end
 
   def set_editable_instance_from_id
@@ -444,5 +457,26 @@ class ReportsController < UserBaseController
 
       @report_item[col_name] = result
     end
+  end
+
+  def send_csv
+    res_a = []
+
+    blank_value = nil
+    blank_value = '' if params[:csv_blank]
+
+    if @results
+      res_a << @results.fields.to_csv
+      @results.each_row do |row|
+        res_a << (row.collect { |val| val || blank_value }).to_csv
+      end
+    end
+
+    send_data res_a.join(''), filename: 'report.csv'
+  end
+
+  def render_json
+    render json: { results: @results,
+                   search_attributes: @runner.search_attr_values }
   end
 end

@@ -603,7 +603,7 @@ module Dynamic
     # @param [Hash] mrs - result of #model_references
     # @return [true| nil]
     def editable_model_not_embeddable?(mrs)
-      mrs.first.to_record_options_config[:view_as][:edit].in?(NotEmbeddedOptions)
+      mrs.first.to_record_options_config&.dig(:view_as, :edit)&.in?(NotEmbeddedOptions)
     rescue StandardError
       nil
     end

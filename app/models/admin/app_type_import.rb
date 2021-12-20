@@ -76,10 +76,10 @@ module Admin::AppTypeImport
           app_type.import_config_sub_items app_type_config, 'page_layouts', %w[layout_name panel_name]
 
         res['user_roles'] =
-          app_type.import_config_sub_items app_type_config, 'user_roles', ['role_name', 'role_template']
+          app_type.import_config_sub_items app_type_config, 'user_roles', ['role_name']
 
         res['role_descriptions'] =
-          app_type.import_config_sub_items app_type_config, 'role_descriptions', ['role_name']
+          app_type.import_config_sub_items app_type_config, 'role_descriptions', ['role_name', 'role_template']
 
         res['nfs_store_filters'] =
           app_type.import_config_sub_items app_type_config, 'nfs_store_filters', %w[role_name resource_name filter]
@@ -117,7 +117,11 @@ module Admin::AppTypeImport
 
       app_type = find(new_id)
       # Ensure only imported user access controls are retained
-      app_type.clean_user_access_controls id_list
+      # if the valid_user_access_controls key was actually in the imported file.
+      # If it wasn't present, the result was nil and we should skip this, since it
+      # indicates we don't want to make any changes
+
+      app_type.clean_user_access_controls id_list if results['app_type']['user_access_controls']
       app_type.reload
 
       [app_type, results]
