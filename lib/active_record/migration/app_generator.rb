@@ -82,12 +82,20 @@ module ActiveRecord
 
         self.belongs_to_model = belongs_to_model.to_s.underscore
 
+        parent_model_is_view = Admin::MigrationGenerator.view_exists?(belongs_to_model.pluralize.to_s)
+
         unless table_exists
           create_table "#{schema}.#{table_name}", comment: table_comment do |t|
             t.belongs_to :master, index: { name: "#{rand_id}_master_id_idx" }, foreign_key: true
-            t.belongs_to belongs_to_model,
-                         index: { name: "#{rand_id}_id_idx" },
-                         foreign_key: { to_table: belongs_to_model.pluralize.to_s }
+
+            # Views can not be referenced by foreign keys
+            if parent_model_is_view
+              t.integer "#{belongs_to_model}_id"
+            else
+              t.belongs_to belongs_to_model,
+                           index: { name: "#{rand_id}_id_idx" },
+                           foreign_key: { to_table: belongs_to_model.pluralize.to_s }
+            end
             create_fields t
             t.string :extra_log_type
             t.references :user, index: { name: "#{rand_id}_user_id_idx" }, foreign_key: true
@@ -98,9 +106,15 @@ module ActiveRecord
         unless history_table_exists || model_is_view
           create_table "#{schema}.#{history_table_name}" do |t|
             t.belongs_to :master, index: { name: "#{rand_id}_master_id_h_idx" }, foreign_key: true
-            t.belongs_to belongs_to_model,
-                         index: { name: "#{rand_id}_id_h_idx" },
-                         foreign_key: { to_table: belongs_to_model.pluralize.to_s }
+
+            # Views can not be referenced by foreign keys
+            if parent_model_is_view
+              t.integer "#{belongs_to_model}_id"
+            else
+              t.belongs_to belongs_to_model,
+                           index: { name: "#{rand_id}_id_h_idx" },
+                           foreign_key: { to_table: belongs_to_model.pluralize.to_s }
+            end
             create_fields t, true
             t.string :extra_log_type
             t.references :user, index: { name: "#{rand_id}_user_id_h_idx" }, foreign_key: true
