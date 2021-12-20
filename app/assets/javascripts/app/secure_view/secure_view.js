@@ -18,6 +18,7 @@ var SecureView = function () {
     this.current_zoom = '';
     this.get_page_path = '';
     this.download_path = '';
+    this.search_path = '';
     this.allow_actions = {};
     this.initial_html_overflow = null;
     this.initial_body_overflow = null;
@@ -38,6 +39,9 @@ var SecureView = function () {
     this.$zoom_selector_fit = null;
     this.$extra_actions = null;
     this.$download_actions = null;
+    this.$search_panel = null;
+    this.$search_form = null;
+    this.$search_results = null;
     this.$pages = null;
     this.$preview_item = null;
     this.$body = null;
@@ -79,6 +83,88 @@ var SecureView = function () {
     }
   }
 
+  this.setup_search = function () {
+    console.log('setup search')
+    this.search_path = (this.download_path || '').replace('?', '/search_doc?');
+    this.$search_form.attr('action', this.search_path);
+    var $search_results = this.$search_results;
+
+    this.$search_form.not('.sv-search-form-setup').on('submit', function (ev) {
+      ev.preventDefault();
+      var block = $(this);
+
+      var action = $(this).attr('action');
+
+      $search_results.find('.sv-search-results-count').remove();
+
+      if (!action) {
+        _this.show_failure_message('Error: no document path set to search');
+        return;
+      }
+
+      var search_string = $(this).find('[name="search_string"]').val().trim();
+      $search_results.html('');
+
+      if (!search_string) return;
+
+      _fpa.ajax_working(block);
+      var last_response_len = false;
+      var response_count = 0;
+      // Run the search and enter each line into the search results block as it is returned
+      $.ajax(action, {
+        data: { search_string: search_string },
+        xhrFields: {
+          onprogress: function (e) {
+            if (response_count > 200) return;
+
+            var this_response, response = e.currentTarget.response;
+            if (last_response_len === false) {
+              this_response = response;
+              last_response_len = response.length;
+            }
+            else {
+              this_response = response.substring(last_response_len);
+              last_response_len = response.length;
+            }
+
+            var new_responses = this_response.split("\n")
+            for (var i in new_responses) {
+              var res = new_responses[i]
+              var res_parts = res.split(':');
+              var text = res_parts.slice(1).join(':')
+              if (res_parts.length > 1) {
+                $search_results.append(`<a href="#" class="sv-search-result" data-result-page="${res_parts[0]}"><p><b>${res_parts[0]}:</b> ${text}</p></a>`)
+                response_count++;
+              }
+            }
+          }
+        }
+      })
+        .done(function (data) {
+          console.log('Completed search - results count:' + response_count);
+          _fpa.ajax_done(block);
+
+          var res_msg = `${response_count} ${response_count == 1 ? 'result' : 'results'} ${response_count > 200 ? ' - refine search to see all results' : ''}`;
+
+          if (response_count !== null) {
+            $search_results.append(`<p class="sv-search-results-count" data-search-count="${response_count}">${res_msg}</p > `);
+          }
+        })
+        .fail(function (data) {
+          _fpa.ajax_done(block);
+
+          _this.show_failure_message(`Error: ${data}`);
+        });
+    }).addClass('sv-search-form-setup');
+
+    this.$search_results.on('click', 'a.sv-search-result', function (ev) {
+      ev.preventDefault();
+      var search_page = $(this).attr('data-result-page');
+      if (!search_page || search_page < 1) return;
+      _this.set_current_page(search_page);
+      _this.show_page(search_page);
+    })
+  }
 
 
   this.setup = function (set_preview_as, options) {
@@ -103,6 +189,9 @@ var SecureView = function () {
     this.$page_controls = $('.secure-view-page-controls');
     this.$pages_block = $('#secure-view-pages');
     this.$secure_view = $('.secure-view');
+    this.$search_panel = $('#secure-view-search-panel');
+    this.$search_form = $('#secure-view-search-form');
+    this.$search_results = $('#secure-view-search-results');
     this.$pages = $('#secure-view-pages');
     this.$loading_page_message = $('.secure-view-loading-page');
     this.$download_link = $('.sv-download-link');
@@ -223,6 +312,7 @@ var SecureView = function () {
 
     });
 
+    this.setup_search();
 
   };
 
@@ -477,7 +567,7 @@ var SecureView = function () {
 
 
   this.set_current_page = function (page) {
-    _this.current_page = page;
+    _this.current_page = parseInt(page);
     _this.$preview_item = $("#" + _this.page_id(page));
     $('#secure-view-current-page').val(_this.current_page);
     $('#preview-next-page').attr('disabled', _this.current_page == _this.page_count);
