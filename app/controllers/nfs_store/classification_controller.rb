@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 module NfsStore
+  #
+  # Controller to support a standalone full page file browser. Not used within ReStructure
+  # applications, and may not even work. Consider removing in the future.
   class ClassificationController < NfsStoreController
     # include InNfsStoreContainer
     #

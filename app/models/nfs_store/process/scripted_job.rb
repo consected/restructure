@@ -8,13 +8,7 @@ module NfsStore
       # retry_on FphsException
       queue_as :nfs_store_process
 
-      flow_control :dicom_deidentify,
-                   skip_if: lambda { |container_file|
-                              container_file.is_a?(NfsStore::Manage::ContainerFile) && !(
-                                container_file.content_type == 'application/dicom' ||
-                                container_file.is_archive?
-                              )
-                            }
+      flow_control :scripted
 
       # Perform the job (called in the background from ActiveJob).
       # The job gets the pipeline configuration from the extra log type for
@@ -40,7 +34,7 @@ module NfsStore
           end
 
           c_user = setup_container_file_current_user(container_file, in_app_type_id)
-
+          configs = [configs] unless configs.is_a? Array
           # Run through each config
           configs.each do |config|
             # Get scopes that can filter files to be deidentified

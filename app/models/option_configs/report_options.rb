@@ -12,11 +12,13 @@ module OptionConfigs
     configure :view_options, with: %i[hide_table_names
                                       hide_field_names_with_comments
                                       humanize_column_names
-                                      hide_result_count hide_export_buttons
+                                      hide_result_count hide_export_buttons hide_search_button
                                       hide_criteria_panel prevent_collapse_for_list
                                       show_column_comments corresponding_data_dic
                                       view_as search_button_label report_auto_submit_on_change
-                                      no_results_scroll show_all_booleans_as_checkboxed]
+                                      no_results_scroll show_all_booleans_as_checkboxed
+                                      hide_list_labels_for_empty_content]
+
     configure :list_options, with: %i[hide_in_list list_description]
     configure :view_css, with: %i[classes selectors]
     configure :criteria_css, with: %i[classes selectors]
