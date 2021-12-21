@@ -10,9 +10,8 @@
 
   external_id_types = ExternalIdentifier.active_model_configurations.map(&:implementation_class)
   viewable_external_ids = external_id_types.select{|e| master_viewables[e.plural_name.to_sym] }.map(&:plural_name)
-
+  all_cnames = general_selection_cache_names
 %>
-
 
 <% # Set up the handlebars templates for the main data blocks: player_infos, pro_infos, addresses and player_contacts %>
 <%= render partial: 'common_templates/search_results_template', locals: {
@@ -91,7 +90,7 @@
 <%= render partial: 'activity_logs/search_results_template' %>
 
 <% # Load partial handlebars templates used by the search results and data blocks%>
-<% if panels && panels.length > 0
+<% if panels.present?
     # Tabs as defined by the page layout panels
 %>
 <%= render partial: 'masters/search_results_master_tabs', locals: {panels: panels, external_id_types: external_id_types, viewable_external_ids: viewable_external_ids} %>
@@ -105,55 +104,12 @@
 <%= render partial: 'common_templates/common_parts' %>
 <%= render partial: 'item_flags/search_results_template' %>
 <%= render partial: 'filestore/result_templates' if current_user.has_access_to?(:access, :table, :nfs_store__manage__containers) %>
-
-<%=render partial: 'secure_view/preview' if current_user.can?(:view_files_as_html) || current_user.can?(:view_files_as_image) %>
-
+<%= render partial: 'secure_view/preview' if current_user.can?(:view_files_as_html) || current_user.can?(:view_files_as_image) %>
 <%= render partial: 'filestore/common_template_view', locals: {} if current_user.has_access_to?(:access, :table, :nfs_store__manage__containers) %>
 <%= render partial: 'common_templates/e_signature/show_parts', locals: {} %>
 
-
 <script>
-  <%
-    all_cnames = []
-
-    # Preload all of the general selections into cache so they can be used
-    # This pulls dynamic model and activity log extra log types as separate items
-    implementation_classes = ActivityLog.implementation_classes
-
-    # Check the definition is ready to use and prepare it for use
-    implementation_classes.reject! {|ic| !ic.definition.ready_to_generate?}
-    implementation_classes.each do |itc|
-
-      next unless itc.allows_user_access_to?(current_user, :access)
-      cnames = []
-      ito = itc.new
-      if itc.respond_to?(:option_configs)
-        cnames = itc.option_configs.map {|k|  "general_selections-item_type+#{ito.item_type}-extra_log_type+#{k.name}" }
-      else
-        cnames = ["general_selections-item_type+#{ito.item_type}"]
-      end
-
-      all_cnames += cnames
-  %>
-  //_fpa.cache_definitions(<%=cnames.to_json.html_safe%>);
-
-  <% end %>
-
-  <%
-  implementation_classes = DynamicModel.implementation_classes
-  implementation_classes.reject! {|ic| !ic.definition.ready_to_generate?}
-  cnames = []
-  implementation_classes.each do |itc|
-    full_name = "dynamic_model__#{itc.definition.implementation_model_name}"
-    if current_user.has_access_to?(:access, :table, full_name.pluralize)
-      ito = itc.new
-      cnames.push("general_selections-item_type+#{ito.item_type}");
-    end
-  end
-  all_cnames += cnames
-  %>
-  //_fpa.cache_definitions(<%=cnames.to_json.html_safe%>);
-  _fpa.cache_definitions(<%=all_cnames.flatten.to_json.html_safe%>);
+  _fpa.cache_definitions(<%= all_cnames.to_json.html_safe %>);
 </script>
 
 
@@ -177,8 +133,6 @@
   {{else}}
       <h2 class="no-results-msg">No Results</h2>
   {{/if}}
-
-
 </script>
 
 <script id="master_main_inner" type="text/x-handlebars-template" class="hidden handlebars-partial">
