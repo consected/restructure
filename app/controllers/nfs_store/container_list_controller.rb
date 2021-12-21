@@ -1,4 +1,11 @@
 module NfsStore
+  #
+  # Handle the file list viewing for a container.
+  # Lists are returned based on the view_type requested, currently:
+  # - list
+  # - icons
+  # The content of the list is a full directory structure of files with their metadata
+  # and information that allows them to be downloaded or viewed.
   class ContainerListController < NfsStoreController
     include ModelNaming
     include ControllerUtils
@@ -10,22 +17,28 @@ module NfsStore
     ValidViewTypes = %w[list icons].freeze
     DefaultViewType = 'list'.freeze
 
+    #
+    # Show the main list container
     def show
       setup_download_list
       render partial: "browse_#{view_type}"
     end
 
+    #
+    # Return the file list content as JSON for rendering in the list container
+    # The actual metadata returned varies based on the view_type requested,
+    # in order to speed up large directories
     def content
       setup_download_list
 
       except_list = case view_type
-      when 'icons'
-        %i[file_metadata last_process_name_run updated_at created_at user_id file_hash
-          content_type nfs_store_stored_file_id]
-      else
-        %i[file_metadata last_process_name_run description updated_at created_at user_id file_hash
-          content_type nfs_store_stored_file_id]
-      end
+                    when 'icons'
+                      %i[file_metadata last_process_name_run updated_at created_at user_id file_hash
+                         content_type nfs_store_stored_file_id]
+                    else
+                      %i[file_metadata last_process_name_run description updated_at created_at user_id file_hash
+                         content_type nfs_store_stored_file_id]
+                    end
 
       extras = {
         except: except_list,
@@ -36,7 +49,7 @@ module NfsStore
       tfa = @container.user_file_actions_config&.map { |a| a[:id] }
 
       ff = NfsStore::Filter::Filter.human_filters_for(@activity_log)
-      
+
       dl_json = @downloads.as_json(extras)
 
       render json: {
@@ -76,26 +89,23 @@ module NfsStore
     # Setup the list of download file items, handling item flags if needed.
     # Also add a @download object, required to build the download selection form.
     def setup_download_list
-      begin
-        if @container.readable?
-          # Check if we should show flags for classifications on each of the types of container file
-          @allow_show_flags = {}
-          %i[stored_file archived_file].each do |rt|
-            full_name = "nfs_store__manage__#{rt}"
-            show_flag = !!Classification::ItemFlagName.enabled_for?(full_name, current_user)
-            @allow_show_flags[rt] = show_flag
-          end
+      return unless @container.readable?
 
-          # List types should we include flags for in the queries that return the stored_files and archived_files
-          show_flags_for = @allow_show_flags.filter { |_k, v| v }.keys.map { |i| i.to_s.pluralize.to_sym }
-          @downloads = Browse.list_files_from @container, activity_log: @activity_log, include_flags: show_flags_for
-          # Prep a download object to allow selection of downloads in the browse list
-          @download = Download.new container: @container, activity_log: @activity_log
-        end
-      rescue FsException::NotFound
-        @directory_not_found = true
+      # Check if we should show flags for classifications on each of the types of container file
+      @allow_show_flags = {}
+      %i[stored_file archived_file].each do |rt|
+        full_name = "nfs_store__manage__#{rt}"
+        show_flag = !!Classification::ItemFlagName.enabled_for?(full_name, current_user)
+        @allow_show_flags[rt] = show_flag
       end
 
+      # List types should we include flags for in the queries that return the stored_files and archived_files
+      show_flags_for = @allow_show_flags.filter { |_k, v| v }.keys.map { |i| i.to_s.pluralize.to_sym }
+      @downloads = Browse.list_files_from @container, activity_log: @activity_log, include_flags: show_flags_for
+      # Prep a download object to allow selection of downloads in the browse list
+      @download = Download.new container: @container, activity_log: @activity_log
+    rescue FsException::NotFound
+      @directory_not_found = true
     end
 
     # return the class for the current item

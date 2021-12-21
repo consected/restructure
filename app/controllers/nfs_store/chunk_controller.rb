@@ -1,11 +1,23 @@
 # frozen_string_literal: true
 
 module NfsStore
+  #
+  # Manage the upload of fixed length data chunks for large file uploads.
+  #
+  # Each upload from a client can consist of one or more files, each sent as one or more chunks.
+  # The reason for splitting files into chunks is it allows easy progress feedback from the server,
+  # and in the case of failures, allows large file uploads to be restarted.
+  # Multiple files may be uploaded as a batch, since we may require a notification to users to be
+  # triggered one time after all the files have been uploaded, rather than for each individual file.
   class ChunkController < FsBaseController
     layout nil
 
     include InNfsStoreContainer
 
+    #
+    # Get details about an existing upload. If it exists this means that
+    # a previous upload has been started. The client may not have completed the
+    # overall upload process, so this facilitates restarting.
     def show
       container = params[:id]
       file_hash = params[:file_hash]
@@ -44,6 +56,11 @@ module NfsStore
       end
     end
 
+    #
+    # Create a new chunk on the server from a posted chunk,
+    # which is accessed in the uploads param. This is attached to the
+    # an existing upload if one is found, otherwise an upload is created
+    # for other chunks to be attached to.
     def create
       chunk = params[:upload]
 
@@ -80,6 +97,10 @@ module NfsStore
       end
     end
 
+    #
+    # A put/patch request indicates to the server that a set of uploads have completed.
+    # When notifications are required after a full set of multiple files have been uploaded
+    # this allows the client to indicate that all the required files have been completed.
     def update
       return not_found unless @container
 

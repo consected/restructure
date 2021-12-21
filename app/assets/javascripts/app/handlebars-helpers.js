@@ -47,6 +47,10 @@
   eR.add('===', function (left, right) {
     return left === right;
   });
+  eR.add('==', function (left, right) {
+    // Allow string to number comparisons
+    return left == right;
+  });
   eR.add('!==', function (left, right) {
     return left !== right;
   });

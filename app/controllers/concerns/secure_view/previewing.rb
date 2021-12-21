@@ -1,4 +1,6 @@
 module SecureView
+  #
+  # Provide previewing functionality to DownloadsController
   module Previewing
     private
 
@@ -14,15 +16,19 @@ module SecureView
       end
     end
 
-    def secure_view_setup_previewer(path)
+    def secure_view_setup_previewer(path, view_as: nil)
       raise GeneralException, 'No path for setup_previewer' unless path
 
-      if secure_view_preview_as == 'png'
+      view_as ||= secure_view_preview_as
+      case view_as
+      when 'png'
         @secure_view_previewer = SecureView::ImagePreviewer.new path: path.to_s
-      elsif secure_view_preview_as == 'icon'
+      when 'icon'
         @secure_view_previewer = SecureView::ImagePreviewer.new path: path.to_s, view_type: :icon
-      elsif secure_view_preview_as == 'html'
+      when 'html'
         @secure_view_previewer = SecureView::HTMLPreviewer.new path: path.to_s
+      when 'pdf'
+        @secure_view_previewer = SecureView::PDFPreviewer.new path: path.to_s
       end
     end
 

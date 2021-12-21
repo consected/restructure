@@ -76,10 +76,10 @@ module Admin::AppTypeImport
           app_type.import_config_sub_items app_type_config, 'page_layouts', %w[layout_name panel_name]
 
         res['user_roles'] =
-          app_type.import_config_sub_items app_type_config, 'user_roles', ['role_name', 'role_template']
+          app_type.import_config_sub_items app_type_config, 'user_roles', ['role_name']
 
         res['role_descriptions'] =
-          app_type.import_config_sub_items app_type_config, 'role_descriptions', ['role_name']
+          app_type.import_config_sub_items app_type_config, 'role_descriptions', ['role_name', 'role_template']
 
         res['nfs_store_filters'] =
           app_type.import_config_sub_items app_type_config, 'nfs_store_filters', %w[role_name resource_name filter]
