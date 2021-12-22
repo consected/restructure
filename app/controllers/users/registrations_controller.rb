@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Users
   class RegistrationsController < Devise::RegistrationsController
     before_action :authorize_resource, only: %i[new create]

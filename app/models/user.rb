@@ -12,15 +12,15 @@ class User < ActiveRecord::Base
 
   acts_as_token_authenticatable
 
-  # TODO: clean this up. Should this be moved to Settings?
+  # TODO: comments
   supported_modules = %i[trackable timeoutable lockable validatable]
-  supported_modules.concat(%i[registerable confirmable recoverable]) if Settings::AllowUsersToRegister
-  # A configuration allows two factor authentication to be disabled for the app server
+  supported_modules += %i[registerable confirmable recoverable] if Settings::AllowUsersToRegister
   if two_factor_auth_disabled
     supported_modules << :database_authenticatable
   else
-    supported_modules.concat([:two_factor_authenticatable, { otp_secret_encryption_key: otp_enc_key }])
+    supported_modules += [:two_factor_authenticatable, { otp_secret_encryption_key: otp_enc_key }]
   end
+
   devise(*supported_modules)
 
   belongs_to :admin
@@ -168,19 +168,36 @@ class User < ActiveRecord::Base
     Admin::AppType.all_available_to(self)
   end
 
+  # method provided by devise confirmable module; Override so job notifications can be executed
   def send_on_create_confirmation_instructions
     return unless allow_users_to_register?
 
     generate_confirmation_token! unless @raw_confirmation_token
-    Users::Confirmations.notify(self)
+    Users::Confirmations.notify self
   end
 
+  # method provided by devise recoverable module; Override so job notifications can be executed
   def send_reset_password_instructions
     return unless allow_users_to_register?
 
     token = set_reset_password_token
-    Users::PasswordRecovery.notify(self)
+    options = { reset_password_hash: token }
+    Users::PasswordRecovery.notify self, options
     token
+  end
+
+  def resend_confirmation_instructions
+    return unless allow_users_to_register?
+
+    generate_confirmation_token! unless @raw_confirmation_token
+    Users::Confirmations.notify self
+  end
+
+  # method provided by devise database_authenticable module; Override so job notifications can be executed
+  def send_password_change_notification
+    return unless allow_users_to_register?
+
+    Users::PasswordChanged.notify self
   end
 
   protected
@@ -212,5 +229,4 @@ class User < ActiveRecord::Base
   def set_app_type
     self.app_type_id = nil if app_type_id && !app_type_valid?
   end
-
 end
