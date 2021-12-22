@@ -81,8 +81,20 @@ class Settings
   # title tag page title, appears in tab or browser heading
   PageTitle = ENV['PAGE_TITLE'] || 'FPHS'
 
+  # Registration Settings
+  # Since passwords have generated upon user creation, we must suppress generating a password
+  # with the user (self) registration feature.
+  AllowUsersToRegister = (ENV['ALLOW_USERS_TO_REGISTER'].to_s.downcase == 'true')
+  RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'] || AdminEmail
+  DefaultUserTemplateEmail = ENV['DEFAULT_USER_TEMPLATE_EMAIL'] || 'registration@template'
+
   # URL to appear on home page for users with login issues to contact
-  LoginIssuesUrl = ENV['LOGIN_ISSUES_URL'] || "mailto: #{AdminEmail}?subject=Login%20Issues"
+
+  DefaultLoginIssuesUrl = AllowUsersToRegister ? '/users/password/new' : "mailto: #{AdminEmail}?subject=Login%20Issues"
+  LoginIssuesUrl = ENV['LOGIN_ISSUES_URL'] || DefaultLoginIssuesUrl
+
+  DidntReceiveConfirmationInstructionsUrl = '/users/confirmation/new'
+
   # Block to appear at top of login page as a user message
   LoginMessage = ENV['LOGIN_MESSAGE']
   # Maximum limit on master search results
@@ -185,11 +197,4 @@ class Settings
 
   # Prevent versioning of dynamic definitions
   DisableVDef = ENV.key?('FPHS_DISABLE_VDEF') ? ENV['FPHS_DISABLE_VDEF'] == 'true' : Rails.env.development?
-
-  # Registration Settings
-  # Since passwords have generated upon user creation, we must suppress generating a password
-  # with the user (self) registration feature.
-  AllowUsersToRegister = (ENV['ALLOW_USERS_TO_REGISTER'].to_s.downcase == 'true')
-  RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'] || AdminEmail
-  DefaultUserTemplateEmail = ENV['DEFAULT_USER_TEMPLATE_EMAIL'] || 'registration@template'
 end

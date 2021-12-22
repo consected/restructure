@@ -174,7 +174,15 @@ Rails.application.routes.draw do
   ActivityLog.routes_load
 
   devise_for :admins, skip: [:registrations]
-  devise_for :users, skip: [:registrations]
+
+  devise_controllers = %i[sesssions]
+  if Settings::AllowUsersToRegister
+    devise_for :users, controllers: {
+      registrations: 'users/registrations'
+    }
+    devise_controllers += %i[confirmations passwords]
+  end
+  devise_for :users, only: devise_controllers
 
   devise_scope :admin do
     get '/admins/show_otp', to: 'devise/registrations#show_otp'
@@ -182,9 +190,6 @@ Rails.application.routes.draw do
   end
 
   devise_scope :user do
-    namespace :users do
-      (resources :registrations, only: %i[new create]) if Settings::AllowUsersToRegister
-    end
     get '/users/show_otp', to: 'devise/registrations#show_otp'
     post '/users/test_otp', to: 'devise/registrations#test_otp'
   end
@@ -210,9 +215,6 @@ Rails.application.routes.draw do
   end
 
   as :user do
-    get 'users/edit' => 'devise/registrations#edit', :as => 'edit_user_registration'
-    put 'users/:id' => 'devise/registrations#update', :as => 'user_registration'
-
     root to: 'pages#home', as: 'authenticated_user_root'
   end
 
