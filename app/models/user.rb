@@ -14,10 +14,11 @@ class User < ActiveRecord::Base
 
   # A configuration allows two factor authentication to be disabled for the app server
   if two_factor_auth_disabled
-    devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable, :registerable, :confirmable
+    devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable # , :registerable, :confirmable
   else
-    devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable, :registerable, :confirmable,
+    devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable,
            otp_secret_encryption_key: otp_enc_key
+    # :registerable, :confirmable,
   end
 
   belongs_to :admin
@@ -104,7 +105,7 @@ class User < ActiveRecord::Base
   # but will become an editable model in the future
   # @return [UserPreference]
   def user_preference
-    UserPreference.new
+    UserPreference.new(user: self)
   end
 
   #
@@ -194,5 +195,4 @@ class User < ActiveRecord::Base
   def set_app_type
     self.app_type_id = nil if app_type_id && !app_type_valid?
   end
-
 end

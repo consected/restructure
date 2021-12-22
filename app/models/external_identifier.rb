@@ -56,6 +56,10 @@ class ExternalIdentifier < ActiveRecord::Base
     name.ns_underscore.singularize
   end
 
+  def base_route_segments
+    model_association_name
+  end
+
   def self.routes_load
     mn = nil
     begin
@@ -66,7 +70,7 @@ class ExternalIdentifier < ActiveRecord::Base
         resources :masters, only: %i[show index new create] do
           m.each do |pg|
             mn = pg
-            pg_name = mn.model_association_name
+            pg_name = mn.base_route_segments
 
             Rails.logger.info "Setting up routes for #{mn}"
             resources pg_name, except: [:destroy]

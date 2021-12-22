@@ -7,10 +7,10 @@ module UserActionLogging
     after_action :log_user_item_action, only: %i[show create update], unless: :canceled?
     after_action :log_user_index_action, only: [:index]
 
-    ExcludeClasses = %w(Devise::ConfirmationsController
+    ExcludeClasses = %w[Devise::ConfirmationsController
                         Devise::SessionsController
                         Devise::RegistrationsController
-                        Users::RegistrationsController).freeze
+                        Users::RegistrationsController].freeze
   end
 
   private
@@ -33,6 +33,8 @@ module UserActionLogging
     if defined?(object_instance) && object_instance
       nma = object_instance.class.no_master_association
       master ||= object_instance.master unless nma
+    else
+      nma = true
     end
 
     master_id = master.id if master

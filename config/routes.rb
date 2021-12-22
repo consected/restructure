@@ -170,6 +170,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resource :user_profile
+
   ExternalIdentifier.routes_load
   ActivityLog.routes_load
 

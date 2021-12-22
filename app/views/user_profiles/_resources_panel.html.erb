@@ -1,0 +1,29 @@
+<%
+  resources = panel.contains.resources
+  init_visible = panel.view_options.initial_show || nil if panel.view_options
+  resources.each do |resource|
+    rs = resource.split('__', 2)
+    if rs.length == 2
+      resource_type = rs.first.hyphenate.pluralize
+    else
+      resource_type = 'details'
+    end
+
+    template_resource = resource.sub(/^dynamic_model__/, '').hyphenate
+%>
+  <div id="user-profile-<%= resource.hyphenate %>-{{user.id}}" 
+       class="<%= resource_type %>-user-profile-block <%= resource.hyphenate %>-block collapse" 
+       role="tabpanel" 
+       aria-labelledby="tab-user-profile-<%= resource.hyphenate %>-{{user.id}}" 
+  >    
+    <div id="<%= template_resource %>--{{<%= resource %>.id}}" 
+         class="<%= resource_type %>-user-profile-inner-block user-profile-resource-block"
+         form-res-template="<%= template_resource %>-result-template"
+         data-subscription="<%= template_resource %>-edit-form--{{<%=resource%>.id}}"
+    >
+    </div>
+  </div>
+<%
+  
+  end
+%>

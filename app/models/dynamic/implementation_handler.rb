@@ -12,6 +12,14 @@ module Dynamic
       after_commit :reset_access_evaluations!
     end
 
+    class_methods do
+      # The base string for route
+      # For example "dynamic_model/some_models"
+      def base_route_segments
+        definition.base_route_segments
+      end
+    end
+
     # resource_name used as a universal identifier
     def resource_name
       current_definition.resource_name

@@ -40,7 +40,9 @@ module Resources
         class_name: model.name,
         model: model,
         table_name: model.table_name,
-        resource_name: resource_name
+        resource_name: resource_name,
+        base_route_name: model.base_route_name,
+        base_route_segments: model.base_route_segments
       }
     end
 

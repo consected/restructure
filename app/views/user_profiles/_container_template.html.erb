@@ -1,0 +1,56 @@
+<%
+  panels = @panels
+%>
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: 'user_preference',
+    caption: 'Preferences',
+    model_data_type: :default,
+    prevent_edit: false,
+    prevent_create: false,
+    item_list: UserPreference.attribute_names - %w[id created_at updated_at admin_id user_id]
+  } 
+%>
+
+<%= render partial: 'user_profiles/tabs', locals: {panels: panels} %>
+
+<script id="user-profile-container-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  <div class="user-profile-container-block" id="user-profile-container">
+    {{#with user_profile}}
+      {{>user_profile_main}}
+    {{/with}}
+  </div>
+</script>
+
+<script id="user_profile_inner" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{>user_profile_tabs}}
+  <div class="panel-body user-profile-panel">
+    <%
+    if panels.present?
+      panels.each do |panel| %>
+        <%= render partial: 'user_profiles/resources_panel', locals: {panel: panel} %>
+    <%
+      end
+    %>
+    <% else # no panels defined %>
+    <div class="well">no user profile panels defined</div>
+    <% end %>
+  </div>
+</script>
+
+<script id="user_profile_main" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <div id="user-{{user.id}}-main-container" 
+       class="panel-no-collapse user-profile-panel" 
+       data-user-id="{{user.id}}" 
+       data-template="user-profile-main-template"
+       role="tablist"
+       aria-multiselectable="true"
+  >
+    {{>user_profile_inner}}
+  </div>
+</script>
+
+<script id="user-profile-main-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{#with user}}
+    {{>user_profile_main}}
+  {{/with}}
+</script>

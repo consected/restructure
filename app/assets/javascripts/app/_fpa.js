@@ -29,6 +29,8 @@ _fpa = {
     'masters',
     'masterss',
     'search_actions',
+    'user_profiles',
+    'user_preferences'
   ],
 
   HandlebarsCompileOptions: { preventIndent: true },
@@ -213,6 +215,7 @@ _fpa = {
 
         // Model references have an item type attribute
         if (data_for_data_type) {
+          data_for_data_type.vdef_version = data_for_data_type.vdef_version || 'v'
           var item_type = data_for_data_type.item_type || data_type;
         } else {
           var item_type = data_type;
@@ -762,9 +765,12 @@ _fpa = {
                         // results for 'works_with_item' classes
                         item_data = d;
                         var matching_data_sub_item = alt_data_key;
-                        if (!matching_data_sub_item) matching_data_sub_item = item_data.item_type.underscore();
+                        if (!matching_data_sub_item && item_data.item_type) matching_data_sub_item = item_data.item_type.underscore();
                         if (item_data[dsfor] === +dsid) {
-                          if (matching_data_sub_item === dst) {
+                          if (matching_data_sub_item == null) {
+                            use_data = {};
+                            use_data[dst] = item_data;
+                          } else if (matching_data_sub_item === dst) {
                             use_data = {};
                             use_data[dst] = item_data;
                           } else if (matching_data_sub_item === dsc) {
