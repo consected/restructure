@@ -9,10 +9,9 @@ module Users
 
     # Set up the notification email when the user tries to recover the password
     # @param [User] user
-    # @return [HandlePasswordRecoveryNotificationJob]
-    def self.notify(user)
-      Rails.logger.info('Setting up the notification when a user tries to recover the password.')
-      HandlePasswordRecoveryNotificationJob.perform_now(user) #unless Rails.env.development?
+    def self.notify(user, options)
+      Rails.logger.info("Setting up the notification when a user tries to recover the password. User #{user.email}")
+      HandlePasswordRecoveryNotificationJob.perform_now(user, options)
     end
 
   end

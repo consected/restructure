@@ -8,8 +8,9 @@ module UserActionLogging
     after_action :log_user_index_action, only: [:index]
 
     ExcludeClasses = %w(Devise::ConfirmationsController
-                        Devise::SessionsController
+                        Devise::PasswordsController
                         Devise::RegistrationsController
+                        Devise::SessionsController
                         Users::RegistrationsController).freeze
   end
 

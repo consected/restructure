@@ -12,8 +12,7 @@ module Users
     # @return [HandleUserConfirmationNotificationJob]
     def self.notify(user)
       Rails.logger.info('Setting up the confirmation notification after the user registers.')
-      HandleUserConfirmationNotificationJob.perform_now(user) #unless Rails.env.development?
+      HandleUserConfirmationNotificationJob.perform_now(user)
     end
-
   end
 end

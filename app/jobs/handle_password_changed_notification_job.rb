@@ -1,20 +1,16 @@
 # frozen_string_literal: true
 
-class HandlePasswordRecoveryNotificationJob < ApplicationJob
+class HandlePasswordChangedNotificationJob < ApplicationJob
   queue_as :default
 
-  def perform(user, options)
+  def perform(user)
     mn = Messaging::MessageNotification.create! user: user,
                                                 recipient_user_ids: [user.id],
                                                 layout_template_name: defaults[:layout],
                                                 content_template_name: defaults[:content],
                                                 message_type: :email,
                                                 subject: defaults[:subject],
-                                                item: user,
-                                                data: {
-                                                  email: user.email,
-                                                  reset_password_hash: options[:reset_password_hash]
-                                                }
+                                                item: user
 
     mn.handle_notification_now logger: Delayed::Worker.logger
 
@@ -23,6 +19,6 @@ class HandlePasswordRecoveryNotificationJob < ApplicationJob
   private
 
   def defaults
-    Users::PasswordRecovery.password_recovery_defaults
+    Users::PasswordChanged.password_changed_defaults
   end
 end

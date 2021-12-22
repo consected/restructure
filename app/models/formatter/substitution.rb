@@ -178,6 +178,7 @@ module Formatter
       data[:password_max_attempts] = Settings::PasswordMaxAttempts
       data[:mfa_disabled] = Settings::TwoFactorAuthDisabled
       data[:login_issues_url] = Settings::LoginIssuesUrl
+      data[:did_not_receive_confirmation_instructions_url] = Settings::DidntReceiveConfirmationInstructionsUrl
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       data[:item] = item.item.attributes.dup if item.respond_to?(:item) && item.item.respond_to?(:attributes)
