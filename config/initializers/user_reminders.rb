@@ -25,4 +25,12 @@ Rails.application.config.to_prepare do
     layout: 'server reset password instructions',
     subject: 'Reset Password Instructions'
   }
+
+  # TODO: should I move to a more specifically named initializer?
+  # Set up the Users::PasswordChanged notifications by setting the class attributes
+  Users::PasswordChanged.password_changed_defaults = {
+    content: 'server password changed',
+    layout: 'server password changed',
+    subject: 'Password Changed Instructions'
+  }
 end
