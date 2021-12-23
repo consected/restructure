@@ -7,7 +7,7 @@ module Users
       attr_accessor :password_changed_defaults
     end
 
-    # Set up the notification email when the user tries to recover the password
+    # Set up the notification email when the user tries to change the password
     # @param [User] user
     def self.notify(user)
       Rails.logger.info("Setting up the notification when a user tries to change the password. User #{user.email}")
