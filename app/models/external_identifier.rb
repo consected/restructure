@@ -57,7 +57,7 @@ class ExternalIdentifier < ActiveRecord::Base
   end
 
   def base_route_segments
-    model_association_name
+    model_association_name.to_s
   end
 
   def self.routes_load

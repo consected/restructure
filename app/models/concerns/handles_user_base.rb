@@ -186,7 +186,7 @@ module HandlesUserBase
     # For example "player_infos"
     # Dynamic configurations will override this
     def base_route_segments
-      table_name
+      table_name.to_s
     end
 
     # The base string for route names
