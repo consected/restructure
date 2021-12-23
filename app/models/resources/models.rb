@@ -30,7 +30,7 @@ module Resources
       val = key_val.first.last
 
       if key == :resource_name
-        @@resources[resource_name.to_sym]
+        @@resources[key]
       else
         res = @@resources.filter { |_k, v| v[key] == val }
         return unless res&.first
