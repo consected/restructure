@@ -5,6 +5,10 @@
 class Admin::PageLayout < Admin::AdminBase
   self.table_name = 'page_layouts'
 
+  def self.app_type_not_required
+    true
+  end
+
   include AdminHandler
   include AppTyped
   include OptionsHandler
