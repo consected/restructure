@@ -30,7 +30,7 @@ module Resources
       val = key_val.first.last
 
       if key == :resource_name
-        @@resources[key]
+        @@resources[val.to_sym]
       else
         res = @@resources.filter { |_k, v| v[key] == val }
         return unless res&.first
@@ -61,10 +61,15 @@ module Resources
         class_name: model.name,
         model: model,
         table_name: model.table_name,
-        resource_name: resource_name,
-        base_route_name: model.base_route_name,
-        base_route_segments: model.base_route_segments
+        resource_name: resource_name
       }
+
+      if model.respond_to? :base_route_name
+        @@resources[resource_name].merge! base_route_name: model.base_route_name,
+                                          base_route_segments: model.base_route_segments
+
+      end
+      @@resources[resource_name]
     end
 
     #
