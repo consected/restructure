@@ -1,17 +1,21 @@
-<%
-  panels = @panels
-%>
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: 'user_preference',
     caption: 'Preferences',
     model_data_type: :default,
     prevent_edit: false,
     prevent_create: false,
-    item_list: UserPreference.attribute_names - %w[id created_at updated_at admin_id user_id]
+    item_list: UserPreference.attribute_names - %w[id created_at updated_at admin_id user_id],
+    field_options: {
+      date_format: { no_downcase: true },
+      timezone: { no_downcase: true },
+      pattern_for_date_format: { no_downcase: true },
+      pattern_for_time_format: { no_downcase: true },
+      pattern_for_date_time_format: { no_downcase: true }
+    }
   } 
 %>
 
-<%= render partial: 'user_profiles/tabs', locals: {panels: panels} %>
+<%= render partial: 'user_profiles/tabs' %>
 
 <script id="user-profile-container-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   <div class="user-profile-container-block" id="user-profile-container">
@@ -24,13 +28,8 @@
 <script id="user_profile_inner" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{>user_profile_tabs}}
   <div class="panel-body user-profile-panel">
-    <%
-    if panels.present?
-      panels.each do |panel| %>
-        <%= render partial: 'user_profiles/resources_panel', locals: {panel: panel} %>
-    <%
-      end
-    %>
+    <% if resources.present? %>  
+    <%= render partial: 'user_profiles/resources_panel' %>
     <% else # no panels defined %>
     <div class="well">no user profile panels defined</div>
     <% end %>

@@ -88,4 +88,31 @@ class UserPreference
 
   # Dummy
   def current_user=(curr); end
+
+  def self.where(_options = {})
+    [new]
+  end
+
+  def self.resource_name
+    'user_preferences'
+  end
+
+  def self.table_name
+    'user_preferences'
+  end
+
+  def self.base_route_name
+    'user_preferences'
+  end
+
+  def self.base_route_segments
+    'user_preferences'
+  end
+
+  def self.human_name
+    'User Preferences'
+  end
+
+  # Not needed in a real model
+  Resources::Models.add(self)
 end

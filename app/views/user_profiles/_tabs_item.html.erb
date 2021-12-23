@@ -1,40 +1,35 @@
 <%
-  panel_name = panel.panel_name
-  panel_label = panel.panel_label&.downcase
-  resources = panel.contains&.resources
-  initial_show = panel.view_options&.initial_show
-  default_panels = app_config_items(:open_panels)
+  initial_show = true
+  
   %>
   
-  <% if resources
-    resources.each do |resource|
+  <% 
+    resources&.each do |resource_name, r_model|
+      resource_name = resource_name.to_s
       template_postfix = ''
-      template_postfix = '-result-template' if resource.start_with?('activity_log__')
+      template_postfix = '-result-template' if resource_name.start_with?('activity_log__')
 
-      if default_panels.length > 0
-        initial_show = resource.to_s.in?(default_panels)
-      end
+      
+      tab_label = r_model&.human_name || resource_name.humanize.titleize
 
-      r_model = Resources::Models.find_by(resource_name: resource.pluralize)&.dig(:model)
-      tab_label = r_model&.human_name || resource.humanize.titleize
-
-      template_resource = resource.sub(/^dynamic_model__/, '').hyphenate
+      template_resource = resource_name.sub(/^dynamic_model__/, '').hyphenate
   %>
   <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
-    <a id="tab-user-profile-<%= resource.hyphenate %>-{{user.id}}" 
-       href="/user_profile?resource_name=<%= resource %>" 
-       data-panel-tab="<%=resource%>" 
+    <a id="tab-user-profile-<%= resource_name.hyphenate %>-{{user.id}}" 
+       href="/user_profile?resource_name=<%= resource_name %>" 
+       data-panel-tab="<%=resource_name%>" 
        data-remote="true" 
        data-prevent-on-collapse="true" 
        data-toggle="collapse" 
-       data-target="#user-profile-<%= resource.hyphenate %>-{{user.id}}" 
+       data-target="#user-profile-<%= resource_name.hyphenate %>-{{user.id}}" 
        aria-expanded="false" 
        class="scroll-to-expanded  collapsed"  
-       data-result-target="#<%= template_resource %>--{{<%= resource %>.id}}"
+       data-result-target="#<%= template_resource %>--{{<%= resource_name %>.id}}"
        data-parent="#user-{{user.id}}-main-container"
     ><%= tab_label %></a>
   </li>
   <%
+      initial_show = false
     end
-  end
+
 %>

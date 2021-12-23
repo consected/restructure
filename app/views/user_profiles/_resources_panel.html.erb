@@ -1,7 +1,6 @@
 <%
-  resources = panel.contains.resources
-  init_visible = panel.view_options.initial_show || nil if panel.view_options
-  resources.each do |resource|
+  
+  resource_names.each do |resource|
     rs = resource.split('__', 2)
     if rs.length == 2
       resource_type = rs.first.hyphenate.pluralize

@@ -1,10 +1,6 @@
 
 <script id="user_profile_tabs" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <ul class="nav nav-pills details-tabs user-profiles-tabs" id="user-profiles-tabs">
-  <%
-    tab_panels = panels&.sort {|p, q| (p.tab && p.tab.parent) <=> (p.tab && p.tab.parent) }
-    tab_panels&.each do |panel| %>
-      <%= render partial: 'user_profiles/tabs_item', locals: {panel: panel} %>
- <% end %>
+    <%= render partial: 'user_profiles/tabs_item' %>
   </ul>
 </script>

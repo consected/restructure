@@ -1,6 +1,33 @@
 # frozen_string_literal: true
 
+#
+# Show user profile page and send resource data on request
+# The resources to be displayed on a page are set within the Admin panel: Page Layouts
+# For testing, create a new Page Layout with the following details:
+#   app type: (all)
+#   use as: User Profile
+#   panel name: user_profile_all
+#   panel label: User Profile
+#   position: 1
+#   yaml options block:
+#      contains:
+#        categories:
+#        resources:
+#         - user_preference
+#
+# Also in Admin: User Access Controls add a new User Access Control:
+#   app type: (all)
+#   user override: <the username you will test with>
+#   resource type: table
+#   resource name: Common Master Tables | user_preferences
+#   access: update
+#
+# You may need to restart the server.
+# This should allow you to view the user profile from the user icon, and see a tab for
+# user preferences.
+#
 class UserProfilesController < UserBaseController
+  helper_method :resources, :resource_names
   #
   # For a full page load, show the landing page for user profile information.
   # If a resource_name param is specified, return the json for that resource
@@ -26,47 +53,67 @@ class UserProfilesController < UserBaseController
       end
 
     elsif request.format == :html
-      @panels = page_layout_panels(layout_name: 'user_profile')
+      @panels = user_profile_panels
       render 'user_profiles/show'
     else
-      render json: { user_profile: resources }
+      render json: { user_profile: resource_data }
     end
   end
 
   private
 
-  #
-  # Get all the resources for this user's profile, using the same mechanism as we identify resources
-  # in views/user_profiles/_resources_panel.html.erb
-  # @return [<Type>] <description>
   def resources
-    return @resources if @resources
+    resource_names.map { |rn| [rn, resource_model(rn.pluralize)] }.to_h
+  end
 
-    @resources = {
+  #
+  # Get all the resource data for this user's profile
+  # @return [<Type>] <description>
+  def resource_data
+    return @resource_data if @resource_data
+
+    @resource_data = {
       user: current_user,
       user_preference: current_user.user_preference
     }
 
-    panel_resource_names.each do |rn|
-      m = resource_model(rn)
+    resource_names.each do |rn|
+      m = resource_model(rn.pluralize)
       next unless m
 
       res = resource_from_model(m)
       res.current_user = current_user
-      @resources[rn.to_sym] = res
+      @resource_data[rn.to_sym] = res
     end
 
-    @resources
+    @resource_data
   end
 
-  def panel_resource_names
-    res = page_layout_panels(layout_name: 'user_profile').first&.contains&.resources
-    unless res
+  def resource_names
+    res = user_profile_panels.map { |p| p.contains&.resources }.reduce([], :concat)
+    unless res.present?
       raise FphsException,
             'No resources defined in user_profiles panel (requires a contains: resources: <list>)'
     end
 
-    res
+    res.select do |resname|
+      current_user.has_access_to?(:access, :table, resname.pluralize)
+    end
+  end
+
+  #
+  # Get panels - since this could represent one for the current app type and one for all app types
+  # (app_type_id is set to nil) then remove items where the panel_name has already been seen
+  def user_profile_panels
+    got_names = {}
+    arr = page_layout_panels(layout_name: 'user_profile').to_a
+    arr.reject! do |a|
+      res = got_names[a.panel_name]
+      got_names[a.panel_name] = true
+      res
+    end
+
+    arr.sort { |a, b| a.panel_position <=> b.panel_position }
   end
 
   def resource_model(valid_rn)
