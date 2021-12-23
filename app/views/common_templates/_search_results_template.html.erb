@@ -173,7 +173,10 @@
     implementation_class = nil
   end
 
-  field_options = extra_options_config&.field_options || {}
+  unless defined? field_options
+    field_options = extra_options_config&.field_options || {}
+  end
+  
   if extra_options_config.respond_to?(:nfs_store) && extra_options_config&.nfs_store
     user_file_actions = extra_options_config&.nfs_store[:user_file_actions] 
   end
