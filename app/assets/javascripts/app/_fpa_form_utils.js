@@ -210,7 +210,8 @@ _fpa.form_utils = {
   setup_select_filtering(block) {
     block.find('[data-select-filtering-target]').not('.done-select-filtering').each(function () {
       var sf = $(this).attr('data-select-filtering-target');
-      var fn = $(this).attr('data-object-name').replace('__', '_');
+      var don = $(this).attr('data-object-name');
+      var fn = don && don.replace('__', '_');
       var curr_el = $(this);
       var val = curr_el.val();
 

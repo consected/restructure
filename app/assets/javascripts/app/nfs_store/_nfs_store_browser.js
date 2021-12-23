@@ -121,7 +121,19 @@ _nfs_store.fs_browser = function ($outer) {
   };
 
   var refresh_browser = function (outer, container_id) {
-    $('.refresh-container-list[data-container-id="' + container_id + '"]').click();
+    var $refresh_btn = $('.refresh-container-list[data-container-id="' + container_id + '"]');
+    // Only allow one refresh every 8 seconds (don't do 10, as this will conflict with the recurring refresh time)
+    // We can't do this on the refresh button itself, since the remote event is not easy to stop
+    var time = (new Date).getTime() / 1000;
+    var dt = $refresh_btn.attr('data-last-click-at');
+    if (dt && time - parseInt(dt) < 8) {
+      var $browse_container = outer.find('.browse-container');
+      // Do reset the refresh counter to zero though, so we wait for this action to finish
+      $browse_container.attr('data-refresh-count', '0')
+      return;
+    }
+
+    $refresh_btn.click();
     refresh(outer);
   };
 
@@ -428,6 +440,8 @@ _nfs_store.fs_browser = function ($outer) {
 
   $(document).on('click', '.refresh-container-list[data-container-id="' + container_id + '"]', function (e) {
     $outer.find('.container-browser').addClass('ajax-running');
+    var time = (new Date).getTime() / 1000;
+    $(this).attr('data-last-click-at', time);
   }).on('change', 'input[name="container-meta-controls-' + container_id + '"]', function (e) {
     set_metadata_views($(this));
   });

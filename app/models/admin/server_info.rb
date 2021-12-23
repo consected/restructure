@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+#
+# Handle server actions such as restarts and showing
+# server settings to admins to assist with identifying issues
 class Admin::ServerInfo
   AppSettingsVars = %w[
     PageTitle EnvironmentName BaseUrl
@@ -13,6 +16,7 @@ class Admin::ServerInfo
     DefaultShortLinkS3Bucket DefaultShortLinkLogS3Bucket LogBucketPrefix ShortcodeLength
     DefaultSubjectInfoTableName DefaultSecondaryInfoTableName DefaultContactInfoTableName DefaultAddressInfoTableName
     ScriptedJobDirectory
+    DisableVDef AllowDynamicMigrations
     AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail
   ].freeze
 

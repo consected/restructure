@@ -2,8 +2,10 @@
 # Requires python
 # pip install aws-mfa-login
 # and aws cli
+# The ~/.aws/config and ~/.aws/credentials should be set up with the appropriate
+# details.
 # Run with
-#   AWS_ACCT_ID=<account id> app-scripts/aws_mfa_set.rb
+#   AWS_PROFILE=<profile name> AWS_ACCT_ID=<account id> app-scripts/aws_mfa_set.rb
 # Copy the exports into your shell
 
 fn = ENV['output_filename']
@@ -12,7 +14,7 @@ aml = `which aws-mfa-login`
 `pip install aws-mfa-login` if !aml || aml == ''
 
 envs = {}
-aws_profile = 'fphsuser-zeus'
+aws_profile = ENV['AWS_PROFILE']
 aws_acct = ENV['AWS_ACCT_ID']
 
 res = `aws sts get-caller-identity | grep "#{aws_acct}"`
