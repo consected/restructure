@@ -85,11 +85,12 @@ class Settings
   # Since passwords have generated upon user creation, we must suppress generating a password
   # with the user (self) registration feature.
   AllowUsersToRegister = (ENV['ALLOW_USERS_TO_REGISTER'].to_s.downcase == 'true')
+  # Admin assigned to newly created user through the user registration feature
   RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'] || AdminEmail
+  # Template user for creating new users. The roles from this user are copied to the new user.
   DefaultUserTemplateEmail = ENV['DEFAULT_USER_TEMPLATE_EMAIL'] || 'registration@template'
 
   # URL to appear on home page for users with login issues to contact
-
   DefaultLoginIssuesUrl = AllowUsersToRegister ? '/users/password/new' : "mailto: #{AdminEmail}?subject=Login%20Issues"
   LoginIssuesUrl = ENV['LOGIN_ISSUES_URL'] || DefaultLoginIssuesUrl
 
