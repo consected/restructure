@@ -37,3 +37,12 @@ To make it easier for app administrators to provision new users, template users 
 Every new *role name* that is created within an app that didn't previously exist, will have an additional entry made with the assigned user `template@template`
 
 This is a template user that allows export of all roles to other servers when using the *App Type* export functionality. In most cases there should be no reason to edit the template definition. An app administrator defining an app may occasionally disable a template entry to ensure that a *role name* that is no longer used will be exported.
+
+## Assignment to App Types
+
+Typically, each definition is assigned to an **App Type**. The current *app type* a user is using selects the appropriate definitions to apply.
+
+A special case allows definitions to have a null *app type*, in which case the definition
+is available to users irrespective of their current *app type* (i.e. in all *app types*).
+
+Unlike other definitions, those assigned to an *app type* and those with a null *app type* are treated the same. Order of precedence is based purely on alphabetic *role name*. Therefore, for roles with a null *app type* it is recommended to use a *role name* starting with '**z**' so that it is clear where in the priority they will fall across all apps.
