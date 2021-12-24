@@ -123,16 +123,15 @@ class Admin::UserRole < Admin::AdminBase
   # Copy roles from one user to another. To avoid confusion, app_type must be specified
   # @param from_user [User] user to copy roles from
   # @param to_user [User] user to copy roles to
-  # @param app_type [Admin::AppType] the app type the roles belong to.
+  # @param app_types [Admin::AppType | Array{Admin::AppType}] the app type(s) the roles belong to.
   # @return [Array] array of Admin::UserRole instances created in the to_user
   def self.copy_user_roles(from_user, to_user, app_types, current_admin)
-
     raise FphsException, 'app_type must be specified and not nil to copy roles' if app_types.blank?
 
     has_roles = Admin::UserRole.active_app_roles to_user, app_type: app_types
     unless has_roles.empty?
       message = app_types.is_a?(Array) ? "#{'s' unless app_types.one?}: #{app_types.join(', ')}" : ": #{app_types}"
-      raise FphsException, "can not copy roles to a user with roles in the following app#{ message }"
+      raise FphsException, "can not copy roles to a user with roles in the following app#{message}"
     end
 
     from_roles = Admin::UserRole.active_app_roles from_user, app_type: app_types
