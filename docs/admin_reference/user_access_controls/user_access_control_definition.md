@@ -39,3 +39,13 @@ Each resource type has different access levels that can be assigned:
 
 - **limited access**
   - **limited** - limits users to master records only if they have the defined resource
+
+## Assignment to App Types
+
+Typically, each definition is assigned to an **App Type**. The current *app type* a user is using selects the appropriate definitions to apply.
+
+A special case allows definitions to have a null *app type*, in which case the definition
+is available to users irrespective of their current *app type* (i.e. in all *app types*). Typically definitions assigned to an *app type* appear ahead of those with a null *app type*. For definitions with matching *role name*, one with an *app type* will override one
+available to all *app types*.
+
+Take care though, since [user roles](../user_roles/role_definition.md#assignment-to-app-types) are handled differently. Those assigned to an *app type* and those with a null *app type* are treated the same. Order of precedence is based purely on alphabetic *role name*. Therefore, for roles with a null *app type* it is recommended to use a *role name* starting with '**z**' so that it is clear where in the priority they will fall across all apps.
