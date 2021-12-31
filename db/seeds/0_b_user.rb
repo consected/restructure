@@ -30,10 +30,10 @@ module Seeds
             template_user.update! disabled: false, current_admin: auto_admin
           else
             template_user = User.create!(email: Settings::DefaultUserTemplateEmail, first_name: 'registration', last_name: 'template', current_admin: auto_admin)
+            # creates the registration template user role
+            app_type = Admin::AppType.find_by(name: 'zeus')
+            Admin::UserRole.add_to_role(template_user, app_type, 'user', auto_admin)
           end
-          # creates the template user role
-          app_type = AppType.find_by(name: '__app__')
-          template_user.user_roles.create!(role_name: 'user', app_type: app_type, admin_id: auto_admin.id)
           log "Ran #{self}.setup"
         end
       end
