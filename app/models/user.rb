@@ -34,12 +34,12 @@ class User < ActiveRecord::Base
 
   validates :first_name,
             presence: {
-              if: -> { allow_users_to_register? }
+              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             }
 
   validates :last_name,
             presence: {
-              if: -> { allow_users_to_register? }
+              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             }
 
   #
@@ -170,7 +170,7 @@ class User < ActiveRecord::Base
 
   # method provided by devise confirmable module; Override so job notifications can be executed
   def send_on_create_confirmation_instructions
-    return unless allow_users_to_register?
+    return if a_template_or_batch_user? || !allow_users_to_register?
 
     generate_confirmation_token! unless @raw_confirmation_token
     Users::Confirmations.notify self
@@ -178,7 +178,7 @@ class User < ActiveRecord::Base
 
   # method provided by devise recoverable module; Override so job notifications can be executed
   def send_reset_password_instructions
-    return unless allow_users_to_register?
+    return if a_template_or_batch_user? || !allow_users_to_register?
 
     token = set_reset_password_token
     options = { reset_password_hash: token }
@@ -187,7 +187,7 @@ class User < ActiveRecord::Base
   end
 
   def resend_confirmation_instructions
-    return unless allow_users_to_register?
+    return if a_template_or_batch_user? || !allow_users_to_register?
 
     generate_confirmation_token! unless @raw_confirmation_token
     Users::Confirmations.notify self
@@ -195,7 +195,7 @@ class User < ActiveRecord::Base
 
   # method provided by devise database_authenticable module; Override so job notifications can be executed
   def send_password_change_notification
-    return unless allow_users_to_register?
+    return if a_template_or_batch_user? || !allow_users_to_register?
 
     Users::PasswordChanged.notify self
   end
@@ -229,4 +229,15 @@ class User < ActiveRecord::Base
   def set_app_type
     self.app_type_id = nil if app_type_id && !app_type_valid?
   end
+
+  def password_required?
+    return false if a_template_or_batch_user?
+
+    super
+  end
+
+  def a_template_or_batch_user?
+    Settings::TemplateUserEmailPattern == "%#{email[email.index('@')..]}" || email == Settings::BatchUserEmail
+  end
+
 end

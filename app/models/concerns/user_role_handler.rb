@@ -23,7 +23,7 @@ module UserRoleHandler
   end
 
   def assign_roles_to_user
-    return unless allow_users_to_register?
+    return if a_template_or_batch_user? || !allow_users_to_register?
 
     template_user = RegistrationHandler.registration_template_user
     template_user_roles = Admin::UserRole.active.where(user: template_user, app_type: Admin::AppType.active.all)
