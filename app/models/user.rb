@@ -29,7 +29,7 @@ class User < ActiveRecord::Base
   belongs_to :app_type, class_name: 'Admin::AppType', optional: true
 
   default_scope -> { order email: :asc }
-  scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPattern) }
+  scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPatternForSQL) }
   before_save :set_app_type
 
   validates :first_name,
@@ -237,7 +237,7 @@ class User < ActiveRecord::Base
   end
 
   def a_template_or_batch_user?
-    Settings::TemplateUserEmailPattern == "%#{email[email.index('@')..]}" || email == Settings::BatchUserEmail
+    email.end_with?(Settings::TemplateUserEmailPattern) || email == Settings::BatchUserEmail
   end
 
 end

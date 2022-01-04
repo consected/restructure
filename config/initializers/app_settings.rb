@@ -120,11 +120,14 @@ class Settings
          end
   OnlyLoadAppTypes = olat
 
-  # A template user is defined to allow user roles to be set up even if no real users are assigned
-  TemplateUserEmail = 'template@template'
   # @template is an email extension to be used to ensure user related configurations are exported
   # and a template is a good way to allow all related roles to be represented, for copying by an admin
-  TemplateUserEmailPattern = '%@template'
+  TemplateUserEmailPattern = '@template'
+  # For the SQL LIKE operator
+  TemplateUserEmailPatternForSQL = "%#{TemplateUserEmailPattern}"
+  # A template user is defined to allow user roles to be set up even if no real users are assigned
+  TemplateUserEmail = "template#{TemplateUserEmailPattern}"
+
   # A dummy role used by all user access controls to allow them to be exported, even if no other
   # roles or users are assigned
   AppTemplateRole = '_app_'
