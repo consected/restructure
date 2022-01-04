@@ -2,11 +2,11 @@
 
 require 'rails_helper'
 
-describe 'user sign in process', js: true, driver: :app_firefox_driver do
+describe 'user sign in process for users that can self register', js: true, driver: :app_firefox_driver do
   include ModelSupport
 
   before(:all) do
-    Settings::AllowUsersToRegister = false
+    Settings::AllowUsersToRegister = true
     Rails.application.reload_routes!
     Rails.application.routes_reloader.reload!
 
@@ -14,12 +14,27 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
 
     Settings::TwoFactorAuthDisabled = false
 
+    create_admin
+
+    # create a template user with some roles
+    @template_user = RegistrationHandler.registration_template_user
+    unless @template_user
+      tue = Settings::DefaultUserTemplateEmail
+      @template_user, = create_user(nil, '', email: tue, with_password: true, no_password_change: true)
+    end
+    at1 = @template_user.app_type_id
+    expect(at1).not_to be nil
+
+    @template_user.user_roles.each { |r| r.update(disabled: true, current_admin: @admin) }
+    @template_user.user_roles.create!(current_admin: @admin, role_name: 'template role 1', app_type_id: at1)
+    @template_user.user_roles.create!(current_admin: @admin, role_name: 'template role 2', app_type_id: at1)
+
     # create a user, then disable it
-    @d_user, @d_pw = create_user(rand(100_000_000..1_099_999_999))
+    @d_user, @d_pw = create_user(rand(100_000_000..1_099_999_999), '', with_password: true, no_password_change: true)
     expect(@d_user).to be_a User
     expect(@d_user.id).to equal @user.id
     @d_email = @d_user.email
-    create_admin
+
     @d_user.current_admin = @admin
     @d_user.send :setup_two_factor_auth
     @d_user.new_two_factor_auth_code = false
@@ -28,8 +43,14 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
     @d_user.save!
     expect(@d_user.active_for_authentication?).to be false
 
-    @user, @good_password = create_user
+    @user, @good_password = create_user(rand(100_000_000..1_099_999_999), '', with_password: true, no_password_change: true)
     @good_email = @user.email
+
+    @user.current_admin = @admin
+    @user.send :setup_two_factor_auth
+    @user.new_two_factor_auth_code = false
+    @user.otp_required_for_login = true
+    @user.save!
   end
 
   it 'should sign in' do
@@ -38,12 +59,14 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
     expect(user.id).to equal @user.id
 
     # login_as @user, scope: :user
+    otp = @user.current_otp
+    expect(otp).not_to be nil
 
     visit '/users/sign_in'
     within '#new_user' do
       fill_in 'Email', with: @good_email
       fill_in 'Password', with: @good_password
-      fill_in 'Two-Factor Authentication Code', with: @user.current_otp
+      fill_in 'Two-Factor Authentication Code', with: otp
       click_button 'Log in'
     end
 
@@ -106,5 +129,6 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
   end
 
   after(:all) do
+    Settings::AllowUsersToRegister = false
   end
 end
