@@ -24,7 +24,7 @@ module UserRoleHandler
 
   #
   # Automatically assign roles from a template user to the newly created user if
-  # we allow users to self register. email.end_with?('@template')
+  # we allow users to self register.
   # When creating template users (email ending '@template') don't do this, since it
   # doesn't allow allow us to create the template user to copy roles from initially.
   def assign_roles_to_new_user
