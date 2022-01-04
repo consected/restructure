@@ -1,10 +1,7 @@
 <div class="col-md-8 col-md-offset-8 well">
 <h2>Change Password for <%= resource_name.to_s.humanize %></h2>
 
- <%
-   path_to_edit = resource_name == 'admin' ? admin_registration_path : user_registration_path
- %>
-<%= form_for(resource, as: resource_name, url: path_to_edit, html: { method: :put })  do |f| %>
+<%= form_for(resource, as: resource_name, url: send("#{resource_name}_registration_path", resource), html: { method: :put })  do |f| %>
   <%= render "devise/shared/error_messages", resource: resource %>
 
   <div class="form-group-non">

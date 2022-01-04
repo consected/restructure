@@ -232,10 +232,10 @@ module StandardAuthentication
 
   # Setup password for new user
   def setup_new_password
-    unless allow_users_to_register?
-      generate_password
-      @forced_password_reset = true
-    end
+    return unless allow_users_to_register?
+
+    generate_password
+    @forced_password_reset = true
   end
 
   # Get the password word blacklist
