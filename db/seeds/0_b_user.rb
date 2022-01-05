@@ -35,7 +35,7 @@ module Seeds
             role_name = 'user'
             Admin::UserRole.add_to_role(template_user, app_type, role_name, auto_admin)
             # TODO: Should creating the UserAccessControl for the registration template user belong here?
-            Admin::UserAccessControl.create!(user: nil, app_type: app_type, resource_type: 'general', resource_name: 'app_type', role_name: role_name, access: :read, current_admin: auto_admin)
+            Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'general', resource_name: 'app_type', role_name: role_name, access: :read, current_admin: auto_admin)
           end
           log "Ran #{self}.setup"
         end
