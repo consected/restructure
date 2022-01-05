@@ -10,6 +10,7 @@ Still having login issues, or have definitely forgotten your password or lost yo
 
 ---
 
+If you were allowed to register as a user without administrator assistance, you should receive a confirmation email with instructions for your first login.
 [Didn't receive confirmation instructions?]({{did_not_receive_confirmation_instructions_url}})
 
 ---

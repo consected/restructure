@@ -94,7 +94,9 @@ class Settings
   DefaultLoginIssuesUrl = AllowUsersToRegister ? '/users/password/new' : "mailto: #{AdminEmail}?subject=Login%20Issues"
   LoginIssuesUrl = ENV['LOGIN_ISSUES_URL'] || DefaultLoginIssuesUrl
 
-  DidntReceiveConfirmationInstructionsUrl = '/users/confirmation/new'
+  # Adding substitutions or conditional verbiage in the markdown files is not supported at this time. Until then,
+  # show the login_issues_url when users are created by administrators.
+  DidntReceiveConfirmationInstructionsUrl = AllowUsersToRegister ? '/users/confirmation/new' : LoginIssuesUrl
 
   # Block to appear at top of login page as a user message
   LoginMessage = ENV['LOGIN_MESSAGE']
