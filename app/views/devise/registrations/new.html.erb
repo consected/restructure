@@ -1,21 +1,21 @@
-<div class="col-md-8 col-md-offset-8 well">
+<div class="devise-block reg-block col-md-8 col-md-offset-8 well">
   <h2>New User Registration</h2>
   <%= form_for(resource, as: resource_name, url: registration_path(resource)) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
 
-    <div class="field">
+    <div class="form-group-non">
       <%= f.label :email %><br />
-      <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
+      <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control" %>
     </div>
 
-    <div class="field">
+    <div class="form-group-non">
       <%= f.label :first_name %><br />
-      <%= f.text_field :first_name %>
+      <%= f.text_field :first_name, class: "form-control" %>
     </div>
 
-    <div class="field">
+    <div class="form-group-non">
       <%= f.label :last_name %><br />
-      <%= f.text_field :last_name %>
+      <%= f.text_field :last_name, class: "form-control" %>
     </div>
 
     <div class="form-group-non">
@@ -30,7 +30,7 @@
 
     <div class="actions">
       <%= f.submit "Sign up", class: "btn btn-primary" %>
-      <%= render "devise/shared/links" %>
     </div>
+    <%= render "devise/shared/links" %>
   <% end %>
 </div>
