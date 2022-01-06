@@ -8,6 +8,10 @@ then
   echo "reset_secret=yes fphs_scripts/add_admin.sh <semicolon separated list of admin users to add or reset passwords>"
   echo The default environment "$RAILS_ENV" or production will be used, unless you set RAILS_ENV=yyy
 else
+  
+  # Setup environment variables
+  export "$(/opt/elasticbeanstalk/bin/get-config --output YAML environment | sed -r 's/: /=/' | xargs)"
+
   if [ -z "$RAILS_ENV" ]
   then
     RAILS_ENV=production
