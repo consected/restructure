@@ -210,7 +210,8 @@ _fpa.form_utils = {
   setup_select_filtering(block) {
     block.find('[data-select-filtering-target]').not('.done-select-filtering').each(function () {
       var sf = $(this).attr('data-select-filtering-target');
-      var fn = $(this).attr('data-object-name').replace('__', '_');
+      var don = $(this).attr('data-object-name');
+      var fn = don && don.replace('__', '_');
       var curr_el = $(this);
       var val = curr_el.val();
 
@@ -862,7 +863,8 @@ _fpa.form_utils = {
     if (block.hasClass('use-secure-view-on-links-setup')) return;
 
     var inner = block.find('a');
-    if (!_fpa.state.user_can.view_files_as_image) {
+    //For admins only, _fpa.state.user_can is undefined.
+    if (_fpa.state.user_can && !_fpa.state.user_can.view_files_as_image) {
       inner = block.find('.use-secure-view-on-links a')
     }
 

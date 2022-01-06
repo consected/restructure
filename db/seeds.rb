@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 # Reinstate this if needed to set up a new server from scratch
-Dir[Rails.root.join('db/seeds/*.rb')].sort.each { |f| Rails.logger.info "requiring: #{f}"; require f }
+Dir[Rails.root.join('db/seeds/*.rb')].sort.each do |f|
+  Rails.logger.info "requiring: #{f}"
+  require f
+end
 module Seeds
   def self.setup
     Rails.logger.info "============ Starting seed setup (#{DateTime.now}) ==============="
@@ -35,7 +38,7 @@ def auto_admin
   # in order to potentially setup or change an admin, it is necessary to set this environment variable
   # since this is only available from command line scripts, not within the server process
   ENV['FPHS_ADMIN_SETUP'] = 'yes'
-  @admin ||= Admin.find_or_create_by email: 'auto-admin@nodomain.com'
+  @admin ||= Admin.find_or_create_by email: Settings::AdminEmail
   @admin.update(disabled: false) if @admin.disabled
   # puts "Admin: #{@admin.inspect}"
   @admin

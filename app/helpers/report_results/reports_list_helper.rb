@@ -19,10 +19,10 @@ module ReportResults
       col_tag = cell.html_tag
       col_content = cell.view_content
 
-      if col_tag.present?
-        col_tag_start = "<#{col_tag} class=\"#{cell.expandable? ? 'expandable' : ''}\">"
-        col_tag_end = "</#{col_tag}>"
-      end
+      col_tag = 'rldata' unless col_tag.present?
+
+      col_tag_start = "<#{col_tag} class=\"#{cell.expandable? ? 'expandable' : ''}\">"
+      col_tag_end = "</#{col_tag}>"
 
       extra_classes = ''
       extra_classes += 'report-el-object-id' if col_name == 'id'
@@ -34,7 +34,7 @@ module ReportResults
 
       header_content = alt_column_header(field_num) || @results.fields[field_num]
       header_content = @view_options.humanize_column_names ? header_content.humanize : header_content
-      if header_content.present?
+      if header_content.present? && !(@view_options.hide_list_labels_for_empty_content && !orig_col_content.present?)
         header_markup = <<~END_HTML
           <span class="report-list-header-item">#{header_content}</span>
         END_HTML

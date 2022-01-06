@@ -173,8 +173,21 @@ Rails.application.routes.draw do
   ExternalIdentifier.routes_load
   ActivityLog.routes_load
 
+  # BEGIN: Users and Admins related routes
   devise_for :admins, skip: [:registrations]
-  devise_for :users, skip: [:registrations]
+
+  if Settings::AllowUsersToRegister
+    devise_for :users,
+               only: %i[sessions confirmations passwords registrations],
+               controllers: { registrations: 'users/registrations' }
+  else
+    devise_for :users,
+               only: %i[sessions]
+    as :user do
+      get '/users/edit' => 'users/registrations#edit', as: :edit_user_registration
+      put '/users' => 'users/registrations#update', as: :user_registration
+    end
+  end
 
   devise_scope :admin do
     get '/admins/show_otp', to: 'devise/registrations#show_otp'
@@ -182,12 +195,20 @@ Rails.application.routes.draw do
   end
 
   devise_scope :user do
-    namespace :users do
-      (resources :registrations, only: %i[new create]) if Settings::AllowUsersToRegister
-    end
     get '/users/show_otp', to: 'devise/registrations#show_otp'
     post '/users/test_otp', to: 'devise/registrations#test_otp'
   end
+
+  as :admin do
+    get 'admins/edit' => 'devise/registrations#edit', :as => 'edit_admin_registration'
+    put 'admins/:id' => 'devise/registrations#update', :as => 'admin_registration'
+    root to: 'pages#index', as: 'authenticated_admin_root'
+  end
+
+  as :user do
+    root to: 'pages#home', as: 'authenticated_user_root'
+  end
+  # END: Users and Admins related routes
 
   # mount NfsStore::Engine, at: "/nfs_store"
   namespace :nfs_store do
@@ -199,21 +220,12 @@ Rails.application.routes.draw do
     end
     resources :chunk, only: %i[create show update]
     post 'downloads/multi', to: 'downloads#multi'
-    resources :downloads, only: %i[show create]
+    resources :downloads, only: %i[show create] do
+      member do
+        get :search_doc
+      end
+    end
     resources :classification, only: %i[edit create]
-  end
-
-  as :admin do
-    get 'admins/edit' => 'devise/registrations#edit', :as => 'edit_admin_registration'
-    put 'admins/:id' => 'devise/registrations#update', :as => 'admin_registration'
-    root to: 'pages#index', as: 'authenticated_admin_root'
-  end
-
-  as :user do
-    get 'users/edit' => 'devise/registrations#edit', :as => 'edit_user_registration'
-    put 'users/:id' => 'devise/registrations#update', :as => 'user_registration'
-
-    root to: 'pages#home', as: 'authenticated_user_root'
   end
 
   get 'child_error_reporter', to: 'application#child_error_reporter'

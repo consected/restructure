@@ -16,6 +16,19 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transfer from ReStructure 8.0.24 - 2021-12-20
+
+- [Added] scripted job script for OCR
+- [Added] logic to avoid too many refreshes on browser
+- [Added] PDF and office doc search (within a single document) in secure view
+- [Changed] scripted job for better job feedback and documentation
+- [Changed] activity log documentation to improve filestore information
+- [Changed] report list functionality to results list view
+- [Fixed] embedded items not updating in activity logs, causing entered data to be lost
+- [Fixed] multiple bugs
+
 ## [8.0.32] - 2021-12-14
 
 - [Added] demo release
@@ -33,6 +46,31 @@ release will be created for any release tested in production, and may be marked 
 - [Changed] rebuild
 
 ## [8.0.27] - 2021-12-03
+
+## [8.0.25] - 2021-12-20
+
+- [Bumped] version
+
+## [8.0.24] - 2021-12-20
+
+### Transfer from Harvard @7.4.94 - 2021-12-16
+
+- [Added] scripted job script for OCR
+- [Added] logic to avoid too many refreshes on browser
+- [Added] PDF and office doc search (within a single document) in secure view
+- [Changed] scripted job for better job feedback and documentation
+- [Changed] activity log documentation to improve filestore information
+- [Changed] report list functionality to results list view
+- [Fixed] embedded items not updating in activity logs, causing entered data to be lost
+- [Fixed] multiple bugs
+
+### Cherrypicked from Project Viva @8.0.30 - 2021-12-07
+
+- [Fixed] scrolling issue with report result lists
+
+## [8.0.24] - 2021-12-20
+
+## [8.0.23] - 2021-12-03
 
 ### Transfer from Harvard @7.4.90 - 2021-12-03
 

@@ -9,7 +9,7 @@
   <div class="report-list" data-results-count="<%=@results.count%>">
     <div>
       <% @results.each_row do |list_item| %>
-        <div class="report-list-result" id="report-item-<%=list_item[0].id_underscore%>">
+        <div class="report-list-result" id="report-item-<%=list_item[0].to_s.id_underscore%>">
           <% if editable? %>
             <div class="report-list-el report-edit-btn-cell"><%= report_edit_btn list_item[0]%> </div>
           <% end %>

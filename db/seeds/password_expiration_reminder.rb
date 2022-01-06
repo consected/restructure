@@ -14,8 +14,6 @@ module Seeds
     end
 
     def self.create_templates
-
-
       values = [
 
         {
@@ -37,7 +35,6 @@ module Seeds
       Rails.logger.info "#{self.name} = #{Admin::MessageTemplate.where(name: 'server password expiration reminder').length}"
 
     end
-
 
     def self.setup
       log "In #{self}.setup"

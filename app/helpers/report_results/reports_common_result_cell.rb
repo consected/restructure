@@ -108,18 +108,20 @@ module ReportResults
       html.html_safe
     end
 
+    #
+    # We expect options to be a Hash or an Array (of [key, value] arrays)
+    # but if it is a String we'll assume it is JSON
     def cell_content_for_options
       return unless cell_content.present?
 
-      # We expect options to be a Hash or an Array (of [key, value] arrays)
-      # but if it is a String we'll assume it is JSON
-      opts = case cell_content
+      opts = cell_content
+      opts = JSON.parse(cell_content) if cell_content.is_a? String
+
+      opts = case opts
              when Hash
-               cell_content
+               opts.to_a
              when Array
-               cell_content
-             when String
-               JSON.parse(cell_content)
+               opts
              end
 
       return cell_content unless opts
@@ -133,22 +135,25 @@ module ReportResults
       end.join('').html_safe
     end
 
+    #
+    # Display a list (array) of either individual values or hashes
+    # We expect options to be an Array, but if it is a String we'll assume it is JSON
     def cell_content_for_list
       return unless cell_content.present?
 
-      # We expect options to be an Array, but if it is a String we'll assume it is JSON
-      list = case cell_content
-             when Array
-               cell_content
-             when String
-               JSON.parse(cell_content)
-             end
+      list = cell_content
+      list = JSON.parse(cell_content) if cell_content.is_a? String
 
-      return cell_content unless list
+      return cell_content unless list.is_a? Array
 
       list.map do |citem|
+        el = if citem.is_a? Hash
+               inner_content_hash citem
+             else
+               html_escape citem
+             end
         <<~END_HTML
-          <li class="report-list-items">#{html_escape citem}</li>
+          <li class="report-list-items">#{el}</li>
         END_HTML
       end.join('').html_safe
     end
@@ -183,6 +188,23 @@ module ReportResults
       html.html_safe
     end
 
+    def cell_content_for_embedded_report
+      return cell_content unless cell_content.present?
+
+      col_url_parts = cell_content&.scan(/^\[(.+)\]\((.+)\)$/)
+      url = col_url_parts&.first&.last
+      url = if url.include? '?'
+              "#{url}&embed=true"
+            else
+              "#{url}?embed=true"
+            end
+      html = <<~END_HTML
+        <a href="#{url}" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true">#{html_escape col_url_parts&.first&.first}</a>
+      END_HTML
+
+      html.html_safe
+    end
+
     #
     # Show the result as a the label from a choice, such as a general selection or the alt_options in a dynamic model
     # @todo Refactor this
@@ -205,6 +227,36 @@ module ReportResults
       html = <<~END_HTML
         <ul class="report-result-cell-tags">
           #{lis}
+        </ul>
+      END_HTML
+
+      html.html_safe
+    end
+
+    def cell_content_for_markdown
+      return cell_content unless cell_content.present?
+
+      Kramdown::Document.new(cell_content).to_html.html_safe
+    end
+
+    private
+
+    def inner_content_hash(content)
+      return unless content
+
+      html = content.map do |k, v|
+        <<~END_HTML
+          <li class="report-inner-hash-item">
+            <strong>#{html_escape k}</strong>&nbsp;<span>#{html_escape v}</span>
+          </li>
+        END_HTML
+      end
+
+      html = html.join('').html_safe
+
+      html = <<~END_HTML
+        <ul class="report-inner-hash">
+          #{html}
         </ul>
       END_HTML
 

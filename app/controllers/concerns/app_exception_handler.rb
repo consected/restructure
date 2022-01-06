@@ -29,14 +29,17 @@ module AppExceptionHandler
   #
   # General method for showing errors, either as plain text or as an error page
   def show_error(title, status, text: nil, flash_level: nil)
-    text = text[0..2000] if text
+    text = text.to_s[0..2000] if text
+
     flash_level ||= :danger
     flash[flash_level] = title
     if request.format == :html
       @error_title = title
       render 'layouts/error_page', status: status, locals: { text: text }
     else
-      render plain: title, status: status
+      msg = title
+      msg = "#{title} - #{text}" if text
+      render plain: msg, status: status
     end
   end
 
