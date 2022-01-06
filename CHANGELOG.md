@@ -18,6 +18,8 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Added] user self-registration, email confirmation and password reset
+
 ### Transfer from ReStructure 8.0.24 - 2021-12-20
 
 - [Added] scripted job script for OCR
