@@ -246,7 +246,7 @@ _fpa = {
         // due to runtime model references returning results with different template versions
         if (data_item) {
           var did = url_data_type + '/' + data_item.id;
-          if (_fpa.state.template_config_versions[did]) continue;
+          if (_fpa.state.template_config_versions[did] || !data_item.id) continue;
 
           _fpa.state.template_config_versions[did] = true;
           list_data_item_state_ids.push(did);
@@ -1028,6 +1028,9 @@ _fpa = {
         riomc.parents('.common-template-item').last().find('a.refresh-item').click();
         riomc.removeClass('refresh-item-on-modal-close');
       }
+      $('body').removeClass('table-results');
+      $('html').css({ overflow: 'auto' });
+      _fpa.reports.reset_window_scrolling();
     });
 
     pm.modal('show');

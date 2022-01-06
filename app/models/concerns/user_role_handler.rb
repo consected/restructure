@@ -13,7 +13,7 @@ module UserRoleHandler
 
     after_save :clear_assoc_cache
 
-    after_create :assign_roles_to_user
+    after_create :assign_roles_to_new_user
   end
 
   def clear_assoc_cache
@@ -22,8 +22,13 @@ module UserRoleHandler
     clear_role_names!
   end
 
-  def assign_roles_to_user
-    return unless allow_users_to_register?
+  #
+  # Automatically assign roles from a template user to the newly created user if
+  # we allow users to self register.
+  # When creating template users (email ending '@template') don't do this, since it
+  # doesn't allow allow us to create the template user to copy roles from initially.
+  def assign_roles_to_new_user
+    return if a_template_or_batch_user? || !allow_users_to_register?
 
     template_user = RegistrationHandler.registration_template_user
     template_user_roles = Admin::UserRole.active.where(user: template_user, app_type: Admin::AppType.active.all)
