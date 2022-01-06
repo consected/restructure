@@ -65,7 +65,7 @@ var SecureViewAppSpecific = function () {
   this.show_search_panel = function () {
     this.secure_view.$search_panel.addClass('sv-search-panel').animate({ width: '250px' });
     this.secure_view.$search_results.html('');
-    this.secure_view.$search_form.find('[name="search_string"]').val('');
+    this.secure_view.$search_form.find('[name="search_string"]').val('').focus();
   }
 
   this.close_search_panel = function () {

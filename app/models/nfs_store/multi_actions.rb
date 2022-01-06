@@ -15,7 +15,9 @@ module NfsStore
 
     before_validation :store_action_items
 
-    attr_accessor :retrieval_type, :selected_items, :multiple_items, :zip_file_path, :all_action_items, :file_metadata, :activity_log
+    attr_accessor :retrieval_type, :selected_items, :multiple_items, :zip_file_path, :all_action_items, :file_metadata,
+                  :activity_log
+
     alias_attribute :container_id, :nfs_store_container_id
     alias_attribute :container_ids, :nfs_store_container_ids
 
@@ -61,8 +63,10 @@ module NfsStore
       # multi container download, otherwise it will be ignored
       selected_items.each do |s|
         container = self.container || Browse.open_container(id: s[:container_id], user: current_user)
-        activity_log = self.activity_log || ActivityLog.open_activity_log(s[:activity_log_type], s[:activity_log_id], current_user)
-        retrieve_file_from(s[:id], s[:retrieval_type], container: container, activity_log: activity_log, for_action: for_action)
+        activity_log = self.activity_log || ActivityLog.open_activity_log(s[:activity_log_type], s[:activity_log_id],
+                                                                          current_user)
+        retrieve_file_from(s[:id], s[:retrieval_type], container: container, activity_log: activity_log,
+                                                       for_action: for_action)
       end
     end
 
@@ -76,38 +80,45 @@ module NfsStore
     end
 
     # Retrieve a file of a specific type (stored file or archived file) from a container
-    # @param id [Integer] the ID of the object
-    # @param retrieval_type [Symbol] the type of object referencing the file
-    # @param container [NfsStore::Manage::Container | nil] optionally provide a container to support multi container downloads
+    # @param [Integer] id the ID of the object
+    # @param [Symbol] retrieval_type the type of object referencing the file
+    # @param [String | Symbol] for_action: required to check if the user has access to perform the action
+    #                          ... but see force below
+    # @param [NfsStore::Manage::Container | nil] container optionally provide a container to support
+    #                                                      multi container downloads
+    # @param [ActivityLog] activity_log: should be provided if the container belongs to one
+    # @param [true | nil] force: don't check if user can perform the action, do it anyway
     # @return [String] filesystem path to the file to be retrieved
-    def retrieve_file_from(id, retrieval_type, container: nil, activity_log: nil, for_action:)
+    def retrieve_file_from(id, retrieval_type, for_action:, container: nil, activity_log: nil, force: nil)
       container ||= self.container
       activity_log ||= self.activity_log
 
       unless container.allows_current_user_access_to? :access
         raise FsException::NoAccess, 'user does not have access to this container'
       end
-      unless container.send("can_#{for_action}?")
+
+      unless force || container.send("can_#{for_action}?")
         raise FsException::NoAccess, "user is not authorized to #{for_action.to_s.humanize}"
       end
 
       unless activity_log
         res = ModelReference.find_where_referenced_from(container).first
         if res
-          raise FsException::NoAccess, 'Attempting to browse a container that is referenced by activity logs, without specifying which one'
+          raise FsException::NoAccess,
+                'Attempting to browse a container that is referenced by activity logs, without specifying which one'
         end
       end
 
       item_for_filter = activity_log || container
-
-      filtered_files = filtered_files_as_scopes item_for_filter
+      filtered_files = filtered_files_as_scopes(item_for_filter)
 
       raise FsException::Download, 'No file filters are configured.' unless filtered_files
 
-      if retrieval_type == :stored_file
-        retrieved_file = filtered_files[:stored_files].select { |f| f.id == id }.first
-      elsif retrieval_type == :archived_file
-        retrieved_file = filtered_files[:archived_files].select { |f| f.id == id }.first
+      case retrieval_type
+      when :stored_file
+        retrieved_file = filtered_files[:stored_files].find { |f| f.id == id }
+      when :archived_file
+        retrieved_file = filtered_files[:archived_files].find { |f| f.id == id }
       else
         raise FsException::Download, "Invalid retrieval type requested for download: #{retrieval_type}"
       end

@@ -92,7 +92,7 @@ module NfsStore
       @download_id = params[:download_id].to_i
       retrieval_type = params[:retrieval_type]
       search_string = params[:search_string]
-      path = retrieve_file(@download_id, retrieval_type)
+      path = retrieve_file(@download_id, retrieval_type, force: true)
 
       retrieved_file = secure_view_setup_previewer(path, view_as: 'pdf')
       raise FsException::NotFound, 'Requested file not found' unless retrieved_file
@@ -209,8 +209,9 @@ module NfsStore
     # @param [Integer] download_id
     # @param retrieval_type [Symbol] the type of object referencing the file
     # @param [Symbol] for_action :download (default) or :download_view
+    # @param [true | nil] force: skip checking if a user has general user access control to download
     # @return [String] filesystem path to the file to be retrieved
-    def retrieve_file(download_id, retrieval_type, for_action: :download)
+    def retrieve_file(download_id, retrieval_type, for_action: :download, force: nil)
       raise FsException::Download, 'id invalid' unless download_id > 0
       raise FsException::Download, 'retrieval_type invalid' unless retrieval_type.present?
 
@@ -223,7 +224,7 @@ module NfsStore
       @download = Download.new container: @container, activity_log: @activity_log
       @master = @container.master
       @id = @container.id
-      @download.retrieve_file_from download_id, retrieval_type, for_action: for_action
+      @download.retrieve_file_from download_id, retrieval_type, for_action: for_action, force: force
     end
   end
 end

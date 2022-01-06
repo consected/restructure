@@ -48,8 +48,12 @@ module SecureView
     # @param [Integer] guide to the number of results to return. This is not exact.
     # @yield [Stdout] a streamed stdout from the pdfgrep program
     def search(search_string, max_count: 210, &block)
+      return if search_string.blank?
+
+      self.class.check_pdfgrep_exists!
+
       max_count = max_count.to_i.to_s
-      cmd = ['pdfgrep', '-i', '--max-count', max_count, '-n', '-F', search_string, path]
+      cmd = [SecureView::Config.pdfgrep_path, '-i', '--max-count', max_count, '-n', '-F', search_string, path]
       IO.popen(cmd, &block)
     end
   end

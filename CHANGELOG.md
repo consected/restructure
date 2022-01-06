@@ -15,9 +15,20 @@ In short this means that version numbers, visible here and on the login page of 
 app match, and have a predictable format indicating how much change from the previous
 version has occurred.
 
-The **Unreleased** section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
+The `## [7.4.94] - 2021-12-17` section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
-## [7.4.90] - 2021-12-03
+## [7.4.94] - 2021-12-16
+
+- [Added] scripted job script for OCR
+- [Changed] scripted job for better job feedback and documentation
+- [Changed] activity log documentation to improve filestore information
+- [Added] logic to avoid too many refreshes on browser
+
+## [7.4.93] - 2021-12-16
+
+- [Fixed] multiple bugs
+
+## [7.4.91] - 2021-12-03
 
 - [Added] PDF and office doc search (within a single document) in secure view
 - [Changed] report list functionality to results list view

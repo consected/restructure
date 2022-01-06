@@ -64,9 +64,8 @@ module NfsStore
         self.success = do_cmd(cmd)
 
         unless success
+          Rails.logger.warn "run_script failed: #{cmd}"
           raise FphsException, 'run_script failed' unless fail_silently
-
-          Rails.logger.info "run_script failed: #{cmd}"
         end
 
         handle_results
@@ -84,22 +83,25 @@ module NfsStore
       def do_cmd(cmd)
         res = nil
         self.result = nil
+        Rails.logger.info "Running scripted job command: #{cmd}"
         IO.popen(cmd) do |stdinout|
           Timeout.timeout(timeout) do
             res = stdinout.read
           end
         rescue Timeout::Error
           ::Process.kill 9, stdinout.pid
-          Rails.logger.warn "Process popen timed out: #{cmd}"
+          Rails.logger.warn "Process popen timed out (#{timeout} sec): #{cmd}"
         end
-
-        exit_res = !!$?.success?
+        rescode = $?
+        exit_res = !!rescode.success?
 
         if exit_res && res
           # Split the results, remove nils and set to nil if the result is empty
           res = res.split("\n").compact
           res = nil if res.empty?
           self.result = res
+        else
+          Rails.logger.warn "Failed scripted job with error code: #{rescode}"
         end
 
         exit_res
