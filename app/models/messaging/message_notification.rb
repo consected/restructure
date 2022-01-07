@@ -463,7 +463,7 @@ module Messaging
       if list_item&.send_status == Messaging::NotificationSms::BadFormatMsg
         logger.info 'Recipient in list had bad format phone number. Will not attempt to resend'
       elsif list_item&.send_status == 'success'
-        logger.info 'Recipient in list was already succesfully sent. Will not resend'
+        logger.info 'Recipient in list was already successfully sent. Will not resend'
       elsif !list_item&.can_retry?
         logger.info 'Recipient previously failed but can not retry'
       elsif list_item&.send_status == 'sent'
