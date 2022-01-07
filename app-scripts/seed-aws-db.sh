@@ -28,4 +28,5 @@ FPHS_POSTGRESQL_PORT=5432 \
 FPHS_RAILS_SECRET_KEY_BASE=temprake1238761826381263ksjafhkjahkjfhjkshfahasjkrywuieryiweh \
 FPHS_RAILS_DEVISE_SECRET_KEY=temprake1238761826381263ksjafhkjahkjfhjkshfahasjkrywuieryiweh \
 FPHS_POSTGRESQL_PASSWORD="$TEMP_DB_PW" \
+FPHS_LOAD_APP_TYPES=1 \
 rake db:seed
