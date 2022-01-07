@@ -2,6 +2,8 @@
 <html>
 <head>
   <title><%= Settings::PageTitle %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <%= stylesheet_link_tag    'application', media: 'all' %>
   <% if current_user&.app_type&.name
        fn = "app_#{current_user.app_type.name.id_underscore}.css"

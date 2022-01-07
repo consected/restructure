@@ -1,4 +1,4 @@
-@import "../app_vars";
+@import '../app_vars';
 
 span.disabled,
 a.disabled {
@@ -201,7 +201,7 @@ span.heading-rank {
   font-style: italic;
 
   &:before {
-    content: "rank";
+    content: 'rank';
     padding-right: 6px;
     padding-left: 12px;
   }
@@ -228,7 +228,7 @@ li.list-group-item.is-combo small {
 .item-flags-block {
   margin-top: 8px;
 
-  a[title="cancel"] {
+  a[title='cancel'] {
     margin-top: 0.5em;
     margin-left: 1.3em;
   }
@@ -270,7 +270,7 @@ a.glyphicon.edit-entity.edit-tracker {
 
   &:before {
     color: #55f;
-    content: "loading...";
+    content: 'loading...';
   }
 }
 
@@ -279,7 +279,7 @@ a.glyphicon.edit-entity.edit-tracker {
 
   &:before {
     color: gray;
-    content: "canceled";
+    content: 'canceled';
   }
 }
 
@@ -301,12 +301,12 @@ a.glyphicon.edit-entity.edit-tracker {
 }
 
 .nav-pills.details-tabs > li > a {
-  color: rgb(46, 109, 164);
+  color: var(--link-color);
   border: 0;
   border-radius: 0;
   margin: 0 4px;
   background-color: $master_header_bg;
-  border-bottom: 3px solid rgb(51, 122, 183);
+  border-bottom: 3px solid var(--bottom-grad-color);
 
   &.collapsed,
   &.dropdown-toggle {
@@ -319,7 +319,7 @@ form.new_tracker {
   .form-group {
     text-align: right;
 
-    input[type="submit"] {
+    input[type='submit'] {
       margin-right: 1.67em;
     }
   }
@@ -361,11 +361,11 @@ table.table.tablesorter > thead > tr > th {
   }
 }
 table.table.tablesorter > thead > tr > th.tablesorter-header:after {
-  content: "\e150";
+  content: '\e150';
   position: absolute;
   bottom: 3px;
   display: inline-block;
-  font-family: "Glyphicons Halflings";
+  font-family: 'Glyphicons Halflings';
   font-style: normal;
   font-weight: 400;
   line-height: 1;
@@ -378,7 +378,7 @@ table.table.tablesorter > thead > tr > th.tablesorter-header:after {
 
 .collapsed span.badge {
   background-color: white;
-  color: #2e6da4;
+  color: var(--project-color);
 }
 
 .record-meta {
@@ -407,13 +407,13 @@ td .record-meta {
     table-layout: fixed;
 }*/
 
-tbody[data-tracker-protocol="study"] td,
-tr[data-tracker-protocol="study"] td {
+tbody[data-tracker-protocol='study'] td,
+tr[data-tracker-protocol='study'] td {
   background-color: #f4d9c0;
 }
 
-tbody[data-tracker-protocol="alerts"] td,
-tr[data-tracker-protocol="alerts"] td {
+tbody[data-tracker-protocol='alerts'] td,
+tr[data-tracker-protocol='alerts'] td {
   background-color: rgb(255, 172, 160);
 
   &.tracker-record-meta .record-meta,
@@ -454,8 +454,8 @@ tr[data-tracker-protocol="alerts"] td {
 }
 
 table.tracker-tree-results {
-  tbody[data-tracker-history-items="1"][data-tracker-protocol=""],
-  tr[data-tracker-history-items="1"][data-tracker-protocol=""] {
+  tbody[data-tracker-history-items='1'][data-tracker-protocol=''],
+  tr[data-tracker-history-items='1'][data-tracker-protocol=''] {
     display: none;
   }
 }
@@ -464,17 +464,17 @@ table.tracker-tree-results,
 table.tracker-chron-results {
   border: $card_border;
 
-  tbody[data-tracker-protocol=""],
-  tr[data-tracker-protocol=""] {
+  tbody[data-tracker-protocol=''],
+  tr[data-tracker-protocol=''] {
     td.tracker-protocol_name:before,
     td.tracker-history-protocol_name:before {
-      content: "(not selected)";
+      content: '(not selected)';
       color: #777;
       font-size: 95%;
     }
   }
-  tbody[data-tracker-protocol="updates"],
-  tr[data-tracker-protocol="updates"] {
+  tbody[data-tracker-protocol='updates'],
+  tr[data-tracker-protocol='updates'] {
     div.cell-holder {
       color: #999;
     }
@@ -538,7 +538,7 @@ table.tracker-chron-results {
 .label.player-info-12,
 .label.general-rank-10,
 .label.address-10 {
-  background-color: #2e6da4;
+  background-color: var(--project-color);
 }
 .label.player-info-badge--1,
 .label.player-info--1,
@@ -583,7 +583,7 @@ li.list-group-item.pro-info-pro_id {
   background-color: inherit;
 }
 
-a[data-toggle="scrollto-target"]:hover {
+a[data-toggle='scrollto-target']:hover {
   cursor: pointer;
 }
 
@@ -613,13 +613,13 @@ li.list-group-item.address-country strong {
   text-transform: uppercase;
 }
 
-ul[data-address-is-us="true"] {
+ul[data-address-is-us='true'] {
   li.list-group-item.address-region,
   li.list-group-item.address-postal_code {
     display: none;
   }
 }
-ul[data-address-is-us="false"] {
+ul[data-address-is-us='false'] {
   li.list-group-item.address-state_name,
   li.list-group-item.address-zip {
     display: none;
@@ -678,7 +678,7 @@ strong {
     border-radius: 0;
   }
   &.notes-empty .notes-text:before {
-    content: "nothing entered";
+    content: 'nothing entered';
     color: #999;
   }
 }
@@ -719,7 +719,7 @@ div.external-links {
   }
 }
 
-div[data-sub-list="sage_assignments"] .sage-assignment-item:nth-of-type(1) {
+div[data-sub-list='sage_assignments'] .sage-assignment-item:nth-of-type(1) {
   opacity: 1;
 }
 
@@ -933,12 +933,12 @@ li.list-group-item.is_external_id_item {
   }
 }
 
-.common-template-item[data-rec-type="phone"] .list-group-item-heading::before {
-  content: "\e145";
+.common-template-item[data-rec-type='phone'] .list-group-item-heading::before {
+  content: '\e145';
   position: relative;
   top: 2px;
   display: inline-block;
-  font-family: "Glyphicons Halflings";
+  font-family: 'Glyphicons Halflings';
   font-style: normal;
   font-weight: 400;
   line-height: 1;
@@ -948,13 +948,13 @@ li.list-group-item.is_external_id_item {
   color: #929191;
 }
 
-.common-template-item[data-rec-type="email"] {
+.common-template-item[data-rec-type='email'] {
   .list-group-item-heading {
     font-size: 16px;
   }
 
   .list-group-item-heading::before {
-    content: "@";
+    content: '@';
     margin-right: 4px;
     vertical-align: baseline;
     font-size: 87%;
@@ -983,7 +983,7 @@ li.list-group-item.is_external_id_item {
     white-space: nowrap;
 
     a::before {
-      content: "\e137";
+      content: '\e137';
       width: 10px;
       display: inline-block;
       float: none;
@@ -994,13 +994,13 @@ li.list-group-item.is_external_id_item {
       position: relative;
       top: 7px;
       display: inline-block;
-      font-family: "Glyphicons Halflings";
+      font-family: 'Glyphicons Halflings';
       font-style: normal;
       font-weight: 400;
       line-height: 1;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      color: rgb(51, 122, 183);
+      color: var(--bottom-grad-color);
     }
   }
 }
