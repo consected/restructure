@@ -38,9 +38,9 @@ tr.report-auto {
     color: #09c;
   }
   &:hover:after {
-    content: "\e066";
+    content: '\e066';
     display: inline-block;
-    font-family: "Glyphicons Halflings";
+    font-family: 'Glyphicons Halflings';
     font-size: 80%;
     padding-left: 0.4em;
     margin-right: -1.6em;
@@ -108,7 +108,7 @@ p.small.report-table-name {
   min-width: 100px;
   text-align: left;
 
-  input[type="submit"] {
+  input[type='submit'] {
     margin-bottom: 4px;
   }
 
@@ -147,9 +147,9 @@ p.small.report-table-name {
   }
 }
 
-td[data-col-type^="perform action:"],
-td[data-col-type^="select items:"],
-td[data-col-type^="search_reports_"] {
+td[data-col-type^='perform action:'],
+td[data-col-type^='select items:'],
+td[data-col-type^='search_reports_'] {
   color: rgba(255, 255, 255, 0);
   -webkit-animation: working 1s ease-in-out infinite;
   -moz-animation: working 1s ease-in-out infinite;
@@ -157,7 +157,7 @@ td[data-col-type^="search_reports_"] {
 
   &:before {
     color: silver;
-    content: "loading...";
+    content: 'loading...';
   }
 
   &.attached_report_search,
@@ -168,7 +168,7 @@ td[data-col-type^="search_reports_"] {
     animation: none;
     color: inherit;
     &:before {
-      content: "";
+      content: '';
     }
   }
 }
@@ -234,12 +234,12 @@ textarea.admin-clean-sql {
 }
 
 .glyphicon {
-  font-family: "Glyphicons Halflings" !important;
+  font-family: 'Glyphicons Halflings' !important;
 }
 
 .report-column-comment {
   font-weight: normal;
-  font-family: "Courier New", monospace;
+  font-family: 'Courier New', monospace;
   font-size: 13px;
 }
 
@@ -286,9 +286,14 @@ th.has-comment {
   // background-color: #eee;
 }
 
-table.table.report-table td pre.expanded {
-  width: 100%;
-  overflow-x: auto;
+table.table.report-table {
+  td pre.expanded {
+    width: 100%;
+    overflow-x: auto;
+  }
+  td[data-col-var-type='Array'] > ul {
+    padding-inline-start: 16px;
+  }
 }
 
 table .report-cb-inner {
