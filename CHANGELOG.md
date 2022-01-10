@@ -16,6 +16,14 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## [8.0.37] - 2022-01-11
+
+- [Added] ability to specify multiple checkboxes in report select items
+- [Fixed] bug by supressing notification  when the admins change their passwords
+- [Updated] css for mobile responsiveness, css vars and app styles
+- [Updated] document library to correctly link to source repository
+- [Updated] admin scripts to improve server configuration
+
 ## [8.0.35] - 2022-01-06
 
 - [Bumped] version
