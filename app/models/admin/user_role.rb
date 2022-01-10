@@ -78,7 +78,12 @@ class Admin::UserRole < Admin::AdminBase
     items = {}
     res.each do |role|
       m = role.app_type
-      n = "#{m.id}/#{m.name}"
+      n = if m
+            "#{m.id}/#{m.name}"
+          else
+            '/'
+          end
+
       items[n] ||= []
       items[n] << role.role_name unless items[n].include? role.role_name
     end
