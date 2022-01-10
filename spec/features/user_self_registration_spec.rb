@@ -22,6 +22,13 @@ describe 'user sign in process for users that can self register', js: true, driv
       tue = Settings::DefaultUserTemplateEmail
       @template_user, = create_user(nil, '', email: tue, with_password: true, no_password_change: true)
     end
+
+    unless @template_user.app_type_id
+      @template_user.app_type_id = Admin::AppType.all_ids_available_to(@template_user).first
+      @template_user.current_admin = @admin
+      @template_user.save!
+    end
+
     at1 = @template_user.app_type_id
     expect(at1).not_to be nil
 
