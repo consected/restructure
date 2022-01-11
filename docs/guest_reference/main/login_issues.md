@@ -15,3 +15,4 @@ If you were allowed to register as a user without administrator assistance, you 
 
 ---
 
+Need help? Contact the app administrator: [{{admin_email}}](mailto:{{admin_email}})
