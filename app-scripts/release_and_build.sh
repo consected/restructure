@@ -3,6 +3,11 @@
 echo "Starting release and build"
 CURRDIR="$(pwd)"
 
+if [ "$1" == 'clean' ]; then
+  build_arg='clean'
+  echo 'Cleaning up old container and rebuilding it from scratch'
+fi
+
 export GIT_MERGE_AUTOEDIT=no
 
 FROM_BRANCH=${FROM_BRANCH:=develop}
@@ -88,7 +93,7 @@ git checkout ${FROM_BRANCH}
 
 echo "Starting build container"
 cd ../restructure-build
-./build.sh
+./build.sh ${build_arg}
 if [ $? != 0 ]; then
   echo "***** build.sh failed with exit code $? *****"
   exit 101
