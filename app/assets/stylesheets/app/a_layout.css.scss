@@ -1,4 +1,4 @@
-@import "../app_vars";
+@import '../app_vars';
 
 html {
   min-height: 100%;
@@ -29,7 +29,7 @@ body#body-top {
   opacity: 0.2;
 
   &:after {
-    content: "loading...";
+    content: 'loading...';
     display: block;
     position: fixed;
     top: 45vh;
@@ -166,11 +166,11 @@ a:hover {
   cursor: pointer;
 }
 
-a[disabled="disabled"] {
+a[disabled='disabled'] {
   cursor: not-allowed;
 }
 
-a[data-toggle-caret][disabled="disabled"] {
+a[data-toggle-caret][disabled='disabled'] {
   cursor: pointer;
 }
 
@@ -178,11 +178,11 @@ a.open-in-new-window {
   white-space: nowrap;
 }
 a.open-in-new-window:after {
-  content: "\e066";
+  content: '\e066';
   position: relative;
   top: 1px;
   display: inline-block;
-  font-family: "Glyphicons Halflings";
+  font-family: 'Glyphicons Halflings';
   font-style: normal;
   font-weight: 400;
   line-height: 1;
@@ -338,12 +338,12 @@ a.glyphicon.glyphicon-remove-sign {
   li {
     > a {
       background-color: white;
-      color: #2e6da4;
+      color: var(--project-color);
       border: 1px solid $master_header_bg;
     }
     > a.collapsed {
       background-color: $master_header_bg;
-      color: #2e6da4;
+      color: var(--project-color);
     }
     > a > .caret,
     &.dropdown.open .caret {
@@ -490,21 +490,21 @@ div.ajax-running {
   display: initial;
 }
 
-a[data-toggle="collapse"] {
+a[data-toggle='collapse'] {
   outline: 0;
 }
-a[data-toggle="collapse"].master-expander {
-  color: #2b669a;
+a[data-toggle='collapse'].master-expander {
+  color: var(--link-darker-color);
 }
-a[data-toggle="collapse"]:hover {
-  color: #770000;
+a[data-toggle='collapse']:hover {
+  color: var(--link-hover-darker-color);
 }
-a[data-toggle="collapse"]:active,
-a[data-toggle="collapse"]:focus {
-  color: #2b669a;
+a[data-toggle='collapse']:active,
+a[data-toggle='collapse']:focus {
+  color: var(--link-darker-color);
 }
 
-a[data-toggle="collapse"].master-expander.collapsed {
+a[data-toggle='collapse'].master-expander.collapsed {
   color: #333;
 }
 
