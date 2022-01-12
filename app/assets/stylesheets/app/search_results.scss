@@ -301,12 +301,12 @@ a.glyphicon.edit-entity.edit-tracker {
 }
 
 .nav-pills.details-tabs > li > a {
-  color: rgb(46, 109, 164);
+  color: var(--link-color);
   border: 0;
   border-radius: 0;
   margin: 0 4px;
   background-color: $master_header_bg;
-  border-bottom: 3px solid rgb(51, 122, 183);
+  border-bottom: 3px solid var(--bottom-grad-color);
 
   &.collapsed,
   &.dropdown-toggle {
@@ -378,7 +378,7 @@ table.table.tablesorter > thead > tr > th.tablesorter-header:after {
 
 .collapsed span.badge {
   background-color: white;
-  color: #2e6da4;
+  color: var(--project-color);
 }
 
 .record-meta {
@@ -538,7 +538,7 @@ table.tracker-chron-results {
 .label.player-info-12,
 .label.general-rank-10,
 .label.address-10 {
-  background-color: #2e6da4;
+  background-color: var(--project-color);
 }
 .label.player-info-badge--1,
 .label.player-info--1,
@@ -1000,7 +1000,7 @@ li.list-group-item.is_external_id_item {
       line-height: 1;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      color: rgb(51, 122, 183);
+      color: var(--bottom-grad-color);
     }
   }
 }

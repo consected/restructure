@@ -286,9 +286,14 @@ th.has-comment {
   // background-color: #eee;
 }
 
-table.table.report-table td pre.expanded {
-  width: 100%;
-  overflow-x: auto;
+table.table.report-table {
+  td pre.expanded {
+    width: 100%;
+    overflow-x: auto;
+  }
+  td[data-col-var-type="Array"] > ul {
+    padding-inline-start: 16px;
+  }
 }
 
 table .report-cb-inner {
@@ -299,4 +304,9 @@ table .report-cb-inner {
   height: 27px;
   width: 27px;
   padding: 4px 0;
+}
+
+.report-sel-item-ind label {
+  display: inline-block;
+  margin-left: 0.8em;
 }

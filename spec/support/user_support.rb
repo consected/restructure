@@ -9,17 +9,26 @@ module UserSupport
 
     part ||= Time.new.to_f.to_s
     good_email = opt[:email] || gen_username("#{part}-#{extra}-")
-
     admin, = @admin || create_admin
-    user = User.create! email: good_email, current_admin: admin, first_name: "fn#{part}", last_name: "ln#{part}"
+
+    attr = {
+      email: good_email, current_admin: admin, first_name: "fn#{part}", last_name: "ln#{part}"
+    }
+
+    good_password = attr[:password] = Devise.friendly_token(30) if opt[:with_password]
+
+    user = User.create! attr
 
     # Save a new password, as required to handle temp passwords
-    user = User.find(user.id)
-    user.current_admin = admin
-    good_password = user.generate_password
-    user.otp_required_for_login = true
-    user.new_two_factor_auth_code = false
-    user.save!
+    unless opt[:no_password_change]
+      user = User.find(user.id)
+      user.current_admin = admin
+      good_password = user.generate_password
+      user.otp_required_for_login = true
+      user.new_two_factor_auth_code = false
+      user.save!
+    end
+
     @user_authentication_token = user.authentication_token
 
     # # Can't reload, as that doesn't clear non-db attributes

@@ -17,6 +17,19 @@ version has occurred.
 
 The `## [7.4.94] - 2021-12-17` section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## Unreleased
+
+### Transferred from ReStructure @8.0.26
+
+- [Added] user self-registration, email confirmation and password reset
+- [Changed] release script to allow clean container to be requested
+- [Changed] change_user_roles trigger to allow app_type to be specified
+- [Changed] ability to specify multiple checkboxes in report select items
+- [Changed] css for mobile responsiveness, css vars and app styles
+- [Changed] document library to correctly link to source repository
+- [Changed] admin scripts to improve server configuration
+- [Fixed] issue with active app types when specified with env var, since it returned an array not a scope
+
 ## [7.4.94] - 2021-12-16
 
 - [Added] scripted job script for OCR

@@ -6,7 +6,7 @@
 @auto_submitter_class = !@report_page ? 'auto-submitter' : ''
 @auto_run_class = !@report_page && @report.auto ? 'auto-run' : ''
 %>
-<div>
+<div class="report-criteria-fields-block">
   <%= form_tag report_path(@report.id), 
         method: :get, 
         class: 'form-formatted search_report', 

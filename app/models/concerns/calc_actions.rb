@@ -43,7 +43,9 @@ module CalcActions
   ValidExtraConditions = (BinaryConditions + UnaryConditions).freeze
   ValidExtraConditionsArrays = [
     '= ANY', # The value of this field (must be scalar) matches any value from the retrieved array field
+    '= ANY REV', # Reverse the operator order
     '<> ANY', # The value of this field (must be scalar) must not match any value from the retrieved array field
+    '<> ANY REV', # Reverse the operator order
     '= ARRAY_LENGTH', # The value of this field (must be integer) equals the length of the retrieved array field
     '<> ARRAY_LENGTH', # The value of this field (must be integer) must not equal length of the retrieved array field
     '= LENGTH', # The value of this field (must be integer) equals the length of the string (varchar or text) field
@@ -801,14 +803,23 @@ module CalcActions
         negate = (val[:not] ? 'NOT' : '')
 
         leftop = '?'
-        if vc == '&&'
+
+        if vc == '&&' || vc.end_with?(' REV') || vv.is_a?(Array)
           leftop = 'ARRAY[?]'
           leftop += '::varchar[]' if vv.first.is_a? String
         end
 
         veca_extra_args = ', 1' if vc.include?('ARRAY_LENGTH')
 
-        @extra_conditions[0] += "#{negate} (#{leftop} #{vc} (#{table_name}.#{field_name}#{veca_extra_args}))"
+        rightop = "#{table_name}.#{field_name}#{veca_extra_args}"
+        if vc.end_with?(' REV')
+          ro = rightop
+          rightop = leftop
+          leftop = ro
+          vc = vc.sub(' REV', '')
+        end
+
+        @extra_conditions[0] += "#{negate} (#{leftop} #{vc} (#{rightop}))"
         @extra_conditions << vv
       end
 

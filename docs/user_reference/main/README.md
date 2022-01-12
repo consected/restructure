@@ -9,12 +9,10 @@ Users are provided access to login to the application server, and from here are 
 The common components of an app are:
 
 - [Login](login.md)
-- Search and Work Queues
-- Participant Record
-- Reports
 - Emails and SMS notifications
-- Change Password
-- Logout
+- [Change Password](change_password.md)
+- [Update User Profile](update_user_profile.md)
+- [Logout](logout.md)
 
 ---
 

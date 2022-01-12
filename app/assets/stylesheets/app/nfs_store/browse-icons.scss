@@ -308,11 +308,11 @@
       }
 
       a.browse-entry-classifications {
-        color: rgb(51, 122, 183);
+        color: var(--bottom-grad-color);
         &:link,
         &:active,
         &:focus {
-          color: rgb(51, 122, 183);
+          color: var(--bottom-grad-color);
         }
       }
 

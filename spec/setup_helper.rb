@@ -158,7 +158,8 @@ module SetupHelper
         'follow_up_when',
         'notes',
         'protocol_id',
-        'set_related_player_contact_rank'
+        'set_related_player_contact_rank',
+        'tag_select_allowed'
       )
     end
 
