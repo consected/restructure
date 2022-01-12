@@ -232,6 +232,8 @@ module StandardAuthentication
 
   # Setup password for new user
   def setup_new_password
+    return if allow_users_to_register?
+
     generate_password
     @forced_password_reset = true
   end
@@ -387,4 +389,5 @@ module StandardAuthentication
     self.password_updated_at = (self.class.expire_password_after - self.class.remind_days_before).days.ago
     save
   end
+
 end

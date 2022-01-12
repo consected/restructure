@@ -3,7 +3,7 @@
   if content.present?
     content = Formatter::Substitution.substitute( content, data: @report).html_safe
   end
-
+  @criteria_block_id = "report-criteria-container-#{SecureRandom.hex}"
   extra_classes = @report.report_options.view_options.hide_criteria_panel ? 'hidden' : ''
 %>
 <%= render partial: 'masters/modal_pi_search_results_template' %>
@@ -14,7 +14,7 @@
 <% if @report.editable_data? %>
   <span id="editable_data"></span>
 <% end %>
-<div class="report-criteria container-fluid <%=extra_classes%>" id="report-criteria-form">
+<div class="report-criteria container-fluid <%=extra_classes%>" id="<%= @criteria_block_id %>-block">
   <div class="row" data-result="#report-embedded">
     <div class="col-sm-22 col-sm-offset-1">
       <div class="well report-criteria-block">
@@ -35,6 +35,7 @@
     </div>
   </div>
 </div>
+<%= render partial: 'criteria_view_css' %>
 <div id="<%=@results_target%>" data-sub-item="masters" data-template="search-results-template" data-preprocessor="master_search_results" class="report-results-outer">
   <% if @results %>
     <%= render partial: 'results' %>

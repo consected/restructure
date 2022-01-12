@@ -1,4 +1,4 @@
-@import "../app_vars";
+@import '../app_vars';
 
 html {
   min-height: 100%;
@@ -27,54 +27,60 @@ body {
 body#body-top {
   filter: grayscale(100%);
   opacity: 0.2;
-}
-
-body#body-top:after {
-  content: "loading...";
-  display: block;
-  position: fixed;
-  top: 45vh;
-  left: 0;
-  text-align: center;
-  width: 100vw;
-  color: black;
-  font-size: 96px;
-  z-index: 600000;
-}
-
-body#body-top.initial-compiling:after {
-  opacity: 1;
-
-  transition: opacity 1s ease;
-  animation-name: fadeInTextOpacity;
-  animation-iteration-count: 1;
-  animation-timing-function: ease-in;
-  animation-duration: 1s;
-}
-
-body#body-top.status-compiled,
-body#body-top.sessions {
-  filter: none;
-  opacity: 1;
-  transition: filter 0.5s ease;
-
-  animation-name: fadeInOpacity;
-  animation-iteration-count: 1;
-  animation-timing-function: ease-in;
-  animation-duration: 0.5s;
 
   &:after {
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s linear 500ms, opacity 500ms;
+    content: 'loading...';
+    display: block;
+    position: fixed;
+    top: 45vh;
+    left: 0;
+    text-align: center;
+    width: 100vw;
+    color: black;
+    font-size: 96px;
+    z-index: 600000;
   }
-}
+  &.initial-compiling:after {
+    opacity: 1;
 
-body#body-top.page-transition {
-  filter: grayscale(100%);
+    transition: opacity 1s ease;
+    animation-name: fadeInTextOpacity;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-duration: 1s;
+  }
 
-  opacity: 0.2;
-  transition: opacity 500ms, filter 0.5s ease;
+  // Any body classes that should hide the "loading..." overlay should be added here.
+  // .status-compiled is a flag class added dynamically by the end of the template compilation process.
+  // .sessions represents the Devise sessions controller (sign in)
+  // .registrations represents the Devise registrations controller (self registration)
+  &.status-compiled,
+  &.sessions,
+  &.confirmations,
+  &.passwords,
+  &.registrations {
+    filter: none;
+    opacity: 1;
+    transition: filter 0.5s ease;
+
+    animation-name: fadeInOpacity;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-duration: 0.5s;
+
+    &:after {
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0s linear 500ms, opacity 500ms;
+    }
+  }
+
+  &.page-transition {
+    filter: grayscale(100%);
+
+    opacity: 0.2;
+    transition: opacity 500ms, filter 0.5s ease;
+  }
 }
 
 @keyframes fadeInOpacity {
@@ -160,11 +166,11 @@ a:hover {
   cursor: pointer;
 }
 
-a[disabled="disabled"] {
+a[disabled='disabled'] {
   cursor: not-allowed;
 }
 
-a[data-toggle-caret][disabled="disabled"] {
+a[data-toggle-caret][disabled='disabled'] {
   cursor: pointer;
 }
 
@@ -172,11 +178,11 @@ a.open-in-new-window {
   white-space: nowrap;
 }
 a.open-in-new-window:after {
-  content: "\e066";
+  content: '\e066';
   position: relative;
   top: 1px;
   display: inline-block;
-  font-family: "Glyphicons Halflings";
+  font-family: 'Glyphicons Halflings';
   font-style: normal;
   font-weight: 400;
   line-height: 1;
@@ -332,12 +338,12 @@ a.glyphicon.glyphicon-remove-sign {
   li {
     > a {
       background-color: white;
-      color: #2e6da4;
+      color: var(--project-color);
       border: 1px solid $master_header_bg;
     }
     > a.collapsed {
       background-color: $master_header_bg;
-      color: #2e6da4;
+      color: var(--project-color);
     }
     > a > .caret,
     &.dropdown.open .caret {
@@ -484,21 +490,21 @@ div.ajax-running {
   display: initial;
 }
 
-a[data-toggle="collapse"] {
+a[data-toggle='collapse'] {
   outline: 0;
 }
-a[data-toggle="collapse"].master-expander {
-  color: #2b669a;
+a[data-toggle='collapse'].master-expander {
+  color: var(--link-darker-color);
 }
-a[data-toggle="collapse"]:hover {
-  color: #770000;
+a[data-toggle='collapse']:hover {
+  color: var(--link-hover-darker-color);
 }
-a[data-toggle="collapse"]:active,
-a[data-toggle="collapse"]:focus {
-  color: #2b669a;
+a[data-toggle='collapse']:active,
+a[data-toggle='collapse']:focus {
+  color: var(--link-darker-color);
 }
 
-a[data-toggle="collapse"].master-expander.collapsed {
+a[data-toggle='collapse'].master-expander.collapsed {
   color: #333;
 }
 

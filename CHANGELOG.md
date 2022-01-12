@@ -18,6 +18,16 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+### Transferred from Viva @8.0.39
+
+- [Added] user self-registration, email confirmation and password reset
+- [Changed] release script to allow clean container to be requested
+- [Changed] change_user_roles trigger to allow app_type to be specified
+- [Changed] ability to specify multiple checkboxes in report select items
+- [Changed] css for mobile responsiveness, css vars and app styles
+- [Changed] document library to correctly link to source repository
+- [Changed] admin scripts to improve server configuration
+- [Fixed] issue with active app types when specified with env var, since it returned an array not a scope
 
 ## [8.0.25] - 2021-12-20
 

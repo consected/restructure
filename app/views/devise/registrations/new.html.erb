@@ -1,1 +1,36 @@
-<% raise FphsException.new "Bad action" %>
+<div class="devise-block reg-block col-md-8 col-md-offset-8 well">
+  <h2>New User Registration</h2>
+  <%= form_for(resource, as: resource_name, url: registration_path(resource)) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <div class="form-group-non">
+      <%= f.label :email %><br />
+      <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control" %>
+    </div>
+
+    <div class="form-group-non">
+      <%= f.label :first_name %><br />
+      <%= f.text_field :first_name, class: "form-control" %>
+    </div>
+
+    <div class="form-group-non">
+      <%= f.label :last_name %><br />
+      <%= f.text_field :last_name, class: "form-control" %>
+    </div>
+
+    <div class="form-group-non">
+      <%= f.label 'enter new password',  'data-add-icon' => 'info-sign', title: 'minimum 10 characters'  %><br />
+      <%= f.password_field :password, autocomplete: "new-password", class: "form-control", minlength: 10, pattern: ".{10,72}", required: true, title: 'minimum 10 characters'%>
+    </div>
+
+    <div class="form-group-non">
+      <%= f.label :password_confirmation,  'data-add-icon' => 'info-sign', title: 'minimum 10 characters'  %><br />
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control", minlength: 10, pattern: ".{10,72}", required: true, title: 'minimum 10 characters'%>
+    </div>
+
+    <div class="actions">
+      <%= f.submit "Sign up", class: "btn btn-primary" %>
+    </div>
+    <%= render "devise/shared/links" %>
+  <% end %>
+</div>

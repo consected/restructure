@@ -17,6 +17,7 @@ class Admin::ServerInfo
     DefaultSubjectInfoTableName DefaultSecondaryInfoTableName DefaultContactInfoTableName DefaultAddressInfoTableName
     ScriptedJobDirectory
     DisableVDef AllowDynamicMigrations
+    AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail
   ].freeze
 
   NfsStoreSettingsVars = %w[

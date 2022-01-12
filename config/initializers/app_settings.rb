@@ -81,8 +81,23 @@ class Settings
   # title tag page title, appears in tab or browser heading
   PageTitle = ENV['PAGE_TITLE'] || 'FPHS'
 
+  # Registration Settings
+  # Since passwords have generated upon user creation, we must suppress generating a password
+  # with the user (self) registration feature.
+  AllowUsersToRegister = (ENV['ALLOW_USERS_TO_REGISTER'].to_s.downcase == 'true')
+  # Admin assigned to newly created user through the user registration feature
+  RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'] || AdminEmail
+  # Template user for creating new users. The roles from this user are copied to the new user.
+  DefaultUserTemplateEmail = ENV['DEFAULT_USER_TEMPLATE_EMAIL'] || 'registration@template'
+
   # URL to appear on home page for users with login issues to contact
-  LoginIssuesUrl = ENV['LOGIN_ISSUES_URL'] || "mailto: #{AdminEmail}?subject=Login%20Issues"
+  DefaultLoginIssuesUrl = AllowUsersToRegister ? '/users/password/new' : "mailto: #{AdminEmail}?subject=Login%20Issues"
+  LoginIssuesUrl = ENV['LOGIN_ISSUES_URL'] || DefaultLoginIssuesUrl
+
+  # Adding substitutions or conditional verbiage in the markdown files is not supported at this time. Until then,
+  # show the login_issues_url when users are created by administrators.
+  DidntReceiveConfirmationInstructionsUrl = AllowUsersToRegister ? '/users/confirmation/new' : LoginIssuesUrl
+
   # Block to appear at top of login page as a user message
   LoginMessage = ENV['LOGIN_MESSAGE']
   # Maximum limit on master search results
@@ -107,11 +122,14 @@ class Settings
          end
   OnlyLoadAppTypes = olat
 
-  # A template user is defined to allow user roles to be set up even if no real users are assigned
-  TemplateUserEmail = 'template@template'
   # @template is an email extension to be used to ensure user related configurations are exported
   # and a template is a good way to allow all related roles to be represented, for copying by an admin
-  TemplateUserEmailPattern = '%@template'
+  TemplateUserEmailPattern = '@template'
+  # For the SQL LIKE operator
+  TemplateUserEmailPatternForSQL = "%#{TemplateUserEmailPattern}"
+  # A template user is defined to allow user roles to be set up even if no real users are assigned
+  TemplateUserEmail = "template#{TemplateUserEmailPattern}"
+
   # A dummy role used by all user access controls to allow them to be exported, even if no other
   # roles or users are assigned
   AppTemplateRole = '_app_'
