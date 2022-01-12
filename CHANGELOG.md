@@ -18,7 +18,6 @@ release will be created for any release tested in production, and may be marked 
 
 ## [8.0.26] - 2022-01-12
 
-<<<<<<< HEAD
 ### Transferred from Viva @8.0.39
 
 - [Added] user self-registration, email confirmation and password reset
@@ -29,8 +28,6 @@ release will be created for any release tested in production, and may be marked 
 - [Changed] document library to correctly link to source repository
 - [Changed] admin scripts to improve server configuration
 - [Fixed] issue with active app types when specified with env var, since it returned an array not a scope
-=======
->>>>>>> 7bb775e47dd7b68b06b74aa1f62548785c7fc677
 
 ## [8.0.25] - 2021-12-20
 
@@ -54,7 +51,6 @@ release will be created for any release tested in production, and may be marked 
 - [Fixed] scrolling issue with report result lists
 
 ## [8.0.24] - 2021-12-20
-
 
 ## [8.0.23] - 2021-12-03
 
