@@ -76,3 +76,6 @@ db/demo-data.sql
 # /config/master.key
 # credentials.yml
 yarn-error.log
+
+# Ignore IDE configs
+.idea/

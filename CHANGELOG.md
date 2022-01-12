@@ -16,86 +16,18 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.0.39] - 2022-01-11
+## Unreleased
 
-- [Fixed] issue with active app types when specified with env var, since it returned an array not a scope
-
-## [8.0.38] - 2022-01-11
-
-- [Updated] release script to allow clean container to be requested
-- [Updated] change_user_roles trigger to allow app_type to be specified
-
-## [8.0.37] - 2022-01-11
-
-- [Added] ability to specify multiple checkboxes in report select items
-- [Fixed] bug by supressing notification  when the admins change their passwords
-- [Updated] css for mobile responsiveness, css vars and app styles
-- [Updated] document library to correctly link to source repository
-- [Updated] admin scripts to improve server configuration
-
-## [8.0.35] - 2022-01-06
-
-- [Bumped] version
-
-## [8.0.33] - 2022-01-06
+### Transferred from Viva @8.0.39
 
 - [Added] user self-registration, email confirmation and password reset
-
-### Transfer from ReStructure 8.0.24 - 2021-12-20
-
-- [Added] scripted job script for OCR
-- [Added] logic to avoid too many refreshes on browser
-- [Added] PDF and office doc search (within a single document) in secure view
-- [Changed] scripted job for better job feedback and documentation
-- [Changed] activity log documentation to improve filestore information
-- [Changed] report list functionality to results list view
-- [Fixed] embedded items not updating in activity logs, causing entered data to be lost
-- [Fixed] multiple bugs
-
-## [8.0.32] - 2021-12-14
-
-- [Added] demo release
-
-## [8.0.30] - 2021-12-07
-
-- [Fixed] scrolling issue with report result lists
-
-## [8.0.29] - 2021-12-07
-
-- [Fixed] report criteria select_from_model defaults
-
-## [8.0.28] - 2021-12-03
-
-- [Changed] rebuild
-
-## [8.0.27] - 2021-12-03
-
-- [Added] changes to allow report record edit and create to work with arbitrary models
-- [Added] report view_as option to show results as a *transposed_table*
-- [Added] handling of multi_editable_ field type configs for lists and choices in forms
-- [Added] column option for "choice_label" and ensure it works for all types of display and editing
-- [Fixed] multiple bugfixes related to report criteria configuration and select_from_model
-- [Fixed] report edit forms and results format and submit dates correctly
-- [Fixed] form, credential and trigger bugs
-- [Changed] updated to latest gems
-- [Fixed] bugfixes
-
-## [8.0.25] - 2021-11-22
-
-
-## [8.0.24] - 2021-11-16
-
-- Bump version
-
-## [8.0.21] - 2021-11-11
-
-- [Fixed] production environment use of encryption salt
-
-## [8.0.19] - 2021-11-01
-
-- [Added] Documentation for a private repository fork
-
-NOTE: this build is largely to test the new private repository is complete and can be built
+- [Changed] release script to allow clean container to be requested
+- [Changed] change_user_roles trigger to allow app_type to be specified
+- [Changed] ability to specify multiple checkboxes in report select items
+- [Changed] css for mobile responsiveness, css vars and app styles
+- [Changed] document library to correctly link to source repository
+- [Changed] admin scripts to improve server configuration
+- [Fixed] issue with active app types when specified with env var, since it returned an array not a scope
 
 ## [8.0.25] - 2021-12-20
 
