@@ -16,8 +16,9 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.0.26] - 2022-01-12
 
+<<<<<<< HEAD
 ### Transferred from Viva @8.0.39
 
 - [Added] user self-registration, email confirmation and password reset
@@ -28,6 +29,8 @@ release will be created for any release tested in production, and may be marked 
 - [Changed] document library to correctly link to source repository
 - [Changed] admin scripts to improve server configuration
 - [Fixed] issue with active app types when specified with env var, since it returned an array not a scope
+=======
+>>>>>>> 7bb775e47dd7b68b06b74aa1f62548785c7fc677
 
 ## [8.0.25] - 2021-12-20
 
