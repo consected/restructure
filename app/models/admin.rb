@@ -77,6 +77,11 @@ class Admin < ActiveRecord::Base
 
   def authentication_token; end
 
+  # method provided by devise database_authenticable module.
+  def send_password_change_notification
+    # do not notify the admins for now
+  end
+
   protected
 
   def unlock_account

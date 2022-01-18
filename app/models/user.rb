@@ -12,14 +12,16 @@ class User < ActiveRecord::Base
 
   acts_as_token_authenticatable
 
-  # A configuration allows two factor authentication to be disabled for the app server
+  # TODO: comments
+  supported_modules = %i[trackable timeoutable lockable validatable]
+  supported_modules += %i[registerable confirmable recoverable] if Settings::AllowUsersToRegister
   if two_factor_auth_disabled
-    devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable # , :registerable, :confirmable
+    supported_modules << :database_authenticatable
   else
-    devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable,
-           otp_secret_encryption_key: otp_enc_key
-    # :registerable, :confirmable,
+    supported_modules += [:two_factor_authenticatable, { otp_secret_encryption_key: otp_enc_key }]
   end
+
+  devise(*supported_modules)
 
   belongs_to :admin
   has_one :contact_info, class_name: 'Users::ContactInfo', foreign_key: :user_id
@@ -27,17 +29,17 @@ class User < ActiveRecord::Base
   belongs_to :app_type, class_name: 'Admin::AppType', optional: true
 
   default_scope -> { order email: :asc }
-  scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPattern) }
+  scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPatternForSQL) }
   before_save :set_app_type
 
   validates :first_name,
             presence: {
-              if: -> { allow_users_to_register? }
+              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             }
 
   validates :last_name,
             presence: {
-              if: -> { allow_users_to_register? }
+              if: -> { allow_users_to_register? && !a_template_or_batch_user? }
             }
 
   #
@@ -166,6 +168,38 @@ class User < ActiveRecord::Base
     Admin::AppType.all_available_to(self)
   end
 
+  # method provided by devise confirmable module; Override so job notifications can be executed
+  def send_on_create_confirmation_instructions
+    return if a_template_or_batch_user? || !allow_users_to_register?
+
+    generate_confirmation_token! unless @raw_confirmation_token
+    Users::Confirmations.notify self
+  end
+
+  # method provided by devise recoverable module; Override so job notifications can be executed
+  def send_reset_password_instructions
+    return if a_template_or_batch_user? || !allow_users_to_register?
+
+    token = set_reset_password_token
+    options = { reset_password_hash: token }
+    Users::PasswordRecovery.notify self, options
+    token
+  end
+
+  def resend_confirmation_instructions
+    return if a_template_or_batch_user? || !allow_users_to_register?
+
+    generate_confirmation_token! unless @raw_confirmation_token
+    Users::Confirmations.notify self
+  end
+
+  # method provided by devise database_authenticable module; Override so job notifications can be executed
+  def send_password_change_notification
+    return if a_template_or_batch_user? || !allow_users_to_register?
+
+    Users::PasswordChanged.notify self
+  end
+
   protected
 
   # Override included functionality that ensures an administrator has been set
@@ -195,4 +229,15 @@ class User < ActiveRecord::Base
   def set_app_type
     self.app_type_id = nil if app_type_id && !app_type_valid?
   end
+
+  def password_required?
+    return false if a_template_or_batch_user?
+
+    super
+  end
+
+  def a_template_or_batch_user?
+    email.end_with?(Settings::TemplateUserEmailPattern) || email == Settings::BatchUserEmail
+  end
+
 end

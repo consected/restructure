@@ -121,7 +121,7 @@ module NavHandler
   def setup_admin_sub_nav(admin_sub)
     if current_admin
       admin_sub << { label: 'manage', url: '/', route: '#root' }
-      admin_sub << { label: 'admin password', url: '/admins/edit',
+      admin_sub << { label: 'admin password', url: edit_admin_registration_path,
                      extras: { 'data-do-action' => 'admin-change-password' } }
       admin_sub << { label: 'logout admin', url: '/admins/sign_out',
                      extras: { method: :delete, 'data-do-action' => 'admin-logout' } }

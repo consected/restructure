@@ -82,7 +82,11 @@ class Admin::UserRole < Admin::AdminBase
     items = {}
     res.each do |role|
       m = role.app_type
-      n = "#{m&.id}/#{m&.name}"
+      n = if m
+            "#{m.id}/#{m.name}"
+          else
+            '/'
+          end
       items[n] ||= []
       items[n] << role.role_name unless items[n].include? role.role_name
     end
@@ -127,7 +131,7 @@ class Admin::UserRole < Admin::AdminBase
   # Copy roles from one user to another. To avoid confusion, app_type must be specified
   # @param from_user [User] user to copy roles from
   # @param to_user [User] user to copy roles to
-  # @param app_type [Admin::AppType] the app type the roles belong to.
+  # @param app_types [Admin::AppType | Array{Admin::AppType}] the app type(s) the roles belong to.
   # @return [Array] array of Admin::UserRole instances created in the to_user
   def self.copy_user_roles(from_user, to_user, app_types, current_admin)
     raise FphsException, 'app_type must be specified and not nil to copy roles' if app_types.blank?

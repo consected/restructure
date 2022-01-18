@@ -536,7 +536,7 @@ RSpec.describe 'Model reference implementation', type: :model do
     expect(res).to be_truthy
 
     # Second reference should not work, since the tag select field is empty
-    ref_config = al_showable.extra_log_type_config.references.first.last[:mr_simple_test]
+    ref_config = al_showable.extra_log_type_config.references.first.last[:mr_simple_tests]
     res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
     expect(res).to be_falsey
 
