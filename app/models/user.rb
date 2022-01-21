@@ -25,6 +25,7 @@ class User < ActiveRecord::Base
 
   belongs_to :admin
   has_one :contact_info, class_name: 'Users::ContactInfo', foreign_key: :user_id
+  has_one :user_preference
 
   belongs_to :app_type, class_name: 'Admin::AppType', optional: true
 

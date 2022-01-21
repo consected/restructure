@@ -1,69 +1,10 @@
-class UserPreference
-  def initialize(user: nil)
-    @belongs_to_user = user
-  end
+# frozen_string_literal: true
 
-  # Fake the association
-  def user_id
-    @belongs_to_user&.id
-  end
+class UserPreference < ActiveRecord::Base
+  belongs_to :user
+  belongs_to :time_zone, optional: true
 
-  # Fake the ID
-  def id
-    @belongs_to_user&.id
-  end
-
-  def created_at
-    @belongs_to_user&.created_at
-  end
-
-  def updated_at
-    @belongs_to_user&.updated_at
-  end
-
-  # Fake attribute names
-  def self.attribute_names
-    %w[id user_id date_format timezone pattern_for_date_format pattern_for_date_time_format pattern_for_time_format
-       created_at updated_at]
-  end
-
-  def attributes
-    l = self.class.attribute_names
-    res = {}
-    l.each do |i|
-      res[i.to_s] = send(i)
-    end
-    res
-  end
-
-  def date_format
-    'mm/dd/yyyy'
-  end
-
-  def date_time_format
-    'mm/dd/yyyy h:mm:sspm'
-  end
-
-  def time_format
-    'h:mm:sspm'
-  end
-
-  def timezone
-    'Eastern Time (US & Canada)'
-  end
-
-  def pattern_for_date_format
-    '%m/%d/%Y'
-  end
-
-  def pattern_for_date_time_format
-    '%m/%d/%Y %l:%M%p'
-  end
-
-  def pattern_for_time_format
-    '%l:%M%p'
-  end
-
+  # put  validations here
   def self.default_pattern_for_date_format
     '%m/%d/%Y'
   end
@@ -80,39 +21,4 @@ class UserPreference
   def self.no_master_association
     true
   end
-
-  # Fake JSON production - scrap this in real life
-  def as_json(options = nil)
-    attributes.as_json(options)
-  end
-
-  # Dummy
-  def current_user=(curr); end
-
-  def self.where(_options = {})
-    [new]
-  end
-
-  def self.resource_name
-    'user_preferences'
-  end
-
-  def self.table_name
-    'user_preferences'
-  end
-
-  def self.base_route_name
-    'user_preferences'
-  end
-
-  def self.base_route_segments
-    'user_preferences'
-  end
-
-  def self.human_name
-    'User Preferences'
-  end
-
-  # Not needed in a real model
-  Resources::Models.add(self)
 end
