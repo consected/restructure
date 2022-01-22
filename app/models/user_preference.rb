@@ -2,7 +2,6 @@
 
 class UserPreference < ActiveRecord::Base
   belongs_to :user
-  belongs_to :time_zone, optional: true
 
   # put  validations here
   def self.default_pattern_for_date_format

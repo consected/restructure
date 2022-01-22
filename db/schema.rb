@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_21_154929) do
+ActiveRecord::Schema.define(version: 2022_01_21_143719) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -1567,15 +1567,6 @@ ActiveRecord::Schema.define(version: 2022_01_21_154929) do
     t.index ["protocol_id"], name: "index_sub_processes_on_protocol_id"
   end
 
-  create_table "time_zones", force: :cascade do |t|
-    t.string "abbreviation"
-    t.string "name"
-    t.string "utc_offset"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["name"], name: "index_time_zones_on_name", unique: true
-  end
-
   create_table "tracker_history", id: :serial, force: :cascade do |t|
     t.integer "master_id"
     t.integer "protocol_id"
@@ -1754,14 +1745,12 @@ ActiveRecord::Schema.define(version: 2022_01_21_154929) do
 
   create_table "user_preferences", force: :cascade do |t|
     t.bigint "user_id"
-    t.bigint "time_zone_id"
     t.string "date_format"
     t.string "pattern_for_date_format"
     t.string "pattern_for_date_time_format"
     t.string "pattern_for_time_format"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["time_zone_id"], name: "index_user_preferences_on_time_zone_id"
     t.index ["user_id"], name: "index_user_preferences_on_user_id"
   end
 

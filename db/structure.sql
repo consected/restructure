@@ -5846,39 +5846,6 @@ ALTER SEQUENCE ml_app.sub_processes_id_seq OWNED BY ml_app.sub_processes.id;
 
 
 --
--- Name: time_zones; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.time_zones (
-    id bigint NOT NULL,
-    abbreviation character varying,
-    name character varying,
-    utc_offset character varying,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: time_zones_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
---
-
-CREATE SEQUENCE ml_app.time_zones_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: time_zones_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
---
-
-ALTER SEQUENCE ml_app.time_zones_id_seq OWNED BY ml_app.time_zones.id;
-
-
---
 -- Name: tracker_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -6284,7 +6251,6 @@ ALTER SEQUENCE ml_app.user_history_id_seq OWNED BY ml_app.user_history.id;
 CREATE TABLE ml_app.user_preferences (
     id bigint NOT NULL,
     user_id bigint,
-    time_zone_id bigint,
     date_format character varying,
     pattern_for_date_format character varying,
     pattern_for_date_time_format character varying,
@@ -8189,13 +8155,6 @@ ALTER TABLE ONLY ml_app.sub_processes ALTER COLUMN id SET DEFAULT nextval('ml_ap
 
 
 --
--- Name: time_zones id; Type: DEFAULT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ml_app.time_zones ALTER COLUMN id SET DEFAULT nextval('ml_app.time_zones_id_seq'::regclass);
-
-
---
 -- Name: tracker_history id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
@@ -9021,14 +8980,6 @@ ALTER TABLE ONLY ml_app.sub_process_history
 
 ALTER TABLE ONLY ml_app.sub_processes
     ADD CONSTRAINT sub_processes_pkey PRIMARY KEY (id);
-
-
---
--- Name: time_zones time_zones_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ml_app.time_zones
-    ADD CONSTRAINT time_zones_pkey PRIMARY KEY (id);
 
 
 --
@@ -10212,13 +10163,6 @@ CREATE INDEX index_sub_processes_on_protocol_id ON ml_app.sub_processes USING bt
 
 
 --
--- Name: index_time_zones_on_name; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE UNIQUE INDEX index_time_zones_on_name ON ml_app.time_zones USING btree (name);
-
-
---
 -- Name: index_tracker_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -10384,13 +10328,6 @@ CREATE INDEX index_user_history_on_app_type_id ON ml_app.user_history USING btre
 --
 
 CREATE INDEX index_user_history_on_user_id ON ml_app.user_history USING btree (user_id);
-
-
---
--- Name: index_user_preferences_on_time_zone_id; Type: INDEX; Schema: ml_app; Owner: -
---
-
-CREATE INDEX index_user_preferences_on_time_zone_id ON ml_app.user_preferences USING btree (time_zone_id);
 
 
 --
@@ -13445,7 +13382,6 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20211222140008'),
 ('20211222140019'),
 ('20211231113457'),
-('20220121143719'),
-('20220121154929');
+('20220121143719');
 
 
