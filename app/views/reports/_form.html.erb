@@ -1,6 +1,10 @@
-<div class="report-criteria container-fluid">
+<%
+  @criteria_block_id = "report-criteria-container-#{SecureRandom.hex}"
+%>
+<div class="report-criteria container-fluid" id="<%= @criteria_block_id %>-block">
   <div class="report-description">
     <%= markdown_to_html @report.description %>
   </div>
   <%= render partial: 'reports/criteria' %>
 </div>
+<%= render partial: 'reports/criteria_view_css' %>
