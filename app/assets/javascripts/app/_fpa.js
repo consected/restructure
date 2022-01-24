@@ -1000,8 +1000,9 @@ _fpa = {
   },
 
   // Show a bootstrap style modal dialog
-  show_modal: function (message, title, large, add_class) {
-    var pm = $('#primary-modal');
+  show_modal: function (message, title, large, add_class, modal_index) {
+    if (!modal_index) modal_index = '';
+    var pm = $(`#primary-modal${modal_index}`);
     var t = pm.find('.modal-title');
     var m = pm.find('.modal-body');
     t.html('');
@@ -1011,39 +1012,57 @@ _fpa = {
     if (message) m.html(message);
 
     // Reset the class to the original
-    $('.modal-dialog').prop('class', 'modal-dialog')
+    var md = pm.find('.modal-dialog')
+    md.prop('class', 'modal-dialog')
 
-    if (large && large == 'md') $('.modal-dialog').removeClass('modal-lg').addClass('modal-md');
-    else if (large) $('.modal-dialog').removeClass('modal-md').addClass('modal-lg');
-    else $('.modal-dialog').removeClass('modal-lg').removeClass('modal-md');
+    if (large && large == 'md') md.removeClass('modal-lg').addClass('modal-md');
+    else if (large) md.removeClass('modal-md').addClass('modal-lg');
+    else md.removeClass('modal-lg').removeClass('modal-md');
 
     if (add_class)
-      $('.modal-dialog').addClass(add_class);
+      md.addClass(add_class);
 
     pm.on('hidden.bs.modal', function () {
-      $('.modal-body').html('');
-      _fpa.utils.scrollTo(0, 0, 0, $('.modal-body'))
+      m.html('');
+      _fpa.utils.scrollTo(0, 0, 0, m)
       var riomc = $('.refresh-item-on-modal-close').first();
       if (riomc.length) {
         riomc.parents('.common-template-item').last().find('a.refresh-item').click();
         riomc.removeClass('refresh-item-on-modal-close');
       }
-      $('body').removeClass('table-results');
-      $('html').css({ overflow: 'auto' });
-      _fpa.reports.reset_window_scrolling();
+
+      if ($('.modal.was-in').length == 0) {
+        $('body').removeClass('table-results');
+        $('html').css({ overflow: 'auto' });
+        _fpa.reports.reset_window_scrolling();
+      }
     });
 
     pm.modal('show');
 
     pm.on('shown.bs.modal', function () {
-      _fpa.utils.scrollTo(0, 0, 0, $('.modal-body'))
+      _fpa.utils.scrollTo(0, 0, 0, m)
     })
+
+    if (modal_index) {
+      // Hide a previously shown modal back
+      $('.modal.in').removeClass('in').addClass('was-in');
+
+      pm.on('click.dismiss.bs.modal', `[data-dismiss="modal${modal_index}"]`, function () {
+        _fpa.hide_modal(modal_index);
+      })
+    }
+
 
     return pm;
   },
 
-  hide_modal: function () {
-    var pm = $('#primary-modal');
+  hide_modal: function (modal_index) {
+    if (!modal_index) modal_index = '';
+    var pm = $(`#primary-modal${modal_index}`);
+
+    if (pm.hasClass('was-in')) return;
+
     var t = pm.find('.modal-title');
     var m = pm.find('.modal-body');
     _fpa.utils.scrollTo(0, 0, 0, m);
@@ -1051,6 +1070,11 @@ _fpa = {
     t.html('');
     m.html('');
     pm.modal('hide');
+
+    // Put a previously shown modal back
+    window.setTimeout(function () {
+      $('.modal.was-in').removeClass('was-in').addClass('in');
+    }, 300)
   },
 
   get_item_by: function (attr, obj, evid) {
