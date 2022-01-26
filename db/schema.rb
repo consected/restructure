@@ -1751,7 +1751,7 @@ ActiveRecord::Schema.define(version: 2022_01_21_143719) do
     t.string "pattern_for_time_format"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_user_preferences_on_user_id"
+    t.index ["user_id"], name: "index_user_preferences_on_user_id", unique: true
   end
 
   create_table "user_role_history", id: :serial, force: :cascade do |t|

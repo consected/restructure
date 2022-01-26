@@ -10334,7 +10334,7 @@ CREATE INDEX index_user_history_on_user_id ON ml_app.user_history USING btree (u
 -- Name: index_user_preferences_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
-CREATE INDEX index_user_preferences_on_user_id ON ml_app.user_preferences USING btree (user_id);
+CREATE UNIQUE INDEX index_user_preferences_on_user_id ON ml_app.user_preferences USING btree (user_id);
 
 
 --
