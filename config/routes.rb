@@ -172,6 +172,8 @@ Rails.application.routes.draw do
 
   resource :user_profile
 
+  resource :user_preference
+
   ExternalIdentifier.routes_load
   ActivityLog.routes_load
 

@@ -35,15 +35,8 @@ class UserProfilesController < UserBaseController
     # Need to check that this is a valid resource
     valid_rn = params[:resource_name]
     if valid_rn.present?
-      if valid_rn == 'user_preference'
-        # This is currently a special case, as it is not a real model. It should be combined with
-        # the regular approach when it becomes a model
-        resource = current_user.user_preference
-      else
-        resclass = resource_model(valid_rn)
-        resource = resource_from_model(resclass)
-
-      end
+      resclass = resource_model(valid_rn)
+      resource = resource_from_model(resclass)
       if resource
         resource.current_user = current_user
         render json: { valid_rn => resource }
@@ -63,7 +56,7 @@ class UserProfilesController < UserBaseController
   private
 
   def resources
-    resource_names.map { |rn| [rn, resource_model(rn.pluralize)] }.to_h
+    resource_names.map { |resource_name| [resource_name, resource_model(resource_name.pluralize)] }.to_h
   end
 
   #
@@ -77,13 +70,13 @@ class UserProfilesController < UserBaseController
       user_preference: current_user.user_preference
     }
 
-    resource_names.each do |rn|
-      m = resource_model(rn.pluralize)
-      next unless m
+    resource_names.each do |resource_name|
+      model = resource_model(resource_name.pluralize)
+      next unless model
 
-      res = resource_from_model(m)
-      res.current_user = current_user
-      @resource_data[rn.to_sym] = res
+      resource = resource_from_model(model)
+      resource.current_user = current_user
+      @resource_data[resource_name.to_sym] = resource
     end
 
     @resource_data
@@ -120,7 +113,7 @@ class UserProfilesController < UserBaseController
     Resources::Models.find_by(resource_name: valid_rn.pluralize)&.dig(:model)
   end
 
-  def resource_from_model(resclass)
-    resclass.where(user_id: current_user.id).first
+  def resource_from_model(resource_class)
+    resource_class.find_by(user_id: current_user.id)
   end
 end
