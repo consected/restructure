@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 class UserPreference < UserBase
+  # Essential method to indicate this does not have an association with a master record
+  def self.no_master_association
+    true
+  end
+
   include UserHandler
 
   belongs_to :user, inverse_of: :user_preference
@@ -38,11 +43,6 @@ class UserPreference < UserBase
 
   def self.default_pattern_for_time_format
     '%l:%M%p'
-  end
-
-  # Essential method to indicate this does not have an association with a master record
-  def self.no_master_association
-    true
   end
 
   add_model_to_list # always at the end of model
