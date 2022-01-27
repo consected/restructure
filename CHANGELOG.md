@@ -17,7 +17,7 @@ version has occurred.
 
 The `## [7.4.94] - 2021-12-17` section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
-## Unreleased
+## [7.4.93] - 2021-12-16
 
 - [Updated] restart script to allow full EB restart of all app servers
 - [Added] app type components page for easy viewing and navigation around an app
