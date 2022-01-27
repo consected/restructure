@@ -6,6 +6,10 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
   include ModelSupport
 
   before(:all) do
+    Settings::AllowUsersToRegister = false
+    Rails.application.reload_routes!
+    Rails.application.routes_reloader.reload!
+
     SetupHelper.feature_setup
 
     Settings::TwoFactorAuthDisabled = false

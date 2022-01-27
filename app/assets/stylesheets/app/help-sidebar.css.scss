@@ -64,3 +64,18 @@
     }
   }
 }
+
+@media (max-width: 1023px) {
+  .help-sidebar {
+    width: 80vw;
+  }
+}
+
+@media (max-width: 767px) {
+  .help-sidebar {
+    width: 95vw;
+    .btn.btn-expander {
+      display: none;
+    }
+  }
+}

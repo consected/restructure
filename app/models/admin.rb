@@ -4,6 +4,7 @@ class Admin < ActiveRecord::Base
   @admin_optional = true
 
   include AdminHandler
+  include RegistrationHandler
   include StandardAuthentication
 
   # A configuration allows two factor authentication to be disabled for the app server
@@ -75,6 +76,11 @@ class Admin < ActiveRecord::Base
   def authentication_token=(_); end
 
   def authentication_token; end
+
+  # method provided by devise database_authenticable module.
+  def send_password_change_notification
+    # do not notify the admins for now
+  end
 
   protected
 

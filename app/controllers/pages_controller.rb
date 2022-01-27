@@ -2,6 +2,7 @@
 
 class PagesController < ApplicationController
   before_action :authenticate_user_or_admin!
+  include AppTypeChange
 
   def home
     home_url = if current_user && !current_admin

@@ -193,16 +193,16 @@ a.add-icon {
 }
 
 .tracker-search-field {
-  color: #2e6da4;
+  color: var(--project-color);
   select {
-    border-color: #2e6da4;
-    color: #2e6da4;
+    border-color: var(--project-color);
+    color: var(--project-color);
   }
 
   &.has-warning select {
     color: #c00;
     option {
-      color: #2e6da4;
+      color: var(--project-color);
     }
   }
 }
@@ -264,14 +264,14 @@ a.add-icon {
   line-height: 2.8;
 
   .btn {
-    color: #2e6da4;
+    color: var(--project-color);
     background: white;
     &:active {
-      color: #008;
+      color: var(--link-active-color);
     }
 
     &.collapsed {
-      background: #2e6da4;
+      background: var(--project-color);
       color: white;
     }
     &.collapsed:active {

@@ -3,11 +3,18 @@
 echo "Starting release and build"
 CURRDIR="$(pwd)"
 
+if [ "$1" == 'clean' ]; then
+  build_arg='clean'
+  echo 'Cleaning up old container and rebuilding it from scratch'
+fi
+
 export GIT_MERGE_AUTOEDIT=no
 
-ONDEVELOP="$(git branch | grep '* develop')"
+FROM_BRANCH=${FROM_BRANCH:=develop}
+
+ONDEVELOP="$(git branch | grep '* '${FROM_BRANCH})"
 if [ -z "${ONDEVELOP}" ]; then
-  echo "Must be on develop branch to get started"
+  echo "Must be on ${FROM_BRANCH} branch to get started"
   exit 1
 fi
 
@@ -77,16 +84,16 @@ if [ -z "${RELEASESTARTED}" ]; then
   git flow release finish -m 'Release' ${NEWVER}
 else
   echo "Release already started. Checking out and continuing"
-  git checkout new-master && git pull && git merge develop
+  git checkout new-master && git pull && git merge ${FROM_BRANCH}
 fi
 git push origin --tags
 git push origin --all
 
-git checkout develop
+git checkout ${FROM_BRANCH}
 
 echo "Starting build container"
 cd ../restructure-build
-./build.sh
+./build.sh ${build_arg}
 if [ $? != 0 ]; then
   echo "***** build.sh failed with exit code $? *****"
   exit 101
@@ -111,7 +118,7 @@ cd ${CURRDIR}
 git fetch origin
 git checkout new-master
 git pull
-git checkout develop
+git checkout ${FROM_BRANCH}
 git pull
 git merge new-master
 git push
