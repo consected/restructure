@@ -135,6 +135,31 @@ _fpa.reports = {
   },
 
 
+  // Add checkboxes to a report table to allow individual items to be selected and
+  // passed to the server for saving in a list model.
+  // The SQL would include a field like this:
+  // '{"field_name": "update_list[items][]", "value": {"list_id": "' || :list_id ||
+  //   '","type":"datadic_variable", "id": ' || cb.id ||
+  //   ', "from_master_id":-1, "init_value": ' ||
+  //   case when coalesce(sel.id, 0) = 0 then 'false' else 'true' end
+  //   || '}}'
+  //   "select items: update list: data_requests_selected_attribs"
+  //
+  // To add multiple items in a single cell, change the JSON to an array of multiple items, something like the following.
+  // Note a label entry is provided at the top level of each item to allow identification of what is being selected by the user.
+  // '[{"field_name": "update_list[items][]", "label": "pick - ' || cb.name || '", "value": {"list_id": "' || :list_id ||
+  //   '","type":"datadic_variable", "id": ' || cb.id ||
+  //   ', "from_master_id":-1, "init_value": ' ||
+  //   case when coalesce(sel.id, 0) = 0 then 'false' else 'true' end
+  //   || '}}, ' ||
+  //   '{"field_name": "update_list[items][]", "label": "alt pick - ' || cb.name || '", "value": {"list_id": "' || :list_id ||
+  //   '","type":"datadic_variable", "id": ' || cb.alt_id  ||
+  //   ', "from_master_id":-1, "init_value": ' ||
+  //   case when coalesce(sel.id, 0) = 0 then 'false' else 'true' end
+  //   || '}}'
+  //   "select items: update list: data_requests_selected_attribs"
+
+
   results_select_items_for_form: function (block) {
 
     var dct;
@@ -207,6 +232,8 @@ _fpa.reports = {
 
     }).addClass('attached_report_chart');
 
+    var cb_id = 0;
+
     block.find('.report-results-table-block td[data-col-type^="select items:"], .report-results-list-block div[data-col-type^="select items:"]').not('.attached_report_select_items').each(function () {
 
       dct = $(this).attr('data-col-type');
@@ -221,19 +248,29 @@ _fpa.reports = {
 
       if (!dct_json || dct_json.trim() == '') return;
 
-      var act_config = JSON.parse(dct_json);
+      var act_configs = JSON.parse(dct_json);
+      if (dct_json[0] == '{') {
+        act_configs = [act_configs]
+      }
 
-      var name = act_config.field_name;
-      var value = act_config.value;
-      var checked = act_config.value.init_value ? 'checked="checked"' : ''
-      var h = '<input type="checkbox" class="report-file-selector" name="' + name + '" ' + checked + '/>';
-      var $h = $(h);
-      $h.val(JSON.stringify(value));
+      $el.html('');
 
-      var new_html = $h;
+      Object.values(act_configs).forEach((act_config) => {
 
-      $el.html(new_html);
-
+        var name = act_config.field_name;
+        var value = act_config.value;
+        var checked = act_config.value.init_value ? 'checked="checked"' : ''
+        var h = `<input type="checkbox" class="report-file-selector" id="seicb-${cb_id}" name="${name}" ${checked}/>`;
+        var $h = $(h);
+        $h.val(JSON.stringify(value));
+        var $eldiv = $('<div class="report-sel-item-ind"></div>').appendTo($el);
+        $eldiv.append($h);
+        if (act_config.label) {
+          var $label = `<label for="seicb-${cb_id}">${act_config.label}</label>`
+          $eldiv.append($label);
+        }
+        cb_id++;
+      })
 
     }).addClass('attached_report_select_items');
 

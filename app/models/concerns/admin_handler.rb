@@ -17,6 +17,8 @@ module AdminHandler
     before_validation :ensure_admin_set, unless: -> { self.class.admin_optional }
     before_create :setup_values
     after_save :invalidate_cache
+
+    add_model_to_list
   end
 
   class_methods do
@@ -59,11 +61,26 @@ module AdminHandler
     def add_model_to_list
       Resources::Models.add self unless abstract_class
     end
+
+    # The base string for route
+    # For example "admin/app_types"
+    # Dynamic configurations will override this
+    def base_route_segments
+      "admin/#{table_name}"
+    end
+
+    # The base string for route names
+    # For example `send("new_#{base_route_name}_path")` returns the path
+    # to the "new" controller action
+    def base_route_name
+      base_route_segments.singularize.gsub('/', '_')
+    end
   end
 
   def init_vars_admin_handler
     instance_var_init :admin_set
     instance_var_init :current_admin
+    instance_var_init :current_admin_id
   end
 
   def setup_values
@@ -108,6 +125,11 @@ module AdminHandler
     @admin_set = true
     @current_admin = new_admin
     write_attribute(:admin_id, new_admin.id)
+  end
+
+  def current_admin_id=(new_admin_id)
+    new_admin = Admin.find_by(id: new_admin_id)
+    self.current_admin = new_admin
   end
 
   # Chainable function, allowing something like:
@@ -181,6 +203,14 @@ module AdminHandler
     return super if defined? super
 
     admin_resource_name
+  end
+
+  # Provide a usable name if this is not overriden or
+  # already exists as a DB attribute
+  def name
+    return super if defined? super
+
+    resource_name.humanize
   end
 
   #

@@ -158,19 +158,25 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
 
     # Validate that we don't already have a protocol / sub process tracked for this player
     protocol = Classification::Protocol.selectable.first
-    sps = protocol.sub_processes.enabled
+    sps = protocol.sub_processes.enabled.where.not(name: 'Alerts')
+
+    spslen = sps.length
+    expect(spslen).to be_positive
 
     sp = nil
     pe = nil
     pe_orig = nil
     pes = nil
     sp_orig = nil
+    i = 0
     while pe.nil?
       sp = pick_one_from sps
       sp_orig = sp
       pes = sp.protocol_events.enabled.reload
-      pe = pes[0]
+      pe = pes[i]
       pe_orig = pe
+      i += 1
+      expect(i).to_be < spslen
     end
 
     have_css "##{h}.tracker-block.collapse.in"

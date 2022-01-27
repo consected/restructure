@@ -86,7 +86,7 @@ module AppTypeChange
   def handled_user_has_no_app_types
     return unless all_user_app_type_ids.empty?
 
-    msg = 'You have not been granted access to any application types.' \
+    msg = 'You have not been granted access to any application types. ' \
           'Contact an administrator to continue use of the application.'
 
     current_user.app_type_id = nil

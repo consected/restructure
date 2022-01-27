@@ -39,7 +39,7 @@ class Admin::AppType < Admin::AdminBase
   def self.active_app_types
     olat = Settings::OnlyLoadAppTypes
     if olat
-      Admin::AppType.find(olat)
+      Admin::AppType.where(id: olat)
     else
       active
     end

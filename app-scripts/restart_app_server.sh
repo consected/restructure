@@ -3,7 +3,15 @@
 sleep 2
 
 if [ ! -f '/opt/elasticbeanstalk/bin/get-config' ]; then
-  touch tmp/restart.txt
+  export AWS_DEFAULT_REGION=$(curl http://169.254.169.254/latest/dynamic/instance-identity/document --silent | grep region | awk -F\" '{print $4}')
+  export AWS_REGION=${AWS_DEFAULT_REGION}
+  INSTID=$(ec2-metadata -i | awk '{print $2}')
+  EBID=$(aws ec2 describe-tags --filter "Name=resource-id,Values=${INSTID}" --query 'Tags[?Key==`elasticbeanstalk:environment-id`].Value' --output text)
+  if [ "${EBID}" ]; then
+    aws elasticbeanstalk restart-app-server --environment-id ${EBID}
+  else
+    touch tmp/restart.txt
+  fi
   exit 'Done'
 fi
 
