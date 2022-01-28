@@ -7,6 +7,36 @@
   --link-active-color: #402964;
   --bottom-grad-color: #4a3277;
   --bottom-grad-darker-color: #452e70;
+  --content-font-family: "Lato", sans-serif;
+  --table-font-family: "Lato", sans-serif;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("/fonts/lato/Lato-Regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("/fonts/lato/Lato-Black.ttf");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("/fonts/lato/Lato-Italic.ttf");
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("/fonts/lato/Lato-BlackItalic.ttf");
+  font-weight: bold;
+  font-style: italic;
 }
 
 body {
@@ -217,7 +247,7 @@ table.table.report-table td {
 }
 
 .edit-field-container .input-sm,
-.button-radio input[type='radio'] + label.radio-label {
+.button-radio input[type="radio"] + label.radio-label {
   font-size: 17.6px;
 }
 
@@ -226,7 +256,7 @@ table.table.report-table td {
   font-size: 15px;
 }
 
-.edit-field-container .input-sm[data-attr-name='project_title'],
+.edit-field-container .input-sm[data-attr-name="project_title"],
 li.dynamic-model--data-request-project_title.result-field-container strong {
   font-size: 23px;
   font-weight: bold;
@@ -238,12 +268,12 @@ hr {
 }
 
 td.report-el {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 13px;
 }
 
 td.report-el.datadict-field-label {
-  font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
   font-size: 13px !important;
 }
 
@@ -372,7 +402,7 @@ h4.container-name {
 .action-buttons .add-item-button {
   display: none;
 }
-.action-buttons .add-item-button[data-target='#activity-log--data-request-assignment-request--1-'] {
+.action-buttons .add-item-button[data-target="#activity-log--data-request-assignment-request--1-"] {
   display: inline;
 }
 
@@ -398,7 +428,7 @@ span.master-header-prefix {
   display: none;
 }
 
-#master-report-data_requests__data_requests img[alt='Data Requests Process'] {
+#master-report-data_requests__data_requests img[alt="Data Requests Process"] {
   width: 800px;
   margin: 0 auto;
   display: block;

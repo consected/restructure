@@ -27,7 +27,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 592,
+      "line": 606,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';\\n\")",
       "render_path": null,
@@ -61,6 +61,47 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "26673dd4cf62484c0dd364a66eb53f9eff4f879dea773fecf05162cfd7f68a07",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/reports/_criteria_view_css.html.erb",
+      "line": 22,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "(Report.find_by_id_or_resource_name(params[:id]).report_options.criteria_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-criteria-container-#{SecureRandom.hex}\"}-block\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end or ([] + Report.find_by_id_or_resource_name(params[:id]).report_options.criteria_css.selectors.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-criteria-container-#{SecureRandom.hex}\"}-block\"} #{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end)).join(\"\\n\")",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "ReportsController",
+          "method": "show",
+          "line": 109,
+          "file": "app/controllers/reports_controller.rb",
+          "rendered": {
+            "name": "reports/_form",
+            "file": "app/views/reports/_form.html.erb"
+          }
+        },
+        {
+          "type": "template",
+          "name": "reports/_form",
+          "line": 10,
+          "file": "app/views/reports/_form.html.erb",
+          "rendered": {
+            "name": "reports/_criteria_view_css",
+            "file": "app/views/reports/_criteria_view_css.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "reports/_criteria_view_css"
+      },
+      "user_input": "Report.find_by_id_or_resource_name(params[:id]).report_options",
+      "confidence": "Weak",
+      "note": ""
+    },
+    {
       "warning_type": "Mass Assignment",
       "warning_code": 70,
       "fingerprint": "2784ca78e0e2edce2a830bf31905df4ea527922a540481ffa3440208782b5cdf",
@@ -87,7 +128,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 324,
+      "line": 338,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE\")",
       "render_path": null,
@@ -219,7 +260,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/concerns/calc_actions.rb",
-      "line": 391,
+      "line": 393,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "@condition_scope.order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")",
       "render_path": null,
@@ -459,7 +500,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/concerns/calc_actions.rb",
-      "line": 403,
+      "line": 405,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "(@condition_scope.order(:id => :desc).limit(1).reorder(\"#{@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.id desc\") or @condition_scope.order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")).select(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.*\").pluck(\"#{@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.#{@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first}\")",
       "render_path": null,
@@ -520,7 +561,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 320,
+      "line": 334,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE\")",
       "render_path": null,
@@ -575,6 +616,6 @@
       "note": ""
     }
   ],
-  "updated": "2021-12-14 10:34:27 +0000",
-  "brakeman_version": "5.1.2"
+  "updated": "2022-01-24 21:28:46 +0000",
+  "brakeman_version": "5.2.0"
 }

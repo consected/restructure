@@ -16,6 +16,10 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## [8.0.40] - 2022-01-24
+
+- [Added] ability to show embedded block from an embedded report in a second modal
+
 ## [8.0.39] - 2022-01-11
 
 - [Fixed] issue with active app types when specified with env var, since it returned an array not a scope

@@ -19,7 +19,7 @@ module FeatureHelper
   end
 
   def force_modal_hide
-    run_script = "var el = $('#primary-modal'); el.on('shown.bs.modal', function(){ el.modal('hide');});"
+    run_script = "var el = $('.modal'); el.on('shown.bs.modal', function(){ el.modal('hide');});"
     begin
       page.execute_script run_script
     rescue StandardError => e
