@@ -172,7 +172,7 @@ Rails.application.routes.draw do
 
   resource :user_profile
 
-  resource :user_preference
+  resources :user_preferences, only: %i[new create edit update]
 
   ExternalIdentifier.routes_load
   ActivityLog.routes_load
