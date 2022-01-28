@@ -52,9 +52,12 @@ class UserPreference < UserBase
   private
 
   def set_defaults
-    self.date_format ||= UserPreference.default_pattern_for_date_format
+    self.date_format ||= 'mm/dd/yyyy'
+    self.date_time_format ||= 'mm/dd/yyyy h:mm:sspm'
     self.pattern_for_date_format ||= UserPreference.default_pattern_for_date_format
     self.pattern_for_date_time_format ||= UserPreference.default_pattern_for_date_time_format
     self.pattern_for_time_format ||= UserPreference.default_pattern_for_time_format
+    self.time_format ||= 'h:mm:sspm'
+    self.timezone ||= 'Eastern Time (US & Canada)'
   end
 end
