@@ -146,12 +146,26 @@ module UserHandler
     end
   end
 
+  def master_id
+    return nil if self.class.no_master_association
+
+    master&.id
+  end
+
   def current_user
-    master.current_user
+    if self.class.no_master_association
+      @current_user
+    else
+      master.current_user
+    end
   end
 
   def current_user=(cu)
-    master.current_user = cu
+    if self.class.no_master_association
+      @current_user = cu
+    else
+      master.current_user = cu
+    end
   end
 
   def belongs_directly_to
