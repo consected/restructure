@@ -15,6 +15,9 @@ class UserPreference < UserBase
   validates :date_format,
             presence: true
 
+  validates :date_time_format,
+            presence: true
+
   validates :pattern_for_date_format,
             presence: true
 
@@ -24,13 +27,12 @@ class UserPreference < UserBase
   validates :pattern_for_time_format,
             presence: true
 
-  def self.base_route_name
-    'user_preference'
-  end
+  validates :time_format,
+            presence: true
 
-  def self.base_route_segments
-    'user_preferences'
-  end
+  validates :timezone,
+            presence: true
+
 
   # put  validations here
   def self.default_pattern_for_date_format
