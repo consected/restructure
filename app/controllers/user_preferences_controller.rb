@@ -2,10 +2,17 @@
 
 class UserPreferencesController < UserBaseController
   include MasterHandler
+  include FilterUtils
+
+  helper_method :filter_params_hash
 
   protected
 
   def edit_form
     'common_templates/edit_form'
+  end
+
+  def filters_on
+    []
   end
 end
