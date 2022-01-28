@@ -29,7 +29,7 @@ class UserPreference < UserBase
   end
 
   def self.base_route_segments
-    'user_preference'
+    'user_preferences'
   end
 
   # put  validations here

@@ -6252,9 +6252,12 @@ CREATE TABLE ml_app.user_preferences (
     id bigint NOT NULL,
     user_id bigint,
     date_format character varying,
+    date_time_format character varying,
     pattern_for_date_format character varying,
     pattern_for_date_time_format character varying,
     pattern_for_time_format character varying,
+    time_format character varying,
+    timezone character varying,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
 );

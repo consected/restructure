@@ -1746,9 +1746,12 @@ ActiveRecord::Schema.define(version: 2022_01_21_143719) do
   create_table "user_preferences", force: :cascade do |t|
     t.bigint "user_id"
     t.string "date_format"
+    t.string "date_time_format"
     t.string "pattern_for_date_format"
     t.string "pattern_for_date_time_format"
     t.string "pattern_for_time_format"
+    t.string "time_format"
+    t.string "timezone"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_user_preferences_on_user_id", unique: true
