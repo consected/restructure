@@ -47,7 +47,7 @@ class UserProfilesController < UserBaseController
 
     elsif request.format == :html
       @panels = user_profile_panels
-      render 'user_profiles/show'
+      render :show
     else
       render json: { user_profile: resource_data }
     end
@@ -75,6 +75,8 @@ class UserProfilesController < UserBaseController
       next unless model
 
       resource = resource_from_model(model)
+      next unless resource # if the resource is not found, assume that we are building a resource (not persisted).
+
       resource.current_user = current_user
       @resource_data[resource_name.to_sym] = resource
     end

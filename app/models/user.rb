@@ -32,7 +32,6 @@ class User < ActiveRecord::Base
   scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPatternForSQL) }
   before_save :set_app_type
 
-
   validates :first_name,
             presence: {
               if: -> { allow_users_to_register? && !a_template_or_batch_user? }
@@ -104,7 +103,7 @@ class User < ActiveRecord::Base
   end
 
   def user_preference
-    super || build_user_preference
+    super || build_user_preference({ current_user: self })
   end
 
   #
@@ -236,5 +235,4 @@ class User < ActiveRecord::Base
   def a_template_or_batch_user?
     email.end_with?(Settings::TemplateUserEmailPattern) || email == Settings::BatchUserEmail
   end
-
 end
