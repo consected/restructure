@@ -349,6 +349,29 @@ class Admin::MigrationGenerator
     res.first && res.first['definition']
   end
 
+  #
+  # Get the SELECT definition of multiple view matching a LIKE from Postgres
+  # @param [String] schema
+  # @param [String] view_name
+  # @return [Array]
+  def self.view_definitions(schema, view_name)
+
+    sql = <<~SQL
+      select schemaname, viewname, definition
+      from pg_views
+      where viewname LIKE $1 and schemaname = $2;
+    SQL
+
+    type  = ActiveModel::Type::String.new
+    binds = [
+      ActiveRecord::Relation::QueryAttribute.new('viewname', view_name, type),
+      ActiveRecord::Relation::QueryAttribute.new('schemaname', schema, type)
+    ]
+
+    connection.exec_query sql, 'SQL', binds 
+  end
+
+
   def table_columns
     ActiveRecord::Base.connection.columns(table_name)
   end
