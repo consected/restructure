@@ -5,14 +5,7 @@
     prevent_edit: false,
     prevent_create: false,
     item_list: UserPreference.attribute_names - %w[id created_at updated_at admin_id user_id],
-    field_options: {
-      date_format: { no_downcase: true },
-      timezone: { no_downcase: true },
-      pattern_for_date_format: { no_downcase: true },
-      pattern_for_time_format: { no_downcase: true },
-      pattern_for_date_time_format: { no_downcase: true }
-    }
-  } 
+  }.merge(user_preferences_form_options) 
 %>
 
 <%= render partial: 'user_profiles/tabs' %>

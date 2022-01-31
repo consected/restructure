@@ -33,6 +33,13 @@ class UserPreference < UserBase
   validates :timezone,
             presence: true
 
+  
+  def self.no_downcase_attributes
+    [
+      :timezone, :date_format, :time_format, :date_time_format,
+      :pattern_for_date_format, :pattern_for_time_format, :pattern_for_date_time_format
+    ]
+  end
 
   # put  validations here
   def self.default_pattern_for_date_format
