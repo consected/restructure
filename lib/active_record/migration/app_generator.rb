@@ -457,6 +457,17 @@ module ActiveRecord
           removed_history = []
         end
 
+        # If there was an activity log referencing this table, drop it, then recreate it at the end
+        view_tn = table_name.sub(/^activity_log_/, 'al_')
+        view_name = "#{view_tn}_from_al_%"
+        reference_views = Admin::MigrationGenerator.view_definitions(schema, view_name)
+        reference_views&.each do |view|
+          execute <<~END_SQL
+            DROP VIEW #{view['schemaname']}.#{view['viewname']};
+          END_SQL
+        end
+
+
         if belongs_to_model && !old_colnames.include?(belongs_to_model) && !col_names.include?(belongs_to_model_field)
           begin
             add_reference "#{schema}.#{table_name}", belongs_to_model, index: { name: "#{rand_id}_bt_id_idx" }
@@ -586,6 +597,19 @@ module ActiveRecord
             change_column "#{schema}.#{table_name}", k, change_type
           end
         end
+
+        # Recreate the activity log reference views
+        reference_views&.each do |view|
+          new_view_sql = view['definition'].dup
+          new_view_sql = new_view_sql.gsub(/dest\..+,\n/, '--removed-col')
+          new_view_sql = new_view_sql.sub('--removed-col', 'dest.*,')  
+          new_view_sql = new_view_sql.gsub(/--removed-col.*\n/, '')
+          execute <<~END_SQL
+            create view #{view['schemaname']}.#{view['viewname']} as
+            #{new_view_sql}
+          END_SQL
+        end
+
 
         change_comments
       rescue StandardError, ActiveRecord::StatementInvalid => e
