@@ -149,7 +149,7 @@ module UserHandler
   def master_id
     return nil if self.class.no_master_association
 
-    master&.id
+    super
   end
 
   def current_user
