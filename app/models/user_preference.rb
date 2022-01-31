@@ -33,11 +33,10 @@ class UserPreference < UserBase
   validates :timezone,
             presence: true
 
-  
   def self.no_downcase_attributes
-    [
-      :timezone, :date_format, :time_format, :date_time_format,
-      :pattern_for_date_format, :pattern_for_time_format, :pattern_for_date_time_format
+    %i[
+      date_format time_format date_time_format timezone
+      pattern_for_date_format pattern_for_time_format pattern_for_date_time_format
     ]
   end
 
@@ -61,10 +60,12 @@ class UserPreference < UserBase
   def set_defaults
     self.date_format ||= 'mm/dd/yyyy'
     self.date_time_format ||= 'mm/dd/yyyy h:mm:sspm'
+    self.time_format ||= 'h:mm:sspm'
+    self.timezone ||= 'Eastern Time (US & Canada)'
     self.pattern_for_date_format ||= UserPreference.default_pattern_for_date_format
     self.pattern_for_date_time_format ||= UserPreference.default_pattern_for_date_time_format
     self.pattern_for_time_format ||= UserPreference.default_pattern_for_time_format
-    self.time_format ||= 'h:mm:sspm'
-    self.timezone ||= 'Eastern Time (US & Canada)'
   end
 end
+
+Time

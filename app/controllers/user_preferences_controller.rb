@@ -12,11 +12,11 @@ class UserPreferencesController < UserBaseController
     'common_templates/edit_form'
   end
 
-  def filters_on
-    []
-  end
-
   def edit_form_extras
     helpers.user_preferences_form_options
+  end
+
+  def filters_on
+    []
   end
 end
