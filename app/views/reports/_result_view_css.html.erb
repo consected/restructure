@@ -11,6 +11,8 @@ end
 if view_css.selectors
   res ||= []
   res += view_css.selectors.map {|c, v|
+    next unless v
+    
     styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
     "#{outer} #{c} \{  #{styles.join(' ')}\}"
   }

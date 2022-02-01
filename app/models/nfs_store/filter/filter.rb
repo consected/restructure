@@ -51,9 +51,10 @@ module NfsStore
       # Get the "human" version of each of the filters returned by NfsStore::Filter::Filter.filters_for
       # This is a rough approximation of what a user would expect to see as file wildcards
       # @return [Array{String}]
-      def self.human_filters_for(item, user:nil, alt_role:nil)
+      def self.human_filters_for(item, user: nil, alt_role: nil)
         filters_for(item).uniq.sort.map do |f|
-          f.gsub('\.', '.').gsub('.*', '*').gsub('.+', '*').gsub(/^\*$/, '*.*').gsub('^/', '').gsub('^', '').gsub('$', '')
+          f.gsub('\.', '.').gsub('.*', '*').gsub('.+', '*').gsub(/^\*$/, '*.*').gsub('^/', '').gsub('^', '').gsub('$',
+                                                                                                                  '')
         end
       end
 

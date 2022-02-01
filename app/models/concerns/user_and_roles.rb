@@ -33,34 +33,47 @@ END"
     def where_user_and_role(user, alt_app_type = nil, alt_role_name = nil)
       where_clause = ''
       where_conditions = []
-
-      app_type = alt_app_type
-
       if user
         where_clause += 'user_id = ?'
         where_conditions << user.id
-
-        rn = Admin::UserRole.active_app_roles(user, app_type: alt_app_type).role_names
-
-        app_type = alt_app_type || user.app_type
       end
+
+      app_type = alt_app_type || user&.app_type
+      app_type_id = if app_type.is_a? Admin::AppType
+                      app_type.id
+                    else
+                      app_type
+                    end
 
       if alt_role_name
         rn = alt_role_name
         rn = [rn] unless rn.is_a? Array
+        app_type_role_names = rn.map { |v| [app_type_id, v] }
+      elsif user
+        app_type_role_names = Admin::UserRole.active_app_roles(user, app_type: [app_type_id, nil])
+                                             .select('app_type_id, role_name').distinct.order(app_type_id: :asc)
+                                             .pluck(:app_type_id, :role_name)
       end
 
-      if rn && !rn.empty?
-        where_clause += ' OR ' if where_clause.present?
-        where_clause += 'role_name IN (?)'
-        where_conditions << rn
+      if app_type_role_names&.present?
+        app_type_role_names.each do |pair|
+          where_clause += ' OR ' if where_clause.present?
+          app_type_clause = if pair.first
+                              'app_type_id = ?'
+                            else
+                              pair = [pair.last]
+                              'app_type_id IS NULL'
+                            end
+          where_clause += "(#{app_type_clause} AND role_name = ?)"
+          where_conditions += pair
+        end
       end
 
       where_clause += ' OR ' if where_clause.present?
       where_clause += "(user_id IS NULL AND (role_name IS NULL OR role_name = ''))"
       conditions = [where_clause] + where_conditions
 
-      active.where(app_type: app_type).where(conditions)
+      active.where(app_type_id: [app_type_id, nil]).where(conditions)
     end
 
     def order_user_and_role

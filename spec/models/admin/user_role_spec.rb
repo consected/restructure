@@ -18,6 +18,7 @@ RSpec.describe Admin::UserRole, type: :model do
       Admin::UserRole.where role_name: RandTestRoleName
     end.to raise_error FphsException
 
+    expect(@user.app_type_id).not_to be nil
     res = Admin::UserRole.where role_name: RandTestRoleName, app_type: @user.app_type
     expect(res).to be_a ActiveRecord::Relation
   end

@@ -51,7 +51,7 @@ class Settings
   # Disable 2FA by setting to true. The environment variable should be 'true' to set this
   TwoFactorAuthDisabled = (ENV['FPHS_2FA_AUTH_DISABLED'] == 'true')
   # App name that appears within 2FA authenticator app
-  TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'FPHS Apps'
+  TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'ReStructure'
   # Number of seconds to use for 2FA token drift (the older it is allowed to be and still be valid)
   TwoFactorAuthDrift = (ENV['FPHS_2FA_DRIFT'] || 30).to_i
 
@@ -79,7 +79,7 @@ class Settings
   # using the curly substitution {{base_url}}
   BaseUrl = ENV['BASE_URL'] || '(not set)'
   # title tag page title, appears in tab or browser heading
-  PageTitle = ENV['PAGE_TITLE'] || 'FPHS'
+  PageTitle = ENV['PAGE_TITLE'] || 'ReStructure'
 
   # Registration Settings
   # Since passwords have generated upon user creation, we must suppress generating a password
