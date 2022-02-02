@@ -82,6 +82,10 @@ class Master < ActiveRecord::Base
   after_initialize :init_vars_master
 
   belongs_to :user
+  if attribute_names.include? 'created_by_user_id'
+    belongs_to :created_by_user, class_name: 'User', optional: true
+    alias optionally_created_by_user created_by_user
+  end
 
   set_associations_for_subject_searches
 
@@ -160,6 +164,8 @@ class Master < ActiveRecord::Base
   # i.e. the underscored pluralized name
   # This is placed here, since there is a dependency on MasterSearchHandler
   ExternalIdentifier.enable_active_configurations
+
+  before_create :write_created_by_user
 
   attr_accessor :force_order, :creating_master
   attr_reader :current_user, :embedded_item
@@ -628,7 +634,7 @@ class Master < ActiveRecord::Base
     header_substitutions template
   end
 
-  # Validate that the external identifier restrictions do not prevent access to this item
+  # Validate that the limited access restrictions do not prevent access to this item
   def allows_user_access
     # but ignore the test if not persisted yet, since the external identifier may be added during the creation process
     er = Admin::UserAccessControl.limited_access_restrictions(current_user) unless creating_master
@@ -641,7 +647,17 @@ class Master < ActiveRecord::Base
     # If all required instances (and their assign_access_to_user_id fields if needed) exist, allow access
     er&.each do |e|
       assoc_name = e.resource_name.to_sym
+
+      if assoc_name == :optionally_created_by_user
+        return created_by_user_id.nil? || current_user.id == created_by_user_id
+      end
+
       assoc = send(assoc_name)
+      # The assoc may by nil if this is a belongs_to association and there is no target instance
+      return false unless assoc
+
+      return current_user.id == created_by_user_id if assoc_name == :created_by_user
+
       return false unless assoc.limit_to_assigned(current_user).first
     end
 
@@ -688,5 +704,9 @@ class Master < ActiveRecord::Base
     end
 
     write_attribute :user_id, cu.id
+  end
+
+  def write_created_by_user
+    self.created_by_user_id = current_user
   end
 end

@@ -10,6 +10,7 @@ module FilterUtils
   # @return [ActiveRecord::Relation] <description>
   def filtered_primary_model(pm = nil)
     pm ||= primary_model
+    init_pm = pm
 
     if filter_params
       pm = pm.active if filter_params[:disabled] == 'enabled' || !current_admin
@@ -34,6 +35,7 @@ module FilterUtils
         end
       end
 
+      p[:allow_all_app_types] = true if init_pm == Admin::UserRole
       pm = pm.where(p)
       pm = pm.where(likes) if likes.length > 0 && likes.first.present?
 
