@@ -79,8 +79,7 @@ module Resources
       res.merge!(
         'external identifiers': ExternalIdentifier.active.map { |r| [r.resource_name, r.label] }.to_h,
         'users': {
-          'created_by_user': 'Created by User',
-          'optionally_created_by_user': 'Optionally Created by User'
+          'created_by_user': 'Created by User'
         }
       )
 

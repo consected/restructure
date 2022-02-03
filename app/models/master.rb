@@ -82,10 +82,7 @@ class Master < ActiveRecord::Base
   after_initialize :init_vars_master
 
   belongs_to :user
-  if attribute_names.include? 'created_by_user_id'
-    belongs_to :created_by_user, class_name: 'User', optional: true
-    alias optionally_created_by_user created_by_user
-  end
+  belongs_to :created_by_user, class_name: 'User', optional: true if attribute_names.include? 'created_by_user_id'
 
   set_associations_for_subject_searches
 

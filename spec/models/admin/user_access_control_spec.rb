@@ -489,15 +489,15 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     expect(res).to be_falsey
     expect(Admin::UserAccessControl.limited_access_restrictions(user1)).to be nil
 
-    # Provide the third user access by allowing "optionally created by user" access and disabling the full version
-    ac3 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :limited, resource_type: rt,
-                                           resource_name: 'optionally_created_by_user', current_admin: @admin, user: user2
-    ac4 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: rt,
-                                           resource_name: 'created_by_user', current_admin: @admin, user: user2
+    # # Provide the third user access by allowing "optionally created by user" access and disabling the full version
+    # ac3 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :limited, resource_type: rt,
+    #                                        resource_name: 'optionally_created_by_user', current_admin: @admin, user: user2
+    # ac4 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: rt,
+    #                                        resource_name: 'created_by_user', current_admin: @admin, user: user2
 
-    res = user2.has_access_to? :limited, rt, 'optionally_created_by_user'
-    expect(res).to be_truthy
-    expect(Admin::UserAccessControl.limited_access_restrictions(user2).first).to eq ac3
+    # res = user2.has_access_to? :limited, rt, 'optionally_created_by_user'
+    # expect(res).to be_truthy
+    # expect(Admin::UserAccessControl.limited_access_restrictions(user2).first).to eq ac3
 
     # Adding created_by_user_id = user to the masters now allows access
     ids.each do |i|
@@ -512,11 +512,11 @@ RSpec.describe Admin::UserAccessControl, type: :model do
       j = JSON.parse(m2.to_json)
       expect(j['id']).to eq m2.id
 
-      # The second user is optionally limited and so can access
-      m3 = Master.find(i)
-      m3.current_user = user2
-      j = JSON.parse(m3.to_json)
-      expect(j['id']).to eq m3.id
+      # # The second user is optionally limited and so can access
+      # m3 = Master.find(i)
+      # m3.current_user = user2
+      # j = JSON.parse(m3.to_json)
+      # expect(j['id']).to eq m3.id
 
       # Force update of the created_by_user_id field without triggering any callbacks
       Master.where(id: i).update_all(created_by_user_id: @user.id)
@@ -533,16 +533,16 @@ RSpec.describe Admin::UserAccessControl, type: :model do
       j = JSON.parse(m2.to_json)
       expect(j['id']).to eq m2.id
 
-      # The third user is optionally limited and so can not access
-      m3 = Master.find(i)
-      m3.current_user = user2
-      j = JSON.parse(m3.to_json)
-      expect(m3.to_json).to eq '{}'
+      # # The third user is optionally limited and so can not access
+      # m3 = Master.find(i)
+      # m3.current_user = user2
+      # j = JSON.parse(m3.to_json)
+      # expect(m3.to_json).to eq '{}'
     end
 
     ac.update! access: nil, disabled: true
     ac2.update! disabled: true
-    ac3.update! disabled: true
+    # ac3.update! disabled: true
   end
 
   it 'manages standard user authorizations to use features, such as create master record' do
