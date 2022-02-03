@@ -1,6 +1,5 @@
 SET statement_timeout = 0;
 SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -10,6 +9,27 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
+-- Name: data_requests; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA data_requests;
+
+
+--
+-- Name: dynamic; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA dynamic;
+
+
+--
+-- Name: extra_app; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA extra_app;
+
+
+--
 -- Name: ml_app; Type: SCHEMA; Schema: -; Owner: -
 --
 
@@ -17,10 +37,372 @@ CREATE SCHEMA ml_app;
 
 
 --
+-- Name: projects; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA projects;
+
+
+--
+-- Name: redcap; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA redcap;
+
+
+--
 -- Name: ref_data; Type: SCHEMA; Schema: -; Owner: -
 --
 
 CREATE SCHEMA ref_data;
+
+
+--
+-- Name: study_info; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA study_info;
+
+
+--
+-- Name: viva_ref_info; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA viva_ref_info;
+
+
+--
+-- Name: log_activity_log_data_request_assignments_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_activity_log_data_request_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_data_request_assignment_history (
+    master_id,
+    data_request_assignment_id,
+    created_by_user_id, status, notes, next_step, disabled,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_data_request_assignment_id)
+  SELECT
+    NEW.master_id,
+    NEW.data_request_assignment_id,
+    NEW.created_by_user_id, NEW.status, NEW.notes, NEW.next_step, NEW.disabled,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_data_request_attribs_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_data_request_attribs_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO data_request_attrib_history (
+    master_id,
+    data_source,
+    user_id,
+    created_at,
+    updated_at,
+    data_request_attrib_id)
+  SELECT
+    NEW.master_id,
+    NEW.data_source,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_data_request_initial_reviews_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_data_request_initial_reviews_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO data_request_initial_review_history (
+    master_id,
+    study_analyst_yes_no, review_notes, next_step, message_notes, review_approved_yes_no, created_by_user_id,
+    user_id,
+    created_at,
+    updated_at,
+    data_request_initial_review_id)
+  SELECT
+    NEW.master_id,
+    NEW.study_analyst_yes_no, NEW.review_notes, NEW.next_step, NEW.message_notes, NEW.review_approved_yes_no, NEW.created_by_user_id,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_data_request_messages_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_data_request_messages_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO data_request_message_history (
+    master_id,
+    message_notes, created_by_user_id,
+    user_id,
+    created_at,
+    updated_at,
+    data_request_message_id)
+  SELECT
+    NEW.master_id,
+    NEW.message_notes, NEW.created_by_user_id,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_data_requests_selected_attribs_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_data_requests_selected_attribs_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO data_requests_selected_attrib_history (
+    master_id,
+    record_id, data, data_request_id, disabled, variable_name, record_type,
+    user_id,
+    created_at,
+    updated_at,
+    data_requests_selected_attrib_id)
+  SELECT
+    NEW.master_id,
+    NEW.record_id, NEW.data, NEW.data_request_id, NEW.disabled, NEW.variable_name, NEW.record_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_data_requests_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_data_requests_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO data_request_history (
+    master_id,
+    status, study_analyst_yes_no, others_handling_data, select_pm_contact, other_pm_contact, select_purpose, other_purpose, data_start_date, data_end_date, project_title, request_notes, terms_of_use_yes_no, created_by_user_id,
+    user_id,
+    created_at,
+    updated_at,
+    data_request_id)
+  SELECT
+    NEW.master_id,
+    NEW.status, NEW.study_analyst_yes_no, NEW.others_handling_data, NEW.select_pm_contact, NEW.other_pm_contact, NEW.select_purpose, NEW.other_purpose, NEW.data_start_date, NEW.data_end_date, NEW.project_title, NEW.request_notes, NEW.terms_of_use_yes_no, NEW.created_by_user_id,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_user_profiile_details_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_user_profiile_details_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO user_profiile_detail_history (
+    
+    notes, user_id,
+    user_id,
+    created_at,
+    updated_at,
+    user_profiile_detail_id)
+  SELECT
+    
+    NEW.notes, NEW.user_id,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_user_profile_academic_details_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_user_profile_academic_details_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO user_profile_academic_detail_history (
+    
+    primary_affiliation, position_title, start_year, created_by_user_id,
+    user_id,
+    created_at,
+    updated_at,
+    user_profile_academic_detail_id)
+  SELECT
+    
+    NEW.primary_affiliation, NEW.position_title, NEW.start_year, NEW.created_by_user_id,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_user_profile_details_update(); Type: FUNCTION; Schema: data_requests; Owner: -
+--
+
+CREATE FUNCTION data_requests.log_user_profile_details_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO user_profile_detail_history (
+    
+    title, notes, created_by_user_id,
+    user_id,
+    created_at,
+    updated_at,
+    user_profile_detail_id)
+  SELECT
+    
+    NEW.title, NEW.notes, NEW.created_by_user_id,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_grit_assignments_update(); Type: FUNCTION; Schema: extra_app; Owner: -
+--
+
+CREATE FUNCTION extra_app.log_grit_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO grit_assignment_history (
+    master_id,
+    grit_id,
+    user_id,
+    admin_id,
+    created_at,
+    updated_at,
+    grit_assignment_table_id)
+  SELECT
+    NEW.master_id,
+    NEW.grit_id,
+    NEW.user_id,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_pitt_bhi_assignments_update(); Type: FUNCTION; Schema: extra_app; Owner: -
+--
+
+CREATE FUNCTION extra_app.log_pitt_bhi_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO pitt_bhi_assignment_history (
+    master_id,
+    pitt_bhi_id,
+    user_id,
+    admin_id,
+    created_at,
+    updated_at,
+    pitt_bhi_assignment_table_id)
+  SELECT
+    NEW.master_id,
+    NEW.pitt_bhi_id,
+    NEW.user_id,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_sleep_assignments_update(); Type: FUNCTION; Schema: extra_app; Owner: -
+--
+
+CREATE FUNCTION extra_app.log_sleep_assignments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO sleep_assignment_history (
+    master_id,
+    sleep_id,
+    user_id,
+    admin_id,
+    created_at,
+    updated_at,
+    sleep_assignment_table_id)
+  SELECT
+    NEW.master_id,
+    NEW.sleep_id,
+    NEW.user_id,
+    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
 
 
 --
@@ -418,6 +800,8 @@ $$;
 
 
 SET default_tablespace = '';
+
+SET default_with_oids = false;
 
 --
 -- Name: nfs_store_archived_files; Type: TABLE; Schema: ml_app; Owner: -
@@ -2747,6 +3131,1864 @@ $$;
 
 
 --
+-- Name: log_activity_log_study_info_parts_update(); Type: FUNCTION; Schema: study_info; Owner: -
+--
+
+CREATE FUNCTION study_info.log_activity_log_study_info_parts_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_study_info_part_history (
+    master_id,
+    study_info_part_id,
+    title, description, default_layout, slug, tag_select_allow_roles_access, footer, tag_select_page_tags, disabled, position_number, extra_classes, notes,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_study_info_part_id)
+  SELECT
+    NEW.master_id,
+    NEW.study_info_part_id,
+    NEW.title, NEW.description, NEW.default_layout, NEW.slug, NEW.tag_select_allow_roles_access, NEW.footer, NEW.tag_select_page_tags, NEW.disabled, NEW.position_number, NEW.extra_classes, NEW.notes,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_activity_log_view_user_data_user_procs_update(); Type: FUNCTION; Schema: study_info; Owner: -
+--
+
+CREATE FUNCTION study_info.log_activity_log_view_user_data_user_procs_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO activity_log_view_user_data_user_proc_history (
+    master_id,
+    view_user_id,
+    is_complete, confirmed_read_terms_yes_no,
+    extra_log_type,
+    user_id,
+    created_at,
+    updated_at,
+    activity_log_view_user_data_user_proc_id)
+  SELECT
+    NEW.master_id,
+    NEW.view_user_id,
+    NEW.is_complete, NEW.confirmed_read_terms_yes_no,
+    NEW.extra_log_type,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_study_common_sections_update(); Type: FUNCTION; Schema: study_info; Owner: -
+--
+
+CREATE FUNCTION study_info.log_study_common_sections_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO study_common_section_history (
+    
+    title, content, position_number, block_width, extra_classes,
+    user_id,
+    created_at,
+    updated_at,
+    study_common_section_id)
+  SELECT
+    
+    NEW.title, NEW.content, NEW.position_number, NEW.block_width, NEW.extra_classes,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_study_page_sections_update(); Type: FUNCTION; Schema: study_info; Owner: -
+--
+
+CREATE FUNCTION study_info.log_study_page_sections_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO study_page_section_history (
+    master_id,
+    title, content, position_number, block_width, extra_classes, tag_select_allow_roles_access, disabled,
+    user_id,
+    created_at,
+    updated_at,
+    study_page_section_id)
+  SELECT
+    NEW.master_id,
+    NEW.title, NEW.content, NEW.position_number, NEW.block_width, NEW.extra_classes, NEW.tag_select_allow_roles_access, NEW.disabled,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_viva2_rcs_update(); Type: FUNCTION; Schema: viva_ref_info; Owner: -
+--
+
+CREATE FUNCTION viva_ref_info.log_viva2_rcs_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO viva2_rc_history (
+    
+    varname, var_label, var_type, restrict_var___0, restrict_var___1, restrict_var___2, restrict_var___3, restrict_var___4, oth_restrict, domain_viva, subdomain___1, subdomain___2, target_of_q, data_source, val_instr, ext_instrument, internal_instrument, doc_yn, doc_link, long_yn, long_timepts___1, long_timepts___2, long_timepts___3, long_timepts___4, long_timepts___5, long_timepts___6, long_timepts___7, long_timepts___8, long_timepts___9, long_timepts___10, long_timepts___11, long_timepts___12, long_timepts___13, long_timepts___14, long_timepts___15, long_timepts___16, long_timepts___17, long_timepts___18, long_timepts___19, long_timepts___20, long_timepts___21, long_timepts___22, long_timepts___23, static_variable_information_complete, event_type, visit_name, visit_time, assay_specimen, assay_type, lab_assay_dataset, form_label_ep, form_version_ep___1, form_version_ep___2, form_version_ep___3, form_version_ep___4, form_version_ep___5, form_version_ep___6, form_version_ep___7, form_version_ep___8, form_label_mp, form_version_mp___1, form_version_mp___2, form_version_mp___3, form_version_mp___4, form_label_del, form_version_del___1, form_version_del___2, form_version_del___3, form_version_del___4, form_version_del___5, form_version_del___6, form_version_del___7, form_label_6m, form_version_6m___1, form_version_6m___2, form_version_6m___3, form_version_6m___4, form_version_6m___5, form_version_6m___6, form_version_6m___7, form_version_6m___8, form_version_6m___9, form_version_6m___10, form_label_1y, form_version_1y___1, form_label_2y, form_version_2y___1, form_label_3y, form_version_3y___1, form_version_3y___2, form_version_3y___3, form_version_3y___4, form_version_3y___5, form_version_3y___6, form_version_3y___7, form_version_3y___8, form_version_3y___9, form_version_3y___10, form_version_3y___11, form_version_3y___12, form_version_3y___13, form_version_3y___14, form_label_4y, form_version_4y___1, form_label_5y, form_version_5y___1, form_label_6y, form_version_6y___1, form_label_7y, form_version_7y___1, form_version_7y___2, form_version_7y___3, form_version_7y___4, form_version_7y___5, form_version_7y___6, form_version_7y___7, form_version_7y___8, form_version_7y___9, form_version_7y___10, form_version_7y___11, form_version_7y___12, form_version_7y___13, form_version_7y___14, form_version_7y___15, form_version_7y___16, form_version_7y___17, form_label_8y, form_version_8y___1, form_label_9y, form_version_9y___1, form_version_9y___2, form_label_10y, form_version_10y___1, form_version_10y___2, form_label_11y, form_version_11y___1, form_version_11y___2, form_label_12y, form_version_12y___1, form_version_12y___2, form_version_12y___3, form_version_12y___4, form_version_12y___5, form_version_12y___6, form_version_12y___7, form_version_12y___8, form_version_12y___9, form_version_12y___10, form_version_12y___11, form_version_12y___12, form_version_12y___13, form_version_12y___14, form_version_12y___15, form_version_12y___16, form_label_14y, form_version_14y___1, form_version_14y___2, form_label_15y, form_version_15y___1, form_version_15y___2, form_label_16y, form_version_16y___1, form_version_16y___2, form_label_mt, form_version_mt, form_label_19y, form_version_19y___1, form_version_19y___2, not_time_specific, var_level, units, model_type, response_options, elig_sample, elig_n, actual_n, an_var, orig_deriv, corr_derived_yn___0, corr_derived_yn___1, der_varname, dervar_explain, orig_varnames, visitspecific_information_complete, redcap_repeat_instrument, redcap_repeat_instance,
+    user_id,
+    created_at,
+    updated_at,
+    viva2_rc_id)
+  SELECT
+    
+    NEW.varname, NEW.var_label, NEW.var_type, NEW.restrict_var___0, NEW.restrict_var___1, NEW.restrict_var___2, NEW.restrict_var___3, NEW.restrict_var___4, NEW.oth_restrict, NEW.domain_viva, NEW.subdomain___1, NEW.subdomain___2, NEW.target_of_q, NEW.data_source, NEW.val_instr, NEW.ext_instrument, NEW.internal_instrument, NEW.doc_yn, NEW.doc_link, NEW.long_yn, NEW.long_timepts___1, NEW.long_timepts___2, NEW.long_timepts___3, NEW.long_timepts___4, NEW.long_timepts___5, NEW.long_timepts___6, NEW.long_timepts___7, NEW.long_timepts___8, NEW.long_timepts___9, NEW.long_timepts___10, NEW.long_timepts___11, NEW.long_timepts___12, NEW.long_timepts___13, NEW.long_timepts___14, NEW.long_timepts___15, NEW.long_timepts___16, NEW.long_timepts___17, NEW.long_timepts___18, NEW.long_timepts___19, NEW.long_timepts___20, NEW.long_timepts___21, NEW.long_timepts___22, NEW.long_timepts___23, NEW.static_variable_information_complete, NEW.event_type, NEW.visit_name, NEW.visit_time, NEW.assay_specimen, NEW.assay_type, NEW.lab_assay_dataset, NEW.form_label_ep, NEW.form_version_ep___1, NEW.form_version_ep___2, NEW.form_version_ep___3, NEW.form_version_ep___4, NEW.form_version_ep___5, NEW.form_version_ep___6, NEW.form_version_ep___7, NEW.form_version_ep___8, NEW.form_label_mp, NEW.form_version_mp___1, NEW.form_version_mp___2, NEW.form_version_mp___3, NEW.form_version_mp___4, NEW.form_label_del, NEW.form_version_del___1, NEW.form_version_del___2, NEW.form_version_del___3, NEW.form_version_del___4, NEW.form_version_del___5, NEW.form_version_del___6, NEW.form_version_del___7, NEW.form_label_6m, NEW.form_version_6m___1, NEW.form_version_6m___2, NEW.form_version_6m___3, NEW.form_version_6m___4, NEW.form_version_6m___5, NEW.form_version_6m___6, NEW.form_version_6m___7, NEW.form_version_6m___8, NEW.form_version_6m___9, NEW.form_version_6m___10, NEW.form_label_1y, NEW.form_version_1y___1, NEW.form_label_2y, NEW.form_version_2y___1, NEW.form_label_3y, NEW.form_version_3y___1, NEW.form_version_3y___2, NEW.form_version_3y___3, NEW.form_version_3y___4, NEW.form_version_3y___5, NEW.form_version_3y___6, NEW.form_version_3y___7, NEW.form_version_3y___8, NEW.form_version_3y___9, NEW.form_version_3y___10, NEW.form_version_3y___11, NEW.form_version_3y___12, NEW.form_version_3y___13, NEW.form_version_3y___14, NEW.form_label_4y, NEW.form_version_4y___1, NEW.form_label_5y, NEW.form_version_5y___1, NEW.form_label_6y, NEW.form_version_6y___1, NEW.form_label_7y, NEW.form_version_7y___1, NEW.form_version_7y___2, NEW.form_version_7y___3, NEW.form_version_7y___4, NEW.form_version_7y___5, NEW.form_version_7y___6, NEW.form_version_7y___7, NEW.form_version_7y___8, NEW.form_version_7y___9, NEW.form_version_7y___10, NEW.form_version_7y___11, NEW.form_version_7y___12, NEW.form_version_7y___13, NEW.form_version_7y___14, NEW.form_version_7y___15, NEW.form_version_7y___16, NEW.form_version_7y___17, NEW.form_label_8y, NEW.form_version_8y___1, NEW.form_label_9y, NEW.form_version_9y___1, NEW.form_version_9y___2, NEW.form_label_10y, NEW.form_version_10y___1, NEW.form_version_10y___2, NEW.form_label_11y, NEW.form_version_11y___1, NEW.form_version_11y___2, NEW.form_label_12y, NEW.form_version_12y___1, NEW.form_version_12y___2, NEW.form_version_12y___3, NEW.form_version_12y___4, NEW.form_version_12y___5, NEW.form_version_12y___6, NEW.form_version_12y___7, NEW.form_version_12y___8, NEW.form_version_12y___9, NEW.form_version_12y___10, NEW.form_version_12y___11, NEW.form_version_12y___12, NEW.form_version_12y___13, NEW.form_version_12y___14, NEW.form_version_12y___15, NEW.form_version_12y___16, NEW.form_label_14y, NEW.form_version_14y___1, NEW.form_version_14y___2, NEW.form_label_15y, NEW.form_version_15y___1, NEW.form_version_15y___2, NEW.form_label_16y, NEW.form_version_16y___1, NEW.form_version_16y___2, NEW.form_label_mt, NEW.form_version_mt, NEW.form_label_19y, NEW.form_version_19y___1, NEW.form_version_19y___2, NEW.not_time_specific, NEW.var_level, NEW.units, NEW.model_type, NEW.response_options, NEW.elig_sample, NEW.elig_n, NEW.actual_n, NEW.an_var, NEW.orig_deriv, NEW.corr_derived_yn___0, NEW.corr_derived_yn___1, NEW.der_varname, NEW.dervar_explain, NEW.orig_varnames, NEW.visitspecific_information_complete, NEW.redcap_repeat_instrument, NEW.redcap_repeat_instance,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_viva3_rcs_update(); Type: FUNCTION; Schema: viva_ref_info; Owner: -
+--
+
+CREATE FUNCTION viva_ref_info.log_viva3_rcs_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO viva3_rc_history (
+    
+    varname, var_label, var_type, restrict_var___0, restrict_var___1, restrict_var___2, restrict_var___3, restrict_var___4, oth_restrict, domain_viva, subdomain___1, subdomain___2, target_of_q, data_source, val_instr, ext_instrument, internal_instrument, doc_yn, doc_link, var_level, units, response_options, long_yn, long_timepts___1, long_timepts___2, long_timepts___3, long_timepts___4, long_timepts___5, long_timepts___6, long_timepts___7, long_timepts___8, long_timepts___9, long_timepts___10, long_timepts___11, long_timepts___12, long_timepts___13, long_timepts___14, long_timepts___15, long_timepts___16, long_timepts___17, long_timepts___18, long_timepts___19, long_timepts___20, long_timepts___21, long_timepts___22, long_timepts___23, static_variable_information_complete, event_type, visit_name, visit_time, assay_specimen, assay_type, lab_assay_dataset, form_label_ep, form_version_ep___1, form_version_ep___2, form_version_ep___3, form_version_ep___4, form_version_ep___5, form_version_ep___6, form_version_ep___7, form_version_ep___8, form_label_mp, form_version_mp___1, form_version_mp___2, form_version_mp___3, form_version_mp___4, form_label_del, form_version_del___1, form_version_del___2, form_version_del___3, form_version_del___4, form_version_del___5, form_version_del___6, form_version_del___7, form_label_6m, form_version_6m___1, form_version_6m___2, form_version_6m___3, form_version_6m___4, form_version_6m___5, form_version_6m___6, form_version_6m___7, form_version_6m___8, form_version_6m___9, form_version_6m___10, form_label_1y, form_version_1y___1, form_label_2y, form_version_2y___1, form_label_3y, form_version_3y___1, form_version_3y___2, form_version_3y___3, form_version_3y___4, form_version_3y___5, form_version_3y___6, form_version_3y___7, form_version_3y___8, form_version_3y___9, form_version_3y___10, form_version_3y___11, form_version_3y___12, form_version_3y___13, form_version_3y___14, form_label_4y, form_version_4y___1, form_label_5y, form_version_5y___1, form_label_6y, form_version_6y___1, form_label_7y, form_version_7y___1, form_version_7y___2, form_version_7y___3, form_version_7y___4, form_version_7y___5, form_version_7y___6, form_version_7y___7, form_version_7y___8, form_version_7y___9, form_version_7y___10, form_version_7y___11, form_version_7y___12, form_version_7y___13, form_version_7y___14, form_version_7y___15, form_version_7y___16, form_version_7y___17, form_label_8y, form_version_8y___1, form_label_9y, form_version_9y___1, form_version_9y___2, form_label_10y, form_version_10y___1, form_version_10y___2, form_label_11y, form_version_11y___1, form_version_11y___2, form_label_12y, form_version_12y___1, form_version_12y___2, form_version_12y___3, form_version_12y___4, form_version_12y___5, form_version_12y___6, form_version_12y___7, form_version_12y___8, form_version_12y___9, form_version_12y___10, form_version_12y___11, form_version_12y___12, form_version_12y___13, form_version_12y___14, form_version_12y___15, form_version_12y___16, form_label_14y, form_version_14y___1, form_version_14y___2, form_label_15y, form_version_15y___1, form_version_15y___2, form_label_16y, form_version_16y___1, form_version_16y___2, form_label_mt, form_version_mt, form_label_19y, form_version_19y___1, form_version_19y___2, not_time_specific, model_type, elig_sample, elig_n, actual_n, an_var, orig_deriv, corr_derived_yn___0, corr_derived_yn___1, der_varname, dervar_explain, orig_varnames, visitspecific_information_complete, redcap_repeat_instrument, redcap_repeat_instance,
+    user_id,
+    created_at,
+    updated_at,
+    viva3_rc_id)
+  SELECT
+    
+    NEW.varname, NEW.var_label, NEW.var_type, NEW.restrict_var___0, NEW.restrict_var___1, NEW.restrict_var___2, NEW.restrict_var___3, NEW.restrict_var___4, NEW.oth_restrict, NEW.domain_viva, NEW.subdomain___1, NEW.subdomain___2, NEW.target_of_q, NEW.data_source, NEW.val_instr, NEW.ext_instrument, NEW.internal_instrument, NEW.doc_yn, NEW.doc_link, NEW.var_level, NEW.units, NEW.response_options, NEW.long_yn, NEW.long_timepts___1, NEW.long_timepts___2, NEW.long_timepts___3, NEW.long_timepts___4, NEW.long_timepts___5, NEW.long_timepts___6, NEW.long_timepts___7, NEW.long_timepts___8, NEW.long_timepts___9, NEW.long_timepts___10, NEW.long_timepts___11, NEW.long_timepts___12, NEW.long_timepts___13, NEW.long_timepts___14, NEW.long_timepts___15, NEW.long_timepts___16, NEW.long_timepts___17, NEW.long_timepts___18, NEW.long_timepts___19, NEW.long_timepts___20, NEW.long_timepts___21, NEW.long_timepts___22, NEW.long_timepts___23, NEW.static_variable_information_complete, NEW.event_type, NEW.visit_name, NEW.visit_time, NEW.assay_specimen, NEW.assay_type, NEW.lab_assay_dataset, NEW.form_label_ep, NEW.form_version_ep___1, NEW.form_version_ep___2, NEW.form_version_ep___3, NEW.form_version_ep___4, NEW.form_version_ep___5, NEW.form_version_ep___6, NEW.form_version_ep___7, NEW.form_version_ep___8, NEW.form_label_mp, NEW.form_version_mp___1, NEW.form_version_mp___2, NEW.form_version_mp___3, NEW.form_version_mp___4, NEW.form_label_del, NEW.form_version_del___1, NEW.form_version_del___2, NEW.form_version_del___3, NEW.form_version_del___4, NEW.form_version_del___5, NEW.form_version_del___6, NEW.form_version_del___7, NEW.form_label_6m, NEW.form_version_6m___1, NEW.form_version_6m___2, NEW.form_version_6m___3, NEW.form_version_6m___4, NEW.form_version_6m___5, NEW.form_version_6m___6, NEW.form_version_6m___7, NEW.form_version_6m___8, NEW.form_version_6m___9, NEW.form_version_6m___10, NEW.form_label_1y, NEW.form_version_1y___1, NEW.form_label_2y, NEW.form_version_2y___1, NEW.form_label_3y, NEW.form_version_3y___1, NEW.form_version_3y___2, NEW.form_version_3y___3, NEW.form_version_3y___4, NEW.form_version_3y___5, NEW.form_version_3y___6, NEW.form_version_3y___7, NEW.form_version_3y___8, NEW.form_version_3y___9, NEW.form_version_3y___10, NEW.form_version_3y___11, NEW.form_version_3y___12, NEW.form_version_3y___13, NEW.form_version_3y___14, NEW.form_label_4y, NEW.form_version_4y___1, NEW.form_label_5y, NEW.form_version_5y___1, NEW.form_label_6y, NEW.form_version_6y___1, NEW.form_label_7y, NEW.form_version_7y___1, NEW.form_version_7y___2, NEW.form_version_7y___3, NEW.form_version_7y___4, NEW.form_version_7y___5, NEW.form_version_7y___6, NEW.form_version_7y___7, NEW.form_version_7y___8, NEW.form_version_7y___9, NEW.form_version_7y___10, NEW.form_version_7y___11, NEW.form_version_7y___12, NEW.form_version_7y___13, NEW.form_version_7y___14, NEW.form_version_7y___15, NEW.form_version_7y___16, NEW.form_version_7y___17, NEW.form_label_8y, NEW.form_version_8y___1, NEW.form_label_9y, NEW.form_version_9y___1, NEW.form_version_9y___2, NEW.form_label_10y, NEW.form_version_10y___1, NEW.form_version_10y___2, NEW.form_label_11y, NEW.form_version_11y___1, NEW.form_version_11y___2, NEW.form_label_12y, NEW.form_version_12y___1, NEW.form_version_12y___2, NEW.form_version_12y___3, NEW.form_version_12y___4, NEW.form_version_12y___5, NEW.form_version_12y___6, NEW.form_version_12y___7, NEW.form_version_12y___8, NEW.form_version_12y___9, NEW.form_version_12y___10, NEW.form_version_12y___11, NEW.form_version_12y___12, NEW.form_version_12y___13, NEW.form_version_12y___14, NEW.form_version_12y___15, NEW.form_version_12y___16, NEW.form_label_14y, NEW.form_version_14y___1, NEW.form_version_14y___2, NEW.form_label_15y, NEW.form_version_15y___1, NEW.form_version_15y___2, NEW.form_label_16y, NEW.form_version_16y___1, NEW.form_version_16y___2, NEW.form_label_mt, NEW.form_version_mt, NEW.form_label_19y, NEW.form_version_19y___1, NEW.form_version_19y___2, NEW.not_time_specific, NEW.model_type, NEW.elig_sample, NEW.elig_n, NEW.actual_n, NEW.an_var, NEW.orig_deriv, NEW.corr_derived_yn___0, NEW.corr_derived_yn___1, NEW.der_varname, NEW.dervar_explain, NEW.orig_varnames, NEW.visitspecific_information_complete, NEW.redcap_repeat_instrument, NEW.redcap_repeat_instance,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_viva_collection_instruments_update(); Type: FUNCTION; Schema: viva_ref_info; Owner: -
+--
+
+CREATE FUNCTION viva_ref_info.log_viva_collection_instruments_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO viva_collection_instrument_history (
+    
+    name, select_data_source, select_data_target, select_record_id_from_viva_domains, select_record_id_from_viva_timepoints, sample_file, disabled,
+    user_id,
+    created_at,
+    updated_at,
+    viva_collection_instrument_id)
+  SELECT
+    
+    NEW.name, NEW.select_data_source, NEW.select_data_target, NEW.select_record_id_from_viva_domains, NEW.select_record_id_from_viva_timepoints, NEW.sample_file, NEW.disabled,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_viva_domains_update(); Type: FUNCTION; Schema: viva_ref_info; Owner: -
+--
+
+CREATE FUNCTION viva_ref_info.log_viva_domains_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO viva_domain_history (
+    
+    select_topic, domain, sub_domain, disabled,
+    user_id,
+    created_at,
+    updated_at,
+    viva_domain_id)
+  SELECT
+    
+    NEW.select_topic, NEW.domain, NEW.sub_domain, NEW.disabled,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: log_viva_timepoints_update(); Type: FUNCTION; Schema: viva_ref_info; Owner: -
+--
+
+CREATE FUNCTION viva_ref_info.log_viva_timepoints_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  INSERT INTO viva_timepoint_history (
+    
+    name, disabled,
+    user_id,
+    created_at,
+    updated_at,
+    viva_timepoint_id)
+  SELECT
+    
+    NEW.name, NEW.disabled,
+    NEW.user_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: activity_log_data_request_assignment_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.activity_log_data_request_assignment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    data_request_assignment_id bigint,
+    created_by_user_id bigint,
+    status character varying,
+    notes character varying,
+    next_step character varying,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_data_request_assignment_id bigint,
+    disabled boolean DEFAULT false
+);
+
+
+--
+-- Name: activity_log_data_request_assignment_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.activity_log_data_request_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_data_request_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.activity_log_data_request_assignment_history_id_seq OWNED BY data_requests.activity_log_data_request_assignment_history.id;
+
+
+--
+-- Name: activity_log_data_request_assignments; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.activity_log_data_request_assignments (
+    id bigint NOT NULL,
+    master_id bigint,
+    data_request_assignment_id bigint,
+    created_by_user_id bigint,
+    status character varying,
+    notes character varying,
+    next_step character varying,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean DEFAULT false
+);
+
+
+--
+-- Name: TABLE activity_log_data_request_assignments; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.activity_log_data_request_assignments IS 'Activitylog: Data Request Form';
+
+
+--
+-- Name: activity_log_data_request_assignments_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.activity_log_data_request_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_data_request_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.activity_log_data_request_assignments_id_seq OWNED BY data_requests.activity_log_data_request_assignments.id;
+
+
+--
+-- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.model_references (
+    id integer NOT NULL,
+    from_record_type character varying,
+    from_record_id integer,
+    from_record_master_id integer,
+    to_record_type character varying,
+    to_record_id integer,
+    to_record_master_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean
+);
+
+
+--
+-- Name: al_data_request_assignments_from_al_data_request_assignments; Type: VIEW; Schema: data_requests; Owner: -
+--
+
+CREATE VIEW data_requests.al_data_request_assignments_from_al_data_request_assignments AS
+ SELECT dest.id,
+    dest.master_id,
+    dest.data_request_assignment_id,
+    dest.created_by_user_id,
+    dest.status,
+    dest.notes,
+    dest.next_step,
+    dest.extra_log_type,
+    dest.user_id,
+    dest.created_at,
+    dest.updated_at,
+    dest.disabled,
+    mr.from_record_master_id,
+    mr.from_record_type,
+    mr.from_record_id,
+    mr.id AS model_reference_id,
+    'data_requests.activity_log_data_request_assignments'::character varying AS from_table
+   FROM (data_requests.activity_log_data_request_assignments dest
+     JOIN ml_app.model_references mr ON (((dest.id = mr.to_record_id) AND (dest.master_id = mr.to_record_master_id) AND (NOT COALESCE(mr.disabled, false)) AND ((mr.from_record_type)::text = 'ActivityLog::DataRequestAssignment'::text) AND ((mr.to_record_type)::text = 'ActivityLog::DataRequestAssignment'::text))));
+
+
+--
+-- Name: data_request_assignment_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_assignment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    data_request_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    data_request_assignment_table_id bigint
+);
+
+
+--
+-- Name: data_request_assignment_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_assignment_history_id_seq OWNED BY data_requests.data_request_assignment_history.id;
+
+
+--
+-- Name: data_request_assignments; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_assignments (
+    id bigint NOT NULL,
+    master_id bigint,
+    data_request_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE data_request_assignments; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.data_request_assignments IS 'Externalidentifier: Data Request Assignments';
+
+
+--
+-- Name: data_request_assignments_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_assignments_id_seq OWNED BY data_requests.data_request_assignments.id;
+
+
+--
+-- Name: data_request_attrib_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_attrib_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    data_source character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    data_request_attrib_id bigint
+);
+
+
+--
+-- Name: COLUMN data_request_attrib_history.data_source; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_attrib_history.data_source IS 'Which FPHS study are you requesting data from?';
+
+
+--
+-- Name: data_request_attrib_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_attrib_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_attrib_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_attrib_history_id_seq OWNED BY data_requests.data_request_attrib_history.id;
+
+
+--
+-- Name: data_request_attribs; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_attribs (
+    id bigint NOT NULL,
+    master_id bigint,
+    data_source character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE data_request_attribs; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.data_request_attribs IS 'Dynamicmodel: Requested Data';
+
+
+--
+-- Name: COLUMN data_request_attribs.data_source; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_attribs.data_source IS 'Which FPHS study are you requesting data from?';
+
+
+--
+-- Name: data_request_attribs_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_attribs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_attribs_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_attribs_id_seq OWNED BY data_requests.data_request_attribs.id;
+
+
+--
+-- Name: data_request_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    status character varying,
+    project_title character varying,
+    select_purpose character varying,
+    other_purpose character varying,
+    others_handling_data character varying,
+    other_pm_contact character varying,
+    data_start_date date,
+    data_end_date date,
+    terms_of_use_yes_no character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    data_request_id bigint,
+    request_notes character varying,
+    study_analyst_yes_no character varying,
+    select_pm_contact character varying
+);
+
+
+--
+-- Name: COLUMN data_request_history.project_title; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.project_title IS 'Proposal title';
+
+
+--
+-- Name: COLUMN data_request_history.select_purpose; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.select_purpose IS 'Purpose of this data request';
+
+
+--
+-- Name: COLUMN data_request_history.other_purpose; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.other_purpose IS '*other purpose*: please explain';
+
+
+--
+-- Name: COLUMN data_request_history.others_handling_data; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.others_handling_data IS 'Name and title of others who will be handling Project Viva data (one per line)';
+
+
+--
+-- Name: COLUMN data_request_history.other_pm_contact; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.other_pm_contact IS 'Project Manager name';
+
+
+--
+-- Name: COLUMN data_request_history.data_start_date; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.data_start_date IS 'Planned analysis start date';
+
+
+--
+-- Name: COLUMN data_request_history.data_end_date; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.data_end_date IS 'Planned analysis end date';
+
+
+--
+-- Name: COLUMN data_request_history.terms_of_use_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.terms_of_use_yes_no IS 'I attest that I have read, understood, and accepted the terms of use stated in the data use agreement, or other form of contractual agreement, with the Project Viva.';
+
+
+--
+-- Name: COLUMN data_request_history.request_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.request_notes IS '#### Background
+
+Brief description of why this topic is important,
+brief summary of literature, and a priori hypothesis
+
+*To include supporting documents or files, complete this form, then
+select the Supporting Files section at the end of the form*';
+
+
+--
+-- Name: COLUMN data_request_history.study_analyst_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.study_analyst_yes_no IS 'Are you an internal Project Viva analyst?';
+
+
+--
+-- Name: COLUMN data_request_history.select_pm_contact; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_history.select_pm_contact IS 'Project Viva Project Manager contact';
+
+
+--
+-- Name: data_request_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_history_id_seq OWNED BY data_requests.data_request_history.id;
+
+
+--
+-- Name: data_request_initial_review_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_initial_review_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    message_notes character varying,
+    next_step character varying,
+    review_approved_yes_no character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    data_request_initial_review_id bigint,
+    review_notes character varying,
+    study_analyst_yes_no character varying
+);
+
+
+--
+-- Name: COLUMN data_request_initial_review_history.message_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_review_history.message_notes IS 'Message to requester';
+
+
+--
+-- Name: COLUMN data_request_initial_review_history.next_step; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_review_history.next_step IS 'Is the review complete?
+
+*If the original request needs to be updated before you can complete
+the initial review, select **update request**. This will notify the requester
+that an update is required.*';
+
+
+--
+-- Name: COLUMN data_request_initial_review_history.review_approved_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_review_history.review_approved_yes_no IS '**Approve the request?**
+
+- Select **no** to reject the data request and inform the requester.
+- Select **yes** if the request is *approved* and to send on for PI notifications and reviews.';
+
+
+--
+-- Name: COLUMN data_request_initial_review_history.review_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_review_history.review_notes IS 'Reviewer''s notes';
+
+
+--
+-- Name: COLUMN data_request_initial_review_history.study_analyst_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_review_history.study_analyst_yes_no IS 'Is the requester a Project Viva analyst?';
+
+
+--
+-- Name: data_request_initial_review_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_initial_review_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_initial_review_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_initial_review_history_id_seq OWNED BY data_requests.data_request_initial_review_history.id;
+
+
+--
+-- Name: data_request_initial_reviews; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_initial_reviews (
+    id bigint NOT NULL,
+    master_id bigint,
+    message_notes character varying,
+    next_step character varying,
+    review_approved_yes_no character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    review_notes character varying,
+    study_analyst_yes_no character varying
+);
+
+
+--
+-- Name: TABLE data_request_initial_reviews; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.data_request_initial_reviews IS 'Dynamicmodel: Initial Review';
+
+
+--
+-- Name: COLUMN data_request_initial_reviews.message_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_reviews.message_notes IS 'Message to requester';
+
+
+--
+-- Name: COLUMN data_request_initial_reviews.next_step; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_reviews.next_step IS 'Is the review complete?
+
+*If the original request needs to be updated before you can complete
+the initial review, select **update request**. This will notify the requester
+that an update is required.*';
+
+
+--
+-- Name: COLUMN data_request_initial_reviews.review_approved_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_reviews.review_approved_yes_no IS '**Approve the request?**
+
+- Select **no** to reject the data request and inform the requester.
+- Select **yes** if the request is *approved* and to send on for PI notifications and reviews.';
+
+
+--
+-- Name: COLUMN data_request_initial_reviews.review_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_reviews.review_notes IS 'Reviewer''s notes';
+
+
+--
+-- Name: COLUMN data_request_initial_reviews.study_analyst_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_initial_reviews.study_analyst_yes_no IS 'Is the requester a Project Viva analyst?';
+
+
+--
+-- Name: data_request_initial_reviews_from_al_data_request_assignments; Type: VIEW; Schema: data_requests; Owner: -
+--
+
+CREATE VIEW data_requests.data_request_initial_reviews_from_al_data_request_assignments AS
+ SELECT dest.id,
+    dest.master_id,
+    dest.message_notes,
+    dest.next_step,
+    dest.review_approved_yes_no,
+    dest.created_by_user_id,
+    dest.user_id,
+    dest.created_at,
+    dest.updated_at,
+    dest.review_notes,
+    dest.study_analyst_yes_no,
+    mr.from_record_type,
+    mr.from_record_id,
+    mr.id AS model_reference_id,
+    'data_requests.data_request_initial_reviews'::character varying AS from_table
+   FROM (data_requests.data_request_initial_reviews dest
+     JOIN ml_app.model_references mr ON (((dest.id = mr.to_record_id) AND (dest.master_id = mr.to_record_master_id) AND (NOT COALESCE(mr.disabled, false)) AND ((mr.from_record_type)::text = 'ActivityLog::DataRequestAssignment'::text) AND ((mr.to_record_type)::text = 'DynamicModel::DataRequestInitialReview'::text))));
+
+
+--
+-- Name: data_request_initial_reviews_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_initial_reviews_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_initial_reviews_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_initial_reviews_id_seq OWNED BY data_requests.data_request_initial_reviews.id;
+
+
+--
+-- Name: data_request_message_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_message_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    message_notes character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    data_request_message_id bigint
+);
+
+
+--
+-- Name: COLUMN data_request_message_history.message_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_message_history.message_notes IS 'Message to requester';
+
+
+--
+-- Name: data_request_message_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_message_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_message_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_message_history_id_seq OWNED BY data_requests.data_request_message_history.id;
+
+
+--
+-- Name: data_request_messages; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_request_messages (
+    id bigint NOT NULL,
+    master_id bigint,
+    message_notes character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE data_request_messages; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.data_request_messages IS 'Dynamicmodel: Message';
+
+
+--
+-- Name: COLUMN data_request_messages.message_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_request_messages.message_notes IS 'Message to requester';
+
+
+--
+-- Name: data_request_messages_from_al_data_request_assignments; Type: VIEW; Schema: data_requests; Owner: -
+--
+
+CREATE VIEW data_requests.data_request_messages_from_al_data_request_assignments AS
+ SELECT dest.id,
+    dest.master_id,
+    dest.message_notes,
+    dest.created_by_user_id,
+    dest.user_id,
+    dest.created_at,
+    dest.updated_at,
+    mr.from_record_master_id,
+    mr.from_record_type,
+    mr.from_record_id,
+    mr.id AS model_reference_id,
+    'data_requests.data_request_messages'::character varying AS from_table
+   FROM (data_requests.data_request_messages dest
+     JOIN ml_app.model_references mr ON (((dest.id = mr.to_record_id) AND (dest.master_id = mr.to_record_master_id) AND (NOT COALESCE(mr.disabled, false)) AND ((mr.from_record_type)::text = 'ActivityLog::DataRequestAssignment'::text) AND ((mr.to_record_type)::text = 'DynamicModel::DataRequestMessage'::text))));
+
+
+--
+-- Name: data_request_messages_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_request_messages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_request_messages_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_request_messages_id_seq OWNED BY data_requests.data_request_messages.id;
+
+
+--
+-- Name: data_requests; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_requests (
+    id bigint NOT NULL,
+    master_id bigint,
+    status character varying,
+    project_title character varying,
+    select_purpose character varying,
+    other_purpose character varying,
+    others_handling_data character varying,
+    other_pm_contact character varying,
+    data_start_date date,
+    data_end_date date,
+    terms_of_use_yes_no character varying,
+    created_by_user_id bigint,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    request_notes character varying,
+    study_analyst_yes_no character varying,
+    select_pm_contact character varying
+);
+
+
+--
+-- Name: TABLE data_requests; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.data_requests IS 'Dynamicmodel: Data Request';
+
+
+--
+-- Name: COLUMN data_requests.project_title; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.project_title IS 'Proposal title';
+
+
+--
+-- Name: COLUMN data_requests.select_purpose; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.select_purpose IS 'Purpose of this data request';
+
+
+--
+-- Name: COLUMN data_requests.other_purpose; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.other_purpose IS '*other purpose*: please explain';
+
+
+--
+-- Name: COLUMN data_requests.others_handling_data; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.others_handling_data IS 'Name and title of others who will be handling Project Viva data (one per line)';
+
+
+--
+-- Name: COLUMN data_requests.other_pm_contact; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.other_pm_contact IS 'Project Manager name';
+
+
+--
+-- Name: COLUMN data_requests.data_start_date; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.data_start_date IS 'Planned analysis start date';
+
+
+--
+-- Name: COLUMN data_requests.data_end_date; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.data_end_date IS 'Planned analysis end date';
+
+
+--
+-- Name: COLUMN data_requests.terms_of_use_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.terms_of_use_yes_no IS 'I attest that I have read, understood, and accepted the terms of use stated in the data use agreement, or other form of contractual agreement, with the Project Viva.';
+
+
+--
+-- Name: COLUMN data_requests.request_notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.request_notes IS '#### Background
+
+Brief description of why this topic is important,
+brief summary of literature, and a priori hypothesis
+
+*To include supporting documents or files, complete this form, then
+select the Supporting Files section at the end of the form*';
+
+
+--
+-- Name: COLUMN data_requests.study_analyst_yes_no; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.study_analyst_yes_no IS 'Are you an internal Project Viva analyst?';
+
+
+--
+-- Name: COLUMN data_requests.select_pm_contact; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.data_requests.select_pm_contact IS 'Project Viva Project Manager contact';
+
+
+--
+-- Name: data_requests_from_al_data_request_assignments; Type: VIEW; Schema: data_requests; Owner: -
+--
+
+CREATE VIEW data_requests.data_requests_from_al_data_request_assignments AS
+ SELECT dest.id,
+    dest.master_id,
+    dest.status,
+    dest.project_title,
+    dest.select_purpose,
+    dest.other_purpose,
+    dest.others_handling_data,
+    dest.other_pm_contact,
+    dest.data_start_date,
+    dest.data_end_date,
+    dest.terms_of_use_yes_no,
+    dest.created_by_user_id,
+    dest.user_id,
+    dest.created_at,
+    dest.updated_at,
+    dest.request_notes,
+    dest.study_analyst_yes_no,
+    dest.select_pm_contact,
+    mr.from_record_master_id,
+    mr.from_record_type,
+    mr.from_record_id,
+    mr.id AS model_reference_id,
+    'data_requests.data_requests'::character varying AS from_table
+   FROM (data_requests.data_requests dest
+     JOIN ml_app.model_references mr ON (((dest.id = mr.to_record_id) AND (dest.master_id = mr.to_record_master_id) AND (NOT COALESCE(mr.disabled, false)) AND ((mr.from_record_type)::text = 'ActivityLog::DataRequestAssignment'::text) AND ((mr.to_record_type)::text = 'DynamicModel::DataRequest'::text))));
+
+
+--
+-- Name: data_requests_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_requests_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_requests_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_requests_id_seq OWNED BY data_requests.data_requests.id;
+
+
+--
+-- Name: data_requests_selected_attrib_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_requests_selected_attrib_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    record_id bigint,
+    data character varying,
+    data_request_id bigint,
+    disabled boolean DEFAULT false,
+    variable_name character varying,
+    record_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    data_requests_selected_attrib_id bigint
+);
+
+
+--
+-- Name: data_requests_selected_attrib_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_requests_selected_attrib_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_requests_selected_attrib_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_requests_selected_attrib_history_id_seq OWNED BY data_requests.data_requests_selected_attrib_history.id;
+
+
+--
+-- Name: data_requests_selected_attribs; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.data_requests_selected_attribs (
+    id bigint NOT NULL,
+    master_id bigint,
+    record_id bigint,
+    data character varying,
+    data_request_id bigint,
+    disabled boolean DEFAULT false,
+    variable_name character varying,
+    record_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE data_requests_selected_attribs; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.data_requests_selected_attribs IS 'Dynamicmodel: Selected Data Attributes';
+
+
+--
+-- Name: data_requests_selected_attribs_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.data_requests_selected_attribs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: data_requests_selected_attribs_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.data_requests_selected_attribs_id_seq OWNED BY data_requests.data_requests_selected_attribs.id;
+
+
+--
+-- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_containers (
+    id integer NOT NULL,
+    name character varying,
+    user_id integer,
+    app_type_id integer,
+    nfs_store_container_id integer,
+    master_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: nfs_store_containers_from_al_data_request_assignments; Type: VIEW; Schema: data_requests; Owner: -
+--
+
+CREATE VIEW data_requests.nfs_store_containers_from_al_data_request_assignments AS
+ SELECT dest.id,
+    dest.name,
+    dest.user_id,
+    dest.app_type_id,
+    dest.nfs_store_container_id,
+    dest.master_id,
+    dest.created_at,
+    dest.updated_at,
+    mr.from_record_master_id,
+    mr.from_record_type,
+    mr.from_record_id,
+    mr.id AS model_reference_id,
+    'nfs_store_containers'::character varying AS from_table
+   FROM (ml_app.nfs_store_containers dest
+     JOIN ml_app.model_references mr ON (((dest.id = mr.to_record_id) AND (dest.master_id = mr.to_record_master_id) AND (NOT COALESCE(mr.disabled, false)) AND ((mr.from_record_type)::text = 'ActivityLog::DataRequestAssignment'::text) AND ((mr.to_record_type)::text = 'NfsStore::Manage::Container'::text))));
+
+
+--
+-- Name: q1_datadic; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.q1_datadic (
+    id integer NOT NULL,
+    variable_name character varying,
+    domain text,
+    field_type_rc text,
+    field_type_sa text,
+    field_label text,
+    field_attributes text,
+    field_note text,
+    text_valid_type text,
+    text_valid_min text,
+    text_valid_max text,
+    required_field text,
+    field_attr_array text[],
+    source text,
+    owner text,
+    classification text,
+    display text
+);
+
+
+--
+-- Name: q1_datadic_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.q1_datadic_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: q1_datadic_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.q1_datadic_id_seq OWNED BY data_requests.q1_datadic.id;
+
+
+--
+-- Name: q2_datadic; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.q2_datadic (
+    id integer NOT NULL,
+    variable_name character varying,
+    domain text,
+    field_type_rc text,
+    field_type_sa text,
+    field_label text,
+    field_attributes text,
+    field_note text,
+    text_valid_type text,
+    text_valid_min text,
+    text_valid_max text,
+    required_field text,
+    field_attr_array text[],
+    source text,
+    owner text,
+    classification text,
+    display text
+);
+
+
+--
+-- Name: q2_datadic_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.q2_datadic_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: q2_datadic_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.q2_datadic_id_seq OWNED BY data_requests.q2_datadic.id;
+
+
+--
+-- Name: user_profiile_detail_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.user_profiile_detail_history (
+    id bigint NOT NULL,
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    user_profiile_detail_id bigint
+);
+
+
+--
+-- Name: user_profiile_detail_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.user_profiile_detail_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_profiile_detail_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.user_profiile_detail_history_id_seq OWNED BY data_requests.user_profiile_detail_history.id;
+
+
+--
+-- Name: user_profiile_details; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.user_profiile_details (
+    id bigint NOT NULL,
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE user_profiile_details; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.user_profiile_details IS 'Dynamicmodel: User Details';
+
+
+--
+-- Name: user_profiile_details_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.user_profiile_details_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_profiile_details_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.user_profiile_details_id_seq OWNED BY data_requests.user_profiile_details.id;
+
+
+--
+-- Name: user_profile_academic_detail_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.user_profile_academic_detail_history (
+    id bigint NOT NULL,
+    primary_affiliation character varying,
+    position_title character varying,
+    start_year character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    user_profile_academic_detail_id bigint,
+    created_by_user_id bigint
+);
+
+
+--
+-- Name: COLUMN user_profile_academic_detail_history.primary_affiliation; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.user_profile_academic_detail_history.primary_affiliation IS 'Primary Affiliation';
+
+
+--
+-- Name: COLUMN user_profile_academic_detail_history.position_title; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.user_profile_academic_detail_history.position_title IS 'Position / Title';
+
+
+--
+-- Name: COLUMN user_profile_academic_detail_history.start_year; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.user_profile_academic_detail_history.start_year IS 'Start Year';
+
+
+--
+-- Name: user_profile_academic_detail_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.user_profile_academic_detail_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_profile_academic_detail_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.user_profile_academic_detail_history_id_seq OWNED BY data_requests.user_profile_academic_detail_history.id;
+
+
+--
+-- Name: user_profile_academic_details; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.user_profile_academic_details (
+    id bigint NOT NULL,
+    primary_affiliation character varying,
+    position_title character varying,
+    start_year integer,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    created_by_user_id bigint
+);
+
+
+--
+-- Name: TABLE user_profile_academic_details; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.user_profile_academic_details IS 'Dynamicmodel: User Details';
+
+
+--
+-- Name: COLUMN user_profile_academic_details.primary_affiliation; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.user_profile_academic_details.primary_affiliation IS 'Primary Affiliation';
+
+
+--
+-- Name: COLUMN user_profile_academic_details.position_title; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.user_profile_academic_details.position_title IS 'Position / Title';
+
+
+--
+-- Name: COLUMN user_profile_academic_details.start_year; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.user_profile_academic_details.start_year IS 'Start Year';
+
+
+--
+-- Name: user_profile_academic_details_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.user_profile_academic_details_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_profile_academic_details_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.user_profile_academic_details_id_seq OWNED BY data_requests.user_profile_academic_details.id;
+
+
+--
+-- Name: user_profile_detail_history; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.user_profile_detail_history (
+    id bigint NOT NULL,
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    user_profile_detail_id bigint,
+    title character varying,
+    created_by_user_id bigint
+);
+
+
+--
+-- Name: COLUMN user_profile_detail_history.notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.user_profile_detail_history.notes IS 'Describe your job, hobbies and interests';
+
+
+--
+-- Name: COLUMN user_profile_detail_history.title; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.user_profile_detail_history.title IS 'Job Title';
+
+
+--
+-- Name: user_profile_detail_history_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.user_profile_detail_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_profile_detail_history_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.user_profile_detail_history_id_seq OWNED BY data_requests.user_profile_detail_history.id;
+
+
+--
+-- Name: user_profile_details; Type: TABLE; Schema: data_requests; Owner: -
+--
+
+CREATE TABLE data_requests.user_profile_details (
+    id bigint NOT NULL,
+    notes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    title character varying,
+    created_by_user_id bigint
+);
+
+
+--
+-- Name: TABLE user_profile_details; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON TABLE data_requests.user_profile_details IS 'Dynamicmodel: User Details';
+
+
+--
+-- Name: COLUMN user_profile_details.notes; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.user_profile_details.notes IS 'Describe your job, hobbies and interests';
+
+
+--
+-- Name: COLUMN user_profile_details.title; Type: COMMENT; Schema: data_requests; Owner: -
+--
+
+COMMENT ON COLUMN data_requests.user_profile_details.title IS 'Job Title';
+
+
+--
+-- Name: user_profile_details_id_seq; Type: SEQUENCE; Schema: data_requests; Owner: -
+--
+
+CREATE SEQUENCE data_requests.user_profile_details_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_profile_details_id_seq; Type: SEQUENCE OWNED BY; Schema: data_requests; Owner: -
+--
+
+ALTER SEQUENCE data_requests.user_profile_details_id_seq OWNED BY data_requests.user_profile_details.id;
+
+
+--
+-- Name: grit_assignment_history; Type: TABLE; Schema: extra_app; Owner: -
+--
+
+CREATE TABLE extra_app.grit_assignment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    grit_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    grit_assignment_table_id bigint
+);
+
+
+--
+-- Name: grit_assignment_history_id_seq; Type: SEQUENCE; Schema: extra_app; Owner: -
+--
+
+CREATE SEQUENCE extra_app.grit_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: grit_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: extra_app; Owner: -
+--
+
+ALTER SEQUENCE extra_app.grit_assignment_history_id_seq OWNED BY extra_app.grit_assignment_history.id;
+
+
+--
+-- Name: grit_assignments; Type: TABLE; Schema: extra_app; Owner: -
+--
+
+CREATE TABLE extra_app.grit_assignments (
+    id bigint NOT NULL,
+    master_id bigint,
+    grit_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: grit_assignments_id_seq; Type: SEQUENCE; Schema: extra_app; Owner: -
+--
+
+CREATE SEQUENCE extra_app.grit_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: grit_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: extra_app; Owner: -
+--
+
+ALTER SEQUENCE extra_app.grit_assignments_id_seq OWNED BY extra_app.grit_assignments.id;
+
+
+--
+-- Name: pitt_bhi_assignment_history; Type: TABLE; Schema: extra_app; Owner: -
+--
+
+CREATE TABLE extra_app.pitt_bhi_assignment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    pitt_bhi_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    pitt_bhi_assignment_table_id bigint
+);
+
+
+--
+-- Name: pitt_bhi_assignment_history_id_seq; Type: SEQUENCE; Schema: extra_app; Owner: -
+--
+
+CREATE SEQUENCE extra_app.pitt_bhi_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: extra_app; Owner: -
+--
+
+ALTER SEQUENCE extra_app.pitt_bhi_assignment_history_id_seq OWNED BY extra_app.pitt_bhi_assignment_history.id;
+
+
+--
+-- Name: pitt_bhi_assignments; Type: TABLE; Schema: extra_app; Owner: -
+--
+
+CREATE TABLE extra_app.pitt_bhi_assignments (
+    id bigint NOT NULL,
+    master_id bigint,
+    pitt_bhi_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: pitt_bhi_assignments_id_seq; Type: SEQUENCE; Schema: extra_app; Owner: -
+--
+
+CREATE SEQUENCE extra_app.pitt_bhi_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pitt_bhi_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: extra_app; Owner: -
+--
+
+ALTER SEQUENCE extra_app.pitt_bhi_assignments_id_seq OWNED BY extra_app.pitt_bhi_assignments.id;
+
+
+--
+-- Name: sleep_assignment_history; Type: TABLE; Schema: extra_app; Owner: -
+--
+
+CREATE TABLE extra_app.sleep_assignment_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    sleep_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    sleep_assignment_table_id bigint
+);
+
+
+--
+-- Name: sleep_assignment_history_id_seq; Type: SEQUENCE; Schema: extra_app; Owner: -
+--
+
+CREATE SEQUENCE extra_app.sleep_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sleep_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: extra_app; Owner: -
+--
+
+ALTER SEQUENCE extra_app.sleep_assignment_history_id_seq OWNED BY extra_app.sleep_assignment_history.id;
+
+
+--
+-- Name: sleep_assignments; Type: TABLE; Schema: extra_app; Owner: -
+--
+
+CREATE TABLE extra_app.sleep_assignments (
+    id bigint NOT NULL,
+    master_id bigint,
+    sleep_id bigint,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: sleep_assignments_id_seq; Type: SEQUENCE; Schema: extra_app; Owner: -
+--
+
+CREATE SEQUENCE extra_app.sleep_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sleep_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: extra_app; Owner: -
+--
+
+ALTER SEQUENCE extra_app.sleep_assignments_id_seq OWNED BY extra_app.sleep_assignments.id;
+
+
+--
 -- Name: accuracy_score_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -4215,7 +6457,8 @@ CREATE TABLE ml_app.masters (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     user_id integer,
-    contact_id integer
+    contact_id integer,
+    created_by_user_id bigint
 );
 
 
@@ -4365,25 +6608,6 @@ ALTER SEQUENCE ml_app.message_templates_id_seq OWNED BY ml_app.message_templates
 
 
 --
--- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.model_references (
-    id integer NOT NULL,
-    from_record_type character varying,
-    from_record_id integer,
-    from_record_master_id integer,
-    to_record_type character varying,
-    to_record_id integer,
-    to_record_master_id integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    disabled boolean
-);
-
-
---
 -- Name: model_references_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -4511,22 +6735,6 @@ CREATE SEQUENCE ml_app.nfs_store_container_history_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_container_history_id_seq OWNED BY ml_app.nfs_store_container_history.id;
-
-
---
--- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_containers (
-    id integer NOT NULL,
-    name character varying,
-    user_id integer,
-    app_type_id integer,
-    nfs_store_container_id integer,
-    master_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone
-);
 
 
 --
@@ -6459,6 +8667,454 @@ CREATE VIEW ml_app.view_users AS
 
 
 --
+-- Name: viva_meta_variable_history; Type: TABLE; Schema: redcap; Owner: -
+--
+
+CREATE TABLE redcap.viva_meta_variable_history (
+    id bigint NOT NULL,
+    varname character varying,
+    var_label character varying,
+    var_type character varying,
+    restrict_var___0 boolean,
+    restrict_var___1 boolean,
+    restrict_var___2 boolean,
+    restrict_var___3 boolean,
+    restrict_var___4 boolean,
+    oth_restrict character varying,
+    domain_viva character varying,
+    subdomain___1 boolean,
+    subdomain___2 boolean,
+    target_of_q character varying,
+    data_source character varying,
+    val_instr character varying,
+    ext_instrument character varying,
+    internal_instrument character varying,
+    doc_yn character varying,
+    doc_link character varying,
+    long_yn character varying,
+    long_timepts___1 boolean,
+    long_timepts___2 boolean,
+    long_timepts___3 boolean,
+    long_timepts___4 boolean,
+    long_timepts___5 boolean,
+    long_timepts___6 boolean,
+    long_timepts___7 boolean,
+    long_timepts___8 boolean,
+    long_timepts___9 boolean,
+    long_timepts___10 boolean,
+    long_timepts___11 boolean,
+    long_timepts___12 boolean,
+    long_timepts___13 boolean,
+    long_timepts___14 boolean,
+    long_timepts___15 boolean,
+    long_timepts___16 boolean,
+    long_timepts___17 boolean,
+    long_timepts___18 boolean,
+    long_timepts___19 boolean,
+    long_timepts___20 boolean,
+    long_timepts___21 boolean,
+    long_timepts___22 boolean,
+    long_timepts___23 boolean,
+    static_variable_information_complete integer,
+    static_variable_information_timestamp timestamp without time zone,
+    event_type character varying,
+    visit_name character varying,
+    visit_time character varying,
+    assay_specimen character varying,
+    assay_type character varying,
+    lab_assay_dataset character varying,
+    form_label_ep character varying,
+    form_version_ep___1 boolean,
+    form_version_ep___2 boolean,
+    form_version_ep___3 boolean,
+    form_version_ep___4 boolean,
+    form_version_ep___5 boolean,
+    form_version_ep___6 boolean,
+    form_version_ep___7 boolean,
+    form_version_ep___8 boolean,
+    form_label_mp character varying,
+    form_version_mp___1 boolean,
+    form_version_mp___2 boolean,
+    form_version_mp___3 boolean,
+    form_version_mp___4 boolean,
+    form_label_del character varying,
+    form_version_del___1 boolean,
+    form_version_del___2 boolean,
+    form_version_del___3 boolean,
+    form_version_del___4 boolean,
+    form_version_del___5 boolean,
+    form_version_del___6 boolean,
+    form_version_del___7 boolean,
+    form_label_6m character varying,
+    form_version_6m___1 boolean,
+    form_version_6m___2 boolean,
+    form_version_6m___3 boolean,
+    form_version_6m___4 boolean,
+    form_version_6m___5 boolean,
+    form_version_6m___6 boolean,
+    form_version_6m___7 boolean,
+    form_version_6m___8 boolean,
+    form_version_6m___9 boolean,
+    form_version_6m___10 boolean,
+    form_label_1y character varying,
+    form_version_1y___1 boolean,
+    form_label_2y character varying,
+    form_version_2y___1 boolean,
+    form_label_3y character varying,
+    form_version_3y___1 boolean,
+    form_version_3y___2 boolean,
+    form_version_3y___3 boolean,
+    form_version_3y___4 boolean,
+    form_version_3y___5 boolean,
+    form_version_3y___6 boolean,
+    form_version_3y___7 boolean,
+    form_version_3y___8 boolean,
+    form_version_3y___9 boolean,
+    form_version_3y___10 boolean,
+    form_version_3y___11 boolean,
+    form_version_3y___12 boolean,
+    form_version_3y___13 boolean,
+    form_version_3y___14 boolean,
+    form_label_4y character varying,
+    form_version_4y___1 boolean,
+    form_label_5y character varying,
+    form_version_5y___1 boolean,
+    form_label_6y character varying,
+    form_version_6y___1 boolean,
+    form_label_7y character varying,
+    form_version_7y___1 boolean,
+    form_version_7y___2 boolean,
+    form_version_7y___3 boolean,
+    form_version_7y___4 boolean,
+    form_version_7y___5 boolean,
+    form_version_7y___6 boolean,
+    form_version_7y___7 boolean,
+    form_version_7y___8 boolean,
+    form_version_7y___9 boolean,
+    form_version_7y___10 boolean,
+    form_version_7y___11 boolean,
+    form_version_7y___12 boolean,
+    form_version_7y___13 boolean,
+    form_version_7y___14 boolean,
+    form_version_7y___15 boolean,
+    form_version_7y___16 boolean,
+    form_version_7y___17 boolean,
+    form_label_8y character varying,
+    form_version_8y___1 boolean,
+    form_label_9y character varying,
+    form_version_9y___1 boolean,
+    form_version_9y___2 boolean,
+    form_label_10y character varying,
+    form_version_10y___1 boolean,
+    form_version_10y___2 boolean,
+    form_label_11y character varying,
+    form_version_11y___1 boolean,
+    form_version_11y___2 boolean,
+    form_label_12y character varying,
+    form_version_12y___1 boolean,
+    form_version_12y___2 boolean,
+    form_version_12y___3 boolean,
+    form_version_12y___4 boolean,
+    form_version_12y___5 boolean,
+    form_version_12y___6 boolean,
+    form_version_12y___7 boolean,
+    form_version_12y___8 boolean,
+    form_version_12y___9 boolean,
+    form_version_12y___10 boolean,
+    form_version_12y___11 boolean,
+    form_version_12y___12 boolean,
+    form_version_12y___13 boolean,
+    form_version_12y___14 boolean,
+    form_version_12y___15 boolean,
+    form_version_12y___16 boolean,
+    form_label_14y character varying,
+    form_version_14y___1 boolean,
+    form_version_14y___2 boolean,
+    form_label_15y character varying,
+    form_version_15y___1 boolean,
+    form_version_15y___2 boolean,
+    form_label_16y character varying,
+    form_version_16y___1 boolean,
+    form_version_16y___2 boolean,
+    form_label_mt character varying,
+    form_version_mt character varying,
+    form_label_19y character varying,
+    form_version_19y___1 boolean,
+    form_version_19y___2 boolean,
+    not_time_specific character varying,
+    var_level character varying,
+    units character varying,
+    model_type character varying,
+    response_options character varying,
+    elig_sample character varying,
+    elig_n character varying,
+    actual_n character varying,
+    an_var character varying,
+    orig_deriv character varying,
+    corr_derived_yn___0 boolean,
+    corr_derived_yn___1 boolean,
+    der_varname character varying,
+    dervar_explain character varying,
+    orig_varnames character varying,
+    visitspecific_information_complete integer,
+    visitspecific_information_timestamp timestamp without time zone,
+    redcap_survey_identifier character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    viva_meta_variable_id bigint,
+    redcap_repeat_instrument character varying,
+    redcap_repeat_instance character varying
+);
+
+
+--
+-- Name: viva_meta_variable_history_id_seq; Type: SEQUENCE; Schema: redcap; Owner: -
+--
+
+CREATE SEQUENCE redcap.viva_meta_variable_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: viva_meta_variable_history_id_seq; Type: SEQUENCE OWNED BY; Schema: redcap; Owner: -
+--
+
+ALTER SEQUENCE redcap.viva_meta_variable_history_id_seq OWNED BY redcap.viva_meta_variable_history.id;
+
+
+--
+-- Name: viva_meta_variables; Type: TABLE; Schema: redcap; Owner: -
+--
+
+CREATE TABLE redcap.viva_meta_variables (
+    id bigint NOT NULL,
+    varname character varying,
+    var_label character varying,
+    var_type character varying,
+    restrict_var___0 boolean,
+    restrict_var___1 boolean,
+    restrict_var___2 boolean,
+    restrict_var___3 boolean,
+    restrict_var___4 boolean,
+    oth_restrict character varying,
+    domain_viva character varying,
+    subdomain___1 boolean,
+    subdomain___2 boolean,
+    target_of_q character varying,
+    data_source character varying,
+    val_instr character varying,
+    ext_instrument character varying,
+    internal_instrument character varying,
+    doc_yn character varying,
+    doc_link character varying,
+    long_yn character varying,
+    long_timepts___1 boolean,
+    long_timepts___2 boolean,
+    long_timepts___3 boolean,
+    long_timepts___4 boolean,
+    long_timepts___5 boolean,
+    long_timepts___6 boolean,
+    long_timepts___7 boolean,
+    long_timepts___8 boolean,
+    long_timepts___9 boolean,
+    long_timepts___10 boolean,
+    long_timepts___11 boolean,
+    long_timepts___12 boolean,
+    long_timepts___13 boolean,
+    long_timepts___14 boolean,
+    long_timepts___15 boolean,
+    long_timepts___16 boolean,
+    long_timepts___17 boolean,
+    long_timepts___18 boolean,
+    long_timepts___19 boolean,
+    long_timepts___20 boolean,
+    long_timepts___21 boolean,
+    long_timepts___22 boolean,
+    long_timepts___23 boolean,
+    static_variable_information_complete integer,
+    static_variable_information_timestamp timestamp without time zone,
+    event_type character varying,
+    visit_name character varying,
+    visit_time character varying,
+    assay_specimen character varying,
+    assay_type character varying,
+    lab_assay_dataset character varying,
+    form_label_ep character varying,
+    form_version_ep___1 boolean,
+    form_version_ep___2 boolean,
+    form_version_ep___3 boolean,
+    form_version_ep___4 boolean,
+    form_version_ep___5 boolean,
+    form_version_ep___6 boolean,
+    form_version_ep___7 boolean,
+    form_version_ep___8 boolean,
+    form_label_mp character varying,
+    form_version_mp___1 boolean,
+    form_version_mp___2 boolean,
+    form_version_mp___3 boolean,
+    form_version_mp___4 boolean,
+    form_label_del character varying,
+    form_version_del___1 boolean,
+    form_version_del___2 boolean,
+    form_version_del___3 boolean,
+    form_version_del___4 boolean,
+    form_version_del___5 boolean,
+    form_version_del___6 boolean,
+    form_version_del___7 boolean,
+    form_label_6m character varying,
+    form_version_6m___1 boolean,
+    form_version_6m___2 boolean,
+    form_version_6m___3 boolean,
+    form_version_6m___4 boolean,
+    form_version_6m___5 boolean,
+    form_version_6m___6 boolean,
+    form_version_6m___7 boolean,
+    form_version_6m___8 boolean,
+    form_version_6m___9 boolean,
+    form_version_6m___10 boolean,
+    form_label_1y character varying,
+    form_version_1y___1 boolean,
+    form_label_2y character varying,
+    form_version_2y___1 boolean,
+    form_label_3y character varying,
+    form_version_3y___1 boolean,
+    form_version_3y___2 boolean,
+    form_version_3y___3 boolean,
+    form_version_3y___4 boolean,
+    form_version_3y___5 boolean,
+    form_version_3y___6 boolean,
+    form_version_3y___7 boolean,
+    form_version_3y___8 boolean,
+    form_version_3y___9 boolean,
+    form_version_3y___10 boolean,
+    form_version_3y___11 boolean,
+    form_version_3y___12 boolean,
+    form_version_3y___13 boolean,
+    form_version_3y___14 boolean,
+    form_label_4y character varying,
+    form_version_4y___1 boolean,
+    form_label_5y character varying,
+    form_version_5y___1 boolean,
+    form_label_6y character varying,
+    form_version_6y___1 boolean,
+    form_label_7y character varying,
+    form_version_7y___1 boolean,
+    form_version_7y___2 boolean,
+    form_version_7y___3 boolean,
+    form_version_7y___4 boolean,
+    form_version_7y___5 boolean,
+    form_version_7y___6 boolean,
+    form_version_7y___7 boolean,
+    form_version_7y___8 boolean,
+    form_version_7y___9 boolean,
+    form_version_7y___10 boolean,
+    form_version_7y___11 boolean,
+    form_version_7y___12 boolean,
+    form_version_7y___13 boolean,
+    form_version_7y___14 boolean,
+    form_version_7y___15 boolean,
+    form_version_7y___16 boolean,
+    form_version_7y___17 boolean,
+    form_label_8y character varying,
+    form_version_8y___1 boolean,
+    form_label_9y character varying,
+    form_version_9y___1 boolean,
+    form_version_9y___2 boolean,
+    form_label_10y character varying,
+    form_version_10y___1 boolean,
+    form_version_10y___2 boolean,
+    form_label_11y character varying,
+    form_version_11y___1 boolean,
+    form_version_11y___2 boolean,
+    form_label_12y character varying,
+    form_version_12y___1 boolean,
+    form_version_12y___2 boolean,
+    form_version_12y___3 boolean,
+    form_version_12y___4 boolean,
+    form_version_12y___5 boolean,
+    form_version_12y___6 boolean,
+    form_version_12y___7 boolean,
+    form_version_12y___8 boolean,
+    form_version_12y___9 boolean,
+    form_version_12y___10 boolean,
+    form_version_12y___11 boolean,
+    form_version_12y___12 boolean,
+    form_version_12y___13 boolean,
+    form_version_12y___14 boolean,
+    form_version_12y___15 boolean,
+    form_version_12y___16 boolean,
+    form_label_14y character varying,
+    form_version_14y___1 boolean,
+    form_version_14y___2 boolean,
+    form_label_15y character varying,
+    form_version_15y___1 boolean,
+    form_version_15y___2 boolean,
+    form_label_16y character varying,
+    form_version_16y___1 boolean,
+    form_version_16y___2 boolean,
+    form_label_mt character varying,
+    form_version_mt character varying,
+    form_label_19y character varying,
+    form_version_19y___1 boolean,
+    form_version_19y___2 boolean,
+    not_time_specific character varying,
+    var_level character varying,
+    units character varying,
+    model_type character varying,
+    response_options character varying,
+    elig_sample character varying,
+    elig_n character varying,
+    actual_n character varying,
+    an_var character varying,
+    orig_deriv character varying,
+    corr_derived_yn___0 boolean,
+    corr_derived_yn___1 boolean,
+    der_varname character varying,
+    dervar_explain character varying,
+    orig_varnames character varying,
+    visitspecific_information_complete integer,
+    visitspecific_information_timestamp timestamp without time zone,
+    redcap_survey_identifier character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    redcap_repeat_instrument character varying,
+    redcap_repeat_instance character varying
+);
+
+
+--
+-- Name: TABLE viva_meta_variables; Type: COMMENT; Schema: redcap; Owner: -
+--
+
+COMMENT ON TABLE redcap.viva_meta_variables IS 'Dynamicmodel: Viva Meta Variable';
+
+
+--
+-- Name: viva_meta_variables_id_seq; Type: SEQUENCE; Schema: redcap; Owner: -
+--
+
+CREATE SEQUENCE redcap.viva_meta_variables_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: viva_meta_variables_id_seq; Type: SEQUENCE OWNED BY; Schema: redcap; Owner: -
+--
+
+ALTER SEQUENCE redcap.viva_meta_variables_id_seq OWNED BY redcap.viva_meta_variables.id;
+
+
+--
 -- Name: datadic_choice_history; Type: TABLE; Schema: ref_data; Owner: -
 --
 
@@ -7610,749 +10266,8376 @@ ALTER SEQUENCE ref_data.redcap_project_users_id_seq OWNED BY ref_data.redcap_pro
 
 
 --
--- Name: accuracy_score_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: activity_log_study_info_part_history; Type: TABLE; Schema: study_info; Owner: -
+--
+
+CREATE TABLE study_info.activity_log_study_info_part_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    study_info_part_id bigint,
+    title character varying,
+    description character varying,
+    default_layout character varying,
+    slug character varying,
+    tag_select_allow_roles_access character varying[],
+    footer character varying,
+    position_number integer,
+    extra_classes character varying,
+    notes character varying,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_study_info_part_id bigint,
+    tag_select_page_tags character varying[],
+    disabled boolean DEFAULT false
+);
+
+
+--
+-- Name: activity_log_study_info_part_history_id_seq; Type: SEQUENCE; Schema: study_info; Owner: -
+--
+
+CREATE SEQUENCE study_info.activity_log_study_info_part_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_study_info_part_history_id_seq; Type: SEQUENCE OWNED BY; Schema: study_info; Owner: -
+--
+
+ALTER SEQUENCE study_info.activity_log_study_info_part_history_id_seq OWNED BY study_info.activity_log_study_info_part_history.id;
+
+
+--
+-- Name: activity_log_study_info_parts; Type: TABLE; Schema: study_info; Owner: -
+--
+
+CREATE TABLE study_info.activity_log_study_info_parts (
+    id bigint NOT NULL,
+    master_id bigint,
+    study_info_part_id bigint,
+    title character varying,
+    description character varying,
+    default_layout character varying,
+    slug character varying,
+    tag_select_allow_roles_access character varying[],
+    footer character varying,
+    position_number integer,
+    extra_classes character varying,
+    notes character varying,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    tag_select_page_tags character varying[],
+    disabled boolean DEFAULT false
+);
+
+
+--
+-- Name: TABLE activity_log_study_info_parts; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON TABLE study_info.activity_log_study_info_parts IS 'Activitylog: Study Info Page';
+
+
+--
+-- Name: activity_log_study_info_parts_id_seq; Type: SEQUENCE; Schema: study_info; Owner: -
+--
+
+CREATE SEQUENCE study_info.activity_log_study_info_parts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_study_info_parts_id_seq; Type: SEQUENCE OWNED BY; Schema: study_info; Owner: -
+--
+
+ALTER SEQUENCE study_info.activity_log_study_info_parts_id_seq OWNED BY study_info.activity_log_study_info_parts.id;
+
+
+--
+-- Name: activity_log_view_user_data_user_proc_history; Type: TABLE; Schema: study_info; Owner: -
+--
+
+CREATE TABLE study_info.activity_log_view_user_data_user_proc_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    view_user_id integer,
+    is_complete boolean,
+    confirmed_read_terms_yes_no character varying,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_view_user_data_user_proc_id bigint
+);
+
+
+--
+-- Name: activity_log_view_user_data_user_proc_history_id_seq; Type: SEQUENCE; Schema: study_info; Owner: -
+--
+
+CREATE SEQUENCE study_info.activity_log_view_user_data_user_proc_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_view_user_data_user_proc_history_id_seq; Type: SEQUENCE OWNED BY; Schema: study_info; Owner: -
+--
+
+ALTER SEQUENCE study_info.activity_log_view_user_data_user_proc_history_id_seq OWNED BY study_info.activity_log_view_user_data_user_proc_history.id;
+
+
+--
+-- Name: activity_log_view_user_data_user_procs; Type: TABLE; Schema: study_info; Owner: -
+--
+
+CREATE TABLE study_info.activity_log_view_user_data_user_procs (
+    id bigint NOT NULL,
+    master_id bigint,
+    view_user_id integer,
+    is_complete boolean,
+    confirmed_read_terms_yes_no character varying,
+    extra_log_type character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE activity_log_view_user_data_user_procs; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON TABLE study_info.activity_log_view_user_data_user_procs IS 'Activitylog: Data User Process';
+
+
+--
+-- Name: activity_log_view_user_data_user_procs_id_seq; Type: SEQUENCE; Schema: study_info; Owner: -
+--
+
+CREATE SEQUENCE study_info.activity_log_view_user_data_user_procs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_view_user_data_user_procs_id_seq; Type: SEQUENCE OWNED BY; Schema: study_info; Owner: -
+--
+
+ALTER SEQUENCE study_info.activity_log_view_user_data_user_procs_id_seq OWNED BY study_info.activity_log_view_user_data_user_procs.id;
+
+
+--
+-- Name: al_study_info_parts_from_al_study_info_parts; Type: VIEW; Schema: study_info; Owner: -
+--
+
+CREATE VIEW study_info.al_study_info_parts_from_al_study_info_parts AS
+ SELECT dest.id,
+    dest.master_id,
+    dest.study_info_part_id,
+    dest.title,
+    dest.description,
+    dest.default_layout,
+    dest.slug,
+    dest.tag_select_allow_roles_access,
+    dest.footer,
+    dest.position_number,
+    dest.extra_classes,
+    dest.notes,
+    dest.extra_log_type,
+    dest.user_id,
+    dest.created_at,
+    dest.updated_at,
+    dest.tag_select_page_tags,
+    dest.disabled,
+    mr.from_record_master_id,
+    mr.from_record_type,
+    mr.from_record_id,
+    mr.id AS model_reference_id,
+    'study_info.activity_log_study_info_parts'::character varying AS from_table
+   FROM (study_info.activity_log_study_info_parts dest
+     JOIN ml_app.model_references mr ON (((dest.id = mr.to_record_id) AND (dest.master_id = mr.to_record_master_id) AND (NOT COALESCE(mr.disabled, false)) AND ((mr.from_record_type)::text = 'ActivityLog::StudyInfoPart'::text) AND ((mr.to_record_type)::text = 'ActivityLog::StudyInfoPart'::text))));
+
+
+--
+-- Name: nfs_store_containers_from_al_study_info_parts; Type: VIEW; Schema: study_info; Owner: -
+--
+
+CREATE VIEW study_info.nfs_store_containers_from_al_study_info_parts AS
+ SELECT dest.id,
+    dest.name,
+    dest.user_id,
+    dest.app_type_id,
+    dest.nfs_store_container_id,
+    dest.master_id,
+    dest.created_at,
+    dest.updated_at,
+    mr.from_record_master_id,
+    mr.from_record_type,
+    mr.from_record_id,
+    mr.id AS model_reference_id,
+    'nfs_store_containers'::character varying AS from_table
+   FROM (ml_app.nfs_store_containers dest
+     JOIN ml_app.model_references mr ON (((dest.id = mr.to_record_id) AND (dest.master_id = mr.to_record_master_id) AND (NOT COALESCE(mr.disabled, false)) AND ((mr.from_record_type)::text = 'ActivityLog::StudyInfoPart'::text) AND ((mr.to_record_type)::text = 'NfsStore::Manage::Container'::text))));
+
+
+--
+-- Name: study_common_section_history; Type: TABLE; Schema: study_info; Owner: -
+--
+
+CREATE TABLE study_info.study_common_section_history (
+    id bigint NOT NULL,
+    title character varying,
+    content character varying,
+    position_number integer,
+    block_width character varying,
+    extra_classes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    study_common_section_id bigint
+);
+
+
+--
+-- Name: COLUMN study_common_section_history.title; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_common_section_history.title IS 'Title';
+
+
+--
+-- Name: COLUMN study_common_section_history.content; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_common_section_history.content IS 'Content';
+
+
+--
+-- Name: COLUMN study_common_section_history.position_number; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_common_section_history.position_number IS 'Position';
+
+
+--
+-- Name: COLUMN study_common_section_history.block_width; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_common_section_history.block_width IS 'Width';
+
+
+--
+-- Name: COLUMN study_common_section_history.extra_classes; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_common_section_history.extra_classes IS 'Extra CSS classes';
+
+
+--
+-- Name: study_common_section_history_id_seq; Type: SEQUENCE; Schema: study_info; Owner: -
+--
+
+CREATE SEQUENCE study_info.study_common_section_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: study_common_section_history_id_seq; Type: SEQUENCE OWNED BY; Schema: study_info; Owner: -
+--
+
+ALTER SEQUENCE study_info.study_common_section_history_id_seq OWNED BY study_info.study_common_section_history.id;
+
+
+--
+-- Name: study_common_sections; Type: TABLE; Schema: study_info; Owner: -
+--
+
+CREATE TABLE study_info.study_common_sections (
+    id bigint NOT NULL,
+    title character varying,
+    content character varying,
+    position_number integer,
+    block_width character varying,
+    extra_classes character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE study_common_sections; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON TABLE study_info.study_common_sections IS 'Dynamicmodel: Common Section';
+
+
+--
+-- Name: COLUMN study_common_sections.title; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_common_sections.title IS 'Title';
+
+
+--
+-- Name: COLUMN study_common_sections.content; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_common_sections.content IS 'Content';
+
+
+--
+-- Name: COLUMN study_common_sections.position_number; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_common_sections.position_number IS 'Position';
+
+
+--
+-- Name: COLUMN study_common_sections.block_width; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_common_sections.block_width IS 'Width';
+
+
+--
+-- Name: COLUMN study_common_sections.extra_classes; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_common_sections.extra_classes IS 'Extra CSS classes';
+
+
+--
+-- Name: study_common_sections_from_al_study_info_parts; Type: VIEW; Schema: study_info; Owner: -
+--
+
+CREATE VIEW study_info.study_common_sections_from_al_study_info_parts AS
+ SELECT dest.id,
+    dest.title,
+    dest.content,
+    dest.position_number,
+    dest.block_width,
+    dest.extra_classes,
+    dest.user_id,
+    dest.created_at,
+    dest.updated_at,
+    mr.from_record_master_id,
+    mr.from_record_type,
+    mr.from_record_id,
+    mr.id AS model_reference_id,
+    'study_info.study_common_sections'::character varying AS from_table
+   FROM (study_info.study_common_sections dest
+     JOIN ml_app.model_references mr ON (((dest.id = mr.to_record_id) AND (NOT COALESCE(mr.disabled, false)) AND ((mr.from_record_type)::text = 'ActivityLog::StudyInfoPart'::text) AND ((mr.to_record_type)::text = 'DynamicModel::StudyCommonSection'::text))));
+
+
+--
+-- Name: study_common_sections_id_seq; Type: SEQUENCE; Schema: study_info; Owner: -
+--
+
+CREATE SEQUENCE study_info.study_common_sections_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: study_common_sections_id_seq; Type: SEQUENCE OWNED BY; Schema: study_info; Owner: -
+--
+
+ALTER SEQUENCE study_info.study_common_sections_id_seq OWNED BY study_info.study_common_sections.id;
+
+
+--
+-- Name: study_info_part_history; Type: TABLE; Schema: study_info; Owner: -
+--
+
+CREATE TABLE study_info.study_info_part_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    study_info_id character varying,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    study_info_part_table_id bigint
+);
+
+
+--
+-- Name: COLUMN study_info_part_history.study_info_id; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_info_part_history.study_info_id IS 'Part Name';
+
+
+--
+-- Name: study_info_part_history_id_seq; Type: SEQUENCE; Schema: study_info; Owner: -
+--
+
+CREATE SEQUENCE study_info.study_info_part_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: study_info_part_history_id_seq; Type: SEQUENCE OWNED BY; Schema: study_info; Owner: -
+--
+
+ALTER SEQUENCE study_info.study_info_part_history_id_seq OWNED BY study_info.study_info_part_history.id;
+
+
+--
+-- Name: study_info_parts; Type: TABLE; Schema: study_info; Owner: -
+--
+
+CREATE TABLE study_info.study_info_parts (
+    id bigint NOT NULL,
+    master_id bigint,
+    study_info_id character varying,
+    user_id bigint,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE study_info_parts; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON TABLE study_info.study_info_parts IS 'Externalidentifier: Study Info Parts';
+
+
+--
+-- Name: COLUMN study_info_parts.study_info_id; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_info_parts.study_info_id IS 'Part Name';
+
+
+--
+-- Name: study_info_parts_id_seq; Type: SEQUENCE; Schema: study_info; Owner: -
+--
+
+CREATE SEQUENCE study_info.study_info_parts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: study_info_parts_id_seq; Type: SEQUENCE OWNED BY; Schema: study_info; Owner: -
+--
+
+ALTER SEQUENCE study_info.study_info_parts_id_seq OWNED BY study_info.study_info_parts.id;
+
+
+--
+-- Name: study_page_section_history; Type: TABLE; Schema: study_info; Owner: -
+--
+
+CREATE TABLE study_info.study_page_section_history (
+    id bigint NOT NULL,
+    master_id bigint,
+    title character varying,
+    content character varying,
+    position_number integer,
+    block_width character varying,
+    extra_classes character varying,
+    tag_select_allow_roles_access character varying[],
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    study_page_section_id bigint,
+    disabled boolean DEFAULT false
+);
+
+
+--
+-- Name: COLUMN study_page_section_history.title; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_page_section_history.title IS 'Title';
+
+
+--
+-- Name: COLUMN study_page_section_history.content; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_page_section_history.content IS 'Content';
+
+
+--
+-- Name: COLUMN study_page_section_history.position_number; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_page_section_history.position_number IS 'Position';
+
+
+--
+-- Name: COLUMN study_page_section_history.block_width; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_page_section_history.block_width IS 'Width';
+
+
+--
+-- Name: COLUMN study_page_section_history.extra_classes; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_page_section_history.extra_classes IS 'Extra CSS classes';
+
+
+--
+-- Name: COLUMN study_page_section_history.tag_select_allow_roles_access; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_page_section_history.tag_select_allow_roles_access IS 'Allow Roles Access';
+
+
+--
+-- Name: study_page_section_history_id_seq; Type: SEQUENCE; Schema: study_info; Owner: -
+--
+
+CREATE SEQUENCE study_info.study_page_section_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: study_page_section_history_id_seq; Type: SEQUENCE OWNED BY; Schema: study_info; Owner: -
+--
+
+ALTER SEQUENCE study_info.study_page_section_history_id_seq OWNED BY study_info.study_page_section_history.id;
+
+
+--
+-- Name: study_page_sections; Type: TABLE; Schema: study_info; Owner: -
+--
+
+CREATE TABLE study_info.study_page_sections (
+    id bigint NOT NULL,
+    master_id bigint,
+    title character varying,
+    content character varying,
+    position_number integer,
+    block_width character varying,
+    extra_classes character varying,
+    tag_select_allow_roles_access character varying[],
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean DEFAULT false
+);
+
+
+--
+-- Name: TABLE study_page_sections; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON TABLE study_info.study_page_sections IS 'Dynamicmodel: Page Section';
+
+
+--
+-- Name: COLUMN study_page_sections.title; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_page_sections.title IS 'Title';
+
+
+--
+-- Name: COLUMN study_page_sections.content; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_page_sections.content IS 'Content';
+
+
+--
+-- Name: COLUMN study_page_sections.position_number; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_page_sections.position_number IS 'Position';
+
+
+--
+-- Name: COLUMN study_page_sections.block_width; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_page_sections.block_width IS 'Width';
+
+
+--
+-- Name: COLUMN study_page_sections.extra_classes; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_page_sections.extra_classes IS 'Extra CSS classes';
+
+
+--
+-- Name: COLUMN study_page_sections.tag_select_allow_roles_access; Type: COMMENT; Schema: study_info; Owner: -
+--
+
+COMMENT ON COLUMN study_info.study_page_sections.tag_select_allow_roles_access IS 'Allow Roles Access';
+
+
+--
+-- Name: study_page_sections_from_al_study_info_parts; Type: VIEW; Schema: study_info; Owner: -
+--
+
+CREATE VIEW study_info.study_page_sections_from_al_study_info_parts AS
+ SELECT dest.id,
+    dest.master_id,
+    dest.title,
+    dest.content,
+    dest.position_number,
+    dest.block_width,
+    dest.extra_classes,
+    dest.tag_select_allow_roles_access,
+    dest.user_id,
+    dest.created_at,
+    dest.updated_at,
+    mr.from_record_master_id,
+    mr.from_record_type,
+    mr.from_record_id,
+    mr.id AS model_reference_id,
+    'study_info.study_page_sections'::character varying AS from_table
+   FROM (study_info.study_page_sections dest
+     JOIN ml_app.model_references mr ON (((dest.id = mr.to_record_id) AND (dest.master_id = mr.to_record_master_id) AND (NOT COALESCE(mr.disabled, false)) AND ((mr.from_record_type)::text = 'ActivityLog::StudyInfoPart'::text) AND ((mr.to_record_type)::text = 'DynamicModel::StudyPageSection'::text))));
+
+
+--
+-- Name: study_page_sections_id_seq; Type: SEQUENCE; Schema: study_info; Owner: -
+--
+
+CREATE SEQUENCE study_info.study_page_sections_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: study_page_sections_id_seq; Type: SEQUENCE OWNED BY; Schema: study_info; Owner: -
+--
+
+ALTER SEQUENCE study_info.study_page_sections_id_seq OWNED BY study_info.study_page_sections.id;
+
+
+--
+-- Name: viva2_rc_history; Type: TABLE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TABLE viva_ref_info.viva2_rc_history (
+    id bigint NOT NULL,
+    varname character varying,
+    var_label character varying,
+    var_type character varying,
+    restrict_var___0 boolean,
+    restrict_var___1 boolean,
+    restrict_var___2 boolean,
+    restrict_var___3 boolean,
+    restrict_var___4 boolean,
+    oth_restrict character varying,
+    domain_viva character varying,
+    subdomain___1 boolean,
+    subdomain___2 boolean,
+    target_of_q character varying,
+    data_source character varying,
+    val_instr character varying,
+    ext_instrument character varying,
+    internal_instrument character varying,
+    doc_yn character varying,
+    doc_link character varying,
+    long_yn character varying,
+    long_timepts___1 boolean,
+    long_timepts___2 boolean,
+    long_timepts___3 boolean,
+    long_timepts___4 boolean,
+    long_timepts___5 boolean,
+    long_timepts___6 boolean,
+    long_timepts___7 boolean,
+    long_timepts___8 boolean,
+    long_timepts___9 boolean,
+    long_timepts___10 boolean,
+    long_timepts___11 boolean,
+    long_timepts___12 boolean,
+    long_timepts___13 boolean,
+    long_timepts___14 boolean,
+    long_timepts___15 boolean,
+    long_timepts___16 boolean,
+    long_timepts___17 boolean,
+    long_timepts___18 boolean,
+    long_timepts___19 boolean,
+    long_timepts___20 boolean,
+    long_timepts___21 boolean,
+    long_timepts___22 boolean,
+    long_timepts___23 boolean,
+    static_variable_information_complete integer,
+    event_type character varying,
+    visit_name character varying,
+    visit_time character varying,
+    assay_specimen character varying,
+    assay_type character varying,
+    lab_assay_dataset character varying,
+    form_label_ep character varying,
+    form_version_ep___1 boolean,
+    form_version_ep___2 boolean,
+    form_version_ep___3 boolean,
+    form_version_ep___4 boolean,
+    form_version_ep___5 boolean,
+    form_version_ep___6 boolean,
+    form_version_ep___7 boolean,
+    form_version_ep___8 boolean,
+    form_label_mp character varying,
+    form_version_mp___1 boolean,
+    form_version_mp___2 boolean,
+    form_version_mp___3 boolean,
+    form_version_mp___4 boolean,
+    form_label_del character varying,
+    form_version_del___1 boolean,
+    form_version_del___2 boolean,
+    form_version_del___3 boolean,
+    form_version_del___4 boolean,
+    form_version_del___5 boolean,
+    form_version_del___6 boolean,
+    form_version_del___7 boolean,
+    form_label_6m character varying,
+    form_version_6m___1 boolean,
+    form_version_6m___2 boolean,
+    form_version_6m___3 boolean,
+    form_version_6m___4 boolean,
+    form_version_6m___5 boolean,
+    form_version_6m___6 boolean,
+    form_version_6m___7 boolean,
+    form_version_6m___8 boolean,
+    form_version_6m___9 boolean,
+    form_version_6m___10 boolean,
+    form_label_1y character varying,
+    form_version_1y___1 boolean,
+    form_label_2y character varying,
+    form_version_2y___1 boolean,
+    form_label_3y character varying,
+    form_version_3y___1 boolean,
+    form_version_3y___2 boolean,
+    form_version_3y___3 boolean,
+    form_version_3y___4 boolean,
+    form_version_3y___5 boolean,
+    form_version_3y___6 boolean,
+    form_version_3y___7 boolean,
+    form_version_3y___8 boolean,
+    form_version_3y___9 boolean,
+    form_version_3y___10 boolean,
+    form_version_3y___11 boolean,
+    form_version_3y___12 boolean,
+    form_version_3y___13 boolean,
+    form_version_3y___14 boolean,
+    form_label_4y character varying,
+    form_version_4y___1 boolean,
+    form_label_5y character varying,
+    form_version_5y___1 boolean,
+    form_label_6y character varying,
+    form_version_6y___1 boolean,
+    form_label_7y character varying,
+    form_version_7y___1 boolean,
+    form_version_7y___2 boolean,
+    form_version_7y___3 boolean,
+    form_version_7y___4 boolean,
+    form_version_7y___5 boolean,
+    form_version_7y___6 boolean,
+    form_version_7y___7 boolean,
+    form_version_7y___8 boolean,
+    form_version_7y___9 boolean,
+    form_version_7y___10 boolean,
+    form_version_7y___11 boolean,
+    form_version_7y___12 boolean,
+    form_version_7y___13 boolean,
+    form_version_7y___14 boolean,
+    form_version_7y___15 boolean,
+    form_version_7y___16 boolean,
+    form_version_7y___17 boolean,
+    form_label_8y character varying,
+    form_version_8y___1 boolean,
+    form_label_9y character varying,
+    form_version_9y___1 boolean,
+    form_version_9y___2 boolean,
+    form_label_10y character varying,
+    form_version_10y___1 boolean,
+    form_version_10y___2 boolean,
+    form_label_11y character varying,
+    form_version_11y___1 boolean,
+    form_version_11y___2 boolean,
+    form_label_12y character varying,
+    form_version_12y___1 boolean,
+    form_version_12y___2 boolean,
+    form_version_12y___3 boolean,
+    form_version_12y___4 boolean,
+    form_version_12y___5 boolean,
+    form_version_12y___6 boolean,
+    form_version_12y___7 boolean,
+    form_version_12y___8 boolean,
+    form_version_12y___9 boolean,
+    form_version_12y___10 boolean,
+    form_version_12y___11 boolean,
+    form_version_12y___12 boolean,
+    form_version_12y___13 boolean,
+    form_version_12y___14 boolean,
+    form_version_12y___15 boolean,
+    form_version_12y___16 boolean,
+    form_label_14y character varying,
+    form_version_14y___1 boolean,
+    form_version_14y___2 boolean,
+    form_label_15y character varying,
+    form_version_15y___1 boolean,
+    form_version_15y___2 boolean,
+    form_label_16y character varying,
+    form_version_16y___1 boolean,
+    form_version_16y___2 boolean,
+    form_label_mt character varying,
+    form_version_mt character varying,
+    form_label_19y character varying,
+    form_version_19y___1 boolean,
+    form_version_19y___2 boolean,
+    not_time_specific character varying,
+    var_level character varying,
+    units character varying,
+    model_type character varying,
+    response_options character varying,
+    elig_sample character varying,
+    elig_n character varying,
+    actual_n character varying,
+    an_var character varying,
+    orig_deriv character varying,
+    corr_derived_yn___0 boolean,
+    corr_derived_yn___1 boolean,
+    der_varname character varying,
+    dervar_explain character varying,
+    orig_varnames character varying,
+    visitspecific_information_complete integer,
+    redcap_repeat_instrument character varying,
+    redcap_repeat_instance character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    viva2_rc_id bigint
+);
+
+
+--
+-- Name: COLUMN viva2_rc_history.varname; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.varname IS 'Variable name';
+
+
+--
+-- Name: COLUMN viva2_rc_history.var_label; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.var_label IS 'Variable label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.var_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.var_type IS 'Type of variable';
+
+
+--
+-- Name: COLUMN viva2_rc_history.restrict_var___0; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.restrict_var___0 IS 'None';
+
+
+--
+-- Name: COLUMN viva2_rc_history.restrict_var___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.restrict_var___1 IS 'PHI, OK for limited dataset';
+
+
+--
+-- Name: COLUMN viva2_rc_history.restrict_var___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.restrict_var___2 IS 'PHI, restricted use';
+
+
+--
+-- Name: COLUMN viva2_rc_history.restrict_var___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.restrict_var___3 IS 'Sensitive information';
+
+
+--
+-- Name: COLUMN viva2_rc_history.restrict_var___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.restrict_var___4 IS 'Other restriction';
+
+
+--
+-- Name: COLUMN viva2_rc_history.oth_restrict; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.oth_restrict IS 'Specify other restriction';
+
+
+--
+-- Name: COLUMN viva2_rc_history.domain_viva; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.domain_viva IS 'Domain or topic area';
+
+
+--
+-- Name: COLUMN viva2_rc_history.subdomain___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.subdomain___1 IS 'Placeholder';
+
+
+--
+-- Name: COLUMN viva2_rc_history.subdomain___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.subdomain___2 IS 'Placeholder';
+
+
+--
+-- Name: COLUMN viva2_rc_history.target_of_q; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.target_of_q IS 'Target';
+
+
+--
+-- Name: COLUMN viva2_rc_history.data_source; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.data_source IS 'Source of data';
+
+
+--
+-- Name: COLUMN viva2_rc_history.val_instr; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.val_instr IS 'Please indicate whether the question comes from an external, internal, or no instrument.';
+
+
+--
+-- Name: COLUMN viva2_rc_history.ext_instrument; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.ext_instrument IS 'External instrument';
+
+
+--
+-- Name: COLUMN viva2_rc_history.internal_instrument; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.internal_instrument IS 'Internal instrument';
+
+
+--
+-- Name: COLUMN viva2_rc_history.doc_yn; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.doc_yn IS 'Documentation available?';
+
+
+--
+-- Name: COLUMN viva2_rc_history.doc_link; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.doc_link IS 'Documentation link';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_yn; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_yn IS 'Longitudinal measurement?';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___1 IS 'Screening';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___2 IS 'Early pregnancy';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___3 IS 'Mid-pregnancy';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___4 IS 'Delivery';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___5 IS 'Infancy (6 months)';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___6 IS '1 year';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___7 IS '2 year';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___8 IS 'Early childhood (3 year)';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___9 IS '4 year';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___10 IS '5 year';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___11 IS '6 year';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___12 IS 'Mid childhood (7-8 years)';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___13 IS '8 year';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___14 IS '9 year';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___15; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___15 IS '10 year';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___16; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___16 IS '11 year';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___17; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___17 IS 'Early adolescence (12-13 years)';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___18; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___18 IS '14 years';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___19; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___19 IS '15 year';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___20; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___20 IS '16 year';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___21; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___21 IS 'Mid/late adolescence (17-18 years)';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___22; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___22 IS '19 year';
+
+
+--
+-- Name: COLUMN viva2_rc_history.long_timepts___23; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.long_timepts___23 IS 'Not time specific';
+
+
+--
+-- Name: COLUMN viva2_rc_history.event_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.event_type IS 'Type of data collection event';
+
+
+--
+-- Name: COLUMN viva2_rc_history.visit_name; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.visit_name IS 'Visit name';
+
+
+--
+-- Name: COLUMN viva2_rc_history.visit_time; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.visit_time IS 'Visit target time point';
+
+
+--
+-- Name: COLUMN viva2_rc_history.assay_specimen; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.assay_specimen IS 'Lab Assay Specimen Source';
+
+
+--
+-- Name: COLUMN viva2_rc_history.assay_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.assay_type IS 'Laboratory assay type';
+
+
+--
+-- Name: COLUMN viva2_rc_history.lab_assay_dataset; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.lab_assay_dataset IS 'Laboratory Assay \''Form\'' (Dataset)';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_ep; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_ep IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_ep___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_ep___1 IS 'EPQ';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_ep___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_ep___2 IS 'EPQ1';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_ep___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_ep___3 IS 'EPQA';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_ep___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_ep___4 IS 'EPS1';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_ep___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_ep___5 IS 'EPI1';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_ep___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_ep___6 IS 'EPIA';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_ep___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_ep___7 IS 'SCR1';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_ep___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_ep___8 IS 'BLD1';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_mp; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_mp IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_mp___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_mp___1 IS 'MPQ2';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_mp___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_mp___2 IS 'BLD2';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_mp___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_mp___3 IS 'PSQ2';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_mp___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_mp___4 IS 'MPI2';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_del; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_del IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_del___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_del___1 IS 'DES3';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_del___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_del___2 IS 'NAN3';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_del___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_del___3 IS 'NBP3';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_del___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_del___4 IS 'NLG3';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_del___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_del___5 IS 'PSQ3';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_del___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_del___6 IS 'PSS3';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_del___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_del___7 IS 'DEI3';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_6m; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_6m IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_6m___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_6m___1 IS 'PSQ4';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_6m___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_6m___2 IS 'MSC4';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_6m___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_6m___3 IS 'VIS4';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_6m___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_6m___4 IS 'SMIR';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_6m___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_6m___5 IS 'SMSB4';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_6m___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_6m___6 IS 'SMSF4';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_6m___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_6m___7 IS 'SMSW4';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_6m___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_6m___8 IS 'SMSM4';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_6m___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_6m___9 IS 'SMQ4';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_6m___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_6m___10 IS 'MSM4';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_1y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_1y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_1y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_1y___1 IS 'OYQ';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_2y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_2y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_2y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_2y___1 IS 'SYQ/SYQ6';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_3y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_3y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___1 IS 'MAT7';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___2 IS 'CAT7';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___3 IS 'MBP7';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___4 IS 'CBP7';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___5 IS 'MBL7';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___6 IS 'CBL7';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___7 IS 'MCT7';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___8 IS 'CCT7';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___9 IS 'TYI';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___10 IS 'TYQ';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___11 IS 'TYS7';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___12 IS 'IBL7';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___13 IS 'IAC7';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_3y___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_3y___14 IS 'IDC7';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_4y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_4y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_4y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_4y___1 IS '4YQ';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_5y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_5y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_5y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_5y___1 IS 'QU5Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_6y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_6y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_6y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_6y___1 IS 'QU6Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_7y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_7y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___1 IS 'MA7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___2 IS 'CA7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___3 IS 'BL7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___4 IS 'PE7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___5 IS 'HR7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___6 IS 'DX7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___7 IS 'BP7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___8 IS 'MC7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___9 IS 'CC7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___10 IS 'SP7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___11 IS 'BQ7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___12 IS 'TE7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___13 IS 'MI7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___14 IS 'IN7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___15; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___15 IS 'HP7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___16; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___16 IS 'ST7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_7y___17; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_7y___17 IS 'QU7Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_8y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_8y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_8y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_8y___1 IS 'QU8Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_9y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_9y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_9y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_9y___1 IS 'QU9Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_9y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_9y___2 IS 'CQ9Y';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_10y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_10y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_10y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_10y___1 IS 'QU10';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_10y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_10y___2 IS 'CQ10';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_11y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_11y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_11y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_11y___1 IS 'QU11';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_11y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_11y___2 IS 'CQ11';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_12y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_12y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___1 IS 'MA12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___2 IS 'CA12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___3 IS 'SJ12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___4 IS 'BL12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___5 IS 'PE12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___6 IS 'HR12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___7 IS 'NS12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___8 IS 'BP12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___9 IS 'DX12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___10 IS 'NO12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___11 IS 'SP12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___12 IS 'MI12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___13 IS 'IN12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___14 IS 'ST12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___15; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___15 IS 'QU12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_12y___16; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_12y___16 IS 'CQ12';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_14y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_14y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_14y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_14y___1 IS 'QU14';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_14y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_14y___2 IS 'CQ14';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_15y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_15y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_15y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_15y___1 IS 'QU15';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_15y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_15y___2 IS 'CQ15';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_16y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_16y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_16y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_16y___1 IS 'QU16';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_16y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_16y___2 IS 'CQ16';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_mt; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_mt IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_mt; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_mt IS 'Form Version';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_label_19y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_label_19y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_19y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_19y___1 IS 'QU19';
+
+
+--
+-- Name: COLUMN viva2_rc_history.form_version_19y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.form_version_19y___2 IS 'TQ19';
+
+
+--
+-- Name: COLUMN viva2_rc_history.not_time_specific; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.not_time_specific IS 'Not time specific';
+
+
+--
+-- Name: COLUMN viva2_rc_history.var_level; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.var_level IS 'Variable Level';
+
+
+--
+-- Name: COLUMN viva2_rc_history.units; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.units IS 'Units';
+
+
+--
+-- Name: COLUMN viva2_rc_history.model_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.model_type IS 'Model';
+
+
+--
+-- Name: COLUMN viva2_rc_history.response_options; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.response_options IS 'Response Options';
+
+
+--
+-- Name: COLUMN viva2_rc_history.elig_sample; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.elig_sample IS 'Eligible sample description';
+
+
+--
+-- Name: COLUMN viva2_rc_history.elig_n; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.elig_n IS 'Eligible sample N';
+
+
+--
+-- Name: COLUMN viva2_rc_history.actual_n; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.actual_n IS 'Actual sample N';
+
+
+--
+-- Name: COLUMN viva2_rc_history.an_var; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.an_var IS 'Analytic variable name';
+
+
+--
+-- Name: COLUMN viva2_rc_history.orig_deriv; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.orig_deriv IS 'Original or derived variable';
+
+
+--
+-- Name: COLUMN viva2_rc_history.corr_derived_yn___0; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.corr_derived_yn___0 IS 'No';
+
+
+--
+-- Name: COLUMN viva2_rc_history.corr_derived_yn___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.corr_derived_yn___1 IS 'Yes';
+
+
+--
+-- Name: COLUMN viva2_rc_history.der_varname; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.der_varname IS 'Name of corresponding derived variable';
+
+
+--
+-- Name: COLUMN viva2_rc_history.dervar_explain; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.dervar_explain IS 'Derived Variable';
+
+
+--
+-- Name: COLUMN viva2_rc_history.orig_varnames; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rc_history.orig_varnames IS 'Name of corresponding original variable(s)';
+
+
+--
+-- Name: viva2_rc_history_id_seq; Type: SEQUENCE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE SEQUENCE viva_ref_info.viva2_rc_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: viva2_rc_history_id_seq; Type: SEQUENCE OWNED BY; Schema: viva_ref_info; Owner: -
+--
+
+ALTER SEQUENCE viva_ref_info.viva2_rc_history_id_seq OWNED BY viva_ref_info.viva2_rc_history.id;
+
+
+--
+-- Name: viva2_rcs; Type: TABLE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TABLE viva_ref_info.viva2_rcs (
+    id bigint NOT NULL,
+    varname character varying,
+    var_label character varying,
+    var_type character varying,
+    restrict_var___0 boolean,
+    restrict_var___1 boolean,
+    restrict_var___2 boolean,
+    restrict_var___3 boolean,
+    restrict_var___4 boolean,
+    oth_restrict character varying,
+    domain_viva character varying,
+    subdomain___1 boolean,
+    subdomain___2 boolean,
+    target_of_q character varying,
+    data_source character varying,
+    val_instr character varying,
+    ext_instrument character varying,
+    internal_instrument character varying,
+    doc_yn character varying,
+    doc_link character varying,
+    long_yn character varying,
+    long_timepts___1 boolean,
+    long_timepts___2 boolean,
+    long_timepts___3 boolean,
+    long_timepts___4 boolean,
+    long_timepts___5 boolean,
+    long_timepts___6 boolean,
+    long_timepts___7 boolean,
+    long_timepts___8 boolean,
+    long_timepts___9 boolean,
+    long_timepts___10 boolean,
+    long_timepts___11 boolean,
+    long_timepts___12 boolean,
+    long_timepts___13 boolean,
+    long_timepts___14 boolean,
+    long_timepts___15 boolean,
+    long_timepts___16 boolean,
+    long_timepts___17 boolean,
+    long_timepts___18 boolean,
+    long_timepts___19 boolean,
+    long_timepts___20 boolean,
+    long_timepts___21 boolean,
+    long_timepts___22 boolean,
+    long_timepts___23 boolean,
+    static_variable_information_complete integer,
+    event_type character varying,
+    visit_name character varying,
+    visit_time character varying,
+    assay_specimen character varying,
+    assay_type character varying,
+    lab_assay_dataset character varying,
+    form_label_ep character varying,
+    form_version_ep___1 boolean,
+    form_version_ep___2 boolean,
+    form_version_ep___3 boolean,
+    form_version_ep___4 boolean,
+    form_version_ep___5 boolean,
+    form_version_ep___6 boolean,
+    form_version_ep___7 boolean,
+    form_version_ep___8 boolean,
+    form_label_mp character varying,
+    form_version_mp___1 boolean,
+    form_version_mp___2 boolean,
+    form_version_mp___3 boolean,
+    form_version_mp___4 boolean,
+    form_label_del character varying,
+    form_version_del___1 boolean,
+    form_version_del___2 boolean,
+    form_version_del___3 boolean,
+    form_version_del___4 boolean,
+    form_version_del___5 boolean,
+    form_version_del___6 boolean,
+    form_version_del___7 boolean,
+    form_label_6m character varying,
+    form_version_6m___1 boolean,
+    form_version_6m___2 boolean,
+    form_version_6m___3 boolean,
+    form_version_6m___4 boolean,
+    form_version_6m___5 boolean,
+    form_version_6m___6 boolean,
+    form_version_6m___7 boolean,
+    form_version_6m___8 boolean,
+    form_version_6m___9 boolean,
+    form_version_6m___10 boolean,
+    form_label_1y character varying,
+    form_version_1y___1 boolean,
+    form_label_2y character varying,
+    form_version_2y___1 boolean,
+    form_label_3y character varying,
+    form_version_3y___1 boolean,
+    form_version_3y___2 boolean,
+    form_version_3y___3 boolean,
+    form_version_3y___4 boolean,
+    form_version_3y___5 boolean,
+    form_version_3y___6 boolean,
+    form_version_3y___7 boolean,
+    form_version_3y___8 boolean,
+    form_version_3y___9 boolean,
+    form_version_3y___10 boolean,
+    form_version_3y___11 boolean,
+    form_version_3y___12 boolean,
+    form_version_3y___13 boolean,
+    form_version_3y___14 boolean,
+    form_label_4y character varying,
+    form_version_4y___1 boolean,
+    form_label_5y character varying,
+    form_version_5y___1 boolean,
+    form_label_6y character varying,
+    form_version_6y___1 boolean,
+    form_label_7y character varying,
+    form_version_7y___1 boolean,
+    form_version_7y___2 boolean,
+    form_version_7y___3 boolean,
+    form_version_7y___4 boolean,
+    form_version_7y___5 boolean,
+    form_version_7y___6 boolean,
+    form_version_7y___7 boolean,
+    form_version_7y___8 boolean,
+    form_version_7y___9 boolean,
+    form_version_7y___10 boolean,
+    form_version_7y___11 boolean,
+    form_version_7y___12 boolean,
+    form_version_7y___13 boolean,
+    form_version_7y___14 boolean,
+    form_version_7y___15 boolean,
+    form_version_7y___16 boolean,
+    form_version_7y___17 boolean,
+    form_label_8y character varying,
+    form_version_8y___1 boolean,
+    form_label_9y character varying,
+    form_version_9y___1 boolean,
+    form_version_9y___2 boolean,
+    form_label_10y character varying,
+    form_version_10y___1 boolean,
+    form_version_10y___2 boolean,
+    form_label_11y character varying,
+    form_version_11y___1 boolean,
+    form_version_11y___2 boolean,
+    form_label_12y character varying,
+    form_version_12y___1 boolean,
+    form_version_12y___2 boolean,
+    form_version_12y___3 boolean,
+    form_version_12y___4 boolean,
+    form_version_12y___5 boolean,
+    form_version_12y___6 boolean,
+    form_version_12y___7 boolean,
+    form_version_12y___8 boolean,
+    form_version_12y___9 boolean,
+    form_version_12y___10 boolean,
+    form_version_12y___11 boolean,
+    form_version_12y___12 boolean,
+    form_version_12y___13 boolean,
+    form_version_12y___14 boolean,
+    form_version_12y___15 boolean,
+    form_version_12y___16 boolean,
+    form_label_14y character varying,
+    form_version_14y___1 boolean,
+    form_version_14y___2 boolean,
+    form_label_15y character varying,
+    form_version_15y___1 boolean,
+    form_version_15y___2 boolean,
+    form_label_16y character varying,
+    form_version_16y___1 boolean,
+    form_version_16y___2 boolean,
+    form_label_mt character varying,
+    form_version_mt character varying,
+    form_label_19y character varying,
+    form_version_19y___1 boolean,
+    form_version_19y___2 boolean,
+    not_time_specific character varying,
+    var_level character varying,
+    units character varying,
+    model_type character varying,
+    response_options character varying,
+    elig_sample character varying,
+    elig_n character varying,
+    actual_n character varying,
+    an_var character varying,
+    orig_deriv character varying,
+    corr_derived_yn___0 boolean,
+    corr_derived_yn___1 boolean,
+    der_varname character varying,
+    dervar_explain character varying,
+    orig_varnames character varying,
+    visitspecific_information_complete integer,
+    redcap_repeat_instrument character varying,
+    redcap_repeat_instance character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE viva2_rcs; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON TABLE viva_ref_info.viva2_rcs IS 'Dynamicmodel: Viva2 Rc';
+
+
+--
+-- Name: COLUMN viva2_rcs.varname; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.varname IS 'Variable name';
+
+
+--
+-- Name: COLUMN viva2_rcs.var_label; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.var_label IS 'Variable label';
+
+
+--
+-- Name: COLUMN viva2_rcs.var_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.var_type IS 'Type of variable';
+
+
+--
+-- Name: COLUMN viva2_rcs.restrict_var___0; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.restrict_var___0 IS 'None';
+
+
+--
+-- Name: COLUMN viva2_rcs.restrict_var___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.restrict_var___1 IS 'PHI, OK for limited dataset';
+
+
+--
+-- Name: COLUMN viva2_rcs.restrict_var___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.restrict_var___2 IS 'PHI, restricted use';
+
+
+--
+-- Name: COLUMN viva2_rcs.restrict_var___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.restrict_var___3 IS 'Sensitive information';
+
+
+--
+-- Name: COLUMN viva2_rcs.restrict_var___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.restrict_var___4 IS 'Other restriction';
+
+
+--
+-- Name: COLUMN viva2_rcs.oth_restrict; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.oth_restrict IS 'Specify other restriction';
+
+
+--
+-- Name: COLUMN viva2_rcs.domain_viva; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.domain_viva IS 'Domain or topic area';
+
+
+--
+-- Name: COLUMN viva2_rcs.subdomain___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.subdomain___1 IS 'Placeholder';
+
+
+--
+-- Name: COLUMN viva2_rcs.subdomain___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.subdomain___2 IS 'Placeholder';
+
+
+--
+-- Name: COLUMN viva2_rcs.target_of_q; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.target_of_q IS 'Target';
+
+
+--
+-- Name: COLUMN viva2_rcs.data_source; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.data_source IS 'Source of data';
+
+
+--
+-- Name: COLUMN viva2_rcs.val_instr; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.val_instr IS 'Please indicate whether the question comes from an external, internal, or no instrument.';
+
+
+--
+-- Name: COLUMN viva2_rcs.ext_instrument; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.ext_instrument IS 'External instrument';
+
+
+--
+-- Name: COLUMN viva2_rcs.internal_instrument; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.internal_instrument IS 'Internal instrument';
+
+
+--
+-- Name: COLUMN viva2_rcs.doc_yn; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.doc_yn IS 'Documentation available?';
+
+
+--
+-- Name: COLUMN viva2_rcs.doc_link; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.doc_link IS 'Documentation link';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_yn; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_yn IS 'Longitudinal measurement?';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___1 IS 'Screening';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___2 IS 'Early pregnancy';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___3 IS 'Mid-pregnancy';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___4 IS 'Delivery';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___5 IS 'Infancy (6 months)';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___6 IS '1 year';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___7 IS '2 year';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___8 IS 'Early childhood (3 year)';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___9 IS '4 year';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___10 IS '5 year';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___11 IS '6 year';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___12 IS 'Mid childhood (7-8 years)';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___13 IS '8 year';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___14 IS '9 year';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___15; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___15 IS '10 year';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___16; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___16 IS '11 year';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___17; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___17 IS 'Early adolescence (12-13 years)';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___18; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___18 IS '14 years';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___19; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___19 IS '15 year';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___20; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___20 IS '16 year';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___21; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___21 IS 'Mid/late adolescence (17-18 years)';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___22; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___22 IS '19 year';
+
+
+--
+-- Name: COLUMN viva2_rcs.long_timepts___23; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.long_timepts___23 IS 'Not time specific';
+
+
+--
+-- Name: COLUMN viva2_rcs.event_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.event_type IS 'Type of data collection event';
+
+
+--
+-- Name: COLUMN viva2_rcs.visit_name; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.visit_name IS 'Visit name';
+
+
+--
+-- Name: COLUMN viva2_rcs.visit_time; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.visit_time IS 'Visit target time point';
+
+
+--
+-- Name: COLUMN viva2_rcs.assay_specimen; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.assay_specimen IS 'Lab Assay Specimen Source';
+
+
+--
+-- Name: COLUMN viva2_rcs.assay_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.assay_type IS 'Laboratory assay type';
+
+
+--
+-- Name: COLUMN viva2_rcs.lab_assay_dataset; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.lab_assay_dataset IS 'Laboratory Assay \''Form\'' (Dataset)';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_ep; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_ep IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_ep___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_ep___1 IS 'EPQ';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_ep___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_ep___2 IS 'EPQ1';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_ep___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_ep___3 IS 'EPQA';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_ep___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_ep___4 IS 'EPS1';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_ep___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_ep___5 IS 'EPI1';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_ep___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_ep___6 IS 'EPIA';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_ep___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_ep___7 IS 'SCR1';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_ep___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_ep___8 IS 'BLD1';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_mp; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_mp IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_mp___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_mp___1 IS 'MPQ2';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_mp___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_mp___2 IS 'BLD2';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_mp___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_mp___3 IS 'PSQ2';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_mp___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_mp___4 IS 'MPI2';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_del; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_del IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_del___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_del___1 IS 'DES3';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_del___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_del___2 IS 'NAN3';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_del___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_del___3 IS 'NBP3';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_del___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_del___4 IS 'NLG3';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_del___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_del___5 IS 'PSQ3';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_del___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_del___6 IS 'PSS3';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_del___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_del___7 IS 'DEI3';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_6m; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_6m IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_6m___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_6m___1 IS 'PSQ4';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_6m___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_6m___2 IS 'MSC4';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_6m___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_6m___3 IS 'VIS4';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_6m___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_6m___4 IS 'SMIR';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_6m___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_6m___5 IS 'SMSB4';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_6m___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_6m___6 IS 'SMSF4';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_6m___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_6m___7 IS 'SMSW4';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_6m___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_6m___8 IS 'SMSM4';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_6m___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_6m___9 IS 'SMQ4';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_6m___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_6m___10 IS 'MSM4';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_1y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_1y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_1y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_1y___1 IS 'OYQ';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_2y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_2y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_2y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_2y___1 IS 'SYQ/SYQ6';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_3y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_3y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___1 IS 'MAT7';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___2 IS 'CAT7';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___3 IS 'MBP7';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___4 IS 'CBP7';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___5 IS 'MBL7';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___6 IS 'CBL7';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___7 IS 'MCT7';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___8 IS 'CCT7';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___9 IS 'TYI';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___10 IS 'TYQ';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___11 IS 'TYS7';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___12 IS 'IBL7';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___13 IS 'IAC7';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_3y___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_3y___14 IS 'IDC7';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_4y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_4y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_4y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_4y___1 IS '4YQ';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_5y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_5y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_5y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_5y___1 IS 'QU5Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_6y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_6y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_6y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_6y___1 IS 'QU6Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_7y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_7y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___1 IS 'MA7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___2 IS 'CA7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___3 IS 'BL7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___4 IS 'PE7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___5 IS 'HR7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___6 IS 'DX7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___7 IS 'BP7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___8 IS 'MC7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___9 IS 'CC7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___10 IS 'SP7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___11 IS 'BQ7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___12 IS 'TE7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___13 IS 'MI7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___14 IS 'IN7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___15; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___15 IS 'HP7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___16; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___16 IS 'ST7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_7y___17; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_7y___17 IS 'QU7Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_8y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_8y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_8y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_8y___1 IS 'QU8Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_9y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_9y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_9y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_9y___1 IS 'QU9Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_9y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_9y___2 IS 'CQ9Y';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_10y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_10y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_10y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_10y___1 IS 'QU10';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_10y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_10y___2 IS 'CQ10';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_11y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_11y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_11y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_11y___1 IS 'QU11';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_11y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_11y___2 IS 'CQ11';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_12y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_12y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___1 IS 'MA12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___2 IS 'CA12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___3 IS 'SJ12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___4 IS 'BL12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___5 IS 'PE12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___6 IS 'HR12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___7 IS 'NS12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___8 IS 'BP12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___9 IS 'DX12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___10 IS 'NO12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___11 IS 'SP12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___12 IS 'MI12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___13 IS 'IN12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___14 IS 'ST12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___15; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___15 IS 'QU12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_12y___16; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_12y___16 IS 'CQ12';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_14y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_14y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_14y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_14y___1 IS 'QU14';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_14y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_14y___2 IS 'CQ14';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_15y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_15y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_15y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_15y___1 IS 'QU15';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_15y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_15y___2 IS 'CQ15';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_16y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_16y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_16y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_16y___1 IS 'QU16';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_16y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_16y___2 IS 'CQ16';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_mt; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_mt IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_mt; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_mt IS 'Form Version';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_label_19y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_label_19y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_19y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_19y___1 IS 'QU19';
+
+
+--
+-- Name: COLUMN viva2_rcs.form_version_19y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.form_version_19y___2 IS 'TQ19';
+
+
+--
+-- Name: COLUMN viva2_rcs.not_time_specific; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.not_time_specific IS 'Not time specific';
+
+
+--
+-- Name: COLUMN viva2_rcs.var_level; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.var_level IS 'Variable Level';
+
+
+--
+-- Name: COLUMN viva2_rcs.units; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.units IS 'Units';
+
+
+--
+-- Name: COLUMN viva2_rcs.model_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.model_type IS 'Model';
+
+
+--
+-- Name: COLUMN viva2_rcs.response_options; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.response_options IS 'Response Options';
+
+
+--
+-- Name: COLUMN viva2_rcs.elig_sample; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.elig_sample IS 'Eligible sample description';
+
+
+--
+-- Name: COLUMN viva2_rcs.elig_n; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.elig_n IS 'Eligible sample N';
+
+
+--
+-- Name: COLUMN viva2_rcs.actual_n; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.actual_n IS 'Actual sample N';
+
+
+--
+-- Name: COLUMN viva2_rcs.an_var; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.an_var IS 'Analytic variable name';
+
+
+--
+-- Name: COLUMN viva2_rcs.orig_deriv; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.orig_deriv IS 'Original or derived variable';
+
+
+--
+-- Name: COLUMN viva2_rcs.corr_derived_yn___0; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.corr_derived_yn___0 IS 'No';
+
+
+--
+-- Name: COLUMN viva2_rcs.corr_derived_yn___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.corr_derived_yn___1 IS 'Yes';
+
+
+--
+-- Name: COLUMN viva2_rcs.der_varname; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.der_varname IS 'Name of corresponding derived variable';
+
+
+--
+-- Name: COLUMN viva2_rcs.dervar_explain; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.dervar_explain IS 'Derived Variable';
+
+
+--
+-- Name: COLUMN viva2_rcs.orig_varnames; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva2_rcs.orig_varnames IS 'Name of corresponding original variable(s)';
+
+
+--
+-- Name: viva2_rcs_id_seq; Type: SEQUENCE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE SEQUENCE viva_ref_info.viva2_rcs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: viva2_rcs_id_seq; Type: SEQUENCE OWNED BY; Schema: viva_ref_info; Owner: -
+--
+
+ALTER SEQUENCE viva_ref_info.viva2_rcs_id_seq OWNED BY viva_ref_info.viva2_rcs.id;
+
+
+--
+-- Name: viva3_rc_history; Type: TABLE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TABLE viva_ref_info.viva3_rc_history (
+    id bigint NOT NULL,
+    varname character varying,
+    var_label character varying,
+    var_type character varying,
+    restrict_var___0 boolean,
+    restrict_var___1 boolean,
+    restrict_var___2 boolean,
+    restrict_var___3 boolean,
+    restrict_var___4 boolean,
+    oth_restrict character varying,
+    domain_viva character varying,
+    subdomain___1 boolean,
+    subdomain___2 boolean,
+    target_of_q character varying,
+    data_source character varying,
+    val_instr character varying,
+    ext_instrument character varying,
+    internal_instrument character varying,
+    doc_yn character varying,
+    doc_link character varying,
+    var_level character varying,
+    units character varying,
+    response_options character varying,
+    long_yn character varying,
+    long_timepts___1 boolean,
+    long_timepts___2 boolean,
+    long_timepts___3 boolean,
+    long_timepts___4 boolean,
+    long_timepts___5 boolean,
+    long_timepts___6 boolean,
+    long_timepts___7 boolean,
+    long_timepts___8 boolean,
+    long_timepts___9 boolean,
+    long_timepts___10 boolean,
+    long_timepts___11 boolean,
+    long_timepts___12 boolean,
+    long_timepts___13 boolean,
+    long_timepts___14 boolean,
+    long_timepts___15 boolean,
+    long_timepts___16 boolean,
+    long_timepts___17 boolean,
+    long_timepts___18 boolean,
+    long_timepts___19 boolean,
+    long_timepts___20 boolean,
+    long_timepts___21 boolean,
+    long_timepts___22 boolean,
+    long_timepts___23 boolean,
+    static_variable_information_complete integer,
+    event_type character varying,
+    visit_name character varying,
+    visit_time character varying,
+    assay_specimen character varying,
+    assay_type character varying,
+    lab_assay_dataset character varying,
+    form_label_ep character varying,
+    form_version_ep___1 boolean,
+    form_version_ep___2 boolean,
+    form_version_ep___3 boolean,
+    form_version_ep___4 boolean,
+    form_version_ep___5 boolean,
+    form_version_ep___6 boolean,
+    form_version_ep___7 boolean,
+    form_version_ep___8 boolean,
+    form_label_mp character varying,
+    form_version_mp___1 boolean,
+    form_version_mp___2 boolean,
+    form_version_mp___3 boolean,
+    form_version_mp___4 boolean,
+    form_label_del character varying,
+    form_version_del___1 boolean,
+    form_version_del___2 boolean,
+    form_version_del___3 boolean,
+    form_version_del___4 boolean,
+    form_version_del___5 boolean,
+    form_version_del___6 boolean,
+    form_version_del___7 boolean,
+    form_label_6m character varying,
+    form_version_6m___1 boolean,
+    form_version_6m___2 boolean,
+    form_version_6m___3 boolean,
+    form_version_6m___4 boolean,
+    form_version_6m___5 boolean,
+    form_version_6m___6 boolean,
+    form_version_6m___7 boolean,
+    form_version_6m___8 boolean,
+    form_version_6m___9 boolean,
+    form_version_6m___10 boolean,
+    form_label_1y character varying,
+    form_version_1y___1 boolean,
+    form_label_2y character varying,
+    form_version_2y___1 boolean,
+    form_label_3y character varying,
+    form_version_3y___1 boolean,
+    form_version_3y___2 boolean,
+    form_version_3y___3 boolean,
+    form_version_3y___4 boolean,
+    form_version_3y___5 boolean,
+    form_version_3y___6 boolean,
+    form_version_3y___7 boolean,
+    form_version_3y___8 boolean,
+    form_version_3y___9 boolean,
+    form_version_3y___10 boolean,
+    form_version_3y___11 boolean,
+    form_version_3y___12 boolean,
+    form_version_3y___13 boolean,
+    form_version_3y___14 boolean,
+    form_label_4y character varying,
+    form_version_4y___1 boolean,
+    form_label_5y character varying,
+    form_version_5y___1 boolean,
+    form_label_6y character varying,
+    form_version_6y___1 boolean,
+    form_label_7y character varying,
+    form_version_7y___1 boolean,
+    form_version_7y___2 boolean,
+    form_version_7y___3 boolean,
+    form_version_7y___4 boolean,
+    form_version_7y___5 boolean,
+    form_version_7y___6 boolean,
+    form_version_7y___7 boolean,
+    form_version_7y___8 boolean,
+    form_version_7y___9 boolean,
+    form_version_7y___10 boolean,
+    form_version_7y___11 boolean,
+    form_version_7y___12 boolean,
+    form_version_7y___13 boolean,
+    form_version_7y___14 boolean,
+    form_version_7y___15 boolean,
+    form_version_7y___16 boolean,
+    form_version_7y___17 boolean,
+    form_label_8y character varying,
+    form_version_8y___1 boolean,
+    form_label_9y character varying,
+    form_version_9y___1 boolean,
+    form_version_9y___2 boolean,
+    form_label_10y character varying,
+    form_version_10y___1 boolean,
+    form_version_10y___2 boolean,
+    form_label_11y character varying,
+    form_version_11y___1 boolean,
+    form_version_11y___2 boolean,
+    form_label_12y character varying,
+    form_version_12y___1 boolean,
+    form_version_12y___2 boolean,
+    form_version_12y___3 boolean,
+    form_version_12y___4 boolean,
+    form_version_12y___5 boolean,
+    form_version_12y___6 boolean,
+    form_version_12y___7 boolean,
+    form_version_12y___8 boolean,
+    form_version_12y___9 boolean,
+    form_version_12y___10 boolean,
+    form_version_12y___11 boolean,
+    form_version_12y___12 boolean,
+    form_version_12y___13 boolean,
+    form_version_12y___14 boolean,
+    form_version_12y___15 boolean,
+    form_version_12y___16 boolean,
+    form_label_14y character varying,
+    form_version_14y___1 boolean,
+    form_version_14y___2 boolean,
+    form_label_15y character varying,
+    form_version_15y___1 boolean,
+    form_version_15y___2 boolean,
+    form_label_16y character varying,
+    form_version_16y___1 boolean,
+    form_version_16y___2 boolean,
+    form_label_mt character varying,
+    form_version_mt character varying,
+    form_label_19y character varying,
+    form_version_19y___1 boolean,
+    form_version_19y___2 boolean,
+    not_time_specific character varying,
+    model_type character varying,
+    elig_sample character varying,
+    elig_n character varying,
+    actual_n character varying,
+    an_var character varying,
+    orig_deriv character varying,
+    corr_derived_yn___0 boolean,
+    corr_derived_yn___1 boolean,
+    der_varname character varying,
+    dervar_explain character varying,
+    orig_varnames character varying,
+    visitspecific_information_complete integer,
+    redcap_repeat_instrument character varying,
+    redcap_repeat_instance character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    viva3_rc_id bigint
+);
+
+
+--
+-- Name: COLUMN viva3_rc_history.varname; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.varname IS 'Variable name';
+
+
+--
+-- Name: COLUMN viva3_rc_history.var_label; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.var_label IS 'Variable label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.var_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.var_type IS 'Type of variable';
+
+
+--
+-- Name: COLUMN viva3_rc_history.restrict_var___0; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.restrict_var___0 IS 'None';
+
+
+--
+-- Name: COLUMN viva3_rc_history.restrict_var___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.restrict_var___1 IS 'PHI, OK for limited dataset';
+
+
+--
+-- Name: COLUMN viva3_rc_history.restrict_var___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.restrict_var___2 IS 'PHI, restricted use';
+
+
+--
+-- Name: COLUMN viva3_rc_history.restrict_var___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.restrict_var___3 IS 'Sensitive information';
+
+
+--
+-- Name: COLUMN viva3_rc_history.restrict_var___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.restrict_var___4 IS 'Other restriction';
+
+
+--
+-- Name: COLUMN viva3_rc_history.oth_restrict; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.oth_restrict IS 'Specify other restriction';
+
+
+--
+-- Name: COLUMN viva3_rc_history.domain_viva; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.domain_viva IS 'Domain or topic area';
+
+
+--
+-- Name: COLUMN viva3_rc_history.subdomain___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.subdomain___1 IS 'Placeholder';
+
+
+--
+-- Name: COLUMN viva3_rc_history.subdomain___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.subdomain___2 IS 'Placeholder';
+
+
+--
+-- Name: COLUMN viva3_rc_history.target_of_q; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.target_of_q IS 'Target';
+
+
+--
+-- Name: COLUMN viva3_rc_history.data_source; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.data_source IS 'Source of data';
+
+
+--
+-- Name: COLUMN viva3_rc_history.val_instr; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.val_instr IS 'Please indicate whether the question comes from an external, internal, or no instrument.';
+
+
+--
+-- Name: COLUMN viva3_rc_history.ext_instrument; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.ext_instrument IS 'External instrument';
+
+
+--
+-- Name: COLUMN viva3_rc_history.internal_instrument; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.internal_instrument IS 'Internal instrument';
+
+
+--
+-- Name: COLUMN viva3_rc_history.doc_yn; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.doc_yn IS 'Documentation available?';
+
+
+--
+-- Name: COLUMN viva3_rc_history.doc_link; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.doc_link IS 'Documentation link';
+
+
+--
+-- Name: COLUMN viva3_rc_history.var_level; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.var_level IS 'Variable Level';
+
+
+--
+-- Name: COLUMN viva3_rc_history.units; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.units IS 'Units';
+
+
+--
+-- Name: COLUMN viva3_rc_history.response_options; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.response_options IS 'Response Options';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_yn; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_yn IS 'Longitudinal measurement?';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___1 IS 'Screening';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___2 IS 'Early pregnancy';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___3 IS 'Mid-pregnancy';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___4 IS 'Delivery';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___5 IS 'Infancy (6 months)';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___6 IS '1 year';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___7 IS '2 year';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___8 IS 'Early childhood (3 year)';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___9 IS '4 year';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___10 IS '5 year';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___11 IS '6 year';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___12 IS 'Mid childhood (7-8 years)';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___13 IS '8 year';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___14 IS '9 year';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___15; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___15 IS '10 year';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___16; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___16 IS '11 year';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___17; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___17 IS 'Early adolescence (12-13 years)';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___18; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___18 IS '14 years';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___19; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___19 IS '15 year';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___20; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___20 IS '16 year';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___21; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___21 IS 'Mid/late adolescence (17-18 years)';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___22; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___22 IS '19 year';
+
+
+--
+-- Name: COLUMN viva3_rc_history.long_timepts___23; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.long_timepts___23 IS 'Not time specific';
+
+
+--
+-- Name: COLUMN viva3_rc_history.event_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.event_type IS 'Type of data collection event';
+
+
+--
+-- Name: COLUMN viva3_rc_history.visit_name; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.visit_name IS 'Visit name';
+
+
+--
+-- Name: COLUMN viva3_rc_history.visit_time; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.visit_time IS 'Visit target time point';
+
+
+--
+-- Name: COLUMN viva3_rc_history.assay_specimen; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.assay_specimen IS 'Lab Assay Specimen Source';
+
+
+--
+-- Name: COLUMN viva3_rc_history.assay_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.assay_type IS 'Laboratory assay type';
+
+
+--
+-- Name: COLUMN viva3_rc_history.lab_assay_dataset; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.lab_assay_dataset IS 'Laboratory Assay \''Form\'' (Dataset)';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_ep; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_ep IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_ep___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_ep___1 IS 'EPQ';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_ep___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_ep___2 IS 'EPQ1';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_ep___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_ep___3 IS 'EPQA';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_ep___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_ep___4 IS 'EPS1';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_ep___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_ep___5 IS 'EPI1';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_ep___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_ep___6 IS 'EPIA';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_ep___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_ep___7 IS 'SCR1';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_ep___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_ep___8 IS 'BLD1';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_mp; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_mp IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_mp___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_mp___1 IS 'MPQ2';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_mp___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_mp___2 IS 'BLD2';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_mp___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_mp___3 IS 'PSQ2';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_mp___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_mp___4 IS 'MPI2';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_del; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_del IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_del___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_del___1 IS 'DES3';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_del___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_del___2 IS 'NAN3';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_del___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_del___3 IS 'NBP3';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_del___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_del___4 IS 'NLG3';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_del___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_del___5 IS 'PSQ3';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_del___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_del___6 IS 'PSS3';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_del___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_del___7 IS 'DEI3';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_6m; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_6m IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_6m___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_6m___1 IS 'PSQ4';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_6m___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_6m___2 IS 'MSC4';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_6m___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_6m___3 IS 'VIS4';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_6m___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_6m___4 IS 'SMIR';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_6m___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_6m___5 IS 'SMSB4';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_6m___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_6m___6 IS 'SMSF4';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_6m___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_6m___7 IS 'SMSW4';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_6m___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_6m___8 IS 'SMSM4';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_6m___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_6m___9 IS 'SMQ4';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_6m___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_6m___10 IS 'MSM4';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_1y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_1y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_1y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_1y___1 IS 'OYQ';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_2y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_2y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_2y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_2y___1 IS 'SYQ/SYQ6';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_3y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_3y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___1 IS 'MAT7';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___2 IS 'CAT7';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___3 IS 'MBP7';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___4 IS 'CBP7';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___5 IS 'MBL7';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___6 IS 'CBL7';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___7 IS 'MCT7';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___8 IS 'CCT7';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___9 IS 'TYI';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___10 IS 'TYQ';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___11 IS 'TYS7';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___12 IS 'IBL7';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___13 IS 'IAC7';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_3y___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_3y___14 IS 'IDC7';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_4y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_4y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_4y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_4y___1 IS '4YQ';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_5y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_5y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_5y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_5y___1 IS 'QU5Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_6y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_6y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_6y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_6y___1 IS 'QU6Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_7y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_7y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___1 IS 'MA7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___2 IS 'CA7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___3 IS 'BL7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___4 IS 'PE7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___5 IS 'HR7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___6 IS 'DX7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___7 IS 'BP7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___8 IS 'MC7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___9 IS 'CC7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___10 IS 'SP7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___11 IS 'BQ7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___12 IS 'TE7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___13 IS 'MI7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___14 IS 'IN7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___15; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___15 IS 'HP7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___16; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___16 IS 'ST7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_7y___17; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_7y___17 IS 'QU7Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_8y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_8y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_8y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_8y___1 IS 'QU8Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_9y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_9y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_9y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_9y___1 IS 'QU9Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_9y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_9y___2 IS 'CQ9Y';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_10y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_10y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_10y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_10y___1 IS 'QU10';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_10y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_10y___2 IS 'CQ10';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_11y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_11y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_11y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_11y___1 IS 'QU11';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_11y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_11y___2 IS 'CQ11';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_12y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_12y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___1 IS 'MA12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___2 IS 'CA12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___3 IS 'SJ12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___4 IS 'BL12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___5 IS 'PE12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___6 IS 'HR12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___7 IS 'NS12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___8 IS 'BP12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___9 IS 'DX12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___10 IS 'NO12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___11 IS 'SP12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___12 IS 'MI12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___13 IS 'IN12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___14 IS 'ST12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___15; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___15 IS 'QU12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_12y___16; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_12y___16 IS 'CQ12';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_14y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_14y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_14y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_14y___1 IS 'QU14';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_14y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_14y___2 IS 'CQ14';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_15y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_15y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_15y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_15y___1 IS 'QU15';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_15y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_15y___2 IS 'CQ15';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_16y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_16y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_16y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_16y___1 IS 'QU16';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_16y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_16y___2 IS 'CQ16';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_mt; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_mt IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_mt; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_mt IS 'Form Version';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_label_19y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_label_19y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_19y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_19y___1 IS 'QU19';
+
+
+--
+-- Name: COLUMN viva3_rc_history.form_version_19y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.form_version_19y___2 IS 'TQ19';
+
+
+--
+-- Name: COLUMN viva3_rc_history.not_time_specific; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.not_time_specific IS 'Not time specific';
+
+
+--
+-- Name: COLUMN viva3_rc_history.model_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.model_type IS 'Model';
+
+
+--
+-- Name: COLUMN viva3_rc_history.elig_sample; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.elig_sample IS 'Eligible sample description';
+
+
+--
+-- Name: COLUMN viva3_rc_history.elig_n; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.elig_n IS 'Eligible sample N';
+
+
+--
+-- Name: COLUMN viva3_rc_history.actual_n; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.actual_n IS 'Actual sample N';
+
+
+--
+-- Name: COLUMN viva3_rc_history.an_var; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.an_var IS 'Analytic variable name';
+
+
+--
+-- Name: COLUMN viva3_rc_history.orig_deriv; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.orig_deriv IS 'Original or derived variable';
+
+
+--
+-- Name: COLUMN viva3_rc_history.corr_derived_yn___0; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.corr_derived_yn___0 IS 'No';
+
+
+--
+-- Name: COLUMN viva3_rc_history.corr_derived_yn___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.corr_derived_yn___1 IS 'Yes';
+
+
+--
+-- Name: COLUMN viva3_rc_history.der_varname; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.der_varname IS 'Name of corresponding derived variable';
+
+
+--
+-- Name: COLUMN viva3_rc_history.dervar_explain; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.dervar_explain IS 'Derived Variable Explanation';
+
+
+--
+-- Name: COLUMN viva3_rc_history.orig_varnames; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rc_history.orig_varnames IS 'Name of corresponding original variable(s)';
+
+
+--
+-- Name: viva3_rc_history_id_seq; Type: SEQUENCE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE SEQUENCE viva_ref_info.viva3_rc_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: viva3_rc_history_id_seq; Type: SEQUENCE OWNED BY; Schema: viva_ref_info; Owner: -
+--
+
+ALTER SEQUENCE viva_ref_info.viva3_rc_history_id_seq OWNED BY viva_ref_info.viva3_rc_history.id;
+
+
+--
+-- Name: viva3_rcs; Type: TABLE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TABLE viva_ref_info.viva3_rcs (
+    id bigint NOT NULL,
+    varname character varying,
+    var_label character varying,
+    var_type character varying,
+    restrict_var___0 boolean,
+    restrict_var___1 boolean,
+    restrict_var___2 boolean,
+    restrict_var___3 boolean,
+    restrict_var___4 boolean,
+    oth_restrict character varying,
+    domain_viva character varying,
+    subdomain___1 boolean,
+    subdomain___2 boolean,
+    target_of_q character varying,
+    data_source character varying,
+    val_instr character varying,
+    ext_instrument character varying,
+    internal_instrument character varying,
+    doc_yn character varying,
+    doc_link character varying,
+    var_level character varying,
+    units character varying,
+    response_options character varying,
+    long_yn character varying,
+    long_timepts___1 boolean,
+    long_timepts___2 boolean,
+    long_timepts___3 boolean,
+    long_timepts___4 boolean,
+    long_timepts___5 boolean,
+    long_timepts___6 boolean,
+    long_timepts___7 boolean,
+    long_timepts___8 boolean,
+    long_timepts___9 boolean,
+    long_timepts___10 boolean,
+    long_timepts___11 boolean,
+    long_timepts___12 boolean,
+    long_timepts___13 boolean,
+    long_timepts___14 boolean,
+    long_timepts___15 boolean,
+    long_timepts___16 boolean,
+    long_timepts___17 boolean,
+    long_timepts___18 boolean,
+    long_timepts___19 boolean,
+    long_timepts___20 boolean,
+    long_timepts___21 boolean,
+    long_timepts___22 boolean,
+    long_timepts___23 boolean,
+    static_variable_information_complete integer,
+    event_type character varying,
+    visit_name character varying,
+    visit_time character varying,
+    assay_specimen character varying,
+    assay_type character varying,
+    lab_assay_dataset character varying,
+    form_label_ep character varying,
+    form_version_ep___1 boolean,
+    form_version_ep___2 boolean,
+    form_version_ep___3 boolean,
+    form_version_ep___4 boolean,
+    form_version_ep___5 boolean,
+    form_version_ep___6 boolean,
+    form_version_ep___7 boolean,
+    form_version_ep___8 boolean,
+    form_label_mp character varying,
+    form_version_mp___1 boolean,
+    form_version_mp___2 boolean,
+    form_version_mp___3 boolean,
+    form_version_mp___4 boolean,
+    form_label_del character varying,
+    form_version_del___1 boolean,
+    form_version_del___2 boolean,
+    form_version_del___3 boolean,
+    form_version_del___4 boolean,
+    form_version_del___5 boolean,
+    form_version_del___6 boolean,
+    form_version_del___7 boolean,
+    form_label_6m character varying,
+    form_version_6m___1 boolean,
+    form_version_6m___2 boolean,
+    form_version_6m___3 boolean,
+    form_version_6m___4 boolean,
+    form_version_6m___5 boolean,
+    form_version_6m___6 boolean,
+    form_version_6m___7 boolean,
+    form_version_6m___8 boolean,
+    form_version_6m___9 boolean,
+    form_version_6m___10 boolean,
+    form_label_1y character varying,
+    form_version_1y___1 boolean,
+    form_label_2y character varying,
+    form_version_2y___1 boolean,
+    form_label_3y character varying,
+    form_version_3y___1 boolean,
+    form_version_3y___2 boolean,
+    form_version_3y___3 boolean,
+    form_version_3y___4 boolean,
+    form_version_3y___5 boolean,
+    form_version_3y___6 boolean,
+    form_version_3y___7 boolean,
+    form_version_3y___8 boolean,
+    form_version_3y___9 boolean,
+    form_version_3y___10 boolean,
+    form_version_3y___11 boolean,
+    form_version_3y___12 boolean,
+    form_version_3y___13 boolean,
+    form_version_3y___14 boolean,
+    form_label_4y character varying,
+    form_version_4y___1 boolean,
+    form_label_5y character varying,
+    form_version_5y___1 boolean,
+    form_label_6y character varying,
+    form_version_6y___1 boolean,
+    form_label_7y character varying,
+    form_version_7y___1 boolean,
+    form_version_7y___2 boolean,
+    form_version_7y___3 boolean,
+    form_version_7y___4 boolean,
+    form_version_7y___5 boolean,
+    form_version_7y___6 boolean,
+    form_version_7y___7 boolean,
+    form_version_7y___8 boolean,
+    form_version_7y___9 boolean,
+    form_version_7y___10 boolean,
+    form_version_7y___11 boolean,
+    form_version_7y___12 boolean,
+    form_version_7y___13 boolean,
+    form_version_7y___14 boolean,
+    form_version_7y___15 boolean,
+    form_version_7y___16 boolean,
+    form_version_7y___17 boolean,
+    form_label_8y character varying,
+    form_version_8y___1 boolean,
+    form_label_9y character varying,
+    form_version_9y___1 boolean,
+    form_version_9y___2 boolean,
+    form_label_10y character varying,
+    form_version_10y___1 boolean,
+    form_version_10y___2 boolean,
+    form_label_11y character varying,
+    form_version_11y___1 boolean,
+    form_version_11y___2 boolean,
+    form_label_12y character varying,
+    form_version_12y___1 boolean,
+    form_version_12y___2 boolean,
+    form_version_12y___3 boolean,
+    form_version_12y___4 boolean,
+    form_version_12y___5 boolean,
+    form_version_12y___6 boolean,
+    form_version_12y___7 boolean,
+    form_version_12y___8 boolean,
+    form_version_12y___9 boolean,
+    form_version_12y___10 boolean,
+    form_version_12y___11 boolean,
+    form_version_12y___12 boolean,
+    form_version_12y___13 boolean,
+    form_version_12y___14 boolean,
+    form_version_12y___15 boolean,
+    form_version_12y___16 boolean,
+    form_label_14y character varying,
+    form_version_14y___1 boolean,
+    form_version_14y___2 boolean,
+    form_label_15y character varying,
+    form_version_15y___1 boolean,
+    form_version_15y___2 boolean,
+    form_label_16y character varying,
+    form_version_16y___1 boolean,
+    form_version_16y___2 boolean,
+    form_label_mt character varying,
+    form_version_mt character varying,
+    form_label_19y character varying,
+    form_version_19y___1 boolean,
+    form_version_19y___2 boolean,
+    not_time_specific character varying,
+    model_type character varying,
+    elig_sample character varying,
+    elig_n character varying,
+    actual_n character varying,
+    an_var character varying,
+    orig_deriv character varying,
+    corr_derived_yn___0 boolean,
+    corr_derived_yn___1 boolean,
+    der_varname character varying,
+    dervar_explain character varying,
+    orig_varnames character varying,
+    visitspecific_information_complete integer,
+    redcap_repeat_instrument character varying,
+    redcap_repeat_instance character varying,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE viva3_rcs; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON TABLE viva_ref_info.viva3_rcs IS 'Dynamicmodel: Viva Data Variable';
+
+
+--
+-- Name: COLUMN viva3_rcs.varname; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.varname IS 'Variable name';
+
+
+--
+-- Name: COLUMN viva3_rcs.var_label; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.var_label IS 'Variable label';
+
+
+--
+-- Name: COLUMN viva3_rcs.var_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.var_type IS 'Type of variable';
+
+
+--
+-- Name: COLUMN viva3_rcs.restrict_var___0; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.restrict_var___0 IS 'None';
+
+
+--
+-- Name: COLUMN viva3_rcs.restrict_var___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.restrict_var___1 IS 'PHI, OK for limited dataset';
+
+
+--
+-- Name: COLUMN viva3_rcs.restrict_var___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.restrict_var___2 IS 'PHI, restricted use';
+
+
+--
+-- Name: COLUMN viva3_rcs.restrict_var___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.restrict_var___3 IS 'Sensitive information';
+
+
+--
+-- Name: COLUMN viva3_rcs.restrict_var___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.restrict_var___4 IS 'Other restriction';
+
+
+--
+-- Name: COLUMN viva3_rcs.oth_restrict; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.oth_restrict IS 'Specify other restriction';
+
+
+--
+-- Name: COLUMN viva3_rcs.domain_viva; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.domain_viva IS 'Domain or topic area';
+
+
+--
+-- Name: COLUMN viva3_rcs.subdomain___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.subdomain___1 IS 'Placeholder';
+
+
+--
+-- Name: COLUMN viva3_rcs.subdomain___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.subdomain___2 IS 'Placeholder';
+
+
+--
+-- Name: COLUMN viva3_rcs.target_of_q; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.target_of_q IS 'Target';
+
+
+--
+-- Name: COLUMN viva3_rcs.data_source; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.data_source IS 'Source of data';
+
+
+--
+-- Name: COLUMN viva3_rcs.val_instr; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.val_instr IS 'Please indicate whether the question comes from an external, internal, or no instrument.';
+
+
+--
+-- Name: COLUMN viva3_rcs.ext_instrument; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.ext_instrument IS 'External instrument';
+
+
+--
+-- Name: COLUMN viva3_rcs.internal_instrument; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.internal_instrument IS 'Internal instrument';
+
+
+--
+-- Name: COLUMN viva3_rcs.doc_yn; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.doc_yn IS 'Documentation available?';
+
+
+--
+-- Name: COLUMN viva3_rcs.doc_link; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.doc_link IS 'Documentation link';
+
+
+--
+-- Name: COLUMN viva3_rcs.var_level; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.var_level IS 'Variable Level';
+
+
+--
+-- Name: COLUMN viva3_rcs.units; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.units IS 'Units';
+
+
+--
+-- Name: COLUMN viva3_rcs.response_options; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.response_options IS 'Response Options';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_yn; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_yn IS 'Longitudinal measurement?';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___1 IS 'Screening';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___2 IS 'Early pregnancy';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___3 IS 'Mid-pregnancy';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___4 IS 'Delivery';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___5 IS 'Infancy (6 months)';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___6 IS '1 year';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___7 IS '2 year';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___8 IS 'Early childhood (3 year)';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___9 IS '4 year';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___10 IS '5 year';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___11 IS '6 year';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___12 IS 'Mid childhood (7-8 years)';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___13 IS '8 year';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___14 IS '9 year';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___15; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___15 IS '10 year';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___16; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___16 IS '11 year';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___17; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___17 IS 'Early adolescence (12-13 years)';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___18; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___18 IS '14 years';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___19; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___19 IS '15 year';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___20; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___20 IS '16 year';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___21; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___21 IS 'Mid/late adolescence (17-18 years)';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___22; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___22 IS '19 year';
+
+
+--
+-- Name: COLUMN viva3_rcs.long_timepts___23; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.long_timepts___23 IS 'Not time specific';
+
+
+--
+-- Name: COLUMN viva3_rcs.event_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.event_type IS 'Type of data collection event';
+
+
+--
+-- Name: COLUMN viva3_rcs.visit_name; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.visit_name IS 'Visit name';
+
+
+--
+-- Name: COLUMN viva3_rcs.visit_time; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.visit_time IS 'Visit target time point';
+
+
+--
+-- Name: COLUMN viva3_rcs.assay_specimen; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.assay_specimen IS 'Lab Assay Specimen Source';
+
+
+--
+-- Name: COLUMN viva3_rcs.assay_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.assay_type IS 'Laboratory assay type';
+
+
+--
+-- Name: COLUMN viva3_rcs.lab_assay_dataset; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.lab_assay_dataset IS 'Laboratory Assay \''Form\'' (Dataset)';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_ep; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_ep IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_ep___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_ep___1 IS 'EPQ';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_ep___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_ep___2 IS 'EPQ1';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_ep___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_ep___3 IS 'EPQA';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_ep___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_ep___4 IS 'EPS1';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_ep___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_ep___5 IS 'EPI1';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_ep___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_ep___6 IS 'EPIA';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_ep___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_ep___7 IS 'SCR1';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_ep___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_ep___8 IS 'BLD1';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_mp; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_mp IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_mp___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_mp___1 IS 'MPQ2';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_mp___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_mp___2 IS 'BLD2';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_mp___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_mp___3 IS 'PSQ2';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_mp___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_mp___4 IS 'MPI2';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_del; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_del IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_del___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_del___1 IS 'DES3';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_del___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_del___2 IS 'NAN3';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_del___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_del___3 IS 'NBP3';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_del___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_del___4 IS 'NLG3';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_del___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_del___5 IS 'PSQ3';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_del___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_del___6 IS 'PSS3';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_del___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_del___7 IS 'DEI3';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_6m; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_6m IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_6m___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_6m___1 IS 'PSQ4';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_6m___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_6m___2 IS 'MSC4';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_6m___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_6m___3 IS 'VIS4';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_6m___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_6m___4 IS 'SMIR';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_6m___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_6m___5 IS 'SMSB4';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_6m___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_6m___6 IS 'SMSF4';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_6m___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_6m___7 IS 'SMSW4';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_6m___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_6m___8 IS 'SMSM4';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_6m___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_6m___9 IS 'SMQ4';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_6m___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_6m___10 IS 'MSM4';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_1y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_1y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_1y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_1y___1 IS 'OYQ';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_2y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_2y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_2y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_2y___1 IS 'SYQ/SYQ6';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_3y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_3y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___1 IS 'MAT7';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___2 IS 'CAT7';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___3 IS 'MBP7';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___4 IS 'CBP7';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___5 IS 'MBL7';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___6 IS 'CBL7';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___7 IS 'MCT7';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___8 IS 'CCT7';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___9 IS 'TYI';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___10 IS 'TYQ';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___11 IS 'TYS7';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___12 IS 'IBL7';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___13 IS 'IAC7';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_3y___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_3y___14 IS 'IDC7';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_4y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_4y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_4y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_4y___1 IS '4YQ';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_5y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_5y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_5y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_5y___1 IS 'QU5Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_6y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_6y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_6y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_6y___1 IS 'QU6Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_7y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_7y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___1 IS 'MA7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___2 IS 'CA7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___3 IS 'BL7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___4 IS 'PE7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___5 IS 'HR7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___6 IS 'DX7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___7 IS 'BP7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___8 IS 'MC7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___9 IS 'CC7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___10 IS 'SP7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___11 IS 'BQ7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___12 IS 'TE7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___13 IS 'MI7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___14 IS 'IN7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___15; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___15 IS 'HP7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___16; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___16 IS 'ST7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_7y___17; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_7y___17 IS 'QU7Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_8y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_8y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_8y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_8y___1 IS 'QU8Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_9y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_9y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_9y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_9y___1 IS 'QU9Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_9y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_9y___2 IS 'CQ9Y';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_10y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_10y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_10y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_10y___1 IS 'QU10';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_10y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_10y___2 IS 'CQ10';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_11y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_11y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_11y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_11y___1 IS 'QU11';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_11y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_11y___2 IS 'CQ11';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_12y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_12y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___1 IS 'MA12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___2 IS 'CA12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___3; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___3 IS 'SJ12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___4; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___4 IS 'BL12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___5; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___5 IS 'PE12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___6; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___6 IS 'HR12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___7; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___7 IS 'NS12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___8; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___8 IS 'BP12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___9; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___9 IS 'DX12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___10; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___10 IS 'NO12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___11; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___11 IS 'SP12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___12; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___12 IS 'MI12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___13; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___13 IS 'IN12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___14; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___14 IS 'ST12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___15; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___15 IS 'QU12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_12y___16; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_12y___16 IS 'CQ12';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_14y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_14y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_14y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_14y___1 IS 'QU14';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_14y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_14y___2 IS 'CQ14';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_15y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_15y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_15y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_15y___1 IS 'QU15';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_15y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_15y___2 IS 'CQ15';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_16y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_16y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_16y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_16y___1 IS 'QU16';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_16y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_16y___2 IS 'CQ16';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_mt; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_mt IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_mt; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_mt IS 'Form Version';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_label_19y; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_label_19y IS 'Form Label';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_19y___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_19y___1 IS 'QU19';
+
+
+--
+-- Name: COLUMN viva3_rcs.form_version_19y___2; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.form_version_19y___2 IS 'TQ19';
+
+
+--
+-- Name: COLUMN viva3_rcs.not_time_specific; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.not_time_specific IS 'Not time specific';
+
+
+--
+-- Name: COLUMN viva3_rcs.model_type; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.model_type IS 'Model';
+
+
+--
+-- Name: COLUMN viva3_rcs.elig_sample; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.elig_sample IS 'Eligible sample description';
+
+
+--
+-- Name: COLUMN viva3_rcs.elig_n; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.elig_n IS 'Eligible sample N';
+
+
+--
+-- Name: COLUMN viva3_rcs.actual_n; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.actual_n IS 'Actual sample N';
+
+
+--
+-- Name: COLUMN viva3_rcs.an_var; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.an_var IS 'Analytic variable name';
+
+
+--
+-- Name: COLUMN viva3_rcs.orig_deriv; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.orig_deriv IS 'Original or derived variable';
+
+
+--
+-- Name: COLUMN viva3_rcs.corr_derived_yn___0; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.corr_derived_yn___0 IS 'No';
+
+
+--
+-- Name: COLUMN viva3_rcs.corr_derived_yn___1; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.corr_derived_yn___1 IS 'Yes';
+
+
+--
+-- Name: COLUMN viva3_rcs.der_varname; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.der_varname IS 'Name of corresponding derived variable';
+
+
+--
+-- Name: COLUMN viva3_rcs.dervar_explain; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.dervar_explain IS 'Derived Variable Explanation';
+
+
+--
+-- Name: COLUMN viva3_rcs.orig_varnames; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva3_rcs.orig_varnames IS 'Name of corresponding original variable(s)';
+
+
+--
+-- Name: viva3_rcs_id_seq; Type: SEQUENCE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE SEQUENCE viva_ref_info.viva3_rcs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: viva3_rcs_id_seq; Type: SEQUENCE OWNED BY; Schema: viva_ref_info; Owner: -
+--
+
+ALTER SEQUENCE viva_ref_info.viva3_rcs_id_seq OWNED BY viva_ref_info.viva3_rcs.id;
+
+
+--
+-- Name: viva_collection_instrument_history; Type: TABLE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TABLE viva_ref_info.viva_collection_instrument_history (
+    id bigint NOT NULL,
+    name character varying,
+    select_data_source character varying,
+    select_data_target character varying,
+    select_record_id_from_viva_domains integer[],
+    select_record_id_from_viva_timepoints integer,
+    sample_file character varying,
+    disabled boolean DEFAULT false,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    viva_collection_instrument_id bigint
+);
+
+
+--
+-- Name: COLUMN viva_collection_instrument_history.name; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_collection_instrument_history.name IS 'Instrument Name';
+
+
+--
+-- Name: COLUMN viva_collection_instrument_history.select_data_source; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_collection_instrument_history.select_data_source IS 'Data Source';
+
+
+--
+-- Name: COLUMN viva_collection_instrument_history.select_data_target; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_collection_instrument_history.select_data_target IS 'Data Target';
+
+
+--
+-- Name: COLUMN viva_collection_instrument_history.select_record_id_from_viva_domains; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_collection_instrument_history.select_record_id_from_viva_domains IS 'Domain';
+
+
+--
+-- Name: COLUMN viva_collection_instrument_history.select_record_id_from_viva_timepoints; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_collection_instrument_history.select_record_id_from_viva_timepoints IS 'Timepoint or Visit';
+
+
+--
+-- Name: COLUMN viva_collection_instrument_history.sample_file; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_collection_instrument_history.sample_file IS 'Sample Form File';
+
+
+--
+-- Name: viva_collection_instrument_history_id_seq; Type: SEQUENCE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE SEQUENCE viva_ref_info.viva_collection_instrument_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: viva_collection_instrument_history_id_seq; Type: SEQUENCE OWNED BY; Schema: viva_ref_info; Owner: -
+--
+
+ALTER SEQUENCE viva_ref_info.viva_collection_instrument_history_id_seq OWNED BY viva_ref_info.viva_collection_instrument_history.id;
+
+
+--
+-- Name: viva_collection_instruments; Type: TABLE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TABLE viva_ref_info.viva_collection_instruments (
+    id bigint NOT NULL,
+    name character varying,
+    select_data_source character varying,
+    select_data_target character varying,
+    select_record_id_from_viva_domains integer[],
+    select_record_id_from_viva_timepoints integer,
+    sample_file character varying,
+    disabled boolean DEFAULT false,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE viva_collection_instruments; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON TABLE viva_ref_info.viva_collection_instruments IS 'Viva Collection Instruments';
+
+
+--
+-- Name: COLUMN viva_collection_instruments.name; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_collection_instruments.name IS 'Instrument Name';
+
+
+--
+-- Name: COLUMN viva_collection_instruments.select_data_source; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_collection_instruments.select_data_source IS 'Data Source';
+
+
+--
+-- Name: COLUMN viva_collection_instruments.select_data_target; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_collection_instruments.select_data_target IS 'Data Target';
+
+
+--
+-- Name: COLUMN viva_collection_instruments.select_record_id_from_viva_domains; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_collection_instruments.select_record_id_from_viva_domains IS 'Domain';
+
+
+--
+-- Name: COLUMN viva_collection_instruments.select_record_id_from_viva_timepoints; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_collection_instruments.select_record_id_from_viva_timepoints IS 'Timepoint or Visit';
+
+
+--
+-- Name: COLUMN viva_collection_instruments.sample_file; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_collection_instruments.sample_file IS 'Sample Form File';
+
+
+--
+-- Name: viva_collection_instruments_id_seq; Type: SEQUENCE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE SEQUENCE viva_ref_info.viva_collection_instruments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: viva_collection_instruments_id_seq; Type: SEQUENCE OWNED BY; Schema: viva_ref_info; Owner: -
+--
+
+ALTER SEQUENCE viva_ref_info.viva_collection_instruments_id_seq OWNED BY viva_ref_info.viva_collection_instruments.id;
+
+
+--
+-- Name: viva_domain_history; Type: TABLE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TABLE viva_ref_info.viva_domain_history (
+    id bigint NOT NULL,
+    select_topic character varying,
+    domain character varying,
+    sub_domain character varying,
+    disabled boolean DEFAULT false,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    viva_domain_id bigint
+);
+
+
+--
+-- Name: COLUMN viva_domain_history.select_topic; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_domain_history.select_topic IS 'Primary Domain Topic';
+
+
+--
+-- Name: COLUMN viva_domain_history.domain; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_domain_history.domain IS 'Domain';
+
+
+--
+-- Name: COLUMN viva_domain_history.sub_domain; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_domain_history.sub_domain IS 'Sub Domain';
+
+
+--
+-- Name: viva_domain_history_id_seq; Type: SEQUENCE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE SEQUENCE viva_ref_info.viva_domain_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: viva_domain_history_id_seq; Type: SEQUENCE OWNED BY; Schema: viva_ref_info; Owner: -
+--
+
+ALTER SEQUENCE viva_ref_info.viva_domain_history_id_seq OWNED BY viva_ref_info.viva_domain_history.id;
+
+
+--
+-- Name: viva_domains; Type: TABLE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TABLE viva_ref_info.viva_domains (
+    id bigint NOT NULL,
+    select_topic character varying,
+    domain character varying,
+    sub_domain character varying,
+    disabled boolean DEFAULT false,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE viva_domains; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON TABLE viva_ref_info.viva_domains IS 'Viva Domains';
+
+
+--
+-- Name: COLUMN viva_domains.select_topic; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_domains.select_topic IS 'Primary Domain Topic';
+
+
+--
+-- Name: COLUMN viva_domains.domain; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_domains.domain IS 'Domain';
+
+
+--
+-- Name: COLUMN viva_domains.sub_domain; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON COLUMN viva_ref_info.viva_domains.sub_domain IS 'Sub Domain';
+
+
+--
+-- Name: viva_domains_id_seq; Type: SEQUENCE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE SEQUENCE viva_ref_info.viva_domains_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: viva_domains_id_seq; Type: SEQUENCE OWNED BY; Schema: viva_ref_info; Owner: -
+--
+
+ALTER SEQUENCE viva_ref_info.viva_domains_id_seq OWNED BY viva_ref_info.viva_domains.id;
+
+
+--
+-- Name: viva_rc_domains; Type: VIEW; Schema: viva_ref_info; Owner: -
+--
+
+CREATE VIEW viva_ref_info.viva_rc_domains AS
+ SELECT (datadic_choices.value)::integer AS id,
+    datadic_choices.label
+   FROM ref_data.datadic_choices
+  WHERE (((datadic_choices.field_name)::text = 'domain_viva'::text) AND (datadic_choices.redcap_data_dictionary_id = 51))
+  ORDER BY (datadic_choices.value)::integer;
+
+
+--
+-- Name: viva_timepoint_history; Type: TABLE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TABLE viva_ref_info.viva_timepoint_history (
+    id bigint NOT NULL,
+    name character varying,
+    disabled boolean DEFAULT false,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    viva_timepoint_id bigint
+);
+
+
+--
+-- Name: viva_timepoint_history_id_seq; Type: SEQUENCE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE SEQUENCE viva_ref_info.viva_timepoint_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: viva_timepoint_history_id_seq; Type: SEQUENCE OWNED BY; Schema: viva_ref_info; Owner: -
+--
+
+ALTER SEQUENCE viva_ref_info.viva_timepoint_history_id_seq OWNED BY viva_ref_info.viva_timepoint_history.id;
+
+
+--
+-- Name: viva_timepoints; Type: TABLE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TABLE viva_ref_info.viva_timepoints (
+    id bigint NOT NULL,
+    name character varying,
+    disabled boolean DEFAULT false,
+    user_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: TABLE viva_timepoints; Type: COMMENT; Schema: viva_ref_info; Owner: -
+--
+
+COMMENT ON TABLE viva_ref_info.viva_timepoints IS 'Dynamicmodel: Viva Timepoints';
+
+
+--
+-- Name: viva_timepoints_id_seq; Type: SEQUENCE; Schema: viva_ref_info; Owner: -
+--
+
+CREATE SEQUENCE viva_ref_info.viva_timepoints_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: viva_timepoints_id_seq; Type: SEQUENCE OWNED BY; Schema: viva_ref_info; Owner: -
+--
+
+ALTER SEQUENCE viva_ref_info.viva_timepoints_id_seq OWNED BY viva_ref_info.viva_timepoints.id;
+
+
+--
+-- Name: viva_view_variables; Type: VIEW; Schema: viva_ref_info; Owner: -
+--
+
+CREATE VIEW viva_ref_info.viva_view_variables AS
+ SELECT vars.id,
+    dc_varuse.label AS study,
+    (COALESCE(NULLIF((dc_extin.label)::text, ''::text), (vars.internal_instrument)::text))::character varying AS source_name,
+    dc_intype.label AS source_type,
+    (lower((COALESCE(dom.label, '(not set)'::character varying))::text))::character varying AS domain,
+    ''::text AS form_name,
+    vars.varname AS variable_name,
+    lower((dc_vtype.label)::text) AS variable_type,
+    NULL::text AS presentation_type,
+    vars.var_label AS label,
+    dc_vistime.label AS visit_time
+   FROM ((((((viva_ref_info.viva3_rcs vars
+     LEFT JOIN ref_data.datadic_choices dc_varuse ON ((((vars.var_type)::text <> ''::text) AND ((vars.var_type)::text = (dc_varuse.value)::text) AND (dc_varuse.redcap_data_dictionary_id = 52) AND ((dc_varuse.field_name)::text = 'var_type'::text))))
+     LEFT JOIN ref_data.datadic_choices dc_extin ON ((((vars.ext_instrument)::text <> ''::text) AND ((vars.ext_instrument)::text = (dc_extin.value)::text) AND (dc_extin.redcap_data_dictionary_id = 52) AND ((dc_extin.field_name)::text = 'ext_instrument'::text))))
+     LEFT JOIN ref_data.datadic_choices dc_intype ON ((((vars.val_instr)::text <> ''::text) AND ((vars.val_instr)::text = (dc_intype.value)::text) AND (dc_intype.redcap_data_dictionary_id = 52) AND ((dc_intype.field_name)::text = 'val_instr'::text))))
+     LEFT JOIN ref_data.datadic_choices dc_vtype ON ((((vars.var_level)::text <> ''::text) AND ((vars.var_level)::text = (dc_vtype.value)::text) AND (dc_vtype.redcap_data_dictionary_id = 52) AND ((dc_vtype.field_name)::text = 'var_level'::text))))
+     LEFT JOIN viva_ref_info.viva_rc_domains dom ON (((vars.domain_viva)::text = ((dom.id)::character varying)::text)))
+     LEFT JOIN ref_data.datadic_choices dc_vistime ON ((((vars.visit_time)::text <> ''::text) AND ((vars.visit_time)::text = (dc_vistime.value)::text) AND (dc_vistime.redcap_data_dictionary_id = 52) AND ((dc_vistime.field_name)::text = 'visit_time'::text))));
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history ALTER COLUMN id SET DEFAULT nextval('data_requests.activity_log_data_request_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignments ALTER COLUMN id SET DEFAULT nextval('data_requests.activity_log_data_request_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignment_history ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignments ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attrib_history ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_attrib_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attribs ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_attribs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_history ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_review_history ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_initial_review_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_reviews ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_initial_reviews_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_message_history ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_message_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_messages ALTER COLUMN id SET DEFAULT nextval('data_requests.data_request_messages_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests ALTER COLUMN id SET DEFAULT nextval('data_requests.data_requests_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attrib_history ALTER COLUMN id SET DEFAULT nextval('data_requests.data_requests_selected_attrib_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attribs ALTER COLUMN id SET DEFAULT nextval('data_requests.data_requests_selected_attribs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.q1_datadic ALTER COLUMN id SET DEFAULT nextval('data_requests.q1_datadic_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.q2_datadic ALTER COLUMN id SET DEFAULT nextval('data_requests.q2_datadic_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profiile_detail_history ALTER COLUMN id SET DEFAULT nextval('data_requests.user_profiile_detail_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profiile_details ALTER COLUMN id SET DEFAULT nextval('data_requests.user_profiile_details_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_academic_detail_history ALTER COLUMN id SET DEFAULT nextval('data_requests.user_profile_academic_detail_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_academic_details ALTER COLUMN id SET DEFAULT nextval('data_requests.user_profile_academic_details_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_detail_history ALTER COLUMN id SET DEFAULT nextval('data_requests.user_profile_detail_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_details ALTER COLUMN id SET DEFAULT nextval('data_requests.user_profile_details_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignment_history ALTER COLUMN id SET DEFAULT nextval('extra_app.grit_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignments ALTER COLUMN id SET DEFAULT nextval('extra_app.grit_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignment_history ALTER COLUMN id SET DEFAULT nextval('extra_app.pitt_bhi_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignments ALTER COLUMN id SET DEFAULT nextval('extra_app.pitt_bhi_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignment_history ALTER COLUMN id SET DEFAULT nextval('extra_app.sleep_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignments ALTER COLUMN id SET DEFAULT nextval('extra_app.sleep_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.accuracy_score_history ALTER COLUMN id SET DEFAULT nextval('ml_app.accuracy_score_history_id_seq'::regclass);
 
 
 --
--- Name: accuracy_scores id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.accuracy_scores ALTER COLUMN id SET DEFAULT nextval('ml_app.accuracy_scores_id_seq'::regclass);
 
 
 --
--- Name: activity_log_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_history_id_seq'::regclass);
 
 
 --
--- Name: activity_log_player_contact_phone_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_player_contact_phone_history_id_seq'::regclass);
 
 
 --
--- Name: activity_log_player_contact_phones id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phones ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_player_contact_phones_id_seq'::regclass);
 
 
 --
--- Name: activity_logs id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_logs ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_logs_id_seq'::regclass);
 
 
 --
--- Name: address_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.address_history ALTER COLUMN id SET DEFAULT nextval('ml_app.address_history_id_seq'::regclass);
 
 
 --
--- Name: addresses id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.addresses ALTER COLUMN id SET DEFAULT nextval('ml_app.addresses_id_seq'::regclass);
 
 
 --
--- Name: admin_action_logs id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.admin_action_logs ALTER COLUMN id SET DEFAULT nextval('ml_app.admin_action_logs_id_seq'::regclass);
 
 
 --
--- Name: admin_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.admin_history ALTER COLUMN id SET DEFAULT nextval('ml_app.admin_history_id_seq'::regclass);
 
 
 --
--- Name: admins id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.admins ALTER COLUMN id SET DEFAULT nextval('ml_app.admins_id_seq'::regclass);
 
 
 --
--- Name: app_configuration_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_configuration_history ALTER COLUMN id SET DEFAULT nextval('ml_app.app_configuration_history_id_seq'::regclass);
 
 
 --
--- Name: app_configurations id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_configurations ALTER COLUMN id SET DEFAULT nextval('ml_app.app_configurations_id_seq'::regclass);
 
 
 --
--- Name: app_type_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_type_history ALTER COLUMN id SET DEFAULT nextval('ml_app.app_type_history_id_seq'::regclass);
 
 
 --
--- Name: app_types id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_types ALTER COLUMN id SET DEFAULT nextval('ml_app.app_types_id_seq'::regclass);
 
 
 --
--- Name: college_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.college_history ALTER COLUMN id SET DEFAULT nextval('ml_app.college_history_id_seq'::regclass);
 
 
 --
--- Name: colleges id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.colleges ALTER COLUMN id SET DEFAULT nextval('ml_app.colleges_id_seq'::regclass);
 
 
 --
--- Name: config_libraries id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.config_libraries ALTER COLUMN id SET DEFAULT nextval('ml_app.config_libraries_id_seq'::regclass);
 
 
 --
--- Name: config_library_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.config_library_history ALTER COLUMN id SET DEFAULT nextval('ml_app.config_library_history_id_seq'::regclass);
 
 
 --
--- Name: delayed_jobs id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.delayed_jobs ALTER COLUMN id SET DEFAULT nextval('ml_app.delayed_jobs_id_seq'::regclass);
 
 
 --
--- Name: dynamic_model_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.dynamic_model_history ALTER COLUMN id SET DEFAULT nextval('ml_app.dynamic_model_history_id_seq'::regclass);
 
 
 --
--- Name: dynamic_models id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.dynamic_models ALTER COLUMN id SET DEFAULT nextval('ml_app.dynamic_models_id_seq'::regclass);
 
 
 --
--- Name: exception_logs id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.exception_logs ALTER COLUMN id SET DEFAULT nextval('ml_app.exception_logs_id_seq'::regclass);
 
 
 --
--- Name: external_identifier_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_identifier_history ALTER COLUMN id SET DEFAULT nextval('ml_app.external_identifier_history_id_seq'::regclass);
 
 
 --
--- Name: external_identifiers id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_identifiers ALTER COLUMN id SET DEFAULT nextval('ml_app.external_identifiers_id_seq'::regclass);
 
 
 --
--- Name: external_link_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_link_history ALTER COLUMN id SET DEFAULT nextval('ml_app.external_link_history_id_seq'::regclass);
 
 
 --
--- Name: external_links id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_links ALTER COLUMN id SET DEFAULT nextval('ml_app.external_links_id_seq'::regclass);
 
 
 --
--- Name: general_selection_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.general_selection_history ALTER COLUMN id SET DEFAULT nextval('ml_app.general_selection_history_id_seq'::regclass);
 
 
 --
--- Name: general_selections id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.general_selections ALTER COLUMN id SET DEFAULT nextval('ml_app.general_selections_id_seq'::regclass);
 
 
 --
--- Name: imports id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.imports ALTER COLUMN id SET DEFAULT nextval('ml_app.imports_id_seq'::regclass);
 
 
 --
--- Name: imports_model_generators id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.imports_model_generators ALTER COLUMN id SET DEFAULT nextval('ml_app.imports_model_generators_id_seq'::regclass);
 
 
 --
--- Name: item_flag_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flag_history ALTER COLUMN id SET DEFAULT nextval('ml_app.item_flag_history_id_seq'::regclass);
 
 
 --
--- Name: item_flag_name_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flag_name_history ALTER COLUMN id SET DEFAULT nextval('ml_app.item_flag_name_history_id_seq'::regclass);
 
 
 --
--- Name: item_flag_names id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flag_names ALTER COLUMN id SET DEFAULT nextval('ml_app.item_flag_names_id_seq'::regclass);
 
 
 --
--- Name: item_flags id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flags ALTER COLUMN id SET DEFAULT nextval('ml_app.item_flags_id_seq'::regclass);
 
 
 --
--- Name: manage_users id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.manage_users ALTER COLUMN id SET DEFAULT nextval('ml_app.manage_users_id_seq'::regclass);
 
 
 --
--- Name: masters id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.masters ALTER COLUMN id SET DEFAULT nextval('ml_app.masters_id_seq'::regclass);
 
 
 --
--- Name: message_notifications id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_notifications ALTER COLUMN id SET DEFAULT nextval('ml_app.message_notifications_id_seq'::regclass);
 
 
 --
--- Name: message_template_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_template_history ALTER COLUMN id SET DEFAULT nextval('ml_app.message_template_history_id_seq'::regclass);
 
 
 --
--- Name: message_templates id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_templates ALTER COLUMN id SET DEFAULT nextval('ml_app.message_templates_id_seq'::regclass);
 
 
 --
--- Name: model_references id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.model_references ALTER COLUMN id SET DEFAULT nextval('ml_app.model_references_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_archived_file_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_archived_file_history ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_archived_file_history_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_archived_files id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_archived_files ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_archived_files_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_container_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_container_history ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_container_history_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_containers id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_containers ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_containers_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_downloads id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_downloads ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_downloads_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_filter_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_filter_history ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_filter_history_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_filters id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_filters ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_filters_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_imports id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_imports ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_imports_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_move_actions id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_move_actions ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_move_actions_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_stored_file_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_stored_file_history ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_stored_file_history_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_stored_files id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_stored_files ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_stored_files_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_trash_actions id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_trash_actions ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_trash_actions_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_uploads id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_uploads ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_uploads_id_seq'::regclass);
 
 
 --
--- Name: nfs_store_user_file_actions id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_user_file_actions ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_user_file_actions_id_seq'::regclass);
 
 
 --
--- Name: page_layout_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.page_layout_history ALTER COLUMN id SET DEFAULT nextval('ml_app.page_layout_history_id_seq'::regclass);
 
 
 --
--- Name: page_layouts id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.page_layouts ALTER COLUMN id SET DEFAULT nextval('ml_app.page_layouts_id_seq'::regclass);
 
 
 --
--- Name: player_contact_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_contact_history ALTER COLUMN id SET DEFAULT nextval('ml_app.player_contact_history_id_seq'::regclass);
 
 
 --
--- Name: player_contacts id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_contacts ALTER COLUMN id SET DEFAULT nextval('ml_app.player_contacts_id_seq'::regclass);
 
 
 --
--- Name: player_info_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_info_history ALTER COLUMN id SET DEFAULT nextval('ml_app.player_info_history_id_seq'::regclass);
 
 
 --
--- Name: player_infos id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_infos ALTER COLUMN id SET DEFAULT nextval('ml_app.player_infos_id_seq'::regclass);
 
 
 --
--- Name: pro_infos id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.pro_infos ALTER COLUMN id SET DEFAULT nextval('ml_app.pro_infos_id_seq'::regclass);
 
 
 --
--- Name: protocol_event_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_event_history ALTER COLUMN id SET DEFAULT nextval('ml_app.protocol_event_history_id_seq'::regclass);
 
 
 --
--- Name: protocol_events id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_events ALTER COLUMN id SET DEFAULT nextval('ml_app.protocol_events_id_seq'::regclass);
 
 
 --
--- Name: protocol_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_history ALTER COLUMN id SET DEFAULT nextval('ml_app.protocol_history_id_seq'::regclass);
 
 
 --
--- Name: protocols id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocols ALTER COLUMN id SET DEFAULT nextval('ml_app.protocols_id_seq'::regclass);
 
 
 --
--- Name: rc_cis id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.rc_cis ALTER COLUMN id SET DEFAULT nextval('ml_app.rc_cis_id_seq'::regclass);
 
 
 --
--- Name: rc_stage_cif_copy id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.rc_stage_cif_copy ALTER COLUMN id SET DEFAULT nextval('ml_app.rc_stage_cif_copy_id_seq'::regclass);
 
 
 --
--- Name: report_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.report_history ALTER COLUMN id SET DEFAULT nextval('ml_app.report_history_id_seq'::regclass);
 
 
 --
--- Name: reports id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.reports ALTER COLUMN id SET DEFAULT nextval('ml_app.reports_id_seq'::regclass);
 
 
 --
--- Name: role_description_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.role_description_history ALTER COLUMN id SET DEFAULT nextval('ml_app.role_description_history_id_seq'::regclass);
 
 
 --
--- Name: role_descriptions id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.role_descriptions ALTER COLUMN id SET DEFAULT nextval('ml_app.role_descriptions_id_seq'::regclass);
 
 
 --
--- Name: sage_assignments id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sage_assignments ALTER COLUMN id SET DEFAULT nextval('ml_app.sage_assignments_id_seq'::regclass);
 
 
 --
--- Name: scantron_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.scantron_history ALTER COLUMN id SET DEFAULT nextval('ml_app.scantron_history_id_seq'::regclass);
 
 
 --
--- Name: scantrons id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.scantrons ALTER COLUMN id SET DEFAULT nextval('ml_app.scantrons_id_seq'::regclass);
 
 
 --
--- Name: sessions id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sessions ALTER COLUMN id SET DEFAULT nextval('ml_app.sessions_id_seq'::regclass);
 
 
 --
--- Name: sub_process_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sub_process_history ALTER COLUMN id SET DEFAULT nextval('ml_app.sub_process_history_id_seq'::regclass);
 
 
 --
--- Name: sub_processes id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sub_processes ALTER COLUMN id SET DEFAULT nextval('ml_app.sub_processes_id_seq'::regclass);
 
 
 --
--- Name: tracker_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.tracker_history ALTER COLUMN id SET DEFAULT nextval('ml_app.tracker_history_id_seq'::regclass);
 
 
 --
--- Name: trackers id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.trackers ALTER COLUMN id SET DEFAULT nextval('ml_app.trackers_id_seq'::regclass);
 
 
 --
--- Name: user_access_control_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_access_control_history ALTER COLUMN id SET DEFAULT nextval('ml_app.user_access_control_history_id_seq'::regclass);
 
 
 --
--- Name: user_access_controls id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_access_controls ALTER COLUMN id SET DEFAULT nextval('ml_app.user_access_controls_id_seq'::regclass);
 
 
 --
--- Name: user_action_logs id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_action_logs ALTER COLUMN id SET DEFAULT nextval('ml_app.user_action_logs_id_seq'::regclass);
 
 
 --
--- Name: user_authorization_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_authorization_history ALTER COLUMN id SET DEFAULT nextval('ml_app.user_authorization_history_id_seq'::regclass);
 
 
 --
--- Name: user_authorizations id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_authorizations ALTER COLUMN id SET DEFAULT nextval('ml_app.user_authorizations_id_seq'::regclass);
 
 
 --
--- Name: user_description_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_description_history ALTER COLUMN id SET DEFAULT nextval('ml_app.user_description_history_id_seq'::regclass);
 
 
 --
--- Name: user_descriptions id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_descriptions ALTER COLUMN id SET DEFAULT nextval('ml_app.user_descriptions_id_seq'::regclass);
 
 
 --
--- Name: user_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_history ALTER COLUMN id SET DEFAULT nextval('ml_app.user_history_id_seq'::regclass);
 
 
 --
--- Name: user_preferences id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_preferences ALTER COLUMN id SET DEFAULT nextval('ml_app.user_preferences_id_seq'::regclass);
 
 
 --
--- Name: user_role_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_role_history ALTER COLUMN id SET DEFAULT nextval('ml_app.user_role_history_id_seq'::regclass);
 
 
 --
--- Name: user_roles id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_roles ALTER COLUMN id SET DEFAULT nextval('ml_app.user_roles_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.users ALTER COLUMN id SET DEFAULT nextval('ml_app.users_id_seq'::regclass);
 
 
 --
--- Name: users_contact_infos id; Type: DEFAULT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.users_contact_infos ALTER COLUMN id SET DEFAULT nextval('ml_app.users_contact_infos_id_seq'::regclass);
 
 
 --
--- Name: datadic_choice_history id; Type: DEFAULT; Schema: ref_data; Owner: -
+-- Name: id; Type: DEFAULT; Schema: redcap; Owner: -
+--
+
+ALTER TABLE ONLY redcap.viva_meta_variable_history ALTER COLUMN id SET DEFAULT nextval('redcap.viva_meta_variable_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: redcap; Owner: -
+--
+
+ALTER TABLE ONLY redcap.viva_meta_variables ALTER COLUMN id SET DEFAULT nextval('redcap.viva_meta_variables_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_choice_history ALTER COLUMN id SET DEFAULT nextval('ref_data.datadic_choice_history_id_seq'::regclass);
 
 
 --
--- Name: datadic_choices id; Type: DEFAULT; Schema: ref_data; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_choices ALTER COLUMN id SET DEFAULT nextval('ref_data.datadic_choices_id_seq'::regclass);
 
 
 --
--- Name: datadic_variable_history id; Type: DEFAULT; Schema: ref_data; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_variable_history ALTER COLUMN id SET DEFAULT nextval('ref_data.datadic_variable_history_id_seq'::regclass);
 
 
 --
--- Name: datadic_variables id; Type: DEFAULT; Schema: ref_data; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_variables ALTER COLUMN id SET DEFAULT nextval('ref_data.datadic_variables_id_seq'::regclass);
 
 
 --
--- Name: redcap_client_requests id; Type: DEFAULT; Schema: ref_data; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_client_requests ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_client_requests_id_seq'::regclass);
 
 
 --
--- Name: redcap_data_collection_instrument_history id; Type: DEFAULT; Schema: ref_data; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_collection_instrument_history ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_data_collection_instrument_history_id_seq'::regclass);
 
 
 --
--- Name: redcap_data_collection_instruments id; Type: DEFAULT; Schema: ref_data; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_collection_instruments ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_data_collection_instruments_id_seq'::regclass);
 
 
 --
--- Name: redcap_data_dictionaries id; Type: DEFAULT; Schema: ref_data; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_dictionaries ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_data_dictionaries_id_seq'::regclass);
 
 
 --
--- Name: redcap_data_dictionary_history id; Type: DEFAULT; Schema: ref_data; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_dictionary_history ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_data_dictionary_history_id_seq'::regclass);
 
 
 --
--- Name: redcap_project_admin_history id; Type: DEFAULT; Schema: ref_data; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_admin_history ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_project_admin_history_id_seq'::regclass);
 
 
 --
--- Name: redcap_project_admins id; Type: DEFAULT; Schema: ref_data; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_admins ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_project_admins_id_seq'::regclass);
 
 
 --
--- Name: redcap_project_user_history id; Type: DEFAULT; Schema: ref_data; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_user_history ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_project_user_history_id_seq'::regclass);
 
 
 --
--- Name: redcap_project_users id; Type: DEFAULT; Schema: ref_data; Owner: -
+-- Name: id; Type: DEFAULT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_users ALTER COLUMN id SET DEFAULT nextval('ref_data.redcap_project_users_id_seq'::regclass);
 
 
 --
--- Name: accuracy_score_history accuracy_score_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: id; Type: DEFAULT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_study_info_part_history ALTER COLUMN id SET DEFAULT nextval('study_info.activity_log_study_info_part_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_study_info_parts ALTER COLUMN id SET DEFAULT nextval('study_info.activity_log_study_info_parts_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_view_user_data_user_proc_history ALTER COLUMN id SET DEFAULT nextval('study_info.activity_log_view_user_data_user_proc_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_view_user_data_user_procs ALTER COLUMN id SET DEFAULT nextval('study_info.activity_log_view_user_data_user_procs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_common_section_history ALTER COLUMN id SET DEFAULT nextval('study_info.study_common_section_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_common_sections ALTER COLUMN id SET DEFAULT nextval('study_info.study_common_sections_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_info_part_history ALTER COLUMN id SET DEFAULT nextval('study_info.study_info_part_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_info_parts ALTER COLUMN id SET DEFAULT nextval('study_info.study_info_parts_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_page_section_history ALTER COLUMN id SET DEFAULT nextval('study_info.study_page_section_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_page_sections ALTER COLUMN id SET DEFAULT nextval('study_info.study_page_sections_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva2_rc_history ALTER COLUMN id SET DEFAULT nextval('viva_ref_info.viva2_rc_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva2_rcs ALTER COLUMN id SET DEFAULT nextval('viva_ref_info.viva2_rcs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva3_rc_history ALTER COLUMN id SET DEFAULT nextval('viva_ref_info.viva3_rc_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva3_rcs ALTER COLUMN id SET DEFAULT nextval('viva_ref_info.viva3_rcs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_collection_instrument_history ALTER COLUMN id SET DEFAULT nextval('viva_ref_info.viva_collection_instrument_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_collection_instruments ALTER COLUMN id SET DEFAULT nextval('viva_ref_info.viva_collection_instruments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_domain_history ALTER COLUMN id SET DEFAULT nextval('viva_ref_info.viva_domain_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_domains ALTER COLUMN id SET DEFAULT nextval('viva_ref_info.viva_domains_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_timepoint_history ALTER COLUMN id SET DEFAULT nextval('viva_ref_info.viva_timepoint_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_timepoints ALTER COLUMN id SET DEFAULT nextval('viva_ref_info.viva_timepoints_id_seq'::regclass);
+
+
+--
+-- Name: activity_log_data_request_assignment_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history
+    ADD CONSTRAINT activity_log_data_request_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_data_request_assignments_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignments
+    ADD CONSTRAINT activity_log_data_request_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_assignment_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignment_history
+    ADD CONSTRAINT data_request_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_assignments_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignments
+    ADD CONSTRAINT data_request_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_attrib_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attrib_history
+    ADD CONSTRAINT data_request_attrib_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_attribs_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attribs
+    ADD CONSTRAINT data_request_attribs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_history
+    ADD CONSTRAINT data_request_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_initial_review_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_review_history
+    ADD CONSTRAINT data_request_initial_review_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_initial_reviews_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_reviews
+    ADD CONSTRAINT data_request_initial_reviews_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_message_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_message_history
+    ADD CONSTRAINT data_request_message_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_request_messages_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_messages
+    ADD CONSTRAINT data_request_messages_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_requests_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests
+    ADD CONSTRAINT data_requests_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_requests_selected_attrib_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attrib_history
+    ADD CONSTRAINT data_requests_selected_attrib_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: data_requests_selected_attribs_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attribs
+    ADD CONSTRAINT data_requests_selected_attribs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_profiile_detail_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profiile_detail_history
+    ADD CONSTRAINT user_profiile_detail_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_profiile_details_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profiile_details
+    ADD CONSTRAINT user_profiile_details_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_profile_academic_detail_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_academic_detail_history
+    ADD CONSTRAINT user_profile_academic_detail_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_profile_academic_details_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_academic_details
+    ADD CONSTRAINT user_profile_academic_details_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_profile_detail_history_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_detail_history
+    ADD CONSTRAINT user_profile_detail_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_profile_details_pkey; Type: CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_details
+    ADD CONSTRAINT user_profile_details_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: grit_assignment_history_pkey; Type: CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignment_history
+    ADD CONSTRAINT grit_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: grit_assignments_pkey; Type: CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignments
+    ADD CONSTRAINT grit_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_assignment_history_pkey; Type: CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignment_history
+    ADD CONSTRAINT pitt_bhi_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pitt_bhi_assignments_pkey; Type: CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignments
+    ADD CONSTRAINT pitt_bhi_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sleep_assignment_history_pkey; Type: CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignment_history
+    ADD CONSTRAINT sleep_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sleep_assignments_pkey; Type: CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignments
+    ADD CONSTRAINT sleep_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: accuracy_score_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.accuracy_score_history
@@ -8360,7 +18643,7 @@ ALTER TABLE ONLY ml_app.accuracy_score_history
 
 
 --
--- Name: accuracy_scores accuracy_scores_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: accuracy_scores_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.accuracy_scores
@@ -8368,7 +18651,7 @@ ALTER TABLE ONLY ml_app.accuracy_scores
 
 
 --
--- Name: activity_log_history activity_log_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: activity_log_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_history
@@ -8376,7 +18659,7 @@ ALTER TABLE ONLY ml_app.activity_log_history
 
 
 --
--- Name: activity_log_player_contact_phone_history activity_log_player_contact_phone_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: activity_log_player_contact_phone_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
@@ -8384,7 +18667,7 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
 
 
 --
--- Name: activity_log_player_contact_phones activity_log_player_contact_phones_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: activity_log_player_contact_phones_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
@@ -8392,7 +18675,7 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
 
 
 --
--- Name: activity_logs activity_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: activity_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_logs
@@ -8400,7 +18683,7 @@ ALTER TABLE ONLY ml_app.activity_logs
 
 
 --
--- Name: address_history address_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: address_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.address_history
@@ -8408,7 +18691,7 @@ ALTER TABLE ONLY ml_app.address_history
 
 
 --
--- Name: addresses addresses_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: addresses_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.addresses
@@ -8416,7 +18699,7 @@ ALTER TABLE ONLY ml_app.addresses
 
 
 --
--- Name: admin_action_logs admin_action_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: admin_action_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.admin_action_logs
@@ -8424,7 +18707,7 @@ ALTER TABLE ONLY ml_app.admin_action_logs
 
 
 --
--- Name: admin_history admin_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: admin_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.admin_history
@@ -8432,7 +18715,7 @@ ALTER TABLE ONLY ml_app.admin_history
 
 
 --
--- Name: admins admins_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: admins_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.admins
@@ -8440,7 +18723,7 @@ ALTER TABLE ONLY ml_app.admins
 
 
 --
--- Name: app_configuration_history app_configuration_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: app_configuration_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_configuration_history
@@ -8448,7 +18731,7 @@ ALTER TABLE ONLY ml_app.app_configuration_history
 
 
 --
--- Name: app_configurations app_configurations_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: app_configurations_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_configurations
@@ -8456,7 +18739,7 @@ ALTER TABLE ONLY ml_app.app_configurations
 
 
 --
--- Name: app_type_history app_type_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: app_type_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_type_history
@@ -8464,7 +18747,7 @@ ALTER TABLE ONLY ml_app.app_type_history
 
 
 --
--- Name: app_types app_types_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: app_types_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_types
@@ -8472,7 +18755,7 @@ ALTER TABLE ONLY ml_app.app_types
 
 
 --
--- Name: ar_internal_metadata ar_internal_metadata_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: ar_internal_metadata_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.ar_internal_metadata
@@ -8480,7 +18763,7 @@ ALTER TABLE ONLY ml_app.ar_internal_metadata
 
 
 --
--- Name: college_history college_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: college_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.college_history
@@ -8488,7 +18771,7 @@ ALTER TABLE ONLY ml_app.college_history
 
 
 --
--- Name: colleges colleges_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: colleges_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.colleges
@@ -8496,7 +18779,7 @@ ALTER TABLE ONLY ml_app.colleges
 
 
 --
--- Name: config_libraries config_libraries_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: config_libraries_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.config_libraries
@@ -8504,7 +18787,7 @@ ALTER TABLE ONLY ml_app.config_libraries
 
 
 --
--- Name: config_library_history config_library_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: config_library_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.config_library_history
@@ -8512,7 +18795,7 @@ ALTER TABLE ONLY ml_app.config_library_history
 
 
 --
--- Name: delayed_jobs delayed_jobs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: delayed_jobs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.delayed_jobs
@@ -8520,7 +18803,7 @@ ALTER TABLE ONLY ml_app.delayed_jobs
 
 
 --
--- Name: dynamic_model_history dynamic_model_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: dynamic_model_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.dynamic_model_history
@@ -8528,7 +18811,7 @@ ALTER TABLE ONLY ml_app.dynamic_model_history
 
 
 --
--- Name: dynamic_models dynamic_models_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: dynamic_models_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.dynamic_models
@@ -8536,7 +18819,7 @@ ALTER TABLE ONLY ml_app.dynamic_models
 
 
 --
--- Name: exception_logs exception_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: exception_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.exception_logs
@@ -8544,7 +18827,7 @@ ALTER TABLE ONLY ml_app.exception_logs
 
 
 --
--- Name: external_identifier_history external_identifier_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: external_identifier_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_identifier_history
@@ -8552,7 +18835,7 @@ ALTER TABLE ONLY ml_app.external_identifier_history
 
 
 --
--- Name: external_identifiers external_identifiers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: external_identifiers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_identifiers
@@ -8560,7 +18843,7 @@ ALTER TABLE ONLY ml_app.external_identifiers
 
 
 --
--- Name: external_link_history external_link_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: external_link_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_link_history
@@ -8568,7 +18851,7 @@ ALTER TABLE ONLY ml_app.external_link_history
 
 
 --
--- Name: external_links external_links_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: external_links_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_links
@@ -8576,7 +18859,7 @@ ALTER TABLE ONLY ml_app.external_links
 
 
 --
--- Name: general_selection_history general_selection_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: general_selection_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.general_selection_history
@@ -8584,7 +18867,7 @@ ALTER TABLE ONLY ml_app.general_selection_history
 
 
 --
--- Name: general_selections general_selections_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: general_selections_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.general_selections
@@ -8592,7 +18875,7 @@ ALTER TABLE ONLY ml_app.general_selections
 
 
 --
--- Name: imports_model_generators imports_model_generators_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: imports_model_generators_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.imports_model_generators
@@ -8600,7 +18883,7 @@ ALTER TABLE ONLY ml_app.imports_model_generators
 
 
 --
--- Name: imports imports_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: imports_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.imports
@@ -8608,7 +18891,7 @@ ALTER TABLE ONLY ml_app.imports
 
 
 --
--- Name: item_flag_history item_flag_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: item_flag_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flag_history
@@ -8616,7 +18899,7 @@ ALTER TABLE ONLY ml_app.item_flag_history
 
 
 --
--- Name: item_flag_name_history item_flag_name_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: item_flag_name_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flag_name_history
@@ -8624,7 +18907,7 @@ ALTER TABLE ONLY ml_app.item_flag_name_history
 
 
 --
--- Name: item_flag_names item_flag_names_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: item_flag_names_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flag_names
@@ -8632,7 +18915,7 @@ ALTER TABLE ONLY ml_app.item_flag_names
 
 
 --
--- Name: item_flags item_flags_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: item_flags_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flags
@@ -8640,7 +18923,7 @@ ALTER TABLE ONLY ml_app.item_flags
 
 
 --
--- Name: manage_users manage_users_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: manage_users_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.manage_users
@@ -8648,7 +18931,7 @@ ALTER TABLE ONLY ml_app.manage_users
 
 
 --
--- Name: masters masters_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: masters_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.masters
@@ -8656,7 +18939,7 @@ ALTER TABLE ONLY ml_app.masters
 
 
 --
--- Name: message_notifications message_notifications_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: message_notifications_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_notifications
@@ -8664,7 +18947,7 @@ ALTER TABLE ONLY ml_app.message_notifications
 
 
 --
--- Name: message_template_history message_template_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: message_template_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_template_history
@@ -8672,7 +18955,7 @@ ALTER TABLE ONLY ml_app.message_template_history
 
 
 --
--- Name: message_templates message_templates_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: message_templates_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_templates
@@ -8680,7 +18963,7 @@ ALTER TABLE ONLY ml_app.message_templates
 
 
 --
--- Name: model_references model_references_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: model_references_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.model_references
@@ -8688,7 +18971,7 @@ ALTER TABLE ONLY ml_app.model_references
 
 
 --
--- Name: nfs_store_archived_file_history nfs_store_archived_file_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_archived_file_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
@@ -8696,7 +18979,7 @@ ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
 
 
 --
--- Name: nfs_store_archived_files nfs_store_archived_files_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_archived_files_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_archived_files
@@ -8704,7 +18987,7 @@ ALTER TABLE ONLY ml_app.nfs_store_archived_files
 
 
 --
--- Name: nfs_store_container_history nfs_store_container_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_container_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_container_history
@@ -8712,7 +18995,7 @@ ALTER TABLE ONLY ml_app.nfs_store_container_history
 
 
 --
--- Name: nfs_store_containers nfs_store_containers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_containers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_containers
@@ -8720,7 +19003,7 @@ ALTER TABLE ONLY ml_app.nfs_store_containers
 
 
 --
--- Name: nfs_store_downloads nfs_store_downloads_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_downloads_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_downloads
@@ -8728,7 +19011,7 @@ ALTER TABLE ONLY ml_app.nfs_store_downloads
 
 
 --
--- Name: nfs_store_filter_history nfs_store_filter_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_filter_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_filter_history
@@ -8736,7 +19019,7 @@ ALTER TABLE ONLY ml_app.nfs_store_filter_history
 
 
 --
--- Name: nfs_store_filters nfs_store_filters_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_filters_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_filters
@@ -8744,7 +19027,7 @@ ALTER TABLE ONLY ml_app.nfs_store_filters
 
 
 --
--- Name: nfs_store_imports nfs_store_imports_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_imports_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_imports
@@ -8752,7 +19035,7 @@ ALTER TABLE ONLY ml_app.nfs_store_imports
 
 
 --
--- Name: nfs_store_move_actions nfs_store_move_actions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_move_actions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_move_actions
@@ -8760,7 +19043,7 @@ ALTER TABLE ONLY ml_app.nfs_store_move_actions
 
 
 --
--- Name: nfs_store_stored_file_history nfs_store_stored_file_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_stored_file_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
@@ -8768,7 +19051,7 @@ ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
 
 
 --
--- Name: nfs_store_stored_files nfs_store_stored_files_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_stored_files_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_stored_files
@@ -8776,7 +19059,7 @@ ALTER TABLE ONLY ml_app.nfs_store_stored_files
 
 
 --
--- Name: nfs_store_trash_actions nfs_store_trash_actions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_trash_actions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_trash_actions
@@ -8784,7 +19067,7 @@ ALTER TABLE ONLY ml_app.nfs_store_trash_actions
 
 
 --
--- Name: nfs_store_uploads nfs_store_uploads_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_uploads_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_uploads
@@ -8792,7 +19075,7 @@ ALTER TABLE ONLY ml_app.nfs_store_uploads
 
 
 --
--- Name: nfs_store_user_file_actions nfs_store_user_file_actions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: nfs_store_user_file_actions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_user_file_actions
@@ -8800,7 +19083,7 @@ ALTER TABLE ONLY ml_app.nfs_store_user_file_actions
 
 
 --
--- Name: page_layout_history page_layout_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: page_layout_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.page_layout_history
@@ -8808,7 +19091,7 @@ ALTER TABLE ONLY ml_app.page_layout_history
 
 
 --
--- Name: page_layouts page_layouts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: page_layouts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.page_layouts
@@ -8816,7 +19099,7 @@ ALTER TABLE ONLY ml_app.page_layouts
 
 
 --
--- Name: player_contact_history player_contact_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: player_contact_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_contact_history
@@ -8824,7 +19107,7 @@ ALTER TABLE ONLY ml_app.player_contact_history
 
 
 --
--- Name: player_contacts player_contacts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: player_contacts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_contacts
@@ -8832,7 +19115,7 @@ ALTER TABLE ONLY ml_app.player_contacts
 
 
 --
--- Name: player_info_history player_info_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: player_info_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_info_history
@@ -8840,7 +19123,7 @@ ALTER TABLE ONLY ml_app.player_info_history
 
 
 --
--- Name: player_infos player_infos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: player_infos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_infos
@@ -8848,7 +19131,7 @@ ALTER TABLE ONLY ml_app.player_infos
 
 
 --
--- Name: pro_infos pro_infos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: pro_infos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.pro_infos
@@ -8856,7 +19139,7 @@ ALTER TABLE ONLY ml_app.pro_infos
 
 
 --
--- Name: protocol_event_history protocol_event_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: protocol_event_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_event_history
@@ -8864,7 +19147,7 @@ ALTER TABLE ONLY ml_app.protocol_event_history
 
 
 --
--- Name: protocol_events protocol_events_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: protocol_events_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_events
@@ -8872,7 +19155,7 @@ ALTER TABLE ONLY ml_app.protocol_events
 
 
 --
--- Name: protocol_history protocol_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: protocol_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_history
@@ -8880,7 +19163,7 @@ ALTER TABLE ONLY ml_app.protocol_history
 
 
 --
--- Name: protocols protocols_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: protocols_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocols
@@ -8888,7 +19171,7 @@ ALTER TABLE ONLY ml_app.protocols
 
 
 --
--- Name: rc_cis rc_cis_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: rc_cis_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.rc_cis
@@ -8896,7 +19179,7 @@ ALTER TABLE ONLY ml_app.rc_cis
 
 
 --
--- Name: rc_stage_cif_copy rc_stage_cif_copy_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: rc_stage_cif_copy_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.rc_stage_cif_copy
@@ -8904,7 +19187,7 @@ ALTER TABLE ONLY ml_app.rc_stage_cif_copy
 
 
 --
--- Name: report_history report_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: report_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.report_history
@@ -8912,7 +19195,7 @@ ALTER TABLE ONLY ml_app.report_history
 
 
 --
--- Name: reports reports_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: reports_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.reports
@@ -8920,7 +19203,7 @@ ALTER TABLE ONLY ml_app.reports
 
 
 --
--- Name: role_description_history role_description_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: role_description_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.role_description_history
@@ -8928,7 +19211,7 @@ ALTER TABLE ONLY ml_app.role_description_history
 
 
 --
--- Name: role_descriptions role_descriptions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: role_descriptions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.role_descriptions
@@ -8936,7 +19219,7 @@ ALTER TABLE ONLY ml_app.role_descriptions
 
 
 --
--- Name: sage_assignments sage_assignments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: sage_assignments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sage_assignments
@@ -8944,7 +19227,7 @@ ALTER TABLE ONLY ml_app.sage_assignments
 
 
 --
--- Name: scantron_history scantron_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: scantron_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.scantron_history
@@ -8952,7 +19235,7 @@ ALTER TABLE ONLY ml_app.scantron_history
 
 
 --
--- Name: scantrons scantrons_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: scantrons_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.scantrons
@@ -8960,7 +19243,7 @@ ALTER TABLE ONLY ml_app.scantrons
 
 
 --
--- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: sessions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sessions
@@ -8968,7 +19251,7 @@ ALTER TABLE ONLY ml_app.sessions
 
 
 --
--- Name: sub_process_history sub_process_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: sub_process_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sub_process_history
@@ -8976,7 +19259,7 @@ ALTER TABLE ONLY ml_app.sub_process_history
 
 
 --
--- Name: sub_processes sub_processes_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: sub_processes_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sub_processes
@@ -8984,7 +19267,7 @@ ALTER TABLE ONLY ml_app.sub_processes
 
 
 --
--- Name: tracker_history tracker_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: tracker_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.tracker_history
@@ -8992,7 +19275,7 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
--- Name: trackers trackers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: trackers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.trackers
@@ -9000,7 +19283,7 @@ ALTER TABLE ONLY ml_app.trackers
 
 
 --
--- Name: trackers unique_master_protocol; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: unique_master_protocol; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.trackers
@@ -9008,7 +19291,7 @@ ALTER TABLE ONLY ml_app.trackers
 
 
 --
--- Name: trackers unique_master_protocol_id; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: unique_master_protocol_id; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.trackers
@@ -9016,7 +19299,7 @@ ALTER TABLE ONLY ml_app.trackers
 
 
 --
--- Name: sub_processes unique_protocol_and_id; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: unique_protocol_and_id; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sub_processes
@@ -9024,7 +19307,7 @@ ALTER TABLE ONLY ml_app.sub_processes
 
 
 --
--- Name: protocol_events unique_sub_process_and_id; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: unique_sub_process_and_id; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_events
@@ -9032,7 +19315,7 @@ ALTER TABLE ONLY ml_app.protocol_events
 
 
 --
--- Name: user_access_control_history user_access_control_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: user_access_control_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_access_control_history
@@ -9040,7 +19323,7 @@ ALTER TABLE ONLY ml_app.user_access_control_history
 
 
 --
--- Name: user_access_controls user_access_controls_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: user_access_controls_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_access_controls
@@ -9048,7 +19331,7 @@ ALTER TABLE ONLY ml_app.user_access_controls
 
 
 --
--- Name: user_action_logs user_action_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: user_action_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_action_logs
@@ -9056,7 +19339,7 @@ ALTER TABLE ONLY ml_app.user_action_logs
 
 
 --
--- Name: user_authorization_history user_authorization_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: user_authorization_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_authorization_history
@@ -9064,7 +19347,7 @@ ALTER TABLE ONLY ml_app.user_authorization_history
 
 
 --
--- Name: user_authorizations user_authorizations_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: user_authorizations_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_authorizations
@@ -9072,7 +19355,7 @@ ALTER TABLE ONLY ml_app.user_authorizations
 
 
 --
--- Name: user_description_history user_description_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: user_description_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_description_history
@@ -9080,7 +19363,7 @@ ALTER TABLE ONLY ml_app.user_description_history
 
 
 --
--- Name: user_descriptions user_descriptions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: user_descriptions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_descriptions
@@ -9088,7 +19371,7 @@ ALTER TABLE ONLY ml_app.user_descriptions
 
 
 --
--- Name: user_history user_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: user_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_history
@@ -9096,7 +19379,7 @@ ALTER TABLE ONLY ml_app.user_history
 
 
 --
--- Name: user_preferences user_preferences_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: user_preferences_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_preferences
@@ -9104,7 +19387,7 @@ ALTER TABLE ONLY ml_app.user_preferences
 
 
 --
--- Name: user_role_history user_role_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: user_role_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_role_history
@@ -9112,7 +19395,7 @@ ALTER TABLE ONLY ml_app.user_role_history
 
 
 --
--- Name: user_roles user_roles_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: user_roles_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_roles
@@ -9120,7 +19403,7 @@ ALTER TABLE ONLY ml_app.user_roles
 
 
 --
--- Name: users_contact_infos users_contact_infos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: users_contact_infos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.users_contact_infos
@@ -9128,7 +19411,7 @@ ALTER TABLE ONLY ml_app.users_contact_infos
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: users_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.users
@@ -9136,7 +19419,23 @@ ALTER TABLE ONLY ml_app.users
 
 
 --
--- Name: datadic_choice_history datadic_choice_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: viva_meta_variable_history_pkey; Type: CONSTRAINT; Schema: redcap; Owner: -
+--
+
+ALTER TABLE ONLY redcap.viva_meta_variable_history
+    ADD CONSTRAINT viva_meta_variable_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: viva_meta_variables_pkey; Type: CONSTRAINT; Schema: redcap; Owner: -
+--
+
+ALTER TABLE ONLY redcap.viva_meta_variables
+    ADD CONSTRAINT viva_meta_variables_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: datadic_choice_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_choice_history
@@ -9144,7 +19443,7 @@ ALTER TABLE ONLY ref_data.datadic_choice_history
 
 
 --
--- Name: datadic_choices datadic_choices_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: datadic_choices_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_choices
@@ -9152,7 +19451,7 @@ ALTER TABLE ONLY ref_data.datadic_choices
 
 
 --
--- Name: datadic_variable_history datadic_variable_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: datadic_variable_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_variable_history
@@ -9160,7 +19459,7 @@ ALTER TABLE ONLY ref_data.datadic_variable_history
 
 
 --
--- Name: datadic_variables datadic_variables_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: datadic_variables_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_variables
@@ -9168,7 +19467,7 @@ ALTER TABLE ONLY ref_data.datadic_variables
 
 
 --
--- Name: redcap_client_requests redcap_client_requests_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: redcap_client_requests_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_client_requests
@@ -9176,7 +19475,7 @@ ALTER TABLE ONLY ref_data.redcap_client_requests
 
 
 --
--- Name: redcap_data_collection_instrument_history redcap_data_collection_instrument_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: redcap_data_collection_instrument_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_collection_instrument_history
@@ -9184,7 +19483,7 @@ ALTER TABLE ONLY ref_data.redcap_data_collection_instrument_history
 
 
 --
--- Name: redcap_data_collection_instruments redcap_data_collection_instruments_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: redcap_data_collection_instruments_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_collection_instruments
@@ -9192,7 +19491,7 @@ ALTER TABLE ONLY ref_data.redcap_data_collection_instruments
 
 
 --
--- Name: redcap_data_dictionaries redcap_data_dictionaries_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: redcap_data_dictionaries_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_dictionaries
@@ -9200,7 +19499,7 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionaries
 
 
 --
--- Name: redcap_data_dictionary_history redcap_data_dictionary_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: redcap_data_dictionary_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
@@ -9208,7 +19507,7 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 
 
 --
--- Name: redcap_project_admin_history redcap_project_admin_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: redcap_project_admin_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_admin_history
@@ -9216,7 +19515,7 @@ ALTER TABLE ONLY ref_data.redcap_project_admin_history
 
 
 --
--- Name: redcap_project_admins redcap_project_admins_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: redcap_project_admins_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_admins
@@ -9224,7 +19523,7 @@ ALTER TABLE ONLY ref_data.redcap_project_admins
 
 
 --
--- Name: redcap_project_user_history redcap_project_user_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: redcap_project_user_history_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_user_history
@@ -9232,11 +19531,738 @@ ALTER TABLE ONLY ref_data.redcap_project_user_history
 
 
 --
--- Name: redcap_project_users redcap_project_users_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: redcap_project_users_pkey; Type: CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_users
     ADD CONSTRAINT redcap_project_users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_study_info_part_history_pkey; Type: CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_study_info_part_history
+    ADD CONSTRAINT activity_log_study_info_part_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_study_info_parts_pkey; Type: CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_study_info_parts
+    ADD CONSTRAINT activity_log_study_info_parts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_view_user_data_user_proc_history_pkey; Type: CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_view_user_data_user_proc_history
+    ADD CONSTRAINT activity_log_view_user_data_user_proc_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_view_user_data_user_procs_pkey; Type: CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_view_user_data_user_procs
+    ADD CONSTRAINT activity_log_view_user_data_user_procs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: study_common_section_history_pkey; Type: CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_common_section_history
+    ADD CONSTRAINT study_common_section_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: study_common_sections_pkey; Type: CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_common_sections
+    ADD CONSTRAINT study_common_sections_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: study_info_part_history_pkey; Type: CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_info_part_history
+    ADD CONSTRAINT study_info_part_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: study_info_parts_pkey; Type: CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_info_parts
+    ADD CONSTRAINT study_info_parts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: study_page_section_history_pkey; Type: CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_page_section_history
+    ADD CONSTRAINT study_page_section_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: study_page_sections_pkey; Type: CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_page_sections
+    ADD CONSTRAINT study_page_sections_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: viva2_rc_history_pkey; Type: CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva2_rc_history
+    ADD CONSTRAINT viva2_rc_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: viva2_rcs_pkey; Type: CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva2_rcs
+    ADD CONSTRAINT viva2_rcs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: viva3_rc_history_pkey; Type: CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva3_rc_history
+    ADD CONSTRAINT viva3_rc_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: viva3_rcs_pkey; Type: CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva3_rcs
+    ADD CONSTRAINT viva3_rcs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: viva_collection_instrument_history_pkey; Type: CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_collection_instrument_history
+    ADD CONSTRAINT viva_collection_instrument_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: viva_collection_instruments_pkey; Type: CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_collection_instruments
+    ADD CONSTRAINT viva_collection_instruments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: viva_domain_history_pkey; Type: CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_domain_history
+    ADD CONSTRAINT viva_domain_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: viva_domains_pkey; Type: CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_domains
+    ADD CONSTRAINT viva_domains_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: viva_timepoint_history_pkey; Type: CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_timepoint_history
+    ADD CONSTRAINT viva_timepoint_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: viva_timepoints_pkey; Type: CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_timepoints
+    ADD CONSTRAINT viva_timepoints_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: 36bd4ead_b_id_h_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_b_id_h_idx" ON data_requests.activity_log_data_request_assignment_history USING btree (activity_log_data_request_assignment_id);
+
+
+--
+-- Name: 36bd4ead_id_h_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_id_h_idx" ON data_requests.activity_log_data_request_assignment_history USING btree (data_request_assignment_id);
+
+
+--
+-- Name: 36bd4ead_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_id_idx" ON data_requests.activity_log_data_request_assignments USING btree (data_request_assignment_id);
+
+
+--
+-- Name: 36bd4ead_master_id_h_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_master_id_h_idx" ON data_requests.activity_log_data_request_assignment_history USING btree (master_id);
+
+
+--
+-- Name: 36bd4ead_master_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_master_id_idx" ON data_requests.activity_log_data_request_assignments USING btree (master_id);
+
+
+--
+-- Name: 36bd4ead_ref_cb_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_ref_cb_user_idx" ON data_requests.activity_log_data_request_assignments USING btree (created_by_user_id);
+
+
+--
+-- Name: 36bd4ead_ref_cb_user_idx_hist; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_ref_cb_user_idx_hist" ON data_requests.activity_log_data_request_assignment_history USING btree (created_by_user_id);
+
+
+--
+-- Name: 36bd4ead_user_id_h_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_user_id_h_idx" ON data_requests.activity_log_data_request_assignment_history USING btree (user_id);
+
+
+--
+-- Name: 36bd4ead_user_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "36bd4ead_user_id_idx" ON data_requests.activity_log_data_request_assignments USING btree (user_id);
+
+
+--
+-- Name: 56fce463_history_master_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "56fce463_history_master_id" ON data_requests.data_request_attrib_history USING btree (master_id);
+
+
+--
+-- Name: 56fce463_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "56fce463_id_idx" ON data_requests.data_request_attrib_history USING btree (data_request_attrib_id);
+
+
+--
+-- Name: 56fce463_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "56fce463_user_idx" ON data_requests.data_request_attrib_history USING btree (user_id);
+
+
+--
+-- Name: 5becac92_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "5becac92_id_idx" ON data_requests.user_profiile_detail_history USING btree (user_profiile_detail_id);
+
+
+--
+-- Name: 5becac92_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "5becac92_user_idx" ON data_requests.user_profiile_detail_history USING btree (user_id);
+
+
+--
+-- Name: 6e54d54e_history_master_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "6e54d54e_history_master_id" ON data_requests.data_request_history USING btree (master_id);
+
+
+--
+-- Name: 6e54d54e_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "6e54d54e_id_idx" ON data_requests.data_request_history USING btree (data_request_id);
+
+
+--
+-- Name: 6e54d54e_ref_cb_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "6e54d54e_ref_cb_user_idx" ON data_requests.data_requests USING btree (created_by_user_id);
+
+
+--
+-- Name: 6e54d54e_ref_cb_user_idx_hist; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "6e54d54e_ref_cb_user_idx_hist" ON data_requests.data_request_history USING btree (created_by_user_id);
+
+
+--
+-- Name: 6e54d54e_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "6e54d54e_user_idx" ON data_requests.data_request_history USING btree (user_id);
+
+
+--
+-- Name: 76842e8d_history_master_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "76842e8d_history_master_id" ON data_requests.data_requests_selected_attrib_history USING btree (master_id);
+
+
+--
+-- Name: 76842e8d_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "76842e8d_id_idx" ON data_requests.data_requests_selected_attrib_history USING btree (data_requests_selected_attrib_id);
+
+
+--
+-- Name: 76842e8d_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "76842e8d_user_idx" ON data_requests.data_requests_selected_attrib_history USING btree (user_id);
+
+
+--
+-- Name: 952319f7_history_master_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "952319f7_history_master_id" ON data_requests.data_request_initial_review_history USING btree (master_id);
+
+
+--
+-- Name: 952319f7_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "952319f7_id_idx" ON data_requests.data_request_initial_review_history USING btree (data_request_initial_review_id);
+
+
+--
+-- Name: 952319f7_ref_cb_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "952319f7_ref_cb_user_idx" ON data_requests.data_request_initial_reviews USING btree (created_by_user_id);
+
+
+--
+-- Name: 952319f7_ref_cb_user_idx_hist; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "952319f7_ref_cb_user_idx_hist" ON data_requests.data_request_initial_review_history USING btree (created_by_user_id);
+
+
+--
+-- Name: 952319f7_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "952319f7_user_idx" ON data_requests.data_request_initial_review_history USING btree (user_id);
+
+
+--
+-- Name: bf6b3e59_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX bf6b3e59_id_idx ON data_requests.user_profile_detail_history USING btree (user_profile_detail_id);
+
+
+--
+-- Name: bf6b3e59_ref_cb_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX bf6b3e59_ref_cb_user_idx ON data_requests.user_profile_details USING btree (created_by_user_id);
+
+
+--
+-- Name: bf6b3e59_ref_cb_user_idx_hist; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX bf6b3e59_ref_cb_user_idx_hist ON data_requests.user_profile_detail_history USING btree (created_by_user_id);
+
+
+--
+-- Name: bf6b3e59_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX bf6b3e59_user_idx ON data_requests.user_profile_detail_history USING btree (user_id);
+
+
+--
+-- Name: c303bcbb_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX c303bcbb_id_idx ON data_requests.user_profile_academic_detail_history USING btree (user_profile_academic_detail_id);
+
+
+--
+-- Name: c303bcbb_ref_cb_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX c303bcbb_ref_cb_user_idx ON data_requests.user_profile_academic_details USING btree (created_by_user_id);
+
+
+--
+-- Name: c303bcbb_ref_cb_user_idx_hist; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX c303bcbb_ref_cb_user_idx_hist ON data_requests.user_profile_academic_detail_history USING btree (created_by_user_id);
+
+
+--
+-- Name: c303bcbb_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX c303bcbb_user_idx ON data_requests.user_profile_academic_detail_history USING btree (user_id);
+
+
+--
+-- Name: data_request_assignment_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX data_request_assignment_id_idx ON data_requests.data_request_assignment_history USING btree (data_request_assignment_table_id);
+
+
+--
+-- Name: dmbt_56fce463_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX dmbt_56fce463_id_idx ON data_requests.data_request_attribs USING btree (master_id);
+
+
+--
+-- Name: dmbt_6e54d54e_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX dmbt_6e54d54e_id_idx ON data_requests.data_requests USING btree (master_id);
+
+
+--
+-- Name: dmbt_76842e8d_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX dmbt_76842e8d_id_idx ON data_requests.data_requests_selected_attribs USING btree (master_id);
+
+
+--
+-- Name: dmbt_952319f7_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX dmbt_952319f7_id_idx ON data_requests.data_request_initial_reviews USING btree (master_id);
+
+
+--
+-- Name: dmbt_f84064ee_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX dmbt_f84064ee_id_idx ON data_requests.data_request_messages USING btree (master_id);
+
+
+--
+-- Name: ei7348f152_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX ei7348f152_id_idx ON data_requests.data_request_assignments USING btree (master_id);
+
+
+--
+-- Name: eih7348f152_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX eih7348f152_id_idx ON data_requests.data_request_assignment_history USING btree (master_id);
+
+
+--
+-- Name: f84064ee_history_master_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX f84064ee_history_master_id ON data_requests.data_request_message_history USING btree (master_id);
+
+
+--
+-- Name: f84064ee_id_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX f84064ee_id_idx ON data_requests.data_request_message_history USING btree (data_request_message_id);
+
+
+--
+-- Name: f84064ee_ref_cb_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX f84064ee_ref_cb_user_idx ON data_requests.data_request_messages USING btree (created_by_user_id);
+
+
+--
+-- Name: f84064ee_ref_cb_user_idx_hist; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX f84064ee_ref_cb_user_idx_hist ON data_requests.data_request_message_history USING btree (created_by_user_id);
+
+
+--
+-- Name: f84064ee_user_idx; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX f84064ee_user_idx ON data_requests.data_request_message_history USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_request_assignment_history_on_admin_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_assignment_history_on_admin_id" ON data_requests.data_request_assignment_history USING btree (admin_id);
+
+
+--
+-- Name: index_data_requests.data_request_assignment_history_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_assignment_history_on_user_id" ON data_requests.data_request_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_request_assignments_on_admin_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_assignments_on_admin_id" ON data_requests.data_request_assignments USING btree (admin_id);
+
+
+--
+-- Name: index_data_requests.data_request_assignments_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_assignments_on_user_id" ON data_requests.data_request_assignments USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_request_attribs_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_attribs_on_user_id" ON data_requests.data_request_attribs USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_request_initial_reviews_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_initial_reviews_on_user_id" ON data_requests.data_request_initial_reviews USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_request_messages_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_request_messages_on_user_id" ON data_requests.data_request_messages USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_requests_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_requests_on_user_id" ON data_requests.data_requests USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.data_requests_selected_attribs_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.data_requests_selected_attribs_on_user_id" ON data_requests.data_requests_selected_attribs USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.user_profiile_details_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.user_profiile_details_on_user_id" ON data_requests.user_profiile_details USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.user_profile_academic_details_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.user_profile_academic_details_on_user_id" ON data_requests.user_profile_academic_details USING btree (user_id);
+
+
+--
+-- Name: index_data_requests.user_profile_details_on_user_id; Type: INDEX; Schema: data_requests; Owner: -
+--
+
+CREATE INDEX "index_data_requests.user_profile_details_on_user_id" ON data_requests.user_profile_details USING btree (user_id);
+
+
+--
+-- Name: grit_assignment_id_idx; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX grit_assignment_id_idx ON extra_app.grit_assignment_history USING btree (grit_assignment_table_id);
+
+
+--
+-- Name: index_extra_app.grit_assignment_history_on_admin_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.grit_assignment_history_on_admin_id" ON extra_app.grit_assignment_history USING btree (admin_id);
+
+
+--
+-- Name: index_extra_app.grit_assignment_history_on_master_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.grit_assignment_history_on_master_id" ON extra_app.grit_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_extra_app.grit_assignment_history_on_user_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.grit_assignment_history_on_user_id" ON extra_app.grit_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_extra_app.grit_assignments_on_admin_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.grit_assignments_on_admin_id" ON extra_app.grit_assignments USING btree (admin_id);
+
+
+--
+-- Name: index_extra_app.grit_assignments_on_master_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.grit_assignments_on_master_id" ON extra_app.grit_assignments USING btree (master_id);
+
+
+--
+-- Name: index_extra_app.grit_assignments_on_user_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.grit_assignments_on_user_id" ON extra_app.grit_assignments USING btree (user_id);
+
+
+--
+-- Name: index_extra_app.pitt_bhi_assignment_history_on_admin_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.pitt_bhi_assignment_history_on_admin_id" ON extra_app.pitt_bhi_assignment_history USING btree (admin_id);
+
+
+--
+-- Name: index_extra_app.pitt_bhi_assignment_history_on_master_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.pitt_bhi_assignment_history_on_master_id" ON extra_app.pitt_bhi_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_extra_app.pitt_bhi_assignment_history_on_user_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.pitt_bhi_assignment_history_on_user_id" ON extra_app.pitt_bhi_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_extra_app.pitt_bhi_assignments_on_admin_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.pitt_bhi_assignments_on_admin_id" ON extra_app.pitt_bhi_assignments USING btree (admin_id);
+
+
+--
+-- Name: index_extra_app.pitt_bhi_assignments_on_master_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.pitt_bhi_assignments_on_master_id" ON extra_app.pitt_bhi_assignments USING btree (master_id);
+
+
+--
+-- Name: index_extra_app.pitt_bhi_assignments_on_user_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.pitt_bhi_assignments_on_user_id" ON extra_app.pitt_bhi_assignments USING btree (user_id);
+
+
+--
+-- Name: index_extra_app.sleep_assignment_history_on_admin_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.sleep_assignment_history_on_admin_id" ON extra_app.sleep_assignment_history USING btree (admin_id);
+
+
+--
+-- Name: index_extra_app.sleep_assignment_history_on_master_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.sleep_assignment_history_on_master_id" ON extra_app.sleep_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_extra_app.sleep_assignment_history_on_user_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.sleep_assignment_history_on_user_id" ON extra_app.sleep_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_extra_app.sleep_assignments_on_admin_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.sleep_assignments_on_admin_id" ON extra_app.sleep_assignments USING btree (admin_id);
+
+
+--
+-- Name: index_extra_app.sleep_assignments_on_master_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.sleep_assignments_on_master_id" ON extra_app.sleep_assignments USING btree (master_id);
+
+
+--
+-- Name: index_extra_app.sleep_assignments_on_user_id; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX "index_extra_app.sleep_assignments_on_user_id" ON extra_app.sleep_assignments USING btree (user_id);
+
+
+--
+-- Name: pitt_bhi_assignment_id_idx; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX pitt_bhi_assignment_id_idx ON extra_app.pitt_bhi_assignment_history USING btree (pitt_bhi_assignment_table_id);
+
+
+--
+-- Name: sleep_assignment_id_idx; Type: INDEX; Schema: extra_app; Owner: -
+--
+
+CREATE INDEX sleep_assignment_id_idx ON extra_app.sleep_assignment_history USING btree (sleep_assignment_table_id);
 
 
 --
@@ -9622,6 +20648,13 @@ CREATE INDEX index_item_flags_on_item_flag_name_id ON ml_app.item_flags USING bt
 --
 
 CREATE INDEX index_item_flags_on_user_id ON ml_app.item_flags USING btree (user_id);
+
+
+--
+-- Name: index_masters_on_created_by_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_masters_on_created_by_user_id ON ml_app.masters USING btree (created_by_user_id);
 
 
 --
@@ -10451,6 +21484,27 @@ CREATE UNIQUE INDEX unique_schema_migrations ON ml_app.schema_migrations USING b
 
 
 --
+-- Name: 13f4f74e_id_idx; Type: INDEX; Schema: redcap; Owner: -
+--
+
+CREATE INDEX "13f4f74e_id_idx" ON redcap.viva_meta_variable_history USING btree (viva_meta_variable_id);
+
+
+--
+-- Name: 13f4f74e_user_idx; Type: INDEX; Schema: redcap; Owner: -
+--
+
+CREATE INDEX "13f4f74e_user_idx" ON redcap.viva_meta_variable_history USING btree (user_id);
+
+
+--
+-- Name: index_redcap.viva_meta_variables_on_user_id; Type: INDEX; Schema: redcap; Owner: -
+--
+
+CREATE INDEX "index_redcap.viva_meta_variables_on_user_id" ON redcap.viva_meta_variables USING btree (user_id);
+
+
+--
 -- Name: idx_dch_on_redcap_dd_id; Type: INDEX; Schema: ref_data; Owner: -
 --
 
@@ -10689,672 +21743,1908 @@ CREATE INDEX "index_ref_data.redcap_project_users_on_redcap_project_admin_id" ON
 
 
 --
--- Name: accuracy_scores accuracy_score_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: 5865aead_history_master_id; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "5865aead_history_master_id" ON study_info.study_page_section_history USING btree (master_id);
+
+
+--
+-- Name: 5865aead_id_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "5865aead_id_idx" ON study_info.study_page_section_history USING btree (study_page_section_id);
+
+
+--
+-- Name: 5865aead_user_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "5865aead_user_idx" ON study_info.study_page_section_history USING btree (user_id);
+
+
+--
+-- Name: 7934da9b_b_id_h_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "7934da9b_b_id_h_idx" ON study_info.activity_log_view_user_data_user_proc_history USING btree (activity_log_view_user_data_user_proc_id);
+
+
+--
+-- Name: 7934da9b_master_id_h_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "7934da9b_master_id_h_idx" ON study_info.activity_log_view_user_data_user_proc_history USING btree (master_id);
+
+
+--
+-- Name: 7934da9b_master_id_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "7934da9b_master_id_idx" ON study_info.activity_log_view_user_data_user_procs USING btree (master_id);
+
+
+--
+-- Name: 7934da9b_user_id_h_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "7934da9b_user_id_h_idx" ON study_info.activity_log_view_user_data_user_proc_history USING btree (user_id);
+
+
+--
+-- Name: 7934da9b_user_id_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "7934da9b_user_id_idx" ON study_info.activity_log_view_user_data_user_procs USING btree (user_id);
+
+
+--
+-- Name: a01c1fd4_b_id_h_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX a01c1fd4_b_id_h_idx ON study_info.activity_log_study_info_part_history USING btree (activity_log_study_info_part_id);
+
+
+--
+-- Name: a01c1fd4_id_h_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX a01c1fd4_id_h_idx ON study_info.activity_log_study_info_part_history USING btree (study_info_part_id);
+
+
+--
+-- Name: a01c1fd4_id_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX a01c1fd4_id_idx ON study_info.activity_log_study_info_parts USING btree (study_info_part_id);
+
+
+--
+-- Name: a01c1fd4_master_id_h_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX a01c1fd4_master_id_h_idx ON study_info.activity_log_study_info_part_history USING btree (master_id);
+
+
+--
+-- Name: a01c1fd4_master_id_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX a01c1fd4_master_id_idx ON study_info.activity_log_study_info_parts USING btree (master_id);
+
+
+--
+-- Name: a01c1fd4_user_id_h_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX a01c1fd4_user_id_h_idx ON study_info.activity_log_study_info_part_history USING btree (user_id);
+
+
+--
+-- Name: a01c1fd4_user_id_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX a01c1fd4_user_id_idx ON study_info.activity_log_study_info_parts USING btree (user_id);
+
+
+--
+-- Name: c5dbb08b_id_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX c5dbb08b_id_idx ON study_info.study_common_section_history USING btree (study_common_section_id);
+
+
+--
+-- Name: c5dbb08b_user_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX c5dbb08b_user_idx ON study_info.study_common_section_history USING btree (user_id);
+
+
+--
+-- Name: dmbt_5865aead_id_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX dmbt_5865aead_id_idx ON study_info.study_page_sections USING btree (master_id);
+
+
+--
+-- Name: ei836094b5_id_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX ei836094b5_id_idx ON study_info.study_info_parts USING btree (master_id);
+
+
+--
+-- Name: eih836094b5_id_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX eih836094b5_id_idx ON study_info.study_info_part_history USING btree (master_id);
+
+
+--
+-- Name: index_study_info.study_common_sections_on_user_id; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "index_study_info.study_common_sections_on_user_id" ON study_info.study_common_sections USING btree (user_id);
+
+
+--
+-- Name: index_study_info.study_info_part_history_on_admin_id; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "index_study_info.study_info_part_history_on_admin_id" ON study_info.study_info_part_history USING btree (admin_id);
+
+
+--
+-- Name: index_study_info.study_info_part_history_on_user_id; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "index_study_info.study_info_part_history_on_user_id" ON study_info.study_info_part_history USING btree (user_id);
+
+
+--
+-- Name: index_study_info.study_info_parts_on_admin_id; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "index_study_info.study_info_parts_on_admin_id" ON study_info.study_info_parts USING btree (admin_id);
+
+
+--
+-- Name: index_study_info.study_info_parts_on_user_id; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "index_study_info.study_info_parts_on_user_id" ON study_info.study_info_parts USING btree (user_id);
+
+
+--
+-- Name: index_study_info.study_page_sections_on_user_id; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX "index_study_info.study_page_sections_on_user_id" ON study_info.study_page_sections USING btree (user_id);
+
+
+--
+-- Name: study_info_part_id_idx; Type: INDEX; Schema: study_info; Owner: -
+--
+
+CREATE INDEX study_info_part_id_idx ON study_info.study_info_part_history USING btree (study_info_part_table_id);
+
+
+--
+-- Name: 1bd41136_id_idx; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX "1bd41136_id_idx" ON viva_ref_info.viva_collection_instrument_history USING btree (viva_collection_instrument_id);
+
+
+--
+-- Name: 1bd41136_user_idx; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX "1bd41136_user_idx" ON viva_ref_info.viva_collection_instrument_history USING btree (user_id);
+
+
+--
+-- Name: 1c993248_id_idx; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX "1c993248_id_idx" ON viva_ref_info.viva3_rc_history USING btree (viva3_rc_id);
+
+
+--
+-- Name: 1c993248_user_idx; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX "1c993248_user_idx" ON viva_ref_info.viva3_rc_history USING btree (user_id);
+
+
+--
+-- Name: 538ddd51_id_idx; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX "538ddd51_id_idx" ON viva_ref_info.viva_timepoint_history USING btree (viva_timepoint_id);
+
+
+--
+-- Name: 538ddd51_user_idx; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX "538ddd51_user_idx" ON viva_ref_info.viva_timepoint_history USING btree (user_id);
+
+
+--
+-- Name: b453deef_id_idx; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX b453deef_id_idx ON viva_ref_info.viva2_rc_history USING btree (viva2_rc_id);
+
+
+--
+-- Name: b453deef_user_idx; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX b453deef_user_idx ON viva_ref_info.viva2_rc_history USING btree (user_id);
+
+
+--
+-- Name: c50790f0_id_idx; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX c50790f0_id_idx ON viva_ref_info.viva_domain_history USING btree (viva_domain_id);
+
+
+--
+-- Name: c50790f0_user_idx; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX c50790f0_user_idx ON viva_ref_info.viva_domain_history USING btree (user_id);
+
+
+--
+-- Name: index_viva_ref_info.viva2_rcs_on_user_id; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX "index_viva_ref_info.viva2_rcs_on_user_id" ON viva_ref_info.viva2_rcs USING btree (user_id);
+
+
+--
+-- Name: index_viva_ref_info.viva3_rcs_on_user_id; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX "index_viva_ref_info.viva3_rcs_on_user_id" ON viva_ref_info.viva3_rcs USING btree (user_id);
+
+
+--
+-- Name: index_viva_ref_info.viva_collection_instruments_on_user_id; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX "index_viva_ref_info.viva_collection_instruments_on_user_id" ON viva_ref_info.viva_collection_instruments USING btree (user_id);
+
+
+--
+-- Name: index_viva_ref_info.viva_domains_on_user_id; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX "index_viva_ref_info.viva_domains_on_user_id" ON viva_ref_info.viva_domains USING btree (user_id);
+
+
+--
+-- Name: index_viva_ref_info.viva_timepoints_on_user_id; Type: INDEX; Schema: viva_ref_info; Owner: -
+--
+
+CREATE INDEX "index_viva_ref_info.viva_timepoints_on_user_id" ON viva_ref_info.viva_timepoints USING btree (user_id);
+
+
+--
+-- Name: log_activity_log_data_request_assignment_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_data_request_assignment_history_insert AFTER INSERT ON data_requests.activity_log_data_request_assignments FOR EACH ROW EXECUTE PROCEDURE data_requests.log_activity_log_data_request_assignments_update();
+
+
+--
+-- Name: log_activity_log_data_request_assignment_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_data_request_assignment_history_update AFTER UPDATE ON data_requests.activity_log_data_request_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_activity_log_data_request_assignments_update();
+
+
+--
+-- Name: log_data_request_attrib_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_attrib_history_insert AFTER INSERT ON data_requests.data_request_attribs FOR EACH ROW EXECUTE PROCEDURE data_requests.log_data_request_attribs_update();
+
+
+--
+-- Name: log_data_request_attrib_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_attrib_history_update AFTER UPDATE ON data_requests.data_request_attribs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_data_request_attribs_update();
+
+
+--
+-- Name: log_data_request_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_history_insert AFTER INSERT ON data_requests.data_requests FOR EACH ROW EXECUTE PROCEDURE data_requests.log_data_requests_update();
+
+
+--
+-- Name: log_data_request_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_history_update AFTER UPDATE ON data_requests.data_requests FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_data_requests_update();
+
+
+--
+-- Name: log_data_request_initial_review_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_initial_review_history_insert AFTER INSERT ON data_requests.data_request_initial_reviews FOR EACH ROW EXECUTE PROCEDURE data_requests.log_data_request_initial_reviews_update();
+
+
+--
+-- Name: log_data_request_initial_review_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_initial_review_history_update AFTER UPDATE ON data_requests.data_request_initial_reviews FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_data_request_initial_reviews_update();
+
+
+--
+-- Name: log_data_request_message_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_message_history_insert AFTER INSERT ON data_requests.data_request_messages FOR EACH ROW EXECUTE PROCEDURE data_requests.log_data_request_messages_update();
+
+
+--
+-- Name: log_data_request_message_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_request_message_history_update AFTER UPDATE ON data_requests.data_request_messages FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_data_request_messages_update();
+
+
+--
+-- Name: log_data_requests_selected_attrib_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_requests_selected_attrib_history_insert AFTER INSERT ON data_requests.data_requests_selected_attribs FOR EACH ROW EXECUTE PROCEDURE data_requests.log_data_requests_selected_attribs_update();
+
+
+--
+-- Name: log_data_requests_selected_attrib_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_data_requests_selected_attrib_history_update AFTER UPDATE ON data_requests.data_requests_selected_attribs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_data_requests_selected_attribs_update();
+
+
+--
+-- Name: log_user_profiile_detail_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_user_profiile_detail_history_insert AFTER INSERT ON data_requests.user_profiile_details FOR EACH ROW EXECUTE PROCEDURE data_requests.log_user_profiile_details_update();
+
+
+--
+-- Name: log_user_profiile_detail_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_user_profiile_detail_history_update AFTER UPDATE ON data_requests.user_profiile_details FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_user_profiile_details_update();
+
+
+--
+-- Name: log_user_profile_academic_detail_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_user_profile_academic_detail_history_insert AFTER INSERT ON data_requests.user_profile_academic_details FOR EACH ROW EXECUTE PROCEDURE data_requests.log_user_profile_academic_details_update();
+
+
+--
+-- Name: log_user_profile_academic_detail_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_user_profile_academic_detail_history_update AFTER UPDATE ON data_requests.user_profile_academic_details FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_user_profile_academic_details_update();
+
+
+--
+-- Name: log_user_profile_detail_history_insert; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_user_profile_detail_history_insert AFTER INSERT ON data_requests.user_profile_details FOR EACH ROW EXECUTE PROCEDURE data_requests.log_user_profile_details_update();
+
+
+--
+-- Name: log_user_profile_detail_history_update; Type: TRIGGER; Schema: data_requests; Owner: -
+--
+
+CREATE TRIGGER log_user_profile_detail_history_update AFTER UPDATE ON data_requests.user_profile_details FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE data_requests.log_user_profile_details_update();
+
+
+--
+-- Name: log_grit_assignment_history_insert; Type: TRIGGER; Schema: extra_app; Owner: -
+--
+
+CREATE TRIGGER log_grit_assignment_history_insert AFTER INSERT ON extra_app.grit_assignments FOR EACH ROW EXECUTE PROCEDURE extra_app.log_grit_assignments_update();
+
+
+--
+-- Name: log_grit_assignment_history_update; Type: TRIGGER; Schema: extra_app; Owner: -
+--
+
+CREATE TRIGGER log_grit_assignment_history_update AFTER UPDATE ON extra_app.grit_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE extra_app.log_grit_assignments_update();
+
+
+--
+-- Name: log_pitt_bhi_assignment_history_insert; Type: TRIGGER; Schema: extra_app; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_assignment_history_insert AFTER INSERT ON extra_app.pitt_bhi_assignments FOR EACH ROW EXECUTE PROCEDURE extra_app.log_pitt_bhi_assignments_update();
+
+
+--
+-- Name: log_pitt_bhi_assignment_history_update; Type: TRIGGER; Schema: extra_app; Owner: -
+--
+
+CREATE TRIGGER log_pitt_bhi_assignment_history_update AFTER UPDATE ON extra_app.pitt_bhi_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE extra_app.log_pitt_bhi_assignments_update();
+
+
+--
+-- Name: log_sleep_assignment_history_insert; Type: TRIGGER; Schema: extra_app; Owner: -
+--
+
+CREATE TRIGGER log_sleep_assignment_history_insert AFTER INSERT ON extra_app.sleep_assignments FOR EACH ROW EXECUTE PROCEDURE extra_app.log_sleep_assignments_update();
+
+
+--
+-- Name: log_sleep_assignment_history_update; Type: TRIGGER; Schema: extra_app; Owner: -
+--
+
+CREATE TRIGGER log_sleep_assignment_history_update AFTER UPDATE ON extra_app.sleep_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE extra_app.log_sleep_assignments_update();
+
+
+--
+-- Name: accuracy_score_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER accuracy_score_history_insert AFTER INSERT ON ml_app.accuracy_scores FOR EACH ROW EXECUTE PROCEDURE ml_app.log_accuracy_score_update();
 
 
 --
--- Name: accuracy_scores accuracy_score_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: accuracy_score_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER accuracy_score_history_update AFTER UPDATE ON ml_app.accuracy_scores FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_accuracy_score_update();
 
 
 --
--- Name: activity_logs activity_log_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: activity_log_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER activity_log_history_insert AFTER INSERT ON ml_app.activity_logs FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_update();
 
 
 --
--- Name: activity_logs activity_log_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: activity_log_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER activity_log_history_update AFTER UPDATE ON ml_app.activity_logs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_update();
 
 
 --
--- Name: activity_log_player_contact_phones activity_log_player_contact_phone_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: activity_log_player_contact_phone_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER activity_log_player_contact_phone_history_insert AFTER INSERT ON ml_app.activity_log_player_contact_phones FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_player_contact_phone_update();
 
 
 --
--- Name: activity_log_player_contact_phones activity_log_player_contact_phone_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: activity_log_player_contact_phone_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER activity_log_player_contact_phone_history_update AFTER UPDATE ON ml_app.activity_log_player_contact_phones FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_player_contact_phone_update();
 
 
 --
--- Name: addresses address_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: address_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER address_history_insert AFTER INSERT ON ml_app.addresses FOR EACH ROW EXECUTE PROCEDURE ml_app.log_address_update();
 
 
 --
--- Name: addresses address_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: address_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER address_history_update AFTER UPDATE ON ml_app.addresses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_address_update();
 
 
 --
--- Name: addresses address_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: address_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER address_insert BEFORE INSERT ON ml_app.addresses FOR EACH ROW EXECUTE PROCEDURE ml_app.handle_address_update();
 
 
 --
--- Name: addresses address_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: address_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER address_update BEFORE UPDATE ON ml_app.addresses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.handle_address_update();
 
 
 --
--- Name: admins admin_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: admin_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER admin_history_insert AFTER INSERT ON ml_app.admins FOR EACH ROW EXECUTE PROCEDURE ml_app.log_admin_update();
 
 
 --
--- Name: admins admin_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: admin_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER admin_history_update AFTER UPDATE ON ml_app.admins FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_admin_update();
 
 
 --
--- Name: app_configurations app_configuration_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: app_configuration_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER app_configuration_history_insert AFTER INSERT ON ml_app.app_configurations FOR EACH ROW EXECUTE PROCEDURE ml_app.log_app_configuration_update();
 
 
 --
--- Name: app_configurations app_configuration_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: app_configuration_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER app_configuration_history_update AFTER UPDATE ON ml_app.app_configurations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_app_configuration_update();
 
 
 --
--- Name: app_types app_type_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: app_type_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER app_type_history_insert AFTER INSERT ON ml_app.app_types FOR EACH ROW EXECUTE PROCEDURE ml_app.log_app_type_update();
 
 
 --
--- Name: app_types app_type_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: app_type_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER app_type_history_update AFTER UPDATE ON ml_app.app_types FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_app_type_update();
 
 
 --
--- Name: colleges college_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: college_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER college_history_insert AFTER INSERT ON ml_app.colleges FOR EACH ROW EXECUTE PROCEDURE ml_app.log_college_update();
 
 
 --
--- Name: colleges college_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: college_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER college_history_update AFTER UPDATE ON ml_app.colleges FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_college_update();
 
 
 --
--- Name: config_libraries config_library_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: config_library_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER config_library_history_insert AFTER INSERT ON ml_app.config_libraries FOR EACH ROW EXECUTE PROCEDURE ml_app.log_config_library_update();
 
 
 --
--- Name: config_libraries config_library_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: config_library_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER config_library_history_update AFTER UPDATE ON ml_app.config_libraries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_config_library_update();
 
 
 --
--- Name: dynamic_models dynamic_model_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: dynamic_model_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER dynamic_model_history_insert AFTER INSERT ON ml_app.dynamic_models FOR EACH ROW EXECUTE PROCEDURE ml_app.log_dynamic_model_update();
 
 
 --
--- Name: dynamic_models dynamic_model_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: dynamic_model_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER dynamic_model_history_update AFTER UPDATE ON ml_app.dynamic_models FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_dynamic_model_update();
 
 
 --
--- Name: external_identifiers external_identifier_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: external_identifier_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER external_identifier_history_insert AFTER INSERT ON ml_app.external_identifiers FOR EACH ROW EXECUTE PROCEDURE ml_app.log_external_identifier_update();
 
 
 --
--- Name: external_identifiers external_identifier_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: external_identifier_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER external_identifier_history_update AFTER UPDATE ON ml_app.external_identifiers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_external_identifier_update();
 
 
 --
--- Name: external_links external_link_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: external_link_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER external_link_history_insert AFTER INSERT ON ml_app.external_links FOR EACH ROW EXECUTE PROCEDURE ml_app.log_external_link_update();
 
 
 --
--- Name: external_links external_link_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: external_link_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER external_link_history_update AFTER UPDATE ON ml_app.external_links FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_external_link_update();
 
 
 --
--- Name: general_selections general_selection_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: general_selection_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER general_selection_history_insert AFTER INSERT ON ml_app.general_selections FOR EACH ROW EXECUTE PROCEDURE ml_app.log_general_selection_update();
 
 
 --
--- Name: general_selections general_selection_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: general_selection_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER general_selection_history_update AFTER UPDATE ON ml_app.general_selections FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_general_selection_update();
 
 
 --
--- Name: item_flags item_flag_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: item_flag_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER item_flag_history_insert AFTER INSERT ON ml_app.item_flags FOR EACH ROW EXECUTE PROCEDURE ml_app.log_item_flag_update();
 
 
 --
--- Name: item_flags item_flag_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: item_flag_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER item_flag_history_update AFTER UPDATE ON ml_app.item_flags FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_item_flag_update();
 
 
 --
--- Name: item_flag_names item_flag_name_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: item_flag_name_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER item_flag_name_history_insert AFTER INSERT ON ml_app.item_flag_names FOR EACH ROW EXECUTE PROCEDURE ml_app.log_item_flag_name_update();
 
 
 --
--- Name: item_flag_names item_flag_name_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: item_flag_name_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER item_flag_name_history_update AFTER UPDATE ON ml_app.item_flag_names FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_item_flag_name_update();
 
 
 --
--- Name: role_descriptions log_role_description_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: log_role_description_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER log_role_description_history_insert AFTER INSERT ON ml_app.role_descriptions FOR EACH ROW EXECUTE PROCEDURE ml_app.role_description_history_upd();
 
 
 --
--- Name: role_descriptions log_role_description_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: log_role_description_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER log_role_description_history_update AFTER UPDATE ON ml_app.role_descriptions FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.role_description_history_upd();
 
 
 --
--- Name: user_descriptions log_user_description_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: log_user_description_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER log_user_description_history_insert AFTER INSERT ON ml_app.user_descriptions FOR EACH ROW EXECUTE PROCEDURE ml_app.user_description_history_upd();
 
 
 --
--- Name: user_descriptions log_user_description_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: log_user_description_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER log_user_description_history_update AFTER UPDATE ON ml_app.user_descriptions FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.user_description_history_upd();
 
 
 --
--- Name: message_templates message_template_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: message_template_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER message_template_history_insert AFTER INSERT ON ml_app.message_templates FOR EACH ROW EXECUTE PROCEDURE ml_app.log_message_template_update();
 
 
 --
--- Name: message_templates message_template_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: message_template_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER message_template_history_update AFTER UPDATE ON ml_app.message_templates FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_message_template_update();
 
 
 --
--- Name: nfs_store_archived_files nfs_store_archived_file_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_archived_file_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER nfs_store_archived_file_history_insert AFTER INSERT ON ml_app.nfs_store_archived_files FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_archived_file_update();
 
 
 --
--- Name: nfs_store_archived_files nfs_store_archived_file_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_archived_file_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER nfs_store_archived_file_history_update AFTER UPDATE ON ml_app.nfs_store_archived_files FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_archived_file_update();
 
 
 --
--- Name: nfs_store_containers nfs_store_container_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_container_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER nfs_store_container_history_insert AFTER INSERT ON ml_app.nfs_store_containers FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_container_update();
 
 
 --
--- Name: nfs_store_containers nfs_store_container_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_container_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER nfs_store_container_history_update AFTER UPDATE ON ml_app.nfs_store_containers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_container_update();
 
 
 --
--- Name: nfs_store_filters nfs_store_filter_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_filter_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER nfs_store_filter_history_insert AFTER INSERT ON ml_app.nfs_store_filters FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_filter_update();
 
 
 --
--- Name: nfs_store_filters nfs_store_filter_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_filter_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER nfs_store_filter_history_update AFTER UPDATE ON ml_app.nfs_store_filters FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_filter_update();
 
 
 --
--- Name: nfs_store_stored_files nfs_store_stored_file_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_stored_file_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER nfs_store_stored_file_history_insert AFTER INSERT ON ml_app.nfs_store_stored_files FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_stored_file_update();
 
 
 --
--- Name: nfs_store_stored_files nfs_store_stored_file_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_stored_file_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER nfs_store_stored_file_history_update AFTER UPDATE ON ml_app.nfs_store_stored_files FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_stored_file_update();
 
 
 --
--- Name: page_layouts page_layout_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: page_layout_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER page_layout_history_insert AFTER INSERT ON ml_app.page_layouts FOR EACH ROW EXECUTE PROCEDURE ml_app.log_page_layout_update();
 
 
 --
--- Name: page_layouts page_layout_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: page_layout_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER page_layout_history_update AFTER UPDATE ON ml_app.page_layouts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_page_layout_update();
 
 
 --
--- Name: player_contacts player_contact_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_contact_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER player_contact_history_insert AFTER INSERT ON ml_app.player_contacts FOR EACH ROW EXECUTE PROCEDURE ml_app.log_player_contact_update();
 
 
 --
--- Name: player_contacts player_contact_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_contact_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER player_contact_history_update AFTER UPDATE ON ml_app.player_contacts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_player_contact_update();
 
 
 --
--- Name: player_contacts player_contact_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_contact_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER player_contact_insert BEFORE INSERT ON ml_app.player_contacts FOR EACH ROW EXECUTE PROCEDURE ml_app.handle_player_contact_update();
 
 
 --
--- Name: player_contacts player_contact_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_contact_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER player_contact_update BEFORE UPDATE ON ml_app.player_contacts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.handle_player_contact_update();
 
 
 --
--- Name: player_infos player_info_before_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_info_before_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER player_info_before_update BEFORE UPDATE ON ml_app.player_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.handle_player_info_before_update();
 
 
 --
--- Name: player_infos player_info_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_info_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER player_info_history_insert AFTER INSERT ON ml_app.player_infos FOR EACH ROW EXECUTE PROCEDURE ml_app.log_player_info_update();
 
 
 --
--- Name: player_infos player_info_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_info_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER player_info_history_update AFTER UPDATE ON ml_app.player_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_player_info_update();
 
 
 --
--- Name: player_infos player_info_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_info_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER player_info_insert AFTER INSERT ON ml_app.player_infos FOR EACH ROW EXECUTE PROCEDURE ml_app.update_master_with_player_info();
 
 
 --
--- Name: player_infos player_info_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_info_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER player_info_update AFTER UPDATE ON ml_app.player_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.update_master_with_player_info();
 
 
 --
--- Name: pro_infos pro_info_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: pro_info_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER pro_info_insert AFTER INSERT ON ml_app.pro_infos FOR EACH ROW EXECUTE PROCEDURE ml_app.update_master_with_pro_info();
 
 
 --
--- Name: pro_infos pro_info_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: pro_info_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER pro_info_update AFTER UPDATE ON ml_app.pro_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.update_master_with_pro_info();
 
 
 --
--- Name: protocol_events protocol_event_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: protocol_event_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER protocol_event_history_insert AFTER INSERT ON ml_app.protocol_events FOR EACH ROW EXECUTE PROCEDURE ml_app.log_protocol_event_update();
 
 
 --
--- Name: protocol_events protocol_event_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: protocol_event_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER protocol_event_history_update AFTER UPDATE ON ml_app.protocol_events FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_protocol_event_update();
 
 
 --
--- Name: protocols protocol_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: protocol_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER protocol_history_insert AFTER INSERT ON ml_app.protocols FOR EACH ROW EXECUTE PROCEDURE ml_app.log_protocol_update();
 
 
 --
--- Name: protocols protocol_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: protocol_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER protocol_history_update AFTER UPDATE ON ml_app.protocols FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_protocol_update();
 
 
 --
--- Name: rc_stage_cif_copy rc_cis_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: rc_cis_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER rc_cis_update BEFORE UPDATE ON ml_app.rc_stage_cif_copy FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.handle_rc_cis_update();
 
 
 --
--- Name: reports report_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: report_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER report_history_insert AFTER INSERT ON ml_app.reports FOR EACH ROW EXECUTE PROCEDURE ml_app.log_report_update();
 
 
 --
--- Name: reports report_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: report_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER report_history_update AFTER UPDATE ON ml_app.reports FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_report_update();
 
 
 --
--- Name: scantrons scantron_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: scantron_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER scantron_history_insert AFTER INSERT ON ml_app.scantrons FOR EACH ROW EXECUTE PROCEDURE ml_app.log_scantron_update();
 
 
 --
--- Name: scantrons scantron_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: scantron_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER scantron_history_update AFTER UPDATE ON ml_app.scantrons FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_scantron_update();
 
 
 --
--- Name: sub_processes sub_process_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: sub_process_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER sub_process_history_insert AFTER INSERT ON ml_app.sub_processes FOR EACH ROW EXECUTE PROCEDURE ml_app.log_sub_process_update();
 
 
 --
--- Name: sub_processes sub_process_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: sub_process_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER sub_process_history_update AFTER UPDATE ON ml_app.sub_processes FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_sub_process_update();
 
 
 --
--- Name: trackers tracker_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: tracker_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER tracker_history_insert AFTER INSERT ON ml_app.trackers FOR EACH ROW EXECUTE PROCEDURE ml_app.log_tracker_update();
 
 
 --
--- Name: tracker_history tracker_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: tracker_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER tracker_history_update BEFORE UPDATE ON ml_app.tracker_history FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.handle_tracker_history_update();
 
 
 --
--- Name: trackers tracker_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: tracker_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER tracker_history_update AFTER UPDATE ON ml_app.trackers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_tracker_update();
 
 
 --
--- Name: tracker_history tracker_record_delete; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: tracker_record_delete; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER tracker_record_delete AFTER DELETE ON ml_app.tracker_history FOR EACH ROW EXECUTE PROCEDURE ml_app.handle_delete();
 
 
 --
--- Name: trackers tracker_upsert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: tracker_upsert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER tracker_upsert BEFORE INSERT ON ml_app.trackers FOR EACH ROW EXECUTE PROCEDURE ml_app.tracker_upsert();
 
 
 --
--- Name: user_access_controls user_access_control_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: user_access_control_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER user_access_control_history_insert AFTER INSERT ON ml_app.user_access_controls FOR EACH ROW EXECUTE PROCEDURE ml_app.log_user_access_control_update();
 
 
 --
--- Name: user_access_controls user_access_control_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: user_access_control_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER user_access_control_history_update AFTER UPDATE ON ml_app.user_access_controls FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_user_access_control_update();
 
 
 --
--- Name: user_authorizations user_authorization_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: user_authorization_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER user_authorization_history_insert AFTER INSERT ON ml_app.user_authorizations FOR EACH ROW EXECUTE PROCEDURE ml_app.log_user_authorization_update();
 
 
 --
--- Name: user_authorizations user_authorization_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: user_authorization_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER user_authorization_history_update AFTER UPDATE ON ml_app.user_authorizations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_user_authorization_update();
 
 
 --
--- Name: users user_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: user_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER user_history_insert AFTER INSERT ON ml_app.users FOR EACH ROW EXECUTE PROCEDURE ml_app.log_user_update();
 
 
 --
--- Name: users user_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: user_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER user_history_update AFTER UPDATE ON ml_app.users FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_user_update();
 
 
 --
--- Name: user_roles user_role_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: user_role_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER user_role_history_insert AFTER INSERT ON ml_app.user_roles FOR EACH ROW EXECUTE PROCEDURE ml_app.log_user_role_update();
 
 
 --
--- Name: user_roles user_role_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: user_role_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
 CREATE TRIGGER user_role_history_update AFTER UPDATE ON ml_app.user_roles FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_user_role_update();
 
 
 --
--- Name: datadic_choices log_datadic_choice_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
+-- Name: log_datadic_choice_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
 CREATE TRIGGER log_datadic_choice_history_insert AFTER INSERT ON ref_data.datadic_choices FOR EACH ROW EXECUTE PROCEDURE ml_app.datadic_choice_history_upd();
 
 
 --
--- Name: datadic_choices log_datadic_choice_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
+-- Name: log_datadic_choice_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
 CREATE TRIGGER log_datadic_choice_history_update AFTER UPDATE ON ref_data.datadic_choices FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.datadic_choice_history_upd();
 
 
 --
--- Name: datadic_variables log_datadic_variable_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
+-- Name: log_datadic_variable_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
 CREATE TRIGGER log_datadic_variable_history_insert AFTER INSERT ON ref_data.datadic_variables FOR EACH ROW EXECUTE PROCEDURE ref_data.log_datadic_variables_update();
 
 
 --
--- Name: datadic_variables log_datadic_variable_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
+-- Name: log_datadic_variable_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
 CREATE TRIGGER log_datadic_variable_history_update AFTER UPDATE ON ref_data.datadic_variables FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ref_data.log_datadic_variables_update();
 
 
 --
--- Name: redcap_data_collection_instruments log_redcap_data_collection_instrument_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
+-- Name: log_redcap_data_collection_instrument_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
 CREATE TRIGGER log_redcap_data_collection_instrument_history_insert AFTER INSERT ON ref_data.redcap_data_collection_instruments FOR EACH ROW EXECUTE PROCEDURE ref_data.redcap_data_collection_instrument_history_upd();
 
 
 --
--- Name: redcap_data_collection_instruments log_redcap_data_collection_instrument_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
+-- Name: log_redcap_data_collection_instrument_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
 CREATE TRIGGER log_redcap_data_collection_instrument_history_update AFTER UPDATE ON ref_data.redcap_data_collection_instruments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ref_data.redcap_data_collection_instrument_history_upd();
 
 
 --
--- Name: redcap_data_dictionaries log_redcap_data_dictionary_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
+-- Name: log_redcap_data_dictionary_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
 CREATE TRIGGER log_redcap_data_dictionary_history_insert AFTER INSERT ON ref_data.redcap_data_dictionaries FOR EACH ROW EXECUTE PROCEDURE ml_app.redcap_data_dictionary_history_upd();
 
 
 --
--- Name: redcap_data_dictionaries log_redcap_data_dictionary_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
+-- Name: log_redcap_data_dictionary_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
 CREATE TRIGGER log_redcap_data_dictionary_history_update AFTER UPDATE ON ref_data.redcap_data_dictionaries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.redcap_data_dictionary_history_upd();
 
 
 --
--- Name: redcap_project_admins log_redcap_project_admin_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
+-- Name: log_redcap_project_admin_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
 CREATE TRIGGER log_redcap_project_admin_history_insert AFTER INSERT ON ref_data.redcap_project_admins FOR EACH ROW EXECUTE PROCEDURE ml_app.redcap_project_admin_history_upd();
 
 
 --
--- Name: redcap_project_admins log_redcap_project_admin_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
+-- Name: log_redcap_project_admin_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
 CREATE TRIGGER log_redcap_project_admin_history_update AFTER UPDATE ON ref_data.redcap_project_admins FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.redcap_project_admin_history_upd();
 
 
 --
--- Name: redcap_project_users log_redcap_project_user_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
+-- Name: log_redcap_project_user_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
 CREATE TRIGGER log_redcap_project_user_history_insert AFTER INSERT ON ref_data.redcap_project_users FOR EACH ROW EXECUTE PROCEDURE ref_data.redcap_project_user_history_upd();
 
 
 --
--- Name: redcap_project_users log_redcap_project_user_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
+-- Name: log_redcap_project_user_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
 CREATE TRIGGER log_redcap_project_user_history_update AFTER UPDATE ON ref_data.redcap_project_users FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ref_data.redcap_project_user_history_upd();
 
 
 --
--- Name: accuracy_score_history fk_accuracy_score_history_accuracy_scores; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: log_activity_log_study_info_part_history_insert; Type: TRIGGER; Schema: study_info; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_study_info_part_history_insert AFTER INSERT ON study_info.activity_log_study_info_parts FOR EACH ROW EXECUTE PROCEDURE study_info.log_activity_log_study_info_parts_update();
+
+
+--
+-- Name: log_activity_log_study_info_part_history_update; Type: TRIGGER; Schema: study_info; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_study_info_part_history_update AFTER UPDATE ON study_info.activity_log_study_info_parts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE study_info.log_activity_log_study_info_parts_update();
+
+
+--
+-- Name: log_activity_log_view_user_data_user_proc_history_insert; Type: TRIGGER; Schema: study_info; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_view_user_data_user_proc_history_insert AFTER INSERT ON study_info.activity_log_view_user_data_user_procs FOR EACH ROW EXECUTE PROCEDURE study_info.log_activity_log_view_user_data_user_procs_update();
+
+
+--
+-- Name: log_activity_log_view_user_data_user_proc_history_update; Type: TRIGGER; Schema: study_info; Owner: -
+--
+
+CREATE TRIGGER log_activity_log_view_user_data_user_proc_history_update AFTER UPDATE ON study_info.activity_log_view_user_data_user_procs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE study_info.log_activity_log_view_user_data_user_procs_update();
+
+
+--
+-- Name: log_study_common_section_history_insert; Type: TRIGGER; Schema: study_info; Owner: -
+--
+
+CREATE TRIGGER log_study_common_section_history_insert AFTER INSERT ON study_info.study_common_sections FOR EACH ROW EXECUTE PROCEDURE study_info.log_study_common_sections_update();
+
+
+--
+-- Name: log_study_common_section_history_update; Type: TRIGGER; Schema: study_info; Owner: -
+--
+
+CREATE TRIGGER log_study_common_section_history_update AFTER UPDATE ON study_info.study_common_sections FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE study_info.log_study_common_sections_update();
+
+
+--
+-- Name: log_study_page_section_history_insert; Type: TRIGGER; Schema: study_info; Owner: -
+--
+
+CREATE TRIGGER log_study_page_section_history_insert AFTER INSERT ON study_info.study_page_sections FOR EACH ROW EXECUTE PROCEDURE study_info.log_study_page_sections_update();
+
+
+--
+-- Name: log_study_page_section_history_update; Type: TRIGGER; Schema: study_info; Owner: -
+--
+
+CREATE TRIGGER log_study_page_section_history_update AFTER UPDATE ON study_info.study_page_sections FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE study_info.log_study_page_sections_update();
+
+
+--
+-- Name: log_viva2_rc_history_insert; Type: TRIGGER; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TRIGGER log_viva2_rc_history_insert AFTER INSERT ON viva_ref_info.viva2_rcs FOR EACH ROW EXECUTE PROCEDURE viva_ref_info.log_viva2_rcs_update();
+
+
+--
+-- Name: log_viva2_rc_history_update; Type: TRIGGER; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TRIGGER log_viva2_rc_history_update AFTER UPDATE ON viva_ref_info.viva2_rcs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE viva_ref_info.log_viva2_rcs_update();
+
+
+--
+-- Name: log_viva3_rc_history_insert; Type: TRIGGER; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TRIGGER log_viva3_rc_history_insert AFTER INSERT ON viva_ref_info.viva3_rcs FOR EACH ROW EXECUTE PROCEDURE viva_ref_info.log_viva3_rcs_update();
+
+
+--
+-- Name: log_viva3_rc_history_update; Type: TRIGGER; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TRIGGER log_viva3_rc_history_update AFTER UPDATE ON viva_ref_info.viva3_rcs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE viva_ref_info.log_viva3_rcs_update();
+
+
+--
+-- Name: log_viva_collection_instrument_history_insert; Type: TRIGGER; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TRIGGER log_viva_collection_instrument_history_insert AFTER INSERT ON viva_ref_info.viva_collection_instruments FOR EACH ROW EXECUTE PROCEDURE viva_ref_info.log_viva_collection_instruments_update();
+
+
+--
+-- Name: log_viva_collection_instrument_history_update; Type: TRIGGER; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TRIGGER log_viva_collection_instrument_history_update AFTER UPDATE ON viva_ref_info.viva_collection_instruments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE viva_ref_info.log_viva_collection_instruments_update();
+
+
+--
+-- Name: log_viva_domain_history_insert; Type: TRIGGER; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TRIGGER log_viva_domain_history_insert AFTER INSERT ON viva_ref_info.viva_domains FOR EACH ROW EXECUTE PROCEDURE viva_ref_info.log_viva_domains_update();
+
+
+--
+-- Name: log_viva_domain_history_update; Type: TRIGGER; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TRIGGER log_viva_domain_history_update AFTER UPDATE ON viva_ref_info.viva_domains FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE viva_ref_info.log_viva_domains_update();
+
+
+--
+-- Name: log_viva_timepoint_history_insert; Type: TRIGGER; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TRIGGER log_viva_timepoint_history_insert AFTER INSERT ON viva_ref_info.viva_timepoints FOR EACH ROW EXECUTE PROCEDURE viva_ref_info.log_viva_timepoints_update();
+
+
+--
+-- Name: log_viva_timepoint_history_update; Type: TRIGGER; Schema: viva_ref_info; Owner: -
+--
+
+CREATE TRIGGER log_viva_timepoint_history_update AFTER UPDATE ON viva_ref_info.viva_timepoints FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE viva_ref_info.log_viva_timepoints_update();
+
+
+--
+-- Name: fk_rails_018f25e797; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_message_history
+    ADD CONSTRAINT fk_rails_018f25e797 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_09244bb3dc; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attrib_history
+    ADD CONSTRAINT fk_rails_09244bb3dc FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_0aeeec6876; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attrib_history
+    ADD CONSTRAINT fk_rails_0aeeec6876 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_0b2f1b7819; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profiile_details
+    ADD CONSTRAINT fk_rails_0b2f1b7819 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_0bc905968a; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_review_history
+    ADD CONSTRAINT fk_rails_0bc905968a FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_0f9a65942f; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_detail_history
+    ADD CONSTRAINT fk_rails_0f9a65942f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1257de9827; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history
+    ADD CONSTRAINT fk_rails_1257de9827 FOREIGN KEY (activity_log_data_request_assignment_id) REFERENCES data_requests.activity_log_data_request_assignments(id);
+
+
+--
+-- Name: fk_rails_21c43e2d3f; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_messages
+    ADD CONSTRAINT fk_rails_21c43e2d3f FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_21e6e0496d; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignments
+    ADD CONSTRAINT fk_rails_21e6e0496d FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_23475adebc; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attrib_history
+    ADD CONSTRAINT fk_rails_23475adebc FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_23edb1d63b; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history
+    ADD CONSTRAINT fk_rails_23edb1d63b FOREIGN KEY (data_request_assignment_id) REFERENCES data_requests.data_request_assignments(id);
+
+
+--
+-- Name: fk_rails_2b3876e80b; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profiile_detail_history
+    ADD CONSTRAINT fk_rails_2b3876e80b FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_2eb6563795; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignments
+    ADD CONSTRAINT fk_rails_2eb6563795 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_31e0691a21; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignment_history
+    ADD CONSTRAINT fk_rails_31e0691a21 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_3697b84df2; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_history
+    ADD CONSTRAINT fk_rails_3697b84df2 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_3760832f71; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_academic_details
+    ADD CONSTRAINT fk_rails_3760832f71 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_3b5bcce9fb; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_reviews
+    ADD CONSTRAINT fk_rails_3b5bcce9fb FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_3ea24a65fd; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests
+    ADD CONSTRAINT fk_rails_3ea24a65fd FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_3fed9dc95f; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_message_history
+    ADD CONSTRAINT fk_rails_3fed9dc95f FOREIGN KEY (data_request_message_id) REFERENCES data_requests.data_request_messages(id);
+
+
+--
+-- Name: fk_rails_44faf7af40; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignments
+    ADD CONSTRAINT fk_rails_44faf7af40 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_4d465b6e85; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignments
+    ADD CONSTRAINT fk_rails_4d465b6e85 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_4e6078aae5; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_detail_history
+    ADD CONSTRAINT fk_rails_4e6078aae5 FOREIGN KEY (user_profile_detail_id) REFERENCES data_requests.user_profile_details(id);
+
+
+--
+-- Name: fk_rails_59cf667728; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_history
+    ADD CONSTRAINT fk_rails_59cf667728 FOREIGN KEY (data_request_id) REFERENCES data_requests.data_requests(id);
+
+
+--
+-- Name: fk_rails_5dc9dc25de; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_details
+    ADD CONSTRAINT fk_rails_5dc9dc25de FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_6c73bce4e5; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_history
+    ADD CONSTRAINT fk_rails_6c73bce4e5 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_7004dc15e9; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignments
+    ADD CONSTRAINT fk_rails_7004dc15e9 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_72b82fa91b; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_message_history
+    ADD CONSTRAINT fk_rails_72b82fa91b FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_782e11a7b8; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests
+    ADD CONSTRAINT fk_rails_782e11a7b8 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_7c8353b1b1; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_academic_detail_history
+    ADD CONSTRAINT fk_rails_7c8353b1b1 FOREIGN KEY (user_profile_academic_detail_id) REFERENCES data_requests.user_profile_academic_details(id);
+
+
+--
+-- Name: fk_rails_8193f411a4; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_academic_detail_history
+    ADD CONSTRAINT fk_rails_8193f411a4 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_84d6bfc68b; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attribs
+    ADD CONSTRAINT fk_rails_84d6bfc68b FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_8e0ef86d46; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attrib_history
+    ADD CONSTRAINT fk_rails_8e0ef86d46 FOREIGN KEY (data_requests_selected_attrib_id) REFERENCES data_requests.data_requests_selected_attribs(id);
+
+
+--
+-- Name: fk_rails_8f01eb43fa; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_messages
+    ADD CONSTRAINT fk_rails_8f01eb43fa FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_91a44fcfc7; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profiile_detail_history
+    ADD CONSTRAINT fk_rails_91a44fcfc7 FOREIGN KEY (user_profiile_detail_id) REFERENCES data_requests.user_profiile_details(id);
+
+
+--
+-- Name: fk_rails_947505797a; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_detail_history
+    ADD CONSTRAINT fk_rails_947505797a FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_9581557259; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history
+    ADD CONSTRAINT fk_rails_9581557259 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_9ab5b92f74; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history
+    ADD CONSTRAINT fk_rails_9ab5b92f74 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_9d83f07142; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_academic_detail_history
+    ADD CONSTRAINT fk_rails_9d83f07142 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_9fcbe0574d; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignment_history
+    ADD CONSTRAINT fk_rails_9fcbe0574d FOREIGN KEY (data_request_assignment_table_id) REFERENCES data_requests.data_request_assignments(id);
+
+
+--
+-- Name: fk_rails_b184b7ce1b; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attribs
+    ADD CONSTRAINT fk_rails_b184b7ce1b FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_b339299708; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attrib_history
+    ADD CONSTRAINT fk_rails_b339299708 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_b6fd89ee5b; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_messages
+    ADD CONSTRAINT fk_rails_b6fd89ee5b FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_b97a24587b; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignments
+    ADD CONSTRAINT fk_rails_b97a24587b FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_c10fc3daf5; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_review_history
+    ADD CONSTRAINT fk_rails_c10fc3daf5 FOREIGN KEY (data_request_initial_review_id) REFERENCES data_requests.data_request_initial_reviews(id);
+
+
+--
+-- Name: fk_rails_d0f41b523a; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_reviews
+    ADD CONSTRAINT fk_rails_d0f41b523a FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_d0fa5dfe8e; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_details
+    ADD CONSTRAINT fk_rails_d0fa5dfe8e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_d1479234ac; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignment_history
+    ADD CONSTRAINT fk_rails_d1479234ac FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_d73d7870a9; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_message_history
+    ADD CONSTRAINT fk_rails_d73d7870a9 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_da6612b225; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests_selected_attribs
+    ADD CONSTRAINT fk_rails_da6612b225 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_e4a6e38e6f; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_history
+    ADD CONSTRAINT fk_rails_e4a6e38e6f FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_e89bc05f2a; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attrib_history
+    ADD CONSTRAINT fk_rails_e89bc05f2a FOREIGN KEY (data_request_attrib_id) REFERENCES data_requests.data_request_attribs(id);
+
+
+--
+-- Name: fk_rails_ead3ce3763; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_requests
+    ADD CONSTRAINT fk_rails_ead3ce3763 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_eb22a58fff; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_attribs
+    ADD CONSTRAINT fk_rails_eb22a58fff FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_ec4718ef45; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignments
+    ADD CONSTRAINT fk_rails_ec4718ef45 FOREIGN KEY (data_request_assignment_id) REFERENCES data_requests.data_request_assignments(id);
+
+
+--
+-- Name: fk_rails_f1e305eb37; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_reviews
+    ADD CONSTRAINT fk_rails_f1e305eb37 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_f37d802307; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_review_history
+    ADD CONSTRAINT fk_rails_f37d802307 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_f5715f3225; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.user_profile_academic_details
+    ADD CONSTRAINT fk_rails_f5715f3225 FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_fac2c6fac3; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.activity_log_data_request_assignment_history
+    ADD CONSTRAINT fk_rails_fac2c6fac3 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_fddf5fc543; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_initial_review_history
+    ADD CONSTRAINT fk_rails_fddf5fc543 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_fea4d0d8c9; Type: FK CONSTRAINT; Schema: data_requests; Owner: -
+--
+
+ALTER TABLE ONLY data_requests.data_request_assignment_history
+    ADD CONSTRAINT fk_rails_fea4d0d8c9 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_081ee3469f; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignments
+    ADD CONSTRAINT fk_rails_081ee3469f FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_15a9d2b53b; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignment_history
+    ADD CONSTRAINT fk_rails_15a9d2b53b FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_3657d6c5a5; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignment_history
+    ADD CONSTRAINT fk_rails_3657d6c5a5 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_3e2d90b6a7; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignments
+    ADD CONSTRAINT fk_rails_3e2d90b6a7 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_4498353cb8; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignment_history
+    ADD CONSTRAINT fk_rails_4498353cb8 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_5948cd2e04; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignment_history
+    ADD CONSTRAINT fk_rails_5948cd2e04 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_5953540cf4; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignments
+    ADD CONSTRAINT fk_rails_5953540cf4 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_675c55afb1; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignments
+    ADD CONSTRAINT fk_rails_675c55afb1 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_6fb9cf3716; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignment_history
+    ADD CONSTRAINT fk_rails_6fb9cf3716 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_8075a87e8f; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignment_history
+    ADD CONSTRAINT fk_rails_8075a87e8f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_821973c8c6; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignments
+    ADD CONSTRAINT fk_rails_821973c8c6 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_838684f7e8; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignment_history
+    ADD CONSTRAINT fk_rails_838684f7e8 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_8b41db7451; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignments
+    ADD CONSTRAINT fk_rails_8b41db7451 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_8fcf1391e1; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignment_history
+    ADD CONSTRAINT fk_rails_8fcf1391e1 FOREIGN KEY (sleep_assignment_table_id) REFERENCES extra_app.sleep_assignments(id);
+
+
+--
+-- Name: fk_rails_ab8e683d49; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.sleep_assignments
+    ADD CONSTRAINT fk_rails_ab8e683d49 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_cbc00f914a; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignments
+    ADD CONSTRAINT fk_rails_cbc00f914a FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_cbe030ce55; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignment_history
+    ADD CONSTRAINT fk_rails_cbe030ce55 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_db9353d15f; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignments
+    ADD CONSTRAINT fk_rails_db9353d15f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_dc3803548c; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignment_history
+    ADD CONSTRAINT fk_rails_dc3803548c FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_de5807ee5f; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.grit_assignment_history
+    ADD CONSTRAINT fk_rails_de5807ee5f FOREIGN KEY (grit_assignment_table_id) REFERENCES extra_app.grit_assignments(id);
+
+
+--
+-- Name: fk_rails_fdd5a80000; Type: FK CONSTRAINT; Schema: extra_app; Owner: -
+--
+
+ALTER TABLE ONLY extra_app.pitt_bhi_assignment_history
+    ADD CONSTRAINT fk_rails_fdd5a80000 FOREIGN KEY (pitt_bhi_assignment_table_id) REFERENCES extra_app.pitt_bhi_assignments(id);
+
+
+--
+-- Name: fk_accuracy_score_history_accuracy_scores; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.accuracy_score_history
@@ -11362,7 +23652,7 @@ ALTER TABLE ONLY ml_app.accuracy_score_history
 
 
 --
--- Name: activity_log_player_contact_phone_history fk_activity_log_player_contact_phone_history_activity_log_playe; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_activity_log_player_contact_phone_history_activity_log_playe; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
@@ -11370,7 +23660,7 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
 
 
 --
--- Name: activity_log_player_contact_phone_history fk_activity_log_player_contact_phone_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_activity_log_player_contact_phone_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
@@ -11378,7 +23668,7 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
 
 
 --
--- Name: activity_log_player_contact_phone_history fk_activity_log_player_contact_phone_history_player_contact_pho; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_activity_log_player_contact_phone_history_player_contact_pho; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
@@ -11386,7 +23676,7 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
 
 
 --
--- Name: activity_log_player_contact_phone_history fk_activity_log_player_contact_phone_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_activity_log_player_contact_phone_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
@@ -11394,7 +23684,7 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
 
 
 --
--- Name: address_history fk_address_history_addresses; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_address_history_addresses; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.address_history
@@ -11402,7 +23692,7 @@ ALTER TABLE ONLY ml_app.address_history
 
 
 --
--- Name: address_history fk_address_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_address_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.address_history
@@ -11410,7 +23700,7 @@ ALTER TABLE ONLY ml_app.address_history
 
 
 --
--- Name: address_history fk_address_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_address_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.address_history
@@ -11418,7 +23708,7 @@ ALTER TABLE ONLY ml_app.address_history
 
 
 --
--- Name: admin_history fk_admin_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_admin_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.admin_history
@@ -11426,7 +23716,7 @@ ALTER TABLE ONLY ml_app.admin_history
 
 
 --
--- Name: admin_history fk_admin_history_upd_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_admin_history_upd_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.admin_history
@@ -11434,7 +23724,7 @@ ALTER TABLE ONLY ml_app.admin_history
 
 
 --
--- Name: app_configuration_history fk_app_configuration_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_app_configuration_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_configuration_history
@@ -11442,7 +23732,7 @@ ALTER TABLE ONLY ml_app.app_configuration_history
 
 
 --
--- Name: app_configuration_history fk_app_configuration_history_app_configurations; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_app_configuration_history_app_configurations; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_configuration_history
@@ -11450,7 +23740,7 @@ ALTER TABLE ONLY ml_app.app_configuration_history
 
 
 --
--- Name: app_type_history fk_app_type_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_app_type_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_type_history
@@ -11458,7 +23748,7 @@ ALTER TABLE ONLY ml_app.app_type_history
 
 
 --
--- Name: app_type_history fk_app_type_history_app_types; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_app_type_history_app_types; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_type_history
@@ -11466,7 +23756,7 @@ ALTER TABLE ONLY ml_app.app_type_history
 
 
 --
--- Name: college_history fk_college_history_colleges; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_college_history_colleges; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.college_history
@@ -11474,7 +23764,7 @@ ALTER TABLE ONLY ml_app.college_history
 
 
 --
--- Name: dynamic_model_history fk_dynamic_model_history_dynamic_models; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_dynamic_model_history_dynamic_models; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.dynamic_model_history
@@ -11482,7 +23772,7 @@ ALTER TABLE ONLY ml_app.dynamic_model_history
 
 
 --
--- Name: external_link_history fk_external_link_history_external_links; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_external_link_history_external_links; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_link_history
@@ -11490,7 +23780,7 @@ ALTER TABLE ONLY ml_app.external_link_history
 
 
 --
--- Name: general_selection_history fk_general_selection_history_general_selections; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_general_selection_history_general_selections; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.general_selection_history
@@ -11498,7 +23788,7 @@ ALTER TABLE ONLY ml_app.general_selection_history
 
 
 --
--- Name: item_flag_history fk_item_flag_history_item_flags; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_item_flag_history_item_flags; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flag_history
@@ -11506,7 +23796,7 @@ ALTER TABLE ONLY ml_app.item_flag_history
 
 
 --
--- Name: item_flag_name_history fk_item_flag_name_history_item_flag_names; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_item_flag_name_history_item_flag_names; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flag_name_history
@@ -11514,7 +23804,7 @@ ALTER TABLE ONLY ml_app.item_flag_name_history
 
 
 --
--- Name: message_template_history fk_message_template_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_message_template_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_template_history
@@ -11522,7 +23812,7 @@ ALTER TABLE ONLY ml_app.message_template_history
 
 
 --
--- Name: message_template_history fk_message_template_history_message_templates; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_message_template_history_message_templates; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_template_history
@@ -11530,7 +23820,7 @@ ALTER TABLE ONLY ml_app.message_template_history
 
 
 --
--- Name: nfs_store_archived_file_history fk_nfs_store_archived_file_history_nfs_store_archived_files; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_nfs_store_archived_file_history_nfs_store_archived_files; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
@@ -11538,7 +23828,7 @@ ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
 
 
 --
--- Name: nfs_store_archived_file_history fk_nfs_store_archived_file_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_nfs_store_archived_file_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
@@ -11546,7 +23836,7 @@ ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
 
 
 --
--- Name: nfs_store_container_history fk_nfs_store_container_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_nfs_store_container_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_container_history
@@ -11554,7 +23844,7 @@ ALTER TABLE ONLY ml_app.nfs_store_container_history
 
 
 --
--- Name: nfs_store_container_history fk_nfs_store_container_history_nfs_store_containers; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_nfs_store_container_history_nfs_store_containers; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_container_history
@@ -11562,7 +23852,7 @@ ALTER TABLE ONLY ml_app.nfs_store_container_history
 
 
 --
--- Name: nfs_store_container_history fk_nfs_store_container_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_nfs_store_container_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_container_history
@@ -11570,7 +23860,7 @@ ALTER TABLE ONLY ml_app.nfs_store_container_history
 
 
 --
--- Name: nfs_store_filter_history fk_nfs_store_filter_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_nfs_store_filter_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_filter_history
@@ -11578,7 +23868,7 @@ ALTER TABLE ONLY ml_app.nfs_store_filter_history
 
 
 --
--- Name: nfs_store_filter_history fk_nfs_store_filter_history_nfs_store_filters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_nfs_store_filter_history_nfs_store_filters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_filter_history
@@ -11586,7 +23876,7 @@ ALTER TABLE ONLY ml_app.nfs_store_filter_history
 
 
 --
--- Name: nfs_store_stored_file_history fk_nfs_store_stored_file_history_nfs_store_stored_files; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_nfs_store_stored_file_history_nfs_store_stored_files; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
@@ -11594,7 +23884,7 @@ ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
 
 
 --
--- Name: nfs_store_stored_file_history fk_nfs_store_stored_file_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_nfs_store_stored_file_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
@@ -11602,7 +23892,7 @@ ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
 
 
 --
--- Name: page_layout_history fk_page_layout_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_page_layout_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.page_layout_history
@@ -11610,7 +23900,7 @@ ALTER TABLE ONLY ml_app.page_layout_history
 
 
 --
--- Name: page_layout_history fk_page_layout_history_page_layouts; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_page_layout_history_page_layouts; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.page_layout_history
@@ -11618,7 +23908,7 @@ ALTER TABLE ONLY ml_app.page_layout_history
 
 
 --
--- Name: player_contact_history fk_player_contact_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_player_contact_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_contact_history
@@ -11626,7 +23916,7 @@ ALTER TABLE ONLY ml_app.player_contact_history
 
 
 --
--- Name: player_contact_history fk_player_contact_history_player_contacts; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_player_contact_history_player_contacts; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_contact_history
@@ -11634,7 +23924,7 @@ ALTER TABLE ONLY ml_app.player_contact_history
 
 
 --
--- Name: player_contact_history fk_player_contact_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_player_contact_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_contact_history
@@ -11642,7 +23932,7 @@ ALTER TABLE ONLY ml_app.player_contact_history
 
 
 --
--- Name: player_info_history fk_player_info_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_player_info_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_info_history
@@ -11650,7 +23940,7 @@ ALTER TABLE ONLY ml_app.player_info_history
 
 
 --
--- Name: player_info_history fk_player_info_history_player_infos; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_player_info_history_player_infos; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_info_history
@@ -11658,7 +23948,7 @@ ALTER TABLE ONLY ml_app.player_info_history
 
 
 --
--- Name: player_info_history fk_player_info_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_player_info_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_info_history
@@ -11666,7 +23956,7 @@ ALTER TABLE ONLY ml_app.player_info_history
 
 
 --
--- Name: protocol_event_history fk_protocol_event_history_protocol_events; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_protocol_event_history_protocol_events; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_event_history
@@ -11674,7 +23964,7 @@ ALTER TABLE ONLY ml_app.protocol_event_history
 
 
 --
--- Name: protocol_history fk_protocol_history_protocols; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_protocol_history_protocols; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_history
@@ -11682,7 +23972,7 @@ ALTER TABLE ONLY ml_app.protocol_history
 
 
 --
--- Name: masters fk_rails_00b234154d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_00b234154d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.masters
@@ -11690,7 +23980,7 @@ ALTER TABLE ONLY ml_app.masters
 
 
 --
--- Name: app_configurations fk_rails_00f31a00c4; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_00f31a00c4; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_configurations
@@ -11698,7 +23988,7 @@ ALTER TABLE ONLY ml_app.app_configurations
 
 
 --
--- Name: nfs_store_filters fk_rails_0208c3b54d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_0208c3b54d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_filters
@@ -11706,7 +23996,7 @@ ALTER TABLE ONLY ml_app.nfs_store_filters
 
 
 --
--- Name: external_identifier_history fk_rails_0210618434; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_0210618434; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_identifier_history
@@ -11714,7 +24004,7 @@ ALTER TABLE ONLY ml_app.external_identifier_history
 
 
 --
--- Name: player_infos fk_rails_08e7f66647; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_08e7f66647; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_infos
@@ -11722,7 +24012,7 @@ ALTER TABLE ONLY ml_app.player_infos
 
 
 --
--- Name: user_action_logs fk_rails_08eec3f089; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_08eec3f089; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_action_logs
@@ -11730,7 +24020,7 @@ ALTER TABLE ONLY ml_app.user_action_logs
 
 
 --
--- Name: role_description_history fk_rails_0910ca20ea; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_0910ca20ea; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.role_description_history
@@ -11738,7 +24028,7 @@ ALTER TABLE ONLY ml_app.role_description_history
 
 
 --
--- Name: protocol_events fk_rails_0a64e1160a; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_0a64e1160a; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_events
@@ -11746,7 +24036,7 @@ ALTER TABLE ONLY ml_app.protocol_events
 
 
 --
--- Name: nfs_store_imports fk_rails_0ad81c489c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_0ad81c489c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_imports
@@ -11754,7 +24044,7 @@ ALTER TABLE ONLY ml_app.nfs_store_imports
 
 
 --
--- Name: nfs_store_containers fk_rails_0c84487284; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_0c84487284; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_containers
@@ -11762,7 +24052,7 @@ ALTER TABLE ONLY ml_app.nfs_store_containers
 
 
 --
--- Name: nfs_store_imports fk_rails_0d30944d1b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_0d30944d1b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_imports
@@ -11770,7 +24060,7 @@ ALTER TABLE ONLY ml_app.nfs_store_imports
 
 
 --
--- Name: nfs_store_stored_files fk_rails_0de144234e; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_0de144234e; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_stored_files
@@ -11778,7 +24068,7 @@ ALTER TABLE ONLY ml_app.nfs_store_stored_files
 
 
 --
--- Name: nfs_store_trash_actions fk_rails_0e2ecd8d43; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_0e2ecd8d43; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_trash_actions
@@ -11786,7 +24076,15 @@ ALTER TABLE ONLY ml_app.nfs_store_trash_actions
 
 
 --
--- Name: users fk_rails_1694bfe639; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_10869244dc; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.masters
+    ADD CONSTRAINT fk_rails_10869244dc FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1694bfe639; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.users
@@ -11794,7 +24092,7 @@ ALTER TABLE ONLY ml_app.users
 
 
 --
--- Name: activity_log_history fk_rails_16d57266f7; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_16d57266f7; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_history
@@ -11802,7 +24100,7 @@ ALTER TABLE ONLY ml_app.activity_log_history
 
 
 --
--- Name: user_roles fk_rails_174e058eb3; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_174e058eb3; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_roles
@@ -11810,7 +24108,7 @@ ALTER TABLE ONLY ml_app.user_roles
 
 
 --
--- Name: scantrons fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.scantrons
@@ -11818,7 +24116,7 @@ ALTER TABLE ONLY ml_app.scantrons
 
 
 --
--- Name: nfs_store_stored_files fk_rails_1cc4562569; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_1cc4562569; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_stored_files
@@ -11826,7 +24124,7 @@ ALTER TABLE ONLY ml_app.nfs_store_stored_files
 
 
 --
--- Name: activity_log_player_contact_phones fk_rails_1d67a3e7f2; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_1d67a3e7f2; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
@@ -11834,7 +24132,7 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
 
 
 --
--- Name: config_library_history fk_rails_1ec40f248c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_1ec40f248c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.config_library_history
@@ -11842,7 +24140,7 @@ ALTER TABLE ONLY ml_app.config_library_history
 
 
 --
--- Name: sub_processes fk_rails_1fc7475261; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_1fc7475261; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sub_processes
@@ -11850,7 +24148,7 @@ ALTER TABLE ONLY ml_app.sub_processes
 
 
 --
--- Name: pro_infos fk_rails_20667815e3; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_20667815e3; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.pro_infos
@@ -11858,7 +24156,7 @@ ALTER TABLE ONLY ml_app.pro_infos
 
 
 --
--- Name: item_flag_names fk_rails_22ccfd95e1; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_22ccfd95e1; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flag_names
@@ -11866,7 +24164,7 @@ ALTER TABLE ONLY ml_app.item_flag_names
 
 
 --
--- Name: player_infos fk_rails_23cd255bc6; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_23cd255bc6; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_infos
@@ -11874,7 +24172,7 @@ ALTER TABLE ONLY ml_app.player_infos
 
 
 --
--- Name: nfs_store_containers fk_rails_2708bd6a94; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_2708bd6a94; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_containers
@@ -11882,7 +24180,7 @@ ALTER TABLE ONLY ml_app.nfs_store_containers
 
 
 --
--- Name: nfs_store_downloads fk_rails_272f69e6af; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_272f69e6af; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_downloads
@@ -11890,7 +24188,7 @@ ALTER TABLE ONLY ml_app.nfs_store_downloads
 
 
 --
--- Name: role_descriptions fk_rails_291bbea3bc; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_291bbea3bc; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.role_descriptions
@@ -11898,7 +24196,7 @@ ALTER TABLE ONLY ml_app.role_descriptions
 
 
 --
--- Name: nfs_store_archived_files fk_rails_2b59e23148; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_2b59e23148; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_archived_files
@@ -11906,7 +24204,7 @@ ALTER TABLE ONLY ml_app.nfs_store_archived_files
 
 
 --
--- Name: user_description_history fk_rails_2cf2ce330f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_2cf2ce330f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_description_history
@@ -11914,7 +24212,7 @@ ALTER TABLE ONLY ml_app.user_description_history
 
 
 --
--- Name: model_references fk_rails_2d8072edea; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_2d8072edea; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.model_references
@@ -11922,7 +24220,7 @@ ALTER TABLE ONLY ml_app.model_references
 
 
 --
--- Name: activity_log_player_contact_phones fk_rails_2de1cadfad; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_2de1cadfad; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
@@ -11930,7 +24228,7 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
 
 
 --
--- Name: nfs_store_archived_files fk_rails_2eab578259; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_2eab578259; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_archived_files
@@ -11938,7 +24236,7 @@ ALTER TABLE ONLY ml_app.nfs_store_archived_files
 
 
 --
--- Name: user_roles fk_rails_318345354e; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_318345354e; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_roles
@@ -11946,7 +24244,7 @@ ALTER TABLE ONLY ml_app.user_roles
 
 
 --
--- Name: admin_action_logs fk_rails_3389f178f6; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_3389f178f6; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.admin_action_logs
@@ -11954,7 +24252,7 @@ ALTER TABLE ONLY ml_app.admin_action_logs
 
 
 --
--- Name: page_layouts fk_rails_37a2f11066; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_37a2f11066; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.page_layouts
@@ -11962,7 +24260,7 @@ ALTER TABLE ONLY ml_app.page_layouts
 
 
 --
--- Name: message_notifications fk_rails_3a3553e146; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_3a3553e146; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_notifications
@@ -11970,7 +24268,7 @@ ALTER TABLE ONLY ml_app.message_notifications
 
 
 --
--- Name: nfs_store_uploads fk_rails_3f5167a964; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_3f5167a964; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_uploads
@@ -11978,7 +24276,7 @@ ALTER TABLE ONLY ml_app.nfs_store_uploads
 
 
 --
--- Name: trackers fk_rails_447d125f63; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_447d125f63; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.trackers
@@ -11986,7 +24284,7 @@ ALTER TABLE ONLY ml_app.trackers
 
 
 --
--- Name: scantrons fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.scantrons
@@ -11994,7 +24292,7 @@ ALTER TABLE ONLY ml_app.scantrons
 
 
 --
--- Name: role_description_history fk_rails_47581bba71; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_47581bba71; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.role_description_history
@@ -12002,7 +24300,7 @@ ALTER TABLE ONLY ml_app.role_description_history
 
 
 --
--- Name: trackers fk_rails_47b051d356; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_47b051d356; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.trackers
@@ -12010,7 +24308,7 @@ ALTER TABLE ONLY ml_app.trackers
 
 
 --
--- Name: addresses fk_rails_48c9e0c5a2; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_48c9e0c5a2; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.addresses
@@ -12018,7 +24316,7 @@ ALTER TABLE ONLY ml_app.addresses
 
 
 --
--- Name: colleges fk_rails_49306e4f49; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_49306e4f49; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.colleges
@@ -12026,7 +24324,7 @@ ALTER TABLE ONLY ml_app.colleges
 
 
 --
--- Name: model_references fk_rails_4bbf83b940; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_4bbf83b940; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.model_references
@@ -12034,7 +24332,7 @@ ALTER TABLE ONLY ml_app.model_references
 
 
 --
--- Name: users_contact_infos fk_rails_4decdf690b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_4decdf690b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.users_contact_infos
@@ -12042,7 +24340,7 @@ ALTER TABLE ONLY ml_app.users_contact_infos
 
 
 --
--- Name: message_templates fk_rails_4fe5122ed4; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_4fe5122ed4; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_templates
@@ -12050,7 +24348,7 @@ ALTER TABLE ONLY ml_app.message_templates
 
 
 --
--- Name: nfs_store_uploads fk_rails_4ff6d28f98; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_4ff6d28f98; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_uploads
@@ -12058,7 +24356,7 @@ ALTER TABLE ONLY ml_app.nfs_store_uploads
 
 
 --
--- Name: exception_logs fk_rails_51ae125c4f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_51ae125c4f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.exception_logs
@@ -12066,7 +24364,7 @@ ALTER TABLE ONLY ml_app.exception_logs
 
 
 --
--- Name: protocol_events fk_rails_564af80fb6; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_564af80fb6; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_events
@@ -12074,7 +24372,7 @@ ALTER TABLE ONLY ml_app.protocol_events
 
 
 --
--- Name: user_descriptions fk_rails_5a9926bbe8; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_5a9926bbe8; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_descriptions
@@ -12082,7 +24380,7 @@ ALTER TABLE ONLY ml_app.user_descriptions
 
 
 --
--- Name: external_identifier_history fk_rails_5b0628cf42; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_5b0628cf42; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_identifier_history
@@ -12090,7 +24388,7 @@ ALTER TABLE ONLY ml_app.external_identifier_history
 
 
 --
--- Name: activity_log_player_contact_phones fk_rails_5ce1857310; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_5ce1857310; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
@@ -12098,7 +24396,7 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
 
 
 --
--- Name: trackers fk_rails_623e0ca5ac; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_623e0ca5ac; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.trackers
@@ -12106,7 +24404,7 @@ ALTER TABLE ONLY ml_app.trackers
 
 
 --
--- Name: nfs_store_user_file_actions fk_rails_639da31037; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_639da31037; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_user_file_actions
@@ -12114,7 +24412,7 @@ ALTER TABLE ONLY ml_app.nfs_store_user_file_actions
 
 
 --
--- Name: app_configurations fk_rails_647c63b069; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_647c63b069; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_configurations
@@ -12122,7 +24420,7 @@ ALTER TABLE ONLY ml_app.app_configurations
 
 
 --
--- Name: nfs_store_containers fk_rails_6a3d7bf39f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_6a3d7bf39f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_containers
@@ -12130,7 +24428,7 @@ ALTER TABLE ONLY ml_app.nfs_store_containers
 
 
 --
--- Name: users fk_rails_6a971dc818; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_6a971dc818; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.users
@@ -12138,7 +24436,7 @@ ALTER TABLE ONLY ml_app.users
 
 
 --
--- Name: protocols fk_rails_6de4fd560d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_6de4fd560d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocols
@@ -12146,7 +24444,7 @@ ALTER TABLE ONLY ml_app.protocols
 
 
 --
--- Name: tracker_history fk_rails_6e050927c2; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_6e050927c2; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.tracker_history
@@ -12154,7 +24452,7 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
--- Name: accuracy_scores fk_rails_70c17e88fd; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_70c17e88fd; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.accuracy_scores
@@ -12162,7 +24460,7 @@ ALTER TABLE ONLY ml_app.accuracy_scores
 
 
 --
--- Name: external_identifiers fk_rails_7218113eac; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_7218113eac; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_identifiers
@@ -12170,7 +24468,7 @@ ALTER TABLE ONLY ml_app.external_identifiers
 
 
 --
--- Name: player_contacts fk_rails_72b1afe72f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_72b1afe72f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_contacts
@@ -12178,7 +24476,7 @@ ALTER TABLE ONLY ml_app.player_contacts
 
 
 --
--- Name: nfs_store_move_actions fk_rails_75138f1972; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_75138f1972; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_move_actions
@@ -12186,7 +24484,7 @@ ALTER TABLE ONLY ml_app.nfs_store_move_actions
 
 
 --
--- Name: nfs_store_filters fk_rails_776e17eafd; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_776e17eafd; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_filters
@@ -12194,7 +24492,7 @@ ALTER TABLE ONLY ml_app.nfs_store_filters
 
 
 --
--- Name: users_contact_infos fk_rails_7808f5fdb3; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_7808f5fdb3; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.users_contact_infos
@@ -12202,7 +24500,7 @@ ALTER TABLE ONLY ml_app.users_contact_infos
 
 
 --
--- Name: sub_processes fk_rails_7c10a99849; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_7c10a99849; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sub_processes
@@ -12210,7 +24508,7 @@ ALTER TABLE ONLY ml_app.sub_processes
 
 
 --
--- Name: user_access_controls fk_rails_8108e25f83; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_8108e25f83; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_access_controls
@@ -12218,7 +24516,7 @@ ALTER TABLE ONLY ml_app.user_access_controls
 
 
 --
--- Name: tracker_history fk_rails_83aa075398; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_83aa075398; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.tracker_history
@@ -12226,7 +24524,7 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
--- Name: user_description_history fk_rails_864938f733; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_864938f733; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_description_history
@@ -12234,7 +24532,7 @@ ALTER TABLE ONLY ml_app.user_description_history
 
 
 --
--- Name: pro_infos fk_rails_86cecb1e36; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_86cecb1e36; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.pro_infos
@@ -12242,7 +24540,7 @@ ALTER TABLE ONLY ml_app.pro_infos
 
 
 --
--- Name: config_library_history fk_rails_88664b466b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_88664b466b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.config_library_history
@@ -12250,7 +24548,7 @@ ALTER TABLE ONLY ml_app.config_library_history
 
 
 --
--- Name: app_types fk_rails_8be93bcf4b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_8be93bcf4b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_types
@@ -12258,7 +24556,7 @@ ALTER TABLE ONLY ml_app.app_types
 
 
 --
--- Name: user_description_history fk_rails_8f99de6d81; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_8f99de6d81; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_description_history
@@ -12266,7 +24564,7 @@ ALTER TABLE ONLY ml_app.user_description_history
 
 
 --
--- Name: tracker_history fk_rails_9513fd1c35; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_9513fd1c35; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.tracker_history
@@ -12274,7 +24572,7 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
--- Name: sage_assignments fk_rails_971255ec2c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_971255ec2c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sage_assignments
@@ -12282,7 +24580,7 @@ ALTER TABLE ONLY ml_app.sage_assignments
 
 
 --
--- Name: protocols fk_rails_990daa5f76; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_990daa5f76; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocols
@@ -12290,7 +24588,7 @@ ALTER TABLE ONLY ml_app.protocols
 
 
 --
--- Name: role_description_history fk_rails_9d88430088; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_9d88430088; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.role_description_history
@@ -12298,7 +24596,7 @@ ALTER TABLE ONLY ml_app.role_description_history
 
 
 --
--- Name: tracker_history fk_rails_9e92bdfe65; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_9e92bdfe65; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.tracker_history
@@ -12306,7 +24604,7 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
--- Name: tracker_history fk_rails_9f5797d684; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_9f5797d684; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.tracker_history
@@ -12314,7 +24612,7 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
--- Name: addresses fk_rails_a44670b00a; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_a44670b00a; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.addresses
@@ -12322,7 +24620,7 @@ ALTER TABLE ONLY ml_app.addresses
 
 
 --
--- Name: model_references fk_rails_a4eb981c4a; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_a4eb981c4a; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.model_references
@@ -12330,7 +24628,7 @@ ALTER TABLE ONLY ml_app.model_references
 
 
 --
--- Name: user_preferences fk_rails_a69bfcfd81; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_a69bfcfd81; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_preferences
@@ -12338,7 +24636,7 @@ ALTER TABLE ONLY ml_app.user_preferences
 
 
 --
--- Name: user_history fk_rails_af2f6ffc55; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_af2f6ffc55; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_history
@@ -12346,7 +24644,7 @@ ALTER TABLE ONLY ml_app.user_history
 
 
 --
--- Name: activity_log_player_contact_phones fk_rails_b071294797; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_b071294797; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
@@ -12354,7 +24652,7 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
 
 
 --
--- Name: colleges fk_rails_b0a6220067; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_b0a6220067; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.colleges
@@ -12362,7 +24660,7 @@ ALTER TABLE ONLY ml_app.colleges
 
 
 --
--- Name: reports fk_rails_b138baacff; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_b138baacff; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.reports
@@ -12370,7 +24668,7 @@ ALTER TABLE ONLY ml_app.reports
 
 
 --
--- Name: imports fk_rails_b1e2154c26; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_b1e2154c26; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.imports
@@ -12378,7 +24676,7 @@ ALTER TABLE ONLY ml_app.imports
 
 
 --
--- Name: user_roles fk_rails_b345649dfe; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_b345649dfe; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_roles
@@ -12386,7 +24684,7 @@ ALTER TABLE ONLY ml_app.user_roles
 
 
 --
--- Name: trackers fk_rails_b822840dc1; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_b822840dc1; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.trackers
@@ -12394,7 +24692,7 @@ ALTER TABLE ONLY ml_app.trackers
 
 
 --
--- Name: trackers fk_rails_bb6af37155; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_bb6af37155; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.trackers
@@ -12402,7 +24700,7 @@ ALTER TABLE ONLY ml_app.trackers
 
 
 --
--- Name: imports_model_generators fk_rails_bd9f10d2c7; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_bd9f10d2c7; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.imports_model_generators
@@ -12410,7 +24708,7 @@ ALTER TABLE ONLY ml_app.imports_model_generators
 
 
 --
--- Name: nfs_store_uploads fk_rails_bdb308087e; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_bdb308087e; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_uploads
@@ -12418,7 +24716,7 @@ ALTER TABLE ONLY ml_app.nfs_store_uploads
 
 
 --
--- Name: admins fk_rails_c05d151591; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_c05d151591; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.admins
@@ -12426,7 +24724,7 @@ ALTER TABLE ONLY ml_app.admins
 
 
 --
--- Name: nfs_store_move_actions fk_rails_c1ea9a5fd9; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_c1ea9a5fd9; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_move_actions
@@ -12434,7 +24732,7 @@ ALTER TABLE ONLY ml_app.nfs_store_move_actions
 
 
 --
--- Name: item_flags fk_rails_c2d5bb8930; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_c2d5bb8930; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flags
@@ -12442,7 +24740,7 @@ ALTER TABLE ONLY ml_app.item_flags
 
 
 --
--- Name: nfs_store_user_file_actions fk_rails_c423dc1802; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_c423dc1802; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_user_file_actions
@@ -12450,7 +24748,7 @@ ALTER TABLE ONLY ml_app.nfs_store_user_file_actions
 
 
 --
--- Name: tracker_history fk_rails_c55341c576; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_c55341c576; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.tracker_history
@@ -12458,7 +24756,7 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
--- Name: exception_logs fk_rails_c720bf523c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_c720bf523c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.exception_logs
@@ -12466,7 +24764,7 @@ ALTER TABLE ONLY ml_app.exception_logs
 
 
 --
--- Name: user_action_logs fk_rails_c94bae872a; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_c94bae872a; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_action_logs
@@ -12474,7 +24772,7 @@ ALTER TABLE ONLY ml_app.user_action_logs
 
 
 --
--- Name: nfs_store_downloads fk_rails_cd756b42dd; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_cd756b42dd; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_downloads
@@ -12482,7 +24780,7 @@ ALTER TABLE ONLY ml_app.nfs_store_downloads
 
 
 --
--- Name: user_action_logs fk_rails_cfc9dc539f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_cfc9dc539f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_action_logs
@@ -12490,7 +24788,7 @@ ALTER TABLE ONLY ml_app.user_action_logs
 
 
 --
--- Name: user_descriptions fk_rails_d15f63d454; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_d15f63d454; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_descriptions
@@ -12498,7 +24796,7 @@ ALTER TABLE ONLY ml_app.user_descriptions
 
 
 --
--- Name: message_notifications fk_rails_d3566ee56d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_d3566ee56d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_notifications
@@ -12506,7 +24804,7 @@ ALTER TABLE ONLY ml_app.message_notifications
 
 
 --
--- Name: player_contacts fk_rails_d3c0ddde90; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_d3c0ddde90; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_contacts
@@ -12514,7 +24812,7 @@ ALTER TABLE ONLY ml_app.player_contacts
 
 
 --
--- Name: config_libraries fk_rails_da3ba4f850; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_da3ba4f850; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.config_libraries
@@ -12522,7 +24820,7 @@ ALTER TABLE ONLY ml_app.config_libraries
 
 
 --
--- Name: item_flags fk_rails_dce5169cfd; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_dce5169cfd; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flags
@@ -12530,7 +24828,7 @@ ALTER TABLE ONLY ml_app.item_flags
 
 
 --
--- Name: nfs_store_trash_actions fk_rails_de41d50f67; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_de41d50f67; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_trash_actions
@@ -12538,7 +24836,7 @@ ALTER TABLE ONLY ml_app.nfs_store_trash_actions
 
 
 --
--- Name: dynamic_models fk_rails_deec8fcb38; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_deec8fcb38; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.dynamic_models
@@ -12546,7 +24844,7 @@ ALTER TABLE ONLY ml_app.dynamic_models
 
 
 --
--- Name: nfs_store_containers fk_rails_e01d928507; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_e01d928507; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_containers
@@ -12554,7 +24852,7 @@ ALTER TABLE ONLY ml_app.nfs_store_containers
 
 
 --
--- Name: sage_assignments fk_rails_e3c559b547; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_e3c559b547; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sage_assignments
@@ -12562,7 +24860,7 @@ ALTER TABLE ONLY ml_app.sage_assignments
 
 
 --
--- Name: page_layouts fk_rails_e410af4010; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_e410af4010; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.page_layouts
@@ -12570,7 +24868,7 @@ ALTER TABLE ONLY ml_app.page_layouts
 
 
 --
--- Name: sage_assignments fk_rails_ebab73db27; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_ebab73db27; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sage_assignments
@@ -12578,7 +24876,7 @@ ALTER TABLE ONLY ml_app.sage_assignments
 
 
 --
--- Name: external_links fk_rails_ebf3863277; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_ebf3863277; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_links
@@ -12586,7 +24884,7 @@ ALTER TABLE ONLY ml_app.external_links
 
 
 --
--- Name: nfs_store_archived_files fk_rails_ecfa3cb151; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_ecfa3cb151; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_archived_files
@@ -12594,7 +24892,7 @@ ALTER TABLE ONLY ml_app.nfs_store_archived_files
 
 
 --
--- Name: app_configurations fk_rails_f0ac516fff; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_f0ac516fff; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_configurations
@@ -12602,7 +24900,7 @@ ALTER TABLE ONLY ml_app.app_configurations
 
 
 --
--- Name: nfs_store_filters fk_rails_f547361daa; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_f547361daa; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_filters
@@ -12610,7 +24908,7 @@ ALTER TABLE ONLY ml_app.nfs_store_filters
 
 
 --
--- Name: general_selections fk_rails_f62500107f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_f62500107f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.general_selections
@@ -12618,7 +24916,7 @@ ALTER TABLE ONLY ml_app.general_selections
 
 
 --
--- Name: role_descriptions fk_rails_f646dbe30d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_f646dbe30d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.role_descriptions
@@ -12626,7 +24924,7 @@ ALTER TABLE ONLY ml_app.role_descriptions
 
 
 --
--- Name: message_notifications fk_rails_fa6dbd15de; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_fa6dbd15de; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_notifications
@@ -12634,7 +24932,7 @@ ALTER TABLE ONLY ml_app.message_notifications
 
 
 --
--- Name: report_history fk_report_history_reports; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_report_history_reports; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.report_history
@@ -12642,7 +24940,7 @@ ALTER TABLE ONLY ml_app.report_history
 
 
 --
--- Name: scantron_history fk_scantron_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_scantron_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.scantron_history
@@ -12650,7 +24948,7 @@ ALTER TABLE ONLY ml_app.scantron_history
 
 
 --
--- Name: scantron_history fk_scantron_history_scantrons; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_scantron_history_scantrons; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.scantron_history
@@ -12658,7 +24956,7 @@ ALTER TABLE ONLY ml_app.scantron_history
 
 
 --
--- Name: scantron_history fk_scantron_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_scantron_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.scantron_history
@@ -12666,7 +24964,7 @@ ALTER TABLE ONLY ml_app.scantron_history
 
 
 --
--- Name: sub_process_history fk_sub_process_history_sub_processes; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_sub_process_history_sub_processes; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sub_process_history
@@ -12674,7 +24972,7 @@ ALTER TABLE ONLY ml_app.sub_process_history
 
 
 --
--- Name: user_access_control_history fk_user_access_control_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_user_access_control_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_access_control_history
@@ -12682,7 +24980,7 @@ ALTER TABLE ONLY ml_app.user_access_control_history
 
 
 --
--- Name: user_access_control_history fk_user_access_control_history_user_access_controls; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_user_access_control_history_user_access_controls; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_access_control_history
@@ -12690,7 +24988,7 @@ ALTER TABLE ONLY ml_app.user_access_control_history
 
 
 --
--- Name: user_authorization_history fk_user_authorization_history_user_authorizations; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_user_authorization_history_user_authorizations; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_authorization_history
@@ -12698,7 +24996,7 @@ ALTER TABLE ONLY ml_app.user_authorization_history
 
 
 --
--- Name: user_history fk_user_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_user_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_history
@@ -12706,7 +25004,7 @@ ALTER TABLE ONLY ml_app.user_history
 
 
 --
--- Name: user_role_history fk_user_role_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_user_role_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_role_history
@@ -12714,7 +25012,7 @@ ALTER TABLE ONLY ml_app.user_role_history
 
 
 --
--- Name: user_role_history fk_user_role_history_user_roles; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_user_role_history_user_roles; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_role_history
@@ -12722,7 +25020,7 @@ ALTER TABLE ONLY ml_app.user_role_history
 
 
 --
--- Name: rc_cis rc_cis_master_id_fkey; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: rc_cis_master_id_fkey; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.rc_cis
@@ -12730,7 +25028,7 @@ ALTER TABLE ONLY ml_app.rc_cis
 
 
 --
--- Name: tracker_history unique_master_protocol_tracker_id; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: unique_master_protocol_tracker_id; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.tracker_history
@@ -12738,7 +25036,7 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
--- Name: trackers valid_protocol_sub_process; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: valid_protocol_sub_process; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.trackers
@@ -12746,7 +25044,7 @@ ALTER TABLE ONLY ml_app.trackers
 
 
 --
--- Name: tracker_history valid_protocol_sub_process; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: valid_protocol_sub_process; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.tracker_history
@@ -12754,7 +25052,7 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
--- Name: trackers valid_sub_process_event; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: valid_sub_process_event; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.trackers
@@ -12762,7 +25060,7 @@ ALTER TABLE ONLY ml_app.trackers
 
 
 --
--- Name: tracker_history valid_sub_process_event; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: valid_sub_process_event; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.tracker_history
@@ -12770,7 +25068,31 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
--- Name: datadic_variables fk_rails_029902d3e3; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_22773d2230; Type: FK CONSTRAINT; Schema: redcap; Owner: -
+--
+
+ALTER TABLE ONLY redcap.viva_meta_variables
+    ADD CONSTRAINT fk_rails_22773d2230 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_c53c5126b5; Type: FK CONSTRAINT; Schema: redcap; Owner: -
+--
+
+ALTER TABLE ONLY redcap.viva_meta_variable_history
+    ADD CONSTRAINT fk_rails_c53c5126b5 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_e5b7c1d45d; Type: FK CONSTRAINT; Schema: redcap; Owner: -
+--
+
+ALTER TABLE ONLY redcap.viva_meta_variable_history
+    ADD CONSTRAINT fk_rails_e5b7c1d45d FOREIGN KEY (viva_meta_variable_id) REFERENCES redcap.viva_meta_variables(id);
+
+
+--
+-- Name: fk_rails_029902d3e3; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_variables
@@ -12778,7 +25100,7 @@ ALTER TABLE ONLY ref_data.datadic_variables
 
 
 --
--- Name: datadic_variable_history fk_rails_143e8a7c25; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_143e8a7c25; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_variable_history
@@ -12786,7 +25108,7 @@ ALTER TABLE ONLY ref_data.datadic_variable_history
 
 
 --
--- Name: redcap_data_dictionaries fk_rails_16cfa46407; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_16cfa46407; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_dictionaries
@@ -12794,7 +25116,7 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionaries
 
 
 --
--- Name: redcap_data_dictionary_history fk_rails_25f366a78c; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_25f366a78c; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
@@ -12802,7 +25124,7 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 
 
 --
--- Name: redcap_data_collection_instruments fk_rails_2aa7bf926a; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_2aa7bf926a; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_collection_instruments
@@ -12810,7 +25132,7 @@ ALTER TABLE ONLY ref_data.redcap_data_collection_instruments
 
 
 --
--- Name: redcap_client_requests fk_rails_32285f308d; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_32285f308d; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_client_requests
@@ -12818,7 +25140,7 @@ ALTER TABLE ONLY ref_data.redcap_client_requests
 
 
 --
--- Name: datadic_variables fk_rails_34eadb0aee; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_34eadb0aee; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_variables
@@ -12826,7 +25148,7 @@ ALTER TABLE ONLY ref_data.datadic_variables
 
 
 --
--- Name: redcap_project_users fk_rails_38d0954914; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_38d0954914; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_users
@@ -12834,7 +25156,7 @@ ALTER TABLE ONLY ref_data.redcap_project_users
 
 
 --
--- Name: datadic_choice_history fk_rails_42389740a0; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_42389740a0; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_choice_history
@@ -12842,7 +25164,7 @@ ALTER TABLE ONLY ref_data.datadic_choice_history
 
 
 --
--- Name: redcap_data_dictionaries fk_rails_4766ebe50f; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_4766ebe50f; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_dictionaries
@@ -12850,7 +25172,7 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionaries
 
 
 --
--- Name: datadic_variable_history fk_rails_5302a77293; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_5302a77293; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_variable_history
@@ -12858,15 +25180,7 @@ ALTER TABLE ONLY ref_data.datadic_variable_history
 
 
 --
--- Name: datadic_variables fk_rails_5578e37430; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.datadic_variables
-    ADD CONSTRAINT fk_rails_5578e37430 FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ref_data.redcap_data_dictionaries(id);
-
-
---
--- Name: datadic_choice_history fk_rails_63103b7cf7; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_63103b7cf7; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_choice_history
@@ -12874,7 +25188,7 @@ ALTER TABLE ONLY ref_data.datadic_choice_history
 
 
 --
--- Name: datadic_choices fk_rails_67ca4d7e1f; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_67ca4d7e1f; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_choices
@@ -12882,15 +25196,7 @@ ALTER TABLE ONLY ref_data.datadic_choices
 
 
 --
--- Name: datadic_variable_history fk_rails_6ba6ab1e1f; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.datadic_variable_history
-    ADD CONSTRAINT fk_rails_6ba6ab1e1f FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ref_data.redcap_data_dictionaries(id);
-
-
---
--- Name: redcap_data_collection_instrument_history fk_rails_6c93846f69; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_6c93846f69; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_collection_instrument_history
@@ -12898,7 +25204,7 @@ ALTER TABLE ONLY ref_data.redcap_data_collection_instrument_history
 
 
 --
--- Name: redcap_project_user_history fk_rails_7ba2e90d7d; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_7ba2e90d7d; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_user_history
@@ -12906,7 +25212,7 @@ ALTER TABLE ONLY ref_data.redcap_project_user_history
 
 
 --
--- Name: redcap_project_user_history fk_rails_89af917107; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_89af917107; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_user_history
@@ -12914,7 +25220,7 @@ ALTER TABLE ONLY ref_data.redcap_project_user_history
 
 
 --
--- Name: datadic_variables fk_rails_8dc5a059ee; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_8dc5a059ee; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_variables
@@ -12922,7 +25228,7 @@ ALTER TABLE ONLY ref_data.datadic_variables
 
 
 --
--- Name: redcap_data_dictionary_history fk_rails_9a6eca0fe7; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_9a6eca0fe7; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
@@ -12930,7 +25236,7 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 
 
 --
--- Name: redcap_project_user_history fk_rails_a0bf0fdddb; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_a0bf0fdddb; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_user_history
@@ -12938,7 +25244,7 @@ ALTER TABLE ONLY ref_data.redcap_project_user_history
 
 
 --
--- Name: redcap_project_users fk_rails_a6952cc0e8; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_a6952cc0e8; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_users
@@ -12946,7 +25252,7 @@ ALTER TABLE ONLY ref_data.redcap_project_users
 
 
 --
--- Name: redcap_project_admin_history fk_rails_a7610f4fec; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_a7610f4fec; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_project_admin_history
@@ -12954,7 +25260,7 @@ ALTER TABLE ONLY ref_data.redcap_project_admin_history
 
 
 --
--- Name: redcap_data_collection_instrument_history fk_rails_cb0b57b6c1; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_cb0b57b6c1; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_collection_instrument_history
@@ -12962,15 +25268,7 @@ ALTER TABLE ONLY ref_data.redcap_data_collection_instrument_history
 
 
 --
--- Name: datadic_choice_history fk_rails_cb8a1e9d10; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.datadic_choice_history
-    ADD CONSTRAINT fk_rails_cb8a1e9d10 FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ref_data.redcap_data_dictionaries(id);
-
-
---
--- Name: redcap_data_collection_instrument_history fk_rails_ce6075441d; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_ce6075441d; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_collection_instrument_history
@@ -12978,7 +25276,7 @@ ALTER TABLE ONLY ref_data.redcap_data_collection_instrument_history
 
 
 --
--- Name: datadic_variable_history fk_rails_d7e89fcbde; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_d7e89fcbde; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_variable_history
@@ -12986,7 +25284,7 @@ ALTER TABLE ONLY ref_data.datadic_variable_history
 
 
 --
--- Name: datadic_variable_history fk_rails_ef47f37820; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_ef47f37820; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.datadic_variable_history
@@ -12994,15 +25292,7 @@ ALTER TABLE ONLY ref_data.datadic_variable_history
 
 
 --
--- Name: datadic_choices fk_rails_f5497a3583; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.datadic_choices
-    ADD CONSTRAINT fk_rails_f5497a3583 FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ref_data.redcap_data_dictionaries(id);
-
-
---
--- Name: redcap_data_dictionary_history fk_rails_fffede9aa7; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
+-- Name: fk_rails_fffede9aa7; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
 ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
@@ -13010,10 +25300,346 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 
 
 --
+-- Name: fk_rails_06dfdfd6c9; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_study_info_parts
+    ADD CONSTRAINT fk_rails_06dfdfd6c9 FOREIGN KEY (study_info_part_id) REFERENCES study_info.study_info_parts(id);
+
+
+--
+-- Name: fk_rails_08cd20e5a1; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_info_part_history
+    ADD CONSTRAINT fk_rails_08cd20e5a1 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_1b9bf2c3f4; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_info_parts
+    ADD CONSTRAINT fk_rails_1b9bf2c3f4 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_2413b23df5; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_view_user_data_user_procs
+    ADD CONSTRAINT fk_rails_2413b23df5 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_250d3c47df; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_study_info_part_history
+    ADD CONSTRAINT fk_rails_250d3c47df FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_29a92b2130; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_page_section_history
+    ADD CONSTRAINT fk_rails_29a92b2130 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_2bc9842a42; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_page_section_history
+    ADD CONSTRAINT fk_rails_2bc9842a42 FOREIGN KEY (study_page_section_id) REFERENCES study_info.study_page_sections(id);
+
+
+--
+-- Name: fk_rails_352288763a; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_page_sections
+    ADD CONSTRAINT fk_rails_352288763a FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45586cadb5; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_info_part_history
+    ADD CONSTRAINT fk_rails_45586cadb5 FOREIGN KEY (study_info_part_table_id) REFERENCES study_info.study_info_parts(id);
+
+
+--
+-- Name: fk_rails_5149b96561; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_info_parts
+    ADD CONSTRAINT fk_rails_5149b96561 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_52e18fc4bc; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_study_info_part_history
+    ADD CONSTRAINT fk_rails_52e18fc4bc FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_5b8f25de61; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_common_section_history
+    ADD CONSTRAINT fk_rails_5b8f25de61 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_6933ff5fa1; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_study_info_parts
+    ADD CONSTRAINT fk_rails_6933ff5fa1 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_76d82b513c; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_view_user_data_user_proc_history
+    ADD CONSTRAINT fk_rails_76d82b513c FOREIGN KEY (activity_log_view_user_data_user_proc_id) REFERENCES study_info.activity_log_view_user_data_user_procs(id);
+
+
+--
+-- Name: fk_rails_7d034f2136; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_study_info_part_history
+    ADD CONSTRAINT fk_rails_7d034f2136 FOREIGN KEY (activity_log_study_info_part_id) REFERENCES study_info.activity_log_study_info_parts(id);
+
+
+--
+-- Name: fk_rails_92a60ed071; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_info_part_history
+    ADD CONSTRAINT fk_rails_92a60ed071 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_9bb36ec3b6; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_study_info_part_history
+    ADD CONSTRAINT fk_rails_9bb36ec3b6 FOREIGN KEY (study_info_part_id) REFERENCES study_info.study_info_parts(id);
+
+
+--
+-- Name: fk_rails_a2e4da626b; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_common_sections
+    ADD CONSTRAINT fk_rails_a2e4da626b FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_a7fbd3d381; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_study_info_parts
+    ADD CONSTRAINT fk_rails_a7fbd3d381 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_aa6a32c045; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_view_user_data_user_procs
+    ADD CONSTRAINT fk_rails_aa6a32c045 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_aa824d721e; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_common_section_history
+    ADD CONSTRAINT fk_rails_aa824d721e FOREIGN KEY (study_common_section_id) REFERENCES study_info.study_common_sections(id);
+
+
+--
+-- Name: fk_rails_b616300198; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_info_part_history
+    ADD CONSTRAINT fk_rails_b616300198 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_bf99059606; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_view_user_data_user_proc_history
+    ADD CONSTRAINT fk_rails_bf99059606 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_d50f946e2e; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.activity_log_view_user_data_user_proc_history
+    ADD CONSTRAINT fk_rails_d50f946e2e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_e7f9c535a2; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_page_sections
+    ADD CONSTRAINT fk_rails_e7f9c535a2 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_ec7910979d; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_page_section_history
+    ADD CONSTRAINT fk_rails_ec7910979d FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_f6598a33d5; Type: FK CONSTRAINT; Schema: study_info; Owner: -
+--
+
+ALTER TABLE ONLY study_info.study_info_parts
+    ADD CONSTRAINT fk_rails_f6598a33d5 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_0be6c15b4e; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_collection_instrument_history
+    ADD CONSTRAINT fk_rails_0be6c15b4e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_24d94bed61; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva2_rcs
+    ADD CONSTRAINT fk_rails_24d94bed61 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_35fbe181e3; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva2_rc_history
+    ADD CONSTRAINT fk_rails_35fbe181e3 FOREIGN KEY (viva2_rc_id) REFERENCES viva_ref_info.viva2_rcs(id);
+
+
+--
+-- Name: fk_rails_36f3819789; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva2_rc_history
+    ADD CONSTRAINT fk_rails_36f3819789 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_5b706322ce; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_domain_history
+    ADD CONSTRAINT fk_rails_5b706322ce FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_6b956971be; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_timepoint_history
+    ADD CONSTRAINT fk_rails_6b956971be FOREIGN KEY (viva_timepoint_id) REFERENCES viva_ref_info.viva_timepoints(id);
+
+
+--
+-- Name: fk_rails_6e89a89675; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_domain_history
+    ADD CONSTRAINT fk_rails_6e89a89675 FOREIGN KEY (viva_domain_id) REFERENCES viva_ref_info.viva_domains(id);
+
+
+--
+-- Name: fk_rails_957d77bbd5; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva3_rcs
+    ADD CONSTRAINT fk_rails_957d77bbd5 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_a38cdf9046; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_collection_instruments
+    ADD CONSTRAINT fk_rails_a38cdf9046 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_a643d228bf; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva3_rc_history
+    ADD CONSTRAINT fk_rails_a643d228bf FOREIGN KEY (viva3_rc_id) REFERENCES viva_ref_info.viva3_rcs(id);
+
+
+--
+-- Name: fk_rails_af05637c2f; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_timepoint_history
+    ADD CONSTRAINT fk_rails_af05637c2f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_b03f78180e; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_domains
+    ADD CONSTRAINT fk_rails_b03f78180e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_b4def23148; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_timepoints
+    ADD CONSTRAINT fk_rails_b4def23148 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_e4f1330dc9; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva3_rc_history
+    ADD CONSTRAINT fk_rails_e4f1330dc9 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_f3ca18e8a5; Type: FK CONSTRAINT; Schema: viva_ref_info; Owner: -
+--
+
+ALTER TABLE ONLY viva_ref_info.viva_collection_instrument_history
+    ADD CONSTRAINT fk_rails_f3ca18e8a5 FOREIGN KEY (viva_collection_instrument_id) REFERENCES viva_ref_info.viva_collection_instruments(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app,ref_data;
+SET search_path TO ml_app,extra_app,fem,data_requests,study_info,sleep,ref_data,redcap,dynamic,viva_ref_info,projects;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20150602181200'),
@@ -13383,6 +26009,38 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20211222140008'),
 ('20211222140019'),
 ('20211231113457'),
-('20220121143719');
+('20220121143719'),
+('20220131111232'),
+('20220131121830'),
+('20220131121831'),
+('20220131121833'),
+('20220131121834'),
+('20220131121835'),
+('20220131123017'),
+('20220131123100'),
+('20220131131244'),
+('20220131132533'),
+('20220131135242'),
+('20220131135349'),
+('20220131135547'),
+('20220131135600'),
+('20220131140353'),
+('20220131140521'),
+('20220131143324'),
+('20220131155227'),
+('20220131155229'),
+('20220131171632'),
+('20220131172554'),
+('20220131172618'),
+('20220131182607'),
+('20220131184011'),
+('20220131184041'),
+('20220131184511'),
+('20220201102247'),
+('20220201102549'),
+('20220201173928'),
+('20220202175848'),
+('20220202190849'),
+('20220202190931');
 
 
