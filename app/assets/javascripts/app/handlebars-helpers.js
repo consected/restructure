@@ -424,6 +424,13 @@
     return !a;
   });
 
+  Handlebars.registerHelper('to_string', function (stre) {
+    if (typeof stre === 'undefined' || stre == null) return
+
+    return String(stre)
+  });
+
+
   Handlebars.registerHelper('underscore', function (stre, options) {
     if (!stre) return null;
     return stre.underscore()
@@ -551,6 +558,7 @@
 
   Handlebars.registerHelper('humanize', function (obj) {
     if (!obj) return;
+    if (typeof obj !== 'string') return obj;
 
     obj = _fpa.utils.translate(obj, 'field_labels');
 
