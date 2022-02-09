@@ -37,11 +37,12 @@ class Admin::AppTypesController < AdminController
     end
 
     @message = 'SUCCESS'
-    if f == 'json'
-      @primary = JSON.pretty_generate results
-    elsif f == 'yaml'
-      @primary = YAML.dump results
-    end
+    @primary = case f
+               when 'json'
+                 @JSON.pretty_generate results
+               when 'yaml'
+                 YAML.dump results
+               end
 
     Rails.cache.clear
 
@@ -67,6 +68,10 @@ class Admin::AppTypesController < AdminController
     send_data app_type.export_config(format: exp_format.to_sym), filename: "#{app_type.name}_config.#{exp_format}"
   end
 
+  #
+  # Exports migrations for creating / updating the app_type
+  # to the directory <app type name>--app-export then
+  # generates a zip file
   def export_migrations
     app_type = Admin::AppType.find(params[:id])
     app_type.current_admin = current_admin
@@ -74,6 +79,7 @@ class Admin::AppTypesController < AdminController
     atn = app_type.name
     raise FphsException if atn.include?('.') || atn.include?('/') || atn.include?('~')
 
+    app_type.export_migrations
     send_file app_type.zip_app_export_migrations.path,
               filename: "#{atn}--#{Admin::AppType::AppExportDirSuffix}.zip"
   end

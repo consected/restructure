@@ -15,9 +15,16 @@ In short this means that version numbers, visible here and on the login page of 
 app match, and have a predictable format indicating how much change from the previous
 version has occurred.
 
-The `## [7.4.94] - 2021-12-17` section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
+The `## Unreleased` section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
-## [7.4.93] - 2021-12-16
+## Unreleased
+
+- [Fixed] pregenerated and non-editable external identifier fields not to show
+- [Changed] export of app-export migrations to go to a single app directory, not each schema directory
+- [Added] app admin navigation for current app
+- [Fixed] Beanstalk scripts
+
+## [7.4.95] - 2022-01-27
 
 - [Updated] restart script to allow full EB restart of all app servers
 - [Added] app type components page for easy viewing and navigation around an app
@@ -131,11 +138,11 @@ The `## [7.4.94] - 2021-12-17` section collects notes for unreleased changes and
 
 ## [7.4.76] - 2021-11-18
 
-- [Fixed] _transposed_table_ bad HTML markup
+- [Fixed] *transposed_table* bad HTML markup
 
 ## [7.4.75] - 2021-11-18
 
-- [Fixed] _transposed_table_ not viewing correctly in emails
+- [Fixed] *transposed_table* not viewing correctly in emails
 
 ## [7.4.74] - 2021-11-18
 
@@ -641,7 +648,7 @@ The `## [7.4.94] - 2021-12-17` section collects notes for unreleased changes and
 
 ### Fixed
 
-- [Admin] A special section filter for _IS NULL_ no longer returns an error
+- [Admin] A special section filter for *IS NULL* no longer returns an error
 - [Docs] Fixed issues in the new deployment readme for secure-view installations
 
 ## [7.2.2] - 2019-03-29

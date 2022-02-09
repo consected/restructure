@@ -64,8 +64,8 @@ if [ "$MIG_PATH" ]; then
 fi
 echo
 
-echo "Specify the schema name"
-read SCHEMA_NAME
+echo "Specify the schema names (space separated) to apply GRANTs to"
+read SCHEMA_NAMES
 
 echo
 
@@ -102,21 +102,24 @@ FPHS_POSTGRESQL_HOSTNAME=$TEMP_HOSTNAME \
 
 export PGPASSWORD="$TEMP_DB_PW"
 
-psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME < ../fphs-app-configs/fphs-sql/grant_roles_access_to_ml_app.sql
+for SCHEMA_NAME in $SCHEMA_NAMES; do
 
-if [ -f "fphs-sql/grant_roles_access_to_${SCHEMA_NAME}.sql" ]; then
-  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME < ../fphs-app-configs/fphs-sql/grant_roles_access_to_${SCHEMA_NAME}.sql
-fi
+  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME < ../fphs-app-configs/fphs-sql/grant_roles_access_to_ml_app.sql
 
-if [ "$TEMP_ENV" == 'filestore-production' ]; then
-  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME < ../fphs-app-configs/fphs-sql/grant_roles_access_to_filestore.sql
-fi
+  if [ "$TEMP_ENV" == 'filestore-production' ]; then
+    psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME < ../fphs-app-configs/fphs-sql/grant_roles_access_to_filestore.sql
+  fi
 
-if [ "$TEMP_ENV" == 'zeus-production' ]; then
-  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME < ../fphs-app-configs/fphs-sql/grant_roles_access_to_zeus.sql
-fi
+  if [ "$TEMP_ENV" == 'zeus-production' ]; then
+    psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME < ../fphs-app-configs/fphs-sql/grant_roles_access_to_zeus.sql
+  fi
 
-psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME 2>&1 << EOF
+  if [ -f "fphs-sql/grant_roles_access_to_${SCHEMA_NAME}.sql" ]; then
+    psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME < ../fphs-app-configs/fphs-sql/grant_roles_access_to_${SCHEMA_NAME}.sql
+    continue
+  fi
+
+  psql -d $TEMP_DBNAME -h $TEMP_HOSTNAME -U $DB_USERNAME 2>&1 << EOF
 REVOKE ALL ON SCHEMA ${SCHEMA_NAME} FROM fphs;
 GRANT ALL ON SCHEMA ${SCHEMA_NAME} TO fphs;
 GRANT USAGE ON SCHEMA ${SCHEMA_NAME} TO fphsadm;
@@ -151,6 +154,8 @@ GRANT SELECT, USAGE ON ALL SEQUENCES IN SCHEMA ${SCHEMA_NAME} TO fphsrailsapp1;
 END IF;
 END \$body\$;
 EOF
+
+done
 
 echo "Note:"
 echo "For Athena or Filestore, it may be necessary to force the migrations that have been completed directly in the database"

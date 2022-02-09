@@ -75,8 +75,6 @@ module Admin::AppTypeExport
     temp_file
   end
 
-  protected
-
   #
   # Export migrations to a specific --app-export directory
   # The order of exports is important, since it activity logs
@@ -85,6 +83,7 @@ module Admin::AppTypeExport
   def export_migrations
     clean_export_dir
     migration_generator = Admin::MigrationGenerator.new(default_schema_name)
+    migration_generator.app_type_name = name
     migration_generator.add_schema AppExportDirSuffix
 
     associated_dynamic_models.each do |dynamic_def|
@@ -100,6 +99,8 @@ module Admin::AppTypeExport
     end
   end
 
+  protected
+
   #
   # Export an individual dynamic type migration, clearing the
   # export directory if needed
@@ -108,13 +109,14 @@ module Admin::AppTypeExport
   def export_migration(dynamic_def)
     dir_suffix = AppExportDirSuffix
     dynamic_def.current_admin ||= current_admin
-    dynamic_def.write_create_or_update_migration dir_suffix
+    dynamic_def.write_create_or_update_migration dir_suffix, name
   end
 
   def app_export_dir
     dir_suffix = AppExportDirSuffix
     migration_generator = Admin::MigrationGenerator.new(default_schema_name)
-    dir = migration_generator.db_migration_dirname(dir_suffix)
+    migration_generator.app_type_name = name
+    migration_generator.db_migration_dirname(dir_suffix)
   end
 
   def clean_export_dir

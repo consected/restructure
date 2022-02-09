@@ -157,7 +157,7 @@ module SelectorCache
     end
 
     def name_for(value)
-      res = selector_name_value_pair.select { |p| p.last == value }
+      res = selector_name_value_pair.select { |p| p.last.to_s == value.to_s }
       res.length >= 1 ? res.first.first : nil
     end
 
