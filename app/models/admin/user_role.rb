@@ -155,6 +155,11 @@ class Admin::UserRole < Admin::AdminBase
     to_roles
   end
 
+  # Provide a usable name for viewing
+  def name
+    "#{role_name} #{user&.email}"
+  end
+
   private
 
   # Automatically add a template@template record if needed

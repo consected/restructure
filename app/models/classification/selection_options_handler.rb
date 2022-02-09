@@ -42,8 +42,11 @@ class Classification::SelectionOptionsHandler
   # @param [String | Symbol] field_value
   # @return [Array|nil]
   def label_for(field_name, field_value)
+    field_value = field_value.to_s
     res = edit_as_alt_option_label_for(field_name, field_value) if user_base_object
-    res || general_selection_label_for(field_name, field_value)
+    res ||= general_selection_label_for(field_name, field_value)
+    res ||= get_field_label_for(field_name, field_value)
+    res || field_value
   end
 
   #
@@ -111,6 +114,17 @@ class Classification::SelectionOptionsHandler
   # @return [Object| nil]
   def general_selection_label_for(field_name, field_value)
     general_selection_for(field_name)&.key(field_value)
+  end
+
+  #
+  # Get the label for the actual field value, based on a get_<field>_name class method
+  # such as ViewHandlers::Subject.get_rank_name for PlayerInfo and general Subject models.
+  def get_field_label_for(field_name, field_value)
+    klass = user_base_object&.class
+    mname = "get_#{field_name}_name"
+    return unless klass.respond_to?(mname)
+
+    klass.send(mname, field_value)
   end
 
   #

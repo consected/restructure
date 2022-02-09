@@ -16,6 +16,18 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transferred from Harvard @7.4.96 - 2022-02-09
+
+- [Fixed] pregenerated and non-editable external identifier fields not to show
+- [Changed] export of app-export migrations to go to a single app directory, not each schema directory
+- [Added] app admin navigation for current app
+- [Fixed] Beanstalk scripts
+- [Updated] restart script to allow full EB restart of all app servers
+- [Added] app type components page for easy viewing and navigation around an app
+- [Added] ability to filter admin resources by id, ids or resource name
+
 ## [8.0.26] - 2022-01-12
 
 ### Transferred from Viva @8.0.39

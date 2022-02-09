@@ -83,7 +83,3 @@ You have **{{password_max_attempts}} attempts** to login successfully, after whi
 ## Lost two-factor authentication
 
 If you uninstall the authenticator app on your smartphone or change your phone you will need to set up the authenticator app again (unless you have backed up the configuration). The app administrator can reset your code and you will need to go through the first time login process again.
-
-## Need more help?
-
-Need help? Contact the app administrator: [{{admin_email}}](mailto:{{admin_email}})
