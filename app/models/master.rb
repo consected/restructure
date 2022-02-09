@@ -197,7 +197,8 @@ class Master < ActiveRecord::Base
   end
 
   # Handle limited access controls in master queries
-  # Scope results with inner joins on external identifier or dynamic model tables if they are in the user access control conditions
+  # Scope results with inner joins on external identifier or dynamic model tables if
+  # they are in the user access control conditions
   def self.limited_access_scope(user)
     # Check if the resource is restricted through external identifier assignment
     er = Admin::UserAccessControl.limited_access_restrictions(user)
