@@ -17,7 +17,7 @@ version has occurred.
 
 The `## Unreleased` section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
-## [7.4.93] - 2021-12-16
+## [7.4.96] - 2022-02-09
 
 - [Fixed] pregenerated and non-editable external identifier fields not to show
 - [Changed] export of app-export migrations to go to a single app directory, not each schema directory
