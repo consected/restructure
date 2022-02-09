@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require './spec/support/feature_helper.rb'
-require './spec/support/user_actions_setup.rb'
+require './spec/support/feature_helper'
+require './spec/support/user_actions_setup'
 module FeatureSupport
   include FeatureHelper
   include UserActionsSetup
@@ -77,7 +77,17 @@ module FeatureSupport
     have_no_css('.collapsing')
   end
 
+  def finish_page_loading
+    if all('body.status-compiled, body.sessions, body.confirmations, body.passwords, body.registrations').present?
+      return
+    end
+
+    has_css?('body.status-compiled, body.sessions, body.confirmations, body.passwords, body.registrations')
+    sleep 1
+  end
+
   def dismiss_modal
+    finish_page_loading
     finish_form_formatting
     if !all('.modal.fade.in').empty?
       finish_form_formatting

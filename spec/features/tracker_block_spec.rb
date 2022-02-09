@@ -71,6 +71,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     # Be sure that the page is showing the menu correctly
 
     click_link 'Create Master'
+    dismiss_modal
 
     # click a test only hidden button to generate a completely empty master record
     # Without this, the player info record that is normally created doesn't provide a completely empty set of tracker records
@@ -81,6 +82,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
       all('input[type="submit"]').first.click
     end
 
+    dismiss_modal
     expand_tracker_panel
 
     has_css? '.tracker-tree-results'
@@ -97,6 +99,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
 
   it 'should create a new tracker item' do
     visit '/masters/search'
+    dismiss_modal
 
     # Switch to advanced search form
     within '#simple_search_master' do
@@ -157,7 +160,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     have_css '.tracker-block.collapse.in'
 
     # Validate that we don't already have a protocol / sub process tracked for this player
-    protocol = Classification::Protocol.selectable.first
+    protocol = Classification::Protocol.active.selectable.find_by(name: 'Q1')
     sps = protocol.sub_processes.enabled.where.not(name: 'Alerts')
 
     spslen = sps.length
@@ -176,7 +179,7 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
       pe = pes[i]
       pe_orig = pe
       i += 1
-      expect(i).to_be < spslen
+      expect(i).to be <= spslen
     end
 
     have_css "##{h}.tracker-block.collapse.in"
