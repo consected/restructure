@@ -46,7 +46,7 @@ class Admin::UserRole < Admin::AdminBase
   # @param conditions [Hash] full set of where clause conditions
   # @return [ActiveRecord::Relation]
   def self.where(conditions)
-    if conditions.is_a?(Hash) && !conditions.empty? && !conditions.delete(:allow_all_app_types)
+    if conditions.is_a?(Hash) && !conditions.empty?
       ur_cond = conditions.dup
       ur_cond = conditions[:user_roles] if conditions[:user_roles]
       ur_cond = ur_cond.symbolize_keys

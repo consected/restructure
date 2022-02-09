@@ -35,7 +35,6 @@ module FilterUtils
         end
       end
 
-      p[:allow_all_app_types] = true if init_pm == Admin::UserRole
       pm = pm.where(p)
       pm = pm.where(likes) if likes.length > 0 && likes.first.present?
 
