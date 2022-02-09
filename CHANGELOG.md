@@ -16,9 +16,8 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.0.26] - 2022-01-12
+## [8.0.27] - 2022-02-09
 
-<<<<<<< HEAD
 ### Transferred from Harvard @7.4.96 - 2022-02-09
 
 - [Fixed] pregenerated and non-editable external identifier fields not to show
@@ -31,9 +30,6 @@ release will be created for any release tested in production, and may be marked 
 
 ## [8.0.26] - 2022-01-12
 
-=======
-<<<<<<< HEAD
->>>>>>> 5da9b6deeb9c91cf5ebb41924e5710e6f4eac9bb
 ### Transferred from Viva @8.0.39
 
 - [Added] user self-registration, email confirmation and password reset
@@ -44,8 +40,6 @@ release will be created for any release tested in production, and may be marked 
 - [Changed] document library to correctly link to source repository
 - [Changed] admin scripts to improve server configuration
 - [Fixed] issue with active app types when specified with env var, since it returned an array not a scope
-=======
->>>>>>> 7bb775e47dd7b68b06b74aa1f62548785c7fc677
 
 ## [8.0.25] - 2021-12-20
 
