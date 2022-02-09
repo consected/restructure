@@ -30,11 +30,11 @@ class Admin::UserAccessControl < Admin::AdminBase
     {
       table: [nil, :see_presence, :read, :update, :create],
       general: [nil, :read],
-      limited_access: [nil, :limited],
+      limited_access: [nil, :limited, :limited_if_none],
       report: [nil, :read],
       standalone_page: [nil, :read],
       activity_log_type: [nil, :see_presence, :read, :update, :create],
-      external_id_assignments: [nil, :limited]
+      external_id_assignments: [nil, :limited, :limited_if_none]
     }
   end
 

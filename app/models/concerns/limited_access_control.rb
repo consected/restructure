@@ -23,15 +23,28 @@ module LimitedAccessControl
     end
 
     #
+    # Join association for a limited_access user access control to the master scope.
+    # For access :limited, and inner join ensures that all resources must exist for the
+    # user access to be
+    #
     # If the AssignedToCol is present in the associated model used to limit access
     # then this must be set on the scope to further limit the access to the current user.
     #
     # The assoc may not be set if the association is a :belongs_to:
-    # this is used by the :user and :created_by_user associations.
-    # For these, existence depends on an inner join of a single item anyway,
+    # this is used by the :user and :master_created_by_user associations.
+    # For these, existence depends on an join of a single item anyway,
     # so the additional limitation is not required
-    def join_limit_to_assigned(assoc_name, current_user)
-      res = joins(assoc_name)
+    def join_limit_to_assigned(assoc, current_user)
+      assoc_name = assoc.resource_name.to_sym
+      res = case assoc.access
+            when 'limited'
+              joins(assoc_name)
+            when 'limited_if_none'
+              left_joins(assoc_name)
+            else
+              all
+            end
+
       assoc = new.send(assoc_name)
 
       if assoc&.requires_assigned_user?

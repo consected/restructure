@@ -9,6 +9,28 @@ RSpec.describe Admin::UserAccessControl, type: :model do
   OtherRoleName = 'other_test_role'
   TestRoleName = 'test_role'
 
+  def setup_implementation_table
+    @implementation_table_name = 'test_external_uac_identifiers'
+    @implementation_attr_name = 'uac_identifier_id'
+    SetupHelper.setup_ext_identifier implementation_table_name: @implementation_table_name,
+                                     implementation_attr_name: @implementation_attr_name
+
+    vals = {
+      name: @implementation_table_name,
+      label: 'test id',
+      external_id_attribute: @implementation_attr_name,
+      min_id: 1,
+      max_id: 99_999_999,
+      disabled: false,
+      current_admin: @admin
+    }
+
+    e = ExternalIdentifier.create! vals
+    e.update_tracker_events
+
+    @implementation_class = e.implementation_class
+  end
+
   it 'should not create default access controls for a new user' do
     3.times do
       create_user nil, '', no_app_type_setup: true
@@ -294,13 +316,10 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
   it 'limits a user to master records with a limited_access specified and an associated model or external identifier in place' do
     # Create an external identifier implementation
-    create_admin
     user1, = create_user opt: { no_app_type_setup: true }
     create_user
-    @implementation_table_name = 'test_external_uac_identifiers'
-    @implementation_attr_name = 'uac_identifier_id'
-    SetupHelper.setup_ext_identifier implementation_table_name: @implementation_table_name,
-                                     implementation_attr_name: @implementation_attr_name
+
+    setup_implementation_table
 
     # We don't know if user1 can access the same app as @user.
     # Set things up so she can
@@ -313,21 +332,6 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     user1.save!
     res = user1.has_access_to? :read, :general, :app_type
     expect(res).to be_truthy
-
-    vals = {
-      name: @implementation_table_name,
-      label: 'test id',
-      external_id_attribute: @implementation_attr_name,
-      min_id: 1,
-      max_id: 99_999_999,
-      disabled: false,
-      current_admin: @admin
-    }
-
-    e = ExternalIdentifier.create! vals
-    e.update_tracker_events
-
-    c = e.implementation_class
 
     let_user_create_player_infos
 
@@ -367,7 +371,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
       expect(Admin::UserAccessControl.limited_access_restrictions(@user).first).to eq ac
 
       # Now we should get none of the master records returned
-      jres = Master.where(id: ids).limited_access_scope(@user).to_json(current_user: @user)
+      ms = Master.where(id: ids)
+      jres = ms.limited_access_scope(@user).to_json(current_user: @user)
       res = JSON.parse jres
       expect(res.length).to eq 0
 
@@ -396,7 +401,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
         j = JSON.parse(m2.to_json)
         expect(j['id']).to eq m2.id
 
-        extids << c.create!(@implementation_attr_name => rand(1..99_999_999), master: m2)
+        extids << @implementation_class.create!(@implementation_attr_name => rand(1..99_999_999), master: m2)
 
         m = Master.find(i)
         m.current_user = @user
@@ -423,7 +428,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     user1, = create_user opt: { no_app_type_setup: true }
     user2, = create_user opt: { no_app_type_setup: true }
     create_user
-    @implementation_table_name = 'created_by_user'
+
+    setup_implementation_table
 
     # We don't know if user1 can access the same app as @user.
     # Set things up so she can
@@ -461,7 +467,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     # Initialize the access control to external id assignments, but don't enforce a restriction
     ac = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: rt,
-                                          resource_name: @implementation_table_name, current_admin: @admin
+                                          resource_name: 'master_created_by_user', current_admin: @admin
     expect(Admin::UserAccessControl.limited_access_restrictions(@user)).to be nil
     res = @user.has_access_to? :limited, rt, @implementation_table_name
     expect(res).to be_falsey
@@ -470,7 +476,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     ac.update! access: :limited
 
     # Validate the control was set
-    res = @user.has_access_to? :limited, rt, @implementation_table_name
+    res = @user.has_access_to? :limited, rt, 'master_created_by_user'
     expect(res).to be_truthy
     expect(Admin::UserAccessControl.limited_access_restrictions(@user).first).to eq ac
 
@@ -483,21 +489,21 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     # Provide the second user access by disabling the limited access
     ac2 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: rt,
-                                           resource_name: @implementation_table_name, current_admin: @admin, user: user1
+                                           resource_name: 'master_created_by_user', current_admin: @admin, user: user1
 
-    res = user1.has_access_to? :limited, rt, @implementation_table_name
+    res = user1.has_access_to? :limited, rt, 'master_created_by_user'
     expect(res).to be_falsey
     expect(Admin::UserAccessControl.limited_access_restrictions(user1)).to be nil
 
-    # # Provide the third user access by allowing "optionally created by user" access and disabling the full version
-    # ac3 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :limited, resource_type: rt,
-    #                                        resource_name: 'optionally_created_by_user', current_admin: @admin, user: user2
-    # ac4 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: rt,
-    #                                        resource_name: 'created_by_user', current_admin: @admin, user: user2
+    # Provide the third user access by optionally allowing "master created by user" or external id access
+    ac3 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :limited_if_none, resource_type: rt,
+                                           resource_name: @implementation_table_name, current_admin: @admin, user: user2
+    ac4 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :limited_if_none, resource_type: rt,
+                                           resource_name: 'master_created_by_user', current_admin: @admin, user: user2
 
-    # res = user2.has_access_to? :limited, rt, 'optionally_created_by_user'
-    # expect(res).to be_truthy
-    # expect(Admin::UserAccessControl.limited_access_restrictions(user2).first).to eq ac3
+    res = user2.has_access_to? :limited_if_none, rt, 'master_created_by_user'
+    expect(res).to be_truthy
+    expect(Admin::UserAccessControl.limited_access_restrictions(user2).first).to eq ac4
 
     # Adding created_by_user_id = user to the masters now allows access
     ids.each do |i|
@@ -512,11 +518,11 @@ RSpec.describe Admin::UserAccessControl, type: :model do
       j = JSON.parse(m2.to_json)
       expect(j['id']).to eq m2.id
 
-      # # The second user is optionally limited and so can access
-      # m3 = Master.find(i)
-      # m3.current_user = user2
-      # j = JSON.parse(m3.to_json)
-      # expect(j['id']).to eq m3.id
+      # The second user is limited if none match and so can access
+      m3 = Master.find(i)
+      m3.current_user = user2
+      j = JSON.parse(m3.to_json)
+      expect(m3.to_json).to eq '{}'
 
       # Force update of the created_by_user_id field without triggering any callbacks
       Master.where(id: i).update_all(created_by_user_id: @user.id)
@@ -533,16 +539,26 @@ RSpec.describe Admin::UserAccessControl, type: :model do
       j = JSON.parse(m2.to_json)
       expect(j['id']).to eq m2.id
 
-      # # The third user is optionally limited and so can not access
-      # m3 = Master.find(i)
-      # m3.current_user = user2
-      # j = JSON.parse(m3.to_json)
-      # expect(m3.to_json).to eq '{}'
+      # The third user is limited if none match and so can not access (master created by does not matches and there is no external id)
+      m3 = Master.find(i)
+      m3.current_user = user2
+      j = JSON.parse(m3.to_json)
+      expect(m3.to_json).to eq '{}'
+
+      # Force update of the created_by_user_id field without triggering any callbacks
+      Master.where(id: i).update_all(created_by_user_id: user2.id)
+
+      # The third user is limited if none match and so can access (master created by matches but there is no external id)
+      m3 = Master.find(i)
+      m3.current_user = user2
+      j = JSON.parse(m3.to_json)
+      expect(j['id']).to eq m3.id
     end
 
     ac.update! access: nil, disabled: true
     ac2.update! disabled: true
-    # ac3.update! disabled: true
+    ac3.update! disabled: true
+    ac4.update! disabled: true
   end
 
   it 'manages standard user authorizations to use features, such as create master record' do
