@@ -92,6 +92,11 @@ module NfsStore
         false
       end
 
+      # Override the base string for route
+      def self.base_route_segments
+        'admin/nfs_store/filter/filters'
+      end
+
       #
       # Setup the filter, ensuring substitutions for the item data are applied
       # @param [String] item
@@ -277,6 +282,8 @@ module NfsStore
 
         true
       end
+
+      add_model_to_list
     end
   end
 end

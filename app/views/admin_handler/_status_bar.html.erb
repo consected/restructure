@@ -2,6 +2,13 @@
 <div class="alert alert-success logged-in-as-admin">        
     <h2>Logged in as Administrator: 
         <%= render partial: 'admin_handler/action_buttons' %>
+
+    <% if current_user&.app_type_id %>
+    <small class="pull-right">Current App components:
+    <%= link_to current_user.app_type.label, admin_app_type_path(id: current_user.app_type_id, show_components: true) %>
+    </small>
+    <% end %>        
     </h2>
+
 </div>
 <% end %>

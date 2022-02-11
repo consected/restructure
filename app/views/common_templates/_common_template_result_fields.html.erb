@@ -277,7 +277,7 @@
       <ul class="view-object collapse {{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key  'show_expanded')}}uncollapse-children in{{/if}}" id="view-object-{{result_data.master_id}}-{{result_data.id}}-{{underscore key}}" aria-expanded="{{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key  'show_expanded')}}true{{else}}false{{/if}}">
       {{#each this_value}}
       {{#with ../template_config}}
-      {{> common_template_result_field no_caption_before="true" this_value=../this key=@key name=name field_type=(lookup this.field_edit_as_types @key) template_config=this result_data=../result_data show_raw_text=true}}
+      {{> common_template_result_field no_caption_before="true" this_value=../this key=(to_string @key) name=name field_type=(lookup this.field_edit_as_types @key) template_config=this result_data=../result_data show_raw_text=true}}
       {{/with}}
       {{/each}}
       </ul>
@@ -314,7 +314,7 @@
 {{#if template_config.item_list.length}}
 {{#filter result_data (join template_config.item_list ',') }}
   {{#with (fpa_state_item 'template_config' (underscore ../name) ../vdef_version)}}
-  {{> common_template_result_field this_value=../this key=@key field_type=(lookup this.field_edit_as_types @key) name=../../name template_config=this result_data=../../result_data}}
+  {{> common_template_result_field this_value=../this key=(to_string @key) field_type=(lookup this.field_edit_as_types @key) name=../../name template_config=this result_data=../../result_data}}
   {{/with}}
 
 {{/filter}}

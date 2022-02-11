@@ -121,12 +121,13 @@ module Dynamic
 
     #
     # Produce "create table" migration for this configuration
-    def write_create_or_update_migration(export_type = nil)
+    def write_create_or_update_migration(export_type = nil, app_type_name = nil)
       return unless allow_migrations
 
       # Force re-parsing of the option configs, to ensure comments are correctly handled
       option_configs(force: true)
       mg = migration_generator(force_reset: true)
+      mg.app_type_name = app_type_name
       mode = 'create_or_update'
       gs = mg.generator_script(self.class, mode)
       mg.write_db_migration(gs, table_name, mg.migration_version, mode: mode, export_type: export_type)
