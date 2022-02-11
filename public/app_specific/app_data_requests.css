@@ -7,8 +7,20 @@
   --link-active-color: #402964;
   --bottom-grad-color: #4a3277;
   --bottom-grad-darker-color: #452e70;
-  --content-font-family: "Lato", sans-serif;
-  --table-font-family: "Lato", sans-serif;
+  --content-font-family: "Assistant", sans-serif;
+  --content-font-size: 18px;
+
+  --table-font-family: "Assistant", sans-serif;
+  --table-font-size: 16px;
+  --table-head-font-family: "Assistant", sans-serif;
+  --table-head-font-size: 15px;
+}
+
+@font-face {
+  font-family: "Assistant";
+  src: url("/fonts/assistant/Assistant-VariableFont_wght.ttf");
+  /* font-weight: normal;
+  font-style: normal; */
 }
 
 @font-face {
@@ -40,7 +52,13 @@
 }
 
 body {
-  font-size: 16px;
+  font-family: var(--content-font-family);
+
+  font-size: var(--content-font-size);
+}
+
+.btn {
+  font-size: 15px;
 }
 
 /* .master-result.panel-heading {
@@ -116,7 +134,7 @@ li.edit-form-header h4.list-group-item-heading {
   color: rgb(88, 88, 88);
   padding: 15px 0;
   font-size: 32px;
-  font-family: serif;
+  font-family: var(--content-font-family);
   /* border-bottom: 3px solid rgb(228, 228, 228); */
 }
 
@@ -188,16 +206,24 @@ li.list-group-item em.all_caps {
   padding-top: 0;
 }
 
+table.import-grid p.table-header-col-type,
+table.table.report-table p.table-header-col-type,
+.report-column-comment {
+  font-weight: normal;
+  font-family: var(--table-head-font);
+  font-size: var(--table-head-font-size);
+}
+
 table.import-grid td,
 table.table.report-table td {
-  font-size: 14px;
+  font-size: var(--table-font-size);
 }
 
 .report-description h1,
 .report-description h2,
 .report-description h3,
 .report-description h4 {
-  font-family: serif;
+  font-family: var(--content-font-family);
 }
 
 .al-shrinkable {
@@ -268,13 +294,14 @@ hr {
 }
 
 td.report-el {
-  font-family: "Courier New", monospace;
-  font-size: 13px;
+  font-family: var(--table-font-family);
+
+  font-size: var(--table-font-size);
 }
 
 td.report-el.datadict-field-label {
-  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-  font-size: 13px !important;
+  font-family: var(--table-head-font-family);
+  font-size: var(--table-font-size) !important;
 }
 
 td.report-el.datadict-field-label pre,
@@ -285,6 +312,8 @@ td.report-el.datadict-field-attributes pre {
 }
 
 td.report-el pre {
+  font-family: var(--table-font-family);
+  font-size: var(--table-font-size);
   padding: 0;
 }
 
@@ -312,7 +341,7 @@ li.in-item-model-references.rr-mr span i {
   font-style: normal;
   color: rgb(88, 88, 88);
   font-size: 28px;
-  font-family: serif;
+  font-family: var(--content-font-family);
 }
 
 .model-reference-result .list-group-item.is-heading,

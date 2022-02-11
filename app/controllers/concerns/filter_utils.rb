@@ -10,6 +10,7 @@ module FilterUtils
   # @return [ActiveRecord::Relation] <description>
   def filtered_primary_model(pm = nil)
     pm ||= primary_model
+    init_pm = pm
 
     if filter_params
       pm = pm.active if filter_params[:disabled] == 'enabled' || !current_admin

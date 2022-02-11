@@ -50,7 +50,8 @@ class Admin::UserRole < Admin::AdminBase
       ur_cond = conditions.dup
       ur_cond = conditions[:user_roles] if conditions[:user_roles]
       ur_cond = ur_cond.symbolize_keys
-      unless ur_cond[:id] || ur_cond[:app_type] || ur_cond[:app_type_id]
+      # One of the keys must be present, even if it is nil (which will evaluation to IS NULL in the query)
+      unless ur_cond.key?(:id) || ur_cond.key?(:app_type) || ur_cond.key?(:app_type_id)
         raise FphsException, 'UserRole.where must use app_type condition'
       end
     end

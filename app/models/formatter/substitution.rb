@@ -194,6 +194,14 @@ module Formatter
       if master
         data[:master] = master
         data[:master_id] ||= master.id
+
+        # Check if the master responds to the underlying attribute, since there are times when a query
+        # on the masters table returns a very limited set of fields
+        if master.respond_to? :created_by_user_id
+          data[:master_created_by_user] = master.master_created_by_user
+          data[:master_created_by_user_email] = master.master_created_by_user&.email
+        end
+
         # Alternative ids are evaluated as needed
         # Associations are evaluated as needed in the data substitution, to avoid slowing everything down
       end

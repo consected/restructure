@@ -23,10 +23,14 @@ module Resources
       end
     end
 
-    def self.add(model)
+    #
+    # Add a new model to this list of resources
+    # @param [ActiveRecord::Model] model
+    # @param [Symbol] resource_name - optional to override the default
+    def self.add(model, resource_name: nil)
       @@resources ||= {}
 
-      resource_name = model.resource_name.to_sym
+      resource_name ||= model.resource_name.to_sym
       type = if model.respond_to? :definition
                model.definition.class.name.underscore.to_sym
              elsif model.respond_to? :resource_category
