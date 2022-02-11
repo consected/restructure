@@ -27,7 +27,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 606,
+      "line": 630,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';\\n\")",
       "render_path": null,
@@ -354,6 +354,47 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "8c2ffcb969369c931ec91f67298416d073b26a4cf6de732e58cb255f1c2964f7",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/reports/_result_view_css.html.erb",
+      "line": 24,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "(Report.find_by_id_or_resource_name(params[:id]).report_options.view_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end or ([] + Report.find_by_id_or_resource_name(params[:id]).report_options.view_css.selectors.map do\n next unless v\nstyles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} #{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end)).join(\"\\n\")",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "ReportsController",
+          "method": "show",
+          "line": 81,
+          "file": "app/controllers/reports_controller.rb",
+          "rendered": {
+            "name": "reports/_results",
+            "file": "app/views/reports/_results.html.erb"
+          }
+        },
+        {
+          "type": "template",
+          "name": "reports/_results",
+          "line": 45,
+          "file": "app/views/reports/_results.html.erb",
+          "rendered": {
+            "name": "reports/_result_view_css",
+            "file": "app/views/reports/_result_view_css.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "reports/_result_view_css"
+      },
+      "user_input": "Report.find_by_id_or_resource_name(params[:id]).report_options",
+      "confidence": "Weak",
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "8eedc4fdd3c7e0de98c4a99b7caceefbbf1c42df81010c9e9a86eedc0be5d094",
@@ -460,7 +501,7 @@
       "check_name": "SendFile",
       "message": "Model attribute used in file name",
       "file": "app/controllers/admin/app_types_controller.rb",
-      "line": 72,
+      "line": 83,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
       "code": "send_file(Admin::AppType.find(params[:id]).zip_app_export_migrations.path, :filename => (\"#{Admin::AppType.find(params[:id]).name}--#{\"app-export\"}.zip\"))",
       "render_path": null,
@@ -573,49 +614,8 @@
       "user_input": "calc_trigger_fn_name(prev_table_name)",
       "confidence": "Medium",
       "note": ""
-    },
-    {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "fc502ff9a2b90e75064dbc148795bff5746ffce603140fb12b5a9857e28abcfe",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/reports/_result_view_css.html.erb",
-      "line": 22,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "(Report.find_by_id_or_resource_name(params[:id]).report_options.view_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end or ([] + Report.find_by_id_or_resource_name(params[:id]).report_options.view_css.selectors.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} #{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end)).join(\"\\n\")",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "ReportsController",
-          "method": "show",
-          "line": 81,
-          "file": "app/controllers/reports_controller.rb",
-          "rendered": {
-            "name": "reports/_results",
-            "file": "app/views/reports/_results.html.erb"
-          }
-        },
-        {
-          "type": "template",
-          "name": "reports/_results",
-          "line": 45,
-          "file": "app/views/reports/_results.html.erb",
-          "rendered": {
-            "name": "reports/_result_view_css",
-            "file": "app/views/reports/_result_view_css.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "reports/_result_view_css"
-      },
-      "user_input": "Report.find_by_id_or_resource_name(params[:id]).report_options",
-      "confidence": "Weak",
-      "note": ""
     }
   ],
-  "updated": "2022-01-24 21:28:46 +0000",
-  "brakeman_version": "5.2.0"
+  "updated": "2022-02-11 11:28:28 +0000",
+  "brakeman_version": "5.2.1"
 }

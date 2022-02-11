@@ -6,6 +6,12 @@ module FilterUtils
   #
   # Generate the results list for a controller index, filtering the
   # primary model using the `filter[]`` URL parameters
+  # Special attributes:
+  #   id: the id of a specific resource
+  #   ids: an array of ids for matching resources, as `filter[ids][]=`
+  #   filter_name: lookup by resource name, even if this isn't a database attribute
+  # If a value ends with a '%' then we assume a LIKE is required to filter
+  # If a value is "is not null" or "is null" then specifically handle that
   # @param [ActiveRecord::Model] pm optionally overrides the default in the primary_model attribute value
   # @return [ActiveRecord::Relation] <description>
   def filtered_primary_model(pm = nil)
@@ -15,37 +21,42 @@ module FilterUtils
     if filter_params
       pm = pm.active if filter_params[:disabled] == 'enabled' || !current_admin
       pm = pm.disabled if filter_params[:disabled] == 'disabled' && current_admin
+      filter_params[:id] ||= filter_params.delete(:ids) if filter_params[:ids].present?
       p = filter_params
       p.delete(:disabled)
       p.delete(:failed)
+      filter_name = p.delete(:filter_name)
 
       likes = ['']
       p.each do |k, v|
-        if v&.end_with?('%')
+        next unless v.is_a? String
 
+        # Handle likes and nulls
+        if v&.end_with?('%')
           likes[0] += ' AND ' if likes.length > 1
           likes[0] += "#{k} LIKE ?"
           likes << v
           p.delete(k)
-
         elsif v&.index(/is (not )?null/)
-
           likes[0] += "#{k} #{v}"
           p.delete(k)
         end
       end
 
       pm = pm.where(p)
-      pm = pm.where(likes) if likes.length > 0 && likes.first.present?
+      pm = pm.where(likes) if likes.present? && likes.first.present?
+
+      # If we have a filter name specified, use it to prepare a list of ids using the #resource_name method,
+      # then apply these ids to the filter result
+      if filter_name.present?
+        pm_ids = pm.all.select { |pi| pi.respond_to?(:resource_name) && pi.resource_name == filter_name }.map(&:id)
+        pm = pm.where(id: pm_ids)
+      end
 
       pm = pm.all
     end
 
     pm
-  end
-
-  def primary_model_uses_app_type?
-    primary_model.attribute_names.include?('app_type_id')
   end
 
   #
@@ -70,19 +81,35 @@ module FilterUtils
     end
   end
 
+  #
+  # Does the primary model have a *disabled* field in the database?
   def has_disabled_field
     primary_model.attribute_names.include?('disabled') && current_admin
   end
 
+  #
+  # Is the primary model tied directly to an app type with an app_type_id field?
+  def primary_model_uses_app_type?
+    primary_model.attribute_names.include?('app_type_id')
+  end
+
+  #
+  # All the attributes that are permitted for filtering
   def filter_params_permitted
     return @filter_params_permitted if @filter_params_permitted
 
     fo = filters_on
+    # Add some additional attributes to allow to be filtered on
     fo << :disabled if has_disabled_field
+    fo << :id
+    fo << { ids: [] }
+    fo << :filter_name
 
     @filter_params_permitted = params.require(:filter).permit(fo) if params[:filter]
   end
 
+  #
+  # Allow the requested filter to be used as an array in controller and view code
   def filter_params_hash
     @filter_params_hash ||= filter_params_permitted&.to_h || {}
   end
@@ -94,7 +121,11 @@ module FilterUtils
   def filter_params
     return @filter_params if @filter_params
 
-    if (filter_params_permitted.blank? || (filter_params_permitted.is_a?(Array) && filter_params_permitted[0].blank?)) && has_disabled_field
+    if has_disabled_field && (
+        filter_params_permitted.blank? ||
+        (filter_params_permitted.is_a?(Array) && filter_params_permitted[0].blank?)
+      )
+
       @filter_params_permitted = { disabled: 'enabled' }
     end
 

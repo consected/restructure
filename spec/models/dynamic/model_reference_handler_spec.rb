@@ -201,29 +201,30 @@ RSpec.describe 'Model reference implementation', type: :model do
           - tag_select_allowed
         references:
           player_contacts:
-            from: master
-            add: many
-            showable_if:
-              any:
-                this:
-                  select_who:
-                    condition: '= ANY REV'
-                    value: current_user_role_names
-                user:
-                  role_name:
-                    - editor
-          mr_simple_tests:
-            from: master
-            add: many
-            showable_if:
-              any:
-                this:
-                  tag_select_allowed:
-                    condition: '&&'
-                    value: current_user_role_names
-                user:
-                  role_name:
-                    - editor
+              from: master
+              add: many
+              showable_if:
+                any:
+                  this:
+                    select_who:
+                      condition: '= ANY REV'
+                      value: current_user_role_names
+                  user:
+                    role_name:
+                      - editor
+          activity_log__player_contact_elt:
+              from: master
+              add: many
+              showable_if:
+                any:
+                  this:
+                    extra_log_type: never-match
+                    tag_select_allowed:
+                      condition: '&&'
+                      value: current_user_role_names
+                  user:
+                    role_name:
+                      - editor
 
     END_DEF
 
@@ -530,13 +531,15 @@ RSpec.describe 'Model reference implementation', type: :model do
     @user.user_roles.create!(app_type_id: @user.app_type_id, role_name: 'xyz', current_admin: @admin)
 
     # Showable should now work, since the user roles matches on select_who
-
-    ref_config = al_showable.extra_log_type_config.references.first.last[:player_contact]
+    ref_config = al_showable.extra_log_type_config.references[:player_contact][:player_contact]
     res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
     expect(res).to be_truthy
 
     # Second reference should not work, since the tag select field is empty
-    ref_config = al_showable.extra_log_type_config.references.first.last[:mr_simple_tests]
+
+    @user.user_roles.find_by(app_type_id: @user.app_type_id, role_name: 'editor')&.disable!(@admin)
+
+    ref_config = al_showable.extra_log_type_config.references[:activity_log__player_contact_elt][:activity_log__player_contact_elt]
     res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
     expect(res).to be_falsey
 
@@ -558,12 +561,10 @@ RSpec.describe 'Model reference implementation', type: :model do
     res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
     expect(res).to be_truthy
 
-    al_showable.reset_model_references
     ur.update!(disabled: true)
-    expect(res).to be_falsey
-
     al_showable.reset_model_references
-    expect(al_showable.model_references.length).to eq 0
+    res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
+    expect(res).to be_falsey
 
     al_showable.reset_model_references
     al_showable.update!(tag_select_allowed: ['abc', 'xyz'])
@@ -574,14 +575,12 @@ RSpec.describe 'Model reference implementation', type: :model do
     expect(al_showable.model_references.length).to eq 1
     expect(al_simple.model_references.length).to be > 0
 
-    # Showable should now not work, since the current record does not match on select_who,
-    # even though the reference matches on data
     al_showable.update! select_who: 'ghi'
     al_showable.reset_model_references
     expect(al_showable.model_references.length).to eq 0
     expect(al_simple.model_references.length).to be > 0
 
     res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
-    expect(res).to be_falsey
+    expect(res).to be_truthy
   end
 end

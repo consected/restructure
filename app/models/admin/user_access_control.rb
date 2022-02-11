@@ -306,6 +306,11 @@ class Admin::UserAccessControl < Admin::AdminBase
     !resource_name_for_type&.include?(resource_name.to_s)
   end
 
+  # Provide a usable name for viewing
+  def name
+    "#{resource_type} #{resource_name} #{role_name} #{user&.email}"
+  end
+
   private
 
   #
