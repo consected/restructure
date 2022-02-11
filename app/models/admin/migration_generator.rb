@@ -11,7 +11,7 @@ class Admin::MigrationGenerator
   attr_accessor :db_migration_schema, :table_name, :all_implementation_fields,
                 :table_comments, :no_master_association, :prev_table_name, :belongs_to_model,
                 :allow_migrations, :db_configs, :resource_type, :view_sql, :all_referenced_tables,
-                :class_name, :dynamic_def
+                :class_name, :dynamic_def, :app_type_name
 
   def initialize(db_migration_schema, table_name: nil, class_name: nil,
                  all_implementation_fields: nil, table_comments: nil,
@@ -349,6 +349,29 @@ class Admin::MigrationGenerator
     res.first && res.first['definition']
   end
 
+  #
+  # Get the SELECT definition of multiple view matching a LIKE from Postgres
+  # @param [String] schema
+  # @param [String] view_name
+  # @return [Array]
+  def self.view_definitions(schema, view_name)
+
+    sql = <<~SQL
+      select schemaname, viewname, definition
+      from pg_views
+      where viewname LIKE $1 and schemaname = $2;
+    SQL
+
+    type  = ActiveModel::Type::String.new
+    binds = [
+      ActiveRecord::Relation::QueryAttribute.new('viewname', view_name, type),
+      ActiveRecord::Relation::QueryAttribute.new('schemaname', schema, type)
+    ]
+
+    connection.exec_query sql, 'SQL', binds 
+  end
+
+
   def table_columns
     ActiveRecord::Base.connection.columns(table_name)
   end
@@ -533,7 +556,8 @@ class Admin::MigrationGenerator
   # @param [String] export_type - suffix, for example 'app-export'
   # @return [String]
   def db_migration_dirname(export_type = nil)
-    dirname = "db/app_migrations/#{db_migration_schema}"
+    loc = app_type_name || db_migration_schema
+    dirname = "db/app_migrations/#{loc}"
     dirname += "--#{export_type}" if export_type
     dirname
   end

@@ -419,8 +419,6 @@ $$;
 
 SET default_tablespace = '';
 
-SET default_table_access_method = heap;
-
 --
 -- Name: nfs_store_archived_files; Type: TABLE; Schema: ml_app; Owner: -
 --
@@ -2749,6 +2747,41 @@ $$;
 
 
 --
+-- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.model_references (
+    id integer NOT NULL,
+    from_record_type character varying,
+    from_record_id integer,
+    from_record_master_id integer,
+    to_record_type character varying,
+    to_record_id integer,
+    to_record_master_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean
+);
+
+
+--
+-- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_containers (
+    id integer NOT NULL,
+    name character varying,
+    user_id integer,
+    app_type_id integer,
+    nfs_store_container_id integer,
+    master_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
 -- Name: accuracy_score_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -4217,7 +4250,8 @@ CREATE TABLE ml_app.masters (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     user_id integer,
-    contact_id integer
+    contact_id integer,
+    created_by_user_id bigint
 );
 
 
@@ -4367,25 +4401,6 @@ ALTER SEQUENCE ml_app.message_templates_id_seq OWNED BY ml_app.message_templates
 
 
 --
--- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.model_references (
-    id integer NOT NULL,
-    from_record_type character varying,
-    from_record_id integer,
-    from_record_master_id integer,
-    to_record_type character varying,
-    to_record_id integer,
-    to_record_master_id integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    disabled boolean
-);
-
-
---
 -- Name: model_references_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -4513,22 +4528,6 @@ CREATE SEQUENCE ml_app.nfs_store_container_history_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_container_history_id_seq OWNED BY ml_app.nfs_store_container_history.id;
-
-
---
--- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_containers (
-    id integer NOT NULL,
-    name character varying,
-    user_id integer,
-    app_type_id integer,
-    nfs_store_container_id integer,
-    master_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone
-);
 
 
 --
@@ -6150,6 +6149,131 @@ ALTER SEQUENCE ml_app.user_description_history_id_seq OWNED BY ml_app.user_descr
 
 --
 -- Name: user_descriptions; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.user_descriptions (
+    id bigint NOT NULL,
+    app_type_id bigint,
+    role_name character varying,
+    role_template character varying,
+    name character varying,
+    description character varying,
+    disabled boolean,
+    admin_id bigint,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: user_descriptions_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.user_descriptions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_descriptions_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.user_descriptions_id_seq OWNED BY ml_app.user_descriptions.id;
+
+
+--
+-- Name: user_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.user_description_history (
+    id bigint NOT NULL,
+    user_description_id bigint,
+    app_type_id bigint,
+    role_name character varying,
+    role_template character varying,
+    name character varying,
+    description character varying,
+    disabled boolean,
+    admin_id integer,
+    user_id integer,
+    app_type_id integer,
+    authentication_token character varying,
+    encrypted_otp_secret character varying,
+    encrypted_otp_secret_iv character varying,
+    encrypted_otp_secret_salt character varying,
+    consumed_timestep integer,
+    otp_required_for_login boolean,
+    password_updated_at timestamp without time zone,
+    first_name character varying,
+    last_name character varying,
+    confirmation_token character varying,
+    confirmed_at timestamp without time zone,
+    confirmation_sent_at timestamp without time zone
+);
+
+
+--
+-- Name: user_description_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.user_description_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_description_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.user_description_history_id_seq OWNED BY ml_app.user_description_history.id;
+
+
+--
+-- Name: user_preferences; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.user_preferences (
+    id bigint NOT NULL,
+    user_id bigint,
+    date_format character varying,
+    date_time_format character varying,
+    pattern_for_date_format character varying,
+    pattern_for_date_time_format character varying,
+    pattern_for_time_format character varying,
+    time_format character varying,
+    timezone character varying,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: user_preferences_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.user_preferences_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_preferences_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.user_preferences_id_seq OWNED BY ml_app.user_preferences.id;
+
+
+--
+-- Name: user_role_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.user_descriptions (
@@ -8186,7 +8310,14 @@ ALTER TABLE ONLY ml_app.user_descriptions ALTER COLUMN id SET DEFAULT nextval('m
 -- Name: user_history id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY ml_app.user_history ALTER COLUMN id SET DEFAULT nextval('ml_app.user_history_id_seq'::regclass);
+ALTER TABLE ONLY ml_app.user_descriptions ALTER COLUMN id SET DEFAULT nextval('ml_app.user_descriptions_id_seq'::regclass);
+
+
+--
+-- Name: user_preferences id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_preferences ALTER COLUMN id SET DEFAULT nextval('ml_app.user_preferences_id_seq'::regclass);
 
 
 --
@@ -9048,8 +9179,16 @@ ALTER TABLE ONLY ml_app.user_descriptions
 -- Name: user_history user_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY ml_app.user_history
-    ADD CONSTRAINT user_history_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ml_app.user_descriptions
+    ADD CONSTRAINT user_descriptions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_preferences user_preferences_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_preferences
+    ADD CONSTRAINT user_preferences_pkey PRIMARY KEY (id);
 
 
 --
@@ -9571,6 +9710,13 @@ CREATE INDEX index_item_flags_on_item_flag_name_id ON ml_app.item_flags USING bt
 --
 
 CREATE INDEX index_item_flags_on_user_id ON ml_app.item_flags USING btree (user_id);
+
+
+--
+-- Name: index_masters_on_created_by_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_masters_on_created_by_user_id ON ml_app.masters USING btree (created_by_user_id);
 
 
 --
@@ -10281,6 +10427,13 @@ CREATE INDEX index_user_history_on_user_id ON ml_app.user_history USING btree (u
 
 
 --
+-- Name: index_user_preferences_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE UNIQUE INDEX index_user_preferences_on_user_id ON ml_app.user_preferences USING btree (user_id);
+
+
+--
 -- Name: index_user_role_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -10631,668 +10784,708 @@ CREATE INDEX "index_ref_data.redcap_project_users_on_redcap_project_admin_id" ON
 
 
 --
--- Name: accuracy_scores accuracy_score_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: activity_log_player_contact_phone_history fk_activity_log_player_contact_phone_history_activity_log_playe; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER accuracy_score_history_insert AFTER INSERT ON ml_app.accuracy_scores FOR EACH ROW EXECUTE FUNCTION ml_app.log_accuracy_score_update();
+ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
+    ADD CONSTRAINT fk_activity_log_player_contact_phone_history_activity_log_playe FOREIGN KEY (activity_log_player_contact_phone_id) REFERENCES ml_app.activity_log_player_contact_phones(id);
 
 
 --
--- Name: accuracy_scores accuracy_score_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: activity_log_player_contact_phone_history fk_activity_log_player_contact_phone_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER accuracy_score_history_update AFTER UPDATE ON ml_app.accuracy_scores FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_accuracy_score_update();
+ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
+    ADD CONSTRAINT fk_activity_log_player_contact_phone_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
--- Name: activity_logs activity_log_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: activity_log_player_contact_phone_history fk_activity_log_player_contact_phone_history_player_contact_pho; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER activity_log_history_insert AFTER INSERT ON ml_app.activity_logs FOR EACH ROW EXECUTE FUNCTION ml_app.log_activity_log_update();
+ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
+    ADD CONSTRAINT fk_activity_log_player_contact_phone_history_player_contact_pho FOREIGN KEY (player_contact_id) REFERENCES ml_app.player_contacts(id);
 
 
 --
--- Name: activity_logs activity_log_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: activity_log_player_contact_phone_history fk_activity_log_player_contact_phone_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER activity_log_history_update AFTER UPDATE ON ml_app.activity_logs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_activity_log_update();
+ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
+    ADD CONSTRAINT fk_activity_log_player_contact_phone_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
--- Name: activity_log_player_contact_phones activity_log_player_contact_phone_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: address_history fk_address_history_addresses; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER activity_log_player_contact_phone_history_insert AFTER INSERT ON ml_app.activity_log_player_contact_phones FOR EACH ROW EXECUTE FUNCTION ml_app.log_activity_log_player_contact_phone_update();
+ALTER TABLE ONLY ml_app.address_history
+    ADD CONSTRAINT fk_address_history_addresses FOREIGN KEY (address_id) REFERENCES ml_app.addresses(id);
 
 
 --
--- Name: activity_log_player_contact_phones activity_log_player_contact_phone_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: address_history fk_address_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER activity_log_player_contact_phone_history_update AFTER UPDATE ON ml_app.activity_log_player_contact_phones FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_activity_log_player_contact_phone_update();
+ALTER TABLE ONLY ml_app.address_history
+    ADD CONSTRAINT fk_address_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
--- Name: addresses address_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: address_history fk_address_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER address_history_insert AFTER INSERT ON ml_app.addresses FOR EACH ROW EXECUTE FUNCTION ml_app.log_address_update();
+ALTER TABLE ONLY ml_app.address_history
+    ADD CONSTRAINT fk_address_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
--- Name: addresses address_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: admin_history fk_admin_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER address_history_update AFTER UPDATE ON ml_app.addresses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_address_update();
+ALTER TABLE ONLY ml_app.admin_history
+    ADD CONSTRAINT fk_admin_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
--- Name: addresses address_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: admin_history fk_admin_history_upd_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER address_insert BEFORE INSERT ON ml_app.addresses FOR EACH ROW EXECUTE FUNCTION ml_app.handle_address_update();
+ALTER TABLE ONLY ml_app.admin_history
+    ADD CONSTRAINT fk_admin_history_upd_admins FOREIGN KEY (updated_by_admin_id) REFERENCES ml_app.admins(id);
 
 
 --
--- Name: addresses address_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: app_configuration_history fk_app_configuration_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER address_update BEFORE UPDATE ON ml_app.addresses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.handle_address_update();
+ALTER TABLE ONLY ml_app.app_configuration_history
+    ADD CONSTRAINT fk_app_configuration_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
--- Name: admins admin_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: app_configuration_history fk_app_configuration_history_app_configurations; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER admin_history_insert AFTER INSERT ON ml_app.admins FOR EACH ROW EXECUTE FUNCTION ml_app.log_admin_update();
+ALTER TABLE ONLY ml_app.app_configuration_history
+    ADD CONSTRAINT fk_app_configuration_history_app_configurations FOREIGN KEY (app_configuration_id) REFERENCES ml_app.app_configurations(id);
 
 
 --
--- Name: admins admin_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: app_type_history fk_app_type_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER admin_history_update AFTER UPDATE ON ml_app.admins FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_admin_update();
+ALTER TABLE ONLY ml_app.app_type_history
+    ADD CONSTRAINT fk_app_type_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
--- Name: app_configurations app_configuration_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: app_type_history fk_app_type_history_app_types; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER app_configuration_history_insert AFTER INSERT ON ml_app.app_configurations FOR EACH ROW EXECUTE FUNCTION ml_app.log_app_configuration_update();
+ALTER TABLE ONLY ml_app.app_type_history
+    ADD CONSTRAINT fk_app_type_history_app_types FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
 
 
 --
--- Name: app_configurations app_configuration_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: college_history fk_college_history_colleges; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER app_configuration_history_update AFTER UPDATE ON ml_app.app_configurations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_app_configuration_update();
+ALTER TABLE ONLY ml_app.college_history
+    ADD CONSTRAINT fk_college_history_colleges FOREIGN KEY (college_id) REFERENCES ml_app.colleges(id);
 
 
 --
--- Name: app_types app_type_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: dynamic_model_history fk_dynamic_model_history_dynamic_models; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER app_type_history_insert AFTER INSERT ON ml_app.app_types FOR EACH ROW EXECUTE FUNCTION ml_app.log_app_type_update();
+ALTER TABLE ONLY ml_app.dynamic_model_history
+    ADD CONSTRAINT fk_dynamic_model_history_dynamic_models FOREIGN KEY (dynamic_model_id) REFERENCES ml_app.dynamic_models(id);
 
 
 --
--- Name: app_types app_type_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: external_link_history fk_external_link_history_external_links; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER app_type_history_update AFTER UPDATE ON ml_app.app_types FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_app_type_update();
+ALTER TABLE ONLY ml_app.external_link_history
+    ADD CONSTRAINT fk_external_link_history_external_links FOREIGN KEY (external_link_id) REFERENCES ml_app.external_links(id);
 
 
 --
--- Name: colleges college_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: general_selection_history fk_general_selection_history_general_selections; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER college_history_insert AFTER INSERT ON ml_app.colleges FOR EACH ROW EXECUTE FUNCTION ml_app.log_college_update();
+ALTER TABLE ONLY ml_app.general_selection_history
+    ADD CONSTRAINT fk_general_selection_history_general_selections FOREIGN KEY (general_selection_id) REFERENCES ml_app.general_selections(id);
 
 
 --
--- Name: colleges college_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: item_flag_history fk_item_flag_history_item_flags; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER college_history_update AFTER UPDATE ON ml_app.colleges FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_college_update();
+ALTER TABLE ONLY ml_app.item_flag_history
+    ADD CONSTRAINT fk_item_flag_history_item_flags FOREIGN KEY (item_flag_id) REFERENCES ml_app.item_flags(id);
 
 
 --
--- Name: config_libraries config_library_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: item_flag_name_history fk_item_flag_name_history_item_flag_names; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER config_library_history_insert AFTER INSERT ON ml_app.config_libraries FOR EACH ROW EXECUTE FUNCTION ml_app.log_config_library_update();
+ALTER TABLE ONLY ml_app.item_flag_name_history
+    ADD CONSTRAINT fk_item_flag_name_history_item_flag_names FOREIGN KEY (item_flag_name_id) REFERENCES ml_app.item_flag_names(id);
 
 
 --
--- Name: config_libraries config_library_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: message_template_history fk_message_template_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER config_library_history_update AFTER UPDATE ON ml_app.config_libraries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_config_library_update();
+ALTER TABLE ONLY ml_app.message_template_history
+    ADD CONSTRAINT fk_message_template_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
--- Name: dynamic_models dynamic_model_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: message_template_history fk_message_template_history_message_templates; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER dynamic_model_history_insert AFTER INSERT ON ml_app.dynamic_models FOR EACH ROW EXECUTE FUNCTION ml_app.log_dynamic_model_update();
+ALTER TABLE ONLY ml_app.message_template_history
+    ADD CONSTRAINT fk_message_template_history_message_templates FOREIGN KEY (message_template_id) REFERENCES ml_app.message_templates(id);
 
 
 --
--- Name: dynamic_models dynamic_model_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_archived_file_history fk_nfs_store_archived_file_history_nfs_store_archived_files; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER dynamic_model_history_update AFTER UPDATE ON ml_app.dynamic_models FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_dynamic_model_update();
+ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
+    ADD CONSTRAINT fk_nfs_store_archived_file_history_nfs_store_archived_files FOREIGN KEY (nfs_store_archived_file_id) REFERENCES ml_app.nfs_store_archived_files(id);
 
 
 --
--- Name: external_identifiers external_identifier_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_archived_file_history fk_nfs_store_archived_file_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER external_identifier_history_insert AFTER INSERT ON ml_app.external_identifiers FOR EACH ROW EXECUTE FUNCTION ml_app.log_external_identifier_update();
+ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
+    ADD CONSTRAINT fk_nfs_store_archived_file_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
--- Name: external_identifiers external_identifier_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_container_history fk_nfs_store_container_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER external_identifier_history_update AFTER UPDATE ON ml_app.external_identifiers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_external_identifier_update();
+ALTER TABLE ONLY ml_app.nfs_store_container_history
+    ADD CONSTRAINT fk_nfs_store_container_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
--- Name: external_links external_link_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_container_history fk_nfs_store_container_history_nfs_store_containers; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER external_link_history_insert AFTER INSERT ON ml_app.external_links FOR EACH ROW EXECUTE FUNCTION ml_app.log_external_link_update();
+ALTER TABLE ONLY ml_app.nfs_store_container_history
+    ADD CONSTRAINT fk_nfs_store_container_history_nfs_store_containers FOREIGN KEY (nfs_store_container_id) REFERENCES ml_app.nfs_store_containers(id);
 
 
 --
--- Name: external_links external_link_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_container_history fk_nfs_store_container_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER external_link_history_update AFTER UPDATE ON ml_app.external_links FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_external_link_update();
+ALTER TABLE ONLY ml_app.nfs_store_container_history
+    ADD CONSTRAINT fk_nfs_store_container_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
--- Name: general_selections general_selection_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_filter_history fk_nfs_store_filter_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER general_selection_history_insert AFTER INSERT ON ml_app.general_selections FOR EACH ROW EXECUTE FUNCTION ml_app.log_general_selection_update();
+ALTER TABLE ONLY ml_app.nfs_store_filter_history
+    ADD CONSTRAINT fk_nfs_store_filter_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
--- Name: general_selections general_selection_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_filter_history fk_nfs_store_filter_history_nfs_store_filters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER general_selection_history_update AFTER UPDATE ON ml_app.general_selections FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_general_selection_update();
+ALTER TABLE ONLY ml_app.nfs_store_filter_history
+    ADD CONSTRAINT fk_nfs_store_filter_history_nfs_store_filters FOREIGN KEY (nfs_store_filter_id) REFERENCES ml_app.nfs_store_filters(id);
 
 
 --
--- Name: item_flags item_flag_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_stored_file_history fk_nfs_store_stored_file_history_nfs_store_stored_files; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER item_flag_history_insert AFTER INSERT ON ml_app.item_flags FOR EACH ROW EXECUTE FUNCTION ml_app.log_item_flag_update();
+ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
+    ADD CONSTRAINT fk_nfs_store_stored_file_history_nfs_store_stored_files FOREIGN KEY (nfs_store_stored_file_id) REFERENCES ml_app.nfs_store_stored_files(id);
 
 
 --
--- Name: item_flags item_flag_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: nfs_store_stored_file_history fk_nfs_store_stored_file_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER item_flag_history_update AFTER UPDATE ON ml_app.item_flags FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_item_flag_update();
+ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
+    ADD CONSTRAINT fk_nfs_store_stored_file_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
--- Name: item_flag_names item_flag_name_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: page_layout_history fk_page_layout_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER item_flag_name_history_insert AFTER INSERT ON ml_app.item_flag_names FOR EACH ROW EXECUTE FUNCTION ml_app.log_item_flag_name_update();
+ALTER TABLE ONLY ml_app.page_layout_history
+    ADD CONSTRAINT fk_page_layout_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
--- Name: item_flag_names item_flag_name_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: page_layout_history fk_page_layout_history_page_layouts; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER item_flag_name_history_update AFTER UPDATE ON ml_app.item_flag_names FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_item_flag_name_update();
+ALTER TABLE ONLY ml_app.page_layout_history
+    ADD CONSTRAINT fk_page_layout_history_page_layouts FOREIGN KEY (page_layout_id) REFERENCES ml_app.page_layouts(id);
 
 
 --
--- Name: role_descriptions log_role_description_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_contact_history fk_player_contact_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER log_role_description_history_insert AFTER INSERT ON ml_app.role_descriptions FOR EACH ROW EXECUTE FUNCTION ml_app.role_description_history_upd();
+ALTER TABLE ONLY ml_app.player_contact_history
+    ADD CONSTRAINT fk_player_contact_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
--- Name: role_descriptions log_role_description_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_contact_history fk_player_contact_history_player_contacts; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER log_role_description_history_update AFTER UPDATE ON ml_app.role_descriptions FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.role_description_history_upd();
+ALTER TABLE ONLY ml_app.player_contact_history
+    ADD CONSTRAINT fk_player_contact_history_player_contacts FOREIGN KEY (player_contact_id) REFERENCES ml_app.player_contacts(id);
 
 
 --
 -- Name: user_descriptions log_user_description_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER log_user_description_history_insert AFTER INSERT ON ml_app.user_descriptions FOR EACH ROW EXECUTE FUNCTION ml_app.user_description_history_upd();
+CREATE TRIGGER log_user_description_history_insert AFTER INSERT ON ml_app.user_descriptions FOR EACH ROW EXECUTE PROCEDURE ml_app.user_description_history_upd();
 
 
 --
 -- Name: user_descriptions log_user_description_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER log_user_description_history_update AFTER UPDATE ON ml_app.user_descriptions FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.user_description_history_upd();
+CREATE TRIGGER log_user_description_history_update AFTER UPDATE ON ml_app.user_descriptions FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.user_description_history_upd();
 
 
 --
 -- Name: message_templates message_template_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER message_template_history_insert AFTER INSERT ON ml_app.message_templates FOR EACH ROW EXECUTE FUNCTION ml_app.log_message_template_update();
+ALTER TABLE ONLY ml_app.player_contact_history
+    ADD CONSTRAINT fk_player_contact_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
--- Name: message_templates message_template_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_info_history fk_player_info_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER message_template_history_update AFTER UPDATE ON ml_app.message_templates FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_message_template_update();
-
-
---
--- Name: nfs_store_archived_files nfs_store_archived_file_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER nfs_store_archived_file_history_insert AFTER INSERT ON ml_app.nfs_store_archived_files FOR EACH ROW EXECUTE FUNCTION ml_app.log_nfs_store_archived_file_update();
+ALTER TABLE ONLY ml_app.player_info_history
+    ADD CONSTRAINT fk_player_info_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
--- Name: nfs_store_archived_files nfs_store_archived_file_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_info_history fk_player_info_history_player_infos; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER nfs_store_archived_file_history_update AFTER UPDATE ON ml_app.nfs_store_archived_files FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_nfs_store_archived_file_update();
-
-
---
--- Name: nfs_store_containers nfs_store_container_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER nfs_store_container_history_insert AFTER INSERT ON ml_app.nfs_store_containers FOR EACH ROW EXECUTE FUNCTION ml_app.log_nfs_store_container_update();
+ALTER TABLE ONLY ml_app.player_info_history
+    ADD CONSTRAINT fk_player_info_history_player_infos FOREIGN KEY (player_info_id) REFERENCES ml_app.player_infos(id);
 
 
 --
--- Name: nfs_store_containers nfs_store_container_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: player_info_history fk_player_info_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER nfs_store_container_history_update AFTER UPDATE ON ml_app.nfs_store_containers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_nfs_store_container_update();
+ALTER TABLE ONLY ml_app.player_info_history
+    ADD CONSTRAINT fk_player_info_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
--- Name: nfs_store_filters nfs_store_filter_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+-- Name: protocol_event_history fk_protocol_event_history_protocol_events; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER nfs_store_filter_history_insert AFTER INSERT ON ml_app.nfs_store_filters FOR EACH ROW EXECUTE FUNCTION ml_app.log_nfs_store_filter_update();
+ALTER TABLE ONLY ml_app.protocol_event_history
+    ADD CONSTRAINT fk_protocol_event_history_protocol_events FOREIGN KEY (protocol_event_id) REFERENCES ml_app.protocol_events(id);
+
+
+--
+-- Name: protocol_history fk_protocol_history_protocols; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.protocol_history
+    ADD CONSTRAINT fk_protocol_history_protocols FOREIGN KEY (protocol_id) REFERENCES ml_app.protocols(id);
+
+
+--
+-- Name: masters fk_rails_00b234154d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_filter_history_insert AFTER INSERT ON ml_app.nfs_store_filters FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_filter_update();
 
 
 --
 -- Name: nfs_store_filters nfs_store_filter_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER nfs_store_filter_history_update AFTER UPDATE ON ml_app.nfs_store_filters FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_nfs_store_filter_update();
+CREATE TRIGGER nfs_store_filter_history_update AFTER UPDATE ON ml_app.nfs_store_filters FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_filter_update();
 
 
 --
 -- Name: nfs_store_stored_files nfs_store_stored_file_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER nfs_store_stored_file_history_insert AFTER INSERT ON ml_app.nfs_store_stored_files FOR EACH ROW EXECUTE FUNCTION ml_app.log_nfs_store_stored_file_update();
+CREATE TRIGGER nfs_store_stored_file_history_insert AFTER INSERT ON ml_app.nfs_store_stored_files FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_stored_file_update();
 
 
 --
 -- Name: nfs_store_stored_files nfs_store_stored_file_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER nfs_store_stored_file_history_update AFTER UPDATE ON ml_app.nfs_store_stored_files FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_nfs_store_stored_file_update();
+CREATE TRIGGER nfs_store_stored_file_history_update AFTER UPDATE ON ml_app.nfs_store_stored_files FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_stored_file_update();
 
 
 --
 -- Name: page_layouts page_layout_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER page_layout_history_insert AFTER INSERT ON ml_app.page_layouts FOR EACH ROW EXECUTE FUNCTION ml_app.log_page_layout_update();
+CREATE TRIGGER page_layout_history_insert AFTER INSERT ON ml_app.page_layouts FOR EACH ROW EXECUTE PROCEDURE ml_app.log_page_layout_update();
 
 
 --
 -- Name: page_layouts page_layout_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER page_layout_history_update AFTER UPDATE ON ml_app.page_layouts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_page_layout_update();
+CREATE TRIGGER page_layout_history_update AFTER UPDATE ON ml_app.page_layouts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_page_layout_update();
 
 
 --
 -- Name: player_contacts player_contact_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER player_contact_history_insert AFTER INSERT ON ml_app.player_contacts FOR EACH ROW EXECUTE FUNCTION ml_app.log_player_contact_update();
+CREATE TRIGGER player_contact_history_insert AFTER INSERT ON ml_app.player_contacts FOR EACH ROW EXECUTE PROCEDURE ml_app.log_player_contact_update();
 
 
 --
 -- Name: player_contacts player_contact_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER player_contact_history_update AFTER UPDATE ON ml_app.player_contacts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_player_contact_update();
+CREATE TRIGGER player_contact_history_update AFTER UPDATE ON ml_app.player_contacts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_player_contact_update();
 
 
 --
 -- Name: player_contacts player_contact_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER player_contact_insert BEFORE INSERT ON ml_app.player_contacts FOR EACH ROW EXECUTE FUNCTION ml_app.handle_player_contact_update();
+CREATE TRIGGER player_contact_insert BEFORE INSERT ON ml_app.player_contacts FOR EACH ROW EXECUTE PROCEDURE ml_app.handle_player_contact_update();
 
 
 --
 -- Name: player_contacts player_contact_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER player_contact_update BEFORE UPDATE ON ml_app.player_contacts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.handle_player_contact_update();
+CREATE TRIGGER player_contact_update BEFORE UPDATE ON ml_app.player_contacts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.handle_player_contact_update();
 
 
 --
 -- Name: player_infos player_info_before_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER player_info_before_update BEFORE UPDATE ON ml_app.player_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.handle_player_info_before_update();
+CREATE TRIGGER player_info_before_update BEFORE UPDATE ON ml_app.player_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.handle_player_info_before_update();
 
 
 --
 -- Name: player_infos player_info_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER player_info_history_insert AFTER INSERT ON ml_app.player_infos FOR EACH ROW EXECUTE FUNCTION ml_app.log_player_info_update();
+CREATE TRIGGER player_info_history_insert AFTER INSERT ON ml_app.player_infos FOR EACH ROW EXECUTE PROCEDURE ml_app.log_player_info_update();
 
 
 --
 -- Name: player_infos player_info_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER player_info_history_update AFTER UPDATE ON ml_app.player_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_player_info_update();
+CREATE TRIGGER player_info_history_update AFTER UPDATE ON ml_app.player_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_player_info_update();
 
 
 --
 -- Name: player_infos player_info_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER player_info_insert AFTER INSERT ON ml_app.player_infos FOR EACH ROW EXECUTE FUNCTION ml_app.update_master_with_player_info();
+CREATE TRIGGER player_info_insert AFTER INSERT ON ml_app.player_infos FOR EACH ROW EXECUTE PROCEDURE ml_app.update_master_with_player_info();
 
 
 --
 -- Name: player_infos player_info_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER player_info_update AFTER UPDATE ON ml_app.player_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.update_master_with_player_info();
+CREATE TRIGGER player_info_update AFTER UPDATE ON ml_app.player_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.update_master_with_player_info();
 
 
 --
 -- Name: pro_infos pro_info_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER pro_info_insert AFTER INSERT ON ml_app.pro_infos FOR EACH ROW EXECUTE FUNCTION ml_app.update_master_with_pro_info();
+CREATE TRIGGER pro_info_insert AFTER INSERT ON ml_app.pro_infos FOR EACH ROW EXECUTE PROCEDURE ml_app.update_master_with_pro_info();
 
 
 --
 -- Name: pro_infos pro_info_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER pro_info_update AFTER UPDATE ON ml_app.pro_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.update_master_with_pro_info();
+CREATE TRIGGER pro_info_update AFTER UPDATE ON ml_app.pro_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.update_master_with_pro_info();
 
 
 --
 -- Name: protocol_events protocol_event_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER protocol_event_history_insert AFTER INSERT ON ml_app.protocol_events FOR EACH ROW EXECUTE FUNCTION ml_app.log_protocol_event_update();
+CREATE TRIGGER protocol_event_history_insert AFTER INSERT ON ml_app.protocol_events FOR EACH ROW EXECUTE PROCEDURE ml_app.log_protocol_event_update();
 
 
 --
 -- Name: protocol_events protocol_event_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER protocol_event_history_update AFTER UPDATE ON ml_app.protocol_events FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_protocol_event_update();
+CREATE TRIGGER protocol_event_history_update AFTER UPDATE ON ml_app.protocol_events FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_protocol_event_update();
 
 
 --
 -- Name: protocols protocol_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER protocol_history_insert AFTER INSERT ON ml_app.protocols FOR EACH ROW EXECUTE FUNCTION ml_app.log_protocol_update();
+CREATE TRIGGER protocol_history_insert AFTER INSERT ON ml_app.protocols FOR EACH ROW EXECUTE PROCEDURE ml_app.log_protocol_update();
 
 
 --
 -- Name: protocols protocol_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER protocol_history_update AFTER UPDATE ON ml_app.protocols FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_protocol_update();
+CREATE TRIGGER protocol_history_update AFTER UPDATE ON ml_app.protocols FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_protocol_update();
 
 
 --
 -- Name: rc_stage_cif_copy rc_cis_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER rc_cis_update BEFORE UPDATE ON ml_app.rc_stage_cif_copy FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.handle_rc_cis_update();
+CREATE TRIGGER rc_cis_update BEFORE UPDATE ON ml_app.rc_stage_cif_copy FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.handle_rc_cis_update();
 
 
 --
 -- Name: reports report_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER report_history_insert AFTER INSERT ON ml_app.reports FOR EACH ROW EXECUTE FUNCTION ml_app.log_report_update();
+CREATE TRIGGER report_history_insert AFTER INSERT ON ml_app.reports FOR EACH ROW EXECUTE PROCEDURE ml_app.log_report_update();
 
 
 --
 -- Name: reports report_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER report_history_update AFTER UPDATE ON ml_app.reports FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_report_update();
+CREATE TRIGGER report_history_update AFTER UPDATE ON ml_app.reports FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_report_update();
 
 
 --
 -- Name: scantrons scantron_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER scantron_history_insert AFTER INSERT ON ml_app.scantrons FOR EACH ROW EXECUTE FUNCTION ml_app.log_scantron_update();
+CREATE TRIGGER scantron_history_insert AFTER INSERT ON ml_app.scantrons FOR EACH ROW EXECUTE PROCEDURE ml_app.log_scantron_update();
 
 
 --
 -- Name: scantrons scantron_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER scantron_history_update AFTER UPDATE ON ml_app.scantrons FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_scantron_update();
+CREATE TRIGGER scantron_history_update AFTER UPDATE ON ml_app.scantrons FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_scantron_update();
 
 
 --
 -- Name: sub_processes sub_process_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER sub_process_history_insert AFTER INSERT ON ml_app.sub_processes FOR EACH ROW EXECUTE FUNCTION ml_app.log_sub_process_update();
+CREATE TRIGGER sub_process_history_insert AFTER INSERT ON ml_app.sub_processes FOR EACH ROW EXECUTE PROCEDURE ml_app.log_sub_process_update();
 
 
 --
 -- Name: sub_processes sub_process_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER sub_process_history_update AFTER UPDATE ON ml_app.sub_processes FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_sub_process_update();
+CREATE TRIGGER sub_process_history_update AFTER UPDATE ON ml_app.sub_processes FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_sub_process_update();
 
 
 --
 -- Name: trackers tracker_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER tracker_history_insert AFTER INSERT ON ml_app.trackers FOR EACH ROW EXECUTE FUNCTION ml_app.log_tracker_update();
+CREATE TRIGGER tracker_history_insert AFTER INSERT ON ml_app.trackers FOR EACH ROW EXECUTE PROCEDURE ml_app.log_tracker_update();
 
 
 --
 -- Name: tracker_history tracker_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER tracker_history_update BEFORE UPDATE ON ml_app.tracker_history FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.handle_tracker_history_update();
+CREATE TRIGGER tracker_history_update BEFORE UPDATE ON ml_app.tracker_history FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.handle_tracker_history_update();
 
 
 --
 -- Name: trackers tracker_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER tracker_history_update AFTER UPDATE ON ml_app.trackers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_tracker_update();
+CREATE TRIGGER tracker_history_update AFTER UPDATE ON ml_app.trackers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_tracker_update();
 
 
 --
 -- Name: tracker_history tracker_record_delete; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER tracker_record_delete AFTER DELETE ON ml_app.tracker_history FOR EACH ROW EXECUTE FUNCTION ml_app.handle_delete();
+CREATE TRIGGER tracker_record_delete AFTER DELETE ON ml_app.tracker_history FOR EACH ROW EXECUTE PROCEDURE ml_app.handle_delete();
 
 
 --
 -- Name: trackers tracker_upsert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER tracker_upsert BEFORE INSERT ON ml_app.trackers FOR EACH ROW EXECUTE FUNCTION ml_app.tracker_upsert();
+CREATE TRIGGER tracker_upsert BEFORE INSERT ON ml_app.trackers FOR EACH ROW EXECUTE PROCEDURE ml_app.tracker_upsert();
 
 
 --
 -- Name: user_access_controls user_access_control_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER user_access_control_history_insert AFTER INSERT ON ml_app.user_access_controls FOR EACH ROW EXECUTE FUNCTION ml_app.log_user_access_control_update();
+CREATE TRIGGER user_access_control_history_insert AFTER INSERT ON ml_app.user_access_controls FOR EACH ROW EXECUTE PROCEDURE ml_app.log_user_access_control_update();
 
 
 --
 -- Name: user_access_controls user_access_control_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER user_access_control_history_update AFTER UPDATE ON ml_app.user_access_controls FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_user_access_control_update();
+CREATE TRIGGER user_access_control_history_update AFTER UPDATE ON ml_app.user_access_controls FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_user_access_control_update();
 
 
 --
 -- Name: user_authorizations user_authorization_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER user_authorization_history_insert AFTER INSERT ON ml_app.user_authorizations FOR EACH ROW EXECUTE FUNCTION ml_app.log_user_authorization_update();
+CREATE TRIGGER user_authorization_history_insert AFTER INSERT ON ml_app.user_authorizations FOR EACH ROW EXECUTE PROCEDURE ml_app.log_user_authorization_update();
 
 
 --
 -- Name: user_authorizations user_authorization_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER user_authorization_history_update AFTER UPDATE ON ml_app.user_authorizations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_user_authorization_update();
+CREATE TRIGGER user_authorization_history_update AFTER UPDATE ON ml_app.user_authorizations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_user_authorization_update();
 
 
 --
 -- Name: users user_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER user_history_insert AFTER INSERT ON ml_app.users FOR EACH ROW EXECUTE FUNCTION ml_app.log_user_update();
+CREATE TRIGGER user_history_insert AFTER INSERT ON ml_app.users FOR EACH ROW EXECUTE PROCEDURE ml_app.log_user_update();
 
 
 --
 -- Name: users user_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER user_history_update AFTER UPDATE ON ml_app.users FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_user_update();
+CREATE TRIGGER user_history_update AFTER UPDATE ON ml_app.users FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_user_update();
 
 
 --
 -- Name: user_roles user_role_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER user_role_history_insert AFTER INSERT ON ml_app.user_roles FOR EACH ROW EXECUTE FUNCTION ml_app.log_user_role_update();
+CREATE TRIGGER user_role_history_insert AFTER INSERT ON ml_app.user_roles FOR EACH ROW EXECUTE PROCEDURE ml_app.log_user_role_update();
 
 
 --
 -- Name: user_roles user_role_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
-CREATE TRIGGER user_role_history_update AFTER UPDATE ON ml_app.user_roles FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_user_role_update();
+CREATE TRIGGER user_role_history_update AFTER UPDATE ON ml_app.user_roles FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_user_role_update();
 
 
 --
 -- Name: datadic_choices log_datadic_choice_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_datadic_choice_history_insert AFTER INSERT ON ref_data.datadic_choices FOR EACH ROW EXECUTE FUNCTION ml_app.datadic_choice_history_upd();
+CREATE TRIGGER log_datadic_choice_history_insert AFTER INSERT ON ref_data.datadic_choices FOR EACH ROW EXECUTE PROCEDURE ml_app.datadic_choice_history_upd();
 
 
 --
 -- Name: datadic_choices log_datadic_choice_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_datadic_choice_history_update AFTER UPDATE ON ref_data.datadic_choices FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.datadic_choice_history_upd();
+CREATE TRIGGER log_datadic_choice_history_update AFTER UPDATE ON ref_data.datadic_choices FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.datadic_choice_history_upd();
 
 
 --
 -- Name: datadic_variables log_datadic_variable_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_datadic_variable_history_insert AFTER INSERT ON ref_data.datadic_variables FOR EACH ROW EXECUTE FUNCTION ref_data.log_datadic_variables_update();
+CREATE TRIGGER log_datadic_variable_history_insert AFTER INSERT ON ref_data.datadic_variables FOR EACH ROW EXECUTE PROCEDURE ref_data.log_datadic_variables_update();
 
 
 --
 -- Name: datadic_variables log_datadic_variable_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_datadic_variable_history_update AFTER UPDATE ON ref_data.datadic_variables FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ref_data.log_datadic_variables_update();
+CREATE TRIGGER log_datadic_variable_history_update AFTER UPDATE ON ref_data.datadic_variables FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ref_data.log_datadic_variables_update();
 
 
 --
 -- Name: redcap_data_collection_instruments log_redcap_data_collection_instrument_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_data_collection_instrument_history_insert AFTER INSERT ON ref_data.redcap_data_collection_instruments FOR EACH ROW EXECUTE FUNCTION ref_data.redcap_data_collection_instrument_history_upd();
+CREATE TRIGGER log_redcap_data_collection_instrument_history_insert AFTER INSERT ON ref_data.redcap_data_collection_instruments FOR EACH ROW EXECUTE PROCEDURE ref_data.redcap_data_collection_instrument_history_upd();
 
 
 --
 -- Name: redcap_data_collection_instruments log_redcap_data_collection_instrument_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_data_collection_instrument_history_update AFTER UPDATE ON ref_data.redcap_data_collection_instruments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ref_data.redcap_data_collection_instrument_history_upd();
+CREATE TRIGGER log_redcap_data_collection_instrument_history_update AFTER UPDATE ON ref_data.redcap_data_collection_instruments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ref_data.redcap_data_collection_instrument_history_upd();
 
 
 --
 -- Name: redcap_data_dictionaries log_redcap_data_dictionary_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_data_dictionary_history_insert AFTER INSERT ON ref_data.redcap_data_dictionaries FOR EACH ROW EXECUTE FUNCTION ml_app.redcap_data_dictionary_history_upd();
+CREATE TRIGGER log_redcap_data_dictionary_history_insert AFTER INSERT ON ref_data.redcap_data_dictionaries FOR EACH ROW EXECUTE PROCEDURE ml_app.redcap_data_dictionary_history_upd();
 
 
 --
 -- Name: redcap_data_dictionaries log_redcap_data_dictionary_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_data_dictionary_history_update AFTER UPDATE ON ref_data.redcap_data_dictionaries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.redcap_data_dictionary_history_upd();
+CREATE TRIGGER log_redcap_data_dictionary_history_update AFTER UPDATE ON ref_data.redcap_data_dictionaries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.redcap_data_dictionary_history_upd();
 
 
 --
 -- Name: redcap_project_admins log_redcap_project_admin_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_project_admin_history_insert AFTER INSERT ON ref_data.redcap_project_admins FOR EACH ROW EXECUTE FUNCTION ml_app.redcap_project_admin_history_upd();
+CREATE TRIGGER log_redcap_project_admin_history_insert AFTER INSERT ON ref_data.redcap_project_admins FOR EACH ROW EXECUTE PROCEDURE ml_app.redcap_project_admin_history_upd();
 
 
 --
 -- Name: redcap_project_admins log_redcap_project_admin_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_project_admin_history_update AFTER UPDATE ON ref_data.redcap_project_admins FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.redcap_project_admin_history_upd();
+CREATE TRIGGER log_redcap_project_admin_history_update AFTER UPDATE ON ref_data.redcap_project_admins FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.redcap_project_admin_history_upd();
 
 
 --
 -- Name: redcap_project_users log_redcap_project_user_history_insert; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_project_user_history_insert AFTER INSERT ON ref_data.redcap_project_users FOR EACH ROW EXECUTE FUNCTION ref_data.redcap_project_user_history_upd();
+CREATE TRIGGER log_redcap_project_user_history_insert AFTER INSERT ON ref_data.redcap_project_users FOR EACH ROW EXECUTE PROCEDURE ref_data.redcap_project_user_history_upd();
 
 
 --
 -- Name: redcap_project_users log_redcap_project_user_history_update; Type: TRIGGER; Schema: ref_data; Owner: -
 --
 
-CREATE TRIGGER log_redcap_project_user_history_update AFTER UPDATE ON ref_data.redcap_project_users FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ref_data.redcap_project_user_history_upd();
+CREATE TRIGGER log_redcap_project_user_history_update AFTER UPDATE ON ref_data.redcap_project_users FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ref_data.redcap_project_user_history_upd();
 
 
 --
@@ -11725,6 +11918,14 @@ ALTER TABLE ONLY ml_app.nfs_store_stored_files
 
 ALTER TABLE ONLY ml_app.nfs_store_trash_actions
     ADD CONSTRAINT fk_rails_0e2ecd8d43 FOREIGN KEY (nfs_store_container_id) REFERENCES ml_app.nfs_store_containers(id);
+
+
+--
+-- Name: masters fk_rails_10869244dc; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.masters
+    ADD CONSTRAINT fk_rails_10869244dc FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -12272,6 +12473,14 @@ ALTER TABLE ONLY ml_app.model_references
 
 
 --
+-- Name: user_preferences fk_rails_a69bfcfd81; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_preferences
+    ADD CONSTRAINT fk_rails_a69bfcfd81 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: user_history fk_rails_af2f6ffc55; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -12792,14 +13001,6 @@ ALTER TABLE ONLY ref_data.datadic_variable_history
 
 
 --
--- Name: datadic_variables fk_rails_5578e37430; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.datadic_variables
-    ADD CONSTRAINT fk_rails_5578e37430 FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ref_data.redcap_data_dictionaries(id);
-
-
---
 -- Name: datadic_choice_history fk_rails_63103b7cf7; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
@@ -12813,14 +13014,6 @@ ALTER TABLE ONLY ref_data.datadic_choice_history
 
 ALTER TABLE ONLY ref_data.datadic_choices
     ADD CONSTRAINT fk_rails_67ca4d7e1f FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
-
-
---
--- Name: datadic_variable_history fk_rails_6ba6ab1e1f; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.datadic_variable_history
-    ADD CONSTRAINT fk_rails_6ba6ab1e1f FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ref_data.redcap_data_dictionaries(id);
 
 
 --
@@ -12896,14 +13089,6 @@ ALTER TABLE ONLY ref_data.redcap_data_collection_instrument_history
 
 
 --
--- Name: datadic_choice_history fk_rails_cb8a1e9d10; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.datadic_choice_history
-    ADD CONSTRAINT fk_rails_cb8a1e9d10 FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ref_data.redcap_data_dictionaries(id);
-
-
---
 -- Name: redcap_data_collection_instrument_history fk_rails_ce6075441d; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
@@ -12925,14 +13110,6 @@ ALTER TABLE ONLY ref_data.datadic_variable_history
 
 ALTER TABLE ONLY ref_data.datadic_variable_history
     ADD CONSTRAINT fk_rails_ef47f37820 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
-
-
---
--- Name: datadic_choices fk_rails_f5497a3583; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.datadic_choices
-    ADD CONSTRAINT fk_rails_f5497a3583 FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ref_data.redcap_data_dictionaries(id);
 
 
 --
@@ -13316,6 +13493,37 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20211222135957'),
 ('20211222140008'),
 ('20211222140019'),
-('20211231113457');
+('20211231113457'),
+('20220121143719'),
+('20220131111232'),
+('20220131121830'),
+('20220131121831'),
+('20220131121833'),
+('20220131121834'),
+('20220131121835'),
+('20220131123017'),
+('20220131123100'),
+('20220131131244'),
+('20220131132533'),
+('20220131135242'),
+('20220131135349'),
+('20220131135547'),
+('20220131135600'),
+('20220131140353'),
+('20220131140521'),
+('20220131143324'),
+('20220131155227'),
+('20220131155229'),
+('20220131171632'),
+('20220131172554'),
+('20220131172618'),
+('20220131182607'),
+('20220131184011'),
+('20220131184041'),
+('20220131184511'),
+('20220201102247'),
+('20220201102549'),
+('20220201173928'),
+('20220202175848');
 
 

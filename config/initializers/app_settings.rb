@@ -51,7 +51,7 @@ class Settings
   # Disable 2FA by setting to true. The environment variable should be 'true' to set this
   TwoFactorAuthDisabled = (ENV['FPHS_2FA_AUTH_DISABLED'] == 'true')
   # App name that appears within 2FA authenticator app
-  TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'FPHS Apps'
+  TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'ReStructure'
   # Number of seconds to use for 2FA token drift (the older it is allowed to be and still be valid)
   TwoFactorAuthDrift = (ENV['FPHS_2FA_DRIFT'] || 30).to_i
 
@@ -79,7 +79,16 @@ class Settings
   # using the curly substitution {{base_url}}
   BaseUrl = ENV['BASE_URL'] || '(not set)'
   # title tag page title, appears in tab or browser heading
-  PageTitle = ENV['PAGE_TITLE'] || 'FPHS'
+  PageTitle = ENV['PAGE_TITLE'] || 'ReStructure'
+
+  # Registration Settings
+  # Since passwords have generated upon user creation, we must suppress generating a password
+  # with the user (self) registration feature.
+  AllowUsersToRegister = (ENV['ALLOW_USERS_TO_REGISTER'].to_s.downcase == 'true')
+  # Admin assigned to newly created user through the user registration feature
+  RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'] || AdminEmail
+  # Template user for creating new users. The roles from this user are copied to the new user.
+  DefaultUserTemplateEmail = ENV['DEFAULT_USER_TEMPLATE_EMAIL'] || 'registration@template'
 
   # Registration Settings
   # Since passwords have generated upon user creation, we must suppress generating a password

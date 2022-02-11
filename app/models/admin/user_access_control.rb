@@ -30,11 +30,11 @@ class Admin::UserAccessControl < Admin::AdminBase
     {
       table: [nil, :see_presence, :read, :update, :create],
       general: [nil, :read],
-      limited_access: [nil, :limited],
+      limited_access: [nil, :limited, :limited_if_none],
       report: [nil, :read],
       standalone_page: [nil, :read],
       activity_log_type: [nil, :see_presence, :read, :update, :create],
-      external_id_assignments: [nil, :limited]
+      external_id_assignments: [nil, :limited, :limited_if_none]
     }
   end
 
@@ -304,6 +304,11 @@ class Admin::UserAccessControl < Admin::AdminBase
                              end
 
     !resource_name_for_type&.include?(resource_name.to_s)
+  end
+
+  # Provide a usable name for viewing
+  def name
+    "#{resource_type} #{resource_name} #{role_name} #{user&.email}"
   end
 
   private

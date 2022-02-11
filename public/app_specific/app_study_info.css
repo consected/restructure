@@ -12,34 +12,34 @@
   --link-active-color: #402964;
   --bottom-grad-color: #4a3277;
   --bottom-grad-darker-color: #452e70;
-  --content-font-family: 'Lato', sans-serif;
-  --table-font-family: 'Lato', sans-serif;
+  --content-font-family: "Lato", sans-serif;
+  --table-font-family: "Lato", sans-serif;
 }
 
 @font-face {
-  font-family: 'Lato';
-  src: url('/fonts/lato/Lato-Regular.ttf');
+  font-family: "Lato";
+  src: url("/fonts/lato/Lato-Regular.ttf");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Lato';
-  src: url('/fonts/lato/Lato-Black.ttf');
+  font-family: "Lato";
+  src: url("/fonts/lato/Lato-Black.ttf");
   font-weight: bold;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Lato';
-  src: url('/fonts/lato/Lato-Italic.ttf');
+  font-family: "Lato";
+  src: url("/fonts/lato/Lato-Italic.ttf");
   font-weight: normal;
   font-style: italic;
 }
 
 @font-face {
-  font-family: 'Lato';
-  src: url('/fonts/lato/Lato-BlackItalic.ttf');
+  font-family: "Lato";
+  src: url("/fonts/lato/Lato-BlackItalic.ttf");
   font-weight: bold;
   font-style: italic;
 }
@@ -150,7 +150,7 @@ li.list-group-item.results-caption-before.activity-log--study-info-part-page-des
   appearance: none;
 }
 
-#master_results_block form .edit-field-container input[type='checkbox'] {
+#master_results_block form .edit-field-container input[type="checkbox"] {
   appearance: auto;
   min-width: 1em;
 }
@@ -237,7 +237,7 @@ table.table.report-table td {
 }
 #standalone-page > .standalone-page-container .reset-row p br {
   display: block;
-  content: '';
+  content: "";
   margin-top: 0.8em;
   line-height: 190%;
   vertical-align: top;
