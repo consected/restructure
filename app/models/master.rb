@@ -166,9 +166,8 @@ class Master < ActiveRecord::Base
   if attribute_names.include? 'created_by_user_id'
     belongs_to :master_created_by_user, class_name: 'User', optional: true, foreign_key: :created_by_user_id
     Resources::Models.add(User, resource_name: :master_created_by_user)
+    before_create :write_created_by_user
   end
-
-  before_create :write_created_by_user
 
   attr_accessor :force_order, :creating_master
   attr_reader :current_user, :embedded_item
@@ -673,7 +672,6 @@ class Master < ActiveRecord::Base
       assoc_name = e.resource_name.to_sym
       assoc = send(assoc_name) if respond_to? assoc_name
 
-      this_res = true
       # The assoc may by nil if this is a belongs_to association and there is no target instance
       this_res = if assoc_name == :master_created_by_user
                    current_user.id == created_by_user_id
@@ -687,7 +685,10 @@ class Master < ActiveRecord::Base
 
       return false if e.access == 'limited' && this_res == false
 
-      limited_once_res ||= this_res if e.access == 'limited_if_none'
+      if e.access == 'limited_if_none'
+        limited_once_res ||= this_res
+        break if limited_once_res
+      end
     end
 
     return limited_once_res unless limited_once_res.nil?
@@ -738,6 +739,6 @@ class Master < ActiveRecord::Base
   end
 
   def write_created_by_user
-    self.created_by_user_id = current_user
+    self.created_by_user_id = current_user&.id
   end
 end
