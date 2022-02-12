@@ -44,10 +44,12 @@ module Resources
     # Most of the definition values will be based on the model
     # The *type* will be calculated to provide a mechanism for
     # categorizing the models.
-    def self.add(model)
+
+    def self.add(model, resource_name: nil)
+
       @@resources ||= {}
 
-      resource_name = model.resource_name.to_sym
+      resource_name ||= model.resource_name.to_sym
       type = if model.respond_to? :definition
                model.definition.class.name.underscore.to_sym
              elsif model.respond_to? :resource_category

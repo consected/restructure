@@ -78,7 +78,11 @@ module Resources
       categorize_resources DynamicModel, 'dynamic model', res
 
       res.merge!(
-        "external identifiers": ExternalIdentifier.active.map { |r| [r.resource_name, r.label] }.to_h
+        'external identifiers': ExternalIdentifier.active.map { |r| [r.resource_name, r.label] }.to_h,
+        'general': {
+          'master_created_by_user': 'Created by User',
+          'temporary_master': 'Temporary Master Record'
+        }
       )
 
       res

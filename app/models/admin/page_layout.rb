@@ -205,4 +205,9 @@ class Admin::PageLayout < Admin::AdminBase
 
     user.has_access_to?(:read, :standalone_page, :_all_standalone_pages_)
   end
+
+  # Provide a viewable name
+  def name
+    "#{layout_name} #{panel_name}"
+  end
 end
