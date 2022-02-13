@@ -67,5 +67,3 @@ class UserPreference < UserBase
     self.pattern_for_time_format ||= UserPreference.default_pattern_for_time_format
   end
 end
-
-Time
