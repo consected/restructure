@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_21_143719) do
+ActiveRecord::Schema.define(version: 2022_02_02_175848) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -754,6 +754,8 @@ ActiveRecord::Schema.define(version: 2022_01_21_143719) do
     t.datetime "updated_at"
     t.integer "user_id"
     t.integer "contact_id"
+    t.bigint "created_by_user_id"
+    t.index ["created_by_user_id"], name: "index_masters_on_created_by_user_id"
     t.index ["msid"], name: "index_masters_on_msid"
     t.index ["pro_id"], name: "index_masters_on_proid"
     t.index ["pro_info_id"], name: "index_masters_on_pro_info_id"
@@ -1904,6 +1906,7 @@ ActiveRecord::Schema.define(version: 2022_01_21_143719) do
   add_foreign_key "item_flags", "item_flag_names"
   add_foreign_key "item_flags", "users"
   add_foreign_key "masters", "users"
+  add_foreign_key "masters", "users", column: "created_by_user_id"
   add_foreign_key "message_notifications", "app_types"
   add_foreign_key "message_notifications", "masters"
   add_foreign_key "message_notifications", "users"
