@@ -44,7 +44,9 @@ module Resources
     # Most of the definition values will be based on the model
     # The *type* will be calculated to provide a mechanism for
     # categorizing the models.
+
     def self.add(model, resource_name: nil)
+
       @@resources ||= {}
 
       resource_name ||= model.resource_name.to_sym

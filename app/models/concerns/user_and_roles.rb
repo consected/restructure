@@ -8,11 +8,14 @@ module UserAndRoles
   class_methods do
     # Standard ordering clause for lists and evaluation of user and roles
     def priority_order
-      Arel.sql "CASE
-WHEN user_id IS NOT NULL THEN user_id::varchar
-WHEN (role_name IS NOT NULL AND role_name <> '') THEN role_name
-ELSE user_id::varchar
-END"
+      Arel.sql <<~END_SQL
+        app_type_id ASC NULLS LAST,
+        CASE
+        WHEN user_id IS NOT NULL THEN user_id::varchar
+        WHEN (role_name IS NOT NULL AND role_name <> '') THEN role_name
+        ELSE user_id::varchar
+        END
+      END_SQL
     end
 
     # Ordered scope of user and role conditions used in user access controls and app configurations
@@ -74,6 +77,7 @@ END"
       conditions = [where_clause] + where_conditions
 
       active.where(app_type_id: [app_type_id, nil]).where(conditions)
+
     end
 
     def order_user_and_role

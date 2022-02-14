@@ -334,6 +334,13 @@ div.reset-row,
   }
 }
 
+.standalone-page-design .custom-editor,
+.standalone-page-design .custom-editor-viewer {
+  img.broken-image {
+    opacity: 100;
+  }
+}
+
 @media (max-width: 767px) {
   div.reset-row .standalone-page-design {
     .custom-editor,

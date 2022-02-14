@@ -137,6 +137,7 @@ module NavHandler
                                      .map { |m| [m.label, m.id] }
                                      .sort { |a, b| a.first <=> b.first }
 
+    user_sub << { label: 'user profile', url: '/user_profile' }
     user_sub << { label: "#{current_admin ? 'user ' : ''}password", url: '/users/edit',
                   extras: { 'data-do-action' => 'user-change-password' } }
     user_sub << { label: 'logout', url: '/users/sign_out',

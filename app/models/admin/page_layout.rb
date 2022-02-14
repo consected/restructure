@@ -5,6 +5,10 @@
 class Admin::PageLayout < Admin::AdminBase
   self.table_name = 'page_layouts'
 
+  def self.app_type_not_required
+    true
+  end
+
   include AdminHandler
   include AppTyped
   include OptionsHandler
@@ -18,6 +22,7 @@ class Admin::PageLayout < Admin::AdminBase
   # @attr [String] layout_name - the role of the definition
   #   - master - a standard master result panel, laid out according to
   #              standard activity log / dynamic model panel configurations, or forced orientation
+  #   - user_profile - definition of the panels to show in a user profile page
   #   - nav - top nav (menu bar) item or "master-tabs" item
   #   - standalone - a standalone page / dashboard
   #   - view - a panel that allows row / column layout definition

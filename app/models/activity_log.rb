@@ -310,6 +310,10 @@ class ActivityLog < ActiveRecord::Base
     logger.error e
   end
 
+  def base_route_segments
+    "activity_log/#{implementation_model_name.pluralize.to_sym}"
+  end
+
   # set up a route for each available activity log definition
   def self.routes_load
     mn = nil
@@ -320,31 +324,33 @@ class ActivityLog < ActiveRecord::Base
       Rails.application.routes.draw do
         resources :masters, only: %i[show index new create] do
           m.each do |pg|
+            brn = pg.base_route_segments
             mn = pg.implementation_model_name.pluralize.to_sym
             Rails.logger.info "Setting up routes for #{mn}"
 
             ic = pg.item_type.pluralize
-            get "#{ic}/:item_id/activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
-            get "#{ic}/:item_id/activity_log/#{mn}/", to: "activity_log/#{mn}#index"
-            get "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
-            post "#{ic}/:item_id/activity_log/#{mn}", to: "activity_log/#{mn}#create"
-            get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
-            patch "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
-            put "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
-            get "#{ic}/:item_id/activity_log/#{mn}/:id/template_config", to: "activity_log/#{mn}#template_config"
+            get "#{ic}/:item_id/#{brn}/new", to: "#{brn}#new"
+            get "#{ic}/:item_id/#{brn}/", to: "#{brn}#index"
+            get "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#show"
+            post "#{ic}/:item_id/#{brn}", to: "#{brn}#create"
+            get "#{ic}/:item_id/#{brn}/:id/edit", to: "#{brn}#edit"
+            patch "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
+            put "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
+            get "#{ic}/:item_id/#{brn}/:id/template_config", to: "#{brn}#template_config"
 
-            # used by links to get to activity logs without having to use parent item (such as a player contact with phone logs)
-            get "activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
-            get "activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
-            get "activity_log/#{mn}/", to: "activity_log/#{mn}#index"
-            get "activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
-            post "activity_log/#{mn}", to: "activity_log/#{mn}#create"
-            patch "activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
-            get "activity_log/#{mn}/:id/template_config", to: "activity_log/#{mn}#template_config"
+            # used by links to get to activity logs without having to use parent item
+            # (such as a player contact with phone logs)
+            get "#{brn}/new", to: "#{brn}#new"
+            get "#{brn}/:id", to: "#{brn}#show"
+            get "#{brn}/", to: "#{brn}#index"
+            get "#{brn}/:id/edit", to: "#{brn}#edit"
+            post brn, to: "#{brn}#create"
+            patch "#{brn}/:id", to: "#{brn}#update"
+            get "#{brn}/:id/template_config", to: "#{brn}#template_config"
 
             # used by item flags to generate appropriate URLs
             begin
-              get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show",
+              get "activity_log__#{mn}/:id", to: "#{brn}#show",
                                              as: "activity_log_#{pg.implementation_model_name}"
             rescue StandardError
               Rails.logger.warn "Skipped creating route activity_log__#{mn}/:id since activity_log_#{pg.implementation_model_name} already exists?"

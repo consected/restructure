@@ -40,6 +40,11 @@ _fpa.postprocessors_help = {
       $(this).addClass('loaded-image')
     });
 
+    if (document.hidden) {
+      document.addEventListener('visibilitychange', function () {
+        block.find('img').not('.loaded-image').addClass('loaded-image')
+      })
+    }
 
     // Add table class to tables
     block.find('table').addClass('table')

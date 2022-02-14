@@ -3,6 +3,10 @@
 class Admin::UserAccessControl < Admin::AdminBase
   self.table_name = 'user_access_controls'
 
+  def self.app_type_not_required
+    true
+  end
+
   include AdminHandler
   include AppTyped
   include UserAndRoles
