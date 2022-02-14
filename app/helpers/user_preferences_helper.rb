@@ -1,14 +1,10 @@
 # frozen_string_literal: true
 
 module UserPreferencesHelper
-
   def timezone_options
     # TODO: Eventually, we would like to obtain the user's country and draw the options accordingly.
     #  priority_timezones are listed at the top of the list of options.
-    priority_timezones_for = %i[us ie gb de gr au].flat_map do |country_code|
-      ActiveSupport::TimeZone.country_zones(country_code)
-    end
-    time_zone_options_for_select(object_instance.timezone, priority_timezones_for)
+    time_zone_options_for_select(object_instance.timezone, PRIORITY_TIMEZONES)
   end
 
   def date_format_options
@@ -31,21 +27,25 @@ module UserPreferencesHelper
     field_options = UserPreference.no_downcase_attributes.map { |f| [f, { no_downcase: true }] }.to_h
 
     {
+      field_options: field_options,
+      # Set the order the fields are displayed
+      item_list: %i[timezone date_format time_format date_time_format],
+
       # caption_before: {
       #   pattern_for_date_format: {
       #     caption: 'Show date as'
       #   }
       # },
-
       labels: {
         timezone: 'Timezone',
         date_format: 'Show date as',
         date_time_format: 'Show date and time as',
         time_format: 'Show time as'
-      },
-      # Set the order the fields are displayed
-      item_list: %i[timezone date_format time_format date_time_format],
-      field_options: field_options
+      }
     }
   end
+
+  PRIORITY_TIMEZONES = %i[us ie gb de gr au].flat_map do |country_code|
+    ActiveSupport::TimeZone.country_zones(country_code)
+  end.freeze
 end
