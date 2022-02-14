@@ -2,16 +2,11 @@
 
 module UserPreferencesHelper
   def timezone_options
-    [
-      'Atlantic Time (Canada)',
-      'Eastern Time (US & Canada)',
-      'Central Time (US & Canada)',
-      'Mountain Time (US & Canada)',
-      'Pacific Time (US & Canada)',
-      'Alaska',
-      'Hawaii',
-      'Puerto Rico'
-    ]
+    # TODO: for now, draw the options the US timezones; however,
+    #  eventually we would like to obtain the user's country and draw the options accordingly.
+    # priority_timezones are listed at the top, so the regex will list the 4 main US timezones.
+    priority_timezones_for = /US/
+    time_zone_options_for_select(object_instance.timezone, priority_timezones_for)
   end
 
   def date_format_options
