@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module UserPreferencesHelper
+
   def timezone_options
-    # TODO: for now, draw the options the US timezones; however,
-    #  eventually we would like to obtain the user's country and draw the options accordingly.
-    # priority_timezones are listed at the top, so the regex will list the 4 main US timezones.
-    priority_timezones_for = /US/
+    # TODO: Eventually, we would like to obtain the user's country and draw the options accordingly.
+    #  priority_timezones are listed at the top of the list of options.
+    priority_timezones_for = %i[us ie gb de gr au].flat_map do |country_code|
+      ActiveSupport::TimeZone.country_zones(country_code)
+    end
     time_zone_options_for_select(object_instance.timezone, priority_timezones_for)
   end
 
