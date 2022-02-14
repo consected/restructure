@@ -45,7 +45,7 @@ module LimitedAccessControl
               all
             end
 
-      assoc = new.send(assoc_name)
+      assoc = (new.send(assoc_name) if new.respond_to?(assoc_name))
 
       if assoc&.requires_assigned_user?
         table_name = ModelReference.record_type_to_ns_table_name(assoc_name)
