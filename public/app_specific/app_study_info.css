@@ -215,6 +215,22 @@ table.table.report-table td {
   display: block;
 }
 
+.notes-text {
+  font-size: 17px;
+}
+div.reset-row .custom-editor h1,
+div.reset-row .custom-editor-viewer h1 {
+  font-size: 2.5em;
+}
+div.reset-row .custom-editor h2,
+div.reset-row .custom-editor-viewer h2 {
+  font-size: 1.4em;
+}
+.footer,
+.footer p {
+  font-size: 15px;
+}
+
 #standalone-page > .standalone-page-container h1,
 #standalone-page > .standalone-page-container h2,
 #standalone-page > .standalone-page-container h3,
