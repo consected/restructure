@@ -4,7 +4,7 @@ module UserPreferencesHelper
   def timezone_options
     # TODO: Eventually, we would like to obtain the user's country and draw the options accordingly.
     #  priority_timezones are listed at the top of the list of options.
-    time_zone_options_for_select(object_instance.timezone, PRIORITY_TIMEZONES)
+    time_zone_options_for_select(object_instance.timezone, Settings::PriorityTimezones)
   end
 
   def date_format_options
@@ -44,8 +44,4 @@ module UserPreferencesHelper
       }
     }
   end
-
-  PRIORITY_TIMEZONES = %i[us ie gb de gr au].flat_map do |country_code|
-    ActiveSupport::TimeZone.country_zones(country_code)
-  end.freeze
 end
