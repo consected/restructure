@@ -12,6 +12,8 @@ class UserPreference < UserBase
 
   after_initialize :set_defaults
 
+  before_validation :map_patterns
+
   validates :date_format,
             presence: true
 
@@ -41,27 +43,27 @@ class UserPreference < UserBase
   end
 
   def self.default_date_format
-    'mm/dd/yyyy'
+    Settings::DefaultDateFormat
   end
 
   def self.default_date_time_format
-    'mm/dd/yyyy h:mm:sspm'
+    Settings::DefaultDateTimeFormat
   end
 
   def self.default_time_format
-    'h:mm:sspm'
+    Settings::DefaultTimeFormat
   end
 
   def self.default_pattern_for_date_format
-    '%m/%d/%Y'
+    UserPreferencesHelper::DateFormats[UserPreference.default_date_format]
   end
 
   def self.default_pattern_for_date_time_format
-    '%m/%d/%Y %l:%M%p'
+    UserPreferencesHelper::DateTimeFormats[UserPreference.default_date_time_format]
   end
 
   def self.default_pattern_for_time_format
-    '%l:%M%p'
+    UserPreferencesHelper::TimeFormats[UserPreference.default_time_format]
   end
 
   # REMARK: to avoid confusion with ActiveRecord.default_timezone, added _user_ to its name.
@@ -81,5 +83,11 @@ class UserPreference < UserBase
     self.pattern_for_date_format ||= UserPreference.default_pattern_for_date_format
     self.pattern_for_date_time_format ||= UserPreference.default_pattern_for_date_time_format
     self.pattern_for_time_format ||= UserPreference.default_pattern_for_time_format
+  end
+
+  def map_patterns
+    self.pattern_for_date_format = UserPreferencesHelper::DateFormats[self.date_format]
+    self.pattern_for_date_time_format = UserPreferencesHelper::DateTimeFormats[self.date_time_format]
+    self.pattern_for_time_format = UserPreferencesHelper::TimeFormats[self.time_format]
   end
 end

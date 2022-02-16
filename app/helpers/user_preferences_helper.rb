@@ -4,19 +4,19 @@ module UserPreferencesHelper
   def timezone_options
     # TODO: Eventually, we would like to obtain the user's country and draw the options accordingly.
     #  priority_timezones are listed at the top of the list of options.
-    time_zone_options_for_select(object_instance.timezone, Settings::PriorityTimezones)
+    time_zone_options_for_select(object_instance.timezone, PriorityTimezones)
   end
 
   def date_format_options
-    %w[mm/dd/yyyy dd/mm/yyyy]
+    DateFormats.keys
   end
 
   def date_time_format_options
-    ['mm/dd/yyyy hh:mm:ss am/pm', 'mm/dd/yyyy 24h:mm:ss', 'dd/mm/yyyy hh:mm:ss am/pm', 'dd/mm/yyyy 24h:mm:ss']
+    DateTimeFormats.keys
   end
 
   def time_format_options
-    ['hh:mm:ss am/pm', '24h:mm:ss']
+    TimeFormats.keys
   end
 
   #
@@ -44,4 +44,28 @@ module UserPreferencesHelper
       }
     }
   end
+
+  DateFormats = {
+    'mm/dd/yyyy' => '%m/%d/%Y',
+    'dd/mm/yyyy' => '%d/%m/%Y'
+  }.freeze
+
+  DateTimeFormats = {
+    'mm/dd/yyyy hh:mm:ss am/pm' => '%m/%d/%Y %l:%M:%S %P',
+    'mm/dd/yyyy 24h:mm:ss' => '%m/%d/%Y %k:%M:%S',
+    'dd/mm/yyyy hh:mm:ss am/pm' => '%d/%m/%Y %l:%M:%S %P',
+    'dd/mm/yyyy 24h:mm:ss' => '%d/%m/%Y %k:%M:%S'
+  }.freeze
+
+  TimeFormats = {
+    'hh:mm:ss am/pm' => '%l:%M:%S %P',
+    '24h:mm:ss' => '%k:%M:%S'
+  }.freeze
+
+  PriorityTimezones = Settings::CountryCodesForTimezones.flat_map do |country_code|
+    ActiveSupport::TimeZone.country_zones(country_code)
+  end
+  # Ensure the default timezone is amongst the priority timezones
+  PriorityTimezones << ActiveSupport::TimeZone[Settings::DefaultUserTimezone]
+  PriorityTimezones.uniq!.freeze
 end

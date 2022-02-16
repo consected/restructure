@@ -207,10 +207,9 @@ class Settings
   # Timezones
   CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES'] || %i[us ie gb de gr au nz]).freeze
   DefaultUserTimezone = (ENV['DEFAULT_TIMEZONE'] || 'Eastern Time (US & Canada)').freeze
-  PriorityTimezones = CountryCodesForTimezones.flat_map do |country_code|
-    ActiveSupport::TimeZone.country_zones(country_code)
-  end
-  # Ensure the default timezone is amongst the priority timezones
-  PriorityTimezones << ActiveSupport::TimeZone[DefaultUserTimezone]
-  PriorityTimezones.uniq!.freeze
+
+  # Date, Time and DateTime formats
+  DefaultDateFormat = (ENV['DEFAULT_DATE_FORMAT'] || 'mm/dd/yy').freeze
+  DefaultDateTimeFormat = (ENV['DEFAULT_DATE_TIME_FORMAT'] || 'mm/dd/yyyy hh:mm:ss am/pm').freeze
+  DefaultTimeFormat = (ENV['DEFAULT_TIME_FORMAT'] || 'hh:mm:ss am/pm').freeze
 end
