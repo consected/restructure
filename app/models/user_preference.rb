@@ -40,7 +40,18 @@ class UserPreference < UserBase
     ]
   end
 
-  # put  validations here
+  def self.default_date_format
+    'mm/dd/yyyy'
+  end
+
+  def self.default_date_time_format
+    'mm/dd/yyyy h:mm:sspm'
+  end
+
+  def self.default_time_format
+    'h:mm:sspm'
+  end
+
   def self.default_pattern_for_date_format
     '%m/%d/%Y'
   end
@@ -53,15 +64,20 @@ class UserPreference < UserBase
     '%l:%M%p'
   end
 
+  # REMARK: to avoid confusion with ActiveRecord.default_timezone, added _user_ to its name.
+  def self.default_user_timezone
+    'Eastern Time (US & Canada)'
+  end
+
   add_model_to_list # always at the end of model
 
   private
 
   def set_defaults
-    self.date_format ||= 'mm/dd/yyyy'
-    self.date_time_format ||= 'mm/dd/yyyy h:mm:sspm'
-    self.time_format ||= 'h:mm:sspm'
-    self.timezone ||= 'Eastern Time (US & Canada)'
+    self.date_format ||= UserPreference.default_date_format
+    self.date_time_format ||= UserPreference.default_date_time_format
+    self.time_format ||= UserPreference.default_time_format
+    self.timezone ||= UserPreference.default_user_timezone
     self.pattern_for_date_format ||= UserPreference.default_pattern_for_date_format
     self.pattern_for_date_time_format ||= UserPreference.default_pattern_for_date_time_format
     self.pattern_for_time_format ||= UserPreference.default_pattern_for_time_format
