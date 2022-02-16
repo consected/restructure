@@ -66,7 +66,7 @@ class UserPreference < UserBase
 
   # REMARK: to avoid confusion with ActiveRecord.default_timezone, added _user_ to its name.
   def self.default_user_timezone
-    'Eastern Time (US & Canada)'
+    Settings::DefaultUserTimezone
   end
 
   add_model_to_list # always at the end of model
