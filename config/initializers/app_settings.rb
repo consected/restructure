@@ -209,7 +209,7 @@ class Settings
   DefaultUserTimezone = (ENV['DEFAULT_TIMEZONE'] || 'Eastern Time (US & Canada)').freeze
 
   # Date, Time and DateTime formats
-  DefaultDateFormat = (ENV['DEFAULT_DATE_FORMAT'] || 'mm/dd/yy').freeze
+  DefaultDateFormat = (ENV['DEFAULT_DATE_FORMAT'] || 'mm/dd/yyyy').freeze
   DefaultDateTimeFormat = (ENV['DEFAULT_DATE_TIME_FORMAT'] || 'mm/dd/yyyy hh:mm:ss am/pm').freeze
   DefaultTimeFormat = (ENV['DEFAULT_TIME_FORMAT'] || 'hh:mm:ss am/pm').freeze
 end
