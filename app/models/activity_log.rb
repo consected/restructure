@@ -337,6 +337,7 @@ class ActivityLog < ActiveRecord::Base
             patch "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
             put "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
             get "#{ic}/:item_id/#{brn}/:id/template_config", to: "#{brn}#template_config"
+            get "#{ic}/:item_id/#{brn}/:extra_log_type/new", to: "#{brn}#new"
 
             # used by links to get to activity logs without having to use parent item
             # (such as a player contact with phone logs)
@@ -347,6 +348,7 @@ class ActivityLog < ActiveRecord::Base
             post brn, to: "#{brn}#create"
             patch "#{brn}/:id", to: "#{brn}#update"
             get "#{brn}/:id/template_config", to: "#{brn}#template_config"
+            get "#{brn}/:extra_log_type/new", to: "#{brn}#new"
 
             # used by item flags to generate appropriate URLs
             begin
