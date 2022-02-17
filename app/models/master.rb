@@ -186,6 +186,12 @@ class Master < ActiveRecord::Base
   end
 
   #
+  # Human name for a master record
+  def self.human_name
+    'Master'
+  end
+
+  #
   # Find a Master with an id, crosswalk attribute or alternative id
   # @param [Hash] params
   #   @option params [String] :type - a crosswalk attribute or external id field name
