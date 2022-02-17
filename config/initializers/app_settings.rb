@@ -203,4 +203,13 @@ class Settings
 
   # Prevent versioning of dynamic definitions
   DisableVDef = ENV.key?('FPHS_DISABLE_VDEF') ? ENV['FPHS_DISABLE_VDEF'] == 'true' : Rails.env.development?
+
+  # Timezones
+  CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES'] || %i[us ie gb de gr au nz]).freeze
+  DefaultUserTimezone = (ENV['DEFAULT_TIMEZONE'] || 'Eastern Time (US & Canada)').freeze
+
+  # Date, Time and DateTime formats
+  DefaultDateFormat = (ENV['DEFAULT_DATE_FORMAT'] || 'mm/dd/yyyy').freeze
+  DefaultDateTimeFormat = (ENV['DEFAULT_DATE_TIME_FORMAT'] || 'mm/dd/yyyy hh:mm:ss am/pm').freeze
+  DefaultTimeFormat = (ENV['DEFAULT_TIME_FORMAT'] || 'hh:mm:ss am/pm').freeze
 end
