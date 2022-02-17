@@ -50,6 +50,8 @@ logo filename: |
   For example: /app_specific/sample_app/project-logo.png
 logo link: |
   Link to go to when the logo is clicked. By default "/". Relative to the app root
+hide master heading: |
+  Hide the master heading, including id, prefix and title
 master header prefix: |
   Prefix to display on the master header. May include curly { { substitutions } }
 master header title: |

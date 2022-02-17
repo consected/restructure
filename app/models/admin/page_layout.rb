@@ -66,7 +66,9 @@ class Admin::PageLayout < Admin::AdminBase
   #   limit: max number of items to show in panel
   #   initial_show: initially open up a panel
   #   find_with: the alternative id (crosswalk or external id) to search for the master record with for standalone pages
-  configure :view_options, with: %i[initial_show orientation add_item_label limit find_with]
+  configure :view_options,
+            with: %i[initial_show orientation add_item_label limit find_with hide_sublist_controls
+                     hide_activity_logs_header]
 
   # List options for dashboards list
   configure :list_options, with: %i[hide_in_list]
