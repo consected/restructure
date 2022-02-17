@@ -89,7 +89,7 @@ module MasterHandler
       end
     end
     # Ensure that show happens outside of the commit, otherwise we get incomplete results from save triggers
-    show if do_show
+    now_show if do_show
   end
 
   def update
@@ -118,7 +118,7 @@ module MasterHandler
       end
     end
     # Ensure that show happens outside of the commit, otherwise we get incomplete results from save triggers
-    show if do_show
+    now_show if do_show
   end
 
   def destroy
@@ -128,6 +128,14 @@ module MasterHandler
   def flags; end
 
   protected
+
+  #
+  # Show the result of an update or create
+  # Force the action_name to be show, so references are calculated correctly
+  def now_show
+    object_instance.action_name = 'show'
+    show
+  end
 
   #
   # Retrieve the index action JSON from master objects and extended data
