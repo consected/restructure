@@ -44,6 +44,7 @@ _fpa.postprocessors_reports = {
     _fpa.show_modal(html, null, true, 'embedded-dynamic-block', 1)
     window.setTimeout(function () {
       $(block).contents().appendTo(`#${target_block}`)
+      $(block).html('');
       window.setTimeout(function () {
         _fpa.form_utils.resize_labels($(`#${target_block}`), null, true)
       }, 500);
@@ -320,6 +321,10 @@ _fpa.postprocessors_reports = {
       _fpa.postprocessors_reports.report_format_result_cells(row, data);
     }, 50)
 
+  },
+
+  master_search_results: function (block, data) {
+    $('#master_results_block').attr('data-report-res-name', data.report_res_name);
   }
 
 };
