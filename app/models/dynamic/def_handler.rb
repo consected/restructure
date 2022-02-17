@@ -446,6 +446,20 @@ module Dynamic
         nil
       end
       got_class if got_class&.to_s&.start_with?(self.class.implementation_prefix)
+
+      return unless fields_match_columns?
+
+      got_class
+    end
+
+    #
+    # Check the defined field list matches the columns in the database. If not,
+    # we may need to regenerate the model
+    def fields_match_columns?
+      fields = all_implementation_fields
+      fields.reject! { |f| f.index(/^embedded_report_|^placeholder_/) }
+
+      (fields.sort - table_columns.map { |c| c.name.to_s }.sort).empty?
     end
 
     # Is the definition ready for a class to be defined?
