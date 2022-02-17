@@ -26,7 +26,7 @@ module Formatter
       return unless all_content
 
       all_content = all_content.dup
-      tags = all_content.scan(/{{[0-9a-zA-Z_.:]+}}/).uniq
+      tags = all_content.scan(/{{[0-9a-zA-Z_.:\-]+}}/).uniq
 
       # Only setup data if there are tags
       sub_data = setup_data(data) unless tags.empty?
@@ -79,6 +79,9 @@ module Formatter
       else
         d = sub_data
       end
+
+      d = d.first if d.respond_to? :where
+      d = d.attributes if d.respond_to? :attributes
 
       # Handle formatting directives, following the ::
       tag_split = tag.split('::')
@@ -155,6 +158,7 @@ module Formatter
         master = item[:master]
         master = Master.find(item[:master_id]) if item[:master_id] && !master
       elsif item
+        item = item.first if item.respond_to? :where
         data = item.attributes.dup
         data[:original_item] = item
         data[:alt_item] = alt_item
@@ -293,12 +297,15 @@ module Formatter
       Reports::Template.embedded_report report_name, list_id, list_type
     end
 
-    def self.add_item_button(tag, _data)
+    def self.add_item_button(tag, data)
       model_name = tag.sub('add_item_button_', '')
 
       if model_name.start_with? 'to_master_'
         _, _, add_to_master = source_for(data)
         model_name = model_name.sub('to_master_', '')
+      elsif model_name.start_with? 'to_temporary_master_'
+        add_to_master = -1
+        model_name = model_name.sub('to_temporary_master_', '')
       end
 
       Formatter::AddItemButton.markup model_name, add_to_master
@@ -342,13 +349,14 @@ module Formatter
         item_reference = false
         ref_parts.each do |name|
           # Get the associated item, based on the current part of the substitution name
-          res_item = get_associated_item(master, name, res_data, item_reference: item_reference)
-          res_data = nil
-          break unless res_item
+          res_data = get_associated_item(master, name, res_data, item_reference: item_reference)
 
-          res_data = setup_data res_item
+          break unless res_data.present?
+
           item_reference = true
         end
+
+        res_data = setup_data res_data if res_data
 
         return unless res_data
       rescue StandardError => e
@@ -381,7 +389,23 @@ module Formatter
 
       return nil unless master
 
+      data = if an == 'first' && data.respond_to?(:first)
+               data.first
+             elsif an == 'last' && data.respond_to?(:last)
+               data.last
+             elsif data.respond_to? :where
+               data.first
+             else
+               data
+             end
+
+      data = setup_data data if data
+
+      return unless data
+
       item = data[:original_item] || data
+
+      return item if ['first', 'last'].include?(an)
 
       if an == 'ids'
         master.alternative_ids
@@ -397,8 +421,6 @@ module Formatter
         item.top_referring_record
       elsif an == 'latest_reference' && item.respond_to?(:latest_reference)
         item.latest_reference
-      elsif an == 'first' && item.respond_to?(:first)
-        item.first
       elsif an == 'constants'
         # Options constants
         item.versioned_definition.options_constants&.dup if item.respond_to?(:versioned_definition)
@@ -411,19 +433,9 @@ module Formatter
           .order(position: :asc)
           .first
       elsif an.in?(allowable_associations(item.class))
-        objs = item.send(an)
-        if objs.respond_to? :first
-          objs.first
-        else
-          objs
-        end
+        item.send(an)
       elsif an.in? allowable_master_associations
-        objs = master.send(an)
-        if objs.respond_to? :first
-          objs.first
-        else
-          objs
-        end
+        master.send(an)
       elsif item_reference
         # Match model reference by underscored to record type, or if not matched by the resource name
         # The latter allows activity logs to be matched on their extra log type too.
