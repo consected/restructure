@@ -56,6 +56,7 @@
   });
   eR.add('in', function (left, right) {
     if (!isArray(right)) {
+      if (!right) right = '';
       right = right.split(',');
     }
     return right.indexOf(left) !== -1;
