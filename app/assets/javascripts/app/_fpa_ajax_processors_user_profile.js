@@ -12,6 +12,7 @@ _fpa.postprocessors_user_profile = {
       })
     });
 
+    _fpa.form_utils.on_open_click(block);
   }
 
 }
