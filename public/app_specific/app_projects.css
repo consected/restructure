@@ -7,7 +7,6 @@
   --link-active-color: #402964;
   --bottom-grad-color: #4a3277;
   --bottom-grad-darker-color: #452e70;
-
   --content-font-family: "Assistant", sans-serif;
   --content-font-size: 18px;
 
@@ -23,6 +22,8 @@
 @font-face {
   font-family: "Assistant";
   src: url("/fonts/assistant/Assistant-VariableFont_wght.ttf");
+  /* font-weight: normal;
+  font-style: normal; */
 }
 
 @font-face {

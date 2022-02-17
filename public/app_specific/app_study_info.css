@@ -12,8 +12,19 @@
   --link-active-color: #402964;
   --bottom-grad-color: #4a3277;
   --bottom-grad-darker-color: #452e70;
-  --content-font-family: "Lato", sans-serif;
-  --table-font-family: "Lato", sans-serif;
+  /* --content-font-family: "Lato", sans-serif;
+  --table-font-family: "Lato", sans-serif; */
+
+  --content-font-family: "Assistant", sans-serif;
+  --content-font-size: 18px;
+
+  --button-font-family: "Assistant", sans-serif;
+  --label-font-family: "Assistant", sans-serif;
+
+  --table-font-family: "Assistant", sans-serif;
+  --table-font-size: 16px;
+  --table-head-font-family: "Assistant", sans-serif;
+  --table-head-font-size: 15px;
 }
 
 @font-face {
