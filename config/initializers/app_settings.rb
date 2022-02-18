@@ -211,7 +211,7 @@ class Settings
 
   # Use the timezone name or identifier.
   # ActiveSupport::TimeZone.country_zones('GB').map(&:name) == ["Edinburgh", "London"]
-  DefaultUserTimezone = (ENV['DEFAULT_TIMEZONE'] || 'London').freeze
+  DefaultUserTimezone = (ENV['DEFAULT_TIMEZONE'] || 'Eastern Time (US & Canada)').freeze
 
   # Date, Time and DateTime formats
   #
