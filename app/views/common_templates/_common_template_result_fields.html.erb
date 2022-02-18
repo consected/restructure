@@ -7,13 +7,11 @@
     {{#if (fpa_state_item 'dialog_before' (underscore name) vdef_version key)}}
       {{{fpa_state_item 'dialog_before' (underscore name) vdef_version key}}}
     {{else if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'show_caption')}}
-    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}">
-      {{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'show_caption'}}}
-    </li>
+    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}"
+    >{{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'show_caption'}}}</li>
     {{else if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption')}}
-    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}">
-      {{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption'}}}
-    </li>
+    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}"
+    >{{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption'}}}</li>
     {{/if}}
   {{/if}}
   {{#is field_type "notes"}}
