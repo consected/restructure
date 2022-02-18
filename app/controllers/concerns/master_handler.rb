@@ -133,7 +133,7 @@ module MasterHandler
   # Show the result of an update or create
   # Force the action_name to be show, so references are calculated correctly
   def now_show
-    object_instance.action_name = 'show'
+    object_instance.action_name = 'show' if object_instance.respond_to? :action_name
     show
   end
 

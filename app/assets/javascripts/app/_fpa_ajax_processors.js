@@ -259,7 +259,7 @@ _fpa.postprocessors = {
     // The layout of data is modelled partially on that provided by MessageTemplate.setup_data
     // allowing caption-before to function in 'show' mode
     if (data.masters && data.masters.length > 0) {
-      _fpa.state.masters = _fpa.state.masters || {}
+      _fpa.state.masters = {}
       data.masters.forEach(function (master) {
         if (master && master.id) {
           _fpa.state.masters[master.id] = Object.assign({}, master);
