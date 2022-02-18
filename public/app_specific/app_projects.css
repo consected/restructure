@@ -121,10 +121,17 @@ ul.list-group.is-activity-log {
 }
 
 ul.list-group.is-activity-log > li.list-group-item,
-form ul.list-group > li.list-group-item {
+form ul.list-group > li.list-group-item,
+.common-template-item-inner > ul.list-group > li.list-group-item {
   border: 0;
   background: none;
   font-size: 110%;
+}
+
+ul.list-group.is-activity-log > li.list-group-item.caption-before,
+form ul.list-group > li.list-group-item.caption-before,
+.common-template-item-inner > ul.list-group > li.list-group-item.caption-before {
+  background: rgb(242, 242, 242);
 }
 
 ul.list-group.is-activity-log > li.list-group-item.placeholder-caption-before,
@@ -133,7 +140,8 @@ form ul.list-group > li.list-group-item.placeholder-caption-before {
 }
 
 ul.list-group.is-activity-log h4.list-group-item-heading,
-li.edit-form-header h4.list-group-item-heading {
+li.edit-form-header h4.list-group-item-heading,
+.common-template-item-inner > ul.list-group h4.list-group-item-heading {
   color: rgb(88, 88, 88);
   padding: 15px 0;
   font-size: 32px;
@@ -143,7 +151,7 @@ li.edit-form-header h4.list-group-item-heading {
 
 ul.list-group.is-activity-log > li.list-group-item.caption-before,
 ul.list-group > li.list-group-item.caption-before {
-  padding: 10px 15px 0 15px;
+  padding: 10px 15px 6px 15px;
   border-top: 1px solid rgb(228, 228, 228);
 }
 
@@ -286,7 +294,8 @@ table.table.report-table td {
 }
 
 .edit-field-container .input-sm[data-attr-name="project_title"],
-li.dynamic-model--data-request-project_title.result-field-container strong {
+li.dynamic-model--data-request-project_title.result-field-container strong,
+#new_activity_log_project_assignment input[name="activity_log_project_assignment[title]"] {
   font-size: 23px;
   font-weight: bold;
   min-height: 38px;
@@ -489,4 +498,17 @@ table.table {
   background: rgb(239, 239, 239);
   margin-top: 1em;
   margin-bottom: 1em;
+}
+
+ul.list-group.is-activity-log
+  > li.list-group-item.caption-before.placeholder-caption-before.activity-log--project-assignment-analysis-plan-placeholder_intro,
+form
+  ul.list-group
+  > li.list-group-item.caption-before.activity-log--project-assignment-placeholder_intro.placeholder-caption-before {
+  background: none !important;
+  color: rgb(102 102 102);
+  border-top: 0;
+  padding-top: 0;
+  margin-top: -17px;
+  font-size: 95%;
 }
