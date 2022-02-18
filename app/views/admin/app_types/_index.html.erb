@@ -18,8 +18,8 @@
           <th>Active on Server?</th>
           <th>Disabled</th>
           <th>Last Admin Update</th>
-          <th>Filestore setup</th>
           <th>Export</th>
+          <th>Filestore setup</th>
         </tr>
       </thead>
       <tbody>
@@ -33,7 +33,6 @@
             <td><%= list_item.active_on_server? ? 'yes' : '<b>no</b>'.html_safe %></td>
             <td><%= list_item.disabled ? 'disabled' : ''%></td>
             <td><%= list_item.admin_name %></td>
-            <td><code>app-scripts/setup_filestore_app.sh <%=list_item.id%></code></td>
             <td>
             <% if list_item.active_on_server? %>
             <%= link_to 'export json', admin_app_type_path(list_item, export_format: :json), target: '_blank' %> | 
@@ -42,6 +41,7 @@
             <%= link_to 'components', admin_app_type_path(list_item, show_components: true), target: '_blank' %>
             <% end %>
             </td>
+            <td><code><% Rails.env.production? ? 'RAILS_ENV=production ' : ''%>app-scripts/setup_filestore_app.sh <%=list_item.id%></code></td>
           </tr>
         <% end %>
       </tbody>
