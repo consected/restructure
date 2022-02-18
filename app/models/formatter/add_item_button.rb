@@ -15,7 +15,7 @@ module Formatter
         hyph_name = model_name.hyphenate
       when 3
         path = "#{parts[0]}/#{parts[1].pluralize}/#{parts[2]}"
-        hyph_name = "#{parts[0..1].join('--').hyphenate}-#{parts[2]}"
+        hyph_name = "#{parts[0..1].join('--').hyphenate}-#{parts[2].hyphenate}"
       else
         hyph_name = model_name.hyphenate
         path = path.pluralize
