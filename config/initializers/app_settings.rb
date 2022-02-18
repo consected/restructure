@@ -205,11 +205,26 @@ class Settings
   DisableVDef = ENV.key?('FPHS_DISABLE_VDEF') ? ENV['FPHS_DISABLE_VDEF'] == 'true' : Rails.env.development?
 
   # Timezones
+  # Use the the alpha2 code for the country code. For example,
+  # ISO3166::Country.find_country_by_iso_short_name('united states of america').alpha2 == 'US'
   CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES'] || %i[us ie gb de gr au nz]).freeze
-  DefaultUserTimezone = (ENV['DEFAULT_TIMEZONE'] || 'Eastern Time (US & Canada)').freeze
+
+  # Use the timezone name or identifier.
+  # ActiveSupport::TimeZone.country_zones('GB').map(&:name) == ["Edinburgh", "London"]
+  DefaultUserTimezone = (ENV['DEFAULT_TIMEZONE'] || 'London').freeze
 
   # Date, Time and DateTime formats
+  #
+  # Set DEFAULT_DATE_FORMAT to mm/dd/yyyy or dd/mm/yyyy.
   DefaultDateFormat = (ENV['DEFAULT_DATE_FORMAT'] || 'mm/dd/yyyy').freeze
+
+  # Set DEFAULT_DATE_TIME_FORMAT to:
+  #   mm/dd/yyyy hh:mm:ss am/pm
+  #   mm/dd/yyyy 24h:mm:ss
+  #   dd/mm/yyyy hh:mm:ss am/pm
+  #   dd/mm/yyyy 24h:mm:ss
   DefaultDateTimeFormat = (ENV['DEFAULT_DATE_TIME_FORMAT'] || 'mm/dd/yyyy hh:mm:ss am/pm').freeze
+
+  # Set DEFAULT_TIME_FORMAT to hh:mm:ss am/pm or 24h:mm:ss.
   DefaultTimeFormat = (ENV['DEFAULT_TIME_FORMAT'] || 'hh:mm:ss am/pm').freeze
 end

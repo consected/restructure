@@ -45,21 +45,29 @@ module UserPreferencesHelper
     }
   end
 
+  # Time.current.strftime('%m/%d/%Y') == "02/18/2022"
+  # Time.current.strftime('%d/%m/%Y') == "18/02/2022"
   DateFormats = {
     'mm/dd/yyyy' => '%m/%d/%Y',
     'dd/mm/yyyy' => '%d/%m/%Y'
   }.freeze
 
+  # Time.current.strftime('%m/%d/%Y %-l:%M:%S %P') == "02/18/2022 2:02:14 pm"
+  # Time.current.strftime('%m/%d/%Y %T') == "02/18/2022 14:02:49"
+  # Time.current.strftime('%d/%m/%Y %-l:%M:%S %P') == "18/02/2022 2:03:19 pm"
+  # Time.current.strftime('%d/%m/%Y %T') == "18/02/2022 13:43:38"
   DateTimeFormats = {
-    'mm/dd/yyyy hh:mm:ss am/pm' => '%m/%d/%Y %l:%M:%S %P',
-    'mm/dd/yyyy 24h:mm:ss' => '%m/%d/%Y %k:%M:%S',
-    'dd/mm/yyyy hh:mm:ss am/pm' => '%d/%m/%Y %l:%M:%S %P',
-    'dd/mm/yyyy 24h:mm:ss' => '%d/%m/%Y %k:%M:%S'
+    'mm/dd/yyyy hh:mm:ss am/pm' => '%m/%d/%Y %-l:%M:%S %P',
+    'mm/dd/yyyy 24h:mm:ss' => '%m/%d/%Y %T',
+    'dd/mm/yyyy hh:mm:ss am/pm' => '%d/%m/%Y %-l:%M:%S %P',
+    'dd/mm/yyyy 24h:mm:ss' => '%d/%m/%Y %T'
   }.freeze
 
+  # Time.current.strftime('%-l:%M:%S %P') == "1:54:32 pm" with no leading zero or blank space.
+  # Time.current.strftime('%T') == "13:49:24"
   TimeFormats = {
-    'hh:mm:ss am/pm' => '%l:%M:%S %P',
-    '24h:mm:ss' => '%k:%M:%S'
+    'hh:mm:ss am/pm' => '%-l:%M:%S %P',
+    '24h:mm:ss' => '%T'
   }.freeze
 
   PriorityTimezones = Settings::CountryCodesForTimezones.flat_map do |country_code|
