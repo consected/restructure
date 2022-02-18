@@ -1080,6 +1080,27 @@ _fpa.form_utils = {
 
     }).addClass('attached-prevent-on-collapse');
 
+    block.find('[data-toggle~="uncollapse-target-parents"]').not('.attached-uncparents').on('click', function () {
+      if ($(this).attr('disabled')) return;
+
+      var a;
+      var f = $(this).parents('[data-form-container]');
+      if (f.length == 1) {
+        a = f.attr('data-form-container');
+      }
+      else
+        a = $(this).attr('data-target');
+
+      if (!a || a == '') {
+        a = $(this).attr('data-result-target');
+      }
+
+      if (!a || a == '') return;
+
+      $(a).parents('.collapse').each(function () {
+        $(this).collapse('show');
+      });
+    }).addClass('attached-uncparents');
 
     block.find('[data-toggle~="scrollto-result"], [data-toggle~="scrollto-target"], [data-toggle~="collapse"].scroll-to-expanded, [data-toggle~="uncollapse"].always-scroll-to-expanded ').not('.attached-datatoggle-str').on('click', function () {
       if ($(this).attr('disabled')) return;
