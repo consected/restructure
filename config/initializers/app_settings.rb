@@ -205,12 +205,13 @@ class Settings
   DisableVDef = ENV.key?('FPHS_DISABLE_VDEF') ? ENV['FPHS_DISABLE_VDEF'] == 'true' : Rails.env.development?
 
   # Timezones
-  # Use the the alpha2 code for the country code. For example,
+  # Use the the country alpha2 code for the country code. For example,
   # ISO3166::Country.find_country_by_iso_short_name('united states of america').alpha2 == 'US'
-  CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES'] || %i[us ie gb de gr au nz]).freeze
+  CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES'].split || %i[us ie gb de gr au nz]).freeze
 
-  # Use the timezone name or identifier.
-  # ActiveSupport::TimeZone.country_zones('GB').map(&:name) == ["Edinburgh", "London"]
+  # Use the timezone name or identifier. For example, "London" or "Eastern Time (US & Canada)".
+  # To obtain the timezone identifiers, execute ActiveSupport::TimeZone.country_zones(<country alpha2 code>)
+  # For example, ActiveSupport::TimeZone.country_zones('GB').map(&:name) == ["Edinburgh", "London"]
   DefaultUserTimezone = (ENV['DEFAULT_TIMEZONE'] || 'Eastern Time (US & Canada)').freeze
 
   # Date, Time and DateTime formats
