@@ -796,6 +796,8 @@ module HandlesUserBase
                 else
                   "#{v.first.first.to_s.humanize.downcase}: #{v.first.last.present? ? v.first.last : '(blank)'}"
                 end
+          elsif v.is_a?(Array) && [['', nil], [nil, '']].include?(v)
+            v = '(blank)'
           else
             v = ": #{v}"
           end
