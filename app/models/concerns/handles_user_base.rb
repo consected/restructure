@@ -195,6 +195,11 @@ module HandlesUserBase
     def base_route_name
       base_route_segments.singularize.gsub('/', '_')
     end
+
+    # Hyphenated name, typically used in HTML markup for referencing target blocks and panels
+    def hyphenated_name
+      resource_name.ns_hyphenate
+    end
   end
 
   #

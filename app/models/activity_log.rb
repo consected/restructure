@@ -611,4 +611,34 @@ class ActivityLog < ActiveRecord::Base
     ttn = to_table_name.sub('activity_log_', 'al_')
     "#{ttn}_from_#{tn}"
   end
+
+  # Hyphenated name, typically used in HTML markup for referencing target blocks and panels
+  def hyphenated_name
+    full_item_type_name.ns_hyphenate
+  end
+
+  # Override to enable extra log types to also be added to Resouces::Models
+  def add_model_to_list(m)
+    super
+    self.class.all_option_configs_resource_names.each do |rn|
+      elt = rn.split('__').last
+      Resources::Models.add(
+        m,
+        resource_name: rn,
+        type: :activity_log_type,
+        base_route_name: nil,
+        base_route_segments: "#{m.base_route_segments}/#{elt}",
+        hyphenated_name: "activity-log--#{implementation_model_name.hyphenate}-#{elt.hyphenate}"
+      )
+    end
+  end
+
+  # Override to enable extra log types to also be added to Resouces::Models
+  # @param [String] tn
+  def remove_model_from_list
+    super
+    self.class.all_option_configs_resource_names.each do |rn|
+      Resources::Models.remove(resource_name: rn)
+    end
+  end
 end

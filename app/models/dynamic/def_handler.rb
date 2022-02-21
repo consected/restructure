@@ -285,6 +285,8 @@ module Dynamic
         @master_nested_attrib << attrib
         Master.accepts_nested_attributes_for(*@master_nested_attrib)
       end
+
+      # End of class_methods
     end
 
     def secondary_key
@@ -480,6 +482,7 @@ module Dynamic
 
     # This needs to be overridden in each provider to allow consistency of calculating model names for implementations
     # Non-namespaced model definition name
+    # @return [String]
     def implementation_model_name
       nil
     end
@@ -511,6 +514,11 @@ module Dynamic
     # Full namespaced item types (pluralized) name, underscored with double underscores
     def full_item_types_name
       full_item_type_name.pluralize
+    end
+
+    # Hyphenated name, typically used in HTML markup for referencing target blocks and panels
+    def hyphenated_name
+      implementation_model_name.ns_hyphenate
     end
 
     # Absolute namespaced class name for the model
@@ -563,8 +571,9 @@ module Dynamic
     end
 
     # Remove an item from the list of available dynamic classes
-    def remove_model_from_list
-      tn = implementation_model_name
+    # @param [String] tn (optional)
+    def remove_model_from_list(tn = nil)
+      tn ||= implementation_model_name
       logger.info "Removed disabled model #{tn}"
       self.class.models.delete(tn)
       self.class.model_names.delete(tn)
