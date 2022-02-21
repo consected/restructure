@@ -4,22 +4,14 @@ module Formatter
   #
   # Generate markup for a button to add an item (dynamic model, external id or core model) within a modal popup
   module AddItemButton
-    def self.markup(model_name, master_id)
+    def self.markup(resource_name, master_id)
       master_pre = "/masters/#{master_id}" if master_id
 
-      path = model_name.ns_pathify
-      parts = path.split('/')
+      model = Resources::Models.find_by(resource_name: resource_name)
+      raise FphsException, "add_item_button configured resource name is not found: #{resource_name}" unless model
 
-      case parts.length
-      when 2
-        hyph_name = model_name.hyphenate
-      when 3
-        path = "#{parts[0]}/#{parts[1].pluralize}/#{parts[2]}"
-        hyph_name = "#{parts[0..1].join('--').hyphenate}-#{parts[2].hyphenate}"
-      else
-        hyph_name = model_name.hyphenate
-        path = path.pluralize
-      end
+      path = model[:base_route_segments]
+      hyph_name = model[:hyphenated_name]
 
       html = <<~END_HTML
         <span class="temp-new-embedded-block">
@@ -35,7 +27,7 @@ module Formatter
                id="#{hyph_name}-#{master_id}-"
                data-subscription="#{hyph_name}-edit-form-#{master_id}-"
                data-preprocessor="report_embed_dynamic_block"
-               data-model-name="#{model_name}"
+               data-model-name="#{resource_name}"
           >
           </span>
         </span>
