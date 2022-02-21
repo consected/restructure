@@ -32,9 +32,8 @@
 
   {{#unless prevent_add_reference}}
     <% if cb %>
-    <li class="list-group-item caption-before results-caption-before <%=caption_before_ref_type.to_s.hyphenate%> <%=caption_before_ref_type.to_s.hyphenate%>-caption">
-      <%= show_caption_before caption_before_ref_type, caption_before, :show %>
-    </li>
+    <li class="list-group-item caption-before results-caption-before <%=caption_before_ref_type.to_s.hyphenate%> <%=caption_before_ref_type.to_s.hyphenate%>-caption"
+    ><%= show_caption_before caption_before_ref_type, caption_before, :show %></li>
     <% end %>
     <%
     view_as_new = ref_config[:view_as] && ref_config[:view_as][:new]
