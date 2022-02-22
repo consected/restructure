@@ -620,7 +620,12 @@ class ActivityLog < ActiveRecord::Base
   # Override to enable extra log types to also be added to Resouces::Models
   def add_model_to_list(m)
     super
-    self.class.all_option_configs_resource_names.each do |rn|
+
+    rns = self.class.all_option_configs_resource_names do |e|
+      e.config_obj.resource_name == m.resource_name.to_s
+    end
+
+    rns.each do |rn|
       elt = rn.split('__').last
       Resources::Models.add(
         m,
