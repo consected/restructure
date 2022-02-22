@@ -1,4 +1,3 @@
-
 create master with: |
   Form to embed in the "create master" block. A dynamic data model or participant resource name.
 heading create master record label: |
@@ -67,6 +66,8 @@ notes field caption: |
   Caption that appears above default "notes" fields if not overridden by field options. Default "Notes"
 notes field format: |
   Default notes field format for this app. Defaults to plain text. Set value "markdown" for rich text editor
+no search in master record: |
+  Do not show search tabs or a search panel when linked followed to a single master record
 open panels: |
   List of panels to open automatically when the master record is displayed. 
   Comma separated list of default panel names or resource names for 
