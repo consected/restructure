@@ -9,6 +9,7 @@ module Formatter
       lowercase
       underscore
       hyphenate
+      id_hyphenate
       id_underscore
       initial
       first
@@ -67,6 +68,10 @@ module Formatter
 
     def self.hyphenate(res, _orig_val)
       res.hyphenate
+    end
+
+    def self.id_hyphenate(res, _orig_val)
+      res.id_hyphenate
     end
 
     def self.id_underscore(res, _orig_val)
