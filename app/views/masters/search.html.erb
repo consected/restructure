@@ -1,8 +1,10 @@
 <%
   # Show the search tabs at the top of the page, a hidden form to trigger an AJAX
   # request to fulfill the requested search, and the final results block
+  
 %>
-<%= render partial: 'search_form' %>
+<span class="from-master-action-<%=action_name%> <%= @no_search ? 'no-search-in-master-record' : '' %>">
+<%= render partial: 'search_form' unless @no_search%>
 
 <% if @master_id || @ext_id %>
   <%= form_for @master, method: :get, remote: true, html: {id: 'msid_search_master', class: 'msid_search_master hidden auto_search_master'} do |f| %>
