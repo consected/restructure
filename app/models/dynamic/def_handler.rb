@@ -77,7 +77,7 @@ module Dynamic
       # or are not included in the OnlyLoadAppTypes setting.
       # This is typically used to improve load times and ensure we only generate
       # templates for models that will actually be used.
-      # @return [ActiveRecord::Relation] scopeed results
+      # @return [ActiveRecord::Relation] scoped results
       def active_model_configurations
         # return @active_model_configurations if @active_model_configurations
 
