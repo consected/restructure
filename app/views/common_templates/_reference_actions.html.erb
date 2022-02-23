@@ -32,16 +32,15 @@
 
   {{#unless prevent_add_reference}}
     <% if cb %>
-    <li class="list-group-item caption-before results-caption-before <%=caption_before_ref_type.to_s.hyphenate%> <%=caption_before_ref_type.to_s.hyphenate%>-caption">
-      <%= show_caption_before caption_before_ref_type, caption_before, :show %>
-    </li>
+    <li class="list-group-item caption-before results-caption-before <%=caption_before_ref_type.to_s.hyphenate%> <%=caption_before_ref_type.to_s.hyphenate%>-caption"
+    ><%= show_caption_before caption_before_ref_type, caption_before, :show %></li>
     <% end %>
     <%
     view_as_new = ref_config[:view_as] && ref_config[:view_as][:new]
     if view_as_new == 'outside_this'
-      data_target = "##{ name.ns_hyphenate}#{elt}-#{master_id}-"
+      data_target = "##{ ref_type.ns_hyphenate}#{elt}-#{master_id}-"
 
-      data_toggle = "unhide scrollto-result"
+      data_toggle = "unhide scrollto-result uncollapse-target-parents"
       a_class = "btn btn-sm btn-primary embedded-add-item-button"
     else
       data_target = "##{inner_data_target}"

@@ -10,7 +10,7 @@
   }
 }
 
-input[type='submit'],
+input[type="submit"],
 button {
   &.ajax-clicked-running {
     animation: button-working 1s ease-in-out infinite;
@@ -82,10 +82,10 @@ form .form-group select {
   padding: 4px;
 }
 
-input[type='date'],
-input[type='time'],
-input[type='datetime-local'],
-input[type='month'] {
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"] {
   line-height: inherit;
 
   &.form-control {
@@ -93,11 +93,11 @@ input[type='month'] {
   }
 }
 
-input[type='date'] {
+input[type="date"] {
   min-width: 10em;
 }
 
-input[type='date'].attached-datepicker {
+input[type="date"].attached-datepicker {
   color: rgba(0, 0, 0, 0);
 
   &.date-is-local {
@@ -155,6 +155,19 @@ li.list-group-item label {
   h4 {
     font-size: 16px;
   }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    &:first-child {
+      margin-top: 0.2em;
+    }
+  }
+}
+
+.placeholder-caption-before:empty {
+  display: none !important;
 }
 
 .form-inline .row > div {
@@ -306,7 +319,7 @@ li.list-group-item small.notes-block-label {
   position: relative !important;
 }
 
-input[type='checkbox'] {
+input[type="checkbox"] {
   height: auto;
   margin-bottom: 6px;
 }
@@ -363,7 +376,7 @@ fieldset.readonly-edit-fieldset {
       height: auto !important;
     }
   }
-  input[type='checkbox'] {
+  input[type="checkbox"] {
     border: 1px solid silver;
     -moz-appearance: checkbox;
     -webkit-appearance: checkbox;
@@ -400,16 +413,16 @@ fieldset.readonly-edit-fieldset {
 }
 
 .list-group-item {
-  .button-radio[data-attr-name$='_blank_yes_no']:first-of-type {
+  .button-radio[data-attr-name$="_blank_yes_no"]:first-of-type {
     display: none;
   }
-  .button-radio[data-attr-name$='_blank_no_yes']:first-of-type {
+  .button-radio[data-attr-name$="_blank_no_yes"]:first-of-type {
     display: none;
   }
-  .button-radio[data-attr-name$='_blank_yes_no_dont_know']:first-of-type {
+  .button-radio[data-attr-name$="_blank_yes_no_dont_know"]:first-of-type {
     display: none;
   }
-  .button-radio[data-attr-name$='_blank_no_yes_dont_know']:first-of-type {
+  .button-radio[data-attr-name$="_blank_no_yes_dont_know"]:first-of-type {
     display: none;
   }
 }
@@ -438,7 +451,7 @@ fieldset.readonly-edit-fieldset {
   margin-bottom: 7px;
 }
 
-.edit-field-container.done-label-resize input[type='text'].form-control:first-child {
+.edit-field-container.done-label-resize input[type="text"].form-control:first-child {
   width: 100%;
 
   // Overrides

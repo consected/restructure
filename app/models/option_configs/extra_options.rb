@@ -60,7 +60,7 @@ module OptionConfigs
       self.caption_before = self.caption_before.each do |k, v|
         if v.is_a? String
 
-          v = Formatter::Substitution.text_to_html(v)
+          v = Formatter::Substitution.text_to_html(v).strip
 
           self.caption_before[k] = {
             caption: v,
@@ -69,7 +69,7 @@ module OptionConfigs
           }
         elsif v.is_a? Hash
           v.each do |mode, modeval|
-            v[mode] = Formatter::Substitution.text_to_html(modeval)
+            v[mode] = Formatter::Substitution.text_to_html(modeval).to_s.strip
           end
         end
       end

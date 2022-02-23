@@ -137,6 +137,8 @@ module FilterUtils
     res = @filter_params_permitted || {}
     res = filter_defaults.merge(res)
 
+    res.delete 'ids' if res.keys.length > 1
+
     res.reject! { |_k, v| v.blank? }
 
     res.each do |k, v|

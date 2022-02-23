@@ -84,7 +84,7 @@ RSpec.describe Formatter::Substitution, type: :model do
     expect(@activity_log.versioned_definition.options_constants[:replace_me]).to eq 'super special'
 
     caption = @activity_log.extra_log_type_config.caption_before[:select_result][:caption]
-    expected_text = "<p>has a caption before select_result with a super special substitution made</p>\n"
+    expected_text = '<p>has a caption before select_result with a super special substitution made</p>'
 
     res = Formatter::Substitution.substitute(caption, data: @activity_log, tag_subs: nil)
 

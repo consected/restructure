@@ -195,6 +195,11 @@ module HandlesUserBase
     def base_route_name
       base_route_segments.singularize.gsub('/', '_')
     end
+
+    # Hyphenated name, typically used in HTML markup for referencing target blocks and panels
+    def hyphenated_name
+      resource_name.ns_hyphenate
+    end
   end
 
   #
@@ -791,6 +796,8 @@ module HandlesUserBase
                 else
                   "#{v.first.first.to_s.humanize.downcase}: #{v.first.last.present? ? v.first.last : '(blank)'}"
                 end
+          elsif v.is_a?(Array) && [['', nil], [nil, '']].include?(v)
+            v = '(blank)'
           else
             v = ": #{v}"
           end

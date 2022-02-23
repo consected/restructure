@@ -7,7 +7,6 @@
   --link-active-color: #402964;
   --bottom-grad-color: #4a3277;
   --bottom-grad-darker-color: #452e70;
-
   --content-font-family: "Assistant", sans-serif;
   --content-font-size: 18px;
 
@@ -23,6 +22,8 @@
 @font-face {
   font-family: "Assistant";
   src: url("/fonts/assistant/Assistant-VariableFont_wght.ttf");
+  /* font-weight: normal;
+  font-style: normal; */
 }
 
 @font-face {
@@ -120,19 +121,27 @@ ul.list-group.is-activity-log {
 }
 
 ul.list-group.is-activity-log > li.list-group-item,
-form ul.list-group > li.list-group-item {
+form ul.list-group > li.list-group-item,
+.common-template-item-inner > ul.list-group > li.list-group-item {
   border: 0;
   background: none;
   font-size: 110%;
 }
 
+ul.list-group.is-activity-log > li.list-group-item.caption-before,
+form ul.list-group > li.list-group-item.caption-before,
+.common-template-item-inner > ul.list-group > li.list-group-item.caption-before {
+  background: rgb(242, 242, 242);
+}
+
 ul.list-group.is-activity-log > li.list-group-item.placeholder-caption-before,
 form ul.list-group > li.list-group-item.placeholder-caption-before {
-  background-color: rgb(234, 234, 234);
+  background-color: rgb(247, 237, 253);
 }
 
 ul.list-group.is-activity-log h4.list-group-item-heading,
-li.edit-form-header h4.list-group-item-heading {
+li.edit-form-header h4.list-group-item-heading,
+.common-template-item-inner > ul.list-group h4.list-group-item-heading {
   color: rgb(88, 88, 88);
   padding: 15px 0;
   font-size: 32px;
@@ -142,7 +151,7 @@ li.edit-form-header h4.list-group-item-heading {
 
 ul.list-group.is-activity-log > li.list-group-item.caption-before,
 ul.list-group > li.list-group-item.caption-before {
-  padding: 10px 15px 0 15px;
+  padding: 10px 15px 6px 15px;
   border-top: 1px solid rgb(228, 228, 228);
 }
 
@@ -285,10 +294,15 @@ table.table.report-table td {
 }
 
 .edit-field-container .input-sm[data-attr-name="project_title"],
-li.dynamic-model--data-request-project_title.result-field-container strong {
-  font-size: 23px;
+li.dynamic-model--data-request-project_title.result-field-container strong,
+#new_activity_log_project_assignment input[name="activity_log_project_assignment[title]"],
+.edit_activity_log_project_assignment input[name="activity_log_project_assignment[title]"],
+li.activity-log--project-assignment-analysis-plan-title.result-field-container strong {
+  font-size: 26px;
   font-weight: bold;
   min-height: 38px;
+  margin-bottom: 0.6em;
+  display: inline-block;
 }
 
 hr {
@@ -488,4 +502,14 @@ table.table {
   background: rgb(239, 239, 239);
   margin-top: 1em;
   margin-bottom: 1em;
+}
+
+ul.list-group.is-activity-log
+  > li.list-group-item.caption-before.results-caption-before.activity-log--project-assignment-analysis-plan-all_fields.all-fields-caption,
+form ul.list-group > li.list-group-item.caption-before.activity-log--project-assignment-all_fields.all-fields-caption {
+  background: none !important;
+  color: rgb(102 102 102);
+  border-top: 0;
+  padding-top: 0;
+  font-size: 95%;
 }

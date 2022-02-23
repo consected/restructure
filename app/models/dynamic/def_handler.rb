@@ -16,6 +16,7 @@ module Dynamic
       after_commit :update_tracker_events, if: -> { @regenerate }
       after_commit :restart_server, if: -> { @regenerate }
       after_commit :other_regenerate_actions
+      after_commit :handle_disabled, if: -> { disabled }
 
       attr_accessor :configurations, :data_dictionary, :options_constants
     end
@@ -77,7 +78,7 @@ module Dynamic
       # or are not included in the OnlyLoadAppTypes setting.
       # This is typically used to improve load times and ensure we only generate
       # templates for models that will actually be used.
-      # @return [ActiveRecord::Relation] scopeed results
+      # @return [ActiveRecord::Relation] scoped results
       def active_model_configurations
         # return @active_model_configurations if @active_model_configurations
 
@@ -285,6 +286,8 @@ module Dynamic
         @master_nested_attrib << attrib
         Master.accepts_nested_attributes_for(*@master_nested_attrib)
       end
+
+      # End of class_methods
     end
 
     def secondary_key
@@ -446,6 +449,20 @@ module Dynamic
         nil
       end
       got_class if got_class&.to_s&.start_with?(self.class.implementation_prefix)
+
+      return unless fields_match_columns?
+
+      got_class
+    end
+
+    #
+    # Check the defined field list matches the columns in the database. If not,
+    # we may need to regenerate the model
+    def fields_match_columns?
+      fields = all_implementation_fields
+      fields.reject! { |f| f.index(/^embedded_report_|^placeholder_/) }
+
+      (fields.sort - table_columns.map { |c| c.name.to_s }.sort).empty?
     end
 
     # Is the definition ready for a class to be defined?
@@ -466,6 +483,7 @@ module Dynamic
 
     # This needs to be overridden in each provider to allow consistency of calculating model names for implementations
     # Non-namespaced model definition name
+    # @return [String]
     def implementation_model_name
       nil
     end
@@ -497,6 +515,11 @@ module Dynamic
     # Full namespaced item types (pluralized) name, underscored with double underscores
     def full_item_types_name
       full_item_type_name.pluralize
+    end
+
+    # Hyphenated name, typically used in HTML markup for referencing target blocks and panels
+    def hyphenated_name
+      implementation_model_name.ns_hyphenate
     end
 
     # Absolute namespaced class name for the model
@@ -537,6 +560,13 @@ module Dynamic
       Classification::GeneralSelection.item_types refresh: true
     end
 
+    # After disabling an item, clean up any mess
+    def handle_disabled
+      Rails.logger.info 'Refreshing item types'
+      Classification::GeneralSelection.item_types refresh: true
+      remove_model_from_list
+    end
+
     # A list of model names and definitions is stored in the class so we can
     # quickly see what dynamic classes are available elsewhere
     # Add an item to this list
@@ -549,8 +579,9 @@ module Dynamic
     end
 
     # Remove an item from the list of available dynamic classes
-    def remove_model_from_list
-      tn = implementation_model_name
+    # @param [String] tn (optional)
+    def remove_model_from_list(tn = nil)
+      tn ||= implementation_model_name
       logger.info "Removed disabled model #{tn}"
       self.class.models.delete(tn)
       self.class.model_names.delete(tn)

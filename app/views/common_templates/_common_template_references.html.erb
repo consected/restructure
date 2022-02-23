@@ -6,7 +6,7 @@
   <span class="small" data-result-target-for-child="#{{ns_hyphenate name}}-{{hyphenate to_record_type_us}}-{{from_record_master_id}}-{{id}}-{{to_record_id}}">
     {{#if to_record_viewable}}
     {{#is view_as '!==' 'see_presence' }}
-    <a href="{{#if to_record_master_id}}/masters/{{to_record_master_id}}{{/if}}/{{pathify to_record_type_us_plural}}/{{to_record_id}}" 
+    <a href="{{#if to_record_master_id}}/masters/{{to_record_master_id}}{{/if}}/{{pathify to_record_type_us_plural}}/{{to_record_id}}{{#is view_as '===' 'as_edit'}}{{#if to_record_editable}}/edit{{/if}}{{/is}}" 
        data-template="{{hyphenate to_record_template}}-result-template" 
        data-result-target-force="true" 
        data-result-target="#{{ns_hyphenate name}}-{{hyphenate to_record_type_us}}-{{from_record_master_id}}-{{id}}-{{to_record_id}}" 
