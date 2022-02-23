@@ -23,6 +23,10 @@ module Dynamic
       def hyphenated_name
         definition.hyphenated_name
       end
+
+      def category
+        definition.category
+      end
     end
 
     # resource_name used as a universal identifier

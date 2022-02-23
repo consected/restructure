@@ -10,7 +10,7 @@ module Resources
   class Models
     class Item < Hash
       KEYS = %i[type class_name model table_name resource_name hyphenated_name base_route_name
-                base_route_segments].freeze
+                base_route_segments category].freeze
 
       # type: one of :dynamic_model, :external_identifier, :activity_log, :activity_log_type, :default, :data_dictionary
       # class_name: simple String respresenting the namespaced class name
@@ -66,7 +66,10 @@ module Resources
     # Most of the definition values will be based on the model
     # The *type* will be calculated to provide a mechanism for
     # categorizing the models, or can provided explicitly
-    def self.add(model, resource_name: nil, type: nil, base_route_name: nil, base_route_segments: nil, hyphenated_name: nil)
+    def self.add(model,
+                 resource_name: nil, type: nil,
+                 base_route_name: nil, base_route_segments: nil,
+                 hyphenated_name: nil, category: nil)
       resource_name ||= model.resource_name
       resource_name = resource_name.to_sym
       type ||= if model.respond_to? :definition
@@ -80,6 +83,7 @@ module Resources
       hyphenated_name = model.hyphenated_name if !hyphenated_name && model.respond_to?(:hyphenated_name)
       base_route_name = model.base_route_name if !base_route_name && model.respond_to?(:base_route_name)
       base_route_segments = model.base_route_segments if !base_route_segments && model.respond_to?(:base_route_segments)
+      category = model.category if !category && model.respond_to?(:category)
 
       resources[resource_name] = Item.new
       resources[resource_name].merge! type: type,
@@ -89,7 +93,8 @@ module Resources
                                       resource_name: resource_name,
                                       base_route_name: base_route_name,
                                       base_route_segments: base_route_segments,
-                                      hyphenated_name: hyphenated_name
+                                      hyphenated_name: hyphenated_name,
+                                      category: category
       resources[resource_name]
     end
 

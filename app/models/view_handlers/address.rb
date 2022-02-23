@@ -30,6 +30,10 @@ module ViewHandlers
         country = ISO3166::Country[country_code]
         country.translations[I18n.locale.to_s] || country.name
       end
+
+      def category
+        :subjects
+      end
     end
 
     def state_name
@@ -50,14 +54,13 @@ module ViewHandlers
         if country.downcase == 'us'
           self.region = nil
           self.postal_code = nil
+        elsif region.blank? && postal_code.blank?
+          errors.add :country,
+                     'was not USA and province/county and postal code are blank. At least one must be entered for countries other than USA.'
+          throw(:abort)
         else
-          if region.blank? && postal_code.blank?
-            errors.add :country, 'was not USA and province/county and postal code are blank. At least one must be entered for countries other than USA.'
-            throw(:abort)
-          else
-            self.state = nil
-            self.zip = nil
-          end
+          self.state = nil
+          self.zip = nil
         end
       end
     end

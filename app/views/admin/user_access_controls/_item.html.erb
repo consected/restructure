@@ -1,3 +1,14 @@
+<%
+    category = if list_item.resource_name.present?
+                 if list_item.resource_type == 'report' 
+                   Report.find_by_alt_resource_name(list_item.resource_name, true, true)&.category
+                 else
+                   Resources::Models.find_by(resource_name: list_item.resource_name)&.category
+                 end
+              else
+                nil
+              end
+%>
 <tr class="admin-list-item <%=list_item.disabled ? 'disabled-result' : ''%> <%= list_item.persisted? ? '' : 'new-record hidden'%> <%= action_name.in?(['create', 'update']) ? 'saved-row postprocessed-scroll-here' : ''%>" id="admin-item-<%=list_item.id%>" data-result-position="<%= list_item.persisted? ? 'replace' : 'after'%>" data-preprocessor="admin_result">
   <% unless view_embedded? %>
     <td><%= admin_edit_btn list_item.id%> &nbsp; <%= admin_edit_btn list_item.id, copy: list_item%> </td>
@@ -10,5 +21,6 @@
   <td><%= list_item.access %></td>
   <td><%= list_item.resource_type %></td>
   <td><%= list_item.bad_resource_name(@resource_names_for_type) ? '<strong>BAD RESOURCE NAME</strong>'.html_safe : '' %> <%= list_item.resource_name %></td>
+  <td><%= category %></td>
   <td><%= list_item.options %></td>
 </tr>
