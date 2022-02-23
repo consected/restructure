@@ -127,7 +127,7 @@ module ApplicationHelper
     dname = dialogs[key][:name]
     dlabel = dialogs[key][:label]
     dmsg = Formatter::DialogTemplate.generate_message(dname, object_instance)
-    id = "dialog-#{dname}-#{dlabel}".gsub(' ', '-')
+    id = "dialog-#{dname}-#{dlabel}".gsub(/[^a-zA-Z0-9]/, '-')
     if strip_tags(dmsg).length <= 100 || dlabel.blank?
       <<~END_HTML
         <div class="in-form-dialog collapse" id="#{id}">#{dmsg}</div><div class="dialog-btn-container"><p>#{dmsg}</p></div>
