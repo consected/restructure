@@ -16,6 +16,7 @@ module Dynamic
       after_commit :update_tracker_events, if: -> { @regenerate }
       after_commit :restart_server, if: -> { @regenerate }
       after_commit :other_regenerate_actions
+      after_commit :handle_disabled, if: -> { disabled }
 
       attr_accessor :configurations, :data_dictionary, :options_constants
     end
@@ -557,6 +558,13 @@ module Dynamic
     def other_regenerate_actions
       Rails.logger.info 'Refreshing item types'
       Classification::GeneralSelection.item_types refresh: true
+    end
+
+    # After disabling an item, clean up any mess
+    def handle_disabled
+      Rails.logger.info 'Refreshing item types'
+      Classification::GeneralSelection.item_types refresh: true
+      remove_model_from_list
     end
 
     # A list of model names and definitions is stored in the class so we can

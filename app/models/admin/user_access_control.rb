@@ -340,7 +340,7 @@ class Admin::UserAccessControl < Admin::AdminBase
             resource_name.nil? || !self.class.resource_names_for(resource_type.to_sym).include?(resource_name.to_s)
           )
       errors.add :resource_name, "is an invalid value (#{resource_name} in #{resource_type})"
-    elsif !disabled
+    elsif !disabled && !persisted?
       res = self.class.access_for? user, nil, resource_type, resource_name, alt_role_name: role_name,
                                                                             alt_app_type_id: app_type_id
       if res && res.id != id # If we have a result and it is not this record
