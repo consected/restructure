@@ -70,16 +70,24 @@ class ActivityLog < ActiveRecord::Base
   # Only enabled admin activity log records are used, excluding other possible options that are not configured.
   # Returns the item_type_name if true
   def self.works_with(item_type, rec_type = nil, process_name = nil)
+    # Get the first item, since this will get the null rec_type and process_name if they match
+    # For the least exact match this is what we want
+    res = works_with_all(item_type, rec_type, process_name).first
+    return unless res
+
+    res.item_type_name
+  end
+
+  # gets all activity log definitions that work with
+  # the specified item_type and optionally rec_type based on admin activity log record configuration
+  # if no rec_type is specified, then just the item_type will be used to match broadly,
+  # even if the configuration specifies a rec_type as a requirement
+  def self.works_with_all(item_type, rec_type = nil, process_name = nil)
     item_type = item_type.downcase
     cond = { item_type: item_type }
     cond[:rec_type] = rec_type if rec_type
     cond[:process_name] = process_name if process_name
-    # Get the first item, since this will get the null rec_type and process_name if they match
-    # For the least exact match this is what we want
-    res = enabled.where(cond).unscope(:order).order('rec_type asc nulls first, process_name asc nulls first').first
-    return unless res
-
-    res.item_type_name
+    enabled.where(cond).unscope(:order).order('rec_type asc nulls first, process_name asc nulls first')
   end
 
   #
@@ -415,6 +423,14 @@ class ActivityLog < ActiveRecord::Base
     end
     unless rec_type_valid?
       errors.add(:rec_type, "(#{rec_type}) invalid for the selected item type #{item_type}.")
+      return
+    end
+
+    existing = self.class.works_with_all(item_type, rec_type, process_name).where.not(id: id)
+    if existing.first
+      errors.add(:rec_type,
+                 " item type and process name already exist as a definition (#{existing.first.id}) " \
+                 "- #{item_type}, #{rec_type}, #{process_name} ")
       nil
     end
   end
@@ -580,6 +596,7 @@ class ActivityLog < ActiveRecord::Base
 
     # Always performed
     self.class.reset_all_option_configs_resource_names!
+    Classification::GeneralSelection.item_types refresh: true
 
     true
   end

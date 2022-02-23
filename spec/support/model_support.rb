@@ -41,6 +41,10 @@ module ModelSupport
     end
   end
 
+  def cleanup_matching_activity_logs(item_type, rec_type, process_name, excluding_id: nil)
+    ActivityLogSupport.cleanup_matching_activity_logs(item_type, rec_type, process_name, excluding_id: excluding_id)
+  end
+
   # Force a database seed at config time, to avoid issues later
   Rails.logger.info 'Starting seed setup in setup of Master Support'
   puts "#{Time.now} Starting seed setup in setup of Master Support"
