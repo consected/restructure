@@ -687,6 +687,8 @@ code {
   max-height: 1px;
   height: 1px;
   overflow: hidden;
+  opacity: 0;
+  display: inline-block;
 }
 
 i.glyphicon.glyphicon-new-window {

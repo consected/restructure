@@ -14,11 +14,19 @@ module SpecSetup
       al.update(disabled: true)
     end
 
+    first_al = als.first
+    if first_al
+      ActivityLogSupport.cleanup_matching_activity_logs(first_al.item_type, first_al.rec_type, first_al.process_name, admin: @admin, excluding_id: first_al.id)
+    end
+
     als = ActivityLog.active.where(name: 'Phone Log')
     als.where('id <> ?', als.first&.id).update_all(disabled: true) if als.count != 1
 
     first_al = als.first
-    first_al.update!(current_admin: auto_admin, disabled: false)
+    if first_al
+      ActivityLogSupport.cleanup_matching_activity_logs(first_al.item_type, first_al.rec_type, first_al.process_name, admin: @admin, excluding_id: first_al.id)
+      first_al.update!(current_admin: auto_admin, disabled: false)
+    end
 
     expect(ActivityLog.model_names).to include 'player_contact_phone'
 
@@ -48,7 +56,6 @@ module SpecSetup
     setup_access :trackers
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, access: :create
     setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, access: :create
-
 
     ActiveRecord::Base.connection.execute("
                            delete from activity_log_player_contact_phone_history;

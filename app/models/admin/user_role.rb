@@ -14,6 +14,10 @@
 class Admin::UserRole < Admin::AdminBase
   self.table_name = 'user_roles'
 
+  def self.app_type_not_required
+    true
+  end
+
   include AdminHandler
   include AppTyped
 
@@ -84,7 +88,6 @@ class Admin::UserRole < Admin::AdminBase
           else
             '/'
           end
-
       items[n] ||= []
       items[n] << role.role_name unless items[n].include? role.role_name
     end

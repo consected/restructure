@@ -171,5 +171,9 @@ _fpa.loaded.default = function () {
     history.pushState(null, null, document.referrer);
   })
 
+  $('a.on-loaded-auto-click').not('[disabled], .clicked-on-loaded-auto-click').each(function () {
+    $(this).click();
+  }).addClass('clicked-on-loaded-auto-click')
+
   $('body').removeClass('page-loading');
 };

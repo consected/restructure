@@ -273,30 +273,39 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
+  def base_route_segments
+    "dynamic_model/#{implementation_model_name.pluralize.to_sym}"
+  end
+
+  def base_route_short_name
+    implementation_model_name.pluralize.to_sym
+  end
+
   #
   # Load dynamic model routes for all active implementations
   def self.routes_load
     m = active_model_configurations
     Rails.application.routes.draw do
       m.each do |dm|
-        pg_name = dm.implementation_model_name.pluralize.to_sym
+        pg_name = dm.base_route_segments
+        short_pg_name = dm.base_route_short_name
         if dm.foreign_key_name.present?
 
           resources :masters do
-            resources pg_name, except: [:destroy], controller: "dynamic_model/#{pg_name}"
+            resources short_pg_name, except: [:destroy], controller: pg_name
             namespace :dynamic_model do
-              resources pg_name, except: [:destroy]
+              resources short_pg_name, except: [:destroy]
             end
-            get "dynamic_model/#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
+            get "#{pg_name}/:id/template_config", to: "#{pg_name}#template_config"
           end
 
         else
 
-          resources pg_name, except: [:destroy], controller: "dynamic_model/#{pg_name}"
+          resources short_pg_name, except: [:destroy], controller: pg_name
           namespace :dynamic_model do
-            resources pg_name, except: [:destroy]
+            resources short_pg_name, except: [:destroy]
           end
-          get "dynamic_model/#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
+          get "#{pg_name}/:id/template_config", to: "#{pg_name}#template_config"
         end
       end
     end

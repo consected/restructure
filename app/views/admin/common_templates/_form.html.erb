@@ -68,7 +68,14 @@
         <%= f.select :item_type, item_types_array, {}, disabled: !!object_instance.id  %>
       <% elsif p == :app_type_id %>
           <%= form_field_label(f, p) %>
-          <%= f.select :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item), {}, extra_field_attributes[p.to_sym]||{} %>
+          <%
+            oc = object_instance.class
+            ib = {}
+            if oc.respond_to?(:app_type_not_required) && oc.app_type_not_required
+              ib = {include_blank: '(all)'}
+            end
+          %>
+          <%= f.select :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item), ib, extra_field_attributes[p.to_sym]||{} %>
       <% elsif p == :user_id %>
           <%
             default_user_id = filter_params_hash.first.last if filter_params_hash&.first&.first == 'user_id'

@@ -29,6 +29,10 @@ module NfsStore
         'nfs_store__manage__containers'
       end
 
+      def self.category
+        :nfs_store
+      end
+
       def self.permitted_params
         super - %i[id file_hash file_name content_type file_size path file_updated_at
                    nfs_store_container_id nfs_store_stored_file_id archive_file

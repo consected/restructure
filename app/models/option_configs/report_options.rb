@@ -17,11 +17,13 @@ module OptionConfigs
                                       show_column_comments corresponding_data_dic
                                       view_as search_button_label report_auto_submit_on_change
                                       no_results_scroll show_all_booleans_as_checkboxed
-                                      hide_list_labels_for_empty_content]
+                                      hide_list_labels_for_empty_content
+                                      force_show_search_button]
 
     configure :list_options, with: %i[hide_in_list list_description]
     configure :view_css, with: %i[classes selectors]
     configure :criteria_css, with: %i[classes selectors]
+    configure :master_results_css, with: %i[classes selectors]
     configure :component, with: [:options]
     configure :column_options, with: %i[tags classes hide show_as alt_column_header]
 

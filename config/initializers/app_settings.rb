@@ -90,15 +90,6 @@ class Settings
   # Template user for creating new users. The roles from this user are copied to the new user.
   DefaultUserTemplateEmail = ENV['DEFAULT_USER_TEMPLATE_EMAIL'] || 'registration@template'
 
-  # Registration Settings
-  # Since passwords have generated upon user creation, we must suppress generating a password
-  # with the user (self) registration feature.
-  AllowUsersToRegister = (ENV['ALLOW_USERS_TO_REGISTER'].to_s.downcase == 'true')
-  # Admin assigned to newly created user through the user registration feature
-  RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'] || AdminEmail
-  # Template user for creating new users. The roles from this user are copied to the new user.
-  DefaultUserTemplateEmail = ENV['DEFAULT_USER_TEMPLATE_EMAIL'] || 'registration@template'
-
   # URL to appear on home page for users with login issues to contact
   DefaultLoginIssuesUrl = AllowUsersToRegister ? '/users/password/new' : "mailto: #{AdminEmail}?subject=Login%20Issues"
   LoginIssuesUrl = ENV['LOGIN_ISSUES_URL'] || DefaultLoginIssuesUrl
@@ -212,4 +203,13 @@ class Settings
 
   # Prevent versioning of dynamic definitions
   DisableVDef = ENV.key?('FPHS_DISABLE_VDEF') ? ENV['FPHS_DISABLE_VDEF'] == 'true' : Rails.env.development?
+
+  # Timezones
+  CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES'] || %i[us ie gb de gr au nz]).freeze
+  DefaultUserTimezone = (ENV['DEFAULT_TIMEZONE'] || 'Eastern Time (US & Canada)').freeze
+
+  # Date, Time and DateTime formats
+  DefaultDateFormat = (ENV['DEFAULT_DATE_FORMAT'] || 'mm/dd/yyyy').freeze
+  DefaultDateTimeFormat = (ENV['DEFAULT_DATE_TIME_FORMAT'] || 'mm/dd/yyyy hh:mm:ss am/pm').freeze
+  DefaultTimeFormat = (ENV['DEFAULT_TIME_FORMAT'] || 'hh:mm:ss am/pm').freeze
 end

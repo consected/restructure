@@ -56,6 +56,10 @@ class ExternalIdentifier < ActiveRecord::Base
     name.ns_underscore.singularize
   end
 
+  def base_route_segments
+    model_association_name.to_s
+  end
+
   def self.routes_load
     mn = nil
     begin
@@ -66,7 +70,7 @@ class ExternalIdentifier < ActiveRecord::Base
         resources :masters, only: %i[show index new create] do
           m.each do |pg|
             mn = pg
-            pg_name = mn.model_association_name
+            pg_name = mn.base_route_segments
 
             Rails.logger.info "Setting up routes for #{mn}"
             resources pg_name, except: [:destroy]
@@ -236,8 +240,6 @@ class ExternalIdentifier < ActiveRecord::Base
 
         res2 = klass.const_set(c_name, a_new_controller)
         res2.include ExternalIdControllerHandler
-
-        add_model_to_list res
       rescue StandardError => e
         failed = true
         logger.info "Failure creating an external identifier model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
@@ -247,6 +249,8 @@ class ExternalIdentifier < ActiveRecord::Base
     if failed || !enabled?
       remove_model_from_list
       reset_master_fields
+    elsif res
+      add_model_to_list res
     end
 
     reset_master_fields if res

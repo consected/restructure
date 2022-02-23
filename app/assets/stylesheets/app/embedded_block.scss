@@ -1,4 +1,6 @@
 .modal-dialog.modal-lg.embedded-dynamic-block {
+  min-width: 60%;
+
   .modal-header {
     display: none;
   }
@@ -46,4 +48,11 @@
     right: 50px;
     z-index: 100;
   }
+}
+
+a.add-item-button > span:after {
+  font-family: var(--button-font-family);
+  padding-left: 0.2em;
+  vertical-align: middle;
+  font-size: 15px;
 }

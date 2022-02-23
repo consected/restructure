@@ -12,8 +12,19 @@
   --link-active-color: #402964;
   --bottom-grad-color: #4a3277;
   --bottom-grad-darker-color: #452e70;
-  --content-font-family: "Lato", sans-serif;
-  --table-font-family: "Lato", sans-serif;
+  /* --content-font-family: "Lato", sans-serif;
+  --table-font-family: "Lato", sans-serif; */
+
+  --content-font-family: "Assistant", sans-serif;
+  --content-font-size: 18px;
+
+  --button-font-family: "Assistant", sans-serif;
+  --label-font-family: "Assistant", sans-serif;
+
+  --table-font-family: "Assistant", sans-serif;
+  --table-font-size: 16px;
+  --table-head-font-family: "Assistant", sans-serif;
+  --table-head-font-size: 15px;
 }
 
 @font-face {
@@ -213,6 +224,22 @@ table.table.report-table td {
 
 .page-embedded-block .list-group-item.submit-action-container {
   display: block;
+}
+
+.notes-text {
+  font-size: 17px;
+}
+div.reset-row .custom-editor h1,
+div.reset-row .custom-editor-viewer h1 {
+  font-size: 2.5em;
+}
+div.reset-row .custom-editor h2,
+div.reset-row .custom-editor-viewer h2 {
+  font-size: 1.4em;
+}
+.footer,
+.footer p {
+  font-size: 15px;
 }
 
 #standalone-page > .standalone-page-container h1,

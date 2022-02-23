@@ -1,0 +1,35 @@
+<%
+  initial_show = true
+  
+  %>
+  
+  <% 
+    resources&.each do |resource_name, r_model|
+      resource_name = resource_name.to_s
+      template_postfix = ''
+      template_postfix = '-result-template' if resource_name.start_with?('activity_log__')
+
+      
+      tab_label = r_model&.human_name || resource_name.humanize.titleize
+
+      template_resource = resource_name.sub(/^dynamic_model__/, '').hyphenate
+  %>
+  <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
+    <a id="tab-user-profile-<%= resource_name.hyphenate %>-{{user.id}}" 
+       href="/user_profile?resource_name=<%= resource_name %>" 
+       data-panel-tab="<%=resource_name%>" 
+       data-remote="true" 
+       data-prevent-on-collapse="true" 
+       data-toggle="collapse" 
+       data-target="#user-profile-<%= resource_name.hyphenate %>-{{user.id}}" 
+       aria-expanded="false" 
+       class="scroll-to-expanded  collapsed"  
+       data-result-target="#<%= template_resource %>--{{<%= resource_name %>.id}}"
+       data-parent="#user-{{user.id}}-main-container"
+    ><%= tab_label %></a>
+  </li>
+  <%
+      initial_show = false
+    end
+
+%>

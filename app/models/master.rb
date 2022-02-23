@@ -3,7 +3,12 @@
 class Master < ActiveRecord::Base
   FilteredAssocPrefix = 'filtered__'
 
+  # Temporary master records can be used with limited(_if_one) user access controls
+  # Providing an association onto these records allows inner join or left joins to
+  # within this functionality to operate, just like an association to any other table
   TemporaryMasterIds = [-1]
+  Resources::Models.add(Master, resource_name: :temporary_master)
+  has_many :temporary_master, -> { Master.temporary_master }, class_name: 'Master', foreign_key: 'id'
 
   MasterNestedAttribs = [
     Settings::DefaultSubjectInfoTableName.to_sym,
@@ -181,6 +186,12 @@ class Master < ActiveRecord::Base
   end
 
   #
+  # Human name for a master record
+  def self.human_name
+    'Master'
+  end
+
+  #
   # Find a Master with an id, crosswalk attribute or alternative id
   # @param [Hash] params
   #   @option params [String] :type - a crosswalk attribute or external id field name
@@ -239,6 +250,14 @@ class Master < ActiveRecord::Base
     w = w.join(' or ')
 
     res.where(w)
+  end
+
+  #
+  # Scope a set of tempoary master records. These may be referred to in a user access control
+  # that limits access just to these temporary records with
+  # limited(_if_none) resource_name: temporary_master
+  def self.temporary_master
+    where(id: TemporaryMasterIds)
   end
 
   #
