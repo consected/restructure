@@ -172,6 +172,14 @@ li.list-group-item label {
 
 .make-labels-placeholders .done-label-resize input[placeholder] {
   width: 100%;
+
+  option.select-option-placeholder {
+    color: rgb(128, 128, 128);
+  }
+}
+
+::placeholder {
+  color: rgb(128, 128, 128) !important;
 }
 
 .form-inline .row > div {
