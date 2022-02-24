@@ -441,8 +441,9 @@ module ActiveRecord
         end
 
         if Rails.env.production? && (removed.present? || removed_history.present?) && ENV['ALLOW_DROP_COLUMNS'] != 'true'
-          puts 'Specify "allow drop columns" is required'
-          exit
+          puts 'Specify "allow drop columns" is required to actually remove the columns - dropped columns will be ignored'
+          removed = []
+          removed_history = []
         end
 
         full_field_list = (old_colnames + new_colnames + col_names).uniq.map(&:to_sym)
