@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_02_175848) do
+ActiveRecord::Schema.define(version: 2022_02_24_020931) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -1749,9 +1749,6 @@ ActiveRecord::Schema.define(version: 2022_02_02_175848) do
     t.bigint "user_id"
     t.string "date_format"
     t.string "date_time_format"
-    t.string "pattern_for_date_format"
-    t.string "pattern_for_date_time_format"
-    t.string "pattern_for_time_format"
     t.string "time_format"
     t.string "timezone"
     t.datetime "created_at", null: false
