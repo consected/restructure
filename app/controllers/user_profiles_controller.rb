@@ -65,6 +65,7 @@ class UserProfilesController < UserBaseController
   def resource_data
     return @resource_data if @resource_data
 
+    current_user.user_preference.current_user = current_user
     @resource_data = {
       user: current_user,
       user_preference: current_user.user_preference
