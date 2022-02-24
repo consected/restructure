@@ -731,6 +731,9 @@ _fpa.form_utils = {
             all.css({ minWidth: wmax + 6, width: wmax + 6, whiteSpace: 'normal' }).addClass('list-small-label');
           }
         }
+
+        _fpa.form_utils.make_labels_placeholders(block);
+
         lgi.addClass('done-label-resize');
       }, 1);
       self.addClass('attached-resize-labels');
@@ -740,9 +743,11 @@ _fpa.form_utils = {
 
   make_labels_placeholders: function (block) {
     block.find('.make-labels-placeholders').not('.done-labels-placeholders').each(function () {
-      $(this).find('.edit-field-container label').each(function () {
+      $(this).find('.edit-field-container label, .edit-field-container small').not('.radio-label').each(function () {
         var f = $(this).attr('for')
-        $(`#${f}`).attr('placeholder', $(this).text())
+        var el = $(`#${f}`)
+        if (!el.length || el.attr('type') == 'radio' || el.attr('type') == 'checkbox') return
+        el.attr('placeholder', $(this).text())
         $(this).hide()
       })
     }).addClass('done-labels-placeholders');
@@ -2119,7 +2124,6 @@ _fpa.form_utils = {
     _fpa.form_utils.setup_has_value_inputs(block);
     _fpa.form_utils.organize_common_templates(block);
     _fpa.form_utils.resize_labels(block);
-    _fpa.form_utils.make_labels_placeholders(block)
     _fpa.form_utils.filtered_selector(block);
     _fpa.form_utils.setup_tablesorter(block);
     _fpa.form_utils.setup_bootstrap_items(block);
