@@ -79,6 +79,7 @@ class Report < ActiveRecord::Base
   # @param csn [String] must match the pattern yyy__zzz
   # @return [Report] or raises an exception if not found
   def self.find_by_alt_resource_name(csn, nil_for_no_match = nil, ignore_bad_format = nil)
+    csn = csn.gsub('___', ' - ')
     parts = csn.split('__')
     raise FphsException, 'Bad item_type__short_name identifier' unless parts.length == 2 || ignore_bad_format
 
