@@ -170,6 +170,10 @@ li.list-group-item label {
   display: none !important;
 }
 
+.make-labels-placeholders .done-label-resize input[placeholder] {
+  width: 100%;
+}
+
 .form-inline .row > div {
   text-align: right;
   div.form-group {
