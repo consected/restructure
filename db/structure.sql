@@ -12876,14 +12876,6 @@ ALTER TABLE ONLY ref_data.datadic_variable_history
 
 
 --
--- Name: datadic_variables fk_rails_5578e37430; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.datadic_variables
-    ADD CONSTRAINT fk_rails_5578e37430 FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ref_data.redcap_data_dictionaries(id);
-
-
---
 -- Name: datadic_choice_history fk_rails_63103b7cf7; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
@@ -12897,14 +12889,6 @@ ALTER TABLE ONLY ref_data.datadic_choice_history
 
 ALTER TABLE ONLY ref_data.datadic_choices
     ADD CONSTRAINT fk_rails_67ca4d7e1f FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
-
-
---
--- Name: datadic_variable_history fk_rails_6ba6ab1e1f; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.datadic_variable_history
-    ADD CONSTRAINT fk_rails_6ba6ab1e1f FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ref_data.redcap_data_dictionaries(id);
 
 
 --
@@ -12980,14 +12964,6 @@ ALTER TABLE ONLY ref_data.redcap_data_collection_instrument_history
 
 
 --
--- Name: datadic_choice_history fk_rails_cb8a1e9d10; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.datadic_choice_history
-    ADD CONSTRAINT fk_rails_cb8a1e9d10 FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ref_data.redcap_data_dictionaries(id);
-
-
---
 -- Name: redcap_data_collection_instrument_history fk_rails_ce6075441d; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
@@ -13012,14 +12988,6 @@ ALTER TABLE ONLY ref_data.datadic_variable_history
 
 
 --
--- Name: datadic_choices fk_rails_f5497a3583; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
---
-
-ALTER TABLE ONLY ref_data.datadic_choices
-    ADD CONSTRAINT fk_rails_f5497a3583 FOREIGN KEY (redcap_data_dictionary_id) REFERENCES ref_data.redcap_data_dictionaries(id);
-
-
---
 -- Name: redcap_data_dictionary_history fk_rails_fffede9aa7; Type: FK CONSTRAINT; Schema: ref_data; Owner: -
 --
 
@@ -13031,7 +12999,7 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app,extra_app,fem,data_requests,study_info,sleep,ref_data,redcap,dynamic;
+SET search_path TO ml_app,ref_data;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20150602181200'),
@@ -13402,7 +13370,60 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20211222140019'),
 ('20211231113457'),
 ('20220121143719'),
+('20220131111232'),
+('20220131121830'),
+('20220131121831'),
+('20220131121833'),
+('20220131121834'),
+('20220131121835'),
+('20220131123017'),
+('20220131123100'),
+('20220131131244'),
+('20220131132533'),
+('20220131135242'),
+('20220131135349'),
+('20220131135547'),
+('20220131135600'),
+('20220131140353'),
+('20220131140521'),
+('20220131143324'),
+('20220131155227'),
+('20220131155229'),
+('20220131171632'),
+('20220131172554'),
+('20220131172618'),
+('20220131182607'),
+('20220131184011'),
+('20220131184041'),
+('20220131184511'),
+('20220201102247'),
+('20220201102549'),
+('20220201173928'),
+('20220201174829'),
 ('20220202175848'),
-('20220216145207');
+('20220202190849'),
+('20220202190931'),
+('20220203193018'),
+('20220203201903'),
+('20220214120443'),
+('20220214122255'),
+('20220214124934'),
+('20220214125216'),
+('20220214125928'),
+('20220214130001'),
+('20220214140459'),
+('20220214154149'),
+('20220216145207'),
+('20220217092246'),
+('20220217144044'),
+('20220218171203'),
+('20220218171455'),
+('20220221101714'),
+('20220221102030'),
+('20220221113950'),
+('20220221120737'),
+('20220221123203'),
+('20220222112229'),
+('20220222112301');
 
 

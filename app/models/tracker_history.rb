@@ -21,6 +21,10 @@ class TrackerHistory < UserBase
     false
   end
 
+  def self.category
+    :subjects
+  end
+
   # Override for latest_tracker_history, where we have no way of getting at the master_user
   # Master is responsible for excluding these items
   def allows_current_user_access_to?(_perform, _with_options = nil)

@@ -58,6 +58,10 @@ class Tracker < UserBase
     false
   end
 
+  def self.category
+    :subjects
+  end
+
   # Check whether a tracker record with the same protocol already exists for this master
   # If it does then a DB trigger will update the existing record rather than creating a new one.
   # This following method ensures that the latest tracker entry for this protocol is returned,

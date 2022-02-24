@@ -20,7 +20,7 @@ module AlternativeIds
     # @param [Boolean | nil] access_by - optional (and ignored), but consistent with others and may be use in the future
     # @return [Array{Symbol}]
     def crosswalk_attrs(access_by: nil)
-      attribute_names.map(&:to_sym) - %i[id master_id user_id created_at updated_at rank]
+      attribute_names.map(&:to_sym) - %i[id master_id user_id created_at updated_at rank created_by_user_id]
     end
 
     #

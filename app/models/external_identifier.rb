@@ -240,8 +240,6 @@ class ExternalIdentifier < ActiveRecord::Base
 
         res2 = klass.const_set(c_name, a_new_controller)
         res2.include ExternalIdControllerHandler
-
-        add_model_to_list res
       rescue StandardError => e
         failed = true
         logger.info "Failure creating an external identifier model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
@@ -251,6 +249,8 @@ class ExternalIdentifier < ActiveRecord::Base
     if failed || !enabled?
       remove_model_from_list
       reset_master_fields
+    elsif res
+      add_model_to_list res
     end
 
     reset_master_fields if res

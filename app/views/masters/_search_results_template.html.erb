@@ -114,14 +114,17 @@
 
 
 <% # Display the set of search results in the "master search" format %>
+<script id="empty" type="text/x-handlebars-template" class="hidden handlebars-template"></script>
 
 <script id="search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#if masters.length}}
-  <div class="panel-group" id="results-accordion" role="tablist" aria-multiselectable="true">
+  <div class="panel-group search-results-template" id="results-accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default results-panel">
 
       {{#each masters}}
+        <% unless app_config_set(:hide_master_heading) %>
         {{>master_panel_heading num_masters=../masters.length}}
+        <% end %>
         {{>master_main num_masters=../masters.length}}
       {{/each}}
 

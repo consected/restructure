@@ -70,16 +70,24 @@ class ActivityLog < ActiveRecord::Base
   # Only enabled admin activity log records are used, excluding other possible options that are not configured.
   # Returns the item_type_name if true
   def self.works_with(item_type, rec_type = nil, process_name = nil)
+    # Get the first item, since this will get the null rec_type and process_name if they match
+    # For the least exact match this is what we want
+    res = works_with_all(item_type, rec_type, process_name).first
+    return unless res
+
+    res.item_type_name
+  end
+
+  # gets all activity log definitions that work with
+  # the specified item_type and optionally rec_type based on admin activity log record configuration
+  # if no rec_type is specified, then just the item_type will be used to match broadly,
+  # even if the configuration specifies a rec_type as a requirement
+  def self.works_with_all(item_type, rec_type = nil, process_name = nil)
     item_type = item_type.downcase
     cond = { item_type: item_type }
     cond[:rec_type] = rec_type if rec_type
     cond[:process_name] = process_name if process_name
-    # Get the first item, since this will get the null rec_type and process_name if they match
-    # For the least exact match this is what we want
-    res = enabled.where(cond).unscope(:order).order('rec_type asc nulls first, process_name asc nulls first').first
-    return unless res
-
-    res.item_type_name
+    enabled.where(cond).unscope(:order).order('rec_type asc nulls first, process_name asc nulls first')
   end
 
   #
@@ -337,6 +345,7 @@ class ActivityLog < ActiveRecord::Base
             patch "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
             put "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
             get "#{ic}/:item_id/#{brn}/:id/template_config", to: "#{brn}#template_config"
+            get "#{ic}/:item_id/#{brn}/:extra_log_type/new", to: "#{brn}#new"
 
             # used by links to get to activity logs without having to use parent item
             # (such as a player contact with phone logs)
@@ -347,6 +356,7 @@ class ActivityLog < ActiveRecord::Base
             post brn, to: "#{brn}#create"
             patch "#{brn}/:id", to: "#{brn}#update"
             get "#{brn}/:id/template_config", to: "#{brn}#template_config"
+            get "#{brn}/:extra_log_type/new", to: "#{brn}#new"
 
             # used by item flags to generate appropriate URLs
             begin
@@ -413,6 +423,14 @@ class ActivityLog < ActiveRecord::Base
     end
     unless rec_type_valid?
       errors.add(:rec_type, "(#{rec_type}) invalid for the selected item type #{item_type}.")
+      return
+    end
+
+    existing = self.class.works_with_all(item_type, rec_type, process_name).where.not(id: id)
+    if existing.first
+      errors.add(:rec_type,
+                 " item type and process name already exist as a definition (#{existing.first.id}) " \
+                 "- #{item_type}, #{rec_type}, #{process_name} ")
       nil
     end
   end
@@ -578,7 +596,7 @@ class ActivityLog < ActiveRecord::Base
 
     # Always performed
     self.class.reset_all_option_configs_resource_names!
-
+    super
     true
   end
 
@@ -608,5 +626,40 @@ class ActivityLog < ActiveRecord::Base
     tn = table_name.sub('activity_log_', 'al_')
     ttn = to_table_name.sub('activity_log_', 'al_')
     "#{ttn}_from_#{tn}"
+  end
+
+  # Hyphenated name, typically used in HTML markup for referencing target blocks and panels
+  def hyphenated_name
+    full_item_type_name.ns_hyphenate
+  end
+
+  # Override to enable extra log types to also be added to Resouces::Models
+  def add_model_to_list(m)
+    super
+
+    rns = self.class.all_option_configs_resource_names do |e|
+      e.config_obj.resource_name == m.resource_name.to_s
+    end
+
+    rns.each do |rn|
+      elt = rn.split('__').last
+      Resources::Models.add(
+        m,
+        resource_name: rn,
+        type: :activity_log_type,
+        base_route_name: nil,
+        base_route_segments: "#{m.base_route_segments}/#{elt}",
+        hyphenated_name: "activity-log--#{implementation_model_name.hyphenate}-#{elt.hyphenate}"
+      )
+    end
+  end
+
+  # Override to enable extra log types to also be added to Resouces::Models
+  # @param [String] tn
+  def remove_model_from_list
+    super
+    self.class.all_option_configs_resource_names.each do |rn|
+      Resources::Models.remove(resource_name: rn)
+    end
   end
 end

@@ -32,10 +32,19 @@
   background-color: #eeeeee;
 }
 
+.hide-activity-logs-header .activity-logs-header {
+  display: none;
+}
+
 .list-group-item {
   p:last-child {
     margin: 0 0 0 0;
   }
+}
+
+/* Cleanup the NFS container */
+li.list-group-item.result-field-container.nfs-store--manage--container-data {
+  display: none;
 }
 
 span.related-tracker-collapser .list-group-item:first-child {

@@ -91,6 +91,21 @@ class Admin::ServerInfo
     'not available'
   end
 
+  def disk_usage
+    IO.popen('df -h').read
+  rescue StandardError
+    'not available'
+  end
+
+  def instance_id
+    IO.popen('ec2-metadata -i').read
+  rescue StandardError
+    res = IO.popen('hostname').read
+    "hostname: #{res.strip}"
+  rescue StandardError
+    'server identifier not available'
+  end
+
   #
   # Initialize the class with a valid, active admin
   # @param [Admin] admin

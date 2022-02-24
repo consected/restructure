@@ -731,11 +731,34 @@ _fpa.form_utils = {
             all.css({ minWidth: wmax + 6, width: wmax + 6, whiteSpace: 'normal' }).addClass('list-small-label');
           }
         }
+
+        _fpa.form_utils.make_labels_placeholders(block);
+
         lgi.addClass('done-label-resize');
       }, 1);
       self.addClass('attached-resize-labels');
     });
 
+  },
+
+  make_labels_placeholders: function (block) {
+    block.find('.make-labels-placeholders').not('.done-labels-placeholders').each(function () {
+      $(this).find('.edit-field-container label, .edit-field-container small').not('.radio-label').each(function () {
+        var f = $(this).attr('for')
+        var el = $(`#${f}`)
+        if (!el.length || el.attr('type') == 'radio' || el.attr('type') == 'checkbox') return
+        if (el[0].tagName == 'SELECT') {
+          if (el.find('option[selected]').length == 0) {
+            var selected = 'selected'
+          }
+          el.prepend(`<option disabled ${selected} class="select-option-placeholder">${$(this).text()}</option>`)
+        }
+        else {
+          el.attr('placeholder', $(this).text())
+        }
+        $(this).hide()
+      })
+    }).addClass('done-labels-placeholders');
   },
 
   // Indicate items that have been entered on a form, making it visually fast to see
@@ -1080,6 +1103,27 @@ _fpa.form_utils = {
 
     }).addClass('attached-prevent-on-collapse');
 
+    block.find('[data-toggle~="uncollapse-target-parents"]').not('.attached-uncparents').on('click', function () {
+      if ($(this).attr('disabled')) return;
+
+      var a;
+      var f = $(this).parents('[data-form-container]');
+      if (f.length == 1) {
+        a = f.attr('data-form-container');
+      }
+      else
+        a = $(this).attr('data-target');
+
+      if (!a || a == '') {
+        a = $(this).attr('data-result-target');
+      }
+
+      if (!a || a == '') return;
+
+      $(a).parents('.collapse').each(function () {
+        $(this).collapse('show');
+      });
+    }).addClass('attached-uncparents');
 
     block.find('[data-toggle~="scrollto-result"], [data-toggle~="scrollto-target"], [data-toggle~="collapse"].scroll-to-expanded, [data-toggle~="uncollapse"].always-scroll-to-expanded ').not('.attached-datatoggle-str').on('click', function () {
       if ($(this).attr('disabled')) return;

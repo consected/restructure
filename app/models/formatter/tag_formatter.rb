@@ -9,6 +9,7 @@ module Formatter
       lowercase
       underscore
       hyphenate
+      id_hyphenate
       id_underscore
       initial
       first
@@ -32,6 +33,7 @@ module Formatter
       split_lines
       markup
       ignore_missing
+      last
     ].freeze
 
     def self.format_with(operation, res, orig_val)
@@ -66,6 +68,10 @@ module Formatter
 
     def self.hyphenate(res, _orig_val)
       res.hyphenate
+    end
+
+    def self.id_hyphenate(res, _orig_val)
+      res.id_hyphenate
     end
 
     def self.id_underscore(res, _orig_val)
@@ -164,6 +170,10 @@ module Formatter
 
     def self.ignore_missing(res, _orig_val)
       res || ''
+    end
+
+    def self.last(res, _orig_val)
+      res.last
     end
   end
 end

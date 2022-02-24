@@ -23,7 +23,7 @@
           extra_log_type_key3: Label for button
       view_as:
         edit: hide|readonly|not_embedded|select_or_add
-        show: hide|readonly|see_presence|filestore
+        show: hide|readonly|see_presence|filestore|as_edit
         new: outside_this|not_embedded|select_or_add
         _notes_:
         - "*outside_this* presents a button that triggers a form outside of this container

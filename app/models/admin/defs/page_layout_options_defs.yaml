@@ -26,6 +26,8 @@ view_options:
   initial_show: true|false            # initially open up a panel
   find_with: (msid|scantron_id|...)   # the alternative id (crosswalk or external id)
                                       # to search for the master record with for standalone pages
+  hide_sublist_controls:              # hide the sublist controls (filter, sort) in dynamic item panel
+  hide_activity_logs_header:          # hide the activity logs header including + buttons
 
 list_options:
   hide_in_list: false (default) | true

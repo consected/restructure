@@ -215,7 +215,7 @@ _fpa.loaded.masters = function () {
 
         var panel = $('.searchable-report-panel .collapse.in');
         if (panel && panel.length == 1) {
-            if ($('#search-action').html() != ('MSID')) {
+            if ($('#search-action').html() != ('MSID') && !$('#simple_m_id').val()) {
                 // Prevent an auto run report if the page is refreshing with a requested master or result set
                 if (!$('#master-search-accordion').hasClass('loading-results')) {
                     panel.find('[type="submit"].auto-run').click();

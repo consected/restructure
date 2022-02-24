@@ -298,69 +298,72 @@ _fpa = {
     var template = options.template;
     var process_block = block;
 
-    // Render the result using the template and data
-    try {
-      var html = template(data);
-    } catch (err) {
-      console.log('(' + err + ') template function not defined for ' + template_name);
-      console.log(err.stack);
+    // Throw away the result if told to show no result
+    if (!options.show_no_result) {
+
+      // Render the result using the template and data
+      try {
+        var html = template(data);
+      } catch (err) {
+        console.log('(' + err + ') template function not defined for ' + template_name);
+        console.log(err.stack);
+      }
+      html = $(html).addClass('view-template-created');
+
+      var new_block = block;
+
+      // Position the result before, after or in the current block
+      if (options.position && options.position.indexOf('before') === 0) {
+        var beforeBlock = block;
+        if (options.position.indexOf('parent') > 0) {
+          beforeBlock = block.parent();
+        }
+
+        new_block = html;
+        var id = new_block.attr('id');
+        // If the results has a root element with an id that exist in the DOM already,
+        // TODO: !!!! this seems wrong - we don't want duplicate items !!!! and has not been created in this transaction,
+        // replace it rather than placing the result before the specified block
+
+        var existing = $('#' + id); //.not('.view-template-created');
+        if (existing.length > 0) {
+          existing.replaceWith(new_block);
+        } else {
+          beforeBlock.before(new_block);
+        }
+        process_block = new_block;
+        block.html('');
+      } else if (options.position && options.position.indexOf('after') === 0) {
+        var afterBlock = block;
+        if (options.position.indexOf('parent') > 0) {
+          afterBlock = block.parent();
+        }
+
+        new_block = html;
+        var id = new_block.attr('id');
+        var existing = $('#' + id);
+        // If the results has a root element with an id that exist in the DOM already,
+        // replace it rather than placing the result after the specified block
+        if (existing.length > 0) {
+          existing.replaceWith(new_block);
+        } else {
+          afterBlock.after(new_block);
+        }
+        block.html('');
+        process_block = new_block;
+      } else {
+        new_block = html;
+
+        // If the results has a root element with an id that matches the existing block,
+        // replace it rather than placing the result inside the current item
+        if (block.attr('id') && block.attr('id') == new_block.attr('id')) {
+          block.replaceWith(new_block);
+        } else {
+          // Just replace the content of the specified block
+          block.html(html);
+        }
+      }
     }
-    html = $(html).addClass('view-template-created');
-
-    var new_block = block;
-
-    // Position the result before, after or in the current block
-    if (options.position && options.position.indexOf('before') === 0) {
-      var beforeBlock = block;
-      if (options.position.indexOf('parent') > 0) {
-        beforeBlock = block.parent();
-      }
-
-      new_block = html;
-      var id = new_block.attr('id');
-      // If the results has a root element with an id that exist in the DOM already,
-      // TODO: !!!! this seems wrong - we don't want duplicate items !!!! and has not been created in this transaction,
-      // replace it rather than placing the result before the specified block
-
-      var existing = $('#' + id); //.not('.view-template-created');
-      if (existing.length > 0) {
-        existing.replaceWith(new_block);
-      } else {
-        beforeBlock.before(new_block);
-      }
-      process_block = new_block;
-      block.html('');
-    } else if (options.position && options.position.indexOf('after') === 0) {
-      var afterBlock = block;
-      if (options.position.indexOf('parent') > 0) {
-        afterBlock = block.parent();
-      }
-
-      new_block = html;
-      var id = new_block.attr('id');
-      var existing = $('#' + id);
-      // If the results has a root element with an id that exist in the DOM already,
-      // replace it rather than placing the result after the specified block
-      if (existing.length > 0) {
-        existing.replaceWith(new_block);
-      } else {
-        afterBlock.after(new_block);
-      }
-      block.html('');
-      process_block = new_block;
-    } else {
-      new_block = html;
-
-      // If the results has a root element with an id that matches the existing block,
-      // replace it rather than placing the result inside the current item
-      if (block.attr('id') && block.attr('id') == new_block.attr('id')) {
-        block.replaceWith(new_block);
-      } else {
-        // Just replace the content of the specified block
-        block.html(html);
-      }
-    }
-
     // We handle the post processing in a timeout to give the UI the opportunity to render the
     // template, providing for a more responsive, less jerky experience.
     window.setTimeout(function () {
@@ -658,6 +661,12 @@ _fpa = {
               else if (b.hasClass('new-below')) options.position = 'after';
               else if (b.hasClass('new-after')) options.position = 'after';
               else options.position = 'before';
+            }
+
+            // Do not add the result template if the class show-no-result is set on the target container.
+            // Pre and post processors are still called though.
+            if (b.hasClass('show-no-result')) {
+              options.show_no_result = true;
             }
             // Since we may have specified multiple items to match the target, run through each in turn
             // making sure to use any specific templates they specify

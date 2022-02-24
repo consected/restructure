@@ -250,9 +250,8 @@
               showed_caption_before = true
               showed_caption_before_kl = caption_before[field_name_sym][:keep_label] ? 'caption-before-keep-label' : ''
           %>
-            <li class="list-group-item caption-before <%= showed_caption_before_kl %> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-caption-before' : ''%>">
-              <%= show_caption_before field_name_sym, caption_before %>
-            </li>
+            <li class="list-group-item caption-before <%= showed_caption_before_kl %> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-caption-before' : ''%>"
+            ><%= show_caption_before field_name_sym, caption_before %></li>
           <% end %>
 
 

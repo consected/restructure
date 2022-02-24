@@ -64,10 +64,10 @@ end
 </div>
 <% if current_admin %>
 <div class="extra-admin-controls panel panel-default">
+  <%= link_to "clear filters", {}, class: "btn btn-sm admin-clear-filters" if params[:filter].present? %>
   <div class="panel-body pull-right">
     <button class="btn btn-sm expand-all-expandables">expand all</button>
     <button class="btn btn-sm shrink-all-expandables">shrink all</button>
-    <%= link_to "clear filters", {}, class: "btn btn-sm admin-clear-filters" if params[:filter].present? %>
     <%= link_to "export csv", {filter: filter_params_permitted, format: 'csv'}, class: "btn btn-sm export-csv" %>
   </div>
 </div>

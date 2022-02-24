@@ -8230,6 +8230,13 @@ ALTER TABLE ONLY ml_app.user_descriptions ALTER COLUMN id SET DEFAULT nextval('m
 
 
 --
+-- Name: user_history id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_history ALTER COLUMN id SET DEFAULT nextval('ml_app.user_history_id_seq'::regclass);
+
+
+--
 -- Name: user_preferences id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
@@ -9089,6 +9096,14 @@ ALTER TABLE ONLY ml_app.user_description_history
 
 ALTER TABLE ONLY ml_app.user_descriptions
     ADD CONSTRAINT user_descriptions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_history user_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_history
+    ADD CONSTRAINT user_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -10692,6 +10707,244 @@ CREATE INDEX "index_ref_data.redcap_project_users_on_redcap_project_admin_id" ON
 
 
 --
+-- Name: accuracy_scores accuracy_score_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER accuracy_score_history_insert AFTER INSERT ON ml_app.accuracy_scores FOR EACH ROW EXECUTE FUNCTION ml_app.log_accuracy_score_update();
+
+
+--
+-- Name: accuracy_scores accuracy_score_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER accuracy_score_history_update AFTER UPDATE ON ml_app.accuracy_scores FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_accuracy_score_update();
+
+
+--
+-- Name: activity_logs activity_log_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_history_insert AFTER INSERT ON ml_app.activity_logs FOR EACH ROW EXECUTE FUNCTION ml_app.log_activity_log_update();
+
+
+--
+-- Name: activity_logs activity_log_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_history_update AFTER UPDATE ON ml_app.activity_logs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_activity_log_update();
+
+
+--
+-- Name: activity_log_player_contact_phones activity_log_player_contact_phone_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_player_contact_phone_history_insert AFTER INSERT ON ml_app.activity_log_player_contact_phones FOR EACH ROW EXECUTE FUNCTION ml_app.log_activity_log_player_contact_phone_update();
+
+
+--
+-- Name: activity_log_player_contact_phones activity_log_player_contact_phone_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_player_contact_phone_history_update AFTER UPDATE ON ml_app.activity_log_player_contact_phones FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_activity_log_player_contact_phone_update();
+
+
+--
+-- Name: addresses address_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER address_history_insert AFTER INSERT ON ml_app.addresses FOR EACH ROW EXECUTE FUNCTION ml_app.log_address_update();
+
+
+--
+-- Name: addresses address_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER address_history_update AFTER UPDATE ON ml_app.addresses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_address_update();
+
+
+--
+-- Name: addresses address_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER address_insert BEFORE INSERT ON ml_app.addresses FOR EACH ROW EXECUTE FUNCTION ml_app.handle_address_update();
+
+
+--
+-- Name: addresses address_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER address_update BEFORE UPDATE ON ml_app.addresses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.handle_address_update();
+
+
+--
+-- Name: admins admin_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER admin_history_insert AFTER INSERT ON ml_app.admins FOR EACH ROW EXECUTE FUNCTION ml_app.log_admin_update();
+
+
+--
+-- Name: admins admin_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER admin_history_update AFTER UPDATE ON ml_app.admins FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_admin_update();
+
+
+--
+-- Name: app_configurations app_configuration_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER app_configuration_history_insert AFTER INSERT ON ml_app.app_configurations FOR EACH ROW EXECUTE FUNCTION ml_app.log_app_configuration_update();
+
+
+--
+-- Name: app_configurations app_configuration_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER app_configuration_history_update AFTER UPDATE ON ml_app.app_configurations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_app_configuration_update();
+
+
+--
+-- Name: app_types app_type_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER app_type_history_insert AFTER INSERT ON ml_app.app_types FOR EACH ROW EXECUTE FUNCTION ml_app.log_app_type_update();
+
+
+--
+-- Name: app_types app_type_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER app_type_history_update AFTER UPDATE ON ml_app.app_types FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_app_type_update();
+
+
+--
+-- Name: colleges college_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER college_history_insert AFTER INSERT ON ml_app.colleges FOR EACH ROW EXECUTE FUNCTION ml_app.log_college_update();
+
+
+--
+-- Name: colleges college_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER college_history_update AFTER UPDATE ON ml_app.colleges FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_college_update();
+
+
+--
+-- Name: config_libraries config_library_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER config_library_history_insert AFTER INSERT ON ml_app.config_libraries FOR EACH ROW EXECUTE FUNCTION ml_app.log_config_library_update();
+
+
+--
+-- Name: config_libraries config_library_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER config_library_history_update AFTER UPDATE ON ml_app.config_libraries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_config_library_update();
+
+
+--
+-- Name: dynamic_models dynamic_model_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER dynamic_model_history_insert AFTER INSERT ON ml_app.dynamic_models FOR EACH ROW EXECUTE FUNCTION ml_app.log_dynamic_model_update();
+
+
+--
+-- Name: dynamic_models dynamic_model_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER dynamic_model_history_update AFTER UPDATE ON ml_app.dynamic_models FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_dynamic_model_update();
+
+
+--
+-- Name: external_identifiers external_identifier_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER external_identifier_history_insert AFTER INSERT ON ml_app.external_identifiers FOR EACH ROW EXECUTE FUNCTION ml_app.log_external_identifier_update();
+
+
+--
+-- Name: external_identifiers external_identifier_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER external_identifier_history_update AFTER UPDATE ON ml_app.external_identifiers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_external_identifier_update();
+
+
+--
+-- Name: external_links external_link_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER external_link_history_insert AFTER INSERT ON ml_app.external_links FOR EACH ROW EXECUTE FUNCTION ml_app.log_external_link_update();
+
+
+--
+-- Name: external_links external_link_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER external_link_history_update AFTER UPDATE ON ml_app.external_links FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_external_link_update();
+
+
+--
+-- Name: general_selections general_selection_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER general_selection_history_insert AFTER INSERT ON ml_app.general_selections FOR EACH ROW EXECUTE FUNCTION ml_app.log_general_selection_update();
+
+
+--
+-- Name: general_selections general_selection_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER general_selection_history_update AFTER UPDATE ON ml_app.general_selections FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_general_selection_update();
+
+
+--
+-- Name: item_flags item_flag_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER item_flag_history_insert AFTER INSERT ON ml_app.item_flags FOR EACH ROW EXECUTE FUNCTION ml_app.log_item_flag_update();
+
+
+--
+-- Name: item_flags item_flag_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER item_flag_history_update AFTER UPDATE ON ml_app.item_flags FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_item_flag_update();
+
+
+--
+-- Name: item_flag_names item_flag_name_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER item_flag_name_history_insert AFTER INSERT ON ml_app.item_flag_names FOR EACH ROW EXECUTE FUNCTION ml_app.log_item_flag_name_update();
+
+
+--
+-- Name: item_flag_names item_flag_name_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER item_flag_name_history_update AFTER UPDATE ON ml_app.item_flag_names FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_item_flag_name_update();
+
+
+--
+-- Name: role_descriptions log_role_description_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_role_description_history_insert AFTER INSERT ON ml_app.role_descriptions FOR EACH ROW EXECUTE FUNCTION ml_app.role_description_history_upd();
+
+
+--
+-- Name: role_descriptions log_role_description_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER log_role_description_history_update AFTER UPDATE ON ml_app.role_descriptions FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.role_description_history_upd();
+
+
+--
 -- Name: user_descriptions log_user_description_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -10703,6 +10956,48 @@ CREATE TRIGGER log_user_description_history_insert AFTER INSERT ON ml_app.user_d
 --
 
 CREATE TRIGGER log_user_description_history_update AFTER UPDATE ON ml_app.user_descriptions FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.user_description_history_upd();
+
+
+--
+-- Name: message_templates message_template_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER message_template_history_insert AFTER INSERT ON ml_app.message_templates FOR EACH ROW EXECUTE FUNCTION ml_app.log_message_template_update();
+
+
+--
+-- Name: message_templates message_template_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER message_template_history_update AFTER UPDATE ON ml_app.message_templates FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_message_template_update();
+
+
+--
+-- Name: nfs_store_archived_files nfs_store_archived_file_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_archived_file_history_insert AFTER INSERT ON ml_app.nfs_store_archived_files FOR EACH ROW EXECUTE FUNCTION ml_app.log_nfs_store_archived_file_update();
+
+
+--
+-- Name: nfs_store_archived_files nfs_store_archived_file_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_archived_file_history_update AFTER UPDATE ON ml_app.nfs_store_archived_files FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_nfs_store_archived_file_update();
+
+
+--
+-- Name: nfs_store_containers nfs_store_container_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_container_history_insert AFTER INSERT ON ml_app.nfs_store_containers FOR EACH ROW EXECUTE FUNCTION ml_app.log_nfs_store_container_update();
+
+
+--
+-- Name: nfs_store_containers nfs_store_container_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_container_history_update AFTER UPDATE ON ml_app.nfs_store_containers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_nfs_store_container_update();
 
 
 --

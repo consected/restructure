@@ -441,8 +441,9 @@ module ActiveRecord
         end
 
         if Rails.env.production? && (removed.present? || removed_history.present?) && ENV['ALLOW_DROP_COLUMNS'] != 'true'
-          puts 'Specify "allow drop columns" is required'
-          exit
+          puts 'Specify "allow drop columns" is required to actually remove the columns - dropped columns will be ignored'
+          removed = []
+          removed_history = []
         end
 
         full_field_list = (old_colnames + new_colnames + col_names).uniq.map(&:to_sym)
@@ -466,7 +467,6 @@ module ActiveRecord
             DROP VIEW #{view['schemaname']}.#{view['viewname']};
           END_SQL
         end
-
 
         if belongs_to_model && !old_colnames.include?(belongs_to_model) && !col_names.include?(belongs_to_model_field)
           begin
@@ -601,15 +601,14 @@ module ActiveRecord
         # Recreate the activity log reference views
         reference_views&.each do |view|
           new_view_sql = view['definition'].dup
-          new_view_sql = new_view_sql.gsub(/dest\..+,\n/, '--removed-col')
-          new_view_sql = new_view_sql.sub('--removed-col', 'dest.*,')  
+          new_view_sql = new_view_sql.gsub(/dest\..+,\n/, "--removed-col\n")
+          new_view_sql = new_view_sql.sub('--removed-col', 'dest.*,')
           new_view_sql = new_view_sql.gsub(/--removed-col.*\n/, '')
           execute <<~END_SQL
             create view #{view['schemaname']}.#{view['viewname']} as
             #{new_view_sql}
           END_SQL
         end
-
 
         change_comments
       rescue StandardError, ActiveRecord::StatementInvalid => e

@@ -39,7 +39,7 @@ module AdminHelper
   def filter_btn(title, filter_on, val)
     res = ''
 
-    filter = (filter_params_permitted || {}).dup
+    filter = (filter_params || {}).dup
     prev_val = filter[filter_on].to_s
     filter[filter_on] = val.to_s
 
