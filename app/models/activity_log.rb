@@ -596,8 +596,7 @@ class ActivityLog < ActiveRecord::Base
 
     # Always performed
     self.class.reset_all_option_configs_resource_names!
-    Classification::GeneralSelection.item_types refresh: true
-
+    super
     true
   end
 
