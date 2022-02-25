@@ -21,7 +21,7 @@
 <script id="user_profile_inner" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{>user_profile_tabs}}
   <div class="panel-body user-profile-panel">
-    <% if resources.present? %>  
+    <% if @panels.present? %>  
     <%= render partial: 'user_profiles/resources_panel' %>
     <% else # no panels defined %>
     <div class="well">no user profile panels defined</div>
