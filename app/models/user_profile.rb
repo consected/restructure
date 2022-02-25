@@ -3,7 +3,7 @@
 #
 # Support user profiles and access to each of the resources that a user can access.
 # User profiles are presented based on configurations of Page Layouts with
-# the user_panel type. Each panel may have one or more resources specified (by resource name).
+# the user_profile type. Each panel may have one or more resources specified (by resource name).
 # Only resources based on the user's current user access controls (for their current app) are
 # presented.
 # The implementation gets the full set of defined resources, then for each one pulls the details
@@ -25,7 +25,7 @@ class UserProfile
     res = all_panel_resource_infos
     unless res.present?
       raise FphsException,
-            'No resources defined in user_profiles panel (requires a contains: resources: <list>)'
+            'No resources defined in Page Layout user_profile panel (requires a contains: resources: <list>)'
     end
 
     res.select do |res_hash|
