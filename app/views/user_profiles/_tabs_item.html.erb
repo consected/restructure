@@ -4,18 +4,17 @@
   %>
   
   <% 
-  
     @panels&.each do |r_model|
       template_postfix = ''
       template_postfix = '-result-template' if r_model[:type] == :activity_log
 
       resource_name = r_model[:resource_name]
       tab_label = r_model[:label]
-      template_resource = r_model[:hyphenated_name].singularize
+      template_resource = r_model[:hyphenated_item_name]
   %>
   <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
     <a id="tab-user-profile-<%= template_resource %>-{{user.id}}" 
-       href="/user_profile?resource_name=<%= resource_name.to_s.singularize %>" 
+       href="/user_profile?resource_name=<%= resource_name %>" 
        data-panel-tab="<%=resource_name%>" 
        data-remote="true" 
        data-prevent-on-collapse="true" 

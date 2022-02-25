@@ -24,6 +24,11 @@ class ActivityLog < ActiveRecord::Base
     full_item_types_name
   end
 
+  # Resource name for a single instance of the model
+  def resource_item_name
+    resource_name.to_s.singularize.to_sym
+  end
+
   def implementation_model_name
     item_type_name
   end
@@ -346,6 +351,8 @@ class ActivityLog < ActiveRecord::Base
             put "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
             get "#{ic}/:item_id/#{brn}/:id/template_config", to: "#{brn}#template_config"
             get "#{ic}/:item_id/#{brn}/:extra_log_type/new", to: "#{brn}#new"
+            get "#{ic}/:item_id/#{brn}/:extra_log_type/:id", to: "#{brn}#show"
+            post "#{ic}/:item_id/#{brn}/:extra_log_type", to: "#{brn}#create"
 
             # used by links to get to activity logs without having to use parent item
             # (such as a player contact with phone logs)
@@ -357,6 +364,8 @@ class ActivityLog < ActiveRecord::Base
             patch "#{brn}/:id", to: "#{brn}#update"
             get "#{brn}/:id/template_config", to: "#{brn}#template_config"
             get "#{brn}/:extra_log_type/new", to: "#{brn}#new"
+            get "#{brn}/:extra_log_type/:id", to: "#{brn}#show"
+            post "#{brn}/:extra_log_type", to: "#{brn}#create"
 
             # used by item flags to generate appropriate URLs
             begin
@@ -643,13 +652,17 @@ class ActivityLog < ActiveRecord::Base
 
     rns.each do |rn|
       elt = rn.split('__').last
+      hyph_name = "activity-log--#{implementation_model_name.hyphenate}-#{elt.hyphenate}"
       Resources::Models.add(
         m,
         resource_name: rn,
+        resource_item_name: rn,
         type: :activity_log_type,
         base_route_name: nil,
         base_route_segments: "#{m.base_route_segments}/#{elt}",
-        hyphenated_name: "activity-log--#{implementation_model_name.hyphenate}-#{elt.hyphenate}"
+        hyphenated_name: hyph_name,
+        hyphenated_item_name: hyph_name,
+        option_type: elt
       )
     end
   end

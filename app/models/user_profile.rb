@@ -30,7 +30,9 @@ class UserProfile
 
     res.select do |res_hash|
       resname = res_hash[:resource_name]
-      current_user.has_access_to?(:access, :table, resname)
+      restype = res_hash[:type]
+      restype = :table unless restype == :activity_log_type
+      current_user.has_access_to?(:access, restype, resname)
     end
   end
 
@@ -63,7 +65,7 @@ class UserProfile
 
     all_panel_resource_infos.each do |res_def|
       resource_name = res_def[:resource_name]
-      res_instance = current_user_resource_instance(resource_name)
+      res_instance = current_user_resource_instance(resource_name: resource_name)
       next unless res_instance # if the resource is not found, assume that we are building a resource (not persisted).
 
       res_instance.current_user = current_user
@@ -103,24 +105,27 @@ class UserProfile
       rn = valid_rn['resource_name']
     end
 
-    model = Resources::Models.find_by(resource_name: rn.to_s.pluralize)
+    model = Resources::Models.find_by(resource_name: rn)
+    model ||= Resources::Models.find_by(resource_item_name: rn.to_sym)
     return model&.model if model_only || model&.model.nil?
 
-    {
-      model: model.model,
-      resource_name: model.resource_name,
-      label: label ||  model.model.human_name || rn.humanize.titleize,
-      hyphenated_name: model.hyphenated_name,
-      type: model.type
-    }
+    model.to_h.merge label: label || model.model.human_name || rn.humanize.titleize
   end
 
   #
-  # Get the instance of the resource for the current user
-  # @param [String] resource_name
-  # @return [UserBase]
-  def current_user_resource_instance(resource_name)
-    resclass = resource_info(resource_name, model_only: true)
-    resclass.find_by(user_id: current_user.id)
+  # Get the resource instance for the supplied resource_info or resource_name
+  # @param [Hash] resource_info
+  # @param [Symbol|String] resource_name
+  # @return [UserBase|nil]
+  def current_user_resource_instance(resource_name: nil, resource_info: nil)
+    resource_info ||= resource_info(resource_name)
+    resclass = resource_info[:model]
+
+    ot = resource_info[:option_type]
+    if ot
+      resclass.find_by(user_id: current_user.id, extra_log_type: ot)
+    else
+      resclass.find_by(user_id: current_user.id)
+    end
   end
 end

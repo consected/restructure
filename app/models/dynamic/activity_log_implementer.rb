@@ -100,6 +100,11 @@ module Dynamic
         definition.resource_name
       end
 
+      # Resource name for a single instance of the model
+      def resource_item_name
+        definition.resource_item_name
+      end
+
       # The user relevant data attributes in the parent class
       def parent_data_names
         parent_class.attribute_names - %w[id master_id disabled user_id admin_id created_at updated_at rank rec_type]

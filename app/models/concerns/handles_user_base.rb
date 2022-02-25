@@ -136,6 +136,11 @@ module HandlesUserBase
       name.ns_underscore.pluralize
     end
 
+    # Resource name for a single instance of the model
+    def resource_item_name
+      resource_name.to_s.singularize.to_sym
+    end
+
     # Returns the full model name, namespaced like 'module__class' if there is a namespace.
     # otherwise it returns just the basic name
     def item_type
@@ -200,6 +205,11 @@ module HandlesUserBase
     def hyphenated_name
       resource_name.ns_hyphenate
     end
+
+    # Hyphenated item name, typically used in HTML markup for referencing individual results
+    def hyphenated_item_name
+      hyphenated_name.singularize
+    end
   end
 
   #
@@ -208,6 +218,11 @@ module HandlesUserBase
   # @return [String]
   def resource_name
     self.class.name.ns_underscore.pluralize
+  end
+
+  # Resource name for a single instance of the model
+  def resource_item_name
+    resource_name.to_s.singularize.to_sym
   end
 
   #

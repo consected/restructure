@@ -36,13 +36,19 @@ class UserProfilesController < UserBaseController
 
     valid_rn = params[:resource_name]
     if valid_rn.present?
-      resource = user_profile.current_user_resource_instance(valid_rn)
+      resource_info = user_profile.resource_info(valid_rn)
+      resource = user_profile.current_user_resource_instance(resource_info: resource_info)
       if resource
         resource.current_user = current_user
-        render json: { resource.resource_name.to_s.singularize => resource }
+        # resource_info[:resource_item_name]
+        render json: { resource.resource_item_name => resource }
       else
-        path_method = "new_#{resclass.base_route_name}_path"
-        redirect_to send(path_method)
+        base_route_segments = resource_info[:base_route_segments]
+        unless resource_info[:model].no_master_association
+          use_temp_master = "/masters/#{Master::TemporaryMasterIds.first}"
+        end
+        new_path = "#{use_temp_master}/#{base_route_segments}/new"
+        redirect_to new_path
       end
 
     elsif request.format == :html
