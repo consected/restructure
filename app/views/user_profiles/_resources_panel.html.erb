@@ -1,24 +1,25 @@
 <%
   
-  resource_names.each do |resource|
-    rs = resource.split('__', 2)
-    if rs.length == 2
-      resource_type = rs.first.hyphenate.pluralize
-    else
-      resource_type = 'details'
-    end
-
-    template_resource = resource.sub(/^dynamic_model__/, '').hyphenate
+  @panels.each do |resource|
+    resource_name = resource[:resource_name]
+    resource_type = resource[:type].to_s.pluralize
+    resource_item_name = resource[:resource_item_name]
+    assoc_name = resource[:model].resource_item_name
+    template_resource = resource[:hyphenated_item_name]
 %>
-  <div id="user-profile-<%= resource.hyphenate %>-{{user.id}}" 
-       class="<%= resource_type %>-user-profile-block <%= resource.hyphenate %>-block collapse" 
+  <div id="user-profile-<%= template_resource %>-{{user.id}}" 
+       class="<%= resource_type %>-user-profile-block <%= template_resource %>-block collapse" 
        role="tabpanel" 
-       aria-labelledby="tab-user-profile-<%= resource.hyphenate %>-{{user.id}}" 
+       aria-labelledby="tab-user-profile-<%= template_resource %>-{{user.id}}" 
   >    
-    <div id="<%= template_resource %>--{{<%= resource %>.id}}" 
+    <div id="<%= template_resource %>--{{<%= resource_name %>.id}}" 
          class="<%= resource_type %>-user-profile-inner-block user-profile-resource-block"
          form-res-template="<%= template_resource %>-result-template"
-         data-subscription="<%= template_resource %>-edit-form--{{<%=resource%>.id}}"
+         data-template="<%= template_resource %>-result-template"
+         data-subscription="<%= template_resource %>-edit-form--{{<%=resource_name%>.id}}"
+         data-item-class="<%= assoc_name%>"
+         data-sub-item="<%= template_resource.underscore %>"
+         data-sub-id="{{<%=resource_name%>.id}}"
     >
     </div>
   </div>

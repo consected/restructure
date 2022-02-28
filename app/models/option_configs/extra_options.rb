@@ -11,7 +11,7 @@ module OptionConfigs
 
     def self.base_key_attributes
       %i[
-        name label config_obj caption_before show_if resource_name save_action view_options
+        name label config_obj caption_before show_if resource_name resource_item_name save_action view_options
         field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
         filestore labels fields button_label orig_config db_configs save_trigger
       ]
@@ -26,7 +26,7 @@ module OptionConfigs
     end
 
     def self.editable_attributes
-      key_attributes - %i[name config_obj resource_name] + [:label]
+      key_attributes - %i[name config_obj resource_name resource_item_name] + [:label]
     end
 
     attr_accessor(*key_attributes, :def_item)
@@ -54,6 +54,7 @@ module OptionConfigs
 
       self.label ||= name.to_s.humanize
       self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
+      self.resource_item_name = resource_name
       self.caption_before ||= {}
       self.caption_before = self.caption_before.symbolize_keys
 
