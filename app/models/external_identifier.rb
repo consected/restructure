@@ -40,6 +40,11 @@ class ExternalIdentifier < ActiveRecord::Base
     name
   end
 
+  # Resource name for a single instance of the model
+  def resource_item_name
+    resource_name.to_s.singularize.to_sym
+  end
+
   def table_name
     name
   end

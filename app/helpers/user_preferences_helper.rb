@@ -45,21 +45,53 @@ module UserPreferencesHelper
     }
   end
 
+  # Time.current.strftime('%m/%d/%Y') == "02/18/2022"
+  # Time.current.strftime('%d/%m/%Y') == "18/02/2022"
   DateFormats = {
     'mm/dd/yyyy' => '%m/%d/%Y',
     'dd/mm/yyyy' => '%d/%m/%Y'
   }.freeze
 
+  # Time.current.strftime('%m/%d/%Y %-l:%M %P') == "02/18/2022 2:02 pm"
+  # Time.current.strftime('%m/%d/%Y %H:%M') == "02/18/2022 14:02"
+  # Time.current.strftime('%d/%m/%Y %-l:%M %P') == "18/02/2022 2:03 pm"
+  # Time.current.strftime('%d/%m/%Y %H:%M') == "18/02/2022 13:43"
+  # Time.current.strftime('%m/%d/%Y %-l:%M:%S %P') == "02/18/2022 2:02:20 pm"
+  # Time.current.strftime('%m/%d/%Y %T') == "02/18/2022 14:02:30"
+  # Time.current.strftime('%d/%m/%Y %-l:%M:%S %P') == "18/02/2022 2:03:01 pm"
+  # Time.current.strftime('%d/%m/%Y %T') == "18/02/2022 13:43:33"
   DateTimeFormats = {
-    'mm/dd/yyyy hh:mm:ss am/pm' => '%m/%d/%Y %l:%M:%S %P',
-    'mm/dd/yyyy 24h:mm:ss' => '%m/%d/%Y %k:%M:%S',
-    'dd/mm/yyyy hh:mm:ss am/pm' => '%d/%m/%Y %l:%M:%S %P',
-    'dd/mm/yyyy 24h:mm:ss' => '%d/%m/%Y %k:%M:%S'
+    'mm/dd/yyyy hh:mm am/pm' => {
+      :hours_minutes => '%m/%d/%Y %-l:%M %P',
+      :with_secs => '%m/%d/%Y %-l:%M:%S %P'
+    },
+    'mm/dd/yyyy 24h:mm' => {
+      :hours_minutes => '%m/%d/%Y %H:%M',
+      :with_secs => '%m/%d/%Y %T'
+    },
+    'dd/mm/yyyy hh:mm am/pm' => {
+      :hours_minutes => '%d/%m/%Y %-l:%M %P',
+      :with_secs => '%d/%m/%Y %-l:%M:%S %P'
+    },
+    'dd/mm/yyyy 24h:mm' => {
+      :hours_minutes => '%d/%m/%Y %H:%M',
+      :with_secs => '%d/%m/%Y %T'
+    }
   }.freeze
 
+  # Time.current.strftime('%-l:%M %P') == "1:54:32 pm" with no leading zero or blank space.
+  # Time.current.strftime('%H:%M') == "13:49"
+  # Time.current.strftime('%-l:%M:%S %P') == "1:54:32 pm" with no leading zero or blank space.
+  # Time.current.strftime('%T') == "13:49"
   TimeFormats = {
-    'hh:mm:ss am/pm' => '%l:%M:%S %P',
-    '24h:mm:ss' => '%k:%M:%S'
+    'hh:mm am/pm' => {
+      :hours_minutes => '%-l:%M %P',
+      :with_secs => '%-l:%M:%S %P'
+    },
+    '24h:mm' => {
+      :hours_minutes => '%H:%M',
+      :with_secs => '%T'
+    }
   }.freeze
 
   PriorityTimezones = Settings::CountryCodesForTimezones.flat_map do |country_code|

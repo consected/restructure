@@ -56,6 +56,8 @@ master header prefix: |
 master header title: |
   Alternative text  appear instead of participant info names on the master header. 
   May include curly { { substitutions } }
+master results panel css class: |
+  Space separated list of additional classes to add to the results-panel
 menu research label: |
   Label for "research" menu item, linking to user home page. Default "Research". Value "none" will hide the item
 menu dashboards label: |
