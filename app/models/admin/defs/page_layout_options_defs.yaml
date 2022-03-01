@@ -16,6 +16,12 @@ contains:
   resources:
     # a single or array of named resources (model names)
     - activity_log__player_contact_phones
+    # For user_profile type, these resources may be also defined as hashes
+    # allowing a resource name and tab label to be defined
+    - label: Date/Time
+      resource_name: user_preferences
+    - label: Tab Label
+      resource_name: activity_log__player_contact_phones
 
 #
 # View options for the panel or standalone page

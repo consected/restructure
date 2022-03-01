@@ -31,6 +31,11 @@ class DynamicModel < ActiveRecord::Base
     "dynamic_model__#{table_name}"
   end
 
+  # Resource name for a single instance of the model
+  def resource_item_name
+    resource_name.to_s.singularize.to_sym
+  end
+
   #
   # Class that implements options functionality
   def self.options_provider

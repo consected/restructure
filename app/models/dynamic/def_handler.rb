@@ -556,6 +556,8 @@ module Dynamic
 
     # After a regeneration, certain other cleanups may be required
     def other_regenerate_actions
+      Rails.logger.info 'Reloading column definitions'
+      implementation_class.reset_column_information
       Rails.logger.info 'Refreshing item types'
       Classification::GeneralSelection.item_types refresh: true
     end

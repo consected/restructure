@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_02_175848) do
+ActiveRecord::Schema.define(version: 2022_03_01_201512) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -1749,9 +1749,6 @@ ActiveRecord::Schema.define(version: 2022_02_02_175848) do
     t.bigint "user_id"
     t.string "date_format"
     t.string "date_time_format"
-    t.string "pattern_for_date_format"
-    t.string "pattern_for_date_time_format"
-    t.string "pattern_for_time_format"
     t.string "time_format"
     t.string "timezone"
     t.datetime "created_at", null: false
@@ -1875,17 +1872,13 @@ ActiveRecord::Schema.define(version: 2022_02_02_175848) do
   add_foreign_key "config_library_history", "config_libraries"
   add_foreign_key "datadic_choice_history", "admins"
   add_foreign_key "datadic_choice_history", "datadic_choices"
-  add_foreign_key "datadic_choice_history", "redcap_data_dictionaries"
   add_foreign_key "datadic_choices", "admins"
-  add_foreign_key "datadic_choices", "redcap_data_dictionaries"
   add_foreign_key "datadic_variable_history", "admins"
   add_foreign_key "datadic_variable_history", "datadic_variables"
   add_foreign_key "datadic_variable_history", "datadic_variables", column: "equivalent_to_id"
-  add_foreign_key "datadic_variable_history", "redcap_data_dictionaries"
   add_foreign_key "datadic_variable_history", "users"
   add_foreign_key "datadic_variables", "admins"
   add_foreign_key "datadic_variables", "datadic_variables", column: "equivalent_to_id"
-  add_foreign_key "datadic_variables", "redcap_data_dictionaries"
   add_foreign_key "datadic_variables", "users"
   add_foreign_key "dynamic_model_history", "dynamic_models", name: "fk_dynamic_model_history_dynamic_models"
   add_foreign_key "dynamic_models", "admins"

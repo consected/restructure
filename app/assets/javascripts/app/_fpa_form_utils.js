@@ -747,7 +747,15 @@ _fpa.form_utils = {
         var f = $(this).attr('for')
         var el = $(`#${f}`)
         if (!el.length || el.attr('type') == 'radio' || el.attr('type') == 'checkbox') return
-        el.attr('placeholder', $(this).text())
+        if (el[0].tagName == 'SELECT') {
+          if (el.find('option[selected]').length == 0) {
+            var selected = 'selected'
+          }
+          el.prepend(`<option disabled ${selected} class="select-option-placeholder">${$(this).text()}</option>`)
+        }
+        else {
+          el.attr('placeholder', $(this).text())
+        }
         $(this).hide()
       })
     }).addClass('done-labels-placeholders');

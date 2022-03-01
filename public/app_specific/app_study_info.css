@@ -12,9 +12,10 @@
   --link-active-color: #402964;
   --bottom-grad-color: #4a3277;
   --bottom-grad-darker-color: #452e70;
+  --input-has-value-color: rgb(247, 237, 253);
+
   /* --content-font-family: "Lato", sans-serif;
   --table-font-family: "Lato", sans-serif; */
-
   --content-font-family: "Assistant", sans-serif;
   --content-font-size: 18px;
 
@@ -168,11 +169,6 @@ li.list-group-item.results-caption-before.activity-log--study-info-part-page-des
 
 input.form-control,
 select.form-control {
-  background-color: rgb(255, 246, 226) !important;
-}
-
-input.form-control.has-value,
-select.form-control.has-value {
   background-color: rgb(255, 246, 226) !important;
 }
 

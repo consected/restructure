@@ -7,6 +7,8 @@
   --link-active-color: #402964;
   --bottom-grad-color: #4a3277;
   --bottom-grad-darker-color: #452e70;
+  --input-has-value-color: rgb(247, 237, 253);
+
   --content-font-family: "Assistant", sans-serif;
   --content-font-size: 18px;
 
@@ -180,11 +182,6 @@ form .list-group-item:first-child {
   font-size: 16px;
   line-height: 1.5;
   border-radius: 3px;
-}
-
-input.form-control.has-value,
-select.form-control.has-value {
-  background-color: rgb(251, 251, 232) !important;
 }
 
 .report-description {

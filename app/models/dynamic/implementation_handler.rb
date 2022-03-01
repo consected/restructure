@@ -34,6 +34,11 @@ module Dynamic
       current_definition.resource_name
     end
 
+    # Resource name for a single instance of the model
+    def resource_item_name
+      current_definition.resource_item_name
+    end
+
     # Option type configuration for the current instance
     # For a dynamic model this is just the 'default'
     # For an activity log this is the config matching the extra_log_type

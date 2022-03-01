@@ -27,6 +27,8 @@
   <div class="row">  
     <h3>NfsStore Settings</h3>
     <%= render partial: 'admin/server_info/view_settings', locals: {settings: @nfs_store_settings} %>
+
+    <pre><%=@nfs_store_mount_dirs%>
   </div>  
 
   <% if @server_type == :passenger %>

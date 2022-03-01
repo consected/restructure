@@ -4,24 +4,22 @@
   %>
   
   <% 
-    resources&.each do |resource_name, r_model|
-      resource_name = resource_name.to_s
+    @panels&.each do |r_model|
       template_postfix = ''
-      template_postfix = '-result-template' if resource_name.start_with?('activity_log__')
+      template_postfix = '-result-template' if r_model[:type] == :activity_log
 
-      
-      tab_label = r_model&.human_name || resource_name.humanize.titleize
-
-      template_resource = resource_name.sub(/^dynamic_model__/, '').hyphenate
+      resource_name = r_model[:resource_name]
+      tab_label = r_model[:label]
+      template_resource = r_model[:hyphenated_item_name]
   %>
   <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
-    <a id="tab-user-profile-<%= resource_name.hyphenate %>-{{user.id}}" 
+    <a id="tab-user-profile-<%= template_resource %>-{{user.id}}" 
        href="/user_profile?resource_name=<%= resource_name %>" 
        data-panel-tab="<%=resource_name%>" 
        data-remote="true" 
        data-prevent-on-collapse="true" 
        data-toggle="collapse" 
-       data-target="#user-profile-<%= resource_name.hyphenate %>-{{user.id}}" 
+       data-target="#user-profile-<%= template_resource %>-{{user.id}}" 
        aria-expanded="false" 
        class="scroll-to-expanded  collapsed"  
        data-result-target="#<%= template_resource %>--{{<%= resource_name %>.id}}"

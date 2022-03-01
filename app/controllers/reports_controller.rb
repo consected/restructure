@@ -11,7 +11,7 @@ class ReportsController < UserBaseController
   before_action :set_master_and_user, only: %i[create update]
   after_action :clear_results, only: %i[show run]
 
-  helper_method :filters, :filters_on, :index_path, :permitted_params, :filter_params_permitted,
+  helper_method :filters, :filters_on, :index_path, :permitted_params, :filter_params_permitted, :filter_params,
                 :search_attrs_params_hash, :embedded_report
   ResultsLimit = Master.results_limit
 

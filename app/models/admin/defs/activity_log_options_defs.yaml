@@ -28,6 +28,8 @@
         _notes_:
         - "*outside_this* presents a button that triggers a form outside of this container
           in the regular panel"
+      view_options:
+        always_open: true # force the reference to always be expanded
   
   #
   # e-signed documents require a filestore setup too.

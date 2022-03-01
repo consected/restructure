@@ -8,10 +8,11 @@ module OptionConfigs
     include OptionConfigs::ExtraOptionImplementers::SaveTriggers
 
     ValidCalcIfKeys = %i[showable_if editable_if creatable_if add_reference_if].freeze
+    LibraryMatchRegex = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/.freeze
 
     def self.base_key_attributes
       %i[
-        name label config_obj caption_before show_if resource_name save_action view_options
+        name label config_obj caption_before show_if resource_name resource_item_name save_action view_options
         field_options dialog_before creatable_if editable_if showable_if add_reference_if valid_if
         filestore labels fields button_label orig_config db_configs save_trigger
       ]
@@ -26,7 +27,7 @@ module OptionConfigs
     end
 
     def self.editable_attributes
-      key_attributes - %i[name config_obj resource_name] + [:label]
+      key_attributes - %i[name config_obj resource_name resource_item_name] + [:label]
     end
 
     attr_accessor(*key_attributes, :def_item)
@@ -54,6 +55,7 @@ module OptionConfigs
 
       self.label ||= name.to_s.humanize
       self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
+      self.resource_item_name = resource_name
       self.caption_before ||= {}
       self.caption_before = self.caption_before.symbolize_keys
 
@@ -377,7 +379,7 @@ module OptionConfigs
     # @return [String] updated content
     def self.include_libraries(content_to_update)
       content_to_update = content_to_update.dup
-      reg = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
+      reg = LibraryMatchRegex
       res = content_to_update.match reg
 
       while res
@@ -391,6 +393,27 @@ module OptionConfigs
       end
 
       content_to_update
+    end
+
+    #
+    # Find referenced libraries into the provided content
+    # @param [String] content
+    # @return [Array{Hash}] array of hashes {category:, name:}
+    def self.requested_libraries(content)
+      reshashes = []
+      content = content.dup
+      reg = LibraryMatchRegex
+      res = content.match reg
+
+      while res
+        category = res[1].strip
+        name = res[2].strip
+        reshashes << { category: category, name: name }
+        content.gsub!(res[0], '')
+        res = content.match reg
+      end
+
+      reshashes
     end
   end
 end
