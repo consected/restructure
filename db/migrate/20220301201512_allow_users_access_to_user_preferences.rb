@@ -7,16 +7,16 @@ class AllowUsersAccessToUserPreferences < ActiveRecord::Migration[5.2]
       user_access_control.disabled = false
     end
 
-    updated_yaml = <<~END_TEXT
-contains:
-  categories:
-  resources:
-  - user_preference
-END_TEXT
+    options_yaml = <<~END_OPTIONS
+      contains:
+        resources:
+          - user_preference
+    END_OPTIONS
 
     Admin::PageLayout.find_or_create_by!(layout_name: 'user_profile',
                                          panel_name: 'user_profile_all',
-                                         panel_label: 'User Profile Tab', options: updated_yaml) do |page_layout|
+                                         panel_label: 'User Profile Tab') do |page_layout|
+      page_layout.options = options_yaml
       page_layout.panel_position = 1
       page_layout.current_admin = auto_admin
       page_layout.disabled = false
