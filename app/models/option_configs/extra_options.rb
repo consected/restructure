@@ -8,6 +8,7 @@ module OptionConfigs
     include OptionConfigs::ExtraOptionImplementers::SaveTriggers
 
     ValidCalcIfKeys = %i[showable_if editable_if creatable_if add_reference_if].freeze
+    LibraryMatchRegex = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/.freeze
 
     def self.base_key_attributes
       %i[
@@ -378,7 +379,7 @@ module OptionConfigs
     # @return [String] updated content
     def self.include_libraries(content_to_update)
       content_to_update = content_to_update.dup
-      reg = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
+      reg = LibraryMatchRegex
       res = content_to_update.match reg
 
       while res
@@ -392,6 +393,27 @@ module OptionConfigs
       end
 
       content_to_update
+    end
+
+    #
+    # Find referenced libraries into the provided content
+    # @param [String] content
+    # @return [Array{Hash}] array of hashes {category:, name:}
+    def self.requested_libraries(content)
+      reshashes = []
+      content = content.dup
+      reg = LibraryMatchRegex
+      res = content.match reg
+
+      while res
+        category = res[1].strip
+        name = res[2].strip
+        reshashes << { category: category, name: name }
+        content.gsub!(res[0], '')
+        res = content.match reg
+      end
+
+      reshashes
     end
   end
 end
