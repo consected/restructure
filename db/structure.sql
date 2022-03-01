@@ -6254,9 +6254,6 @@ CREATE TABLE ml_app.user_preferences (
     user_id bigint,
     date_format character varying,
     date_time_format character varying,
-    pattern_for_date_format character varying,
-    pattern_for_date_time_format character varying,
-    pattern_for_time_format character varying,
     time_format character varying,
     timezone character varying,
     created_at timestamp without time zone NOT NULL,
@@ -12999,7 +12996,7 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app,ref_data;
+SET search_path TO ml_app,extra_app,fem,data_requests,study_info,sleep,ref_data,redcap,dynamic;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20150602181200'),
@@ -13424,6 +13421,9 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220221120737'),
 ('20220221123203'),
 ('20220222112229'),
-('20220222112301');
+('20220222112301'),
+('20220224020931'),
+('20220224023446'),
+('20220301144234');
 
 
