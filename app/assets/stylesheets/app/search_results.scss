@@ -298,6 +298,8 @@ a.glyphicon.edit-entity.edit-tracker {
   background-color: $master_header_bg;
   box-shadow: 0 7px 5px -5px silver;
   z-index: 10;
+  border: 1px solid rgb(192, 192, 192);
+  border-top: 0;
 }
 
 .nav-pills.details-tabs > li > a {
