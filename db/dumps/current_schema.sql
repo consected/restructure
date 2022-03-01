@@ -6262,9 +6262,6 @@ CREATE TABLE ml_app.user_preferences (
     user_id bigint,
     date_format character varying,
     date_time_format character varying,
-    pattern_for_date_format character varying,
-    pattern_for_date_time_format character varying,
-    pattern_for_time_format character varying,
     time_format character varying,
     timezone character varying,
     created_at timestamp without time zone NOT NULL,
@@ -6951,7 +6948,7 @@ CREATE TABLE ref_data.datadic_variables (
 -- Name: TABLE datadic_variables; Type: COMMENT; Schema: ref_data; Owner: -
 --
 
-COMMENT ON TABLE ref_data.datadic_variables IS 'Dynamicmodel: User Variables';
+COMMENT ON TABLE ref_data.datadic_variables IS 'Dynamicmodel: Full Data Dictionary';
 
 
 --
