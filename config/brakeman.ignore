@@ -27,7 +27,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 628,
+      "line": 629,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';\\n\")",
       "render_path": null,
@@ -58,6 +58,26 @@
       },
       "user_input": "quoted_schemas",
       "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "Redirect",
+      "warning_code": 18,
+      "fingerprint": "20b237d30191645e82d078ddcbffb4648a182fd08ff3af33c2fd292192ee1f3c",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/user_profiles_controller.rb",
+      "line": 51,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(\"#{\"/masters/#{-1}\"}/#{UserProfile.new(:current_user => current_user).resource_info(params[:resource_name])[:base_route_segments]}/new\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "UserProfilesController",
+        "method": "show"
+      },
+      "user_input": "UserProfile.new(:current_user => current_user).resource_info(params[:resource_name])[:base_route_segments]",
+      "confidence": "High",
       "note": ""
     },
     {
@@ -156,7 +176,7 @@
           "type": "controller",
           "class": "PageLayoutsController",
           "method": "show",
-          "line": 24,
+          "line": 26,
           "file": "app/controllers/page_layouts_controller.rb",
           "rendered": {
             "name": "page_layouts/show",
@@ -197,7 +217,7 @@
           "type": "controller",
           "class": "PageLayoutsController",
           "method": "show",
-          "line": 24,
+          "line": 26,
           "file": "app/controllers/page_layouts_controller.rb",
           "rendered": {
             "name": "page_layouts/show",
@@ -251,6 +271,26 @@
       },
       "user_input": "self.class.position_attribute",
       "confidence": "Weak",
+      "note": ""
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "4cc941f4aa2f087c45d0360910d3b97e7be48ed3b2ed20a053c6728166550b89",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/models/admin/server_info.rb",
+      "line": 115,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "IO.popen(\"ls #{NfsStore::Manage::Filesystem.nfs_store_directory}/gid#{NfsStore::Manage::Filesystem.group_id_range.first}\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Admin::ServerInfo",
+        "method": "nfs_store_mount_dirs"
+      },
+      "user_input": "NfsStore::Manage::Filesystem.group_id_range.first",
+      "confidence": "High",
       "note": ""
     },
     {
@@ -542,7 +582,7 @@
       "check_name": "SendFile",
       "message": "Model attribute used in file name",
       "file": "app/controllers/admin/app_types_controller.rb",
-      "line": 83,
+      "line": 84,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
       "code": "send_file(Admin::AppType.find(params[:id]).zip_app_export_migrations.path, :filename => (\"#{Admin::AppType.find(params[:id]).name}--#{\"app-export\"}.zip\"))",
       "render_path": null,
@@ -610,7 +650,7 @@
           "type": "controller",
           "class": "PageLayoutsController",
           "method": "show",
-          "line": 24,
+          "line": 26,
           "file": "app/controllers/page_layouts_controller.rb",
           "rendered": {
             "name": "page_layouts/show",
@@ -688,6 +728,6 @@
       "note": ""
     }
   ],
-  "updated": "2022-02-23 20:05:42 +0000",
+  "updated": "2022-03-01 20:51:39 +0000",
   "brakeman_version": "5.2.1"
 }
