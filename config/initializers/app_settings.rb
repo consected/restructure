@@ -222,12 +222,12 @@ class Settings
   DefaultDateFormat = (ENV['DEFAULT_DATE_FORMAT'] || 'mm/dd/yyyy').freeze
 
   # Set DEFAULT_DATE_TIME_FORMAT to:
-  #   mm/dd/yyyy hh:mm:ss am/pm
-  #   mm/dd/yyyy 24h:mm:ss
-  #   dd/mm/yyyy hh:mm:ss am/pm
-  #   dd/mm/yyyy 24h:mm:ss
-  DefaultDateTimeFormat = (ENV['DEFAULT_DATE_TIME_FORMAT'] || 'mm/dd/yyyy hh:mm:ss am/pm').freeze
+  #   mm/dd/yyyy hh:mm am/pm
+  #   mm/dd/yyyy 24h:mm
+  #   dd/mm/yyyy hh:mm am/pm
+  #   dd/mm/yyyy 24h:mm
+  DefaultDateTimeFormat = (ENV['DEFAULT_DATE_TIME_FORMAT'] || 'mm/dd/yyyy hh:mm am/pm').freeze
 
-  # Set DEFAULT_TIME_FORMAT to hh:mm:ss am/pm or 24h:mm:ss.
-  DefaultTimeFormat = (ENV['DEFAULT_TIME_FORMAT'] || 'hh:mm:ss am/pm').freeze
+  # Set DEFAULT_TIME_FORMAT to hh:mm am/pm or 24h:mm.
+  DefaultTimeFormat = (ENV['DEFAULT_TIME_FORMAT'] || 'hh:mm am/pm').freeze
 end

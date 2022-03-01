@@ -29,11 +29,23 @@ class UserPreference < UserBase
   end
 
   def pattern_for_date_time_format
-    UserPreferencesHelper::DateTimeFormats[self.date_time_format] || UserPreference.default_pattern_for_date_time_format
+    UserPreferencesHelper::DateTimeFormats[self.date_time_format][:hours_minutes] ||
+      UserPreference.default_pattern_for_date_time_sec_format
   end
 
   def pattern_for_time_format
-    UserPreferencesHelper::TimeFormats[self.time_format] || UserPreference.default_pattern_for_time_format
+    UserPreferencesHelper::TimeFormats[self.time_format][:hours_minutes] ||
+      UserPreference.default_pattern_for_time_sec_format
+  end
+
+  def pattern_for_date_time_sec_format
+    UserPreferencesHelper::DateTimeFormats[self.date_time_format][:with_secs] ||
+      UserPreference.default_pattern_for_date_time_format
+  end
+
+  def pattern_for_time_sec_format
+    UserPreferencesHelper::TimeFormats[self.time_format][:with_secs] ||
+      UserPreference.default_pattern_for_time_format
   end
 
   def self.no_downcase_attributes
@@ -57,11 +69,19 @@ class UserPreference < UserBase
   end
 
   def self.default_pattern_for_date_time_format
-    UserPreferencesHelper::DateTimeFormats[UserPreference.default_date_time_format]
+    UserPreferencesHelper::DateTimeFormats[UserPreference.default_date_time_format][:hours_minutes]
+  end
+
+  def self.default_pattern_for_date_time_sec_format
+    UserPreferencesHelper::DateTimeFormats[UserPreference.default_date_time_format][:with_secs]
   end
 
   def self.default_pattern_for_time_format
-    UserPreferencesHelper::TimeFormats[UserPreference.default_time_format]
+    UserPreferencesHelper::TimeFormats[UserPreference.default_time_format][:hours_minutes]
+  end
+
+  def self.default_pattern_for_time_sec_format
+    UserPreferencesHelper::TimeFormats[UserPreference.default_time_format][:with_secs]
   end
 
   # REMARK: to avoid confusion with ActiveRecord.default_timezone, added _user_ to its name.
@@ -77,6 +97,6 @@ class UserPreference < UserBase
     self.date_format ||= UserPreference.default_date_format
     self.date_time_format ||= UserPreference.default_date_time_format
     self.time_format ||= UserPreference.default_time_format
-    self.timezone ||= UserPreference.default_user_timezone
+    self.timezone ||= UserPreference.default_time_format
   end
 end
