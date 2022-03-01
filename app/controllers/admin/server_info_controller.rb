@@ -14,6 +14,7 @@ class Admin::ServerInfoController < AdminController
     @processes = si.processes
     @disk_usage = si.disk_usage
     @instance_id = si.instance_id
+    @nfs_store_mount_dirs = si.nfs_store_mount_dirs
     render 'admin/server_info/index'
   end
 end

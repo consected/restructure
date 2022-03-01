@@ -25,6 +25,7 @@ class Admin::ServerInfo
     temp_directory
     containers_dirname
     use_parent_sub_dir
+    group_id_range
   ].freeze
 
   attr_accessor :current_admin
@@ -104,6 +105,16 @@ class Admin::ServerInfo
     "hostname: #{res.strip}"
   rescue StandardError
     'server identifier not available'
+  end
+
+  def nfs_store_mount_dirs
+    dir = NfsStore::Manage::Filesystem.nfs_store_directory
+    group_id_range = NfsStore::Manage::Filesystem.group_id_range
+    return unless dir.present?
+
+    IO.popen("ls #{dir}/gid#{group_id_range.first}").read
+  rescue StandardError
+    'mount dirs not available'
   end
 
   #
