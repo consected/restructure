@@ -53,6 +53,10 @@ module Resources
       resources.sort_by { |_k, r| "#{r[:type]} - #{r[:human_name]}" }.to_h || {}
     end
 
+    def self.to_a
+      resources.values
+    end
+
     #
     # Find a single model by one of the possible model keys
     # @return [Hash]

@@ -114,6 +114,16 @@ Then set up the database.
     git clone https://github.com/consected/restructure-build.git
     git clone https://github.com/consected/restructure-apps.git
     git clone https://github.com/consected/restructure-docs.git
+
+### Setup the databsae
+
+It is highly recommended to use a consistent version of Postgres client on all machines. Currently we are using Postgres 12.
+To ensure `psql` and all `rake db:structure:dump` works as expected, set the path to Postgres 12 binaries explicitly.
+
+    export PATH=/usr/lib/postgresql/12/bin:${PATH}
+
+Now create a development environment database
+
     DB_USER=$(whoami)
     sudo -u postgres psql -c "create database restr_development owner ${DB_USER};"
 
@@ -134,11 +144,29 @@ Seed the database (even if you have populated demo data):
 
     bundle exec rake db:seed
 
+### Setup a simulated Filestore filesystem
+
+File storage in production is typically on an NFS filesystem. In development without NFS we simulate
+a separate filesystem with some internal mounts. Some directories will be created in the user's home directory
+to make this work.
+
+    app-scripts/setup-init-mounts.sh
+    app-scripts/setup_filestore_app.sh 1
+    app-scripts/setup-dev-filestore.sh
+
+A Fuse filesystem can also be used as external storage rather than
+the home directories, and will be used if there is a Fuse filesystem mounted at `/media/$USER/Data` by skipping
+`app-scripts/setup-init-mounts.sh`
+
+### Setup a new admin user
+
 Set up a new admin user:
 
     RAILS_ENV=development app-scripts/add_admin.sh <email address>
 
 _Record the password that is returned._
+
+### Run the server
 
 Run the server:
 
@@ -164,6 +192,8 @@ Back in the browser you will be at the user login screen. Login as **test@test**
 Now login as the user you have just created.
 
 Welcome to **ReStructure**!!!
+
+### Logging in as a user
 
 For future logins as a user, just go to [https://localhost:3000](https://localhost:3000). If you are an administrator, you will be able to access the admin panel login through the wrench icon in the nav bar, or using the link above.
 
@@ -213,25 +243,53 @@ Then from `ReStructure` run
 
 ## Testing
 
-Rspec tests are available. To run:
+Rspec tests are available. To set up a test database, first get a dump of the current
+development database structure (if you have made migrations)
 
-    app-scripts/create-test-db.sh
+    export PATH=/usr/lib/postgresql/12/bin:${PATH}
+    FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data bundle exec rake db:structure:dump
+
+To allow easier DB authentication for tests, make entries into the `~/.pgpass` file
+to enable automatic authentication with your DB password, such as:
+
+    localhost:5432:restr_test:username:mysecretpw
+
+To create a single test database for running rspec directly:
+
+    app-scripts/create-test-db.sh 1
+
+Make sure the Filestore mounts are in place:
+
+    app-scripts/setup-dev-filestore.sh
+
+Run the test suite:
+
     IGNORE_MFA=true bundle exec rspec
+
+It is recommended to periodically drop and recreate the test database, since over time tests will slow down.
+
+    app-scripts/drop-test-db.sh 1 ; app-scripts/create-test-db.sh 1
+
+### Running tests against AWS APIs
 
 There are some tests that attempt to use an AWS account to send SMS notifications. These have been mocked out,
 although at least one should run an SMS notification as an integration test, and to allow a comparison against
-CloudWatch results. Setup your `~/.aws/config` and `~/.aws/credentials` files appropriately to allow tests to
-run against the live AWS API.
+CloudWatch results. Setup your `~/.aws/config` and `~/.aws/credentials` files appropriately to allow tests to run against the live AWS API. Then make this the preferred profile the default:
+
+    export AWS_PROFILE=<profile name in ~/.aws/config>
 
 On well secured AWS accounts, you may have MFA configured. Either setup your credentials file to include the appropriate
 `aws_access_key_id` and `aws_secret_access_key` for these, or alternatively don't attempt to authenticate (and accept certain tests will fail.)
+
 The environment variable `IGNORE_MFA=true` prevents AWS multifactor authentication blocking the startup of the tests.
+
+### Parallel test
 
 For faster testing, _parallel_tests_ provides parallelization of Rspec, although does introduce some quirks into the testing, with false positives appearing. Better structuring of the spec tests will eventually resolve this, but in the meantime a few focused singular rspec calls will validate those that fail.
 
-Assuming you have an 8 core computer, the following will create 8 test databases:
+The following will create a set of test databases for the number of processor cores on your machine:
 
-    app-scripts/create-test-db.sh 8
+    app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
 
 This will have created the database with the owner matching your current OS user. To allow easier DB authentication for tests, make entries into the `~/.pgpass` file
 to enable automatic authentication with your DB password, such as:
@@ -243,7 +301,7 @@ to enable automatic authentication with your DB password, such as:
 
 Then run the parallel tests:
 
-    IGNORE_MFA=true PARALLEL_TEST_PROCESSORS=8 app-scripts/parallel_test.sh
+    app-scripts/parallel_test.sh
 
 To review failed results:
 
@@ -251,9 +309,11 @@ To review failed results:
 
 The easiest way to deal with migrations is to drop the test database and recreate.
 
-    app-scripts/drop-test-db.sh 8 ; app-scripts/create-test-db.sh 8
+    app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
 
 ## Future development themes
+
+Upgrade to Rails 6.
 
 The Javascript UI is a custom reactive front end. Near the beginning of development a simple platform was developed, which is tightly bound to the operation of the backend. Although completely functional without changes (except obviously for addition of new features), a long term vision is to replace the UI with Vue.js or React running against the existing API.
 
