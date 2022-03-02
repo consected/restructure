@@ -229,9 +229,9 @@ The environment variable `IGNORE_MFA=true` prevents AWS multifactor authenticati
 
 For faster testing, _parallel_tests_ provides parallelization of Rspec, although does introduce some quirks into the testing, with false positives appearing. Better structuring of the spec tests will eventually resolve this, but in the meantime a few focused singular rspec calls will validate those that fail.
 
-Assuming you have an 8 core computer, the following will create 8 test databases:
+The following will create a test database for the number of processor cores on your machine:
 
-    app-scripts/create-test-db.sh 8
+    app-scripts/create-test-db.sh
 
 This will have created the database with the owner matching your current OS user. To allow easier DB authentication for tests, make entries into the `~/.pgpass` file
 to enable automatic authentication with your DB password, such as:
@@ -243,7 +243,7 @@ to enable automatic authentication with your DB password, such as:
 
 Then run the parallel tests:
 
-    IGNORE_MFA=true PARALLEL_TEST_PROCESSORS=8 app-scripts/parallel_test.sh
+    app-scripts/parallel_test.sh
 
 To review failed results:
 
@@ -251,7 +251,7 @@ To review failed results:
 
 The easiest way to deal with migrations is to drop the test database and recreate.
 
-    app-scripts/drop-test-db.sh 8 ; app-scripts/create-test-db.sh 8
+    app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
 
 ## Future development themes
 
