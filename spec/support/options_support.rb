@@ -1,18 +1,18 @@
 # Support dynamic definition options specs
 module OptionsSupport
-  def option_configs_comparable arr
+  def option_configs_comparable(arr)
     return unless arr.is_a? Array
 
     arr.map(&:orig_config)
   end
 
-  def check_version num
+  def check_version(num)
     # Forcefully reload unless not persisted
     inst_id = @dyn_instances[num].id
     @dyn_instances[num] = @dyn_instances[num].class.find(inst_id) if inst_id
 
     dyn_inst = @dyn_instances[num]
-    expect(dyn_inst).to be_a dynamic_type
+    expect(dyn_inst.class.to_s).to eq dynamic_type
 
     t = dyn_inst.options_text
     expect(t).to eq @option_texts[num]
