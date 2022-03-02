@@ -556,6 +556,8 @@ module Dynamic
 
     # After a regeneration, certain other cleanups may be required
     def other_regenerate_actions
+      return if disabled
+
       Rails.logger.info 'Reloading column definitions'
       implementation_class.reset_column_information
       Rails.logger.info 'Refreshing item types'
@@ -566,7 +568,11 @@ module Dynamic
     def handle_disabled
       Rails.logger.info 'Refreshing item types'
       Classification::GeneralSelection.item_types refresh: true
+
       remove_model_from_list
+      remove_assoc_class 'Master'
+      remove_implementation_class
+      remove_implementation_controller_class
     end
 
     # A list of model names and definitions is stored in the class so we can
@@ -597,6 +603,43 @@ module Dynamic
     rescue StandardError => e
       logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
       # puts "Failed to remove #{assoc_ext_name} : #{e}"
+    end
+
+    def prefix_class
+      klass = Object
+      klass = "::#{self.class.implementation_prefix}".constantize if self.class.implementation_prefix.present?
+      klass
+    end
+
+    def remove_implementation_class(alt_prefix_class = nil)
+      klass = alt_prefix_class || prefix_class
+      # This may fail if an underlying dependent class (parent class) has been redefined by
+      # another dynamic implementation, such as external identifier
+      return unless implementation_class_defined?(klass, fail_without_exception: true,
+                                                         fail_without_exception_newable_result: true)
+
+      klass.send(:remove_const, model_class_name)
+    rescue StandardError => e
+      logger.info <<~END_TEXT
+        *************************************************************************************
+        Failed to remove the old definition of #{model_class_name}. #{e.inspect}
+        *************************************************************************************
+      END_TEXT
+    end
+
+    def remove_implementation_controller_class
+      klass = prefix_class
+      return unless implementation_controller_defined?(klass)
+
+      # This may fail if an underlying dependent class (parent class) has been redefined by
+      # another dynamic implementation, such as external identifier
+      klass.send(:remove_const, full_implementation_controller_name)
+    rescue StandardError => e
+      logger.info <<~END_TEXT
+        *************************************************************************************
+        Failed to remove the old definition of #{full_implementation_controller_name}. #{e.inspect}
+        *************************************************************************************
+      END_TEXT
     end
 
     #
@@ -673,7 +716,7 @@ module Dynamic
 
       # For some reason the underlying table exists but the class doesn't. Inform the admin
       unless res
-        err = "The implementation of #{model_class_name} was not completed." \
+        err = "The implementation of #{model_class_name} was not completed. " \
               "The DB table #{table_name} has #{table_or_view_ready? ? '' : 'NOT '}been created"
         logger.warn err
         errors.add :name, err

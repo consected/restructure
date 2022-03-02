@@ -491,19 +491,7 @@ class ActivityLog < ActiveRecord::Base
           self.definition = definition
         end
 
-        begin
-          # This may fail if an underlying dependent class (parent class) has been redefined by
-          # another dynamic implementation, such as external identifier
-          if implementation_class_defined?(klass, fail_without_exception: true)
-            klass.send(:remove_const, model_class_name)
-          end
-        rescue StandardError => e
-          logger.info <<~END_TEXT
-            *************************************************************************************
-            Failed to remove the old definition of #{model_class_name}. #{e.inspect}
-            *************************************************************************************
-          END_TEXT
-        end
+        remove_implementation_class
 
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
@@ -516,24 +504,9 @@ class ActivityLog < ActiveRecord::Base
         ESignature::ESignatureManager.enable_e_signature_for res
         res.final_setup
 
-        c_name = full_implementation_controller_name
-
-        begin
-          # This may fail if an underlying dependent class (parent class) has been redefined by
-          # another dynamic implementation, such as external identifier
-          klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
-        rescue StandardError => e
-          logger.info <<~END_TEXT
-            *************************************************************************************
-            Failed to remove the old definition of #{c_name}. #{e.inspect}
-            *************************************************************************************
-          END_TEXT
-        end
-
-        res2 = klass.const_set(c_name, a_new_controller)
+        remove_implementation_controller_class
+        res2 = klass.const_set(full_implementation_controller_name, a_new_controller)
         res2.include ActivityLogControllerHandler
-
-        logger.debug "Model Name: #{model_class_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
 
         add_model_to_list res
       rescue StandardError => e
@@ -605,6 +578,7 @@ class ActivityLog < ActiveRecord::Base
 
     # Always performed
     self.class.reset_all_option_configs_resource_names!
+    add_model_to_list(implementation_class) unless disabled
     super
     true
   end
@@ -646,9 +620,7 @@ class ActivityLog < ActiveRecord::Base
   def add_model_to_list(m)
     super
 
-    rns = self.class.all_option_configs_resource_names do |e|
-      e.config_obj.resource_name == m.resource_name.to_s
-    end
+    rns = option_configs.map(&:resource_name)
 
     rns.each do |rn|
       elt = rn.split('__').last
@@ -665,14 +637,18 @@ class ActivityLog < ActiveRecord::Base
         option_type: elt
       )
     end
+    self.class.reset_all_option_configs_resource_names!
   end
 
   # Override to enable extra log types to also be added to Resouces::Models
   # @param [String] tn
   def remove_model_from_list
     super
-    self.class.all_option_configs_resource_names.each do |rn|
+
+    rns = Resources::Models.to_a.select { |m| m[:class_name] == full_implementation_class_name }.map(&:resource_name)
+    rns.each do |rn|
       Resources::Models.remove(resource_name: rn)
     end
+    self.class.reset_all_option_configs_resource_names!
   end
 end
