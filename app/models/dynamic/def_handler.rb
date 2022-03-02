@@ -567,7 +567,11 @@ module Dynamic
     # After disabling an item, clean up any mess
     def handle_disabled
       Rails.logger.info 'Refreshing item types'
-      Classification::GeneralSelection.item_types refresh: true
+      begin
+        Classification::GeneralSelection.item_types refresh: true
+      rescue NameError => e
+        Rails.logger.info "Failed to clear general selections for #{model_class_name}"
+      end
 
       remove_model_from_list
       remove_assoc_class 'Master'
