@@ -97,6 +97,6 @@ class UserPreference < UserBase
     self.date_format ||= UserPreference.default_date_format
     self.date_time_format ||= UserPreference.default_date_time_format
     self.time_format ||= UserPreference.default_time_format
-    self.timezone ||= UserPreference.default_time_format
+    self.timezone ||= UserPreference.default_user_timezone
   end
 end
