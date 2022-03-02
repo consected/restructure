@@ -618,6 +618,9 @@ class ActivityLog < ActiveRecord::Base
 
   # Override to enable extra log types to also be added to Resouces::Models
   def add_model_to_list(m)
+    # Clean up before re-adding
+    remove_model_from_list
+
     super
 
     rns = option_configs.map(&:resource_name)
