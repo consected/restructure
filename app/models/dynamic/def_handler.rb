@@ -558,6 +558,7 @@ module Dynamic
     def other_regenerate_actions
       return if disabled
 
+      self.class.preload
       Rails.logger.info 'Reloading column definitions'
       implementation_class.reset_column_information
       Rails.logger.info 'Refreshing item types'
