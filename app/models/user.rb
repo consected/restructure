@@ -31,6 +31,7 @@ class User < ActiveRecord::Base
   default_scope -> { order email: :asc }
   scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPatternForSQL) }
   before_save :set_app_type
+  before_create :user_preference # builds the user_preference if it does not exists
 
   validates :first_name,
             presence: {

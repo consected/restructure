@@ -16,7 +16,6 @@ module Users
     def build_resource(hash = {})
       super
       resource.current_admin = RegistrationHandler.registration_admin
-      resource.user_preference # build the user_preference if it does not exists
     end
 
     def devise_registration_params
