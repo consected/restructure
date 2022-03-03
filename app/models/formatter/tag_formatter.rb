@@ -126,7 +126,6 @@ module Formatter
 
     # Time only including hours:minutes
     def time(_res, orig_val)
-      byebug
       Formatter::TimeWithZone.format(orig_val, current_user: current_user, time_only: true)
     end
 
