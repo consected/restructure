@@ -31,7 +31,7 @@ class User < ActiveRecord::Base
   default_scope -> { order email: :asc }
   scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPatternForSQL) }
   before_save :set_app_type
-  before_create :user_preference # Builds the user_preference if it does not exist.
+  before_create :find_or_create_user_preference # Builds the user_preference if it does not exist.
 
   validates :first_name,
             presence: {
@@ -101,10 +101,6 @@ class User < ActiveRecord::Base
     end
 
     res.map { |u| ["#{u.email} #{u.disabled ? '[disabled]' : ''}", u.id] }
-  end
-
-  def user_preference
-    super || build_user_preference({ current_user: self })
   end
 
   #
@@ -235,5 +231,13 @@ class User < ActiveRecord::Base
 
   def a_template_or_batch_user?
     email.end_with?(Settings::TemplateUserEmailPattern) || email == Settings::BatchUserEmail
+  end
+
+  private
+
+  def find_or_create_user_preference
+    unless user_preference
+      build_user_preference({ current_user: self }) unless a_template_or_batch_user?
+    end
   end
 end
