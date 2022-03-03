@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module Formatter
-  module TagFormatter
+  class TagFormatter
+    attr_accessor :current_user
+
     ValidOps = %w[
       capitalize
       titleize
@@ -15,7 +17,11 @@ module Formatter
       first
       age
       date
+      date_time
+      date_time_with_zone
       time
+      time_with_zone
+      time_sec
       dicom_datetime
       dicom_date
       join_with_space
@@ -36,7 +42,17 @@ module Formatter
       last
     ].freeze
 
-    def self.format_with(operation, res, orig_val)
+    def self.format_with(operation, res, orig_val, current_user = nil)
+      processor = new(current_user: current_user)
+
+      processor.process(operation, res, orig_val)
+    end
+
+    def initialize(current_user: nil)
+      self.current_user = current_user
+    end
+
+    def process(operation, res, orig_val)
       if operation.in?(ValidOps)
         send operation, res, orig_val
       elsif operation.to_i != 0
@@ -46,47 +62,47 @@ module Formatter
       end
     end
 
-    def self.capitalize(res, _orig_val)
+    def capitalize(res, _orig_val)
       res.capitalize
     end
 
-    def self.titleize(res, _orig_val)
+    def titleize(res, _orig_val)
       res.captionize
     end
 
-    def self.uppercase(res, _orig_val)
+    def uppercase(res, _orig_val)
       res.upcase
     end
 
-    def self.lowercase(res, _orig_val)
+    def lowercase(res, _orig_val)
       res.downcase
     end
 
-    def self.underscore(res, _orig_val)
+    def underscore(res, _orig_val)
       res.underscore
     end
 
-    def self.hyphenate(res, _orig_val)
+    def hyphenate(res, _orig_val)
       res.hyphenate
     end
 
-    def self.id_hyphenate(res, _orig_val)
+    def id_hyphenate(res, _orig_val)
       res.id_hyphenate
     end
 
-    def self.id_underscore(res, _orig_val)
+    def id_underscore(res, _orig_val)
       res.id_underscore
     end
 
-    def self.initial(res, _orig_val)
+    def initial(res, _orig_val)
       res.first&.upcase
     end
 
-    def self.first(res, _orig_val)
+    def first(res, _orig_val)
       res.first
     end
 
-    def self.age(_res, orig_val)
+    def age(_res, orig_val)
       return unless orig_val.respond_to? :year
 
       today = ::Date.today
@@ -95,84 +111,105 @@ module Formatter
       age
     end
 
-    def self.date(_res, orig_val)
+    def date(_res, orig_val)
       Formatter::TimeWithZone.format(orig_val, current_user: current_user, date_only: true)
     end
 
-    def self.time(_res, orig_val)
+    def date_time(_res, orig_val)
+      Formatter::DateTime.format(orig_val, current_user: current_user)
+    end
+
+    # Date and time only including hours:minutes and timezone of displayed time
+    def date_time_with_zone(_res, orig_val)
+      Formatter::DateTime.format(orig_val, current_user: current_user, show_timezone: true)
+    end
+
+    # Time only including hours:minutes
+    def time(_res, orig_val)
+      byebug
       Formatter::TimeWithZone.format(orig_val, current_user: current_user, time_only: true)
     end
 
-    def self.dicom_datetime(_res, orig_val)
+    # Time only including hours:minutes and timezone of displayed time
+    def time_with_zone(_res, orig_val)
+      Formatter::TimeWithZone.format(orig_val, current_user: current_user, time_only: true, show_timezone: true)
+    end
+
+    # Time for hours:minutes:seconds
+    def time_sec(_res, orig_val)
+      Formatter::TimeWithZone.format(orig_val, current_user: current_user, time_only: true, include_sec: true)
+    end
+
+    def dicom_datetime(_res, orig_val)
       orig_val.strftime('%Y%m%d%H%M%S+0000') if orig_val.respond_to? :strftime
     end
 
-    def self.dicom_date(_res, orig_val)
+    def dicom_date(_res, orig_val)
       orig_val.strftime('%Y%m%d') if orig_val.respond_to? :strftime
     end
 
-    def self.join_with_space(res, _orig_val)
+    def join_with_space(res, _orig_val)
       res.join(' ') if res.is_a? Array
     end
 
-    def self.join_with_comma(res, _orig_val)
+    def join_with_comma(res, _orig_val)
       res.join(', ') if res.is_a? Array
     end
 
-    def self.join_with_semicolon(res, _orig_val)
+    def join_with_semicolon(res, _orig_val)
       res.join('; ') if res.is_a? Array
     end
 
-    def self.join_with_newline(res, _orig_val)
+    def join_with_newline(res, _orig_val)
       res.join("\n") if res.is_a? Array
     end
 
-    def self.join_with_2newlines(res, _orig_val)
+    def join_with_2newlines(res, _orig_val)
       res.join("\n\n") if res.is_a? Array
     end
 
-    def self.compact(res, _orig_val)
+    def compact(res, _orig_val)
       res.reject(&:blank?) if res.is_a? Array
     end
 
-    def self.sort(res, _orig_val)
+    def sort(res, _orig_val)
       res.sort if res.is_a? Array
     end
 
-    def self.uniq(res, _orig_val)
+    def uniq(res, _orig_val)
       res.uniq if res.is_a? Array
     end
 
-    def self.markdown_list(res, _orig_val)
+    def markdown_list(res, _orig_val)
       "  - #{res.join("\n  - ")}" if res.is_a? Array
     end
 
-    def self.html_list(res, _orig_val)
+    def html_list(res, _orig_val)
       "<ul><li>#{res.join("</li>\n  <li>")}</li></ul>'" if res.is_a? Array
     end
 
-    def self.plaintext(res, _orig_val)
+    def plaintext(res, _orig_val)
       res = ActionController::Base.helpers.sanitize(res)
       res.gsub("\n", '<br>').html_safe
     end
 
-    def self.strip(res, _orig_val)
+    def strip(res, _orig_val)
       res.strip
     end
 
-    def self.split_lines(res, _orig_val)
+    def split_lines(res, _orig_val)
       res.split("\n")
     end
 
-    def self.markup(res, _orig_val)
+    def markup(res, _orig_val)
       Kramdown::Document.new(res).to_html.html_safe
     end
 
-    def self.ignore_missing(res, _orig_val)
+    def ignore_missing(res, _orig_val)
       res || ''
     end
 
-    def self.last(res, _orig_val)
+    def last(res, _orig_val)
       res.last
     end
   end

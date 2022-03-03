@@ -230,13 +230,25 @@ _fpa.postprocessors_reports = {
       $(this).html(d);
     }).addClass('td-date-formatted');
 
-    $('td[data-col-type$="_at"], td[data-col-type$="_time"], td[data-col-type$=" time"], td[data-col-type$=" at"], td[data-col-var-type="Time"]').not('.td-time-formatted').each(function () {
+    $('td[data-col-var-type="Time"]').not('.td-time-formatted').each(function () {
       var d = null;
       var val = $(this).html();
       if (val == 'Invalid Date')
         d = '';
       else if (val && val != '')
         d = _fpa.utils.YMDtimeToLocale(val);
+      $(this).html(d);
+    }).addClass('td-time-formatted');
+
+    $('td[data-col-type$="_at"], td[data-col-type$="_time"], td[data-col-type$=" time"], td[data-col-type$=" at"]').not('.td-time-formatted').each(function () {
+      var d = null;
+      var val = $(this).html();
+      if (val == 'Invalid Date')
+        d = '';
+      else if (val && val != '')
+        d = _fpa.utils.YMDtimeToLocale(val);
+      console.log(d)
+      if (d && d.split(' ').length > 1) d = d.split(' ').slice(1).join(' ')
       $(this).html(d);
     }).addClass('td-time-formatted');
 
