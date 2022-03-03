@@ -251,7 +251,7 @@ module Formatter
       tagp = tag_and_operator.split('::')
       tag = tagp.first
 
-      current_user = data[:current_user_instance]
+      current_user = data[:current_user_instance] || data[:current_user]
 
       return run_embedded_report tag, data if tag.start_with? 'embedded_report_'
       return add_item_button tag, data if tag.start_with? 'add_item_button_'
@@ -268,7 +268,7 @@ module Formatter
       tagp[1..].each do |op|
         # NOTE: if additional formatters are added here, they also need matching javascript
         # in _fpa_form_utils.format_subtitution
-        res = TagFormatter.format_with(op, res, orig_val)
+        res = TagFormatter.format_with(op, res, orig_val, current_user)
       end
 
       res
