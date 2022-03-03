@@ -29,7 +29,6 @@ RSpec.describe UserPreference, type: :model do
 
   describe 'validations' do
 
-    it { is_expected.to validate_presense_of(:user) }
     it { is_expected.to validate_presense_of(:timezone) }
     it { is_expected.to validate_presense_of(:date_format) }
     it { is_expected.to validate_presense_of(:date_time_format) }
