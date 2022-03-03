@@ -16,7 +16,6 @@ RSpec.describe UserPreference, type: :model do
 
     it { is_expected.to belong_to(:user) }
 
-    it { is_expected.to have_one(:user) }
     context 'when user is present' do
       before { subject.user = @user }
       it { is_expected.to be_valid }
@@ -31,10 +30,10 @@ RSpec.describe UserPreference, type: :model do
   describe 'validations' do
 
     it { is_expected.to validate_presense_of(:user) }
+    it { is_expected.to validate_presense_of(:timezone) }
     it { is_expected.to validate_presense_of(:date_format) }
-    it { is_expected.to validate_presense_of(:pattern_for_date_format) }
-    it { is_expected.to validate_presense_of(:pattern_for_date_time_format) }
-    it { is_expected.to validate_presense_of(:pattern_for_time_format) }
+    it { is_expected.to validate_presense_of(:date_time_format) }
+    it { is_expected.to validate_presense_of(:time_format) }
 
   end
 end
