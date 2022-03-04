@@ -70,6 +70,7 @@ group :test do
   gem 'simplecov-console'
   gem 'spring-commands-rspec'
   gem 'webmock'
+  gem 'shoulda-matchers', '~> 5.0'
 end
 
 group :development, :production, :assets do

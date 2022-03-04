@@ -353,6 +353,8 @@ GEM
       childprocess (~> 0.5)
       rubyzip (~> 1.0)
     sexp_processor (4.16.0)
+    shoulda-matchers (5.1.0)
+      activesupport (>= 5.2.0)
     simple_po_parser (1.1.5)
     simplecov (0.21.2)
       docile (~> 1.1)
@@ -484,6 +486,7 @@ DEPENDENCIES
   rubyzip
   sass-rails (~> 5.1)
   selenium-webdriver (= 3.4.4)
+  shoulda-matchers (~> 5.0)
   simple_token_authentication (~> 1.0)!
   simplecov
   simplecov-console
@@ -500,4 +503,4 @@ DEPENDENCIES
   webmock
 
 BUNDLED WITH
-   2.2.24
+   2.3.8
