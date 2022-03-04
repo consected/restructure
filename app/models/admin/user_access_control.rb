@@ -52,11 +52,13 @@ class Admin::UserAccessControl < Admin::AdminBase
 
   #
   # Scope result of a query to only return valid resources, not those that no longer exist
-  def self.valid_resources
+  # @param [Array|nil] only_resource_types - optionally provide an array of resource types to search for -
+  #                                          by default we get all resource_types
+  def self.valid_resources(only_resource_types = nil)
     # Return if everything is not setup yet
     return active unless Master.respond_to? :get_all_associations
 
-    rnft = resource_names_by_type
+    rnft = resource_names_by_type(only_resource_types)
 
     ids = []
     active.each do |r|
@@ -128,10 +130,13 @@ class Admin::UserAccessControl < Admin::AdminBase
 
   #
   # Hash of resource names keyed by resource type
+  # @param [Array|nil] only_resource_types - optionally provide an array of resource types to search for -
+  #                                          by default we get all resource_types
   # @return [Hash]
-  def self.resource_names_by_type
+  def self.resource_names_by_type(only_resource_types = nil)
     rn = {}
-    resource_types.each do |k|
+    rts = only_resource_types || resource_types
+    rts.each do |k|
       rn[k] = resource_names_for(k).sort
     end
     rn
