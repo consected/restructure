@@ -486,7 +486,7 @@ DEPENDENCIES
   rubyzip
   sass-rails (~> 5.1)
   selenium-webdriver (= 3.4.4)
-  shoulda-matchers (~> 5.0)
+  shoulda-matchers (~> 5.1)
   simple_token_authentication (~> 1.0)!
   simplecov
   simplecov-console
