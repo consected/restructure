@@ -18,7 +18,7 @@ module Dynamic
       after_commit :other_regenerate_actions
       after_commit :handle_disabled, if: -> { disabled }
 
-      attr_accessor :configurations, :data_dictionary, :options_constants
+      attr_accessor :configurations, :data_dictionary, :options_constants, :force_regenerate
     end
 
     class_methods do
@@ -287,6 +287,81 @@ module Dynamic
         Master.accepts_nested_attributes_for(*@master_nested_attrib)
       end
 
+      #
+      # Get the timestamp for the latest definition stored in the DB.
+      # @return [DateTime]
+      def latest_stored_update
+        active_model_configurations.select(:updated_at).reorder('').order('updated_at desc nulls last').first.updated_at
+      end
+
+      #
+      # Does the persisted latest updated definition match the memoized update?
+      # Returns nil if not previously memoized, otherwise true or false.
+      # @return [true | false | nil]
+      def up_to_date?
+        lu = latest_stored_update
+
+        if !lu && !@prev_latest_update
+          # They match if both nil
+          true
+        elsif lu && @prev_latest_update && (lu - @prev_latest_update).abs < 2
+          # Consider them a match if they are within 2 seconds of one another,
+          # accounting for the difference between Rails and DB times
+          true
+        elsif @prev_latest_update.nil?
+          # The remembered value was nil, so let the caller know this
+          self.prev_latest_update = lu
+          nil
+        else
+          # There was no match
+          self.prev_latest_update = lu
+          false
+        end
+      end
+
+      #
+      # Remember the latest updated at timestamp
+      def prev_latest_update=(updated_at)
+        return if @prev_latest_update && updated_at && updated_at <= @prev_latest_update
+
+        @prev_latest_update = updated_at
+      end
+
+      #
+      # Reload the models and configurations any definitions that
+      # do not match the memoized version, since these may have changed on
+      # another server in the cluster.
+      def refresh_outdated
+        utd = up_to_date?
+        # If up to date, or not previously set
+        # (and therefore we are on our first load and everything will have just been set up) just return
+        return if utd || utd.nil?
+
+        defs = active_model_configurations.reorder('').order('updated_at desc nulls last')
+        any_new = false
+        defs.each do |d|
+          rn = d.resource_name
+          u = d.updated_at
+          m = Resources::Models.find_by(resource_name: rn)&.model&.definition
+          # Skip if the model was previous set and the updated timestamps match
+          next if m && m.updated_at == u
+
+          this_is_new = !m
+          any_new ||= this_is_new
+          d.force_regenerate = true
+          d.generate_model
+          d.check_implementation_class
+          d.force_option_config_parse
+          d.add_master_association
+          d.add_user_access_controls
+          d.reset_active_model_configurations! if this_is_new
+          d.update_tracker_events
+          d.other_regenerate_actions
+        end
+
+        routes_reload if any_new
+      end
+
       # End of class_methods
     end
 
@@ -443,6 +518,8 @@ module Dynamic
     # Decide whether to regenerate a model based on it not existing already in the namespace
     # @return [Class | nil] truthy result unless the model exists in the namespace
     def prevent_regenerate_model
+      return if force_regenerate
+
       got_class = begin
         full_implementation_class_name.constantize
       rescue StandardError
@@ -558,6 +635,7 @@ module Dynamic
     def other_regenerate_actions
       return if disabled
 
+      self.class.prev_latest_update = updated_at
       self.class.preload
       Rails.logger.info 'Reloading column definitions'
       implementation_class.reset_column_information
