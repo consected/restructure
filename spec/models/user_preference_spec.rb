@@ -27,7 +27,7 @@ RSpec.describe UserPreference, type: :model do
       it { is_expected.to be_valid }
     end
 
-    context 'when user is not present' do
+    context 'when setting the user to nil' do
       it { expect{ @user_preference.user = nil }.to raise_error(RuntimeError, 'can not set user=') }
     end
   end
@@ -38,6 +38,10 @@ RSpec.describe UserPreference, type: :model do
     it { is_expected.to validate_presence_of(:date_format) }
     it { is_expected.to validate_presence_of(:date_time_format) }
     it { is_expected.to validate_presence_of(:time_format) }
+
+    describe 'user cannot be set directly' do
+      it { expect{ @user_preference.user = @user }.to raise_error(RuntimeError, 'can not set user=') }
+    end
 
   end
 end
