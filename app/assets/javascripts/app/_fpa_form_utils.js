@@ -1600,6 +1600,12 @@ _fpa.form_utils = {
     window.setTimeout(function () {
       _fpa.form_utils.resize_labels(uc)
     }, 200)
+
+    $('a[href$="#open-in-new-tab"]').each(function () {
+      $(this).attr('target', '_blank');
+      if ($(this).find('.glyphicon-new-window').length) return;
+      $(this).append(' <i class="glyphicon glyphicon-new-window"></i>');
+    });
   },
 
   setup_drag_and_drop: function (block) {
