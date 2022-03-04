@@ -12,7 +12,7 @@ describe User do
   subject{ @user }
 
   describe 'associations' do
-    it { is_expected.to have_one(:user_preference) }
+    it { is_expected.to have_one(:user_preference).inverse_of(:user).autosave(true) }
   end
 
   it 'creates a user' do
