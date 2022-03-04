@@ -408,10 +408,3 @@ div.reset-row .custom-editor-viewer h2 {
   a.browse-filename:focus {
   color: rgb(64, 64, 64);
 }
-#standalone-page > .standalone-page-container .icon-files-center .container-icons-folder-items {
-  justify-content: center;
-}
-#standalone-page > .standalone-page-container .no-border {
-  border: 0;
-  box-shadow: none;
-}

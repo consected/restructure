@@ -269,6 +269,32 @@ div.reset-row,
       padding-bottom: 0.3em;
     }
   }
+
+  .default-layout-rows .page-item-container {
+    flex-flow: column;
+    .embedded-items-item {
+      flex-shrink: 1;
+      flex-grow: 0;
+    }
+  }
+}
+
+#standalone-page > .standalone-page-container {
+  .icon-files-center .container-icons-folder-items {
+    justify-content: center;
+  }
+  .icon-files-center .container-icons-entry .browse-entry-classifications .bem-class-title {
+    margin-right: 0;
+  }
+
+  .notes-empty {
+    display: none;
+  }
+
+  .no-border {
+    border: 0;
+    box-shadow: none;
+  }
 }
 
 div.reset-row,

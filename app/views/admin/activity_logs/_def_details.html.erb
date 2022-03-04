@@ -60,7 +60,7 @@
       <%= link_to(got, link, target: '_blank') %>
       <ul>
         <li>table: <%= to_table_name %></li>
-        <li>view: <%= link_to(view_name, report_path('reference_data__table_data', 
+        <li>view: <%= link_to(link_label_open_in_new(view_name), report_path('reference_data__table_data', 
                                           table_name: view_name, 
                                           schema_name: object_instance.schema_name, 
                                           search_attrs: { no_run: true }
