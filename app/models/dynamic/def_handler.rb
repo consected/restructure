@@ -291,7 +291,10 @@ module Dynamic
       # Get the timestamp for the latest definition stored in the DB.
       # @return [DateTime]
       def latest_stored_update
-        active_model_configurations.select(:updated_at).reorder('').order('updated_at desc nulls last').first.updated_at
+        active_model_configurations
+          .select(:updated_at).reorder('')
+          .order('updated_at desc nulls last')
+          .first.updated_at if active_model_configurations.any?
       end
 
       #
