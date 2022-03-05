@@ -292,9 +292,11 @@ module Dynamic
       # @return [DateTime]
       def latest_stored_update
         active_model_configurations
-          .select(:updated_at).reorder('')
+          .select(:updated_at)
+          .reorder('')
           .order('updated_at desc nulls last')
-          .first.updated_at if active_model_configurations.any?
+          .pluck(:updated_at)
+          .first
       end
 
       #
