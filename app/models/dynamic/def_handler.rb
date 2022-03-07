@@ -295,6 +295,7 @@ module Dynamic
           .select(:updated_at)
           .reorder('')
           .order('updated_at desc nulls last')
+          .limit(1)
           .pluck(:updated_at)
           .first
       end
