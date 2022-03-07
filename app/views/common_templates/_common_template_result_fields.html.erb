@@ -82,6 +82,16 @@
     {{/if}}
     </li>    
 
+  {{else is field_type '===' 'country' }}
+    <li class="{{> field_result_class}} is--country-field " data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">
+      {{> field_label labels=(concat 'labels_' (underscore name)) }}
+      <strong>{{#if (fpa_state_item 'special_field_options' 'address_country' this_value)}}{{fpa_state_item 'special_field_options' 'address_country' this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong>
+    </li>
+  {{else is field_type '===' 'us_state' }}
+    <li class="{{> field_result_class}} is--country-field " data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">
+      {{> field_label labels=(concat 'labels_' (underscore name)) }}
+      <strong>{{#if (fpa_state_item 'special_field_options' 'us_state' this_value)}}{{fpa_state_item 'special_field_options' 'us_state' this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong>
+    </li>
 
   {{else is field_type 'includes' '^tag_select_' }}
     <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^tag_select_' }}
