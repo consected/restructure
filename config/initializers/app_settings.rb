@@ -2,7 +2,7 @@
 
 class Settings
   DefaultMigrationSchema = 'ml_app'
-  DefaultSchemaOwner = 'fphs'
+  DefaultSchemaOwner = ENV['FPHS_DEFAULT_SCHEMA_OWNER'] || 'fphs'
 
   # Does not set the prefix, just specifies what we search by in jobs
   GlobalIdPrefix = 'fpa1'
@@ -203,4 +203,31 @@ class Settings
 
   # Prevent versioning of dynamic definitions
   DisableVDef = ENV.key?('FPHS_DISABLE_VDEF') ? ENV['FPHS_DISABLE_VDEF'] == 'true' : Rails.env.development?
+
+  # Timezones
+  # Use the the country alpha2 code for the country code. For example,
+  # ISO3166::Country.find_country_by_iso_short_name('united states of america').alpha2 == 'US'
+  # If setting more than one country, separate them with a blank-space.
+  # For example, PRIORITY_TIMEZONE_COUNTRY_CODES='us gb au'
+  CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES']&.split || %i[us ie gb de gr au nz]).freeze
+
+  # Use the timezone name or identifier. For example, "London" or "Eastern Time (US & Canada)".
+  # To obtain the timezone identifiers, execute ActiveSupport::TimeZone.country_zones(<country alpha2 code>)
+  # For example, ActiveSupport::TimeZone.country_zones('GB').map(&:name) == ["Edinburgh", "London"]
+  DefaultUserTimezone = (ENV['DEFAULT_TIMEZONE'] || 'Eastern Time (US & Canada)').freeze
+
+  # Date, Time and DateTime formats
+  #
+  # Set DEFAULT_DATE_FORMAT to mm/dd/yyyy or dd/mm/yyyy.
+  DefaultDateFormat = (ENV['DEFAULT_DATE_FORMAT'] || 'mm/dd/yyyy').freeze
+
+  # Set DEFAULT_DATE_TIME_FORMAT to:
+  #   mm/dd/yyyy hh:mm am/pm
+  #   mm/dd/yyyy 24h:mm
+  #   dd/mm/yyyy hh:mm am/pm
+  #   dd/mm/yyyy 24h:mm
+  DefaultDateTimeFormat = (ENV['DEFAULT_DATE_TIME_FORMAT'] || 'mm/dd/yyyy hh:mm am/pm').freeze
+
+  # Set DEFAULT_TIME_FORMAT to hh:mm am/pm or 24h:mm.
+  DefaultTimeFormat = (ENV['DEFAULT_TIME_FORMAT'] || 'hh:mm am/pm').freeze
 end
