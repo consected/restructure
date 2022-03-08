@@ -2,7 +2,14 @@
 # Save Trigger: Create Reference options
         - model_name:
             if: if_extras
-            in: 'this | referring_record | master (creates no reference, just uses master_id) | master_with_reference (creates a reference to the master, not the item)'
+            in: |
+              one of:
+                - this
+                - referring_record
+                - master (creates no reference, just uses master_id)
+                - master_with_reference (creates a reference to the master, not the item)
+                - specific_record
+
             force_create: 'true to force the creation of a reference and referenced object, independent of user access controls'
             with: 
               field_name: 'now()'
@@ -13,4 +20,6 @@
               field_name_4: 
                 reference_name: 'field_name'
 
+            to_existing_record: # use an existing record of type "model_name", rather than creating a new one
+              record_id: 'Hash with return_value, such as {model_name: {match: value, id: return_value}}'
     
