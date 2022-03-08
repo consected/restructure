@@ -310,7 +310,7 @@ module CalcActions
     return unless return_failures && !@skip_merge
 
     results.first.last.each do |t, res|
-      next unless res.is_a?(Hash) && res.first.last && res.first.last.first.first == :validate
+      next unless res.is_a?(Hash) && res.first&.last&.first&.first == :validate
 
       field = res.first.first
       results.first.last[t] =

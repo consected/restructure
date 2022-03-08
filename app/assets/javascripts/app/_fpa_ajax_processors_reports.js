@@ -41,9 +41,10 @@ _fpa.postprocessors_reports = {
     var id = block.attr('data-id')
     var target_block = "report-result-embedded-block"
     var html = $(`<div id="${target_block}-outer"><div id="${target_block}" class="common-template-item index-1" data-model-data-type="dynamic_model" data-subscription="${hyph_name}-edit-form--${id}" data-template="${hyph_name}-result-template" data-item-class="dynamic_model__${us_name}" data-sub-item="dynamic_model__${us_name}" data-sub-id="${id}" data-item-id="" data-preprocessor="${us_name}_edit_form"></div></div>`)
-    _fpa.show_modal(html, null, true, 'embedded-dynamic-block')
+    _fpa.show_modal(html, null, true, 'embedded-dynamic-block', 1)
     window.setTimeout(function () {
       $(block).contents().appendTo(`#${target_block}`)
+      $(block).html('');
       window.setTimeout(function () {
         _fpa.form_utils.resize_labels($(`#${target_block}`), null, true)
       }, 500);
@@ -229,13 +230,25 @@ _fpa.postprocessors_reports = {
       $(this).html(d);
     }).addClass('td-date-formatted');
 
-    $('td[data-col-type$="_at"], td[data-col-type$="_time"], td[data-col-type$=" time"], td[data-col-type$=" at"], td[data-col-var-type="Time"]').not('.td-time-formatted').each(function () {
+    $('td[data-col-var-type="Time"]').not('.td-time-formatted').each(function () {
       var d = null;
       var val = $(this).html();
       if (val == 'Invalid Date')
         d = '';
       else if (val && val != '')
         d = _fpa.utils.YMDtimeToLocale(val);
+      $(this).html(d);
+    }).addClass('td-time-formatted');
+
+    $('td[data-col-type$="_at"], td[data-col-type$="_time"], td[data-col-type$=" time"], td[data-col-type$=" at"]').not('.td-time-formatted').each(function () {
+      var d = null;
+      var val = $(this).html();
+      if (val == 'Invalid Date')
+        d = '';
+      else if (val && val != '')
+        d = _fpa.utils.YMDtimeToLocale(val);
+      console.log(d)
+      if (d && d.split(' ').length > 1) d = d.split(' ').slice(1).join(' ')
       $(this).html(d);
     }).addClass('td-time-formatted');
 
@@ -320,6 +333,10 @@ _fpa.postprocessors_reports = {
       _fpa.postprocessors_reports.report_format_result_cells(row, data);
     }, 50)
 
+  },
+
+  master_search_results: function (block, data) {
+    $('#master_results_block').attr('data-report-res-name', data.report_res_name);
   }
 
 };

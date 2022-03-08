@@ -34,9 +34,8 @@
 
      if caption_before.has_key? key_sym
 
-%>      <li class="e-sign-group-item caption-before results-caption-before">
-        <%= caption_before[key_sym] && (caption_before[key_sym][:caption] || '') %>
-      </li>
+%>      <li class="e-sign-group-item caption-before results-caption-before"
+        ><%= caption_before[key_sym] && (caption_before[key_sym][:caption] || '') %></li>
 <%
      end
 

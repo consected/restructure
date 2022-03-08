@@ -16,6 +16,7 @@ module ActivityLogSupport
     @master = Master.create! current_user: @user
     @master.current_user = @user
 
+    ActivityLogSupport.cleanup_matching_activity_logs('player_contact', 'email', nil, admin: @admin)
     al = ActivityLog.create! current_admin: @admin,
                              name: 'activity_log_player_contact_emails',
                              item_type: 'player_contact',
@@ -136,6 +137,14 @@ module ActivityLogSupport
       resp = Aws::SNS::Types::PublishResponse.new
       resp.message_id = "MOCK-#{rand 1_000_000_000}"
       resp
+    end
+  end
+
+  def self.cleanup_matching_activity_logs(item_type, rec_type, process_name, excluding_id: nil, admin: nil)
+    others = ActivityLog.works_with_all(item_type, rec_type, process_name)
+    others = others.where.not(id: excluding_id) if excluding_id
+    others.each do |o|
+      o.update!(disabled: true, current_admin: admin || o.admin)
     end
   end
 end

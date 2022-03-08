@@ -1,6 +1,19 @@
 #!/bin/bash
-# Setup a container for a new app type in the mounted NFS
-#./setup_app_type.sh
+# Setup a container for a new app type in the mounted NFS.
+# This sets up the structure expected by the apps filestore
+# and sets the initial OS group with access to the container as `nfs_store_group_0`.
+# This group maps to the app role `nfs_store group 600`
+#
+# The environment variables RAILS_ENV=production should be set if running on a production server
+# otherwise the script assumes this is a dev / test machine.
+#
+# The admin panel App Types list show the specific script to be run for each app type.
+# This only needs to be run one time, from a command line on a machine where the
+# NFS filesystem is mounted at the location /efs1 - unless the MOUNTPOINT environment
+# variable is set to point to another location.
+#
+# Example on a dev server: `app-scripts/setup_filestore_app.sh 1`
+# Example on a production server: `RAILS_ENV=production app-scripts/setup_filestore_app.sh 1`
 
 APP_TYPE_ID=$1
 
@@ -13,12 +26,23 @@ if [ -z "$MOUNTPOINT" ]; then
   if [ "$RAILS_ENV" == 'production' ]; then
     MOUNTPOINT=/efs1
   else
-    MOUNTPOINT=/home/$USER/dev-filestore
-    if [ ! -d ${MOUNTPOINT} ]; then
-      echo "MOUNTPOINT ${MOUNTPOINT} does not exist. Where is it?"
-      read -p 'MOUNTPOINT directory: ' MOUNTPOINT
+
+    if [ -d /media/$USER/Data ]; then
+      MOUNTPOINT=/media/$USER/Data
+    else
+      MOUNTPOINT=/home/$USER/dev-filestore
     fi
+
   fi
+  if [ ! -d ${MOUNTPOINT} ]; then
+    echo "MOUNTPOINT ${MOUNTPOINT} does not exist. Where is it?"
+    read -p 'MOUNTPOINT directory: ' MOUNTPOINT
+  fi
+fi
+
+if [ ! -d ${MOUNTPOINT} ]; then
+  echo "MOUNTPOINT ${MOUNTPOINT} does not exist"
+  exit 1
 fi
 
 echo "Mountpoint is: $MOUNTPOINT"

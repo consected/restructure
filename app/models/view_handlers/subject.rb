@@ -18,6 +18,10 @@ module ViewHandlers
 
         Classification::AccuracyScore.name_for(value)
       end
+
+      def category
+        :subjects
+      end
     end
 
     def accuracy_rank

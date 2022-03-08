@@ -45,6 +45,7 @@ class Admin::AppTypesController < AdminController
                end
 
     Rails.cache.clear
+    AppControl.restart_server
 
     render 'upload_results'
   end

@@ -17,7 +17,12 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
     create_data_set_outside_tx
 
     gs = Classification::GeneralSelection.all
-    gs.each { |g| g.current_admin = @admin; g.create_with = true; g.edit_always = true; g.save! }
+    gs.each do |g|
+      g.current_admin = @admin
+      g.create_with = true
+      g.edit_always = true
+      g.save!
+    end
 
     @user, @good_password = create_user
     @good_email = @user.email
@@ -33,6 +38,8 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
   end
 
   before :each do
+    ActivityLog.define_models
+
     user = User.where(email: @good_email).first
 
     expect(user).to be_a User

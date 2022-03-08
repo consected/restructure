@@ -8,6 +8,9 @@ module ViewHandlers
     end
 
     class_methods do
+      def category
+        :subjects
+      end
     end
   end
 end

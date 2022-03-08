@@ -9,9 +9,7 @@ if [ -z "$1" ]; then
 else
 
   # Setup environment variables
-  if [ -f "/opt/elasticbeanstalk/bin/get-config" ]; then
-    export "$(/opt/elasticbeanstalk/bin/get-config --output YAML environment | sed -r 's/: /=/' | xargs)"
-  fi
+  source app-scripts/get-aws-env-vars.sh
 
   if [ -z "$RAILS_ENV" ]; then
     RAILS_ENV=production

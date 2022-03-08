@@ -25,6 +25,7 @@ class Admin::ServerInfo
     temp_directory
     containers_dirname
     use_parent_sub_dir
+    group_id_range
   ].freeze
 
   attr_accessor :current_admin
@@ -89,6 +90,31 @@ class Admin::ServerInfo
     IO.popen('top -b -n 1 -o +%MEM -c -w 512').read
   rescue StandardError
     'not available'
+  end
+
+  def disk_usage
+    IO.popen('df -h').read
+  rescue StandardError
+    'not available'
+  end
+
+  def instance_id
+    IO.popen('ec2-metadata -i').read
+  rescue StandardError
+    res = IO.popen('hostname').read
+    "hostname: #{res.strip}"
+  rescue StandardError
+    'server identifier not available'
+  end
+
+  def nfs_store_mount_dirs
+    dir = NfsStore::Manage::Filesystem.nfs_store_directory
+    group_id_range = NfsStore::Manage::Filesystem.group_id_range
+    return unless dir.present?
+
+    IO.popen("ls #{dir}/gid#{group_id_range.first}").read
+  rescue StandardError
+    'mount dirs not available'
   end
 
   #

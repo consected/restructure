@@ -36,7 +36,7 @@ module AccuracyScoreSupport
   def list_invalid_update_attribs
     [
       {
-        value: 1001
+        name: nil
       },
       {
         value: nil

@@ -47,7 +47,8 @@ module Resources
             'trackers': 'Latest tracker entry per protocol',
             'tracker_histories': 'All tracker entries',
             'latest_tracker_history': 'Most recent tracker entry',
-            'item_flags': 'Item Flags core table'
+            'item_flags': 'Item Flags core table',
+            'user_preferences': 'User preferences'
           }
       }
 
@@ -77,7 +78,11 @@ module Resources
       categorize_resources DynamicModel, 'dynamic model', res
 
       res.merge!(
-        "external identifiers": ExternalIdentifier.active.map { |r| [r.resource_name, r.label] }.to_h
+        'external identifiers': ExternalIdentifier.active.map { |r| [r.resource_name, r.label] }.to_h,
+        'general': {
+          'master_created_by_user': 'Created by User',
+          'temporary_master': 'Temporary Master Record'
+        }
       )
 
       res
@@ -115,6 +120,7 @@ module Resources
     end
 
     def self.resource_descriptions_for_activity_log_type
+      ActivityLog.reset_all_option_configs_resource_names!
       ActivityLog.all_option_configs_grouped_resources
     end
 

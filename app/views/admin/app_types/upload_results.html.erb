@@ -2,7 +2,7 @@
   <h1><%=@message%></h1>
   <div class="row">
     <% if @app_type&.id %>
-    <div class="col-md-24 text-center"><code>app-scripts/setup_filestore_app.sh <%=@app_type.id%></code></div>
+    <div class="col-md-24 text-center"><code><% Rails.env.production? ? 'RAILS_ENV=production ' : ''%>app-scripts/setup_filestore_app.sh <%=@app_type.id%></code></div>
     <% end %>
     <div class="col-md-24">
       <pre><%=@primary%></pre>

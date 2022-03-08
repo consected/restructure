@@ -123,6 +123,40 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     expect(mn.from_user_email).to eq Settings::NotificationsFromEmail || mn.user.email
   end
 
+  it 'sets up a notification to be sent, where substitution data is a hash' do
+    t = '<p>This is some new content in a text template.</p><p>Related to another master_id {{master_id}}. This is a name: {{select_who}}.</p>'
+
+    master = @activity_log.master
+    layout = @layout
+
+    # NOTE: do not specify app_type when using data rather than setting an item
+    mn = Messaging::MessageNotification.create! user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
+                                                content_template_text: t, message_type: :email,
+                                                data: {
+                                                  master_id: 1234,
+                                                  select_who: 'henry anderson'
+                                                }
+
+    mn.handle_notification_now logger: Delayed::Worker.logger
+
+    mn.reload
+    res = mn.generated_text
+    expected_name = @activity_log.select_who
+
+    expected_text = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some new content in a text template.</p><p>Related to another master_id 1234. This is a name: henry anderson.</p></div></body></html>'
+
+    expect(res).to eq expected_text
+    expect(mn.generated_content).to eq res
+
+    expect(mn.recipient_data).not_to be_empty
+    expect(mn.recipient_data).to be_a Array
+    expect(mn.recipient_data.first).to be_a String
+    expect(mn.recipient_data.first).to eq @rec_user.email
+
+    expect(mn.data)
+    expect(mn.from_user_email).to eq Settings::NotificationsFromEmail || mn.user.email
+  end
+
   it 'sets a from email address' do
     t = '<p>This is some new content in a text template.</p><p>Related to another master_id {{master_id}}. This is a name: {{select_who}}.</p>'
 

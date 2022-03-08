@@ -24,6 +24,7 @@ module FilterUtils
       p = filter_params
       p.delete(:disabled)
       p.delete(:failed)
+      p.delete(:ids)
       filter_name = p.delete(:filter_name)
 
       likes = ['']
@@ -116,10 +117,9 @@ module FilterUtils
   #
   # Clean up the `filter[]`` URL parameters, removing empty string values and
   # setting nils to 'IS NULL' in preparation for later querying
+  # NOTE: Intentionally not memoized - this breaks things
   # @return [Hash] a hash that can safely be used in redirects and link_to
   def filter_params
-    return @filter_params if @filter_params
-
     if has_disabled_field && (
         filter_params_permitted.blank? ||
         (filter_params_permitted.is_a?(Array) && filter_params_permitted[0].blank?)
@@ -133,8 +133,19 @@ module FilterUtils
       return @filter_params
     end
 
+    @filter_params_permitted[:disabled] ||= 'enabled' if has_disabled_field
+
     res = @filter_params_permitted || {}
     res = filter_defaults.merge(res)
+
+    num_to_clear_ids = 1
+    num_to_clear_ids += 1 if has_disabled_field
+    num_to_clear_ids += 1 if primary_model_uses_app_type?
+
+    if res.keys.length > num_to_clear_ids
+      res.delete 'ids'
+      res.delete 'id'
+    end
 
     res.reject! { |_k, v| v.blank? }
 

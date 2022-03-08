@@ -47,6 +47,8 @@ class MastersController < UserBaseController
     end
     @master.current_user ||= current_user
 
+    @no_search = app_config_set(:no_search_in_master_record)
+
     # Allow return of a simple JSON master
     respond_to do |format|
       format.html { search }
@@ -128,7 +130,8 @@ class MastersController < UserBaseController
         if @master&.id
           redirect_to master_path(@master.id), notice: "Created Master Record with ID #{@master.id}"
         else
-          redirect_to new_master_url, notice: "Error creating Master Record: #{Application.record_error_message @master}"
+          redirect_to new_master_url,
+                      notice: "Error creating Master Record: #{Application.record_error_message @master}"
         end
       end
       format.json do

@@ -20,6 +20,10 @@ module ViewHandlers
       def secondary_key
         :data
       end
+
+      def category
+        :subjects
+      end
     end
   end
 end

@@ -3,17 +3,27 @@ module Formatter
     IsoFormat = '%H:%M:%S'.freeze
 
     # If a current_user is set and no data zone, the current_user's timezone will be used to interpret the date / time
-    def self.format(data, _options = nil, current_user: nil, iso: nil, utc: nil, show_timezone: nil, current_timezone: nil, current_date: nil)
+    def self.format(data, _options = nil, current_user: nil,
+                    include_sec: nil,
+                    iso: nil, utc: nil, show_timezone: nil,
+                    current_timezone: nil, current_date: nil)
       unless data.blank?
-
-        current_timezone = current_user.user_preference.timezone if current_timezone&.to_sym == :user && current_user
 
         df = if iso
                IsoFormat
              elsif current_user
-               current_user.user_preference.pattern_for_date_time_format
+               current_timezone = current_user.user_preference.timezone if current_timezone&.to_sym == :user
+               df = if include_sec
+                      current_user.user_preference.pattern_for_time_sec_format
+                    else
+                      current_user.user_preference.pattern_for_time_format
+                    end
              else
-               UserPreference.default_pattern_for_date_time_format
+               df = if include_sec
+                      UserPreference.default_pattern_for_time_sec_format
+                    else
+                      UserPreference.default_pattern_for_time_format
+                    end
              end
 
         if current_timezone && current_date
@@ -29,6 +39,8 @@ module Formatter
           data = data.to_time.utc
           show_timezone ||= :utc
         end
+
+        show_timezone = current_timezone if show_timezone == true
 
         df = "#{df} #{show_timezone.to_s.upcase}" if show_timezone
 

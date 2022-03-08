@@ -15,6 +15,7 @@ category_models.each do |m|
 
   if viewable  [m.resource_name.to_sym]
     po = panel&.view_options&.orientation
+    hide_sl = panel&.view_options&.hide_sublist_controls
 
     orientation ||= po == 'horizontal' || (DynamicModel.orientation(category) == :horizontal) ? 'horizontal' : po
 
@@ -28,7 +29,9 @@ category_models.each do |m|
       <div class="row common-template-list dynamic-model-list resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
     <% else %>
     <div class="<%= layout_item_block_sizes[:regular] %> orientation-<%=orientation%> sublist-column">
+      <% unless hide_sl %>
       {{>sublist_controls sub_list="<%=m.full_item_types_name%>" order='asc'}}
+      <% end %>
       <div class="dynamic-container do-not-resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
     </div>
 <%
