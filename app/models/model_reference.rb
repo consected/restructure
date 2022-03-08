@@ -162,7 +162,8 @@ class ModelReference < ActiveRecord::Base
                            without_reference: false,
                            ref_order: nil,
                            active: nil,
-                           order_by: nil)
+                           order_by: nil,
+                           ref_created_by_user: nil)
 
     ref_order ||= default_ref_order
     filter_by = substitute_filter(filter_by, from_item_or_master)
@@ -172,16 +173,28 @@ class ModelReference < ActiveRecord::Base
       to_record_type = to_record_type_class.name if to_record_type_class
     end
 
+    if ref_created_by_user
+      from_record_type = from_item_or_master.class.name
+      from_record_id = from_item_or_master.id
+
+      without_reference = true
+      filter_by ||= {}
+      filter_by.merge! created_by_user_id: from_item_or_master.current_user.id
+    end
+
     if without_reference
-      cond = { master: from_item_or_master } if to_record_type_class.respond_to? :master
+      if to_record_type_class.respond_to?(:master) && from_item_or_master && !ref_created_by_user
+        cond = { master: from_item_or_master }
+      end
       cond ||= {}
       cond.merge!(filter_by) if filter_by
+
       recs = to_record_type_class.where(cond).order(ref_order)
       recs = recs.active if active
       res = []
       recs.each do |r|
-        res << ModelReference.new(from_record_type: nil,
-                                  from_record_id: nil,
+        res << ModelReference.new(from_record_type: from_record_type,
+                                  from_record_id: from_record_id,
                                   from_record_master_id: from_item_or_master.id,
                                   to_record_type: r.class.name,
                                   to_record_id: r.id,
