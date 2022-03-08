@@ -271,6 +271,12 @@ Support from the community may be available. Create an issue and clearly describ
 
 Alternatively, [Consected](https://www.consected.com) can provide additional deployment assistance and full support packages.
 
+## Contributors
+
+- Harvard Medical School [Football Players Health Study at Harvard University](https://footballplayershealth.harvard.edu/)
+- [Consected LLC](https://consected.com)
+- Harvard Pilgrim Health Care Institute [Project Viva](https://www.hms.harvard.edu/viva/)
+
 ## License
 
 This code is property of Harvard University
