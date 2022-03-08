@@ -136,6 +136,11 @@ module HandlesUserBase
       name.ns_underscore.pluralize
     end
 
+    # Resource name for a single instance of the model
+    def resource_item_name
+      resource_name.to_s.singularize.to_sym
+    end
+
     # Returns the full model name, namespaced like 'module__class' if there is a namespace.
     # otherwise it returns just the basic name
     def item_type
@@ -181,6 +186,30 @@ module HandlesUserBase
     def add_model_to_list
       Resources::Models.add self unless abstract_class || instance_methods.include?(:add_model_to_list)
     end
+
+    # The base string for route
+    # For example "player_infos"
+    # Dynamic configurations will override this
+    def base_route_segments
+      table_name.to_s
+    end
+
+    # The base string for route names
+    # For example `send("new_#{base_route_name}_path")` returns the path
+    # to the "new" controller action
+    def base_route_name
+      base_route_segments.singularize.gsub('/', '_')
+    end
+
+    # Hyphenated name, typically used in HTML markup for referencing target blocks and panels
+    def hyphenated_name
+      resource_name.ns_hyphenate
+    end
+
+    # Hyphenated item name, typically used in HTML markup for referencing individual results
+    def hyphenated_item_name
+      hyphenated_name.singularize
+    end
   end
 
   #
@@ -189,6 +218,11 @@ module HandlesUserBase
   # @return [String]
   def resource_name
     self.class.name.ns_underscore.pluralize
+  end
+
+  # Resource name for a single instance of the model
+  def resource_item_name
+    resource_name.to_s.singularize.to_sym
   end
 
   #
@@ -370,18 +404,22 @@ module HandlesUserBase
   end
 
   def allows_current_user_access_to?(perform, _with_options = nil)
-    curr_user = if self.class.no_master_association
+    no_ma = self.class.no_master_association
+    curr_user = if no_ma
                   current_user
                 else
                   master_user
                 end
-    raise FphsException, 'no master_user in allows_current_user_access_to?' unless curr_user
+    unless curr_user
+      raise FphsException,
+            "no current_user in allows_current_user_access_to? (no master? #{no_ma})"
+    end
 
     res = self.class.allows_user_access_to? curr_user, perform
     return false unless res
 
     # Since there is no master association, there is no master to block the access
-    return true if self.class.no_master_association
+    return true if no_ma
 
     if respond_to?(:master) && master
       m = master
@@ -773,6 +811,8 @@ module HandlesUserBase
                 else
                   "#{v.first.first.to_s.humanize.downcase}: #{v.first.last.present? ? v.first.last : '(blank)'}"
                 end
+          elsif v.is_a?(Array) && [['', nil], [nil, '']].include?(v)
+            v = '(blank)'
           else
             v = ": #{v}"
           end

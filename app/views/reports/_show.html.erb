@@ -36,8 +36,10 @@
   </div>
 </div>
 <%= render partial: 'criteria_view_css' %>
-<div id="<%=@results_target%>" data-sub-item="masters" data-template="search-results-template" data-preprocessor="master_search_results" class="report-results-outer">
+<% if @report.searchable %><%= render partial: 'reports/master_results_css' %><% end %>
+<div id="<%=@results_target%>" data-sub-item="masters" data-template="search-results-template" class="report-results-outer">
   <% if @results %>
     <%= render partial: 'results' %>
   <% end %>
 </div>
+<div data-preprocessor="master_search_results" data-sub-item="report_res_name" data-template="empty"></div>

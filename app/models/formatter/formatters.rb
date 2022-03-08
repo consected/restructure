@@ -10,9 +10,10 @@ module Formatter
 
     def self.formatter_do(type, data, options = nil)
       options ||= {}
+      current_user = options[:current_user]
       ff = formatter_for(type)
       if ff
-        ff.format(data, options)
+        ff.format(data, options, current_user: current_user)
       else
         data
       end

@@ -13,7 +13,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
   include OptionsSupport
 
   let :dynamic_type do
-    DynamicModel::TestCreatedByRec
+    'DynamicModel::TestCreatedByRec'
   end
 
   before :example do
@@ -72,7 +72,7 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     # Create an instance of the dynamic model (v1)
     sleep 2 # ensure there are no timing issues
     @dyn_instances[1] = @master.dynamic_model__test_created_by_recs.create! test1: 'abc'
-    expect(@dyn_instances[1]).to be_a dynamic_type
+    expect(@dyn_instances[1].class.to_s).to eq dynamic_type
 
     # The definition options should match the original
     expect(@dyn_instances[1].current_definition.options.strip).to eq @option_texts[1].strip

@@ -6,7 +6,10 @@ module UserSupport
 
   def create_user(part = nil, extra = '', opt = {})
     start_time = Time.now
-
+    if part.is_a? Hash
+      opt = part
+      part = nil
+    end
     part ||= Time.new.to_f.to_s
     good_email = opt[:email] || gen_username("#{part}-#{extra}-")
     admin, = @admin || create_admin

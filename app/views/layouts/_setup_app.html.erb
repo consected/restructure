@@ -1,3 +1,6 @@
+<%
+  Application.refresh_dynamic_defs
+%>
 <script>
 
   _fpa.version = '<%=Application.version%>-<%=Application.server_cache_version%>';
@@ -14,6 +17,10 @@
     download_files: <%=!!current_user.can?(:download_files)%>,
     view_files_as_image: <%=!!current_user.can?(:view_files_as_image)%>,
     view_files_as_html: <%=!!current_user.can?(:view_files_as_html)%>,
+  }
+  _fpa.state.special_field_options = {
+    address_country: <%= country_hash_lower_keys.to_json.html_safe %>,
+    address_us_state: <%= state_hash_lower_keys.to_json.html_safe %>
   }
   <% end %>
   _fpa.loaded.preload();

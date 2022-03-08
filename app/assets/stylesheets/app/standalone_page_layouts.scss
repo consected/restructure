@@ -16,6 +16,8 @@ div.reset-row,
 
   hr {
     border-top: 3px solid rgb(213, 213, 213);
+    float: none;
+    clear: both;
   }
 
   .common-template-item {
@@ -238,7 +240,7 @@ div.reset-row,
   .standalone-page-design .custom-editor-viewer,
   .default-layout-columns .embedded-items-item,
   .common-template-item div.browse-container {
-    padding: 0.4em 1.7em 1.5em;
+    padding: 0.4em 2% 1.5em;
     h1,
     h2,
     h3,
@@ -266,6 +268,32 @@ div.reset-row,
       border-bottom: 1px rgb(221, 221, 221) solid;
       padding-bottom: 0.3em;
     }
+  }
+
+  .default-layout-rows .page-item-container {
+    flex-flow: column;
+    .embedded-items-item {
+      flex-shrink: 1;
+      flex-grow: 0;
+    }
+  }
+}
+
+#standalone-page > .standalone-page-container {
+  .icon-files-center .container-icons-folder-items {
+    justify-content: center;
+  }
+  .icon-files-center .container-icons-entry .browse-entry-classifications .bem-class-title {
+    margin-right: 0;
+  }
+
+  .notes-empty {
+    display: none;
+  }
+
+  .no-border {
+    border: 0;
+    box-shadow: none;
   }
 }
 
@@ -334,6 +362,13 @@ div.reset-row,
   }
 }
 
+.standalone-page-design .custom-editor,
+.standalone-page-design .custom-editor-viewer {
+  img.broken-image {
+    opacity: 100;
+  }
+}
+
 @media (max-width: 767px) {
   div.reset-row .standalone-page-design {
     .custom-editor,
@@ -345,7 +380,11 @@ div.reset-row,
   }
   div.reset-row,
   .standalone-page-design {
-    .default-layout-rows {
+    .default-layout-rows,
+    .default-layout-columns,
+    .default-layout-one-column,
+    .default-layout-two-columns,
+    .default-layout-three-columns {
       &.common-page-template-item {
         margin: 0 1%;
       }
@@ -396,5 +435,66 @@ div.reset-row,
         width: 100% !important;
       }
     }
+  }
+}
+
+.standalone-page-design,
+.reset-row .common-template-item.common-page-template-item {
+  .center-column {
+    margin: 0 auto;
+  }
+
+  .column-3 {
+    max-width: 300px;
+  }
+
+  .column-4 {
+    max-width: 400px;
+  }
+
+  .column-6 {
+    max-width: 600px;
+  }
+
+  .column-8 {
+    max-width: 800px;
+  }
+
+  .column-9 {
+    max-width: 900px;
+  }
+
+  .column-12 {
+    max-width: 1200px;
+  }
+}
+
+.standalone-page-design,
+div.reset-row {
+  .float-images-left {
+    .custom-editor img,
+    .custom-editor-viewer img {
+      @media (min-width: 485px) {
+        float: left;
+        margin-right: 22px;
+        margin-top: 30px;
+        margin-bottom: 30px;
+      }
+    }
+  }
+
+  .photo-borders {
+    .custom-editor img,
+    .custom-editor-viewer img {
+      padding: 4px;
+      border: solid silver 1px;
+    }
+  }
+}
+
+.page-embedded-block {
+  .custom-editor {
+    border: 1px solid #cccccc;
+    margin-bottom: 18px;
   }
 }

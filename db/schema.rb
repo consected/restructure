@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_11_11_165110) do
+ActiveRecord::Schema.define(version: 2022_03_01_201512) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -365,6 +365,144 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.string "source"
   end
 
+  create_table "datadic_choice_history", force: :cascade do |t|
+    t.bigint "datadic_choice_id"
+    t.string "source_name"
+    t.string "source_type"
+    t.string "form_name"
+    t.string "field_name"
+    t.string "value"
+    t.string "label"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.bigint "redcap_data_dictionary_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_ref_data.datadic_choice_history_on_admin_id"
+    t.index ["datadic_choice_id"], name: "idx_history_on_datadic_choice_id"
+    t.index ["redcap_data_dictionary_id"], name: "idx_dch_on_redcap_dd_id"
+  end
+
+  create_table "datadic_choices", force: :cascade do |t|
+    t.string "source_name"
+    t.string "source_type"
+    t.string "form_name"
+    t.string "field_name"
+    t.string "value"
+    t.string "label"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.bigint "redcap_data_dictionary_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_ref_data.datadic_choices_on_admin_id"
+    t.index ["redcap_data_dictionary_id"], name: "index_ref_data.datadic_choices_on_redcap_data_dictionary_id"
+  end
+
+  create_table "datadic_variable_history", force: :cascade do |t|
+    t.bigint "datadic_variable_id"
+    t.string "study", comment: "Study name"
+    t.string "source_name", comment: "Source of variable"
+    t.string "source_type", comment: "Source type"
+    t.string "domain", comment: "Domain"
+    t.string "form_name", comment: "Form name (if the source was a type of form)"
+    t.string "variable_name", comment: "Variable name"
+    t.string "variable_type", comment: "Variable type"
+    t.string "presentation_type", comment: "Data type for presentation purposes"
+    t.string "label", comment: "Primary label or title (if source was a form, the label presented for the field)"
+    t.string "label_note", comment: "Description (if source was a form, a note presented for the field)"
+    t.string "annotation", comment: "Annotations (if source was a form, annotations not presented to the user)"
+    t.boolean "is_required", comment: "Was required in source"
+    t.string "valid_type", comment: "Source data type"
+    t.string "valid_min", comment: "Minimum value"
+    t.string "valid_max", comment: "Maximum value"
+    t.string "multi_valid_choices", comment: "List of valid choices for categorical variables", array: true
+    t.boolean "is_identifier", comment: "Represents identifiable information"
+    t.boolean "is_derived_var", comment: "Is a derived variable"
+    t.bigint "multi_derived_from_id", comment: "If a derived variable, ids of variables used to calculate it", array: true
+    t.string "doc_url", comment: "URL to additional documentation"
+    t.string "target_type", comment: "Type of participant this variable relates to"
+    t.string "owner_email", comment: "Owner, especially for derived variables"
+    t.string "classification", comment: "Category of sensitivity from a privacy perspective"
+    t.string "other_classification", comment: "Additional information regarding classification"
+    t.string "multi_timepoints", comment: "Timepoints this data is collected (in longitudinal studies)", array: true
+    t.bigint "equivalent_to_id", comment: "Primary variable id this is equivalent to"
+    t.string "storage_type", comment: "Type of storage for dataset"
+    t.string "db_or_fs", comment: "Database or Filesystem name"
+    t.string "schema_or_path", comment: "Database schema or Filesystem directory path"
+    t.string "table_or_file", comment: "Database table (or view, if derived or equivalent to another variable), or filename in directory"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.bigint "redcap_data_dictionary_id", comment: "Reference to REDCap data dictionary representation"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "position", comment: "Relative position (for source forms or other variables where order of collection matters)"
+    t.integer "section_id", comment: "Section this belongs to"
+    t.integer "sub_section_id", comment: "Sub-section this belongs to"
+    t.string "title", comment: "Section caption"
+    t.string "storage_varname", comment: "Database field name, or variable name in data file"
+    t.string "contributor_type", comment: "Type of contributor this variable was provided by"
+    t.jsonb "n_for_timepoints", comment: "For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)"
+    t.string "notes", comment: "Notes"
+    t.bigint "user_id"
+    t.index ["admin_id"], name: "index_ref_data.datadic_variable_history_on_admin_id"
+    t.index ["datadic_variable_id"], name: "idx_h_on_datadic_variable_id"
+    t.index ["equivalent_to_id"], name: "idx_dvh_equiv"
+    t.index ["redcap_data_dictionary_id"], name: "idx_dvh_on_redcap_dd_id"
+    t.index ["user_id"], name: "index_datadic_variable_history_on_user_id"
+  end
+
+  create_table "datadic_variables", comment: "Dynamicmodel: User Variables", force: :cascade do |t|
+    t.string "study", comment: "Study name"
+    t.string "source_name", comment: "Source of variable"
+    t.string "source_type", comment: "Source type"
+    t.string "domain", comment: "Domain"
+    t.string "form_name", comment: "Form name (if the source was a type of form)"
+    t.string "variable_name", comment: "Variable name"
+    t.string "variable_type", comment: "Variable type"
+    t.string "presentation_type", comment: "Data type for presentation purposes"
+    t.string "label", comment: "Primary label or title (if source was a form, the label presented for the field)"
+    t.string "label_note", comment: "Description (if source was a form, a note presented for the field)"
+    t.string "annotation", comment: "Annotations (if source was a form, annotations not presented to the user)"
+    t.boolean "is_required", comment: "Was required in source"
+    t.string "valid_type", comment: "Source data type"
+    t.string "valid_min", comment: "Minimum value"
+    t.string "valid_max", comment: "Maximum value"
+    t.string "multi_valid_choices", comment: "List of valid choices for categorical variables", array: true
+    t.boolean "is_identifier", comment: "Represents identifiable information"
+    t.boolean "is_derived_var", comment: "Is a derived variable"
+    t.bigint "multi_derived_from_id", comment: "If a derived variable, ids of variables used to calculate it", array: true
+    t.string "doc_url", comment: "URL to additional documentation"
+    t.string "target_type", comment: "Type of participant this variable relates to"
+    t.string "owner_email", comment: "Owner, especially for derived variables"
+    t.string "classification", comment: "Category of sensitivity from a privacy perspective"
+    t.string "other_classification", comment: "Additional information regarding classification"
+    t.string "multi_timepoints", comment: "Timepoints this data is collected (in longitudinal studies)", array: true
+    t.bigint "equivalent_to_id", comment: "Primary variable id this is equivalent to"
+    t.string "storage_type", comment: "Type of storage for dataset"
+    t.string "db_or_fs", comment: "Database or Filesystem name"
+    t.string "schema_or_path", comment: "Database schema or Filesystem directory path"
+    t.string "table_or_file", comment: "Database table (or view, if derived or equivalent to another variable), or filename in directory"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.bigint "redcap_data_dictionary_id", comment: "Reference to REDCap data dictionary representation"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "position", comment: "Relative position (for source forms or other variables where order of collection matters)"
+    t.integer "section_id", comment: "Section this belongs to"
+    t.integer "sub_section_id", comment: "Sub-section this belongs to"
+    t.string "title", comment: "Section caption"
+    t.string "storage_varname", comment: "Database field name, or variable name in data file"
+    t.bigint "user_id"
+    t.string "contributor_type", comment: "Type of contributor this variable was provided by"
+    t.jsonb "n_for_timepoints", comment: "For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)"
+    t.string "notes", comment: "Notes"
+    t.index ["admin_id"], name: "index_ref_data.datadic_variables_on_admin_id"
+    t.index ["equivalent_to_id"], name: "idx_dv_equiv"
+    t.index ["redcap_data_dictionary_id"], name: "index_ref_data.datadic_variables_on_redcap_data_dictionary_id"
+    t.index ["user_id"], name: "index_datadic_variables_on_user_id"
+  end
+
   create_table "delayed_jobs", id: :serial, force: :cascade do |t|
     t.integer "priority", default: 0, null: false
     t.integer "attempts", default: 0, null: false
@@ -452,6 +590,7 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.string "extra_fields"
     t.boolean "alphanumeric"
     t.string "schema_name"
+    t.string "options"
     t.index ["admin_id"], name: "index_external_identifier_history_on_admin_id"
     t.index ["external_identifier_id"], name: "index_external_identifier_history_on_external_identifier_id"
   end
@@ -474,6 +613,7 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.string "extra_fields"
     t.string "category"
     t.string "schema_name"
+    t.string "options"
     t.index ["admin_id"], name: "index_external_identifiers_on_admin_id"
   end
 
@@ -533,32 +673,6 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.index ["admin_id"], name: "index_general_selections_on_admin_id"
   end
 
-  create_table "grit_assignment_history", force: :cascade do |t|
-    t.bigint "master_id"
-    t.bigint "grit_id"
-    t.bigint "user_id"
-    t.bigint "admin_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "grit_assignment_table_id"
-    t.index ["admin_id"], name: "index_extra_app.grit_assignment_history_on_admin_id"
-    t.index ["grit_assignment_table_id"], name: "grit_assignment_id_idx"
-    t.index ["master_id"], name: "index_extra_app.grit_assignment_history_on_master_id"
-    t.index ["user_id"], name: "index_extra_app.grit_assignment_history_on_user_id"
-  end
-
-  create_table "grit_assignments", force: :cascade do |t|
-    t.bigint "master_id"
-    t.bigint "grit_id"
-    t.bigint "user_id"
-    t.bigint "admin_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["admin_id"], name: "index_extra_app.grit_assignments_on_admin_id"
-    t.index ["master_id"], name: "index_extra_app.grit_assignments_on_master_id"
-    t.index ["user_id"], name: "index_extra_app.grit_assignments_on_user_id"
-  end
-
   create_table "imports", id: :serial, force: :cascade do |t|
     t.string "primary_table"
     t.integer "item_count"
@@ -568,6 +682,17 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_imports_on_user_id"
+  end
+
+  create_table "imports_model_generators", force: :cascade do |t|
+    t.string "name"
+    t.string "dynamic_model_table"
+    t.json "options"
+    t.string "description"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_imports_model_generators_on_admin_id"
   end
 
   create_table "item_flag_history", id: :serial, force: :cascade do |t|
@@ -606,7 +731,7 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
   create_table "item_flags", id: :serial, force: :cascade do |t|
     t.integer "item_id"
     t.string "item_type"
-    t.integer "item_flag_name_id"
+    t.integer "item_flag_name_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id"
@@ -629,6 +754,8 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.datetime "updated_at"
     t.integer "user_id"
     t.integer "contact_id"
+    t.bigint "created_by_user_id"
+    t.index ["created_by_user_id"], name: "index_masters_on_created_by_user_id"
     t.index ["msid"], name: "index_masters_on_msid"
     t.index ["pro_id"], name: "index_masters_on_proid"
     t.index ["pro_info_id"], name: "index_masters_on_pro_info_id"
@@ -829,6 +956,7 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.integer "nfs_store_container_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string "path"
   end
 
   create_table "nfs_store_move_actions", id: :serial, force: :cascade do |t|
@@ -959,32 +1087,6 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.string "description"
     t.index ["admin_id"], name: "index_page_layouts_on_admin_id"
     t.index ["app_type_id"], name: "index_page_layouts_on_app_type_id"
-  end
-
-  create_table "pitt_bhi_assignment_history", force: :cascade do |t|
-    t.bigint "master_id"
-    t.bigint "pitt_bhi_id"
-    t.bigint "user_id"
-    t.bigint "admin_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "pitt_bhi_assignment_table_id"
-    t.index ["admin_id"], name: "index_extra_app.pitt_bhi_assignment_history_on_admin_id"
-    t.index ["master_id"], name: "index_extra_app.pitt_bhi_assignment_history_on_master_id"
-    t.index ["pitt_bhi_assignment_table_id"], name: "pitt_bhi_assignment_id_idx"
-    t.index ["user_id"], name: "index_extra_app.pitt_bhi_assignment_history_on_user_id"
-  end
-
-  create_table "pitt_bhi_assignments", force: :cascade do |t|
-    t.bigint "master_id"
-    t.bigint "pitt_bhi_id"
-    t.bigint "user_id"
-    t.bigint "admin_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["admin_id"], name: "index_extra_app.pitt_bhi_assignments_on_admin_id"
-    t.index ["master_id"], name: "index_extra_app.pitt_bhi_assignments_on_master_id"
-    t.index ["user_id"], name: "index_extra_app.pitt_bhi_assignments_on_user_id"
   end
 
   create_table "player_contact_history", id: :serial, force: :cascade do |t|
@@ -1186,6 +1288,140 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.boolean "added_tracker"
   end
 
+  create_table "redcap_client_requests", comment: "Redcap client requests", force: :cascade do |t|
+    t.bigint "redcap_project_admin_id"
+    t.string "action"
+    t.string "name"
+    t.string "server_url"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.jsonb "result"
+    t.index ["admin_id"], name: "index_ref_data.redcap_client_requests_on_admin_id"
+    t.index ["redcap_project_admin_id"], name: "idx_rcr_on_redcap_admin_id"
+  end
+
+  create_table "redcap_data_collection_instrument_history", force: :cascade do |t|
+    t.bigint "redcap_data_collection_instrument_id"
+    t.bigint "redcap_project_admin_id"
+    t.string "name"
+    t.string "label"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "idx_rdcih_on_admin_id"
+    t.index ["redcap_data_collection_instrument_id"], name: "idx_h_on_rdci_id"
+    t.index ["redcap_project_admin_id"], name: "idx_rdcih_on_proj_admin_id"
+  end
+
+  create_table "redcap_data_collection_instruments", force: :cascade do |t|
+    t.string "name"
+    t.string "label"
+    t.boolean "disabled"
+    t.bigint "redcap_project_admin_id"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_ref_data.redcap_data_collection_instruments_on_admin_id"
+    t.index ["redcap_project_admin_id"], name: "idx_rdci_pa"
+  end
+
+  create_table "redcap_data_dictionaries", comment: "Retrieved Redcap Data Dictionaries (metadata)", force: :cascade do |t|
+    t.bigint "redcap_project_admin_id"
+    t.integer "field_count"
+    t.jsonb "captured_metadata"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_ref_data.redcap_data_dictionaries_on_admin_id"
+    t.index ["redcap_project_admin_id"], name: "idx_on_redcap_admin_id"
+  end
+
+  create_table "redcap_data_dictionary_history", comment: "Retrieved Redcap Data Dictionaries (metadata) - history", force: :cascade do |t|
+    t.bigint "redcap_data_dictionary_id"
+    t.bigint "redcap_project_admin_id"
+    t.integer "field_count"
+    t.jsonb "captured_metadata"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_ref_data.redcap_data_dictionary_history_on_admin_id"
+    t.index ["redcap_data_dictionary_id"], name: "idx_history_on_redcap_data_dictionary_id"
+    t.index ["redcap_project_admin_id"], name: "idx_h_on_redcap_admin_id"
+  end
+
+  create_table "redcap_project_admin_history", comment: "Redcap project administration - history", force: :cascade do |t|
+    t.bigint "redcap_project_admin_id"
+    t.string "name"
+    t.string "api_key"
+    t.string "server_url"
+    t.jsonb "captured_project_info"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "transfer_mode"
+    t.string "frequency"
+    t.string "status"
+    t.string "post_transfer_pipeline", default: [], array: true
+    t.string "notes"
+    t.string "study"
+    t.string "dynamic_model_table"
+    t.index ["admin_id"], name: "index_ref_data.redcap_project_admin_history_on_admin_id"
+    t.index ["redcap_project_admin_id"], name: "idx_history_on_redcap_project_admin_id"
+  end
+
+  create_table "redcap_project_admins", comment: "Redcap project administration", force: :cascade do |t|
+    t.string "name"
+    t.string "api_key"
+    t.string "server_url"
+    t.jsonb "captured_project_info"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "transfer_mode"
+    t.string "frequency"
+    t.string "status"
+    t.string "post_transfer_pipeline", default: [], array: true
+    t.string "notes"
+    t.string "study"
+    t.string "dynamic_model_table"
+    t.string "options"
+    t.index ["admin_id"], name: "index_ref_data.redcap_project_admins_on_admin_id"
+  end
+
+  create_table "redcap_project_user_history", force: :cascade do |t|
+    t.bigint "redcap_project_user_id"
+    t.bigint "redcap_project_admin_id"
+    t.string "username"
+    t.string "email"
+    t.string "expiration"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_ref_data.redcap_project_user_history_on_admin_id"
+    t.index ["redcap_project_admin_id"], name: "idx_h_on_proj_admin_id"
+    t.index ["redcap_project_user_id"], name: "idx_h_on_redcap_project_user_id"
+  end
+
+  create_table "redcap_project_users", force: :cascade do |t|
+    t.bigint "redcap_project_admin_id"
+    t.string "username"
+    t.string "email"
+    t.string "expiration"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_ref_data.redcap_project_users_on_admin_id"
+    t.index ["redcap_project_admin_id"], name: "index_ref_data.redcap_project_users_on_redcap_project_admin_id"
+  end
+
   create_table "report_history", id: :serial, force: :cascade do |t|
     t.string "name"
     t.string "description"
@@ -1231,6 +1467,36 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.index ["admin_id"], name: "index_reports_on_admin_id"
   end
 
+  create_table "role_description_history", force: :cascade do |t|
+    t.bigint "role_description_id"
+    t.bigint "app_type_id"
+    t.string "role_name"
+    t.string "role_template"
+    t.string "name"
+    t.string "description"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_role_description_history_on_admin_id"
+    t.index ["app_type_id"], name: "index_role_description_history_on_app_type_id"
+    t.index ["role_description_id"], name: "idx_h_on_role_descriptions_id"
+  end
+
+  create_table "role_descriptions", force: :cascade do |t|
+    t.bigint "app_type_id"
+    t.string "role_name"
+    t.string "role_template"
+    t.string "name"
+    t.string "description"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_role_descriptions_on_admin_id"
+    t.index ["app_type_id"], name: "index_role_descriptions_on_app_type_id"
+  end
+
   create_table "sage_assignments", id: :serial, force: :cascade do |t|
     t.string "sage_id", limit: 10
     t.string "assigned_by"
@@ -1267,30 +1533,13 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.index ["user_id"], name: "index_scantrons_on_user_id"
   end
 
-  create_table "sleep_assignment_history", force: :cascade do |t|
-    t.bigint "master_id"
-    t.bigint "sleep_id"
-    t.bigint "user_id"
-    t.bigint "admin_id"
+  create_table "sessions", force: :cascade do |t|
+    t.string "session_id", null: false
+    t.text "data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "sleep_assignment_table_id"
-    t.index ["admin_id"], name: "index_extra_app.sleep_assignment_history_on_admin_id"
-    t.index ["master_id"], name: "index_extra_app.sleep_assignment_history_on_master_id"
-    t.index ["sleep_assignment_table_id"], name: "sleep_assignment_id_idx"
-    t.index ["user_id"], name: "index_extra_app.sleep_assignment_history_on_user_id"
-  end
-
-  create_table "sleep_assignments", force: :cascade do |t|
-    t.bigint "master_id"
-    t.bigint "sleep_id"
-    t.bigint "user_id"
-    t.bigint "admin_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["admin_id"], name: "index_extra_app.sleep_assignments_on_admin_id"
-    t.index ["master_id"], name: "index_extra_app.sleep_assignments_on_master_id"
-    t.index ["user_id"], name: "index_extra_app.sleep_assignments_on_user_id"
+    t.index ["session_id"], name: "index_sessions_on_session_id", unique: true
+    t.index ["updated_at"], name: "index_sessions_on_updated_at"
   end
 
   create_table "smback", id: false, force: :cascade do |t|
@@ -1430,6 +1679,36 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "user_description_history", force: :cascade do |t|
+    t.bigint "user_description_id"
+    t.bigint "app_type_id"
+    t.string "role_name"
+    t.string "role_template"
+    t.string "name"
+    t.string "description"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_user_description_history_on_admin_id"
+    t.index ["app_type_id"], name: "index_user_description_history_on_app_type_id"
+    t.index ["user_description_id"], name: "idx_h_on_user_descriptions_id"
+  end
+
+  create_table "user_descriptions", force: :cascade do |t|
+    t.bigint "app_type_id"
+    t.string "role_name"
+    t.string "role_template"
+    t.string "name"
+    t.string "description"
+    t.boolean "disabled"
+    t.bigint "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_user_descriptions_on_admin_id"
+    t.index ["app_type_id"], name: "index_user_descriptions_on_app_type_id"
+  end
+
   create_table "user_history", id: :serial, force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -1459,8 +1738,22 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.datetime "password_updated_at"
     t.string "first_name"
     t.string "last_name"
+    t.string "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
     t.index ["app_type_id"], name: "index_user_history_on_app_type_id"
     t.index ["user_id"], name: "index_user_history_on_user_id"
+  end
+
+  create_table "user_preferences", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "date_format"
+    t.string "date_time_format"
+    t.string "time_format"
+    t.string "timezone"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_user_preferences_on_user_id", unique: true
   end
 
   create_table "user_role_history", id: :serial, force: :cascade do |t|
@@ -1518,9 +1811,13 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
     t.string "first_name"
     t.string "last_name"
     t.boolean "do_not_email", default: false
+    t.string "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
     t.index ["admin_id"], name: "index_users_on_admin_id"
     t.index ["app_type_id"], name: "index_users_on_app_type_id"
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
+    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
@@ -1573,6 +1870,16 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
   add_foreign_key "config_libraries", "admins"
   add_foreign_key "config_library_history", "admins"
   add_foreign_key "config_library_history", "config_libraries"
+  add_foreign_key "datadic_choice_history", "admins"
+  add_foreign_key "datadic_choice_history", "datadic_choices"
+  add_foreign_key "datadic_choices", "admins"
+  add_foreign_key "datadic_variable_history", "admins"
+  add_foreign_key "datadic_variable_history", "datadic_variables"
+  add_foreign_key "datadic_variable_history", "datadic_variables", column: "equivalent_to_id"
+  add_foreign_key "datadic_variable_history", "users"
+  add_foreign_key "datadic_variables", "admins"
+  add_foreign_key "datadic_variables", "datadic_variables", column: "equivalent_to_id"
+  add_foreign_key "datadic_variables", "users"
   add_foreign_key "dynamic_model_history", "dynamic_models", name: "fk_dynamic_model_history_dynamic_models"
   add_foreign_key "dynamic_models", "admins"
   add_foreign_key "exception_logs", "admins"
@@ -1584,20 +1891,15 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
   add_foreign_key "external_links", "admins"
   add_foreign_key "general_selection_history", "general_selections", name: "fk_general_selection_history_general_selections"
   add_foreign_key "general_selections", "admins"
-  add_foreign_key "grit_assignment_history", "admins"
-  add_foreign_key "grit_assignment_history", "grit_assignments", column: "grit_assignment_table_id"
-  add_foreign_key "grit_assignment_history", "masters"
-  add_foreign_key "grit_assignment_history", "users"
-  add_foreign_key "grit_assignments", "admins"
-  add_foreign_key "grit_assignments", "masters"
-  add_foreign_key "grit_assignments", "users"
   add_foreign_key "imports", "users"
+  add_foreign_key "imports_model_generators", "admins"
   add_foreign_key "item_flag_history", "item_flags", name: "fk_item_flag_history_item_flags"
   add_foreign_key "item_flag_name_history", "item_flag_names", name: "fk_item_flag_name_history_item_flag_names"
   add_foreign_key "item_flag_names", "admins"
   add_foreign_key "item_flags", "item_flag_names"
   add_foreign_key "item_flags", "users"
   add_foreign_key "masters", "users"
+  add_foreign_key "masters", "users", column: "created_by_user_id"
   add_foreign_key "message_notifications", "app_types"
   add_foreign_key "message_notifications", "masters"
   add_foreign_key "message_notifications", "users"
@@ -1645,13 +1947,6 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
   add_foreign_key "page_layout_history", "page_layouts", name: "fk_page_layout_history_page_layouts"
   add_foreign_key "page_layouts", "admins"
   add_foreign_key "page_layouts", "app_types"
-  add_foreign_key "pitt_bhi_assignment_history", "admins"
-  add_foreign_key "pitt_bhi_assignment_history", "masters"
-  add_foreign_key "pitt_bhi_assignment_history", "pitt_bhi_assignments", column: "pitt_bhi_assignment_table_id"
-  add_foreign_key "pitt_bhi_assignment_history", "users"
-  add_foreign_key "pitt_bhi_assignments", "admins"
-  add_foreign_key "pitt_bhi_assignments", "masters"
-  add_foreign_key "pitt_bhi_assignments", "users"
   add_foreign_key "player_contact_history", "masters", name: "fk_player_contact_history_masters"
   add_foreign_key "player_contact_history", "player_contacts", name: "fk_player_contact_history_player_contacts"
   add_foreign_key "player_contact_history", "users", name: "fk_player_contact_history_users"
@@ -1671,8 +1966,29 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
   add_foreign_key "protocols", "admins"
   add_foreign_key "protocols", "app_types"
   add_foreign_key "rc_cis", "masters", name: "rc_cis_master_id_fkey"
+  add_foreign_key "redcap_client_requests", "redcap_project_admins"
+  add_foreign_key "redcap_data_collection_instrument_history", "admins"
+  add_foreign_key "redcap_data_collection_instrument_history", "redcap_data_collection_instruments"
+  add_foreign_key "redcap_data_collection_instrument_history", "redcap_project_admins"
+  add_foreign_key "redcap_data_collection_instruments", "admins"
+  add_foreign_key "redcap_data_dictionaries", "admins"
+  add_foreign_key "redcap_data_dictionaries", "redcap_project_admins"
+  add_foreign_key "redcap_data_dictionary_history", "admins"
+  add_foreign_key "redcap_data_dictionary_history", "redcap_data_dictionaries"
+  add_foreign_key "redcap_data_dictionary_history", "redcap_project_admins"
+  add_foreign_key "redcap_project_admin_history", "redcap_project_admins"
+  add_foreign_key "redcap_project_user_history", "admins"
+  add_foreign_key "redcap_project_user_history", "redcap_project_admins"
+  add_foreign_key "redcap_project_user_history", "redcap_project_users"
+  add_foreign_key "redcap_project_users", "admins"
+  add_foreign_key "redcap_project_users", "redcap_project_admins"
   add_foreign_key "report_history", "reports", name: "fk_report_history_reports"
   add_foreign_key "reports", "admins"
+  add_foreign_key "role_description_history", "admins"
+  add_foreign_key "role_description_history", "app_types"
+  add_foreign_key "role_description_history", "role_descriptions"
+  add_foreign_key "role_descriptions", "admins"
+  add_foreign_key "role_descriptions", "app_types"
   add_foreign_key "sage_assignments", "admins"
   add_foreign_key "sage_assignments", "masters"
   add_foreign_key "sage_assignments", "users"
@@ -1681,13 +1997,6 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
   add_foreign_key "scantron_history", "users", name: "fk_scantron_history_users"
   add_foreign_key "scantrons", "masters"
   add_foreign_key "scantrons", "users"
-  add_foreign_key "sleep_assignment_history", "admins"
-  add_foreign_key "sleep_assignment_history", "masters"
-  add_foreign_key "sleep_assignment_history", "sleep_assignments", column: "sleep_assignment_table_id"
-  add_foreign_key "sleep_assignment_history", "users"
-  add_foreign_key "sleep_assignments", "admins"
-  add_foreign_key "sleep_assignments", "masters"
-  add_foreign_key "sleep_assignments", "users"
   add_foreign_key "sub_process_history", "sub_processes", name: "fk_sub_process_history_sub_processes"
   add_foreign_key "sub_processes", "admins"
   add_foreign_key "sub_processes", "protocols"
@@ -1714,8 +2023,14 @@ ActiveRecord::Schema.define(version: 2020_11_11_165110) do
   add_foreign_key "user_action_logs", "masters"
   add_foreign_key "user_action_logs", "users"
   add_foreign_key "user_authorization_history", "user_authorizations", name: "fk_user_authorization_history_user_authorizations"
+  add_foreign_key "user_description_history", "admins"
+  add_foreign_key "user_description_history", "app_types"
+  add_foreign_key "user_description_history", "user_descriptions"
+  add_foreign_key "user_descriptions", "admins"
+  add_foreign_key "user_descriptions", "app_types"
   add_foreign_key "user_history", "app_types"
   add_foreign_key "user_history", "users", name: "fk_user_history_users"
+  add_foreign_key "user_preferences", "users"
   add_foreign_key "user_role_history", "admins", name: "fk_user_role_history_admins"
   add_foreign_key "user_role_history", "user_roles", name: "fk_user_role_history_user_roles"
   add_foreign_key "user_roles", "admins"

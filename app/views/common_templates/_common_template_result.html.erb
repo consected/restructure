@@ -139,9 +139,7 @@
       {{/if}}
     {{/if}}
     {{#with (fpa_state_item 'caption_before' (underscore name) vdef_version 'metadata' )}}
-    <li class="list-group-item caption-before results-caption-before {{ hyphenate ../full_name }}-metadata">
-        {{{this.show_caption}}}
-    </li>
+    <li class="list-group-item caption-before results-caption-before {{ hyphenate ../full_name }}-metadata">{{{this.show_caption}}}</li>
     {{/with}}
 
     {{#unless exclude_metadata }}

@@ -60,6 +60,7 @@
     <% if current_user %>_fpa.user_prefs = <%= current_user.user_preference.attributes.to_json.html_safe %>;<% end %>
   </script>
   <%= render partial: 'layouts/bootstrap_modal' %>
+  <%= render partial: 'layouts/bootstrap_modal' %>
   <script id="flash_template" type="text/x-handlebars-template" class="handlebars-template">
     {{#if message}}
     <div class="alert alert-info" role="alert">

@@ -12,6 +12,7 @@ module UserActionLogging
                         Devise::RegistrationsController
                         Devise::SessionsController
                         Users::RegistrationsController).freeze
+
   end
 
   private
@@ -34,6 +35,8 @@ module UserActionLogging
     if defined?(object_instance) && object_instance
       nma = object_instance.class.no_master_association
       master ||= object_instance.master unless nma
+    else
+      nma = true
     end
 
     master_id = master.id if master

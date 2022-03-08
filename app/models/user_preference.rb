@@ -1,52 +1,102 @@
-class UserPreference
+# frozen_string_literal: true
 
-  def attributes
-    l = %i(date_format timezone pattern_for_date_format pattern_for_date_time_format pattern_for_time_format)
-    res = {}
-    l.each do |i|
-      res[i.to_s] = send(i)
-    end
-    res
+class UserPreference < UserBase
+  # Essential method to indicate this does not have an association with a master record
+  def self.no_master_association
+    true
   end
 
-  def date_format
-    'mm/dd/yyyy'
-  end
+  include UserHandler
 
-  def date_time_format
-    "mm/dd/yyyy h:mm:sspm"
-  end
+  belongs_to :user, inverse_of: :user_preference
 
-  def time_format
-    "h:mm:sspm"
-  end
+  after_initialize :set_defaults
 
-  def timezone
-    'Eastern Time (US & Canada)'
-  end
+  validates :date_format,
+            presence: true
+
+  validates :date_time_format,
+            presence: true
+
+  validates :time_format,
+            presence: true
+
+  validates :timezone,
+            presence: true
 
   def pattern_for_date_format
-    '%m/%d/%Y'
+    UserPreferencesHelper::DateFormats[self.date_format] || UserPreference.default_pattern_for_date_format
   end
 
   def pattern_for_date_time_format
-    '%m/%d/%Y %l:%M%p'
+    UserPreferencesHelper::DateTimeFormats[self.date_time_format][:hours_minutes] ||
+      UserPreference.default_pattern_for_date_time_sec_format
   end
 
   def pattern_for_time_format
-    '%l:%M%p'
+    UserPreferencesHelper::TimeFormats[self.time_format][:hours_minutes] ||
+      UserPreference.default_pattern_for_time_sec_format
+  end
+
+  def pattern_for_date_time_sec_format
+    UserPreferencesHelper::DateTimeFormats[self.date_time_format][:with_secs] ||
+      UserPreference.default_pattern_for_date_time_format
+  end
+
+  def pattern_for_time_sec_format
+    UserPreferencesHelper::TimeFormats[self.time_format][:with_secs] ||
+      UserPreference.default_pattern_for_time_format
+  end
+
+  def self.no_downcase_attributes
+    %i[date_format time_format date_time_format timezone]
+  end
+
+  def self.default_date_format
+    Settings::DefaultDateFormat
+  end
+
+  def self.default_date_time_format
+    Settings::DefaultDateTimeFormat
+  end
+
+  def self.default_time_format
+    Settings::DefaultTimeFormat
   end
 
   def self.default_pattern_for_date_format
-    '%m/%d/%Y'
+    UserPreferencesHelper::DateFormats[UserPreference.default_date_format]
   end
 
   def self.default_pattern_for_date_time_format
-    '%m/%d/%Y %l:%M%p'
+    UserPreferencesHelper::DateTimeFormats[UserPreference.default_date_time_format][:hours_minutes]
+  end
+
+  def self.default_pattern_for_date_time_sec_format
+    UserPreferencesHelper::DateTimeFormats[UserPreference.default_date_time_format][:with_secs]
   end
 
   def self.default_pattern_for_time_format
-    '%l:%M%p'
+    UserPreferencesHelper::TimeFormats[UserPreference.default_time_format][:hours_minutes]
   end
 
+  def self.default_pattern_for_time_sec_format
+    UserPreferencesHelper::TimeFormats[UserPreference.default_time_format][:with_secs]
+  end
+
+  # REMARK: to avoid confusion with ActiveRecord.default_timezone, added _user_ to its name.
+  def self.default_user_timezone
+    Settings::DefaultUserTimezone
+  end
+
+  add_model_to_list # always at the end of model
+
+  private
+
+  def set_defaults
+    self.date_format ||= UserPreference.default_date_format
+    self.date_time_format ||= UserPreference.default_date_time_format
+    self.time_format ||= UserPreference.default_time_format
+    self.timezone ||= UserPreference.default_user_timezone
+  end
 end

@@ -60,7 +60,7 @@ module EditFields
       cl, reslist = record_data_class_and_results
 
       if cl.nil?
-        logger.warn "Failed to find valid class name for #{assoc_or_class_name}"
+        Rails.logger.warn "Failed to find valid class name for #{assoc_or_class_name}"
       elsif cl.attribute_names.include?('rank')
         reslist_data = list_for_rank(reslist)
       elsif label_attr == :data || value_attr == :data

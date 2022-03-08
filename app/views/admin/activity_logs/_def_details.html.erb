@@ -21,6 +21,22 @@
   </ul>
   <div id="activity-list-detail" class="activity-list-detail"></div>
 </div>
+
+<% if object_instance.persisted? && object_instance.options_text %>
+<div class="activity-list-libraries">
+  <label>libraries</label>
+  <ul class="al-reference-list">
+  <% OptionConfigs::ExtraOptions.requested_libraries(object_instance.options_text).each do |l| %>
+  <li>
+    <%= link_to link_label_open_in_new("#{l[:category]} - #{l[:name]}"), admin_config_libraries_path(filter: l), target: 'configlibs' %>
+    <br/>
+    <code># @library <%= "#{l[:category]}  #{l[:name]}" %></code>
+  </li>
+  <% end %>
+  </ul>
+</div>
+<% end %>
+
 <div class="activity-list-references">
   <label>references</label>
   <ul class="al-reference-list">
@@ -44,7 +60,7 @@
       <%= link_to(got, link, target: '_blank') %>
       <ul>
         <li>table: <%= to_table_name %></li>
-        <li>view: <%= link_to(view_name, report_path('reference_data__table_data', 
+        <li>view: <%= link_to(link_label_open_in_new(view_name), report_path('reference_data__table_data', 
                                           table_name: view_name, 
                                           schema_name: object_instance.schema_name, 
                                           search_attrs: { no_run: true }
