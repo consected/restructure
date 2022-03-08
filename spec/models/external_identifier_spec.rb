@@ -26,6 +26,8 @@ RSpec.describe ExternalIdentifier, type: :model do
 
     create_admin
     create_user
+
+    ExternalIdentifier.define_models
   end
 
   it 'validates new configurations' do
@@ -135,6 +137,15 @@ RSpec.describe ExternalIdentifier, type: :model do
 
   it 'creates an external ID automatically' do
     create_master
+
+    ei = ExternalIdentifier.active.find_by name: :sage_assignments
+    unless ei
+      ei = ExternalIdentifier.find_by name: :sage_assignments
+      ei.current_admin = @admin
+      ei.disabled = false
+      ei.save!
+    end
+
     setup_access :sage_assignments, user: @master.current_user
     expect(SageAssignment.definition.pregenerate_ids).to be true
 

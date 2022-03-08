@@ -15,7 +15,30 @@ In short this means that version numbers, visible here and on the login page of 
 app match, and have a predictable format indicating how much change from the previous
 version has occurred.
 
-The `## Unreleased` section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
+The [Unreleased](#unreleased) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
+
+Note that not every tagged version may be suitable for production use. A Github
+release will be created for any release tested in production, and may be marked below with the tag [Release]
+
+## Unreleased
+
+### Transferred from ReStructure @8.0.28 - 2022-03-08
+
+- [Added] paths and resource names when referencing activity log types
+- [Added] much more consistent handling of resource names with **Resources::Models**
+- [Added] user profiles tabs definable using page layout definitions
+- [Added] ability to include activity log type as a resource in a page layout definition
+- [Added] **add_item_button** substitution for captions and report headers
+- [Added] user definable user preferences for timezones and formats
+- [Added] per-server caching of latest dynamic definition versions, to allow automated reloading on a page refresh
+- [Added] view_options for references in activity log def to always open a reference
+- [Added] new disk usage and host id information
+- [Added] user_is_creator as references from: option, including for NFS store containers
+- [Added] option to skip creating a container as a save trigger if one already exists with a matching name
+- [Changed] to restart server on successful app import
+- [Changed] NFS Store file download to ensure the file is correctly retrieved when a user is in a different app to the container
+- [Changed] app migrations to ignore removed columns if ALLOW_DROP_COLUMNS not set
+- [Fixed] handling of admin filters to consistently show correct app selection
 
 ## [7.4.96] - 2022-02-09
 

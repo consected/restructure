@@ -3,6 +3,11 @@
     def_version = nil
   end
 
+  unless defined? hide_sublist_controls
+    hide_sublist_controls = nil
+  end
+
+
   main_log_full_name = "#{full_name}_primary"
   item_type_name_hyphenated = item_type_name.hyphenate
   full_name_hyphenated = full_name.hyphenate
@@ -238,7 +243,9 @@
   
   
         <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="<%=item_type_name%>_logs">
+          <% unless hide_sublist_controls %>
           {{>sublist_controls sub_list="<%=item_type_name%>_logs" sub_list_data_name="activity_log__<%=item_type_name.pluralize%>" filter_attr='extra_log_type' filter_name="human_name" filter_all=true order='asc' all_active=true layout=true}}
+          <% end %>
           <div data-sort-desc="<%= data_action_when.hyphenate %>" <%= data_action_when.hyphenate %>="" class="new-blocks-container">
             <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-primary-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-primary-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form">
             </div>

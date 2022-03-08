@@ -14,4 +14,21 @@ $project_color: #2e6da4;
   --link-focus-color: #25527c;
   --bottom-grad-color: #2e6da4;
   --bottom-grad-darker-color: #265a88;
+  --input-has-value-color: rgb(255, 246, 226);
+
+  --content-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --content-font-size: 14px;
+
+  --button-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --label-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --table-font-family: "Assistant", sans-serif;
+  --table-font-size: 16px;
+  --table-head-font-family: "Assistant", sans-serif;
+  --table-head-font-size: 15px;
+}
+
+@font-face {
+  font-family: "Assistant";
+  src: url("/fonts/assistant/Assistant-VariableFont_wght.ttf");
 }

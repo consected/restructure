@@ -14,6 +14,7 @@ module BhsImportConfig
   end
 
   def self.import_config
+    ExternalIdentifier.define_models
     config_dir = Rails.root.join('spec', 'fixtures', 'app_configs', 'config_files')
     config_fn = 'bhs_config.json'
     app, = SetupHelper.setup_app_from_import bhs_app_name, config_dir, config_fn

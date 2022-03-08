@@ -237,8 +237,8 @@ module Admin::AppTypeImport
           i = i.first
           if i
             el = i
-            el = nil unless el.changed?
             i.update! new_vals
+            el = nil unless i.saved_changes?
           else
             new_vals['disabled'] = true if create_disabled
             i = el = parent.send(assoc_name).create! new_vals
@@ -256,8 +256,8 @@ module Admin::AppTypeImport
           new_vals['disabled'] = true if i.respond_to?(:ready_to_generate?) && !i.ready_to_generate?
           new_vals.delete 'id'
           new_vals.delete :id
-          el = nil unless el.changed?
           i.update! new_vals
+          el = nil unless i.saved_changes?
         else
           new_vals['disabled'] = true if create_disabled
           i = el = cname.create! new_vals

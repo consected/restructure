@@ -164,7 +164,12 @@ _fpa.activity_logs = {
 
       if (typeof save_action == 'object') {
         if (save_action.go_to_master) {
-          _fpa.send_ajax_request("/masters.json?master[id]=" + obj_data.master_id + "&commit=search");
+          _fpa.send_ajax_request("/masters.json?master[id]=" + obj_data.master_id + "&commit=search", {
+            try_app_callback: function (el, data) {
+              _fpa.hide_modal(1);
+            }
+          });
+
         }
 
         if (save_action.create_next_creatable) {

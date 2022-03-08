@@ -149,7 +149,7 @@ module AppTypeChange
     respond_to do |type|
       type.html do
         # Redirect, to ensure the flash and navs in the layout are updated
-        redirect_to pages_home_url unless no_redirect_after_change
+        redirect_to request.path unless no_redirect_after_change
       end
       type.json do
       end

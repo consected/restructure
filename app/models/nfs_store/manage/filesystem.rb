@@ -67,8 +67,9 @@ module NfsStore
 
       # Generate the absolute path to the specified item, based on the provided options
       # @param role_name [String]
-      # @param app_type_id [Integer] (optional) app type to be used, or if nil rely on the current user's
-      #   app type set in the container
+      # @param app_type_id [Integer] (optional) app type to be used, or if nil rely on the
+      #   app type set directly in the container or on the current user's
+      #   app type set in the container (the latter is unlikely to ever occur)
       # @param container [NfsStore::Manage::Container] the container,
       #    which will also set the app type if it is not set explicitly
       # @param path [String] path relative to the container for a directory
@@ -83,7 +84,7 @@ module NfsStore
         fs_dir = nfs_store_directory
 
         # Use the specified app type if stated explicitly, otherwise get it from the container
-        app_type_id ||= container&.current_user&.app_type_id
+        app_type_id ||= container&.app_type_id || container&.current_user&.app_type_id
         app_dir = "#{AppDirprefix}#{app_type_id}"
         mount_name = Group.nfs_mount_from_role_name(role_name)
         parts = []

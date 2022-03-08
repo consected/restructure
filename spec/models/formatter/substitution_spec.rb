@@ -84,10 +84,32 @@ RSpec.describe Formatter::Substitution, type: :model do
     expect(@activity_log.versioned_definition.options_constants[:replace_me]).to eq 'super special'
 
     caption = @activity_log.extra_log_type_config.caption_before[:select_result][:caption]
-    expected_text = "<p>has a caption before select_result with a super special substitution made</p>\n"
+    expected_text = '<p>has a caption before select_result with a super special substitution made</p>'
 
     res = Formatter::Substitution.substitute(caption, data: @activity_log, tag_subs: nil)
 
     expect(res).to eq expected_text
+  end
+
+  it 'substitutes times and dates using user preferences for formatting' do
+    # Day before daylight savings time starts. Standard time is UTC -5 hours
+    date = Date.parse('2015-03-07')
+    time = Time.parse('14:56:04 EST')
+
+    res = Formatter::DateTime.format({ date: date, time: time, zone: nil }, show_timezone: nil, current_user: @user)
+
+    # expect(res).to eq '03/07/2022 2:56 pm EST'
+
+    txt = 'This is a simple test: {{int_val}} {{a_date}} {{a_time}} - {{a_time::time_sec}}'
+    data = {
+      int_val: 12_345,
+      a_time: time,
+      a_date: date,
+      current_user: @user
+    }
+
+    res = Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
+
+    expect(res).to eq 'This is a simple test: 12345 03/07/2015 2:56 pm - 2:56:04 pm'
   end
 end

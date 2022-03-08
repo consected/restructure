@@ -7,13 +7,11 @@
     {{#if (fpa_state_item 'dialog_before' (underscore name) vdef_version key)}}
       {{{fpa_state_item 'dialog_before' (underscore name) vdef_version key}}}
     {{else if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'show_caption')}}
-    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}">
-      {{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'show_caption'}}}
-    </li>
+    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}"
+    >{{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'show_caption'}}}</li>
     {{else if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption')}}
-    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}">
-      {{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption'}}}
-    </li>
+    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) vdef_version key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}} {{#is key 'includes' '^placeholder'}}placeholder-caption-before{{/is}}"
+    >{{{fpa_state_item 'caption_before' (underscore name) vdef_version key 'caption'}}}</li>
     {{/if}}
   {{/if}}
   {{#is field_type "notes"}}
@@ -83,6 +81,23 @@
       </div>
     {{/if}}
     </li>    
+
+  {{else is field_type '===' 'country' }}
+    <li class="{{> field_result_class}} is--country-field " data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">
+      {{> field_label labels=(concat 'labels_' (underscore name)) }}
+      <strong>{{#if (fpa_state_item 'special_field_options' 'address_country' this_value)}}{{fpa_state_item 'special_field_options' 'address_country' this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong>
+    </li>
+  {{else is field_type '===' 'us_state' }}
+    <li class="{{> field_result_class}} is--country-field " data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">
+      {{> field_label labels=(concat 'labels_' (underscore name)) }}
+      <strong>{{#if (fpa_state_item 'special_field_options' 'us_state' this_value)}}{{fpa_state_item 'special_field_options' 'us_state' this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong>
+    </li>
+
+  {{else is field_type 'includes' '^tag_select_' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^tag_select_' }}
+      {{>tag_select_container field_key=key tag_selects=this_value nothing_selected_text="nothing selected"}}
+    </li>
+
   {{else if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'edit_as' 'alt_options')}}
     <li class="{{> field_result_class}} from-template-config-alt-options" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>
     {{#each (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'edit_as' 'alt_options')}}
@@ -93,9 +108,7 @@
 
 
   {{else if (get result_data._general_selections key this_value 'name')}}
-
     <li class="{{> field_result_class}} is--select-field from-general-selection" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
-
   {{else is field_type "data" }}
     <li class="{{> field_result_class}}" data-field-name="{{key}}"><small class="ctlabel">
     {{#if result_data.rec_type}}{{result_data.rec_type}}{{else}}{{humanize key}}{{/if}}
@@ -164,10 +177,6 @@
     {{/unless}}
     {{/if}}
   {{/unless}}
-  {{else is field_type 'includes' '^tag_select_' }}
-    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^tag_select_' }}
-      {{>tag_select_container field_key=key tag_selects=this_value nothing_selected_text="nothing selected"}}
-    </li>
   {{else is field_type 'includes' '^select_record_from_' }}
     <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is field_type 'includes' '^select_' }}
@@ -177,7 +186,7 @@
   {{else is field_type 'includes' '_selection$' }}
     <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_selection$' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^multi_' }}
-    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^multi_' }}
+    <li class="{{> field_result_class}} is--select-field is--multi" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^multi_' }}
       {{#* inline "iterateMultiSelect"}}
         {{#each multi_vals}}
           {{#is this '!in' "0,false,no" }}

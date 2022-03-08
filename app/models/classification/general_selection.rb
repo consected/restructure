@@ -11,9 +11,10 @@ class Classification::GeneralSelection < ActiveRecord::Base
                       player_contacts_type player_contacts_source player_contacts_rank
                       addresses_type addresses_source addresses_rank].freeze
 
-  default_scope { order item_type: :asc, disabled: :asc, position: :asc }
+  default_scope { order Arel.sql('item_type asc, coalesce(disabled, false) asc, coalesce(position, 0) asc, name asc') }
 
   before_validation :prevent_value_change, on: :update
+  before_validation :downcase_value
   validates :name, presence: true
   validates :value, presence: true
   validate :not_duplicated
@@ -122,5 +123,9 @@ class Classification::GeneralSelection < ActiveRecord::Base
     end
 
     true
+  end
+
+  def downcase_value
+    self.value = value&.downcase
   end
 end

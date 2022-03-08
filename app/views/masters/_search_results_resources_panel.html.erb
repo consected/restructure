@@ -1,6 +1,8 @@
 <%
   resources = panel.contains.resources
   init_visible = panel.view_options.initial_show || nil if panel.view_options
+  hide_sl_class = 'hide-sublist-controls' if panel.view_options&.hide_sublist_controls
+  hide_al_header_class = 'hide-activity-logs-header' if panel.view_options&.hide_activity_logs_header
   resources.each do |resource|
     if master_viewables[resource.to_sym]
       rs = resource.split('__', 2)
@@ -10,7 +12,13 @@
         resource_type = 'details'
       end
 %>
-    <div id="<%= resource.hyphenate %>-{{id}}" class="<%= resource_type %>-generic-block <%= resource.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= resource %>" data-template="<%= resource.hyphenate %>-main-result-template"  >
+    <div id="<%= resource.hyphenate %>-{{id}}" 
+         class="<%= resource_type %>-generic-block <%= resource.hyphenate %>-block collapse <%=hide_sl_class%> <%=hide_al_header_class%>"
+         data-sub-for-root="master_id"
+         data-sub-id="{{id}}"
+         data-sub-item="<%= resource %>"
+         data-template="<%= resource.hyphenate %>-main-result-template"
+    >
         <div id="<%= resource.hyphenate %>-inner-{{id}}" class="<%= resource_type %>-inner-block">
         </div>
     </div>

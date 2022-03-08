@@ -31,6 +31,11 @@ class DynamicModel < ActiveRecord::Base
     "dynamic_model__#{table_name}"
   end
 
+  # Resource name for a single instance of the model
+  def resource_item_name
+    resource_name.to_s.singularize.to_sym
+  end
+
   #
   # Class that implements options functionality
   def self.options_provider
@@ -180,18 +185,7 @@ class DynamicModel < ActiveRecord::Base
           self.definition = definition
         end
 
-        begin
-          # This may fail if an underlying dependent class (parent class) has been redefined by
-          # another dynamic implementation, such as external identifier
-          if implementation_class_defined?(klass, fail_without_exception: true,
-                                                  fail_without_exception_newable_result: true)
-            klass.send(:remove_const, model_class_name)
-          end
-        rescue StandardError => e
-          logger.info '*************************************************************************************'
-          logger.info "Failed to remove the old definition of #{model_class_name}. #{e.inspect}"
-          logger.info '*************************************************************************************'
-        end
+        remove_implementation_class
 
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
@@ -209,35 +203,14 @@ class DynamicModel < ActiveRecord::Base
           res.extension_setup if res.respond_to? :extension_setup
         end
 
-        # Create an alias in the main namespace to make dynamic model easier to refer to
-        begin
-          if implementation_class_defined?(Object, fail_without_exception: true,
-                                                   fail_without_exception_newable_result: true,
-                                                   class_name: model_class_name)
-            Object.send(:remove_const, model_class_name)
-          end
-        rescue StandardError => e
-          logger.info '*************************************************************************************'
-          logger.info "Failed to remove the old definition of Object::#{model_class_name}. #{e.inspect}"
-          logger.info '*************************************************************************************'
-        end
-
+        remove_implementation_class Object
         Object.const_set(model_class_name, res)
 
         # Setup the controller
-        c_name = full_implementation_controller_name
-        begin
-          klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
-        rescue StandardError => e
-          logger.info '*************************************************************************************'
-          logger.info "Failed to remove the old definition of #{c_name}. #{e.inspect}"
-          logger.info '*************************************************************************************'
-        end
+        remove_implementation_controller_class
 
-        res2 = klass.const_set(c_name, a_new_controller)
+        res2 = klass.const_set(full_implementation_controller_name, a_new_controller)
         res2.include DynamicModelControllerHandler
-
-        logger.debug "Model Name: #{model_class_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
       rescue StandardError => e
         failed = true
         puts "Failure creating dynamic model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
@@ -273,30 +246,39 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
+  def base_route_segments
+    "dynamic_model/#{implementation_model_name.pluralize.to_sym}"
+  end
+
+  def base_route_short_name
+    implementation_model_name.pluralize.to_sym
+  end
+
   #
   # Load dynamic model routes for all active implementations
   def self.routes_load
     m = active_model_configurations
     Rails.application.routes.draw do
       m.each do |dm|
-        pg_name = dm.implementation_model_name.pluralize.to_sym
+        pg_name = dm.base_route_segments
+        short_pg_name = dm.base_route_short_name
         if dm.foreign_key_name.present?
 
           resources :masters do
-            resources pg_name, except: [:destroy], controller: "dynamic_model/#{pg_name}"
+            resources short_pg_name, except: [:destroy], controller: pg_name
             namespace :dynamic_model do
-              resources pg_name, except: [:destroy]
+              resources short_pg_name, except: [:destroy]
             end
-            get "dynamic_model/#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
+            get "#{pg_name}/:id/template_config", to: "#{pg_name}#template_config"
           end
 
         else
 
-          resources pg_name, except: [:destroy], controller: "dynamic_model/#{pg_name}"
+          resources short_pg_name, except: [:destroy], controller: pg_name
           namespace :dynamic_model do
-            resources pg_name, except: [:destroy]
+            resources short_pg_name, except: [:destroy]
           end
-          get "dynamic_model/#{pg_name}/:id/template_config", to: "dynamic_model/#{pg_name}#template_config"
+          get "#{pg_name}/:id/template_config", to: "#{pg_name}#template_config"
         end
       end
     end

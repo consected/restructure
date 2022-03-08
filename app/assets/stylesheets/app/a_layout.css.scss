@@ -393,7 +393,7 @@ li.search-field input.default {
 
 input.form-control.has-value,
 select.form-control.has-value {
-  background-color: #fff6e2 !important;
+  background-color: var(--input-has-value-color) !important;
 }
 
 input.form-control.has-value,
@@ -687,6 +687,8 @@ code {
   max-height: 1px;
   height: 1px;
   overflow: hidden;
+  opacity: 0;
+  display: inline-block;
 }
 
 i.glyphicon.glyphicon-new-window {

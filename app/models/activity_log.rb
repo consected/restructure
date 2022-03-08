@@ -24,6 +24,11 @@ class ActivityLog < ActiveRecord::Base
     full_item_types_name
   end
 
+  # Resource name for a single instance of the model
+  def resource_item_name
+    resource_name.to_s.singularize.to_sym
+  end
+
   def implementation_model_name
     item_type_name
   end
@@ -70,16 +75,24 @@ class ActivityLog < ActiveRecord::Base
   # Only enabled admin activity log records are used, excluding other possible options that are not configured.
   # Returns the item_type_name if true
   def self.works_with(item_type, rec_type = nil, process_name = nil)
+    # Get the first item, since this will get the null rec_type and process_name if they match
+    # For the least exact match this is what we want
+    res = works_with_all(item_type, rec_type, process_name).first
+    return unless res
+
+    res.item_type_name
+  end
+
+  # gets all activity log definitions that work with
+  # the specified item_type and optionally rec_type based on admin activity log record configuration
+  # if no rec_type is specified, then just the item_type will be used to match broadly,
+  # even if the configuration specifies a rec_type as a requirement
+  def self.works_with_all(item_type, rec_type = nil, process_name = nil)
     item_type = item_type.downcase
     cond = { item_type: item_type }
     cond[:rec_type] = rec_type if rec_type
     cond[:process_name] = process_name if process_name
-    # Get the first item, since this will get the null rec_type and process_name if they match
-    # For the least exact match this is what we want
-    res = enabled.where(cond).unscope(:order).order('rec_type asc nulls first, process_name asc nulls first').first
-    return unless res
-
-    res.item_type_name
+    enabled.where(cond).unscope(:order).order('rec_type asc nulls first, process_name asc nulls first')
   end
 
   #
@@ -310,6 +323,10 @@ class ActivityLog < ActiveRecord::Base
     logger.error e
   end
 
+  def base_route_segments
+    "activity_log/#{implementation_model_name.pluralize.to_sym}"
+  end
+
   # set up a route for each available activity log definition
   def self.routes_load
     mn = nil
@@ -320,31 +337,39 @@ class ActivityLog < ActiveRecord::Base
       Rails.application.routes.draw do
         resources :masters, only: %i[show index new create] do
           m.each do |pg|
+            brn = pg.base_route_segments
             mn = pg.implementation_model_name.pluralize.to_sym
             Rails.logger.info "Setting up routes for #{mn}"
 
             ic = pg.item_type.pluralize
-            get "#{ic}/:item_id/activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
-            get "#{ic}/:item_id/activity_log/#{mn}/", to: "activity_log/#{mn}#index"
-            get "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
-            post "#{ic}/:item_id/activity_log/#{mn}", to: "activity_log/#{mn}#create"
-            get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
-            patch "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
-            put "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
-            get "#{ic}/:item_id/activity_log/#{mn}/:id/template_config", to: "activity_log/#{mn}#template_config"
+            get "#{ic}/:item_id/#{brn}/new", to: "#{brn}#new"
+            get "#{ic}/:item_id/#{brn}/", to: "#{brn}#index"
+            get "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#show"
+            post "#{ic}/:item_id/#{brn}", to: "#{brn}#create"
+            get "#{ic}/:item_id/#{brn}/:id/edit", to: "#{brn}#edit"
+            patch "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
+            put "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
+            get "#{ic}/:item_id/#{brn}/:id/template_config", to: "#{brn}#template_config"
+            get "#{ic}/:item_id/#{brn}/:extra_log_type/new", to: "#{brn}#new"
+            get "#{ic}/:item_id/#{brn}/:extra_log_type/:id", to: "#{brn}#show"
+            post "#{ic}/:item_id/#{brn}/:extra_log_type", to: "#{brn}#create"
 
-            # used by links to get to activity logs without having to use parent item (such as a player contact with phone logs)
-            get "activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
-            get "activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
-            get "activity_log/#{mn}/", to: "activity_log/#{mn}#index"
-            get "activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
-            post "activity_log/#{mn}", to: "activity_log/#{mn}#create"
-            patch "activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
-            get "activity_log/#{mn}/:id/template_config", to: "activity_log/#{mn}#template_config"
+            # used by links to get to activity logs without having to use parent item
+            # (such as a player contact with phone logs)
+            get "#{brn}/new", to: "#{brn}#new"
+            get "#{brn}/:id", to: "#{brn}#show"
+            get "#{brn}/", to: "#{brn}#index"
+            get "#{brn}/:id/edit", to: "#{brn}#edit"
+            post brn, to: "#{brn}#create"
+            patch "#{brn}/:id", to: "#{brn}#update"
+            get "#{brn}/:id/template_config", to: "#{brn}#template_config"
+            get "#{brn}/:extra_log_type/new", to: "#{brn}#new"
+            get "#{brn}/:extra_log_type/:id", to: "#{brn}#show"
+            post "#{brn}/:extra_log_type", to: "#{brn}#create"
 
             # used by item flags to generate appropriate URLs
             begin
-              get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show",
+              get "activity_log__#{mn}/:id", to: "#{brn}#show",
                                              as: "activity_log_#{pg.implementation_model_name}"
             rescue StandardError
               Rails.logger.warn "Skipped creating route activity_log__#{mn}/:id since activity_log_#{pg.implementation_model_name} already exists?"
@@ -407,6 +432,14 @@ class ActivityLog < ActiveRecord::Base
     end
     unless rec_type_valid?
       errors.add(:rec_type, "(#{rec_type}) invalid for the selected item type #{item_type}.")
+      return
+    end
+
+    existing = self.class.works_with_all(item_type, rec_type, process_name).where.not(id: id)
+    if existing.first
+      errors.add(:rec_type,
+                 " item type and process name already exist as a definition (#{existing.first.id}) " \
+                 "- #{item_type}, #{rec_type}, #{process_name} ")
       nil
     end
   end
@@ -458,19 +491,7 @@ class ActivityLog < ActiveRecord::Base
           self.definition = definition
         end
 
-        begin
-          # This may fail if an underlying dependent class (parent class) has been redefined by
-          # another dynamic implementation, such as external identifier
-          if implementation_class_defined?(klass, fail_without_exception: true)
-            klass.send(:remove_const, model_class_name)
-          end
-        rescue StandardError => e
-          logger.info <<~END_TEXT
-            *************************************************************************************
-            Failed to remove the old definition of #{model_class_name}. #{e.inspect}
-            *************************************************************************************
-          END_TEXT
-        end
+        remove_implementation_class
 
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
@@ -483,24 +504,9 @@ class ActivityLog < ActiveRecord::Base
         ESignature::ESignatureManager.enable_e_signature_for res
         res.final_setup
 
-        c_name = full_implementation_controller_name
-
-        begin
-          # This may fail if an underlying dependent class (parent class) has been redefined by
-          # another dynamic implementation, such as external identifier
-          klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
-        rescue StandardError => e
-          logger.info <<~END_TEXT
-            *************************************************************************************
-            Failed to remove the old definition of #{c_name}. #{e.inspect}
-            *************************************************************************************
-          END_TEXT
-        end
-
-        res2 = klass.const_set(c_name, a_new_controller)
+        remove_implementation_controller_class
+        res2 = klass.const_set(full_implementation_controller_name, a_new_controller)
         res2.include ActivityLogControllerHandler
-
-        logger.debug "Model Name: #{model_class_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
 
         add_model_to_list res
       rescue StandardError => e
@@ -572,7 +578,8 @@ class ActivityLog < ActiveRecord::Base
 
     # Always performed
     self.class.reset_all_option_configs_resource_names!
-
+    add_model_to_list(implementation_class) unless disabled
+    super
     true
   end
 
@@ -602,5 +609,49 @@ class ActivityLog < ActiveRecord::Base
     tn = table_name.sub('activity_log_', 'al_')
     ttn = to_table_name.sub('activity_log_', 'al_')
     "#{ttn}_from_#{tn}"
+  end
+
+  # Hyphenated name, typically used in HTML markup for referencing target blocks and panels
+  def hyphenated_name
+    full_item_type_name.ns_hyphenate
+  end
+
+  # Override to enable extra log types to also be added to Resouces::Models
+  def add_model_to_list(m)
+    # Clean up before re-adding
+    remove_model_from_list
+
+    super
+
+    rns = option_configs.map(&:resource_name)
+
+    rns.each do |rn|
+      elt = rn.split('__').last
+      hyph_name = "activity-log--#{implementation_model_name.hyphenate}-#{elt.hyphenate}"
+      Resources::Models.add(
+        m,
+        resource_name: rn,
+        resource_item_name: rn,
+        type: :activity_log_type,
+        base_route_name: nil,
+        base_route_segments: "#{m.base_route_segments}/#{elt}",
+        hyphenated_name: hyph_name,
+        hyphenated_item_name: hyph_name,
+        option_type: elt
+      )
+    end
+    self.class.reset_all_option_configs_resource_names!
+  end
+
+  # Override to enable extra log types to also be added to Resouces::Models
+  # @param [String] tn
+  def remove_model_from_list
+    super
+
+    rns = Resources::Models.to_a.select { |m| m[:class_name] == full_implementation_class_name }.map(&:resource_name)
+    rns.each do |rn|
+      Resources::Models.remove(resource_name: rn)
+    end
+    self.class.reset_all_option_configs_resource_names!
   end
 end

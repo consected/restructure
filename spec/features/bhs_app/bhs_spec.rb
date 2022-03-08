@@ -54,6 +54,7 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
   end
 
   before :each do
+    ActivityLog.define_models
   end
 
   def as_user(role)

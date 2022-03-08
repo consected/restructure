@@ -9,6 +9,8 @@ class PageLayoutsController < ApplicationController
   before_action :set_page_filters, only: %i[show]
   attr_accessor :object_instance, :objects_instance
 
+  include AppTypeChange
+
   def index
     pm = Admin::PageLayout.app_standalone_layouts(current_user.app_type_id)
                           .standalone_pages_for_user(current_user)
