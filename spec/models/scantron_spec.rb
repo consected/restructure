@@ -28,10 +28,10 @@ RSpec.describe 'Scantron', type: :model do
 
     it 'prevents pre-generation of scantron ids' do
       res = begin
-              Scantron.generate_ids(@admin, 100)
-            rescue StandardError
-              nil
-            end
+        current_scantron_model.generate_ids(@admin, 100)
+      rescue StandardError
+        nil
+      end
       expect(res).to be nil
     end
 
