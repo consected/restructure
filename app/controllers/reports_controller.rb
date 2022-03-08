@@ -11,8 +11,8 @@ class ReportsController < UserBaseController
   before_action :set_master_and_user, only: %i[create update]
   after_action :clear_results, only: %i[show run]
 
-  helper_method :filters, :filters_on, :index_path, :permitted_params, :filter_params_permitted,
-                :search_attrs_params_hash, :embedded_report
+  helper_method :filters, :filters_on, :index_path, :permitted_params, :filter_params_permitted, :filter_params,
+                :search_attrs_params_hash, :embedded_report, :object_instance
   ResultsLimit = Master.results_limit
 
   attr_accessor :failed
@@ -190,6 +190,11 @@ class ReportsController < UserBaseController
   end
 
   protected
+
+  # Allows edit fields to reference the report
+  def object_instance
+    @report_item
+  end
 
   def no_create
     true

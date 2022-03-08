@@ -1,16 +1,66 @@
 /*@import url("https://fonts.googleapis.com/css2?family=Ubuntu&display=swap");*/
-@import url("https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400");
+/* @import url("https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400"); */
+
+/*  */
 
 :root {
-  --content-font-family: "Titillium Web", sans-serif;
-  --table-font-family: "Titillium Web", sans-serif;
+  --project-color: #5e4096;
+  --link-color: #5e4096;
+  --link-darker-color: #472f72;
+  --link-hover-darker-color: #630077;
+  --link-focus-color: #3e2964;
+  --link-active-color: #402964;
+  --bottom-grad-color: #4a3277;
+  --bottom-grad-darker-color: #452e70;
+  --input-has-value-color: rgb(247, 237, 253);
+
+  /* --content-font-family: "Lato", sans-serif;
+  --table-font-family: "Lato", sans-serif; */
+  --content-font-family: "Assistant", sans-serif;
+  --content-font-size: 18px;
+
+  --button-font-family: "Assistant", sans-serif;
+  --label-font-family: "Assistant", sans-serif;
+
+  --table-font-family: "Assistant", sans-serif;
+  --table-font-size: 16px;
+  --table-head-font-family: "Assistant", sans-serif;
+  --table-head-font-size: 15px;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("/fonts/lato/Lato-Regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("/fonts/lato/Lato-Black.ttf");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("/fonts/lato/Lato-Italic.ttf");
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Lato";
+  src: url("/fonts/lato/Lato-BlackItalic.ttf");
+  font-weight: bold;
+  font-style: italic;
 }
 
 .standalone-page-container,
 .standalone-page-design {
   /*font-family: "Ubuntu", sans-serif;*/
-  font-family: "Titillium Web", sans-serif;
-  font-size: 16px;
+  font-family: var(--content-font-family);
+  /* font-size: 16px; */
 }
 
 .standalone-page-design .in-item-model-references.rr-mr {
@@ -122,11 +172,6 @@ select.form-control {
   background-color: rgb(255, 246, 226) !important;
 }
 
-input.form-control.has-value,
-select.form-control.has-value {
-  background-color: rgb(255, 246, 226) !important;
-}
-
 table.table.report-table .report-column-comment {
   font-weight: normal;
   font-family: var(--table-font-family);
@@ -175,6 +220,22 @@ table.table.report-table td {
 
 .page-embedded-block .list-group-item.submit-action-container {
   display: block;
+}
+
+.notes-text {
+  font-size: 17px;
+}
+div.reset-row .custom-editor h1,
+div.reset-row .custom-editor-viewer h1 {
+  font-size: 2.5em;
+}
+div.reset-row .custom-editor h2,
+div.reset-row .custom-editor-viewer h2 {
+  font-size: 1.4em;
+}
+.footer,
+.footer p {
+  font-size: 15px;
 }
 
 #standalone-page > .standalone-page-container h1,
@@ -346,11 +407,4 @@ table.table.report-table td {
   .container-icons-folder-items
   a.browse-filename:focus {
   color: rgb(64, 64, 64);
-}
-#standalone-page > .standalone-page-container .icon-files-center .container-icons-folder-items {
-  justify-content: center;
-}
-#standalone-page > .standalone-page-container .no-border {
-  border: 0;
-  box-shadow: none;
 }

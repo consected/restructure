@@ -145,6 +145,7 @@ RSpec.describe 'Export an app configuration', type: :model do
     config = @app_type.export_config
 
     @activity_log = ActivityLog.active.first
+    ActivityLogSupport.cleanup_matching_activity_logs(@activity_log.item_type, @activity_log.rec_type, @activity_log.process_name, admin: @admin, excluding_id: @activity_log.id)
 
     al_orig_name = @activity_log.name
     @activity_log.name = "Changed #{rand}!"

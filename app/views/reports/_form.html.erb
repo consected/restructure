@@ -1,6 +1,14 @@
-<div class="report-criteria container-fluid">
+<%
+  @criteria_block_id = "report-criteria-container-#{SecureRandom.hex}"
+  # make sure markdown escaping doesn't break substitutions
+  # description = @report.description&.gsub('\\_', '_')
+  description = @report.description
+%>
+<div class="report-criteria container-fluid" id="<%= @criteria_block_id %>-block">
   <div class="report-description">
-    <%= markdown_to_html @report.description %>
+    <%= Formatter::Substitution.substitute(markdown_to_html(description), data: current_user).html_safe %>
   </div>
   <%= render partial: 'reports/criteria' %>
 </div>
+<%= render partial: 'reports/criteria_view_css' %>
+<% if @report.searchable %><%= render partial: 'reports/master_results_css' %><% end %>

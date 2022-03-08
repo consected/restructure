@@ -2,7 +2,7 @@
 
 class Settings
   DefaultMigrationSchema = 'ml_app'
-  DefaultSchemaOwner = 'fphs'
+  DefaultSchemaOwner = ENV['FPHS_DEFAULT_SCHEMA_OWNER'] || 'restrdba'
 
   # Does not set the prefix, just specifies what we search by in jobs
   GlobalIdPrefix = 'fpa1'
@@ -33,7 +33,7 @@ class Settings
   # Default logo filename. Can be overridden on an app by app basis with the "logo filename" app configuration.
   # The logo file itself should be placed in `app/assets/images` or directly in `public/``. Alternatively, place it in
   # `public/app_specific/<app folder>`` and use the appropriate relative path `/app_specific/<app folder>` in the config.
-  DefaultLogo = 'restructure-logo.svg'
+  DefaultLogo = 'project-viva-logo.png'
 
   # Force a 'from email' address for notifications
   # If not set (nil), then the current user email address will be used,
@@ -51,7 +51,7 @@ class Settings
   # Disable 2FA by setting to true. The environment variable should be 'true' to set this
   TwoFactorAuthDisabled = (ENV['FPHS_2FA_AUTH_DISABLED'] == 'true')
   # App name that appears within 2FA authenticator app
-  TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'FPHS Apps'
+  TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'ReStructure'
   # Number of seconds to use for 2FA token drift (the older it is allowed to be and still be valid)
   TwoFactorAuthDrift = (ENV['FPHS_2FA_DRIFT'] || 30).to_i
 
@@ -79,7 +79,7 @@ class Settings
   # using the curly substitution {{base_url}}
   BaseUrl = ENV['BASE_URL'] || '(not set)'
   # title tag page title, appears in tab or browser heading
-  PageTitle = ENV['PAGE_TITLE'] || 'FPHS'
+  PageTitle = ENV['PAGE_TITLE'] || 'ReStructure'
 
   # Registration Settings
   # Since passwords have generated upon user creation, we must suppress generating a password
@@ -203,4 +203,31 @@ class Settings
 
   # Prevent versioning of dynamic definitions
   DisableVDef = ENV.key?('FPHS_DISABLE_VDEF') ? ENV['FPHS_DISABLE_VDEF'] == 'true' : Rails.env.development?
+
+  # Timezones
+  # Use the the country alpha2 code for the country code. For example,
+  # ISO3166::Country.find_country_by_iso_short_name('united states of america').alpha2 == 'US'
+  # If setting more than one country, separate them with a blank-space.
+  # For example, PRIORITY_TIMEZONE_COUNTRY_CODES='us gb au'
+  CountryCodesForTimezones = (ENV['PRIORITY_TIMEZONE_COUNTRY_CODES']&.split || %i[us ie gb de gr au nz]).freeze
+
+  # Use the timezone name or identifier. For example, "London" or "Eastern Time (US & Canada)".
+  # To obtain the timezone identifiers, execute ActiveSupport::TimeZone.country_zones(<country alpha2 code>)
+  # For example, ActiveSupport::TimeZone.country_zones('GB').map(&:name) == ["Edinburgh", "London"]
+  DefaultUserTimezone = (ENV['DEFAULT_TIMEZONE'] || 'Eastern Time (US & Canada)').freeze
+
+  # Date, Time and DateTime formats
+  #
+  # Set DEFAULT_DATE_FORMAT to mm/dd/yyyy or dd/mm/yyyy.
+  DefaultDateFormat = (ENV['DEFAULT_DATE_FORMAT'] || 'mm/dd/yyyy').freeze
+
+  # Set DEFAULT_DATE_TIME_FORMAT to:
+  #   mm/dd/yyyy hh:mm am/pm
+  #   mm/dd/yyyy 24h:mm
+  #   dd/mm/yyyy hh:mm am/pm
+  #   dd/mm/yyyy 24h:mm
+  DefaultDateTimeFormat = (ENV['DEFAULT_DATE_TIME_FORMAT'] || 'mm/dd/yyyy hh:mm am/pm').freeze
+
+  # Set DEFAULT_TIME_FORMAT to hh:mm am/pm or 24h:mm.
+  DefaultTimeFormat = (ENV['DEFAULT_TIME_FORMAT'] || 'hh:mm am/pm').freeze
 end

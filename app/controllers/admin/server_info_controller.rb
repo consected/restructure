@@ -12,6 +12,9 @@ class Admin::ServerInfoController < AdminController
     @passenger_stats = si.passenger_status
     @passenger_memory_stats = si.passenger_memory_stats
     @processes = si.processes
+    @disk_usage = si.disk_usage
+    @instance_id = si.instance_id
+    @nfs_store_mount_dirs = si.nfs_store_mount_dirs
     render 'admin/server_info/index'
   end
 end

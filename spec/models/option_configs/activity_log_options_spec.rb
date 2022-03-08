@@ -12,7 +12,7 @@ RSpec.describe 'Activity Log Options', type: :model do
   include OptionsSupport
 
   let :dynamic_type do
-    ActivityLog::PlayerContactEmail
+    'ActivityLog::PlayerContactEmail'
   end
 
   before :example do
@@ -43,8 +43,8 @@ RSpec.describe 'Activity Log Options', type: :model do
 
     # Create an instance of the dynamic model (v1)
     sleep 2 # ensure there are no timing issues
-    @dyn_instances[1] = @master.activity_log__player_contact_emails.create! select_result: 'res1', extra_log_type: 'primary'
-    expect(@dyn_instances[1]).to be_a dynamic_type
+    @dyn_instances[1] = ActivityLog::PlayerContactEmail.create! master: @master, select_result: 'res1', extra_log_type: 'primary'
+    expect(@dyn_instances[1].class.to_s).to eq dynamic_type
 
     # The definition options should match the original
     expect(@dyn_instances[1].current_definition.extra_log_types).to eq @option_texts[1]
@@ -74,7 +74,7 @@ RSpec.describe 'Activity Log Options', type: :model do
 
     # Create an instance of the dynamic model (v2)
     sleep 2 # ensure there are no timing issues
-    @dyn_instances[2] = @master.activity_log__player_contact_emails.create! select_result: 'res2', extra_log_type: 'new_step'
+    @dyn_instances[2] = ActivityLog::PlayerContactEmail.create! select_result: 'res2', extra_log_type: 'new_step', master: @master
 
     # The dynamic model instance should pull options that matches the original v1 options
     check_version 1
@@ -105,7 +105,7 @@ RSpec.describe 'Activity Log Options', type: :model do
 
     # Create an instance of the dynamic model (v2)
     sleep 2 # ensure there are no timing issues
-    @dyn_instances[3] = @master.activity_log__player_contact_emails.create! select_result: 'res3', extra_log_type: 'new_step'
+    @dyn_instances[3] = ActivityLog::PlayerContactEmail.create! master: @master, select_result: 'res3', extra_log_type: 'new_step'
     check_version 3
     check_version 1
     check_version 2
@@ -133,7 +133,7 @@ RSpec.describe 'Activity Log Options', type: :model do
 
     # Create an instance of the dynamic model (v2)
     sleep 2 # ensure there are no timing issues
-    @dyn_instances[4] = @master.activity_log__player_contact_emails.create! select_result: 'res4', extra_log_type: 'new_step2'
+    @dyn_instances[4] = ActivityLog::PlayerContactEmail.create! master: @master, select_result: 'res4', extra_log_type: 'new_step2'
     check_version 4
     check_version 2
     check_version 1
@@ -162,7 +162,7 @@ RSpec.describe 'Activity Log Options', type: :model do
 
     # Create an instance of the dynamic model (v2)
     sleep 2 # ensure there are no timing issues
-    @dyn_instances[5] = @master.activity_log__player_contact_emails.create! select_result: 'res5', extra_log_type: 'new_step2'
+    @dyn_instances[5] = ActivityLog::PlayerContactEmail.create! master: @master, select_result: 'res5', extra_log_type: 'new_step2'
     check_version 5
     check_version 4
     check_version 2
@@ -190,8 +190,8 @@ RSpec.describe 'Activity Log Options', type: :model do
 
     # Create an instance of the dynamic model (v1)
     sleep 2 # ensure there are no timing issues
-    @dyn_instances[1] = @master.activity_log__player_contact_emails.create! select_result: 'res1', extra_log_type: 'primary'
-    expect(@dyn_instances[1]).to be_a dynamic_type
+    @dyn_instances[1] = ActivityLog::PlayerContactEmail.create! select_result: 'res1', extra_log_type: 'primary', master: @master
+    expect(@dyn_instances[1].class.to_s).to eq dynamic_type.to_s
 
     # The definition options should match the original
     expect(@dyn_instances[1].current_definition.extra_log_types).to eq @option_texts[1]
@@ -223,7 +223,7 @@ RSpec.describe 'Activity Log Options', type: :model do
 
     # Create an instance of the dynamic model (v2)
     sleep 2 # ensure there are no timing issues
-    al = @dyn_instances[2] = @master.activity_log__player_contact_emails.create! select_result: 'good', extra_log_type: 'new_step'
+    al = @dyn_instances[2] = ActivityLog::PlayerContactEmail.create! select_result: 'good', extra_log_type: 'new_step', master: @master
 
     expect(al.option_type_config.editable_if[:all][:this][:select_result]).to eq 'good'
 
@@ -262,7 +262,7 @@ RSpec.describe 'Activity Log Options', type: :model do
 
     # Create an instance of the dynamic model (v2)
     sleep 2 # ensure there are no timing issues
-    al = @dyn_instances[3] = @master.activity_log__player_contact_emails.create! select_result: 'bad', extra_log_type: 'new_step'
+    al = @dyn_instances[3] = ActivityLog::PlayerContactEmail.create! master: @master, select_result: 'bad', extra_log_type: 'new_step'
     expect(al.option_type_config.editable_if[:all][:this][:select_result]).to eq 'bad'
 
     expect(al.can_edit?).to be_truthy

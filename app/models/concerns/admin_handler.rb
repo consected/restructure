@@ -52,6 +52,11 @@ module AdminHandler
       name.ns_underscore.pluralize
     end
 
+    # Resource name for a single instance of the model
+    def resource_item_name
+      resource_name.to_s.singularize.to_sym
+    end
+
     def human_name
       name.underscore.humanize.titleize
     end
@@ -203,6 +208,11 @@ module AdminHandler
     return super if defined? super
 
     admin_resource_name
+  end
+
+  # Resource name for a single instance of the model
+  def resource_item_name
+    resource_name.to_s.singularize.to_sym
   end
 
   # Provide a usable name if this is not overriden or

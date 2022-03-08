@@ -29,6 +29,8 @@ _fpa = {
     'masters',
     'masterss',
     'search_actions',
+    'user_profiles',
+    'user_preferences'
   ],
 
   HandlebarsCompileOptions: { preventIndent: true },
@@ -213,6 +215,7 @@ _fpa = {
 
         // Model references have an item type attribute
         if (data_for_data_type) {
+          data_for_data_type.vdef_version = data_for_data_type.vdef_version || 'v'
           var item_type = data_for_data_type.item_type || data_type;
         } else {
           var item_type = data_type;
@@ -295,69 +298,72 @@ _fpa = {
     var template = options.template;
     var process_block = block;
 
-    // Render the result using the template and data
-    try {
-      var html = template(data);
-    } catch (err) {
-      console.log('(' + err + ') template function not defined for ' + template_name);
-      console.log(err.stack);
+    // Throw away the result if told to show no result
+    if (!options.show_no_result) {
+
+      // Render the result using the template and data
+      try {
+        var html = template(data);
+      } catch (err) {
+        console.log('(' + err + ') template function not defined for ' + template_name);
+        console.log(err.stack);
+      }
+      html = $(html).addClass('view-template-created');
+
+      var new_block = block;
+
+      // Position the result before, after or in the current block
+      if (options.position && options.position.indexOf('before') === 0) {
+        var beforeBlock = block;
+        if (options.position.indexOf('parent') > 0) {
+          beforeBlock = block.parent();
+        }
+
+        new_block = html;
+        var id = new_block.attr('id');
+        // If the results has a root element with an id that exist in the DOM already,
+        // TODO: !!!! this seems wrong - we don't want duplicate items !!!! and has not been created in this transaction,
+        // replace it rather than placing the result before the specified block
+
+        var existing = $('#' + id); //.not('.view-template-created');
+        if (existing.length > 0) {
+          existing.replaceWith(new_block);
+        } else {
+          beforeBlock.before(new_block);
+        }
+        process_block = new_block;
+        block.html('');
+      } else if (options.position && options.position.indexOf('after') === 0) {
+        var afterBlock = block;
+        if (options.position.indexOf('parent') > 0) {
+          afterBlock = block.parent();
+        }
+
+        new_block = html;
+        var id = new_block.attr('id');
+        var existing = $('#' + id);
+        // If the results has a root element with an id that exist in the DOM already,
+        // replace it rather than placing the result after the specified block
+        if (existing.length > 0) {
+          existing.replaceWith(new_block);
+        } else {
+          afterBlock.after(new_block);
+        }
+        block.html('');
+        process_block = new_block;
+      } else {
+        new_block = html;
+
+        // If the results has a root element with an id that matches the existing block,
+        // replace it rather than placing the result inside the current item
+        if (block.attr('id') && block.attr('id') == new_block.attr('id')) {
+          block.replaceWith(new_block);
+        } else {
+          // Just replace the content of the specified block
+          block.html(html);
+        }
+      }
     }
-    html = $(html).addClass('view-template-created');
-
-    var new_block = block;
-
-    // Position the result before, after or in the current block
-    if (options.position && options.position.indexOf('before') === 0) {
-      var beforeBlock = block;
-      if (options.position.indexOf('parent') > 0) {
-        beforeBlock = block.parent();
-      }
-
-      new_block = html;
-      var id = new_block.attr('id');
-      // If the results has a root element with an id that exist in the DOM already,
-      // TODO: !!!! this seems wrong - we don't want duplicate items !!!! and has not been created in this transaction,
-      // replace it rather than placing the result before the specified block
-
-      var existing = $('#' + id); //.not('.view-template-created');
-      if (existing.length > 0) {
-        existing.replaceWith(new_block);
-      } else {
-        beforeBlock.before(new_block);
-      }
-      process_block = new_block;
-      block.html('');
-    } else if (options.position && options.position.indexOf('after') === 0) {
-      var afterBlock = block;
-      if (options.position.indexOf('parent') > 0) {
-        afterBlock = block.parent();
-      }
-
-      new_block = html;
-      var id = new_block.attr('id');
-      var existing = $('#' + id);
-      // If the results has a root element with an id that exist in the DOM already,
-      // replace it rather than placing the result after the specified block
-      if (existing.length > 0) {
-        existing.replaceWith(new_block);
-      } else {
-        afterBlock.after(new_block);
-      }
-      block.html('');
-      process_block = new_block;
-    } else {
-      new_block = html;
-
-      // If the results has a root element with an id that matches the existing block,
-      // replace it rather than placing the result inside the current item
-      if (block.attr('id') && block.attr('id') == new_block.attr('id')) {
-        block.replaceWith(new_block);
-      } else {
-        // Just replace the content of the specified block
-        block.html(html);
-      }
-    }
-
     // We handle the post processing in a timeout to give the UI the opportunity to render the
     // template, providing for a more responsive, less jerky experience.
     window.setTimeout(function () {
@@ -656,6 +662,12 @@ _fpa = {
               else if (b.hasClass('new-after')) options.position = 'after';
               else options.position = 'before';
             }
+
+            // Do not add the result template if the class show-no-result is set on the target container.
+            // Pre and post processors are still called though.
+            if (b.hasClass('show-no-result')) {
+              options.show_no_result = true;
+            }
             // Since we may have specified multiple items to match the target, run through each in turn
             // making sure to use any specific templates they specify
             var default_tname = $(this).attr('data-template');
@@ -762,9 +774,12 @@ _fpa = {
                         // results for 'works_with_item' classes
                         item_data = d;
                         var matching_data_sub_item = alt_data_key;
-                        if (!matching_data_sub_item) matching_data_sub_item = item_data.item_type.underscore();
+                        if (!matching_data_sub_item && item_data.item_type) matching_data_sub_item = item_data.item_type.underscore();
                         if (item_data[dsfor] === +dsid) {
-                          if (matching_data_sub_item === dst) {
+                          if (matching_data_sub_item == null) {
+                            use_data = {};
+                            use_data[dst] = item_data;
+                          } else if (matching_data_sub_item === dst) {
                             use_data = {};
                             use_data[dst] = item_data;
                           } else if (matching_data_sub_item === dsc) {
@@ -1000,8 +1015,9 @@ _fpa = {
   },
 
   // Show a bootstrap style modal dialog
-  show_modal: function (message, title, large, add_class) {
-    var pm = $('#primary-modal');
+  show_modal: function (message, title, large, add_class, modal_index) {
+    if (!modal_index) modal_index = '';
+    var pm = $(`#primary-modal${modal_index}`);
     var t = pm.find('.modal-title');
     var m = pm.find('.modal-body');
     t.html('');
@@ -1011,39 +1027,57 @@ _fpa = {
     if (message) m.html(message);
 
     // Reset the class to the original
-    $('.modal-dialog').prop('class', 'modal-dialog')
+    var md = pm.find('.modal-dialog')
+    md.prop('class', 'modal-dialog')
 
-    if (large && large == 'md') $('.modal-dialog').removeClass('modal-lg').addClass('modal-md');
-    else if (large) $('.modal-dialog').removeClass('modal-md').addClass('modal-lg');
-    else $('.modal-dialog').removeClass('modal-lg').removeClass('modal-md');
+    if (large && large == 'md') md.removeClass('modal-lg').addClass('modal-md');
+    else if (large) md.removeClass('modal-md').addClass('modal-lg');
+    else md.removeClass('modal-lg').removeClass('modal-md');
 
     if (add_class)
-      $('.modal-dialog').addClass(add_class);
+      md.addClass(add_class);
 
     pm.on('hidden.bs.modal', function () {
-      $('.modal-body').html('');
-      _fpa.utils.scrollTo(0, 0, 0, $('.modal-body'))
+      m.html('');
+      _fpa.utils.scrollTo(0, 0, 0, m)
       var riomc = $('.refresh-item-on-modal-close').first();
       if (riomc.length) {
         riomc.parents('.common-template-item').last().find('a.refresh-item').click();
         riomc.removeClass('refresh-item-on-modal-close');
       }
-      $('body').removeClass('table-results');
-      $('html').css({ overflow: 'auto' });
-      _fpa.reports.reset_window_scrolling();
+
+      if ($('.modal.was-in').length == 0) {
+        $('body').removeClass('table-results');
+        $('html').css({ overflow: 'auto' });
+        _fpa.reports.reset_window_scrolling();
+      }
     });
 
     pm.modal('show');
 
     pm.on('shown.bs.modal', function () {
-      _fpa.utils.scrollTo(0, 0, 0, $('.modal-body'))
+      _fpa.utils.scrollTo(0, 0, 0, m)
     })
+
+    if (modal_index) {
+      // Hide a previously shown modal back
+      $('.modal.in').removeClass('in').addClass('was-in');
+
+      pm.on('click.dismiss.bs.modal', `[data-dismiss="modal${modal_index}"]`, function () {
+        _fpa.hide_modal(modal_index);
+      })
+    }
+
 
     return pm;
   },
 
-  hide_modal: function () {
-    var pm = $('#primary-modal');
+  hide_modal: function (modal_index) {
+    if (!modal_index) modal_index = '';
+    var pm = $(`#primary-modal${modal_index}`);
+
+    if (pm.hasClass('was-in')) return;
+
     var t = pm.find('.modal-title');
     var m = pm.find('.modal-body');
     _fpa.utils.scrollTo(0, 0, 0, m);
@@ -1051,6 +1085,11 @@ _fpa = {
     t.html('');
     m.html('');
     pm.modal('hide');
+
+    // Put a previously shown modal back
+    window.setTimeout(function () {
+      $('.modal.was-in').removeClass('was-in').addClass('in');
+    }, 300)
   },
 
   get_item_by: function (attr, obj, evid) {

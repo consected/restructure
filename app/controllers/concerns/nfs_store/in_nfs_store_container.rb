@@ -39,13 +39,34 @@ module NfsStore
         end
 
         @container.parent_item = @activity_log
-        # Get all the activity logs that may reference this container. Then check the specified one actually does
-        refs = ModelReference.find_where_referenced_from(@container).pluck(:from_record_id, :from_record_type)
-        in_refs = refs.select { |r| r.first == @activity_log.id && r.last == @activity_log.class.to_s }.first
-        raise FsException::List, 'Container and Activity Log do not match' unless in_refs
+
+        activity_log_for_container_access
       end
 
       @container
+    end
+
+    #
+    # Get all the activity logs that may reference this container.
+    # If the activity log specified in the request matches one of these, use it to control
+    # access to the container.
+    # Otherwise, if the first one has the option {nfs_store: {always_use_this_for_access_control: true} }
+    # then use that activity log to control the access to the container.
+    def activity_log_for_container_access
+      al_id = @activity_log.id
+      al_cname = @activity_log.class.to_s
+
+      # Match the specified activity log against a referenced item
+      refs = ModelReference.find_where_referenced_from(@container)
+      in_refs = refs.select { |r| r.from_record_id == al_id && r.from_record_type == al_cname }.first
+      return @activity_log if in_refs
+
+      # No match, so try the first reference to see if it has the nfs_store option
+      from_al = refs.first.from_record
+      use_this_for_access = from_al.option_type_config.nfs_store&.dig(:always_use_this_for_access_control)
+      raise FsException::List, 'Container and Activity Log do not match' unless use_this_for_access
+
+      @activity_log = from_al
     end
 
     def use_secure_view
