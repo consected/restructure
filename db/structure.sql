@@ -1696,6 +1696,7 @@ CREATE FUNCTION ml_app.log_nfs_store_container_update() RETURNS trigger
                 name,
                 app_type_id,
                 orig_nfs_store_container_id,
+                created_by_user_id,
                 user_id,
                 created_at,
                 updated_at,
@@ -1706,6 +1707,7 @@ CREATE FUNCTION ml_app.log_nfs_store_container_update() RETURNS trigger
                 NEW.name,
                 NEW.app_type_id,
                 NEW.nfs_store_container_id,
+                NEW.created_by_user_id,
                 NEW.user_id,
                 NEW.created_at,
                 NEW.updated_at,
@@ -2746,6 +2748,42 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+
+--
+-- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.model_references (
+    id integer NOT NULL,
+    from_record_type character varying,
+    from_record_id integer,
+    from_record_master_id integer,
+    to_record_type character varying,
+    to_record_id integer,
+    to_record_master_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean
+);
+
+
+--
+-- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_containers (
+    id integer NOT NULL,
+    name character varying,
+    user_id integer,
+    app_type_id integer,
+    nfs_store_container_id integer,
+    master_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    created_by_user_id bigint
+);
 
 
 --
@@ -4368,25 +4406,6 @@ ALTER SEQUENCE ml_app.message_templates_id_seq OWNED BY ml_app.message_templates
 
 
 --
--- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.model_references (
-    id integer NOT NULL,
-    from_record_type character varying,
-    from_record_id integer,
-    from_record_master_id integer,
-    to_record_type character varying,
-    to_record_id integer,
-    to_record_master_id integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    disabled boolean
-);
-
-
---
 -- Name: model_references_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -4493,7 +4512,8 @@ CREATE TABLE ml_app.nfs_store_container_history (
     user_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    nfs_store_container_id integer
+    nfs_store_container_id integer,
+    created_by_user_id bigint
 );
 
 
@@ -4514,22 +4534,6 @@ CREATE SEQUENCE ml_app.nfs_store_container_history_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_container_history_id_seq OWNED BY ml_app.nfs_store_container_history.id;
-
-
---
--- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_containers (
-    id integer NOT NULL,
-    name character varying,
-    user_id integer,
-    app_type_id integer,
-    nfs_store_container_id integer,
-    master_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone
-);
 
 
 --
@@ -6584,10 +6588,10 @@ CREATE TABLE ref_data.datadic_variable_history (
     sub_section_id integer,
     title character varying,
     storage_varname character varying,
+    user_id bigint,
     contributor_type character varying,
     n_for_timepoints jsonb,
-    notes character varying,
-    user_id bigint
+    notes character varying
 );
 
 
@@ -6841,27 +6845,6 @@ COMMENT ON COLUMN ref_data.datadic_variable_history.title IS 'Section caption';
 --
 
 COMMENT ON COLUMN ref_data.datadic_variable_history.storage_varname IS 'Database field name, or variable name in data file';
-
-
---
--- Name: COLUMN datadic_variable_history.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variable_history.contributor_type IS 'Type of contributor this variable was provided by';
-
-
---
--- Name: COLUMN datadic_variable_history.n_for_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variable_history.n_for_timepoints IS 'For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)';
-
-
---
--- Name: COLUMN datadic_variable_history.notes; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variable_history.notes IS 'Notes';
 
 
 --
@@ -9772,6 +9755,13 @@ CREATE INDEX index_nfs_store_archived_files_on_nfs_store_stored_file_id ON ml_ap
 
 
 --
+-- Name: index_nfs_store_container_history_on_created_by_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_container_history_on_created_by_user_id ON ml_app.nfs_store_container_history USING btree (created_by_user_id);
+
+
+--
 -- Name: index_nfs_store_container_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -9790,6 +9780,13 @@ CREATE INDEX index_nfs_store_container_history_on_nfs_store_container_id ON ml_a
 --
 
 CREATE INDEX index_nfs_store_container_history_on_user_id ON ml_app.nfs_store_container_history USING btree (user_id);
+
+
+--
+-- Name: index_nfs_store_containers_on_created_by_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_containers_on_created_by_user_id ON ml_app.nfs_store_containers USING btree (created_by_user_id);
 
 
 --
@@ -12529,6 +12526,14 @@ ALTER TABLE ONLY ml_app.player_contacts
 
 
 --
+-- Name: nfs_store_container_history fk_rails_d6593e5c9d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_container_history
+    ADD CONSTRAINT fk_rails_d6593e5c9d FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: config_libraries fk_rails_da3ba4f850; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -12606,6 +12611,14 @@ ALTER TABLE ONLY ml_app.external_links
 
 ALTER TABLE ONLY ml_app.nfs_store_archived_files
     ADD CONSTRAINT fk_rails_ecfa3cb151 FOREIGN KEY (nfs_store_container_id) REFERENCES ml_app.nfs_store_containers(id);
+
+
+--
+-- Name: nfs_store_containers fk_rails_ee25fc60fa; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_containers
+    ADD CONSTRAINT fk_rails_ee25fc60fa FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -13313,6 +13326,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20210712152134'),
 ('20210809151207'),
 ('20210816170804'),
+('20211020183551'),
 ('20211031152538'),
 ('20211031183210'),
 ('20211031183429'),
@@ -13400,6 +13414,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220202175848'),
 ('20220202190849'),
 ('20220202190931'),
+('20220202193750'),
 ('20220203193018'),
 ('20220203201903'),
 ('20220214120443'),
@@ -13461,6 +13476,32 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220301120158'),
 ('20220301120734'),
 ('20220301120755'),
-('20220301201512');
+('20220301201512'),
+('20220303112202'),
+('20220304115824'),
+('20220304115826'),
+('20220304115827'),
+('20220304115830'),
+('20220304115836'),
+('20220304115838'),
+('20220304115839'),
+('20220304115841'),
+('20220304120359'),
+('20220304120401'),
+('20220304120404'),
+('20220304120557'),
+('20220304120558'),
+('20220304120600'),
+('20220304120602'),
+('20220304120604'),
+('20220304120605'),
+('20220307144639'),
+('20220307153310'),
+('20220307154248'),
+('20220307162856'),
+('20220307162929'),
+('20220307163124'),
+('20220307164817'),
+('20220307164959');
 
 

@@ -23,13 +23,23 @@
   save_trigger (for filestore):
     on_create_filestore_container:
       create_filestore_container: 
-        name: general files
+        name: general files 
+              # If an Array, in which case current item attributes will be substituted, separated by ' -- '
+              # If a String then standard curly substitutions will be applied
+              # If a Hash, then a reference lookup with return_value will be used
         label: General Files
         create_with_role: nfs_store group 600
+                          # or any number in the available group range
+        skip_if_exists: user_is_creator | master 
+                        # skip if container with matching name attribute exists in specified reference
 
 
 
   nfs_store:
+    always_use_this_for_access_control: false(default) | true 
+                                        # use this activity log to enforce access control, 
+                                        # even if another activity log references the container
+    
     pipeline: # pipeline_config - a list of jobs to perform for new uploads
       - mount_archive:
       - index_files:

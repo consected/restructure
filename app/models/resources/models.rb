@@ -105,6 +105,8 @@ module Resources
       base_route_segments = model.base_route_segments if !base_route_segments && model.respond_to?(:base_route_segments)
       category = model.category if !category && model.respond_to?(:category)
 
+      updated_at = model.definition.updated_at if model.respond_to? :definition
+
       resources[resource_name] = Item.new
       resources[resource_name].merge! type: type.to_sym,
                                       class_name: model.name.freeze,
@@ -117,7 +119,8 @@ module Resources
                                       hyphenated_name: hyphenated_name&.freeze,
                                       hyphenated_item_name: hyphenated_item_name&.freeze,
                                       category: category&.freeze,
-                                      option_type: option_type&.to_sym
+                                      option_type: option_type&.to_sym,
+                                      updated_at: updated_at
       resources[resource_name]
     end
 

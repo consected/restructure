@@ -30,6 +30,8 @@
           in the regular panel"
       view_options:
         always_open: true # force the reference to always be expanded
+      showable_if: # exclude to always show
+      creatable_if: # exclude to always allow creation
   
   #
   # e-signed documents require a filestore setup too.

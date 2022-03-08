@@ -37,13 +37,19 @@
           
             {{#is resource_name '===' 'nfs_store__manage__containers'}}
               {{#each ../model_references}}
-                {{#is to_record_options_config.view_as.show '!==' 'hide'}}
-                  {{#is to_record_options_config.view_as.show '===' 'filestore'}}
-                    {{>filestore_simple_template_view prevent_edit=true name=name}}
-                  {{/is}}
+                {{#is to_record_options_config.view_as.show '===' 'filestore'}}
+                  {{>filestore_simple_template_view prevent_edit=true name=name}}
                 {{/is}}
               {{/each}}
             {{/is}}
+          {{else}}
+            {{#each ../model_references}}
+              {{#is to_record_type_us_plural '===' 'nfs_store__manage__containers'}}
+                {{#is to_record_options_config.view_as.show '===' 'filestore'}}
+                  {{>filestore_simple_template_view prevent_edit=true name=name}}
+                {{/is}}
+              {{/is}}          
+            {{/each}}
           {{/with}}
         </div>
         {{/each}}
