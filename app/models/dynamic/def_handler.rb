@@ -251,9 +251,23 @@ module Dynamic
         @all_option_configs_resource_names = nil
       end
 
-      # The list of defined and usable activity log implementation classes
-      def implementation_classes
-        @implementation_classes = active_model_configurations.map(&:implementation_class)
+      #
+      # The list of defined and usable activity log implementation classes.
+      # By default only return classes that are usable. Unusable classes may be due to
+      # the underlying table not being within the defined schema search path.
+      # @param [true] only_usable
+      def implementation_classes(only_usable: true)
+        @implementation_classes = active_model_configurations.map do |dm|
+          if only_usable
+            klass = dm.prefix_class
+            next unless dm.implementation_class_defined?(klass, fail_without_exception: true)
+          end
+
+          dm.implementation_class
+        end
+
+        @implementation_classes.compact!
+        @implementation_classes
       end
 
       # List of item types that can be used to define Classification::GeneralSelection drop downs
