@@ -5198,6 +5198,7 @@ CREATE FUNCTION ml_app.log_nfs_store_container_update() RETURNS trigger
                 name,
                 app_type_id,
                 orig_nfs_store_container_id,
+                created_by_user_id,
                 user_id,
                 created_at,
                 updated_at,
@@ -5208,6 +5209,7 @@ CREATE FUNCTION ml_app.log_nfs_store_container_update() RETURNS trigger
                 NEW.name,
                 NEW.app_type_id,
                 NEW.nfs_store_container_id,
+                NEW.created_by_user_id,
                 NEW.user_id,
                 NEW.created_at,
                 NEW.updated_at,
@@ -9543,7 +9545,8 @@ CREATE TABLE ml_app.masters (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     user_id integer,
-    contact_id integer
+    contact_id integer,
+    created_by_user_id bigint
 );
 
 
@@ -9962,7 +9965,8 @@ CREATE TABLE ml_app.nfs_store_container_history (
     user_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    nfs_store_container_id integer
+    nfs_store_container_id integer,
+    created_by_user_id bigint
 );
 
 
@@ -9997,7 +10001,8 @@ CREATE TABLE ml_app.nfs_store_containers (
     nfs_store_container_id integer,
     master_id integer,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    created_by_user_id bigint
 );
 
 
@@ -12384,6 +12389,41 @@ ALTER SEQUENCE ml_app.user_history_id_seq OWNED BY ml_app.user_history.id;
 
 
 --
+-- Name: user_preferences; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.user_preferences (
+    id bigint NOT NULL,
+    user_id bigint,
+    date_format character varying,
+    date_time_format character varying,
+    time_format character varying,
+    timezone character varying,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: user_preferences_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.user_preferences_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_preferences_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.user_preferences_id_seq OWNED BY ml_app.user_preferences.id;
+
+
+--
 -- Name: user_role_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -14003,6 +14043,47 @@ ALTER SEQUENCE ref_data.redcap_project_users_id_seq OWNED BY ref_data.redcap_pro
 
 
 --
+-- Name: test_views; Type: VIEW; Schema: ref_data; Owner: -
+--
+
+CREATE VIEW ref_data.test_views AS
+ SELECT player_infos.id,
+    player_infos.master_id,
+    player_infos.first_name,
+    player_infos.last_name,
+    player_infos.middle_name,
+    player_infos.nick_name,
+    player_infos.birth_date,
+    player_infos.death_date,
+    player_infos.user_id,
+    player_infos.created_at,
+    player_infos.updated_at,
+    player_infos.contact_pref,
+    player_infos.start_year,
+    player_infos.rank,
+    player_infos.notes,
+    player_infos.contact_id,
+    player_infos.college,
+    player_infos.end_year,
+    player_infos.source
+   FROM ml_app.player_infos;
+
+
+--
+-- Name: VIEW test_views; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON VIEW ref_data.test_views IS 'Dynamicmodel: Test View';
+
+
+--
+-- Name: COLUMN test_views.first_name; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.test_views.first_name IS 'First Name';
+
+
+--
 -- Name: view_study_datadic; Type: VIEW; Schema: ref_data; Owner: -
 --
 
@@ -14954,6 +15035,13 @@ ALTER TABLE ONLY ml_app.user_authorizations ALTER COLUMN id SET DEFAULT nextval(
 --
 
 ALTER TABLE ONLY ml_app.user_history ALTER COLUMN id SET DEFAULT nextval('ml_app.user_history_id_seq'::regclass);
+
+
+--
+-- Name: user_preferences id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_preferences ALTER COLUMN id SET DEFAULT nextval('ml_app.user_preferences_id_seq'::regclass);
 
 
 --
@@ -16112,6 +16200,14 @@ ALTER TABLE ONLY ml_app.user_history
 
 
 --
+-- Name: user_preferences user_preferences_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_preferences
+    ADD CONSTRAINT user_preferences_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: user_role_history user_role_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -17029,6 +17125,13 @@ CREATE INDEX index_item_flags_on_user_id ON ml_app.item_flags USING btree (user_
 
 
 --
+-- Name: index_masters_on_created_by_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_masters_on_created_by_user_id ON ml_app.masters USING btree (created_by_user_id);
+
+
+--
 -- Name: index_masters_on_msid; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -17225,6 +17328,13 @@ CREATE INDEX index_nfs_store_archived_files_on_nfs_store_stored_file_id ON ml_ap
 
 
 --
+-- Name: index_nfs_store_container_history_on_created_by_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_container_history_on_created_by_user_id ON ml_app.nfs_store_container_history USING btree (created_by_user_id);
+
+
+--
 -- Name: index_nfs_store_container_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -17243,6 +17353,13 @@ CREATE INDEX index_nfs_store_container_history_on_nfs_store_container_id ON ml_a
 --
 
 CREATE INDEX index_nfs_store_container_history_on_user_id ON ml_app.nfs_store_container_history USING btree (user_id);
+
+
+--
+-- Name: index_nfs_store_containers_on_created_by_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_containers_on_created_by_user_id ON ml_app.nfs_store_containers USING btree (created_by_user_id);
 
 
 --
@@ -18181,6 +18298,13 @@ CREATE INDEX index_user_history_on_app_type_id ON ml_app.user_history USING btre
 --
 
 CREATE INDEX index_user_history_on_user_id ON ml_app.user_history USING btree (user_id);
+
+
+--
+-- Name: index_user_preferences_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE UNIQUE INDEX index_user_preferences_on_user_id ON ml_app.user_preferences USING btree (user_id);
 
 
 --
@@ -20233,6 +20357,14 @@ ALTER TABLE ONLY ml_app.nfs_store_trash_actions
 
 
 --
+-- Name: masters fk_rails_10869244dc; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.masters
+    ADD CONSTRAINT fk_rails_10869244dc FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: users fk_rails_1694bfe639; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -21089,6 +21221,14 @@ ALTER TABLE ONLY ml_app.model_references
 
 
 --
+-- Name: user_preferences fk_rails_a69bfcfd81; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_preferences
+    ADD CONSTRAINT fk_rails_a69bfcfd81 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: user_history fk_rails_af2f6ffc55; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -21265,6 +21405,14 @@ ALTER TABLE ONLY ml_app.player_contacts
 
 
 --
+-- Name: nfs_store_container_history fk_rails_d6593e5c9d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_container_history
+    ADD CONSTRAINT fk_rails_d6593e5c9d FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: config_libraries fk_rails_da3ba4f850; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -21342,6 +21490,14 @@ ALTER TABLE ONLY ml_app.external_links
 
 ALTER TABLE ONLY ml_app.nfs_store_archived_files
     ADD CONSTRAINT fk_rails_ecfa3cb151 FOREIGN KEY (nfs_store_container_id) REFERENCES ml_app.nfs_store_containers(id);
+
+
+--
+-- Name: nfs_store_containers fk_rails_ee25fc60fa; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_containers
+    ADD CONSTRAINT fk_rails_ee25fc60fa FOREIGN KEY (created_by_user_id) REFERENCES ml_app.users(id);
 
 
 --

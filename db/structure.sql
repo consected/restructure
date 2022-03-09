@@ -30,140 +30,6 @@ COMMENT ON SCHEMA ml_app IS 'The primary Zeus application, player contact and tr
 CREATE SCHEMA ref_data;
 
 
-SET default_tablespace = '';
-
-SET default_table_access_method = heap;
-
---
--- Name: addresses; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.addresses (
-    id integer NOT NULL,
-    master_id integer,
-    street character varying,
-    street2 character varying,
-    street3 character varying,
-    city character varying,
-    state character varying,
-    zip character varying,
-    source character varying,
-    rank integer,
-    rec_type character varying,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:35.929228'::timestamp without time zone,
-    country character varying(3),
-    postal_code character varying,
-    region character varying
-);
-
-
---
--- Name: player_contacts; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.player_contacts (
-    id integer NOT NULL,
-    master_id integer,
-    rec_type character varying,
-    data character varying,
-    source character varying,
-    rank integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:36.922871'::timestamp without time zone
-);
-
-
---
--- Name: player_infos; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.player_infos (
-    id integer NOT NULL,
-    master_id integer,
-    first_name character varying,
-    last_name character varying,
-    middle_name character varying,
-    nick_name character varying,
-    birth_date date,
-    death_date date,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:37.094626'::timestamp without time zone,
-    contact_pref character varying,
-    start_year integer,
-    rank integer,
-    notes character varying,
-    contact_id integer,
-    college character varying,
-    end_year integer,
-    source character varying
-);
-
-
---
--- Name: TABLE player_infos; Type: COMMENT; Schema: ml_app; Owner: -
---
-
-COMMENT ON TABLE ml_app.player_infos IS 'Player biographical information';
-
-
---
--- Name: COLUMN player_infos.first_name; Type: COMMENT; Schema: ml_app; Owner: -
---
-
-COMMENT ON COLUMN ml_app.player_infos.first_name IS 'First Name';
-
-
---
--- Name: nfs_store_archived_files; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_archived_files (
-    id integer NOT NULL,
-    file_hash character varying,
-    file_name character varying NOT NULL,
-    content_type character varying NOT NULL,
-    archive_file character varying NOT NULL,
-    path character varying NOT NULL,
-    file_size bigint NOT NULL,
-    file_updated_at timestamp without time zone,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    nfs_store_container_id integer,
-    user_id integer,
-    title character varying,
-    description character varying,
-    nfs_store_stored_file_id integer,
-    file_metadata jsonb
-);
-
-
---
--- Name: nfs_store_stored_files; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_stored_files (
-    id integer NOT NULL,
-    file_hash character varying NOT NULL,
-    file_name character varying NOT NULL,
-    content_type character varying NOT NULL,
-    file_size bigint NOT NULL,
-    path character varying,
-    file_updated_at timestamp without time zone,
-    user_id integer,
-    nfs_store_container_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    title character varying,
-    description character varying,
-    last_process_name_run character varying,
-    file_metadata jsonb
-);
-
-
 --
 -- Name: activity_log_bhs_assignment_info_request_notification(integer); Type: FUNCTION; Schema: ml_app; Owner: -
 --
@@ -895,6 +761,68 @@ CREATE FUNCTION ml_app.create_message_notification_job(message_notification_id i
     $$;
 
 
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: player_contacts; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.player_contacts (
+    id integer NOT NULL,
+    master_id integer,
+    rec_type character varying,
+    data character varying,
+    source character varying,
+    rank integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:36.922871'::timestamp without time zone
+);
+
+
+--
+-- Name: player_infos; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.player_infos (
+    id integer NOT NULL,
+    master_id integer,
+    first_name character varying,
+    last_name character varying,
+    middle_name character varying,
+    nick_name character varying,
+    birth_date date,
+    death_date date,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:37.094626'::timestamp without time zone,
+    contact_pref character varying,
+    start_year integer,
+    rank integer,
+    notes character varying,
+    contact_id integer,
+    college character varying,
+    end_year integer,
+    source character varying
+);
+
+
+--
+-- Name: TABLE player_infos; Type: COMMENT; Schema: ml_app; Owner: -
+--
+
+COMMENT ON TABLE ml_app.player_infos IS 'Player biographical information';
+
+
+--
+-- Name: COLUMN player_infos.first_name; Type: COMMENT; Schema: ml_app; Owner: -
+--
+
+COMMENT ON COLUMN ml_app.player_infos.first_name IS 'First Name';
+
+
 --
 -- Name: create_remote_bhs_record(bigint, ml_app.player_infos, ml_app.player_contacts[]); Type: FUNCTION; Schema: ml_app; Owner: -
 --
@@ -1080,6 +1008,31 @@ return found_bhs.master_id;
 
 END;
 $$;
+
+
+--
+-- Name: addresses; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.addresses (
+    id integer NOT NULL,
+    master_id integer,
+    street character varying,
+    street2 character varying,
+    street3 character varying,
+    city character varying,
+    state character varying,
+    zip character varying,
+    source character varying,
+    rank integer,
+    rec_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:35.929228'::timestamp without time zone,
+    country character varying(3),
+    postal_code character varying,
+    region character varying
+);
 
 
 --
@@ -1924,6 +1877,53 @@ END IF;
 end;
 
 $$;
+
+
+--
+-- Name: nfs_store_archived_files; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_archived_files (
+    id integer NOT NULL,
+    file_hash character varying,
+    file_name character varying NOT NULL,
+    content_type character varying NOT NULL,
+    archive_file character varying NOT NULL,
+    path character varying NOT NULL,
+    file_size bigint NOT NULL,
+    file_updated_at timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    nfs_store_container_id integer,
+    user_id integer,
+    title character varying,
+    description character varying,
+    nfs_store_stored_file_id integer,
+    file_metadata jsonb
+);
+
+
+--
+-- Name: nfs_store_stored_files; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_stored_files (
+    id integer NOT NULL,
+    file_hash character varying NOT NULL,
+    file_name character varying NOT NULL,
+    content_type character varying NOT NULL,
+    file_size bigint NOT NULL,
+    path character varying,
+    file_updated_at timestamp without time zone,
+    user_id integer,
+    nfs_store_container_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    title character varying,
+    description character varying,
+    last_process_name_run character varying,
+    file_metadata jsonb
+);
 
 
 --
@@ -7441,74 +7441,6 @@ $$;
 
 
 --
--- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.model_references (
-    id integer NOT NULL,
-    from_record_type character varying,
-    from_record_id integer,
-    from_record_master_id integer,
-    to_record_type character varying,
-    to_record_id integer,
-    to_record_master_id integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    disabled boolean
-);
-
-
---
--- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_containers (
-    id integer NOT NULL,
-    name character varying,
-    user_id integer,
-    app_type_id integer,
-    nfs_store_container_id integer,
-    master_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    created_by_user_id bigint
-);
-
-
---
--- Name: scantrons; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.scantrons (
-    id integer NOT NULL,
-    master_id integer,
-    scantron_id integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: masters; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.masters (
-    id integer NOT NULL,
-    msid integer,
-    pro_id integer,
-    pro_info_id integer,
-    rank integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    user_id integer,
-    contact_id integer,
-    created_by_user_id bigint
-);
-
-
---
 -- Name: accuracy_score_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -9593,6 +9525,24 @@ CREATE VIEW ml_app.marketo_master_ids AS
 
 
 --
+-- Name: masters; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.masters (
+    id integer NOT NULL,
+    msid integer,
+    pro_id integer,
+    pro_info_id integer,
+    rank integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    user_id integer,
+    contact_id integer,
+    created_by_user_id bigint
+);
+
+
+--
 -- Name: masters_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -9813,6 +9763,25 @@ CREATE TABLE ml_app.ml_copy (
 
 
 --
+-- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.model_references (
+    id integer NOT NULL,
+    from_record_type character varying,
+    from_record_id integer,
+    from_record_master_id integer,
+    to_record_type character varying,
+    to_record_id integer,
+    to_record_master_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean
+);
+
+
+--
 -- Name: model_references_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -10010,6 +9979,23 @@ CREATE SEQUENCE ml_app.nfs_store_container_history_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_container_history_id_seq OWNED BY ml_app.nfs_store_container_history.id;
+
+
+--
+-- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_containers (
+    id integer NOT NULL,
+    name character varying,
+    user_id integer,
+    app_type_id integer,
+    nfs_store_container_id integer,
+    master_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    created_by_user_id bigint
+);
 
 
 --
@@ -10786,35 +10772,6 @@ ALTER SEQUENCE ml_app.protocols_id_seq OWNED BY ml_app.protocols.id;
 
 
 --
--- Name: q1_rc_links; Type: VIEW; Schema: ml_app; Owner: -
---
-
-CREATE VIEW ml_app.q1_rc_links AS
- SELECT rc_links.id,
-    rc_links.master_id,
-    rc_links.link AS q1_rc_link_ext_id,
-    NULL::timestamp without time zone AS created_at,
-    NULL::timestamp without time zone AS updated_at,
-    NULL::integer AS user_id
-   FROM q1.rc_links;
-
-
---
--- Name: q2_rc_links; Type: VIEW; Schema: ml_app; Owner: -
---
-
-CREATE VIEW ml_app.q2_rc_links AS
- SELECT rc.id,
-    masters.id AS master_id,
-    split_part((rc.link)::text, '='::text, 2) AS q2_rc_link_ext_id,
-    NULL::timestamp without time zone AS created_at,
-    NULL::timestamp without time zone AS updated_at,
-    NULL::integer AS user_id
-   FROM (q2.rc_links rc
-     JOIN ml_app.masters ON ((masters.msid = rc.msid)));
-
-
---
 -- Name: rc_cis; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -11359,6 +11316,20 @@ CREATE SEQUENCE ml_app.scantron_series_twos_id_seq
 --
 
 ALTER SEQUENCE ml_app.scantron_series_twos_id_seq OWNED BY ml_app.scantron_series_twos.id;
+
+
+--
+-- Name: scantrons; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.scantrons (
+    id integer NOT NULL,
+    master_id integer,
+    scantron_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
 
 
 --
@@ -19033,20 +19004,6 @@ CREATE TRIGGER general_selection_history_insert AFTER INSERT ON ml_app.general_s
 --
 
 CREATE TRIGGER general_selection_history_update AFTER UPDATE ON ml_app.general_selections FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION ml_app.log_general_selection_update();
-
-
---
--- Name: grit_assignments grit_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER grit_assignment_history_insert AFTER INSERT ON ml_app.grit_assignments FOR EACH ROW EXECUTE FUNCTION grit.log_grit_assignment_update();
-
-
---
--- Name: grit_assignments grit_assignment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER grit_assignment_history_update AFTER UPDATE ON ml_app.grit_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE FUNCTION grit.log_grit_assignment_update();
 
 
 --

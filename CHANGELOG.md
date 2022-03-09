@@ -20,7 +20,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [7.4.96] - 2022-02-09
 
 ### Transferred from ReStructure @8.0.28 - 2022-03-08
 
