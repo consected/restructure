@@ -32,7 +32,9 @@ class Admin::ManageAdminsController < AdminController
   end
 
   def create
-    not_authorized
+    not_authorized unless Settings::AllowAdminsToManageAdmins
+
+    super
   end
 
   protected
