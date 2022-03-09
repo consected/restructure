@@ -82,6 +82,9 @@ module Dynamic
                     ModelReference.find_references self, **pass_options
                   when 'master', 'any'
                     ModelReference.find_references master, **pass_options
+                  when 'user_is_creator'
+                    pass_options[:ref_created_by_user] = true
+                    ModelReference.find_references self, **pass_options
                   else
                     msg = "Find references attempted without known :from key: #{ref_config[:from]}"
                     Rails.logger.warn msg
@@ -217,7 +220,7 @@ module Dynamic
     #
     # Check if action defined for model reference item. If so, evaluate the conditions,
     # otherwise just return default of true to say it is always performable.
-    # @param [Symbole] action - one of :showable_if, :creatable_if)
+    # @param [Symbol] action - one of :showable_if, :creatable_if)
     # @param [Hash] ref_config - single model reference config
     # @return [Boolean | Object] ConditionalAction#calc_action_if result
     def ref_config_performable?(action, ref_config)
@@ -305,11 +308,13 @@ module Dynamic
       # Additional options to apply to #find_reference calls
       filter_by = ref_config[:filter_by]
       without_reference = (ref_config[:without_reference] == true)
+      ref_created_by_user = (ref_config[:from] == 'user_is_creator')
       pass_options = {
         to_record_type: ref_type,
         filter_by: filter_by,
         active: true,
-        without_reference: without_reference
+        without_reference: without_reference,
+        ref_created_by_user: ref_created_by_user
       }
 
       if add_config == 'many'

@@ -1,27 +1,7 @@
 # frozen_string_literal: true
 
 class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
-  def self.config_def(if_extras: {})
-    # [
-    #   {
-    #     model_name: {
-    #       if: if_extras,
-    #       in: 'this | referring_record | master (creates no reference, just uses master_id) | master_with_reference (creates a reference to the master, not the item)',
-    #       force_create: 'true to force the creation of a reference and referenced object, independent of user access controls',
-    #       with: {
-    #         field_name: 'now()',
-    #         field_name_2: 'literal value',
-    #         field_name_3: {
-    #           this: 'field_name'
-    #         },
-    #         field_name_4: {
-    #           reference_name: 'field_name'
-    #         }
-    #       }
-    #     }
-    #   }
-    # ]
-  end
+  def self.config_def(if_extras: {}); end
 
   def initialize(config, item)
     super
@@ -35,38 +15,45 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
     @model_defs.each do |model_def|
       model_def.each do |model_name, config|
         vals = {}
+        force_create = config[:force_create]
+        to_existing_record = config[:to_existing_record]
+        create_in = config[:in]
+        create_if = config[:if]
+        create_with = config[:with]
 
         # We calculate the conditional if inside each item, rather than relying
         # on the outer processing in ActivityLogOptions#calc_save_trigger_if
-        if config[:if]
-          ca = ConditionalActions.new config[:if], @item
+        if create_if
+          ca = ConditionalActions.new create_if, @item
           next unless ca.calc_action_if
         end
 
-        config[:with]&.each do |fn, def_val|
-          if def_val.is_a? Hash
-            ca = ConditionalActions.new def_val, @item
-            res = ca.get_this_val
-          else
-            res = FieldDefaults.calculate_default @item, def_val
-          end
-
+        create_with&.each do |fn, def_val|
+          res = FieldDefaults.calculate_default @item, def_val
           vals[fn] = res
         end
 
         @item.transaction do
-          force_create = config[:force_create]
-          new_item = @master.assoc_named(model_name.to_s.pluralize).new vals
-          new_item.force_save! if force_create
-          new_item.save!
+          new_type = @master.assoc_named(model_name.to_s.pluralize)
+          if to_existing_record
+            ca = ConditionalActions.new to_existing_record[:record_id], @item
+            to_existing_record_id = ca.get_this_val
+            new_item = new_type.find(to_existing_record_id)
+          else
+            new_item = new_type.new vals
+            new_item.save!
+            new_item.force_save! if force_create
+          end
 
-          if config[:in] == 'this'
+          case create_in
+          when 'this'
             ModelReference.create_with @item, new_item, force_create: force_create
-          elsif config[:in] == 'referring_record'
+          when 'referring_record'
             ModelReference.create_with @item.referring_record, new_item, force_create: force_create
-          elsif config[:in] == 'master'
-            # ModelReference.create_from_master_with @master, new_item
-          elsif config[:in] == 'master_with_reference'
+          when 'master'
+            # 'master' indicates that we want to create an instance belonging to the master without
+            # creating a ModelReference. Do nothing here.
+          when 'master_with_reference'
             ModelReference.create_from_master_with @master, new_item, force_create: force_create
           else
             raise FphsException, "Unknown 'in' value in create_reference"
