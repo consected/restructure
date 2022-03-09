@@ -17,7 +17,7 @@ class Admin < ActiveRecord::Base
 
   before_validation :prevent_email_change, on: :update
   before_validation :prevent_reenabling_admin, on: :update
-  before_validation :prevent_not_in_setup_script, on: :create
+  before_validation :prevent_not_in_setup_script_or_allowed, on: :create
 
   validate :only_allow_disable
   after_save :unlock_account, on: :update
@@ -101,8 +101,8 @@ class Admin < ActiveRecord::Base
     end
   end
 
-  def prevent_not_in_setup_script
-    errors.add(:admin, 'can only create admins in console') unless in_setup_script
+  def prevent_not_in_setup_script_or_allowed
+    errors.add(:admin, 'can only create admins in console') unless in_setup_script || Settings::AllowAdminsToManageAdmins
   end
 
   def only_allow_disable

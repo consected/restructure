@@ -46,22 +46,40 @@ describe Admin do
     expect(@admin.save).to be false
   end
 
-  it 'allows only admin setup script to reset password' do
-    ENV['FPHS_ADMIN_SETUP'] = 'yes'
-    res = AdminSetup.setup @good_email
+  describe 'allow admin to reset password' do
 
-    admin = Admin.find_by_email @good_email
-    expect(admin.disable!).to be true
-    admin.disabled = false
-    expect(admin.save).to be true
-    admin.disable!
+    context 'when admin is allowed to execute a setup script' do
+      it 'allows only admin setup script to reset password' do
+        ENV['FPHS_ADMIN_SETUP'] = 'yes'
+        res = AdminSetup.setup @good_email
 
-    # Now simulate re-enabling the user outside of the admin setup script
-    ENV['FPHS_ADMIN_SETUP'] = 'no'
-    admin.disabled = false
-    res = admin.save
+        admin = Admin.find_by_email @good_email
+        expect(admin.disable!).to be_truthy #TODO separate expectations into their own block.
+        admin.disabled = false
+        expect(admin.save).to be_truthy
+      end
+    end
 
-    expect(res).to be false
+    context 'when admin is NOT allowed to execute a setup script' do
+      # Now simulate re-enabling the user outside of the admin setup script
+      res = AdminSetup.setup @good_email
+
+      admin = Admin.find_by_email @good_email
+      admin.disable!
+      ENV['FPHS_ADMIN_SETUP'] = 'no'
+      admin.disabled = false
+      res = admin.save
+
+      expect(res).to be_falsy
+    end
+
+    context 'when admins are allowed to manage admins' do
+      # TODO
+    end
+
+    context 'when admins are NOT allowed to manage admins' do
+      # TODO
+    end
   end
 
   it 'only allows scripts outside of passenger to create admins' do
