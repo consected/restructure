@@ -24,6 +24,10 @@ module NfsStore
         'nfs_store__manage__containers'
       end
 
+      def self.category
+        :nfs_store
+      end
+
       def self.human_name
         'File Container'
       end

@@ -3,6 +3,10 @@
 class Admin::UserAccessControl < Admin::AdminBase
   self.table_name = 'user_access_controls'
 
+  def self.app_type_not_required
+    true
+  end
+
   include AdminHandler
   include AppTyped
   include UserAndRoles
@@ -30,11 +34,11 @@ class Admin::UserAccessControl < Admin::AdminBase
     {
       table: [nil, :see_presence, :read, :update, :create],
       general: [nil, :read],
-      limited_access: [nil, :limited],
+      limited_access: [nil, :limited, :limited_if_none],
       report: [nil, :read],
       standalone_page: [nil, :read],
       activity_log_type: [nil, :see_presence, :read, :update, :create],
-      external_id_assignments: [nil, :limited]
+      external_id_assignments: [nil, :limited, :limited_if_none]
     }
   end
 
@@ -48,11 +52,13 @@ class Admin::UserAccessControl < Admin::AdminBase
 
   #
   # Scope result of a query to only return valid resources, not those that no longer exist
-  def self.valid_resources
+  # @param [Array|nil] only_resource_types - optionally provide an array of resource types to search for -
+  #                                          by default we get all resource_types
+  def self.valid_resources(only_resource_types = nil)
     # Return if everything is not setup yet
     return active unless Master.respond_to? :get_all_associations
 
-    rnft = resource_names_by_type
+    rnft = resource_names_by_type(only_resource_types)
 
     ids = []
     active.each do |r|
@@ -124,10 +130,13 @@ class Admin::UserAccessControl < Admin::AdminBase
 
   #
   # Hash of resource names keyed by resource type
+  # @param [Array|nil] only_resource_types - optionally provide an array of resource types to search for -
+  #                                          by default we get all resource_types
   # @return [Hash]
-  def self.resource_names_by_type
+  def self.resource_names_by_type(only_resource_types = nil)
     rn = {}
-    resource_types.each do |k|
+    rts = only_resource_types || resource_types
+    rts.each do |k|
       rn[k] = resource_names_for(k).sort
     end
     rn
@@ -336,7 +345,7 @@ class Admin::UserAccessControl < Admin::AdminBase
             resource_name.nil? || !self.class.resource_names_for(resource_type.to_sym).include?(resource_name.to_s)
           )
       errors.add :resource_name, "is an invalid value (#{resource_name} in #{resource_type})"
-    elsif !disabled
+    elsif !disabled && !persisted?
       res = self.class.access_for? user, nil, resource_type, resource_name, alt_role_name: role_name,
                                                                             alt_app_type_id: app_type_id
       if res && res.id != id # If we have a result and it is not this record

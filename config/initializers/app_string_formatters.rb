@@ -7,6 +7,10 @@ module StringExtensions
     to_s.downcase.gsub(/[^a-zA-Z0-9]/, '_')
   end
 
+  def id_hyphenate
+    to_s.downcase.gsub(/[^a-zA-Z0-9]/, '-')
+  end
+
   # Underscore the string, replacing the generated namespace delimeter with
   # double underscore which is safe for HTML templates and URLs
   def ns_underscore

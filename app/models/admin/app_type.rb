@@ -92,7 +92,7 @@ class Admin::AppType < Admin::AdminBase
 
   # Select any tables that have some kind of access
   def associated_table_names
-    user_access_controls.valid_resources.where(resource_type: :table).select(&:access).map(&:resource_name).uniq
+    user_access_controls.valid_resources([:table]).where(resource_type: :table).select(&:access).map(&:resource_name).uniq
   end
 
   def valid_associated_activity_logs
@@ -105,7 +105,7 @@ class Admin::AppType < Admin::AdminBase
     nrn = not_resource_names
 
     uacs = if valid_resources_only
-             user_access_controls.valid_resources
+             user_access_controls.valid_resources([:table])
            else
              user_access_controls.active
            end
@@ -128,7 +128,7 @@ class Admin::AppType < Admin::AdminBase
     nrn = not_resource_names
 
     uacs = if valid_resources_only
-             user_access_controls.valid_resources
+             user_access_controls.valid_resources([:table])
            else
              user_access_controls.active
            end
@@ -152,7 +152,7 @@ class Admin::AppType < Admin::AdminBase
 
     self.associated_external_identifier_names =
       user_access_controls
-      .valid_resources
+      .valid_resources([:table])
       .where(resource_type: :table)
       .select { |a| a.access && a.resource_name.in?(eids) && (nrn.nil? || !a.resource_name.in?(nrn)) }
       .map(&:resource_name)
@@ -163,7 +163,7 @@ class Admin::AppType < Admin::AdminBase
 
   def associated_reports
     names = user_access_controls
-            .valid_resources.where(resource_type: :report)
+            .valid_resources([:report]).where(resource_type: :report)
             .where("access IS NOT NULL and access <> ''")
             .map(&:resource_name)
             .uniq

@@ -1,4 +1,9 @@
 #! /bin/bash
+# Set up the filestore OS groups and mounts that allow the apps to
+# enforce different OS level security without switching OS user.
+# This script is typically run after every reboot of the development machine.
+# If `./setup-init-mounts.sh` has not been run previously (only required one time)
+# then run it first.
 
 if [ -z "$MOUNTPOINT" ]; then
   if [ -d /media/$USER/Data ]; then
@@ -10,7 +15,14 @@ fi
 
 FS_ROOT=${MOUNTPOINT}/test-fphsfs
 FS_DIR=main
-MOUNT_ROOT=/mnt/fphsfs
+if [ -z "$MOUNT_ROOT" ]; then
+  if [ -d /mnt/fphsfs ]; then
+    MOUNT_ROOT=/mnt/fphsfs
+  else
+    MOUNT_ROOT=/home/$USER/dev-bind-fs
+  fi
+fi
+
 WEBAPP_USER=${USER}
 
 mountpoint -q $MOUNT_ROOT/gid600

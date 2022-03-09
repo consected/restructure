@@ -43,7 +43,12 @@ module MasterSearch
       else
         # Return no results
         @no_masters = true
-        m = { message: 'no conditions were specified', masters: [], count: { count: 0, show_count: 0 } }
+        m = {
+          message: 'no conditions were specified',
+          masters: [],
+          count: { count: 0, show_count: 0 },
+          report_res_name: @report&.alt_resource_name
+        }
       end
     rescue StandardError => e
       @no_masters = true
@@ -154,7 +159,7 @@ module MasterSearch
       mlen = original_length
     end
 
-    if @search_type == 'MSID' && mlen > 0 && @masters.first.id >= 0
+    if @search_type == 'MSID' && mlen > 1 && @masters.first.id >= 0
       @result_message = "Displaying results for a list of #{mlen} record #{'ID'.pluralize(mlen)}."
     end
 
@@ -169,7 +174,8 @@ module MasterSearch
         show_count: mlen
       },
       search_action: @search_type,
-      message: @result_message
+      message: @result_message,
+      report_res_name: @report&.alt_resource_name
     }
   end
 

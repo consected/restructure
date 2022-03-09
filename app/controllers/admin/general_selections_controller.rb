@@ -15,10 +15,6 @@ class Admin::GeneralSelectionsController < AdminController
     [:item_type]
   end
 
-  def default_index_order
-    { item_type: :asc, value: :asc }
-  end
-
   private
 
   def permitted_params

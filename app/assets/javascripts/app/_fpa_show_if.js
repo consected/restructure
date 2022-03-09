@@ -141,6 +141,12 @@ _fpa.show_if.methods = {
             subdef[cond_field] = exp_value;
             var matches = _fpa.show_if.methods.calc_conditions(subdef, data);
           }
+          else if (cond_field == 'always') {
+            matches = exp_value
+          }
+          else if (cond_field == 'never') {
+            matches = !exp_value
+          }
           else {
             // This is instead a standard field comparison
 

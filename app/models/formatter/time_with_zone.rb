@@ -1,13 +1,24 @@
 module Formatter
   module TimeWithZone
-    def self.format(data, _options = nil, current_user: nil, iso: nil, utc: nil, show_timezone: nil, time_only: nil, date_only: nil)
+    def self.format(data, _options = nil, current_user: nil,
+                    include_sec: nil,
+                    time_only: nil, date_only: nil,
+                    iso: nil, utc: nil, show_timezone: nil)
       return if data.blank?
 
       if current_user
         current_timezone = current_user.user_preference.timezone
-        df = current_user.user_preference.pattern_for_date_time_format
+        df = if include_sec
+               current_user.user_preference.pattern_for_date_time_sec_format
+             else
+               current_user.user_preference.pattern_for_date_time_format
+             end
       else
-        df = UserPreference.default_pattern_for_date_time_format
+        df = if include_sec
+               UserPreference.default_pattern_for_date_time_sec_format
+             else
+               UserPreference.default_pattern_for_date_time_format
+             end
       end
 
       if current_timezone && data
@@ -24,7 +35,7 @@ module Formatter
 
       # Just want the time or date portion
       if time_only
-        res = res.split(' ').last
+        res = res.split(' ')[1..].join(' ')
       elsif date_only
         res = res.split(' ').first
       end

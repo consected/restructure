@@ -47,4 +47,10 @@ class Application
     Rails.logger.info "Hide messages: #{@@hide_messages}"
     @@hide_messages
   end
+
+  def self.refresh_dynamic_defs
+    ::ActivityLog.refresh_outdated
+    ::DynamicModel.refresh_outdated
+    ::ExternalIdentifier.refresh_outdated
+  end
 end

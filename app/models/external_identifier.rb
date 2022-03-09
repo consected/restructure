@@ -40,6 +40,11 @@ class ExternalIdentifier < ActiveRecord::Base
     name
   end
 
+  # Resource name for a single instance of the model
+  def resource_item_name
+    resource_name.to_s.singularize.to_sym
+  end
+
   def table_name
     name
   end
@@ -56,6 +61,10 @@ class ExternalIdentifier < ActiveRecord::Base
     name.ns_underscore.singularize
   end
 
+  def base_route_segments
+    model_association_name.to_s
+  end
+
   def self.routes_load
     mn = nil
     begin
@@ -66,7 +75,7 @@ class ExternalIdentifier < ActiveRecord::Base
         resources :masters, only: %i[show index new create] do
           m.each do |pg|
             mn = pg
-            pg_name = mn.model_association_name
+            pg_name = mn.base_route_segments
 
             Rails.logger.info "Setting up routes for #{mn}"
             resources pg_name, except: [:destroy]
@@ -205,18 +214,7 @@ class ExternalIdentifier < ActiveRecord::Base
           self.definition = definition
         end
 
-        begin
-          # This may fail if an underlying dependent class (parent class) has been redefined by
-          # another dynamic implementation, such as external identifier
-          if implementation_class_defined?(klass, fail_without_exception: true,
-                                                  fail_without_exception_newable_result: true)
-            klass.send(:remove_const, model_class_name)
-          end
-        rescue StandardError => e
-          logger.info '*************************************************************************************'
-          logger.info "Failed to remove the old definition of #{model_class_name}. #{e.inspect}"
-          logger.info '*************************************************************************************'
-        end
+        remove_implementation_class
 
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
@@ -224,20 +222,9 @@ class ExternalIdentifier < ActiveRecord::Base
         res.include Dynamic::ExternalIdImplementer
         res.include LimitedAccessControl
 
-        # Setup the controller
-        c_name = full_implementation_controller_name
-        begin
-          klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
-        rescue StandardError => e
-          logger.info '*************************************************************************************'
-          logger.info "Failed to remove the old definition of #{c_name}. #{e.inspect}"
-          logger.info '*************************************************************************************'
-        end
-
-        res2 = klass.const_set(c_name, a_new_controller)
+        remove_implementation_controller_class
+        res2 = klass.const_set(full_implementation_controller_name, a_new_controller)
         res2.include ExternalIdControllerHandler
-
-        add_model_to_list res
       rescue StandardError => e
         failed = true
         logger.info "Failure creating an external identifier model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
@@ -247,6 +234,8 @@ class ExternalIdentifier < ActiveRecord::Base
     if failed || !enabled?
       remove_model_from_list
       reset_master_fields
+    elsif res
+      add_model_to_list res
     end
 
     reset_master_fields if res

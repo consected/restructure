@@ -2,14 +2,16 @@
 module PageLayoutsHelper
   #
   # Get an ordered list of page layout panels for the named layout
-  # in the current user's app
+  # in the current user's app, or for any panels where the app type is NULL.
+  # The definitions matching the current app always appear first, allowing them to override
+  # app-types that are not set.
   # @param [String] layout_name - defaults to 'master' for master record related panels
   # @return [ActiveRecord::Relation]
   def page_layout_panels(layout_name: 'master')
     Admin::PageLayout
       .active
-      .where(app_type_id: current_user.app_type_id, layout_name: layout_name)
-      .order(panel_position: :asc)
+      .where(app_type_id: [nil, current_user.app_type_id], layout_name: layout_name)
+      .order(Arel.sql('app_type_id ASC NULLS LAST, panel_position ASC'))
   end
 
   #

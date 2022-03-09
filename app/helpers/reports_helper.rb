@@ -80,7 +80,6 @@ module ReportsHelper
       options_for_select(config.selections || [], value)
     elsif config.type == 'select_from_model'
       # Get the model by the configured resource name
-
       def_value = value
       resource_name = config.resource_name
       res = Resources::Models.find_by(resource_name: resource_name)

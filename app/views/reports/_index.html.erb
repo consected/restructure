@@ -21,13 +21,19 @@ extra_params[:embed] = true if link_extras[:data] && link_extras[:data][:remote]
   </thead>
 
   <tbody>
-    <% @reports.each do |list_item| %>
+    <% @reports.each do |list_item| 
+    
+          content = markdown_to_html list_item.list_description
+          if content.present?
+            content = Formatter::Substitution.substitute( content, data: list_item, ignore_missing: true).html_safe
+          end    
+    %>
     <tr class="<%=list_item.disabled ? 'disabled-result' : ''%> report-type-<%= list_item.report_type %> <%= list_item.auto ? 'report-auto' : '' %>" data-report-id="<%=list_item.id %>">
       <td style="width: 5%"><span class="hidden"><%= list_item.report_type %></span><span class="glyphicon <%= list_item.report_type == 'count' ? 'glyphicon-record' : list_item.report_type == 'regular_report' ? 'glyphicon-list-alt' : 'glyphicon-search'  %>" title="<%= list_item.report_type.humanize %>"></span></td>
 
       <td style="width: 15%"><%= link_to  list_item.name, report_path(list_item.id, extra_params), link_extras %></td>
 
-      <td style="width: 30%"><%= markdown_to_html list_item.list_description %></td>
+      <td style="width: 30%"><%= markdown_to_html content %></td>
       <% unless simple_view %>
       <td style="width: 25%" class="report-search-attr"></td>
       <td style="width: 25%" class="report-measure"></td>

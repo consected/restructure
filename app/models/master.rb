@@ -3,6 +3,13 @@
 class Master < ActiveRecord::Base
   FilteredAssocPrefix = 'filtered__'
 
+  # Temporary master records can be used with limited(_if_one) user access controls
+  # Providing an association onto these records allows inner join or left joins to
+  # within this functionality to operate, just like an association to any other table
+  TemporaryMasterIds = [-1]
+  Resources::Models.add(Master, resource_name: :temporary_master)
+  has_many :temporary_master, -> { Master.temporary_master }, class_name: 'Master', foreign_key: 'id'
+
   MasterNestedAttribs = [
     Settings::DefaultSubjectInfoTableName.to_sym,
     Settings::DefaultSecondaryInfoTableName.to_sym,
@@ -161,6 +168,12 @@ class Master < ActiveRecord::Base
   # This is placed here, since there is a dependency on MasterSearchHandler
   ExternalIdentifier.enable_active_configurations
 
+  if attribute_names.include? 'created_by_user_id'
+    belongs_to :master_created_by_user, class_name: 'User', optional: true, foreign_key: :created_by_user_id
+    Resources::Models.add(User, resource_name: :master_created_by_user)
+    before_create :write_created_by_user
+  end
+
   attr_accessor :force_order, :creating_master
   attr_reader :current_user, :embedded_item
 
@@ -170,6 +183,12 @@ class Master < ActiveRecord::Base
   # Ensure a string representation of a master is just its id, not revealing anything else
   def to_s
     (id || '').to_s
+  end
+
+  #
+  # Human name for a master record
+  def self.human_name
+    'Master'
   end
 
   #
@@ -196,22 +215,49 @@ class Master < ActiveRecord::Base
     end
   end
 
+  #
   # Handle limited access controls in master queries
-  # Scope results with inner joins on external identifier or dynamic model tables if
-  # they are in the user access control conditions
+  # Scope results with appropriate joins on external identifier or dynamic model tables
+  # if they are in the user access control conditions
   def self.limited_access_scope(user)
-    # Check if the resource is restricted through external identifier assignment
+    # Check if the resource is has a limited_access restriction
     er = Admin::UserAccessControl.limited_access_restrictions(user)
 
     res = all
-    # For each required limited_access model, inner join it. If it also requires
+    return res unless er
+
+    # For each required limited_access model with access :limited, inner join it.
+    # For each required limited_access model with access :limited_if_none, left join it
+    # If it also requires
     # an assign_access_to_user_id field ensure this matches the current user too
-    er&.each do |e|
-      assoc_name = e.resource_name.to_sym
-      res = res.join_limit_to_assigned(assoc_name, user)
+    all_limited_once = []
+
+    er.each do |e|
+      res = res.join_limit_to_assigned(e, user)
+      all_limited_once << e.resource_name.to_sym if e.access == 'limited_if_none'
     end
 
-    res
+    return res if all_limited_once.empty?
+
+    # Make sure at least on of the limited_if_none models was present
+    w = all_limited_once.map do |rn|
+      m = Resources::Models.find_by(resource_name: rn)
+      raise FphsException, "No model resource found for resource name #{rn} when limiting access scope" unless m
+
+      t = m[:table_name]
+      "#{t}.id is not null"
+    end
+    w = w.join(' or ')
+
+    res.where(w)
+  end
+
+  #
+  # Scope a set of tempoary master records. These may be referred to in a user access control
+  # that limits access just to these temporary records with
+  # limited(_if_none) resource_name: temporary_master
+  def self.temporary_master
+    where(id: TemporaryMasterIds)
   end
 
   #
@@ -587,7 +633,7 @@ class Master < ActiveRecord::Base
     res = super(extras)
 
     # Handled the filtered lists, changing their names back to match the original expected objects names
-    res.keys.each do |k|
+    res.each_key do |k|
       if k.start_with?(FilteredAssocPrefix)
         res[k.sub(FilteredAssocPrefix, '')] = res[k]
         res.delete(k)
@@ -629,7 +675,7 @@ class Master < ActiveRecord::Base
     header_substitutions template
   end
 
-  # Validate that the external identifier restrictions do not prevent access to this item
+  # Validate that the limited access restrictions do not prevent access to this item
   def allows_user_access
     # but ignore the test if not persisted yet, since the external identifier may be added during the creation process
     er = Admin::UserAccessControl.limited_access_restrictions(current_user) unless creating_master
@@ -640,11 +686,31 @@ class Master < ActiveRecord::Base
     # If restrictions were returned - go through each and validate an external ID
     # has been assigned to this master by calling its association
     # If all required instances (and their assign_access_to_user_id fields if needed) exist, allow access
+    limited_once_res = nil
     er&.each do |e|
       assoc_name = e.resource_name.to_sym
-      assoc = send(assoc_name)
-      return false unless assoc.limit_to_assigned(current_user).first
+      assoc = send(assoc_name) if respond_to? assoc_name
+
+      # The assoc may by nil if this is a belongs_to association and there is no target instance
+      this_res = if assoc_name == :master_created_by_user
+                   current_user.id == created_by_user_id
+                 elsif assoc_name == :temporary_master
+                   TemporaryMasterIds.include? id
+                 elsif !assoc
+                   false
+                 else
+                   assoc.limit_to_assigned(current_user).length > 0
+                 end
+
+      return false if e.access == 'limited' && this_res == false
+
+      if e.access == 'limited_if_none'
+        limited_once_res ||= this_res
+        break if limited_once_res
+      end
     end
+
+    return limited_once_res unless limited_once_res.nil?
 
     true
   end
@@ -689,5 +755,9 @@ class Master < ActiveRecord::Base
     end
 
     write_attribute :user_id, cu.id
+  end
+
+  def write_created_by_user
+    self.created_by_user_id = current_user&.id
   end
 end

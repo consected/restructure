@@ -16,8 +16,9 @@ module Dynamic
       after_commit :update_tracker_events, if: -> { @regenerate }
       after_commit :restart_server, if: -> { @regenerate }
       after_commit :other_regenerate_actions
+      after_commit :handle_disabled, if: -> { disabled }
 
-      attr_accessor :configurations, :data_dictionary, :options_constants
+      attr_accessor :configurations, :data_dictionary, :options_constants, :force_regenerate
     end
 
     class_methods do
@@ -77,7 +78,7 @@ module Dynamic
       # or are not included in the OnlyLoadAppTypes setting.
       # This is typically used to improve load times and ensure we only generate
       # templates for models that will actually be used.
-      # @return [ActiveRecord::Relation] scopeed results
+      # @return [ActiveRecord::Relation] scoped results
       def active_model_configurations
         # return @active_model_configurations if @active_model_configurations
 
@@ -285,6 +286,89 @@ module Dynamic
         @master_nested_attrib << attrib
         Master.accepts_nested_attributes_for(*@master_nested_attrib)
       end
+
+      #
+      # Get the timestamp for the latest definition stored in the DB.
+      # @return [DateTime]
+      def latest_stored_update
+        active_model_configurations
+          .select(:updated_at)
+          .reorder('')
+          .order('updated_at desc nulls last')
+          .limit(1)
+          .pluck(:updated_at)
+          .first
+      end
+
+      #
+      # Does the persisted latest updated definition match the memoized update?
+      # Returns nil if not previously memoized, otherwise true or false.
+      # @return [true | false | nil]
+      def up_to_date?
+        lu = latest_stored_update
+
+        if !lu && !@prev_latest_update
+          # They match if both nil
+          true
+        elsif lu && @prev_latest_update && (lu - @prev_latest_update).abs < 2
+          # Consider them a match if they are within 2 seconds of one another,
+          # accounting for the difference between Rails and DB times
+          true
+        elsif @prev_latest_update.nil?
+          # The remembered value was nil, so let the caller know this
+          self.prev_latest_update = lu
+          nil
+        else
+          # There was no match
+          self.prev_latest_update = lu
+          false
+        end
+      end
+
+      #
+      # Remember the latest updated at timestamp
+      def prev_latest_update=(updated_at)
+        return if @prev_latest_update && updated_at && updated_at <= @prev_latest_update
+
+        @prev_latest_update = updated_at
+      end
+
+      #
+      # Reload the models and configurations any definitions that
+      # do not match the memoized version, since these may have changed on
+      # another server in the cluster.
+      def refresh_outdated
+        utd = up_to_date?
+        # If up to date, or not previously set
+        # (and therefore we are on our first load and everything will have just been set up) just return
+        return if utd || utd.nil?
+
+        defs = active_model_configurations.reorder('').order('updated_at desc nulls last')
+        any_new = false
+        defs.each do |d|
+          rn = d.resource_name
+          u = d.updated_at
+          m = Resources::Models.find_by(resource_name: rn)&.model&.definition
+          # Skip if the model was previous set and the updated timestamps match
+          next if m && m.updated_at == u
+
+          this_is_new = !m
+          any_new ||= this_is_new
+          d.force_regenerate = true
+          d.generate_model
+          d.check_implementation_class
+          d.force_option_config_parse
+          d.add_master_association
+          d.add_user_access_controls
+          d.reset_active_model_configurations! if this_is_new
+          d.update_tracker_events
+          d.other_regenerate_actions
+        end
+
+        routes_reload if any_new
+      end
+
+      # End of class_methods
     end
 
     def secondary_key
@@ -440,12 +524,28 @@ module Dynamic
     # Decide whether to regenerate a model based on it not existing already in the namespace
     # @return [Class | nil] truthy result unless the model exists in the namespace
     def prevent_regenerate_model
+      return if force_regenerate
+
       got_class = begin
         full_implementation_class_name.constantize
       rescue StandardError
         nil
       end
       got_class if got_class&.to_s&.start_with?(self.class.implementation_prefix)
+
+      return unless fields_match_columns?
+
+      got_class
+    end
+
+    #
+    # Check the defined field list matches the columns in the database. If not,
+    # we may need to regenerate the model
+    def fields_match_columns?
+      fields = all_implementation_fields
+      fields.reject! { |f| f.index(/^embedded_report_|^placeholder_/) }
+
+      (fields.sort - table_columns.map { |c| c.name.to_s }.sort).empty?
     end
 
     # Is the definition ready for a class to be defined?
@@ -466,6 +566,7 @@ module Dynamic
 
     # This needs to be overridden in each provider to allow consistency of calculating model names for implementations
     # Non-namespaced model definition name
+    # @return [String]
     def implementation_model_name
       nil
     end
@@ -497,6 +598,11 @@ module Dynamic
     # Full namespaced item types (pluralized) name, underscored with double underscores
     def full_item_types_name
       full_item_type_name.pluralize
+    end
+
+    # Hyphenated name, typically used in HTML markup for referencing target blocks and panels
+    def hyphenated_name
+      implementation_model_name.ns_hyphenate
     end
 
     # Absolute namespaced class name for the model
@@ -533,8 +639,29 @@ module Dynamic
 
     # After a regeneration, certain other cleanups may be required
     def other_regenerate_actions
+      return if disabled
+
+      self.class.prev_latest_update = updated_at
+      self.class.preload
+      Rails.logger.info 'Reloading column definitions'
+      implementation_class.reset_column_information
       Rails.logger.info 'Refreshing item types'
       Classification::GeneralSelection.item_types refresh: true
+    end
+
+    # After disabling an item, clean up any mess
+    def handle_disabled
+      Rails.logger.info 'Refreshing item types'
+      begin
+        Classification::GeneralSelection.item_types refresh: true
+      rescue NameError => e
+        Rails.logger.info "Failed to clear general selections for #{model_class_name}"
+      end
+
+      remove_model_from_list
+      remove_assoc_class 'Master'
+      remove_implementation_class
+      remove_implementation_controller_class
     end
 
     # A list of model names and definitions is stored in the class so we can
@@ -549,8 +676,9 @@ module Dynamic
     end
 
     # Remove an item from the list of available dynamic classes
-    def remove_model_from_list
-      tn = implementation_model_name
+    # @param [String] tn (optional)
+    def remove_model_from_list(tn = nil)
+      tn ||= implementation_model_name
       logger.info "Removed disabled model #{tn}"
       self.class.models.delete(tn)
       self.class.model_names.delete(tn)
@@ -564,6 +692,43 @@ module Dynamic
     rescue StandardError => e
       logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
       # puts "Failed to remove #{assoc_ext_name} : #{e}"
+    end
+
+    def prefix_class
+      klass = Object
+      klass = "::#{self.class.implementation_prefix}".constantize if self.class.implementation_prefix.present?
+      klass
+    end
+
+    def remove_implementation_class(alt_prefix_class = nil)
+      klass = alt_prefix_class || prefix_class
+      # This may fail if an underlying dependent class (parent class) has been redefined by
+      # another dynamic implementation, such as external identifier
+      return unless implementation_class_defined?(klass, fail_without_exception: true,
+                                                         fail_without_exception_newable_result: true)
+
+      klass.send(:remove_const, model_class_name)
+    rescue StandardError => e
+      logger.info <<~END_TEXT
+        *************************************************************************************
+        Failed to remove the old definition of #{model_class_name}. #{e.inspect}
+        *************************************************************************************
+      END_TEXT
+    end
+
+    def remove_implementation_controller_class
+      klass = prefix_class
+      return unless implementation_controller_defined?(klass)
+
+      # This may fail if an underlying dependent class (parent class) has been redefined by
+      # another dynamic implementation, such as external identifier
+      klass.send(:remove_const, full_implementation_controller_name)
+    rescue StandardError => e
+      logger.info <<~END_TEXT
+        *************************************************************************************
+        Failed to remove the old definition of #{full_implementation_controller_name}. #{e.inspect}
+        *************************************************************************************
+      END_TEXT
     end
 
     #
@@ -640,7 +805,7 @@ module Dynamic
 
       # For some reason the underlying table exists but the class doesn't. Inform the admin
       unless res
-        err = "The implementation of #{model_class_name} was not completed." \
+        err = "The implementation of #{model_class_name} was not completed. " \
               "The DB table #{table_name} has #{table_or_view_ready? ? '' : 'NOT '}been created"
         logger.warn err
         errors.add :name, err

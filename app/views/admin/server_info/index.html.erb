@@ -1,44 +1,54 @@
 <div class="container">
   <div class="row">
     <h1>Server Information</h1>
+    <p><code><%= @instance_id%></code></p>
   </div>
   <div class="row">
-      <h2>Restart Server, DelayedJob and Clear Memcached</h2>
+      <h3>Restart Server, DelayedJob and Clear Memcached</h3>
       <%= form_tag(admin_app_types_restart_server_url, remote: true) do %>
         <%= submit_tag "Restart server" %>
       <% end %>
-      <h2>Restart DelayedJob</h2>
+      <h3>Restart DelayedJob</h3>
       <%= form_tag(admin_app_types_restart_delayed_job_url, remote: true) do %>
         <%= submit_tag "Restart DelayedJob" %>
       <% end %>
+      <h3>View Exception Log</h3>
+      <%= link_to link_label_open_in_new('open log'), "/reports/z___admin__exception_log", target: "exceptionlog" %>
   </div>
 
   <div class="row">  
-    <h2>App Settings</h2>
+    <h3>App Settings</h3>
     <%= render partial: 'admin/server_info/view_settings', locals: {settings: @app_settings} %>
   </div>
   <div class="row">  
-    <h2>Database Settings</h2>
+    <h3>Database Settings</h3>
     <%= render partial: 'admin/server_info/view_settings', locals: {settings: @db_settings} %>
   </div>
   <div class="row">  
-    <h2>NfsStore Settings</h2>
+    <h3>NfsStore Settings</h3>
     <%= render partial: 'admin/server_info/view_settings', locals: {settings: @nfs_store_settings} %>
+
+    <pre><%=@nfs_store_mount_dirs%>
   </div>  
 
   <% if @server_type == :passenger %>
   <div class="row">  
-    <h2>Passenger Status</h2>
+    <h3>Passenger Status</h3>
     <pre><%=@passenger_status%></pre>
   </div>
   <div class="row">  
-    <h2>Passenger Memory Stats</h2>
+    <h3>Passenger Memory Stats</h3>
     <pre><%=@passenger_memory_stats%></pre>
   </div>
   <% end %>
 
   <div class="row">  
-    <h2>Processes</h2>
+    <h3>Disk Usage</h3>
+    <pre><%=@disk_usage%></pre>
+  </div>
+
+  <div class="row">  
+    <h3>Processes</h3>
     <pre><%=@processes%></pre>
   </div>
 </div>

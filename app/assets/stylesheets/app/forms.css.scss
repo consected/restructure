@@ -105,6 +105,10 @@ input[type="date"].attached-datepicker {
   }
 }
 
+.datepicker-dropdown {
+  z-index: 1000 !important;
+}
+
 li.list-group-item.placeholder-field-item {
   display: none !important;
 }
@@ -155,6 +159,31 @@ li.list-group-item label {
   h4 {
     font-size: 16px;
   }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    &:first-child {
+      margin-top: 0.2em;
+    }
+  }
+}
+
+.placeholder-caption-before:empty {
+  display: none !important;
+}
+
+.make-labels-placeholders .done-label-resize input[placeholder] {
+  width: 100%;
+
+  option.select-option-placeholder {
+    color: rgb(128, 128, 128);
+  }
+}
+
+::placeholder {
+  color: rgb(128, 128, 128) !important;
 }
 
 .form-inline .row > div {
