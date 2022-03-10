@@ -8,7 +8,7 @@
 #   2. generate other admin's password or 2FA authorizations
 #   3. disable other admins
 #
-# Re-enabling an admin cannot be done by another admin; this feature remains limited to an OS-user.
+# Regular admin cannot re-enable an admin; this feature remains limited to an OS-user.
 class Admin::ManageAdminsController < AdminController
   # Only allow update of the disabled status of an administrator to disabled.
   def update
