@@ -9,7 +9,11 @@ describe User do
     @good_email = @user.email
   end
 
-  it { is_expected.to have_one(:user_preference) }
+  subject{ @user }
+
+  describe 'associations' do
+    it { is_expected.to have_one(:user_preference).inverse_of(:user).autosave(true) }
+  end
 
   it 'creates a user' do
     new_user = User.where email: @good_email
