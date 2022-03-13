@@ -13,10 +13,13 @@ class Admin::ManageAdminsController < AdminController
   # Only allow update of the disabled status of an administrator to disabled.
   def update
     if @admin.disabled && secure_params[:disabled] != '1'
-      not_authorized
-      flash.now[:warning] = 'Admins can not be re-enabled'
-      return
+      unless Settings::AllowAdminsToManageAdmins
+        not_authorized
+        flash.now[:warning] = 'Admins can not be re-enabled.'
+        return
+      end
     end
+
 
     if params[:gen_new_pw] == '1'
       @admin.force_password_reset
