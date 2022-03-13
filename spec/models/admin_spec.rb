@@ -10,43 +10,82 @@ describe Admin do
   end
 
   it 'creates a admin' do
-    new_admin = Admin.where email: @good_email
-    expect(new_admin.first).to be_a Admin
+    new_admin = Admin.find_by email: @good_email
+    expect(new_admin).to be_a Admin
   end
 
   it 'allows password change' do
     @admin.password = @good_password + '&&!'
-    expect(@admin.save).to be true
+    expect(@admin.save).to be_truthy
   end
 
   it 'prevents own email address change by admin' do
     @admin.email = 'testadmin-change@testing.com'
     @admin.current_admin = @admin
-    expect(@admin.save).to be false
+    expect(@admin.save).to be_falsy
   end
 
   it 'prevents admin disabled from authenticating' do
     create_admin
     @admin.disable!
 
-    expect(@admin.active_for_authentication?).to be false
+    expect(@admin.active_for_authentication?).to be_falsy
   end
 
-  it 'prevent admin changing disabled flag outside of setup, except to disable' do
-    allow(@admin).to receive(:can_manage_admins?).and_return(false)
-    expect(@admin.disabled).to eq false
+  describe '#disabled' do
+    subject { @admin }
+    context 'when current admin CAN manage other admins' do
+      before { allow(@admin).to receive(:can_manage_admins?).and_return(true) }
 
-    # Can change nil or to false or vice versa
-    @admin.disabled = nil
+      describe 'changing disabled flag' do
+        context 'when disabled is false' do
+          it { is_expected.to be_valid }
+          it { expect(@admin.save).to be_truthy }
+        end
+        context 'when disabled is true' do
+          before { @admin.disabled = true }
+          it { is_expected.to be_valid }
+          it { expect(@admin.save).to be_truthy }
+        end
+        context 'when re-enabling another admin' do
+          before do
+            @admin.disabled = true
+            @admin.save
+            @admin.disabled = false
+          end
+          it { is_expected.to be_valid }
+          it { expect(@admin.save).to be_truthy }
+        end
+      end
+    end
 
-    expect(@admin.save).to be true
-    @admin.disabled = true
-    expect(@admin.save).to be true
-    @admin.disabled = false
-    expect(@admin.save).to be false
+    context 'when current admin CANNOT manage other admins' do
+      before { allow(@admin).to receive(:can_manage_admins?).and_return(false) }
+
+      describe 'changing disabled flag' do
+        context 'when disabled is false' do
+          it { is_expected.to be_valid }
+          it { expect(@admin.save).to be_truthy }
+        end
+        context 'when disabled is true' do
+          before { @admin.disabled = true }
+          it { is_expected.to be_valid }
+          it { expect(@admin.save).to be_truthy }
+        end
+        context 'when re-enabling another admin' do
+          before do
+            @admin.disabled = true
+            @admin.save
+            @admin.disabled = false
+          end
+          it { is_expected.to_not be_valid }
+          it { expect(@admin.save).to be_falsy }
+        end
+      end
+    end
   end
 
-  describe 'OS-user resets password' do
+  describe 'resets password' do
 
     context 'when OS-users are allowed to execute a setup script' do
       before do
@@ -99,7 +138,7 @@ describe Admin do
   end
 
   describe 'password reset' do
-    before { allow(@admin).to receive(:can_manage_admins?).and_return(true) }
+
     it 'prevents an admin from reusing a recent password' do
 
       create_admin
