@@ -4,7 +4,8 @@ sleep 2
 
 if [ ! -f '/opt/elasticbeanstalk/bin/get-config' ]; then
   touch tmp/restart.txt
-  exit 'Done'
+  echo 'Done'
+  exit 0
 fi
 
 # This relies on the app server being set up as a systemd service, which will be restarted automatically.
