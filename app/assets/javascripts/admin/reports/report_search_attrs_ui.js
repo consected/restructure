@@ -47,17 +47,26 @@ class ReportSearchAttrsUi {
       if (search_attr_type == 'config_selector') {
         $('.report-attr-config-selections').collapse('show');
         $('.report-attr-select-from-model').collapse('hide');
+        $('.report-attr-defined-selector').collapse('hide');
         $('.config-selector-help.for-config_selector').collapse('show');
         $('.config-selector-help.for-select_from_model').collapse('hide');
         if (_this.ra_resource_name) _this.ra_resource_name.val('');
       } else if (search_attr_type == 'select_from_model') {
         $('.report-attr-config-selections').collapse('show');
         $('.report-attr-select-from-model').collapse('show');
+        $('.report-attr-defined-selector').collapse('hide');
+        $('.config-selector-help.for-config_selector').collapse('hide');
+        $('.config-selector-help.for-select_from_model').collapse('show');
+      } else if (search_attr_type == 'defined_selector') {
+        $('.report-attr-config-selections').collapse('hide');
+        $('.report-attr-defined-selector').collapse('show');
+        $('.report-attr-select-from-model').collapse('hide');
         $('.config-selector-help.for-config_selector').collapse('hide');
         $('.config-selector-help.for-select_from_model').collapse('show');
       } else {
         $('.report-attr-config-selections').collapse('hide');
         $('.report-attr-select-from-model').collapse('hide');
+        $('.report-attr-defined-selector').collapse('hide');
         $('.config-selector-help.for-config_selector').collapse('hide');
         $('.config-selector-help.for-select_from_model').collapse('hide');
         if (_this.ra_config_selections) _this.ra_config_selections.setValue('');
@@ -145,6 +154,7 @@ class ReportSearchAttrsUi {
 
       name = name.underscore();
       var filter = $('#search_attrs_filter').val();
+      var defined_selector = $('#search_attrs_defined_selector').val();
       var no_disabled = $('#search_no_disabled').is(':checked');
       var hidden_field = $('#search_hidden_field').is(':checked');
       var multi = $('#search_attrs_multi').val();
@@ -167,6 +177,7 @@ class ReportSearchAttrsUi {
       rsa.selections = rsa.load_value_hash(selections_yaml);
       rsa.conditions = rsa.load_value_hash(conditions_yaml);
       rsa.filter = filter;
+      rsa.defined_selector = defined_selector;
       rsa.default = rsa.load_value_list(defval);
       rsa.disabled = no_disabled;
 

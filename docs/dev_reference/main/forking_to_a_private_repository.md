@@ -58,11 +58,16 @@ Create a new branch on the public repo
 
     git checkout -b <branch name>
 
-Rebase the _develop_ branch of the private repo onto the new branch
+To retain the full history, rebase the _develop_ branch of the private repo onto the new branch
 
     git fetch downstream
     git rebase downstream/develop
     git rebase develop
+
+Or to apply the latest changes onto the top of _develop_ as uncommitted changes (allowing for selective commits)
+
+    git fetch downstream
+    git merge downstream/develop --no-commit
 
 Raise a PR on the public repo for the new branch
 
@@ -72,4 +77,4 @@ Once the PR is complete, if there are no more changes expected from downstream
 
 ---
 
-_NOTE:_ adapted from https://docs.publishing.service.gov.uk/manual/make-github-repo-private.html
+_NOTE:_ adapted from <https://docs.publishing.service.gov.uk/manual/make-github-repo-private.html>

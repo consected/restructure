@@ -31,6 +31,8 @@ module Dynamic
       @memoize_embedded_items = nil
       @creatable_model_references = nil
       @always_embed_item = nil
+      @never_embed_item = nil
+      @never_embed_creatable_item = nil
     end
 
     #
@@ -450,7 +452,9 @@ module Dynamic
         mrs = model_references
         cmrs = creatable_model_references only_creatables: true
 
-        if embed_action_type == :creating && always_embed_creatable
+        if never_embed_item || embed_action_type == :creating && never_embed_creatable_item
+          # Do nothing - we have been told to never embed
+        elsif embed_action_type == :creating && always_embed_creatable
           # The current action is to display a new form or to create an item from a submitted form.
           # If always_embed_creatable_reference: true has been specified, use this,
           # unless the embeddable item is an activity log or is configured to not be viewable as embedded.
@@ -458,7 +462,7 @@ module Dynamic
                                        always_embed_creatable_model_reference(cmrs)])
           res = nil if creatable_model_not_embeddable?(cmrs, res)
         elsif (res = always_embed_item(mrs))
-        # Do nothing, we've found an embedded item that matches the configured type and set it in the condition above
+          # Do nothing, we've found an embedded item that matches the configured type and set it in the condition above
         elsif embed_action_type == :creating && cmrs.length == 1
           # The current action is to display a new form or to create an item from a submitted form.
           # and exactly one item is creatable.
@@ -563,6 +567,25 @@ module Dynamic
       # It is possible that this will not have matched a record if no model reference of the required
       # type is in existence, so it could still be nil.
       @always_embed_item = always_embed.to_record
+    end
+
+    #
+    # Prevent any items from being shown as embedded
+    def never_embed_item
+      return @never_embed_item unless @never_embed_item.nil?
+
+      aer = extra_log_type_config&.view_options&.dig(:always_embed_reference)
+      @never_embed_item = (aer == 'never')
+    end
+
+    #
+    # Prevent any items from being shown as embedded during creation of the
+    # activity log type
+    def never_embed_creatable_item
+      return @never_embed_creatable_item unless @never_embed_creatable_item.nil?
+
+      aer = extra_log_type_config&.view_options&.dig(:always_embed_creatable_reference)
+      @never_embed_creatable_item = (aer == 'never')
     end
 
     #

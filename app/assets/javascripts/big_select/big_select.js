@@ -69,10 +69,11 @@ $.big_select = function ($field, $target, full_hash, before, after, options) {
     if (options.hide_key) {
       show_k = null;
 
-      var split = val.split('>>>')
+      var split = val.trim().split(/(>>>|\n)/)
+      console.log(split)
       if (split.length > 1) {
         show_k = split[0];
-        val = split[1];
+        val = split.slice(1).join("\n");
       }
     }
 

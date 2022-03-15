@@ -17,8 +17,8 @@ module EditFields
       sf = SelectFieldHandler.new
       sf.form_object_instance = form_object_instance
       sf.assoc_or_class_name = assoc_or_class_name
-      sf.value_attr = value_attr
-      sf.label_attr = label_attr
+      sf.value_attr = value_attr.to_sym
+      sf.label_attr = label_attr.to_sym
       sf.group_split_char = group_split_char
       sf.generate_record_data
     end

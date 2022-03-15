@@ -18,8 +18,9 @@ module Reports
     # Run the report
     # @param [Hash | String] search_attr_values - hash of search values, or '_use_defaults_' to force use of
     #                                             default values from the report options
+    # @param [Admin] current_admin - (optional) indicates that a full SQL error can be communicated if the report fails to run 
     # @return [Array] results array from ActiveRecord::Base.connection.execute
-    def run(initial_search_attr_values)
+    def run(initial_search_attr_values, current_admin=nil)
       raise FphsException, 'SQL is not set' if sql.blank?
 
       search_attrs_prep initial_search_attr_values
@@ -47,7 +48,7 @@ module Reports
         rescue StandardError => e
           Rails.logger.info "Failed to run sql: #{e.inspect}.\n#{sql}"
           msg = 'Failed to run query.'
-          msg += e.to_s unless Rails.env.production?
+          msg += e.to_s if current_admin
           raise FphsException, msg
         end
         raise ActiveRecord::Rollback

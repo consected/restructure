@@ -633,11 +633,8 @@ class Master < ActiveRecord::Base
     res = super(extras)
 
     # Handled the filtered lists, changing their names back to match the original expected objects names
-    res.each_key do |k|
-      if k.start_with?(FilteredAssocPrefix)
-        res[k.sub(FilteredAssocPrefix, '')] = res[k]
-        res.delete(k)
-      end
+    res.transform_keys! do |k|
+      k.start_with?(FilteredAssocPrefix) ? k.sub(FilteredAssocPrefix, '') : k
     end
 
     res

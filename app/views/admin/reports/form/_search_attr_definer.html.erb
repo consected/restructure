@@ -18,6 +18,7 @@
               <option value="address_state">address state</option>
               <option value="accuracy_score">accuracy score</option>
               <option value="general_selection">general selection</option>
+              <option value="defined_selector">defined selector</option>
               <option value="config_selector">config selector</option>
               <option value="select_from_model">select from model</option>
               <option value="protocol">tracker protocol</option>
@@ -50,6 +51,19 @@
               <input type="checkbox" id="search_no_disabled" data-attr-el="no_disabled"/>
             </div>
           </div>
+        </div>
+        <div class="report-attr-defined-selector collapse">
+          <div class="report-admin-subblock">
+            <div class="report-admin-sb-item">defined selectors</div>
+            <div class="report-admin-sb-field-block">
+              <select id="search_attrs_defined_selector" data-attr-el="defined_selector">
+                <% 
+                Classification::GeneralSelection.selector_with_config_overrides.map{|f| "#{f[:base_item_type]}/#{f[:field_name]}"}.uniq.sort.each do |i|%>
+                  <option value="<%=i%>"><%=i%></option>
+                <% end %>
+              </select>
+            </div>
+          </div>                   
         </div>
         <div class="report-admin-subblock">
           <div class="report-admin-sb-item">hide field</div>
