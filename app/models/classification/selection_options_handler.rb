@@ -151,7 +151,7 @@ class Classification::SelectionOptionsHandler
 
   #
   # Get all the general selection configurations and override them with the form_options.edit_as.alt_options
-  # This is only really used by UI requests to the DefinitionsController to get and cache general selections
+  # This is only used by UI requests to the DefinitionsController to get and cache general selections
   # options on the front end.
   #
   # If alt_options override an existing select_... field, the general selection records for this will
