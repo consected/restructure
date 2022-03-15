@@ -76,13 +76,19 @@ module ReportsHelper
       end
 
       options_for_select(classification_class.all_name_value_enable_flagged(type_filter), value)
+    elsif config.type == 'defined_selector'
+      item_type, field_name = config.defined_selector.split('/')
+      opts = Classification::GeneralSelection.selector_with_config_overrides item_type: item_type,
+                                                                             field_name: field_name
+      opts = opts.map { |r| [r[:name], r[:value]] }
+      options_for_select(opts || [], value)
     elsif config.type == 'config_selector'
       options_for_select(config.selections || [], value)
     elsif config.type == 'select_from_model'
       # Get the model by the configured resource name
       def_value = value
       resource_name = config.resource_name
-      res = Resources::Models.find_by(resource_name: resource_name)
+      res = Resources::Models.find_by(resource_name: resource_name) if resource_name
       raise FphsException, "No resource matches resource_name: #{resource_name}" unless res
 
       # Use the configuration of selections to define which fields to pull as the options
@@ -199,7 +205,10 @@ module ReportsHelper
   # Options for select for a "select from model" resource names drop down
   # @return [options_for_select]
   def select_from_model_resource_name_options
-    res = Resources::Models.all.values.map { |r| ["#{r[:type]} - #{r[:model].human_name}", r[:resource_name]] }
+    res = Resources::Models.all.values
+                           .reject { |r| r.option_type }
+                           .map { |r| ["#{r[:type]} - #{r[:model].human_name}", r[:resource_name]] }
+                           .uniq
     options_for_select res
   end
 end
