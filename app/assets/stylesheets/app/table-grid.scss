@@ -73,6 +73,11 @@ table.import-grid,
 table.table.report-table {
   tr.report-item-edit td {
     background-color: rgb(255, 255, 200);
+    font-size: var(--table-font-size);
+
+    .input-sm {
+      font-size: var(--table-font-size);
+    }
   }
 
   tr.report-item-edit td.report-el-disabled {
