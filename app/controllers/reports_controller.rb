@@ -59,7 +59,7 @@ class ReportsController < UserBaseController
       # Search attributes or data reference parameters have been provided
       # and the query should be run
       begin
-        @results = @runner.run(search_attrs_params_hash)
+        @results = @runner.run(search_attrs_params_hash, current_admin)
 
         if params[:commit] == 'search'
           # Based on the results for the report, the MasterHandler uses the ids returned to
