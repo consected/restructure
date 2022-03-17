@@ -3,7 +3,7 @@ require './app-scripts/supporting/admin_setup'
 
 describe Admin do
   include ModelSupport
-  before(:each) do
+  before do
     ENV['FPHS_ADMIN_SETUP'] = 'yes'
     @admin, @good_password = create_admin 'test-admin'
     @good_email = @admin.email
@@ -27,6 +27,7 @@ describe Admin do
 
   it 'prevents admin disabled from authenticating' do
     create_admin
+    @admin.current_admin = @admin
     @admin.disable!
 
     expect(@admin.active_for_authentication?).to be_falsy
@@ -37,6 +38,7 @@ describe Admin do
     context 'when current admin CAN manage other admins' do
       before do
         stub_const('Settings::AllowAdminsToManageAdmins', true)
+        @admin.current_admin = create_admin[0]
       end
 
       describe 'changing disabled flag' do
@@ -61,25 +63,36 @@ describe Admin do
       end
     end
 
-    context 'when current admin or OS-users CANNOT manage other admins' do
-      %w[yes no].each do |is_fphs_admin_setup|
-        before do
-          stub_const('Settings::AllowAdminsToManageAdmins', false)
-        end
+    context 'when current admin CANNOT manage other admins' do
+      before do
+        stub_const('Settings::AllowAdminsToManageAdmins', false)
+      end
 
-        describe 'changing disabled flag' do
-          context 'when disabled is false' do
-            it { is_expected.to be_valid }
-            it { expect(@admin.save).to be_truthy }
-          end
-          context 'when disabled is true' do
-            before { @admin.disabled = true }
-            it { is_expected.to be_valid }
-            it { expect(@admin.save).to be_truthy }
-          end
-          context 'when re-enabling another admin' do
+      describe 'changing disabled flag' do
+        context 'when disabled is false' do
+          it { is_expected.to be_valid }
+          it { expect(@admin.save).to be_truthy }
+        end
+        context 'when disabled is true' do
+          before { @admin.disabled = true }
+          it { is_expected.to be_valid }
+          it { expect(@admin.save).to be_truthy }
+        end
+        context 'when re-enabling another admin' do
+          context "and the OS-user is allowed to update an admin through the console" do
             before do
-              ENV['FPHS_ADMIN_SETUP'] = is_fphs_admin_setup
+              ENV['FPHS_ADMIN_SETUP'] = 'yes'
+              @admin.disabled = true
+              @admin.save
+              @admin.disabled = false
+            end
+            it { is_expected.to be_valid }
+            it { expect(@admin.save).to be_truthy }
+
+          end
+          context "and the OS-user is allowed to update an admin through the console" do
+            before do
+              ENV['FPHS_ADMIN_SETUP'] = 'no'
               @admin.disabled = true
               @admin.save
               @admin.disabled = false

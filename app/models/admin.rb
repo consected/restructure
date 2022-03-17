@@ -66,7 +66,7 @@ class Admin < ActiveRecord::Base
 
   # Simple way to ensure that the current admin is allowed to create, re-enable, and update another admin.
   def can_manage_admins?
-    ENV['FPHS_ADMIN_SETUP'] == 'yes' || Settings::AllowAdminsToManageAdmins
+    (ENV['FPHS_ADMIN_SETUP'] == 'yes' && !current_admin) || (Settings::AllowAdminsToManageAdmins && !!current_admin)
   end
 
   def to_s
