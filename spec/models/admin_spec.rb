@@ -100,51 +100,20 @@ describe Admin do
     end
   end
 
-  describe 'resets password' do
+  describe 'current admin creating another admin in the webapp' do
+    before { allow_any_instance_of(Admin).to receive(:current_admin).and_return(@admin) }
 
-    context 'when current_admin are allowed to manage other users' do
-      before do
-        AdminSetup.setup @good_email
-      end
-      it 'is expected to update the admin password' do
-        admin = Admin.find_by(email: @good_email)
-        expect(admin.disable!).to be_truthy
-      end
-      it 'is expected to re-enable an admin' do
-        admin = Admin.find_by(email: @good_email)
-        admin.disable!
-        admin.disabled = false
-        expect(admin).to be_valid
-      end
-    end
-
-    context 'when OS-users NOT allowed to execute a setup script' do
-      # Now simulate re-enabling the user outside of the admin setup script
-      it 'is expected to not re-enabled an admin' do
-        AdminSetup.setup @good_email
-
-        admin = Admin.find_by(email: @good_email)
-        allow(admin).to receive(:can_manage_admins?).and_return(true)
-        admin.disable!
-        allow(admin).to receive(:can_manage_admins?).and_return(false)
-        admin.disabled = false
-        expect(admin).to_not be_valid
-      end
-    end
-  end
-
-  describe 'create admin in the app' do
     context 'when admins are allowed to manage admins' do
-      before { allow(@admin).to receive(:can_manage_admins?).and_return(true) }
+      before { stub_const('Settings::AllowAdminsToManageAdmins', true) }
       it 'expects to create an admin' do
-        expect(create_admin).to be_truthy
+        expect { create_admin }.to_not raise_error
+        expect(create_admin[0]).to be_a(Admin)
         expect(create_admin[0]).to be_valid
       end
-
     end
 
     context 'when admins are NOT allowed to manage admins' do
-      before { allow_any_instance_of(Admin).to receive(:can_manage_admins?).and_return(false) }
+      before { stub_const('Settings::AllowAdminsToManageAdmins', false) }
       it 'expects not to create an admin' do
         expect { create_admin }.to raise_error(/can only create admins in console/)
       end
