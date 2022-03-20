@@ -38,27 +38,31 @@ describe Admin do
     context 'when current admin CAN manage other admins' do
       before do
         stub_const('Settings::AllowAdminsToManageAdmins', true)
-        @admin.current_admin = create_admin[0]
+        subject.current_admin = create_admin[0]
       end
 
-      describe 'changing disabled flag' do
-        context 'when disabled is false' do
-          it { is_expected.to be_valid }
-          it { expect(@admin.save).to be_truthy }
+      describe 'changing the disabled flag' do
+        [false, true]. each do |disable|
+          context "when disabled is #{disable}" do
+            before { subject.disabled = disable }
+            it { is_expected.to be_valid }
+            describe "and after invoking save" do
+              before { subject.save }
+              it { is_expected.to_not have_changes_to_save }
+            end
+          end
         end
-        context 'when disabled is true' do
-          before { @admin.disabled = true }
-          it { is_expected.to be_valid }
-          it { expect(@admin.save).to be_truthy }
-        end
-        context 'when re-enabling another admin' do
+        context 'when re-enabling an admin' do
           before do
-            @admin.disabled = true
-            @admin.save
-            @admin.disabled = false
+            subject.disabled = true
+            subject.save
+            subject.disabled = false
           end
           it { is_expected.to be_valid }
-          it { expect(@admin.save).to be_truthy }
+          describe "and after invoking save" do
+            before { subject.save }
+            it { is_expected.to_not have_changes_to_save  }
+          end
         end
       end
     end
@@ -66,39 +70,30 @@ describe Admin do
     context 'when current admin CANNOT manage other admins' do
       before do
         stub_const('Settings::AllowAdminsToManageAdmins', false)
+        subject.current_admin = create_admin[0]
       end
 
-      describe 'changing disabled flag' do
-        context 'when disabled is false' do
-          it { is_expected.to be_valid }
-          it { expect(@admin.save).to be_truthy }
-        end
-        context 'when disabled is true' do
-          before { @admin.disabled = true }
-          it { is_expected.to be_valid }
-          it { expect(@admin.save).to be_truthy }
-        end
-        context 'when re-enabling another admin' do
-          context "and the OS-user is allowed to update an admin through the console" do
-            before do
-              ENV['FPHS_ADMIN_SETUP'] = 'yes'
-              @admin.disabled = true
-              @admin.save
-              @admin.disabled = false
-            end
+      describe 'changing the disabled flag' do
+        [false, true]. each do |disable|
+          context "when disabled is #{disable}" do
+            before { subject.disabled = disable }
             it { is_expected.to be_valid }
-            it { expect(@admin.save).to be_truthy }
-
-          end
-          context "and the OS-user is allowed to update an admin through the console" do
-            before do
-              ENV['FPHS_ADMIN_SETUP'] = 'no'
-              @admin.disabled = true
-              @admin.save
-              @admin.disabled = false
+            describe "and after invoking save" do
+              before { subject.save }
+              it { is_expected.to_not have_changes_to_save  }
             end
-            it { is_expected.to_not be_valid }
-            it { expect(@admin.save).to be_falsy }
+          end
+        end
+        context 'when re-enabling an admin' do
+          before do
+            subject.disabled = true
+            subject.save
+            subject.disabled = false
+          end
+          it { is_expected.to_not be_valid }
+          describe "and after invoking save" do
+            before { subject.save }
+            it { is_expected.to have_changes_to_save }
           end
         end
       end
@@ -109,7 +104,6 @@ describe Admin do
 
     context 'when current_admin are allowed to manage other users' do
       before do
-        allow(@admin).to receive(:can_manage_admins?).and_return(true)
         AdminSetup.setup @good_email
       end
       it 'is expected to update the admin password' do
