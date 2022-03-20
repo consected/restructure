@@ -35,10 +35,10 @@ describe Admin do
 
   describe '#disabled' do
     subject { @admin }
-    context 'when current admin CAN manage other admins' do
+    context 'when the current admin CAN manage other admins' do
       before do
         stub_const('Settings::AllowAdminsToManageAdmins', true)
-        subject.current_admin = create_admin[0]
+        subject.current_admin = create_admin[0] # When an admin is in the web app, the current_admin is set.
       end
 
       describe 'changing the disabled flag' do
@@ -67,10 +67,10 @@ describe Admin do
       end
     end
 
-    context 'when current admin CANNOT manage other admins' do
+    context 'when the  current admin CANNOT manage other admins' do
       before do
         stub_const('Settings::AllowAdminsToManageAdmins', false)
-        subject.current_admin = create_admin[0]
+        subject.current_admin = create_admin[0] # When an admin is in the web app, the current_admin is set.
       end
 
       describe 'changing the disabled flag' do
