@@ -64,14 +64,14 @@ describe Admin do
     expect(@admin.active_for_authentication?).to be false
   end
 
-  describe 'prevent admin changing disabled flag outside of setup, except to disable' do
+  describe 'prevent admin changing disabled flag outside of setup (with the add_admin script in the console), except to disable' do
     subject { @admin }
     %w(yes no).each do |admin_setup|
-      context "when the fphs_admin_setup is #{admin_setup}" do
+      context "when fphs_admin_setup is #{admin_setup}" do
         before { ENV['FPHS_ADMIN_SETUP'] = admin_setup }
         context 'when admin is not disabled' do
           [nil, false].each do |disable|
-            context "such that disabled is #{disable}" do
+            context "such that disabled is #{ disable.nil? ? 'nil': disable }" do
               before { subject.disabled = disable }
               it { is_expected.to be_valid }
               describe "and after invoking save" do
@@ -94,7 +94,7 @@ describe Admin do
         end
       end
     end
-    context 'when the fphs_admin_setup is yes, and admin is re-enabling another admin' do
+    context 'when fphs_admin_setup is yes, and admin is re-enabling another admin' do
       before do
         ENV['FPHS_ADMIN_SETUP'] = 'yes'
         subject.disable!
@@ -107,7 +107,7 @@ describe Admin do
       end
     end
 
-    context 'when the fphs_admin_setup is no, and admin is re-enabling another admin' do
+    context 'when fphs_admin_setup is no, and admin is re-enabling another admin' do
       before do
         ENV['FPHS_ADMIN_SETUP'] = 'no'
         subject.disable!
@@ -131,7 +131,7 @@ describe Admin do
 
       describe 'changing the disabled flag' do
         [nil, false, true].each do |disable|
-          context "when disabled is #{disable}" do
+          context "when disabled is #{ disable.nil? ? 'nil': disable }" do
             before { subject.disabled = disable }
             it { is_expected.to be_valid }
             describe "and after invoking save" do
@@ -162,7 +162,7 @@ describe Admin do
 
       describe 'changing the disabled flag' do
         [nil, false, true].each do |disable|
-          context "when disabled is #{disable}" do
+          context "when disabled is #{ disable.nil? ? 'nil': disable }" do
             before { subject.disabled = disable }
             it { is_expected.to be_valid }
             describe "and after invoking save" do
@@ -187,15 +187,11 @@ describe Admin do
     end
   end
 
-  describe "#disabled!" do
-
-  end
-
   describe 'creating other admins' do
     describe 'current admin creating another admin in the webapp' do
       before { allow_any_instance_of(Admin).to receive(:current_admin).and_return(@admin) }
 
-      context 'when the  current admin CAN manage other admins' do
+      context 'when the current admin CAN manage other admins' do
         before { stub_const('Settings::AllowAdminsToManageAdmins', true) }
         it 'is expected to another an admin' do
           expect { create_admin }.to_not raise_error
@@ -212,17 +208,17 @@ describe Admin do
       end
     end
 
-    describe 'OS-user creates another admin in the console' do
+    describe 'OS-user creates another admin with add_admin script in the console' do
       before { stub_const('Settings::AllowAdminsToManageAdmins', false) }
       context 'when the current admin CAN manage other admins' do
         before { ENV['FPHS_ADMIN_SETUP'] = 'yes' }
-        it 'is expected to another an admin' do
+        it 'is expected to create another an admin' do
           expect { create_admin }.to_not raise_error
           expect(create_admin[0]).to be_a(Admin)
           expect(create_admin[0]).to be_valid
         end
       end
-      context 'when the  current admin CANNOT manage other admins' do
+      context 'when the current admin CANNOT manage other admins' do
         before { ENV['FPHS_ADMIN_SETUP'] = 'no' }
         it 'is expected not to create another admin' do
           expect { create_admin }.to raise_error(/can only create admins in console/)
