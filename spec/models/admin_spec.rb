@@ -33,6 +33,76 @@ describe Admin do
     expect(@admin.active_for_authentication?).to be_falsy
   end
 
+  it 'only allows scripts outside of passenger to create admins' do
+    ENV['FPHS_ADMIN_SETUP'] = 'no'
+
+    expect { create_admin }.to raise_error(/can only create admins in console/)
+  end
+
+  it 'allows only admin setup script to reset password' do
+    ENV['FPHS_ADMIN_SETUP'] = 'yes'
+    res = AdminSetup.setup @good_email
+
+    admin = Admin.find_by_email @good_email
+    expect(admin.disable!).to be true
+    admin.disabled = false
+    expect(admin.save).to be true
+    admin.disable!
+
+    # Now simulate re-enabling the user outside of the admin setup script
+    ENV['FPHS_ADMIN_SETUP'] = 'no'
+    admin.disabled = false
+    res = admin.save
+
+    expect(res).to be false
+  end
+
+  it 'prevents admin disabled from authenticating' do
+    create_admin
+    @admin.disable!
+
+    expect(@admin.active_for_authentication?).to be false
+  end
+
+  describe 'prevent admin changing disabled flag outside of setup, except to disable' do
+    before { ENV['FPHS_ADMIN_SETUP'] = 'no' }
+    subject { @admin }
+    context 'when it is not disabled' do
+      [nil, false].each do |disable|
+        context "when disabled is #{disable}" do
+          before { subject.disabled = disable }
+          it { is_expected.to be_valid }
+          describe "and after invoking save" do
+            before { subject.save }
+            it { is_expected.to_not have_changes_to_save }
+          end
+        end
+      end
+    end
+
+    context 'when it is disabled' do
+      before { subject.disabled = true }
+      it { is_expected.to be_valid }
+      describe "and after invoking save" do
+        before { subject.save }
+        it { is_expected.to_not have_changes_to_save }
+      end
+    end
+
+    context 'when re-enabling an admin' do
+      before do
+        subject.disabled = true
+        subject.save
+        subject.disabled = false
+      end
+      it { is_expected.to_not be_valid }
+      describe "and after invoking save" do
+        before { subject.save }
+        it { is_expected.to have_changes_to_save }
+      end
+    end
+  end
+
   describe '#disabled' do
     subject { @admin }
     context 'when the current admin CAN manage other admins' do
@@ -42,7 +112,7 @@ describe Admin do
       end
 
       describe 'changing the disabled flag' do
-        [false, true]. each do |disable|
+        [nil, false, true].each do |disable|
           context "when disabled is #{disable}" do
             before { subject.disabled = disable }
             it { is_expected.to be_valid }
@@ -61,7 +131,7 @@ describe Admin do
           it { is_expected.to be_valid }
           describe "and after invoking save" do
             before { subject.save }
-            it { is_expected.to_not have_changes_to_save  }
+            it { is_expected.to_not have_changes_to_save }
           end
         end
       end
@@ -74,13 +144,13 @@ describe Admin do
       end
 
       describe 'changing the disabled flag' do
-        [false, true]. each do |disable|
+        [nil, false, true].each do |disable|
           context "when disabled is #{disable}" do
             before { subject.disabled = disable }
             it { is_expected.to be_valid }
             describe "and after invoking save" do
               before { subject.save }
-              it { is_expected.to_not have_changes_to_save  }
+              it { is_expected.to_not have_changes_to_save }
             end
           end
         end
@@ -100,21 +170,25 @@ describe Admin do
     end
   end
 
+  describe "#disabled!" do
+
+  end
+
   describe 'current admin creating another admin in the webapp' do
     before { allow_any_instance_of(Admin).to receive(:current_admin).and_return(@admin) }
 
-    context 'when admins are allowed to manage admins' do
+    context 'when the  current admin CAN manage other admins' do
       before { stub_const('Settings::AllowAdminsToManageAdmins', true) }
-      it 'expects to create an admin' do
+      it 'is expected to another an admin' do
         expect { create_admin }.to_not raise_error
         expect(create_admin[0]).to be_a(Admin)
         expect(create_admin[0]).to be_valid
       end
     end
 
-    context 'when admins are NOT allowed to manage admins' do
+    context 'when the  current admin CANNOT manage other admins' do
       before { stub_const('Settings::AllowAdminsToManageAdmins', false) }
-      it 'expects not to create an admin' do
+      it 'is expected not to create another admin' do
         expect { create_admin }.to raise_error(/can only create admins in console/)
       end
     end
