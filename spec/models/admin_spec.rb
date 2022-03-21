@@ -78,6 +78,9 @@ describe Admin do
                 before { subject.save }
                 it { is_expected.to_not have_changes_to_save }
               end
+              describe "#disabled!" do
+                it { expect(subject.disable!).to be_truthy }
+              end
             end
           end
         end
@@ -94,8 +97,7 @@ describe Admin do
     context 'when the fphs_admin_setup is yes, and admin is re-enabling another admin' do
       before do
         ENV['FPHS_ADMIN_SETUP'] = 'yes'
-        subject.disabled = true
-        subject.save
+        subject.disable!
         subject.disabled = false
       end
       it { is_expected.to be_valid }
@@ -108,8 +110,7 @@ describe Admin do
     context 'when the fphs_admin_setup is no, and admin is re-enabling another admin' do
       before do
         ENV['FPHS_ADMIN_SETUP'] = 'no'
-        subject.disabled = true
-        subject.save
+        subject.disable!
         subject.disabled = false
       end
       it { is_expected.to_not be_valid }
@@ -141,8 +142,7 @@ describe Admin do
         end
         context 'when re-enabling an admin' do
           before do
-            subject.disabled = true
-            subject.save
+            subject.disable!
             subject.disabled = false
           end
           it { is_expected.to be_valid }
