@@ -16,6 +16,8 @@ class ActivityLog::ActivityLogsController < UserBaseController
   attr_accessor :embedded_item
 
   def template_config
+    Application.refresh_dynamic_defs
+
     @instance_list.each do |oi|
       handle_embedded_item oi
     end
