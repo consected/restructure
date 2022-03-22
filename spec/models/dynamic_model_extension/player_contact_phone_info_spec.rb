@@ -8,6 +8,12 @@ RSpec.describe 'DynamicModelExtension::PlayerContactPhoneInfo', type: :model do
   include ModelSupport
   include PlayerContactSupport
   include BulkMsgSupport
+  include BulkMsg::AwsApiStubs
+
+  # before :all do
+  #   WebMock.disable_net_connect!(allow_localhost: true)
+  #   # SetupHelper.get_webmock_responses
+  # end
 
   before :example do
     create_admin
@@ -54,6 +60,10 @@ RSpec.describe 'DynamicModelExtension::PlayerContactPhoneInfo', type: :model do
 
     expect(PlayerContact.phone.where(rank: [5, 10]).count).to be > 0
     expect(DynamicModel::PlayerContactPhoneInfo.count).to eq 0
+
+    setup_stub(:pinpoint_validate)
+    setup_stub(:sns_opt_out)
+    setup_stub(:sns_opt_out_page2)
   end
 
   it 'lists player contact records that have not had phone number verified' do

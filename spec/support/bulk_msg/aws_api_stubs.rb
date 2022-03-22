@@ -10,8 +10,14 @@ module BulkMsg
       setup_webmock_stub(**use)
     end
 
-    def setup_webmock_stub(url:, body:, result:)
-      stub_request(:post, "https://#{url}/")
+    def setup_webmock_stub(url:, body:, result:, extras: nil)
+      url_slash = '/' unless url.include? '/'
+
+      extras ||= {
+        'X-Amz-Target' => /.+/
+      }
+
+      stub_request(:post, "https://#{url}#{url_slash}")
         .with(
           body: body,
           headers: {
@@ -20,13 +26,12 @@ module BulkMsg
             'Authorization' => /.+/,
             'Content-Length' => /.+/,
             'Content-Type' => /.+/,
-            'Host' => url,
+            'Host' => /.+/,
             'User-Agent' => /.+/,
             'X-Amz-Content-Sha256' => /.+/,
             'X-Amz-Date' => /.+/,
-            'X-Amz-Security-Token' => /.+/,
-            'X-Amz-Target' => /.+/
-          }
+            'X-Amz-Security-Token' => /.+/
+          }.merge(extras)
         )
         .to_return(status: 200, body: result, headers: {})
     end
@@ -632,6 +637,70 @@ module BulkMsg
             'searchStatistics' => { 'approximateTotalLogStreamCount' => 36, 'completedLogStreamCount' => 0 },
             'searchedLogStreams' => []
           }
+        },
+        pinpoint_validate: {
+          url: 'pinpoint.us-east-1.amazonaws.com/v1/phone/number/validate',
+          body: /\{"PhoneNumber":"\+1\d+"\}/,
+          extras: {},
+
+          result: { 'CountryCodeIso2' => 'US',
+                    'CountryCodeNumeric' => '1',
+                    'Country' => 'United States',
+                    'City' => 'Massapequa',
+                    'ZipCode' => '11758',
+                    'Timezone' => 'America/New_York',
+                    'CleansedPhoneNumberNational' => '5162621289',
+                    'CleansedPhoneNumberE164' => '+15162621289',
+                    'Carrier' => 'T-Mobile USA, Inc.',
+                    'PhoneTypeCode' => 0,
+                    'PhoneType' => 'MOBILE',
+                    'OriginalPhoneNumber' => '+15162621289' }
+        },
+        sns_opt_out: {
+          url: 'sns.us-east-1.amazonaws.com',
+          body: 'Action=ListPhoneNumbersOptedOut&Version=2010-03-31',
+          extras: {},
+          result: <<~END_RES
+            <ListPhoneNumbersOptedOutResponse xmlns="http://sns.amazonaws.com/doc/2010-03-31/">
+              <ListPhoneNumbersOptedOutResult>
+                <nextToken>ayJPcmlnaW5hdGlvbkVudGl0eSI6eyJzIjoiYXJuOmF3czppYW06Ojc1NjU5ODI0ODIzNDpyb290In0sIkRlc3RpbmF0aW9uUGhvbmVOdW1iZXIiOnsicyI6IisxMjc2MzkzMTU2NSJ9fQ==</nextToken>
+                <phoneNumbers>
+                  <member>+16171112222</member>
+                  <member>+16171112223</member>
+                  <member>+16171112224</member>
+                  <member>+16171112225</member>
+                  <member>+16171112226</member>
+                </phoneNumbers>
+              </ListPhoneNumbersOptedOutResult>
+              <ResponseMetadata>
+                <RequestId>d4fabe74-73a0-5878-8226-e4c072b96252</RequestId>
+              </ResponseMetadata>
+            </ListPhoneNumbersOptedOutResponse>
+          END_RES
+
+        },
+        sns_opt_out_page2: {
+          url: 'sns.us-east-1.amazonaws.com',
+          body: /Action=ListPhoneNumbersOptedOut&Version=2010-03-31&nextToken=.+/,
+          extras: {},
+          result: <<~END_RES
+            <ListPhoneNumbersOptedOutResponse xmlns="http://sns.amazonaws.com/doc/2010-03-31/">
+              <ListPhoneNumbersOptedOutResult>
+                <nextToken>ayJPcmlnaW5hdGlvbkVudGl0eSI6eyJzIjoiYXJuOmF3czppYW06Ojc1NjU5ODI0ODIzNDpyb290In0sIkRlc3RpbmF0aW9uUGhvbmVOdW1iZXIiOnsicyI6IisxMjc2MzkzMTU2NSJ9fQ==</nextToken>
+                <phoneNumbers>
+                  <member>+16171112222</member>
+                  <member>+16171112223</member>
+                  <member>+16171112224</member>
+                  <member>+16171112225</member>
+                  <member>+16171112226</member>
+                </phoneNumbers>
+              </ListPhoneNumbersOptedOutResult>
+              <ResponseMetadata>
+                <RequestId>d4fabe74-73a0-5878-8226-e4c072b96252</RequestId>
+              </ResponseMetadata>
+            </ListPhoneNumbersOptedOutResponse>
+          END_RES
+
         }
       }
     end
