@@ -33,12 +33,6 @@ describe Admin do
     expect(@admin.active_for_authentication?).to be_falsy
   end
 
-  it 'only allows scripts outside of passenger to create admins' do
-    ENV['FPHS_ADMIN_SETUP'] = 'no'
-
-    expect { create_admin }.to raise_error(/can only create admins in console/)
-  end
-
   it 'allows only admin setup script to reset password' do
     ENV['FPHS_ADMIN_SETUP'] = 'yes'
     res = AdminSetup.setup @good_email
@@ -94,7 +88,7 @@ describe Admin do
         end
       end
     end
-    context 'when fphs_admin_setup is yes, and admin is re-enabling another admin' do
+    context 'when FPHS_ADMIN_SETUP is yes, and admin is re-enabling another admin' do
       before do
         ENV['FPHS_ADMIN_SETUP'] = 'yes'
         subject.disable!
@@ -107,7 +101,7 @@ describe Admin do
       end
     end
 
-    context 'when fphs_admin_setup is no, and admin is re-enabling another admin' do
+    context 'when FPHS_ADMIN_SETUP is no, and admin is re-enabling another admin' do
       before do
         ENV['FPHS_ADMIN_SETUP'] = 'no'
         subject.disable!
