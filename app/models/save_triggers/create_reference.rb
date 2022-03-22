@@ -36,13 +36,16 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
         @item.transaction do
           new_type = @master.assoc_named(model_name.to_s.pluralize)
           if to_existing_record
-            ca = ConditionalActions.new to_existing_record[:record_id], @item
+            to_record_id = to_existing_record[:record_id]
+            raise FphsException, 'record_id must be set in to_existing_record' unless to_record_id
+
+            ca = ConditionalActions.new to_record_id, @item
             to_existing_record_id = ca.get_this_val
             new_item = new_type.find(to_existing_record_id)
           else
             new_item = new_type.new vals
-            new_item.save!
             new_item.force_save! if force_create
+            new_item.save!
           end
 
           case create_in

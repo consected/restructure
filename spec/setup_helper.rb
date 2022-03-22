@@ -270,4 +270,25 @@ module SetupHelper
 
     res
   end
+
+  # Used only to get responses from live API requests so they can be
+  # made into stub_request arguments
+  def self.get_webmock_responses
+    WebMock.allow_net_connect!
+    WebMock.after_request do |request_signature, response|
+      stubbing_instructions =
+        WebMock::RequestSignatureSnippet
+        .new(request_signature)
+        .stubbing_instructions
+      parsed_body = JSON.parse(response.body)
+      puts '===== outgoing request ======================='
+      puts stubbing_instructions
+      puts
+      puts 'parsed body:'
+      puts
+      pp parsed_body
+      puts '=============================================='
+      puts
+    end
+  end
 end
