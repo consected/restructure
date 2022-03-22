@@ -425,6 +425,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
   it 'limits a user to master records they created' do
     # Create an external identifier implementation
     create_admin
+    user_creator, = create_user opt: { no_app_type_setup: true }
     user1, = create_user opt: { no_app_type_setup: true }
     user2, = create_user opt: { no_app_type_setup: true }
     create_user
@@ -433,7 +434,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     # We don't know if user1 can access the same app as @user.
     # Set things up so she can
-    users = [user1, user2]
+    users = [user_creator, user1, user2]
     users.each do |u|
       res = u.has_access_to? :read, :general, :app_type, alt_app_type_id: @user.app_type_id
       unless res
@@ -452,8 +453,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     ids = []
     player_ids = []
     10.times do
-      create_master
-      create_item
+      master = create_master(user_creator)
+      create_item nil, master
       ids << @master.id
       player_ids << @player_info.id
     end
@@ -483,6 +484,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     # Now we should get none of the master records returned
     ms = Master.where(id: ids)
 
+    expect(ms.pluck(:created_by_user_id).uniq).not_to include(@user.id)
     jres = ms.limited_access_scope(@user).to_json(current_user: @user)
     res = JSON.parse jres
     expect(res.length).to eq 0

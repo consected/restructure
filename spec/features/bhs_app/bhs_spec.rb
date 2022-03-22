@@ -11,6 +11,10 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
   include BhsExpectations
   include BhsActions
 
+  def bhs_app_type
+    Admin::AppType.active.find_by(name: BhsImportConfig.bhs_app_name)
+  end
+
   before :all do
     BhsImportConfig.import_config
     SetupHelper.feature_setup
@@ -18,13 +22,13 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
     create_data_set_outside_tx
 
     create_admin
-    @app_type = Admin::AppType.where(name: BhsImportConfig.bhs_app_name).active.first
 
+    @app_type = bhs_app_type
     # By default the app limits access to only those masters that have a BHS assignment
     # already made in another app.
     # To avoid this, just disable this restriction for now.
     Admin::UserAccessControl.active
-                            .where(app_type_id: @app_type.id,
+                            .where(app_type_id: bhs_app_type.id,
                                    resource_type: %i[external_id_assignments limited_access])
                             .update_all(disabled: true)
 
@@ -54,6 +58,7 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
   end
 
   before :each do
+    @app_type = bhs_app_type
     ActivityLog.define_models
   end
 
@@ -68,9 +73,9 @@ describe 'Create a BHS subject and activity', driver: :app_firefox_driver do
     user_logout if user_logged_in?
     as_user @ra
     login_to_app
-    expect(@user.app_type_id).to eq @app_type.id
-    a = Admin::UserAccessControl.active.where(user: @user, app_type: @app_type, resource_type: :general,
-                                              resource_name: 'create_master').first.access
+    expect(@user.app_type_id).to eq bhs_app_type.id
+    a = Admin::UserAccessControl.active.find_by(user: @user, app_type: bhs_app_type, resource_type: :general,
+                                                resource_name: 'create_master').access
     expect(a).to eq 'read'
     expect(@user.can?(:create_master)).to be_truthy
     create_bhs_master
