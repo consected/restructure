@@ -40,12 +40,7 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
   before :each do
     ActivityLog.define_models
 
-    user = User.where(email: @good_email).first
-
-    expect(user).to be_a User
-    expect(user.id).to equal @user.id
-
-    # login_as @user, scope: :user
+    validate_setup
 
     login
   end

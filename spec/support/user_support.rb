@@ -205,4 +205,16 @@ module UserSupport
 
     # expect(user.has_access_to?(:create, :table, resource_name)).to be_truthy
   end
+
+  def validate_setup
+    user = User.find_by(email: @good_email)
+    expect(user).to be_a User
+    expect(user.id).to equal @user.id
+
+    unless defined? Scantron
+      puts 'Scantron was not defined!'
+      Rails.logger.warn 'Scantron was not defined!'
+      seed_database
+    end
+  end
 end

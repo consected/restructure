@@ -15,7 +15,12 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     @admin, = create_admin
 
     gs = Classification::GeneralSelection.all
-    gs.each { |g| g.current_admin = @admin; g.create_with = true; g.edit_always = true; g.save! }
+    gs.each do |g|
+      g.current_admin = @admin
+      g.create_with = true
+      g.edit_always = true
+      g.save!
+    end
 
     # Clean up the general selection list to only allow one phone, email etc
     gslist = []
@@ -291,13 +296,10 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
   end
 
   before :each do
-    user = User.where(email: @good_email).first
-
-    expect(user).to be_a User
-    expect(user.id).to equal @user.id
+    validate_setup
 
     # login_as @user, scope: :user
-    expect(user.has_access_to?(:create, :table, :player_contacts))
+    expect(@user.has_access_to?(:create, :table, :player_contacts))
     expect(@user.has_access_to?(:read, :general, :create_master))
     login
   end
