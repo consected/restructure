@@ -90,6 +90,9 @@ class Settings
   # Template user for creating new users. The roles from this user are copied to the new user.
   DefaultUserTemplateEmail = ENV['DEFAULT_USER_TEMPLATE_EMAIL'] || 'registration@template'
 
+  # Admins may be able to create other admins.
+  AllowAdminsToManageAdmins = (ENV['ALLOW_ADMINS_TO_MANAGE_ADMINS'].to_s.downcase == 'true').freeze
+
   # URL to appear on home page for users with login issues to contact
   DefaultLoginIssuesUrl = AllowUsersToRegister ? '/users/password/new' : "mailto: #{AdminEmail}?subject=Login%20Issues"
   LoginIssuesUrl = ENV['LOGIN_ISSUES_URL'] || DefaultLoginIssuesUrl
