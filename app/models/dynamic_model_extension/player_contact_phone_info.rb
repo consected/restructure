@@ -110,16 +110,16 @@ module DynamicModelExtension
               next
             end
 
-            unless pcpi.opted_out_at
-              # Not opted-out yet
-              begin
-                pcpi.opted_out_at = DateTime.now
-                pcpi.current_user = batch_user || pcpi.user  # the latter user is only likely to be needed in test
-                pcpi.save!
-              rescue StandardError => e
-                Rails.logger.warn "Could not update player contact phone info record: #{pcpi.id}\n#{e}"
-                raise e if e.to_s.start_with?('This item is not editable')
-              end
+            next if pcpi.opted_out_at
+
+            # Not opted-out yet
+            begin
+              pcpi.opted_out_at = DateTime.now
+              pcpi.current_user = batch_user || pcpi.user  # the latter user is only likely to be needed in test
+              pcpi.save!
+            rescue StandardError => e
+              Rails.logger.warn "Could not update player contact phone info record: #{pcpi.id}\n#{e}"
+              raise e if e.to_s.start_with?('This item is not editable')
             end
             total_opt_outs += 1
           end
