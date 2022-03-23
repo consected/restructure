@@ -211,10 +211,17 @@ module UserSupport
     expect(user).to be_a User
     expect(user.id).to equal @user.id
 
-    unless defined? Scantron
-      puts 'Scantron was not defined!'
-      Rails.logger.warn 'Scantron was not defined!'
-      seed_database
-    end
+    return if defined? Scantron
+
+    puts 'Scantron was not defined!'
+    Rails.logger.warn 'Scantron was not defined!'
+    seed_database
+    return if defined? Scantron
+
+    m = Resources::Models.find_by(resource_name: 'scantrons')
+    r = ExternalIdentifier.active.where(name: 'scantron')
+    Rails.logger.warn m
+    Rails.logger.warn r
+    raise FphsException, "Scantron is still not defined, even after seeding: \n#{m}\n#{r}"
   end
 end

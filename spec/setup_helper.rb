@@ -280,13 +280,22 @@ module SetupHelper
         WebMock::RequestSignatureSnippet
         .new(request_signature)
         .stubbing_instructions
-      parsed_body = JSON.parse(response.body)
+      begin
+        json = JSON.parse(response.body)
+      rescue JSON::ParserError
+        json = response.body
+      end
+      parsed_body = json
       puts '===== outgoing request ======================='
       puts stubbing_instructions
       puts
       puts 'parsed body:'
       puts
       pp parsed_body
+      puts 'response headers'
+      puts
+      puts response.headers
+      puts
       puts '=============================================='
       puts
     end

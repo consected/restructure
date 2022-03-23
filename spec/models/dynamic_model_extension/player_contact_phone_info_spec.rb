@@ -8,7 +8,7 @@ RSpec.describe 'DynamicModelExtension::PlayerContactPhoneInfo', type: :model do
   include ModelSupport
   include PlayerContactSupport
   include BulkMsgSupport
-  include BulkMsg::AwsApiStubs
+  include AwsApiStubs
 
   # before :all do
   #   WebMock.disable_net_connect!(allow_localhost: true)
