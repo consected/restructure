@@ -17,6 +17,12 @@ envs = {}
 aws_profile = ENV['AWS_PROFILE']
 aws_acct = ENV['AWS_ACCT_ID']
 
+if !aws_profile || !aws_acct || aws_profile.strip == '' || aws_acct.strip == ''
+  puts 'Usage:'
+  puts '  AWS_PROFILE=<profile name> AWS_ACCT_ID=<account id> app-scripts/aws_mfa_set.rb'
+  exit 2
+end
+
 res = `aws sts get-caller-identity | grep "#{aws_acct}"`
 while res == ''
   puts 'AWS MFA is needed. Enter the one time code and hit enter'
