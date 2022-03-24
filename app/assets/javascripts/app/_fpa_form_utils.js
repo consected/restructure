@@ -2109,10 +2109,10 @@ _fpa.form_utils = {
 
   set_image_classes: function (block) {
     block.find('img').on('error', function () {
-      $(this).addClass('broken-image')
+      $(this).addClass('broken-image').removeClass('image-to-load')
     }).on('load', function () {
-      $(this).addClass('loaded-image')
-    });
+      $(this).addClass('loaded-image').removeClass('image-to-load')
+    }).addClass('image-to-load');
   },
 
 
