@@ -327,17 +327,17 @@ class ActivityLog < ActiveRecord::Base
     #    has_many :activity_logs, as: :item, inverse_of: :item ????
     impl_parent_class.has_many model_association_name.to_sym, class_name: full_implementation_class_name do
       def build(att = nil)
-        att[:master] = proxy_association.owner.master
+        att[:master] ||= proxy_association.owner.master
         super(att)
       end
 
       def create(att = nil)
-        att[:master] = proxy_association.owner.master
+        att[:master] ||= proxy_association.owner.master
         super(att)
       end
 
       def create!(att = nil)
-        att[:master] = proxy_association.owner.master
+        att[:master] ||= proxy_association.owner.master
         super(att)
       end
     end
@@ -357,17 +357,17 @@ class ActivityLog < ActiveRecord::Base
                                  -> { where(extra_log_type: elt).order(awa => :desc, id: :desc) },
                                  class_name: full_implementation_class_name do
         def build(att = nil)
-          att[:master] = proxy_association.owner.master
+          att[:master] ||= proxy_association.owner.master
           super(att)
         end
 
         def create(att = nil)
-          att[:master] = proxy_association.owner.master
+          att[:master] ||= proxy_association.owner.master
           super(att)
         end
 
         def create!(att = nil)
-          att[:master] = proxy_association.owner.master
+          att[:master] ||= proxy_association.owner.master
           super(att)
         end
       end
