@@ -92,7 +92,7 @@ RSpec.describe 'Activity Log definition', type: :model do
       expect(@master.activity_log__player_contact_phone__step_2.reload.count).to eq 0
     end
 
-    it 'creates activity logs with the correct extra log type through associations' do
+    it 'creates activity logs with the correct extra log type through master associations' do
       expect(@master.activity_log__player_contact_phones.count).to eq 0
       expect(@master.activity_log__player_contact_phone__primary.count).to eq 0
       expect(@master.activity_log__player_contact_phone__blank_log.count).to eq 0
@@ -128,6 +128,44 @@ RSpec.describe 'Activity Log definition', type: :model do
       expect(@master.activity_log__player_contact_phone__blank_log.reload.count).to eq 0
       expect(@master.activity_log__player_contact_phone__step_1.reload.count).to eq 2
       expect(@master.activity_log__player_contact_phone__step_2.reload.count).to eq 1
+    end
+
+    it 'creates activity logs with the correct extra log type through item associations' do
+      expect(@player_contact.activity_log__player_contact_phones.count).to eq 0
+      expect(@player_contact.activity_log__player_contact_phone__primary.count).to eq 0
+      expect(@player_contact.activity_log__player_contact_phone__blank_log.count).to eq 0
+      expect(@player_contact.activity_log__player_contact_phone__step_1.count).to eq 0
+      expect(@player_contact.activity_log__player_contact_phone__step_2.count).to eq 0
+
+      al = @player_contact.activity_log__player_contact_phone__step_1.create!(select_call_direction: 'from player',
+                                                                              select_who: 'user', player_contact: @player_contact)
+
+      # expect(al.extra_log_type).to eq :step_1
+      # al.save!
+
+      expect(@player_contact.activity_log__player_contact_phones.reload.count).to eq 1
+      expect(@player_contact.activity_log__player_contact_phone__primary.reload.count).to eq 0
+      expect(@player_contact.activity_log__player_contact_phone__blank_log.reload.count).to eq 0
+      expect(@player_contact.activity_log__player_contact_phone__step_1.reload.count).to eq 1
+      expect(@player_contact.activity_log__player_contact_phone__step_2.reload.count).to eq 0
+
+      al = @player_contact.activity_log__player_contact_phone__step_2.create!(select_call_direction: 'from player',
+                                                                              select_who: 'user', player_contact: @player_contact)
+
+      expect(@player_contact.activity_log__player_contact_phones.reload.count).to eq 2
+      expect(@player_contact.activity_log__player_contact_phone__primary.reload.count).to eq 0
+      expect(@player_contact.activity_log__player_contact_phone__blank_log.reload.count).to eq 0
+      expect(@player_contact.activity_log__player_contact_phone__step_1.reload.count).to eq 1
+      expect(@player_contact.activity_log__player_contact_phone__step_2.reload.count).to eq 1
+
+      al = @player_contact.activity_log__player_contact_phone__step_1.create!(select_call_direction: 'from player',
+                                                                              select_who: 'user', player_contact: @player_contact)
+
+      expect(@player_contact.activity_log__player_contact_phones.reload.count).to eq 3
+      expect(@player_contact.activity_log__player_contact_phone__primary.reload.count).to eq 0
+      expect(@player_contact.activity_log__player_contact_phone__blank_log.reload.count).to eq 0
+      expect(@player_contact.activity_log__player_contact_phone__step_1.reload.count).to eq 2
+      expect(@player_contact.activity_log__player_contact_phone__step_2.reload.count).to eq 1
     end
   end
 end

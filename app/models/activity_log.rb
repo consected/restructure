@@ -298,7 +298,6 @@ class ActivityLog < ActiveRecord::Base
 
       rns.each do |rn|
         elt = rn.split('__').last
-
         elt = nil if elt == 'blank_log'
 
         Master.has_many rn.to_sym,
@@ -340,6 +339,37 @@ class ActivityLog < ActiveRecord::Base
       def create!(att = nil)
         att[:master] = proxy_association.owner.master
         super(att)
+      end
+    end
+
+    # Add an association for each extra log type
+    rns = self.class.all_option_configs_resource_names do |e|
+      e.config_obj.resource_name == resource_name.to_s
+    end
+
+    awa = action_when_attribute.to_sym
+    awa = :created_at if awa == :alt_order
+    rns.each do |rn|
+      elt = rn.split('__').last
+      elt = nil if elt == 'blank_log'
+
+      impl_parent_class.has_many rn.to_sym,
+                                 -> { where(extra_log_type: elt).order(awa => :desc, id: :desc) },
+                                 class_name: full_implementation_class_name do
+        def build(att = nil)
+          att[:master] = proxy_association.owner.master
+          super(att)
+        end
+
+        def create(att = nil)
+          att[:master] = proxy_association.owner.master
+          super(att)
+        end
+
+        def create!(att = nil)
+          att[:master] = proxy_association.owner.master
+          super(att)
+        end
       end
     end
   rescue StandardError => e
