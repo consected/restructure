@@ -124,7 +124,7 @@ class Admin::PageLayout < Admin::AdminBase
   #     "#an-id .some-class":
   #       display: block
   #       margin-right: 20px
-  configure :view_css, with: %i[classes selectors]
+  configure :view_css, with: %i[classes selectors media_queries]
 
   scope :standalone, -> { where layout_name: 'standalone' }
   scope :view, -> { where layout_name: 'view' }
