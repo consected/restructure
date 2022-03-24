@@ -1608,6 +1608,33 @@ _fpa.form_utils = {
     });
   },
 
+  setup_open_tab_before_requests: function (block) {
+    block.find('a[data-open-tab-before-request]').not('.setup-open-tab-br').each(function () {
+      $(this).on('click', function (ev) {
+        var elid = $(this).attr('data-open-tab-before-request');
+        var tab_el = $(elid);
+        if (tab_el.length === 0 || !tab_el.hasClass('collapsed')) return;
+
+        ev.preventDefault();
+        $(this).addClass('prevent-first-ajax');
+
+        // Trigger a click on this tab
+        tab_el.click();
+        // Save the current link
+        var click_a = $(this);
+
+        // Attach a post callback to the tab's target panel
+        var panel_el = $(tab_el.attr('data-target'));
+        panel_el[0].app_post_callback = function () {
+          // Now click the original link again, which will run through the ajax call
+          // and then quit because the panel is not collapsed
+          click_a.click();
+        }
+      })
+    }).addClass('setup-open-tab-br');
+  },
+
+
   setup_drag_and_drop: function (block) {
 
     block.find('.make-sortable').not('.made-sortable').each(function () {
@@ -2151,6 +2178,7 @@ _fpa.form_utils = {
     _fpa.form_utils.setup_filestore(block);
     _fpa.form_utils.setup_e_signature(block);
     _fpa.form_utils.hide_empty_blocks(block);
+    _fpa.form_utils.setup_open_tab_before_requests(block);
     // Not currently used or tested.
     // _fpa.form_utils.setup_form_filtered_select(block);
 

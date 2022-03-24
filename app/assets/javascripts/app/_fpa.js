@@ -498,6 +498,14 @@ _fpa = {
           return false;
         }
 
+        // Add the class prevent-first-ajax to a data-remote link
+        // to prevent the first ajax call from this link, then re-enable future requests
+        if ($(this).hasClass('prevent-first-ajax')) {
+          ev.preventDefault();
+          $(this).removeClass('prevent-first-ajax');
+          return false;
+        }
+
         if ($(this).hasClass('one-time-only-ajax')) {
           if ($(this).hasClass('one-time-only-fired')) {
             ev.preventDefault();
