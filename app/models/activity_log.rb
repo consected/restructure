@@ -291,6 +291,22 @@ class ActivityLog < ActiveRecord::Base
                       class_name: full_implementation_class_name,
                       &association_block
 
+      # Add an association for each extra log type
+      rns = self.class.all_option_configs_resource_names do |e|
+        e.config_obj.resource_name == resource_name.to_s
+      end
+
+      rns.each do |rn|
+        elt = rn.split('__').last
+
+        elt = nil if elt == 'blank_log'
+
+        Master.has_many rn.to_sym,
+                        -> { where(extra_log_type: elt).order(awa => :desc, id: :desc) },
+                        inverse_of: :master,
+                        class_name: full_implementation_class_name
+      end
+
       # Unlike external_id handlers (Scantron, etc) there is no need to update the
       # master's nested attributes for this model's symbol
       # since there is no link to advanced search
@@ -312,6 +328,16 @@ class ActivityLog < ActiveRecord::Base
     #    has_many :activity_logs, as: :item, inverse_of: :item ????
     impl_parent_class.has_many model_association_name.to_sym, class_name: full_implementation_class_name do
       def build(att = nil)
+        att[:master] = proxy_association.owner.master
+        super(att)
+      end
+
+      def create(att = nil)
+        att[:master] = proxy_association.owner.master
+        super(att)
+      end
+
+      def create!(att = nil)
         att[:master] = proxy_association.owner.master
         super(att)
       end
