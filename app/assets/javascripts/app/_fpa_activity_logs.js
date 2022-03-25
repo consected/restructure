@@ -89,6 +89,8 @@ _fpa.activity_logs = {
     _fpa.postprocessors.info_update_handler(block, d);
   },
 
+  // Get the activity log object data from the provided structure
+  // which may be either a single item or multiple results
   get_object_data: function (data) {
     data.item_types = data.multiple_results;
 
@@ -143,70 +145,7 @@ _fpa.activity_logs = {
   },
 
   handle_save_action: function (block, data) {
-
-    var save_action;
-    if (data._control) {
-      obj_data = _fpa.activity_logs.get_object_data(data);
-
-      if (obj_data._created) {
-        var dc = obj_data._control;
-        if (!dc) dc = data._control;
-        if (dc && dc.save_action)
-          save_action = dc.save_action.on_create;
-      }
-      else if (obj_data._updated) {
-        var dc = obj_data._control;
-        if (!dc) dc = data._control;
-        if (dc && dc.save_action)
-          save_action = dc.save_action.on_update;
-      }
-
-
-      if (typeof save_action == 'object') {
-        if (save_action.go_to_master) {
-          _fpa.send_ajax_request("/masters.json?master[id]=" + obj_data.master_id + "&commit=search", {
-            try_app_callback: function (el, data) {
-              _fpa.hide_modal(1);
-            }
-          });
-
-        }
-
-        if (save_action.create_next_creatable) {
-          var sel = '.activity-logs-generic-block[data-sub-id="' + obj_data.master_id + '"][data-sub-item="' + obj_data.item_types + '"] a.add-item-button[data-extra-log-type]';
-          var res = $(sel).not('[disabled]').first().click();
-        }
-        if (save_action.show_panel) {
-          var tab = $('.master-panel[data-master-id="' + obj_data.master_id + '"] a[data-panel-tab="' + save_action.show_panel + '"]').click();
-          window.setTimeout(function () {
-            $(tab.attr('data-target')).collapse('show');
-          }, 500);
-        }
-        if (save_action.hide_panel) {
-          var tab2 = $('.master-panel[data-master-id="' + obj_data.master_id + '"] a[data-panel-tab="' + save_action.hide_panel + '"]');
-          window.setTimeout(function () {
-            $(tab2.attr('data-target')).collapse('hide');
-          }, 500);
-        }
-        if (save_action.refresh_panel) {
-          var tab3 = $('.master-panel[data-master-id="' + obj_data.master_id + '"] a[data-panel-tab="' + save_action.refresh_panel + '"]');
-          var exp = tab3.attr('aria-expanded') == 'true';
-          tab3.click();
-
-          if (exp) {
-            window.setTimeout(function () {
-              $(tab3.attr('data-target')).collapse('show');
-            }, 500);
-          }
-          else {
-            window.setTimeout(function () {
-              $(tab3.attr('data-target')).collapse('hide');
-            }, 500);
-          }
-
-        }
-      }
-    }
+    _fpa.activity_logs.save_action.handle(block, data)
   }
 
 };
