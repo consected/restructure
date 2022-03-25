@@ -13,7 +13,6 @@ module SetupHelper
 
   def self.registration_admin
     admin, = ::UserSupport.create_admin('registration')
-    ENV['REGISTRATION_ADMIN_EMAIL'] = admin.email
     admin
   end
 
