@@ -11,6 +11,12 @@ module SetupHelper
     admin
   end
 
+  def self.registration_admin
+    admin, = ::UserSupport.create_admin('registration')
+    ENV['REGISTRATION_ADMIN_EMAIL'] = admin.email
+    admin
+  end
+
   def self.db_name
     ActiveRecord::Base.connection.current_database
   end
