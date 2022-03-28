@@ -30,8 +30,10 @@ class User < ActiveRecord::Base
 
   default_scope -> { order email: :asc }
   scope :not_template, -> { where('email NOT LIKE ?', Settings::TemplateUserEmailPatternForSQL) }
+
+  before_validation :set_current_user_on_user_preferences
+  before_create :build_user_preference_on_create
   before_save :set_app_type
-  before_create :find_or_create_user_preference # Builds the user_preference if it does not exist.
 
   validates :first_name,
             presence: {
@@ -235,9 +237,11 @@ class User < ActiveRecord::Base
 
   private
 
-  def find_or_create_user_preference
-    unless user_preference
+  def set_current_user_on_user_preferences
+    user_preference&.current_user = self
+  end
+
+  def build_user_preference_on_create
       build_user_preference({ current_user: self }) unless a_template_or_batch_user?
-    end
   end
 end

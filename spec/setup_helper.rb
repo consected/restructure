@@ -11,6 +11,11 @@ module SetupHelper
     admin
   end
 
+  def self.registration_admin
+    admin, = ::UserSupport.create_admin('registration')
+    admin
+  end
+
   def self.db_name
     ActiveRecord::Base.connection.current_database
   end
