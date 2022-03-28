@@ -16,6 +16,18 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] users as a table to calculate against in *_if evaluations
+- [Added] save_action expand_reference
+- [Added] media queries to view css options
+- [Added] activity log master and item associations for extra log types, allowing for substitutions against a specific activity
+- [Added] defined_selector options to reports criteria to allow easy selector configuration based on central and model configurations
+- [Added] 'never' option to always_embed_*reference
+- [Added] ability for an existing admin to add a new admin account if appropriate server setting allows
+- [Fixed] limited_access_control using association master_created_by_user
+- [Fixed] issue loading images when window not focused
+
 ## [8.0.54] - 2022-03-16
 
 Interim release for testing only
