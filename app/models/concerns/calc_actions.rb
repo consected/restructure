@@ -373,7 +373,11 @@ module CalcActions
 
         # The result instance now gets the defined association
         # TODO: check this against a list of valid associations
-        all_res = @this_val = first_cond_res.send(@this_val_where[:assoc])
+        all_res = @this_val = if first_cond_res.respond_to?(@this_val_where[:assoc])
+                                first_cond_res.send(@this_val_where[:assoc])
+                              else
+                                [first_cond_res]
+                              end
         first_res = all_res.first
 
         # If we got a result from the asssociation process it, otherwise continue
@@ -917,7 +921,12 @@ module CalcActions
     # Make the list of tables to be joined valid (in case anything slipped through) and unique
     @join_tables = (@join_tables - NonJoinTableNames).uniq
 
-    if %i[all not_all].include? condition_type
+    if @join_tables.first == :users
+      # Just get from the non masters tables without a join
+      @base_query = User.all
+      @current_scope = User.all
+      # @current_scope = @base_query
+    elsif %i[all not_all].include? condition_type
       # Inner join, since our conditions require the existence of records in the joined tables
       @base_query = @current_scope.joins(@join_tables)
     else
