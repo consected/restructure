@@ -16,8 +16,8 @@ class Admin < ActiveRecord::Base
   end
 
   before_validation :prevent_email_change, on: :update
-  before_validation :prevent_reenabling_admin, on: :update
-  before_validation :prevent_not_in_setup_script, on: :create
+  before_validation :prevent_re_enabling_admin, on: :update
+  before_validation :prevent_creating_admin, on: :create
 
   validate :only_allow_disable
   after_save :unlock_account, on: :update
@@ -64,9 +64,9 @@ class Admin < ActiveRecord::Base
   # This facilitates app type importing and automatic migrations
   attr_writer :matching_user_app_type
 
-  # Simple way to ensure that this is not being run from inside Passenger
-  def in_setup_script
-    ENV['FPHS_ADMIN_SETUP'] == 'yes'
+  # Simple way to ensure that the current admin is allowed to create, re-enable, and update another admin.
+  def can_manage_admins?
+    (ENV['FPHS_ADMIN_SETUP'] == 'yes' && !current_admin) || (Settings::AllowAdminsToManageAdmins && !!current_admin)
   end
 
   def to_s
@@ -95,19 +95,19 @@ class Admin < ActiveRecord::Base
     errors.add(:email, 'change not allowed!') if id == current_admin&.id && email_changed? && persisted?
   end
 
-  def prevent_reenabling_admin
-    if disabled_changed? && persisted? && disabled != true && disabled_was == true && !in_setup_script
+  def prevent_re_enabling_admin
+    if disabled_changed? && persisted? && disabled != true && disabled_was == true && !can_manage_admins?
       errors.add(:disabled, 'change not allowed!')
     end
   end
 
-  def prevent_not_in_setup_script
-    errors.add(:admin, 'can only create admins in console') unless in_setup_script
+  def prevent_creating_admin
+    errors.add(:admin, 'can only create admins in console') unless can_manage_admins?
   end
 
   def only_allow_disable
-    return if in_setup_script
-    return unless !disabled && disabled_changed? && !disabled_was != true
+    return if can_manage_admins?
+    return unless !disabled && disabled_changed? && !disabled_was != true #TODO simplify
 
     errors.add(:admin, 'can not re-enable administrators')
   end

@@ -5,6 +5,8 @@ class DynamicModel::DynamicModelsController < UserBaseController
   include MasterHandler
 
   def template_config
+    Application.refresh_dynamic_defs
+
     render partial: 'dynamic_models/common_search_results_template_set'
   end
 

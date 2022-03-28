@@ -18,11 +18,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
   end
 
   before :each do
-    user = User.where(email: @good_email).first
-    expect(user).to be_a User
-    expect(user.id).to equal @user.id
-
-    # login_as @user, scope: :user
+    validate_setup
 
     login
   end

@@ -8,6 +8,7 @@ RSpec.describe 'DynamicModelExtension::ZeusShortLinkClick', type: :model do
   include ModelSupport
   include PlayerContactSupport
   include BulkMsgSupport
+  include AwsApiStubs
 
   before :example do
     create_admin
@@ -24,6 +25,11 @@ RSpec.describe 'DynamicModelExtension::ZeusShortLinkClick', type: :model do
     let_user_create :dynamic_model__zeus_bulk_message_recipients
     let_user_create :dynamic_model__zeus_bulk_message_statuses
     let_user_create :dynamic_model__zeus_short_links
+
+    setup_stub(:s3_shortlink)
+    setup_stub(:s3_head_shortlink)
+    setup_stub(:s3_get_access_list)
+    setup_stub(:s3_get_access_item)
   end
 
   it 'adds a short link record to a master record, ' do

@@ -90,6 +90,10 @@ view_css:
       font-size: 200%
     'p > span':
       font-decoration: underscore
+  media_queries:
+    "@media only screen and (min-width: 1180px)":
+      '.someselectors':
+        width: 75%
 
 criteria_css:
   classes:
@@ -104,6 +108,11 @@ criteria_css:
       font-size: 200%
     'p > span':
       font-decoration: underscore
+  media_queries:
+    "@media only screen and (min-width: 1180px)":
+      '.someselectors':
+        width: 75%
+
 
 master_results_css:
   classes:
@@ -118,7 +127,10 @@ master_results_css:
       font-size: 200%
     'p > span':
       font-decoration: underscore
-
+  media_queries:
+    "@media only screen and (min-width: 1180px)":
+      '.someselectors':
+        width: 75%
 
 component:
   options:

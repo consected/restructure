@@ -5,6 +5,7 @@
         - type: 'email|sms'
           role: '(optional) role name(s) to notify - or reference like {this:user_id: return_value} '
           users: '(optional) list of users to notify - or reference like {this:phone_numbers: return_value} '
+          emails: '(optional) list of emails (or single email) - not necessarily users - or reference like {this: emails: return_value} '
           phones: '(optional) list of phone numbers to notify - or reference like {this:role_names: return_value} '
           phone_records:
             dynamic_model__zeus_bulk_message_recipients:

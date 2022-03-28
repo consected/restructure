@@ -1,16 +1,25 @@
 # frozen_string_literal: true
 
-# Manage Admins from the admin panel is limited disabling admin accounts. There is no
-# ability for regular admins to create or update other admin accounts. This remains
-# limited to an OS user, using the app-scripts/add_admin.sh command.
+# Regular admins are allowed to create other admin accounts if ALLOW_ADMINS_TO_MANAGE_ADMINS is true.
+# Otherwise, the ability to create other admins is limited to an OS-user, using the app-scripts/add_admin.sh command.
+#
+# Regular admins are always allowed to:
+#   1. update other admin's names,
+#   2. generate other admin's password or 2FA authorizations
+#   3. disable other admins
+#
+# Regular admin cannot re-enable an admin; this feature remains limited to an OS-user.
 class Admin::ManageAdminsController < AdminController
   # Only allow update of the disabled status of an administrator to disabled.
   def update
     if @admin.disabled && secure_params[:disabled] != '1'
-      not_authorized
-      flash.now[:warning] = 'Admins can not be re-enabled'
-      return
+      unless Settings::AllowAdminsToManageAdmins
+        not_authorized
+        flash.now[:warning] = 'Admins can not be re-enabled.'
+        return
+      end
     end
+
 
     if params[:gen_new_pw] == '1'
       @admin.force_password_reset
@@ -32,7 +41,9 @@ class Admin::ManageAdminsController < AdminController
   end
 
   def create
-    not_authorized
+    not_authorized unless Settings::AllowAdminsToManageAdmins
+
+    super
   end
 
   protected

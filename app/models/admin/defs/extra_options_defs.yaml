@@ -61,6 +61,8 @@
       refresh_panel:
         value: panel / category name
         if: 'ref: ** conditions reference **'
+      expand_reference:
+        value: next | reference with caption
     on_create: {}
     on_save:
       notes: |

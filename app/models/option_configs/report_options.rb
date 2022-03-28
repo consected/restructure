@@ -21,9 +21,9 @@ module OptionConfigs
                                       force_show_search_button]
 
     configure :list_options, with: %i[hide_in_list list_description]
-    configure :view_css, with: %i[classes selectors]
-    configure :criteria_css, with: %i[classes selectors]
-    configure :master_results_css, with: %i[classes selectors]
+    configure :view_css, with: %i[classes selectors media_queries]
+    configure :criteria_css, with: %i[classes selectors media_queries]
+    configure :master_results_css, with: %i[classes selectors media_queries]
     configure :component, with: [:options]
     configure :column_options, with: %i[tags classes hide show_as alt_column_header]
 

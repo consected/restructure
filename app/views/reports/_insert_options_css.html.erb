@@ -1,0 +1,64 @@
+<%
+
+# Generate CSS for the block from the YAML, matching class names
+# For example -
+#
+# view_css:
+#   classes:
+#     class-name:
+#       display: block
+#       margin-right: 20px
+if view_css.classes
+  res = view_css.classes.map {|c, v|
+    styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
+    "#{outer} .#{c} \{  #{styles.join(' ')}\}"
+  }
+end
+
+# Generate CSS for the block from the YAML, matching CSS selectors
+# For example -
+#
+# view_css:
+#   selectors:
+#     "#an-id .some-class, .another-class":
+#       display: block
+#       margin-right: 20px
+if view_css.selectors
+  res ||= []
+  res += view_css.selectors.map {|c, v|
+    next unless v
+
+    cs = c.to_s.split(',').map{|c1| "#{outer} #{c1}"}.join(", ")
+    styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
+    "#{cs} \{  #{styles.join(' ')}\}"
+  }
+end
+
+# Generate CSS for the block from the YAML, matching media queries and inner CSS selectors
+# For example -
+#
+# view_css:
+#   media_queries:
+#     "@media only screen and (min-width: 1180px)":
+#       '.someselectors':
+#         width: 75%
+if view_css.media_queries
+  res ||= []
+  view_css.media_queries.map {|mk, mv|
+    res << "#{mk} {"
+    res += mv.map {|c, v|
+      cs = c.to_s.split(',').map{|c1| "#{outer} #{c1}"}.join(", ")
+      styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
+      "#{cs} \{  #{styles.join(' ')}\}"
+    }
+    res << "}"
+  }
+end
+# Put the result straight into a <style> block
+if res
+  res = res.join("\n")
+%>
+<style>
+  <%= res.html_safe %>
+</style>
+<% end %>

@@ -45,8 +45,9 @@ module LimitedAccessControl
               all
             end
 
-      assoc = (new.send(assoc_name) if new.respond_to?(assoc_name))
+      res = res.only_created_by_current_user(current_user) if assoc_name == :master_created_by_user
 
+      assoc = (new.send(assoc_name) if new.respond_to?(assoc_name))
       if assoc&.requires_assigned_user?
         table_name = ModelReference.record_type_to_ns_table_name(assoc_name)
         res = res.where(table_name => { AssignedToCol => current_user.id })

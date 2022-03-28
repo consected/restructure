@@ -4,6 +4,8 @@ class ExternalIdentifier::ExternalIdentifierController < UserBaseController
   include MasterHandler
 
   def template_config
+    Application.refresh_dynamic_defs
+
     render plain: ''
   end
 
