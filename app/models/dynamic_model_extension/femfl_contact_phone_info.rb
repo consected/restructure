@@ -23,7 +23,8 @@ module DynamicModelExtension
       def incomplete_femfl_contacts(conditions: {}, limit: nil)
         conditions[:rank] ||= [5, 10]
 
-        FemflContact.phone
+        FemflContact.active
+                    .where(rec_type: :phone)
                     .joins('left outer join femfl_contact_phone_infos ' \
                             'on femfl_contact_phone_infos.femfl_contact_id = femfl_contacts.id')
                     .where('femfl_contact_phone_infos.id is null')
