@@ -113,7 +113,7 @@ _fpa.activity_logs.save_action = class {
         block.parent().next('.in-item-model-references').find('.mr-expander').click()
       }
       else {
-        block.parent().next(`.in-item-model-references[data-mr-name="${action_value}"]`).find('.mr-expander').click()
+        block.parent().parent().find(`.in-item-model-references[data-mr-name="${action_value}"]`).find('.mr-expander').click()
       }
     }, 500)
   }
