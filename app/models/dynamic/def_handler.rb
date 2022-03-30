@@ -422,8 +422,8 @@ module Dynamic
     end
 
     #
-    # Array of option config names (strings)
-    # @return [Array]
+    # Array of option config names (Symbols)
+    # @return [Array{Symbol}]
     def option_configs_names
       option_configs&.map(&:name)
     end
