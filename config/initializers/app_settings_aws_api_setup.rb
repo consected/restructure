@@ -2,8 +2,9 @@
 
 # Set up AWS API default configurations
 ActiveSupport.on_load(:aws_api_setup) do
-  self.sms_aws_region = ENV['SMS_AWS_REGION'] || ENV['AWS_REGION'] || 'us-east-1'
-  self.s3_aws_region =  ENV['S3_AWS_REGION'] || ENV['AWS_REGION'] || 'us-east-1'
+  self.default_aws_region = ENV['AWS_REGION'] || 'us-east-1'
+  self.sms_aws_region = ENV['SMS_AWS_REGION'] || default_aws_region
+  self.s3_aws_region =  ENV['S3_AWS_REGION'] || default_aws_region
 
   if Rails.env.production?
     self.sender_id = ENV['SMS_SENDER_ID']

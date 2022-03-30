@@ -111,13 +111,14 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
 
     al_def.current_admin = @admin
     al_def.save!
+    al_def.force_option_config_parse
 
     expect(al_def.resource_name).to eq 'activity_log__player_contact_phones'
 
     setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create, user: @user
     setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
 
-    al = player_contact.activity_log__player_contact_phones.build(select_call_direction: 'from player',
+    al = player_contact.activity_log__player_contact_phones.build(select_call_direction: 'one',
                                                                   select_who: 'user',
                                                                   extra_log_type: 'step_1')
     al.save!
@@ -156,6 +157,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
 
     al_def.current_admin = @admin
     al_def.save!
+    al_def.force_option_config_parse
 
     expect(al_def.resource_name).to eq 'activity_log__player_contact_phones'
 

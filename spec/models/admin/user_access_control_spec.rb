@@ -447,6 +447,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
       expect(res).to be_truthy
     end
 
+    orig_user = @user
+    @user = user_creator
     let_user_create_player_infos
 
     # Create some master records
@@ -458,6 +460,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
       ids << @master.id
       player_ids << @player_info.id
     end
+
+    @user = orig_user
 
     rt = :limited_access
 

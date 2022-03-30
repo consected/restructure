@@ -422,8 +422,8 @@ module Dynamic
     end
 
     #
-    # Array of option config names (strings)
-    # @return [Array]
+    # Array of option config names (Symbols)
+    # @return [Array{Symbol}]
     def option_configs_names
       option_configs&.map(&:name)
     end
@@ -685,13 +685,19 @@ module Dynamic
       Resources::Models.remove(resource_name: resource_name)
     end
 
-    def remove_assoc_class(in_class_name)
-      # Dump the old association
-      assoc_ext_name = "#{in_class_name}#{model_class_name.pluralize}AssociationExtension"
-      Object.send(:remove_const, assoc_ext_name) if implementation_class_defined?(Object)
+    # Dump the old association
+    def remove_assoc_class(in_class_name, alt_target_class = nil)
+      cns = in_class_name.to_s.split('::')
+      klass = Object
+      klass = cns.first.constantize if cns.length == 2
+      short_class_name = cns.last
+      alt_target_class ||= model_class_name.pluralize
+      assoc_ext_name = "#{short_class_name}#{alt_target_class}AssociationExtension"
+      return unless klass.constants.include?(assoc_ext_name.to_sym)
+
+      klass.send(:remove_const, assoc_ext_name) if implementation_class_defined?(Object)
     rescue StandardError => e
       logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
-      # puts "Failed to remove #{assoc_ext_name} : #{e}"
     end
 
     def prefix_class

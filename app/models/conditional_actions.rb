@@ -66,44 +66,64 @@ class ConditionalActions
   # }
   # Items that either have no 'if' condition, or are true are kept.
   # Conditional failures are not returned.
-  def calc_save_option_if
+  #
+  # If the *check_action_if* param is not set (default), typically by
+  # a save trigger like create_reference, allow
+  # multiple items to be performed with the same name.
+  # This just passes responsibility for checking the condition to the processor.
+  # If the *check_action_if* param is set, the if condition
+  # for each action will be checked.
+  #  - When the definition includes the value: key
+  #    then the value for the first successful condition for each action will be returned.
+  #    This allows save_actions to return an actual value, rather than just success / fail
+  #  - When the definition does not include the value: key
+  #    then true will be returned for the action if any conditions match
+  #
+  # @param [true | nil] check_action_if - default not set
+  # @return [Hash | nil | Object] - returns:
+  #                                   Hash of results for {on_save:, on_create:, on_update:}
+  #                                   nil if the Hash has no entries
+  #                                   the original configuration if not a Hash
+  def calc_save_option_if(check_action_if: nil)
     sa = @action_conf
+    res = {}
 
-    if sa.is_a? Hash
-      res = {}
-      return unless sa.first
-      if sa.first.last.is_a? String
-        return { sa.first.first => { sa.first.last => true } }
-      else
-        sa.each do |on_act, conf|
-          conf.each do |do_act, conf_act|
-            if conf_act.is_a? Hash
-              if conf_act[:if]
-                ca = ConditionalActions.new conf_act[:if], @current_instance
-                succ = ca.calc_action_if
-              else
-                succ = true
-              end
-              if succ
-                res[on_act] ||= {}
-                if conf_act[:value]
-                  res[on_act].merge!(do_act => conf_act[:value])
-                else
-                  res[on_act][do_act] = true
-                end
-              end
-            else
-              # Default if this was not a Hash definition
-              # For example, an array might be used in the create_reference, allowing
-              # multiple items to be performed with the same name. This just passes responsibility
-              # for checking the condition to the processor
-              res[on_act] ||= {}
-              res[on_act][do_act] = true
-            end
+    return sa unless sa.is_a? Hash
+
+    return unless sa.first
+
+    return { sa.first.first => { sa.first.last => true } } if sa.first.last.is_a? String
+
+    sa.each do |on_act, conf|
+      conf.each do |do_act, conf_acts|
+        unless check_action_if
+          res[on_act] ||= {}
+          res[on_act][do_act] = true
+          next
+        end
+
+        conf_acts = [conf_acts] unless conf_acts.is_a? Array
+
+        conf_acts.each do |conf_act|
+          if conf_act[:if]
+            ca = ConditionalActions.new conf_act[:if], @current_instance
+            succ = ca.calc_action_if
+          else
+            succ = true
           end
+          next unless succ
+
+          res[on_act] ||= {}
+          res[on_act][do_act] = if conf_act.key? :value
+                                  conf_act[:value]
+                                else
+                                  true
+                                end
+          break
         end
       end
     end
+
     res
   end
 end

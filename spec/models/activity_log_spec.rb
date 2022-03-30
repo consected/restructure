@@ -46,6 +46,9 @@ RSpec.describe 'Activity Log definition', type: :model do
       al_def.save!
       al_def.reload
       al_def.force_option_config_parse
+
+      Application.refresh_dynamic_defs unless al_def.option_configs_names == %i[step_1 step_2 primary blank_log]
+
       setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create, user: @user
       setup_access :activity_log__player_contact_phone__blank_log, resource_type: :activity_log_type, access: :create, user: @user
       setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, access: :create, user: @user

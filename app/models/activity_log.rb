@@ -353,6 +353,7 @@ class ActivityLog < ActiveRecord::Base
       elt = rn.split('__').last
       elt = nil if elt == 'blank_log'
 
+      remove_assoc_class impl_parent_class, rn.ns_camelize.gsub('::', '') if item_type_exists
       impl_parent_class.has_many rn.to_sym,
                                  -> { where(extra_log_type: elt).order(awa => :desc, id: :desc) },
                                  class_name: full_implementation_class_name do
@@ -527,6 +528,8 @@ class ActivityLog < ActiveRecord::Base
           logger.info "Already defined class #{model_class_name}."
           # Refresh the definition in the implementation class
           implementation_class.definition = definition
+          # Re-add the model to the list to pick up new extra log types
+          add_model_to_list implementation_class
           return
         end
 

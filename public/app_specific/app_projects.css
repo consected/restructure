@@ -113,7 +113,8 @@ div#master-search-accordion {
   background: rgb(248, 248, 248);
 }
 
-h4.list-group-item-heading.al-label-data-request-assignment-item {
+h4.list-group-item-heading.al-label-data-request-assignment-item,
+h4.list-group-item-heading.al-label-project-assignment-data-update-item {
   display: none;
 }
 
@@ -441,9 +442,10 @@ h4.container-name {
   display: none;
 }
 
-.action-buttons .add-item-button {
+/* .action-buttons .add-item-button {
   display: none;
-}
+}*/
+
 .action-buttons .add-item-button[data-target="#activity-log--data-request-assignment-request--1-"] {
   display: inline;
 }

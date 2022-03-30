@@ -298,9 +298,17 @@ module Dynamic
       send(action)
     end
 
-    def action_when=(d)
+    # Set the action_when attribute (which may be a timestamp or integer)
+    # If a timestamp is received and the target attribute is and integer,
+    # then it will be implicitly cast to an.
+    # If the id attribute is the target, then do not set anything,
+    # since this will break the primary key. Just return silently.
+    # @param [DateTime|Integer] date_or_int
+    def action_when=(date_or_int)
+      return if self.class.action_when_attribute == :id
+
       action = self.class.action_when_attribute
-      send("#{action}=", d)
+      send("#{action}=", date_or_int)
     end
 
     def save_action
