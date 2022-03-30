@@ -3,6 +3,14 @@
 # Configurations for AWS APIs.
 # The actual configurations are defined in (config/initializers/app_settings_aws_api_setup.rb)
 module AwsApiSetup
+  def self.default_aws_region=(r)
+    @default_aws_region = r
+  end
+
+  def self.default_aws_region
+    @default_aws_region
+  end
+
   def self.s3_aws_region=(r)
     @s3_aws_region = r
   end
@@ -41,10 +49,6 @@ module AwsApiSetup
 
   def self.importance
     @importance
-  end
-
-  def self.stub_responses
-    Rails.env.test? && ENV['IGNORE_MFA'] == 'true'
   end
 
   ActiveSupport.run_load_hooks(:aws_api_setup, self)
