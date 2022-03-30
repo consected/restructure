@@ -2,11 +2,47 @@
 
 module AwsApiStubs
   def setup_stub(type, result: nil)
+    setup_default_aws_stubs
     use = requests_responses[type]
     use[result: result] if result
     use[:result] = use[:result].to_json if use[:result].is_a? Hash
 
     setup_webmock_stub(**use)
+  end
+
+  def setup_default_aws_stubs
+    stub_request(:put, 'http://169.254.169.254/latest/api/token')
+      .with(
+        headers: {
+          'Accept' => '*/*',
+          'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'User-Agent' => 'aws-sdk-ruby3/3.130.0',
+          'X-Aws-Ec2-Metadata-Token-Ttl-Seconds' => '21600'
+        }
+      )
+      .to_return(status: 200, body: '', headers: {})
+
+    body = <<~END_BODY
+      {
+        "Code" : "Success",
+        "LastUpdated" : "2012-04-26T16:39:16Z",
+        "Type" : "AWS-HMAC",
+        "AccessKeyId" : "ASIAIOSFODNN7EXAMPLE",
+        "SecretAccessKey" : "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+        "Token" : "token",
+        "Expiration" : "#{(DateTime.now + 1.hour).iso8601}"
+      }
+    END_BODY
+
+    stub_request(:get, %r{http://169.254.169.254/latest/meta-data/iam/security-credentials/.*})
+      .with(
+        headers: {
+          'Accept' => '*/*',
+          'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'User-Agent' => 'aws-sdk-ruby3/3.130.0'
+        }
+      )
+      .to_return(status: 200, body: body, headers: {})
   end
 
   def setup_webmock_stub(url:, result:, body: nil, method: :post, extras: {}, return_headers: {}, return_status: 200)
