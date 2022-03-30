@@ -687,9 +687,15 @@ module Dynamic
 
     # Dump the old association
     def remove_assoc_class(in_class_name, alt_target_class = nil)
+      cns = in_class_name.to_s.split('::')
+      klass = Object
+      klass = cns.first.constantize if cns.length == 2
+      short_class_name = cns.last
       alt_target_class ||= model_class_name.pluralize
-      assoc_ext_name = "#{in_class_name}#{alt_target_class}AssociationExtension"
-      Object.send(:remove_const, assoc_ext_name) if implementation_class_defined?(Object)
+      assoc_ext_name = "#{short_class_name}#{alt_target_class}AssociationExtension"
+      return unless klass.constants.include?(assoc_ext_name.to_sym)
+
+      klass.send(:remove_const, assoc_ext_name) if implementation_class_defined?(Object)
     rescue StandardError => e
       logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
     end
