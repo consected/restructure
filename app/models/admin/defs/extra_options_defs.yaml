@@ -59,10 +59,13 @@
         value: panel / category name
         if: 'ref: ** conditions reference **'
       refresh_panel:
-        value: panel / category name
-        if: 'ref: ** conditions reference **'
+        - value: panel / category name
+          if: 'ref: ** conditions reference **'
       expand_reference:
-        value: next | reference with caption
+        - value: reference with caption - the option if means the first matched item will be used as the value
+          if: 'ref: ** conditions reference **'
+        - value: next | reference with caption
+          if: 'ref: ** conditions reference **'
     on_create: {}
     on_save:
       notes: |
