@@ -9,11 +9,6 @@ RSpec.describe SaveTriggers::Notify, type: :model do
   include ActivityLogSupport
   include AwsApiStubs
 
-  before :all do
-    WebMock.disable_net_connect!(allow_localhost: true)
-    # SetupHelper.get_webmock_responses
-  end
-
   before :example do
     SetupHelper.setup_al_player_contact_phones
     SetupHelper.setup_al_gen_tests AlNameGenTest2, 'elt2_test', 'player_contact'

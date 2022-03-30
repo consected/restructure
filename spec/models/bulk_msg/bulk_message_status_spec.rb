@@ -11,15 +11,6 @@ RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
   include BulkMsgSupport
   include AwsApiStubs
 
-  before :all do
-    WebMock.disable_net_connect!(allow_localhost: true)
-    # SetupHelper.get_webmock_responses
-  end
-
-  # after :all do
-  #   WebMock.allow_net_connect!
-  # end
-
   before :example do
     BulkMsgSupport.import_bulk_msg_app
     seed_database

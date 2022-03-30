@@ -15,8 +15,10 @@ of the NFS storage.
     app-scripts/setup-dev-filestore.sh
 
 If your tests should include real AWS API calls, and your AWS profile requires MFA, ensure your CLI has access with the
-environment variables `AWS_ACCESS_key_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` appropriately set. To skip
-an MFA check at the start of testing:
+environment variables `AWS_ACCESS_key_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` appropriately set. If no MFA
+is required, just ensure `AWS_PROFILE` is set.
+
+To skip an AWS authorization check at the start of testing:
 
     export IGNORE_MFA=true
 
