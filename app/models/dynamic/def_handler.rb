@@ -685,13 +685,13 @@ module Dynamic
       Resources::Models.remove(resource_name: resource_name)
     end
 
-    def remove_assoc_class(in_class_name)
-      # Dump the old association
-      assoc_ext_name = "#{in_class_name}#{model_class_name.pluralize}AssociationExtension"
+    # Dump the old association
+    def remove_assoc_class(in_class_name, alt_target_class = nil)
+      alt_target_class ||= model_class_name.pluralize
+      assoc_ext_name = "#{in_class_name}#{alt_target_class}AssociationExtension"
       Object.send(:remove_const, assoc_ext_name) if implementation_class_defined?(Object)
     rescue StandardError => e
       logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
-      # puts "Failed to remove #{assoc_ext_name} : #{e}"
     end
 
     def prefix_class
