@@ -11,6 +11,7 @@
                 - specific_record
 
             force_create: 'true to force the creation of a reference and referenced object, independent of user access controls'
+            force_not_valid: 'true to allow valid_if checks to be ignored'
             with: 
               field_name: 'now()'
               field_name_2: 'literal value'
