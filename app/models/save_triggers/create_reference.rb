@@ -16,6 +16,7 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
       model_def.each do |model_name, config|
         vals = {}
         force_create = config[:force_create]
+        force_not_valid = true if config[:force_not_valid]
         to_existing_record = config[:to_existing_record]
         create_in = config[:in]
         create_if = config[:if]
@@ -44,6 +45,7 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
             new_item = new_type.find(to_existing_record_id)
           else
             new_item = new_type.new vals
+            new_item.ignore_configurable_valid_if = force_not_valid
             new_item.force_save! if force_create
             new_item.save!
           end
