@@ -101,7 +101,7 @@ class ConditionalActions
           res[on_act][do_act] = true
           next
         end
-
+        conf_acts = { value: conf_acts } unless conf_acts.respond_to?(:each)
         conf_acts = [conf_acts] unless conf_acts.is_a? Array
 
         conf_acts.each do |conf_act|
