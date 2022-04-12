@@ -24,6 +24,7 @@ release will be created for any release tested in production, and may be marked 
 - [Fixed] Fixed issue with simple true in show_if and save_action
 - [Fixed] specs for stubbing and activity log definitions
 - [Fixed] issues with dynamic reloading
+- [Updated] gems and holding puma at 5.6.2 for AWS Beanstalk
 
 ## [8.0.57] - 2022-03-31
 

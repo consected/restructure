@@ -53,7 +53,9 @@ group :development, :test do
   gem 'debase'
   gem 'jasmine-rails'
   gem 'parallel_tests'
-  gem 'puma'
+  # This version must always match the AWS Beanstalk version
+  # See https://docs.aws.amazon.com/elasticbeanstalk/latest/platforms/platform-history-ruby.html
+  gem 'puma', '5.6.2'
   gem 'readapt'
   gem 'rspec-rails'
   gem 'ruby-debug-ide'
