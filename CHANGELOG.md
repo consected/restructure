@@ -18,13 +18,14 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- []
 - [Added] view_css support to regular panels
 - [Added] force_not_valid option in create/update_reference and update_this
 - [Added] ability for save_action to return the first result that matches an if condition
 - [Fixed] Fixed issue with simple true in show_if and save_action
 - [Fixed] specs for stubbing and activity log definitions
 - [Fixed] issues with dynamic reloading
-- [Updated] gems and holding puma at 5.6.2 for AWS Beanstalk
+- [Updated] puma to 5.6.4 - Procfile for AWS Beanstalk created during deployment must start the web: entry with bundle exec to use the bundled version
 
 ## [8.0.57] - 2022-03-31
 
