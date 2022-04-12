@@ -318,47 +318,6 @@
       "note": ""
     },
     {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "865aeea33147c0d0b685f94661253114076b8b75e1e501fafb9024dc42c7730a",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/reports/_master_results_css.html.erb",
-      "line": 22,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "(Report.find_by_id_or_resource_name(params[:id]).report_options.master_results_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"#master_results_block[data-report-res-name='#{Report.find_by_id_or_resource_name(params[:id]).alt_resource_name}']\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end or ([] + Report.find_by_id_or_resource_name(params[:id]).report_options.master_results_css.selectors.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"#master_results_block[data-report-res-name='#{Report.find_by_id_or_resource_name(params[:id]).alt_resource_name}']\"} #{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end)).join(\"\\n\")",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "ReportsController",
-          "method": "show",
-          "line": 109,
-          "file": "app/controllers/reports_controller.rb",
-          "rendered": {
-            "name": "reports/_form",
-            "file": "app/views/reports/_form.html.erb"
-          }
-        },
-        {
-          "type": "template",
-          "name": "reports/_form",
-          "line": 14,
-          "file": "app/views/reports/_form.html.erb",
-          "rendered": {
-            "name": "reports/_master_results_css",
-            "file": "app/views/reports/_master_results_css.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "reports/_master_results_css"
-      },
-      "user_input": "Report.find_by_id_or_resource_name(params[:id]).report_options",
-      "confidence": "Weak",
-      "note": ""
-    },
-    {
       "warning_type": "File Access",
       "warning_code": 16,
       "fingerprint": "89dc70f354ad3576baf4313669da7d9e79bfb66361a46c250b55c57d4a85a37b",
@@ -396,47 +355,6 @@
       },
       "user_input": "current_database",
       "confidence": "Medium",
-      "note": ""
-    },
-    {
-      "warning_type": "Cross-Site Scripting",
-      "warning_code": 2,
-      "fingerprint": "8c2ffcb969369c931ec91f67298416d073b26a4cf6de732e58cb255f1c2964f7",
-      "check_name": "CrossSiteScripting",
-      "message": "Unescaped model attribute",
-      "file": "app/views/reports/_result_view_css.html.erb",
-      "line": 24,
-      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "(Report.find_by_id_or_resource_name(params[:id]).report_options.view_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end or ([] + Report.find_by_id_or_resource_name(params[:id]).report_options.view_css.selectors.map do\n next unless v\nstyles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} #{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end)).join(\"\\n\")",
-      "render_path": [
-        {
-          "type": "controller",
-          "class": "ReportsController",
-          "method": "show",
-          "line": 81,
-          "file": "app/controllers/reports_controller.rb",
-          "rendered": {
-            "name": "reports/_results",
-            "file": "app/views/reports/_results.html.erb"
-          }
-        },
-        {
-          "type": "template",
-          "name": "reports/_results",
-          "line": 45,
-          "file": "app/views/reports/_results.html.erb",
-          "rendered": {
-            "name": "reports/_result_view_css",
-            "file": "app/views/reports/_result_view_css.html.erb"
-          }
-        }
-      ],
-      "location": {
-        "type": "template",
-        "template": "reports/_result_view_css"
-      },
-      "user_input": "Report.find_by_id_or_resource_name(params[:id]).report_options",
-      "confidence": "Weak",
       "note": ""
     },
     {
@@ -693,6 +611,6 @@
       "note": ""
     }
   ],
-  "updated": "2022-04-12 16:30:34 +0100",
-  "brakeman_version": "5.2.1"
+  "updated": "2022-04-12 18:54:38 +0100",
+  "brakeman_version": "5.2.2"
 }
