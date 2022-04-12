@@ -96,6 +96,27 @@ module DicomSupport
                       '0010,0010': '{{master_id}}'
                       '0010,0020': '{{player_contacts.data}}'
               - dicom_metadata:
+          - name: Re-Identify Filtered Set
+            pipeline:
+              - dicom_deidentify:
+                  - file_filters:
+                      - .*000001.dcm
+                      - .*000003.dcm
+                    recursive: true
+                    new_path: filtered-set-location
+                    set_tags:
+                      '0010,0010': 'set1-{{master_id}}'
+                      '0010,0020': 'set1-{{player_contacts.data}}'
+
+                  - file_filters:
+                      - .*000002.dcm
+                      - .*000004.dcm
+                    recursive: true
+                    new_path: filtered-set-location-2
+                    set_tags:
+                      '0010,0010': 'set2-{{master_id}}'
+                      '0010,0020': 'set2-{{player_contacts.data}}'
+              - dicom_metadata:
           - name: Re-Run Pipeline
             id: rerun_pipeline
             pipeline:
