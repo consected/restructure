@@ -53,9 +53,7 @@ group :development, :test do
   gem 'debase'
   gem 'jasmine-rails'
   gem 'parallel_tests'
-  # This version must always match the AWS Beanstalk version
-  # See https://docs.aws.amazon.com/elasticbeanstalk/latest/platforms/platform-history-ruby.html
-  gem 'puma', '5.6.2'
+  gem 'puma'
   gem 'readapt'
   gem 'rspec-rails'
   gem 'ruby-debug-ide'
@@ -68,11 +66,11 @@ group :test do
   gem 'database_cleaner'
   gem 'rails-controller-testing'
   gem 'selenium-webdriver', '3.4.4'
+  gem 'shoulda-matchers', '~> 5.1'
   gem 'simplecov'
   gem 'simplecov-console'
   gem 'spring-commands-rspec'
   gem 'webmock'
-  gem 'shoulda-matchers', '~> 5.1'
 end
 
 group :development, :production, :assets do
