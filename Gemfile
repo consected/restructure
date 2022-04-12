@@ -66,11 +66,11 @@ group :test do
   gem 'database_cleaner'
   gem 'rails-controller-testing'
   gem 'selenium-webdriver', '3.4.4'
+  gem 'shoulda-matchers', '~> 5.1'
   gem 'simplecov'
   gem 'simplecov-console'
   gem 'spring-commands-rspec'
   gem 'webmock'
-  gem 'shoulda-matchers', '~> 5.1'
 end
 
 group :development, :production, :assets do
