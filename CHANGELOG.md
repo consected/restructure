@@ -16,6 +16,15 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] view_css support to regular panels
+- [Added] force_not_valid option in create/update_reference and update_this
+- [Added] ability for save_action to return the first result that matches an if condition
+- [Fixed] Fixed issue with simple true in show_if and save_action
+- [Fixed] specs for stubbing and activity log definitions
+- [Fixed] issues with dynamic reloading
+
 ## [8.0.57] - 2022-03-31
 
 Interim release for testing only
