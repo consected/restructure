@@ -16,6 +16,27 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transferred from Viva @8.0.58 - 2022-04-12
+
+- [Added] view_css support to regular panels
+- [Added] force_not_valid option in create/update_reference and update_this
+- [Added] ability for save_action to return the first result that matches an if condition
+- [Added] users as a table to calculate against in *_if evaluations
+- [Added] save_action expand_reference
+- [Added] media queries to view css options
+- [Added] activity log master and item associations for extra log types, allowing for substitutions against a specific activity
+- [Added] defined_selector options to reports criteria to allow easy selector configuration based on central and model configurations
+- [Added] 'never' option to always_embed_*reference
+- [Added] ability for an existing admin to add a new admin account if appropriate server setting allows
+- [Fixed] limited_access_control using association master_created_by_user
+- [Fixed] issue loading images when window not focused
+- [Fixed] Fixed issue with simple true in show_if and save_action
+- [Fixed] specs for stubbing and activity log definitions
+- [Fixed] issues with dynamic reloading
+- [Updated] puma to 5.6.4 - Procfile for AWS Beanstalk created during deployment must start the web: entry with bundle exec to use the bundled version
+
 ## [8.0.28] - 2022-03-08
 
 ### Transferred from Viva @8.0.52 - 2022-03-08

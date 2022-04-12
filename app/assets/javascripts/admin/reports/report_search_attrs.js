@@ -25,7 +25,7 @@ class ReportSearchAttrs {
       window.setTimeout(() => {
         _fpa.flash_notice(
           'Error in search attributes configuration YAML. View the attribute configuration to correct it. ' +
-            err.message,
+          err.message,
           'warning'
         );
       }, 1000);
@@ -90,7 +90,7 @@ class ReportSearchAttr {
       window.setTimeout(() => {
         _fpa.flash_notice(
           'Error in search attributes configuration value YAML. View the configuration fields to correct it. ' +
-            err.message,
+          err.message,
           'warning'
         );
       }, 1000);
@@ -188,8 +188,18 @@ class ReportSearchAttr {
     this.def_block.selections = val;
   }
 
-  get selections() {
-    return this.def_block.selections;
+  get defined_selector() {
+    return this.def_block.defined_selector;
+  }
+
+  set defined_selector(val) {
+    if (!val) return;
+
+    this.def_block.defined_selector = val;
+  }
+
+  get defined_selector() {
+    return this.def_block.defined_selector;
   }
 
   set conditions(val) {

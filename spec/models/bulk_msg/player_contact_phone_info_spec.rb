@@ -9,6 +9,7 @@ RSpec.describe 'DynamicModel::PlayerContactPhoneInfo', type: :model do
   include ModelSupport
   include PlayerContactSupport
   include BulkMsgSupport
+  include AwsApiStubs
 
   before :example do
     create_admin
@@ -42,6 +43,10 @@ RSpec.describe 'DynamicModel::PlayerContactPhoneInfo', type: :model do
     # @bulk_master.dynamic_model__zeus_bulk_message_recipients.update_all(response: nil)
 
     @pcpi = DynamicModel::PlayerContactPhoneInfo.new
+
+    setup_stub(:pinpoint_validate)
+    setup_stub(:sns_opt_out)
+    setup_stub(:sns_opt_out_page2)
   end
 
   def create_item_for_test(data = nil)
@@ -64,7 +69,7 @@ RSpec.describe 'DynamicModel::PlayerContactPhoneInfo', type: :model do
 
   it 'gets a list of SMS opt outs' do
     nt = nil
-    max_iters = 100
+    max_iters = 2
     total_opt_outs = 0
 
     # Create a player contact info record for every opt out
@@ -86,7 +91,7 @@ RSpec.describe 'DynamicModel::PlayerContactPhoneInfo', type: :model do
     expect(total_opt_outs).to be > 0
 
     # Now run and update the records for real
-    total_opt_outs = DynamicModel::PlayerContactPhoneInfo.update_opt_outs
+    total_opt_outs = DynamicModel::PlayerContactPhoneInfo.update_opt_outs 1
 
     oo = DynamicModel::PlayerContactPhoneInfo.where('opted_out_at IS NOT NULL').count
 

@@ -9,6 +9,13 @@ _fpa.loaded.preload = function () {
   $(document).on('click', 'a[disabled], btn[disabled]', function (ev) {
     ev.preventDefault();
   });
+
+  window.addEventListener('focus', function () {
+    // Force a reload of images when the window gains focus
+    $('.image-to-load').each(function () {
+      $(this)[0].src = `${$(this)[0].src}#`
+    })
+  })
 };
 _fpa.loaded.default = function () {
 

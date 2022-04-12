@@ -266,6 +266,12 @@ Run the test suite:
 
     IGNORE_MFA=true bundle exec rspec
 
+Or if you want to use real AWS calls, set `AWS_PROFILE` then run:
+
+    bundle exec rspec
+
+For more rspec information, check [running rspec tests](docs/dev_reference/main/running_rspec_tests.md)
+
 It is recommended to periodically drop and recreate the test database, since over time tests will slow down.
 
     app-scripts/drop-test-db.sh 1 ; app-scripts/create-test-db.sh 1

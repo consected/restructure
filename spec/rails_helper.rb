@@ -37,8 +37,13 @@ require 'rspec/rails'
 
 put_now 'Require webmock'
 require 'webmock/rspec'
-WebMock.allow_net_connect!
-# WebMock.disable_net_connect!(allow_localhost: true)
+# Enable or disable WebMock allowing requests to external resources.
+# Generally, when preparing new stubs, call SetupHelper.get_webmock_responses
+# at the top of a spec module (in before :all) to get full information on
+# the requirements of each stub.
+
+# WebMock.allow_net_connect!
+WebMock.disable_net_connect!(allow_localhost: true)
 
 put_now 'Browser setups'
 require 'capybara/rspec'
@@ -192,5 +197,12 @@ RSpec.configure do |config|
   config.extend ControllerMacros, type: :controller
   config.after :each do
     Warden.test_reset!
+  end
+
+  Shoulda::Matchers.configure do |config|
+    config.integrate do |with|
+      with.test_framework :rspec
+      with.library :rails
+    end
   end
 end

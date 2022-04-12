@@ -5,12 +5,15 @@ require 'rails_helper'
 RSpec.describe Messaging::NotificationSms, type: :model do
   include ModelSupport
   include ActivityLogSupport
+  include AwsApiStubs
 
   before :example do
     create_admin
 
     @message_notification = Messaging::MessageNotification.new message_type: :sms
     @message_notification.generated_text = 'This is a test message to send via the SMS service'
+
+    setup_stub(:sns_send_sms)
   end
 
   it 'validates an sms number' do

@@ -4,7 +4,7 @@ module ScantronSupport
   # Since scantron definition can be redefined after the initial load of this module,
   # make sure that we use the current version of the model for building tests
   def current_scantron_model
-    Resources::Models.find_by(resource_name: 'scantrons').model
+    'Scantron'.constantize
   end
 
   def list_valid_attribs

@@ -125,3 +125,7 @@ view_css:
     "#an-id .some-class":
       display: block
       margin-right: 20px
+  media_queries:
+    "@media only screen and (min-width: 1180px)":
+      '.someselectors':
+        width: 75%

@@ -8,7 +8,7 @@ class UserPreference < UserBase
 
   include UserHandler
 
-  belongs_to :user, inverse_of: :user_preference
+  belongs_to :user, inverse_of: :user_preference, autosave: true
 
   after_initialize :set_defaults
 

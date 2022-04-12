@@ -1,8 +1,11 @@
 $.big_select = function ($field, $target, full_hash, before, after, options) {
 
-  var setup_with = function (hash, $target, selected_value) {
-    var $outer = $target.append(`<div class="big-select"></div>`);
+  var setup_with = function (hash, $target, $field) {
+    var $outer = $(`<div class="big-select"></div>`).appendTo($target);
     var group_num = 0
+
+    var selected_value = $field.val();
+    $outer.called_from_field = $field;
 
     var main_sorted = sort_option_items(hash);
 
@@ -46,7 +49,7 @@ $.big_select = function ($field, $target, full_hash, before, after, options) {
       }
 
     }
-
+    append_item('big-select-clear', '(none)', selected_value, $outer)
     return $outer
   }
 
@@ -69,23 +72,32 @@ $.big_select = function ($field, $target, full_hash, before, after, options) {
     if (options.hide_key) {
       show_k = null;
 
-      var split = val.split('>>>')
+      var split = val.trim().split(/(>>>|\n)/)
+      console.log(split)
       if (split.length > 1) {
         show_k = split[0];
-        val = split[1];
+        val = split.slice(1).join("\n");
       }
+    }
+
+    var kid = k
+    if (show_k == 'big-select-clear') {
+      show_k = null
+      k = ''
+      val = '(none)'
+      kid = 'big-select-clear'
     }
 
     if (!show_k) {
       var html = `
-      <div class="big-select-item ${selected_class}" data-bsi-key="${k}" id="big-select-item--${k}">
+      <div class="big-select-item ${selected_class}" data-bsi-key="${k}" id="big-select-item--${kid}">
         <div class="bsi--head">${val}</div>
       </div>
       `
     }
     else {
       var html = `
-      <div class="big-select-item ${selected_class}" data-bsi-key="${k}" id="big-select-item--${k}">
+      <div class="big-select-item ${selected_class}" data-bsi-key="${k}" id="big-select-item--${kid}">
         <div class="bsi--head">${show_k}</div>
         <div class="bsi--body">${val}</div>
       </div>
@@ -137,7 +149,6 @@ $.big_select = function ($field, $target, full_hash, before, after, options) {
   //
   // Start initialization
   //
-  var res
   var init_val = $field.val()
 
   var $field_parent = $field.parent()
@@ -164,7 +175,7 @@ $.big_select = function ($field, $target, full_hash, before, after, options) {
     hash = set_hash(full_hash)
     if (!hash) return
 
-    res = setup_with(hash, $target, $field.val());
+    var res = setup_with(hash, $target, $field);
 
     window.setTimeout(function () {
       _fpa.utils.scrollTo($target.find('.bsi-selected'), 0, -200, $target)
@@ -172,6 +183,7 @@ $.big_select = function ($field, $target, full_hash, before, after, options) {
 
     res.on('click', '.big-select-item', function () {
       var val = $(this).attr('data-bsi-key')
+      var $field = res.called_from_field
       $field.val(val)
       set_info(val)
       if (after) after()

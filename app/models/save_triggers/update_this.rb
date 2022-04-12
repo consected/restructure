@@ -61,6 +61,7 @@ class SaveTriggers::UpdateThis < SaveTriggers::SaveTriggersBase
         updated = res._updated
         disabled = res._disabled
         @item.transaction do
+          res.ignore_configurable_valid_if = true if config[:force_not_valid]
           res.force_save! if config[:force_not_editable_save]
           res.update! vals.merge(current_user: @item.current_user || @item.user)
         end

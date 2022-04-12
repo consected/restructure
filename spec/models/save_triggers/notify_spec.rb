@@ -7,6 +7,7 @@ AlNameGenTest2 = 'Gen Test ELT 2'
 RSpec.describe SaveTriggers::Notify, type: :model do
   include ModelSupport
   include ActivityLogSupport
+  include AwsApiStubs
 
   before :example do
     SetupHelper.setup_al_player_contact_phones
@@ -50,6 +51,8 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: u1.app_type).where('users.disabled is null or users.disabled = false').count).to eq 4
 
     @role_user_ids = [u1.id, @user.id, ud.id] + [User.template_user.id]
+
+    setup_stub(:sns_send_sms)
   end
 
   it 'generates a message notification and job' do

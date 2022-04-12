@@ -142,7 +142,7 @@ RSpec.describe ItemFlagsController, type: :controller do
         }
         # expect { post :create, attr}.to raise_error ActionController::RoutingError
         post :create, params: attr
-        expect(response).to have_http_status(404), "Didn't get a 404 response with attr #{attr.inspect}"
+        expect(response).to have_http_status(404), "Didn't get a 404 response (got #{response.status}) with attr #{attr.inspect}"
       end
 
       it 'assigns a newly created but unsaved item as @var' do

@@ -61,9 +61,7 @@ describe 'user sign in process for users that can self register', js: true, driv
   end
 
   it 'should sign in' do
-    user = User.where(email: @good_email).first
-    expect(user).to be_a User
-    expect(user.id).to equal @user.id
+    validate_setup
 
     # login_as @user, scope: :user
     otp = @user.current_otp
@@ -93,9 +91,7 @@ describe 'user sign in process for users that can self register', js: true, driv
   end
 
   it 'should prevent invalid sign in' do
-    user = User.where(email: @good_email).first
-    expect(user).to be_a User
-    expect(user.id).to equal @user.id
+    validate_setup
 
     # login_as @user, scope: :user
 

@@ -11,8 +11,12 @@
       else
         resource_type = 'details'
       end
+      block_id = "#{resource.hyphenate}-{{id}}"
+      view_css = panel.view_css
+      outer = "##{block_id}"
 %>
-    <div id="<%= resource.hyphenate %>-{{id}}" 
+    <%= render partial: 'reports/insert_options_css', locals: {outer: outer, view_css: view_css} %>
+    <div id="<%= block_id %>" 
          class="<%= resource_type %>-generic-block <%= resource.hyphenate %>-block collapse <%=hide_sl_class%> <%=hide_al_header_class%>"
          data-sub-for-root="master_id"
          data-sub-id="{{id}}"

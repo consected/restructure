@@ -25,13 +25,13 @@ RSpec.describe 'Alternative ID implementation', type: :model do
              1
            end
     @master.scantrons.create! scantron_id: @sid
-  end
 
-  it 'creates an item based on an alternative ID, linking it to the master automatically' do
     expect(defined?(Scantron)).to be_truthy
     expect(Master.alternative_id_fields).to include :scantron_id
     expect(PlayerContact.new).to respond_to 'scantron_id='
+  end
 
+  it 'creates an item based on an alternative ID, linking it to the master automatically' do
     att = valid_attribs.dup
     # Specify an alternative ID instead of a master_id
     att[:scantron_id] = @sid
@@ -47,10 +47,6 @@ RSpec.describe 'Alternative ID implementation', type: :model do
   end
 
   it 'enforces user access to alternative ids' do
-    expect(defined?(Scantron)).to be_truthy
-    expect(Master.alternative_id_fields(access_by: @user)).to include :scantron_id
-    expect(PlayerContact.new).to respond_to 'scantron_id='
-
     att = valid_attribs.dup
     # Specify an alternative ID instead of a master_id
     att[:scantron_id] = @sid

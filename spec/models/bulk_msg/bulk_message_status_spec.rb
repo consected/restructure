@@ -9,6 +9,7 @@ RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
   include ModelSupport
   include PlayerContactSupport
   include BulkMsgSupport
+  include AwsApiStubs
 
   before :example do
     BulkMsgSupport.import_bulk_msg_app
@@ -31,12 +32,23 @@ RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
     expect(has_ranks.length).to be > 0
 
     @bulk_master.dynamic_model__zeus_bulk_message_recipients.update_all(response: nil)
+
+    setup_stub(:sns_log)
+    setup_stub(:sns_direct_publish)
+    setup_stub(:sns_direct_publish_page2)
+    setup_stub(:sns_direct_publish_10)
+    setup_stub(:sns_direct_publish_10_page2)
+    setup_stub(:sns_direct_publish_failure)
+    setup_stub(:sns_direct_publish_failure_page2)
+    setup_stub(:sns_direct_publish_no_limit)
+    setup_stub(:sns_direct_publish_10_start_empty)
+    setup_stub(:sns_direct_publish_10_failed_empty)
+    # setup_stub(:sns_direct_publish_11_empty)
   end
 
   it 'associates with the recipient list' do
     pcs = []
     max_num = 3
-
     recips = []
 
     zbmsg = @bulk_master.dynamic_model__zeus_bulk_messages.create!(status: 'sent', name: 'test', channel: 'sms', message: 'message', send_date: DateTime.now, send_time: Time.now - 10.minutes)
@@ -165,7 +177,7 @@ RSpec.describe 'DynamicModel::ZeusBulkMessageStatus', type: :model do
     expect(res[:more_results]).to be false
 
     # Erroneously attempt to pull another next page
-    res = @bms.delivery_responses :success, limit: 10
+    res = @bms.delivery_responses :success, limit: 11
     expect(res).to be nil
   end
 
