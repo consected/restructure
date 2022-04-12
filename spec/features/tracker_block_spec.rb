@@ -35,15 +35,13 @@ describe 'tracker block', js: true, driver: :app_firefox_driver do
     # end
 
     # before :each do
-    user = User.where(email: @good_email).first
-    expect(user).to be_a User
-    expect(user.id).to equal @user.id
+    validate_setup
 
-    setup_access :player_contacts, user: user
-    setup_access :player_infos, user: user
-    setup_access :trackers, user: user
-    setup_access :tracker_histories, user: user
-    setup_access :create_master, resource_type: :general, access: :read, user: user
+    setup_access :player_contacts, user: @user
+    setup_access :player_infos, user: @user
+    setup_access :trackers, user: @user
+    setup_access :tracker_histories, user: @user
+    setup_access :create_master, resource_type: :general, access: :read, user: @user
 
     login
   end

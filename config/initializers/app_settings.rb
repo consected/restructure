@@ -33,7 +33,7 @@ class Settings
   # Default logo filename. Can be overridden on an app by app basis with the "logo filename" app configuration.
   # The logo file itself should be placed in `app/assets/images` or directly in `public/``. Alternatively, place it in
   # `public/app_specific/<app folder>`` and use the appropriate relative path `/app_specific/<app folder>` in the config.
-  DefaultLogo = 'project-viva-logo.png'
+  DefaultLogo = 'restructure-logo.svg'
 
   # Force a 'from email' address for notifications
   # If not set (nil), then the current user email address will be used,
@@ -89,6 +89,9 @@ class Settings
   RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'] || AdminEmail
   # Template user for creating new users. The roles from this user are copied to the new user.
   DefaultUserTemplateEmail = ENV['DEFAULT_USER_TEMPLATE_EMAIL'] || 'registration@template'
+
+  # Admins may be able to create other admins.
+  AllowAdminsToManageAdmins = (ENV['ALLOW_ADMINS_TO_MANAGE_ADMINS'].to_s.downcase == 'true')
 
   # URL to appear on home page for users with login issues to contact
   DefaultLoginIssuesUrl = AllowUsersToRegister ? '/users/password/new' : "mailto: #{AdminEmail}?subject=Login%20Issues"

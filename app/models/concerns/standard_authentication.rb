@@ -232,7 +232,7 @@ module StandardAuthentication
 
   # Setup password for new user
   def setup_new_password
-    return if allow_users_to_register?
+    return if allow_users_to_register? && (current_admin == RegistrationHandler.registration_admin)
 
     generate_password
     @forced_password_reset = true

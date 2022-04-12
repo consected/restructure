@@ -7,6 +7,15 @@ module ActivityLogSupport
     res
   end
 
+  #
+  # Add a model references definition to an existing activity log instance,
+  # to simplify the configuration required for certain tests
+  # e.g add_reference_def_to(activity_log, [player_contacts: { from: 'this', add: 'many' }])
+  def add_reference_def_to(activity_log, ref_def)
+    activity_log.option_type_config.references = ref_def
+    activity_log.option_type_config.clean_references_def
+  end
+
   def list_valid_attribs
     @player_contact = PlayerContact.last
 

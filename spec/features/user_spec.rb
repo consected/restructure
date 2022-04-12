@@ -33,11 +33,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
   end
 
   it 'should sign in' do
-    user = User.where(email: @good_email).first
-    expect(user).to be_a User
-    expect(user.id).to equal @user.id
-
-    # login_as @user, scope: :user
+    validate_setup
 
     visit '/users/sign_in'
     within '#new_user' do
@@ -63,11 +59,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
   end
 
   it 'should prevent invalid sign in' do
-    user = User.where(email: @good_email).first
-    expect(user).to be_a User
-    expect(user.id).to equal @user.id
-
-    # login_as @user, scope: :user
+    validate_setup
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do

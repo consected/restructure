@@ -467,12 +467,17 @@ fieldset.readonly-edit-fieldset {
   margin-bottom: 7px;
 }
 
-.edit-field-container.done-label-resize input[type="text"].form-control:first-child {
-  width: 100%;
+.edit-field-container.done-label-resize {
+  input[type="text"],
+  input[type="email"] {
+    &.form-control:first-child {
+      width: 100%;
 
-  // Overrides
-  &.time-entry {
-    width: auto;
+      // Overrides
+      &.time-entry {
+        width: auto;
+      }
+    }
   }
 }
 

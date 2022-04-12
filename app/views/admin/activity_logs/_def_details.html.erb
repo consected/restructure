@@ -8,7 +8,10 @@
   <label>fields</label>
   <p class="al-field-list">
   <ul class="activity-list">
-    <li><%= object_instance.all_implementation_fields.join("</li> <li>").html_safe %></;i>
+    <li><%= object_instance.all_implementation_fields
+              .reject{|f| f.index(/^placeholder_|^embedded_report_/)}
+              .join("</li> <li>")
+              .html_safe %></li>
   </ul>
   </p>
 </div>

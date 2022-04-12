@@ -1,24 +1,6 @@
 <%
 outer = "##{@criteria_block_id}-block"
 view_css = @report.report_options.criteria_css
-
-if view_css.classes
-  res = view_css.classes.map {|c, v|
-    styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
-    "#{outer} .#{c} \{  #{styles.join(' ')}\}"
-  }
-end
-if view_css.selectors
-  res ||= []
-  res += view_css.selectors.map {|c, v|
-    styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
-    "#{outer} #{c} \{  #{styles.join(' ')}\}"
-  }
-end
-if res
-  res = res.join("\n")
 %>
-<style>
-  <%= res.html_safe %>
-</style>
-<% end %>
+<%= render partial: 'reports/insert_options_css', locals: {outer: outer, view_css: view_css} %>
+

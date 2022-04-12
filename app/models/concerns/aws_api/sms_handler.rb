@@ -11,19 +11,19 @@ module AwsApi
 
     class_methods do
       def sms_aws_region
-        Messaging.sms_aws_region
+        AwsApiSetup.sms_aws_region
       end
 
       def test_sms_number
-        Messaging.test_sms_number
+        AwsApiSetup.test_sms_number
       end
 
       def sender_id
-        Messaging.sender_id
+        AwsApiSetup.sender_id
       end
 
       def importance
-        Messaging.importance
+        AwsApiSetup.importance
       end
     end
 

@@ -190,6 +190,8 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
 
   def setup_emails
     @force_emails = calc_field_or_return(@emails)
+    @force_emails = [@force_emails] if @force_emails.is_a? String
+    @force_emails
   end
 
   def filter_notifications

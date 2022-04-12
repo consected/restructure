@@ -36,12 +36,13 @@
     ><%= show_caption_before caption_before_ref_type, caption_before, :show %></li>
     <% end %>
     <%
-    view_as_new = ref_config[:view_as] && ref_config[:view_as][:new]
+    view_as_new = ref_config.dig(:view_as, :new)
     if view_as_new == 'outside_this'
       data_target = "##{ ref_type.ns_hyphenate}#{elt}-#{master_id}-"
 
       data_toggle = "unhide scrollto-result uncollapse-target-parents"
       a_class = "btn btn-sm btn-primary embedded-add-item-button"
+      data_open_tab_before_request = "[data-panel-tab='#{ref_type.to_s.pluralize}']"
     else
       data_target = "##{inner_data_target}"
       data_toggle = "scrollto-result"
@@ -55,7 +56,9 @@
            data-toggle="<%=data_toggle%>" 
            data-target-force="true" 
            data-target="<%=data_target%>" 
+           data-open-tab-before-request="<%=data_open_tab_before_request%>"
            data-remote="true" 
+           data-mr-name="<%= caption %>"
            class="<%=a_class%>"><span class="glyphicon glyphicon-plus"></span> <%= caption %></a>
       </p>
     </li>

@@ -38,7 +38,96 @@ release will be created for any release tested in production, and may be marked 
 
 ## [8.0.27] - 2022-02-09
 
-### Transferred from Harvard @7.4.96 - 2022-02-09
+- []
+- [Added] view_css support to regular panels
+- [Added] force_not_valid option in create/update_reference and update_this
+- [Added] ability for save_action to return the first result that matches an if condition
+- [Fixed] Fixed issue with simple true in show_if and save_action
+- [Fixed] specs for stubbing and activity log definitions
+- [Fixed] issues with dynamic reloading
+- [Updated] puma to 5.6.4 - Procfile for AWS Beanstalk created during deployment must start the web: entry with bundle exec to use the bundled version
+
+## [8.0.57] - 2022-03-31
+
+Interim release for testing only
+
+## [8.0.56] - 2022-03-30
+
+Interim release for testing only
+
+## [8.0.55] - 2022-03-28
+
+- [Added] users as a table to calculate against in *_if evaluations
+- [Added] save_action expand_reference
+- [Added] media queries to view css options
+- [Added] activity log master and item associations for extra log types, allowing for substitutions against a specific activity
+- [Added] defined_selector options to reports criteria to allow easy selector configuration based on central and model configurations
+- [Added] 'never' option to always_embed_*reference
+- [Added] ability for an existing admin to add a new admin account if appropriate server setting allows
+- [Fixed] limited_access_control using association master_created_by_user
+- [Fixed] issue loading images when window not focused
+
+## [8.0.54] - 2022-03-16
+
+Interim release for testing only
+
+## [8.0.53] - 2022-03-15
+
+Interim release for testing only
+
+## [8.0.52] - 2022-03-08
+
+- [Added] paths and resource names when referencing activity log types
+- [Added] much more consistent handling of resource names with **Resources::Models**
+- [Added] user profiles tabs definable using page layout definitions
+- [Added] ability to include activity log type as a resource in a page layout definition
+- [Added] **add_item_button** substitution for captions and report headers
+- [Added] user definable user preferences for timezones and formats
+- [Added] per-server caching of latest dynamic definition versions, to allow automated reloading on a page refresh
+- [Added] view_options for references in activity log def to always open a reference
+- [Added] new disk usage and host id information
+- [Added] user_is_creator as references from: option, including for NFS store containers
+- [Added] option to skip creating a container as a save trigger if one already exists with a matching name
+- [Changed] to restart server on successful app import
+- [Changed] NFS Store file download to ensure the file is correctly retrieved when a user is in a different app to the container
+- [Changed] app migrations to ignore removed columns if ALLOW_DROP_COLUMNS not set
+- [Fixed] handling of admin filters to consistently show correct app selection
+
+## [8.0.51] - 2022-03-03
+
+Interim release for testing only
+
+## [8.0.50] - 2022-03-03
+
+Interim release for testing only
+
+## [8.0.49] - 2022-03-02
+
+Interim release for testing only
+
+## [8.0.48] - 2022-03-01
+
+Interim release for testing only
+
+## [8.0.46] - 2022-02-24
+
+Interim release for testing only
+
+## [8.0.45] - 2022-02-24
+
+Interim release for testing only
+
+## [8.0.44] - 2022-02-24
+
+Interim release for testing only
+
+## [8.0.43] - 2022-02-23
+
+Interim release for testing only
+
+## [8.0.41] - 2022-02-11
+
+### Transfer from ReStructure 8.0.27 - 2022-02-10
 
 - [Fixed] pregenerated and non-editable external identifier fields not to show
 - [Changed] export of app-export migrations to go to a single app directory, not each schema directory
@@ -48,18 +137,63 @@ release will be created for any release tested in production, and may be marked 
 - [Added] app type components page for easy viewing and navigation around an app
 - [Added] ability to filter admin resources by id, ids or resource name
 
-## [8.0.26] - 2022-01-12
+## [8.0.40] - 2022-01-24
 
-### Transferred from Viva @8.0.39
+- [Added] ability to show embedded block from an embedded report in a second modal
+
+## [8.0.39] - 2022-01-11
+
+- [Fixed] issue with active app types when specified with env var, since it returned an array not a scope
+
+## [8.0.38] - 2022-01-11
+
+- [Updated] release script to allow clean container to be requested
+- [Updated] change_user_roles trigger to allow app_type to be specified
+
+## [8.0.37] - 2022-01-11
+
+- [Added] ability to specify multiple checkboxes in report select items
+- [Fixed] bug by supressing notification  when the admins change their passwords
+- [Updated] css for mobile responsiveness, css vars and app styles
+- [Updated] document library to correctly link to source repository
+- [Updated] admin scripts to improve server configuration
+
+## [8.0.35] - 2022-01-06
+
+- [Bumped] version
+
+## [8.0.33] - 2022-01-06
 
 - [Added] user self-registration, email confirmation and password reset
-- [Changed] release script to allow clean container to be requested
-- [Changed] change_user_roles trigger to allow app_type to be specified
-- [Changed] ability to specify multiple checkboxes in report select items
-- [Changed] css for mobile responsiveness, css vars and app styles
-- [Changed] document library to correctly link to source repository
-- [Changed] admin scripts to improve server configuration
-- [Fixed] issue with active app types when specified with env var, since it returned an array not a scope
+
+### Transfer from ReStructure 8.0.24 - 2021-12-20
+
+- [Added] scripted job script for OCR
+- [Added] logic to avoid too many refreshes on browser
+- [Added] PDF and office doc search (within a single document) in secure view
+- [Changed] scripted job for better job feedback and documentation
+- [Changed] activity log documentation to improve filestore information
+- [Changed] report list functionality to results list view
+- [Fixed] embedded items not updating in activity logs, causing entered data to be lost
+- [Fixed] multiple bugs
+
+## [8.0.32] - 2021-12-14
+
+- [Added] demo release
+
+## [8.0.30] - 2021-12-07
+
+- [Fixed] scrolling issue with report result lists
+
+## [8.0.29] - 2021-12-07
+
+- [Fixed] report criteria select_from_model defaults
+
+## [8.0.28] - 2021-12-03
+
+- [Changed] rebuild
+
+## [8.0.27] - 2021-12-03
 
 ## [8.0.25] - 2021-12-20
 
@@ -105,7 +239,13 @@ release will be created for any release tested in production, and may be marked 
 - [Added] report edit and criteria select fields to use models more effectively and provide grouping
 - [Fixed] migrations with references that don't produce views
 
-## [8.0.22] - 2021-11-22
+## [8.0.26] - 2021-11-24
+
+- [Added] better handling of report results list with full set of column types from the table
+- [Added] report edit and criteria select fields to use models more effectively and provide grouping
+- [Fixed] migrations with references that don't produce views
+
+## [8.0.25] - 2021-11-22
 
 - [Added] changes to allow report record edit and create to work with arbitrary models
 - [Added] report view*as option to show results as a \_transposed_table*
@@ -117,17 +257,26 @@ release will be created for any release tested in production, and may be marked 
 - [Changed] updated to latest gems
 - [Fixed] bugfixes
 
+## [8.0.24] - 2021-11-16
+
+- Bump version
+
+## [8.0.23] - 2021-11-16
+
+## [8.0.22] - 2021-11-15
+
 ### Transfer from Harvard @7.4.71.1 - 2021-11-15
 
 - [Added] column option for "choice_label" and ensure it works for all types of display and editing
 - [Fixed] report edit forms and results format and submit dates correctly
 - [Fixed] form, credential and trigger bugs
+- [Fixed] - bugfixes
 
 ## [8.0.21] - 2021-11-11
 
-## [8.0.21] - 2021-11-11
+- [Fixed] production environment use of encryption salt
 
-## [8.0.20] - 2021-11-11
+## [8.0.20] - 2021-11-10
 
 ### Transfer from Harvard @7.4.72 - 2021-11-10
 
@@ -144,7 +293,11 @@ release will be created for any release tested in production, and may be marked 
 - [Fixed] Template retrieval and post processing templates
 - [Changed] Report results table significantly refactored
 
-## [8.0.19] - 2021-11-10
+## [8.0.19] - 2021-11-01
+
+- [Added] Documentation for a private repository fork
+
+NOTE: this build is largely to test the new private repository is complete and can be built
 
 ## [8.0.18] - 2021-11-01
 

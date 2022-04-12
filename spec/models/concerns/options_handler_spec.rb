@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'OptionsHandler', type: :model do
   before :example do
+    Object.send :remove_const, 'TestOptionsHandler' if defined? TestOptionsHandler
     Object.const_set(
       'TestOptionsHandler',
       Class.new do

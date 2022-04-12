@@ -169,7 +169,12 @@ class Master < ActiveRecord::Base
   ExternalIdentifier.enable_active_configurations
 
   if attribute_names.include? 'created_by_user_id'
+    # NOTE: a belongs_to association can't include a scope definition and be used in a join
+    # therefore it is necessary to always use this association with the separately defined scope.
+    # For example:
+    #   m.master_created_by_user.only_created_by_current_user(current_user)
     belongs_to :master_created_by_user, class_name: 'User', optional: true, foreign_key: :created_by_user_id
+    scope :only_created_by_current_user, ->(current_user) { where(masters: { created_by_user_id: current_user.id }) }
     Resources::Models.add(User, resource_name: :master_created_by_user)
     before_create :write_created_by_user
   end
@@ -633,11 +638,8 @@ class Master < ActiveRecord::Base
     res = super(extras)
 
     # Handled the filtered lists, changing their names back to match the original expected objects names
-    res.each_key do |k|
-      if k.start_with?(FilteredAssocPrefix)
-        res[k.sub(FilteredAssocPrefix, '')] = res[k]
-        res.delete(k)
-      end
+    res.transform_keys! do |k|
+      k.start_with?(FilteredAssocPrefix) ? k.sub(FilteredAssocPrefix, '') : k
     end
 
     res
