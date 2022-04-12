@@ -18,7 +18,6 @@ release will be created for any release tested in production, and may be marked 
 
 ## [8.0.58] - 2022-04-12
 
-- []
 - [Added] view_css support to regular panels
 - [Added] force_not_valid option in create/update_reference and update_this
 - [Added] ability for save_action to return the first result that matches an if condition
