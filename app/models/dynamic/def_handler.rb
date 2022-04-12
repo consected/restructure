@@ -394,6 +394,15 @@ module Dynamic
       @secondary_key = configurations && configurations[:secondary_key]
     end
 
+    def use_current_version
+      return @use_current_version if @use_current_version_set
+
+      @use_current_version_set = true
+      # Parse option configs if necessary
+      option_configs
+      @use_current_version = configurations && configurations[:use_current_version]
+    end
+
     # Return result based on the current
     # list of model defintions based on them being available in
     # the active app types.
@@ -479,6 +488,11 @@ module Dynamic
     # @return [Array] parsed configs
     def force_option_config_parse
       return if disabled?
+
+      @secondary_key_set = false
+      @secondary_key = nil
+      @use_current_version_set = false
+      @use_current_version = nil
 
       option_configs force: true, raise_bad_configs: true
     end
