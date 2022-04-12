@@ -737,43 +737,6 @@ module Dynamic
       END_TEXT
     end
 
-    def prefix_class
-      klass = Object
-      klass = "::#{self.class.implementation_prefix}".constantize if self.class.implementation_prefix.present?
-      klass
-    end
-
-    def remove_implementation_class(alt_prefix_class = nil)
-      klass = alt_prefix_class || prefix_class
-      # This may fail if an underlying dependent class (parent class) has been redefined by
-      # another dynamic implementation, such as external identifier
-      return unless implementation_class_defined?(klass, fail_without_exception: true,
-                                                         fail_without_exception_newable_result: true)
-
-      klass.send(:remove_const, model_class_name)
-    rescue StandardError => e
-      logger.info <<~END_TEXT
-        *************************************************************************************
-        Failed to remove the old definition of #{model_class_name}. #{e.inspect}
-        *************************************************************************************
-      END_TEXT
-    end
-
-    def remove_implementation_controller_class
-      klass = prefix_class
-      return unless implementation_controller_defined?(klass)
-
-      # This may fail if an underlying dependent class (parent class) has been redefined by
-      # another dynamic implementation, such as external identifier
-      klass.send(:remove_const, full_implementation_controller_name)
-    rescue StandardError => e
-      logger.info <<~END_TEXT
-        *************************************************************************************
-        Failed to remove the old definition of #{full_implementation_controller_name}. #{e.inspect}
-        *************************************************************************************
-      END_TEXT
-    end
-
     #
     # Create a user access control for the item with a template role, to
     # ensure that it is correctly exported from an app type, even
