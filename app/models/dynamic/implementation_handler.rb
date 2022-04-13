@@ -78,6 +78,10 @@ module Dynamic
       return @versioned_definition unless @versioned_definition.nil? ||
                                           @versioned_definition.def_version.nil? && id
 
+      return @versioned_definition = current_definition if current_definition.use_current_version
+
+      return @versioned_definition = current_definition if respond_to?(:use_current_version) && use_current_version
+
       unless respond_to?(:use_def_version_time) || respond_to?(:created_at)
         return @versioned_definition = current_definition
       end
