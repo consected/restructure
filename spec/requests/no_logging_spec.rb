@@ -8,7 +8,7 @@ describe 'no logging in production' do
 
     d = DateTime.now
     s = "This is a test of the logger at #{d}"
-    Rails.logger.info s
+    Rails.logger.warn s
     log = Rails.root.join('log/test.log')
     n = `grep '#{s}' #{log}`
     n = n.gsub("\n", '')
@@ -22,7 +22,7 @@ describe 'no logging in production' do
 
     d = DateTime.now
     s = "This is a test of the logger being disabled at #{d}"
-    Rails.logger.info s
+    Rails.logger.warn s
     log = Rails.root.join('log/test.log')
     n = `grep '#{s}' #{log}`
     n = n.gsub("\n", '')
