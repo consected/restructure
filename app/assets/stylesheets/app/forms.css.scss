@@ -469,7 +469,8 @@ fieldset.readonly-edit-fieldset {
 
 .edit-field-container.done-label-resize {
   input[type="text"],
-  input[type="email"] {
+  input[type="email"],
+  input[type="url"] {
     &.form-control:first-child {
       width: 100%;
 

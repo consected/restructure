@@ -7,7 +7,7 @@
   <div class="<%= @runner.count_only ? 'count-only' : '' %>">
     <div id="report-edit-" data-preprocessor="report-edit-form" data-subscription="report-edit-form-" class="new-block new-below no-processed-scroll"></div>
     <% unless embedded_report %>
-      <p class="text-center"><%= link_to "link to report", report_path(id: @report.alt_resource_name, search_attrs: search_attrs_params_hash.merge(no_run: 'true')) if current_admin || current_user.can?(:view_reports)%> </p>
+      <div class="link-to-report"><%= link_to "", report_path(id: @report.alt_resource_name, search_attrs: search_attrs_params_hash.merge(no_run: 'true')), class: 'glyphicon glyphicon-link' if current_admin || current_user.can?(:view_reports)%></div>
     <% end %>
     <%= render partial: 'filter_on' if @runner.previous_filtering.sql_requests_filtering %>
     <% if current_admin && @runner.sql && !embedded_report%>

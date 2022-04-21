@@ -3,3 +3,19 @@
   border: 1px solid rgb(192, 192, 192);
   box-shadow: 0 2px 3px 1px rgba(0, 0, 0, 0.1);
 }
+
+#user_profile_container_block {
+  margin-top: -21px;
+  z-index: 1;
+  position: relative;
+
+  ul#user-profiles-tabs {
+    background-color: rgb(238, 238, 238);
+    border: 1px solid rgb(231, 231, 231);
+    border-top: 0;
+
+    li a {
+      background-color: transparent;
+    }
+  }
+}
