@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Changed] gemfile to include puma in all environments, to allow latest version to be installed on beanstalk
+- [Changed] styling of user profile panel
+- [Fixed] issue with view_options in model references
+
 ## [8.0.58] - 2022-04-12
 
 - [Added] view_css support to regular panels
