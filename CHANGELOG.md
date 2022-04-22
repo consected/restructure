@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Changed] embedded_block to allow formatting of link and allow models related to a master to edit
+- [Added] tag select for records from tables / dynamic models
+- [Fixed] issue with created_by_user_id
+
 ## [8.0.59] - 2022-04-21
 
 - [Changed] gemfile to include puma in all environments, to allow latest version to be installed on beanstalk
