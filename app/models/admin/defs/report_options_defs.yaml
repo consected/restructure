@@ -162,7 +162,11 @@ column_options:
 
     # embedded_block - url linking to a dynamic model, to be opened in a modal popup for viewing or editing
     #   A SQL field definition like this can be used:
+    #      '/masters/' || master_id::varchar || '/dynamic_model/rc_q2_results/' || id::varchar "view results"
+    #   or
     #      '/dynamic_model/rc_q2_results/' || id::varchar "view results"
+    #   By default, a 'details' icon will be shown. To use defined text instead, use a markdown format link
+    #      [label for link]('/dynamic_model/rc_q2_results/' || id::varchar "view results")
     
     # checkbox - checkbox shows as checked, unchecked or blank
     #   booleans (true | false | NULL)
