@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.0.60] - 2022-04-22
 
 - [Changed] embedded_block to allow formatting of link and allow models related to a master to edit
 - [Added] tag select for records from tables / dynamic models
