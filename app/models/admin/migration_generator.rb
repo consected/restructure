@@ -355,7 +355,6 @@ class Admin::MigrationGenerator
   # @param [String] view_name
   # @return [Array]
   def self.view_definitions(schema, view_name)
-
     sql = <<~SQL
       select schemaname, viewname, definition
       from pg_views
@@ -368,9 +367,8 @@ class Admin::MigrationGenerator
       ActiveRecord::Relation::QueryAttribute.new('schemaname', schema, type)
     ]
 
-    connection.exec_query sql, 'SQL', binds 
+    connection.exec_query sql, 'SQL', binds
   end
-
 
   def table_columns
     ActiveRecord::Base.connection.columns(table_name)
@@ -595,11 +593,11 @@ class Admin::MigrationGenerator
   rescue StandardError => e
     FileUtils.mkdir_p db_migration_failed_dirname
     FileUtils.mv @do_migration, db_migration_failed_dirname
-    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}"
+    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}\n#{e.backtrace.join("\n")}"
   rescue FphsException => e
     FileUtils.mkdir_p db_migration_failed_dirname
     FileUtils.mv @do_migration, db_migration_failed_dirname
-    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}"
+    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}\n#{e.backtrace.join("\n")}"
   end
 
   #

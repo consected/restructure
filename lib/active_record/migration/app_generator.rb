@@ -508,7 +508,8 @@ module ActiveRecord
 
           if fdef == :references
             begin
-              add_reference "#{schema}.#{table_name}", c, options
+              alt_c = field_opts[:attr_name]
+              add_reference "#{schema}.#{table_name}", alt_c, options
             rescue StandardError, ActiveRecord::StatementInvalid
               nil
             end
@@ -532,7 +533,8 @@ module ActiveRecord
           next if skip_master && c.to_sym == :master_id
 
           if fdef == :references
-            remove_reference "#{schema}.#{table_name}", c, options
+            alt_c = field_opts[:attr_name]
+            remove_reference "#{schema}.#{table_name}", alt_c, options
           else
             remove_column "#{schema}.#{table_name}", c, fdef
           end
@@ -754,9 +756,8 @@ module ActiveRecord
             fopts[:default] = field_config[:default] if field_config[:default]
             fopts[:index] = field_config[:index] if field_config[:index]
           elsif a == 'created_by_user_id'
-            attr_name = :created_by_user
             f = :references
-            fopts = { index: { name: "#{rand_id}_ref_cb_user_idx" }, foreign_key: { to_table: :users } }
+            fopts = { index: { name: "#{rand_id}_ref_cb_user_idx" }, foreign_key: { to_table: :users }, attr_name: :created_by_user }
           elsif a.index(/(?:_when|_date)$/)
             f = :date
           elsif a.index(/(?:_time)$/)
