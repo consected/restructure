@@ -86,7 +86,8 @@ reports list title: |
   The title that appears at the top of the list of reports when the Reports menu item is clicked. 
   Any value overrides the default "Reports"
 report library button label: |
-  The label on the "report library" button that appears in the reports list page.
+  The label on the "report library" button that appears in the reports list page. User "none" to hide it.
+  The user access control *view_report_no_list* will also hide this button.
 show ids in master result: |
   Master record results headers show one or more IDs. Provide a comma separated list of IDs to show using 
   alternative ID names, "master_id", or "none" to hide all IDs
