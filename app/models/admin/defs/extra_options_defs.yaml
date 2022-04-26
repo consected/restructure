@@ -133,6 +133,9 @@
       notify: 
 #!defs(save_triggers_notify_options_defs.yaml)
 
+      change_user_roles:
+#!defs(save_triggers_change_user_roles_options_defs.yaml)
+
       create_reference: 
 #!defs(save_triggers_create_reference_options_defs.yaml)
 
