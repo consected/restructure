@@ -3,9 +3,12 @@
 # User controller for interacting with dynamic model implementations
 class DynamicModel::DynamicModelsController < UserBaseController
   include MasterHandler
+  include EmbeddedItemHandler
 
   def template_config
     Application.refresh_dynamic_defs
+
+    refresh_embedded_item_for @instance_list
 
     render partial: 'dynamic_models/common_search_results_template_set'
   end

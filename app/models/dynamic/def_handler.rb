@@ -832,5 +832,29 @@ module Dynamic
     def restart_server
       AppControl.restart_server # if Rails.env.production?
     end
+
+    # Get a complete set of all tables to be accessed by model reference configurations,
+    # with a value representing what they are associated from.
+    def all_referenced_tables
+      res = []
+
+      option_configs.map(&:references).compact.each do |act_refs|
+        act_refs.each do |ref_name, outer_config|
+          outer_config.each do |full_name, ref_config|
+            details = ref_config.slice(:to_table_name, :to_schema_name, :to_model_class_name, :to_class_type,
+                                       :from, :without_reference, :no_master_association)
+            details.merge! reference_name: ref_name, full_ref_name: full_name
+            res << details
+          end
+        end
+      end
+
+      res
+    rescue StandardError => e
+      raise FphsException, <<~END_TEXT
+        Failed to use the extra log options. It is likely that the 'references:' attribute of one of
+        activities is not formatted as expected, or a @library inclusion has an error. #{e}
+      END_TEXT
+    end
   end
 end

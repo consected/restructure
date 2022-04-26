@@ -293,7 +293,7 @@
       <% end %>
 
     </div>
-      <% if @has_source %>
+      <% if @has_source && form_object_instance.respond_to?(:source) %>
         <%= render partial: 'general_selections/definitions_block', locals: {item_type: general_selection_source_name(form_object_instance), value: form_object_instance.source} %>
       <% end %>
 

@@ -123,13 +123,13 @@ module Dynamic
     # @param [Symbol] reference_type - :references | :e_sign
     # @return [Hash]
     def references_config_for_type(reference_type)
-      return unless extra_log_type_config
+      return unless option_type_config
 
       case reference_type
       when :references
-        extra_log_type_config.references
+        option_type_config.references
       when :e_sign
-        extra_log_type_config.e_sign && extra_log_type_config.e_sign[:document_reference]
+        option_type_config.e_sign && option_type_config.e_sign[:document_reference]
       end
     end
 
@@ -162,7 +162,7 @@ module Dynamic
 
       memoize_creatable_model_references(only_creatables) do
         cre_res = {}
-        ref_configs = extra_log_type_config&.references
+        ref_configs = option_type_config&.references
         break cre_res unless ref_configs
 
         ref_configs.each do |ref_key, refitem|
@@ -226,10 +226,10 @@ module Dynamic
     # @param [Hash] ref_config - single model reference config
     # @return [Boolean | Object] ConditionalAction#calc_action_if result
     def ref_config_performable?(action, ref_config)
-      extra_log_type_config.calc_reference_if(ref_config,
-                                              action,
-                                              self,
-                                              default_if_no_config: true)
+      option_type_config.calc_reference_if(ref_config,
+                                           action,
+                                           self,
+                                           default_if_no_config: true)
     end
 
     #
@@ -553,9 +553,9 @@ module Dynamic
       return nil if @always_embed_item == false
 
       @always_embed_item = false
-      return unless extra_log_type_config&.view_options
+      return unless option_type_config&.view_options
 
-      always_embed_reference = extra_log_type_config.view_options[:always_embed_reference]
+      always_embed_reference = option_type_config.view_options[:always_embed_reference]
       return unless always_embed_reference
 
       # Get the first model reference for this activity log that matches the record type in the
@@ -574,7 +574,7 @@ module Dynamic
     def never_embed_item
       return @never_embed_item unless @never_embed_item.nil?
 
-      aer = extra_log_type_config&.view_options&.dig(:always_embed_reference)
+      aer = option_type_config&.view_options&.dig(:always_embed_reference)
       @never_embed_item = (aer == 'never')
     end
 
@@ -584,14 +584,14 @@ module Dynamic
     def never_embed_creatable_item
       return @never_embed_creatable_item unless @never_embed_creatable_item.nil?
 
-      aer = extra_log_type_config&.view_options&.dig(:always_embed_creatable_reference)
+      aer = option_type_config&.view_options&.dig(:always_embed_creatable_reference)
       @never_embed_creatable_item = (aer == 'never')
     end
 
     #
     # Get the view option for :always_embed_creatable_reference
     def always_embed_creatable
-      extra_log_type_config.view_options[:always_embed_creatable_reference]
+      option_type_config.view_options[:always_embed_creatable_reference]
     end
 
     #

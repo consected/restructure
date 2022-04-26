@@ -185,12 +185,6 @@ class ActivityLog < ActiveRecord::Base
     []
   end
 
-  # Get a complete set of all tables to be accessed by model reference configurations,
-  # with a value representing what they are associated from.
-  # @see OptionConfigs::ActivityLogOptions.referenced_tables_for_all_in
-  def all_referenced_tables
-    OptionConfigs::ActivityLogOptions.referenced_tables_for_all_in(self)
-  end
 
   # The class that an activity log implementation belongs to
   def item_class

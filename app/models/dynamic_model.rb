@@ -191,6 +191,7 @@ class DynamicModel < ActiveRecord::Base
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
         res.include Dynamic::DynamicModelImplementer
+        res.include Dynamic::ModelReferenceHandler
         add_handlers(res)
 
         res.final_setup

@@ -87,42 +87,43 @@ _fpa.preprocessors.activity_log_edit_form = function (block, data) {
 
 
 _fpa.preprocessors.activity_log_show_log_block = function (block, data) {
-  {
+  // _fpa.preprocessors.dynamic_block_references(block, data)
+  // {
 
-    var ds;
-    if (data.multiple_results) {
-      ds = data[data.multiple_results]
-    }
-    else {
-      for (var e in data) {
-        if (data.hasOwnProperty(e) && e != '_control') {
-          ds = [data[e]];
-          break;
-        }
-      }
-    }
+  //   var ds;
+  //   if (data.multiple_results) {
+  //     ds = data[data.multiple_results]
+  //   }
+  //   else {
+  //     for (var e in data) {
+  //       if (data.hasOwnProperty(e) && e != '_control') {
+  //         ds = [data[e]];
+  //         break;
+  //       }
+  //     }
+  //   }
 
-    /* Decide whether to show a model reference as embedded or in a list */
-    for (var i = 0; i < ds.length; i++) {
-      var d = ds[i];
-      var no_creatable_references;
-      if (d.creatable_model_references) {
-        no_creatable_references = true;
-        var cr0 = null;
-        for (var p in d.creatable_model_references) {
-          if (d.creatable_model_references.hasOwnProperty(p) && d.creatable_model_references[p]) {
-            for (var p1 in d.creatable_model_references[p]) {
-              if (d.creatable_model_references[p].hasOwnProperty(p1)) {
-                no_creatable_references = d.creatable_model_references[p][p1] != 'many';
-              }
-            }
-          }
-        }
-      }
+  //   /* Decide whether to show a model reference as embedded or in a list */
+  //   for (var i = 0; i < ds.length; i++) {
+  //     var d = ds[i];
+  //     var no_creatable_references;
+  //     if (d.creatable_model_references) {
+  //       no_creatable_references = true;
+  //       var cr0 = null;
+  //       for (var p in d.creatable_model_references) {
+  //         if (d.creatable_model_references.hasOwnProperty(p) && d.creatable_model_references[p]) {
+  //           for (var p1 in d.creatable_model_references[p]) {
+  //             if (d.creatable_model_references[p].hasOwnProperty(p1)) {
+  //               no_creatable_references = d.creatable_model_references[p][p1] != 'many';
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
 
-      d._show_embedded_as_single_item = (d.model_references && d.model_references.length == 1 && no_creatable_references);
-    }
-  }
+  //     d._show_embedded_as_single_item = (d.model_references && d.model_references.length == 1 && no_creatable_references);
+  //   }
+  // }
 
 
 }

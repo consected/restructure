@@ -71,7 +71,7 @@
         {{#if creatable_model_references.<%= al_refkey %>.<%= al_reftype %> }}
           {{#if creatable_model_references.<%= al_refkey %>.<%= al_reftype %>.ref_type }}
       <%= render partial: 'common_templates/reference_actions',  locals: {
-            name: "activity_log/#{implementation_class_name}", 
+            name: class_resource_name&.ns_pathify&.singularize, 
             ref_type: ref_type, 
             caption: label, 
             block_id: "#{name.hyphenate}-#{ref_type}", 
@@ -93,7 +93,7 @@
           {{#if creatable_model_references.<%= ref_key %>.<%= ref_type %>.ref_type }}
 
       <%= render partial: 'common_templates/reference_actions',  locals: {
-            name: "activity_log/#{implementation_class_name}", 
+            name: class_resource_name&.ns_pathify&.singularize, 
             ref_type: ref_type, 
             caption: ref_config[:to_record_label], 
             block_id: "#{name.hyphenate}-#{ref_type}", 

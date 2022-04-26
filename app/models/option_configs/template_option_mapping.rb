@@ -43,6 +43,7 @@ module OptionConfigs
         extra_class: view_options[:extra_class],
         template_class: nil,
         extra_data_attribs: field_list.include?('rec_type') ? [:rec_type] : nil,
+        references: option_type_config.references,
         extra_options_config: option_type_config,
         external_id_options: {
           label: external_id_type.label,
@@ -99,6 +100,7 @@ module OptionConfigs
         data_sort: data_sort,
         category: def_record.category,
         view_options: view_options,
+        references: option_type_config.references,
         extra_class: view_options[:extra_class],
         template_class: nil,
         extra_data_attribs: field_list.include?('rec_type') ? [:rec_type] : nil,
