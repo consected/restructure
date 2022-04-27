@@ -119,40 +119,45 @@ describe User do
 
   describe 'create a user' do
     before do
-      @registration_admin = SetupHelper::registration_admin
+      @registration_admin = SetupHelper.registration_admin
       stub_const('Settings::RegistrationAdminEmail', @registration_admin.email)
     end
     context 'when user NOT are allowed to self-register; i.e., AllowUsersToRegister is false' do
       before { stub_const('Settings::AllowUsersToRegister', false) }
       it 'requires admin to create a user' do
         expect { User.create! email: "atest-#{@good_email}", first_name: 'Last', last_name: 'Last' }.to raise_error(
-                                                                                                          ActiveRecord::RecordInvalid,
-                                                                                                          'Validation failed: Admin account must be used to create user, Admin must exist'
-                                                                                                        )
+          ActiveRecord::RecordInvalid,
+          'Validation failed: Admin account must be used to create user, Admin must exist'
+        )
       end
       it 'is expected to be created by an admin' do
-        expect { User.create!(email: "#{rand(100_000_000..1_099_999_999)}-atest-#{@good_email}",
-                              current_admin: @admin,
-                              first_name: 'First',
-                              last_name: 'Last') }.to_not raise_error
+        expect do
+          User.create!(email: "#{rand(100_000_000..1_099_999_999)}-atest-#{@good_email}",
+                       current_admin: @admin,
+                       first_name: 'First',
+                       last_name: 'Last')
+        end.to_not raise_error
       end
     end
-    context 'when user are allowed to self-register; i.e., AllowUsersToRegister is true' do
+    context 'rwhen user are allowed to self-register; i.e., AllowUsersToRegister is true' do
       before { stub_const('Settings::AllowUsersToRegister', true) }
       it 'is expected to be created by the self registering user' do
-        expect { User.create!(email: "#{rand(100_000_000..1_099_999_999)}-atest-#{@good_email}",
-                                 password: 'AwDuHxX3LwhrfQyF',
-                                 current_admin: @registration_admin,
-                                 first_name: 'First',
-                                 last_name: 'Last') }.to_not raise_error
+        expect do
+          User.create!(email: "#{rand(100_000_000..1_099_999_999)}-atest-#{@good_email}",
+                       password: 'AwDuHxX3LwhrfQyF',
+                       current_admin: @registration_admin,
+                       first_name: 'First',
+                       last_name: 'Last')
+        end.to_not raise_error
       end
       it 'is expected to be created by an admin' do
-        expect { User.create!(email: "#{rand(100_000_000..1_099_999_999)}-atest-#{@good_email}",
-                              current_admin: @admin,
-                              first_name: 'First',
-                              last_name: 'Last') }.to_not raise_error
+        expect do
+          User.create!(email: "#{rand(100_000_000..1_099_999_999)}-atest-#{@good_email}",
+                       current_admin: @admin,
+                       first_name: 'First',
+                       last_name: 'Last')
+        end.to_not raise_error
       end
-
     end
   end
 
@@ -173,23 +178,23 @@ describe User do
     # Set the time so that it is too late for repeated reminders to be sent, since without an actual delay from
     # a future delayed job, the repeats will happen indefinitely.
     @user.class.send(:define_method, :password_updated_at) do
-      Time.now - 87.days
+      Time.now - (Settings::PasswordAgeLimit - 3).days
     end
 
     @user.save!
 
-    expect(User.expire_password_after).to eq 90
+    expect(User.expire_password_after).to eq Settings::PasswordAgeLimit
     expect(User.remind_days_before).to eq 15
     expect(User.remind_repeat_days).to eq 4
 
-    expect(Messaging::MessageNotification.count).to eq 2
+    orig_count = Messaging::MessageNotification.count
     expect(Messaging::MessageNotification.first.user).to eq @user
     expect(Messaging::MessageNotification.first.layout_template_name).to eq Users::Reminders.password_expiration_defaults[:layout]
 
     @user.password = 'some new password that needs notification'
     @user.save!
 
-    expect(Messaging::MessageNotification.count).to eq 4
+    expect(Messaging::MessageNotification.count).to eq(orig_count + 1)
     expect(Messaging::MessageNotification.last.user).to eq @user
     expect(Messaging::MessageNotification.last.layout_template_name).to eq Users::Reminders.password_expiration_defaults[:layout]
 
@@ -198,7 +203,8 @@ describe User do
     @user.class.send :alias_method, :password_updated_at, :orig_password_updated_at
 
     @user.save!
-    expect(Messaging::MessageNotification.count).to eq 5
+    # No new notification should have been set
+    expect(Messaging::MessageNotification.count).to eq(orig_count + 1)
   end
 
   after :all do
