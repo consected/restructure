@@ -77,7 +77,14 @@
         true or false to force a drop down field to include a selectable
         blank
       pattern: provide a mask for a text field
-      value: default value | now() | today()
+      value: |
+        default value | now() | today() 
+        
+        NOTE this is set in the form fields, not before building the instances
+      preset_value: |
+        default value | now() | today() 
+        
+        NOTE this is set when building the instances and may be used to drive logic like an embed_resource_name field
       no_downcase: true to prevent downcasing of the attribute when stored to the database
       format: plain | markdown - for free text editor fields such as notes and description
       config:
