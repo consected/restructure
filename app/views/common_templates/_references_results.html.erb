@@ -7,7 +7,11 @@
 
 <script id="activity_log_<%=name%>_references"  type="text/x-handlebars-template" class="hidden handlebars-partial references_def_block">
 <%
-  first_ref_def = references&.first&.last&.first&.last
+  unless defined? embed
+    embed = nil
+  end
+  
+  first_ref_def = references&.first&.last&.first&.last&.dig(:to_model_name_us) || embed
   if first_ref_def 
     # There is at least one reference definition
     # At run time, run through the model references twice, first handling an embedded item
@@ -16,12 +20,12 @@
 %>
   {{#each model_references}}
     {{#is ../embedded_item.id '===' to_record_id}}
-      {{#is ../embedded_item.item_type '===' '<%= first_ref_def[:to_model_name_us] %>'}}
+      {{#is ../embedded_item.item_type '===' <%= embed ? '../embedded_item.item_type' : "'#{first_ref_def}'".html_safe %>}}
         {{#is to_record_options_config.view_as.show '!==' 'hide'}}
           {{#is to_record_options_config.view_as.show '!==' 'not_embedded'}}
             {{#with ../embedded_item}}
-              <% mr_name = ModelReference.record_type_to_ns_table_name references&.first&.first %>
-              {{> common_template_result_fields result_data=this name='<%=mr_name%>' template_config=(fpa_state_item 'template_config' '<%=mr_name.underscore%>' vdef_version)}}
+              <% mr_name = '../to_record_template' #ModelReference.record_type_to_ns_table_name references&.first&.first %>
+              {{> common_template_result_fields result_data=this name=<%=mr_name%> template_config=(fpa_state_item 'template_config' (underscore <%=mr_name%>) vdef_version)}}
             {{/with}}
           {{/is}}
         {{/is}}

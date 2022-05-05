@@ -35,6 +35,11 @@ module HandlesUserBase
     # Create a referring record, if it has been set up
     after_save :create_referring_record
 
+    # Complete the linkage of an embedded item back to this record
+    # Do this both before and after create, to handle the different permutations
+    before_create :link_embedded_item
+    after_create :link_embedded_item
+
     # If records have the `disabled` column (or a method that wants to pretend this),
     # trigger a handler if the record was disabled
     after_save :handle_disabled, if: -> { respond_to?(:disabled?) && disabled? }
@@ -46,7 +51,7 @@ module HandlesUserBase
     # The #reference is used to identify the current to_record when iterating model references
     # to check the ability to access the record being pointed to from this one.
     # Used primarily by #model_references to calculate ConditionalAction#calc_reference_if
-    attr_accessor :reference
+    attr_accessor :reference, :embedded_item
 
     # Setup alternative id field methods
     Master.setup_resource_alternative_id_fields self unless no_master_association
@@ -502,6 +507,55 @@ module HandlesUserBase
     end
   end
 
+  #
+  # When a new dynamic record is persisted with an embedded item, the
+  # appropriate fields need to be set to create the link.
+  # This is omnipotent and may safely be called multiple times without
+  # breaking existing links.
+  # The method will be called both before and after creation of the current instance
+  # allowing the appropriate setting of fields in either the current instance and/or
+  # the embedded item.
+  # If the embed type is 'field' (has an embed_resource_name) amd has an
+  # embed_resource_id field, set the latter.
+  # Otherwise, if the config says the direct embed item has a foreign key
+  # field back to this instance, set that foreign key field in the new embedded item
+  # In either case, if the target id field is already set and the value is not
+  # negative (we often default embedded item id values to -1 to protect
+  # against full table searches) then skip the update.
+  def link_new_embedded_item(new_embedded_item)
+    return unless new_embedded_item
+
+    dec = direct_embed_config
+
+    if dec[:embed_type] == 'field' && respond_to?(:embed_resource_id) && !persisted?
+      # The embed type has fields embed_resource_name and embed_resource_id
+      # If the embed_resource_id is not already set and the new embed item id
+      # is valid then set the embed_resource_id in the current instance with the
+      # new embedded item's id
+      return if embed_resource_id
+
+      new_id = new_embedded_item.id
+      return if !new_id || new_id < 0
+
+      self.embed_resource_id = new_id
+      return
+    end
+
+    # Make sure the new embedded item is saved to ensure it is created
+    new_embedded_item.save!
+
+    target_fk = dec[:target_fk]
+    # Return if the configuration says there is not a foreign key field in the new embedded item
+    return unless target_fk
+
+    fk_val = new_embedded_item.attributes[target_fk]
+    # Exit if this isntance does not have a valid id or if the foreign
+    # key field in the new embedded item is already set
+    return if (!id || id < 0) || (fk_val && fk_val >= 0)
+
+    new_embedded_item.update!(target_fk => id)
+  end
+
   # Used as an indicator in certain models to show that this is part of a master record creation
   # This is used within an external identifier to disable certain validations
   def creating_master=(cm_flag)
@@ -550,6 +604,15 @@ module HandlesUserBase
 
     @referring_record = find_referring_record
     ModelReference.create_with @referring_record, self if @referring_record
+  end
+
+  #
+  # After creating a new record, if it has a directly embedded item now is the time to
+  # link it with its parent. This may be through fields in either the current record or
+  # the target embedded item, depending on the configuration. We can only do this when
+  # either record has been persisted with an id.
+  def link_embedded_item
+    link_new_embedded_item(embedded_item) if respond_to?(:direct_embed?) && direct_embed?
   end
 
   #

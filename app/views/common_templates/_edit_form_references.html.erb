@@ -4,12 +4,28 @@
   end
 
   shown_embedded = false
+  dec = object_instance.direct_embed_config
 
-  if !embedded && @option_type_config && @option_type_config.references
-    # Get the creatable references and work out what we can show based on the items that can be created
-    # only_creatables = object_instance.creatable_model_references only_creatables: true
+  if !embedded && (@option_type_config&.references || dec)
+    # Reformat the creatable model references for easier use in the partials below
+    creatable_references = {}
+    
+    # Using the creatable references, work out what we can show based on the items that can be created
     ocmr = object_instance.creatable_model_references
-    creatable_references = @option_type_config.references.select {|ref_key| ocmr[ref_key] && ocmr[ref_key].length > 0 }
+    creatable_references = @option_type_config.references&.select {|ref_key| ocmr[ref_key] && ocmr[ref_key].length > 0 }
+    creatable_references ||= {}
+    
+    if dec
+      ern = dec[:resource_name]
+      creatable_references[:embed_resource_name] = { 
+        ern => {
+          ref_type: ern,
+          many: 'direct_embed',
+          ref_config: { embed_resource_name: ern, to_record_label: @embedded_item&.human_name }
+        }  
+      }
+    end
+
     creatable_count = creatable_references.length
 
     if action_name.in?( ['new', 'edit']) && !@embedded_item

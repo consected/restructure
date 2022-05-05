@@ -4,6 +4,8 @@ module Dynamic
     extend ActiveSupport::Concern
 
     included do
+      after_initialize :force_preset_values, unless: :persisted?
+
       # Ensure that memoized versioned definition is cleared on creation, or if we
       # force an updated of the created_at timestamp to make it use a later definition
       before_save :reset_versioned_definition!, if: -> { !persisted? || created_at_changed? }
@@ -250,6 +252,22 @@ module Dynamic
     def handle_before_save_triggers
       option_type_config&.calc_save_trigger_if self, alt_on: :before_save
       true
+    end
+
+    #
+    # Force fields to be preset before initialization has been completed.
+    # This uses the option config {field_options: <field_name>: preset_value:}
+    # rather than default: (which only sets the value in the initial form).
+    # By setting ahead of time, things like embed_resource_name can operate.
+    def force_preset_values
+      fo = option_type_config&.field_options
+      return unless fo
+
+      fo.each do |name, config|
+        next unless config.key? :preset_value
+
+        send "#{name}=", config[:preset_value]
+      end
     end
   end
 end

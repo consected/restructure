@@ -176,6 +176,10 @@
   unless defined? field_options
     field_options = extra_options_config&.field_options || {}
   end
+
+  unless defined? embed
+    embed = nil
+  end
   
   if extra_options_config.respond_to?(:nfs_store) && extra_options_config&.nfs_store
     user_file_actions = extra_options_config&.nfs_store[:user_file_actions] 
@@ -340,6 +344,7 @@
       name: name.underscore, 
       full_name: full_name, 
       references: references, 
+      embed: embed,
       item_list: item_list, 
       implementation_class_name: implementation_class_name, 
       caption_before: caption_before, 

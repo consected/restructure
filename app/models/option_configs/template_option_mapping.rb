@@ -44,6 +44,7 @@ module OptionConfigs
         template_class: nil,
         extra_data_attribs: field_list.include?('rec_type') ? [:rec_type] : nil,
         references: option_type_config.references,
+        embed: direct_embed_type(def_record, option_type_config),
         extra_options_config: option_type_config,
         external_id_options: {
           label: external_id_type.label,
@@ -101,6 +102,7 @@ module OptionConfigs
         category: def_record.category,
         view_options: view_options,
         references: option_type_config.references,
+        embed: direct_embed_type(def_record, option_type_config),
         extra_class: view_options[:extra_class],
         template_class: nil,
         extra_data_attribs: field_list.include?('rec_type') ? [:rec_type] : nil,
@@ -170,6 +172,7 @@ module OptionConfigs
         item_flags_readonly: true,
         extra_type: option_type_config.name,
         references: option_type_config.references,
+        embed: direct_embed_type(def_record, option_type_config),
         show_if: option_type_config.show_if,
         view_options: view_options,
         extra_data_attribs: [:extra_log_type],
@@ -203,6 +206,19 @@ module OptionConfigs
         hide_item_list_panel: !!def_record.hide_item_list_panel,
         template_class: nil
       }
+    end
+
+    #
+    # The direct embed type for an embedded item in this definition
+    # @param [DynamicModel|ActivityLog] def_record
+    # @param [OptionConfigs::ExtraOptions] option_type_config
+    # @return [String|nil] - the type of the direct embed, or nil if one is not defined
+    def self.direct_embed_type(def_record, option_type_config)
+      if option_type_config.embed
+        'option_type_config'
+      elsif def_record&.implementation_class&.attribute_names&.include?('embed_resource_name')
+        'field'
+      end
     end
   end
 end

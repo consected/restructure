@@ -24,7 +24,7 @@ module AwsApiStubs
         headers: {
           'Accept' => '*/*',
           'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'User-Agent' => 'aws-sdk-ruby3/3.130.0',
+          'User-Agent' => /.+/,
           'X-Aws-Ec2-Metadata-Token-Ttl-Seconds' => '21600'
         }
       )
@@ -47,7 +47,7 @@ module AwsApiStubs
         headers: {
           'Accept' => '*/*',
           'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'User-Agent' => 'aws-sdk-ruby3/3.130.0'
+          'User-Agent' => /.+/
         }
       )
       .to_return(status: 200, body: body, headers: {})

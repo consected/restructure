@@ -9,7 +9,6 @@
 
   # An embedded form does not return a <form> tag, and also excludes some decoration and duplicate submit buttons.
 
-
   unless defined? embedded
     embedded = nil
   end
@@ -166,7 +165,7 @@
       <%= form_block_object.send(*form_block) do |form|%>
       <% form_embed = form if @embedded_item && !embedded %>
       <% if @option_type_config && !embedded %>
-        <%= form.hidden_field :extra_log_type, value: @extra_log_type_name, data: {attr_name: 'option_type', option_type: 'extra_log_type', object_name: form_object_item_type_us} %>
+        <%= form.hidden_field @option_type_attr_name, value: @option_type_name, data: {attr_name: 'option_type', option_type: @option_type_attr_name, object_name: form_object_item_type_us} %>
       <% else %>
         <%= hidden_field_tag :option_type, nil, data: {attr_name: 'option_type', option_type: 'embedded', object_name: form_object_item_type_us} %>
       <% end %>

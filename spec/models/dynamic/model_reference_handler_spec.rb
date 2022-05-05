@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require './db/table_generators/dynamic_models_table'
 
 AlNameGenTest = 'Gen Test ELT'
 # Use the activity log player contact phone activity log implementation,
@@ -14,6 +15,7 @@ RSpec.describe 'Model reference implementation', type: :model do
   include ModelSupport
   include PlayerContactSupport
   include BulkMsgSupport
+  include DynamicModelSupport
 
   before :context do
     SetupHelper.setup_al_gen_tests AlNameGenTest, 'elt', 'player_contact'
@@ -587,7 +589,7 @@ RSpec.describe 'Model reference implementation', type: :model do
     end
   end
 
-  describe 'references defined for dynamic modesl' do
+  describe 'references defined for dynamic models' do
     before :each do
       dm_name = 'Player Contact Phone Info'
       create_admin
@@ -630,6 +632,146 @@ RSpec.describe 'Model reference implementation', type: :model do
       ModelReference.create_from_master_with(dm.master, @player_contact)
 
       expect(dm.model_references.length).to be > 0
+    end
+  end
+
+  describe 'direct embed resource' do
+    before :each do
+      create_admin
+      create_user
+      generate_test_embed_dynamic_models
+
+      setup_access :player_contacts
+      create_item(data: rand(10_000_000_000_000_000), rank: 10)
+      @master = @player_contact.master
+
+      let_user_create :dynamic_model__test_embed_options
+      dm_name = 'test embed options'
+      dm = @dynamic_model_w_option = DynamicModel.active.find_by(name: dm_name)
+      raise "Dynamic Model #{dm_name} not set up" if dm.nil?
+
+      let_user_create :dynamic_model__test_embed_fields
+      dm_name = 'test embed fields'
+      dm = @dynamic_model_w_field = DynamicModel.active.find_by(name: dm_name)
+      raise "Dynamic Model #{dm_name} not set up" if dm.nil?
+
+      let_user_create :dynamic_model__test_embed_field_and_ids
+      dm_name = 'test embed field and ids'
+      dm = @dynamic_model_w_field_and_id = DynamicModel.active.find_by(name: dm_name)
+      raise "Dynamic Model #{dm_name} not set up" if dm.nil?
+
+      let_user_create :dynamic_model__test_embedded_recs
+      dm_name = 'test embedded recs'
+      dm = @dynamic_model_embed = DynamicModel.active.find_by(name: dm_name)
+      raise "Dynamic Model #{dm_name} not set up" if dm.nil?
+    end
+
+    it 'uses the embed option for a resource to be embedded' do
+      dm = @dynamic_model_w_option.implementation_class.new(master: @master, action_name: 'new')
+
+      dm.embedded_item.test1 = 'a value'
+      dm.save!
+
+      dm = dm.class.find(dm.id)
+      dm.current_user = @user
+      embedded_item = dm.embedded_item
+      expect(embedded_item).to be_a DynamicModel::TestEmbeddedRec
+      expect(embedded_item).to be_persisted
+      expect(embedded_item.test_embed_option_id).to eq dm.id
+    end
+
+    it 'uses the embed_resource_name field for the first record in the resource to be embedded' do
+      dm = @dynamic_model_w_field.implementation_class.new(
+        master: @master,
+        embed_resource_name: @dynamic_model_embed.resource_name,
+        action_name: 'new'
+      )
+
+      dm.embedded_item.test1 = 'a value 2'
+
+      dm.save!
+
+      dm = dm.class.find(dm.id)
+      dm.current_user = @user
+      embedded_item = dm.embedded_item
+      expect(embedded_item).to be_a DynamicModel::TestEmbeddedRec
+      expect(embedded_item).to be_persisted
+      expect(embedded_item.test_embed_field_id).to eq dm.id
+      expect(embedded_item.test1).to eq 'a value 2'
+    end
+
+    it 'ignores the embed_resource_name field if it is not set' do
+      dm = @dynamic_model_w_field.implementation_class.new(
+        master: @master,
+        embed_resource_name: nil,
+        action_name: 'new'
+      )
+      dm.save!
+
+      dm = dm.class.find(dm.id)
+      dm.current_user = @user
+      embedded_item = dm.embedded_item
+      expect(embedded_item).to be nil
+    end
+
+    it 'uses the embed_resource_name and _id fields for a resource to be embedded' do
+      DynamicModel::TestEmbeddedRec.create! test1: 'some value', master: @master
+      DynamicModel::TestEmbeddedRec.create! test1: 'some value2', master: @master
+      last_id = DynamicModel::TestEmbeddedRec.first.id
+
+      expect(last_id).not_to be nil
+      dm = @dynamic_model_w_field_and_id.implementation_class.new(
+        master: @master,
+        embed_resource_name: @dynamic_model_embed.resource_name,
+        embed_resource_id: last_id,
+        action_name: 'new'
+      )
+      dm.save!
+
+      dm = dm.class.find(dm.id)
+      dm.current_user = @user
+
+      embedded_item = dm.embedded_item
+      expect(embedded_item).to be_a DynamicModel::TestEmbeddedRec
+      expect(embedded_item.id).to eq last_id
+    end
+
+    it 'creates a new embedded it if the _id field is not set' do
+      DynamicModel::TestEmbeddedRec.create! test1: 'some value', master: @master
+      first_id = DynamicModel::TestEmbeddedRec.first.id
+
+      dm = @dynamic_model_w_field.implementation_class.new(
+        master: @master,
+        embed_resource_name: @dynamic_model_embed.resource_name,
+        action_name: 'new'
+      )
+      dm.save!
+
+      expect(DynamicModel::TestEmbeddedRec.first.id).to be > first_id
+
+      dm = dm.class.find(dm.id)
+      dm.current_user = @user
+
+      embedded_item = dm.embedded_item
+      expect(embedded_item).to be_a DynamicModel::TestEmbeddedRec
+      expect(embedded_item.id).to be > first_id
+    end
+
+    it 'ignores the embed if the embed resource is not accessible by the user' do
+      revoke_user_create :dynamic_model__test_embedded_recs
+
+      dm = @dynamic_model_w_field.implementation_class.new(
+        master: @master,
+        embed_resource_name: @dynamic_model_embed.resource_name,
+        action_name: 'new'
+      )
+      dm.save!
+
+      dm = dm.class.find(dm.id)
+      dm.current_user = @user
+
+      embedded_item = dm.embedded_item
+      expect(embedded_item).to be nil
     end
   end
 end

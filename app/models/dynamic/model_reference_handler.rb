@@ -25,6 +25,15 @@ module Dynamic
       attr_accessor :embedded_items
     end
 
+    class_methods do
+      #
+      # Field name for foreign key on another table referencing this table
+      # @return [String] <description>
+      def foreign_key_field_name
+        "#{table_name.singularize}_id"
+      end
+    end
+
     def reset_model_references
       @model_references = nil
       @embedded_items = nil
@@ -65,6 +74,11 @@ module Dynamic
 
         res = []
         refs = references_config_for_type reference_type
+        drefs = references_config_for_direct_embed
+        if drefs
+          refs ||= {}
+          refs.merge!(drefs)
+        end
 
         break res unless refs
 
@@ -134,6 +148,45 @@ module Dynamic
     end
 
     #
+    # Gets the references configuration Hash for a direct embed, if configured
+    # and the current instance has an id for the reference
+    # @return [Hash]
+    def references_config_for_direct_embed
+      return unless direct_embed?
+
+      dec = direct_embed_config
+      rn = dec && dec[:resource_name]
+      return unless rn
+
+      rin = dec[:resource_item_name]
+
+      filter_by = if dec.key? :target_fk
+                    # No resource_id was specified, so we filter on the target table having a field pointing to this one
+                    { dec[:target_fk] => id || -1 }
+                  elsif dec.key? :resource_id
+                    { "id": dec[:resource_id] }
+                  end
+      # A resource_id was specified, either based on a field being present, or from the option config
+      # If either of these are defined but returned nil, we have already forced the result to be -1
+      # to prevent a full table scan of the target
+
+      {
+        rin => {
+          rin => {
+            from: 'any',
+            to_record_type: rin,
+            filter_by: filter_by,
+            without_reference: true,
+            many: 'direct_embed',
+            ref_config: { embed_resource_name: rin },
+            limit: dec[:limit],
+            add: dec[:add]
+          }
+        }
+      }
+    end
+
+    #
     # Filter out the items based on reference specific showable_if rules.
     # Deletes items directly from ref_list.
     # @param [Array] ref_list - array of model reference results
@@ -162,8 +215,15 @@ module Dynamic
 
       memoize_creatable_model_references(only_creatables) do
         cre_res = {}
-        ref_configs = option_type_config&.references
-        break cre_res unless ref_configs
+        ref_configs = option_type_config&.references || {}
+
+        if direct_embed?
+
+          drefs = references_config_for_direct_embed
+          ref_configs.merge!(drefs) if drefs
+        end
+
+        break cre_res if ref_configs&.empty?
 
         ref_configs.each do |ref_key, refitem|
           refitem.each do |ref_type, ref_config|
@@ -430,7 +490,7 @@ module Dynamic
     #
     # Return an "embedded item", which is a standard model that appears embedded directly
     # within a parent activity log's form. This ties in tightly with the handling of this
-    # within an ActivityLogsController, which enables forms to submit data cleanly to
+    # within an EmbeddedItemHandler, which enables forms to submit data cleanly to
     # and embedded item, without having to manually traverse through the model reference.
     # Also, JSON data returned for an activity log will include an *embedded_item* method response
     # so that the embedded item data can be accessed directly within an activity log's data.
@@ -441,10 +501,9 @@ module Dynamic
     #
     # We don't have the capability (currently) to handle embedded items that are activity logs,
     # so avoid the issue by explicitly excluding the result.
-    # Perhaps this should really be handled within the ActivityLogController, since this limitation
+    # Perhaps this exclusion should really be handled within the EmbeddedItemHandler, since this limitation
     # is likely due to the UI, but for now retain it here.
     #
-    # @todo - refactor and add more comments to make it clearer what the logic is
     # @return [UserBase]
     def embedded_item
       memoize_embedded_item do
@@ -510,9 +569,12 @@ module Dynamic
 
     #
     # Simplify the action_name set by the controller, to
-    # get the type we are trying to handle for embedding
+    # get the type we are trying to handle for embedding.
+    # If a current #action_name is set, use it, otherwise
+    # if the instance is not persisted, assume we are in a new action,
+    # or if it is persisted then default to 'index' to force viewing
     def embed_action_type
-      action_name = self.action_name || 'index'
+      action_name = self.action_name || (!persisted? && 'new') || 'index'
 
       case action_name
       when 'new', 'create'
@@ -645,6 +707,50 @@ module Dynamic
       model_references(active_only: true).each do |mr|
         @embedded_items << mr.to_record
       end
+    end
+
+    #
+    # Does an extra options configuration or an embed_resource_name field
+    # indicate that we will directly embed a resource?
+    # @return [true] <description>
+    def direct_embed?
+      option_type_config&.embed || respond_to?(:embed_resource_name)
+    end
+
+    #
+    # The direct embed configuration to make an embedded item definition
+    # look like an option type config *references:* definition when
+    # used in #model_reference / #creatable_model_references
+    # This method uses extra options config or the embed_resource_name field
+    # The return is a Hash
+    # {embed_type:, resource_name:, :resource_item_name, add:, limit:, :target_fk, :resource_id}
+    # Returns nil if a direct embed definition is not matched.
+    # @return [Hash|nil]
+    def direct_embed_config
+      res = option_type_config.embed
+
+      if res
+        res[:embed_type] = 'option_type_config'
+      elsif respond_to?(:embed_resource_name) && embed_resource_name
+        res = { embed_type: 'field', resource_name: embed_resource_name }
+        res[:resource_id] = embed_resource_id if respond_to?(:embed_resource_id)
+      else
+        return
+      end
+
+      rn = res[:resource_name]
+      return unless rn
+
+      embed_resource = Resources::Models.find_by(resource_name: rn)
+
+      fk = self.class.foreign_key_field_name
+      res[:target_fk] = fk if !res.key?(:resource_id) && embed_resource.model.attribute_names.include?(fk)
+
+      res[:resource_item_name] = embed_resource.resource_item_name
+      res[:add] = 'many'
+      res[:limit] ||= 1
+
+      res
     end
   end
 end

@@ -11,10 +11,7 @@ module EmbeddedItemHandler
   def set_embedded_item_optional_params
     return unless @embedded_item
 
-    return unless params[al_type.singularize.to_sym] && params[al_type.singularize.to_sym][:embedded_item]
-
-    ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(embedded_item_permitted_params)
-    ei_secure_params.each do |p, v|
+    embedded_item_secure_params&.each do |p, v|
       @embedded_item.send("#{p}=", v)
     end
   end
@@ -38,12 +35,9 @@ module EmbeddedItemHandler
     case action_name
     when 'new'
       set_embedded_item_optional_params
-    when 'create'
+    when 'create', 'update'
       begin
-        ei_secure_params = params[al_type.singularize.to_sym]
-                           .require(:embedded_item)
-                           .permit(embedded_item_permitted_params)
-        @embedded_item.update ei_secure_params
+        @embedded_item.update embedded_item_secure_params if embedded_item_secure_params
         oi.updated_at = @embedded_item.updated_at
       rescue ActionController::ParameterMissing
         raise FphsException, 'Could not save the item, since you do not have access to any of the data it references.'
@@ -95,5 +89,11 @@ module EmbeddedItemHandler
     instance_list.each do |oi|
       handle_embedded_item oi
     end
+  end
+
+  def embedded_item_secure_params
+    return unless params.dig(params_namespace, :embedded_item)
+
+    params[params_namespace].require(:embedded_item).permit(embedded_item_permitted_params)
   end
 end

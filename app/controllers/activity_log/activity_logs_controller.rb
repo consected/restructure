@@ -10,7 +10,6 @@ class ActivityLog::ActivityLogsController < UserBaseController
   # e.g. a player contact
   # Not called for new or edit, since these are call elsewhere
   before_action :set_item, only: %i[index create update destroy]
-  # before_action :handle_extra_log_type, only: [:edit, :new]
   after_action :check_authentication_still_valid
 
   def template_config
@@ -74,10 +73,6 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
   def edit_form_helper_prefix
     'activity_log'
-  end
-
-  def al_type
-    @implementation_class.table_name
   end
 
   def item_data
@@ -145,7 +140,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
     creatables = @master_objects.build.creatables(**options)
 
     {
-      al_type: al_type,
+      al_type: params_namespace,
       item_type: item_type_us,
       item_types_name: @item_type,
       item_id: item_id,
@@ -218,7 +213,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
   # The secure parameters (key / value strong params) that can be used to
   # create or update instances
   def secure_params
-    @secure_params ||= params.require(al_type.singularize.to_sym).permit(*permitted_params)
+    @secure_params ||= params.require(params_namespace.singularize.to_sym).permit(*permitted_params)
   end
 
   #
@@ -232,7 +227,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
   #
   # Use the correct extra log type value, based on either the param (for a new action) or
   # the object_instance attribute (for an edit action)
-  def handle_extra_log_type
+  def handle_option_type_config
     etp = params[:extra_type]
     etp = params[:extra_log_type] if etp.blank?
     etp = object_instance.extra_log_type if etp.blank?
@@ -249,7 +244,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
       return
     end
 
-    @extra_log_type_name = etp
+    @option_type_name = etp
     # Get the options that were current when the form was originally created, or the current
     # options if this is a new instance
     @option_type_config = if object_instance.persisted?
@@ -257,23 +252,8 @@ class ActivityLog::ActivityLogsController < UserBaseController
                           else
                             @implementation_class.definition.option_type_config_for(etp)
                           end
-    object_instance.extra_log_type = @extra_log_type_name unless object_instance.persisted?
-  end
-
-  def check_editable?
-    handle_extra_log_type if action_name == 'edit'
-    return if object_instance.allows_current_user_access_to? :edit
-
-    not_editable
-    nil
-  end
-
-  def check_creatable?
-    handle_extra_log_type if action_name == 'new'
-    return if object_instance.allows_current_user_access_to?(:create) || current_admin_sample
-
-    not_creatable
-    nil
+    @option_type_attr_name = :extra_log_type
+    object_instance.extra_log_type = @option_type_name unless object_instance.persisted?
   end
 
   #
