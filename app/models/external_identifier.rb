@@ -4,6 +4,7 @@ class ExternalIdentifier < ActiveRecord::Base
   include Dynamic::VersionHandler
   include Dynamic::MigrationHandler
   include Dynamic::DefHandler
+  include Dynamic::DefGenerator
   include AdminHandler
 
   DefaultRange = (1..9_999_999_999).freeze

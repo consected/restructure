@@ -15,6 +15,11 @@ module Dynamic
     NotEmbeddedOptions = %w[not_embedded select_or_add].freeze
 
     included do
+      # Complete the linkage of an embedded item back to this record
+      # Do this both before and after create, to handle the different permutations
+      before_create :link_embedded_item
+      after_create :link_embedded_item
+
       after_commit :reset_model_references
 
       attr_accessor :action_name
@@ -653,6 +658,8 @@ module Dynamic
     #
     # Get the view option for :always_embed_creatable_reference
     def always_embed_creatable
+      return unless option_type_config
+
       option_type_config.view_options[:always_embed_creatable_reference]
     end
 
@@ -727,7 +734,7 @@ module Dynamic
     # Returns nil if a direct embed definition is not matched.
     # @return [Hash|nil]
     def direct_embed_config
-      res = option_type_config.embed
+      res = option_type_config&.embed
 
       if res
         res[:embed_type] = 'option_type_config'
@@ -742,6 +749,7 @@ module Dynamic
       return unless rn
 
       embed_resource = Resources::Models.find_by(resource_name: rn)
+      raise FphsException, "embed_resource not found for #{rn}" unless embed_resource
 
       fk = self.class.foreign_key_field_name
       res[:target_fk] = fk if !res.key?(:resource_id) && embed_resource.model.attribute_names.include?(fk)
@@ -751,6 +759,65 @@ module Dynamic
       res[:limit] ||= 1
 
       res
+    end
+
+    #
+    # After creating a new record, if it has a directly embedded item now is the time to
+    # link it with its parent. This may be through fields in either the current record or
+    # the target embedded item, depending on the configuration. We can only do this when
+    # either record has been persisted with an id.
+    def link_embedded_item
+      link_new_embedded_item(embedded_item) if respond_to?(:direct_embed?) && direct_embed?
+    end
+
+    #
+    # When a new dynamic record is persisted with an embedded item, the
+    # appropriate fields need to be set to create the link.
+    # This is omnipotent and may safely be called multiple times without
+    # breaking existing links.
+    # The method will be called both before and after creation of the current instance
+    # allowing the appropriate setting of fields in either the current instance and/or
+    # the embedded item.
+    # If the embed type is 'field' (has an embed_resource_name) amd has an
+    # embed_resource_id field, set the latter.
+    # Otherwise, if the config says the direct embed item has a foreign key
+    # field back to this instance, set that foreign key field in the new embedded item
+    # In either case, if the target id field is already set and the value is not
+    # negative (we often default embedded item id values to -1 to protect
+    # against full table searches) then skip the update.
+    def link_new_embedded_item(new_embedded_item)
+      return unless new_embedded_item
+
+      dec = direct_embed_config
+
+      if dec[:embed_type] == 'field' && respond_to?(:embed_resource_id) && !persisted?
+        # The embed type has fields embed_resource_name and embed_resource_id
+        # If the embed_resource_id is not already set and the new embed item id
+        # is valid then set the embed_resource_id in the current instance with the
+        # new embedded item's id
+        return if embed_resource_id
+
+        new_embedded_item.save! unless new_embedded_item.persisted?
+        new_id = new_embedded_item.id
+        return if !new_id || new_id < 0
+
+        self.embed_resource_id = new_id
+        return
+      end
+
+      # Make sure the new embedded item is saved to ensure it is created
+      new_embedded_item.save!
+
+      target_fk = dec[:target_fk]
+      # Return if the configuration says there is not a foreign key field in the new embedded item
+      return unless target_fk
+
+      fk_val = new_embedded_item.attributes[target_fk]
+      # Exit if this isntance does not have a valid id or if the foreign
+      # key field in the new embedded item is already set
+      return if (!id || id < 0) || (fk_val && fk_val >= 0)
+
+      new_embedded_item.update!(target_fk => id)
     end
   end
 end

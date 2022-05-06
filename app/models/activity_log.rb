@@ -4,6 +4,7 @@ class ActivityLog < ActiveRecord::Base
   include Dynamic::VersionHandler
   include Dynamic::MigrationHandler
   include Dynamic::DefHandler
+  include Dynamic::DefGenerator
   include AdminHandler
   include SelectorCache
 

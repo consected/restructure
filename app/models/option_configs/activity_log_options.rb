@@ -19,6 +19,8 @@ module OptionConfigs
         return
       end
       raise FphsException, 'extra log options name: property can not be blank' if self.name.blank?
+
+      # Activity logs have some predefined captions. Set these up.
       if caption_before && !caption_before.is_a?(Hash)
         raise FphsException, 'extra log options caption_before: must be a hash of {field_name: caption, ...}'
       end
