@@ -76,6 +76,10 @@ RSpec.describe NfsStore::Manage::ContainerFile, type: :model do
     expect(sf.option_type_config).to be_a OptionConfigs::ContainerFilesOptions
     expect(sf.embedded_item).to be_a DynamicModel::TestEmbeddedRec
 
+    sf = sf.class.find(sf.id)
+    sf.current_user = @user
+    expect(sf.embedded_item).to be_a DynamicModel::TestEmbeddedRec
+
     # @todo - this will not work, because callbacks are not made when creating archived files
     # since we do everything in a mass insert for performance reasons. Limit to stored files only for now.
     #

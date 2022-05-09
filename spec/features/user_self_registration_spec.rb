@@ -79,6 +79,8 @@ describe 'user sign in process for users that can self register', js: true, driv
   end
 
   it 'should prevent sign in if user disabled' do
+    expect(@d_user.disabled).to be true
+
     visit '/users/sign_in'
     within '#new_user' do
       fill_in 'Email', with: @d_email

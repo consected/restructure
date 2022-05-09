@@ -291,6 +291,8 @@ module Dynamic
     # @param [Hash] ref_config - single model reference config
     # @return [Boolean | Object] ConditionalAction#calc_action_if result
     def ref_config_performable?(action, ref_config)
+      return true unless option_type_config
+
       option_type_config.calc_reference_if(ref_config,
                                            action,
                                            self,
