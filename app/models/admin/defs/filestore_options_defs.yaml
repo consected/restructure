@@ -40,6 +40,17 @@
                                         # use this activity log to enforce access control, 
                                         # even if another activity log references the container
     
+    container_files:
+      # use most extra options to control the display and triggers for stored and archived files
+      stored_file:
+        field_options:
+          embed_resource_name:
+            preset_value: resource name to embed
+      
+      archived_file: 
+      # other extra options are implemented, but it is not possible to use direct embedded items for archived files
+        
+
     pipeline: # pipeline_config - a list of jobs to perform for new uploads
       - mount_archive:
       - index_files:

@@ -9,16 +9,17 @@ module NfsStore
       # @param user [User] the user accessing the container
       # @return [NfsStore::Manage::Container] the container
       def open_container(id:, user:)
-        id = if id.is_a? NfsStore::Manage::Container
-               id.id
-             else
-               id.to_i
-             end
+        cid = if id.is_a? NfsStore::Manage::Container
+                container = id
+                id.id
+              else
+                id.to_i
+              end
 
-        raise FsException::Action, 'container id must be set' unless id && id > 0
+        raise FsException::Action, 'container id must be set' unless cid && cid > 0
         raise FsException::Action, 'user must be set' unless user
 
-        container = NfsStore::Manage::Container.find(id)
+        container ||= NfsStore::Manage::Container.find(cid)
         container.current_user = user
         unless container.allows_current_user_access_to? :access
           raise FsException::NoAccess, 'user does not have access to this container'

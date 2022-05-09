@@ -441,7 +441,9 @@ CREATE TABLE ml_app.nfs_store_archived_files (
     title character varying,
     description character varying,
     nfs_store_stored_file_id integer,
-    file_metadata jsonb
+    file_metadata jsonb,
+    embed_resource_name character varying,
+    embed_resource_id bigint
 );
 
 
@@ -464,7 +466,9 @@ CREATE TABLE ml_app.nfs_store_stored_files (
     title character varying,
     description character varying,
     last_process_name_run character varying,
-    file_metadata jsonb
+    file_metadata jsonb,
+    embed_resource_name character varying,
+    embed_resource_id bigint
 );
 
 
@@ -1657,7 +1661,9 @@ CREATE FUNCTION ml_app.log_nfs_store_archived_file_update() RETURNS trigger
                 user_id,
                 created_at,
                 updated_at,
-                nfs_store_archived_file_id
+                nfs_store_archived_file_id,
+                embed_resource_name,
+                embed_resource_id
                 )
             SELECT
                 NEW.file_hash,
@@ -1675,7 +1681,9 @@ CREATE FUNCTION ml_app.log_nfs_store_archived_file_update() RETURNS trigger
                 NEW.user_id,
                 NEW.created_at,
                 NEW.updated_at,
-                NEW.id
+                NEW.id,
+                NEW.embed_resource_name,
+                NEW.embed_resource_id
             ;
             RETURN NEW;
         END;
@@ -1782,7 +1790,9 @@ CREATE FUNCTION ml_app.log_nfs_store_stored_file_update() RETURNS trigger
                 user_id,
                 created_at,
                 updated_at,
-                nfs_store_stored_file_id
+                nfs_store_stored_file_id,
+                embed_resource_name,
+                embed_resource_id
                 )
             SELECT
                 NEW.file_hash,
@@ -1799,7 +1809,9 @@ CREATE FUNCTION ml_app.log_nfs_store_stored_file_update() RETURNS trigger
                 NEW.user_id,
                 NEW.created_at,
                 NEW.updated_at,
-                NEW.id
+                NEW.id,
+                NEW.embed_resource_name,
+                NEW.embed_resource_id
             ;
             RETURN NEW;
         END;
@@ -2748,6 +2760,42 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+
+--
+-- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.model_references (
+    id integer NOT NULL,
+    from_record_type character varying,
+    from_record_id integer,
+    from_record_master_id integer,
+    to_record_type character varying,
+    to_record_id integer,
+    to_record_master_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean
+);
+
+
+--
+-- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_containers (
+    id integer NOT NULL,
+    name character varying,
+    user_id integer,
+    app_type_id integer,
+    nfs_store_container_id integer,
+    master_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    created_by_user_id bigint
+);
 
 
 --
@@ -4370,25 +4418,6 @@ ALTER SEQUENCE ml_app.message_templates_id_seq OWNED BY ml_app.message_templates
 
 
 --
--- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.model_references (
-    id integer NOT NULL,
-    from_record_type character varying,
-    from_record_id integer,
-    from_record_master_id integer,
-    to_record_type character varying,
-    to_record_id integer,
-    to_record_master_id integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    disabled boolean
-);
-
-
---
 -- Name: model_references_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -4440,7 +4469,9 @@ CREATE TABLE ml_app.nfs_store_archived_file_history (
     user_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    nfs_store_archived_file_id integer
+    nfs_store_archived_file_id integer,
+    embed_resource_name character varying,
+    embed_resource_id bigint
 );
 
 
@@ -4517,23 +4548,6 @@ CREATE SEQUENCE ml_app.nfs_store_container_history_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_container_history_id_seq OWNED BY ml_app.nfs_store_container_history.id;
-
-
---
--- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_containers (
-    id integer NOT NULL,
-    name character varying,
-    user_id integer,
-    app_type_id integer,
-    nfs_store_container_id integer,
-    master_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    created_by_user_id bigint
-);
 
 
 --
@@ -4762,7 +4776,9 @@ CREATE TABLE ml_app.nfs_store_stored_file_history (
     user_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    nfs_store_stored_file_id integer
+    nfs_store_stored_file_id integer,
+    embed_resource_name character varying,
+    embed_resource_id bigint
 );
 
 
@@ -6848,27 +6864,6 @@ COMMENT ON COLUMN ref_data.datadic_variable_history.storage_varname IS 'Database
 
 
 --
--- Name: COLUMN datadic_variable_history.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variable_history.contributor_type IS 'Type of contributor this variable was provided by';
-
-
---
--- Name: COLUMN datadic_variable_history.n_for_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variable_history.n_for_timepoints IS 'For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)';
-
-
---
--- Name: COLUMN datadic_variable_history.notes; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variable_history.notes IS 'Notes';
-
-
---
 -- Name: datadic_variable_history_id_seq; Type: SEQUENCE; Schema: ref_data; Owner: -
 --
 
@@ -6944,7 +6939,7 @@ CREATE TABLE ref_data.datadic_variables (
 -- Name: TABLE datadic_variables; Type: COMMENT; Schema: ref_data; Owner: -
 --
 
-COMMENT ON TABLE ref_data.datadic_variables IS 'Dynamicmodel: User Variables';
+COMMENT ON TABLE ref_data.datadic_variables IS 'Dynamicmodel: Full Data Dictionary';
 
 
 --
@@ -7197,27 +7192,6 @@ COMMENT ON COLUMN ref_data.datadic_variables.title IS 'Section caption';
 --
 
 COMMENT ON COLUMN ref_data.datadic_variables.storage_varname IS 'Database field name, or variable name in data file';
-
-
---
--- Name: COLUMN datadic_variables.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.contributor_type IS 'Type of contributor this variable was provided by';
-
-
---
--- Name: COLUMN datadic_variables.n_for_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.n_for_timepoints IS 'For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)';
-
-
---
--- Name: COLUMN datadic_variables.notes; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.notes IS 'Notes';
 
 
 --
@@ -13499,6 +13473,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220301120755'),
 ('20220301201512'),
 ('20220303112202'),
+('20220304115603'),
 ('20220304115824'),
 ('20220304115826'),
 ('20220304115827'),
@@ -13535,6 +13510,103 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220324133951'),
 ('20220324133952'),
 ('20220324133953'),
-('20220328115603');
+('20220328115603'),
+('20220329113632'),
+('20220329113634'),
+('20220329113635'),
+('20220329113637'),
+('20220329113640'),
+('20220329113641'),
+('20220329113642'),
+('20220329130557'),
+('20220329181503'),
+('20220330105313'),
+('20220330105858'),
+('20220331110656'),
+('20220331110717'),
+('20220331110820'),
+('20220421190539'),
+('20220421190541'),
+('20220421190542'),
+('20220421190544'),
+('20220421190545'),
+('20220421190547'),
+('20220421190549'),
+('20220421190550'),
+('20220421190552'),
+('20220421190553'),
+('20220421190555'),
+('20220421190556'),
+('20220421190557'),
+('20220421203328'),
+('20220422170048'),
+('20220422170050'),
+('20220422170051'),
+('20220422170418'),
+('20220422170420'),
+('20220422170421'),
+('20220422170446'),
+('20220422170448'),
+('20220422170449'),
+('20220422170830'),
+('20220422170832'),
+('20220422170833'),
+('20220422170919'),
+('20220422170920'),
+('20220422170922'),
+('20220422171039'),
+('20220422171041'),
+('20220422171042'),
+('20220422172000'),
+('20220422172002'),
+('20220422172003'),
+('20220422172155'),
+('20220422172157'),
+('20220422172158'),
+('20220422172305'),
+('20220422172307'),
+('20220422172308'),
+('20220422172839'),
+('20220422172841'),
+('20220422172842'),
+('20220422173038'),
+('20220422173040'),
+('20220422173041'),
+('20220422173147'),
+('20220422173149'),
+('20220422173150'),
+('20220422173153'),
+('20220422173710'),
+('20220422173712'),
+('20220422173713'),
+('20220422173857'),
+('20220422173859'),
+('20220422173900'),
+('20220422173902'),
+('20220422173904'),
+('20220422173905'),
+('20220422173907'),
+('20220422173908'),
+('20220422180358'),
+('20220422180430'),
+('20220422180453'),
+('20220422180936'),
+('20220422181037'),
+('20220426181659'),
+('20220427144604'),
+('20220427144732'),
+('20220429142550'),
+('20220429142651'),
+('20220503171647'),
+('20220503172002'),
+('20220503172112'),
+('20220503172331'),
+('20220503172418'),
+('20220503172607'),
+('20220503172620'),
+('20220503172651'),
+('20220503172714'),
+('20220505095408'),
+('20220509163510');
 
 

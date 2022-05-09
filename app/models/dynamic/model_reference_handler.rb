@@ -15,6 +15,11 @@ module Dynamic
     NotEmbeddedOptions = %w[not_embedded select_or_add].freeze
 
     included do
+      # Complete the linkage of an embedded item back to this record
+      # Do this both before and after create, to handle the different permutations
+      before_create :link_embedded_item
+      after_create :link_embedded_item
+
       after_commit :reset_model_references
 
       attr_accessor :action_name
@@ -23,6 +28,15 @@ module Dynamic
       # is available, if the #populate_embedded_items method is called
       # otherwise it is nil
       attr_accessor :embedded_items
+    end
+
+    class_methods do
+      #
+      # Field name for foreign key on another table referencing this table
+      # @return [String] <description>
+      def foreign_key_field_name
+        "#{table_name.singularize}_id"
+      end
     end
 
     def reset_model_references
@@ -65,6 +79,11 @@ module Dynamic
 
         res = []
         refs = references_config_for_type reference_type
+        drefs = references_config_for_direct_embed
+        if drefs
+          refs ||= {}
+          refs.merge!(drefs)
+        end
 
         break res unless refs
 
@@ -123,14 +142,53 @@ module Dynamic
     # @param [Symbol] reference_type - :references | :e_sign
     # @return [Hash]
     def references_config_for_type(reference_type)
-      return unless extra_log_type_config
+      return unless option_type_config
 
       case reference_type
       when :references
-        extra_log_type_config.references
+        option_type_config.references
       when :e_sign
-        extra_log_type_config.e_sign && extra_log_type_config.e_sign[:document_reference]
+        option_type_config.e_sign && option_type_config.e_sign[:document_reference]
       end
+    end
+
+    #
+    # Gets the references configuration Hash for a direct embed, if configured
+    # and the current instance has an id for the reference
+    # @return [Hash]
+    def references_config_for_direct_embed
+      return unless direct_embed?
+
+      dec = direct_embed_config
+      rn = dec && dec[:resource_name]
+      return unless rn
+
+      rin = dec[:resource_item_name]
+
+      filter_by = if dec.key? :target_fk
+                    # No resource_id was specified, so we filter on the target table having a field pointing to this one
+                    { dec[:target_fk] => id || -1 }
+                  elsif dec.key? :resource_id
+                    { "id": dec[:resource_id] }
+                  end
+      # A resource_id was specified, either based on a field being present, or from the option config
+      # If either of these are defined but returned nil, we have already forced the result to be -1
+      # to prevent a full table scan of the target
+
+      {
+        rin => {
+          rin => {
+            from: 'any',
+            to_record_type: rin,
+            filter_by: filter_by,
+            without_reference: true,
+            many: 'direct_embed',
+            ref_config: { embed_resource_name: rin },
+            limit: dec[:limit],
+            add: dec[:add]
+          }
+        }
+      }
     end
 
     #
@@ -162,8 +220,15 @@ module Dynamic
 
       memoize_creatable_model_references(only_creatables) do
         cre_res = {}
-        ref_configs = extra_log_type_config&.references
-        break cre_res unless ref_configs
+        ref_configs = option_type_config&.references || {}
+
+        if direct_embed?
+
+          drefs = references_config_for_direct_embed
+          ref_configs.merge!(drefs) if drefs
+        end
+
+        break cre_res if ref_configs&.empty?
 
         ref_configs.each do |ref_key, refitem|
           refitem.each do |ref_type, ref_config|
@@ -226,10 +291,12 @@ module Dynamic
     # @param [Hash] ref_config - single model reference config
     # @return [Boolean | Object] ConditionalAction#calc_action_if result
     def ref_config_performable?(action, ref_config)
-      extra_log_type_config.calc_reference_if(ref_config,
-                                              action,
-                                              self,
-                                              default_if_no_config: true)
+      return true unless option_type_config
+
+      option_type_config.calc_reference_if(ref_config,
+                                           action,
+                                           self,
+                                           default_if_no_config: true)
     end
 
     #
@@ -430,7 +497,7 @@ module Dynamic
     #
     # Return an "embedded item", which is a standard model that appears embedded directly
     # within a parent activity log's form. This ties in tightly with the handling of this
-    # within an ActivityLogsController, which enables forms to submit data cleanly to
+    # within an EmbeddedItemHandler, which enables forms to submit data cleanly to
     # and embedded item, without having to manually traverse through the model reference.
     # Also, JSON data returned for an activity log will include an *embedded_item* method response
     # so that the embedded item data can be accessed directly within an activity log's data.
@@ -441,10 +508,9 @@ module Dynamic
     #
     # We don't have the capability (currently) to handle embedded items that are activity logs,
     # so avoid the issue by explicitly excluding the result.
-    # Perhaps this should really be handled within the ActivityLogController, since this limitation
+    # Perhaps this exclusion should really be handled within the EmbeddedItemHandler, since this limitation
     # is likely due to the UI, but for now retain it here.
     #
-    # @todo - refactor and add more comments to make it clearer what the logic is
     # @return [UserBase]
     def embedded_item
       memoize_embedded_item do
@@ -510,9 +576,12 @@ module Dynamic
 
     #
     # Simplify the action_name set by the controller, to
-    # get the type we are trying to handle for embedding
+    # get the type we are trying to handle for embedding.
+    # If a current #action_name is set, use it, otherwise
+    # if the instance is not persisted, assume we are in a new action,
+    # or if it is persisted then default to 'index' to force viewing
     def embed_action_type
-      action_name = self.action_name || 'index'
+      action_name = self.action_name || (!persisted? && 'new') || 'index'
 
       case action_name
       when 'new', 'create'
@@ -553,9 +622,9 @@ module Dynamic
       return nil if @always_embed_item == false
 
       @always_embed_item = false
-      return unless extra_log_type_config&.view_options
+      return unless option_type_config&.view_options
 
-      always_embed_reference = extra_log_type_config.view_options[:always_embed_reference]
+      always_embed_reference = option_type_config.view_options[:always_embed_reference]
       return unless always_embed_reference
 
       # Get the first model reference for this activity log that matches the record type in the
@@ -574,7 +643,7 @@ module Dynamic
     def never_embed_item
       return @never_embed_item unless @never_embed_item.nil?
 
-      aer = extra_log_type_config&.view_options&.dig(:always_embed_reference)
+      aer = option_type_config&.view_options&.dig(:always_embed_reference)
       @never_embed_item = (aer == 'never')
     end
 
@@ -584,14 +653,16 @@ module Dynamic
     def never_embed_creatable_item
       return @never_embed_creatable_item unless @never_embed_creatable_item.nil?
 
-      aer = extra_log_type_config&.view_options&.dig(:always_embed_creatable_reference)
+      aer = option_type_config&.view_options&.dig(:always_embed_creatable_reference)
       @never_embed_creatable_item = (aer == 'never')
     end
 
     #
     # Get the view option for :always_embed_creatable_reference
     def always_embed_creatable
-      extra_log_type_config.view_options[:always_embed_creatable_reference]
+      return unless option_type_config
+
+      option_type_config.view_options[:always_embed_creatable_reference]
     end
 
     #
@@ -645,6 +716,110 @@ module Dynamic
       model_references(active_only: true).each do |mr|
         @embedded_items << mr.to_record
       end
+    end
+
+    #
+    # Does an extra options configuration or an embed_resource_name field
+    # indicate that we will directly embed a resource?
+    # @return [true] <description>
+    def direct_embed?
+      option_type_config&.embed || respond_to?(:embed_resource_name)
+    end
+
+    #
+    # The direct embed configuration to make an embedded item definition
+    # look like an option type config *references:* definition when
+    # used in #model_reference / #creatable_model_references
+    # This method uses extra options config or the embed_resource_name field
+    # The return is a Hash
+    # {embed_type:, resource_name:, :resource_item_name, add:, limit:, :target_fk, :resource_id}
+    # Returns nil if a direct embed definition is not matched.
+    # @return [Hash|nil]
+    def direct_embed_config
+      res = option_type_config&.embed
+
+      if res
+        res[:embed_type] = 'option_type_config'
+      elsif respond_to?(:embed_resource_name) && embed_resource_name
+        res = { embed_type: 'field', resource_name: embed_resource_name }
+        res[:resource_id] = embed_resource_id if respond_to?(:embed_resource_id)
+      else
+        return
+      end
+
+      rn = res[:resource_name]
+      return unless rn
+
+      embed_resource = Resources::Models.find_by(resource_name: rn)
+      raise FphsException, "embed_resource not found for #{rn}" unless embed_resource
+
+      fk = self.class.foreign_key_field_name
+      res[:target_fk] = fk if !res.key?(:resource_id) && embed_resource.model.attribute_names.include?(fk)
+
+      res[:resource_item_name] = embed_resource.resource_item_name
+      res[:add] = 'many'
+      res[:limit] ||= 1
+
+      res
+    end
+
+    #
+    # After creating a new record, if it has a directly embedded item now is the time to
+    # link it with its parent. This may be through fields in either the current record or
+    # the target embedded item, depending on the configuration. We can only do this when
+    # either record has been persisted with an id.
+    def link_embedded_item
+      link_new_embedded_item(embedded_item) if respond_to?(:direct_embed?) && direct_embed?
+    end
+
+    #
+    # When a new dynamic record is persisted with an embedded item, the
+    # appropriate fields need to be set to create the link.
+    # This is omnipotent and may safely be called multiple times without
+    # breaking existing links.
+    # The method will be called both before and after creation of the current instance
+    # allowing the appropriate setting of fields in either the current instance and/or
+    # the embedded item.
+    # If the embed type is 'field' (has an embed_resource_name) amd has an
+    # embed_resource_id field, set the latter.
+    # Otherwise, if the config says the direct embed item has a foreign key
+    # field back to this instance, set that foreign key field in the new embedded item
+    # In either case, if the target id field is already set and the value is not
+    # negative (we often default embedded item id values to -1 to protect
+    # against full table searches) then skip the update.
+    def link_new_embedded_item(new_embedded_item)
+      return unless new_embedded_item
+
+      dec = direct_embed_config
+
+      if dec[:embed_type] == 'field' && respond_to?(:embed_resource_id) && !persisted?
+        # The embed type has fields embed_resource_name and embed_resource_id
+        # If the embed_resource_id is not already set and the new embed item id
+        # is valid then set the embed_resource_id in the current instance with the
+        # new embedded item's id
+        return if embed_resource_id
+
+        new_embedded_item.save! unless new_embedded_item.persisted?
+        new_id = new_embedded_item.id
+        return if !new_id || new_id < 0
+
+        self.embed_resource_id = new_id
+        return
+      end
+
+      # Make sure the new embedded item is saved to ensure it is created
+      new_embedded_item.save!
+
+      target_fk = dec[:target_fk]
+      # Return if the configuration says there is not a foreign key field in the new embedded item
+      return unless target_fk
+
+      fk_val = new_embedded_item.attributes[target_fk]
+      # Exit if this isntance does not have a valid id or if the foreign
+      # key field in the new embedded item is already set
+      return if (!id || id < 0) || (fk_val && fk_val >= 0)
+
+      new_embedded_item.update!(target_fk => id)
     end
   end
 end

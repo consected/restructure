@@ -7,6 +7,10 @@ module Filestore
   class ClassificationController < NfsStore::FsBaseController
     include NfsStore::InNfsStoreContainer
     include MasterHandler
+    include ModelNaming
+    include EmbeddedItemHandler
+
+    before_action :set_container_parent_item
 
     helper_method :object_instance, :edit_form_hash, :edit_form_id, :inline_cancel_button, :caption
 
@@ -21,6 +25,10 @@ module Filestore
 
     protected
 
+    def set_container_parent_item
+      object_instance&.container = @container
+    end
+
     #
     # Classification specific implementation to override NfsStore::InNfsStoreContainer#find_container
     def find_container
@@ -29,21 +37,27 @@ module Filestore
       else
         cid = params[:id]
         params[:id] = params[:download_id]
+        alid = params[:activity_log_id]
+        altype = params[:activity_log_type]
       end
       @container = NfsStore::Browse.open_container id: cid, user: current_user
       @retrieval_type = params[:retrieval_type]
 
+      @activity_log = ActivityLog.open_activity_log altype, alid, current_user if alid.present? && altype.present?
+
       case @retrieval_type
       when 'stored_file'
-        @download = @container.stored_files.where(id: params[:download_id]).first
+        @download = @container.stored_files.find_by(id: params[:download_id])
       when 'archived_file'
-        @download = @container.archived_files.where(id: params[:download_id]).first
+        @download = @container.archived_files.find_by(id: params[:download_id])
       else
         raise FphsException, 'Incorrect retrieval_type set'
       end
 
+      @container.parent_item = @activity_log
       @master = @container.master
       @master.current_user ||= current_user
+      # object_instance.container = @container
       @container
     end
 
@@ -71,7 +85,9 @@ module Filestore
         master_filestore_classification_path(object_instance.master_id,
                                              object_instance.id,
                                              container_id: @container.id,
-                                             retrieval_type: @retrieval_type)
+                                             retrieval_type: @retrieval_type,
+                                             activity_log_id: @activity_log&.id,
+                                             activity_log_type: @activity_log&.item_type)
 
       res
     end

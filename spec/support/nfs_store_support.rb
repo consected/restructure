@@ -86,80 +86,147 @@ module NfsStoreSupport
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
     @content = Admin::MessageTemplate.create! name: 'test email content upload', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
-    @aldef.extra_log_types = <<ENDDEF
-    step_1:
-      label: Step 1
-      fields:
-        - select_call_direction
-        - select_who
+    @aldef.extra_log_types = <<~ENDDEF
+      step_1:
+        label: Step 1
+        fields:
+          - select_call_direction
+          - select_who
 
-      save_trigger:
-        on_create:
-          create_filestore_container:
-            name:
-              - session files
-              - select_scanner
-            label: Session Files
-            create_with_role: nfs_store group 600
+        save_trigger:
+          on_create:
+            create_filestore_container:
+              name:
+                - session files
+                - select_scanner
+              label: Session Files
+              create_with_role: nfs_store group 600
 
-        on_upload:
-          notify:
-            type: email
-            role: upload notify role
-            layout_template: test email layout upload
-            content_template: test email content upload
-            subject: Send test
+          on_upload:
+            notify:
+              type: email
+              role: upload notify role
+              layout_template: test email layout upload
+              content_template: test email content upload
+              subject: Send test
 
-      references:
-        nfs_store__manage__container:
-          label: Files
-          from: this
-          add: one_to_this
-          view_as:
-            edit: hide
-            show: filestore
-            new: not_embedded
+        references:
+          nfs_store__manage__container:
+            label: Files
+            from: this
+            add: one_to_this
+            view_as:
+              edit: hide
+              show: filestore
+              new: not_embedded
 
-      nfs_store:
-        pipeline:
-          - mount_archive:
-          - index_files:
-          - dicom_metadata:
+        nfs_store:
+          pipeline:
+            - mount_archive:
+            - index_files:
+            - dicom_metadata:
 
-    step_2:
-      label: Step 2
-      fields:
-        - select_call_direction
-        - select_who
+      step_2:
+        label: Step 2
+        fields:
+          - select_call_direction
+          - select_who
 
-      save_trigger:
-        on_create:
-          create_filestore_container:
-            name:
-              - session files
-              - select_scanner
-            label: Session Files
-            create_with_role: nfs_store group 600
+        save_trigger:
+          on_create:
+            create_filestore_container:
+              name:
+                - session files
+                - select_scanner
+              label: Session Files
+              create_with_role: nfs_store group 600
 
-        on_upload:
-          notify:
-            type: email
-            role: upload notify role
-            layout_template: test email layout upload
-            content_template: test email content upload
-            subject: Send test
+          on_upload:
+            notify:
+              type: email
+              role: upload notify role
+              layout_template: test email layout upload
+              content_template: test email content upload
+              subject: Send test
 
-      references:
-        nfs_store__manage__container:
-          label: Files
-          from: this
-          add: one_to_this
-          view_as:
-            edit: hide
-            show: filestore
-            new: not_embedded
+        references:
+          nfs_store__manage__container:
+            label: Files
+            from: this
+            add: one_to_this
+            view_as:
+              edit: hide
+              show: filestore
+              new: not_embedded
 
-ENDDEF
+      file_config:
+        label: File Config
+        fields:
+          - select_call_direction
+
+        save_trigger:
+          on_create:
+            create_filestore_container:
+              name:
+                - session files
+                - select_scanner
+                - 1
+              label: Session Files
+              create_with_role: nfs_store group 600
+
+        references:
+          nfs_store__manage__container:
+            label: Files
+            from: this
+            add: one_to_this
+            view_as:
+              edit: hide
+              show: filestore
+              new: not_embedded
+
+        nfs_store:
+          container_files:
+            stored_file:
+              embed:
+                resource_name: player_contacts
+
+      file_config2:
+        label: File Config 2
+        fields:
+          - select_call_direction
+
+        save_trigger:
+          on_create:
+            create_filestore_container:
+              name:
+                - session files
+                - select_scanner
+                - 2
+              label: Session Files
+              create_with_role: nfs_store group 600
+
+        references:
+          nfs_store__manage__container:
+            label: Files
+            from: this
+            add: one_to_this
+            view_as:
+              edit: hide
+              show: filestore
+              new: not_embedded
+
+        nfs_store:
+          container_files:
+            stored_file:
+              field_options:
+                embed_resource_name:
+                  preset_value: dynamic_model__test_embedded_recs
+            archived_file:
+              field_options:
+                embed_resource_name:
+                  preset_value: dynamic_model__test_created_by_recs
+
+    ENDDEF
 
     @aldef.current_admin = @admin
     @aldef.save!

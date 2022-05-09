@@ -77,7 +77,14 @@
         true or false to force a drop down field to include a selectable
         blank
       pattern: provide a mask for a text field
-      value: default value | now() | today()
+      value: |
+        default value | now() | today() 
+        
+        NOTE this is set in the form fields, not before building the instances
+      preset_value: |
+        default value | now() | today() 
+        
+        NOTE this is set when building the instances and may be used to drive logic like an embed_resource_name field
       no_downcase: true to prevent downcasing of the attribute when stored to the database
       format: plain | markdown - for free text editor fields such as notes and description
       config:
@@ -124,9 +131,58 @@
           "model_table_name | this":
             validation_field_name_5: 
               validation_type: 'validation options'
-          
-        
+  embed:
+    resource_name: resource name for the item to embed
+    resource_id: |
+      (optional) literal or reference definition to use as an id of the embedded item
 
+      When not specified, the embedded item is looked up based on the existence of a foreign key
+      field in the target direct embed table pointing back to the parent record. The foreign key
+      field is named "<singularized parent table name>_id"
+    limit: (optional) default 1 - although other values may be set, the aim is not really to use direct embedded items for this
+
+    # NOTE: direct embed may be configured either using this *embed:* configuration, or directly
+    # defining fields on the parent and optionally target tables.
+    # An advantage of using fields on the parent table is that the target embed resource may be specified on a
+    # record by record basis.
+    # To define an embedded item using fields alone, use one of the following field configurations:
+    # <parent table>: embed_resource_name, embed_resource_id - directly reference the embedded item
+    # <parent table>: embed_resource_name, <target embed table>: <singularized parent table name>_id - foreign key reference.
+    # { {substitutions}} may reference attributes in an embedded item using { {embedded_item.<attribute name>}}
+
+  references:
+    model_name:
+      label: button label
+      from: this | master | any
+      without_reference: true
+      add: many | one_to_master | one_to_this
+      add_with:
+        extra_log_type: type name
+        item_name:
+          embedded_item:
+            field_name: value
+      filter_by:
+        field_name: value to filter the referenced items by (may include { {substitution}}
+      order_by:
+        field_name: asc | desc
+      type_config:
+        activity_selector:
+          # use an activity selector to show the creatable extra log types
+          extra_log_type_key1: Label for button
+          extra_log_type_key2: Label for button
+          extra_log_type_key3: Label for button
+      view_as:
+        edit: hide|readonly|not_embedded|select_or_add
+        show: hide|readonly|see_presence|filestore|as_edit
+        new: outside_this|not_embedded|select_or_add
+        _notes_:
+        - "*outside_this* presents a button that triggers a form outside of this container
+          in the regular panel"
+      view_options:
+        always_open: true # force the reference to always be expanded
+      showable_if: # exclude to always show
+      creatable_if: # exclude to always allow creation
+  
 
   save_trigger:
     on_create:

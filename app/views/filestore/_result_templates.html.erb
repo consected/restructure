@@ -8,7 +8,8 @@
     prevent_edit: false,
     prevent_create: true,
     item_list: NfsStore::Manage::StoredFile.permitted_params,
-    edit_button_href: "/masters/{{master_id}}/filestore/classification/{{nfs_store_container_id}}/edit?download_id={{id}}&retrieval_type=stored_file"
+    edit_button_href: "/masters/{{master_id}}/filestore/classification/{{nfs_store_container_id}}/edit?download_id={{id}}&retrieval_type=stored_file&activity_log_id={{container_parent.activity_log_id}}&activity_log_type={{container_parent.activity_log_type}}",
+    embed: true
   } %>
 <% end %>
 

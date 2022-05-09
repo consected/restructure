@@ -24,7 +24,9 @@ _fpa.preprocessors = {
       .addClass('er-attached');
   },
 
-  default: function (block, data, has_preprocessor) {},
+  default: function (block, data, has_preprocessor) {
+    _fpa.preprocessors.dynamic_block_references(block, data)
+  },
 };
 
 _fpa.postprocessors = {
@@ -99,11 +101,11 @@ _fpa.postprocessors = {
           if (drf.hasOwnProperty(i) && drf[i].from_record_type_us)
             _fpa.send_ajax_request(
               '/masters/' +
-                drf[i].from_record_master_id +
-                '/' +
-                drf[i].from_record_type_us.replace('__', '/') +
-                's/' +
-                drf[i].from_record_id
+              drf[i].from_record_master_id +
+              '/' +
+              drf[i].from_record_type_us.replace('__', '/') +
+              's/' +
+              drf[i].from_record_id
             );
         }
       }

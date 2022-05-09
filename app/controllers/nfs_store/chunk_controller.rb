@@ -63,11 +63,12 @@ module NfsStore
     # for other chunks to be attached to.
     def create
       chunk = params[:upload]
+      find_container
 
       @upload = Upload.init content_type: chunk.content_type,
                             file_name: chunk.original_filename,
                             file_hash: params[:file_hash],
-                            container_id: params[:container_id],
+                            container_id: @container,
                             user: current_user,
                             relative_path: params[:relative_path],
                             upload_set: params[:upload_set]

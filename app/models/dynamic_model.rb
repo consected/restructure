@@ -4,6 +4,7 @@ class DynamicModel < ActiveRecord::Base
   include Dynamic::VersionHandler
   include Dynamic::MigrationHandler
   include Dynamic::DefHandler
+  include Dynamic::DefGenerator
   include AdminHandler
 
   StandardFields = %w[id created_at updated_at contactid user_id master_id].freeze
@@ -191,6 +192,7 @@ class DynamicModel < ActiveRecord::Base
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
         res.include Dynamic::DynamicModelImplementer
+        res.include Dynamic::ModelReferenceHandler
         add_handlers(res)
 
         res.final_setup
