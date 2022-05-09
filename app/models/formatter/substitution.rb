@@ -2,7 +2,7 @@
 
 module Formatter
   class Substitution
-    HtmlRegEx = /<(p ?.*|br ?.*|div ?.*|ul ?.*|hr ?.*)>/.freeze
+    HtmlRegEx = /<(p|br|div|ul|hr|p .+=.+|br |div .+=.+|ul .+=.+|hr .+=.+)>/.freeze
 
     #
     # Perform subsititions on the the text, using either a Hash of data or an object item.
