@@ -27,7 +27,7 @@
       <% if col_type == :boolean %>
         <%= form_field_label(f, p) %>
         <%= f.check_box p %>
-      <% elsif p == :description || p == :notes %>
+      <% elsif p == :description || p == :notes || respond_to?("#{p}_editor") %>
         <%= form_field_label(f, p) %>
         <% if respond_to?("#{p}_editor") && send("#{p}_editor") == :markdown %>        
         <div class="common-admin-markdown-editor">
