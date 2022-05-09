@@ -218,7 +218,7 @@ module UserSupport
   end
 
   def validate_setup
-    user = User.find_by(email: @good_email)
+    user = User.active.find_by(email: @good_email)
     expect(user).to be_a User
     expect(user.id).to equal @user.id
 

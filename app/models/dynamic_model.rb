@@ -4,6 +4,7 @@ class DynamicModel < ActiveRecord::Base
   include Dynamic::VersionHandler
   include Dynamic::MigrationHandler
   include Dynamic::DefHandler
+  include Dynamic::DefGenerator
   include AdminHandler
 
   StandardFields = %w[id created_at updated_at contactid user_id master_id].freeze
