@@ -21,12 +21,41 @@ module NfsStore
       # include HandlesUserBase
       include UserHandler
       include HasCurrentUser
+      include Dynamic::DefHandler
+      include Dynamic::ModelReferenceHandler
+      include Dynamic::ImplementationHandler
 
       validate :prevent_path_change
       validates :user_id, presence: true
 
       def self.resource_name
         'nfs_store__manage__containers'
+      end
+
+      def self.short_type
+        name.split('::').last.ns_underscore.to_sym
+      end
+
+      def implementation_model_name
+        self.class.name.split('::').last
+      end
+
+      def disabled
+        return attributes['disabled'] if attributes.key?('disabled')
+
+        false
+      end
+
+      def disabled?
+        !!disabled
+      end
+
+      def saved_change_to_disabled?
+        false
+      end
+
+      def self.implementation_prefix
+        'NfsStore::Manage'
       end
 
       def self.category
@@ -79,9 +108,7 @@ module NfsStore
 
       #
       # Calculate the new path for a file moved to trash
-      #
       # @return [<Type>] <description>
-      #
       def trash_path
         f_path = container_path(no_filename: true)
         f_path.blank? ? TrashPath : File.join(TrashPath, f_path)
@@ -95,13 +122,24 @@ module NfsStore
         container_path(no_filename: true, leading_dot: true)
       end
 
+      def container_parent
+        cpi = container&.parent_item
+        return unless cpi
+
+        {
+          activity_log_id: cpi.id,
+          activity_log_type: cpi.item_type
+        }
+      end
+
       def as_json(extras = {})
         lr = extras.delete(:limited_results)
+        extras[:methods] ||= []
+        extras[:methods] << :container_parent
         return super unless lr
 
         allow_show_flags = extras.delete(:allow_show_flags)
 
-        extras[:methods] ||= []
         extras[:include] ||= []
         extras[:methods] << :retrieval_type
         extras[:methods] << :mime_type_text
@@ -372,6 +410,27 @@ module NfsStore
       end
 
       alias file_metadata_present file_metadata_present?
+
+      def option_configs(force: false, raise_bad_configs: false)
+        [option_type_config]
+      end
+
+      #
+      # Option type config to allow a container file to act a little like a dynamic model.
+      # Pulls the configurations from the {nfs_store: container_files: stored_file:, container_file:}
+      # and uses the standard ExtraOptions configurations within the appropriate configuration.
+      # @return [OptionConfigs::ContainerFilesOptions]
+      def option_type_config
+        return unless container
+
+        eoc = container.extra_options_config
+        return unless eoc
+
+        config = eoc.nfs_store&.dig(:container_files, self.class.short_type)
+        return unless config
+
+        OptionConfigs::ContainerFilesOptions.new :default, config, self
+      end
 
       private
 

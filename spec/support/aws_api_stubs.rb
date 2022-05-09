@@ -24,8 +24,9 @@ module AwsApiStubs
         headers: {
           'Accept' => '*/*',
           'Accept-Encoding' => /.+/,
-          'User-Agent' => %r{aws-sdk-ruby3/.*},
+          'User-Agent' => /.+/,
           'X-Aws-Ec2-Metadata-Token-Ttl-Seconds' => /.+/
+
         }
       )
       .to_return(status: 200, body: '', headers: {})
@@ -47,7 +48,7 @@ module AwsApiStubs
         headers: {
           'Accept' => '*/*',
           'Accept-Encoding' => /.*/,
-          'User-Agent' => %r{aws-sdk-ruby3/.*}
+          'User-Agent' => /.+/
         }
       )
       .to_return(status: 200, body: body, headers: {})

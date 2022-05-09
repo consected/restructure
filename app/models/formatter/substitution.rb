@@ -2,7 +2,7 @@
 
 module Formatter
   class Substitution
-    HtmlRegEx = /<(p ?.*|br ?.*|div ?.*|ul ?.*|hr ?.*)>/.freeze
+    HtmlRegEx = /<(p|br|div|ul|hr|p .+=.+|br |div .+=.+|ul .+=.+|hr .+=.+)>/.freeze
 
     #
     # Perform subsititions on the the text, using either a Hash of data or an object item.
@@ -375,6 +375,7 @@ module Formatter
     # - parent_item:
     # - referring_record: the record referring to this item (such as an activity log referring to a dynamic model)
     # - latest_reference: the most recent reference from the record
+    # - embedded_item: the direct embedded item
     #
     # @param [Master] master the current master instance
     # @param [String|Symbol] name the association to get
@@ -421,6 +422,8 @@ module Formatter
         item.top_referring_record
       elsif an == 'latest_reference' && item.respond_to?(:latest_reference)
         item.latest_reference
+      elsif an == 'embedded_item' && item.respond_to?(:embedded_item)
+        item.embedded_item
       elsif an == 'constants'
         # Options constants
         item.versioned_definition.options_constants&.dup if item.respond_to?(:versioned_definition)

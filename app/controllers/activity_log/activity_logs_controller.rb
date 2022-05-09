@@ -3,24 +3,19 @@
 class ActivityLog::ActivityLogsController < UserBaseController
   include MasterHandler
   include ParentHandler
+  include EmbeddedItemHandler
   include ESignature::ESignatureHandler
 
   # The @item is set to represent the instance that activity log belongs to
   # e.g. a player contact
   # Not called for new or edit, since these are call elsewhere
   before_action :set_item, only: %i[index create update destroy]
-  # before_action :handle_extra_log_type, only: [:edit, :new]
-  before_action :handle_embedded_item, only: %i[show edit new create update]
   after_action :check_authentication_still_valid
-
-  attr_accessor :embedded_item
 
   def template_config
     Application.refresh_dynamic_defs
 
-    @instance_list.each do |oi|
-      handle_embedded_item oi
-    end
+    refresh_embedded_item_for @instance_list
 
     render partial: 'activity_logs/common_search_results_template_set'
   end
@@ -29,51 +24,6 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
   def edit_form
     'common_templates/edit_form'
-  end
-
-  #
-  # Allow passing of params to embedded item to initialize the new form
-  def set_embedded_item_optional_params
-    return unless @embedded_item
-
-    return unless params[al_type.singularize.to_sym] && params[al_type.singularize.to_sym][:embedded_item]
-
-    ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(embedded_item_permitted_params)
-    ei_secure_params.each do |p, v|
-      @embedded_item.send("#{p}=", v)
-    end
-  end
-
-  #
-  # Set up all the requirements for an embedded item, based on the current action
-  # This includes setting the current user on the item, and updating the embedded item
-  # with secure params from the request if the item is being created.
-  # @param [UserBase | nil] use_object - force the use of a specific instance as
-  #                                      the parent (rather than default requested instance)
-  def handle_embedded_item(use_object = nil)
-    oi = use_object || object_instance
-    return unless oi
-
-    oi.current_user = current_user
-    oi.action_name = action_name
-    @embedded_item = oi.embedded_item
-
-    return unless @embedded_item
-
-    case action_name
-    when 'new'
-      set_embedded_item_optional_params
-    when 'create'
-      begin
-        ei_secure_params = params[al_type.singularize.to_sym]
-                           .require(:embedded_item)
-                           .permit(embedded_item_permitted_params)
-        @embedded_item.update ei_secure_params
-        oi.updated_at = @embedded_item.updated_at
-      rescue ActionController::ParameterMissing
-        raise FphsException, 'Could not save the item, since you do not have access to any of the data it references.'
-      end
-    end
   end
 
   #
@@ -125,10 +75,6 @@ class ActivityLog::ActivityLogsController < UserBaseController
     'activity_log'
   end
 
-  def al_type
-    @implementation_class.table_name
-  end
-
   def item_data
     @item.data if @item&.respond_to?(:data)
   end
@@ -148,11 +94,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
   # Otherwise get all items for this master
   def items
     if @implementation_class.definition.hide_item_list_panel
-      mos = @master_objects.select do |o|
-        o.respond_to?(:embedded_item) &&
-          ModelReference.record_type_to_ns_table_name(o.embedded_item, pluralize: true) == @item_type
-      end
-      mos.map(&:embedded_item)
+      master_objects_embedded_items @item_type
     elsif @master.respond_to? @item_type
       @master.send(@item_type)
     elsif @master.respond_to? "dynamic_model__#{@item_type}"
@@ -182,17 +124,6 @@ class ActivityLog::ActivityLogsController < UserBaseController
   end
 
   #
-  # Tell each object in the index results to populate embedded items for each model reference
-  def embed_all_references
-    return @master_objects unless params[:embed_all_references] == 'true' && @master_objects.present?
-
-    @master_objects.each do |mo|
-      mo.populate_embedded_items if mo.respond_to?(:populate_embedded_items)
-    end
-    @master_objects
-  end
-
-  #
   # Extend the data returned for an index request
   # to include an item listing the "creatables", the activity logs
   # that can be created by a user directly in this master,
@@ -209,7 +140,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
     creatables = @master_objects.build.creatables(**options)
 
     {
-      al_type: al_type,
+      al_type: params_namespace,
       item_type: item_type_us,
       item_types_name: @item_type,
       item_id: item_id,
@@ -274,25 +205,15 @@ class ActivityLog::ActivityLogsController < UserBaseController
   def permitted_params
     res = @implementation_class.permitted_params
     res = @implementation_class.refine_permitted_params res
-
-    # The embedded_item params are only used in an update. Create actions are handled separately
-    res << { embedded_item: embedded_item_permitted_params } if @embedded_item
-
+    extend_permitted_params_with_embedded_item(res)
     res
-  end
-
-  #
-  # The list of permitted parameters for an embedded item
-  def embedded_item_permitted_params
-    epp = @embedded_item.class.permitted_params
-    @embedded_item.class.refine_permitted_params(epp)
   end
 
   #
   # The secure parameters (key / value strong params) that can be used to
   # create or update instances
   def secure_params
-    @secure_params ||= params.require(al_type.singularize.to_sym).permit(*permitted_params)
+    @secure_params ||= params.require(params_namespace.singularize.to_sym).permit(*permitted_params)
   end
 
   #
@@ -306,7 +227,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
   #
   # Use the correct extra log type value, based on either the param (for a new action) or
   # the object_instance attribute (for an edit action)
-  def handle_extra_log_type
+  def handle_option_type_config
     etp = params[:extra_type]
     etp = params[:extra_log_type] if etp.blank?
     etp = object_instance.extra_log_type if etp.blank?
@@ -323,7 +244,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
       return
     end
 
-    @extra_log_type_name = etp
+    @option_type_name = etp
     # Get the options that were current when the form was originally created, or the current
     # options if this is a new instance
     @option_type_config = if object_instance.persisted?
@@ -331,23 +252,8 @@ class ActivityLog::ActivityLogsController < UserBaseController
                           else
                             @implementation_class.definition.option_type_config_for(etp)
                           end
-    object_instance.extra_log_type = @extra_log_type_name unless object_instance.persisted?
-  end
-
-  def check_editable?
-    handle_extra_log_type if action_name == 'edit'
-    return if object_instance.allows_current_user_access_to? :edit
-
-    not_editable
-    nil
-  end
-
-  def check_creatable?
-    handle_extra_log_type if action_name == 'new'
-    return if object_instance.allows_current_user_access_to?(:create) || current_admin_sample
-
-    not_creatable
-    nil
+    @option_type_attr_name = :extra_log_type
+    object_instance.extra_log_type = @option_type_name unless object_instance.persisted?
   end
 
   #

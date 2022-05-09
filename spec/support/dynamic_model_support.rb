@@ -59,4 +59,62 @@ module DynamicModelSupport
       schema_name: 'dynamic_test'
     )
   end
+
+  def generate_test_embed_dynamic_models
+    unless Admin::MigrationGenerator.table_exists? 'test_embed_fields'
+      TableGenerators.dynamic_models_table('test_embed_fields', :create_do, 'test1', 'test2', 'embed_resource_name')
+    end
+
+    unless Admin::MigrationGenerator.table_exists? 'test_embed_field_and_ids'
+      TableGenerators.dynamic_models_table('test_embed_field_and_ids', :create_do, 'test1', 'test2', 'embed_resource_name', 'embed_resource_id')
+    end
+
+    unless Admin::MigrationGenerator.table_exists? 'test_embed_options'
+      TableGenerators.dynamic_models_table('test_embed_options', :create_do, 'test1', 'test2')
+    end
+
+    unless Admin::MigrationGenerator.table_exists? 'test_embedded_recs'
+      TableGenerators.dynamic_models_table('test_embedded_recs', :create_do, 'test1', 'test2', 'test_embed_field_id', 'test_embed_option_id', 'test_embed_field_and_id')
+    end
+
+    dm = DynamicModel.create! current_admin: @admin,
+                              name: 'test embed fields',
+                              table_name: 'test_embed_fields',
+                              schema_name: 'dynamic',
+                              category: :test
+
+    dm.update_tracker_events
+
+    dm = DynamicModel.create! current_admin: @admin,
+                              name: 'test embed field and ids',
+                              table_name: 'test_embed_field_and_ids',
+                              schema_name: 'dynamic',
+                              category: :test
+
+    dm.update_tracker_events
+
+    options = <<~END_DEF
+      default:
+        label: Reference Simple Test
+        embed:
+          resource_name: dynamic_model__test_embedded_recs
+    END_DEF
+
+    dm = DynamicModel.create! current_admin: @admin,
+                              name: 'test embed options',
+                              table_name: 'test_embed_options',
+                              schema_name: 'dynamic',
+                              category: :test,
+                              options: options
+
+    dm.update_tracker_events
+
+    dm = DynamicModel.create! current_admin: @admin,
+                              name: 'test embedded recs',
+                              table_name: 'test_embedded_recs',
+                              schema_name: 'dynamic',
+                              category: :test
+
+    dm.update_tracker_events
+  end
 end

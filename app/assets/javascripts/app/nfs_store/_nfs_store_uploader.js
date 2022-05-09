@@ -272,6 +272,9 @@ _nfs_store.uploader = function ($outer) {
         data.formData.chunk_hash = chunk_hashes.shift();
 
       var al = getActivityLog();
+      data.formData.activity_log_id = al.activity_log_id
+      data.formData.activity_log_type = al.activity_log_type
+
       if (that) {
 
         var test_params = {
