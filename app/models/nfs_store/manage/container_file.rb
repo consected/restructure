@@ -122,13 +122,24 @@ module NfsStore
         container_path(no_filename: true, leading_dot: true)
       end
 
+      def container_parent
+        cpi = container&.parent_item
+        return unless cpi
+
+        {
+          activity_log_id: cpi.id,
+          activity_log_type: cpi.item_type
+        }
+      end
+
       def as_json(extras = {})
         lr = extras.delete(:limited_results)
+        extras[:methods] ||= []
+        extras[:methods] << :container_parent
         return super unless lr
 
         allow_show_flags = extras.delete(:allow_show_flags)
 
-        extras[:methods] ||= []
         extras[:include] ||= []
         extras[:methods] << :retrieval_type
         extras[:methods] << :mime_type_text
@@ -410,6 +421,8 @@ module NfsStore
       # and uses the standard ExtraOptions configurations within the appropriate configuration.
       # @return [OptionConfigs::ContainerFilesOptions]
       def option_type_config
+        return unless container
+
         eoc = container.extra_options_config
         return unless eoc
 
@@ -430,7 +443,6 @@ module NfsStore
 
         errors.add :path, 'must not be changed'
       end
-
     end
   end
 end

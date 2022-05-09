@@ -126,7 +126,8 @@
     <a href="{{this_value}}" target="_new" title="open link in new tab">{{this_value}}</a>
     </span></strong></li>
 
-
+  {{else is field_type 'includes' 'embed_resource_'}}
+    <% # Do not show these %>
   {{else is field_type 'includes' 'embedded_report_'}}
 
     <li class="{{> field_result_class}}" data-field-name="{{key}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
