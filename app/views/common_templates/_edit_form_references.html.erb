@@ -4,7 +4,7 @@
   end
 
   shown_embedded = false
-  dec = object_instance.direct_embed_config
+  dec = object_instance.direct_embed_config if object_instance.respond_to?(:direct_embed_config)
 
   if !embedded && (@option_type_config&.references || dec)
     # Reformat the creatable model references for easier use in the partials below

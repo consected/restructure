@@ -9,7 +9,7 @@ module AwsApiStubs
   def setup_stub(type, result: nil)
     return unless ENV['IGNORE_MFA'] == 'true'
 
-    puts 'Stubbing AWS API calls'
+    # puts 'Stubbing AWS API calls'
     setup_default_aws_stubs
     use = requests_responses[type]
     use[result: result] if result
