@@ -49,6 +49,8 @@ describe 'tracker record update', js: true, driver: :app_firefox_driver do
       click_button 'Advanced Search'
     end
 
+    has_css? '#body-top:not(.initial-compiling)'
+    sleep 2
     # Wait for the advance form collapse animation to complete
     expect(page).to have_css '#master-search-advanced-form.in'
 

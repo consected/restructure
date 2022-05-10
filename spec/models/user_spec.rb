@@ -139,7 +139,7 @@ describe User do
         end.to_not raise_error
       end
     end
-    context 'rwhen user are allowed to self-register; i.e., AllowUsersToRegister is true' do
+    context 'when user are allowed to self-register; i.e., AllowUsersToRegister is true' do
       before { stub_const('Settings::AllowUsersToRegister', true) }
       it 'is expected to be created by the self registering user' do
         expect do

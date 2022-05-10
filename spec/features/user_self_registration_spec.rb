@@ -37,7 +37,7 @@ describe 'user sign in process for users that can self register', js: true, driv
     @template_user.user_roles.create!(current_admin: @admin, role_name: 'template role 2', app_type_id: at1)
 
     # create a user, then disable it
-    @d_user, @d_pw = create_user(rand(100_000_000..1_099_999_999), '', with_password: true, no_password_change: true)
+    @d_user, @d_pw = create_user(rand(100_000_000..1_099_999_999))
     expect(@d_user).to be_a User
     expect(@d_user.id).to equal @user.id
     @d_email = @d_user.email
@@ -50,7 +50,7 @@ describe 'user sign in process for users that can self register', js: true, driv
     @d_user.save!
     expect(@d_user.active_for_authentication?).to be false
 
-    @user, @good_password = create_user(rand(100_000_000..1_099_999_999), '', with_password: true, no_password_change: true)
+    @user, @good_password = create_user(rand(100_000_000..1_099_999_999))
     @good_email = @user.email
 
     @user.current_admin = @admin
@@ -66,6 +66,8 @@ describe 'user sign in process for users that can self register', js: true, driv
     # login_as @user, scope: :user
     otp = @user.current_otp
     expect(otp).not_to be nil
+    expect(@good_email).to eq @user.email
+    expect(@user.disabled).to be_falsey
 
     visit '/users/sign_in'
     within '#new_user' do

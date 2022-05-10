@@ -41,7 +41,7 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
     ActivityLog.define_models
 
     validate_setup
-
+    BhsImportConfig.validate_setup
     login
   end
 

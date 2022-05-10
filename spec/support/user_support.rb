@@ -230,7 +230,7 @@ module UserSupport
     return if defined? Scantron
 
     m = Resources::Models.find_by(resource_name: 'scantrons')
-    r = ExternalIdentifier.active.where(name: 'scantron')
+    r = ExternalIdentifier.active.where(name: 'scantron').count
     Rails.logger.warn m
     Rails.logger.warn r
     raise FphsException, "Scantron is still not defined, even after seeding: \n#{m}\n#{r}"
