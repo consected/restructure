@@ -450,6 +450,12 @@ fieldset.readonly-edit-fieldset {
   }
 }
 
+// Override labels for simple items in a JSON object field
+.view-object li.list-group-item small.ctlabel {
+  position: relative;
+  margin-right: 1em;
+}
+
 .e-sign-doc {
   min-width: 860px;
 }
