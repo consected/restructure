@@ -1,12 +1,12 @@
 require 'rails_helper'
 
-AlNameGenTestSave = 'Gen Test ELT Save'
-
 RSpec.describe SaveTriggers::PullExternalData, type: :model do
   include ModelSupport
   include ActivityLogSupport
 
   before :example do
+    # SetupHelper.get_webmock_responses
+
     content = <<~END_CONTENT
       <?xml version="1.0" ?>
       <!DOCTYPE PubmedArticleSet PUBLIC "-//NLM//DTD PubMedArticle, 1st January 2019//EN" "https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_190101.dtd">
@@ -24,7 +24,6 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
       )
       .to_return(status: 200, body: content, headers: {})
 
-    # SetupHelper.get_webmock_responses
     content = <<~END_CONTENT
       {"header":{"type":"esummary", "version":"0.3"},
       "result":
@@ -104,15 +103,37 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
         }
       )
       .to_return(status: 200, body: content, headers: {})
+
+    stub_request(:get, 'https://eutils.ncbi.nlm.nih.gov/404page')
+      .with(
+        headers: {
+          'Accept' => /.*/,
+          'Accept-Encoding' => /.*/,
+          'Host' => /.*/,
+          'User-Agent' => /.*/
+        }
+      )
+      .to_return(status: 404, body: content, headers: {})
+
+    stub_request(:get, 'https://eutils.ncbi.nlm.nih.gov/blank')
+      .with(
+        headers: {
+          'Accept' => /.*/,
+          'Accept-Encoding' => /.*/,
+          'Host' => /.*/,
+          'User-Agent' => /.*/
+        }
+      )
+      .to_return(status: 200, body: '', headers: {})
   end
 
   before :example do
     SetupHelper.setup_al_player_contact_phones
-    SetupHelper.setup_al_gen_tests AlNameGenTestSave, 'elt_save_test', 'player_contact'
+    res = SetupHelper.setup_al_gen_tests 'Test Pull External', 'test_pull_external', 'player_contact'
     create_user
     @master = create_master
     @player_contact = @master.player_contacts.create! data: '(617)123-1234 b', rec_type: :phone, rank: 10
-    @al = create_item master: @master
+    @al = create_al_for_resource_name(res.resource_name, master: @master)
     expect(@al.master_id).to eq @master.id
     setup_access @al.resource_name, resource_type: :activity_log_type, access: :create, user: @user
   end
@@ -135,6 +156,24 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
     expect(@al.notes).to start_with('{"PubmedArticleSet"=>{"PubmedArticle"=>')
   end
 
+  it 'pulls xml from a url and saves to a JSON field' do
+    config = {
+      this1: {
+        data_field: 'result_json',
+        from: {
+          url: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=14760269&retmode=xml',
+          format: 'xml'
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+    @trigger.perform
+
+    expect(@al.result_json).to be_present
+    expect(@al.result_json.dig('PubmedArticleSet', 'PubmedArticle')).to be_present
+  end
+
   it 'pulls json from a url' do
     config = {
       this1: {
@@ -151,5 +190,100 @@ RSpec.describe SaveTriggers::PullExternalData, type: :model do
 
     expect(@al.notes).to be_present
     expect(@al.notes).to start_with('{"header"=>{"type"=>')
+  end
+
+  it 'pulls json from a url and saves to a JSON field' do
+    config = {
+      this1: {
+        data_field: 'result_json',
+        from: {
+          url: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=14760269&retmode=json',
+          format: 'json'
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+    @trigger.perform
+
+    expect(@al.result_json).to be_present
+    expect(@al.result_json.dig('header', 'type')).to be_present
+  end
+
+  it 'fails to pull from a bad url' do
+    config = {
+      this1: {
+        data_field: 'notes',
+        from: {
+          url: 'https://eutils.ncbi.nlm.nih.gov/404page',
+          format: 'json'
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+    expect do
+      @trigger.perform
+    end.to raise_error(FphsException, "Pull external data: failed request with code '404' from url https://eutils.ncbi.nlm.nih.gov/404page")
+  end
+
+  it 'fails to pull from a bad url but the failure can be whitelisted, and the result is saved to a field' do
+    config = {
+      this1: {
+        data_field: 'notes',
+        response_code_field: 'select_result',
+        from: {
+          url: 'https://eutils.ncbi.nlm.nih.gov/404page',
+          format: 'json',
+          allow_response_codes: [404]
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+    expect do
+      @trigger.perform
+    end.not_to raise_error
+
+    expect(@al.select_result).to eq '404'
+  end
+
+  it 'fails if the content is blank' do
+    config = {
+      this1: {
+        data_field: 'notes',
+        from: {
+          url: 'https://eutils.ncbi.nlm.nih.gov/blank',
+          format: 'json'
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+    expect do
+      @trigger.perform
+    end.to raise_error(FphsException, 'Pull external data: empty content received from https://eutils.ncbi.nlm.nih.gov/blank')
+  end
+
+  it 'allows content to be blank if allow_empty_result option set' do
+    config = {
+      this1: {
+        data_field: 'notes',
+        from: {
+          url: 'https://eutils.ncbi.nlm.nih.gov/blank',
+          format: 'json',
+          allow_empty_result: true
+        }
+      }
+    }
+
+    @trigger = SaveTriggers::PullExternalData.new(config, @al)
+
+    expect do
+      @trigger.perform
+    end.not_to raise_error
   end
 end

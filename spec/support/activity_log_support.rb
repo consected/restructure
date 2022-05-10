@@ -132,6 +132,22 @@ module ActivityLogSupport
     @activity_log = @player_contact.activity_log__player_contact_phones.create! att
   end
 
+  def create_al_for_resource_name(resource_name, att = nil)
+    setup_access :player_contacts, user: @user
+    att ||= valid_attribs
+    # master ||= @master || @player_contact.master
+    # item ||= @player_contact
+    # att[:player_contact] = item
+    att[:master] ||= @player_contact.master
+    @player_contact.current_user = @user
+
+    setup_access resource_name, user: @user
+    setup_access "#{resource_name.singularize}__primary".to_sym, resource_type: :activity_log_type, user: @user
+    setup_access "#{resource_name.singularize}__blank".to_sym, resource_type: :activity_log_type, user: @user
+
+    @activity_log = @player_contact.send(resource_name).create! att
+  end
+
   def mock_send_sms_response(notification_inst)
     allow(notification_inst).to receive(:send_sms) do |_sms_number, _msg_text, _importance|
       resp = Aws::SNS::Types::PublishResponse.new

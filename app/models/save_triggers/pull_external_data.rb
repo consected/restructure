@@ -1,16 +1,9 @@
 # frozen_string_literal: true
 
 class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
-  def self.config_def(if_extras: {})
-    #     this_1:
-    #       if: if_extras
-    #       force_not_editable_save: true allows the update to succeed even if this item is set as not_editable
-    #       data_field: name of json field to update
-    #       from:
-    #         url: 'url with substitutions',
-    #         format: xml|json|text
-    #         allow_empty_result: true | false (default)
-  end
+  attr_accessor :response_code
+
+  def self.config_def(if_extras: {}); end
 
   def initialize(config, item)
     super
@@ -23,6 +16,8 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
 
     @model_defs.each do |model_def|
       model_def.each do |_model_name, config|
+        data_field = config[:data_field]
+        response_code_field = config[:response_code_field]
         vals = {}
 
         data = pull_data config[:from]
@@ -34,8 +29,8 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
           next unless ca.calc_action_if
         end
 
-        fn = config[:data_field]
-        vals[fn] = data
+        vals[data_field] = data
+        vals[response_code_field] = response_code if response_code_field
 
         # Retain the flags so that the #update! doesn't change
         # what we need to report through the API
@@ -59,14 +54,26 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
     url = config[:url]
     format = config[:format]
     allow_empty_result = config[:allow_empty_result]
+    allow_response_codes = config[:allow_response_codes] || []
 
     url = Formatter::Substitution.substitute(url, data: @item, ignore_missing: false)
 
-    content = Net::HTTP.get(URI.parse(url))
+    response = Net::HTTP.get_response(URI.parse(url))
 
-    if content.blank? && !allow_empty_result
-      raise FphsException,
-            "Pull external data: empty content received from #{url}"
+    self.response_code = response.code.to_i
+
+    unless response_code == 200
+      return if response_code&.in?(allow_response_codes)
+
+      raise FphsException, "Pull external data: failed request with code '#{response_code}' from url #{url}"
+    end
+
+    content = response.body
+
+    if content.blank?
+      return if allow_empty_result
+
+      raise FphsException, "Pull external data: empty content received from #{url}"
     end
 
     case format
