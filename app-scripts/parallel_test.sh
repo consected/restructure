@@ -16,6 +16,11 @@ else
   specs=$@
 fi
 
+rm -f tmp/working_failing_specs.log
+
 for spec in ${specs}; do
   bundle exec rake parallel:spec[${spec}]
+  cat tmp/failing_specs.log >> tmp/working_failing_specs.log
 done
+
+mv tmp/working_failing_specs.log tmp/failing_specs.log
