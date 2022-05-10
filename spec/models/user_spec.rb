@@ -122,8 +122,12 @@ describe User do
       @registration_admin = SetupHelper.registration_admin
       stub_const('Settings::RegistrationAdminEmail', @registration_admin.email)
     end
+
     context 'when user NOT are allowed to self-register; i.e., AllowUsersToRegister is false' do
-      before { stub_const('Settings::AllowUsersToRegister', false) }
+      before do
+        stub_const('Settings::AllowUsersToRegister', false)
+        Seeds.setup
+      end
       it 'requires admin to create a user' do
         expect { User.create! email: "atest-#{@good_email}", first_name: 'Last', last_name: 'Last' }.to raise_error(
           ActiveRecord::RecordInvalid,
@@ -140,7 +144,10 @@ describe User do
       end
     end
     context 'when user are allowed to self-register; i.e., AllowUsersToRegister is true' do
-      before { stub_const('Settings::AllowUsersToRegister', true) }
+      before do
+        stub_const('Settings::AllowUsersToRegister', true)
+        Seeds.setup
+      end
       it 'is expected to be created by the self registering user' do
         expect do
           User.create!(email: "#{rand(100_000_000..1_099_999_999)}-atest-#{@good_email}",

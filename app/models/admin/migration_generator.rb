@@ -529,7 +529,16 @@ class Admin::MigrationGenerator
 
     dirname = db_migration_dirname export_type
     cname_us = "#{mode}_#{name}_#{version}"
-    filepath = "#{dirname}/#{Time.new.to_s(:number)}_#{cname_us}.rb"
+
+    # Ensure we don't get overlapping migration version numbers
+    migtime = Time.new.to_s(:number)
+    while Dir.glob("#{migtime}*", base: dirname).length > 0
+      sleep 1.5
+      migtime = Time.new.to_s(:number)
+    end
+
+    filepath = "#{dirname}/#{migtime}_#{cname_us}.rb"
+
     FileUtils.mkdir_p dirname
     File.write(filepath, mig_text)
     # Cheat way to ensure multiple migrations can not have the same timestamp during app type loads

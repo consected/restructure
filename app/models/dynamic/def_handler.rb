@@ -410,6 +410,7 @@ module Dynamic
     rescue StandardError => e
       msg = "Failed to get the implementation_class for #{full_implementation_class_name}: #{e}"
       Rails.logger.warn msg
+      Rails.logger.warn e.backtrace.join("\n")
       raise e, msg
     end
 

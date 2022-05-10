@@ -253,7 +253,7 @@ RSpec.describe 'Model reference implementation', type: :model do
     end
 
     it 'evaluates rules to optionally show references' do
-      puts @activity_log.resource_name
+      # puts @activity_log.resource_name
 
       @player_contact.current_user = @user
 
@@ -508,7 +508,7 @@ RSpec.describe 'Model reference implementation', type: :model do
     end
 
     it 'evaluates rules to optionally show references' do
-      puts @activity_log.resource_name
+      # puts @activity_log.resource_name
 
       @player_contact.current_user = @user
 
@@ -622,7 +622,7 @@ RSpec.describe 'Model reference implementation', type: :model do
     end
 
     it 'evaluates rules to show references' do
-      puts @dynamic_model.resource_name
+      # puts @dynamic_model.resource_name
 
       @player_contact.current_user = @user
 

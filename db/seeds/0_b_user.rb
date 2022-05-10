@@ -9,10 +9,10 @@ module Seeds
     def self.setup
       log "In #{self}.setup"
 
-      if User.active.where(email: Settings::TemplateUserEmail).first
+      if User.active.find_by(email: Settings::TemplateUserEmail)
         log 'Did not setup template user'
       else
-        u = User.where(email: Settings::TemplateUserEmail).first
+        u = User.find_by(email: Settings::TemplateUserEmail)
         if u
           u.update! disabled: false, current_admin: auto_admin
         else
@@ -41,10 +41,10 @@ module Seeds
         end
       end
 
-      if User.active.where(email: Settings::BatchUserEmail).first
+      if User.active.find_by(email: Settings::BatchUserEmail)
         log 'Did not setup batch user'
       else
-        u = User.where(email: Settings::BatchUserEmail).first
+        u = User.find_by(email: Settings::BatchUserEmail)
         if u
           u.update! disabled: false, current_admin: auto_admin
         else
