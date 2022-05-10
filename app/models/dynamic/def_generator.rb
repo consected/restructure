@@ -106,8 +106,8 @@ module Dynamic
           rn = d.resource_name
           u = d.updated_at
           m = Resources::Models.find_by(resource_name: rn)&.model&.definition
-          # Skip if the model was previous set and the updated timestamps match
-          next if m && m.updated_at == u
+          # Skip if the model was previous set and the updated timestamps match AND the implementation class is defined
+          next if m && m.updated_at == u && d.implementation_class_defined?(fail_without_exception: true)
 
           this_is_new = !m
           any_new ||= this_is_new
@@ -291,7 +291,6 @@ module Dynamic
     rescue StandardError => e
       logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
     end
-
 
     def remove_implementation_class(alt_prefix_class = nil)
       klass = alt_prefix_class || prefix_class

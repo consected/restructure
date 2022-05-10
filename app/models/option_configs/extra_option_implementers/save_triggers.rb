@@ -14,7 +14,8 @@ module OptionConfigs
                              create_filestore_container
                              update_this
                              add_tracker
-                             change_user_roles].freeze
+                             change_user_roles
+                             pull_external_data].freeze
 
       class_methods do
         #

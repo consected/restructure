@@ -272,7 +272,7 @@
         {{#is this_value.length 0}}
         {{else is this_value.[0] 'typeof' 'string'}}
         {{else}}
-        <a data-target="#view-object-{{result_data.master_id}}-{{result_data.id}}-{{underscore key}}" data-toggle="collapse" data-toggle-caret="true" class="glyphicon glyphicon-triangle-bottom view-object-caret"></a>
+        <a data-target="#view-object-{{new_random}}" data-toggle="collapse" data-toggle-caret="true" class="glyphicon glyphicon-triangle-bottom view-object-caret"></a>
         {{/is}}
       </div>
       {{/if}}
@@ -284,7 +284,7 @@
         {{/each}}
       </ul>
       {{else}}
-      <ul class="view-object collapse {{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key  'show_expanded')}}uncollapse-children in{{/if}}" id="view-object-{{result_data.master_id}}-{{result_data.id}}-{{underscore key}}" aria-expanded="{{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key  'show_expanded')}}true{{else}}false{{/if}}">
+      <ul class="view-object collapse {{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key  'show_expanded')}}uncollapse-children in{{/if}}" id="view-object-{{get_random}}" aria-expanded="{{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key  'show_expanded')}}true{{else}}false{{/if}}">
       {{#each this_value}}
       {{#with ../template_config}}
       {{> common_template_result_field no_caption_before="true" this_value=../this key=(to_string @key) name=name field_type=(lookup this.field_edit_as_types @key) template_config=this result_data=../result_data show_raw_text=true}}

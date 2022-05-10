@@ -68,10 +68,10 @@ module BhsImportConfig
     end
   end
 
-  def self.validate_setup
+  def validate_bhs_setup
     user = User.active.find_by(email: @good_email)
-    raise "#{user} is not a User" unless user.is_a? User
-    raise "#{user.id} is not #{@user.id}" unless user.id == @user.id
+    raise "#{user} (#{@good_email}) is not a User" unless user.is_a? User
+    raise "#{user.id} (#{user.email}) is not #{@user.id} (#{@user.email})" unless user.id == @user.id
 
     return if defined?(BhsAssignment)
 

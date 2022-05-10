@@ -121,6 +121,8 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     al = player_contact.activity_log__player_contact_phones.build(select_call_direction: 'one',
                                                                   select_who: 'user',
                                                                   extra_log_type: 'step_1')
+
+    ::ActivityLog.refresh_outdated unless al.extra_log_type_config
     expect(al.extra_log_type_config).not_to be nil
     al.save!
     al.data
@@ -170,6 +172,7 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
                                                                   select_who: 'user',
                                                                   extra_log_type: 'step_1')
 
+    ::ActivityLog.refresh_outdated unless al.extra_log_type_config
     expect(al.extra_log_type_config).not_to be nil
     al.save!
 

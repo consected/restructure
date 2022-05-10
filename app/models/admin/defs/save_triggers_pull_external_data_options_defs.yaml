@@ -1,0 +1,12 @@
+
+# Save Trigger: Pull External Data options
+        - this_1:
+            if: if_extras
+            force_not_editable_save: true allows the update to succeed even if this item is set as not_editable
+            data_field: name of text or json field to update
+            response_code_field: name of integer or string field to receive HTTP response code
+            from:
+              url: url with substitutions
+              format: xml|json|text
+              allow_empty_result: true | false (default)
+              allow_response_codes: [array of allowable integer codes that are not 200]

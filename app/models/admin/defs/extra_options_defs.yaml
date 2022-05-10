@@ -186,29 +186,32 @@
 
   save_trigger:
     on_create:
-      notify: 
-#!defs(save_triggers_notify_options_defs.yaml)
-
-      change_user_roles:
-#!defs(save_triggers_change_user_roles_options_defs.yaml)
-
-      create_reference: 
-#!defs(save_triggers_create_reference_options_defs.yaml)
-
-      update_reference: 
-#!defs(save_triggers_update_reference_options_defs.yaml)
+      add_tracker: 
+#!defs(save_triggers_add_tracker_options_defs.yaml)
 
       create_master: 
 #!defs(save_triggers_create_master_options_defs.yaml)
 
+      create_reference: 
+#!defs(save_triggers_create_reference_options_defs.yaml)
+
+      change_user_roles:
+#!defs(save_triggers_change_user_roles_options_defs.yaml)
+
       create_filestore_container: 
 #!defs(save_triggers_create_filestore_container_options_defs.yaml)
 
+      notify: 
+#!defs(save_triggers_notify_options_defs.yaml)
+
+      pull_external_data: 
+#!defs(save_triggers_pull_external_data_options_defs.yaml)
+
+      update_reference: 
+#!defs(save_triggers_update_reference_options_defs.yaml)
+
       update_this: 
 #!defs(save_triggers_update_this_options_defs.yaml)
-
-      add_tracker: 
-#!defs(save_triggers_add_tracker_options_defs.yaml)
 
     on_update: {}
     

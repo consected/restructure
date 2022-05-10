@@ -89,6 +89,7 @@ EOF
         f = 'integer' if a.start_with?('number_')
         f = 'integer' if a.end_with?('_number')
         f = 'integer' if a.end_with?('_timestamp')
+        f = 'jsonb' if a.end_with?('_json')
         f += ','
         attrib_pair[a] = f
       end
