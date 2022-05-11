@@ -265,7 +265,7 @@
     </strong></li>
 
   {{else is this_value 'typeof' 'object'}}
-      <li class="list-group-item typeof-object-field" data-field-name="{{key}}">
+      <li class="list-group-item typeof-object-field result-field-container {{hyphenate full_name}}-{{key}}" data-field-name="{{key}}">
       {{#if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key  'show_expanded')}}
       {{else}}
       <div class="view-object-label">{{humanize key}}
