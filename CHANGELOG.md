@@ -16,6 +16,20 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] field_options: field_name: preset_value: option
+- [Added] direct embed ability through options or field definitions
+- [Added] viewing / editing of direct embedded item within a stored file
+- [Added] pull_external_data save trigger
+- [Added] full markdown support for master list header title
+- [Added] change_user_roles option for_user to specify non-current user, and allow lookup of role names with calc reference
+- [Changed] parallel tests script and specs for reliability
+- [Fixed] curly substitutions in javascript to traverse full dotted path
+- [Fixed] substitutions for markdown to HTML incorrectly identifying HTML documents
+- [Fixed] datepicker being hidden by modal view
+- [Fixed] issue with caching of user roles and access controls not clearing when new role added
+
 ## [8.0.60] - 2022-04-22
 
 - [Changed] embedded_block to allow formatting of link and allow models related to a master to edit

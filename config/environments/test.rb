@@ -56,6 +56,7 @@ Rails.application.configure do
   if ENV['FPHS_USE_LOGGER'] == 'TRUE'
     puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger disabled !!!!!!!!!!!!!!!!!!!!!!'
     config.log_level = :info
+    config.log_formatter = ::Logger::Formatter.new
   else
     puts '!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!'
     config.logger = DoNothingLogger.new

@@ -206,8 +206,19 @@ module UserSupport
     # expect(user.has_access_to?(:create, :table, resource_name)).to be_truthy
   end
 
+  def revoke_user_create(resource_name, in_app_type: nil, alt_user: nil)
+    user = alt_user || @user
+    in_app_type ||= user.app_type
+    res = user.has_access_to? :access, :table, resource_name, alt_app_type_id: in_app_type
+    if res && res.user_id == user.id
+      res.disabled = true
+      res.current_admin = @admin
+      res.save!
+    end
+  end
+
   def validate_setup
-    user = User.find_by(email: @good_email)
+    user = User.active.find_by(email: @good_email)
     expect(user).to be_a User
     expect(user.id).to equal @user.id
 
@@ -219,7 +230,7 @@ module UserSupport
     return if defined? Scantron
 
     m = Resources::Models.find_by(resource_name: 'scantrons')
-    r = ExternalIdentifier.active.where(name: 'scantron')
+    r = ExternalIdentifier.active.where(name: 'scantron').count
     Rails.logger.warn m
     Rails.logger.warn r
     raise FphsException, "Scantron is still not defined, even after seeding: \n#{m}\n#{r}"

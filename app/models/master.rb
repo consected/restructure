@@ -654,13 +654,19 @@ class Master < ActiveRecord::Base
     return unless template.present?
 
     template = Formatter::Substitution.substitute template, data: self, tag_subs: nil, ignore_missing: true
-    template = CGI.escapeHTML template
-    while template.include? '**'
-      template = template.sub('**', '<b>')
-      template = template.sub('**', '</b>')
+
+    if template.include? "\n"
       html = true
+      template = Formatter::Substitution.text_to_html(template).html_safe
+    else
+      template = CGI.escapeHTML template
+      while template.include? '**'
+        template = template.sub('**', '<b>')
+        template = template.sub('**', '</b>')
+        html = true
+      end
     end
-    template.html_safe if html
+    template = template.html_safe if html
     template
   end
 

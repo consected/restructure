@@ -1,5 +1,5 @@
 class Admin::AppConfigurationsController < AdminController
-  helper_method :role_name_options
+  helper_method :role_name_options, :value_editor
 
   protected
 
@@ -28,6 +28,10 @@ class Admin::AppConfigurationsController < AdminController
         'data-filters-select': '#admin_app_configuration_role_name'
       }
     }
+  end
+
+  def value_editor
+    :plain_text
   end
 
   private

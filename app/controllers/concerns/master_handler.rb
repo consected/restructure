@@ -200,8 +200,10 @@ module MasterHandler
   def reload_objects
     object_instance.reload
     object_instance.current_user = current_user
-    object_instance.embedded_item&.reload
-    object_instance.embedded_item&.current_user = current_user
+    return unless object_instance.embedded_item&.persisted?
+
+    object_instance.embedded_item.reload
+    object_instance.embedded_item.current_user = current_user
   end
 
   #
@@ -280,22 +282,27 @@ module MasterHandler
     nil
   end
 
-  #
-  # Render a plain 401 page if object doesn't allow editing
   def check_editable?
+    handle_option_type_config if action_name == 'edit' && respond_to?(:handle_option_type_config, true)
     return if object_instance.allows_current_user_access_to?(:edit)
 
     not_editable
     nil
   end
 
-  #
-  # Render a plain 401 page if object can't be created
   def check_creatable?
+    handle_option_type_config if action_name == 'new' && respond_to?(:handle_option_type_config, true)
     return if object_instance.allows_current_user_access_to?(:create) || current_admin_sample
 
     not_creatable
     nil
+  end
+
+  #
+  # The name that embedded itenms
+  def params_namespace
+    primary_params_name.to_s
+    # @implementation_class.resource_name.gsub('__', '_')
   end
 
   # Allow overrides
@@ -481,9 +488,13 @@ module MasterHandler
       ItemFlag.set_flags flag_list, object_instance, current_user
     end
 
-    # Based on an embedded item coming from an activity log form, create the reference.
-    # In this mode we are in the activity log record, so the order is different from the previous create_with usage
-    ModelReference.create_with object_instance, object_instance.embedded_item if object_instance.embedded_item&.id
+    # Based on an embedded item coming from a dynamic form, create the reference.
+    # In this mode we are in the dynamic record, so the order is different from the previous create_with usage
+    if object_instance.embedded_item&.id && !object_instance.direct_embed?
+      ModelReference.create_with object_instance,
+                                 object_instance.embedded_item
+
+    end
 
     true
   end
@@ -613,6 +624,17 @@ module MasterHandler
     updated_params.each do |k, v|
       object_instance.send("#{k}=", v)
       secure_params.delete k
+    end
+
+    obj_params = params.dig(rname, :embedded_item)
+    ei = object_instance.embedded_item
+    return unless obj_params && ei
+
+    updated_params = Dynamic::FieldEditAs::Handler.new(ei, obj_params).translate_to_persistable
+    # We don't use #assign_attributes, since a Hash will be treated as an update of a nested object
+    updated_params.each do |k, v|
+      ei.send("#{k}=", v)
+      secure_params[:embedded_item].delete k
     end
   end
 end

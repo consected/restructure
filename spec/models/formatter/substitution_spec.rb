@@ -91,6 +91,52 @@ RSpec.describe Formatter::Substitution, type: :model do
     expect(res).to eq expected_text
   end
 
+  it 'substitutes embedded items' do
+    let_user_create :player_contacts
+    create_item
+    master = @player_contact.master
+    master.current_user = @user
+
+    expect(@player_contact.data).not_to be_blank
+
+    setup_access :activity_log__player_contact_new_elts, user: @user
+
+    @al_def.extra_log_types = <<~END_DEF
+      _constants:
+        replace_me: embedding value
+
+      new_step2:
+        label: New Step2
+        embed:
+          resource_name: player_contacts
+          resource_id: #{@player_contact.id}
+        caption_before:
+          all_fields: show before all fields
+          select_result: 'has a new caption before select_result with {{embedded_item.data}}'
+
+    END_DEF
+
+    @al_def.current_admin = @admin
+    @al_def.save!
+
+    setup_access :activity_log__player_contact_new_elt__new_step2, resource_type: :activity_log_type, access: :create, user: @user
+
+    @al_def.reload
+    @al_def.option_type_config_for :new_step
+
+    @activity_log = @player_contact.activity_log__player_contact_new_elts.create!(select_call_direction: 'from player',
+                                                                                  select_who: 'user',
+                                                                                  master: master,
+                                                                                  extra_log_type: 'new_step2')
+
+    caption = @activity_log.extra_log_type_config.caption_before[:select_result][:caption]
+    expected_text = "<p>has a new caption before select_result with #{@player_contact.data}</p>"
+
+    res = Formatter::Substitution.substitute(caption, data: @activity_log, tag_subs: nil)
+
+    expect(res).to eq expected_text
+  end
+
   it 'substitutes times and dates using user preferences for formatting' do
     # Day before daylight savings time starts. Standard time is UTC -5 hours
     date = Date.parse('2015-03-07')

@@ -9,7 +9,7 @@ module AwsApiStubs
   def setup_stub(type, result: nil)
     return unless ENV['IGNORE_MFA'] == 'true'
 
-    puts 'Stubbing AWS API calls'
+    # puts 'Stubbing AWS API calls'
     setup_default_aws_stubs
     use = requests_responses[type]
     use[result: result] if result
@@ -23,9 +23,10 @@ module AwsApiStubs
       .with(
         headers: {
           'Accept' => '*/*',
-          'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'User-Agent' => 'aws-sdk-ruby3/3.130.0',
-          'X-Aws-Ec2-Metadata-Token-Ttl-Seconds' => '21600'
+          'Accept-Encoding' => /.+/,
+          'User-Agent' => /.+/,
+          'X-Aws-Ec2-Metadata-Token-Ttl-Seconds' => /.+/
+
         }
       )
       .to_return(status: 200, body: '', headers: {})
@@ -46,8 +47,8 @@ module AwsApiStubs
       .with(
         headers: {
           'Accept' => '*/*',
-          'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'User-Agent' => 'aws-sdk-ruby3/3.130.0'
+          'Accept-Encoding' => /.*/,
+          'User-Agent' => /.+/
         }
       )
       .to_return(status: 200, body: body, headers: {})

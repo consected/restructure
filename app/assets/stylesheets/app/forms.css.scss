@@ -106,7 +106,7 @@ input[type="date"].attached-datepicker {
 }
 
 .datepicker-dropdown {
-  z-index: 1000 !important;
+  z-index: 21000 !important;
 }
 
 li.list-group-item.placeholder-field-item {
@@ -448,6 +448,12 @@ fieldset.readonly-edit-fieldset {
   &.ref-new-edit {
     display: none;
   }
+}
+
+// Override labels for simple items in a JSON object field
+.view-object li.list-group-item small.ctlabel {
+  position: relative;
+  margin-right: 1em;
 }
 
 .e-sign-doc {

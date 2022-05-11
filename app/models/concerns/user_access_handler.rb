@@ -84,12 +84,12 @@ module UserAccessHandler
   end
 
   def clear_has_access_to!
-    @latest_user_access_control = Admin::UserAccessControl.latest_update
+    @latest_user_access_control = Admin::UserAccessControl.latest_update(force: true)
     @has_access_to = {}
   end
 
   def clear_role_names!
-    @latest_user_role = Admin::UserRole.latest_update
+    @latest_user_role = Admin::UserRole.latest_update(force: true)
     @role_names = nil
     # Updated roles also lead to has_access_to evaluations requiring refresh
     clear_has_access_to!

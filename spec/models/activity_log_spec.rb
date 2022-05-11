@@ -44,6 +44,7 @@ RSpec.describe 'Activity Log definition', type: :model do
       al_def.force_regenerate = true
       al_def.updated_at = DateTime.now # force a save
       al_def.save!
+      ::ActivityLog.refresh_outdated
       al_def.reload
       al_def.force_option_config_parse
 
@@ -56,9 +57,13 @@ RSpec.describe 'Activity Log definition', type: :model do
       setup_access :activity_log__player_contact_phone__step_2, resource_type: :activity_log_type, access: :create, user: @user
       expect(@user.has_access_to?(:create, :activity_log_type, :activity_log__player_contact_phone__step_1)).to be_truthy
       al_def.add_master_association
+
+      @al_def = al_def
     end
 
     it 'has a set of master associations pointing to the full table and individual extra log types' do
+      expect(@al_def.option_configs_names).to eq %i[step_1 step_2 primary blank_log]
+
       expect(@master.activity_log__player_contact_phones.count).to eq 0
       expect(@master.activity_log__player_contact_phone__primary.count).to eq 0
       expect(@master.activity_log__player_contact_phone__blank_log.count).to eq 0
