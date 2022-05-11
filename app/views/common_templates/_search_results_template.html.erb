@@ -328,7 +328,11 @@
   _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'].<%=vdef_version%> = 
   <% end %>
   _fpa.show_if.forms['<%=full_name%>'].<%=vdef_version%> = <%= show_if.to_json.html_safe %>;
-
+  <% if full_name.to_s.start_with?('dynamic_model__') %>
+  _fpa.show_if.forms['<%=full_name%>_default'] = _fpa.show_if.forms['<%=full_name%>'];
+  _fpa.show_if.forms['<%=full_name%>_default'].<%=vdef_version%> = _fpa.show_if.forms['<%=full_name%>'].<%=vdef_version%>;
+  <% end %>
+  
 </script>
 
 
