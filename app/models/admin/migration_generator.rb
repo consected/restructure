@@ -266,8 +266,13 @@ class Admin::MigrationGenerator
   # duplicating standard app columns for current table_name
   # @return [Array]
   def standard_columns
-    pset = %w[id created_at updated_at contactid user_id master_id
+    pset = %w[id created_at updated_at contactid user_id
               extra_log_type admin_id]
+
+    # Only add in the master_id if the master is a foreign key, not a standard integer field
+    # so that we treat the field correctly in comparisons of new - old
+    pset << 'master_id' if master_fk?
+
     pset += ["#{table_name.singularize}_table_id", "#{table_name.singularize}_id"]
     pset
   end
@@ -424,11 +429,19 @@ class Admin::MigrationGenerator
   end
 
   #
-  # Has the configured master_id been added or removed
+  # Has the no_master_association setting changed, often based on
+  # the dynamic model foreign key being blank
   # @return [true|false]
-  def master_id_changed
-    prev_no_master_association = !self.class.table_column_names(table_name).include?('master_id')
+  def no_master_association_changed
+    prev_no_master_association = !master_fk?
     prev_no_master_association != !!no_master_association
+  end
+
+  #
+  # Does a master_id column appear as a foreign key?
+  # @return [true|false]
+  def master_fk?
+    !!self.class.connection.foreign_keys(table_name).find { |f| f.column == 'master_id' }
   end
 
   #
@@ -443,7 +456,7 @@ class Admin::MigrationGenerator
     end
 
     unless added.present? || removed.present? || changed.present? ||
-           new_table_comment || new_fields_comments.present? || table_name_changed || master_id_changed
+           new_table_comment || new_fields_comments.present? || table_name_changed || no_master_association_changed
       return
     end
 
