@@ -424,6 +424,14 @@ class Admin::MigrationGenerator
   end
 
   #
+  # Has the configured master_id been added or removed
+  # @return [true|false]
+  def master_id_changed
+    prev_no_master_association = !self.class.table_column_names(table_name).include?('master_id')
+    prev_no_master_association != !!no_master_association
+  end
+
+  #
   # Content for a migration file for a table update
   # @return [String]
   def migration_update_table
@@ -435,13 +443,14 @@ class Admin::MigrationGenerator
     end
 
     unless added.present? || removed.present? || changed.present? ||
-           new_table_comment || new_fields_comments.present? || table_name_changed
+           new_table_comment || new_fields_comments.present? || table_name_changed || master_id_changed
       return
     end
 
     new_fields_comments ||= {}
 
     <<~ARCONTENT
+      self.no_master_association = #{!!no_master_association}
       #{table_name_changed ? "    self.prev_table_name = '#{prev_table_name}'" : ''}
       #{table_name_changed ? '    update_table_name' : ''}
       #{table_name_changed ? '' : "    self.prev_fields = %i[#{prev_fields.join(' ')}]"}
@@ -583,7 +592,7 @@ class Admin::MigrationGenerator
     puts "Running migration from #{db_migration_dirname}"
     Rails.logger.info "Running migration from #{db_migration_dirname}"
 
-    Timeout.timeout(30) do
+    Timeout.timeout(60) do
       # Outside the current transaction
       Thread.new do
         ActiveRecord::Base.connection_pool.with_connection do
