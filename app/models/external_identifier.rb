@@ -270,8 +270,10 @@ class ExternalIdentifier < ActiveRecord::Base
     "#{external_id_attribute.to_sym} #{extra_fields}"
   end
 
-  def all_implementation_fields(ignore_errors: true)
-    field_list_array
+  def all_implementation_fields(ignore_errors: true, only_real: false)
+    res = field_list_array
+    res = res.reject { |f| f.index(/^embedded_report_|^placeholder_/) } if only_real
+    res
   rescue StandardError => e
     msg = "all_implementation_fields for external identifier #{id} failed. #{e}"
     Rails.logger.warn msg

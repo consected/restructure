@@ -297,18 +297,22 @@ module Redcap
     # the actual dynamic model configuration
     # @return [Array{storage fields, dynamic model fields}]
     def compare_storage_and_model_field_lists
-      fl = dynamic_storage.field_list
+      fl = dynamic_storage.field_list(no_placeholder_fields: true)
       dmfl = dynamic_storage.dynamic_model.field_list
       [fl, dmfl]
     end
 
     #
-    # Do the field lists for that required by storage match
-    # the actual dynamic model configuration
+    # Do the field lists for that are required by storage match
+    # the actual dynamic model configuration.
+    # Additional fields in the dynamic model are acceptable
     # @return [Boolean]
-    def storage_and_model_fields_match?
-      pair = compare_storage_and_model_field_lists
-      pair[0] == pair[1]
+    def model_has_all_fields_for_storage?
+      storage, dm_fields = compare_storage_and_model_field_lists
+      storage_fields_a = storage&.split(' ')
+      dm_fields_a = dm_fields&.split(' ')
+
+      (storage_fields_a - dm_fields_a).empty?
     end
 
     def valid_metadata?

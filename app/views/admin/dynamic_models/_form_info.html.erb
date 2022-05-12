@@ -16,7 +16,6 @@
       <%= render partial: 'admin/dynamic_models/def_details', locals: {object_instance: object_instance} %>
       <% if object_instance.persisted? %>
       <h4>Actions</h4>
-      <p>Fields <%=object_instance.field_list_array.sort != object_instance.default_field_list_array.sort ? 'does not' : '' %> match table</p> 
       <p>
       <%= link_to 'Update Config from Table', 
                   update_config_from_table_admin_dynamic_model_path(object_instance),

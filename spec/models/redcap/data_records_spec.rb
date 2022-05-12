@@ -74,7 +74,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect { dr.validate }.to raise_error(FphsException, 'Redcap::DataRecords retrieved data that has a nil record id')
   end
 
-  it 'raises errors if retrieved records have mismatched fields' do
+  it 'raises errors if retrieved records have missing fields' do
     dm = create_dynamic_model_for_sample_response
 
     rc = Redcap::ProjectAdmin.active.first
@@ -120,6 +120,37 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect { dr.validate }.to raise_error FphsException,
                                           "Redcap::DataRecords retrieved record fields are not present in the model:\n" \
                                           'redcap_survey_identifier q2_survey_timestamp test_timestamp'
+  end
+
+  it 'stores retrieved records even if the target has additional fields' do
+    dm = create_dynamic_model_for_sample_response
+
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+
+    WebMock.reset!
+
+    mock_limited_requests
+    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+
+    api_key = rc.api_key
+    rc.update! current_admin: @admin, disabled: true
+    rc = Redcap::ProjectAdmin.create! current_admin: @admin,
+                                      study: 'Q2',
+                                      name: 'q2_demo',
+                                      api_key: api_key,
+                                      server_url: rc.server_url
+
+    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+    dr.retrieve
+    expect { dr.validate }.not_to raise_error
+
+    dr.store
+
+    expect(dr.errors).to be_empty
+    expect(dr.created_ids.map { |r| r[:record_id] }.sort).to eq %w[1 19 32 4 5].sort
+    expect(dr.updated_ids).to be_empty
   end
 
   it 'complains if records are missing' do
@@ -247,6 +278,101 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(cr.result['updated_ids']).to be_empty
     expect(cr.result['unchanged_ids']).to be_empty
     expect(cr.result['errors']).to be_empty
+  end
+
+  it 'retrieves all records in the background if there are more model than storage fields' do
+    dm = create_dynamic_model_for_sample_response
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+    rc.dynamic_model_table = dm.implementation_class.table_name.to_s
+    rc.save # to ensure the background job works
+
+    WebMock.reset!
+
+    mock_limited_requests
+    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+    api_key = rc.api_key
+    rc.update! current_admin: @admin, disabled: true
+    rc = Redcap::ProjectAdmin.create! current_admin: @admin,
+                                      study: 'Q2',
+                                      name: 'q2_demo',
+                                      api_key: api_key,
+                                      server_url: rc.server_url
+
+    rc.update! current_admin: @admin, dynamic_model_table: dm.implementation_class.table_name.to_s
+
+    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+    start_time = DateTime.now
+    expect(dm.implementation_class_defined?)
+
+    expect(dr.existing_records_length).to eq 0
+
+    dr.request_records
+
+    expect(dr.existing_records_length).to be > 0
+
+    cr = Redcap::ClientRequest.where(admin: @admin,
+                                     action: 'store records',
+                                     server_url: rc.server_url,
+                                     name: rc.name,
+                                     redcap_project_admin: rc)
+                              .where('created_at > :created_at', created_at: start_time)
+                              .last
+
+    expect(cr.result).to be_a Hash
+    expect(cr.result['created_ids']).not_to be_empty
+    expect(cr.result['updated_ids']).to be_empty
+    expect(cr.result['unchanged_ids']).to be_empty
+    expect(cr.result['errors']).to be_empty
+  end
+
+  it 'fails to start background request if model has missing fields' do
+    dm = create_dynamic_model_for_sample_response
+    rc = Redcap::ProjectAdmin.active.first
+    rc.current_admin = @admin
+    rc.dynamic_model_table = dm.implementation_class.table_name.to_s
+    rc.save # to ensure the background job works
+
+    WebMock.reset!
+
+    WebMock.reset!
+    mock_limited_requests
+    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records)
+    rc.api_client.send :clear_cache, rc.api_client.send(:cache_key, :records, rc.records_request_options)
+    stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
+
+    api_key = rc.api_key
+    rc.update! current_admin: @admin, disabled: true
+    rc = Redcap::ProjectAdmin.create! current_admin: @admin,
+                                      study: 'Q2',
+                                      name: 'q2_demo',
+                                      api_key: api_key,
+                                      server_url: rc.server_url
+
+    rc.update! current_admin: @admin, dynamic_model_table: dm.implementation_class.table_name.to_s
+
+    dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+    start_time = DateTime.now
+    expect(dm.implementation_class_defined?)
+
+    expect(dr.existing_records_length).to eq 0
+
+    expect { dr.request_records }.to raise_error FphsException, /Redcap::DataRecords retrieved record fields don't match the data dictionary:/
+
+    expect(dr.existing_records_length).to eq 0
+
+    cr = Redcap::ClientRequest.where(admin: @admin,
+                                     action: 'store records',
+                                     server_url: rc.server_url,
+                                     name: rc.name,
+                                     redcap_project_admin: rc)
+                              .where('created_at > :created_at', created_at: start_time)
+                              .last
+
+    expect(cr).to be nil
   end
 
   it 'downloads files' do

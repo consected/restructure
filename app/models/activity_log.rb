@@ -174,18 +174,19 @@ class ActivityLog < ActiveRecord::Base
 
   # Get a complete list of all fields required to generate a table.
   # The individual field lists may overlap or be distinct. This gets us a usable list
-  def all_implementation_fields(ignore_errors: true)
+  def all_implementation_fields(ignore_errors: true, only_real: false)
     res = (view_attribute_list || []) +
           (view_blank_log_attribute_list || []) +
           OptionConfigs::ActivityLogOptions.fields_for_all_in(self)
-    res.uniq
+    res = res.uniq
+    res = res.reject { |f| f.index(/^embedded_report_|^placeholder_/) } if only_real
+    res
   rescue FphsException => e
     raise e unless ignore_errors
 
     @extra_error = e
     []
   end
-
 
   # The class that an activity log implementation belongs to
   def item_class

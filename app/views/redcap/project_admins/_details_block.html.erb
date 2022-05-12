@@ -33,6 +33,7 @@ end
 </p>
 <%
   if dm
+  
     fl, dmfl = object_instance.compare_storage_and_model_field_lists
 
     dmfla = dmfl&.split(' ')
@@ -40,7 +41,18 @@ end
 
 %>
 <p><label>metadata and table fields</label> <span>
-    <%= dmfl.present? && fl.present? ? (dmfl == fl ? 'match' : "mismatched: +[#{(dmfla - fla).join(" ")}] -[#{(fla - dmfla).join(" ")}]") : 'not set up'%> </span></p>
+
+  <% if !dmfl.present? || !fl.present? %>
+  <p>REDCap or table fields not set up</p>
+  <% elsif dmfl == fl %>
+  <p>REDCap fields match table</p>
+  <% else %>
+  <p>REDCap fields don't match table</p>
+  <% if (fla - dmfla).present? %><p>- REDCap has additional fields (pull will fail): <%= "[#{(fla - dmfla).join(" ")}]" %><p><% end %>
+  <% if (dmfla - fla).present? %><p>- table has additional fields (pull will ignore them): <%= "[#{(dmfla - fla).join(" ")}]" %><p><% end %>
+  <% end %>  
+
+    </span></p>
 <p><label>pull schedule</label>
   <span>
     <% if  object_instance.frequency.present? && object_instance.transfer_mode == 'scheduled' %>

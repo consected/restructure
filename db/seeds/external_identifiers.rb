@@ -39,7 +39,12 @@ module Seeds
       if Rails.env.test?
 
         sa = ExternalIdentifier.active.find_by(name: 'scantrons')
-        unless sa
+        if sa
+          unless defined? Scantron
+            log 'Reloading external identifiers since Scantron is not defined'
+            ExternalIdentifier.define_models
+          end
+        else
           s = ExternalIdentifier.find_by(name: 'scantrons')
           raise 'Scantron not found' unless s
 

@@ -201,8 +201,8 @@ module Dynamic
     # Check the defined field list matches the columns in the database. If not,
     # we may need to regenerate the model
     def fields_match_columns?
-      fields = all_implementation_fields
-      fields.reject! { |f| f.index(/^embedded_report_|^placeholder_/) }
+      fields = all_implementation_fields(only_real: true)
+      # fields.reject! { |f| f.index(/^embedded_report_|^placeholder_/) }
 
       (fields.sort - table_columns.map { |c| c.name.to_s }.sort).empty?
     end
