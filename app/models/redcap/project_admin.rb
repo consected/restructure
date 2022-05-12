@@ -372,6 +372,12 @@ module Redcap
         captured_project_info[:has_repeating_instruments_or_events] == 1
     end
 
+    #
+    # Returns the full model name, namespaced like 'module__class'
+    def item_type
+      name.singularize.ns_underscore
+    end
+
     private
 
     #
