@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.0.63] - 2022-05-13
 
 - [Changed] rules so master_id can be provided as a regular field, not a foreign key (for Redcap data for example)
 - [Changed] handling of redcap pull to ignore excess fields in dynamic model
