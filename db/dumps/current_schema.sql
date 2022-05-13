@@ -449,7 +449,9 @@ CREATE TABLE ml_app.nfs_store_archived_files (
     title character varying,
     description character varying,
     nfs_store_stored_file_id integer,
-    file_metadata jsonb
+    file_metadata jsonb,
+    embed_resource_name character varying,
+    embed_resource_id bigint
 );
 
 
@@ -472,7 +474,9 @@ CREATE TABLE ml_app.nfs_store_stored_files (
     title character varying,
     description character varying,
     last_process_name_run character varying,
-    file_metadata jsonb
+    file_metadata jsonb,
+    embed_resource_name character varying,
+    embed_resource_id bigint
 );
 
 
@@ -1665,7 +1669,9 @@ CREATE FUNCTION ml_app.log_nfs_store_archived_file_update() RETURNS trigger
                 user_id,
                 created_at,
                 updated_at,
-                nfs_store_archived_file_id
+                nfs_store_archived_file_id,
+                embed_resource_name,
+                embed_resource_id
                 )
             SELECT
                 NEW.file_hash,
@@ -1683,7 +1689,9 @@ CREATE FUNCTION ml_app.log_nfs_store_archived_file_update() RETURNS trigger
                 NEW.user_id,
                 NEW.created_at,
                 NEW.updated_at,
-                NEW.id
+                NEW.id,
+                NEW.embed_resource_name,
+                NEW.embed_resource_id
             ;
             RETURN NEW;
         END;
@@ -1790,7 +1798,9 @@ CREATE FUNCTION ml_app.log_nfs_store_stored_file_update() RETURNS trigger
                 user_id,
                 created_at,
                 updated_at,
-                nfs_store_stored_file_id
+                nfs_store_stored_file_id,
+                embed_resource_name,
+                embed_resource_id
                 )
             SELECT
                 NEW.file_hash,
@@ -1807,7 +1817,9 @@ CREATE FUNCTION ml_app.log_nfs_store_stored_file_update() RETURNS trigger
                 NEW.user_id,
                 NEW.created_at,
                 NEW.updated_at,
-                NEW.id
+                NEW.id,
+                NEW.embed_resource_name,
+                NEW.embed_resource_id
             ;
             RETURN NEW;
         END;
@@ -4448,7 +4460,9 @@ CREATE TABLE ml_app.nfs_store_archived_file_history (
     user_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    nfs_store_archived_file_id integer
+    nfs_store_archived_file_id integer,
+    embed_resource_name character varying,
+    embed_resource_id bigint
 );
 
 
@@ -4770,7 +4784,9 @@ CREATE TABLE ml_app.nfs_store_stored_file_history (
     user_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    nfs_store_stored_file_id integer
+    nfs_store_stored_file_id integer,
+    embed_resource_name character varying,
+    embed_resource_id bigint
 );
 
 
@@ -7184,27 +7200,6 @@ COMMENT ON COLUMN ref_data.datadic_variables.title IS 'Section caption';
 --
 
 COMMENT ON COLUMN ref_data.datadic_variables.storage_varname IS 'Database field name, or variable name in data file';
-
-
---
--- Name: COLUMN datadic_variables.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.contributor_type IS 'Type of contributor this variable was provided by';
-
-
---
--- Name: COLUMN datadic_variables.n_for_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.n_for_timepoints IS 'For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)';
-
-
---
--- Name: COLUMN datadic_variables.notes; Type: COMMENT; Schema: ref_data; Owner: -
---
-
-COMMENT ON COLUMN ref_data.datadic_variables.notes IS 'Notes';
 
 
 --
