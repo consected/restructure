@@ -108,7 +108,7 @@ module ReportsHelper
       end
 
       selections = model
-      selections = selections.active if selections.respond_to? :active
+      selections = selections.active if selections.attribute_names.include? 'disabled'
 
       selections = if label.to_s == 'data' || value.to_s == 'data'
                      # Map rather than pluck so we can get the data attribute successfully

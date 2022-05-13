@@ -266,8 +266,13 @@ class Admin::MigrationGenerator
   # duplicating standard app columns for current table_name
   # @return [Array]
   def standard_columns
-    pset = %w[id created_at updated_at contactid user_id master_id
+    pset = %w[id created_at updated_at contactid user_id
               extra_log_type admin_id]
+
+    # Only add in the master_id if the master is a foreign key, not a standard integer field
+    # so that we treat the field correctly in comparisons of new - old
+    pset << 'master_id' if master_fk?
+
     pset += ["#{table_name.singularize}_table_id", "#{table_name.singularize}_id"]
     pset
   end
@@ -424,6 +429,22 @@ class Admin::MigrationGenerator
   end
 
   #
+  # Has the no_master_association setting changed, often based on
+  # the dynamic model foreign key being blank
+  # @return [true|false]
+  def no_master_association_changed
+    prev_no_master_association = !master_fk?
+    prev_no_master_association != !!no_master_association
+  end
+
+  #
+  # Does a master_id column appear as a foreign key?
+  # @return [true|false]
+  def master_fk?
+    !!self.class.connection.foreign_keys(table_name).find { |f| f.column == 'master_id' }
+  end
+
+  #
   # Content for a migration file for a table update
   # @return [String]
   def migration_update_table
@@ -435,13 +456,14 @@ class Admin::MigrationGenerator
     end
 
     unless added.present? || removed.present? || changed.present? ||
-           new_table_comment || new_fields_comments.present? || table_name_changed
+           new_table_comment || new_fields_comments.present? || table_name_changed || no_master_association_changed
       return
     end
 
     new_fields_comments ||= {}
 
     <<~ARCONTENT
+      self.no_master_association = #{!!no_master_association}
       #{table_name_changed ? "    self.prev_table_name = '#{prev_table_name}'" : ''}
       #{table_name_changed ? '    update_table_name' : ''}
       #{table_name_changed ? '' : "    self.prev_fields = %i[#{prev_fields.join(' ')}]"}
@@ -583,7 +605,7 @@ class Admin::MigrationGenerator
     puts "Running migration from #{db_migration_dirname}"
     Rails.logger.info "Running migration from #{db_migration_dirname}"
 
-    Timeout.timeout(30) do
+    Timeout.timeout(60) do
       # Outside the current transaction
       Thread.new do
         ActiveRecord::Base.connection_pool.with_connection do
