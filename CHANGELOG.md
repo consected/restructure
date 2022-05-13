@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.0.29] - 2022-04-12
+## Unreleased
 
 ### Transferred from Viva @8.0.63 - 2022-05-13
 
@@ -41,6 +41,8 @@ release will be created for any release tested in production, and may be marked 
 - [Fixed] issue with caching of user roles and access controls not clearing when new role added
 - [Fixed] issue with created_by_user_id
 - [Fixed] issue with view_options in model references
+
+## [8.0.29] - 2022-04-12
 
 ### Transferred from Viva @8.0.58 - 2022-04-12
 

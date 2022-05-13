@@ -30,9 +30,9 @@ less -r tmp/failing_specs.log
 ```
 
 - Commit the changes that are required
-- Update the CHANGELOG to include the appropriate changes
 - Checkout **develop** branch
 - Merge the new transfer branch into **develop**
+- Update the CHANGELOG to include the appropriate changes
 
 ## From ReStructure to Private Repo
 
@@ -58,6 +58,6 @@ less -r tmp/failing_specs.log
 ```
 
 - Commit the changes that are required
-- Update the CHANGELOG to include the appropriate changes
 - Checkout **develop** branch
 - Merge the new transfer branch into **develop**
+- Update the CHANGELOG to include the appropriate changes
