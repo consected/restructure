@@ -32,9 +32,10 @@ module AdminHandler
     #
     # Get the latest updated_at or created_at value for this type and memoize it
     # The memo can be dropped with reset_latest_update
+    # @param [true|nil] force - force the latest update memo to be updated (default nil)
     # @return [DateTime]
-    def latest_update
-      return @latest_update if @latest_update
+    def latest_update(force: nil)
+      return @latest_update if @latest_update && !force
 
       obj = reorder('').order(Arel.sql('coalesce(updated_at, created_at) desc nulls last')).first
       @latest_update = obj&.updated_at || obj&.created_at

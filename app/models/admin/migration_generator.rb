@@ -266,8 +266,13 @@ class Admin::MigrationGenerator
   # duplicating standard app columns for current table_name
   # @return [Array]
   def standard_columns
-    pset = %w[id created_at updated_at contactid user_id master_id
+    pset = %w[id created_at updated_at contactid user_id
               extra_log_type admin_id]
+
+    # Only add in the master_id if the master is a foreign key, not a standard integer field
+    # so that we treat the field correctly in comparisons of new - old
+    pset << 'master_id' if master_fk?
+
     pset += ["#{table_name.singularize}_table_id", "#{table_name.singularize}_id"]
     pset
   end
@@ -355,7 +360,6 @@ class Admin::MigrationGenerator
   # @param [String] view_name
   # @return [Array]
   def self.view_definitions(schema, view_name)
-
     sql = <<~SQL
       select schemaname, viewname, definition
       from pg_views
@@ -368,9 +372,8 @@ class Admin::MigrationGenerator
       ActiveRecord::Relation::QueryAttribute.new('schemaname', schema, type)
     ]
 
-    connection.exec_query sql, 'SQL', binds 
+    connection.exec_query sql, 'SQL', binds
   end
-
 
   def table_columns
     ActiveRecord::Base.connection.columns(table_name)
@@ -426,6 +429,22 @@ class Admin::MigrationGenerator
   end
 
   #
+  # Has the no_master_association setting changed, often based on
+  # the dynamic model foreign key being blank
+  # @return [true|false]
+  def no_master_association_changed
+    prev_no_master_association = !master_fk?
+    prev_no_master_association != !!no_master_association
+  end
+
+  #
+  # Does a master_id column appear as a foreign key?
+  # @return [true|false]
+  def master_fk?
+    !!self.class.connection.foreign_keys(table_name).find { |f| f.column == 'master_id' }
+  end
+
+  #
   # Content for a migration file for a table update
   # @return [String]
   def migration_update_table
@@ -437,13 +456,14 @@ class Admin::MigrationGenerator
     end
 
     unless added.present? || removed.present? || changed.present? ||
-           new_table_comment || new_fields_comments.present? || table_name_changed
+           new_table_comment || new_fields_comments.present? || table_name_changed || no_master_association_changed
       return
     end
 
     new_fields_comments ||= {}
 
     <<~ARCONTENT
+      self.no_master_association = #{!!no_master_association}
       #{table_name_changed ? "    self.prev_table_name = '#{prev_table_name}'" : ''}
       #{table_name_changed ? '    update_table_name' : ''}
       #{table_name_changed ? '' : "    self.prev_fields = %i[#{prev_fields.join(' ')}]"}
@@ -531,7 +551,16 @@ class Admin::MigrationGenerator
 
     dirname = db_migration_dirname export_type
     cname_us = "#{mode}_#{name}_#{version}"
-    filepath = "#{dirname}/#{Time.new.to_s(:number)}_#{cname_us}.rb"
+
+    # Ensure we don't get overlapping migration version numbers
+    migtime = Time.new.to_s(:number)
+    while Dir.glob("#{migtime}*", base: dirname).length > 0
+      sleep 1.5
+      migtime = Time.new.to_s(:number)
+    end
+
+    filepath = "#{dirname}/#{migtime}_#{cname_us}.rb"
+
     FileUtils.mkdir_p dirname
     File.write(filepath, mig_text)
     # Cheat way to ensure multiple migrations can not have the same timestamp during app type loads
@@ -576,7 +605,7 @@ class Admin::MigrationGenerator
     puts "Running migration from #{db_migration_dirname}"
     Rails.logger.info "Running migration from #{db_migration_dirname}"
 
-    Timeout.timeout(30) do
+    Timeout.timeout(60) do
       # Outside the current transaction
       Thread.new do
         ActiveRecord::Base.connection_pool.with_connection do
@@ -595,11 +624,11 @@ class Admin::MigrationGenerator
   rescue StandardError => e
     FileUtils.mkdir_p db_migration_failed_dirname
     FileUtils.mv @do_migration, db_migration_failed_dirname
-    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}"
+    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}\n#{e.backtrace.join("\n")}"
   rescue FphsException => e
     FileUtils.mkdir_p db_migration_failed_dirname
     FileUtils.mv @do_migration, db_migration_failed_dirname
-    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}"
+    raise FphsException, "Failed migration for path '#{db_migration_dirname}': #{e}\n#{e.backtrace.join("\n")}"
   end
 
   #

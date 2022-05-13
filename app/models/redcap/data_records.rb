@@ -91,7 +91,7 @@ module Redcap
       # no way of recognizing which forms have surveys available and would
       # therefore return a _timestamp field when completed.
       timestamp_fields = project_admin.redcap_data_dictionary.form_names.map { |f| "#{f}_timestamp".to_sym }
-      expected_minus_form_timestamps = all_expected_fields.keys - timestamp_fields
+      expected_minus_form_timestamps = all_data_dictionary_fields.keys - timestamp_fields
       records.each do |r|
         actual_fields_minus_timestamps = r.keys - timestamp_fields
         next if actual_fields_minus_timestamps.sort == expected_minus_form_timestamps.sort
@@ -193,8 +193,8 @@ module Redcap
     #
     # All fields expected to be retrieved from REDCap to be stored as a record
     # @return [Hash{Symbol => Redcap::DataDictionaries::Field}]
-    def all_expected_fields
-      @all_expected_fields ||= data_dictionary.all_retrievable_fields
+    def all_data_dictionary_fields
+      @all_data_dictionary_fields ||= data_dictionary.all_retrievable_fields
     end
 
     #
@@ -333,10 +333,10 @@ module Redcap
     def record_matches_retrieved(existing_record, new_record)
       new_attrs = new_record.dup
       existing_attrs = existing_record.attributes.symbolize_keys.dup
-      existing_attrs.slice!(*all_expected_fields.keys)
+      existing_attrs.slice!(*all_data_dictionary_fields.keys)
 
       res = new_attrs.reject do |field_name, new_value|
-        all_expected_fields[field_name].field_type.values_match?(new_value, existing_attrs[field_name])
+        all_data_dictionary_fields[field_name].field_type.values_match?(new_value, existing_attrs[field_name])
       end
 
       res.empty?

@@ -177,12 +177,27 @@ module ReportResults
       return cell_content unless cell_content.present?
 
       url = cell_content
-      id = url.split('/').last
-      hyph_name = url.split('/')[-2].hyphenate.singularize
+
+      if url.start_with? '['
+        # This is a markdown format link
+        col_url_parts = url&.scan(/^\[(.+)\]\((.+)\)$/)
+        a_text = html_escape col_url_parts&.first&.first
+        url = html_escape col_url_parts&.first&.last
+      else
+        # This is a plain URL
+        icon = 'glyphicon glyphicon-tasks'
+      end
+
+      split_url = url.split('/')
+
+      split_url = split_url.reject(&:blank?)
+      id = split_url.last
+      master_id = split_url[1] if split_url.first == 'masters'
+      hyph_name = split_url[-2].hyphenate.singularize
 
       html = <<~END_HTML
-        <a class="report-embedded-block-link glyphicon glyphicon-tasks" title="open result" href="#{url}" data-remote="true" data-#{hyph_name}-id="#{id}" data-result-target="#report-result-embedded-block--#{id}" data-template="#{hyph_name}-result-template" data-result-target-force="true"></a>
-        <div id="report-result-embedded-block--#{id}" class="report-temp-embedded-block" data-preprocessor="report_embed_dynamic_block" data-model-name="#{hyph_name.underscore}" data-id="#{id}"></div>
+        <a class="report-embedded-block-link #{icon}" title="open result" href="#{url}" data-remote="true" data-#{hyph_name}-id="#{id}" data-result-target="#report-result-embedded-block--#{id}" data-template="#{hyph_name}-result-template" data-result-target-force="true">#{a_text}</a>
+        <div id="report-result-embedded-block--#{id}" class="report-temp-embedded-block" data-preprocessor="report_embed_dynamic_block" data-model-name="#{hyph_name.underscore}" data-id="#{id}" data-master-id="#{master_id}"></div>
       END_HTML
 
       html.html_safe
@@ -222,7 +237,9 @@ module ReportResults
     def cell_content_for_tags
       return cell_content unless cell_content.present?
 
-      lis = cell_content.map { |c| "<li class=\"report-result-cell-tags\">#{html_escape c}</li>" }.join("\n")
+      lis = cell_content.reject(&:blank?)
+                        .map { |c| "<li class=\"report-result-cell-tags\">#{html_escape c}</li>" }
+                        .join("\n")
 
       html = <<~END_HTML
         <ul class="report-result-cell-tags">

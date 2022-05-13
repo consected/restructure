@@ -38,7 +38,6 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     # It will gain db column configurations pulled from the table definition
     dmdef = generate_test_dynamic_model
     @option_texts[1] = <<~END_CONFIG
-
       _db_columns:
         id:
           type: integer
@@ -142,5 +141,162 @@ RSpec.describe 'Dynamic Model Options', type: :model do
     ###
     # With a fixed version def *use_def_version_time* set, the correct version should be returned
     expect(option_configs_comparable(fixed_version.versioned_definition.option_configs)).to eql option_configs_comparable(@option_configs[3])
+  end
+
+  it 'replaces option configurations' do
+    unless Admin::MigrationGenerator.table_exists? 'test_created_by_recs'
+      TableGenerators.dynamic_models_table('test_created_by_recs', :create_do, 'test1', 'test2', 'created_by_user_id')
+    end
+
+    name = 'test created by 2'
+    dm = DynamicModel.create! current_admin: @admin,
+                              name: name,
+                              table_name: 'test_created_by_recs',
+                              schema_name: 'ml_app',
+                              category: :test,
+                              options: nil
+
+    # Initially sets the options for db columns from the definition
+    expect(dm.options).to eq <<~END_OPT
+      _db_columns:
+        id:
+          type: integer
+        master_id:
+          type: integer
+        test1:
+          type: string
+        test2:
+          type: string
+        created_by_user_id:
+          type: integer
+        user_id:
+          type: integer
+        created_at:
+          type: datetime
+        updated_at:
+          type: datetime
+
+    END_OPT
+
+    hash = {
+      _comments: nil
+    }
+
+    dm.prepend_to_options(hash)
+
+    expect(dm.options).to eq <<~END_OPT
+      _comments:#{' '}
+
+      _db_columns:
+        id:
+          type: integer
+        master_id:
+          type: integer
+        test1:
+          type: string
+        test2:
+          type: string
+        created_by_user_id:
+          type: integer
+        user_id:
+          type: integer
+        created_at:
+          type: datetime
+        updated_at:
+          type: datetime
+
+    END_OPT
+
+    hash = {
+      _db_columns: {
+        id: { type: 'integer' },
+        test1: { type: 'string' },
+        test2: { type: 'string' }
+      }
+    }
+
+    dm.prepend_to_options(hash)
+
+    expect(dm.options).to eq <<~END_OPT
+      _comments:#{' '}
+
+      _db_columns:
+        id:
+          type: integer
+        test1:
+          type: string
+        test2:
+          type: string
+    END_OPT
+
+    dm.options = <<~END_OPT
+      default:
+        label: Something
+
+    END_OPT
+
+    expect(dm.options).to eq <<~END_OPT
+      default:
+        label: Something
+
+    END_OPT
+
+    hash = {
+      _comments: nil
+    }
+
+    dm.prepend_to_options(hash)
+
+    expect(dm.options).to eq <<~END_OPT
+      _comments:#{' '}
+
+      default:
+        label: Something
+
+    END_OPT
+
+    hash = {
+      _comments: {
+        test1: 'A test comment'
+      }
+    }
+
+    dm.prepend_to_options(hash)
+
+    expect(dm.options).to eq <<~END_OPT
+      _comments:
+        test1: A test comment
+
+      default:
+        label: Something
+
+    END_OPT
+
+    hash = {
+      _db_columns: {
+        id: { type: 'integer' },
+        test1: { type: 'string' },
+        test2: { type: 'string' }
+      }
+    }
+
+    dm.prepend_to_options(hash)
+
+    expect(dm.options).to eq <<~END_OPT
+      _db_columns:
+        id:
+          type: integer
+        test1:
+          type: string
+        test2:
+          type: string
+
+      _comments:
+        test1: A test comment
+
+      default:
+        label: Something
+
+    END_OPT
   end
 end

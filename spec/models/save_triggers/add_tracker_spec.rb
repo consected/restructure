@@ -210,7 +210,7 @@ RSpec.describe SaveTriggers::AddTracker, type: :model do
     expect(tracker.protocol_event.name).to eq pe_name
     expect(tracker.notes).to eq text2
     expect(tracker.event_date).not_to be_nil
-    expect(tracker.item).to eq @al0
+    expect(tracker.item.id).to eq @al0.id
     expect(tracker.master_id).to eq @master0.id
 
     # Use the {with: {protocol_name: ...}} configuration instead of the {dynamic: } key

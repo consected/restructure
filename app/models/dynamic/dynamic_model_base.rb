@@ -5,6 +5,7 @@ module Dynamic
 
     include RankHandler
     include LimitedAccessControl
+    include Dynamic::VersionedDefHandler
     include Dynamic::ImplementationHandler
   end
 end

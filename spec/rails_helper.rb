@@ -107,29 +107,31 @@ Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 put_now 'Enforce migrations'
 ActiveRecord::Migration.maintain_test_schema!
 
-`mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
+unless ENV['SKIP_DB_SETUP']
+  `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
 
-sql = <<~END_SQL
-  DROP SCHEMA IF EXISTS redcap_test CASCADE;
-  CREATE SCHEMA redcap_test;
-  DROP SCHEMA IF EXISTS dynamic_test CASCADE;
-  CREATE SCHEMA dynamic_test;
+  sql = <<~END_SQL
+    DROP SCHEMA IF EXISTS redcap_test CASCADE;
+    CREATE SCHEMA redcap_test;
+    DROP SCHEMA IF EXISTS dynamic_test CASCADE;
+    CREATE SCHEMA dynamic_test;
 
-  -- Clean up the migrations that need to be rerun in redcap-test
-  delete from schema_migrations where version in (
-    '20211105105700',
-    '20211105105701',
-    '20211105105702'
-  );
-END_SQL
+    -- Clean up the migrations that need to be rerun in redcap-test
+    delete from schema_migrations where version in (
+      '20211105105700',
+      '20211105105701',
+      '20211105105702'
+    );
+  END_SQL
 
-ActiveRecord::Base.connection.execute sql
+  ActiveRecord::Base.connection.execute sql
 
-# We need to ensure that dynamic tables are in place before we setup dynamic models
-# in each example, otherwise the tests lock up.
-db_migration_dirname = Rails.root.join('spec/migrations')
-ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
-puts "Exists test_file_field_recs? > #{ActiveRecord::Base.connection.table_exists?('test_file_field_recs')}"
+  # We need to ensure that dynamic tables are in place before we setup dynamic models
+  # in each example, otherwise the tests lock up.
+  db_migration_dirname = Rails.root.join('spec/migrations')
+  ActiveRecord::MigrationContext.new(db_migration_dirname).migrate
+  puts "Exists test_file_field_recs? > #{ActiveRecord::Base.connection.table_exists?('test_file_field_recs')}"
+end
 
 RSpec.configure do |config|
   config.before(:suite) do
@@ -161,7 +163,7 @@ RSpec.configure do |config|
     put_now 'load_tasks'
     Rails.application.load_tasks
     put_now 'Precompile assets'
-    Rake::Task['assets:precompile'].invoke unless ENV['SKIP_ASSETS']
+    Rake::Task['assets:precompile'].invoke unless ENV['SKIP_ASSETS'] || ENV['SKIP_APP_SETUP']
     put_now 'Done before suite'
   end
 

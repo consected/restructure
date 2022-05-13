@@ -46,7 +46,7 @@ module HandlesUserBase
     # The #reference is used to identify the current to_record when iterating model references
     # to check the ability to access the record being pointed to from this one.
     # Used primarily by #model_references to calculate ConditionalAction#calc_reference_if
-    attr_accessor :reference
+    attr_accessor :reference, :embedded_item
 
     # Setup alternative id field methods
     Master.setup_resource_alternative_id_fields self unless no_master_association

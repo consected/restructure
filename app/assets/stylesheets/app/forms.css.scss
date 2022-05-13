@@ -106,7 +106,7 @@ input[type="date"].attached-datepicker {
 }
 
 .datepicker-dropdown {
-  z-index: 1000 !important;
+  z-index: 21000 !important;
 }
 
 li.list-group-item.placeholder-field-item {
@@ -450,6 +450,12 @@ fieldset.readonly-edit-fieldset {
   }
 }
 
+// Override labels for simple items in a JSON object field
+.view-object li.list-group-item small.ctlabel {
+  position: relative;
+  margin-right: 1em;
+}
+
 .e-sign-doc {
   min-width: 860px;
 }
@@ -469,7 +475,8 @@ fieldset.readonly-edit-fieldset {
 
 .edit-field-container.done-label-resize {
   input[type="text"],
-  input[type="email"] {
+  input[type="email"],
+  input[type="url"] {
     &.form-control:first-child {
       width: 100%;
 

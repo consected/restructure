@@ -7,8 +7,8 @@ module NfsStore
 
       include HandlesContainerFile
 
-      belongs_to :stored_file, class_name: 'NfsStore::Manage::StoredFile', 
-                               foreign_key: 'nfs_store_stored_file_id', 
+      belongs_to :stored_file, class_name: 'NfsStore::Manage::StoredFile',
+                               foreign_key: 'nfs_store_stored_file_id',
                                optional: true
 
       # Analyze the file to complete its ArchivedFile attributes
@@ -115,6 +115,17 @@ module NfsStore
 
         connection.exec_query(remove_dups, 'SQL', binds)
       end
+
+      #
+      # Override the container to use the stored file container if the parent_item is not set in this one
+      # @return [NfsStore::Manage::Container]
+      def container
+        return super if super.parent_item
+
+        stored_file.container
+      end
+
+      Resources::Models.add self, resource_name: :nfs_store__manage__archived_files
     end
   end
 end

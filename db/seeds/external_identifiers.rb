@@ -5,7 +5,7 @@ module Seeds
     def self.add_values(values)
       updated = false
       values.each do |v|
-        res = ExternalIdentifier.where(name: v['name']).first
+        res = ExternalIdentifier.find_by(name: v['name'])
         next if res
 
         v[:current_admin] = auto_admin
@@ -38,15 +38,30 @@ module Seeds
 
       if Rails.env.test?
 
-        unless ExternalIdentifier.active.where(name: 'scantrons').first
-          s = ExternalIdentifier.where(name: 'scantrons').first
-          s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
-        end
+        sa = ExternalIdentifier.active.find_by(name: 'scantrons')
+        if sa
+          unless defined? Scantron
+            log 'Reloading external identifiers since Scantron is not defined'
+            ExternalIdentifier.define_models
+          end
+        else
+          s = ExternalIdentifier.find_by(name: 'scantrons')
+          raise 'Scantron not found' unless s
 
-        unless ExternalIdentifier.active.where(name: 'sage_assignments').first
-          s = ExternalIdentifier.where(name: 'sage_assignments').first
           s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
         end
+        # ::ExternalIdentifier.refresh_outdated unless defined? Scantron
+        raise "Scantron not defined: #{sa}\n#{s}" unless defined? Scantron
+
+        sa = ExternalIdentifier.active.find_by(name: 'sage_assignments')
+        unless sa
+          s = ExternalIdentifier.find_by(name: 'sage_assignments')
+          raise 'SageAssignment not found' unless s
+
+          s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
+        end
+        # ::ExternalIdentifier.refresh_outdated unless defined? SageAssignment
+        raise "SageAssignment not defined: #{sa}\n#{s}" unless defined? SageAssignment
 
         Master.reset_external_id_matching_fields!
 

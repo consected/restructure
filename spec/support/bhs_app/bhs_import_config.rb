@@ -67,4 +67,26 @@ module BhsImportConfig
       setup_access :activity_log__bhs_assignment__primary, resource_type: :activity_log_type, access: :create, user: @user
     end
   end
+
+  def validate_bhs_setup
+    user = User.active.find_by(email: @good_email)
+    raise "#{user} (#{@good_email}) is not a User" unless user.is_a? User
+    raise "#{user.id} (#{user.email}) is not #{@user.id} (#{@user.email})" unless user.id == @user.id
+
+    return if defined?(BhsAssignment)
+
+    unless defined?(BhsAssignment)
+      puts 'BhsAssignment was not defined!'
+      Rails.logger.warn 'BhsAssignment was not defined!'
+    end
+    seed_database
+    import_config
+    return if defined?(BhsAssignment)
+
+    m = Resources::Models.find_by(resource_name: 'bhs_assignments')
+    r = ExternalIdentifier.active.where(name: 'bhs_assignments')
+    Rails.logger.warn m
+    Rails.logger.warn r
+    raise FphsException, "BhsAssignment is still not defined, even after seeding and config: \n#{m}\n#{r}"
+  end
 end

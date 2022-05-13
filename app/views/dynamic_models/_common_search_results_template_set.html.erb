@@ -1,14 +1,79 @@
 <% 
+# Run through each of the dynamic model instances to prepare templates for:
+#   - the instance itself
+#   - an embedded item
+#   - instances referred to as model references
+
+# Only prepare the template once, so we keep a tally of those we have already prepared
+
+unless defined? type
+  type = 'dynamic_models'
+end
+
+done_templates = []
+
 @instance_list.each do |oi|
   ovd = oi.versioned_definition 
+  done_oid = "#{type}/#{ovd.def_version}"
   ovd.option_configs.each do |otc|
+
+    # If this template has already been done, don't do it again.
+    # But do continue on to handle the embedded item and model references
+    # since these may be different in other instances
+    unless done_templates.include? done_oid
 %>
-<%= render partial: 'dynamic_models/common_search_results_template_item',
+<%=   render partial: "#{type}/common_search_results_template_item",
                  locals: {
                    def_record: ovd,
                    option_type_config: otc
                  } %>
 <% 
+    end
   end
-end  
+  done_templates << done_oid
+
+  if oi.embedded_item
+    evd = oi.embedded_item.versioned_definition
+    view_type = oi.embedded_item.model_data_type.to_s.pluralize
+    done_id = "#{view_type}/#{evd.def_version}"
+
+    unless done_templates.include? done_id
+      done_templates << done_id
+      
+      evd.option_configs.each do |etc|
+
+%>
+<%=       render partial: "#{view_type}/common_search_results_template_item",
+              locals: {
+                def_record: evd,
+                option_type_config: etc
+              } %>
+<% 
+      end
+    end 
+  end
+  
+  oi.model_references.each do |mr|
+    mrto = mr.to_record
+    next unless mrto.respond_to? :versioned_definition
+    mrtovd = mrto.versioned_definition
+    mrto_view_type = mrto.model_data_type.to_s.pluralize
+    
+    # Ensure we only do this version once for this type of template
+    done_id = "#{mrto_view_type}/#{mrtovd.def_version}"
+    next if done_templates.include? done_id
+    
+    done_templates << done_id
+
+    mrtovd.option_configs.each do |mrtoetc|
+%>
+<%=     render partial: "#{mrto_view_type}/common_search_results_template_item",
+              locals: {
+                def_record: mrtovd,
+                option_type_config: mrtoetc
+              } %>  
+<%
+    end
+  end
+end 
 %>

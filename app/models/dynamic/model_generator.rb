@@ -148,13 +148,14 @@ module Dynamic
 
     #
     # List of field names to be used in a dynamic model field list
+    # @param [true|false] no_placeholder_fields - don't add placeholder fields into the list
     # @return [String]
-    def field_list
+    def field_list(no_placeholder_fields: false)
       return @field_list if @field_list
 
       fields = db_columns.keys.map(&:to_s)
 
-      if respond_to?(:placeholder_fields)
+      if respond_to?(:placeholder_fields) && !no_placeholder_fields
         placeholder_fields.each do |before, placeholder|
           i = fields.index(before)
           i ||= 0

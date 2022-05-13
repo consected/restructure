@@ -33,7 +33,8 @@ module NfsStore
       def analyze_file!
         rp = retrieval_path
         unless rp
-          raise FsException::Action, "Retrieval path is not set when analyzing file '#{path}' '#{file_name}'. Does gid #{current_gid} have permissions for this app / container?"
+          raise FsException::Action,
+                "Retrieval path is not set when analyzing file '#{path}' '#{file_name}'. Does gid #{current_gid} have permissions for this app / container?"
         end
 
         super(rp)
@@ -66,6 +67,8 @@ module NfsStore
         end
         true
       end
+
+      Resources::Models.add self, resource_name: :nfs_store__manage__stored_files
     end
   end
 end

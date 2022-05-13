@@ -621,33 +621,24 @@ _fpa.form_utils = {
           var no_html_tag = true;
         }
 
-
-        if (elsplit.length > 0) {
-
+        var iter_data = new_data;
+        for (const next_tag of Object.values(elsplit)) {
           var got = null;
-          var el0 = elsplit[0];
-          var el1 = elsplit[1];
-          var tag_name = el1 || el0;
+          var tag_name = next_tag;
 
-          if (el0) {
-            got = new_data[el0];
+          if (iter_data.hasOwnProperty(next_tag)) {
+            got = iter_data[next_tag];
+          }
+          else if (iter_data.embedded_item) {
+            got = iter_data.embedded_item[next_tag];
           }
 
-          // The value was not found since the new_data doesn't have the el0 key
-          // and this is not a referenced request like el0.el1
-          // and there is an embedded_item, so check to see if we should be returning that instead
-          if (!got && !el1 && !new_data.hasOwnProperty(el0) && new_data.embedded_item) {
-            got = new_data.embedded_item[el0];
+          if (got) {
+            iter_data = got
           }
-
-          if (got && el1) {
-            // If this is an array of results, get the first item for use
-            if (Array.isArray(got)) {
-              got = got[0];
-            }
-            got = got[el1];
+          else {
+            continue;
           }
-
         }
 
         if (got == null) {

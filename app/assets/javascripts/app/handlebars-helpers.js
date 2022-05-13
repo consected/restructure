@@ -378,6 +378,17 @@
     ));
   });
 
+  Handlebars.registerHelper('new_random', function (array, items, options) {
+    _fpa.state.hh = _fpa.state.hh || {};
+    _fpa.state.hh.random = Math.floor(10000000000000 * Math.random());
+
+    return _fpa.state.hh.random;
+  });
+
+  Handlebars.registerHelper('get_random', function (array, items, options) {
+    return _fpa.state.hh.random;
+  });
+
 
   Handlebars.registerHelper('filter', function (array, items, options) {
     var item, result, _i, _len;

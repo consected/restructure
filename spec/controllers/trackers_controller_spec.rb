@@ -37,7 +37,7 @@ RSpec.describe TrackersController, type: :controller do
     it 'returns a result' do
       res = create_master
       get :index, params: { master_id: res.id }
-      expect(response).to have_http_status(200), "Attempting #{@user}"
+      expect(response).to have_http_status(200), "Attempting #{@user}. Got response #{response.status}"
     end
   end
 
@@ -106,7 +106,7 @@ RSpec.describe TrackersController, type: :controller do
         create_master
         va = valid_attributes
         post :create, params: { object_symbol => va, master_id: @master_id }
-        expect(response).to have_http_status(200), "Didn't get a 200 response with atts #{va.inspect}"
+        expect(response).to have_http_status(200), "Didn't get a 200 response (got #{response.status}) with atts #{va.inspect}"
       end
     end
 
@@ -152,7 +152,7 @@ RSpec.describe TrackersController, type: :controller do
 
         put :update, params: { :id => item_id, object_symbol => new_attributes, master_id: @master_id }
 
-        expect(response).to have_http_status(200), "Response was not good: #{response.body}"
+        expect(response).to have_http_status(200), "Response (#{response.status}) was not good: #{response.body}"
 
         new_item = Tracker.find_by_master_id_and_protocol_id item.master_id, item.protocol_id
 
@@ -181,7 +181,7 @@ RSpec.describe TrackersController, type: :controller do
         va = put_valid_attribs || valid_attributes
 
         put :update, params: { :id => item_id, object_symbol => va, master_id: @master_id }
-        expect(response).to have_http_status(200), "Expected 200 status with attributes: #{va}"
+        expect(response).to have_http_status(200), "Expected 200 status (got #{response.status}) with attributes: #{va}"
         expect(resp.length).to be > 0
         expect(resp).to have_key object_symbol.to_s
       end
