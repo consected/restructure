@@ -410,12 +410,15 @@ class DynamicModel < ActiveRecord::Base
   def prepend_to_options(hash)
     hash.deep_stringify_keys!
     key = hash.keys.first
-    new_options = YAML.dump(hash).gsub(/^---/, '') + "\r\n"
+    new_options = YAML.dump(hash)
     self.options ||= ''
-    self.options = self.options.gsub(/^(#{key}:\s*$(^\s+.+?))(^[_a-zA-Z]|\z)/m, "#{new_options}\\3").gsub(/^---/, '')
-    return if self.options.index(/^#{key}:/)
+    self.options = if self.options.index(/^#{key}:/)
+                     self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m, "#{new_options}\\3")
+                   else
+                     "#{new_options}\n#{self.options}"
+                   end
 
-    self.options = (new_options + self.options).gsub(/^---/, '')
+    self.options = self.options.gsub(/^---.*\n/, '')
   end
 
   #
