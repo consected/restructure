@@ -25,6 +25,13 @@ gem 'kramdown-parser-gfm'
 gem 'mime-types'
 gem 'nokogiri' # , '1.11.5'
 gem 'pg' # , '~> 0.15'
+
+# puma has been moved to all environments and will be included in the production packaging
+# this allows EB to run with the latest version of puma, without breaking if the preinstalled version
+# is lower or has different dependencies.
+# For this to work, Procfile must call puma with `bundle exec`
+gem 'puma'
+
 gem 'rails', '~> 5.0'
 gem 'redcap', git: 'https://github.com/consected/redcap.git'
 # for development, replace with with:
@@ -53,7 +60,6 @@ group :development, :test do
   gem 'debase'
   gem 'jasmine-rails'
   gem 'parallel_tests'
-  gem 'puma'
   gem 'readapt'
   gem 'rspec-rails'
   gem 'ruby-debug-ide'
