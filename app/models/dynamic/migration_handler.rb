@@ -111,7 +111,8 @@ module Dynamic
                       )
                     ) ||
                     reference_views_missing? ||
-                    saved_change_to_table_name?
+                    saved_change_to_table_name? ||
+                    saved_change_to_foreign_key_name?
 
       mode = 'update'
       gs = migration_generator.generator_script(self.class, mode)

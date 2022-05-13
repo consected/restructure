@@ -58,6 +58,15 @@ module Redcap
       @metadata_project[:server_url] + "?v=get#{type}"
     end
 
+    def mock_limited_requests
+      stub_request_project @project[:server_url], @project[:api_key]
+      stub_request_project_users @project[:server_url], @project[:api_key]
+      stub_request_instruments @project[:server_url], @project[:api_key]
+
+      stub_request_limited_metadata @project[:server_url], @project[:api_key]
+      stub_request_records @project[:server_url], @project[:api_key], 'limited_fields'
+    end
+
     def mock_full_requests
       stub_request_full_project server_url('full'), @project[:api_key]
       stub_request_full_metadata server_url('full'), @project[:api_key]
@@ -144,6 +153,20 @@ module Redcap
           }
         )
         .to_return(status: 200, body: data_sample_response(type), headers: {})
+    end
+
+    def stub_request_limited_metadata(server_url, api_key)
+      stub_request(:post, server_url)
+        .with(
+          body: {
+            'content' => 'metadata',
+            'fields' => nil,
+            'format' => 'json',
+            'token' => api_key
+          }
+
+        )
+        .to_return(status: 200, body: metadata_limited_response, headers: {})
     end
 
     def stub_request_full_project(server_url, api_key)
@@ -373,6 +396,10 @@ module Redcap
 
     def metadata_sample_response
       File.read('spec/fixtures/redcap/short_metadata_narrow.json')
+    end
+
+    def metadata_limited_response
+      File.read('spec/fixtures/redcap/limited_metadata.json')
     end
 
     def metadata_full_response

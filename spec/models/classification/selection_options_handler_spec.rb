@@ -118,9 +118,13 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     setup_access :activity_log__player_contact_phones, resource_type: :table, access: :create, user: @user
     setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
 
+    sleep 2
     al = player_contact.activity_log__player_contact_phones.build(select_call_direction: 'one',
                                                                   select_who: 'user',
                                                                   extra_log_type: 'step_1')
+
+    ::ActivityLog.refresh_outdated unless al.extra_log_type_config
+    expect(al.extra_log_type_config).not_to be nil
     al.save!
     al.data
     expect(al.data).to eq "#{al.id} - #{al.select_call_direction}"
@@ -165,9 +169,13 @@ RSpec.describe Classification::SelectionOptionsHandler, type: :model do
     setup_access :activity_log__player_contact_phone__step_1, resource_type: :activity_log_type, user: @user
 
     expect(player_contact.current_user).to eq @user
+    sleep 2
     al = player_contact.activity_log__player_contact_phones.build(select_call_direction: 'from player',
                                                                   select_who: 'user',
                                                                   extra_log_type: 'step_1')
+
+    ::ActivityLog.refresh_outdated unless al.extra_log_type_config
+    expect(al.extra_log_type_config).not_to be nil
     al.save!
 
     res = Classification::SelectionOptionsHandler.label_for(al, :select_call_direction, 'two')

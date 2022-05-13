@@ -30,6 +30,7 @@ class Admin::UserRole < Admin::AdminBase
                               }
 
   after_save :save_template
+  after_save :clear_user_role_cache
 
   # Scope used when user.user_roles association is called, effectively forcing the results
   # to the user's current app type
@@ -173,5 +174,12 @@ class Admin::UserRole < Admin::AdminBase
     tu = User.template_user
     tu.app_type = app_type
     self.class.add_to_role tu, app_type, role_name, current_admin
+  end
+
+  #
+  # Ensure the role names (and associated access controls) memoized in the user
+  # are cleared when a role changes
+  def clear_user_role_cache
+    user&.clear_role_names!
   end
 end

@@ -1,0 +1,24 @@
+
+# Save Trigger: Change User Roles options
+
+        if: if_extras
+        add_role_names:
+          - app_type: study info
+            role_name: viewer-has-agreement
+            # Defaults to the current user
+          - app_type: data-requests
+            role_name: nfs_store group 600
+            for_user: 
+              this:
+                created_by_user_id: return_value
+          - app_type: study info
+            role_name: 
+              this:
+                role_name_attr: return_value
+            for_user: 
+              this:
+                user_email: return_value
+        remove_role_names:
+          - app_type: study info
+            role_name: viewer-no-agreement
+        

@@ -18,6 +18,30 @@ release will be created for any release tested in production, and may be marked 
 
 ## [8.0.29] - 2022-04-12
 
+### Transferred from Viva @8.0.63 - 2022-05-13
+
+- [Added] field_options: field_name: preset_value: option
+- [Added] direct embed ability through options or field definitions
+- [Added] viewing / editing of direct embedded item within a stored file
+- [Added] pull_external_data save trigger
+- [Added] full markdown support for master list header title
+- [Added] change_user_roles option for_user to specify non-current user, and allow lookup of role names with calc reference
+- [Added] tag select for records from tables / dynamic models
+- [Changed] parallel tests script and specs for reliability
+- [Changed] rules so master_id can be provided as a regular field, not a foreign key (for Redcap data for example)
+- [Changed] handling of redcap pull to ignore excess fields in dynamic model
+- [Changed] embedded_block to allow formatting of link and allow models related to a master to edit
+- [Changed] gemfile to include puma in all environments, to allow latest version to be installed on beanstalk
+- [Changed] styling of user profile panel
+- [Fixed] dynamic migrations adding master_id foreign key field after creation
+- [Fixed] show_if issues with object fields and referenced dynamic_models
+- [Fixed] curly substitutions in javascript to traverse full dotted path
+- [Fixed] substitutions for markdown to HTML incorrectly identifying HTML documents
+- [Fixed] datepicker being hidden by modal view
+- [Fixed] issue with caching of user roles and access controls not clearing when new role added
+- [Fixed] issue with created_by_user_id
+- [Fixed] issue with view_options in model references
+
 ### Transferred from Viva @8.0.58 - 2022-04-12
 
 - [Added] view_css support to regular panels

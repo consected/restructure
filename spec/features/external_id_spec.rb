@@ -35,13 +35,17 @@ describe 'external id (bhs_assignments)', js: true, driver: :app_firefox_driver 
 
     @master.current_user = @user
     @master.bhs_assignments.create! bhs_id: rand(100_000_000..999_999_999)
+
+    ActivityLog.define_models
+    validate_setup
+    validate_bhs_setup
   end
 
   before :each do
     ActivityLog.define_models
 
     validate_setup
-
+    validate_bhs_setup
     login
   end
 

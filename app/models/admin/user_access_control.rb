@@ -15,6 +15,8 @@ class Admin::UserAccessControl < Admin::AdminBase
 
   validate :correct_access_valid?
 
+  after_save :clear_user_access_cache
+
   attr_accessor :allow_bad_resource_name
 
   #
@@ -358,5 +360,12 @@ class Admin::UserAccessControl < Admin::AdminBase
         end
       end
     end
+  end
+
+  #
+  # Ensure access controls memoized in the user
+  # are cleared when a user access control changes
+  def clear_user_access_cache
+    user&.clear_has_access_to!
   end
 end

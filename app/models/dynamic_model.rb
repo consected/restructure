@@ -4,6 +4,7 @@ class DynamicModel < ActiveRecord::Base
   include Dynamic::VersionHandler
   include Dynamic::MigrationHandler
   include Dynamic::DefHandler
+  include Dynamic::DefGenerator
   include AdminHandler
 
   StandardFields = %w[id created_at updated_at contactid user_id master_id].freeze
@@ -52,7 +53,10 @@ class DynamicModel < ActiveRecord::Base
   # All fields used by the implementation are either specified in the field list
   # or if empty, the fields are pulled from the underlying table fields, removing
   # standard fields (such as id, created_at...)
-  def all_implementation_fields(ignore_errors: true)
+  # @param [true|false|nil] ignore_errors - return empty array rather than raising exception
+  # @param [true|false|nil] only_real - only return real table columns, not placeholders, etc
+  # @return [Array{String}]
+  def all_implementation_fields(ignore_errors: true, only_real: false)
     fl = field_list_array
 
     res = (fl || [])
@@ -68,6 +72,9 @@ class DynamicModel < ActiveRecord::Base
         return []
       end
     end
+
+    res = res.reject { |f| f.index(/^embedded_report_|^placeholder_/) } if only_real
+
     res
   rescue FphsException => e
     raise e unless ignore_errors
@@ -191,6 +198,7 @@ class DynamicModel < ActiveRecord::Base
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
         res.include Dynamic::DynamicModelImplementer
+        res.include Dynamic::ModelReferenceHandler
         add_handlers(res)
 
         res.final_setup
@@ -402,12 +410,15 @@ class DynamicModel < ActiveRecord::Base
   def prepend_to_options(hash)
     hash.deep_stringify_keys!
     key = hash.keys.first
-    new_options = YAML.dump(hash).gsub(/^---/, '') + "\n"
+    new_options = YAML.dump(hash)
     self.options ||= ''
-    self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m, "#{new_options}\\3")
-    return if self.options.index(/^#{key}:/)
+    self.options = if self.options.index(/^#{key}:/)
+                     self.options = self.options.gsub(/^(#{key}:(.+?))(\n[^\s]|\z)/m, "#{new_options}\\3")
+                   else
+                     "#{new_options}\n#{self.options}"
+                   end
 
-    self.options = new_options + self.options
+    self.options = self.options.gsub(/^---.*\n/, '')
   end
 
   #

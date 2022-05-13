@@ -31,7 +31,7 @@ module Redcap
         raise FphsException, "Data Model not ready for table: #{project_admin.dynamic_model_table}"
       end
 
-      unless project_admin&.storage_and_model_fields_match?
+      unless project_admin&.model_has_all_fields_for_storage?
         status_already_set = true
         project_admin.update_status(:changes_detected)
         raise FphsException, "Data Model table fields don't match the data dictionary: " \

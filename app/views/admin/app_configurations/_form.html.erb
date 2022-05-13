@@ -13,9 +13,9 @@
 
     <%= big_select_field(f, :name, Admin::AppConfiguration.configuation_meanings)%>
   </div>
-  <div class="form-group">
+  <div class="form-group app-configuration-value-block">
     <%= f.label :value %>
-    <%= f.text_field :value %>
+    <%= f.text_area :value %>
   </div>
   <div class="form-group">
     <%= f.label 'role name override' %>
