@@ -2,6 +2,9 @@
 
 Github doesn't allow a public repository to be forked and then the fork to be made private. This process allows a private repo to be generated from the _upstream_ private repo.
 
+**NOTE:** although the mechanism below is the formal way to do things, a more convenient and reliable mechanism
+is described in [How to Copy to and from ReStructure](how-to-copy-to-restructure.md)
+
 ## Create a private repository
 
 To generate a new repository for private development
