@@ -65,9 +65,11 @@ module Dynamic
     #   the field values in the model_references table (not the target)
     # @param [Boolean] use_options_order_by - use the order_by settings for each reference configuration to order
     #   based on field values in the records pointed to
+    # @param [Boolean] force_reload - force any previously memoized results to be ignored
+    # @param [Boolean] showable_only - default true, force filtering of results based on *showable_if* config
     # @return [Array{ModelReference}]
     def model_references(reference_type: :references, active_only: false, ref_order: nil, use_options_order_by: false,
-                         force_reload: nil)
+                         force_reload: nil, showable_only: true)
       clear_model_reference_memo if force_reload
 
       memoize_references({ reference_type: reference_type, active_only: active_only,
@@ -117,7 +119,7 @@ module Dynamic
             next unless got
 
             got = got.to_a
-            filter_showable_references! got, ref_config
+            filter_showable_references! got, ref_config if showable_only
             res += got
           end
         end
