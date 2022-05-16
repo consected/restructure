@@ -73,7 +73,6 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
   end
 
   it 'runs a single job that fails and is handled appropriately' do
-
     f = 'bad.dcm'
     expect(@container.stored_files.where(file_name: f).first).to be nil
 
@@ -85,15 +84,14 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
     sf.current_user = @user
 
     name = 'test_failure'
-    
-    expect {
+
+    expect do
       NfsStore::Process::ProcessHandler.new(sf, do_not_run_job_after: true).run(name)
-    }.to raise_error 'forced failure'
+    end.to raise_error 'forced failure'
 
     sf = NfsStore::Manage::StoredFile.find sf.id
     expect(sf.last_process_name_run.to_s).to eq "failed: #{name}"
   end
-
 
   it 'runs user_file_actions pipeline' do
     f = '000000.dcm'
@@ -211,5 +209,69 @@ RSpec.describe NfsStore::Process::ProcessHandler, type: :model do
       expect(sf1.file_metadata['Patient ID']).to eq sf.master.player_contacts.first.data
       expect(sf1.path).to eq 'copy-location'
     end
+  end
+
+  it 'runs user_file_actions pipeline with multiple files defined by a filter' do
+    sfs = []
+    f = '000001.dcm'
+    dicom_content = File.read(dicom_file_path(f))
+    ul = upload_file(f, dicom_content)
+    sf = ul.stored_file
+    sf.current_user = @user
+    sfs << sf
+
+    # This file is not included in the filter
+    f = '000002.dcm'
+    dicom_content = File.read(dicom_file_path(f))
+    ul = upload_file(f, dicom_content)
+    sf = ul.stored_file
+    sf.current_user = @user
+    sfs << sf
+
+    f = '000003.dcm'
+    dicom_content = File.read(dicom_file_path(f))
+    ul = upload_file(f, dicom_content)
+    sf = ul.stored_file
+    sf.current_user = @user
+    sfs << sf
+
+    f = '000004.dcm'
+    dicom_content = File.read(dicom_file_path(f))
+    ul = upload_file(f, dicom_content)
+    sf = ul.stored_file
+    sf.current_user = @user
+    sfs << sf
+
+    ph = NfsStore::Process::ProcessHandler.new(sfs, use_pipeline: { user_file_actions: 're_identify_filtered_set' })
+    expect(ph.job_list).to eq %i[dicom_deidentify dicom_metadata]
+    ph.run_all
+
+    sfs1 = @container.stored_files.where(path: 'filtered-set-location')
+    expect(sfs1.count).to eq 2
+
+    # Force reload of the file
+    sf = sfs1[0]
+    sf = sf.class.find(sf.id)
+    expect(sf.file_metadata["Patient's Name"]).to eq "set1-#{sf.master_id}"
+    expect(sf.file_metadata['Patient ID']).to eq "set1-#{sf.master.player_contacts.first.data}"
+
+    sf = sfs1[1]
+    sf = sf.class.find(sf.id)
+    expect(sf.file_metadata["Patient's Name"]).to eq "set1-#{sf.master_id}"
+    expect(sf.file_metadata['Patient ID']).to eq "set1-#{sf.master.player_contacts.first.data}"
+
+    sfs1 = @container.stored_files.where(path: 'filtered-set-location-2')
+    expect(sfs1.count).to eq 2
+
+    # Force reload of the file
+    sf = sfs1[0]
+    sf = sf.class.find(sf.id)
+    expect(sf.file_metadata["Patient's Name"]).to eq "set2-#{sf.master_id}"
+    expect(sf.file_metadata['Patient ID']).to eq "set2-#{sf.master.player_contacts.first.data}"
+
+    sf = sfs1[1]
+    sf = sf.class.find(sf.id)
+    expect(sf.file_metadata["Patient's Name"]).to eq "set2-#{sf.master_id}"
+    expect(sf.file_metadata['Patient ID']).to eq "set2-#{sf.master.player_contacts.first.data}"
   end
 end

@@ -263,11 +263,11 @@ div.reset-row,
     box-shadow: 0 3px 3px 0px #d6d6d6;
     margin: 0.4em 0 1.2em;
 
-    h1,
-    h2 {
-      border-bottom: 1px rgb(221, 221, 221) solid;
-      padding-bottom: 0.3em;
-    }
+    // h1,
+    // h2 {
+    //   border-bottom: 1px rgb(221, 221, 221) solid;
+    //   padding-bottom: 0.3em;
+    // }
   }
 
   .default-layout-rows .page-item-container {
@@ -294,6 +294,10 @@ div.reset-row,
   .no-border {
     border: 0;
     box-shadow: none;
+  }
+
+  .no-background {
+    background-color: transparent;
   }
 }
 

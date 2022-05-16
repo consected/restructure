@@ -220,8 +220,10 @@ module NfsStore
         if fs_path == from_path && file_name.blank?
           raise FsException::Action, 'Path to move to matches the current path'
         end
+
         if File.exist? fs_path
-          raise FsException::Upload, "File already exists. Will not overwrite: #{file_name} in '#{container.name}'"
+          raise FsException::Upload,
+                "File already exists. Will not overwrite: #{path}/#{file_name} in '#{container.name}' from '#{from_path}' with role '#{role_name}'"
         end
 
         test_dir role_name, container, :write

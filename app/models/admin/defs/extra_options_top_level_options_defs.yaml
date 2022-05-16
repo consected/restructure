@@ -31,6 +31,7 @@ _db_columns:
     type: ...
 
 _configurations:
+  use_current_version: force the use of the current definition version when defining a dynamic class
   secondary_key: field name to use as a secondary key to lookup items
   view_sql: define a view instead of a table to underpin this model
 
