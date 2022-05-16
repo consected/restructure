@@ -1,5 +1,5 @@
 <%
-  external_id_types = ExternalIdentifier.active_model_configurations.map(&:implementation_class)
+  external_id_types = ExternalIdentifier.implementation_classes
   subject_data_type = app_config_text(:header_subject_data_type, Settings::DefaultSubjectInfoTableName).pluralize
   secondary_data_type = app_config_text(:header_secondary_data_type, Settings::DefaultSecondaryInfoTableName).pluralize
   no_subject_details_label = app_config_text(:header_no_subject_details_label, '(no subject details)')
