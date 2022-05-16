@@ -20,14 +20,14 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
         response_code_field = config[:response_code_field]
         vals = {}
 
-        data = pull_data config[:from]
-
         # We calculate the conditional if inside each item, rather than relying
         # on the outer processing in ActivityLogOptions#calc_save_trigger_if
         if config[:if]
           ca = ConditionalActions.new config[:if], @item
           next unless ca.calc_action_if
         end
+
+        data = pull_data config[:from]
 
         vals[data_field] = data
         vals[response_code_field] = response_code if response_code_field
@@ -41,7 +41,7 @@ class SaveTriggers::PullExternalData < SaveTriggers::SaveTriggersBase
         @item.transaction do
           res.ignore_configurable_valid_if = true if config[:force_not_valid]
           res.force_save! if config[:force_not_editable_save]
-          res.update! vals.merge(current_user: @item.current_user || @item.user)
+          res.update! vals.merge(current_user: @item.current_user || @item.user, skip_save_trigger: true)
         end
         res._created = created
         res._updated = updated
