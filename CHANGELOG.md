@@ -16,6 +16,13 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transfer from ReStructure 8.0.30 - 2022-05-16
+
+- [Changed] de/re-identification job failure handling for reliability
+- [Changed] dynamic definition code to DRY common usages
+
 ## [8.0.63] - 2022-05-13
 
 - [Changed] rules so master_id can be provided as a regular field, not a foreign key (for Redcap data for example)
