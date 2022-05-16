@@ -105,10 +105,20 @@ RSpec.describe 'Definition versioning', type: :model do
     sleep 2
     expect(all_versions.length).to eq(@orig_num_versions + 1)
 
-    # @player_contact.current_user = @user
-    # al_v2 = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
-    #                                                                   extra_log_type: 'step_2',
-    #                                                                   select_who: 'abc')
+    # Save an instance using v2
+    @player_contact.current_user = @user
+    al_v2 = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
+                                                                      extra_log_type: 'step_2',
+                                                                      select_who: 'abc',
+                                                                      master: @player_contact.master)
+
+    new_al = ActivityLog::PlayerContactElt.find(al_v2.id)
+    c1 = new_al.versioned_definition.option_configs[1]
+    expect(c1.label).to eq 'Step 2 v2'
+
+    sleep 2
+
+    ##### Add a new version
 
     @activity_log.extra_log_types = <<~END_DEF
       step_1:
@@ -152,14 +162,73 @@ RSpec.describe 'Definition versioning', type: :model do
 
     all_versions
     @activity_log.versioned(at_1)
-    expect(@activity_log.versioned(at_1)).to eq all_versions[@orig_num_versions - 1]
-    expect(@activity_log.versioned(at_2)).to eq all_versions[@orig_num_versions]
+    expect(@activity_log.versioned(at_1)).to eq all_versions[2]
+    expect(@activity_log.versioned(at_2)).to eq all_versions[1]
     expect(@activity_log.versioned(at_3)).to be nil # since it is the current version and this is what is returned
 
     expect(@activity_log.versioned(DateTime.now + 99.years)).to be nil # simulates *use_def_version_time*
 
-    # new_al = ActivityLog::PlayerContactElt.find(al_v2.id)
-    # c1 = new_al.versioned_definition.option_configs[1]
-    # expect(c1.label).to eq 'Step 2 v2'
+    new_al = ActivityLog::PlayerContactElt.find(al_v2.id)
+    c1 = new_al.versioned_definition.option_configs[1]
+    expect(c1.label).to eq 'Step 2 v2'
+
+    ##### Force use of the current version
+
+    sleep 2
+
+    @activity_log.extra_log_types = <<~END_DEF
+      _configurations:
+        use_current_version: true
+
+      step_1:
+        label: Step 1 v4
+        fields:
+          - select_call_direction
+          - select_who
+
+      step_2:
+        label: Step 2 v4
+        fields:
+          - select_call_direction
+          - select_who
+
+      step_3:
+        label: Step 3 v4
+        fields:
+          - select_call_direction
+          - select_who
+    END_DEF
+
+    @activity_log.save!
+    v4 = latest_history_item
+    at_4 = DateTime.now
+
+    c1 = @activity_log.option_configs[0]
+    expect(c1.label).to eq 'Step 1 v4'
+
+    c1 = @activity_log.option_configs[1]
+    expect(c1.label).to eq 'Step 2 v4'
+
+    c1 = @activity_log.option_configs[2]
+    expect(c1.label).to eq 'Step 3 v4'
+    sleep 2
+
+    # al_v3 = @player_contact.activity_log__player_contact_elts.create!(select_call_direction: 'from staff',
+    #                                                                   extra_log_type: 'step_3',
+    #                                                                   select_who: 'abc')
+
+    expect(all_versions.length).to eq(@orig_num_versions + 3)
+
+    all_versions
+    @activity_log.versioned(at_1)
+    expect(@activity_log.versioned(at_1)).to eq all_versions[3]
+    expect(@activity_log.versioned(at_2)).to eq all_versions[2]
+    expect(@activity_log.versioned(at_3)).to be all_versions[1]
+    expect(@activity_log.versioned(at_4)).to be nil # since it is the current version and this is what is returned
+
+    # Instance should be using the latest definition
+    new_al = ActivityLog::PlayerContactElt.find(al_v2.id)
+    c1 = new_al.versioned_definition.option_configs[1]
+    expect(c1.label).to eq 'Step 2 v4'
   end
 end

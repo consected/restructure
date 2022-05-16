@@ -8,7 +8,7 @@
     @prevent_edits[res] = !(current_user.has_access_to? :create, :table, res)
   end
 
-  external_id_types = ExternalIdentifier.active_model_configurations.map(&:implementation_class)
+  external_id_types = ExternalIdentifier.implementation_classes
   viewable_external_ids = external_id_types.select{|e| master_viewables[e.plural_name.to_sym] }.map(&:plural_name)
   all_cnames = general_selection_cache_names
 %>

@@ -170,9 +170,23 @@ module Dynamic
         @all_option_configs_resource_names = nil
       end
 
-      # The list of defined and usable activity log implementation classes
-      def implementation_classes
-        @implementation_classes = active_model_configurations.map(&:implementation_class)
+      #
+      # The list of defined and usable activity log implementation classes.
+      # By default only return classes that are usable. Unusable classes may be due to
+      # the underlying table not being within the defined schema search path.
+      # @param [true] only_usable
+      def implementation_classes(only_usable: true)
+        @implementation_classes = active_model_configurations.map do |dm|
+          if only_usable
+            klass = dm.prefix_class
+            next unless dm.implementation_class_defined?(klass, fail_without_exception: true)
+          end
+
+          dm.implementation_class
+        end
+
+        @implementation_classes.compact!
+        @implementation_classes
       end
 
       # List of item types that can be used to define Classification::GeneralSelection drop downs
@@ -264,6 +278,15 @@ module Dynamic
       @secondary_key = configurations && configurations[:secondary_key]
     end
 
+    def use_current_version
+      return @use_current_version if @use_current_version_set
+
+      @use_current_version_set = true
+      # Parse option configs if necessary
+      option_configs
+      @use_current_version = configurations && configurations[:use_current_version]
+    end
+
     # Return result based on the current
     # list of model defintions based on them being available in
     # the active app types.
@@ -349,6 +372,11 @@ module Dynamic
     # @return [Array] parsed configs
     def force_option_config_parse
       return if disabled?
+
+      @secondary_key_set = false
+      @secondary_key = nil
+      @use_current_version_set = false
+      @use_current_version = nil
 
       option_configs force: true, raise_bad_configs: true
     end
