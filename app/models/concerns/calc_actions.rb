@@ -706,8 +706,9 @@ module CalcActions
 
       # Now go ahead and get the possible values to use in the condition
       val = []
-      # Ensure we only get results from an active (not disabled) model reference, and
-      model_refs = from_instance.model_references(active_only: true)
+      # Ensure we only get results from an active (not disabled) model reference, and don't recalculate
+      # showable filter since this might recurse infinitely
+      model_refs = from_instance.model_references(active_only: true, showable_only: false)
       Rails.logger.info '*** No model_refs found' if model_refs.empty?
       # filter it to return only those matching the required to_record_type (if necessary)
       if to_table_name
