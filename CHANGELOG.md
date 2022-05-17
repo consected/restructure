@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.0.69] - 2022-05-17
 
 - [Fixed] issue with if block substitutions
 - [Fixed] bug with using document secure viewer on second load of report results
