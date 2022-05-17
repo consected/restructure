@@ -158,4 +158,71 @@ RSpec.describe Formatter::Substitution, type: :model do
 
     expect(res).to eq 'This is a simple test: 12345 03/07/2015 2:56 pm - 2:56:04 pm'
   end
+
+  it 'provides conditional display using an if block' do
+    txt = <<~END_TEXT
+      This is a simple test: {{int_val}}
+
+      {{#if some_text}}shows {{some_text}}{{/if}} or {{#if truthy_val}}some other text{{/if}}
+
+      {{#if true_val}}shows true{{/if}}
+      {{#if false_val}}does not show false{{else}}but does show {{int_val}} else{{/if}}
+      {{#if nil_val}}ignores nils{{else}}nil was skipped{{/if}}
+      {{#if blank_val}}ignores blanks{{else}}blank was skipped{{/if}}
+
+      {{#if true_val}}{{int_val}}{{/if}}
+
+      All done!
+    END_TEXT
+
+    if_blocks = txt.scan Formatter::Substitution::IfBlockRegEx
+
+    # 7 blocks each of 5 elements
+    expect(if_blocks.length).to eq 7
+    expect(if_blocks[0].length).to eq 5
+    expect(if_blocks[0][0]).to eq '{{#if some_text}}shows {{some_text}}{{/if}}'
+    expect(if_blocks[0][1]).to eq 'some_text'
+    expect(if_blocks[0][2]).to eq 'shows {{some_text}}'
+    expect(if_blocks[0][3]).to be nil
+    expect(if_blocks[0][4]).to be nil
+
+    expect(if_blocks[1][0]).to eq '{{#if truthy_val}}some other text{{/if}}'
+    expect(if_blocks[1][1]).to eq 'truthy_val'
+    expect(if_blocks[1][2]).to eq 'some other text'
+    expect(if_blocks[1][3]).to be nil
+    expect(if_blocks[1][4]).to be nil
+
+    expect(if_blocks[3][0]).to eq '{{#if false_val}}does not show false{{else}}but does show {{int_val}} else{{/if}}'
+    expect(if_blocks[3][1]).to eq 'false_val'
+    expect(if_blocks[3][2]).to eq 'does not show false'
+    expect(if_blocks[3][3]).to be_truthy
+    expect(if_blocks[3][4]).to eq 'but does show {{int_val}} else'
+
+    data = {
+      int_val: 12_345,
+      some_text: 'this is optional',
+      truthy_val: 0,
+      true_val: true,
+      false_val: false,
+      nil_val: nil,
+      blank_val: ''
+    }
+
+    res = Formatter::Substitution.substitute txt.dup, data: data, tag_subs: nil
+
+    expect(res).to eq <<~END_TEXT
+      This is a simple test: 12345
+
+      shows this is optional or some other text
+
+      shows true
+      but does show 12345 else
+      nil was skipped
+      blank was skipped
+
+      12345
+
+      All done!
+    END_TEXT
+  end
 end
