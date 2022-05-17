@@ -46,9 +46,9 @@ module Formatter
         tag = if_block[1]
         tag_value = value_for_tag(tag, sub_data, tag_subs, ignore_missing)
         if tag_value.present?
-          all_content.sub!(block_container, if_block[2])
+          all_content.sub!(block_container, if_block[2] || '')
         else
-          all_content.sub!(block_container, if_block[4])
+          all_content.sub!(block_container, if_block[4] || '')
         end
       end
 
