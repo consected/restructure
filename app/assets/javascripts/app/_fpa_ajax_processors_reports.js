@@ -117,7 +117,7 @@ _fpa.postprocessors_reports = {
   },
 
   reports_result: function (block, data) {
-
+    block.removeClass('use-secure-view-on-links-setup');
     if (data) {
       // Update the search form results count bar manually
       var c = $('.result-count').html();
