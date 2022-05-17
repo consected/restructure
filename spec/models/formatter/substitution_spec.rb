@@ -171,14 +171,15 @@ RSpec.describe Formatter::Substitution, type: :model do
       {{#if blank_val}}ignores blanks{{else}}blank was skipped{{/if}}
 
       {{#if true_val}}{{int_val}}{{/if}}
+      {{#if false_val}}{{int_val}}{{/if}}
 
       All done!
     END_TEXT
 
     if_blocks = txt.scan Formatter::Substitution::IfBlockRegEx
 
-    # 7 blocks each of 5 elements
-    expect(if_blocks.length).to eq 7
+    # 8 blocks each of 5 elements
+    expect(if_blocks.length).to eq 8
     expect(if_blocks[0].length).to eq 5
     expect(if_blocks[0][0]).to eq '{{#if some_text}}shows {{some_text}}{{/if}}'
     expect(if_blocks[0][1]).to eq 'some_text'
@@ -221,6 +222,7 @@ RSpec.describe Formatter::Substitution, type: :model do
       blank was skipped
 
       12345
+
 
       All done!
     END_TEXT

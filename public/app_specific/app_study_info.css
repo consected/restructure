@@ -27,7 +27,7 @@
   --table-head-font-family: "Assistant", sans-serif;
   --table-head-font-size: 15px;
 }
-
+/* 
 @font-face {
   font-family: "Lato";
   src: url("/fonts/lato/Lato-Regular.ttf");
@@ -54,6 +54,12 @@
   src: url("/fonts/lato/Lato-BlackItalic.ttf");
   font-weight: bold;
   font-style: italic;
+} */
+
+body {
+    font-family: var(--content-font-family);
+    
+    font-size: var(--content-font-size);
 }
 
 .standalone-page-container,
