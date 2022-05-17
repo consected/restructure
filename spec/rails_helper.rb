@@ -65,22 +65,23 @@ Warden.test_mode!
 # end with _spec.rb. You can configure this pattern with the --pattern
 # option on the command line or in ~/.rspec, .rspec or `.rspec-local`.
 #
+unless ENV['SKIP_DB_SETUP']
+  put_now 'Validate and setup app dbs'
+  SetupHelper.validate_db_setup
+  SetupHelper.migrate_if_needed
 
-put_now 'Validate and setup app dbs'
-SetupHelper.validate_db_setup
-SetupHelper.migrate_if_needed
+  # The DB setup can be forced to skip with an env variable
+  # It will automatically skip if a specific table is already in place
+  SetupHelper.setup_app_dbs
 
-# The DB setup can be forced to skip with an env variable
-# It will automatically skip if a specific table is already in place
-SetupHelper.setup_app_dbs unless ENV['SKIP_DB_SETUP']
-
-# Seed the database before loading files, since things like Scantron model and
-# controller will not exist without the seed
-put_now 'Seed setup'
-require "#{::Rails.root}/db/seeds.rb"
-# Seeds.setup is automatically run when seeds.rb is required
-$dont_seed = true
-raise 'Scantron not defined by seeds' unless defined?(Scantron) && defined?(ScantronsController)
+  # Seed the database before loading files, since things like Scantron model and
+  # controller will not exist without the seed
+  put_now 'Seed setup'
+  require "#{::Rails.root}/db/seeds.rb"
+  # Seeds.setup is automatically run when seeds.rb is required
+  $dont_seed = true
+  raise 'Scantron not defined by seeds' unless defined?(Scantron) && defined?(ScantronsController)
+end
 
 put_now 'Filestore mount'
 res = `#{::Rails.root}/app-scripts/setup-dev-filestore.sh`
@@ -102,12 +103,12 @@ require "#{::Rails.root}/spec/support/model_support.rb"
 Dir[Rails.root.join('spec/support/*.rb')].sort.each { |f| require f }
 Dir[Rails.root.join('spec/support/*/*.rb')].sort.each { |f| require f }
 
-# Checks for pending migrations before tests are run.
-# If you are not using ActiveRecord, you can remove this line.
-put_now 'Enforce migrations'
-ActiveRecord::Migration.maintain_test_schema!
-
 unless ENV['SKIP_DB_SETUP']
+  # Checks for pending migrations before tests are run.
+  # If you are not using ActiveRecord, you can remove this line.
+  put_now 'Enforce migrations'
+  ActiveRecord::Migration.maintain_test_schema!
+
   `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
 
   sql = <<~END_SQL

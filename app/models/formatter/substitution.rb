@@ -3,6 +3,15 @@
 module Formatter
   class Substitution
     HtmlRegEx = /<(p|br|div|ul|hr|p .+=.+|br |div .+=.+|ul .+=.+|hr .+=.+)>/.freeze
+    TagnameRegExString = '[0-9a-zA-Z_.:\-]+'
+
+    # Gets an array of 5 element arrays for each {(#if <tagname>}}true text{{else}}else text{{/if}}
+    # - the full matched block
+    # - tagname
+    # - true text
+    # - truthy if there is an {{else}}
+    # - else text
+    IfBlockRegEx = %r{({{#if (#{TagnameRegExString})}}(.+?)({{else}}(.+?))?{{/if}})}
 
     #
     # Perform subsititions on the the text, using either a Hash of data or an object item.
@@ -26,11 +35,25 @@ module Formatter
       return unless all_content
 
       all_content = all_content.dup
-      tags = all_content.scan(/{{[0-9a-zA-Z_.:\-]+}}/).uniq
 
-      # Only setup data if there are tags
-      sub_data = setup_data(data) unless tags.empty?
+      # Only setup data if there are double curly brackets
+      sub_data = setup_data(data) if all_content.index('{{')
+
+      # Replace each if block {{#if ...}}...(optional {{else}}...){{/if}}
+      if_blocks = all_content.scan(IfBlockRegEx)
+      if_blocks.each do |if_block|
+        block_container = if_block[0]
+        tag = if_block[1]
+        tag_value = value_for_tag(tag, sub_data, tag_subs, ignore_missing)
+        if tag_value.present?
+          all_content.sub!(block_container, if_block[2])
+        else
+          all_content.sub!(block_container, if_block[4])
+        end
+      end
+
       # Replace each tag {{tag}}
+      tags = all_content.scan(/{{#{TagnameRegExString}}}/).uniq
       tags.each do |tag_container|
         tag = tag_container[2..-3]
         tag_value = value_for_tag(tag, sub_data, tag_subs, ignore_missing)
@@ -93,7 +116,7 @@ module Formatter
              tag.start_with?('embedded_report_') || tag.start_with?('add_item_button_')
         unless ignore_missing || this_ignore_missing
           raise FphsException,
-                "Data (#{d.class.name}) does not contain the tag '#{tag_name}'" \
+                "Data (#{d.class.name}) does not contain the tag '#{tag_name}' " \
                  "or :#{tag_name} for #{tagpair}\n#{d || 'data is empty'}"
         end
 
