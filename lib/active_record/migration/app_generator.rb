@@ -129,13 +129,20 @@ module ActiveRecord
       end
 
       def create_reference_views
+        done = []
         reversible do |dir|
           dir.up do
             all_referenced_tables.each do |ref_config|
               to_table_name = ref_config[:to_table_name]
+              next if to_table_name.in? done
+
+              done << to_table_name
               puts "-- create or replace reference view #{ref_view_name(to_table_name)}"
               refsql = reference_view_sql(ref_config)
-              next unless refsql
+              unless refsql
+                puts "No reference view sql generated for #{to_table_name} view #{ref_view_name(to_table_name)}"
+                next
+              end
 
               ActiveRecord::Base.connection.execute refsql
             end
@@ -143,6 +150,9 @@ module ActiveRecord
           dir.down do
             all_referenced_tables.each do |ref_config|
               to_table_name = ref_config[:to_table_name]
+              next if to_table_name.in? done
+
+              done << to_table_name
               puts "-- drop function #{ref_view_name(to_table_name)}"
               refsql = reverse_reference_view_sql(ref_config)
               next unless refsql

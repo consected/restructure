@@ -650,10 +650,11 @@ class ActivityLog < ActiveRecord::Base
   end
 
   #
-  # Get a full list of reference_views
+  # Get a full list of reference_views.
+  # These are based on references being defined and not being set with the reference option without_reference: true
   # @return [Array]
   def all_reference_views
-    all_referenced_tables.map { |t| reference_view_name(t[:to_table_name]) }
+    all_referenced_tables.map { |t| reference_view_name(t[:to_table_name]) unless t[:without_reference] }.compact.uniq
   end
 
   #
