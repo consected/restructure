@@ -1,0 +1,26 @@
+<% 
+mr = object_instance.model_references&.find {|mr| mr.to_record_options_config&.dig(:view_as, :edit) == 'filestore' }
+if mr
+
+  data = {
+    to_record_id: mr.to_record_id,
+    to_record_data: mr.to_record_data,
+    to_record_label: mr.to_record_label,
+    from_record_id: object_instance.id,
+    from_record_type_us: mr.from_record_type_us,
+    prevent_edit: !!object_instance.prevent_edit,
+    can_download: !!current_user.can?(:download_files),
+    to_record_editable: !!mr.to_record_editable
+  };
+%>
+<script> 
+window.setTimeout(function() {
+  var data = <%= data.to_json.html_safe %>;
+  var block = $('#edit-filestore-block-<%= object_instance.id %>');
+  console.log(data);
+  _fpa.view_template(block, 'filestore-view-template', data); 
+
+}, 500);
+</script>
+<div id="edit-filestore-block-<%= object_instance.id %>" class="edit-filestore-block"></div>
+<% end %>
