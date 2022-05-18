@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.0.70] - 2022-05-18
 
 - [Added] filestore browser to appear in edit forms, if view_as: edit: filestore is set
 - [Changed] if block substitutions to allow for multiline text
