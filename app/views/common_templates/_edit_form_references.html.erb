@@ -115,7 +115,7 @@
                 r = @option_type_config&.model_reference_config(model_reference)
                 view_as_edit = r && r.first && r.first.last[:view_as] && r.first.last[:view_as][:edit]
                 dis = view_as_edit  == 'readonly'
-                no_show = (view_as_edit == 'hide') && action_name == 'edit'
+                no_show = (view_as_edit == 'hide') && action_name == 'edit' || view_as_edit == 'filestore'
                 shown_embedded = true
             %>
               <%= render partial: 'common_templates/edit_form', locals: {embedded: true, form_embed: form_embed, disabled_form: dis  } unless no_show %>

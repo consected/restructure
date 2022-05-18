@@ -11,7 +11,7 @@ module Formatter
     # - true text
     # - truthy if there is an {{else}}
     # - else text
-    IfBlockRegEx = %r{({{#if (#{TagnameRegExString})}}(.+?)({{else}}(.+?))?{{/if}})}
+    IfBlockRegEx = %r{({{#if (#{TagnameRegExString})}}(.+?)({{else}}(.+?))?{{/if}})}m
 
     #
     # Perform subsititions on the the text, using either a Hash of data or an object item.

@@ -14,7 +14,7 @@
       from: this
       add: one_to_this
       view_as:
-        edit: hide
+        edit: filestore|hide
         show: filestore
         new: not_embedded
       creatable_if:
