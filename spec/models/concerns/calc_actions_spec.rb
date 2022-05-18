@@ -1603,6 +1603,70 @@ RSpec.describe 'Calculate conditional actions', type: :model do
     expect(res_if).to be true
   end
 
+  it 'checks IS (NOT) NULL conditions' do
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id,
+          created_at: {
+            condition: 'IS NULL'
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id,
+          created_at: {
+            condition: 'IS NOT NULL'
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id,
+          select_who: {
+            condition: 'IS NULL'
+          }
+        }
+      }
+    }
+    expect(@al.select_who).not_to be nil
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    @al.update(current_user: @user, select_who: nil)
+    @al = @al.class.find(@al.id)
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id,
+          select_who: {
+            condition: 'IS NOT NULL'
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+  end
+
   it 'checks non-equality conditions' do
     conf = {
       all: {

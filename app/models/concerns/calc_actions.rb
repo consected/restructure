@@ -339,7 +339,7 @@ module CalcActions
                        end
 
     # For extra_conditions related to non query conditions, apply them directly
-    if extra_conditions.length > 1
+    if extra_conditions.present? && extra_conditions[0]&.strip&.present?
       # Handle replacement of AND or OR into the generated query conditions SQL
       extra_conditions[0].gsub(BoolTypeString, bool)
       @condition_scope = @condition_scope.where(extra_conditions)
@@ -830,11 +830,11 @@ module CalcActions
 
     end
 
-    if !condition_type && !val.in?(ReturnTypes)
-      @condition_values[table_name] ||= {}
-      val = val.reject { |r| r.in?(ReturnTypes) } if val.is_a?(Array)
-      @condition_values[table_name][field_name] = dynamic_value(val)
-    end
+    return unless !condition_type && !val.in?(ReturnTypes)
+
+    @condition_values[table_name] ||= {}
+    val = val.reject { |r| r.in?(ReturnTypes) } if val.is_a?(Array)
+    @condition_values[table_name][field_name] = dynamic_value(val)
   end
 
   # If we are expecting values or results to be returned, handle the setup for this here
@@ -891,7 +891,7 @@ module CalcActions
           # inner joins on the master. They are handled as individual queries.
           non_query_condition = is_non_query_condition table_name, field_name, val
 
-          if val.is_a? Hash
+          if val.is_a?(Hash)
             # Since the conditional value is actually a hash, we need to
             # get the value to be matched from another referenced record (or this)
             # Generate the query condition to do this
