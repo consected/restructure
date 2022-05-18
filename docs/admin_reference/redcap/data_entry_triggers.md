@@ -1,6 +1,6 @@
 # Setting up the Data Entry Trigger (DET) for a project
 
-## (FRAFT)
+## (DRAFT)
 
 Go to the *Project Setup*
 
