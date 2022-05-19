@@ -19,8 +19,11 @@ module ReportResults
     #
     # Alter the cell tag based on configurations
     def html_tag
-      new_col_tag = col_tag || 'pre' if content_lines >= 1
-      return new_col_tag if col_show_as.blank?
+      if col_show_as.blank?
+        new_col_tag = col_tag
+        new_col_tag = 'pre' if !new_col_tag && content_lines >= 1
+        return new_col_tag
+      end
 
       mapping = {
         'div' => 'div',
@@ -29,7 +32,8 @@ module ReportResults
         'options' => 'div',
         'list' => 'ul',
         'tags' => 'div',
-        'choice_label' => 'div'
+        'choice_label' => 'div',
+        'iframe' => 'div'
       }
 
       return col_show_as unless mapping.key? col_show_as
@@ -254,6 +258,29 @@ module ReportResults
       return cell_content unless cell_content.present?
 
       Kramdown::Document.new(cell_content).to_html.html_safe
+    end
+
+    def cell_content_for_iframe
+      return cell_content unless cell_content.present?
+
+      block_id = SecureRandom.hex(10)
+
+      html = <<~END_HTML
+        <iframe id="report-cell-iframe-#{block_id}" src='javascript:void(0)' srcdoc="" class="iframe-report-cell if-report-cell-type" sandbox></iframe>
+        <script id="report-cell-content-#{block_id}" class="hidden" type="x-html">
+          #{cell_content.gsub('<head>', '<head><base target="_blank" />').html_safe}
+        </script>
+        <script>
+          window.setTimeout(function() {
+            var c = $('#report-cell-content-#{block_id}');
+            var html = c.html();
+
+            $('#report-cell-iframe-#{block_id}').attr('srcdoc', html);
+          }, 100);
+        </script>
+      END_HTML
+
+      html.html_safe
     end
 
     private
