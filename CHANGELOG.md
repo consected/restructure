@@ -16,6 +16,11 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] show_as iframe for report cell and fixed tags handling
+- [Fixed] handling of always_use_this_for_access_control, save trigger success and skip_if_exists
+
 ## [8.0.70] - 2022-05-18
 
 - [Added] filestore browser to appear in edit forms, if view_as: edit: filestore is set
