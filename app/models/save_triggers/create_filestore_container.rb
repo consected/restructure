@@ -31,7 +31,8 @@ class SaveTriggers::CreateFilestoreContainer < SaveTriggers::SaveTriggersBase
   end
 
   def perform
-    return lookup_existing.present? if skip_if_exists
+    le = lookup_existing&.first if skip_if_exists
+    return le if le
 
     container = NfsStore::Manage::Container.create_in_current_app user: item.master_user,
                                                                   name: name,

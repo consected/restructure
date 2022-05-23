@@ -153,7 +153,7 @@
   references:
     model_name:
       label: button label
-      from: this | master | any
+      from: this | master | any | user_is_creator (item in any master that was created by current user)
       without_reference: true
       add: many | one_to_master | one_to_this
       add_with:

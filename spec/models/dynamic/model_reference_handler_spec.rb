@@ -36,9 +36,15 @@ RSpec.describe 'Model reference implementation', type: :model do
       setup_access :player_contacts
       setup_access :addresses
       setup_access :activity_log__player_contact_phones
+      @alt_player_contact = create_item(data: rand(10_000_000_000_000_000), rank: 10)
+      @alt_master = @alt_player_contact.master
       @player_contact1 = create_item(data: rand(10_000_000_000_000_000), rank: 10)
       @player_contact2 = create_item({ data: rand(10_000_000_000_000_000), rank: 10 }, @player_contact1.master)
       @player_contact3 = create_item({ data: rand(10_000_000_000_000_000), rank: 10 }, @player_contact1.master)
+
+      expect(@player_contact1.master).not_to eq @alt_master
+
+      generate_test_dynamic_model
 
       @activity_log = al = ActivityLog.active.where(name: al_name).first
       @working_data = '(111)222-3333 ext 7654321'
@@ -229,6 +235,22 @@ RSpec.describe 'Model reference implementation', type: :model do
                     user:
                       role_name:
                         - editor
+        mr_user_is_creator:
+          label: User is Creator
+          fields:
+            - select_call_direction
+            - select_who
+          editable_if:
+            always: true
+          references:
+            - dynamic_model__test_created_by_recs:
+                label: Was created by user
+                from: user_is_creator
+                add: one_to_this
+                filter_by:
+                  test1: 'user_is_creator test'
+                add_with:
+                  test1: 'user_is_creator test'
 
       END_DEF
 
@@ -250,6 +272,7 @@ RSpec.describe 'Model reference implementation', type: :model do
       setup_option_config 8, 'Always Embed', %w[select_call_direction select_who]
       setup_option_config 9, 'Avoid Missing', %w[select_call_direction select_who]
       setup_option_config 10, 'Reference Showable Test2', %w[select_call_direction select_who tag_select_allowed]
+      setup_option_config 11, 'User is Creator', %w[select_call_direction select_who]
     end
 
     it 'evaluates rules to optionally show references' do
@@ -431,6 +454,58 @@ RSpec.describe 'Model reference implementation', type: :model do
       # We should not be able to create another, since this is set as one_to_master
       cmrs = al_simple.creatable_model_references only_creatables: true, force_reload: true
       expect(cmrs.keys).to eq %i[player_contact]
+    end
+
+    it 'handles model references where we specify from: user_is_creator' do
+      master = @player_contact.master
+      expect(master.dynamic_model__test_created_by_recs.count).to eq 0
+
+      @player_contact.current_user = @user
+      @player_contact.master.current_user = @user
+
+      al_simple = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                          extra_log_type: 'mr_user_is_creator',
+                                                                          select_who: 'abc')
+      al_simple.save!
+
+      cmrs = al_simple.creatable_model_references only_creatables: true
+      expect(cmrs.keys).to eq %i[dynamic_model__test_created_by_rec]
+
+      referenced = master.dynamic_model__test_created_by_recs.create! test1: 'user_is_creator test'
+      expect(referenced.created_by_user_id).to eq @user.id
+
+      mr_ref = ModelReference.create_with(al_simple, referenced)
+      expect(mr_ref).to be_truthy
+
+      expect(al_simple.model_references(force_reload: true).length).to eq 1
+
+      # We should not be able to create another, since this is set as one_to_this
+      cmrs = al_simple.creatable_model_references only_creatables: true, force_reload: true
+      expect(cmrs).to be_empty
+
+      # Create a new activity log, in which we should see the existing item
+      al_simple2 = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                           extra_log_type: 'mr_user_is_creator',
+                                                                           select_who: 'def')
+      al_simple2.save!
+
+      expect(al_simple.model_references(force_reload: true).length).to eq 1
+      expect(al_simple2.model_references(force_reload: true).length).to eq 1
+
+      # Create a new activity log in a different master, in which we should see the existing item
+      @alt_player_contact.current_user = @user
+      @alt_player_contact.master.current_user = @user
+
+      al_simple3 = @alt_player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                               extra_log_type: 'mr_user_is_creator',
+                                                                               select_who: 'ghi')
+      al_simple3.save!
+
+      expect(al_simple.model_references(force_reload: true).length).to eq 1
+      expect(al_simple2.model_references(force_reload: true).length).to eq 1
+      expect(al_simple3.model_references(force_reload: true).length).to eq 1
+
+      expect(al_simple.model_references.first.to_record_id).to eq al_simple3.model_references.first.to_record_id
     end
 
     it 'always embeds defined references' do
