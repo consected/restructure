@@ -33,7 +33,7 @@ module OptionConfigs
           results = configs.map do |perform, config|
             o = trigger_class(perform).new(config, obj)
             # Add the trigger result to the list
-            results << o.perform
+            o.perform
           end
 
           # If we had any results then check if they were all true. If they were then return true.

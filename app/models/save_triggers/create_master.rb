@@ -67,11 +67,12 @@ class SaveTriggers::CreateMaster < SaveTriggers::SaveTriggersBase
         if ei
           ei.master = @new_master
           ei.update_columns(master_id: new_master_id)
-          mr = @item.model_references.first do |mra|
+          mr = @item.model_references.select do |mra|
             mra.to_record_type == ei.class.name && mra.to_record_id == ei.id
           end
 
-          mr.update_columns(from_record_master_id: new_master_id, to_record_master_id: new_master_id)
+          ModelReference.active.where(id: mr.map(&:id)).update_all(from_record_master_id: new_master_id,
+                                                                   to_record_master_id: new_master_id)
         end
 
       end

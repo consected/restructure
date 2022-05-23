@@ -58,7 +58,7 @@ module NfsStore
 
       # Match the specified activity log against a referenced item
       refs = ModelReference.find_where_referenced_from(@container)
-      in_refs = refs.select { |r| r.from_record_id == al_id && r.from_record_type == al_cname }.first
+      in_refs = refs.find { |r| r.from_record_id == al_id && r.from_record_type == al_cname }
       return @activity_log if in_refs
 
       # No match, so try the first reference to see if it has the nfs_store option

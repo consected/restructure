@@ -8,8 +8,11 @@ module ReportResults
     #
     # Alter the cell tag based on configurations
     def html_tag
-      new_col_tag = col_tag || 'pre' if content_lines >= 1
-      return new_col_tag if col_show_as.blank?
+      if col_show_as.blank?
+        new_col_tag = col_tag
+        new_col_tag = 'pre' if !new_col_tag && content_lines >= 1
+        return new_col_tag
+      end
 
       mapping = {
         'div' => 'div',
@@ -19,7 +22,8 @@ module ReportResults
         'list' => 'ul',
         'url' => 'div',
         'tags' => 'div',
-        'choice_label' => 'div'
+        'choice_label' => 'div',
+        'iframe' => 'div'
       }
 
       return col_show_as unless mapping.key? col_show_as
