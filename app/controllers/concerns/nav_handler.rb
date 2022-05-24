@@ -92,29 +92,28 @@ module NavHandler
   end
 
   def setup_page_layout_navs
-    nav_conf = page_layout_panel layout_name: :nav, panel_name: %i[all page]
+    nav_conf = page_layout_panel layout_name: :nav, panel_name: %i[all page], set_of: %i[nav links]
 
-    if nav_conf&.nav&.links
-      nav_conf.nav.links.each do |l|
-        next unless l.is_a? Hash
+    return unless nav_conf
 
-        l = l.symbolize_keys
-        if l[:resource_type]
-          rt = l[:resource_type].to_sym
-          rn = l[:resource_name]
-          begin
-            next unless current_user.has_access_to? :access, rt, rn
-          rescue StandardError => e
-            logger.warn "Bad resource name or type specified: #{e}"
-            next
-          end
+    nav_conf.each do |l|
+      next unless l.is_a? Hash
+
+      l = l.symbolize_keys
+      if l[:resource_type]
+        rt = l[:resource_type].to_sym
+        rn = l[:resource_name]
+        begin
+          next unless current_user.has_access_to? :access, rt, rn
+        rescue StandardError => e
+          logger.warn "Bad resource name or type specified: #{e}"
+          next
         end
-        url = l[:url]
-        label = l[:label]
-        icon = l[:icon]
-        @primary_navs << { label: label, url: url, icon: icon }
       end
-
+      url = l[:url]
+      label = l[:label]
+      icon = l[:icon]
+      @primary_navs << { label: label, url: url, icon: icon }
     end
   end
 

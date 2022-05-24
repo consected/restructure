@@ -150,6 +150,46 @@ class Classification::SelectionOptionsHandler
   end
 
   #
+  # Get the form_options.edit_as.field_type select_record_... field array for a specific (UserBase) object
+  # For activity logs, generally the extra_log_type attribute is set, allowing the appropriate
+  # configuration to be pulled.
+  # The user_base_object does not need to be persisted for this to operate. If the master is set then
+  # the master specific results will be retrieved for those datasets having a master association
+  # @param [UserBase] user_base_object
+  # @return [Hash{field_name: [name, value]} | nil] returns the selection results
+  #      configurations per field, or nil if there are none
+  def self.all_edit_as_select_field(user_base_object)
+    otc = user_base_object.option_type_config
+    fndefs = {}
+
+    user_base_object.attribute_names.each do |fn|
+      fn = fn.to_sym
+      opt = otc.field_options[fn] if otc
+      edit_as = opt[:edit_as] if opt
+      edit_as ||= {}
+      alt_fn = (edit_as[:field_type] || fn).to_s
+      next unless alt_fn.start_with?('select_record_')
+
+      group_split_char = edit_as[:group_split_char]
+      value_attr = edit_as[:value_attr] || :data
+      label_attr = edit_as[:label_attr] || :data
+
+      assoc_or_class_name = alt_fn.sub(/^select_record_(id_)?from_(table_)?/, '').singularize
+
+      got_res, res = EditFields::SelectFieldHandler.list_record_data_for_select(user_base_object,
+                                                                                assoc_or_class_name,
+                                                                                value_attr: value_attr,
+                                                                                label_attr: label_attr,
+                                                                                group_split_char: group_split_char)
+
+      fndefs[fn] = res if got_res && res
+    end
+    return if fndefs.empty?
+
+    fndefs
+  end
+
+  #
   # Get all the general selection configurations and override them with the form_options.edit_as.alt_options
   # This is only used by UI requests to the DefinitionsController to get and cache general selections
   # options on the front end.
@@ -221,9 +261,13 @@ class Classification::SelectionOptionsHandler
         end
       end
 
-      # Get the alt_options that add to or override the general selections
-      alt_options = all_edit_as_alt_options dyn_object
-      next unless alt_options
+      # Get the select_... field options that add to or override the general selections
+      alt_options = all_edit_as_select_field(dyn_object) || {}
+
+      # Get the alt_options that add to or override the previous definitions
+      alt_options.merge!(all_edit_as_alt_options(dyn_object) || {})
+
+      next unless alt_options.present?
 
       # alt_options were found for this implementation.
       # Run through each field that has a definition

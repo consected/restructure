@@ -42,13 +42,18 @@ list_options:
 
 #
 # Add a navigation (top menu bar) item as either a link or a list of resources
-# Providing a resource name and type allows user access controls to be enforced
+# Providing a resource name and type allows user access controls to be enforced.
+# For navigation links, a full set of definitions will be compiled in position order
+# across entried defined in the current app and for all apps if the app type is set to
+# null in the record.
+# When a *resource_type* is specified, the user's access to that resource will be checked
 # NOTE: to add the nav to the top page menu, specify panel name 'page' (or 'all').
 #       To add the nav to a master result, use panel name 'master-tabs'
 nav:
   # array of links
   links:
     - label: View Report              # visible label
+      icon:                           # glyphicon lable to be shown (before label, or in place of it)
       url: /reports/test__report      # URL for the nav item
       resource_type: report           # the resource type to use to assess user access to this nav item
       resource_name: test__report     # the resource name to use to assess user access to this nav item

@@ -202,7 +202,7 @@ class Settings
   # Alternative to blindly using inflector acronyms.
   # This array of acronyms will be enforced for titleize only, avoiding
   # existing expectations around class names being broken
-  CaptionAcronyms = %w[IPA IPAs BHS PI PIs HMS FPHS].freeze
+  CaptionAcronyms = %w[IPA IPAs BHS PI PIs HMS FPHS MD RA RAs].freeze
 
   # Prevent versioning of dynamic definitions
   DisableVDef = ENV.key?('FPHS_DISABLE_VDEF') ? ENV['FPHS_DISABLE_VDEF'] == 'true' : Rails.env.development?

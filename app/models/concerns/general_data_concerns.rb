@@ -154,6 +154,45 @@ module GeneralDataConcerns
     master.alternative_ids
   end
 
+  #
+  # Return a set of selection list data in the _general_selections entry
+  # since this will be picked up by the front end to be used to translate
+  # specific field values to human names. Since the select_from_... fields
+  # may be tied through a master association to the current instance,
+  # it is not possible to cache the results directly based on a dynamic definition
+  # and it must be handled at the time of the request.
+  # The result format matches what is expected by the front end, for example:
+  # { "title": {
+  #      "66": { "name": "Project Viva Analysis Plan Presentation_Template-widescreen.pptx" },
+  #      "67": {"name": "policies-for-using-our-data.pdf" }
+  # } }
+  # @return [Hash{<field_name:>{<field_value>: {name: <display result>}}}]
+  def _general_selections
+    return @add_show_attribs if @add_show_attribs
+
+    @add_show_attribs = {}
+    otc = option_type_config
+    allselects = Classification::SelectionOptionsHandler.all_edit_as_select_field(self)
+    return unless allselects
+
+    attribute_names.each do |an|
+      opt = otc.field_options[an.to_sym] if otc
+      edit_as = opt[:edit_as] if opt
+      edit_as ||= {}
+      alt_fn = (edit_as[:field_type] || an).to_s
+      next unless alt_fn.start_with?('select_record_')
+
+      entries = allselects[an.to_sym]&.map do |e|
+        [e.last, { name: e.first }]
+      end
+
+      # @add_show_attribs[an_show] = entry&.first
+      @add_show_attribs[an] = entries.to_h
+    end
+
+    @add_show_attribs
+  end
+
   def as_json(extras = {})
     self.current_user ||= extras[:current_user] if extras[:current_user] # if self.class.no_master_association
     if allows_current_user_access_to?(:access)
@@ -219,6 +258,7 @@ module GeneralDataConcerns
 
       extras[:methods] << :ids if respond_to?(:master) && !self.class.no_master_association
 
+      extras[:methods] << :_general_selections
     elsif allows_current_user_access_to?(:see_presence_or_access)
 
       extras[:include] ||= {}
