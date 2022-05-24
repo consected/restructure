@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] showing select_from_... values based on live data and master associations, not just dynamic definitions
+- [Added] global app definition of nav links, and ability for icon to be used without a label
+- [Fixed] date and time formatting in reports presented as lists
+
 ## [8.0.71] - 2022-05-23
 
 - [Added] show_as iframe for report cell and fixed tags handling
