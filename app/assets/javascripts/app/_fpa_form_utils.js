@@ -315,7 +315,8 @@ _fpa.form_utils = {
 
     _fpa.set_definition(cname, function () {
       var pe = _fpa.cache(cname);
-      data._general_selections = {};
+      // _general_selections may be passed as an attribute in the response data
+      if (!data._general_selections) data._general_selections = {};
       for (var k in data) {
         if (data.hasOwnProperty(k)) {
 
@@ -333,7 +334,7 @@ _fpa.form_utils = {
             break;
           }
 
-          if (ibhi) {
+          if (ibhi && !data._general_selections[k]) {
             data._general_selections[k] = ibh;
           }
         }
