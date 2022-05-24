@@ -20,7 +20,7 @@
         <% end %>
         <%
         if current_user && current_user.app_type_id
-          @primary_navs.reject{|a| a[:label].blank? }.each do |nav| 
+          @primary_navs.reject{|a| a[:label].blank? && a[:icon].blank?}.each do |nav| 
             icon = ''
             if nav[:icon]
               icon = "<i class=\"glyphicon glyphicon-#{nav[:icon]}\"></i> "
