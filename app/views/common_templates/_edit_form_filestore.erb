@@ -1,5 +1,8 @@
 <% 
-mr = object_instance.model_references&.find {|mr| mr.to_record_options_config&.dig(:view_as, :edit) == 'filestore' }
+if object_instance.respond_to? :model_references
+  mr = object_instance.model_references&.find {|mr| mr.to_record_options_config&.dig(:view_as, :edit) == 'filestore' }
+end
+
 if mr
 
   data = {
