@@ -236,7 +236,7 @@ GEM
       racc (~> 1.4)
     orm_adapter (0.5.0)
     parallel (1.22.1)
-    parallel_tests (3.10.1)
+    parallel_tests (3.8.1)
       parallel
     parser (3.1.2.0)
       ast (~> 2.4.1)
@@ -473,7 +473,7 @@ DEPENDENCIES
   listen
   mime-types
   nokogiri
-  parallel_tests
+  parallel_tests (= 3.8.1)
   pg
   puma
   rails (~> 5.0)
