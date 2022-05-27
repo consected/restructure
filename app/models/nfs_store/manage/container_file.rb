@@ -136,7 +136,10 @@ module NfsStore
         lr = extras.delete(:limited_results)
         extras[:methods] ||= []
         extras[:methods] << :container_parent
-        return super unless lr
+        unless lr
+          extras[:methods] << :direct_uri
+          return super
+        end
 
         allow_show_flags = extras.delete(:allow_show_flags)
 
@@ -430,6 +433,22 @@ module NfsStore
         return unless config
 
         OptionConfigs::ContainerFilesOptions.new :default, config, self
+      end
+
+      def direct_uri
+        container_parent = container.parent_item
+        return unless container_parent
+
+        parent_id = container_parent.secondary_key || container_parent.id
+
+        enc_path = if path.present?
+                     "#{path}/#{file_name}"
+                   else
+                     file_name
+                   end
+        enc_path = URI.escape(enc_path)
+
+        "/nfs_store/downloads/in/#{container_parent.resource_item_name}/#{parent_id}/#{enc_path}"
       end
 
       private

@@ -25,7 +25,7 @@ module NfsStore
       file_path = path_parts[0..-2] unless pp_length
 
       res = container.stored_files.find_by(path: file_path, file_name: file_name)
-      return res if res || pp_length == 1
+      return res if res || pp_length
 
       archive_file = file_path.first
       file_path = if file_path.length == 1

@@ -242,13 +242,14 @@ class ActivityLog < ActiveRecord::Base
   end
 
   # Open an activity log instance for a user, given a string activity log type and ID
+  # or secondary key
   # Verifies that the user has access to this activity log item
   # @param activity_log_type [String] type string that can be converted to a namespaced camelized class name
-  # @param id [Integer] id for the activity log implementation instance
+  # @param id [Integer|String] id or secondary key for the activity log implementation instance
   # @return [Dynamic::ActivityLogBase]
   def self.open_activity_log(activity_log_type, id, current_user)
     al_class = activity_log_class_from_type activity_log_type
-    activity_log = al_class.find(id)
+    activity_log = al_class.find_by_id_or_secondary_key(id)
     activity_log.current_user = current_user
     unless activity_log.allows_current_user_access_to? :access
       raise FsException::NoAccess,

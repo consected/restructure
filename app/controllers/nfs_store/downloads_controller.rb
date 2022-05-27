@@ -11,6 +11,8 @@ module NfsStore
     # Actions that are valid to be called from a post (create) action
     ValidActions = %i[trash download move_files rename_file trigger_file_action].freeze
 
+    before_action :set_container_from_activity_log!, only: [:show_from_activity_log]
+
     include InNfsStoreContainer
     include SecureView::Previewing
 
@@ -27,6 +29,8 @@ module NfsStore
       download_path = params[:download_path]
       if download_path
         dl = Download.find_download_by_path(@container, download_path)
+        return not_found unless dl
+
         retrieval_type = dl.retrieval_type
         @download_id = dl.id
       end
@@ -43,6 +47,19 @@ module NfsStore
       else
         send_file retrieved_file
       end
+    end
+
+    # Allow files to be downloaded by a pretty route
+    #   downloads/in/:activity_log_type/:activity_log_id/:download_path
+    # For example:
+    #   https://<server>/nfs_store/downloads/in/activity_log__study_info_part/test-slug/image2.png
+    # NOTE: set_container_from_activity_log! is called before this action to allow
+    # the default container for the specified activity log to be retrieved by #find_container
+    def show_from_activity_log
+      # Force the file extension back onto the download path, since Rails strips it
+      params[:download_path] = "#{params[:download_path]}.#{params[:format]}" if params[:format].present?
+      # continue with the standard show action
+      show
     end
 
     #
@@ -229,6 +246,10 @@ module NfsStore
       @master = @container.master
       @id = @container.id
       @download.retrieve_file_from download_id, retrieval_type, for_action: for_action, force: force
+    end
+
+    def set_container_from_activity_log!
+      @set_container_from_activity_log = true
     end
   end
 end

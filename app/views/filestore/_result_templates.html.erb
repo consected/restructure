@@ -4,6 +4,9 @@
     name: 'filestore-classification-stored-file-full',
     with_data: 'nfs_store__manage__stored_file',
     caption: 'Stored File',
+    caption_before: {
+      all_fields: {show_caption: "link: {{direct_uri::no_html_tag}}"}
+    }, 
     model_data_type: :nfs_store_file,
     prevent_edit: false,
     prevent_create: true,
