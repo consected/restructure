@@ -397,37 +397,50 @@ class ActivityLog < ActiveRecord::Base
             ic = pg.item_type.pluralize
             get "#{ic}/:item_id/#{brn}/new", to: "#{brn}#new"
             get "#{ic}/:item_id/#{brn}/", to: "#{brn}#index"
-            get "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#show"
             post "#{ic}/:item_id/#{brn}", to: "#{brn}#create"
             get "#{ic}/:item_id/#{brn}/:id/edit", to: "#{brn}#edit"
             patch "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
-            put "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
             get "#{ic}/:item_id/#{brn}/:id/template_config", to: "#{brn}#template_config"
             get "#{ic}/:item_id/#{brn}/:extra_log_type/new", to: "#{brn}#new"
             get "#{ic}/:item_id/#{brn}/:extra_log_type/:id", to: "#{brn}#show"
             post "#{ic}/:item_id/#{brn}/:extra_log_type", to: "#{brn}#create"
+            # These must go last to ensure secondary_key lookup (where id is a string)
+            # doesn't override other routes
+            put "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#update"
+            get "#{ic}/:item_id/#{brn}/:id", to: "#{brn}#show"
 
             # used by links to get to activity logs without having to use parent item
             # (such as a player contact with phone logs)
             get "#{brn}/new", to: "#{brn}#new"
-            get "#{brn}/:id", to: "#{brn}#show"
             get "#{brn}/", to: "#{brn}#index"
             get "#{brn}/:id/edit", to: "#{brn}#edit"
             post brn, to: "#{brn}#create"
-            patch "#{brn}/:id", to: "#{brn}#update"
             get "#{brn}/:id/template_config", to: "#{brn}#template_config"
             get "#{brn}/:extra_log_type/new", to: "#{brn}#new"
             get "#{brn}/:extra_log_type/:id", to: "#{brn}#show"
             post "#{brn}/:extra_log_type", to: "#{brn}#create"
+            # These must go last to ensure secondary_key lookup (where id is a string)
+            # doesn't override other routes
+            patch "#{brn}/:id", to: "#{brn}#update"
+            get "#{brn}/:id", to: "#{brn}#show"
 
             # used by item flags to generate appropriate URLs
             begin
               get "activity_log__#{mn}/:id", to: "#{brn}#show",
                                              as: "activity_log_#{pg.implementation_model_name}"
             rescue StandardError
-              Rails.logger.warn "Skipped creating route activity_log__#{mn}/:id since activity_log_#{pg.implementation_model_name} already exists?"
+              Rails.logger.warn "Skipped creating route activity_log__#{mn}/:id " \
+                                "since activity_log_#{pg.implementation_model_name} already exists?"
             end
           end
+        end
+
+        # Provide a simplified path to retrieve a single activity log without a master_id
+        # something like: /activity_log/test_processes/8 or /activity_log/test_processes/item-slug
+        # The final segment of the path may be either the numeric id or the secondary key if not numeric
+        m.each do |pg|
+          brn = pg.base_route_segments
+          get "#{brn}/:id", to: "#{brn}#show"
         end
       end
     rescue ActiveRecord::StatementInvalid => e

@@ -8,6 +8,34 @@ module NfsStore
       'retrieved_items'
     end
 
+    #
+    # Find a download file by path, returning a the ContainerFile
+    # This allows theretrieval type and the download id to be easily accessed
+    # if the file is found.
+    # Leading slash and double slash will be ignored
+    # @param [String] full_path
+    # @return [NfsStore::Manage::ContainerFile]
+    def self.find_download_by_path(full_path)
+      return if full_path.strip.blank?
+
+      path_parts = full_path.split('/').reject(&:blank?)
+      pp_length = path_parts.length == 1
+      file_name = path_parts.last
+      file_path = path_parts[0..-2] unless pp_length
+
+      res = NfsStore::Manage::StoredFile.find_by(path: file_path, file_name: file_name)
+      return res if res || pp_length == 1
+
+      archive_file = file_path.first
+      file_path = if file_path.length == 1
+                    ''
+                  else
+                    file_path[1..]
+                  end
+      res = NfsStore::Manage::ArchivedFile.find_by(path: file_path, archive_file: archive_file, file_name: file_name)
+      return res if res
+    end
+
     # Handle the retrieval of muliple requested files, returning an array of results
     # Each result is a hash referencing the requested id/retrieval_type
     # @param selected_items [Hash{id=>Integer, retrieval_type=>Symbol}] a hash of items to retrieve, with each ID qualified by a retrieval type

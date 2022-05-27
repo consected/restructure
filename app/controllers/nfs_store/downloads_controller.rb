@@ -25,7 +25,11 @@ module NfsStore
       for_action = :download
       for_action = :download_or_view if params.dig(:secure_view, :preview_as).present?
       download_path = params[:download_path]
-      retrieval_type, @download_id = find_download_by_path(download_path) if download_path
+      if download_path
+        dl = Download.find_download_by_path(download_path)
+        retrieval_type = dl.retrieval_type
+        @download_id = dl.id
+      end
 
       raise FsException::NotFound, 'Requested file ID or path not found' unless @download_id
 
@@ -200,9 +204,7 @@ module NfsStore
 
     def handle_action_results(action_files)
       if action_files && !action_files.empty?
-        filename = "#{@container.name} - #{action_files.length} #{'file'.pluralize(action_files.length)}.zip"
         @action.save!
-
         render json: action_files
       else
         redirect_to nfs_store_browse_path(@container)
@@ -212,6 +214,7 @@ module NfsStore
     #
     # Retrieve a file to be downloaded or searched, or retrieve a portion of a document
     # for secure viewing, from the current container (@container) and master (@master)
+    # Sets the @download, @master and @id (of the container) appropriately
     # @param [Integer] download_id
     # @param retrieval_type [Symbol] the type of object referencing the file
     # @param [Symbol] for_action :download (default) or :download_view
@@ -221,43 +224,11 @@ module NfsStore
       raise FsException::Download, 'id invalid' unless download_id > 0
       raise FsException::Download, 'retrieval_type invalid' unless retrieval_type.present?
 
-      # Avoid brakeman issue
-      retrieval_type = NfsStore::Download::ValidRetrievalTypes.find { |r| r == retrieval_type.to_sym }
-      unless Download.valid_retrieval_type? retrieval_type
-        raise FsException::Download, 'Invalid retreival type specified'
-      end
-
+      retrieval_type = Download.validated_retrieval_type!(retrieval_type)
       @download = Download.new container: @container, activity_log: @activity_log
       @master = @container.master
       @id = @container.id
       @download.retrieve_file_from download_id, retrieval_type, for_action: for_action, force: force
-    end
-
-    #
-    # Find a download id by path, returning an array indicating the
-    # retrieval type and the download id if the file is found.
-    # Leading slash and double slash will be ignored
-    # @param [String] full_path
-    # @return [Array{<retrieval type>, <download id>}]
-    def find_download_by_path(full_path)
-      return if full_path.strip.blank?
-
-      path_parts = full_path.split('/').reject(&:blank?)
-      pp_length = path_parts.length == 1
-      file_name = path_parts.last
-      file_path = path_parts[0..-2] unless pp_length
-
-      res = NfsStore::Manage::StoredFile.find_by(path: file_path, file_name: file_name)
-      return ['stored_file', res.id] if res || pp_length == 1
-
-      archive_file = file_path.first
-      file_path = if file_path.length == 1
-                    ''
-                  else
-                    file_path[1..]
-                  end
-      res = NfsStore::Manage::ArchivedFile.find_by(path: file_path, archive_file: archive_file, file_name: file_name)
-      return ['archived_file', res.id] if res
     end
   end
 end

@@ -144,6 +144,18 @@ module UserHandler
 
       where(secondary_key => value)
     end
+
+    # If the id is numeric, use a regular #find, otherwise attempt to find by
+    # treating the id as a secondary key
+    def find_by_id_or_secondary_key(id)
+      if id.is_a?(Integer) || id.to_i.to_s == id
+        # Is numeric id
+        find(id)
+      else
+        # id param is a string, so use a secondary id lookup instead
+        find_by_secondary_key(id)
+      end
+    end
   end
 
   def master_id

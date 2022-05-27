@@ -28,6 +28,18 @@ module NfsStore
       retrieval_type.in? ValidRetrievalTypes
     end
 
+    #
+    # Validate the required retrieval_type and return the found value to avoid accidental misuse.
+    # Raises an FsException::Download exception if incorrect
+    # @param[String|Symbol] retrieval_type - the retrieval type to test
+    # @return [Symbol]
+    def self.validated_retrieval_type!(retrieval_type)
+      retrieval_type = NfsStore::Download::ValidRetrievalTypes.find { |r| r == retrieval_type.to_sym }
+      raise FsException::Download, 'Invalid retrieval type specified' unless valid_retrieval_type? retrieval_type
+
+      retrieval_type
+    end
+
     # Initialize download with NfsStore::Download.new ...
     # @param options [Hash{container=>(NfsStore::Manage::Container), multiple_items=>(True,False)}]
     #   container - the container holding the files - must be set
