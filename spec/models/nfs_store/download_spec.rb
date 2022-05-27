@@ -30,7 +30,7 @@ RSpec.describe NfsStore::Download, type: :model do
     expect(@container.stored_files.last.file_name).to eq file_name
 
     download_path = file_name
-    res = NfsStore::Download.find_download_by_path(download_path)
+    res = NfsStore::Download.find_download_by_path(@container, download_path)
     expect(res).to be_a NfsStore::Manage::StoredFile
     expect(res.retrieval_type).to eq :stored_file
     expect(res.id).to eq @container.stored_files.last.id

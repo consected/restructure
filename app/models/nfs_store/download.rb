@@ -13,9 +13,10 @@ module NfsStore
     # This allows theretrieval type and the download id to be easily accessed
     # if the file is found.
     # Leading slash and double slash will be ignored
+    # @param [NfsStore::Manage::Container] container
     # @param [String] full_path
     # @return [NfsStore::Manage::ContainerFile]
-    def self.find_download_by_path(full_path)
+    def self.find_download_by_path(container, full_path)
       return if full_path.strip.blank?
 
       path_parts = full_path.split('/').reject(&:blank?)
@@ -23,7 +24,7 @@ module NfsStore
       file_name = path_parts.last
       file_path = path_parts[0..-2] unless pp_length
 
-      res = NfsStore::Manage::StoredFile.find_by(path: file_path, file_name: file_name)
+      res = container.stored_files.find_by(path: file_path, file_name: file_name)
       return res if res || pp_length == 1
 
       archive_file = file_path.first
@@ -32,7 +33,7 @@ module NfsStore
                   else
                     file_path[1..]
                   end
-      res = NfsStore::Manage::ArchivedFile.find_by(path: file_path, archive_file: archive_file, file_name: file_name)
+      res = container.archived_files.find_by(path: file_path, archive_file: archive_file, file_name: file_name)
       return res if res
     end
 

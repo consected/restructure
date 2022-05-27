@@ -26,7 +26,7 @@ module NfsStore
       for_action = :download_or_view if params.dig(:secure_view, :preview_as).present?
       download_path = params[:download_path]
       if download_path
-        dl = Download.find_download_by_path(download_path)
+        dl = Download.find_download_by_path(@container, download_path)
         retrieval_type = dl.retrieval_type
         @download_id = dl.id
       end
