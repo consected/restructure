@@ -203,6 +203,14 @@ module UserHandler
     (attributes[(attribute_names - a_list).first] || '').to_s
   end
 
+  #
+  # Return the value of the secondary key if a field is set for it in the configurations
+  # @return [String|Integer]
+  def secondary_key
+    sk_field = self.class.secondary_key&.to_s
+    attributes[sk_field] if sk_field
+  end
+
   protected
 
   def init_vars_user_handler
@@ -264,13 +272,5 @@ module UserHandler
                    end
 
     @was_disabled = respond_to?(:disabled) && saved_change_to_disabled? && disabled ? 'disabled' : false
-  end
-
-  #
-  # Return the value of the secondary key if a field is set for it in the configurations
-  # @return [String|Integer]
-  def secondary_key
-    sk_field = self.class.secondary_key&.to_s
-    attributes[sk_field] if sk_field
   end
 end
