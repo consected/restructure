@@ -2,44 +2,56 @@
   secure_view_defaults
 %>
 <div class="secure-view" style="display: none;" data-preview-as="">
-  <div class="secure-view-control-panel">
 
-    <div class="secure-view-preview-as-selectors sv-control-block">
-      <%= link_to "image", '#', id: "preview-as-png", data: {preview_as: 'png'}, class: 'secure-view-preview-as-selector btn btn-default btn-sm ' + (@secure_view_preview_as == :png ? 'focus' : '') %>
-      <%= link_to "html", '#', id: "preview-as-html", data: {preview_as: 'html'}, class: 'secure-view-preview-as-selector btn btn-default btn-sm' + (@secure_view_preview_as == :html ? 'focus' : '') %>
-    </div>
 
-    <div class="secure-download-actions sv-control-block">
-      <%= link_to '', '#', id: "sv-download-link", class: "sv-download-link btn btn-default btn-sm glyphicon glyphicon-download-alt", title: 'download', target: '_blank' %>
-    </div>
-
-    <div class="secure-view-zoom-selector sv-control-block">
-      <% @secure_view_zoom_factors.each do |zoom| %>
-      <%= link_to "#{zoom}#{zoom.is_a?(Integer) ? '%' : ''}", '#', id: "secure-view-zoom-factor-#{zoom}", data: {zoom_factor: zoom}, class: 'secure-view-zoom-factor-selector btn btn-default btn-sm ' + (zoom == @secure_view_default_zoom ? 'focus' : '') %>
-      <% end %>
-    </div>
+  <div class="secure-view-control-panel navbar-default" role="navigation">
+    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#sv-navbar-collapse-1">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
 
     <div class="secure-view-page-controls sv-control-block">
       <%= link_to "<", '#', id: "preview-prev-page", class: 'secure-view-page-control btn btn-default btn-sm' %>
       <input id="secure-view-current-page" value="1"> of <span id="secure-view-page-count"><%=@page_count%></span>
       <%= link_to ">", '#', id: "preview-next-page", class: 'secure-view-page-control btn btn-default btn-sm' %>
-    </div>
-
-    <% if @secure_view_extra_controls&.first %>
-      <div class="secure-view-extra-actions sv-control-block">
-        <% @secure_view_extra_controls.each do |k, v|
-          attrs = v[:attrs] || {}
-          attrs.merge!(id: "sv-extra-actions-#{k}", class: "secure-view-extra-action btn btn-default btn-sm #{v[:extra_class]}" )
-          %>
-          <%= link_to v[:label], v[:link], attrs %>
-          <% end %>
-      </div>
-    <% end %>
-
-    <div class="secure-view-file-name sv-control-block"></div>
+    </div>    
 
     <div class="secure-view-close">
       <a class="sv-close glyphicon glyphicon-remove-sign show-entity" data-dismiss="modal" aria-label="Close" id="secure-view-close-btn"></a>
+    </div>
+
+
+    <div id="sv-navbar-collapse-1" class="sv-panel-container collapse navbar-collapse">
+      <div class="secure-view-preview-as-selectors sv-control-block">
+        <%= link_to "image", '#', id: "preview-as-png", data: {preview_as: 'png'}, class: 'secure-view-preview-as-selector btn btn-default btn-sm ' + (@secure_view_preview_as == :png ? 'focus' : '') %>
+        <%= link_to "html", '#', id: "preview-as-html", data: {preview_as: 'html'}, class: 'secure-view-preview-as-selector btn btn-default btn-sm' + (@secure_view_preview_as == :html ? 'focus' : '') %>
+      </div>
+
+      <div class="secure-download-actions sv-control-block">
+        <%= link_to '', '#', id: "sv-download-link", class: "sv-download-link btn btn-default btn-sm glyphicon glyphicon-download-alt", title: 'download', target: '_blank' %>
+      </div>
+
+      <div class="secure-view-zoom-selector sv-control-block">
+        <% @secure_view_zoom_factors.each do |zoom| %>
+        <%= link_to "#{zoom}#{zoom.is_a?(Integer) ? '%' : ''}", '#', id: "secure-view-zoom-factor-#{zoom}", data: {zoom_factor: zoom}, class: 'secure-view-zoom-factor-selector btn btn-default btn-sm ' + (zoom == @secure_view_default_zoom ? 'focus' : '') %>
+        <% end %>
+      </div>
+
+      <% if @secure_view_extra_controls&.first %>
+        <div class="secure-view-extra-actions sv-control-block">
+          <% @secure_view_extra_controls.each do |k, v|
+            attrs = v[:attrs] || {}
+            attrs.merge!(id: "sv-extra-actions-#{k}", class: "secure-view-extra-action btn btn-default btn-sm #{v[:extra_class]}" )
+            %>
+            <%= link_to v[:label], v[:link], attrs %>
+            <% end %>
+        </div>
+      <% end %>
+
+      <div class="secure-view-file-name sv-control-block"></div>
+
     </div>
   </div>
 
@@ -48,6 +60,8 @@
       <form action="" method="get" id="secure-view-search-form" data-skip-handlers="true">
         <input type="text" class="secure-view-search-field" name="search_string" value="" placeholder="search"/>
         <button class="glyphicon glyphicon-search small"></button>
+
+        <button id="sv-close-search" class="secure-view-extra-action glyphicon glyphicon-remove small" href="#"></button>
       </form>
 
       <div id="secure-view-search-results"></div>
