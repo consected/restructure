@@ -120,6 +120,9 @@
 
     .secure-view-page {
       pointer-events: none;
+      display: block;
+      margin: 0 auto;
+      margin-bottom: 5px;
     }
 
     .secure-view-page-iframe {
