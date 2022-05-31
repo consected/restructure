@@ -2691,14 +2691,14 @@ CREATE FUNCTION ref_data.log_datadic_variables_update() RETURNS trigger
 BEGIN
   INSERT INTO datadic_variable_history (
     
-    study, source_name, source_type, domain, form_name, variable_name, variable_type, presentation_type, label, label_note, annotation, is_required, valid_type, valid_min, valid_max, multi_valid_choices, is_identifier, is_derived_var, multi_derived_from_id, doc_url, target_type, owner_email, classification, other_classification, multi_timepoints, equivalent_to_id, storage_type, db_or_fs, schema_or_path, table_or_file, disabled, admin_id, redcap_data_dictionary_id, position, section_id, sub_section_id, title, storage_varname, contributor_type, n_for_timepoints, notes,
+    study, source_name, source_type, domain, form_name, variable_name, variable_type, presentation_type, label, label_note, annotation, is_required, valid_type, valid_min, valid_max, multi_valid_choices, is_identifier, is_derived_var, multi_derived_from_id, doc_url, target_type, owner_email, classification, other_classification, multi_timepoints, equivalent_to_id, storage_type, db_or_fs, schema_or_path, table_or_file, disabled, admin_id, redcap_data_dictionary_id, position, section_id, sub_section_id, title, storage_varname,
     user_id,
     created_at,
     updated_at,
     datadic_variable_id)
   SELECT
     
-    NEW.study, NEW.source_name, NEW.source_type, NEW.domain, NEW.form_name, NEW.variable_name, NEW.variable_type, NEW.presentation_type, NEW.label, NEW.label_note, NEW.annotation, NEW.is_required, NEW.valid_type, NEW.valid_min, NEW.valid_max, NEW.multi_valid_choices, NEW.is_identifier, NEW.is_derived_var, NEW.multi_derived_from_id, NEW.doc_url, NEW.target_type, NEW.owner_email, NEW.classification, NEW.other_classification, NEW.multi_timepoints, NEW.equivalent_to_id, NEW.storage_type, NEW.db_or_fs, NEW.schema_or_path, NEW.table_or_file, NEW.disabled, NEW.admin_id, NEW.redcap_data_dictionary_id, NEW.position, NEW.section_id, NEW.sub_section_id, NEW.title, NEW.storage_varname, NEW.contributor_type, NEW.n_for_timepoints, NEW.notes,
+    NEW.study, NEW.source_name, NEW.source_type, NEW.domain, NEW.form_name, NEW.variable_name, NEW.variable_type, NEW.presentation_type, NEW.label, NEW.label_note, NEW.annotation, NEW.is_required, NEW.valid_type, NEW.valid_min, NEW.valid_max, NEW.multi_valid_choices, NEW.is_identifier, NEW.is_derived_var, NEW.multi_derived_from_id, NEW.doc_url, NEW.target_type, NEW.owner_email, NEW.classification, NEW.other_classification, NEW.multi_timepoints, NEW.equivalent_to_id, NEW.storage_type, NEW.db_or_fs, NEW.schema_or_path, NEW.table_or_file, NEW.disabled, NEW.admin_id, NEW.redcap_data_dictionary_id, NEW.position, NEW.section_id, NEW.sub_section_id, NEW.title, NEW.storage_varname,
     NEW.user_id,
     NEW.created_at,
     NEW.updated_at,
@@ -2760,6 +2760,42 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+
+
+--
+-- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.model_references (
+    id integer NOT NULL,
+    from_record_type character varying,
+    from_record_id integer,
+    from_record_master_id integer,
+    to_record_type character varying,
+    to_record_id integer,
+    to_record_master_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean
+);
+
+
+--
+-- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_containers (
+    id integer NOT NULL,
+    name character varying,
+    user_id integer,
+    app_type_id integer,
+    nfs_store_container_id integer,
+    master_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    created_by_user_id bigint
+);
 
 
 --
@@ -3219,7 +3255,8 @@ CREATE TABLE ml_app.admins (
     first_name character varying,
     last_name character varying,
     do_not_email boolean DEFAULT false,
-    admin_id bigint
+    admin_id bigint,
+    capabilities character varying[]
 );
 
 
@@ -4382,25 +4419,6 @@ ALTER SEQUENCE ml_app.message_templates_id_seq OWNED BY ml_app.message_templates
 
 
 --
--- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.model_references (
-    id integer NOT NULL,
-    from_record_type character varying,
-    from_record_id integer,
-    from_record_master_id integer,
-    to_record_type character varying,
-    to_record_id integer,
-    to_record_master_id integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    disabled boolean
-);
-
-
---
 -- Name: model_references_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -4531,23 +4549,6 @@ CREATE SEQUENCE ml_app.nfs_store_container_history_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_container_history_id_seq OWNED BY ml_app.nfs_store_container_history.id;
-
-
---
--- Name: nfs_store_containers; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_containers (
-    id integer NOT NULL,
-    name character varying,
-    user_id integer,
-    app_type_id integer,
-    nfs_store_container_id integer,
-    master_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    created_by_user_id bigint
-);
 
 
 --
@@ -6604,10 +6605,7 @@ CREATE TABLE ref_data.datadic_variable_history (
     sub_section_id integer,
     title character varying,
     storage_varname character varying,
-    user_id bigint,
-    contributor_type character varying,
-    n_for_timepoints jsonb,
-    notes character varying
+    user_id bigint
 );
 
 
@@ -6928,10 +6926,7 @@ CREATE TABLE ref_data.datadic_variables (
     sub_section_id integer,
     title character varying,
     storage_varname character varying,
-    user_id bigint,
-    contributor_type character varying,
-    n_for_timepoints jsonb,
-    notes character varying
+    user_id bigint
 );
 
 
@@ -13331,6 +13326,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20211124120038'),
 ('20211126152918'),
 ('20211206102025'),
+('20211206102026'),
 ('20211206102028'),
 ('20211206102030'),
 ('20211206102244'),
@@ -13607,6 +13603,105 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20220503172651'),
 ('20220503172714'),
 ('20220505095408'),
-('20220509163510');
+('20220509163510'),
+('20220510103824'),
+('20220510104245'),
+('20220510104418'),
+('20220510104623'),
+('20220510104958'),
+('20220510105005'),
+('20220510105350'),
+('20220510105624'),
+('20220510105625'),
+('20220510111800'),
+('20220510111823'),
+('20220510115936'),
+('20220510120159'),
+('20220510120548'),
+('20220510134118'),
+('20220510134159'),
+('20220511181927'),
+('20220511182044'),
+('20220512131102'),
+('20220512143846'),
+('20220512143859'),
+('20220512144040'),
+('20220512144126'),
+('20220512144303'),
+('20220512144337'),
+('20220512145418'),
+('20220512145552'),
+('20220512145818'),
+('20220512145831'),
+('20220512150022'),
+('20220512150119'),
+('20220512150230'),
+('20220512184859'),
+('20220512185002'),
+('20220512191330'),
+('20220512191711'),
+('20220512192613'),
+('20220512192730'),
+('20220512192833'),
+('20220512193005'),
+('20220512193108'),
+('20220512193213'),
+('20220512193318'),
+('20220512194008'),
+('20220512194228'),
+('20220512194359'),
+('20220512194457'),
+('20220512194611'),
+('20220512194744'),
+('20220512194926'),
+('20220516092942'),
+('20220516100849'),
+('20220516113651'),
+('20220516113940'),
+('20220516122435'),
+('20220516122623'),
+('20220516122849'),
+('20220516123101'),
+('20220516123415'),
+('20220516123459'),
+('20220516123628'),
+('20220517122146'),
+('20220517122239'),
+('20220517142648'),
+('20220517142650'),
+('20220517142651'),
+('20220517142654'),
+('20220517142655'),
+('20220517142657'),
+('20220517142851'),
+('20220517142853'),
+('20220517142854'),
+('20220517142857'),
+('20220517142858'),
+('20220517142900'),
+('20220517142902'),
+('20220517142903'),
+('20220517142904'),
+('20220517143044'),
+('20220517143124'),
+('20220517144705'),
+('20220517150044'),
+('20220519170301'),
+('20220524105006'),
+('20220524105008'),
+('20220524105009'),
+('20220524105012'),
+('20220524105013'),
+('20220524105015'),
+('20220524105017'),
+('20220524105018'),
+('20220526172521'),
+('20220526172550'),
+('20220526173106'),
+('20220526173112'),
+('20220526173244'),
+('20220526181804'),
+('20220526182143'),
+('20220531121546');
 
 

@@ -82,6 +82,11 @@ class Admin < ActiveRecord::Base
     # do not notify the admins for now
   end
 
+  def can_admin?(controller_name)
+    cap = capabilities&.reject(&:blank?)
+    cap.nil? || cap.empty? || controller_name.to_s.in?(cap)
+  end
+
   protected
 
   def unlock_account
@@ -107,7 +112,7 @@ class Admin < ActiveRecord::Base
 
   def only_allow_disable
     return if can_manage_admins?
-    return unless !disabled && disabled_changed? && !disabled_was != true #TODO simplify
+    return unless !disabled && disabled_changed? && !disabled_was != true # TODO: simplify
 
     errors.add(:admin, 'can not re-enable administrators')
   end
