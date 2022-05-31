@@ -88,7 +88,13 @@ _fpa.preprocessors_nfs_store = {
       var value = downloads[i]
       if (value.id) {
         value.edit_path = `/masters/${data.nfs_store_container.master_id}/filestore/classification/${data.nfs_store_container.id}?download_id=${value.id}&retrieval_type=${value.retrieval_type}&activity_log_id=${data.nfs_store_container.parent_id}&activity_log_type=${data.nfs_store_container.parent_type}`
-        value.filename_path = `/nfs_store/downloads/${data.nfs_store_container.id}?activity_log_id=${data.nfs_store_container.parent_id}&activity_log_type=${data.nfs_store_container.parent_type}&download_id=${value.id}&retrieval_type=${value.retrieval_type}`
+
+        if (data.nfs_store_container.view_options && data.nfs_store_container.view_options.show_file_links_as == 'path' && value.direct_uri) {
+          value.filename_path = value.direct_uri
+        }
+        else {
+          value.filename_path = `/nfs_store/downloads/${data.nfs_store_container.id}?activity_log_id=${data.nfs_store_container.parent_id}&activity_log_type=${data.nfs_store_container.parent_type}&download_id=${value.id}&retrieval_type=${value.retrieval_type}`
+        }
         value.file_size_mb = Math.floor(value.file_size / 1000000 * 10) / 10
       }
       else {

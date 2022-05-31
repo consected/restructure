@@ -21,10 +21,6 @@ module NfsStore
         cid = params[:id]
       end
 
-      @container = Browse.open_container id: cid, user: current_user
-      @master = @container.master
-      @master.current_user ||= current_user
-
       if alid.present? && altype.present?
         if altype.start_with?('activity_log_')
           @activity_log = ActivityLog.open_activity_log altype, alid, current_user
@@ -37,7 +33,18 @@ module NfsStore
           @activity_log = altype.singularize.ns_camelize.ns_constantize.find(alid)
           @activity_log.current_user = current_user
         end
+      end
 
+      @container = if @set_container_from_activity_log
+                     NfsStore::Manage::Container.referenced_container(@activity_log)
+                   else
+                     Browse.open_container id: cid, user: current_user
+                   end
+
+      @master = @container.master
+      @master.current_user ||= current_user
+
+      if @activity_log
         @container.parent_item = @activity_log
 
         activity_log_for_container_access

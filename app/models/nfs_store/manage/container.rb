@@ -317,6 +317,14 @@ module NfsStore
         extra_options_config.nfs_store[:user_file_actions] if extra_options_config&.nfs_store
       end
 
+      def view_options
+        extra_options_config.nfs_store[:view_options] if extra_options_config&.nfs_store
+      end
+
+      def show_file_links_as_path
+        view_options&.dig(:show_file_links_as) == 'path'
+      end
+
       private
 
       # Create the container directory on the filesystem, using the first available role that provides this access if
