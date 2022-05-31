@@ -56,6 +56,11 @@
     display: block;
     position: relative;
     overflow: hidden;
+
+    p.file-info:empty, 
+    p.file-error:empty {
+      display: none;
+    }
   }
 
   .progress-info {

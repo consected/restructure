@@ -1,2 +1,14 @@
+<% 
+  default_options= {
+    step: 1,
+    pattern: '\\d{0,15}',
+    data: {
+      attr_name: field_name_sym, 
+      object_name: form_object_item_type_us
+    }
+  }
+
+  new_options = default_options.merge( field_options_for(form_object_instance, field_name_sym) )
+%>
 <%= form.label field_name_sym, label_for(field_name_sym, labels) %>
-<%= form.number_field field_name_sym, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}, step: 1, pattern: '\\d{0,15}'} %>
+<%= form.number_field field_name_sym, new_options %>

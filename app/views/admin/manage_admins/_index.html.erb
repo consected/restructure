@@ -21,6 +21,7 @@
           <th>Matching User?</th>
           <th>Expires in (days)</th>
           <th>Locked</th>
+          <th>Capabilities</th>
           <th>Disabled</th>
         </tr>
       </thead>
@@ -36,6 +37,13 @@
             <td><%= list_item.matching_user ? 'yes' : 'no' %></td>
             <td><%= list_item.expires_in == 0 ? '<i class="password-expired">expired</i>'.html_safe : list_item.expires_in %></td>
             <td><%= list_item.access_locked? ? 'locked' : ''%></td>
+            <td>
+              <ul class="admin-tag-list">
+              <% list_item.capabilities&.reject(&:blank?)&.each do |c| %>
+                <li><%=c.humanize.titleize%></li>
+              <% end %>
+              </ul>
+            </td>
             <td><%= list_item.disabled ? 'disabled' : ''%></td>
 
           </tr>

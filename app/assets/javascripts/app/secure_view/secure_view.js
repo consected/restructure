@@ -46,6 +46,14 @@ var SecureView = function () {
     this.$preview_item = null;
     this.$body = null;
     this.html = null;
+
+    this.page_defaults = {
+      overflow: 'hidden',
+      display: 'block'
+    }
+    this.last_scroll_event_date = 0;
+    this.last_keypress_date = 0;
+    this.last_scroll_to_date = 0;
   };
 
   this.init();
@@ -283,17 +291,26 @@ var SecureView = function () {
     }).addClass('sv-added-click-ev');
 
     $('#secure-view-current-page').not('.sv-added-keyup-ev').on('keyup', function (ev) {
-      var inval = $(this).val();
+      const new_keypress_date = Date.now()
 
-      if (inval == '') return;
-      inval = parseInt(inval);
+      if (new_keypress_date == _this.last_keypress_date) return;
 
-      if (inval >= 1 && inval <= _this.page_count && inval != _this.current_page) {
-        _this.show_page(inval);
-      }
-      else {
-        $(this).val(_this.current_page);
-      }
+      var $el = $(this);
+      window.setTimeout(function () {
+        _this.last_keypress_date = new_keypress_date;
+
+        var inval = $el.val();
+
+        if (inval == '') return;
+        inval = parseInt(inval);
+
+        if (inval >= 1 && inval <= _this.page_count && inval != _this.current_page) {
+          _this.show_page(inval);
+        }
+        else {
+          $el.val(_this.current_page);
+        }
+      }, 500)
     }).addClass('sv-added-keyup-ev');
 
     $('.sv-close').not('.sv-added-click-ev').on('click', function (ev) {
@@ -396,7 +413,58 @@ var SecureView = function () {
 
   };
 
+  this.setup_infinite_scroll = function () {
+    _this.$pages_block.on('scroll', function () {
 
+      const new_date = Date.now();
+      if (new_date - _this.last_scroll_event_date < 1000) return;
+
+      window.setTimeout(function () {
+        _this.last_scroll_event_date = new_date;
+
+        const $last_img = $('.secure-view-page').last();
+        if (!$last_img) return;
+
+        const outer_scroll_top = _this.$pages_block.scrollTop(),
+          last_img_pos = $last_img.position();
+        if (!last_img_pos) return;
+
+        const last_img_top = $last_img.position().top;
+
+        if (last_img_top - outer_scroll_top < 50) {
+          _this.show_next_page(true);
+        }
+
+        _this.set_current_page_for_scroll()
+      }, 1000)
+
+    });
+
+    if (_this.page_count > 1) {
+      _this.page_defaults.overflow = 'auto';
+      _this.$pages_block.css({ overflow: _this.page_defaults.overflow })
+    }
+
+
+  }
+
+  // Based on infinite scroll position, set the current page number
+  this.set_current_page_for_scroll = function () {
+
+    window.setTimeout(function () {
+
+      $('.secure-view-page').each(function () {
+        const img_top = $(this).position().top,
+          b_height = _this.$pages_block.height();
+
+        if (img_top >= -10 && img_top < b_height / 2) {
+          _this.set_current_page($(this).attr('data-page-num'));
+          return false;
+        }
+      })
+
+    }, 250)
+  }
 
   this.get_info = function (callback) {
 
@@ -422,6 +490,8 @@ var SecureView = function () {
       _this.can_preview = data.can_preview;
 
       $('#secure-view-page-count').html(_this.page_count);
+
+      _this.setup_infinite_scroll();
 
       if (callback) {
         callback();
@@ -471,7 +541,7 @@ var SecureView = function () {
     else {
 
       if (_this.current_zoom == 'fit') {
-        _this.$pages_block.css({ overflow: 'hidden' });
+        _this.$pages_block.css({ overflow: _this.page_defaults.overflow });
       }
       else {
         _this.$pages_block.css({ overflow: 'auto' });
@@ -526,12 +596,12 @@ var SecureView = function () {
     _this.set_zoom(z);
   };
 
-  this.show_page = function (page) {
+  this.show_page = function (page, no_scroll) {
     if (!_this.got_page(page)) {
       _this.$loading_page_message.show();
     }
     _this.get_page(page);
-    $(".secure-view-page").hide();
+    // $(".secure-view-page").hide();
 
     _this.$preview_item = $("#" + _this.page_id(page));
     _this.$preview_item.show();
@@ -543,21 +613,44 @@ var SecureView = function () {
       _this.show_html_page(_this.current_page);
     }
 
-    _this.set_current_page(page);
+
+    if (no_scroll) return;
+
+    if (_this.$preview_item.hasClass('sv-img-not-loaded')) {
+      _this.$preview_item.on('load', function () {
+        _this.scroll_to($(this))
+      })
+    }
+    else {
+      // The page was previously loaded, just scroll to it
+      _this.scroll_to(_this.$preview_item)
+    }
 
   };
+
+  this.scroll_to = function ($preview_item) {
+    const new_scroll_date = Date.now();
+    if (_this.last_scroll_to_date > new_scroll_date) return;
+
+    _this.last_scroll_to_date = new_scroll_date;
+
+    window.setTimeout(function () {
+      _fpa.utils.scrollTo($preview_item, 0, 0, _this.$pages_block)
+      _this.set_current_page_for_scroll()
+    }, 10);
+  }
 
 
   this.show_img_page = function (page) {
     _this.set_zoom();
     if (page + 1 <= _this.page_count)
       _this.get_page(page + 1);
+    if (page - 1 >= 1)
+      _this.get_page(page - 1);
     if (page + 2 <= _this.page_count)
       _this.get_page(page + 2);
     if (page + 3 <= _this.page_count)
       _this.get_page(page + 3);
-    if (page - 1 >= 1)
-      _this.get_page(page - 1);
 
   };
 
@@ -574,10 +667,10 @@ var SecureView = function () {
     $('#preview-prev-page').attr('disabled', _this.current_page == 1);
   };
 
-  this.show_next_page = function () {
+  this.show_next_page = function (no_scroll) {
     var page = _this.current_page + 1;
     if (page > _this.page_count) return;
-    _this.show_page(page);
+    _this.show_page(page, no_scroll);
   };
 
   this.show_prev_page = function () {
@@ -589,6 +682,7 @@ var SecureView = function () {
   this.page_loaded = function ($preview_item) {
     _this.$loading_page_message.hide();
     _this.set_zoom(null, $preview_item);
+    $preview_item.removeClass('sv-img-not-loaded');
   };
 
   this.got_page = function (page) {
@@ -626,17 +720,36 @@ var SecureView = function () {
     }
     url += $.param(params);
 
+    var display_page = _this.page_defaults.display;
+
     if (_this.preview_as == 'png') {
-      var $preview_item = $('<img id="' + page_id + '" src="' + url + '" class="secure-view-page" data-secure-view-page="' + page + '" style="display: none; width: 1px;" draggable="false" />');
+      var $preview_item = $(`<img id="${page_id}" src="${url}" data-page-num="${page}" class="sv-img-not-loaded secure-view-page" data-secure-view-page="${page}" style="display: ${display_page}; width: 1px;" draggable="false" />`);
     }
     else if (_this.preview_as == 'html') {
-      var $preview_item = $('<iframe id="' + page_id + '" src="' + url + '" class="secure-view-page-iframe" data-secure-view-page="' + page + '" style="display: none;" ></iframe>');
+      var $preview_item = $(`<iframe id="${page_id}" src="${url}" data-page-num="${page}" class="secure-view-page-iframe" data-secure-view-page="${page}" style="display: ${display_page};" ></iframe>`);
     }
     else {
       console.log('preview_as not set');
     };
 
-    _this.$pages.append($preview_item);
+    if (page > 1) {
+      var $after_page;
+      // Scan through the pages until we find the point to place the new page
+      $('.secure-view-page').each(function () {
+        var curr_page = $(this).data('pageNum');
+        if (curr_page > page) {
+          $after_page = $(this);
+          return false;
+        }
+      })
+    }
+
+    if ($after_page) {
+      $after_page.before($preview_item);
+    }
+    else {
+      _this.$pages.append($preview_item);
+    }
 
     $preview_item.on('hover', function (ev) {
       ev.preventDefault();

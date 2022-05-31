@@ -16,6 +16,15 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] admin capabilities to allow admins to be restricted in what they can administer
+- [Added] responsive styling to secure viewer
+- [Added] infinite scrolling to secure viewer
+- [Added] option for nfs_store: view_options: show_file_links_as: path to enable path URI in filestore browser
+- [Added] path based access to container files, and a link provided in stored file and archived file forms
+- [Added] consistent secondary key handling for activity logs
+
 ## [8.0.73] - 2022-05-25
 
 - [Added] download of files using a download_path param

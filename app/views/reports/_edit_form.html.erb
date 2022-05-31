@@ -50,6 +50,7 @@
           # One time only, redefine the label method for this specific form fields instance
           unless label_redefined
             def f.label *args
+              return super if args.last.is_a?(Hash) && args.last[:force_show]
               ""
             end
             label_redefined = true

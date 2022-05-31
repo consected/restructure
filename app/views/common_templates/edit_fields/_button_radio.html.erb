@@ -23,13 +23,13 @@
         attr_name: field_name_sym,
         object_name: form_object_item_type_us
       }
-    }
+    }.merge( field_options_for(form_object_instance, field_name_sym) )
 
     add_options[:checked] = (opt_val == force_val) if force_val
   %>
 <div class="button-radio" data-attr-name="<%=field_name_sym%>">
   <%= form.radio_button field_name_sym, opt_val, add_options %>
 
-  <%= form.label field_name_sym, opt_label, value: opt_val, class: "radio-label"  %>
+  <%= form.label field_name_sym, opt_label, value: opt_val, class: "radio-label", force_show: true  %>
 </div>
 <% end %>
