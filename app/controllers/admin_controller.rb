@@ -9,6 +9,8 @@ class AdminController < ApplicationController
   helper_method :object_has_admin_parent?, :object_name, :editor_code_type,
                 :filter_params_permitted, :filter_params_hash, :filter_params
 
+  before_action :check_capabilities!
+
   protected
 
   def object_has_admin_parent?
@@ -23,5 +25,12 @@ class AdminController < ApplicationController
 
   def secure_params
     params.require(object_name.gsub('__', '_').to_sym).permit(*permitted_params)
+  end
+
+  def check_capabilities!
+    return if current_admin.can_admin? controller_name
+
+    raise FphsNotAuthorized,
+          "Admin not authorized for #{controller_name}"
   end
 end
