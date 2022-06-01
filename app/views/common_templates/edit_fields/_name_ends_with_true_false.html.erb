@@ -10,4 +10,4 @@
   sel_options.merge! 'true': 'true', 'false': 'false'
 
 %>
-<%= render partial: 'common_templates/edit_fields/button_radio', locals: {form: form, field_name_sym: field_name_sym, form_object_item_type_us: form_object_item_type_us, options: sel_options, value: form_object_instance.attributes[field_name], data: {attr_name: field_name_sym, object_name: form_object_item_type_us}, alt_options: options } %>
+<%= render partial: 'common_templates/edit_fields/button_radio', locals: {form: form, form_object_instance: form_object_instance,  field_name_sym: field_name_sym, form_object_item_type_us: form_object_item_type_us, options: sel_options, value: form_object_instance.attributes[field_name], data: {attr_name: field_name_sym, object_name: form_object_item_type_us}, alt_options: options } %>

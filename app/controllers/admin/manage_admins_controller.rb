@@ -10,16 +10,49 @@
 #
 # Regular admin cannot re-enable an admin; this feature remains limited to an OS-user.
 class Admin::ManageAdminsController < AdminController
+  ControllerList = %w[
+    accuracy_scores
+    activity_logs
+    app_configurations
+    app_types
+    colleges
+    config_libraries
+    dynamic_models
+    external_identifier_details
+    external_identifiers
+    external_links
+    general_selections
+    imports
+    item_flag_names
+    job_reviews
+    manage_admins
+    manage_users
+    message_notifications
+    message_templates
+    model_generators
+    filters
+    page_layouts
+    protocol_events
+    protocols
+    redcap
+    reference_data
+    reports
+    role_descriptions
+    server_info
+    sub_processes
+    user_access
+    user_roles
+  ].freeze
+
+  helper_method :capabilities_options
+
   # Only allow update of the disabled status of an administrator to disabled.
   def update
-    if @admin.disabled && secure_params[:disabled] != '1'
-      unless Settings::AllowAdminsToManageAdmins
-        not_authorized
-        flash.now[:warning] = 'Admins can not be re-enabled.'
-        return
-      end
+    if @admin.disabled && secure_params[:disabled] != '1' && !Settings::AllowAdminsToManageAdmins
+      not_authorized
+      flash.now[:warning] = 'Admins can not be re-enabled.'
+      return
     end
-
 
     if params[:gen_new_pw] == '1'
       @admin.force_password_reset
@@ -47,6 +80,10 @@ class Admin::ManageAdminsController < AdminController
   end
 
   protected
+
+  def capabilities_options
+    ControllerList.map { |c| [c.humanize.titleize, c] }
+  end
 
   def primary_model
     Admin
@@ -80,6 +117,6 @@ class Admin::ManageAdminsController < AdminController
   private
 
   def permitted_params
-    %i[email first_name last_name disabled]
+    %i[email first_name last_name disabled] + [{ capabilities: [] }]
   end
 end

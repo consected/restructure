@@ -91,9 +91,10 @@ module EditFields
 
       if Master.get_all_associations.include?(assoc_name)
         # We matched one of the possible classes an activity log be used with (really these are master associations)
-        reslist = form_object_instance.master.send(assoc_name)
+        # It is possible the master is not set yet, so skip it in that case
+        reslist = form_object_instance.master.send(assoc_name) if form_object_instance.master
 
-        cl = reslist.first&.class
+        cl = reslist&.first&.class
       elsif (ActivityLog.all_valid_item_and_rec_types - ActivityLog.use_with_class_names).include? assoc_or_class_name
         # We matched one of the valid item and rec_types
         ActivityLog.use_with_class_names.each do |ucn|

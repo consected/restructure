@@ -9,6 +9,9 @@ module Dynamic
       before_save :handle_before_save_triggers
       after_commit :handle_save_triggers
       after_commit :reset_access_evaluations!
+
+      # skip_save_trigger: Prevent save triggers from running
+      attr_accessor :skip_save_trigger
     end
 
     #
@@ -151,14 +154,14 @@ module Dynamic
     #
     # Handle on save save triggers
     def handle_save_triggers
-      option_type_config&.calc_save_trigger_if self
+      option_type_config&.calc_save_trigger_if self unless skip_save_trigger
       true
     end
 
     #
     # Handle actions that must be performed before on save save triggers
     def handle_before_save_triggers
-      option_type_config&.calc_save_trigger_if self, alt_on: :before_save
+      option_type_config&.calc_save_trigger_if self, alt_on: :before_save unless skip_save_trigger
       true
     end
 

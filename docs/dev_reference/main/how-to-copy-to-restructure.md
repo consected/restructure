@@ -4,7 +4,7 @@
 
 In ReStructure repo:
 
-- Find the latest commit transferred from Private Repo to ReStructure `git log --all --max-count=1 --grep=tx-`
+- Find the latest commit transferred from Private Repo to ReStructure (or vice versa) `git log --all --max-count=1 --grep=tx-`
 - Check it out `git checkout <commit-id>`
 - Create a new branch `tx-<harvard|viva|etc>-@<current version>`
 
@@ -30,18 +30,18 @@ less -r tmp/failing_specs.log
 ```
 
 - Commit the changes that are required
-- Update the CHANGELOG to include the appropriate changes
 - Checkout **develop** branch
 - Merge the new transfer branch into **develop**
+- Update the CHANGELOG to include the appropriate changes
 
 ## From ReStructure to Private Repo
 
 In Private repo:
 
-- Find the latest commit transferred from ReStructure to Private Repo `git log --all --max-count=1 --grep=tx-`
+- Find the latest commit transferred from ReStructure to Private Repo (or vice versa) `git log --all --max-count=1 --grep=tx-`
 - Check it out `git checkout <commit-id>`
 - Create a new branch `tx-restructure-@<current version>`
-- Run `app-scripts/copy-restructure-to-here.sh`
+- Run `app-scripts/copy-restructure-to-here.sh ../../restructure/restructure`
 - Review the changes, which should just reflect those related to the last transfer - take care with:
   - config/initializers/app_settings.rb
   - config/database.yml
@@ -58,6 +58,6 @@ less -r tmp/failing_specs.log
 ```
 
 - Commit the changes that are required
-- Update the CHANGELOG to include the appropriate changes
 - Checkout **develop** branch
 - Merge the new transfer branch into **develop**
+- Update the CHANGELOG to include the appropriate changes

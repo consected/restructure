@@ -380,7 +380,9 @@ module MasterHandler
   def set_instance_from_id
     return if canceled?
 
-    set_object_instance primary_model.find(params[:id])
+    id = params[:id]
+    found_inst = primary_model.find_by_id_or_secondary_key(id)
+    set_object_instance found_inst
     object_instance.master.current_user = current_user unless primary_model.no_master_association
     @id = object_instance.id
   end

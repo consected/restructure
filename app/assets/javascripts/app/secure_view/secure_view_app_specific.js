@@ -27,7 +27,7 @@ var SecureViewAppSpecific = function () {
       ev.preventDefault();
     }).addClass('sv-added-click-ev');
 
-    this.$search_doc = $('#sv-extra-actions-search_doc');
+    this.$search_doc = $('#sv-extra-actions-search_doc, #sv-close-search');
     this.$search_doc.not('.sv-added-click-ev').on('click', function (ev) {
       var $search_panel = _this.secure_view.$search_panel;
 

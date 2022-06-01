@@ -59,7 +59,7 @@ group :development, :test do
   gem 'byebug'
   gem 'debase'
   gem 'jasmine-rails'
-  gem 'parallel_tests'
+  gem 'parallel_tests', '3.8.1'
   gem 'readapt'
   gem 'rspec-rails'
   gem 'ruby-debug-ide'

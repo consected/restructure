@@ -85,12 +85,12 @@
   {{else is field_type '===' 'country' }}
     <li class="{{> field_result_class}} is--country-field " data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">
       {{> field_label labels=(concat 'labels_' (underscore name)) }}
-      <strong>{{#if (fpa_state_item 'special_field_options' 'address_country' this_value)}}{{fpa_state_item 'special_field_options' 'address_country' this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong>
+      <strong>{{#if (not this_value)}}{{else if (fpa_state_item 'special_field_options' 'address_country' this_value)}}{{fpa_state_item 'special_field_options' 'address_country' this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong>
     </li>
   {{else is field_type '===' 'us_state' }}
-    <li class="{{> field_result_class}} is--country-field " data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">
+    <li class="{{> field_result_class}} is--us-state-field " data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">
       {{> field_label labels=(concat 'labels_' (underscore name)) }}
-      <strong>{{#if (fpa_state_item 'special_field_options' 'us_state' this_value)}}{{fpa_state_item 'special_field_options' 'us_state' this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong>
+      <strong>{{#if (not this_value)}}{{else if (fpa_state_item 'special_field_options' 'us_state' this_value)}}{{fpa_state_item 'special_field_options' 'us_state' this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong>
     </li>
 
   {{else is field_type 'includes' '^tag_select_' }}
@@ -178,8 +178,14 @@
     {{/unless}}
     {{/if}}
   {{/unless}}
+  {{else is field_type 'includes' '^select_record_from_table_' }}
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_table_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^select_record_from_' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+  {{else is field_type 'includes' '^select_record_id_from_table_' }}
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_id_from_table_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+  {{else is field_type 'includes' '^select_record_id_from_' }}
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_id_from_' }} {{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^select_' }}
     <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{else is field_type 'includes' 'redcap_select' }}

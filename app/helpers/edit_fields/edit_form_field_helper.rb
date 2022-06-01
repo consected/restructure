@@ -68,9 +68,9 @@ module EditFields
       end
 
       unless got
-        f_names.select { |fn| fn.start_with?('name_starts_with_') }
-               .map { |fn| fn.sub('name_starts_with_', '') }
-               .each do |sw|
+        mapped = f_names.select { |fn| fn.start_with?('name_starts_with_') }
+                        .map { |fn| fn.sub('name_starts_with_', '') }
+        mapped.each do |sw|
           match_name = "name_starts_with_#{sw}"
           next unless curr_field_name.start_with?("#{sw}_") && f_names.include?(match_name)
 
@@ -82,9 +82,9 @@ module EditFields
       end
 
       unless got
-        f_names.select do |fn|
-          fn.start_with?('name_ends_with_')
-        end.map { |fn| fn.sub('name_ends_with_', '') }.each do |ew|
+        mapped = f_names.select { |fn| fn.start_with?('name_ends_with_') }
+                        .map { |fn| fn.sub('name_ends_with_', '') }
+        mapped.each do |ew|
           match_name = "name_ends_with_#{ew}"
           next unless curr_field_name.end_with?("_#{ew}") && f_names.include?(match_name)
 
@@ -127,7 +127,7 @@ module EditFields
 
       unless got
         # Handle Brakeman issue with using column type directly to generate partial path
-        valid_col_types = %i[boolean integer decimal datetime date jsonb json]
+        valid_col_types = %i[boolean integer decimal float datetime date jsonb json]
         ct = valid_col_types.find { |c| c == column_type.to_sym }
 
         match_name = "column_type_#{ct}"

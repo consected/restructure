@@ -116,9 +116,9 @@ module Dynamic
           d.check_implementation_class
           d.force_option_config_parse
           d.add_master_association
-          d.add_user_access_controls
+          # d.add_user_access_controls
           d.reset_active_model_configurations! if this_is_new
-          d.update_tracker_events
+          # d.update_tracker_events
           d.other_regenerate_actions
         end
 

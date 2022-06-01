@@ -20,62 +20,63 @@
       <div class="col-sm-4">
         <h3>Manage Selections</h3>
         <ul class="nav">
-          <li class="nav"><%= link_to "Accuracy Scores", admin_accuracy_scores_path %> </li>
-          <li class="nav"><%= link_to "Colleges List", admin_colleges_path %> </li>
-          <li class="nav"><%= link_to "Drop-Down Selections", admin_general_selections_path %> </li>
-          <li class="nav"><%= link_to "Item Flags", admin_item_flag_names_path %> </li>
-          <li class="nav"><%= link_to "External Links", admin_external_links_path %> </li>
-          <li class="nav"><%= link_to "Protocol / Status / Method", admin_protocols_path %> </li>
+          <% if current_admin.can_admin?(:accuracy)%><li class="nav"><%= link_to "Accuracy Scores", admin_accuracy_scores_path %> </li><%end%>
+          <% if current_admin.can_admin?(:colleges)%><li class="nav"><%= link_to "Colleges List", admin_colleges_path %> </li><%end%>
+          <% if current_admin.can_admin?(:general_selections)%><li class="nav"><%= link_to "Drop-Down Selections", admin_general_selections_path %> </li><%end%>
+          <% if current_admin.can_admin?(:item_flag_names)%><li class="nav"><%= link_to "Item Flags", admin_item_flag_names_path %> </li><%end%>
+          <% if current_admin.can_admin?(:external_links)%><li class="nav"><%= link_to "External Links", admin_external_links_path %> </li><%end%>
+          <% if current_admin.can_admin?(:protocols)%><li class="nav"><%= link_to "Protocol / Status / Method", admin_protocols_path %> </li><%end%>
         </ul>
       </div>
       <div class="col-sm-4">
         <h3>App Configs</h3>
         <ul class="nav">
-          <li class="nav"><%= link_to "App Types", admin_app_types_path %> </li>
-          <li class="nav"><%= link_to "Page Layouts", admin_page_layouts_path %> </li>
-          <li class="nav"><%= link_to "App Configurations", admin_app_configurations_path %> </li>
-          <li class="nav"><%= link_to "Server Settings", admin_server_info_index_path %> </li>
+          <% if current_admin.can_admin?(:app_types)%><li class="nav"><%= link_to "App Types", admin_app_types_path %> </li><%end%>
+          <% if current_admin.can_admin?(:page_layouts)%><li class="nav"><%= link_to "Page Layouts", admin_page_layouts_path %> </li><%end%>
+          <% if current_admin.can_admin?(:app_configurations)%><li class="nav"><%= link_to "App Configurations", admin_app_configurations_path %> </li><%end%>
+          <% if current_admin.can_admin?(:server_info)%><li class="nav"><%= link_to "Server Settings", admin_server_info_index_path %> </li><%end%>
         </ul>
       </div>
       <div class="col-sm-4">
         <h3>Definitions</h3>
         <ul class="nav">
-          <li class="nav"><%= link_to "Reports", admin_reports_path %> </li>
-          <li class="nav"><%= link_to "Activity Logs", admin_activity_logs_path %> </li>
-          <li class="nav"><%= link_to "Dynamic Models", admin_dynamic_models_path %> </li>
-          <li class="nav"><%= link_to "External Identifiers", admin_external_identifiers_path %> </li>
-          <li class="nav"><%= link_to "Config Library", admin_config_libraries_path %> </li>
-          <li class="nav"><%= link_to "Reference Data", admin_reference_data_path %> </li>
+          <% if current_admin.can_admin?(:reports)%><li class="nav"><%= link_to "Reports", admin_reports_path %> </li><%end%>
+          <% if current_admin.can_admin?(:activity_logs)%><li class="nav"><%= link_to "Activity Logs", admin_activity_logs_path %> </li><%end%>
+          <% if current_admin.can_admin?(:dynamic_models)%><li class="nav"><%= link_to "Dynamic Models", admin_dynamic_models_path %> </li><%end%>
+          <% if current_admin.can_admin?(:external_identifiers)%><li class="nav"><%= link_to "External Identifiers", admin_external_identifiers_path %> </li><%end%>
+          <% if current_admin.can_admin?(:config_libraries)%><li class="nav"><%= link_to "Config Library", admin_config_libraries_path %> </li><%end%>
+          <% if current_admin.can_admin?(:reference_data)%><li class="nav"><%= link_to "Reference Data", admin_reference_data_path %> </li><%end%>
         </ul>
       </div>
       <div class="col-sm-4">
         <h3>Users and Access</h3>
         <ul class="nav">
-          <li class="nav"><%= link_to "Usernames & Passwords", admin_manage_users_path %> </li>
-          <li class="nav"><%= link_to "User Contact Info", users_contact_infos_path %> </li>
-          <li class="nav"><%= link_to "User Roles", admin_user_roles_path %> </li>
-          <li class="nav"><%= link_to "User Access Controls", admin_user_access_controls_path %> </li>
-          <li class="nav"><%= link_to "Role Descriptions", admin_role_descriptions_path %> </li>
-          <li class="nav"><%= link_to "File Filters", admin_nfs_store_filter_filters_path %> </li>
-          <li class="nav"><%= link_to "Administrators", admin_manage_admins_path %> </li>
+          <% if current_admin.can_admin?(:manage_users)%><li class="nav"><%= link_to "Usernames & Passwords", admin_manage_users_path %> </li><%end%>
+          <% if current_admin.can_admin?(:user_contact_infos)%><li class="nav"><%= link_to "User Contact Info", users_contact_infos_path %> </li><%end%>
+          <% if current_admin.can_admin?(:user_roles)%><li class="nav"><%= link_to "User Roles", admin_user_roles_path %> </li><%end%>
+          <% if current_admin.can_admin?(:user_access_controls)%><li class="nav"><%= link_to "User Access Controls", admin_user_access_controls_path %> </li><%end%>
+          <% if current_admin.can_admin?(:role_descriptions)%><li class="nav"><%= link_to "Role Descriptions", admin_role_descriptions_path %> </li><%end%>
+          <% if current_admin.can_admin?(:filters)%><li class="nav"><%= link_to "File Filters", admin_nfs_store_filter_filters_path %> </li><%end%>
+          <% if current_admin.can_admin?(:manage_admins)%><li class="nav"><%= link_to "Administrators", admin_manage_admins_path %> </li><%end%>
         </ul>
       </div>
       <div class="col-sm-4">
         <h3>Messaging</h3>
         <ul class="nav">
-          <li class="nav"><%= link_to "Message Templates", admin_message_templates_path %> </li>
-          <li class="nav"><%= link_to "Message Notifications", admin_message_notifications_path %> </li>
-          <li class="nav"><%= link_to "Background Jobs", admin_job_reviews_path %> </li>
+          <% if current_admin.can_admin?(:message_templates)%><li class="nav"><%= link_to "Message Templates", admin_message_templates_path %> </li><%end%>
+          <% if current_admin.can_admin?(:message_notifications)%><li class="nav"><%= link_to "Message Notifications", admin_message_notifications_path %> </li><%end%>
+          <% if current_admin.can_admin?(:job_reviews)%><li class="nav"><%= link_to "Background Jobs", admin_job_reviews_path %> </li><%end%>
         </ul>
       </div>
       <div class="col-sm-4">
         <h3>External ID Details</h3>
         <ul class="admin-menu-list">
-          <%= render partial: 'pages/index_admin_external_identifiers' %>
+          <% if current_admin.can_admin?(:external_identifier_details)%><%= render partial: 'pages/index_admin_external_identifiers' %><%end%>
         </ul>
       </div>
     </div>
     <div class="row">
+      <% if current_admin.can_admin?(:redcap)%>
       <div class="col-sm-4">
         <h3>REDCap</h3>
       <% if current_admin&.matching_user&.accessible_app_types&.map(&:name)&.include? 'ref-data' %>
@@ -96,14 +97,16 @@
         in app <b>ref-data</b> <br>
         to use the REDCap admin panel</p>
       <% end%>
-
       </div>
+      <%end%>
+
+
       <div class="col-sm-4">
         <h3>Imports</h3>
       
         <ul class="nav">
-          <li class="nav"><%= link_to "Import CSV", imports_imports_path %> </li>
-          <li class="nav"><%= link_to "Generate Table from CSV", imports_model_generators_path %> </li>
+          <% if current_admin.can_admin?(:imports)%><li class="nav"><%= link_to "Import CSV", imports_imports_path %> </li><%end%>
+          <% if current_admin.can_admin?(:model_generators)%><li class="nav"><%= link_to "Generate Table from CSV", imports_model_generators_path %> </li><%end%>
         </ul>
       
 
