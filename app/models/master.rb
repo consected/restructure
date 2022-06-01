@@ -107,6 +107,14 @@ class Master < ActiveRecord::Base
            },
            inverse_of: :master
 
+  # Allow calc actions and substitutions to work correctly
+  has_many :tracker_history,
+           lambda {
+             preload(:protocol, :sub_process, :protocol_event, :user)
+               .order(TrackerHistoryEventOrderClause)
+           },
+           inverse_of: :master
+
   has_many :latest_tracker_history,
            -> { order(id: :desc).limit(1) },
            class_name: 'TrackerHistory',

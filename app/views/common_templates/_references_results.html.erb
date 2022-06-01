@@ -43,7 +43,9 @@
   {{/each}}
   <% end %>
 
-<%  # Iterate all the references, setting up the creatable items' actions
+<%  
+  if class_resource_name
+    # Iterate all the references, setting up the creatable items' actions
     references&.each do |ref_key, refitem|
       next unless ref_key && refitem
       
@@ -109,6 +111,7 @@
 <%    end
     end 
     # Done iterating references
+  end
 %>
 
   {{#if model_references}}
