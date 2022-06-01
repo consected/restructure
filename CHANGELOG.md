@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transfer from ReStructure 8.0.31 - 2022-06-01
+
+- [Fixed] issue related to definition loading and select from record configs
+
 ## [8.0.74] - 2022-05-31
 
 - [Added] admin capabilities to allow admins to be restricted in what they can administer
