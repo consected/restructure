@@ -17,8 +17,8 @@ module EditFields
       sf = SelectFieldHandler.new
       sf.form_object_instance = form_object_instance
       sf.assoc_or_class_name = assoc_or_class_name
-      sf.value_attr = value_attr.to_sym
-      sf.label_attr = label_attr.to_sym
+      sf.value_attr = value_attr
+      sf.label_attr = label_attr
       sf.group_split_char = group_split_char
       sf.generate_record_data
     end
@@ -63,7 +63,8 @@ module EditFields
         Rails.logger.warn "Failed to find valid class name for #{assoc_or_class_name}"
       elsif cl.attribute_names.include?('rank')
         reslist_data = list_for_rank(reslist)
-      elsif label_attr == :data || value_attr == :data
+      elsif (label_attr.respond_to?(:to_sym) && label_attr.to_sym == :data) ||
+            (value_attr.respond_to?(:to_sym) && value_attr.to_sym == :data)
         reslist_data = list_for_complex_attributes(reslist)
       else
         reslist_data = list_for_defined_attributes(reslist, cl)
