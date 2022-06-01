@@ -16,6 +16,36 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transferred from Viva @8.0.74 - 2022-06-01
+
+- [Added] admin capabilities to allow admins to be restricted in what they can administer
+- [Added] responsive styling to secure viewer
+- [Added] infinite scrolling to secure viewer
+- [Added] option for nfs_store: view_options: show_file_links_as: path to enable path URI in filestore browser
+- [Added] path based access to container files, and a link provided in stored file and archived file forms
+- [Added] consistent secondary key handling for activity logs
+- [Added] download of files using a download_path param
+- [Added] showing select_from_... values based on live data and master associations, not just dynamic definitions
+- [Added] global app definition of nav links, and ability for icon to be used without a label
+- [Added] show_as iframe for report cell and fixed tags handling
+- [Added] filestore browser to appear in edit forms, if view_as: edit: filestore is set
+- [Added] if block substitions
+- [Changed] if block substitutions to allow for multiline text
+
+- [Fixed] failure attempting to edit external id
+- [Fixed] date and time formatting in reports presented as lists
+- [Fixed] handling of always_use_this_for_access_control, save trigger success and skip_if_exists
+- [Fixed] calc action to use conditions consistently
+- [Fixed] issue with if block substitutions
+- [Fixed] bug with using document secure viewer on second load of report results
+- [Fixed] migrations related to reference views
+- [Fixed] css for hiding empty captions
+- [Fixed] issue adding new dynamic models
+- [Fixed] recursive calling of save trigger within update_this and pull_external_data
+- [Fixed] references: showable_if: calculation causing infinite recursion
+
 ## [8.0.30] - 2022-05-13
 
 ### Transferred from Viva @8.0.63 - 2022-05-13
