@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transfer from Harvard 7.4.106 - 2022-06-01
+
+- [Fixed] issue related to definition loading and select from record configs
+
 ## [8.0.31] - 2022-06-01
 
 ### Transferred from Viva @8.0.74 - 2022-06-01
