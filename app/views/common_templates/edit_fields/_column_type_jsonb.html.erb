@@ -26,7 +26,7 @@ html_options = {
   data: {attr_name: field_name_sym, object_name: form_object_item_type_us, code_editor_type: 'yaml'}, 
   class: "code-editor code-editor-yaml",
   value: gs
-}
+}.merge(options)
 %>
 <%= form.label field_name_sym, label_for(field_name_sym, labels), opt %>
 <%= form.text_area field_name_sym, html_options %>

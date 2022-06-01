@@ -117,7 +117,7 @@ _fpa.postprocessors_reports = {
   },
 
   reports_result: function (block, data) {
-
+    block.removeClass('use-secure-view-on-links-setup');
     if (data) {
       // Update the search form results count bar manually
       var c = $('.result-count').html();
@@ -221,7 +221,7 @@ _fpa.postprocessors_reports = {
   },
 
   report_format_result_cells: function (block, data) {
-    $('td[data-col-type$="_when"], td[data-col-type$=" when"], td[data-col-type$="_date"], td[data-col-type$=" date"], td[data-col-type="date"], td[data-col-var-type="Date"]').not('.td-date-formatted, [data-col-var-type="Time"]').each(function () {
+    $('td[data-col-type$="_when"], td[data-col-type$=" when"], td[data-col-type$="_date"], td[data-col-type$=" date"], td[data-col-type="date"], td[data-col-var-type="Date"], [data-col-var-type="Date"] rldata').not('.td-date-formatted, [data-col-var-type="Time"]').each(function () {
       var d = null;
       var val = $(this).html();
       if (val == 'Invalid Date')
@@ -231,7 +231,7 @@ _fpa.postprocessors_reports = {
       $(this).html(d);
     }).addClass('td-date-formatted');
 
-    $('td[data-col-var-type="Time"]').not('.td-time-formatted').each(function () {
+    $('td[data-col-var-type="Time"], [data-col-var-type="Time"] rldata').not('.td-time-formatted').each(function () {
       var d = null;
       var val = $(this).html();
       if (val == 'Invalid Date')

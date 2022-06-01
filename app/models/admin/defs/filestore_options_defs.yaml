@@ -14,7 +14,7 @@
       from: this
       add: one_to_this
       view_as:
-        edit: hide
+        edit: filestore|hide
         show: filestore
         new: not_embedded
       creatable_if:
@@ -91,4 +91,7 @@
         pipeline: # a pipeline to perform, using the pipeline format described above
           - rerun_all:
 
+    view_options:
+      show_file_links_as: basic|path - basic (default) is an id based link, whereas "path" follows the format
+                            "/nfs_store/downloads/in/:activity_log_type/:activity_log_id/:download_path"
         

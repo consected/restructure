@@ -224,6 +224,11 @@ Rails.application.routes.draw do
     end
     resources :chunk, only: %i[create show update]
     post 'downloads/multi', to: 'downloads#multi'
+    get 'downloads/in/:activity_log_type/:activity_log_id/:download_path', to: 'downloads#show_from_activity_log',
+                                                                           constraints: { download_path: /.*/ },
+                                                                           format: false
+    #  ,
+    #  defaults: { format: 'html' }
     resources :downloads, only: %i[show create] do
       member do
         get :search_doc

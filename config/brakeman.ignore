@@ -47,7 +47,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 631,
+      "line": 641,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';\\n\")",
       "render_path": null,
@@ -127,7 +127,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 338,
+      "line": 348,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE\")",
       "render_path": null,
@@ -304,20 +304,20 @@
     {
       "warning_type": "File Access",
       "warning_code": 16,
-      "fingerprint": "89dc70f354ad3576baf4313669da7d9e79bfb66361a46c250b55c57d4a85a37b",
+      "fingerprint": "7d076acfdb3069c878d3c8da5ec077aa7b3c49764b73226543a6e7da19a9080a",
       "check_name": "SendFile",
       "message": "Parameter value used in file name",
       "file": "app/controllers/nfs_store/downloads_controller.rb",
-      "line": 34,
+      "line": 48,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
-      "code": "send_file(retrieve_file(params[:download_id].to_i, params[:retrieval_type], :for_action => ((:download or :download_or_view))))",
+      "code": "send_file(retrieve_file((params[:download_id].to_i or Download.find_download_by_path(@container, params[:download_path]).id), (params[:retrieval_type] or Download.find_download_by_path(@container, params[:download_path]).retrieval_type), :for_action => ((:download or :download_or_view))))",
       "render_path": null,
       "location": {
         "type": "method",
         "class": "NfsStore::DownloadsController",
         "method": "show"
       },
-      "user_input": "params[:retrieval_type]",
+      "user_input": "params[:download_path]",
       "confidence": "Weak",
       "note": ""
     },
@@ -366,7 +366,7 @@
       "warning_code": 122,
       "fingerprint": "98b26f60d776fd41ee6f088c833725145be9aac2d7c5b33780241c273622db42",
       "check_name": "EOLRails",
-      "message": "Support for Rails 5.2.7.1 ends on 2022-06-01",
+      "message": "Support for Rails 5.2.8 ends on 2022-06-01",
       "file": "Gemfile.lock",
       "line": 253,
       "link": "https://brakemanscanner.org/docs/warning_types/unmaintained_dependency/",
@@ -597,7 +597,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 334,
+      "line": 344,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE\")",
       "render_path": null,
@@ -611,6 +611,6 @@
       "note": ""
     }
   ],
-  "updated": "2022-05-11 09:39:01 +0100",
-  "brakeman_version": "5.2.2"
+  "updated": "2022-05-31 14:52:45 +0100",
+  "brakeman_version": "5.2.3"
 }

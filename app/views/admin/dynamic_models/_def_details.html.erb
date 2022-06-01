@@ -41,10 +41,12 @@
     <%= sortable_block "#dynamic_model_field_list", "li" %>
   </ul>
 
+<% if object_instance.persisted? && object_instance.enabled?%>
   <label>additional table columns</label>
   <ul class="activity-list">
   <% (table_cols - fields).each do |f|%><li><%=f%></li><% end %>
   </ul>
+<% end %>  
 
 </div>
 <% if object_instance.persisted? && object_instance.enabled? %>

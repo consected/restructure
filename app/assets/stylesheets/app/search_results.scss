@@ -138,7 +138,7 @@ li.list-group-item {
   }
 
   &.caption-before:empty {
-    display: none;
+    display: none !important;
   }
 
   &:not(.caption-before, .notes-block, .dialog-before) {

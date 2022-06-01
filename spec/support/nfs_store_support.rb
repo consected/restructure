@@ -226,6 +226,36 @@ module NfsStoreSupport
                 embed_resource_name:
                   preset_value: dynamic_model__test_created_by_recs
 
+      file_config_user_creator:
+        label: File Config User Creator
+        fields:
+          - select_call_direction
+
+        save_trigger:
+          on_create:
+            create_filestore_container:
+              name:
+                - session files
+                - select_scanner
+                - user creator
+              label: Session Files for User
+              create_with_role: nfs_store group 600
+              skip_if_exists: user_is_creator
+
+        references:
+          nfs_store__manage__container:
+            label: Files
+
+            from: user_is_creator
+            add: one_to_this
+
+            view_as:
+              edit: hide
+              show: filestore
+              new: not_embedded
+
+        nfs_store:
+          always_use_this_for_access_control: true
     ENDDEF
 
     @aldef.current_admin = @admin
@@ -280,18 +310,18 @@ module NfsStoreSupport
 
     @activity_log.save!
     expect(@activity_log.resource_name).to eq "activity_log__player_contact_phone__#{activity}"
+    expect(@activity_log).to be_a ActivityLog::PlayerContactPhone
+    expect(@activity_log.extra_log_type_config.nfs_store).to be_a Hash
+    expect(@activity_log.user_id).to eq @player_contact.current_user.id
+    expect(@activity_log.user_id).to eq @activity_log.current_user.id
+    expect(@activity_log.user_id).to eq @user.id
 
-    @container = @activity_log.model_references.first.to_record
+    @container = @activity_log.model_references&.first&.to_record
     expect(@container).not_to be nil
-    # end
-
     @container.parent_item = @activity_log
-    @activity_log.current_user = @user
     @container.current_user = @user
 
-    expect(@activity_log).to be_a ActivityLog::PlayerContactPhone
-    expect(@activity_log.resource_name).to eq "activity_log__player_contact_phone__#{activity}"
-    expect(@activity_log.extra_log_type_config.nfs_store).to be_a Hash
+    @activity_log.current_user = @user
 
     @container
   end

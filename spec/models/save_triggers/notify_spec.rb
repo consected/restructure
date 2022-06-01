@@ -432,6 +432,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
     setup_access al.resource_name, resource_type: :table, access: :create, user: user
 
+    sleep 1.5
     alstep1 = @player_contact.activity_log__player_contact_elt2_tests.build(select_call_direction: 'from player', select_who: 'user', extra_log_type: 'step_1')
 
     setup_access alstep1.resource_name, resource_type: :activity_log_type, access: :create, user: user

@@ -3,6 +3,7 @@ $color2: rgb(0, 97, 140);
 
 .button-radio {
   display: inline-block;
+  position: relative;
   margin: 0 0.5rem;
   background-color: transparent;
   border-radius: 50px;
@@ -85,6 +86,10 @@ $color2: rgb(0, 97, 140);
       }
     }
   }
+}
+
+td .button-radio {
+  min-width: 110px;
 }
 
 .button-radio-view {
