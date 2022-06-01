@@ -24,7 +24,7 @@ bundle ; yarn
 FPHS_LOAD_APP_TYPES=1 bundle exec rails db:migrate
 FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data FPHS_LOAD_APP_TYPES=1 bundle exec rake db:structure:dump
 app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
-app-scripts/parallel-test.sh
+app-scripts/parallel_test.sh
 # Review the failures
 less -r tmp/failing_specs.log
 ```
@@ -52,7 +52,7 @@ bundle ; yarn
 FPHS_LOAD_APP_TYPES=1 bundle exec rails db:migrate
 FPHS_POSTGRESQL_SCHEMA=ml_app,ref_data FPHS_LOAD_APP_TYPES=1 bundle exec rake db:structure:dump
 app-scripts/drop-test-db.sh ; app-scripts/create-test-db.sh
-app-scripts/parallel-test.sh
+app-scripts/parallel_test.sh
 # Review the failures
 less -r tmp/failing_specs.log
 ```
