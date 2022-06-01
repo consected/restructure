@@ -3227,7 +3227,8 @@ CREATE TABLE ml_app.admins (
     first_name character varying,
     last_name character varying,
     do_not_email boolean DEFAULT false,
-    admin_id bigint
+    admin_id bigint,
+    capabilities character varying[]
 );
 
 
@@ -6872,6 +6873,27 @@ COMMENT ON COLUMN ref_data.datadic_variable_history.storage_varname IS 'Database
 
 
 --
+-- Name: COLUMN datadic_variable_history.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variable_history.contributor_type IS 'Type of contributor this variable was provided by';
+
+
+--
+-- Name: COLUMN datadic_variable_history.n_for_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variable_history.n_for_timepoints IS 'For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)';
+
+
+--
+-- Name: COLUMN datadic_variable_history.notes; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variable_history.notes IS 'Notes';
+
+
+--
 -- Name: datadic_variable_history_id_seq; Type: SEQUENCE; Schema: ref_data; Owner: -
 --
 
@@ -6947,7 +6969,7 @@ CREATE TABLE ref_data.datadic_variables (
 -- Name: TABLE datadic_variables; Type: COMMENT; Schema: ref_data; Owner: -
 --
 
-COMMENT ON TABLE ref_data.datadic_variables IS 'Dynamicmodel: Full Data Dictionary';
+COMMENT ON TABLE ref_data.datadic_variables IS 'Dynamicmodel: User Variables';
 
 
 --
@@ -7200,6 +7222,27 @@ COMMENT ON COLUMN ref_data.datadic_variables.title IS 'Section caption';
 --
 
 COMMENT ON COLUMN ref_data.datadic_variables.storage_varname IS 'Database field name, or variable name in data file';
+
+
+--
+-- Name: COLUMN datadic_variables.contributor_type; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.contributor_type IS 'Type of contributor this variable was provided by';
+
+
+--
+-- Name: COLUMN datadic_variables.n_for_timepoints; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.n_for_timepoints IS 'For each named timepoint (name:), the population or count of responses (n:), with notes (notes:)';
+
+
+--
+-- Name: COLUMN datadic_variables.notes; Type: COMMENT; Schema: ref_data; Owner: -
+--
+
+COMMENT ON COLUMN ref_data.datadic_variables.notes IS 'Notes';
 
 
 --
