@@ -496,7 +496,7 @@ _fpa.form_utils = {
     }
 
     // Automatically titleize names
-    if (ops.length == 0 && (tag_name == 'name' || tag_name.split('_name').length == 1)) {
+    if (ops.length == 0 && (tag_name == 'name' || tag_name.match(/_name$/))) {
       ops = ['titleize']
     }
 
@@ -1593,7 +1593,7 @@ _fpa.form_utils = {
       _fpa.form_utils.resize_labels(uc)
     }, 200)
 
-    $('a[href$="#open-in-new-tab"]').each(function () {
+    $('a[href$="#open-in-new-tab"], a[href^="mailto:"], a[href^="tel:"]').each(function () {
       $(this).attr('target', '_blank');
       if ($(this).find('.glyphicon-new-window').length) return;
       $(this).append(' <i class="glyphicon glyphicon-new-window"></i>');

@@ -17,12 +17,21 @@
       <% if object_instance.persisted? %>
       <h4>Actions</h4>
       <p>
-      <%= link_to 'Update Config from Table', 
-                  update_config_from_table_admin_dynamic_model_path(object_instance),
-                  class: 'btn btn-danger',
-                  remote: true, 
-                  method: :post 
-      %>
+      
+      <a class="btn btn-danger show-in-modal" data-content-el="#dmdef-update-config-from-table-<%=object_instance.id%>" data-title="Update Config from Table">Update Config from Table</a>
+      <div id="dmdef-update-config-from-table-<%=object_instance.id%>" class="hidden">
+        <h2>This action is destructive</h2>
+        <p>Click to continue if you are sure</p>
+        <p>
+        <%= link_to 'Update Config from Table', 
+                    update_config_from_table_admin_dynamic_model_path(object_instance),
+                    class: 'btn btn-danger',
+                    remote: true, 
+                    method: :post 
+        %>
+        </p>
+      </div>
+
       </p>
       <% end %>
       <%= %>

@@ -63,8 +63,8 @@ module EditFields
         Rails.logger.warn "Failed to find valid class name for #{assoc_or_class_name}"
       elsif cl.attribute_names.include?('rank')
         reslist_data = list_for_rank(reslist)
-      elsif (label_attr.respond_to?(:to_sym) && label_attr.to_sym == :data) ||
-            (value_attr.respond_to?(:to_sym) && value_attr.to_sym == :data)
+      elsif label_attr.respond_to?(:to_sym) && value_attr.respond_to?(:to_sym) &&
+            (label_attr.to_sym == :data || value_attr.to_sym == :data)
         reslist_data = list_for_complex_attributes(reslist)
       else
         reslist_data = list_for_defined_attributes(reslist, cl)
@@ -145,8 +145,13 @@ module EditFields
     # if a matching named attribute exists, otherwise is included as a literal string.
     # The benefit of using this method over #list_for_complex_attributes is speed with large lists,
     # since we are able to identify just the attributes that are needed and they can be plucked directly
-    # from a database query rather than instantiating every object
-    # @param [ActiveRecord::Relation] reslist <description>
+    # from a database query rather than instantiating every object.
+    # NOTE: It is essential that all attributes are accessible directly through a query on the database,
+    # so the definition can't rely on the definition of a "data_attribute" (data) in a dynamic model,
+    # which by default label_attr and value_attr will try to use. For this reason, we check all attributes
+    # exist prior to attempting the query.
+    # @param [ActiveRecord::Relation] reslist
+    # @param [UserBase] model
     # @return [Array]
     def list_for_defined_attributes(reslist, model)
       arr_label_attr, pluck_attrs, do_subs_label = pluck_attrs_for(label_attr, model)
@@ -155,6 +160,14 @@ module EditFields
       pluck_attrs += val_pluck_attrs
       pluck_attrs.uniq!
       sort_attr = pluck_attrs.first
+
+      pluck_attrs_strs = pluck_attrs.map(&:to_s)
+
+      if (reslist.attribute_names & pluck_attrs_strs).sort != pluck_attrs_strs.sort
+        raise FphsException,
+              "Not all attributes from value_attr or label_attr (#{pluck_attrs_strs}) configs " \
+              "are defined in #{reslist.model}: #{reslist.attribute_names} / #{model}"
+      end
 
       reslist_data = reslist.reorder('')
                             .order(sort_attr => :asc)

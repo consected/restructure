@@ -18,6 +18,19 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+### Transfer from Harvard 7.4.111 - 2022-06-13
+
+- [Added] new_caption option
+- [Added] returning JSON data related to created_by_user for current instance and master
+- [Added] prevent-reload-on-reference-save class to prevent an updated or created reference forcing the container block to refresh
+- [Added] show-in-modal class for links, allowing a confirmation mechanism for dangerous actions
+- [Changed] handling of closing an embedded report modal to only refresh if the container block has a class allow-refresh-item-on-modal-close
+- [Changed] error handling related to selection configs in selector_with_config_overrides, so there is enough information to diagnose an issue
+- [Fixed] prevent_disable on references when pluralized
+- [Fixed] handling of created_by_user reference in dynamic migrations
+- [Fixed] select from record configs again
+- [Fixed] incorrect titleization of substitutions within UI
+
 ### Transfer from Harvard 7.4.106 - 2022-06-01
 
 - [Fixed] issue related to definition loading and select from record configs

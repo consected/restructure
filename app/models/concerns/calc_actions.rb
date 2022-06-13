@@ -648,10 +648,10 @@ module CalcActions
         # Identify all records this instance references
         from_instance = @current_instance
       when :parent_references
-        # Identify all records this instance's referrring record (parent) references
+        # Identify all records this instance's referring record (parent) references
         from_instance = @current_instance.referring_record
       when :parent_or_this_references
-        # Identify all records this instance's referrring record (parent) references,
+        # Identify all records this instance's referring record (parent) references,
         # or if there is no parent, this record references
         from_instance = @current_instance.referring_record || @current_instance
       end
