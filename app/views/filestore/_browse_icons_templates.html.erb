@@ -77,7 +77,7 @@
          title="{{file_name}}"
          target="_blank"
       >
-        <img src="{{filename_path}}&secure_view[page]=1&secure_view[do]=convert_to&secure_view[preview_as]=icon" class="browse-icon-img" draggable="false" id="icon-img-{{id}}"/>
+        <img src="{{filename_path}}{{#is '?' 'in' filename_path}}&{{else}}?{{/is}}secure_view[page]=1&secure_view[do]=convert_to&secure_view[preview_as]=icon" class="browse-icon-img" draggable="false" id="icon-img-{{id}}"/>
       </a>
       <a class="browse-entry-classifications" href="{{filename_path}}" target="_blank" data-id="{{id}}" data-rt="{{retrieval_type}}">        
         <span class="bem-classification-attrs">

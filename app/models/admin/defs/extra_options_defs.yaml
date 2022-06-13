@@ -1,9 +1,9 @@
 # Common Options
-  label: button label  
+  label: main label  (also used as + button label if button_label not defined)
+  button_label: add record button label
   fields:
   - field_name_1
   - field_name_2
-  button_label: add record button label
   caption_before:
     field_name: string caption to appear before field
     all_fields: caption to appear before all fields
@@ -44,7 +44,16 @@
       subject)
     header_caption: header caption to use - can include { {substitution}}
     alt_width_classes: html classes (space separated) to replace standard col-* classes
+      # For example:
+      #   resized-width col-md-18 col-lg-18 col-md-offset-3 prevent_nfs_resize
+      # This forces the width of the block, and prevents the NFS filestore block changing the container width
     extra_class: html classes (space separated) to add to block
+      # Useful classes:
+      # - allow-refresh-item-on-modal-close
+      #   - to ensure an embedded_report_* field refreshes the block when the modal is closed
+      # - prevent-reload-on-reference-save
+      #   - by default the container will reload when a reference is created or updated. This prevents it
+
   filestore:
     container: {}
   save_action:
@@ -182,6 +191,10 @@
         always_open: true # force the reference to always be expanded
       showable_if: # exclude to always show
       creatable_if: # exclude to always allow creation
+      prevent_disable: true | condition Hash 
+        # always prevent the reference from being disabled, even if the containing record is editable
+      allow_disable_if_not_editable: true | condition Hash 
+        # always allow the references to be disabled, even if the containing record is not editable
   
 
   save_trigger:

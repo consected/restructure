@@ -518,9 +518,10 @@ module ActiveRecord
 
           if fdef == :references
             begin
-              alt_c = field_opts[:attr_name]
+              alt_c = options[:attr_name]
               add_reference "#{schema}.#{table_name}", alt_c, options
-            rescue StandardError, ActiveRecord::StatementInvalid
+            rescue StandardError, ActiveRecord::StatementInvalid => e
+              puts "******* Failed adding reference: #{schema}.#{table_name}, #{alt_c}, #{options}\n#{e}\n#{e.backtrace.join("\n")}"
               nil
             end
           else
@@ -543,7 +544,7 @@ module ActiveRecord
           next if skip_master && c.to_sym == :master_id
 
           if fdef == :references
-            alt_c = field_opts[:attr_name]
+            alt_c = options[:attr_name]
             remove_reference "#{schema}.#{table_name}", alt_c, options
           else
             remove_column "#{schema}.#{table_name}", c, fdef
@@ -768,6 +769,7 @@ module ActiveRecord
           elsif a == 'created_by_user_id'
             f = :references
             fopts = { index: { name: "#{rand_id}_ref_cb_user_idx" }, foreign_key: { to_table: :users }, attr_name: :created_by_user }
+            attr_name = :created_by_user
           elsif a.index(/(?:_when|_date)$/)
             f = :date
           elsif a.index(/(?:_time)$/)
