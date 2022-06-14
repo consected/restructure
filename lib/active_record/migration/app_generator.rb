@@ -48,6 +48,8 @@ module ActiveRecord
       end
 
       def create_schema
+        return if schema_exists?(schema)
+
         sql = "CREATE SCHEMA IF NOT EXISTS #{schema}"
         sql += " AUTHORIZATION #{owner}" if owner.present? && !Rails.env.development?
         ActiveRecord::Base.connection.execute sql
