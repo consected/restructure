@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.0.30] - 2022-05-13
+## [8.0.34] - 2022-06-13
 
 ### Transfer from Harvard 7.4.111 - 2022-06-13
 
@@ -46,7 +46,7 @@ release will be created for any release tested in production, and may be marked 
 - [Added] path based access to container files, and a link provided in stored file and archived file forms
 - [Added] consistent secondary key handling for activity logs
 - [Added] download of files using a download_path param
-- [Added] showing select_from_... values based on live data and master associations, not just dynamic definitions
+- [Added] showing select*from*... values based on live data and master associations, not just dynamic definitions
 - [Added] global app definition of nav links, and ability for icon to be used without a label
 - [Added] show_as iframe for report cell and fixed tags handling
 - [Added] filestore browser to appear in edit forms, if view_as: edit: filestore is set
@@ -98,12 +98,12 @@ release will be created for any release tested in production, and may be marked 
 - [Added] view_css support to regular panels
 - [Added] force_not_valid option in create/update_reference and update_this
 - [Added] ability for save_action to return the first result that matches an if condition
-- [Added] users as a table to calculate against in *_if evaluations
+- [Added] users as a table to calculate against in \*\_if evaluations
 - [Added] save_action expand_reference
 - [Added] media queries to view css options
 - [Added] activity log master and item associations for extra log types, allowing for substitutions against a specific activity
 - [Added] defined_selector options to reports criteria to allow easy selector configuration based on central and model configurations
-- [Added] 'never' option to always_embed_*reference
+- [Added] 'never' option to always*embed*\*reference
 - [Added] ability for an existing admin to add a new admin account if appropriate server setting allows
 - [Fixed] limited_access_control using association master_created_by_user
 - [Fixed] issue loading images when window not focused
