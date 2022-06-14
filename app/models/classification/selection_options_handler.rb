@@ -300,6 +300,9 @@ class Classification::SelectionOptionsHandler
           }
         end
       end
+    rescue StandardError => e
+      raise FphsException, "Failure getting selector_with_config_overrides(#{conditions}) for implementation: " \
+      "#{impl_class}\n#{e}\n#{e.backtrace.join("\n")}"
     end
 
     res

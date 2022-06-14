@@ -252,6 +252,20 @@ RSpec.describe 'Model reference implementation', type: :model do
                 add_with:
                   test1: 'user_is_creator test'
 
+        mr_prevent_disable:
+          label: Prevent Disable
+          fields:
+            - select_call_direction
+            - select_who
+          editable_if:
+            always: true
+          references:
+            - dynamic_model__test_created_by_recs:
+                label: Disable Me
+                from: this
+                add: one_to_this
+                prevent_disable: true
+
       END_DEF
 
       al.current_admin = @admin
@@ -273,6 +287,7 @@ RSpec.describe 'Model reference implementation', type: :model do
       setup_option_config 9, 'Avoid Missing', %w[select_call_direction select_who]
       setup_option_config 10, 'Reference Showable Test2', %w[select_call_direction select_who tag_select_allowed]
       setup_option_config 11, 'User is Creator', %w[select_call_direction select_who]
+      setup_option_config 12, 'Prevent Disable', %w[select_call_direction select_who]
     end
 
     it 'evaluates rules to optionally show references' do
@@ -661,6 +676,24 @@ RSpec.describe 'Model reference implementation', type: :model do
 
       res = al_showable.extra_log_type_config.calc_reference_if(ref_config, :showable_if, al_showable, default_if_no_config: true)
       expect(res).to be_truthy
+    end
+
+    it 'evaluates rules to prevent references being disabled' do
+      @player_contact.current_user = @user
+
+      al = @player_contact.activity_log__player_contact_elts.build(select_call_direction: 'from staff',
+                                                                   extra_log_type: 'mr_prevent_disable',
+                                                                   select_who: 'abc')
+      al.save!
+
+      referenced = @player_contact.master.dynamic_model__test_created_by_recs.create! test1: 'prevent disabled test'
+      mr = ModelReference.create_with al, referenced
+
+      # Simple always works
+      expect(al.model_references.length).to be > 0
+
+      res = mr.can_disable
+      expect(res).to be false
     end
   end
 

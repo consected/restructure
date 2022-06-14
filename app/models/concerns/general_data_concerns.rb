@@ -81,6 +81,16 @@ module GeneralDataConcerns
     created_by_user_name
   end
 
+  def master_created_by_user_email
+    master_created_by_user&.email
+  end
+
+  def master_created_by_user
+    return unless respond_to?(:master) && master.respond_to?(:master_created_by_user)
+
+    master.master_created_by_user
+  end
+
   def rank_name
     return nil unless respond_to? :rank
 
@@ -222,8 +232,12 @@ module GeneralDataConcerns
       extras[:methods] << :accuracy_score_name if respond_to? :accuracy_score_name
       extras[:methods] << :user_name if respond_to? :user_name
       extras[:methods] << :user_email if respond_to? :user_email
+      extras[:methods] << :created_by_user if respond_to? :created_by_user
       extras[:methods] << :created_by_user_name if respond_to? :created_by_user_name
       extras[:methods] << :created_by_user_email if respond_to? :created_by_user_email
+
+      extras[:methods] << :master_created_by_user if respond_to? :master_created_by_user
+      extras[:methods] << :master_created_by_user_email if respond_to? :master_created_by_user_email
 
       # update_action can be used by requestor to identify whether the record was just updated (saved) or not
       extras[:methods] << :update_action if respond_to? :update_action

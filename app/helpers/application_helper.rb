@@ -148,9 +148,19 @@ module ApplicationHelper
 
   #
   # Generate the caption to appear before a field, based on the dynamic extra options
-  def show_caption_before(key, captions, mode = :edit)
+  # Use the <mode>_caption definition based on the following precedence:
+  #  - <mode>_caption *mode* has been specified
+  #  - new_caption if the current action is 'new'
+  #  - edit_caption
+  #
+  # @param [String] key - field key
+  # @param [Hash] captions - defined captions
+  # @param [Symbol] mode - one of :new, :edit, :show
+  # @return [String] HTML result
+  def show_caption_before(key, captions, mode = nil)
     return unless captions && captions[key]
 
+    mode ||= action_name == 'new' ? :new : :edit
     caption = captions[key]
     caption = caption["#{mode}_caption".to_sym] || caption[:caption] || '' if caption.is_a?(Hash)
     if @form_object_instance
