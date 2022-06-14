@@ -114,8 +114,8 @@ class ModelReference < ActiveRecord::Base
       mr = from_record&.option_type_config&.references
 
       if mr && to_record
-        m = mr[to_record_result_key.to_sym]
-        m = m[from_record_type_us.to_sym] if m
+        m = mr[to_record_result_key.pluralize.to_sym] || mr[to_record_result_key.to_sym]
+        m = m.first.last if m
         config = m
       end
     rescue StandardError => e

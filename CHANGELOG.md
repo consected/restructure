@@ -18,6 +18,19 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+### Transfer from ReStructure 8.0.34 - 2022-06-14
+
+- [Added] new_caption option
+- [Added] returning JSON data related to created_by_user for current instance and master
+- [Added] prevent-reload-on-reference-save class to prevent an updated or created reference forcing the container block to refresh
+- [Added] show-in-modal class for links, allowing a confirmation mechanism for dangerous actions
+- [Changed] handling of closing an embedded report modal to only refresh if the container block has a class allow-refresh-item-on-modal-close
+- [Changed] error handling related to selection configs in selector_with_config_overrides, so there is enough information to diagnose an issue
+- [Fixed] prevent_disable on references when pluralized
+- [Fixed] handling of created_by_user reference in dynamic migrations
+- [Fixed] select from record configs again
+- [Fixed] incorrect titleization of substitutions within UI
+
 ### Transfer from ReStructure 8.0.31 - 2022-06-01
 
 - [Fixed] issue related to definition loading and select from record configs
@@ -38,7 +51,7 @@ release will be created for any release tested in production, and may be marked 
 
 ## [8.0.72] - 2022-05-24
 
-- [Added] showing select_from_... values based on live data and master associations, not just dynamic definitions
+- [Added] showing select*from*... values based on live data and master associations, not just dynamic definitions
 - [Added] global app definition of nav links, and ability for icon to be used without a label
 - [Fixed] date and time formatting in reports presented as lists
 
@@ -139,12 +152,12 @@ Interim release for testing only
 
 ## [8.0.55] - 2022-03-28
 
-- [Added] users as a table to calculate against in *_if evaluations
+- [Added] users as a table to calculate against in \*\_if evaluations
 - [Added] save_action expand_reference
 - [Added] media queries to view css options
 - [Added] activity log master and item associations for extra log types, allowing for substitutions against a specific activity
 - [Added] defined_selector options to reports criteria to allow easy selector configuration based on central and model configurations
-- [Added] 'never' option to always_embed_*reference
+- [Added] 'never' option to always*embed*\*reference
 - [Added] ability for an existing admin to add a new admin account if appropriate server setting allows
 - [Fixed] limited_access_control using association master_created_by_user
 - [Fixed] issue loading images when window not focused
@@ -235,7 +248,7 @@ Interim release for testing only
 ## [8.0.37] - 2022-01-11
 
 - [Added] ability to specify multiple checkboxes in report select items
-- [Fixed] bug by supressing notification  when the admins change their passwords
+- [Fixed] bug by supressing notification when the admins change their passwords
 - [Updated] css for mobile responsiveness, css vars and app styles
 - [Updated] document library to correctly link to source repository
 - [Updated] admin scripts to improve server configuration

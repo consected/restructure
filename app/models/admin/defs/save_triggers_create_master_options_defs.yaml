@@ -7,7 +7,8 @@
               field_name: 'now()'
               field_name_2: 'literal value'
               field_name_3: 
-                this: 'field_name'
-              
+                this: 
+                  field_name: return_value
               field_name_4: 
-                reference_name: 'field_name'
+                reference_name:
+                  field_name: return_value

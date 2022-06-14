@@ -17,9 +17,11 @@ _fpa.preprocessors = {
     block
       .parent()
       .find('[data-preprocessor="embedded_report"]')
-      .not('er-attached')
+      .not('.er-attached')
       .on('ajax:success', function () {
-        $(this).addClass('refresh-item-on-modal-close');
+        if ($(this).parents('.allow-refresh-item-on-modal-close').length) {
+          $(this).addClass('refresh-item-on-modal-close');
+        }
       })
       .addClass('er-attached');
   },
@@ -93,8 +95,10 @@ _fpa.postprocessors = {
       if (data.hasOwnProperty(item_key) && item_key != '_control') break;
     }
 
+    // Force a reload of the container if a referenced form is created or updated.
+    // This can be disabled by adding a class to the parent: prevent-reload-on-reference-save
     var di = data[item_key];
-    if (di && (di._created || di._updated)) {
+    if (di && (di._created || di._updated) && block.parents('.prevent-reload-on-reference-save').length === 0) {
       var drf = di.referenced_from;
       if (drf && drf.length > 0) {
         for (var i in drf) {
@@ -187,6 +191,21 @@ _fpa.postprocessors = {
     block.find('pre code').each(function () {
       hljs.highlightBlock($(this)[0]);
     });
+
+
+    block.find('.show-in-modal').not('.attached-show-in-modal').each(function () {
+      var el = $(this).attr('data-content-el');
+      if (!el) return;
+
+      var content = $(el).html()
+      var title = $(this).attr('data-title');
+
+      $(this).on('click', function (ev) {
+        ev.preventDefault();
+        _fpa.show_modal(content, title);
+      })
+    }).addClass('attached-show-in-modal');
+
   },
 
   modal_pi_search_results_template: function (block, data) {

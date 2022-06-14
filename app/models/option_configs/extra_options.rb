@@ -67,12 +67,15 @@ module OptionConfigs
           self.caption_before[k] = {
             caption: v,
             edit_caption: v,
-            show_caption: v
+            show_caption: v,
+            new_caption: v
           }
         elsif v.is_a? Hash
           v.each do |mode, modeval|
             v[mode] = Formatter::Substitution.text_to_html(modeval).to_s.strip
           end
+
+          v[:new_caption] = v[:edit_caption] unless v.key?(:new_caption)
         end
       end
 

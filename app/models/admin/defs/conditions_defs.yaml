@@ -1,7 +1,7 @@
 # Conditions Definitions
 
         all:
-          'model_table_name | this | this_references | parent_references | referring_record (the record referring to this one)':
+          'model_table_name | this | this_references | parent_references | parent_or_this_references | referring_record (the record referring to this one)':
             field_name: 'all conditional values must be true in model_table_name (any matching record unless id or other filters specified separately) or this (this record)'
             field_name_2: 'literal value | null'
             field_name_3: 
