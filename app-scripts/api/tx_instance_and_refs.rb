@@ -16,10 +16,14 @@ source = {
 dest = {
   username: ENV['DEST_API_USER'],
   token: ENV['DEST_API_TOKEN'],
-  app_type: 16,
-  protocol: 'https',
-  host: 'vivademoportal.net',
-  port: '443'
+  # app_type: 16,
+  # protocol: 'https',
+  # host: 'vivademoportal.net',
+  # port: '443'
+  app_type: 72,
+  protocol: 'http',
+  host: 'localhost',
+  port: 3001
 }
 
 failures = []
@@ -86,104 +90,171 @@ results.each do |result|
   end
 
   als_res = JSON.parse(response.body)
-  part = als_res['activity_log__study_info_parts']
+  parts = als_res['activity_log__study_info_parts']
 
   # Find out if the master exists already
   path = "/masters/#{study_info_id}.json"
   query = {
     type: 'study_info_id'
   }
-  response = get target, path, query
+  response = get dest, path, query
 
   if response.code == '200'
     study_info_res = JSON.parse(response.body)
     study_info = study_info_res['master']
+    puts "found destination library #{study_info_id}"
   elsif response.code == '404'
-    # doesn't exist yet, so create it
-    study_info = nil
+    form = {
+      'master[embedded_item][study_info_id]' => study_info_id
+    }
+    path = '/masters/create.json'
+    response = post dest, path, {}, form
+
+    if response.code != '200'
+      puts "failed to create a new master record: #{response.code} - #{path} "
+      exit 10
+    end
+
+    study_info_res = JSON.parse(response.body)
+    study_info = study_info_res['master']
+    puts "created destination library #{study_info['study_info_id']} - #{study_info['master_id']}"
   else
     puts "failed to get the target study info record: #{response.code} - #{path} "
     exit 10
   end
 
-  new_master_id = study_info['id']
-  puts study_info
-  next
+  dest_master_id = study_info['id']
 
-  new_details = {}
-  if player_info
-    new_details = player_info.symbolize_keys.slice(:first_name, :last_name, :birth_date, :death_date, :accuracy_score, :source)
-    new_details[:first_name] = new_details[:first_name].reverse
-    new_details[:last_name] = new_details[:last_name].reverse
-    new_details.transform_keys! { |k| "master[embedded_item][#{k}]" }
-  end
-  form = new_details
-  path = '/masters/create.json'
-  response = post dest, path, {}, form
+  # Add new or find pages for the new (or found) library
+  parts.each do |part|
+    part_slug = part['slug']
+    part_title = part['title']
+    part_elt = part['extra_log_type']
+    part_id = part['id']
 
-  if response.code != '200'
-    puts "failed to create a new master record: #{response.code} - #{path} "
-    exit 10
-  end
-
-  new_master_res = JSON.parse(response.body)
-  new_master = new_master_res['master']
-  new_master_id = new_master['id']
-
-  # Add the player contacts
-  new_player_contacts = []
-
-  player_contacts = master['player_contacts']
-  player_contacts.each do |player_contact|
-    new_details = player_contact.symbolize_keys.slice(:data, :rec_type, :rank, :source)
-    new_details.transform_keys! { |k| "player_contact[#{k}]" }
-
-    form = new_details
-    path = "/masters/#{new_master_id}/player_contacts.json"
-    response = post dest, path, {}, form
-
-    if response.code != '200'
-      puts "failed to create a new player contact record: #{response.code} - #{path} "
-      exit 10
+    puts "in part: #{part_slug || part_title || part_elt} - #{part['master_id']} - #{master_id} - #{study_info_id}"
+    if part['disabled']
+      puts 'is disabled - skipping'
+      next
     end
 
-    # Result is all the player contact records in this master
-    new_pc_res = JSON.parse(response.body)
-
-    new_pc = new_pc_res['player_contact']
-    new_player_contacts << new_pc
-  end
-
-  # Create a copy of the phone log records
-  path = "/masters/#{master['id']}/activity_log/player_contact_phones.json"
-  query = {}
-  response = get source, path, query
-
-  if response.code != '200'
-    puts "failed to get the phone log records: #{response.code} - #{path} "
-    exit 10
-  end
-
-  als = JSON.parse(response.body)
-
-  als['activity_log__player_contact_phones'].each do |al|
-    # Find the newly created player contact record with this data, so we can reference it
-    new_pc = new_player_contacts.first { |pc| pc['data'] == al['data'] }
-    next unless new_pc
-
-    new_pc_id = new_pc['id']
-    elt = al['extra_log_type']
-    new_al = al.symbolize_keys.slice(:extra_log_type, :select_call_direction, :select_who, :called_when, :select_result, :select_next_step, :notes)
-    path = "/masters/#{new_master_id}/player_contacts/#{new_pc_id}/activity_log/player_contact_phones.json"
-    query = { extra_type: elt }
-
-    response = post dest, path, {}, form
-
+    # Does the destination part slug exist?
+    path = "/masters/#{dest_master_id}/activity_log/study_info_parts.json"
+    query = {
+      # type: 'study_info_id'
+    }
+    response = get dest, path, query
     if response.code != '200'
-      puts "failed to create activity log record: #{response.code} - #{path} "
+      puts "failed to get the destination study info part records: #{response.code} - #{path} "
       exit 10
     end
+    dest_parts_res = JSON.parse(response.body)
+    dest_parts = dest_parts_res['activity_log__study_info_parts']
+    puts "existing #{dest_parts.map { |r| (r['slug'] || r['title'] || r['extra_log_type']) }}"
+    puts "looking for: #{part_slug || part_title || part_elt}"
+    dest_part = dest_parts.find { |r| (r['slug'] || r['title'] || r['extra_log_type']).downcase == (part_slug || part_title || part_elt).downcase }
 
-    puts "Added new master record #{dest[:protocol]}://#{dest[:host]}:#{dest[:port]}/masters/#{new_master_id}"
+    if dest_part
+      puts "found dest part: #{dest_part['slug'] || dest_part['title'] || dest_part['extra_log_type']} for #{part_slug || part_title || part_elt}"
+    else
+      # Slug does not exist in the destination - create a new part
+      elt = part['extra_log_type']
+      form = part.symbolize_keys.slice(:extra_log_type, :title, :description, :default_layout, :slug, :tag_select_allow_roles_access, :footer, :tag_select_page_tags, :disabled, :position_number, :extra_classes, :notes)
+      path = "/masters/#{dest_master_id}/activity_log/study_info_parts.json"
+      query = { extra_type: elt }
+      form.transform_keys! { |k| "activity_log_study_info_part[#{k}]" }
+
+      response = post dest, path, {}, form
+      if response.code != '200'
+        puts "failed to create activity log part record: #{response.code} - #{path} "
+        exit 10
+      end
+      dest_part_res = JSON.parse(response.body)
+      dest_part = dest_part_res['activity_log__study_info_part']
+      dest_parts << dest_part
+
+      puts "created dest part: #{dest_part['slug'] || dest_part['title'] || dest_part['extra_log_type']} - #{dest_part['master_id']} - #{dest_part['id']}"
+
+    end
+
+    next if ['supporting_files', 'supporting-files'].include?(part_elt)
+
+    # For each of the model references add it if needed
+    mrs = part['model_references']
+    dest_mrs = dest_part['model_references']
+
+    # puts "part: #{part}"
+    # puts "dest_part: #{dest_part}"
+    puts "mrs = #{mrs.map { |v| v['to_record_data'] }}"
+    puts "dest_mrs = #{dest_mrs.map { |v| v['to_record_data'] }}"
+    mrs.each do |mr|
+      to_type_pl = mr['to_record_type_us_plural']
+      to_type = mr['to_record_type_us']
+      to_type_path = to_type_pl.gsub('dynamic_model__', '').gsub('__', '/')
+      to_id = mr['to_record_id']
+      to_master_id = mr['to_record_master_id']
+      to_data = mr['to_record_data']
+      from_record_type = mr['from_record_type_us']
+      if to_type_pl == 'nfs_store__manage__containers'
+        puts 'is a nfs store container - skipping'
+        next
+      elsif !from_record_type
+        puts 'is a shared item - skipping'
+        next
+      elsif  mr['disabled']
+        puts 'is disabled - skipping'
+        next
+      end
+
+      puts "try matching: #{to_data}"
+      matched_dest_mr = dest_mrs.find { |r| r['to_record_data'] == to_data }
+      if matched_dest_mr
+        puts "matched ref: #{matched_dest_mr['to_record_data']}"
+        next
+      end
+
+      path_pre = ''
+      path_pre = "/masters/#{dest_master_id}" if to_master_id
+      path = "#{path_pre}/#{to_type_path}/#{to_id}.json"
+      query = {}
+      response = get source, path, query
+      if response.code != '200'
+        puts "failed to get referenced to record: #{response.code} - #{path} "
+        exit 10
+      end
+      to_record_res = JSON.parse(response.body)
+      to_record = to_record_res[to_type]
+
+      puts 'to record is disabled - skipping' if to_record['disabled']
+
+      new_to_record = to_record
+      delete_atts = %w[id created_at created_at_ts updated_at updated_at_ts user_id created_by_user_email created_by_user_name
+                       creatable_model_references def_version embedded_item embedded_items human_name ids item_type
+                       master_created_by_user master_created_by_user_email master_id model_data_type model_references
+                       prevent_add_reference prevent_edit rank_name referenced_from resource_name source_name update_action
+                       user_email user_id user_name user_preference vdef_version _created _general_selections _updated]
+
+      delete_atts.each do |a|
+        new_to_record.delete(a)
+      end
+
+      part_ref_type = from_record_type.sub('__', '/')
+      dest_part_id = dest_part['id']
+      path = "#{path_pre}/#{to_type_path}.json"
+      query = {}
+      form_prefix = to_type.gsub('__', '_')
+      form = new_to_record.dup
+      form.merge! ref_record_type: part_ref_type, ref_record_id: dest_part_id
+      form.transform_keys! { |k| "#{form_prefix}[#{k}]" }
+
+      response = post dest, path, query, form
+      if response.code != '200'
+        puts "failed to add new destination model ref: #{response.code} - #{path} "
+        exit 10
+      else
+        puts "added new destination model ref (#{path}): #{to_data}"
+      end
+    end
+    ##################
   end
 end
