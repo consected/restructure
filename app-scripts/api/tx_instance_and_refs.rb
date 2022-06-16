@@ -16,14 +16,14 @@ source = {
 dest = {
   username: ENV['DEST_API_USER'],
   token: ENV['DEST_API_TOKEN'],
-  # app_type: 16,
-  # protocol: 'https',
-  # host: 'vivademoportal.net',
-  # port: '443'
-  app_type: 72,
-  protocol: 'http',
-  host: 'localhost',
-  port: 3001
+  app_type: 16,
+  protocol: 'https',
+  host: 'vivademoportal.net',
+  port: '443'
+  # app_type: 72,
+  # protocol: 'http',
+  # host: 'localhost',
+  # port: 3001
 }
 
 failures = []
