@@ -47,9 +47,6 @@ def get(target, path, query = {})
 end
 
 def post(target, path, query = {}, form = {})
-  host = target[:host]
-  port = target[:port]
-
   query.merge!(
     user_email: target[:username],
     user_token: target[:token],
@@ -99,11 +96,12 @@ results.each do |result|
   }
   response = get dest, path, query
 
-  if response.code == '200'
+  case response.code
+  when '200'
     study_info_res = JSON.parse(response.body)
     study_info = study_info_res['master']
     puts "found destination library #{study_info_id}"
-  elsif response.code == '404'
+  when '404'
     form = {
       'master[embedded_item][study_info_id]' => study_info_id
     }
@@ -130,7 +128,6 @@ results.each do |result|
     part_slug = part['slug']
     part_title = part['title']
     part_elt = part['extra_log_type']
-    part_id = part['id']
 
     puts "in part: #{part_slug || part_title || part_elt} - #{part['master_id']} - #{master_id} - #{study_info_id}"
     if part['disabled']
@@ -163,6 +160,22 @@ results.each do |result|
       path = "/masters/#{dest_master_id}/activity_log/study_info_parts.json"
       query = { extra_type: elt }
       form.transform_keys! { |k| "activity_log_study_info_part[#{k}]" }
+
+      # Array fields need to be split into appropriate parameters
+      array_fields = {}
+      form.each do |k, v|
+        next unless v.is_a? Array
+
+        array_fields = v.map { |av| ["#{k}[]", av] }.to_h
+      end
+
+      # Remove the original entries for array fields
+      array_fields.each_key do |k|
+        form.delete k
+      end
+
+      # Add in the new multiple entries for each array field
+      form.merge! array_fields
 
       response = post dest, path, {}, form
       if response.code != '200'
