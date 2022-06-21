@@ -22,7 +22,10 @@ class Imports::ImportsController < ApplicationController
           if current_admin
             @imports = Imports::Import.all
           elsif current_user
-            @imports = Imports::Import.where('user_id=? AND imported_items is not NULL', current_user.id).order(created_at: :desc).limit(10)
+            @imports = Imports::Import.where('user_id=? AND imported_items is not NULL',
+                                             current_user.id)
+                                      .order(created_at: :desc)
+                                      .limit(10)
           end
         end
       end
@@ -91,7 +94,8 @@ class Imports::ImportsController < ApplicationController
         flash.now[:warning] = @import.errors.to_a.join("\n")[0..2000] unless @import.errors.empty?
         render 'new_import'
       else
-        redirect_to new_imports_import_path, alert: "Error preparing the import: #{Application.record_error_message @import}"
+        redirect_to new_imports_import_path,
+                    alert: "Error preparing the import: #{Application.record_error_message @import}"
       end
     else
       redirect_to new_imports_import_path, notice: 'Ensure that a file and table are set'
@@ -189,7 +193,8 @@ class Imports::ImportsController < ApplicationController
     return if @complete
 
     if errors.empty? && (prev_invalid_items != 0 || @import.item_count.nil?)
-      flash.now[:notice] = 'Newly entered data has been validated and matched. Check the data is correct and submit again.'
+      flash.now[:notice] =
+        'Newly entered data has been validated and matched. Check the data is correct and submit again.'
     else
       flash.now[:warning] = errors.uniq.join("\n")[0..2000]
     end
@@ -208,7 +213,22 @@ class Imports::ImportsController < ApplicationController
 
   def item_parameters
     item = {}
-    item["#{@primary_table}_attributes".to_sym] = fields
+
+    # Permitted parameters that are arrays must be specified as such
+    # Identify the columns that are arrays and handle them appropriately as []
+    allow_cols = []
+    array_cols = {}
+
+    fields.each do |f|
+      if item_class.columns.find { |c| c.name == f.to_s }.array?
+        array_cols[f] = []
+      else
+        allow_cols << f
+      end
+    end
+    allow_cols << array_cols if array_cols.present?
+
+    item["#{@primary_table}_attributes".to_sym] = allow_cols
     item
   end
 

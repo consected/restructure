@@ -119,17 +119,19 @@ class Imports::Import < ActiveRecord::Base
   end
 
   #
-  # Preprocess a row of entries to handle special types (arrays)
+  # Process a row of entries to handle special types (arrays).
+  # The results are applied directly to the specified object, to avoid
+  # issues with what is permitted by attribute assignments.
+  # @param [UserBase] object instance
   # @param [CSV::Row] row
-  # @return [CSV::Row]
-  def preprocess_columns(row)
+  def process_columns(obj, row)
     row.each do |k, v|
       next unless item_class.columns.find { |c| c.name == k.to_s }.array?
 
       if v&.start_with? '['
-        row[k] = JSON.parse(v)
+        obj[k] = JSON.parse(v)
       elsif v.is_a? String
-        row[k] = v.split(',')
+        obj[k] = v.split(',')
       end
     end
 
@@ -145,8 +147,8 @@ class Imports::Import < ActiveRecord::Base
 
     csv_rows.each do |row|
       begin
-        row = preprocess_columns(row)
         new_obj = item_class.new(row.to_h)
+        process_columns(new_obj, row)
         attempt_match_on_secondary_key new_obj
 
         if new_obj.respond_to?(:master) &&
