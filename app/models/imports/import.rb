@@ -118,6 +118,24 @@ class Imports::Import < ActiveRecord::Base
     self.class.permitted_params_for primary_table, include_alt_ids
   end
 
+  #
+  # Preprocess a row of entries to handle special types (arrays)
+  # @param [CSV::Row] row
+  # @return [CSV::Row]
+  def preprocess_columns(row)
+    row.each do |k, v|
+      next unless item_class.columns.find { |c| c.name == k.to_s }.array?
+
+      if v&.start_with? '['
+        row[k] = JSON.parse(v)
+      elsif v.is_a? String
+        row[k] = v.split(',')
+      end
+    end
+
+    row
+  end
+
   # Instantiate the primary_table / model for each CSV row previously set up in {#import_csv}.
   # Sets #items with an array of instances, with current_user set
   # @return [Array]
@@ -127,6 +145,7 @@ class Imports::Import < ActiveRecord::Base
 
     csv_rows.each do |row|
       begin
+        row = preprocess_columns(row)
         new_obj = item_class.new(row.to_h)
         attempt_match_on_secondary_key new_obj
 
