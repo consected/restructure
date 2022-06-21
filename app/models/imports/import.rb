@@ -106,7 +106,7 @@ class Imports::Import < ActiveRecord::Base
     pt = item_class_for(primary_table)
     return unless pt
 
-    res = pt.attribute_names - %w[id user_id created_at updated_at disabled]
+    res = pt.attribute_names - %w[id user_id created_at updated_at]
     res += Master.alternative_id_fields.map(&:to_s) if include_alt_ids && res.include?('master_id')
     res.uniq!
     res
