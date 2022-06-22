@@ -16,6 +16,15 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] preprocessing to CSV imports for array fields
+- [Added] sample use of API in Ruby scripts
+- [Added] study info content migrator using api
+- [Changed] to handle select_record fields not associated with master and better documentation
+- [Changed] allowable fields in import CSV to allow "disabled"
+- [Fixed] issue where incorrect page layout nav configuration breaks UI completely
+
 ## [8.0.75] - 2022-06-14
 
 ### Transfer from ReStructure 8.0.34 - 2022-06-14
