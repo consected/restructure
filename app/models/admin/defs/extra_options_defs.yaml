@@ -105,6 +105,15 @@
           optional specification of options for a select_ type field to
           use instead of general selection specified list. {Label: value, ...} or [Label,...].
           For the latter the Label is downcased automatically to generate the value
+        
+        # For select_record_* fields:
+        value_attr: attribute_name to use for selection value in select_record_* fields
+        label_attr: attribute_name to use for selection label in select_record_* fields
+        group_split_char: optional character to split on when grouping selections in select_record_* fields
+        no_assoc: | 
+          false | true - optionally specify that no association should be used in select_record_* data lookup
+                         select_record_from_table_* automatically sets this to true
+                         select_record_from_* defaults to false but this setting overrides the default
       calculate_with:
         sum: []
       prompt: used by some select fields for the placeholder prompt text
