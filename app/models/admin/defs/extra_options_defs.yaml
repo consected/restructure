@@ -71,9 +71,9 @@
         - value: panel / category name
           if: 'ref: ** conditions reference **'
       expand_reference:
-        - value: reference with caption - the option if means the first matched item will be used as the value
+        - value: reference with caption - the option *if:* means the first matched item will be used as the value
           if: 'ref: ** conditions reference **'
-        - value: next | reference with caption
+        - value: next - this literal value tells the action to open the next available reference tab
           if: 'ref: ** conditions reference **'
     on_create: {}
     on_save:
