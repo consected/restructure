@@ -194,7 +194,7 @@ module Reports
 
     def authorized?
       return true if current_admin
-      return true if current_user.can? :view_reports
+      return true if current_user.can?(:view_report_not_list) || current_user.can?(:view_reports)
 
       raise FphsException, 'not authorized'
     end

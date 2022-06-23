@@ -7,10 +7,17 @@ value_attr = options.dig(:edit_as, :value_attr) || :data
 label_attr = options.dig(:edit_as, :label_attr) || :data
 big_select = options.dig(:edit_as, :big_select)
 sf_el = options.dig(:edit_as, :select_filtering_target)
+no_assoc = true
+no_assoc = options.dig(:edit_as, :no_assoc) if options[:edit_as]&.key?(:no_assoc)
 options[:include_blank] = true unless options.has_key?(:include_blank)
 assoc_or_class_name = field_name.sub('select_record_from_table_', '').singularize
 
-human_name, reslist = list_record_data_for_select(form_object_instance, assoc_or_class_name, value_attr: value_attr, label_attr: label_attr, group_split_char: group_split_char)
+human_name, reslist = list_record_data_for_select(form_object_instance, 
+                                                  assoc_or_class_name, 
+                                                  value_attr: value_attr, 
+                                                  label_attr: label_attr, 
+                                                  group_split_char: group_split_char, 
+                                                  no_assoc: true)
 unless human_name
   logger.warn "Failed to find valid class name for #{field_name_sym}"
 end

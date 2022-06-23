@@ -48,6 +48,8 @@ module ActiveRecord
       end
 
       def create_schema
+        return if schema_exists?(schema)
+
         sql = "CREATE SCHEMA IF NOT EXISTS #{schema}"
         sql += " AUTHORIZATION #{owner}" if owner.present? && !Rails.env.development?
         ActiveRecord::Base.connection.execute sql
@@ -918,6 +920,9 @@ module ActiveRecord
         to_model_class_name = ref_config[:to_model_class_name]
         to_no_master = ref_config[:no_master_association]
         from_what = ref_config[:from]
+
+        return if Admin::MigrationGenerator.view_exists?("#{schema}.#{ref_view_name(to_table_name)}")
+
         <<~DO_TEXT
           DROP VIEW if exists #{schema}.#{ref_view_name(to_table_name)};
           CREATE VIEW #{schema}.#{ref_view_name(to_table_name)} AS

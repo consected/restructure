@@ -32,6 +32,7 @@ module PageLayoutsHelper
     return res.first unless set_of
 
     res.map { |panel_def| panel_def.send(set_of.first)&.send(set_of.last) }
+       .compact
        .reduce([], :concat)
        .uniq
        .compact
