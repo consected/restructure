@@ -247,4 +247,18 @@ module ApplicationHelper
 
     Formatter::TimeWithZone.format date_time, nil, current_user: current_user
   end
+
+  #
+  # Generate a block from a plain message template
+  # @param [String] name - message template name
+  # @param [Hash|UserBase|nil] data - data for substitutions
+  # @param [Boolean] allow_missing_template - return nil if no matching template found
+  # @return [String]
+  def template_block(name, data: nil, allow_missing_template: true, markdown_to_html: true)
+    data ||= {}
+    data = data.attributes if data.respond_to? :attributes
+    Admin::MessageTemplate.generate_content content_template_name: name, data: data,
+                                            allow_missing_template: allow_missing_template,
+                                            markdown_to_html: markdown_to_html
+  end
 end
