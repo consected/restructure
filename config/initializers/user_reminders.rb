@@ -33,4 +33,11 @@ Rails.application.config.to_prepare do
     layout: 'server password changed',
     subject: 'Password Changed Instructions'
   }
+
+  # Optionally can remove *content_text:* and replace with *content:* specifying a content template name
+  Users::NewUserAdded.new_user_added_defaults = {
+    content_text: 'A new {{class_name}} was registered: {{email}}',
+    layout: 'server registration confirmation',
+    subject: 'New {{class_name}} registered'
+  }
 end

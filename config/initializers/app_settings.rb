@@ -93,6 +93,9 @@ class Settings
   # Admins may be able to create other admins.
   AllowAdminsToManageAdmins = (ENV['ALLOW_ADMINS_TO_MANAGE_ADMINS'].to_s.downcase == 'true')
 
+  # Notify the RegistraionAdminEmail when a new admin or user is registered (notify on 'admin', 'user' or 'admin,user')
+  NotifyOnRegistration = ENV['NOTIFY_ON_REGISTRATION']
+
   # URL to appear on home page for users with login issues to contact
   DefaultLoginIssuesUrl = AllowUsersToRegister ? '/users/password/new' : "mailto: #{AdminEmail}?subject=Login%20Issues"
   LoginIssuesUrl = ENV['LOGIN_ISSUES_URL'] || DefaultLoginIssuesUrl

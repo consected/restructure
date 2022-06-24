@@ -242,6 +242,6 @@ class User < ActiveRecord::Base
   end
 
   def build_user_preference_on_create
-      build_user_preference({ current_user: self }) unless a_template_or_batch_user?
+    build_user_preference({ current_user: self }) unless a_template_or_batch_user?
   end
 end
