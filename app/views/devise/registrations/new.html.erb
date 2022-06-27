@@ -1,7 +1,7 @@
 <div class="devise-block reg-block col-md-8 col-md-offset-8 well">
   <h2>New User Registration</h2>
   <div class="template-block"><%= template_block 'ui new user registration' %></div>
-  <hr/>
+
   <%= form_for(resource, as: resource_name, url: registration_path(resource)) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
 

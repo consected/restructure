@@ -249,10 +249,11 @@ module ApplicationHelper
   end
 
   #
-  # Generate a block from a plain message template
+  # Generate a block from a plain message template, configured in markdown format
   # @param [String] name - message template name
   # @param [Hash|UserBase|nil] data - data for substitutions
   # @param [Boolean] allow_missing_template - return nil if no matching template found
+  # @param [Boolean] markdown_to_html - by default assume the template is markdown and must be converted to html
   # @return [String]
   def template_block(name, data: nil, allow_missing_template: true, markdown_to_html: true)
     data ||= {}
