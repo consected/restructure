@@ -16,6 +16,15 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] message template UI blocks for registration forms and user preferences
+- [Added] admin documentation for message templates
+- [Added] caption before references with extra log types
+- [Added] on_master_id as embedded_report extension
+- [Changed] expand_reference action to scroll to result
+- [Fixed] issue where activity log panels don't get fully scrolled to
+
 ## [8.0.78] - 2022-06-23
 
 - [Fixed] issue where report list updates fail if user only has view_report_not_list access

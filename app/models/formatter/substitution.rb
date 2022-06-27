@@ -192,6 +192,7 @@ module Formatter
         elsif item.is_a? Master
           master = item
         end
+        data[:class_name] = item.class.name
       else
         data = {}
       end

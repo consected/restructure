@@ -31,11 +31,12 @@ module UserPreferencesHelper
       # Set the order the fields are displayed
       item_list: %i[timezone date_format time_format date_time_format],
 
-      # caption_before: {
-      #   pattern_for_date_format: {
-      #     caption: 'Show date as'
-      #   }
-      # },
+      caption_before: {
+        all_fields: {
+          show_caption: template_block('ui user preferences caption'),
+          edit_caption: template_block('ui user preferences caption')
+        }
+      },
       labels: {
         timezone: 'Timezone',
         date_format: 'Show date as',
@@ -62,20 +63,20 @@ module UserPreferencesHelper
   # Time.current.strftime('%d/%m/%Y %T') == "18/02/2022 13:43:33"
   DateTimeFormats = {
     'mm/dd/yyyy hh:mm am/pm' => {
-      :hours_minutes => '%m/%d/%Y %-l:%M %P',
-      :with_secs => '%m/%d/%Y %-l:%M:%S %P'
+      hours_minutes: '%m/%d/%Y %-l:%M %P',
+      with_secs: '%m/%d/%Y %-l:%M:%S %P'
     },
     'mm/dd/yyyy 24h:mm' => {
-      :hours_minutes => '%m/%d/%Y %H:%M',
-      :with_secs => '%m/%d/%Y %T'
+      hours_minutes: '%m/%d/%Y %H:%M',
+      with_secs: '%m/%d/%Y %T'
     },
     'dd/mm/yyyy hh:mm am/pm' => {
-      :hours_minutes => '%d/%m/%Y %-l:%M %P',
-      :with_secs => '%d/%m/%Y %-l:%M:%S %P'
+      hours_minutes: '%d/%m/%Y %-l:%M %P',
+      with_secs: '%d/%m/%Y %-l:%M:%S %P'
     },
     'dd/mm/yyyy 24h:mm' => {
-      :hours_minutes => '%d/%m/%Y %H:%M',
-      :with_secs => '%d/%m/%Y %T'
+      hours_minutes: '%d/%m/%Y %H:%M',
+      with_secs: '%d/%m/%Y %T'
     }
   }.freeze
 
@@ -85,12 +86,12 @@ module UserPreferencesHelper
   # Time.current.strftime('%T') == "13:49"
   TimeFormats = {
     'hh:mm am/pm' => {
-      :hours_minutes => '%-l:%M %P',
-      :with_secs => '%-l:%M:%S %P'
+      hours_minutes: '%-l:%M %P',
+      with_secs: '%-l:%M:%S %P'
     },
     '24h:mm' => {
-      :hours_minutes => '%H:%M',
-      :with_secs => '%T'
+      hours_minutes: '%H:%M',
+      with_secs: '%T'
     }
   }.freeze
 

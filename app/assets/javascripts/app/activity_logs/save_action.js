@@ -109,12 +109,20 @@ _fpa.activity_logs.save_action = class {
 
     window.setTimeout(function () {
       var block = block = $(`#${block_id}`);
+      $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
+
       if (action_value === 'next') {
-        block.parent().next('.in-item-model-references').find('.mr-expander').click()
+        var ev_link = block.parent().next('.in-item-model-references').find('.mr-expander')
       }
       else {
-        block.parent().parent().find(`.in-item-model-references[data-mr-name="${action_value}"]`).find('.mr-expander').click()
+        var ev_link = block.parent().parent().find(`.in-item-model-references[data-mr-name="${action_value}"]`).find('.mr-expander')
       }
+
+      ev_link.click();
+      window.setTimeout(function () {
+        _fpa.utils.scrollTo(ev_link, 100, -100)
+      }, 500)
+
     }, 500)
   }
 
