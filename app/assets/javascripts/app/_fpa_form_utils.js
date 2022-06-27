@@ -1167,9 +1167,10 @@ _fpa.form_utils = {
           }
 
           var not_visible = !(rect.top >= 0 && 1.25 * rect.bottom < $(window).height());
-          if (not_visible)
-            _fpa.utils.scrollTo(a, 200, -100);
-          // $(document).scrollTo(a, 100, {offset: -50});
+          if (not_visible) {
+            _fpa.utils.jump_to_linked_item(a, -100, { no_highlight: true })
+          }
+
         };
 
         window.setTimeout(function () { doscroll() }, 250);
