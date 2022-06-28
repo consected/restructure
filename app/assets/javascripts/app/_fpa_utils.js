@@ -516,7 +516,7 @@ _fpa.utils.html_to_markdown = function (obj) {
   $html.find('style').remove();
 
   $html.find('*')
-    .not('div, p, h1, h2, h3, h4, i, b, strong, em, u, li, ol, ul, table, tr, td, thead, th, tbody, code, pre, img, a, br, sup')
+    .not('div, p, h1, h2, h3, h4, i, b, strong, em, u, li, ol, ul, table, tr, td, thead, th, tbody, code, pre, img, a, br, sup, sub')
     .contents()
     .unwrap().wrap('');
 
@@ -573,7 +573,7 @@ _fpa.utils.html_to_markdown = function (obj) {
 
   obj.html = $html.html();
 
-  var txt = domador(obj.html, { inline: true });
+  var txt = domador(obj.html, { inline: true, pad_ol_li: 3 });
 
   // Clean the text to remove
   // any number of hash or asterisk symbols followed by 

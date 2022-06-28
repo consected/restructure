@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Fixed] issue with nested ordered lists in markdown editor
+- [Fixed] hiding modal on submitting embedded form & no_report_scroll not enabling full page scroll
+- [Fixed] search doc with download/in route form - plus refactored to DRY code
+
 ## [8.0.79] - 2022-06-27
 
 - [Added] message template UI blocks for registration forms and user preferences
