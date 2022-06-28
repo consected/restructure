@@ -41,7 +41,7 @@ _fpa.postprocessors = {
       if (
         $('body').hasClass('user_page') &&
         $('body').hasClass('show') &&
-        $('#master_results_block #results-accordion, .no-table-results').length == 0
+        $('#master_results_block #results-accordion, .no-table-results, .no_results_scroll').length == 0
       ) {
         $('body').addClass('table-results');
         $('html').css({ overflow: 'hidden' });
