@@ -47,7 +47,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 641,
+      "line": 644,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"COMMENT ON VIEW #{schema}.#{table_name} IS '#{table_comment}';\\n\")",
       "render_path": null,
@@ -127,7 +127,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 348,
+      "line": 350,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(table_name)}() CASCADE\")",
       "render_path": null,
@@ -302,26 +302,6 @@
       "note": ""
     },
     {
-      "warning_type": "File Access",
-      "warning_code": 16,
-      "fingerprint": "7d076acfdb3069c878d3c8da5ec077aa7b3c49764b73226543a6e7da19a9080a",
-      "check_name": "SendFile",
-      "message": "Parameter value used in file name",
-      "file": "app/controllers/nfs_store/downloads_controller.rb",
-      "line": 48,
-      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
-      "code": "send_file(retrieve_file((params[:download_id].to_i or Download.find_download_by_path(@container, params[:download_path]).id), (params[:retrieval_type] or Download.find_download_by_path(@container, params[:download_path]).retrieval_type), :for_action => ((:download or :download_or_view))))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "NfsStore::DownloadsController",
-        "method": "show"
-      },
-      "user_input": "params[:download_path]",
-      "confidence": "Weak",
-      "note": ""
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "8aab190043a4006f4d50d665865d8a1a6f412f450c1dcaa0ada8c58202fb9b0e",
@@ -339,6 +319,26 @@
       },
       "user_input": "current_database",
       "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "8d13efa20c2c351e4ec6a9a57d90b099bae4ce08cc246e1921c00095c0261dec",
+      "check_name": "SendFile",
+      "message": "Parameter value used in file name",
+      "file": "app/controllers/nfs_store/downloads_controller.rb",
+      "line": 39,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(retrieve_file((Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).id or params[:download_id].to_i), (Download.find_download_by_path(@container, (params[:download_path] or \"#{params[:download_path]}.#{params[:format]}\")).retrieval_type or params[:retrieval_type]), :for_action => ((:download or :download_or_view))))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStore::DownloadsController",
+        "method": "show"
+      },
+      "user_input": "params[:retrieval_type]",
+      "confidence": "Weak",
       "note": ""
     },
     {
@@ -408,7 +408,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 53,
+      "line": 55,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute((\"CREATE SCHEMA IF NOT EXISTS #{schema}\" + \" AUTHORIZATION #{owner}\"))",
       "render_path": null,
@@ -597,7 +597,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "lib/active_record/migration/app_generator.rb",
-      "line": 344,
+      "line": 346,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "ActiveRecord::Base.connection.execute(\"DROP FUNCTION IF EXISTS #{calc_trigger_fn_name(prev_table_name)}() CASCADE\")",
       "render_path": null,
@@ -611,6 +611,6 @@
       "note": ""
     }
   ],
-  "updated": "2022-06-01 12:08:53 +0100",
+  "updated": "2022-06-28 18:50:30 +0100",
   "brakeman_version": "5.2.3"
 }
