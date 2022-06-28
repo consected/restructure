@@ -93,7 +93,14 @@ var SecureView = function () {
 
   this.setup_search = function () {
     console.log('setup search')
-    this.search_path = (this.download_path || '').replace('?', '/search_doc?');
+    var dp = this.download_path || '';
+    if (dp.indexOf('/nfs_store/downloads/in/') >= 0) {
+      this.search_path = dp.replace('/nfs_store/downloads/in/', '/nfs_store/downloads/search_doc/in/');
+    }
+    else if (dp.indexOf('?') >= 0) {
+      this.search_path = dp.replace('?', '/search_doc?');
+    }
+
     this.$search_form.attr('action', this.search_path);
     var $search_results = this.$search_results;
 

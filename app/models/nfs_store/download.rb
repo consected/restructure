@@ -17,7 +17,7 @@ module NfsStore
     # @param [String] full_path
     # @return [NfsStore::Manage::ContainerFile]
     def self.find_download_by_path(container, full_path)
-      return if full_path.strip.blank?
+      return if full_path&.strip.blank?
 
       path_parts = full_path.split('/').reject(&:blank?)
       pp_length = path_parts.length == 1

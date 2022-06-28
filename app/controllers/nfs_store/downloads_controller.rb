@@ -11,33 +11,24 @@ module NfsStore
     # Actions that are valid to be called from a post (create) action
     ValidActions = %i[trash download move_files rename_file trigger_file_action].freeze
 
-    before_action :set_container_from_activity_log!, only: [:show_from_activity_log]
+    before_action :set_container_from_activity_log!, only: %i[show_from_activity_log search_doc_from_activity_log]
 
     include InNfsStoreContainer
     include SecureView::Previewing
 
+    before_action :set_download!, only: %i[show show_from_activity_log search_doc search_doc_from_activity_log]
     before_action :setup_selected_items, only: %i[create trash]
 
     #
     # Request download of a single file for download or view
     # Specify either a download_id & retrieval_type or download_path
     def show
-      @download_id = params[:download_id].to_i
-      retrieval_type = params[:retrieval_type]
       for_action = :download
       for_action = :download_or_view if params.dig(:secure_view, :preview_as).present?
-      download_path = params[:download_path]
-      if download_path
-        dl = Download.find_download_by_path(@container, download_path)
-        return not_found unless dl
-
-        retrieval_type = dl.retrieval_type
-        @download_id = dl.id
-      end
 
       raise FsException::NotFound, 'Requested file ID or path not found' unless @download_id
 
-      retrieved_file = retrieve_file(@download_id, retrieval_type, for_action: for_action)
+      retrieved_file = retrieve_file(@download_id, @retrieval_type, for_action: for_action)
       raise FsException::NotFound, 'Requested file not found' unless retrieved_file
 
       @download.save!
@@ -55,10 +46,9 @@ module NfsStore
     #   https://<server>/nfs_store/downloads/in/activity_log__study_info_part/test-slug/image2.png
     # NOTE: set_container_from_activity_log! is called before this action to allow
     # the default container for the specified activity log to be retrieved by #find_container
+    # In addition, before_action will have
+    # set up other essential variables explicitly prior to the call to #show.
     def show_from_activity_log
-      # Force the file extension back onto the download path, since Rails strips it
-      params[:download_path] = "#{params[:download_path]}.#{params[:format]}" if params[:format].present?
-      # continue with the standard show action
       show
     end
 
@@ -116,10 +106,8 @@ module NfsStore
     # result set.
     # Future extension may allow search across multiple specified files.
     def search_doc
-      @download_id = params[:download_id].to_i
-      retrieval_type = params[:retrieval_type]
       search_string = params[:search_string]
-      path = retrieve_file(@download_id, retrieval_type, force: true)
+      path = retrieve_file(@download_id, @retrieval_type, force: true)
 
       retrieved_file = secure_view_setup_previewer(path, view_as: 'pdf')
       raise FsException::NotFound, 'Requested file not found' unless retrieved_file
@@ -139,6 +127,14 @@ module NfsStore
       end
     ensure
       response.stream.close
+    end
+
+    #
+    # Perform #search_doc when we are using the download/in route form.
+    # Although this calls the method directly, before_action will have
+    # set up essential variables explicitly prior to the call.
+    def search_doc_from_activity_log
+      search_doc
     end
 
     private
@@ -250,6 +246,27 @@ module NfsStore
 
     def set_container_from_activity_log!
       @set_container_from_activity_log = true
+    end
+
+    #
+    # Set the key download variables based on whether this is a retrieval
+    # using explicit retrieval type and download id, or using the
+    # download path parameter
+    def set_download!
+      download_path = params[:download_path]
+      if download_path
+        # Force the file extension back onto the download path, since Rails strips it
+        format = params[:format]
+        download_path = "#{download_path}.#{format}" if format.present?
+        dl = Download.find_download_by_path(@container, download_path)
+        not_found unless dl
+
+        @retrieval_type = dl.retrieval_type
+        @download_id = dl.id
+      else
+        @download_id = params[:download_id].to_i
+        @retrieval_type = params[:retrieval_type]
+      end
     end
   end
 end
