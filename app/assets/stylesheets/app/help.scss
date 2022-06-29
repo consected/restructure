@@ -296,3 +296,10 @@ div.help-view-doc.not-embedded,
     opacity: 1;
   }
 }
+
+/* Hide the help icon in the nav bar for standalone help pages */
+body.help {
+  .nav a[data-target="#help-sidebar"] {
+    display: none;
+  }
+}

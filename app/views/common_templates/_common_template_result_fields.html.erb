@@ -243,7 +243,7 @@
   {{else is field_type 'includes' '_description' }}
     <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is field_type 'includes' '^fixed_' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^fixed_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^fixed_' }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (or (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase') (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'view_original_case')) }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^placeholder_' }}
     <li class="{{> field_result_class}} hidden placeholder-field-item" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^placeholder_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is field_type 'e_signed_by'}}
@@ -310,7 +310,7 @@
     <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="date" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong data-format-datetime-local="true">{{this_value}}</strong></li>
   {{else is this_value '===' null}}
   {{else}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="{{lookup field_types @key}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase') }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="{{lookup field_types @key}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (or (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase') (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'view_original_case')) }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{/is}}
   {{#if show_item_type_flags_after}}
   {{#is key item_flags_after}}

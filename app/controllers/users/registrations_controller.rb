@@ -6,6 +6,8 @@ module Users
 
     before_action :devise_registration_params
 
+    before_action :verify_invitation_code, only: [:create]
+
     private
 
     def sign_up(resource_name, resource)
@@ -25,6 +27,12 @@ module Users
     def authorize_resource
       raise 'Users are not allow to register; contact the administrator.' unless Settings::AllowUsersToRegister
     end
-  end
 
+    def verify_invitation_code
+      inv = Settings::InvitationCode
+      return unless inv
+
+      raise FphsGeneralError, 'Incorrect invitation code' unless params[:invitation_code] == inv
+    end
+  end
 end
