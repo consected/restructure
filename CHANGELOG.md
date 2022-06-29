@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] notifications option to user menu and updated help with notifications page
+- [Added] help link handling in study info pages
+- [Changed] substitutions to allow glyphicons and notifications_from_email address
+
 ## [8.0.80] - 2022-06-28
 
 - [Fixed] issue with nested ordered lists in markdown editor
