@@ -77,7 +77,7 @@ _fpa.loaded.default = function () {
     _fpa.printing.appPrintHandler();
   });
 
-  if (_fpa.state.current_user.sign_in_count < 3) {
+  if (_fpa.state.current_user.sign_in_count < 3 && $('body.rails-env-test').length == 0) {
     var viewed = localStorage.getItem('viewed-introduction');
     if (!viewed) {
       var help_icon = $('a[data-target="#help-sidebar"]');
