@@ -11,7 +11,9 @@ module Formatter
     # - true text
     # - truthy if there is an {{else}}
     # - else text
-    IfBlockRegEx = %r{({{#if (#{TagnameRegExString})}}(.+?)({{else}}(.+?))?{{/if}})}m
+    IfBlockRegEx = %r{({{#if (#{TagnameRegExString})}}(.+?)({{else}}(.+?))?{{/if}})}m.freeze
+
+    OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_)/.freeze
 
     #
     # Perform subsititions on the the text, using either a Hash of data or an object item.
@@ -113,7 +115,7 @@ module Formatter
       this_ignore_missing = :show_blank if first_format_directive == 'ignore_missing'
 
       unless d.is_a?(Hash) && (d&.key?(tag_name.to_s) || d&.key?(tag_name.to_sym)) ||
-             tag.start_with?('embedded_report_') || tag.start_with?('add_item_button_')
+             tag.index(OverrideTags)
         unless ignore_missing || this_ignore_missing
           raise FphsException,
                 "Data (#{d.class.name}) does not contain the tag '#{tag_name}' " \
@@ -207,6 +209,7 @@ module Formatter
       data[:mfa_disabled] = Settings::TwoFactorAuthDisabled
       data[:login_issues_url] = Settings::LoginIssuesUrl
       data[:did_not_receive_confirmation_instructions_url] = Settings::DidntReceiveConfirmationInstructionsUrl
+      data[:notifications_from_email] = Settings::NotificationsFromEmail
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       data[:item] = item.item.attributes.dup if item.respond_to?(:item) && item.item.respond_to?(:attributes)
@@ -277,6 +280,7 @@ module Formatter
 
       current_user = data[:current_user_instance] || data[:current_user]
 
+      return glyphicon tag, data if tag.start_with? 'glyphicon_'
       return run_embedded_report tag, data if tag.start_with? 'embedded_report_'
       return add_item_button tag, data if tag.start_with? 'add_item_button_'
 
@@ -311,6 +315,12 @@ module Formatter
         list_master_id = list_item[:master_id]
       end
       [list_item, list_id, list_master_id]
+    end
+
+    def self.glyphicon(tag, _data)
+      icon = tag.sub('glyphicon_', '')
+
+      "<span class=\"glyphicon glyphicon-#{icon}\"></span>".html_safe
     end
 
     def self.run_embedded_report(tag, data)

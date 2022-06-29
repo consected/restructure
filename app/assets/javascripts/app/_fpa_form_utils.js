@@ -1599,6 +1599,12 @@ _fpa.form_utils = {
       if ($(this).find('.glyphicon-new-window').length) return;
       $(this).append(' <i class="glyphicon glyphicon-new-window"></i>');
     });
+
+    $('a[href$="#open-in-sidebar"], a[href^="mailto:"], a[href^="tel:"]').each(function () {
+      $(this).attr('target', '_blank').attr('data-remote', "true").attr('data-toggle', "collapse")
+        .attr('data-target', "#help-sidebar").attr('data-working-target', "#help-sidebar-body");
+    });
+
   },
 
   setup_open_tab_before_requests: function (block) {
