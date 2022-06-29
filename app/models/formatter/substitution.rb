@@ -13,7 +13,7 @@ module Formatter
     # - else text
     IfBlockRegEx = %r{({{#if (#{TagnameRegExString})}}(.+?)({{else}}(.+?))?{{/if}})}m.freeze
 
-    OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_)/.freeze
+    OverrideTags = /^(embedded_report_|add_item_button_|glyphicon_|template_block_)/.freeze
 
     #
     # Perform subsititions on the the text, using either a Hash of data or an object item.
@@ -280,6 +280,7 @@ module Formatter
 
       current_user = data[:current_user_instance] || data[:current_user]
 
+      return template_block tag, data if tag.start_with? 'template_block_'
       return glyphicon tag, data if tag.start_with? 'glyphicon_'
       return run_embedded_report tag, data if tag.start_with? 'embedded_report_'
       return add_item_button tag, data if tag.start_with? 'add_item_button_'
@@ -317,8 +318,13 @@ module Formatter
       [list_item, list_id, list_master_id]
     end
 
+    def self.template_block(tag, data)
+      block_name = tag.sub('template_block_', '').gsub('_', ' ')
+      ApplicationController.helpers.template_block(block_name, data: data)
+    end
+
     def self.glyphicon(tag, _data)
-      icon = tag.sub('glyphicon_', '')
+      icon = tag.sub('glyphicon_', '').gsub('_', '-')
 
       "<span class=\"glyphicon glyphicon-#{icon}\"></span>".html_safe
     end
