@@ -16,6 +16,12 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] invitation code to registration
+- [Added] view_original_case field option to prevent the UI capitalizing downcased fields
+- [Fixed] help sidebar in standalone help pages
+
 ## [8.0.82] - 2022-06-29
 
 - [Added] first login sidebar popup
