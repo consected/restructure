@@ -50,3 +50,4 @@ used in the following forms / pages:
 - `ui resend unlock code` - form to request a locked account be unlocked
 - `ui 2fa setup` - the page presented when a user has to set up their two-factor authentication app with a QR code
 - `ui user preferences caption` - user preferences (timezones / formats) form
+- `ui first login` - information for a new user on first login

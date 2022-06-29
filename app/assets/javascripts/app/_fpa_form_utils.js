@@ -1595,6 +1595,8 @@ _fpa.form_utils = {
     }, 200)
 
     $('a[href$="#open-in-new-tab"], a[href^="mailto:"], a[href^="tel:"]').each(function () {
+      if ($(this).parents('#help-doc-content, .help-doc-content').length) return;
+
       $(this).attr('target', '_blank');
       if ($(this).find('.glyphicon-new-window').length) return;
       $(this).append(' <i class="glyphicon glyphicon-new-window"></i>');
