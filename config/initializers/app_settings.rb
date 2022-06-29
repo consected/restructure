@@ -89,6 +89,8 @@ class Settings
   RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'] || AdminEmail
   # Template user for creating new users. The roles from this user are copied to the new user.
   DefaultUserTemplateEmail = ENV['DEFAULT_USER_TEMPLATE_EMAIL'] || 'registration@template'
+  # Require an invitation code to be used to register
+  InvitationCode = ENV['INVITATION_CODE']
 
   # Admins may be able to create other admins.
   AllowAdminsToManageAdmins = (ENV['ALLOW_ADMINS_TO_MANAGE_ADMINS'].to_s.downcase == 'true')

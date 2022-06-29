@@ -18,6 +18,7 @@ class Admin::ServerInfo
     ScriptedJobDirectory
     DisableVDef AllowDynamicMigrations
     AllowUsersToRegister DefaultUserTemplateEmail RegistrationAdminEmail AllowAdminsToManageAdmins NotifyOnRegistration
+    InvitationCode
   ].freeze
 
   NfsStoreSettingsVars = %w[
