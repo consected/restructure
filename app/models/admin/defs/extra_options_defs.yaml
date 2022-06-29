@@ -94,7 +94,8 @@
         default value | now() | today() 
         
         NOTE this is set when building the instances and may be used to drive logic like an embed_resource_name field
-      no_downcase: true to prevent downcasing of the attribute when stored to the database
+      no_downcase: true - to prevent downcasing of the attribute when stored to the database
+      view_original_case: true - to prevent the UI capitalizing downcased fields
       format: plain | markdown - for free text editor fields such as notes and description
       config:
         _comment: additional configurations for editor fields
