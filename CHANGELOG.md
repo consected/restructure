@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.0.84] - 2022-06-30
 
 - [Added] ability for standalone pages to be loaded in the help sidebar
 - [Added] escaping for curly brackets in substitutions
