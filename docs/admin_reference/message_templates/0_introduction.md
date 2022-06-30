@@ -12,14 +12,14 @@ Message notifications may be used by dynamic definition save triggers, causing a
 They are either an *email* or *sms* **message type**.
 
 Each sent message is generated from a **layout** template providing a common template for styling messages,
-and **content** template providing specific content and allowing curly braces as { {substitutions} }.
+and **content** template providing specific content and allowing curly braces as \{\{substitutions\}\}. Read more about [substitutions](../general/substitutions.md).
 
 For emails, layout and content templates are configured as HTML. For the layout, full HTML including `<style>` tags
 defining CSS may be used. This means that care must be taken to escape plain text.
 
 For SMS messages, layout and content are plain text.
 
-The content of a message is substituted into its layout in the position indicated by `{ {main_content} }` (without the spaces!)
+The content of a message is substituted into its layout in the position indicated by `\{\{main_content\}\}`
 
 ### Dialog Templates
 
