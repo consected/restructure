@@ -66,6 +66,10 @@ _fpa.postprocessors_help = {
 
     var c = $('#help-doc-content')
     _fpa.utils.scrollTo(c, 0, -60, block);
+
+    // Special case when loading a standalone page into the sidebar
+    _fpa.page_layouts.load_columns('#help-sidebar-body')
+
   }
 
 };

@@ -1,0 +1,15 @@
+<%
+container = @page_layout.container
+rows = container.rows || []
+
+# Set a unique id for the container block
+@outer_block_id = "standalone-page-container-#{SecureRandom.hex}"
+view_css = @page_layout.view_css
+outer = "##{@outer_block_id}"
+
+@view_doc = render partial: 'show_row', locals: {rows: rows, container: container} 
+%>
+<div data-postprocessor="page_layout_sidebar">
+<%= render partial: 'help/show_embedded' %>
+</div>
+

@@ -29,7 +29,11 @@ class PageLayoutsController < ApplicationController
   def show_content
     params[:filters] = params
     set_page_filters
-    render :show unless performed?
+    return if performed?
+
+    return render(:show) if request.format == :html
+
+    render(partial: 'page_layouts/sidebar_show', content_type: 'text/html')
   end
 
   private

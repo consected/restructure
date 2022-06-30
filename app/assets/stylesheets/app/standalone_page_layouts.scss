@@ -502,3 +502,14 @@ div.reset-row {
     margin-bottom: 18px;
   }
 }
+
+
+#help-sidebar-body {
+
+  div.reset-row .default-layout-rows.common-page-template-item,
+  .standalone-page-design .default-layout-rows.common-page-template-item {
+    margin: 0;
+    width: auto;
+    float: none;
+  }
+}
