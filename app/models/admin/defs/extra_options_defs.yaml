@@ -42,7 +42,7 @@
     view_handlers: |
       name of handler for UI and models (options include: address, contact,
       subject)
-    header_caption: header caption to use - can include { {substitution}}
+    header_caption: header caption to use - can include `\{\{substitution\}\}`
     alt_width_classes: html classes (space separated) to replace standard col-* classes
       # For example:
       #   resized-width col-md-18 col-lg-18 col-md-offset-3 prevent_nfs_resize
@@ -167,7 +167,7 @@
     # To define an embedded item using fields alone, use one of the following field configurations:
     # <parent table>: embed_resource_name, embed_resource_id - directly reference the embedded item
     # <parent table>: embed_resource_name, <target embed table>: <singularized parent table name>_id - foreign key reference.
-    # { {substitutions}} may reference attributes in an embedded item using { {embedded_item.<attribute name>}}
+    # `\{\{substitutions\}\}` may reference attributes in an embedded item using `\{\{embedded_item.<attribute name>\}\}`
 
   references:
     model_name:
@@ -181,7 +181,7 @@
           embedded_item:
             field_name: value
       filter_by:
-        field_name: value to filter the referenced items by (may include { {substitution}}
+        field_name: value to filter the referenced items by (may include `\{\{substitution\}\}`
       order_by:
         field_name: asc | desc
       type_config:

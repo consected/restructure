@@ -84,6 +84,8 @@ module Formatter
         all_content.gsub!(tag_container, tag_value) if tag_value
       end
 
+      all_content&.gsub!('\{\{', '{{')&.gsub!('\}\}', '}}')
+
       # Return the resulting text
       all_content
     end

@@ -33,7 +33,7 @@
           content_template_text: 'alternative content template text'
           subject: 'subject text'
           extra_substitutions:
-            data1: 'fixed data item to be substituted into the message in { {extra_substitutions.data1}}'
+            data1: 'fixed data item to be substituted into the message in `\{\{extra_substitutions.data1\}\}`'
           
           importance: |
             transactional (default) | promotional. 
