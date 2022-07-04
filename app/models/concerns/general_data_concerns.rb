@@ -145,6 +145,13 @@ module GeneralDataConcerns
   end
 
   #
+  # Embed the user preference for the last user to update the record
+  # @return [UserPreference]
+  def user_preference
+    user&.user_preference
+  end
+
+  #
   # Return a definition version string prefixed with a v
   # If not version definition is provided (the version is current)
   # or the templates don't use a version definition, just return 'v'
@@ -256,6 +263,7 @@ module GeneralDataConcerns
       extras[:methods] << :can_download? if respond_to? :can_download?
       extras[:methods] << :option_type if respond_to? :option_type
       extras[:methods] << :alt_order if respond_to? :alt_order
+      extras[:methods] << :user_preference if respond_to? :user_preference
 
       extras[:include][self.class.parent_type] = { methods: %i[rank_name data] } if self.class.respond_to? :parent_type
       if self.class.respond_to?(:uses_item_flags?) && self.class.uses_item_flags?(master_user)
@@ -291,6 +299,7 @@ module GeneralDataConcerns
       extras[:methods] << :_created if respond_to? :_created
       extras[:methods] << :_updated if respond_to? :_updated
       extras[:methods] << :_disabled if respond_to? :_disabled
+      extras[:methods] << :user_preference if respond_to? :user_preference
 
     else
       return {}

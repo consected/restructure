@@ -103,9 +103,13 @@ class UserPreference < UserBase
   def as_json(extras = {})
     extras[:methods] ||= []
 
-    super
+    # Call #serializable_hash rather than super, since we don't want to return
+    # all the unnecessary attributes / methods provided by GeneralDataConcerns#as_json
+    serializable_hash(extras)
   end
 
+  # Make sure that as_json doesn't recurse
+  undef user_preference
   add_model_to_list # always at the end of model
 
   private
