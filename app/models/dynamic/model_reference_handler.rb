@@ -94,7 +94,7 @@ module Dynamic
             pass_options = {
               to_record_type: ref_type,
               filter_by: ref_config[:filter_by],
-              without_reference: (ref_config[:without_reference] == true),
+              without_reference: ref_config[:without_reference],
               ref_order: ref_order,
               active: active_only,
               order_by: (use_options_order_by && ref_config[:order_by])
@@ -137,6 +137,7 @@ module Dynamic
 
     def clear_model_reference_memo
       @creatable_model_references = nil
+      @model_references = nil
     end
 
     #
@@ -378,7 +379,7 @@ module Dynamic
 
       # Additional options to apply to #find_reference calls
       filter_by = ref_config[:filter_by]
-      without_reference = (ref_config[:without_reference] == true)
+      without_reference = ref_config[:without_reference]
       ref_created_by_user = (ref_config[:from] == 'user_is_creator')
       pass_options = {
         to_record_type: ref_type,

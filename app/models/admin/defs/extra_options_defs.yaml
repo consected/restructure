@@ -173,7 +173,10 @@
     model_name:
       label: button label
       from: this | master | any | user_is_creator (item in any master that was created by current user)
-      without_reference: true
+      without_reference: |
+        true | outside_master - 
+          true will check only within the current master, if the instance has a master association
+          outside_master always ignores the master, even if defined, relying only on the filter_by definition
       add: many | one_to_master | one_to_this
       add_with:
         extra_log_type: type name
