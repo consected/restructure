@@ -27,7 +27,7 @@
     <script>
       _fpa.translations = <%= YAML.load_file(Rails.root.join('config', 'locales', "#{I18n.locale}.yml")).to_json.html_safe %>;
       _fpa.locale_t = _fpa.translations[_fpa.current_locale];
-      _fpa.current_user_preference = _fpa.current_user_preference || {
+      _fpa.state.current_user_preference = _fpa.state.current_user_preference || {
         date_format: 'mm/dd/yyyy'
       };
       

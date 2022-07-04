@@ -595,7 +595,7 @@ _fpa.form_utils = {
       if (data && (data.master_id || data.vdef_version)) {
         var master_id = data.master_id;
         new_data = Object.assign({}, data);
-        if (!new_data.user_preference) new_data.user_preference = _fpa.current_user_preference;
+        if (!new_data.user_preference) new_data.user_preference = _fpa.state.current_user_preference;
       }
       else {
         var master_id = block.parents('.master-panel').first().attr('data-master-id');
@@ -1341,7 +1341,7 @@ _fpa.form_utils = {
         autoclose: true,
         todayHighlight: true,
         todayBtn: 'linked',
-        format: _fpa.current_user_preference.date_format
+        format: _fpa.state.current_user_preference.date_format
       });
 
       $(this).on('click', function () {
