@@ -251,6 +251,27 @@ RSpec.describe 'Model reference implementation', type: :model do
                   test1: 'user_is_creator test'
                 add_with:
                   test1: 'user_is_creator test'
+                if:
+                  all:
+                    this:
+                      user_id:
+                        user: id
+
+            - dynamic_model__test_created_by_recs:
+                label: Was created by other user
+                from: any
+                without_reference: outside_master
+                add: one_to_this
+                filter_by:
+                  test1: 'user_is_creator test'
+                  created_by_user_id: '{{created_by_user_id}}'
+                add_with:
+                  test1: 'user_is_creator test'
+                if:
+                  not_any:
+                    this:
+                      user_id:
+                        user: id
 
         mr_prevent_disable:
           label: Prevent Disable
@@ -520,7 +541,30 @@ RSpec.describe 'Model reference implementation', type: :model do
       expect(al_simple2.model_references(force_reload: true).length).to eq 1
       expect(al_simple3.model_references(force_reload: true).length).to eq 1
 
-      expect(al_simple.model_references.first.to_record_id).to eq al_simple3.model_references.first.to_record_id
+      to_id = al_simple.model_references.first.to_record_id
+      to_id2 = al_simple2.model_references.first.to_record_id
+      to_id3 = al_simple3.model_references.first.to_record_id
+      expect(to_id).to eq to_id3
+
+      # When the current user is different from the original creator, we can define an alternative reference to access
+      # the original user's referenced items
+      expect(al_simple).to be_persisted
+      prev_user = @user
+      create_user
+      expect(prev_user).not_to eq @user
+      al_simple.current_user = @user
+      al_simple2.current_user = @user
+      al_simple3.current_user = @user
+      expect(al_simple.user_id).not_to eq @user
+      expect(al_simple.current_user).to eq @user
+
+      expect(al_simple.model_references(force_reload: true).length).to eq 1
+      expect(al_simple2.model_references(force_reload: true).length).to eq 1
+      expect(al_simple3.model_references(force_reload: true).length).to eq 1
+
+      expect(al_simple.model_references.first.to_record_id).to eq to_id
+      expect(al_simple2.model_references.first.to_record_id).to eq to_id2
+      expect(al_simple3.model_references.first.to_record_id).to eq to_id3
     end
 
     it 'always embeds defined references' do

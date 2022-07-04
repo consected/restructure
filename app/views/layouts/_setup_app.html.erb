@@ -12,6 +12,7 @@
   _fpa.state.app_configs = <%= Admin::AppConfiguration.all_for(current_user).to_json.html_safe %>;
   _fpa.state.current_user_roles = <%= current_user.app_type ? current_user.role_names.to_json.html_safe : [] %>;
   _fpa.state.current_user = <%= current_user.attributes.slice('email', 'first_name', 'last_name', 'sign_in_count', 'current_sign_in_at','last_sign_in_at', 'otp_required_for_login', 'password_updated_at', 'do_not_email', 'app_type_id').to_json.html_safe %>;
+  _fpa.state.current_user_preference = <%= current_user.user_preference.to_json.html_safe %>
   _fpa.state.crosswalk_attrs = <%= Master.crosswalk_attrs.to_json.html_safe %>;
   _fpa.state.alternative_id_fields = <%= Master.alternative_id_fields.to_json.html_safe %>;
   _fpa.state.user_can = {

@@ -144,8 +144,11 @@ module GeneralDataConcerns
     created_at&.to_i
   end
 
+  #
+  # Embed the user preference for the last user to update the record
+  # @return [UserPreference]
   def user_preference
-    user&.user_preference&.attributes
+    user&.user_preference
   end
 
   #
