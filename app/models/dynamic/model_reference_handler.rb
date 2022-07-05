@@ -106,7 +106,10 @@ module Dynamic
                   when 'master', 'any'
                     ModelReference.find_references master, **pass_options
                   when 'user_is_creator'
-                    pass_options[:ref_created_by_user] = true
+                    pass_options[:ref_created_by_user] = ref_config[:from]
+                    ModelReference.find_references self, **pass_options
+                  when 'other_user_is_creator'
+                    pass_options[:ref_created_by_user] = ref_config[:from]
                     ModelReference.find_references self, **pass_options
                   else
                     msg = "Find references attempted without known :from key: #{ref_config[:from]}"
@@ -380,7 +383,7 @@ module Dynamic
       # Additional options to apply to #find_reference calls
       filter_by = ref_config[:filter_by]
       without_reference = ref_config[:without_reference]
-      ref_created_by_user = (ref_config[:from] == 'user_is_creator')
+      ref_created_by_user = ref_config[:from] if ref_config[:from].in?(['user_is_creator', 'other_user_is_creator'])
       pass_options = {
         to_record_type: ref_type,
         filter_by: filter_by,
