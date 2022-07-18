@@ -82,7 +82,13 @@ class Admin::ManageAdminsController < AdminController
   protected
 
   def capabilities_options
-    ControllerList.map { |c| [c.humanize.titleize, c] }
+    curr_list = current_admin.capabilities&.reject(&:blank?)
+    list = if curr_list.present?
+             ControllerList & curr_list
+           else
+             ControllerList
+           end
+    list.map { |c| [c.humanize.titleize, c] }
   end
 
   def primary_model

@@ -68,7 +68,8 @@ module Reports
     attr_accessor :list_name, :list_id, :source_type, :full_source_type_name,
                   :item_ids_in_list, :items,
                   :new_item_ids, :removed_item_ids,
-                  :current_user, :current_admin
+                  :current_user, :current_admin,
+                  :list_on_attr
 
     def self.setup(list_name, items_text, current_user, current_admin = nil)
       obj = new
@@ -111,6 +112,11 @@ module Reports
       list_ids = items.map { |i| i['list_id'] }.uniq
       self.list_id = list_ids.first
       raise(FphsGeneralError, 'list id not specified') unless list_ids.length == 1 && list_id
+
+      # Use the optional *on_attr:* value to specify an alternative field to check the list against.
+      # For example, this allows master_id to be specified, tying lists to master records rather than
+      # dynamic definition records. By default we assume the id field will be used.
+      self.list_on_attr = items.first['on_attr'] || 'id'
 
       check_authorizations!
       check_valid_list_id!
@@ -194,7 +200,7 @@ module Reports
 
     def authorized?
       return true if current_admin
-      return true if current_user.can? :view_reports
+      return true if current_user.can?(:view_report_not_list) || current_user.can?(:view_reports)
 
       raise FphsException, 'not authorized'
     end
@@ -246,7 +252,7 @@ module Reports
     # Raise an error if the list id is not found within the class the selections model is associated with
     def check_valid_list_id!
       assoc_class = ModelReference.to_record_class_for_type assoc_name.singularize
-      assoc_item = assoc_class.where(id: list_id).first
+      assoc_item = assoc_class.where(list_on_attr => list_id).first
       return if assoc_item
 
       raise FphsGeneralError, "list id does not represent an associated list: #{list_id} for #{assoc_class}"

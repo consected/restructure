@@ -1,5 +1,6 @@
 <div class="devise-block conf-block col-md-8 col-md-offset-8 well">
   <h2>Resend confirmation instructions</h2>
+  <div class="template-block"><%= template_block 'ui resend confirmation code' %></div>
 
   <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>

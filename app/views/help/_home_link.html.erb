@@ -1,4 +1,6 @@
   <%  
+    begin
+
     if section == HelpController::IndexSection && subsection ==  HelpController::IndexSubsection
       # Do nothing
     elsif subsection == HelpController::IntroductionDocument
@@ -13,3 +15,9 @@
   <% else %>
     <%= link_to 'back to main section', main_section %>
   <% end %>
+  <%
+  rescue StandardError
+  # Handles missing section / subsection / main_section helper methods cleanly, especially
+  # for standalone pages embedded in the sidebar
+  end
+  %>

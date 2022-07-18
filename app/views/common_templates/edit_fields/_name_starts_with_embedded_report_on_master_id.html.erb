@@ -1,0 +1,5 @@
+<%
+  report_id = field_name.sub('embedded_report_on_master_id_', '')
+%>
+<%= form.label field_name_sym, label_for(field_name_sym, labels) %>
+<a href="/reports/<%=report_id%>?embed=true&search_attrs[list_id]=<%=form_object_instance.master_id%>" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="btn btn-sm btn-default glyphicon glyphicon-list" type="button" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true"></a>

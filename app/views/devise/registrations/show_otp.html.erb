@@ -1,6 +1,6 @@
 <div class="col-md-12 col-md-offset-6 well">
 <h2><%= @resource_name.to_s.humanize %> Two-Factor Authentication Setup</h2>
-
+  <div class="template-block"><%= template_block 'ui 2fa setup' %></div>
 
 <%
   # Double check the logic to make sure we don't accidentally show the QR Code at the wrong time

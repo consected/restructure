@@ -42,7 +42,7 @@
     view_handlers: |
       name of handler for UI and models (options include: address, contact,
       subject)
-    header_caption: header caption to use - can include { {substitution}}
+    header_caption: header caption to use - can include `\{\{substitution\}\}`
     alt_width_classes: html classes (space separated) to replace standard col-* classes
       # For example:
       #   resized-width col-md-18 col-lg-18 col-md-offset-3 prevent_nfs_resize
@@ -71,9 +71,9 @@
         - value: panel / category name
           if: 'ref: ** conditions reference **'
       expand_reference:
-        - value: reference with caption - the option if means the first matched item will be used as the value
+        - value: reference with caption - the option *if:* means the first matched item will be used as the value
           if: 'ref: ** conditions reference **'
-        - value: next | reference with caption
+        - value: next - this literal value tells the action to open the next available reference tab
           if: 'ref: ** conditions reference **'
     on_create: {}
     on_save:
@@ -94,7 +94,8 @@
         default value | now() | today() 
         
         NOTE this is set when building the instances and may be used to drive logic like an embed_resource_name field
-      no_downcase: true to prevent downcasing of the attribute when stored to the database
+      no_downcase: true - to prevent downcasing of the attribute when stored to the database
+      view_original_case: true - to prevent the UI capitalizing downcased fields
       format: plain | markdown - for free text editor fields such as notes and description
       config:
         _comment: additional configurations for editor fields
@@ -105,6 +106,15 @@
           optional specification of options for a select_ type field to
           use instead of general selection specified list. {Label: value, ...} or [Label,...].
           For the latter the Label is downcased automatically to generate the value
+        
+        # For select_record_* fields:
+        value_attr: attribute_name to use for selection value in select_record_* fields
+        label_attr: attribute_name to use for selection label in select_record_* fields
+        group_split_char: optional character to split on when grouping selections in select_record_* fields
+        no_assoc: | 
+          false | true - optionally specify that no association should be used in select_record_* data lookup
+                         select_record_from_table_* automatically sets this to true
+                         select_record_from_* defaults to false but this setting overrides the default
       calculate_with:
         sum: []
       prompt: used by some select fields for the placeholder prompt text
@@ -157,13 +167,16 @@
     # To define an embedded item using fields alone, use one of the following field configurations:
     # <parent table>: embed_resource_name, embed_resource_id - directly reference the embedded item
     # <parent table>: embed_resource_name, <target embed table>: <singularized parent table name>_id - foreign key reference.
-    # { {substitutions}} may reference attributes in an embedded item using { {embedded_item.<attribute name>}}
+    # `\{\{substitutions\}\}` may reference attributes in an embedded item using `\{\{embedded_item.<attribute name>\}\}`
 
   references:
     model_name:
       label: button label
       from: this | master | any | user_is_creator (item in any master that was created by current user)
-      without_reference: true
+      without_reference: |
+        true | outside_master - 
+          true will check only within the current master, if the instance has a master association
+          outside_master always ignores the master, even if defined, relying only on the filter_by definition
       add: many | one_to_master | one_to_this
       add_with:
         extra_log_type: type name
@@ -171,7 +184,7 @@
           embedded_item:
             field_name: value
       filter_by:
-        field_name: value to filter the referenced items by (may include { {substitution}}
+        field_name: value to filter the referenced items by (may include `\{\{substitution\}\}`
       order_by:
         field_name: asc | desc
       type_config:

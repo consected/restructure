@@ -12,7 +12,10 @@
   end
 
   elt = ""
-  elt = "-#{extra_log_type.ns_hyphenate}" if extra_log_type
+  if extra_log_type
+    elt = "-#{extra_log_type.ns_hyphenate}"
+    elt_class = "cb-extra-log-type#{elt}"
+  end
   inner_data_target = "#{name.ns_hyphenate}#{elt}-#{ref_type.ns_hyphenate}-edit-form-#{master_id}-#{id}"
 
   caption = ref_config[:label] || caption.to_s
@@ -25,15 +28,22 @@
       <span class="small"><i><%= caption.humanize %></i></span>
     </li>
   <% else
-
       caption_before_ref_type = "reference_#{ref_type}".to_sym
-      cb = caption_before[caption_before_ref_type]
+      caption_before_ref_type_elt = "#{caption_before_ref_type.to_s.singularize}__#{extra_log_type}".to_sym
+      cb_key = caption_before_ref_type_elt
+
+      cb = caption_before[cb_key]
+      unless cb
+        cb_key = caption_before_ref_type
+        cb = caption_before[cb_key]
+      end
+
   %>
 
   {{#unless prevent_add_reference}}
     <% if cb %>
-    <li class="list-group-item caption-before results-caption-before <%=caption_before_ref_type.to_s.hyphenate%> <%=caption_before_ref_type.to_s.hyphenate%>-caption"
-    ><%= show_caption_before caption_before_ref_type, caption_before, :show %></li>
+    <li class="list-group-item caption-before results-caption-before <%=caption_before_ref_type.to_s.hyphenate%> <%=elt_class%> <%=caption_before_ref_type.to_s.hyphenate%>-caption"
+    ><%= show_caption_before cb_key, caption_before, :show %></li>
     <% end %>
     <%
     view_as_new = ref_config.dig(:view_as, :new)
@@ -49,7 +59,7 @@
       a_class = "btn btn-sm btn-primary embedded-add-item-button"
     end
     %>
-    <li class="list-group-item <%=block_id%> in-item-model-references is-full-width">
+    <li class="list-group-item <%=block_id%> <%=elt_class%> in-item-model-references is-full-width">
       <p class="text-center">
         <% path_pref ="/masters/#{master_id}" unless ref_config[:no_master_association] %>
         <a href="<%=path_pref%>/<%=ref_type.ns_pathify.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %><%= view_as_new == 'select_or_add' ? "&references[allow_select]=true" : "" %><%= view_as_new == 'outside_this' ? "&references[new_outside_this]=true" : "" %><%=add_extra_params_to_add_item_link ref_type, ref_config%>" 
@@ -65,7 +75,7 @@
   {{/unless}}
   <% end %>
 <% end %>
-<div id="<%=ref_type.ns_hyphenate.pluralize%>-<%= id %>-" data-sub-list="<%=ref_type.ns_underscore.pluralize%>" class="common-template-list model-reference-list alt-width">
+<div id="<%=ref_type.ns_hyphenate.pluralize%>-<%= id %>-" data-sub-list="<%=ref_type.ns_underscore.pluralize%>" class="common-template-list model-reference-list block-<%=caption_before_ref_type.to_s.hyphenate%> <%=elt_class%> alt-width">
   <div class="new-block model-reference-new-block" 
       id="<%= inner_data_target %>" 
       data-result-target-for-child="#<%= inner_data_target %>, #<%=ref_type.ns_hyphenate%>-<%= master_id %>-" 

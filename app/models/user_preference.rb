@@ -25,26 +25,26 @@ class UserPreference < UserBase
             presence: true
 
   def pattern_for_date_format
-    UserPreferencesHelper::DateFormats[self.date_format] || UserPreference.default_pattern_for_date_format
+    UserPreferencesHelper::DateFormats[date_format] || UserPreference.default_pattern_for_date_format
   end
 
   def pattern_for_date_time_format
-    UserPreferencesHelper::DateTimeFormats[self.date_time_format][:hours_minutes] ||
+    UserPreferencesHelper::DateTimeFormats[date_time_format][:hours_minutes] ||
       UserPreference.default_pattern_for_date_time_sec_format
   end
 
   def pattern_for_time_format
-    UserPreferencesHelper::TimeFormats[self.time_format][:hours_minutes] ||
+    UserPreferencesHelper::TimeFormats[time_format][:hours_minutes] ||
       UserPreference.default_pattern_for_time_sec_format
   end
 
   def pattern_for_date_time_sec_format
-    UserPreferencesHelper::DateTimeFormats[self.date_time_format][:with_secs] ||
+    UserPreferencesHelper::DateTimeFormats[date_time_format][:with_secs] ||
       UserPreference.default_pattern_for_date_time_format
   end
 
   def pattern_for_time_sec_format
-    UserPreferencesHelper::TimeFormats[self.time_format][:with_secs] ||
+    UserPreferencesHelper::TimeFormats[time_format][:with_secs] ||
       UserPreference.default_pattern_for_time_format
   end
 
@@ -89,6 +89,27 @@ class UserPreference < UserBase
     Settings::DefaultUserTimezone
   end
 
+  # Ensure we don't attempt to look for flags against a user preference instance
+  def self.uses_item_flags?(_user)
+    false
+  end
+
+  # Override to always allow access. The caller is responsible for allowing access.
+  # Limited risk, even if misused.
+  def allows_current_user_access_to?(_perform, _with_options = nil)
+    true
+  end
+
+  def as_json(extras = {})
+    extras[:methods] ||= []
+
+    # Call #serializable_hash rather than super, since we don't want to return
+    # all the unnecessary attributes / methods provided by GeneralDataConcerns#as_json
+    serializable_hash(extras)
+  end
+
+  # Make sure that as_json doesn't recurse
+  undef user_preference
   add_model_to_list # always at the end of model
 
   private

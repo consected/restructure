@@ -227,6 +227,9 @@ Rails.application.routes.draw do
     get 'downloads/in/:activity_log_type/:activity_log_id/:download_path', to: 'downloads#show_from_activity_log',
                                                                            constraints: { download_path: /.*/ },
                                                                            format: false
+    get 'downloads/search_doc/in/:activity_log_type/:activity_log_id/:download_path', to: 'downloads#search_doc_from_activity_log',
+                                                                                      constraints: { download_path: /.*/ },
+                                                                                      format: false
     #  ,
     #  defaults: { format: 'html' }
     resources :downloads, only: %i[show create] do

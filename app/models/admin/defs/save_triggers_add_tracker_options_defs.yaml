@@ -6,7 +6,7 @@
             if: 'ref: ** conditions reference **'
             with:
               # The tracker entry information to add.
-              # Each of the attributes may be based on value, potentially including { {substitutions}}
+              # Each of the attributes may be based on value, potentially including `\{\{substitutions\}\}`
               # or a reference definition that returns a value (defined as a Hash with return_value)
               # NOTE: substitutions will be handled against the current item and master record,
               # regardless of an alterative being specified
@@ -20,7 +20,7 @@
               notes: |
                 Free text notes.
                 Is optional.
-                May include { {substitutions}}
+                May include `\{\{substitutions\}\}`
               
               # item attributes are optional, to specify a model record to reference the tracker to
               # By default, the current item is used

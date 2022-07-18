@@ -6,7 +6,7 @@ In ReStructure repo:
 
 - Find the latest commit transferred from Private Repo to ReStructure (or vice versa) `git log --all --max-count=1 --grep=tx-`
 - Check it out `git checkout <commit-id>`
-- Create a new branch `tx-<harvard|viva|etc>-@<current version>`
+- Create a new branch `git checkout -b tx-<harvard|viva|etc>-@<current version>`
 
 In Private repo:
 
@@ -40,7 +40,7 @@ In Private repo:
 
 - Find the latest commit transferred from ReStructure to Private Repo (or vice versa) `git log --all --max-count=1 --grep=tx-`
 - Check it out `git checkout <commit-id>`
-- Create a new branch `tx-restructure-@<current version>`
+- Create a new branch `git checkout -b tx-restructure-@<current version>`
 - Run `app-scripts/copy-restructure-to-here.sh ../../restructure/restructure`
 - Review the changes, which should just reflect those related to the last transfer - take care with:
   - config/initializers/app_settings.rb

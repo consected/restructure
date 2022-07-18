@@ -9,13 +9,15 @@ Users are provided access to login to the application server, and from here are 
 The common components of an app are:
 
 - [Login](login.md)
-- Emails and SMS notifications
 - [Change Password](change_password.md)
 - [Update User Profile](update_user_profile.md)
+- [Emails and SMS notifications](notifications.md)
 - [Logout](logout.md)
+{{#if current_user_app_type_label}}
 
 ---
 
 Additional information for your current app: [{{current_user_app_type_label}}](../../app_reference/{{current_user_app_type_name::lowercase::id_underscore}}/0_introduction.md)
 
 ---
+{{/if}}

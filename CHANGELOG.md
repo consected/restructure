@@ -18,6 +18,40 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+### Transferred from Viva @8.0.88 - 2022-07-18
+
+- [Added] other_user_is_creator from reference option
+- [Fixed] context issue with edit form captions
+- [Added] reference definition without_reference: outside_master
+- [Fixed] passing user_preference to front end
+- [Added] ability for standalone pages to be loaded in the help sidebar
+- [Added] escaping for curly brackets in substitutions
+- [Changed] documentation for optional MFA and added substitution info
+- [Added] invitation code to registration
+- [Added] view_original_case field option to prevent the UI capitalizing downcased fields
+- [Fixed] help sidebar in standalone help pages
+- [Added] first login sidebar popup
+- [Added] notifications option to user menu and updated help with notifications page
+- [Added] help link handling in study info pages
+- [Changed] substitutions to allow glyphicons and notifications_from_email address
+- [Fixed] issue with nested ordered lists in markdown editor
+- [Fixed] hiding modal on submitting embedded form & no_report_scroll not enabling full page scroll
+- [Fixed] search doc with download/in route form - plus refactored to DRY code
+- [Added] message template UI blocks for registration forms and user preferences
+- [Added] admin documentation for message templates
+- [Added] caption before references with extra log types
+- [Added] on_master_id as embedded_report extension
+- [Changed] expand_reference action to scroll to result
+- [Fixed] issue where activity log panels don't get fully scrolled to
+- [Fixed] issue where report list updates fail if user only has view_report_not_list access
+- [Updated] expand_reference documentation
+- [Added] preprocessing to CSV imports for array fields
+- [Added] sample use of API in Ruby scripts
+- [Added] study info content migrator using api
+- [Changed] to handle select_record fields not associated with master and better documentation
+- [Changed] allowable fields in import CSV to allow "disabled"
+- [Fixed] issue where incorrect page layout nav configuration breaks UI completely
+
 ### Transfer from Harvard 7.4.111 - 2022-06-13
 
 - [Added] new_caption option
@@ -46,7 +80,7 @@ release will be created for any release tested in production, and may be marked 
 - [Added] path based access to container files, and a link provided in stored file and archived file forms
 - [Added] consistent secondary key handling for activity logs
 - [Added] download of files using a download_path param
-- [Added] showing select_from_... values based on live data and master associations, not just dynamic definitions
+- [Added] showing select*from*... values based on live data and master associations, not just dynamic definitions
 - [Added] global app definition of nav links, and ability for icon to be used without a label
 - [Added] show_as iframe for report cell and fixed tags handling
 - [Added] filestore browser to appear in edit forms, if view_as: edit: filestore is set
@@ -98,12 +132,12 @@ release will be created for any release tested in production, and may be marked 
 - [Added] view_css support to regular panels
 - [Added] force_not_valid option in create/update_reference and update_this
 - [Added] ability for save_action to return the first result that matches an if condition
-- [Added] users as a table to calculate against in *_if evaluations
+- [Added] users as a table to calculate against in \*\_if evaluations
 - [Added] save_action expand_reference
 - [Added] media queries to view css options
 - [Added] activity log master and item associations for extra log types, allowing for substitutions against a specific activity
 - [Added] defined_selector options to reports criteria to allow easy selector configuration based on central and model configurations
-- [Added] 'never' option to always_embed_*reference
+- [Added] 'never' option to always*embed*\*reference
 - [Added] ability for an existing admin to add a new admin account if appropriate server setting allows
 - [Fixed] limited_access_control using association master_created_by_user
 - [Fixed] issue loading images when window not focused
