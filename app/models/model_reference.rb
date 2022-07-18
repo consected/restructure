@@ -179,11 +179,14 @@ class ModelReference < ActiveRecord::Base
 
       without_reference = true
       filter_by ||= {}
-      filter_by.merge! created_by_user_id: from_item_or_master.current_user.id
+      if ref_created_by_user == 'user_is_creator'
+        filter_by.merge! created_by_user_id: from_item_or_master.current_user.id
+      end
     end
 
     if without_reference
-      if to_record_type_class.respond_to?(:master) && from_item_or_master && !ref_created_by_user
+      if to_record_type_class.respond_to?(:master) && from_item_or_master &&
+         !ref_created_by_user && without_reference != 'outside_master'
         cond = { master: from_item_or_master }
       end
       cond ||= {}

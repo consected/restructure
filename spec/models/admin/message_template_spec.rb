@@ -126,6 +126,19 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     expect(res).to eq expected_text
   end
 
+  it 'generates UI blocks' do
+    t = '<div><p>This is a UI block</p><p>It shows the base url {{base_url}}</p></div>'
+    template = Admin::MessageTemplate.create! name: 'test ui content', message_type: :plain, template_type: :content,
+                                              template: t, current_admin: @admin
+
+    expect(template.name).to eq 'test ui content'
+
+    res = Admin::MessageTemplate.generate_content content_template_name: 'test ui content', data: {}
+    expected_text = "<div><p>This is a UI block</p><p>It shows the base url #{Settings::BaseUrl}</p></div>"
+
+    expect(res).to eq expected_text
+  end
+
   it 'embeds reports' do
     create_reports
     rn = @report1.alt_resource_name

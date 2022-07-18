@@ -36,7 +36,7 @@ module ApplicationHelper
   #
   # 'class=""' attribute to add to the main body tag
   def body_classes
-    class_list = "#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class}"
+    class_list = "#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class} #{Rails.env.test? && 'rails-env-test'}"
     " class=\"#{class_list} initial-compiling \"".html_safe
   end
 
@@ -246,5 +246,20 @@ module ApplicationHelper
     return unless date_time
 
     Formatter::TimeWithZone.format date_time, nil, current_user: current_user
+  end
+
+  #
+  # Generate a block from a plain message template, configured in markdown format
+  # @param [String] name - message template name
+  # @param [Hash|UserBase|nil] data - data for substitutions
+  # @param [Boolean] allow_missing_template - return nil if no matching template found
+  # @param [Boolean] markdown_to_html - by default assume the template is markdown and must be converted to html
+  # @return [String]
+  def template_block(name, data: nil, allow_missing_template: true, markdown_to_html: true)
+    data ||= {}
+    data = data.attributes if data.respond_to? :attributes
+    Admin::MessageTemplate.generate_content content_template_name: name, data: data,
+                                            allow_missing_template: allow_missing_template,
+                                            markdown_to_html: markdown_to_html
   end
 end

@@ -19,6 +19,8 @@ header subject data type: |
   In the master header, the data model to get subject names from. A data model resource name
 header secondary data type: |
   In the master header, the data model to get secondary subject names from. A data model resource name
+hide app selector: |
+  The navbar app selector appears by default if the user has more than one app available. Value "true" always hides it
 hide navbar search: |
   By default, the main menu navbar has ID search fields. Value "true" hides it
 hide player accuracy: |
@@ -52,10 +54,10 @@ logo link: |
 hide master heading: |
   Hide the master heading, including id, prefix and title
 master header prefix: |
-  Prefix to display on the master header. May include curly { { substitutions } }
+  Prefix to display on the master header. May include curly `{{substitutions}}`
 master header title: |
   Alternative text  appear instead of participant info names on the master header. 
-  May include curly { { substitutions } }
+  May include curly `\{\{substitutions}}`
 master results panel css class: |
   Space separated list of additional classes to add to the results-panel
 menu research label: |

@@ -56,16 +56,16 @@
       - index_files:
 
       - dicom_deidentify:
-          - new_path: 'reidentified/{ {path}}'
+          - new_path: 'reidentified/\{\{path\}\}'
             recursive: true              
             file_filters:
                 - '.*_MPRAGE_RMS_0.*'
                 - '.*_TOF_0.*'
                 - '.*_DTI_ADC_0.*'              
             set_tags:
-              '0010,0010': '{ {player_infos.first_name::initial}}{ { player_infos.last_name::initial}}'
-              '0010,0020': '{ {player_infos.first_name::initial}}{ { player_infos.last_name::initial}}'
-              '0008,0020': '{ {parent_item.session_date::dicom_date}}'
+              '0010,0010': '\{\{player_infos.first_name::initial\}\}\{\{ player_infos.last_name::initial\}\}'
+              '0010,0020': '\{\{player_infos.first_name::initial\}\}\{\{ player_infos.last_name::initial\}\}'
+              '0008,0020': '\{\{parent_item.session_date::dicom_date\}\}'
 
       - dicom_metadata: # run to reextract metadata from dicom files
       - scripted:

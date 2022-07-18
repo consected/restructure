@@ -165,7 +165,8 @@ module SetupHelper
         'protocol_id',
         'set_related_player_contact_rank',
         'tag_select_allowed',
-        'result_json'
+        'result_json',
+        'created_by_user_id'
       )
     end
 

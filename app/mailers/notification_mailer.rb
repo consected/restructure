@@ -30,6 +30,11 @@ class NotificationMailer < ActionMailer::Base
       res
     end
 
+    if notify.from_user_email.blank?
+      raise FphsException,
+            'No FROM user set in notification. Check NotificationsFromEmail setting'
+    end
+
     options = {
       to: emails,
       from: notify.from_user_email,
