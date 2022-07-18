@@ -357,7 +357,7 @@ Date.prototype.asLocale = function () {
 };
 
 // Take yyyy-mm-dd... and make it mm/dd/yyyy
-// TODO: conform to _fpa.user_prefs.date_format
+// TODO: conform to _fpa.state.current_user_preference.date_format
 _fpa.utils.isoDateStringToLocale = function (stre) {
   stre = stre.trim();
   if (stre == '') return '';
@@ -366,7 +366,7 @@ _fpa.utils.isoDateStringToLocale = function (stre) {
 };
 
 // Take yyyy-mm-dd hh24:min:ss... and make it mm/dd/yyyy hh24:min:ss
-// TODO: conform to _fpa.user_prefs.date_format
+// TODO: conform to _fpa.state.current_user_preference.date_format
 _fpa.utils.isoDateTimeStringToLocale = function (stre) {
   stre = stre.trim();
   if (stre == '') return '';
@@ -516,7 +516,7 @@ _fpa.utils.html_to_markdown = function (obj) {
   $html.find('style').remove();
 
   $html.find('*')
-    .not('div, p, h1, h2, h3, h4, i, b, strong, em, u, li, ol, ul, table, tr, td, thead, th, tbody, code, pre, img, a, br, sup')
+    .not('div, p, h1, h2, h3, h4, i, b, strong, em, u, li, ol, ul, table, tr, td, thead, th, tbody, code, pre, img, a, br, sup, sub')
     .contents()
     .unwrap().wrap('');
 
@@ -573,7 +573,7 @@ _fpa.utils.html_to_markdown = function (obj) {
 
   obj.html = $html.html();
 
-  var txt = domador(obj.html, { inline: true });
+  var txt = domador(obj.html, { inline: true, pad_ol_li: 3 });
 
   // Clean the text to remove
   // any number of hash or asterisk symbols followed by 

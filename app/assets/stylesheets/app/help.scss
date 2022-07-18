@@ -23,7 +23,8 @@
 
 div.help-view-doc,
 .common-help-item,
-.md-formatted-block {
+.md-formatted-block,
+#help-sidebar-body div.standalone-page-col.reset-row {
   font-family: Roboto, sans-serif;
 
   .common-help-item {
@@ -151,7 +152,7 @@ div.help-view-doc,
     }
   }
 
-  .md-formatted-block {
+  .md-formatted-block, .custom-editor-viewer {
     h1,
     h2,
     h3,
@@ -238,6 +239,18 @@ div.help-view-doc,
     overflow: visible;
   }
 
+  li.list-group-item {
+    list-style-position: outside;
+    list-style-type: none;
+    margin-left: 0;
+    overflow: hidden;
+  }
+
+  .container-icons-items li,
+  .container-icons-items ul li {
+    list-style-type: none;
+  }
+
   ol li,
   ol ol {
     list-style-position: outside;
@@ -283,6 +296,16 @@ div.help-view-doc,
     padding-left: 0.4em;
     font-size: 80%;
   }
+
+  .nfs-store-container-block {
+    a[target]:after {
+      display: none;
+    }
+  }
+
+  .footer {
+    display: none;
+  }
 }
 
 .help-doc-header {
@@ -294,5 +317,12 @@ div.help-view-doc.not-embedded,
 .md-formatted-block {
   img {
     opacity: 1;
+  }
+}
+
+/* Hide the help icon in the nav bar for standalone help pages */
+body.help {
+  .nav a[data-target="#help-sidebar"] {
+    display: none;
   }
 }

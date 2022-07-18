@@ -98,7 +98,7 @@ module MasterHandler
       translate_params_to_persistable
       if object_instance.update(secure_params)
         reload_objects
-        handle_additional_updates
+        handle_additional_updates :update
         if object_instance.has_multiple_results
           @master_objects = object_instance.multiple_results
           index
@@ -480,7 +480,7 @@ module MasterHandler
   # This:
   # - sets up flags changed during new / edit
   # - creates a model reference for an embedded item form
-  def handle_additional_updates
+  def handle_additional_updates(action = :create)
     @flag_item_type = object_instance.item_type
     # Check for blank item_flag param to cover testing scenarios that do not return
     # the item_flag set. Which is reasonable and conceivable in a real form too
@@ -492,7 +492,7 @@ module MasterHandler
 
     # Based on an embedded item coming from a dynamic form, create the reference.
     # In this mode we are in the dynamic record, so the order is different from the previous create_with usage
-    if object_instance.embedded_item&.id && !object_instance.direct_embed?
+    if action == :create && object_instance.embedded_item&.id && !object_instance.direct_embed?
       ModelReference.create_with object_instance,
                                  object_instance.embedded_item
 

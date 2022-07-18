@@ -19,6 +19,7 @@ module StandardAuthentication
     before_save :handle_password_change
     after_save :handle_password_reminder_setup, if: :set_reminder
     after_save :clear_plaintext_password
+    after_create :notify_admin
     attr_accessor :new_two_factor_auth_code, :forced_password_reset, :new_password, :set_reminder
 
     scope :can_email, -> { where 'do_not_email IS NULL or do_not_email = FALSE' }
@@ -218,7 +219,8 @@ module StandardAuthentication
     c = self.class.password_config
     return true if res >= c[:min_entropy]
 
-    errors.add :password, "strength is #{(res.to_f / c[:min_entropy] * 100).to_i}%. Try to use a mix of upper and lower case, symbols and numbers, and avoid dictionary words."
+    errors.add :password,
+               "strength is #{(res.to_f / c[:min_entropy] * 100).to_i}%. Try to use a mix of upper and lower case, symbols and numbers, and avoid dictionary words."
     false
   end
 
@@ -390,4 +392,13 @@ module StandardAuthentication
     save
   end
 
+  #
+  # Optionally notify the administration when new users or admins are registered
+  def notify_admin
+    notify = Settings::NotifyOnRegistration
+    return unless notify.present?
+
+    Users::NewUserAdded.notify(self) if is_a?(Admin) && notify.include?('admin')
+    Users::NewUserAdded.notify(self) if is_a?(User) && notify.include?('user')
+  end
 end

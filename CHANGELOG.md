@@ -16,6 +16,42 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transferred from Viva @8.0.88 - 2022-07-18
+
+- [Added] other_user_is_creator from reference option
+- [Fixed] context issue with edit form captions
+- [Added] reference definition without_reference: outside_master
+- [Fixed] passing user_preference to front end
+- [Added] ability for standalone pages to be loaded in the help sidebar
+- [Added] escaping for curly brackets in substitutions
+- [Changed] documentation for optional MFA and added substitution info
+- [Added] invitation code to registration
+- [Added] view_original_case field option to prevent the UI capitalizing downcased fields
+- [Fixed] help sidebar in standalone help pages
+- [Added] first login sidebar popup
+- [Added] notifications option to user menu and updated help with notifications page
+- [Added] help link handling in study info pages
+- [Changed] substitutions to allow glyphicons and notifications_from_email address
+- [Fixed] issue with nested ordered lists in markdown editor
+- [Fixed] hiding modal on submitting embedded form & no_report_scroll not enabling full page scroll
+- [Fixed] search doc with download/in route form - plus refactored to DRY code
+- [Added] message template UI blocks for registration forms and user preferences
+- [Added] admin documentation for message templates
+- [Added] caption before references with extra log types
+- [Added] on_master_id as embedded_report extension
+- [Changed] expand_reference action to scroll to result
+- [Fixed] issue where activity log panels don't get fully scrolled to
+- [Fixed] issue where report list updates fail if user only has view_report_not_list access
+- [Updated] expand_reference documentation
+- [Added] preprocessing to CSV imports for array fields
+- [Added] sample use of API in Ruby scripts
+- [Added] study info content migrator using api
+- [Changed] to handle select_record fields not associated with master and better documentation
+- [Changed] allowable fields in import CSV to allow "disabled"
+- [Fixed] issue where incorrect page layout nav configuration breaks UI completely
+
 ## [8.0.34] - 2022-06-13
 
 ### Transfer from Harvard 7.4.111 - 2022-06-13

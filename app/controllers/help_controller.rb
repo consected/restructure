@@ -35,9 +35,11 @@ class HelpController < ApplicationController
       @view_doc = view_doc library,
                            section,
                            subsection
-    rescue StandardError
+    rescue StandardError => e
       @view_doc = view_doc_in_wrapper('<h1>Page Not Found</h1>', library, section)
       @result_status = 404
+      Rails.logger.warn(e)
+      Rails.logger.warn(e.backtrace.join("\n"))
     end
 
     if display_embedded?

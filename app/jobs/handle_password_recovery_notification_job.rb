@@ -14,7 +14,8 @@ class HandlePasswordRecoveryNotificationJob < ApplicationJob
                                                 data: {
                                                   email: user.email,
                                                   reset_password_hash: options[:reset_password_hash]
-                                                }
+                                                },
+                                                from_user_email: Settings::RegistrationAdminEmail
 
     mn.handle_notification_now logger: Delayed::Worker.logger
 

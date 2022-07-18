@@ -77,7 +77,19 @@ _fpa.loaded.default = function () {
     _fpa.printing.appPrintHandler();
   });
 
+  if (_fpa.state.current_user.sign_in_count < 3 && $('body.rails-env-test').length == 0) {
+    var viewed = localStorage.getItem('viewed-introduction');
+    if (!viewed) {
+      var help_icon = $('a[data-target="#help-sidebar"]');
+      var help_href = help_icon.attr('href');
+      help_icon.attr('href', '/help/user_reference/main/first_login.md?display_as=embedded').click()
+      window.setTimeout(function () {
+        help_icon.attr('href', help_href);
+      })
 
+    }
+    localStorage.setItem('viewed-introduction', true);
+  }
 
   // Finally, if a hash is set in the URL, jump to it:
   var target = window.location.hash;

@@ -11,10 +11,10 @@ class HandleUserConfirmationNotificationJob < ApplicationJob
                                                 content_template_name: defaults[:content],
                                                 message_type: :email,
                                                 subject: defaults[:subject],
-                                                item: user
+                                                item: user,
+                                                from_user_email: Settings::RegistrationAdminEmail
 
     mn.handle_notification_now logger: Delayed::Worker.logger
-
   end
 
   private

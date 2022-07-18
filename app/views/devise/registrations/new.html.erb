@@ -1,7 +1,19 @@
 <div class="devise-block reg-block col-md-8 col-md-offset-8 well">
   <h2>New User Registration</h2>
+  <div class="template-block"><%= template_block 'ui new user registration' %></div>
+
   <%= form_for(resource, as: resource_name, url: registration_path(resource)) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
+
+    <% if Settings::InvitationCode.blank? %>
+    <% elsif params[:invitation_code].blank? %>
+    <div class="form-group-non">
+      <%= f.label :invitation_code %><br />
+      <%= text_field_tag :invitation_code, '', class: "form-control" %>
+    </div>
+    <% else %>
+      <%= hidden_field_tag :invitation_code, params[:invitation_code] %>
+    <% end %>
 
     <div class="form-group-non">
       <%= f.label :email %><br />

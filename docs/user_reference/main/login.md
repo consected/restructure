@@ -6,13 +6,16 @@ When connected to the login URL, a simple login form will be displayed. You will
 
 ![Login Form](images/login-form.png)
 
-**NOTE:** your specific application server may be configured to disable *two-factor authentication*. If this is the case, your administrator will have informed you about this, and the **Two-Factor Authentication Code** field will not appear.
+{{#if mfa_disabled}}
+**NOTE:** your specific application server does not use *two-factor authentication*. The **Two-Factor Authentication Code** field will not appear.
+{{/if}}
 
-**IMPORTANT:** if you see any other page than a study app page with your organizations's logo and a login form (for example, you see a browser warning) or anything else that you don’t expect, do not continue. Close your browser tab and report it to your app administrator.
+**IMPORTANT:** if you see any other page than a study app page with your organizations's logo and a login form (for example, you see a browser warning) or anything else that you don’t expect, do not continue. Close your browser tab and report it to your app administrator [{{admin_email}}](mailto:{{admin_email}}).
 
 ## First Login
 
-The first time you login you will have been provided a temporary password. Enter this, and leave the Two-Factor Authentication Code field blank.
+The first time you login you will have been provided a temporary password. Enter this.
+{{#if mfa_disabled}} {{else}}Leave the Two-Factor Authentication Code field blank.
 
 After logging in you will be presented with a dialog that displays a QR code to set up your two-factor authenticator app. On your smartphone, open the app and add a new entry to scan the barcode.
 
@@ -37,6 +40,7 @@ Once you have the new barcode added, the authenticator app should present a six 
 ![6-digit code](images/6-digit-code.png)
 
 Enter this number (without the space) into the **Two-Factor Authentication Code** field and hit the **Submit Code** button. If the code is correct this will confirm that your app is set up correctly and can be used for future logins.
+{{/if}}
 
 Now you will need to change your temporary password. Enter the temporary password that you were provided into **Current password** and a new password into the **Enter new password** and **Password confirmation** fields, then click **Update**. If you use a password manager, save this new password now.
 
@@ -48,13 +52,15 @@ After this step you will be taken to the home page. Future logins will not requi
 
 ## Future logins
 
-To login to the app for all future logins, go to the login page as before. The page will prompt you for your email, password and two-factor authentication code. Enter your email and password, but do not login until you have a two-factor authentication code.
+To login to the app for all future logins, go to the login page as before. The page will prompt you for your email{{#if mfa_disabled}} and password{{else}}, password and two-factor authentication code{{/if}}. Enter your email and password.{{#if mfa_disabled}} {{else}}
+, but do not login until you have a two-factor authentication code.
 
 Open the authenticator app on your smartphone and find the appropriate login in the list. View the 6-digit code that is displayed. Enter the code into the Two-Factor Authentication Code field and click Log in.
-
+{{/if}}
 ![Login Form filled](images/login-form-with-2fa-code.png)
 
 If all of the entered details are correct, you will be logged in successfully and can continue using the app. If any one of the details is incorrect, you will need to try again.
+{{#if mfa_disabled}} {{else}}
 
 ---
 
@@ -67,6 +73,7 @@ If all of the entered details are correct, you will be logged in successfully an
 *Only attempt to enter a two-factor authentication code once. The app prevents reuse of codes (even if a login failed), to avoid somebody looking over your shoulder from using a code you have used.*
 
 ---
+{{/if}}
 
 ## Logging in from bookmarks or notification emails
 
@@ -75,7 +82,13 @@ If you click a bookmarked search or report, or a link in an app notification ema
 ## Forgotten password or locked account
 
 You have **{{password_max_attempts}} attempts** to login successfully, after which point your account will be locked for one hour *(dependent on server configuration)*. If you have forgotten your password, or need your account unlocked faster, contact the app administrator for a password reset.
+{{#if mfa_disabled}} {{else}}
 
 ## Lost two-factor authentication
 
 If you uninstall the authenticator app on your smartphone or change your phone you will need to set up the authenticator app again (unless you have backed up the configuration). The app administrator can reset your code and you will need to go through the first time login process again.
+{{/if}}
+
+## Need more help?
+
+Need help? Contact the app administrator: [{{admin_email}}](mailto:{{admin_email}})

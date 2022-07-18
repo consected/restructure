@@ -1,7 +1,7 @@
 
 <script id="model-references-<%=name%>-result-template"  type="text/x-handlebars-template" class="hidden handlebars-template">
 {{#with model_reference}}
-  {{>activity_log_common_template_references_list_item name='<%=name%>' view_as=to_record_options_config.view_as.show}}
+  {{>activity_log_common_template_references_list_item name='<%=name%>' view_as=to_record_options_config.view_as.show to_elt=to_record_options_config.add_with.extra_log_type}}
 {{/with}}
 </script>
 
@@ -36,11 +36,11 @@
   {{#each model_references}}
     {{#is to_record_options_config.view_as.show '!==' 'hide'}}
       {{#is to_record_options_config.view_as.show '===' 'not_embedded'}}
-        {{>activity_log_common_template_references_list_item name='<%=name%>' view_as=to_record_options_config.view_as.show}}
+        {{>activity_log_common_template_references_list_item name='<%=name%>' view_as=to_record_options_config.view_as.show to_elt=to_record_options_config.add_with.extra_log_type}}
       {{else is to_record_options_config.view_as.show '===' 'filestore'}}
       {{else}}
         {{#is ../embedded_item.id '!==' to_record_id}}
-          {{>activity_log_common_template_references_list_item name='<%=name%>' view_as=to_record_options_config.view_as.show}}
+          {{>activity_log_common_template_references_list_item name='<%=name%>' view_as=to_record_options_config.view_as.show to_elt=to_record_options_config.add_with.extra_log_type}}
         {{/is}}
       {{/is}}
     {{/is}}

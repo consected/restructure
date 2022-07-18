@@ -21,6 +21,7 @@
   if embedded
     form_object_instance = @embedded_item
   end
+  prev_form_object_instance = @form_object_instance
   @form_object_instance = form_object_instance
   option_type_config = form_object_instance.option_type_config
 
@@ -307,3 +308,7 @@
   </div>
 </div>
 <% end %>
+<% 
+  # Reset the instance so that captions in the outer level use the correct context
+  @form_object_instance = prev_form_object_instance
+%>

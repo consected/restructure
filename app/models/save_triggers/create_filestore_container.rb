@@ -63,7 +63,7 @@ class SaveTriggers::CreateFilestoreContainer < SaveTriggers::SaveTriggersBase
     when 'master'
       ModelReference.find_references master, **pass_options
     when 'user_is_creator'
-      pass_options[:ref_created_by_user] = true
+      pass_options[:ref_created_by_user] = 'user_is_creator'
       ModelReference.find_references item, **pass_options
     end
   end
