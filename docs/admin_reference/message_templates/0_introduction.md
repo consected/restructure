@@ -46,7 +46,10 @@ used in the following forms / pages:
 - `ui admin login` - administrator login form
 - `ui new user registration` - user self-registration form
 - `ui resend confirmation code` - form to request a registration confirmation code to be resent
-- `ui change password` - password change form
+- `ui user change password` - password change form
+- `ui user forgot password` - forgot password form
+- `ui admin change password` - password change form
+- `ui admin forgot password` - forgot password form
 - `ui resend unlock code` - form to request a locked account be unlocked
 - `ui 2fa setup` - the page presented when a user has to set up their two-factor authentication app with a QR code
 - `ui user preferences caption` - user preferences (timezones / formats) form

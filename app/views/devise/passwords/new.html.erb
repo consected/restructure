@@ -1,7 +1,7 @@
 <div class="devise-block password-block col-md-8 col-md-offset-8 well">
 
   <h2>Forgot your password?</h2>
-
+  <div class="template-block"><%= template_block "ui #{resource_name} forgot password" %></div>
   <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
 
