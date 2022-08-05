@@ -22,7 +22,8 @@
     prevent_create: @prevent_creates[:player_infos],
     item_list: %w(first_name last_name middle_name nick_name birth_date death_date start_year end_year college source_name notes tracker_history_id),
     data_sort: [:desc, "data-item-id"],
-    hide_rank_badge: (app_config_set(:hide_player_accuracy) || app_config_set(:hide_participant_accuracy))
+    hide_rank_badge: (app_config_set(:hide_player_accuracy) || app_config_set(:hide_participant_accuracy)),
+    implementation_class: PlayerInfo
   } if current_user.has_access_to?(:access, :table, :player_infos) %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
@@ -32,7 +33,8 @@
     prevent_create: true,
     item_list: %w(pro_id first_name last_name middle_name nick_name birth_date death_date start_year end_year college),
     data_sort: [:desc, "data-item-id"],
-    exclude_metadata: true
+    exclude_metadata: true,
+    implementation_class: ProInfo
   } if current_user.has_access_to?(:access, :table, :pro_infos) %>
 
 
@@ -46,7 +48,8 @@
     data_sort: [:desc, "data-rank"],
     extra_class: '{{rec_type}}-type',
     extra_data_attribs: [:rec_type],
-    view_options: { view_handlers: ['contact'] }
+    view_options: { view_handlers: ['contact'] },
+    implementation_class: PlayerContact
   } if current_user.has_access_to?(:access, :table, :player_contacts) %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
@@ -58,7 +61,8 @@
     data_sort: [:desc, "data-rank"],
     # add custom markup data attribute to allow country to be processed in Javascript formatting
     custom_block_attrs: {data_address_is_us: "{{#is country 'us'}}true{{else is country ''}}true{{else is country null}}true{{else}}false{{/is}}"},
-    view_options: { view_handlers: ['address'] }
+    view_options: { view_handlers: ['address'] },
+    implementation_class: Address
   } if current_user.has_access_to?(:access, :table, :addresses) %>
 
 <% # Add in all the external ID handlers (Scantron, Sage, etc) %>
