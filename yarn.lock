@@ -467,6 +467,10 @@ js-yaml@^3.14.0:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
+"jsTreeTable@https://github.com/consected/jsTreeTable":
+  version "0.0.0"
+  resolved "https://github.com/consected/jsTreeTable#f41b004b41e1aa61af95465f484d2182808931ad"
+
 jsbn@~0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/jsbn/-/jsbn-0.1.1.tgz#a5e654c2e5a2deb5f201d96cefbca80c0ef2f513"

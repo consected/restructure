@@ -12,6 +12,7 @@ module ReportResults
       @alt_column_header = {}
 
       @view_options = @report.report_options.view_options
+      @tree_view_options = @report.report_options.tree_view_options
 
       column_options = @report.report_options.column_options
       return unless column_options

@@ -48,6 +48,7 @@ view_options:
   #   chart
   #   calendar
   #   transposed_table
+  #   tree
 
   search_button_label: <string>
   # Label to show on the search button
@@ -68,6 +69,10 @@ view_options:
   force_show_search_button: false (default) | true
   # Ensure the search button is shown, even for auto-run reports
 
+  no_sorting: false (default) | true
+  # Prevent dynamic sorting being added to the results table
+  
+
 list_options:
   hide_in_list: false (default) | true
   # Hide this report in the list of available reports, but still
@@ -76,6 +81,12 @@ list_options:
   list_description: <string>
   # Markdown formatted description to appear in the list of available reports,
   # allowing the main description field to appear just in the search criteria form
+
+tree_view_options:
+  parent_columns:
+    - col1
+    - col2
+  # List of column names to use as the top-level parent columns in the tree view
 
 view_css:
   classes:
