@@ -29,7 +29,7 @@ module Seeds
 
     def self.setup
       log "In #{self}.setup"
-      if Settings::AllowUsersToRegister && (Rails.env.test? || Admin::MessageTemplate.where(name: TEMPLATE_NAME).count == 0)
+      if Settings::AllowUsersToRegister && (Rails.env.test? || Admin::MessageTemplate.where(name: LAYOUT_NAME).count == 0)
         create_templates
         log "Ran #{self}.setup"
       else
