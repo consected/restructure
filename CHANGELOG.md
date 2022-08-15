@@ -18,7 +18,8 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
-Rebuild to fix missing gem mini_portal from vendor/cache
+- Bumped version
+- Rebuild to fix missing gem mini_portile from vendor/cache
 
 ## [8.0.89] - 2022-08-15
 
