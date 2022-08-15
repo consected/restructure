@@ -22,6 +22,29 @@ release will be created for any release tested in production, and may be marked 
 - [Added] ui templates for messages in change and forgot password form
 - [Fixed] field types not being passed to UI templates for standard subject types
 
+### Transfer from ReStructure 8.0.37 - 2022-08-15
+
+- [Added] ui templates for messages in change and forgot password form
+- [Fixed] field types not being passed to UI templates for standard subject types
+- [Changed] login issues help for self registration
+- [Added] is-(not-?)embedded-report class to report criteria and results blocks
+- [Changed] report list checkboxes so the last item in the list can be removed
+- [Changed] links to reports in lists to use name rather than id
+- [Changed] reporting of redcap stored record requests to give counts rather than list of items
+- [Fixed] scrolling on go_to_master save action
+- [Fixed] inability to download files in secure viewer when opened from a link outside a filestore browser
+- [Fixed] bug getting random value from uninitialized handlebars helper state
+- [Fixed] mailto links
+- [Fixed] open-in-sidebar from study info pages
+- [Added] overflow storage to handle local_storage quota
+- [Added] ability for report page to force to run with a param ?force_run=true
+- [Added] open-embedded-report hash options for URLs in content
+- [Added] edit_as: general_selection: to override standard general selection definition for a field to use
+- [Added] page_embedded_block to study info
+- [Fixed] issue with redcap admin NFS container
+- [Added] ui templates for messages in change and forgot password form
+- [Fixed] field types not being passed to UI templates for standard subject types
+
 ## [8.0.88] - 2022-07-05
 
 - [Added] other_user_is_creator from reference option
