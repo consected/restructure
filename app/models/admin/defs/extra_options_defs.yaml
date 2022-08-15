@@ -14,6 +14,7 @@
     field_with_different_views:
       show_caption: caption in show mode
       edit_caption: caption in edit mode
+      new_caption: caption in new mode
     reference_with_reference_name: |
       add caption above a reference action / list where
       the reference is named reference_<reference name>
@@ -108,6 +109,9 @@
           For the latter the Label is downcased automatically to generate the value
         
         # For select_record_* fields:
+        general_selection: |
+          use a general selection definition with an alternative name, or belonging to a
+          different prefix name
         value_attr: attribute_name to use for selection value in select_record_* fields
         label_attr: attribute_name to use for selection label in select_record_* fields
         group_split_char: optional character to split on when grouping selections in select_record_* fields

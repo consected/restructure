@@ -121,6 +121,10 @@ module Reports
       check_authorizations!
       check_valid_list_id!
 
+      # Remove the initial item that provides details about the list if nothing else is returned
+      items.delete_if { |i| i['id'].nil? }
+      item_ids.compact!
+
       items_in_list_record_ids = items_in_list.pluck(:record_id)
       items_in_list_ids = items_in_list.pluck(:id)
 

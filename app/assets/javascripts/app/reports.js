@@ -349,6 +349,20 @@ _fpa.reports = {
     if (res.length === 0)
       $t.prepend(b);
 
+    // Add a default item that will allow all items to be removed if needed. Without this, there must always be at least one
+    // result sent.
+    var $el = $('#seicb-0').clone();
+    $el.prop('id', 'seicb-default');
+    var defval = JSON.parse($el.val());
+    defval.id = null;
+    defval.init_value = true;
+    $el.val(JSON.stringify(defval));
+    $el.attr('checked', true)
+    $el.hide();
+    console.log($el);
+    $('.report-files-actions').append($el);
+
+
   },
 
   // If the update list, add to list or remove from list submit buttons are 

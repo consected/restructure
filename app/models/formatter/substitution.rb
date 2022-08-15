@@ -210,6 +210,7 @@ module Formatter
       data[:password_max_attempts] = Settings::PasswordMaxAttempts
       data[:mfa_disabled] = Settings::TwoFactorAuthDisabled
       data[:login_issues_url] = Settings::LoginIssuesUrl
+      data[:allow_users_to_register] = Settings::AllowUsersToRegister ? true : nil
       data[:did_not_receive_confirmation_instructions_url] = Settings::DidntReceiveConfirmationInstructionsUrl
       data[:notifications_from_email] = Settings::NotificationsFromEmail
 

@@ -30,7 +30,16 @@ _fpa.cache = function (name) {
   name = _fpa.cache_name(name);
   if (_fpa.use_cached_local_storage) {
     var res = _fpa.local_storage.getItem(name);
-    res = JSON.parse(res);
+    if (!res) {
+      res = _fpa.overflow_local_storage[name];
+      console.log(`Getting ${name} from overflow storage`)
+    }
+    if (typeof res === 'undefined' || res == null) {
+      res = null
+    }
+    else {
+      res = JSON.parse(res);
+    }
   }
   else {
     var res = _fpa.local_storage[name];
@@ -165,7 +174,18 @@ _fpa.set_cache = function (name, val) {
 
   if (_fpa.use_cached_local_storage) {
     val = JSON.stringify(val);
-    _fpa.local_storage.setItem(name, val);
+    if (val.length > 100000) {
+      console.log(`Failed to set the cache for ${name} with value length ${val.length}.`)
+      _fpa.overflow_local_storage[name] = val;
+    }
+    else {
+      try {
+        _fpa.local_storage.setItem(name, val);
+      } catch (err) {
+        console.log(`Failed to set the cache for ${name} with value length ${val.length}. Exception: ${err.message}`)
+        _fpa.overflow_local_storage[name] = val
+      }
+    }
   }
   else {
     _fpa.local_storage[name] = val;

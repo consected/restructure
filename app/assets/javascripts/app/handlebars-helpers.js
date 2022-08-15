@@ -386,6 +386,7 @@
   });
 
   Handlebars.registerHelper('get_random', function (array, items, options) {
+    _fpa.state.hh = _fpa.state.hh || {};
     return _fpa.state.hh.random;
   });
 

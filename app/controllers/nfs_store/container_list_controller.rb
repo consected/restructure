@@ -69,7 +69,7 @@ module NfsStore
           can_user_file_actions: @container.can_user_file_actions?,
           parent_type: @activity_log.class.to_s.ns_underscore,
           parent_id: @activity_log.id,
-          parent_sk: @activity_log.secondary_key,
+          parent_sk: @activity_log.respond_to?(:secondary_key) && @activity_log.secondary_key,
           master_id: @activity_log.master_id,
           trigger_file_action_ids: tfa,
           directory_not_found: @directory_not_found,
