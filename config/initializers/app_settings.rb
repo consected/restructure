@@ -144,7 +144,7 @@ class Settings
 
   # Initial configurations for the bulk messaging app
   def self.bulk_msg_app
-    Admin::AppType.where(name: 'bulk-msg').first
+    Admin::AppType.active_app_types.where(name: 'bulk-msg').first
   end
 
   def self.bulk_msg_master

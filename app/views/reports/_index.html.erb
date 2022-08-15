@@ -31,7 +31,7 @@ extra_params[:embed] = true if link_extras[:data] && link_extras[:data][:remote]
     <tr class="<%=list_item.disabled ? 'disabled-result' : ''%> report-type-<%= list_item.report_type %> <%= list_item.auto ? 'report-auto' : '' %>" data-report-id="<%=list_item.id %>">
       <td style="width: 5%"><span class="hidden"><%= list_item.report_type %></span><span class="glyphicon <%= list_item.report_type == 'count' ? 'glyphicon-record' : list_item.report_type == 'regular_report' ? 'glyphicon-list-alt' : 'glyphicon-search'  %>" title="<%= list_item.report_type.humanize %>"></span></td>
 
-      <td style="width: 15%"><%= link_to  list_item.name, report_path(list_item.id, extra_params), link_extras %></td>
+      <td style="width: 15%"><%= link_to  list_item.name, report_path(list_item.alt_resource_name, extra_params), link_extras %></td>
 
       <td style="width: 30%"><%= markdown_to_html content %></td>
       <% unless simple_view %>

@@ -145,9 +145,9 @@ module Redcap
       end
 
       result = {
-        created_ids: created_ids,
-        updated_ids: updated_ids,
-        unchanged_ids: unchanged_ids,
+        count_created_ids: created_ids&.length,
+        count_updated_ids: updated_ids&.length,
+        count_unchanged_ids: unchanged_ids&.length,
         table: project_admin.dynamic_model_table,
         errors: errors,
         imported_files: imported_files.map { |i| "#{i.path}/#{i.file_name}" }

@@ -1,7 +1,8 @@
 <div class="container">
   <div class="row">
     <h1>Server Information</h1>
-    <p><code><%= @instance_id%></code></p>
+    <p class="si-instance-id"><code><%= @instance_id%></code></p>
+    <p class="si-server-version"><span>server version: </span><strong><%= Application.version %></strong></p>
   </div>
   <div class="row">
       <h3>Restart Server, DelayedJob and Clear Memcached</h3>
