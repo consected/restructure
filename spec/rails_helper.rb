@@ -109,7 +109,7 @@ unless ENV['SKIP_DB_SETUP']
   put_now 'Enforce migrations'
   ActiveRecord::Migration.maintain_test_schema!
 
-  `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb`
+  `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_*.rb; rm -f db/app_migrations/test/*test_*.rb`
 
   sql = <<~END_SQL
     DROP SCHEMA IF EXISTS redcap_test CASCADE;
@@ -121,7 +121,11 @@ unless ENV['SKIP_DB_SETUP']
     delete from schema_migrations where version in (
       '20211105105700',
       '20211105105701',
-      '20211105105702'
+      '20211105105702',
+      '20210215184600',
+      '20210215184601',
+      '20210305184601',
+      '20211101051705'
     );
   END_SQL
 

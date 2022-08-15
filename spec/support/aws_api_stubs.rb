@@ -55,18 +55,23 @@ module AwsApiStubs
   end
 
   def setup_webmock_stub(url:, result:, body: nil, method: :post, extras: {}, return_headers: {}, return_status: 200)
+    headers =  {
+      'Accept' => '*/*',
+      'Accept-Encoding' => '',
+      'Authorization' => /.+/,
+      'Host' => /.+/,
+      'User-Agent' => /.+/,
+      'X-Amz-Content-Sha256' => /.+/,
+      'X-Amz-Date' => /.+/
+    }.merge(extras)
+    
+    # puts url
+    # puts headers    
+
     stub_request(method, url)
       .with(
         body: body,
-        headers: {
-          'Accept' => '*/*',
-          'Accept-Encoding' => '',
-          'Authorization' => /.+/,
-          'Host' => /.+/,
-          'User-Agent' => /.+/,
-          'X-Amz-Content-Sha256' => /.+/,
-          'X-Amz-Date' => /.+/
-        }.merge(extras)
+        headers: headers
       )
       .to_return(status: return_status, body: result, headers: return_headers)
   end

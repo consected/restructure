@@ -168,21 +168,33 @@ class Classification::SelectionOptionsHandler
       edit_as = opt[:edit_as] if opt
       edit_as ||= {}
       alt_fn = (edit_as[:field_type] || fn).to_s
-      next unless alt_fn.start_with?('select_record_')
+      alt_gs = edit_as[:general_selection]
+      if alt_gs
+        res = begin
+          # GeneralSelectionsHelper.helpers.general_selection(alt_gs, return_all: true)
+          attr = %i[name value]
+          cond = { item_type: alt_gs }
+          Classification::GeneralSelection.selector_attributes(attr, cond)
+        rescue StandardError => e
+          Rails.logger.error "Failed to get alternative general selection\n#{e}"
+          nil
+        end
+        fndefs[fn] = res if res
+      elsif alt_fn.start_with?('select_record_')
+        group_split_char = edit_as[:group_split_char]
+        value_attr = edit_as[:value_attr] || :data
+        label_attr = edit_as[:label_attr] || :data
 
-      group_split_char = edit_as[:group_split_char]
-      value_attr = edit_as[:value_attr] || :data
-      label_attr = edit_as[:label_attr] || :data
+        assoc_or_class_name = alt_fn.sub(/^select_record_(id_)?from_(table_)?/, '').singularize
 
-      assoc_or_class_name = alt_fn.sub(/^select_record_(id_)?from_(table_)?/, '').singularize
+        got_res, res = EditFields::SelectFieldHandler.list_record_data_for_select(user_base_object,
+                                                                                  assoc_or_class_name,
+                                                                                  value_attr: value_attr,
+                                                                                  label_attr: label_attr,
+                                                                                  group_split_char: group_split_char)
 
-      got_res, res = EditFields::SelectFieldHandler.list_record_data_for_select(user_base_object,
-                                                                                assoc_or_class_name,
-                                                                                value_attr: value_attr,
-                                                                                label_attr: label_attr,
-                                                                                group_split_char: group_split_char)
-
-      fndefs[fn] = res if got_res && res
+        fndefs[fn] = res if got_res && res
+      end
     end
     return if fndefs.empty?
 

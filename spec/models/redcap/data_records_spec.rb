@@ -274,9 +274,9 @@ RSpec.describe Redcap::DataRecords, type: :model do
                               .last
 
     expect(cr.result).to be_a Hash
-    expect(cr.result['created_ids']).not_to be_empty
-    expect(cr.result['updated_ids']).to be_empty
-    expect(cr.result['unchanged_ids']).to be_empty
+    expect(cr.result['count_created_ids']).to be > 0
+    expect(cr.result['count_updated_ids']).to eq 0
+    expect(cr.result['count_unchanged_ids']).to eq 0
     expect(cr.result['errors']).to be_empty
   end
 
@@ -322,9 +322,9 @@ RSpec.describe Redcap::DataRecords, type: :model do
                               .last
 
     expect(cr.result).to be_a Hash
-    expect(cr.result['created_ids']).not_to be_empty
-    expect(cr.result['updated_ids']).to be_empty
-    expect(cr.result['unchanged_ids']).to be_empty
+    expect(cr.result['count_created_ids']).to be > 0
+    expect(cr.result['count_updated_ids']).to eq 0
+    expect(cr.result['count_unchanged_ids']).to eq 0
     expect(cr.result['errors']).to be_empty
   end
 

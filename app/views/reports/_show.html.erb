@@ -15,7 +15,7 @@
   <span id="editable_data"></span>
 <% end %>
 <div class="report-criteria container-fluid <%=extra_classes%>" id="<%= @criteria_block_id %>-block">
-  <div class="row" data-result="#report-embedded">
+  <div class="row is-<%= embedded_report ? '' : 'not-' %>embedded-report" data-result="#report-embedded">
     <div class="col-sm-22 col-sm-offset-1">
       <div class="well report-criteria-block">
         <% 
@@ -46,7 +46,7 @@
 </div>
 <%= render partial: 'criteria_view_css' %>
 <% if @report.searchable %><%= render partial: 'reports/master_results_css' %><% end %>
-<div id="<%=@results_target%>" data-sub-item="masters" data-template="search-results-template" class="report-results-outer">
+<div id="<%=@results_target%>" data-sub-item="masters" data-template="search-results-template" class="report-results-outer is-<%= embedded_report ? '' : 'not-' %>embedded-report">
   <% if @results %>
     <%= render partial: 'results' %>
   <% end %>
