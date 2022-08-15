@@ -23,7 +23,7 @@ gem 'jquery-rails'
 gem 'kramdown'
 gem 'kramdown-parser-gfm'
 gem 'mime-types'
-gem 'nokogiri' # , '1.11.5'
+gem 'nokogiri', '1.13.6'
 gem 'pg' # , '~> 0.15'
 
 # puma has been moved to all environments and will be included in the production packaging
