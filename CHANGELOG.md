@@ -16,7 +16,7 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## [8.0.36] - 2022-08-05
+## [8.0.37] - 2022-08-15
 
 ### Transferred from Harvard @7.4.120a - 2022-08-15
 
