@@ -12,9 +12,13 @@ Still having login issues, or have definitely forgotten your password{{#if mfa_d
 
 ---
 
+{{#if allow_users_to_register}}
+
 If you were allowed to register as a user without administrator assistance, you should receive a confirmation email with instructions for your first login.
 [Didn't receive confirmation instructions?]({{did_not_receive_confirmation_instructions_url}})
 
 ---
+
+{{/if}}
 
 Need help? Contact the app administrator: [{{admin_email}}](mailto:{{admin_email}})
