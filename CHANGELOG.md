@@ -18,6 +18,7 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Added] tree view option for reports
 - [Added] ui templates for messages in change and forgot password form
 - [Fixed] field types not being passed to UI templates for standard subject types
 
