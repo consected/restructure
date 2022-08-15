@@ -53,7 +53,7 @@ module HelpHelper
     ipath = help_doc_path(library, section)
     text = text.gsub(' src="images/', " src=\"#{ipath}/images/")
 
-    Formatter::Substitution.substitute(text, data: current_admin || current_user).html_safe
+    Formatter::Substitution.substitute(text, data: (current_admin || current_user), ignore_missing: :show_tag).html_safe
   end
 
   #

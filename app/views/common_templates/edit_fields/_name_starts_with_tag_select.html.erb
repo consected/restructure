@@ -1,28 +1,29 @@
 <%
 fopt = field_options_for(form_object_instance, field_name_sym)
 
-alt_options = fopt[:edit_as] && fopt[:edit_as][:alt_options]
-
+alt_options = fopt.dig(:edit_as, :alt_options)
 opt = {}
 
 unless alt_options
-  gs = general_selection("#{general_selection_name}_#{field_name_sym}".to_sym, return_all: true) rescue nil
+  alt_gs_name = (fopt.dig(:edit_as, :general_selection) || "#{general_selection_name}_#{field_name_sym}").to_sym
+
+  gs = general_selection(alt_gs_name, return_all: true) rescue nil
   unless gs
-    raise FphsException.new "The general selection #{general_selection_name}_#{field_name_sym} has not been defined. Please inform the administrator of this error."
+    raise FphsException.new "The general selection #{alt_gs_name} has not been defined. Please inform the administrator of this error."
   end
   desc = gs.reduce(false){|r,i| r || !i[6].blank?}
 
   v = form_object_instance.send(field_name_sym)
   if desc.blank?
   else
-    idesc = "#{general_selection_name}_#{field_name_sym}".to_sym
+    idesc = alt_gs_name
     opt = {'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id(idesc), title: "#{field_name.humanize} options"}
-    select_desc["#{general_selection_name}_#{field_name_sym}".to_sym] = v
+    select_desc[alt_gs_name] = v
   end
 
-  gs = general_selection("#{general_selection_name}_#{field_name_sym}".to_sym, value: v) rescue nil
+  gs = general_selection(alt_gs_name, value: v) rescue nil
   unless gs
-  raise FphsException.new "The general selection #{general_selection_name}_#{field_name_sym} has not been defined. Please inform the administrator of this error."
+  raise FphsException.new "The general selection #{alt_gs_name} has not been defined. Please inform the administrator of this error."
   end
 
 else

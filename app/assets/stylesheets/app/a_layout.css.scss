@@ -695,3 +695,16 @@ i.glyphicon.glyphicon-new-window {
   font-size: 1rem;
   vertical-align: super;
 }
+
+.template-block {
+  border: 1px solid silver;
+  border-left: 0;
+  border-right: 0;
+  padding: 0.4em 0 0;
+  margin: 1em 0;
+  color: var(--template-block-text-color);
+  
+  &:empty {
+    display: none;
+  }
+}

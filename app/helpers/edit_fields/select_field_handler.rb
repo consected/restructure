@@ -3,16 +3,20 @@
 module EditFields
   class SelectFieldHandler
     attr_accessor :form_object_instance, :assoc_or_class_name,
-                  :value_attr, :label_attr, :group_split_char
+                  :value_attr, :label_attr, :group_split_char,
+                  :no_assoc
 
     #
     # Gets the #data for each record for a select on an association or class name
     # @param [UserBase] form_object_instance the current instance for the form object
     # @param [String] assoc_or_class_name a master association name or an underscored class name to select from
     # @param [Symbol] value_attr names the attribute to be returned as the value of a selection - default :data
+    # @param [String | nil] group_split_char optionally specifies the character to split groups of results
+    # @param [true] no_assoc states that we should ignore any associations and just use the class name to find data
     # @return [Array(String, Array(Array, Array))] a human name string and a list of data from the matched records
     def self.list_record_data_for_select(form_object_instance, assoc_or_class_name,
-                                         value_attr: :data, label_attr: :data, group_split_char: nil)
+                                         value_attr: :data, label_attr: :data, group_split_char: nil,
+                                         no_assoc: nil)
 
       sf = SelectFieldHandler.new
       sf.form_object_instance = form_object_instance
@@ -20,6 +24,7 @@ module EditFields
       sf.value_attr = value_attr
       sf.label_attr = label_attr
       sf.group_split_char = group_split_char
+      sf.no_assoc = no_assoc
       sf.generate_record_data
     end
 
@@ -90,30 +95,34 @@ module EditFields
     def record_data_class_and_results
       assoc_name = assoc_or_class_name.pluralize
 
-      if Master.get_all_associations.include?(assoc_name)
-        # We matched one of the possible classes an activity log be used with (really these are master associations)
-        # It is possible the master is not set yet, so skip it in that case
-        reslist = form_object_instance.master.send(assoc_name) if form_object_instance.master
+      unless no_assoc
+        if Master.get_all_associations.include?(assoc_name)
+          # We matched one of the possible classes an activity log be used with (really these are master associations)
+          # It is possible the master is not set yet, so skip it in that case
+          reslist = form_object_instance.master.send(assoc_name) if form_object_instance.master
 
-        cl = reslist&.first&.class
-      elsif (ActivityLog.all_valid_item_and_rec_types - ActivityLog.use_with_class_names).include? assoc_or_class_name
-        # We matched one of the valid item and rec_types
-        ActivityLog.use_with_class_names.each do |ucn|
-          next unless assoc_or_class_name.start_with?(ucn)
+          cl = reslist&.first&.class
+        elsif (ActivityLog.all_valid_item_and_rec_types - ActivityLog.use_with_class_names).include? assoc_or_class_name
+          # We matched one of the valid item and rec_types
+          ActivityLog.use_with_class_names.each do |ucn|
+            next unless assoc_or_class_name.start_with?(ucn)
 
-          # Ensure that the class supporting the association has loaded
-          # Item classes such as PlayerContact don't always load until referenced in the application.
-          # When they provide dynamically generated rec_type associations in their setup the associations won't exist
-          # Just touch the base class to get it set up, and the dynamic associations to be configured.
-          ucn.camelize.constantize
-          reslist = form_object_instance.master
-                                        .send(assoc_or_class_name.pluralize)
-                                        .where(rec_type: assoc_or_class_name.sub(/^#{ucn}_/, ''))
-          break
+            # Ensure that the class supporting the association has loaded
+            # Item classes such as PlayerContact don't always load until referenced in the application.
+            # When they provide dynamically generated rec_type associations in their setup the associations won't exist
+            # Just touch the base class to get it set up, and the dynamic associations to be configured.
+            ucn.camelize.constantize
+            reslist = form_object_instance.master
+                                          .send(assoc_or_class_name.pluralize)
+                                          .where(rec_type: assoc_or_class_name.sub(/^#{ucn}_/, ''))
+            break
+          end
+
+          cl = reslist.first&.class
         end
+      end
 
-        cl = reslist.first&.class
-      else
+      unless cl
         # Just get the resource by its resource name or alternatively its table name
         cl = Resources::Models.find_by(resource_name: assoc_name) || Resources::Models.find_by(table_name: assoc_name)
 
@@ -122,6 +131,7 @@ module EditFields
           reslist = cl.all
         end
       end
+
       reslist = reslist.active if reslist.respond_to?(:active)
       reslist = reslist.distinct if reslist.respond_to?(:distinct)
 

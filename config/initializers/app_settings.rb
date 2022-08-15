@@ -39,7 +39,7 @@ class Settings
   # If not set (nil), then the current user email address will be used,
   # which may fail on some email servers if the domain name does not match
   # a verified domain name.
-  NotificationsFromEmail = ENV['FPHS_FROM_EMAIL']
+  NotificationsFromEmail = ENV['FPHS_FROM_EMAIL'] || ENV['FROM_EMAIL']
   # Email address for admin contact
   AdminEmail = ENV['FPHS_ADMIN_EMAIL'] || 'admin@restructure'
   # Email address that identifies the batch user profile. Defaults to the user that matches the AdminEmail
@@ -89,9 +89,14 @@ class Settings
   RegistrationAdminEmail = ENV['REGISTRATION_ADMIN_EMAIL'] || AdminEmail
   # Template user for creating new users. The roles from this user are copied to the new user.
   DefaultUserTemplateEmail = ENV['DEFAULT_USER_TEMPLATE_EMAIL'] || 'registration@template'
+  # Require an invitation code to be used to register
+  InvitationCode = ENV['INVITATION_CODE']
 
   # Admins may be able to create other admins.
   AllowAdminsToManageAdmins = (ENV['ALLOW_ADMINS_TO_MANAGE_ADMINS'].to_s.downcase == 'true')
+
+  # Notify the RegistraionAdminEmail when a new admin or user is registered (notify on 'admin', 'user' or 'admin,user')
+  NotifyOnRegistration = ENV['NOTIFY_ON_REGISTRATION']
 
   # URL to appear on home page for users with login issues to contact
   DefaultLoginIssuesUrl = AllowUsersToRegister ? '/users/password/new' : "mailto: #{AdminEmail}?subject=Login%20Issues"
@@ -139,7 +144,7 @@ class Settings
 
   # Initial configurations for the bulk messaging app
   def self.bulk_msg_app
-    Admin::AppType.where(name: 'bulk-msg').first
+    Admin::AppType.active_app_types.where(name: 'bulk-msg').first
   end
 
   def self.bulk_msg_master

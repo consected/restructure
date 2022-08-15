@@ -15,6 +15,7 @@ class Admin < ActiveRecord::Base
            otp_secret_encryption_key: otp_enc_key
   end
 
+  before_save :restrict_capabilities
   before_validation :prevent_email_change, on: :update
   before_validation :prevent_re_enabling_admin, on: :update
   before_validation :prevent_creating_admin, on: :create
@@ -115,5 +116,19 @@ class Admin < ActiveRecord::Base
     return unless !disabled && disabled_changed? && !disabled_was != true # TODO: simplify
 
     errors.add(:admin, 'can not re-enable administrators')
+  end
+
+  #
+  # Restrict the capabilities of a new admin to match the set of capabilities the current admin has
+  # If the current admin is unrestricted, just return without making any changes.
+  # This has the positive side-effect that the current admin can not add capabilities to themselves.
+  def restrict_capabilities
+    return unless current_admin&.capabilities&.reject(&:blank?)&.present?
+
+    if capabilities&.reject(&:blank?)&.present?
+      self.capabilities &= current_admin.capabilities
+    else
+      self.capabilities = current_admin.capabilities
+    end
   end
 end

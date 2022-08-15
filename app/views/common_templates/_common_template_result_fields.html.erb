@@ -105,7 +105,14 @@
     {{/each}}
     </strong></li>
 
-
+  {{else is field_type 'includes' 'embedded_report_on_master_id_'}}
+    <li class="{{> field_result_class}}" data-field-name="{{key}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+      <a href="/reports/{{replace key 'embedded_report_on_master_id_' ''}}?embed=true&search_attrs[list_id]={{result_data.master_id}}&search_attrs[no_run]=true" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="btn btn-sm btn-default glyphicon glyphicon-list" type="button" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true"></a>
+    </span></strong></li>
+  {{else is field_type 'includes' 'embedded_report_'}}
+    <li class="{{> field_result_class}}" data-field-name="{{key}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+      <a href="/reports/{{replace key 'embedded_report_' ''}}?embed=true&search_attrs[list_id]={{result_data.id}}&search_attrs[no_run]=true" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="btn btn-sm btn-default glyphicon glyphicon-list" type="button" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true"></a>
+    </span></strong></li>
 
   {{else if (get result_data._general_selections key this_value 'name')}}
     <li class="{{> field_result_class}} is--select-field from-general-selection" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get result_data._general_selections key this_value 'name')}}{{get result_data._general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
@@ -128,11 +135,6 @@
 
   {{else is field_type 'includes' 'embed_resource_'}}
     <% # Do not show these %>
-  {{else is field_type 'includes' 'embedded_report_'}}
-
-    <li class="{{> field_result_class}}" data-field-name="{{key}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
-      <a href="/reports/{{replace key 'embedded_report_' ''}}?embed=true&search_attrs[list_id]={{result_data.id}}&search_attrs[no_run]=true" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="btn btn-sm btn-default glyphicon glyphicon-list" type="button" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true"></a>
-    </span></strong></li>
   {{else is field_type 'includes' '_rank' }}
     {{#if hide_rank_badge }}
     <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="label label-default">{{this_value}}</span></strong></li>
@@ -241,7 +243,7 @@
   {{else is field_type 'includes' '_description' }}
     <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is field_type 'includes' '^fixed_' }}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^fixed_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^fixed_' }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (or (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase') (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'view_original_case')) }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{else is field_type 'includes' '^placeholder_' }}
     <li class="{{> field_result_class}} hidden placeholder-field-item" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^placeholder_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is field_type 'e_signed_by'}}
@@ -308,7 +310,7 @@
     <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="date" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong data-format-datetime-local="true">{{this_value}}</strong></li>
   {{else is this_value '===' null}}
   {{else}}
-    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="{{lookup field_types @key}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase') }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-name="{{key}}" data-field-type="{{field_type}}" data-col-type="{{lookup field_types @key}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{#if show_raw_text}}{{this_value}}{{else if (or (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'no_downcase') (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'view_original_case')) }}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{/is}}
   {{#if show_item_type_flags_after}}
   {{#is key item_flags_after}}

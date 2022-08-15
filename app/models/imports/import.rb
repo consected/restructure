@@ -106,7 +106,7 @@ class Imports::Import < ActiveRecord::Base
     pt = item_class_for(primary_table)
     return unless pt
 
-    res = pt.attribute_names - %w[id user_id created_at updated_at disabled]
+    res = pt.attribute_names - %w[id user_id created_at updated_at]
     res += Master.alternative_id_fields.map(&:to_s) if include_alt_ids && res.include?('master_id')
     res.uniq!
     res
@@ -116,6 +116,26 @@ class Imports::Import < ActiveRecord::Base
   # Performs {Import#permitted_params_for} on the instance *primary_table*
   def permitted_params_for_primary_table(include_alt_ids = true)
     self.class.permitted_params_for primary_table, include_alt_ids
+  end
+
+  #
+  # Process a row of entries to handle special types (arrays).
+  # The results are applied directly to the specified object, to avoid
+  # issues with what is permitted by attribute assignments.
+  # @param [UserBase] object instance
+  # @param [CSV::Row] row
+  def process_columns(obj, row)
+    row.each do |k, v|
+      next unless item_class.columns.find { |c| c.name == k.to_s }.array?
+
+      if v&.start_with? '['
+        obj[k] = JSON.parse(v)
+      elsif v.is_a? String
+        obj[k] = v.split(',')
+      end
+    end
+
+    row
   end
 
   # Instantiate the primary_table / model for each CSV row previously set up in {#import_csv}.
@@ -128,6 +148,7 @@ class Imports::Import < ActiveRecord::Base
     csv_rows.each do |row|
       begin
         new_obj = item_class.new(row.to_h)
+        process_columns(new_obj, row)
         attempt_match_on_secondary_key new_obj
 
         if new_obj.respond_to?(:master) &&

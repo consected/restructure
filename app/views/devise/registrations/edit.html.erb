@@ -1,5 +1,6 @@
 <div class="devise-block reg-block col-md-8 col-md-offset-8 well">
   <h2>Change Password for <%= resource_name.to_s.humanize %></h2>
+  <div class="template-block"><%= template_block 'ui change password' %></div>
 
   <%
     action_path = resource_name == :admin ? send('admin_registration_path', resource) : user_registration_path
