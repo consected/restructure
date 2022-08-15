@@ -16,6 +16,10 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+Rebuild to fix missing gem mini_portal from vendor/cache
+
 ## [8.0.89] - 2022-08-15
 
 - [Added] tree view option for reports
