@@ -23,6 +23,7 @@ gem 'jquery-rails'
 gem 'kramdown'
 gem 'kramdown-parser-gfm'
 gem 'mime-types'
+gem 'mini_portile2', '2.8.0' # attempt to fix issue with mini_portile2 not being installed to vendor/cache during build
 gem 'nokogiri', '1.13.6'
 gem 'pg' # , '~> 0.15'
 
