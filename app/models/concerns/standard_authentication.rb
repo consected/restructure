@@ -264,7 +264,7 @@ module StandardAuthentication
   #
   # Validation to check the password strength is sufficient
   def check_strength
-    return unless errors.any? && password
+    return if errors.any? || password.nil?
 
     res = {}
     return true if self.class.password_strong_enough(password, result: res)

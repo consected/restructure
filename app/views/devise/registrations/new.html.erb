@@ -5,11 +5,13 @@
   <%= form_for(resource, as: resource_name, url: registration_path(resource)) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
 
+    <% af = true %>
     <% if Settings::InvitationCode.blank? %>
     <% elsif params[:invitation_code].blank? %>
     <div class="form-group-non">
       <%= f.label :invitation_code %><br />
-      <%= text_field_tag :invitation_code, '', class: "form-control" %>
+      <%= text_field_tag :invitation_code, '', class: "form-control", autofocus: true, required: true %>
+      <% af = false %>
     </div>
     <% else %>
       <%= hidden_field_tag :invitation_code, params[:invitation_code] %>
@@ -17,7 +19,7 @@
 
     <div class="form-group-non">
       <%= f.label :email %><br />
-      <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control" %>
+      <%= f.email_field :email, autofocus: af, autocomplete: "email", class: "form-control" %>
     </div>
 
     <div class="form-group-non">
@@ -30,14 +32,28 @@
       <%= f.text_field :last_name, class: "form-control" %>
     </div>
 
+    <% 
+    pw_min_len = Settings::PasswordConfig[:min_length] 
+    re = Settings::PasswordConfig[:regex]
+    %>
     <div class="form-group-non">
-      <%= f.label 'enter new password',  'data-add-icon' => 'info-sign', title: 'minimum 10 characters'  %><br />
-      <%= f.password_field :password, autocomplete: "new-password", class: "form-control", minlength: 10, pattern: ".{10,72}", required: true, title: 'minimum 10 characters'%>
+      <%= f.label 'enter new password'  %><br />
+      <% if re.present? %>
+      <%= f.password_field :password, autocomplete: "new-password", class: "form-control", minlength: pw_min_len, pattern: re, required: true, title: 'not complex enough' %>
+      <span id="helpBlock2" class="help-block"><%=Settings::PasswordConfig[:regex_requirements]%></span>
+      <%else%>
+      <%= f.password_field :password, autocomplete: "new-password", class: "form-control", minlength: pw_min_len, pattern: ".{#{pw_min_len},72}", required: true, title: "minimum #{pw_min_len} characters" %>
+      <span id="helpBlock2" class="help-block">Select a long, complex password, preferably using a password generator</span>
+      <%end%>
     </div>
 
     <div class="form-group-non">
-      <%= f.label :password_confirmation,  'data-add-icon' => 'info-sign', title: 'minimum 10 characters'  %><br />
-      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control", minlength: 10, pattern: ".{10,72}", required: true, title: 'minimum 10 characters'%>
+      <%= f.label :password_confirmation %><br />
+      <% if re.present? %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control", minlength: pw_min_len, pattern: re, required: true%>
+      <%else%>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control", minlength: pw_min_len, pattern: ".{#{pw_min_len},72}", required: true, title: "minimum #{pw_min_len} characters" %>
+      <%end%>
     </div>
 
     <div class="actions">

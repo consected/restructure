@@ -32,6 +32,7 @@ class Settings
     min_word_length: 4,
     extra_dictionary_words: :word_list,
     use_dictionary: !Rails.env.test?,
+    min_length: (ENV['PW_MIN_LEN'] || 10).to_i,
     regex: ENV['PW_REGEX'],
     regex_requirements: ENV['PW_REGEX_REQ']
   }.freeze
