@@ -55,6 +55,12 @@ _fpa.loaded.default = function () {
     has_loaded_callback = true;
   }
 
+  // Allow for _fpa.loaded.custom to be defined in the page ui template to call at load time
+  if (_fpa.loaded.custom) {
+    _fpa.loaded.custom();
+  }
+
+
   // Trigger a warning if user tries to print without using the app functionality
   window.onbeforeprint = _fpa.printing.beforePrintHandler;
   window.onafterprint = _fpa.printing.afterPrintHandler;
