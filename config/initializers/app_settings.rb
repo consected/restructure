@@ -55,8 +55,10 @@ class Settings
   # Set the max number of recipients for a message, to avoid an unexpected nasty error spamming the whole organization
   MaxNotificationRecipients = ENV['FPHS_MAX_NOTIFY_RECIPS']&.to_i || 200
 
-  # Disable 2FA by setting to true. The environment variable should be 'true' to set this
-  TwoFactorAuthDisabled = (ENV['FPHS_2FA_AUTH_DISABLED'] == 'true')
+  # Disable 2FA by setting to true (for users and admins), user (for users only) or admin (for admins only). 
+  TwoFactorAuthDisabledForUser = ENV['FPHS_2FA_AUTH_DISABLED'].in?(['true', 'user'])
+  TwoFactorAuthDisabledForAdmin = ENV['FPHS_2FA_AUTH_DISABLED'].in?(['true', 'admin'])
+
   # App name that appears within 2FA authenticator app
   TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'ReStructure'
   # Number of seconds to use for 2FA token drift (the older it is allowed to be and still be valid)

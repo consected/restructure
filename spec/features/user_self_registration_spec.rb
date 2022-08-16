@@ -12,8 +12,9 @@ describe 'user sign in process for users that can self register', js: true, driv
 
     SetupHelper.feature_setup
 
-    Settings::TwoFactorAuthDisabled = false
-
+    Settings::TwoFactorAuthDisabledForUser = false
+    Settings::TwoFactorAuthDisabledForAdmin = false
+    
     create_admin
 
     # create a template user with some roles

@@ -29,7 +29,10 @@ module StandardAuthentication
     #
     # @return [Boolean] - true if 2FA is disabled
     def two_factor_auth_disabled
-      Settings::TwoFactorAuthDisabled
+      return Settings::TwoFactorAuthDisabledForUser if self == User
+      return Settings::TwoFactorAuthDisabledForAdmin if self == Admin
+
+      nil
     end
 
     #
