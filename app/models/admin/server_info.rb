@@ -8,7 +8,7 @@ class Admin::ServerInfo
     PageTitle EnvironmentName BaseUrl
     OnlyLoadAppTypes
     DefaultMigrationSchema DefaultSchemaOwner StartYearRange EndYearRange AgeRange CareerYearsRange
-    UserTimeout AdminTimeout OsWordsFile PasswordEntropyConfig
+    UserTimeout AdminTimeout OsWordsFile PasswordConfig
     NotificationsFromEmail AdminEmail BatchUserEmail TwoFactorAuthDisabled TwoFactorAuthIssuer TwoFactorAuthDrift
     CheckPrevPasswords PasswordAgeLimit PasswordReminderDays PasswordMaxAttempts PasswordUnlockStrategy
     LoginIssuesUrl LoginMessage

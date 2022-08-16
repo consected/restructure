@@ -17,17 +17,23 @@ class Settings
   YearFieldPattern = '\\d{4,4}'
 
   # Inactivity timeouts for user / admin sessions
-  UserTimeout = (Rails.env.production? ? 30 : 60).minutes.freeze
-  AdminTimeout = (Rails.env.production? ? 30 : 60).minutes.freeze
+  UserTimeout = (ENV['USER_TIMEOUT_MINS'] || 30).minutes.freeze
+  AdminTimeout = (ENV['ADMIN_TIMEOUT_MINS'] || 30).minutes.freeze
 
   OsWordsFile = '/usr/share/dict/words'
   # Setup information for the StrongPassword::StrengthChecker and
-  # password setting
-  PasswordEntropyConfig = {
-    min_entropy: (Rails.env.test? ? 1 : 20),
+  # password setting.
+  # Set PW_MIN_ENTROPY=0 to disable entropy test
+  # Set PW_REGEX to blank to remove regex requirement
+  # Set PW_REGEX_REQ to provide message about the password requirements, such as:
+  #  "Minimum 1 upper case letter, 1 lower case letter, 1 number"
+  PasswordConfig = {
+    min_entropy: (Rails.env.test? ? 1 : (ENV['PW_MIN_ENTROPY'] || 20).to_i),
     min_word_length: 4,
     extra_dictionary_words: :word_list,
-    use_dictionary: !Rails.env.test?
+    use_dictionary: !Rails.env.test?,
+    regex: ENV['PW_REGEX'],
+    regex_requirements: ENV['PW_REGEX_REQ']
   }.freeze
 
   # Default logo filename. Can be overridden on an app by app basis with the "logo filename" app configuration.
