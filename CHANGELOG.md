@@ -16,6 +16,13 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] password regex option and refactored entropy results
+- [Added] disabling of 2FA for user and admin independently
+- [Changed] new and edit password forms for usability
+- [Fixed] sandbox of iframes (reports and message notifications) to allow popups from links
+
 ## [8.0.95] - 2022-08-15
 
 Attempting build to fix mini_portile2 issue again
