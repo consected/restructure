@@ -36,8 +36,8 @@
   <%= render partial: "layouts/setup_app" %>
   <%= csrf_meta_tags %>
   <link rel="shortcut icon" type="image/png" href="/favicon.png">
-  <style><%= template_block("ui page css - #{current_user&.app_type.name}", markdown_to_html: false)&.html_safe %></style>
-  <script><%= template_block("ui page js - #{current_user&.app_type.name}", markdown_to_html: false)&.html_safe %></script>
+  <style><%= template_block("ui page css - #{current_user&.app_type&.name}", markdown_to_html: false)&.html_safe %></style>
+  <script><%= template_block("ui page js - #{current_user&.app_type&.name}", markdown_to_html: false)&.html_safe %></script>
 </head>
 <body <%= body_classes %> id="body-top">
     <%= render partial: 'layouts/browser_check' %>
