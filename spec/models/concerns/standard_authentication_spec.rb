@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'StandardAuthentication', type: :model do
   TestRegex = '^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}$'
+  TestRegex2 = '^.*(?=.{8,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*$'
 
   def unfreeze_config
     conf = Settings::PasswordConfig.deep_dup
@@ -27,6 +28,12 @@ RSpec.describe 'StandardAuthentication', type: :model do
     expect(User.password_regex_matched?('')).to be false
     expect(User.password_regex_matched?('abcdef')).to be false
     expect(User.password_regex_matched?('abc3DE')).to be true
+
+    User.password_config[:regex] = TestRegex2
+    expect(User.password_regex_matched?('')).to be false
+    expect(User.password_regex_matched?('abcdefgh123123')).to be false
+    expect(User.password_regex_matched?('abc3DE')).to be false
+    expect(User.password_regex_matched?('abc3DE45')).to be true
   end
 
   it 'checks entropy of a password' do
