@@ -18,6 +18,7 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
+- [Testing] bootsnap
 - [Added] password regex option and refactored entropy results
 - [Added] disabling of 2FA for user and admin independently
 - [Changed] new and edit password forms for usability
