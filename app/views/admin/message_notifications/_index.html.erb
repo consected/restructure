@@ -32,7 +32,7 @@
             <tr><td><%= i.humanize %>:</td><td><%= list_item.send(i) %></td></tr>
             <% end %>
           </table>
-          <iframe id="message-iframe-<%= list_item.id %>" src='javascript:void(0)' srcdoc="" class="iframe-message-notification if-mn-type-<%= list_item.message_type%>">
+          <iframe id="message-iframe-<%= list_item.id %>" src='javascript:void(0)' srcdoc="" class="iframe-message-notification if-mn-type-<%= list_item.message_type%>" sandbox="allow-popups">
           </iframe>
 
           <script id="message-content-<%= list_item.id %>" class="hidden" type="x-html">

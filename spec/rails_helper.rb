@@ -19,6 +19,12 @@ ENV['FPHS_USE_LOGGER'] = 'TRUE'
 # AWS_SESSION_TOKEN
 #
 
+if ENV['QUICK']
+  ENV['SKIP_BROWSER_SETUP'] = 'true'
+  ENV['SKIP_DB_SETUP'] = 'true'
+  ENV['SKIP_APP_SETUP'] = 'true'
+end
+
 unless ENV['IGNORE_MFA'] == 'true'
   res = `aws sts get-caller-identity | grep "UserId"`
   if res == ''

@@ -18,7 +18,7 @@
       <%= f.password_field :password, autocomplete: "current-password", class: 'form-control', required: true %>
     </div>
 
-    <% unless Settings::TwoFactorAuthDisabled %>
+    <% unless resource.two_factor_auth_disabled %>
     <div class="form-group-non full-width">
       <%= f.label :otp_attempt, 'Two-Factor Authentication Code' %><br />
       <%= f.text_field :otp_attempt, autocomplete: "off", inputmode: "numeric", minlength: "6", maxlength: "6", class: 'form-control', value: '', pattern: "\\d{6}" %>

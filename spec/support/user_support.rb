@@ -27,8 +27,10 @@ module UserSupport
       user = User.find(user.id)
       user.current_admin = admin
       good_password = user.generate_password
-      user.otp_required_for_login = true
-      user.new_two_factor_auth_code = false
+      unless Settings::TwoFactorAuthDisabledForUser
+        user.otp_required_for_login = true
+        user.new_two_factor_auth_code = false
+      end
       user.save!
     end
 

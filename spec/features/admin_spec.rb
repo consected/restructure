@@ -2,7 +2,6 @@
 
 require 'rails_helper'
 
-
 describe 'admin sign in process', driver: :app_firefox_driver do
   include ModelSupport
 
@@ -71,6 +70,34 @@ describe 'admin sign in process', driver: :app_firefox_driver do
   end
 
   it 'should sign in' do
+    admin = Admin.where(email: @good_email).first
+    expect(admin).to be_a Admin
+    expect(admin.id).to equal @admin.id
+
+    url = "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
+    visit url
+    expect(current_path).to eq '/admins/sign_in'
+
+    within '#new_admin' do
+      expect(@admin.email).to eq @good_email
+      expect(@admin.valid_password?(@good_password)).to be true
+      # Do not validate, since this consumes the one time code and prevents it from being used (causes a long delay in the process)
+      # expect(@admin.validate_one_time_code(@admin.current_otp)).to be true
+
+      fill_in 'Email', with: @good_email
+      fill_in 'Password', with: @good_password
+      fill_in 'Two-Factor Authentication Code', with: @admin.current_otp
+
+      click_button 'Log in'
+    end
+    expect(page).to have_css('.flash .alert', text: '× Signed in successfully')
+  end
+
+  it 'should sign in with 2FA even if it is disabled for users' do
+    Settings::TwoFactorAuthDisabledForUser = true
+    expect(User.two_factor_auth_disabled).to be true
+    expect(Admin.two_factor_auth_disabled).to be false
+
     admin = Admin.where(email: @good_email).first
     expect(admin).to be_a Admin
     expect(admin.id).to equal @admin.id
