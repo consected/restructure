@@ -16,8 +16,9 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
-## Unreleased
+## [8.0.96] - 2022-08-19
 
+- [Testing] bootsnap
 - [Added] password regex option and refactored entropy results
 - [Added] disabling of 2FA for user and admin independently
 - [Changed] new and edit password forms for usability
