@@ -378,6 +378,16 @@ module Redcap
       name.singularize.ns_underscore
     end
 
+    #
+    # Force update of the dynamic model definition if it has already been created, typically to add new fields
+    def update_dynamic_model
+      raise FphsException, 'Not ready to update dynamic model / database table' unless ready_to_setup_dynamic_model?
+
+      dynamic_storage.create_dynamic_model
+      record_job_request 'update_dynamic_model', result: { dynamic_model: dynamic_storage.dynamic_model.id }
+      # dynamic_storage.add_user_access_control
+    end
+
     private
 
     #

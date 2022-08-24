@@ -87,4 +87,20 @@ RSpec.describe Redcap::DynamicStorage, type: :model do
     dmclass = @dm.implementation_class
     expect(dmclass < Dynamic::DynamicModelBase).to be true
   end
+
+  it 'evaluates branching logic to produce show_if conditions' do
+    @dm.option_configs(force: true)
+    d = @dm.default_options
+    cs = d.show_if_condition_strings
+    expect(cs.keys).to eq %i[placeholder_smoketime smoketime___pnfl smoketime___dnfl smoketime___anfl smoke_start smoke_stop smoke_curr]
+    expect(cs[:placeholder_smoketime]).to eq "[smoke] = '1' or [smoke] = '2'"
+    expect(d.show_if[:placeholder_smoketime]).to eq(
+      any_0: {
+        all_nonblock_0: { smoke: '1' },
+        all_nonblock_1: {
+          all_dupvar_0: { smoke: '2' }
+        }
+      }
+    )
+  end
 end

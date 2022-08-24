@@ -108,3 +108,19 @@ A subset of the full test suite can be run by specifying a path as the first arg
 run the redcap model specs.
 
     NO_BRAKEMAN=true app-scripts/parallel_test.sh spec/models/redcap
+
+## Running Javascript tests with Jasmine
+
+[jasmine-browser-runner](https://github.com/jasmine/jasmine-browser-runner) is used for Spec style Javascript testing. To simplify
+running of the tests, use:
+
+    app-scripts/jasmine-serve.sh
+
+After a few seconds this will open a Firefox window with the test results. Firefox is used, since it doesn't enforce a security feature
+that blocks debugging of Jasmine in the browser debugger (either by placing a breakpoint or using the `debugger;` instruction in the code.)
+
+For automated testing, instead use:
+
+    app-scripts/jasmine-serve.sh headless
+
+This should run the tests, closing the browser window after use.

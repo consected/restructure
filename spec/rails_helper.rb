@@ -174,7 +174,7 @@ RSpec.configure do |config|
     put_now 'load_tasks'
     Rails.application.load_tasks
     put_now 'Precompile assets'
-    Rake::Task['assets:precompile'].invoke unless ENV['SKIP_ASSETS'] || ENV['SKIP_APP_SETUP']
+    Rake::Task['assets:precompile'].invoke if ENV['JS_SETUP'] || !(ENV['SKIP_ASSETS'] || ENV['SKIP_APP_SETUP'])
     put_now 'Done before suite'
   end
 

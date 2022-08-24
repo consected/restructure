@@ -92,6 +92,10 @@ module Redcap
         field_choices.choices(plain_text: true)
       end
 
+      def branching_logic
+        @branching_logic ||= BranchingLogic.new(self)
+      end
+
       def to_s
         name.to_s
       end

@@ -61,7 +61,8 @@ module Dynamic
         default: {
           field_options: field_options,
           caption_before: caption_before,
-          labels: labels
+          labels: labels,
+          show_if_condition_strings: show_if_condition_strings
         }
       }.deep_stringify_keys!
 
@@ -247,6 +248,18 @@ module Dynamic
       end
 
       @comments
+    end
+
+    def show_if_condition_strings
+      @show_if_condition_strings = {}
+      return unless respond_to?(:fields) && fields
+
+      fields.each do |name, config|
+        res = config_value(config, :show_if_condition_strings)
+        @@show_if_condition_strings[name] = res
+      end
+
+      @show_if_condition_strings
     end
 
     def data_dictionary_config

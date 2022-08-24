@@ -62,23 +62,29 @@ module Redcap
       return @fields if @fields
 
       @fields = {}
+      @show_if_condition_strings = {}
       all_retrievable_fields = data_dictionary.all_retrievable_fields
 
       data_dictionary.all_fields.each do |field_name, field|
-        if placeholder_fields.value?("placeholder_#{field_name}__title")
-          @fields["placeholder_#{field_name}__title"] = {
+        fn = "placeholder_#{field_name}__title"
+        if placeholder_fields.value?(fn)
+          @fields[fn] = {
             caption: field.title
           }
+          use_fn = fn
         end
 
-        if placeholder_fields.value?("placeholder_#{field_name}")
-          @fields["placeholder_#{field_name}"] = {
+        fn = "placeholder_#{field_name}"
+        if placeholder_fields.value?(fn)
+          @fields[fn] = {
             caption: field.label
           }
+          use_fn = fn
         elsif all_retrievable_fields.key?(field_name)
           @fields[field_name] = {
             caption: field.label
           }
+          use_fn = field_name
 
           ### Handle field types and alt options
 
@@ -90,6 +96,10 @@ module Redcap
 
         end
 
+        bl = field.branching_logic
+        bl_condition_string = bl&.condition_string
+        @show_if_condition_strings[use_fn.to_sym] = bl_condition_string if bl_condition_string.present?
+
         next unless field.field_type.name == :checkbox
 
         ccf = field.field_choices&.choices_plain_text
@@ -98,9 +108,11 @@ module Redcap
         ccf.each do |arr|
           fname = arr.first
           label = arr.last
-          @fields[field.choice_field_name(fname)] = {
+          ccffn = field.choice_field_name(fname)
+          @fields[ccffn] = {
             label: label
           }
+          @show_if_condition_strings[ccffn.to_sym] = bl_condition_string if bl_condition_string.present?
         end
       end
 
@@ -200,6 +212,14 @@ module Redcap
       end
 
       @field_options
+    end
+
+    #
+    # Override default show_if_condition_strings method, to branching logic strings
+    # @return [Hash]
+    def show_if_condition_strings
+      fields # initializes the hash
+      @show_if_condition_strings
     end
 
     #

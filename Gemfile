@@ -60,6 +60,7 @@ group :development, :test do
   gem 'bundler-audit'
   gem 'byebug'
   gem 'debase'
+  # gem 'jasmine-rails'
   gem 'parallel_tests', '3.8.1'
   gem 'readapt'
   gem 'rspec-rails'
