@@ -167,14 +167,24 @@ module Redcap
       end
 
       #
+      # Does a checkbox field have more than one choice field and therefore
+      # have a summary array field (if the project requires it)
+      # @return [true|false]
+      def has_checkbox_summary_array?
+        ccf = checkbox_choice_fields
+        ccf && ccf.length > 1
+      end
+
+      #
       # Get a Hash of all fields that should be returned in a REDCap record retrieval, which takes into account
       # the checkbox choice fields that are persisted individually. This is based on the latest retrieved REDCap
       # metadata data dictionary.
       # Checkbox choice fields, with checkbox_field___choice style appear in the results, and the
       # base checkbox_field without the suffix does not appear, since it is not a field actually retrieved.
       # @param [Form] form
+      # @param [true | false] summary_fields - include the summary fields (such as the chosen arrays for checkboxes)
       # @return [Hash{Symbol => Field}]
-      def self.all_retrievable_fields(in_form)
+      def self.all_retrievable_fields(in_form, summary_fields: false)
         new_set = {}
 
         all_from(in_form).each do |field_name, field|
@@ -182,6 +192,10 @@ module Redcap
 
           ccf = field.checkbox_choice_fields
           if ccf
+
+            # If there are multiple possible values for the checkbox field, add a summary field to collect them as an array
+            SpecialFields.add_summary_fields(new_set, in_form, field) if summary_fields && ccf.length > 1
+
             ccf.each do |c|
               field.field_type.name = :checkbox_choice
               new_set[c] = field
@@ -216,6 +230,29 @@ module Redcap
       # @return [String]
       def choice_field_name(value)
         "#{name}___#{value}"
+      end
+
+      #
+      # Field value for a choice field name
+      # @param [String|Symbol] name
+      # @return [String]
+      def self.choice_field_value(name)
+        name.to_s.split('___').last
+      end
+
+      #
+      # Generate the field name for a summary array field to hold all the
+      # individual checkbox choices in a single place
+      # @return [String]
+      def chosen_array_field_name
+        "#{name}_chosen_array".to_sym
+      end
+
+      #
+      # Generate the original field name for a summary array field
+      # @return [String]
+      def chosen_array_original_field_name
+        name.to_s.sub(/_chosen_array$/, '').to_sym
       end
 
       #

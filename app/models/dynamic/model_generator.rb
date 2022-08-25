@@ -11,7 +11,7 @@ module Dynamic
     included do
       # :field_types is a Hash of field_name => field_type values, where the field_name
       # is a symbol and field_type is a valid DB migration data type (also a symbol)
-      attr_accessor :field_types
+      attr_accessor :field_types, :array_fields
       attr_accessor :parent, :qualified_table_name, :category
     end
 
@@ -183,9 +183,14 @@ module Dynamic
       @db_columns = {}
 
       field_types.each do |field_name, field_type|
-        @db_columns[field_name] = {
-          type: field_type.to_s
+        ft = field_type.to_s
+        config = {
+          type: ft
         }
+
+        config[:array] = true if array_fields&.dig(field_name)
+
+        @db_columns[field_name] = config
       end
 
       @db_columns

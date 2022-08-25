@@ -48,11 +48,27 @@ module Redcap
     # @return [Hash]
     def field_types
       @field_types = {}
-      data_dictionary&.all_retrievable_fields&.each do |field_name, field|
+      data_dictionary&.all_retrievable_fields(summary_fields: true)&.each do |field_name, field|
         @field_types[field_name] = field.field_type.database_type.to_s
       end
 
       @field_types
+    end
+
+    #
+    # Return a hash of all fields, with a value true if they are to berepresented as an array
+    # in the database. Used alongside #field_types a full definition of the field can be made
+    # for migrations.
+    # @return [Hash]
+    def array_fields
+      return @array_fields if @array_fields
+
+      @array_fields = {}
+      data_dictionary&.all_retrievable_fields(summary_fields: true)&.each do |field_name, field|
+        @array_fields[field_name] = field.field_type.database_array?
+      end
+
+      @array_fields
     end
 
     #
@@ -66,6 +82,8 @@ module Redcap
       all_retrievable_fields = data_dictionary.all_retrievable_fields
 
       data_dictionary.all_fields.each do |field_name, field|
+        choices = nil
+
         fn = "placeholder_#{field_name}__title"
         if placeholder_fields.value?(fn)
           @fields[fn] = {
@@ -105,6 +123,25 @@ module Redcap
         ccf = field.field_choices&.choices_plain_text
         next unless ccf.present?
 
+        if project_admin.data_options.add_multi_choice_summary_fields && ccf.length > 1
+          # Create a "chosen array" if the project configuration requires a summary field
+          # to capture all of the multiple choice values in one place
+          # But only do this if the number of choices is greater than 1, since we don't want this
+          # for standalone checkboxes
+          choices ||= field.field_choices&.choices(plain_text: true, rails_format: true)
+
+          @fields[field.chosen_array_field_name] = {
+            caption: field.label,
+            edit_options: choices.to_h,
+            edit_field_type: "tag_select_#{field.chosen_array_field_name}"
+          }
+          # NOTE: we use a full tag_select_... field name to ensure the values can be looked up correctly
+          # This requires display of the field to look for
+          # "name_starts_with_redcap_tag_select" rather than an exact match
+          # on the redcap_tag_select field type.
+        end
+
+        # Create a field for each multiple choice value
         ccf.each do |arr|
           fname = arr.first
           label = arr.last

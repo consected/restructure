@@ -194,7 +194,19 @@ module Redcap
                                                  exportDataAccessGroups
                                                  returnFormat]
 
+    #
+    # Return format for redcap metadata requests - typically not changed
     configure :metadata_request_options, with: %i[returnFormat]
+
+    #
+    # Specify options for the project.
+    # add_multi_choice_summary_fields: automatically capture summary fields from checkbox fields with multiple responses
+    #                                  providing a single array result field that can more easily be used within SQL without
+    #                                  having to know each of the individual checkbox field columns in the database.
+    configure :data_options, with: %i[add_multi_choice_summary_fields]
+
+    #
+    # A hash digest of the data dictionary, allowing any changes to indicate that an update is required
     configure_attributes :data_dictionary_version
 
     #
@@ -206,6 +218,12 @@ module Redcap
       attrs[:use_hash_config][:metadata_request_options] ||= Settings::RedcapMetadataRequestOptions
 
       super(attrs)
+    end
+
+    #
+    # Required to allow the filestore for this project to operate correctly.
+    def secondary_key
+      name
     end
 
     def config_text
