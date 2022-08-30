@@ -814,8 +814,8 @@ js-yaml@^3.14.0:
     esprima "^4.0.0"
 
 "jsTreeTable@https://github.com/consected/jsTreeTable":
-  version "0.0.0"
-  resolved "https://github.com/consected/jsTreeTable#2e587aab0b37b62a73826410ef9877593357aeef"
+  version "0.1.3"
+  resolved "https://github.com/consected/jsTreeTable#fa50005531e0449a605748c98445c7ffd2b713dc"
 
 jsbn@~0.1.0:
   version "0.1.1"
