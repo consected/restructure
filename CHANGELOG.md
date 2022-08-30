@@ -18,7 +18,7 @@ release will be created for any release tested in production, and may be marked 
 
 ## Unreleased
 
-- [Added] show_if generation from Redcap branching logic 
+- [Added] show_if generation from Redcap branching logic
 - [Added] jasmine-browser-runner to replace old gem and support script app-scripts/jasmine-serve.sh
 - [Added] ability to force update of a redcap dynamic model
 - [Added] Redcap pull generation of array summary fields for multiple choice checkboxes
