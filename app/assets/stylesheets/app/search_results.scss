@@ -379,57 +379,6 @@ table.table.tablesorter > thead > tr > th.tablesorter-header:after {
   color: gray;
 }
 
-table.table.tree-table {
-
-  thead tr th.is-parent-col{
-    background-color: rgb(230,230,230);
-  }
-
-  td id {
-    display: none;
-  }
-
-  [data-col-type="id"], [data-col-name="id"] {
-    min-width: 30px;
-    width: 30px;
-  }
-
-  td[data-col-type="id"] {
-    text-align: center;
-    // border-right-color: rgb(238, 238, 238);
-  }
-
-  tr[data-tt-level="0"] td {
-    // border-bottom: 0;
-    font-weight: bold;
-    background: rgb(242, 242, 242);
-    
-    &.is-not-parent-col {
-      border-left: 0px;
-      border-right: 0px;
-      background: none;
-    }
-
-    &.report-el[colspan] pre {
-      max-width: 100%;
-    }
-  }
-
-  tr[data-tt-level="1"] td {
-    border-top: 1px;
-    // border-top-color: rgb(230, 230, 230);
-    // border-bottom-color: rgb(230, 230, 230);
-      
-    &.is-parent-col {
-      border-top: 0px;
-      border-bottom: 0;
-      border-left: 0px;
-      border-right: 0px;
-      background: rgb(242, 242, 242);
-    }
-
-  }
-}
 
 .collapsed span.badge {
   background-color: white;

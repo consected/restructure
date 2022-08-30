@@ -21,7 +21,7 @@ module OptionConfigs
                                       force_show_search_button no_sorting]
 
     configure :list_options, with: %i[hide_in_list list_description]
-    configure :tree_view_options, with: %i[parent_columns]
+    configure :tree_view_options, with: %i[num_levels column_levels expand_level]
     configure :view_css, with: %i[classes selectors media_queries]
     configure :criteria_css, with: %i[classes selectors media_queries]
     configure :master_results_css, with: %i[classes selectors media_queries]

@@ -58,6 +58,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
 
     dr.retrieve
+    dr.summarize_fields
 
     expect { dr.validate }.not_to raise_error
   end
@@ -71,6 +72,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
     stub_request_records @project[:server_url], @project[:api_key], 'fail_record_id_nil'
     dr.retrieve
+    dr.summarize_fields
     expect { dr.validate }.to raise_error(FphsException, 'Redcap::DataRecords retrieved data that has a nil record id')
   end
 
@@ -83,6 +85,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     stub_request_records @project[:server_url], @project[:api_key], 'mismatch_fields'
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
     dr.retrieve
+    dr.summarize_fields
     expect do
       dr.validate
     end.to raise_error(FphsException,
@@ -98,6 +101,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
     stub_request_records @project[:server_url], @project[:api_key]
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
     dr.retrieve
+    dr.summarize_fields
+
     expect { dr.validate }.not_to raise_error
 
     dr.store
@@ -144,6 +149,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
     dr.retrieve
+    dr.summarize_fields
     expect { dr.validate }.not_to raise_error
 
     dr.store
@@ -162,6 +168,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     stub_request_records @project[:server_url], @project[:api_key]
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
     dr.retrieve
+    dr.summarize_fields
     expect { dr.validate }.not_to raise_error
 
     dr.store
@@ -177,7 +184,8 @@ RSpec.describe Redcap::DataRecords, type: :model do
     stub_request_records @project[:server_url], @project[:api_key], 'missing_record'
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
     dr.retrieve
-    expect do
+        dr.summarize_fields
+expect do
       dr.validate
     end.to raise_error(FphsException, 'Redcap::DataRecords existing records were not in the retrieved records: 4')
   end
@@ -194,6 +202,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     stub_request_records @project[:server_url], @project[:api_key]
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
     dr.retrieve
+    dr.summarize_fields
     expect { dr.validate }.not_to raise_error
 
     dr.store
@@ -204,6 +213,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
     dr.retrieve
+    dr.summarize_fields
     expect { dr.validate }.not_to raise_error
 
     dr.store
@@ -223,6 +233,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
     stub_request_records @project[:server_url], @project[:api_key]
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
     dr.retrieve
+    dr.summarize_fields
     expect { dr.validate }.not_to raise_error
 
     dr.store
@@ -240,6 +251,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
     dr.retrieve
+    dr.summarize_fields
     expect { dr.validate }.not_to raise_error
     dr.store
 
@@ -439,5 +451,70 @@ RSpec.describe Redcap::DataRecords, type: :model do
     expect(files.count).to eq 4
     expect(files.map { |f| "#{f.path}/#{f.file_name}" }.sort)
       .to eq ["#{rc.dynamic_model_table}/file-fields/4/file1", "#{rc.dynamic_model_table}/file-fields/4/signature", "#{rc.dynamic_model_table}/file-fields/19/signature", "#{rc.dynamic_model_table}/file-fields/32/file1"].sort
+  end
+
+  describe 'project with summary choice array fields' do
+    before :all do
+      @bad_admin, = create_admin
+      @bad_admin.update! disabled: true
+      create_admin
+      @projects = setup_redcap_project_admin_configs
+      @project = @projects.first
+
+      # Create the first DM with multiple choice summary fields
+      rc = Redcap::ProjectAdmin.active.first
+      rc.data_options.add_multi_choice_summary_fields = true
+      rc.current_admin = @admin
+      rc.save!
+      `mkdir -p db/app_migrations/redcap_test; rm -f db/app_migrations/redcap_test/*test_rc*.rb`
+      ds = Redcap::DynamicStorage.new rc, "redcap_test.test_rc#{rand 100_000_000_000_000}_recs"
+      ds.category = 'redcap-test-env'
+      @dm = ds.create_dynamic_model
+      expect(ds.dynamic_model_ready?).to be_truthy
+    end
+
+    before :example do
+      create_admin
+      reset_mocks
+    end
+
+    it 'saves records with summary arrays' do
+      dm = @dm
+
+      rc = Redcap::ProjectAdmin.active.first
+      rc.current_admin = @admin
+      rc.data_options.add_multi_choice_summary_fields = true
+      rc.save!
+      expect(rc.data_options.add_multi_choice_summary_fields).to be true
+      dd = rc.redcap_data_dictionary
+      all_rf_summ = dd.all_retrievable_fields(summary_fields: true)
+      expect(all_rf_summ[:smoketime_chosen_array].field_type.name).to eq :checkbox_chosen_array
+
+      stub_request_records @project[:server_url], @project[:api_key]
+      dr = Redcap::DataRecords.new(rc, dm.implementation_class.name)
+
+      dr.retrieve
+
+      dr.summarize_fields
+      expect(dr.records.first.keys).to include(:smoketime_chosen_array)
+
+      expect { dr.validate }.not_to raise_error
+      dr.store
+
+      expect(dr.errors).to be_empty
+      created_record_ids = dr.created_ids.map { |r| r[:record_id] }.sort
+      expect(created_record_ids).to eq %w[1 4 14 19 32].sort
+      expect(dr.updated_ids).to be_empty
+
+      stored_recs = dm.implementation_class.where(record_id: created_record_ids)
+      stored_recs.each do |r|
+        sa = r.smoketime_chosen_array
+
+        # Get the actual choices
+        exp_array = %w[pnfl dnfl anfl].map { |choice| r["smoketime___#{choice}"] && choice }.select { |item| item }
+
+        expect(sa).to eq exp_array
+      end
+    end
   end
 end

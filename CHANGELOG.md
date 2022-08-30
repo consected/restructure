@@ -16,6 +16,14 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+- [Added] show_if generation from Redcap branching logic
+- [Added] jasmine-browser-runner to replace old gem and support script app-scripts/jasmine-serve.sh
+- [Added] ability to force update of a redcap dynamic model
+- [Added] Redcap pull generation of array summary fields for multiple choice checkboxes
+- [Added] multilevel functionality to report trees
+
 ## [8.0.96] - 2022-08-19
 
 - [Testing] bootsnap

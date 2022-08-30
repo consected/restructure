@@ -83,10 +83,19 @@ list_options:
   # allowing the main description field to appear just in the search criteria form
 
 tree_view_options:
-  parent_columns:
-    - col1
-    - col2
-  # List of column names to use as the top-level parent columns in the tree view
+  # A tree view allows for drill down into lower levels.
+  # A query must return an "id" field to operate, even if it is random.
+  # For each level (except lowest level), provide list of column names to use as
+  # the parent columns in the tree view
+  # Expand the tree by default to the value set in *expand_level:*
+  num_levels: 3
+  expand_level: 1
+  column_levels:
+    -
+      - col1
+      - col2
+    -
+      - col3
 
 view_css:
   classes:
