@@ -261,7 +261,7 @@ module Dynamic
 
       fields.each do |name, config|
         res = config_value(config, :show_if_condition_strings)
-        @@show_if_condition_strings[name] = res
+        @show_if_condition_strings[name] = res
       end
 
       @show_if_condition_strings
@@ -280,7 +280,7 @@ module Dynamic
         config
       elsif config.respond_to?(key)
         config.send(key)
-      else
+      elsif config.key?(key)
         config[key]
       end
     end
