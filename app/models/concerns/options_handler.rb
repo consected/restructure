@@ -68,6 +68,10 @@ module OptionsHandler
       params ||= {}
       self.class.configure_with_items.each { |key| send "#{key}=", params[key] }
     end
+
+    def key?(key)
+      to_h.key? key
+    end
   end
 
   class ConfigurationHash < Hash

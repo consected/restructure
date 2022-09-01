@@ -29,6 +29,7 @@ module Redcap
         radio: 'categorical',
         checkbox: 'categorical',
         checkbox_choice: 'dichotomous item', # This is not a real REDCap type, but is used as a lookup
+        checkbox_chosen_array: 'categorical array', # This is not a real REDCap type, but is used as a lookup
         yesno: 'dichotomous',
         truefalse: 'dichotomous',
         file: 'file',
@@ -71,6 +72,7 @@ module Redcap
         radio: 'radio',
         checkbox: nil, # boolean
         checkbox_choice: nil, # boolean
+        checkbox_chosen_array: 'tag_select_checkbox',
         yesno: 'yes_no',
         truefalse: 'true_false',
         file: 'file',
@@ -108,6 +110,7 @@ module Redcap
       VariableTypesToRealTypes = {
         'dichotomous' => :true_if_1,
         'dichotomous item' => :true_if_1,
+        'categorical array' => :to_a,
         'integer' => :to_i,
         'numeric' => :to_d,
         'date' => :to_date,
@@ -121,6 +124,7 @@ module Redcap
       VariableTypesToDatabaseTypes = {
         'dichotomous' => :boolean,
         'dichotomous item' => :boolean,
+        'categorical array' => :string,
         'integer' => :integer,
         'numeric' => :decimal,
         'date' => :date,
@@ -129,6 +133,11 @@ module Redcap
         'redcap status' => :integer,
         'redcap completion timestamp' => :timestamp
       }.freeze
+
+      # Types that are array fields
+      VariableTypesToDatabaseArrays = {
+        'categorical array' => true
+      }
 
       attr_accessor :name, :field
 
@@ -191,6 +200,13 @@ module Redcap
       # @return [Symbol]
       def database_type
         VariableTypesToDatabaseTypes[default_variable_type] || :string
+      end
+
+      #
+      # Is an array field in the study database?
+      # @return [true|false]
+      def database_array?
+        VariableTypesToDatabaseArrays[default_variable_type]
       end
 
       #

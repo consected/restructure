@@ -54,3 +54,6 @@ used in the following forms / pages:
 - `ui 2fa setup` - the page presented when a user has to set up their two-factor authentication app with a QR code
 - `ui user preferences caption` - user preferences (timezones / formats) form
 - `ui first login` - information for a new user on first login
+- `ui page css - {app type name}` - plain CSS to place in a *style* block in the *head* section
+- `ui page js - {app type name}` - plain Javascript to place in a *style* block in the *head* section
+  - **NOTE:** use `_fpa.loaded.custom = function () { }` to ensure actions are only called after the page has loaded

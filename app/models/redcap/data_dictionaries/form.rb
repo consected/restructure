@@ -82,14 +82,15 @@ module Redcap
       # Checkbox choice fields, with checkbox_field___choice style appear in the results, and the
       # base checkbox_field without the suffix does not appear, since it is not a field actually retrieved.
       # @param [Recap::DataDictionary] data_dictionary
+      # @param [true | false] summary_fields - include the summary fields (such as the chosen arrays for checkboxes)
       # @return [Hash{Symbol => Field}]
-      def self.all_retrievable_fields(data_dictionary)
+      def self.all_retrievable_fields(data_dictionary, summary_fields: false)
         captured_metadata = data_dictionary.captured_metadata
         return unless captured_metadata.present?
 
         all_fields = {}
         all_from(data_dictionary).each do |_k, form|
-          all_fields.merge! Redcap::DataDictionaries::Field.all_retrievable_fields(form)
+          all_fields.merge! Redcap::DataDictionaries::Field.all_retrievable_fields(form, summary_fields: summary_fields)
         end
 
         all_fields

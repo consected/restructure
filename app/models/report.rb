@@ -86,6 +86,7 @@ class Report < ActiveRecord::Base
     i = parts.first
     # Allow hyphenated categories to be matched with underscores
     its = [i, i.gsub('_', '-'), i.gsub('_', ' ')].uniq
+    its << nil if i == '_default'
     res = where(item_type: its, short_name: parts.last).first
     raise ActiveRecord::RecordNotFound unless res || nil_for_no_match
 

@@ -50,6 +50,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     dr = Redcap::DataRecords.new(rc, @dmcn)
     dr.retrieve
+    dr.summarize_fields
     expect { dr.validate }.not_to raise_error
 
     dr.store
@@ -60,6 +61,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     dr = Redcap::DataRecords.new(rc, @dmcn)
     dr.retrieve
+    dr.summarize_fields
     expect { dr.validate }.not_to raise_error
 
     dr.store
@@ -161,6 +163,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     dr = Redcap::DataRecords.new(rc, @dmcn_sf)
     dr.retrieve
+    dr.summarize_fields
     expect { dr.validate }.not_to raise_error
 
     dr.store
@@ -173,6 +176,7 @@ RSpec.describe Redcap::DataRecords, type: :model do
 
     dr = Redcap::DataRecords.new(rc, @dmcn_sf)
     dr.retrieve
+    dr.summarize_fields
     expect { dr.validate }.not_to raise_error
 
     dr.store

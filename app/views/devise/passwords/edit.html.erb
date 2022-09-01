@@ -7,17 +7,31 @@
     <%= render "devise/shared/error_messages", resource: resource %>
     <%= f.hidden_field :reset_password_token %>
 
+    <% 
+    pw_min_len = Settings::PasswordConfig[:min_length] 
+    re = Settings::PasswordConfig[:regex]
+    %>
     <div class="form-group-non">
       <%= f.label :password, "New password" %><br />
-      <% if @minimum_password_length %>
-      <em>(<%= @minimum_password_length %> characters minimum)</em>
-      <% end %><br />
-      <%= f.password_field :password, autofocus: true, autocomplete: "off", class: "form-control" %>
+
+      <% if re.present? %>
+      <%= f.password_field :password, autocomplete: "new-password", class: "form-control", minlength: pw_min_len, pattern: re, required: true, title: 'not complex enough' %>
+      <span id="helpBlock2" class="help-block"><%=Settings::PasswordConfig[:regex_requirements]%></span>
+      <%else%>
+      <%= f.password_field :password, autocomplete: "new-password", class: "form-control", minlength: pw_min_len, pattern: ".{#{pw_min_len},72}", required: true, title: "minimum #{pw_min_len} characters" %>
+      <span id="helpBlock2" class="help-block">Select a long, complex password, preferably using a password generator</span>
+      <%end%>
+
     </div>
 
     <div class="form-group-non">
       <%= f.label :password_confirmation, "Confirm new password" %><br />
-      <%= f.password_field :password_confirmation, autocomplete: "off", class: "form-control" %>
+      <% if re.present? %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control", minlength: pw_min_len, pattern: re, required: true%>
+      <%else%>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control", minlength: pw_min_len, pattern: ".{#{pw_min_len},72}", required: true, title: "minimum #{pw_min_len} characters" %>
+      <%end%>
+
     </div>
 
     <div class="actions">

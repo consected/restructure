@@ -33,7 +33,7 @@ _fpa.postprocessors_ref_data = {
 
       // Handle dynamic loading of table columns when the table column block is shown.
       // Responds to the collapse show event being fired for whatever reason
-      // It stops propogation of the event, otherwise this will bubble up to the
+      // It stops propagation of the event, otherwise this will bubble up to the
       // schema block containing this table, making it fire
       $('.ref-tblock').not('.table-ev-setup').on('show.bs.collapse', function (ev) {
         ev.stopPropagation()
