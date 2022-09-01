@@ -208,8 +208,9 @@ module Formatter
       data[:password_age_limit] = Settings::PasswordAgeLimit
       data[:password_reminder_days] = Settings::PasswordReminderDays
       data[:password_max_attempts] = Settings::PasswordMaxAttempts
-      data[:mfa_disabled] = Settings::TwoFactorAuthDisabled
+      data[:mfa_disabled] = User.two_factor_auth_disabled
       data[:login_issues_url] = Settings::LoginIssuesUrl
+      data[:allow_users_to_register] = Settings::AllowUsersToRegister ? true : nil
       data[:did_not_receive_confirmation_instructions_url] = Settings::DidntReceiveConfirmationInstructionsUrl
       data[:notifications_from_email] = Settings::NotificationsFromEmail
 

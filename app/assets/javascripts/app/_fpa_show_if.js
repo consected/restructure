@@ -92,7 +92,8 @@ _fpa.show_if.methods = {
   calc_conditions: function (cond_def_init, data) {
 
     // Valid condition types
-    var cond_types = ['all', 'any', 'not_all', 'not_any'];
+    const cond_types = ['all', 'any', 'not_all', 'not_any'];
+    // valid binary_conds = ['=', '<', '>', '<>', '<=', '>='];
     var cond_success = true;
 
     // Iterate through each top level rule
@@ -128,15 +129,15 @@ _fpa.show_if.methods = {
         cond_type = 'all';
       }
 
-
       // Now iterate through each of the fields in the definition
       for (var cond_field in cond_def) {
         if (cond_def.hasOwnProperty(cond_field)) {
 
           var exp_value = cond_def[cond_field];
 
-          // If the condition definition is a hash, then this is an embedded condition. Handle it.
-          if (exp_value != null && typeof (exp_value) == 'object' && !Array.isArray(exp_value)) {
+          if (exp_value != null && typeof (exp_value) == 'object' && !Array.isArray(exp_value) && !exp_value.condition) {
+            // If the condition definition is a hash and does not have a "condition" key, 
+            // then this is an embedded condition. Handle it.
             var subdef = {};
             subdef[cond_field] = exp_value;
             var matches = _fpa.show_if.methods.calc_conditions(subdef, data);
@@ -148,7 +149,10 @@ _fpa.show_if.methods = {
             matches = !exp_value
           }
           else {
-            // This is instead a standard field comparison
+            // Start the standard field comparison
+
+            // An explicit condition is specified if there is a condition key. Use it to set up the comparison
+            var explicit_cond = (exp_value != null && typeof (exp_value) == 'object' && !Array.isArray(exp_value) && exp_value.condition);
 
             // Expect field data
             var exp_field_value = data[cond_field];
@@ -156,6 +160,11 @@ _fpa.show_if.methods = {
             if (typeof exp_field_value == 'undefined') exp_field_value = null;
 
             // to have value
+
+            if (explicit_cond) {
+              exp_value = exp_value.value;
+            }
+
             if (exp_value == null)
               exp_value = [exp_value];
             else if (typeof exp_value == 'string')
@@ -175,7 +184,36 @@ _fpa.show_if.methods = {
             }
 
             var matches;
-            if (exp_field_value && Array.isArray(exp_field_value)) {
+
+
+            if (explicit_cond) {
+              // Take the expected value back out of the array
+              exp_value = exp_value[0];
+              switch (explicit_cond) {
+                case '<':
+                  matches = (parseInt(exp_field_value) < parseInt(exp_value));
+                  break;
+                case '>':
+                  matches = (parseInt(exp_field_value) > parseInt(exp_value));
+                  break;
+                case '<=':
+                  matches = (parseInt(exp_field_value) <= parseInt(exp_value));
+                  break;
+                case '>=':
+                  matches = (parseInt(exp_field_value) >= parseInt(exp_value));
+                  break;
+                case '=':
+                  matches = (exp_field_value == exp_value);
+                  break;
+                case '<>':
+                  matches = (exp_field_value != exp_value);
+                  break;
+                default:
+                  console.log(`The specified 'condition' '${explicit_cond}' is not valid.`)
+                  break;
+              }
+            }
+            else if (exp_field_value && Array.isArray(exp_field_value)) {
               for (var fvi in exp_field_value) {
                 matches = exp_value.indexOf(exp_field_value[fvi]) >= 0;
                 if (matches) {

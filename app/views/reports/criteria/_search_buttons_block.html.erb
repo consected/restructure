@@ -16,7 +16,7 @@
           name: 'commit', 
           value: 'table', 
           type: 'submit', 
-          class: "#{@view_options.hide_search_button ? 'hidden' : ''} #{@btn_class} #{(!@report_page || @view_options.report_auto_submit_on_change) ? 'auto-submitter' : ''} #{ @report.auto ? 'auto-run' : ''}", 
+          class: "#{@view_options.hide_search_button ? 'hidden' : ''} #{@btn_class} #{(!@report_page || @view_options.report_auto_submit_on_change) ? 'auto-submitter' : ''} #{ @report.auto || @auto_run_class ? 'auto-run' : ''}", 
           id: "report-form-submit-btn"
     %>
   <% end %>

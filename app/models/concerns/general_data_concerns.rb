@@ -193,7 +193,8 @@ module GeneralDataConcerns
       edit_as = opt[:edit_as] if opt
       edit_as ||= {}
       alt_fn = (edit_as[:field_type] || an).to_s
-      next unless alt_fn.start_with?('select_record_')
+      alt_gs = edit_as[:general_selection]
+      next unless alt_gs || alt_fn.start_with?('select_record_')
 
       entries = allselects[an.to_sym]&.map do |e|
         [e.last, { name: e.first }]

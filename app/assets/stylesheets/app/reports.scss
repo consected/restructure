@@ -239,8 +239,8 @@ textarea.admin-clean-sql {
 
 .report-column-comment {
   font-weight: normal;
-  font-family: "Courier New", monospace;
-  font-size: 13px;
+  font-family: var(--table-head-font);
+  font-size: var(--table-head-font-size);
 }
 
 .report-column-attribs {

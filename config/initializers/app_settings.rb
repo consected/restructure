@@ -17,17 +17,24 @@ class Settings
   YearFieldPattern = '\\d{4,4}'
 
   # Inactivity timeouts for user / admin sessions
-  UserTimeout = (Rails.env.production? ? 30 : 60).minutes.freeze
-  AdminTimeout = (Rails.env.production? ? 30 : 60).minutes.freeze
+  UserTimeout = (ENV['USER_TIMEOUT_MINS'] || 30).minutes.freeze
+  AdminTimeout = (ENV['ADMIN_TIMEOUT_MINS'] || 30).minutes.freeze
 
   OsWordsFile = '/usr/share/dict/words'
   # Setup information for the StrongPassword::StrengthChecker and
-  # password setting
-  PasswordEntropyConfig = {
-    min_entropy: (Rails.env.test? ? 1 : 20),
+  # password setting.
+  # Set PW_MIN_ENTROPY=0 to disable entropy test
+  # Set PW_REGEX to blank to remove regex requirement
+  # Set PW_REGEX_REQ to provide message about the password requirements, such as:
+  #  "Minimum 1 upper case letter, 1 lower case letter, 1 number"
+  PasswordConfig = {
+    min_entropy: (Rails.env.test? ? 1 : (ENV['PW_MIN_ENTROPY'] || 20).to_i),
     min_word_length: 4,
     extra_dictionary_words: :word_list,
-    use_dictionary: !Rails.env.test?
+    use_dictionary: !Rails.env.test?,
+    min_length: (ENV['PW_MIN_LEN'] || 10).to_i,
+    regex: ENV['PW_REGEX'],
+    regex_requirements: ENV['PW_REGEX_REQ']
   }.freeze
 
   # Default logo filename. Can be overridden on an app by app basis with the "logo filename" app configuration.
@@ -48,8 +55,10 @@ class Settings
   # Set the max number of recipients for a message, to avoid an unexpected nasty error spamming the whole organization
   MaxNotificationRecipients = ENV['FPHS_MAX_NOTIFY_RECIPS']&.to_i || 200
 
-  # Disable 2FA by setting to true. The environment variable should be 'true' to set this
-  TwoFactorAuthDisabled = (ENV['FPHS_2FA_AUTH_DISABLED'] == 'true')
+  # Disable 2FA by setting to true (for users and admins), user (for users only) or admin (for admins only). 
+  TwoFactorAuthDisabledForUser = ENV['FPHS_2FA_AUTH_DISABLED'].in?(['true', 'user'])
+  TwoFactorAuthDisabledForAdmin = ENV['FPHS_2FA_AUTH_DISABLED'].in?(['true', 'admin'])
+
   # App name that appears within 2FA authenticator app
   TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'ReStructure'
   # Number of seconds to use for 2FA token drift (the older it is allowed to be and still be valid)
@@ -144,7 +153,7 @@ class Settings
 
   # Initial configurations for the bulk messaging app
   def self.bulk_msg_app
-    Admin::AppType.where(name: 'bulk-msg').first
+    Admin::AppType.active_app_types.where(name: 'bulk-msg').first
   end
 
   def self.bulk_msg_master

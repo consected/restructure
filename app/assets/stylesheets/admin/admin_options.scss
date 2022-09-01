@@ -99,3 +99,10 @@ ul.admin-options-tag-list {
     margin-bottom: 30px;
   }
 }
+
+.admin-info-col {
+
+  max-width: 50%; 
+  flex-grow: 1; 
+  min-width: 250px;
+}

@@ -15,6 +15,7 @@ _fpa = {
   version: '0',
   remote_request: null,
   remote_request_block: null,
+  overflow_local_storage: {},
 
   non_versioned_template_types: [
     'trackers',

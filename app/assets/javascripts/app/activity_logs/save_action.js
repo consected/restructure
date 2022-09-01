@@ -54,12 +54,27 @@ _fpa.activity_logs.save_action = class {
   }
 
   go_to_master() {
-    _fpa.send_ajax_request("/masters.json?master[id]=" + this.master_id + "&commit=search", {
+    var master_id = this.master_id;
+
+    _fpa.send_ajax_request("/masters.json?master[id]=" + master_id + "&commit=search", {
       try_app_callback: function (el, data) {
         _fpa.hide_modal(1);
-      }
+
+
+        // After the initial callback, set a post callback on the actual target in the master
+        // search results list. This appears to need some delay to work, so may not be fully reliable.
+        window.setTimeout(function () {
+          var $target = $(`[data-sub-for-root="master_id"][data-sub-id="${master_id}"]`)
+          $target[0].app_post_callback = function (el, data) {
+            _fpa.utils.scrollTo($target, 200, -100)
+          }
+        }, 300)
+
+      },
+
     });
   }
+
 
   create_next_creatable() {
     var sel = '.activity-logs-generic-block[data-sub-id="' + this.master_id + '"][data-sub-item="' + this.obj_data.item_types + '"] a.add-item-button[data-extra-log-type]';

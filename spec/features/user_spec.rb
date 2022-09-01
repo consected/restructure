@@ -12,7 +12,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
 
     SetupHelper.feature_setup
 
-    Settings::TwoFactorAuthDisabled = false
+    Settings::TwoFactorAuthDisabledForUser = false
 
     # create a user, then disable it
     @d_user, @d_pw = create_user(rand(100_000_000..1_099_999_999))
@@ -34,6 +34,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
 
   it 'should sign in' do
     validate_setup
+    expect(User.two_factor_auth_disabled).to be false
 
     visit '/users/sign_in'
     within '#new_user' do
@@ -47,6 +48,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
   end
 
   it 'should prevent sign in if user disabled' do
+    expect(User.two_factor_auth_disabled).to be false
     visit '/users/sign_in'
     within '#new_user' do
       fill_in 'Email', with: @d_email
@@ -59,6 +61,7 @@ describe 'user sign in process', js: true, driver: :app_firefox_driver do
   end
 
   it 'should prevent invalid sign in' do
+    expect(User.two_factor_auth_disabled).to be false
     validate_setup
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"

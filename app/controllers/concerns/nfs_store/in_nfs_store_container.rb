@@ -35,6 +35,8 @@ module NfsStore
         end
       end
 
+      return not_found if @set_container_from_activity_log && !@activity_log
+
       @container = if @set_container_from_activity_log
                      NfsStore::Manage::Container.referenced_container(@activity_log)
                    else

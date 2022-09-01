@@ -1,0 +1,74 @@
+table.table.tree-table {
+
+  thead tr th.is-parent-col {
+    background-color: rgb(230, 230, 230);
+  }
+
+
+  [data-col-type="id"],
+  [data-col-name="id"] {
+    min-width: 30px;
+    width: 30px;
+  }
+
+  td[data-col-type="id"] {
+    text-align: center;
+    // border-right-color: rgb(238, 238, 238);
+  }
+
+  tr[data-tt-level="0"] {
+    border-top: 3px solid rgb(192, 192, 192);
+  }
+
+  tr[data-tt-level="0"] td {
+    // border-bottom: 0;
+    font-weight: bold;
+    // background: rgb(242, 242, 242);
+
+    &.is-not-parent-col {
+      border-left: 0px;
+      border-right: 0px;
+      background: none;
+    }
+
+    &.report-el[colspan] pre {
+      max-width: 100%;
+    }
+  }
+
+  tr[data-tt-level="1"] td {
+    border-top: 1px;
+    // border-top-color: rgb(230, 230, 230);
+    // border-bottom-color: rgb(230, 230, 230);
+
+
+  }
+
+  tr[data-tt-level] td {
+    &.is-parent-col {
+      border-top: 0px;
+      border-bottom: 0;
+      border-left: 0px;
+      border-right: 0px;
+      background: rgb(242, 242, 242);
+    }
+  }
+
+  td.tt-expander-cell:hover {
+    cursor: pointer;
+  }
+
+  thead {
+    border-width: 0 0 3px 0;
+    border-style: solid;
+    border-color: rgb(128, 128, 128);
+  }
+
+  treeid {
+    display: none;
+  }
+
+  td {
+    border: 0;
+  }
+}
