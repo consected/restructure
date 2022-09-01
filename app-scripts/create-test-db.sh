@@ -8,12 +8,12 @@ function setup() {
 
   cd $(dirname ${BASEDIR})
 
-  sudo -u postgres psql -c "create database $DBNAME with owner $DBOWNER;"
-  psql -d $DBNAME < "../db/structure.sql"
-  psql -d $DBNAME -c "create schema if not exists bulk_msg;"
-  psql -d $DBNAME -c "create schema if not exists ref_data;"
+  psql -c "create database $DBNAME" -U postgres -h localhost
+  psql -d $DBNAME < "../db/structure.sql"  -U postgres -h localhost
+  psql -d $DBNAME -c "create schema if not exists bulk_msg;"  -U postgres -h localhost
+  psql -d $DBNAME -c "create schema if not exists ref_data;" -U postgres -h localhost
 
-  RAILS_ENV=test TEST_ENV_NUMBER=${DBNUM} bundle exec rake db:seed
+  RAILS_ENV=test TEST_ENV_NUMBER=${DBNUM} bundle exec rails db:seed
 }
 
 if [ -z $1 ]; then

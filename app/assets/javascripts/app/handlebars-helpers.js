@@ -313,16 +313,13 @@
     }
   });
 
+  //TODO refactor to use luxon dates
   Handlebars.registerHelper('date_time', function (text) {
-    if (text) {
-      var ds = new Date(Date.parse(text));
-      var d = ds.toLocaleString();
-      return new Handlebars.SafeString(d);
-    } else {
-      var ds = new Date();
-      var d = ds.toLocaleString();
-      return new Handlebars.SafeString(d);
-    }
+    const d = (text) ? DateTime.fromISO(text) : DateTime.now();
+    const formatted = (d.isValid) ?
+        d.toFormat(date_time_formats[_fpa.state.current_user_preference.date_time_format]) :
+        text;
+    return new Handlebars.SafeString(formatted);
   });
 
 
@@ -406,13 +403,14 @@
   });
 
   // Display date in local format, without adjusting the timezone and giving the appearance of changing the day
+  //Revise code, understand its purpose
   Handlebars.registerHelper('local_date', function (date_string, unknown, options) {
     if (date_string === null || date_string === '') return unknown;
-    var startTime = date_string; //
-    var testTime = new Date(Date.parse(date_string + 'T00:00:00Z'));
+    const startTime = date_string; //
+    const testTime = new Date(Date.parse(date_string + 'T00:00:00Z')); //may not be necessary
 
-
-    if (!testTime || testTime == 'Invalid Date') {
+    console.log(testTime);
+    if (!testTime || testTime == 'Invalid Date') { //coercion for invalid date
       if (options.hash.return_string)
         return date_string;
       else
@@ -420,7 +418,10 @@
     }
 
     // Using information from https://bugzilla.mozilla.org/show_bug.cgi?id=1139167 to prevent occasional day difference issues
-    return new Date(startTime).toLocaleDateString(undefined, { timeZone: "UTC" });
+    const DateTime = luxon.DateTime;
+    const date_format = date_formats[_fpa.state.current_user_preference.date_format];
+    return DateTime.fromISO(startTime).toFormat(date_format);
+    //return new Date(startTime).toLocaleDateString(undefined, { timeZone: "UTC" });
 
 
   });
@@ -467,14 +468,14 @@
 
 
   Handlebars.registerHelper('local_time', function (stre, options) {
+    console.log(stre);
     if (!stre || stre == '' || !stre.length) return;
     if (options && !options.hash) options.hash = {};
+    //use the utils
     var s = stre.toString();
-    if (s.toLowerCase().indexOf('pm') > 1 || s.toLowerCase().indexOf('am') > 1)
-      return s;
-    var s = new Date(s);
-    var stz = new Date(s.getTime() + (s.getTimezoneOffset() * 60000));
-    return stz.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    const DateTime = luxon.DateTime;
+    //const date_format = date_formats[_fpa.state.current_user_preference.date_format];
+    return DateTime.fromISO(stre).toFormat('dd/MM/yyyy');
   });
 
 

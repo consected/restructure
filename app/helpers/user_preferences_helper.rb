@@ -49,6 +49,7 @@ module UserPreferencesHelper
   # Time.current.strftime('%m/%d/%Y') == "02/18/2022"
   # Time.current.strftime('%d/%m/%Y') == "18/02/2022"
   DateFormats = {
+    #TODO map for UI and Back
     'mm/dd/yyyy' => '%m/%d/%Y',
     'dd/mm/yyyy' => '%d/%m/%Y'
   }.freeze
@@ -68,7 +69,7 @@ module UserPreferencesHelper
     },
     'mm/dd/yyyy 24h:mm' => {
       hours_minutes: '%m/%d/%Y %H:%M',
-      with_secs: '%m/%d/%Y %T'
+      with_secs: '%m/%d/%Y %T',
     },
     'dd/mm/yyyy hh:mm am/pm' => {
       hours_minutes: '%d/%m/%Y %-l:%M %P',

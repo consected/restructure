@@ -5,7 +5,6 @@ module ESignatureHelper
   end
 
   def pretty_string stre, options = {}
-
     return "" if stre.blank?
 
     start_time = nil
@@ -50,6 +49,7 @@ module ESignatureHelper
             return
         end
     end
+
     if as_timestamp
         return as_timestamp.new_offset(0)
     else

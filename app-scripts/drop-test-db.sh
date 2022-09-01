@@ -7,7 +7,7 @@ function drop() {
   SCHEMA_NAME=ml_app
   DBOWNER=$(whoami)
 
-  sudo -u postgres psql -c "drop database $DBNAME;"
+  psql -c "drop database $DBNAME;" -h localhost -U postgres
 
 }
 
