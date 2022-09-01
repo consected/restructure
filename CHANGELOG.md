@@ -16,6 +16,24 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transferred from Viva @8.0.97 - 2022-09-01
+
+- [Added] show_if generation from Redcap branching logic
+- [Added] jasmine-browser-runner to replace old gem and support script app-scripts/jasmine-serve.sh
+- [Added] ability to force update of a redcap dynamic model
+- [Added] Redcap pull generation of array summary fields for multiple choice checkboxes
+- [Added] multilevel functionality to report trees
+- [Added] bootsnap
+- [Added] password regex option and refactored entropy results
+- [Added] disabling of 2FA for user and admin independently
+- [Added] tree view option for reports
+- [Added] ui templates for messages in change and forgot password form
+- [Changed] new and edit password forms for usability
+- [Fixed] sandbox of iframes (reports and message notifications) to allow popups from links
+- [Fixed] field types not being passed to UI templates for standard subject types
+
 ## [8.0.37] - 2022-08-15
 
 ### Transferred from Harvard @7.4.120a - 2022-08-15
