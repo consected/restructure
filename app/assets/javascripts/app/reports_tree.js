@@ -4,7 +4,8 @@
 _fpa.reports_tree = class {
 
   static show_table_as_tree($table) {
-    console.log('jstree')
+    if (!$table.hasClass('tree-table')) return;
+
     let tree = new _fpa.reports_tree($table);
     tree.setup()
     tree.setup_header()
