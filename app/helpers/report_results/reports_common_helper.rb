@@ -13,6 +13,7 @@ module ReportResults
 
       @view_options = @report.report_options.view_options
       @tree_view_options = @report.report_options.tree_view_options
+      @column_types = column_types
 
       column_options = @report.report_options.column_options
       return unless column_options
@@ -63,6 +64,14 @@ module ReportResults
       return @selection_options_for[table_name] if @selection_options_for.key?(table_name)
 
       @selection_options_for[table_name] = Classification::SelectionOptionsHandler.new(table_name: table_name)
+    end
+
+    #
+    # Return an array of DB column types (strings) for the columns
+    # For example: ['timestamp', 'date', 'varchar', 'int4']
+    # @return [Array{String}]
+    def column_types
+      @results&.type_map&.coders&.map(&:name) || []
     end
   end
 end

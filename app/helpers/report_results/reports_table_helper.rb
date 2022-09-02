@@ -89,8 +89,11 @@ module ReportResults
       extra_classes = @col_classes[col_name] || ''
       extra_classes = "#{extra_classes} #{comment.present? ? 'has-comment' : 'no-comment'}"
 
+      extra_data = "data-db-col-type=\"#{@column_types[field_num]}\""
+      extra_data += ' data-sorter="sqlDate"' if @column_types[field_num]&.in?(['timestamp', 'date'])
+
       res = <<~END_HTML
-        <#{alt_html_tag} title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{header_content}" data-col-name="#{col_name}" class="table-header #{extra_classes}">
+        <#{alt_html_tag} title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{header_content}" data-col-name="#{col_name}" class="table-header #{extra_classes}" #{extra_data}>
           #{field_name} #{show_table_name} #{col_comment}
         </#{alt_html_tag}>
       END_HTML
