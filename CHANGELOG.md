@@ -16,6 +16,13 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transferred from Harvard @7.4.122 - 2022-09-06
+
+- [Added] view of report criteria in admin
+- [Fixed] failure trying to add a new redcap project
+
 ## [8.0.42] - 2022-09-01
 
 - Bumped version
