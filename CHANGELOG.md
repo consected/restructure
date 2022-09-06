@@ -16,6 +16,19 @@ The [Unreleased](#unreleased) section collects notes for unreleased changes and 
 Note that not every tagged version may be suitable for production use. A Github
 release will be created for any release tested in production, and may be marked below with the tag [Release]
 
+## Unreleased
+
+### Transferred from Harvard @7.4.122 - 2022-09-06
+
+- [Added] view of report criteria in admin
+- [Fixed] failure trying to add a new redcap project
+
+### Viva
+
+- [Changed] modal scrolling control and secure view over modals
+- [Fixed] open-in-sidebar for study info pages
+- [Fixed] small issue with tree table attempting to setup regular table reports
+
 ## [8.0.97] - 2022-08-30
 
 - [Added] show_if generation from Redcap branching logic

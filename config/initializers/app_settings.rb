@@ -55,7 +55,7 @@ class Settings
   # Set the max number of recipients for a message, to avoid an unexpected nasty error spamming the whole organization
   MaxNotificationRecipients = ENV['FPHS_MAX_NOTIFY_RECIPS']&.to_i || 200
 
-  # Disable 2FA by setting to true (for users and admins), user (for users only) or admin (for admins only). 
+  # Disable 2FA by setting to true (for users and admins), user (for users only) or admin (for admins only).
   TwoFactorAuthDisabledForUser = ENV['FPHS_2FA_AUTH_DISABLED'].in?(['true', 'user'])
   TwoFactorAuthDisabledForAdmin = ENV['FPHS_2FA_AUTH_DISABLED'].in?(['true', 'admin'])
 
