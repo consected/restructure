@@ -7,6 +7,10 @@
   <p class="report-item-type">
     <%=link_to report_path(@report.alt_resource_name), report_path(@report.alt_resource_name), target: '_blank', class: 'report-admin-report-path-link' %>
   </p>
+  <label>form criteria</label>
+  <div class="well row">
+  <%= render partial: 'admin/reports/form/admin_criteria_view' %>  
+  </div>
 </div>
 <div class="report-config-options">
 </div>

@@ -470,6 +470,39 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "a64600a882f9c7adf6a1a46beb34aab8a244b5ab5c91615ab6a8cbca17922586",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/admin/reports/form/_admin_criteria_view.html.erb",
+      "line": 9,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Formatter::Substitution.substitute(markdown_to_html(object_instance.description), :data => current_user)",
+      "render_path": [
+        {
+          "type": "template",
+          "name": "admin/reports/_def_block",
+          "line": 12,
+          "file": "app/views/admin/reports/_def_block.html.erb",
+          "rendered": {
+            "name": "admin/reports/form/_admin_criteria_view",
+            "file": "app/views/admin/reports/form/_admin_criteria_view.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "admin/reports/form/_admin_criteria_view"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "b1e62cc85c7eba4c9f39f2f82936341481bc4da5ada4a7d0df55ace601f34a06",
@@ -709,7 +742,7 @@
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/reports/_form.html.erb",
-      "line": 9,
+      "line": 10,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "Formatter::Substitution.substitute(markdown_to_html(Report.find_by_id_or_resource_name(params[:id]).description), :data => current_user)",
       "render_path": [
@@ -760,6 +793,6 @@
       "note": ""
     }
   ],
-  "updated": "2022-08-19 10:31:09 +0100",
+  "updated": "2022-09-02 11:27:54 +0100",
   "brakeman_version": "5.3.1"
 }
