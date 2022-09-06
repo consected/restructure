@@ -315,7 +315,7 @@ module Redcap
     # the actual dynamic model configuration
     # @return [Array{storage fields, dynamic model fields}]
     def compare_storage_and_model_field_lists
-      fl = dynamic_storage.field_list(no_placeholder_fields: true)
+      fl = dynamic_storage.field_list # (no_placeholder_fields: true)
       dmfl = dynamic_storage.dynamic_model.field_list
       [fl, dmfl]
     end
