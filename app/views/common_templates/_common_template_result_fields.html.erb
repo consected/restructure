@@ -98,6 +98,11 @@
       {{>tag_select_container field_key=key tag_selects=this_value nothing_selected_text="nothing selected"}}
     </li>
 
+  {{else is field_type 'includes' '^redcap_tag_select_' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^tag_select_' }}
+      {{>tag_select_container field_key=key tag_selects=this_value nothing_selected_text="nothing selected"}}
+    </li>
+
   {{else if (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'edit_as' 'alt_options')}}
     <li class="{{> field_result_class}} from-template-config-alt-options" data-field-name="{{key}}" data-field-type="{{field_type}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>
     {{#each (fpa_state_item 'template_config' (underscore name) vdef_version 'field_options' key 'edit_as' 'alt_options')}}

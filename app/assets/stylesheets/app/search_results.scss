@@ -339,7 +339,8 @@ table.table tbody.tracker-history {
   margin: 16px 16px 32px;
 }
 
-table.table.tablesorter > thead > tr > th {
+table.table.tablesorter > thead > tr > th,
+table.table.no-tablesorter > thead > tr > th {
   // &.tablesorter-header {
   //
   //     border-top: 4px solid transparent !important;
@@ -377,6 +378,7 @@ table.table.tablesorter > thead > tr > th.tablesorter-header:after {
   font-size: 12px;
   color: gray;
 }
+
 
 .collapsed span.badge {
   background-color: white;

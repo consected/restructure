@@ -90,7 +90,7 @@ module ReportResults
       extra_classes = "#{extra_classes} #{comment.present? ? 'has-comment' : 'no-comment'}"
 
       res = <<~END_HTML
-        <#{alt_html_tag} title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{header_content}" class="table-header #{extra_classes}">
+        <#{alt_html_tag} title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="#{header_content}" data-col-name="#{col_name}" class="table-header #{extra_classes}">
           #{field_name} #{show_table_name} #{col_comment}
         </#{alt_html_tag}>
       END_HTML

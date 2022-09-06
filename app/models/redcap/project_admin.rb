@@ -194,7 +194,19 @@ module Redcap
                                                  exportDataAccessGroups
                                                  returnFormat]
 
+    #
+    # Return format for redcap metadata requests - typically not changed
     configure :metadata_request_options, with: %i[returnFormat]
+
+    #
+    # Specify options for the project.
+    # add_multi_choice_summary_fields: automatically capture summary fields from checkbox fields with multiple responses
+    #                                  providing a single array result field that can more easily be used within SQL without
+    #                                  having to know each of the individual checkbox field columns in the database.
+    configure :data_options, with: %i[add_multi_choice_summary_fields]
+
+    #
+    # A hash digest of the data dictionary, allowing any changes to indicate that an update is required
     configure_attributes :data_dictionary_version
 
     #
@@ -206,6 +218,12 @@ module Redcap
       attrs[:use_hash_config][:metadata_request_options] ||= Settings::RedcapMetadataRequestOptions
 
       super(attrs)
+    end
+
+    #
+    # Required to allow the filestore for this project to operate correctly.
+    def secondary_key
+      name
     end
 
     def config_text
@@ -297,7 +315,7 @@ module Redcap
     # the actual dynamic model configuration
     # @return [Array{storage fields, dynamic model fields}]
     def compare_storage_and_model_field_lists
-      fl = dynamic_storage.field_list(no_placeholder_fields: true)
+      fl = dynamic_storage.field_list # (no_placeholder_fields: true)
       dmfl = dynamic_storage.dynamic_model.field_list
       [fl, dmfl]
     end
@@ -376,6 +394,16 @@ module Redcap
     # Returns the full model name, namespaced like 'module__class'
     def item_type
       name.singularize.ns_underscore
+    end
+
+    #
+    # Force update of the dynamic model definition if it has already been created, typically to add new fields
+    def update_dynamic_model
+      raise FphsException, 'Not ready to update dynamic model / database table' unless ready_to_setup_dynamic_model?
+
+      dynamic_storage.create_dynamic_model
+      record_job_request 'update_dynamic_model', result: { dynamic_model: dynamic_storage.dynamic_model.id }
+      # dynamic_storage.add_user_access_control
     end
 
     private

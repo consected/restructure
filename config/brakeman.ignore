@@ -18,6 +18,43 @@
       },
       "user_input": "(@condition_scope.order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]) or [@condition_scope.order(:id => :desc).limit(1).first]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first",
       "confidence": "Weak",
+      "cwe_id": [
+        89
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "13461696d535c988627af1a66521217926b205060f69fdc7513045f5d5feb124",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/layouts/application.html.erb",
+      "line": 39,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "template_block(\"ui page css - #{current_user.app_type.name}\", :markdown_to_html => false)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "AddressesController",
+          "method": "edit_form",
+          "line": 10,
+          "file": "app/controllers/addresses_controller.rb",
+          "rendered": {
+            "name": "layouts/application",
+            "file": "app/views/layouts/application.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "layouts/application"
+      },
+      "user_input": "current_user.app_type.name",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
       "note": ""
     },
     {
@@ -38,6 +75,9 @@
       },
       "user_input": "DateTime.now.iso8601",
       "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
       "note": ""
     },
     {
@@ -58,6 +98,9 @@
       },
       "user_input": "schema",
       "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
       "note": ""
     },
     {
@@ -78,6 +121,9 @@
       },
       "user_input": "quoted_schemas",
       "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
       "note": ""
     },
     {
@@ -98,6 +144,9 @@
       },
       "user_input": "UserProfile.new(:current_user => current_user).resource_info(params[:resource_name])[:base_route_segments]",
       "confidence": "High",
+      "cwe_id": [
+        601
+      ],
       "note": ""
     },
     {
@@ -118,6 +167,9 @@
       },
       "user_input": null,
       "confidence": "Medium",
+      "cwe_id": [
+        915
+      ],
       "note": ""
     },
     {
@@ -138,6 +190,9 @@
       },
       "user_input": "calc_trigger_fn_name(table_name)",
       "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
       "note": ""
     },
     {
@@ -179,6 +234,9 @@
       },
       "user_input": null,
       "confidence": "Medium",
+      "cwe_id": [
+        79
+      ],
       "note": ""
     },
     {
@@ -188,7 +246,7 @@
       "check_name": "MassAssignment",
       "message": "Specify exact keys allowed for mass assignment instead of using `permit!` which allows any keys",
       "file": "app/controllers/reports_controller.rb",
-      "line": 426,
+      "line": 428,
       "link": "https://brakemanscanner.org/docs/warning_types/mass_assignment/",
       "code": "params.require(:search_attrs).permit!",
       "render_path": null,
@@ -199,6 +257,9 @@
       },
       "user_input": null,
       "confidence": "Medium",
+      "cwe_id": [
+        915
+      ],
       "note": ""
     },
     {
@@ -219,6 +280,9 @@
       },
       "user_input": "self.class.position_attribute",
       "confidence": "Weak",
+      "cwe_id": [
+        89
+      ],
       "note": ""
     },
     {
@@ -228,7 +292,7 @@
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/models/admin/server_info.rb",
-      "line": 115,
+      "line": 117,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
       "code": "IO.popen(\"ls #{NfsStore::Manage::Filesystem.nfs_store_directory}/gid#{NfsStore::Manage::Filesystem.group_id_range.first}\")",
       "render_path": null,
@@ -239,6 +303,9 @@
       },
       "user_input": "NfsStore::Manage::Filesystem.group_id_range.first",
       "confidence": "High",
+      "cwe_id": [
+        77
+      ],
       "note": ""
     },
     {
@@ -259,6 +326,9 @@
       },
       "user_input": "UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))",
       "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
       "note": ""
     },
     {
@@ -279,6 +349,9 @@
       },
       "user_input": null,
       "confidence": "Medium",
+      "cwe_id": [
+        915
+      ],
       "note": ""
     },
     {
@@ -299,6 +372,9 @@
       },
       "user_input": "full_file_path",
       "confidence": "Medium",
+      "cwe_id": [
+        77
+      ],
       "note": ""
     },
     {
@@ -319,6 +395,9 @@
       },
       "user_input": "current_database",
       "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
       "note": ""
     },
     {
@@ -339,6 +418,9 @@
       },
       "user_input": "params[:retrieval_type]",
       "confidence": "Weak",
+      "cwe_id": [
+        22
+      ],
       "note": ""
     },
     {
@@ -359,6 +441,9 @@
       },
       "user_input": "tables_and_views.find do\n (tn[\"table_name\"] == \"#{basename}_datadic\")\n end[\"table_name\"]",
       "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
       "note": ""
     },
     {
@@ -379,6 +464,42 @@
       },
       "user_input": "m",
       "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "a64600a882f9c7adf6a1a46beb34aab8a244b5ab5c91615ab6a8cbca17922586",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/admin/reports/form/_admin_criteria_view.html.erb",
+      "line": 9,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Formatter::Substitution.substitute(markdown_to_html(object_instance.description), :data => current_user)",
+      "render_path": [
+        {
+          "type": "template",
+          "name": "admin/reports/_def_block",
+          "line": 12,
+          "file": "app/views/admin/reports/_def_block.html.erb",
+          "rendered": {
+            "name": "admin/reports/form/_admin_criteria_view",
+            "file": "app/views/admin/reports/form/_admin_criteria_view.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "admin/reports/form/_admin_criteria_view"
+      },
+      "user_input": null,
+      "confidence": "Medium",
+      "cwe_id": [
+        79
+      ],
       "note": ""
     },
     {
@@ -399,6 +520,9 @@
       },
       "user_input": "Admin::UserAccessControl.priority_order",
       "confidence": "High",
+      "cwe_id": [
+        89
+      ],
       "note": ""
     },
     {
@@ -419,6 +543,9 @@
       },
       "user_input": "owner",
       "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
       "note": ""
     },
     {
@@ -439,6 +566,9 @@
       },
       "user_input": "Admin::AppType.find(params[:id]).zip_app_export_migrations.path",
       "confidence": "Medium",
+      "cwe_id": [
+        22
+      ],
       "note": ""
     },
     {
@@ -459,6 +589,9 @@
       },
       "user_input": "Admin::UserAccessControl.priority_order",
       "confidence": "High",
+      "cwe_id": [
+        89
+      ],
       "note": ""
     },
     {
@@ -500,6 +633,43 @@
       },
       "user_input": "params[:id]",
       "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "d1dc095a085c2a1a14639530eafabf6b28a4525a7b77c7e25a2a4b417989e01a",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/layouts/application.html.erb",
+      "line": 40,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "template_block(\"ui page js - #{current_user.app_type.name}\", :markdown_to_html => false)",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "AddressesController",
+          "method": "edit_form",
+          "line": 10,
+          "file": "app/controllers/addresses_controller.rb",
+          "rendered": {
+            "name": "layouts/application",
+            "file": "app/views/layouts/application.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "layouts/application"
+      },
+      "user_input": "current_user.app_type.name",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
       "note": ""
     },
     {
@@ -507,15 +677,18 @@
       "warning_code": 120,
       "fingerprint": "d84924377155b41e094acae7404ec2e521629d86f97b0ff628e3d1b263f8101c",
       "check_name": "EOLRails",
-      "message": "Support for Rails 5.2.8 ended on 2022-06-01",
+      "message": "Support for Rails 5.2.8.1 ended on 2022-06-01",
       "file": "Gemfile.lock",
-      "line": 253,
+      "line": 245,
       "link": "https://brakemanscanner.org/docs/warning_types/unmaintained_dependency/",
       "code": null,
       "render_path": null,
       "location": null,
       "user_input": null,
       "confidence": "High",
+      "cwe_id": [
+        1104
+      ],
       "note": ""
     },
     {
@@ -557,6 +730,9 @@
       },
       "user_input": null,
       "confidence": "Medium",
+      "cwe_id": [
+        79
+      ],
       "note": ""
     },
     {
@@ -566,7 +742,7 @@
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/reports/_form.html.erb",
-      "line": 9,
+      "line": 10,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "Formatter::Substitution.substitute(markdown_to_html(Report.find_by_id_or_resource_name(params[:id]).description), :data => current_user)",
       "render_path": [
@@ -574,7 +750,7 @@
           "type": "controller",
           "class": "ReportsController",
           "method": "show",
-          "line": 109,
+          "line": 111,
           "file": "app/controllers/reports_controller.rb",
           "rendered": {
             "name": "reports/_form",
@@ -588,6 +764,9 @@
       },
       "user_input": null,
       "confidence": "Medium",
+      "cwe_id": [
+        79
+      ],
       "note": ""
     },
     {
@@ -608,9 +787,12 @@
       },
       "user_input": "calc_trigger_fn_name(prev_table_name)",
       "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
       "note": ""
     }
   ],
-  "updated": "2022-06-28 18:50:30 +0100",
-  "brakeman_version": "5.2.3"
+  "updated": "2022-09-02 11:27:54 +0100",
+  "brakeman_version": "5.3.1"
 }

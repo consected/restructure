@@ -7,7 +7,7 @@
 %>
 <div class="report-results-table-block" id="<%=@outer_block_id%>-table-block">
 
-  <table class="report-table table tablesorter">
+  <table class="report-table table <%= @view_options.no_sorting ? 'no-tablesorter' : 'tablesorter' %>">
     <thead>
       <tr>
         <% if editable? %><th class="no-sort edit-button-column"></th><% end %>

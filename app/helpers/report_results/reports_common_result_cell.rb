@@ -266,7 +266,7 @@ module ReportResults
       block_id = SecureRandom.hex(10)
 
       html = <<~END_HTML
-        <iframe id="report-cell-iframe-#{block_id}" src='javascript:void(0)' srcdoc="" class="iframe-report-cell if-report-cell-type" sandbox></iframe>
+        <iframe id="report-cell-iframe-#{block_id}" src='javascript:void(0)' srcdoc="" class="iframe-report-cell if-report-cell-type" sandbox="allow-popups"></iframe>
         <script id="report-cell-content-#{block_id}" class="hidden" type="x-html">
           #{cell_content.gsub('<head>', '<head><base target="_blank" />').html_safe}
         </script>

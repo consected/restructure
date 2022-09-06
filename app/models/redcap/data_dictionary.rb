@@ -104,11 +104,13 @@ module Redcap
     # The configuration is based on the latest retrieved REDCap metadata data dictionary.
     # Checkbox choice fields, with checkbox_field___choice style appear in the results, and the
     # base checkbox_field without the suffix does not appear, since it is not a field actually retrieved.
+    # @param [true | false] summary_fields - include the summary fields (such as the chosen arrays for checkboxes)
     # @return [Hash{Symbol => Field}]
-    def all_retrievable_fields
+    def all_retrievable_fields(summary_fields: false)
       return unless captured_metadata.present?
 
-      all_rf = Redcap::DataDictionaries::Form.all_retrievable_fields(self)
+      summary_fields &&= redcap_project_admin.data_options.add_multi_choice_summary_fields
+      all_rf = Redcap::DataDictionaries::Form.all_retrievable_fields(self, summary_fields: summary_fields)
 
       records_request_options = redcap_project_admin.records_request_options
       f = Redcap::DataDictionaries::SpecialFields

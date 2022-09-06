@@ -19,6 +19,12 @@ ENV['FPHS_USE_LOGGER'] = 'TRUE'
 # AWS_SESSION_TOKEN
 #
 
+if ENV['QUICK']
+  ENV['SKIP_BROWSER_SETUP'] = 'true'
+  ENV['SKIP_DB_SETUP'] = 'true'
+  ENV['SKIP_APP_SETUP'] = 'true'
+end
+
 unless ENV['IGNORE_MFA'] == 'true'
   res = `aws sts get-caller-identity | grep "UserId"`
   if res == ''
@@ -168,7 +174,7 @@ RSpec.configure do |config|
     put_now 'load_tasks'
     Rails.application.load_tasks
     put_now 'Precompile assets'
-    Rake::Task['assets:precompile'].invoke unless ENV['SKIP_ASSETS'] || ENV['SKIP_APP_SETUP']
+    Rake::Task['assets:precompile'].invoke if ENV['JS_SETUP'] || !(ENV['SKIP_ASSETS'] || ENV['SKIP_APP_SETUP'])
     put_now 'Done before suite'
   end
 

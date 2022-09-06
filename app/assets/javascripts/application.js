@@ -34,6 +34,7 @@
 //= require chosen-js/chosen.jquery
 //= require tablesorter/dist/js/jquery.tablesorter
 //= require jquery-mask-plugin/dist/jquery.mask
+//= require jsTreeTable/treeTable.js
 // Note FullCalendar is frozen at 4.2.0 to avoid needing to transcompile
 //= require @fullcalendar/core/main
 //= require @fullcalendar/interaction/main

@@ -1,0 +1,59 @@
+<%
+  @report = report if local_assigns[:report]
+  @results = results if local_assigns[:results]
+  @outer_block_id = outer_block_id if local_assigns[:outer_block_id]
+  @result_tables = result_tables if local_assigns[:result_tables]
+  setup_column_options
+
+  @col_tags['id'] ||= 'id'
+%>
+<div class="report-results-table-block" id="<%=@outer_block_id%>-table-block">
+
+  <table class="report-table table tree-table" data-tt-tree-cols="<%= @tree_view_options.column_levels.to_json %>" data-tt-tree-num-levels="<%= @tree_view_options.num_levels%>" data-tt-tree-expand-level="<%= @tree_view_options.expand_level%>">
+    <thead>
+      <tr>
+        <% if editable? %><th class="no-sort edit-button-column"></th><% end %>
+        <%
+          i = 0
+          hide_cols = []
+
+          @results.fields.each do |col|
+            @col = col
+            hide_this = report_cell_hide?(i)
+            hide_cols << hide_this
+            unless hide_this
+        %>
+        <%= report_table_header_cell(i, col) %>
+        <%  
+            end
+            i += 1
+         end 
+        %>
+      </tr>
+    </thead>
+    <tbody>
+
+      <% @results.each_row do |list_item| %>
+
+
+        <tr class="" id="report-item-<%=list_item[0]%>">
+         <% if editable? %>
+         <td class="report-el report-edit-btn-cell"><%= report_edit_btn list_item[0]%> </td>
+         <% end %>
+          <%
+            i = 0 
+            list_item.each do |col| 
+              unless hide_cols[i]
+          %>
+            <%= report_table_result_cell(i, col)%>
+          <%
+              end
+              i += 1
+            end 
+          %>
+        </tr>
+      <% end %>
+      <%= render partial: 'reports/result_template/edit_row' %>
+    </tbody>
+  </table>
+</div>
