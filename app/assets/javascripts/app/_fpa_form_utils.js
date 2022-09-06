@@ -1614,6 +1614,16 @@ _fpa.form_utils = {
         .attr('data-target', '#help-sidebar')
         .attr('data-working-target', '#help-sidebar-body');
 
+      let href = $(this).attr('href').replace('#open-in-sidebar', '');
+
+      // Prevent the outer page reloading
+      $(this).parents('.standalone-page-col').attr('data-no-load', 'true')
+
+      if (href.indexOf('display_as=embedded') < 0) {
+        let sym = (href.indexOf('?') > 0) ? '&' : '?';
+        $(this).attr('href', `${href}${sym}display_as=embedded#open-in-sidebar`)
+      }
+
       $(this).click(function (ev) {
         ev.preventDefault()
       });
