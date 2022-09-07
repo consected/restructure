@@ -6,14 +6,14 @@
 %>  
   <div class="admin-view report-criteria">
     <div class="report-description">
-      <%= Formatter::Substitution.substitute(markdown_to_html(@report.description), data: current_user).html_safe %>
+      <%= Formatter::Substitution.substitute(markdown_to_html(@report.description), data: current_user, ignore_missing: true).html_safe %>
     </div>  
     <div class="row report-criteria-fields">
       <%= render partial: 'reports/criteria/fields' %>
       <%= render partial: 'reports/criteria/inline_search_button_block' %>
     </div>
     <div class="form-group form-actions clearfix" style="border-color: transparent;">
-    <%= render partial: 'reports/criteria/search_buttons_block' %>
+    <%= render partial: 'reports/criteria/search_buttons_block', locals: { embedded_report: true } %>
     </div>
 
     <%= render partial: 'reports/criteria_view_css' %>
