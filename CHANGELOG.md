@@ -18,6 +18,9 @@ release will be created for any release tested in production, and may be marked 
 
 ## [8.0.102] - 2022-09-07
 
+- [Fixed] inability to edit report with bad options
+- [Fixed] table tree to only set up its own block
+- [Fixed] report_options causing errors in lists
 - [Fixed] tree view opacity during load
 - [Fixed] small issue with admin reports criteria
 - [Fixed] issues with show_modal
