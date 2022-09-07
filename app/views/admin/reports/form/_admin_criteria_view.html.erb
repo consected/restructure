@@ -1,7 +1,7 @@
 <% if object_instance.persisted? 
     @runner = object_instance.runner
     @report = object_instance
-    @view_options = @report.report_options.view_options
+    @view_options = @report.report_options(fail_without_exception: true)&.view_options
     begin
 %>  
   <div class="admin-view report-criteria">
