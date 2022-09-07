@@ -1,5 +1,13 @@
 table.table.tree-table {
 
+  border: 1px solid gray;
+  margin: 0 auto;
+  opacity: 0.10;
+
+  &.jsTT {
+    opacity: 1
+  }
+
   thead tr th.is-parent-col {
     background-color: rgb(230, 230, 230);
   }

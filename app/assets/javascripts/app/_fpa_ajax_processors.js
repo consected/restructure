@@ -37,7 +37,7 @@ _fpa.postprocessors = {
 
     _fpa.masters.get_results_block().addClass('search-status-done');
 
-    if (!$('body').hasClass('fixed-overlay')) {
+    if (!$('body').hasClass('fixed-overlay') && !$('body').hasClass('modal-open')) {
       if (
         $('body').hasClass('user_page') &&
         $('body').hasClass('show') &&

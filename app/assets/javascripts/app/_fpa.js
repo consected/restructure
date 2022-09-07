@@ -1065,6 +1065,9 @@ _fpa = {
         if (_fpa.state.scroll_pos_before_modal != null)
           _fpa.utils.scrollTo(_fpa.state.scroll_pos_before_modal, 0, 0, $(document));
       }
+
+      pm.off('shown.bs.modal');
+      pm.off('hidden.bs.modal');
     });
 
     _fpa.state.scroll_pos_before_modal = $(document).scrollTop();
