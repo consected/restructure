@@ -9,7 +9,7 @@
         pm = pm.where(item_type: 'reference-data') #.where.not(short_name: 'table_data')
 
         @reports = pm.order auto: :desc, report_type: :asc, position: :asc
-        @reports = @reports.reject { |r| r.report_options.list_options&.hide_in_list }
+        @reports = @reports.reject { |r| r.report_options(fail_without_exception: true)&.list_options&.hide_in_list }
       
       %>
     <%= render partial: 'reports/index', 
