@@ -69,10 +69,13 @@ group :development, :test do
 end
 
 group :test do
-  gem 'capybara', '~> 3.36'
-  gem 'database_cleaner', '~> 2.0', '>= 2.0.1'
+  gem 'capybara', '~> 2.18'
+  # gem 'capybara', '~> 3.36'
+  gem 'database_cleaner'
+  # gem 'database_cleaner', '~> 2.0', '>= 2.0.1'
   gem 'rails-controller-testing'
-  gem 'selenium-webdriver', '4.1'
+  gem 'selenium-webdriver', '3.4.4'
+  # gem 'selenium-webdriver', '4.1'
   gem 'shoulda-matchers', '~> 5.1'
   gem 'simplecov'
   gem 'simplecov-console'
@@ -84,6 +87,6 @@ group :development, :production, :assets do
   gem 'execjs'
   gem 'sass-rails', '~> 5.1'
   gem 'therubyracer'
-  #gem 'mini_racer', github: 'rubyjs/mini_racer', branch: 'refs/pull/186/head'
+  # gem 'mini_racer', github: 'rubyjs/mini_racer', branch: 'refs/pull/186/head'
   gem 'uglifier', '>= 1.3.0'
 end
