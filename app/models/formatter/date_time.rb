@@ -26,7 +26,7 @@ module Formatter
                                                              include_sec: include_sec}"
         end
 
-        data = ::DateTime.parse(data) if data.is_a? String #Ruby method
+        data = ::DateTime.parse(data) if data.is_a? String
 
         df = if iso
                '%Y-%m-%d %H:%M:%S'
