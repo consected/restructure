@@ -301,7 +301,7 @@ _fpa.utils.ISOdatetoTimestamp = function (stre) {
 // Typically returns mm/dd/yyyy or Invalid DateTime
 _fpa.utils.YMDtoLocale = function (stre) {
   stre = stre.trim();
-  let d =_fpa.utils.isoDateStringToLocale(stre);
+  let d = _fpa.utils.isoDateStringToLocale(stre);
   if (d === 'Invalid DateTime') d = stre;
 
   return d;
@@ -350,7 +350,7 @@ _fpa.utils.isoDateTimeStringToLocale = function (stre) {
   stre = stre.trim();
   if (_fpa.utils.is_blank(stre)) return stre;
   const format = UserPreferences.date_time_format();
-  return _fpa.utils.DateTime.fromSQL(stre, {zone: UserPreferences.timezone()}).toFormat(format);
+  return _fpa.utils.DateTime.fromSQL(stre, { zone: UserPreferences.timezone() }).toFormat(format);
 };
 
 // Translate an obj from a loc in the translation files, such as 'field_labels'
@@ -372,14 +372,13 @@ _fpa.utils.pretty_print = function (stre, options_hash) {
   let startTime;
   let asTimestamp;
   if (stre && stre.length >= 8) {
-    if (!stre.match(/^\d\d\d\d-\d\d-\d\d.*/)) {
-    } else if ((stre.indexOf('t') >= 0 && stre.indexOf('z') >= 0) || (stre.indexOf('T') >= 0 && stre.indexOf('Z') >= 0)) {
+    if (stre.match(/^\d\d\d\d-\d\d-\d\d(?:t|T)\d\d:\d\d:\d\d(?:\.\d+)?(?:z|Z)/)) {
       startTime = _fpa.utils.DateTime.fromISO(stre);
-      asTimestamp = true;
+      asTimestamp = !stre.match(/(?:t|T)00:00:00(?:\.0+)?(?:z|Z)/);
     }
-    else {
+    else if (stre.match(/^\d\d\d\d-\d\d-\d\d.*/)) {
       startTime = _fpa.utils.DateTime.fromSQL(stre);
-      asTimestamp = false;
+      asTimestamp = !stre.match(/^\d\d\d\d-\d\d-\d\d 00:00:00(?:\.0+)?/);
     }
   }
   if (typeof startTime === 'undefined' || !(startTime && startTime.isValid)) {
