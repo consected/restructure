@@ -71,7 +71,7 @@ module UserPreferencesHelper
     },
     'mm/dd/yyyy 24h:mm' => {
       hours_minutes: '%m/%d/%Y %H:%M',
-      with_secs: '%m/%d/%Y %T',
+      with_secs: '%m/%d/%Y %T'
     },
     'dd/mm/yyyy hh:mm am/pm' => {
       hours_minutes: '%d/%m/%Y %-l:%M %P',
