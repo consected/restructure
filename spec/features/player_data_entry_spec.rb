@@ -235,7 +235,7 @@ describe 'advanced search', js: true, driver: :app_firefox_driver do
     expect(page).to have_css('.player-info-header')
     res = all('.player-info-header')
     t = res.first
-    expect(t.text).to include "DOB #{m}/#{d}/#{y}"
+    expect(t.text).to include "DOB #{m.to_s.rjust(2, '0')}/#{d.to_s.rjust(2, '0')}/#{y}"
 
     me = all('a.master-expander')
     el = me.first
