@@ -13047,7 +13047,7 @@ ALTER TABLE ONLY ref_data.redcap_data_dictionary_history
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app,extra_app,fem,data_requests,study_info,sleep,ref_data,redcap,dynamic;
+SET search_path TO ml_app,ref_data;
 
 INSERT INTO "schema_migrations" (version) VALUES
 ('20150602181200'),
