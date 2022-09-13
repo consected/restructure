@@ -209,7 +209,7 @@ _fpa.postprocessors_reports = {
       _fpa.reports.results_subsearch(block);
       _fpa.reports.results_perform_action_link(block);
       _fpa.reports.results_select_items_for_form(block);
-      _fpa.reports.show_table_as_tree($('.report-results-table-block table.tree-table'));
+      _fpa.reports_tree.show_table_as_tree($('.report-results-table-block table.tree-table'));
       _fpa.form_utils.setup_tablesorter($('.report-results-table-block'));
       block.find('.expandable').not('.attached-exp').on('click', function () {
         if ($(this).attr('disabled')) return;
@@ -224,43 +224,34 @@ _fpa.postprocessors_reports = {
 
   },
 
-  // TODO more date formatting
   report_format_result_cells: function (block, data) {
     $('td[data-col-type$="_when"], td[data-col-type$=" when"], td[data-col-type$="_date"], td[data-col-type$=" date"], td[data-col-type="date"], td[data-col-var-type="Date"], [data-col-var-type="Date"] rldata').not('.td-date-formatted, [data-col-var-type="Time"]').each(function () {
       var d = null;
       var val = $(this).html();
-      console.log(val);
-      if (val == 'Invalid Date')
+      if (val == 'Invalid DateTime')
         d = '';
-      else if (!_fpa.utils.is_blank(val)) {
-        console.log(val);
+      else if (!_fpa.utils.is_blank(val))
         d = _fpa.utils.YMDtoLocale(val);
-      }
       $(this).html(d);
     }).addClass('td-date-formatted');
 
     $('td[data-col-var-type="Time"], [data-col-var-type="Time"] rldata').not('.td-time-formatted').each(function () {
       var d = null;
       var val = $(this).html();
-      console.log(val);
-      if (val === 'Invalid Date') {
+      if (val === 'Invalid DateTime')
         d = '';
-      } else if (!_fpa.utils.is_blank(val)) {
-        console.log(val);
+      else if (!_fpa.utils.is_blank(val))
         d = _fpa.utils.YMDtimeToLocale(val);
-      }
       $(this).html(d);
     }).addClass('td-time-formatted');
 
     $('td[data-col-type$="_at"], td[data-col-type$="_time"], td[data-col-type$=" time"], td[data-col-type$=" at"]').not('.td-time-formatted').each(function () {
       var d = null;
       var val = $(this).html();
-      console.log(val);
-      if (val == 'Invalid Date')
+      if (val == 'Invalid DateTime')
         d = '';
       else if (val && val != '')
         d = _fpa.utils.YMDtimeToLocale(val);
-      console.log(d)
       if (d && d.split(' ').length > 1) d = d.split(' ').slice(1).join(' ')
       $(this).html(d);
     }).addClass('td-time-formatted');

@@ -1,31 +1,6 @@
-_fpa.utils = {};
-
-
-const date_formats = {
-  'mm/dd/yyyy': 'MM/dd/yyyy',
-  'dd/mm/yyyy': 'dd/MM/yyyy',
+_fpa.utils = {
+  DateTime: luxon.DateTime
 };
-
-const date_time_formats = {
-  'mm/dd/yyyy hh:mm am/pm': 'MM/dd/yyyy hh:mm a',
-  'mm/dd/yyyy 24h:mm': 'MM/dd/yyyy HH:mm',
-  'dd/mm/yyyy hh:mm am/pm': 'dd/MM/yyyy hh:mm a',
-  'dd/mm/yyyy 24h:mm': 'dd/MM/yyyy HH:mm',
-};
-
-const time_formats = {
-  'hh:mm am/pm': '%-l:%M %P',
-  '24h:mm': '%H:%M'
-}
-
-const timezone_iana = {
-  'Eastern Time (US & Canada)': 'America/New_York',
-  'Central Time (US & Canada)': 'America/Chicago',
-  'Puerto Rico': 'America/Puerto_Rico',
-  'London': 'Europe/London'
-}
-
-const DateTime = luxon.DateTime;
 
 // Jump to the linked item, based on the target ID
 // If necessary expand the block containing this item by uncollapsing and showing it
@@ -302,7 +277,7 @@ _fpa.utils.escape_html = function (string) {
   });
 };
 
-//TODO
+
 // This always returns the original if the date is not processable
 _fpa.utils.ISOdatetoTimestamp = function (stre) {
 
@@ -313,53 +288,37 @@ _fpa.utils.ISOdatetoTimestamp = function (stre) {
     (stre.indexOf('T') >= 0 && stre.indexOf('Z') >= 0) ||
     (stre.indexOf('t') >= 0 && stre.indexOf('+') >= 0) ||
     (stre.indexOf('T') >= 0 && stre.indexOf('+') >= 0)) {
-    var ds = new Date(Date.parse(stre));
-    if (!ds) return stre;
-    var res = ds.getTime().toFixed(0);
-    return res;
+    const dt = _fpa.utils.DateTime.fromISO(stre);
+    if (dt.isValid)
+      return dt.valueOf();
+    else
+      return stre;
   } else {
     return stre;
   }
 };
 
-// Typically returns mm/dd/yyyy
-//TODO refactor
+// Typically returns mm/dd/yyyy or Invalid DateTime
 _fpa.utils.YMDtoLocale = function (stre) {
   stre = stre.trim();
-  console.log(stre);
   let d =_fpa.utils.isoDateStringToLocale(stre);
-  console.log(d);
   if (d === 'Invalid DateTime') d = stre;
+
   return d;
 };
 
-//TODO: UserPreference JS class for the formats
 
 // Typically returns mm/dd/yyyy hh:mm:ss a/pm
 _fpa.utils.YMDtimeToLocale = function (stre) {
-
   stre = stre.trim();
   let d;
 
   // Take special care to avoid issues with timezones and daylight savings time quirks
-  const isoDate = DateTime.fromISO(stre);
-  console.log(isoDate);
-  console.log(stre);
-  if ((stre.indexOf('t') >= 0 && stre.indexOf('z') >= 0) || (stre.indexOf('T') >= 0 && stre.indexOf('Z') >= 0)) {
-    // startTime = new Date(Date.parse(stre));
-    // startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
-    // var d = startTime.asLocale();
+  if ((stre.indexOf('t') >= 0 && stre.indexOf('z') >= 0) || (stre.indexOf('T') >= 0 && stre.indexOf('Z') >= 0) || stre.length > 15) {
     d = _fpa.utils.isoDateTimeStringToLocale(stre);
-  } else if (stre.length > 15) {
-    // This case is not an ISO date. It is a date from the SQL.
-    //TODO Consider Move to Function
-    const date_time_format = date_time_formats[_fpa.state.current_user_preference.date_time_format];
-    const timezone_iana = date_time_formats[_fpa.state.current_user_preference.timezone_iana];
-    d = DateTime.fromSQL(stre, {zone: timezone_iana}).toFormat(date_time_format);
   }
-  else if (stre.indexOf(':') == 2) {
-    //What is this for? This has already been converted to a time. REgex to detect if already formatted as a time.
-    //dd:dd d is for digit check for 24-hour, format if seconds are allowed
+  else if (stre.indexOf(':') === 2) {
+    // stre is Time: 00:00:00 with colon on 2nd position (0-based).
     return stre;
   }
   else {
@@ -367,46 +326,31 @@ _fpa.utils.YMDtimeToLocale = function (stre) {
     // var d = new Date(stre).asLocale();
     d = _fpa.utils.isoDateTimeStringToLocale(stre);
   }
-  if (d == 'Invalid DateTime') d = stre;
+  if (d === 'Invalid DateTime') d = stre;
 
   return d;
 };
-// TODO
+
+// Returns a JS object.
 _fpa.utils.parseLocaleDate = function (stre) {
-  //TODO move to preferences
-  console.log(stre);
-  const date_format = date_formats[_fpa.state.current_user_preference.date_format];
-  return DateTime.fromFormat(stre, date_format).toSQLDate();
-};
-
-// Get locale string, only including the date and not the time portion
-Date.prototype.asLocale = function () {
-  console.log(this);
-  return _fpa.utils.isoDateStringToLocale(this.toISOString());
-  // Don't trust browser locale handling
-  //return this.toLocaleDateString(undefined, {timeZone: "UTC"});
-
+  const format = UserPreferences.date_format();
+  const isoDate = _fpa.utils.DateTime.fromFormat(stre, format).toISO();
+  return new Date(isoDate);
 };
 
 // Take yyyy-mm-dd... and make it mm/dd/yyyy
 _fpa.utils.isoDateStringToLocale = function (stre) {
-  if (!_fpa.utils.is_blank(stre)) return stre;
-  return DateTime.fromISO(stre).toFormat(date_formats[_fpa.state.current_user_preference.date_format]);
+  if (_fpa.utils.is_blank(stre)) return stre;
+  const format = UserPreferences.date_format();
+  return _fpa.utils.DateTime.fromISO(stre).toFormat(format);
 };
 
-// Take yyyy-mm-dd hh24:min:ss... and make it mm/dd/yyyy hh24:min:ss
-// TODO: conform to _fpa.state.current_user_preference.date_format
+// Take yyyy-mm-dd hh24:min:ss... and make it mm/dd/yyyy hh24:min:ss or dd/mm/yyyy hh24:min:ss
 _fpa.utils.isoDateTimeStringToLocale = function (stre) {
   stre = stre.trim();
   if (_fpa.utils.is_blank(stre)) return stre;
-  const date_time_format = date_time_formats[_fpa.state.current_user_preference.date_time_format]; //TODO move to user pref
-  return DateTime.fromSQL(stre).toFormat(date_time_format);
-};
-
-
-Date.prototype.asYMD = function () {
-  console.log(this);
-  return DateTime.fromJSDate(this).toSQLDate();
+  const format = UserPreferences.date_time_format();
+  return _fpa.utils.DateTime.fromSQL(stre, {zone: UserPreferences.timezone()}).toFormat(format);
 };
 
 // Translate an obj from a loc in the translation files, such as 'field_labels'
@@ -423,23 +367,22 @@ _fpa.utils.translate = function (obj, loc) {
   return obj;
 };
 
-//TODO players
 _fpa.utils.pretty_print = function (stre, options_hash) {
   if (stre === null || stre === '') return "";
-  var startTime;
-  var asTimestamp;
+  let startTime;
+  let asTimestamp;
   if (stre && stre.length >= 8) {
     if (!stre.match(/^\d\d\d\d-\d\d-\d\d.*/)) {
     } else if ((stre.indexOf('t') >= 0 && stre.indexOf('z') >= 0) || (stre.indexOf('T') >= 0 && stre.indexOf('Z') >= 0)) {
-      startTime = new Date(Date.parse(stre));
+      startTime = _fpa.utils.DateTime.fromISO(stre);
       asTimestamp = true;
     }
     else {
-      startTime = new Date(Date.parse(stre + 'T00:00:00Z'));
+      startTime = _fpa.utils.DateTime.fromSQL(stre);
       asTimestamp = false;
     }
   }
-  if (typeof startTime === 'undefined' || !startTime || startTime === 'Invalid Date') {
+  if (typeof startTime === 'undefined' || !(startTime && startTime.isValid)) {
     if (options_hash.return_string) {
 
       // This ugly condition checks for the difficult case where Handlebars decides to mangle empty numbers
@@ -483,14 +426,13 @@ _fpa.utils.pretty_print = function (stre, options_hash) {
       return null;
     }
   }
-  //todo refactor
+  const format = UserPreferences.date_format();
   if (asTimestamp) {
-    startTime = new Date(startTime.getTime() + (startTime.getTimezoneOffset() * 60000));
-    return startTime.toLocaleDateString();
+    const timezone = UserPreferences.timezone();
+    return startTime.setZone(timezone).toFormat(format);
   } else {
-    return new Date(stre).toLocaleDateString(undefined, { timeZone: "UTC" });
+    return startTime.toUTC().toFormat(format);
   }
-  return stre;
 };
 
 _fpa.utils.calc_field = function (field_name_sym, form_object_item_type_us) {

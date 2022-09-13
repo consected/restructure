@@ -167,7 +167,7 @@ _fpa.form_utils = {
 
       dates.each(function () {
         var v = $(this).val();
-        if (v || v != '') {
+        if (v || v !== '') {
           var res = _fpa.form_utils.locale_date_to_iso(v);
           if (res) {
             $(this).val(res);
@@ -178,16 +178,13 @@ _fpa.form_utils = {
     }
   },
 
-  // TODO
+
   locale_date_to_iso(v) {
-    //alert('locale_date_to_iso');
-    //alert(v);
     if (!v) return;
 
-    return _fpa.utils.parseLocaleDate(v);
+    return _fpa.utils.parseLocaleDate(v).asYMD();
   },
 
-  // TODO
   locale_datetime_to_iso(v) {
     if (!v) return;
 
@@ -1315,7 +1312,7 @@ _fpa.form_utils = {
       });
     });
   },
-  //TODO refactor?
+
   setup_datepickers: function (block) {
 
     // force date type fields to use the date picker by making them fall back to text
@@ -1332,7 +1329,7 @@ _fpa.form_utils = {
     block.find('input[type="datepicker"]').not('.date-is-local').each(function () {
       var v = $(this).val();
 
-      if (v && v != '') {
+      if (!_fpa.utils.is_blank(v)) {
         var d = _fpa.utils.YMDtoLocale(v);
         $(this).val(d);
       }

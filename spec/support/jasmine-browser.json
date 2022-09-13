@@ -1,0 +1,14 @@
+{
+  "srcDir": "public/assets",
+  "cssDir": "app/assets/stylesheets",
+  "srcFiles": [
+    "application-*.js"
+  ],
+  "specDir": "spec/javascripts",
+  "helpers": [
+    "helpers/**/*.js"
+  ],
+  "specFiles": [
+    "**/*[Ss]pec.js"
+  ]
+}

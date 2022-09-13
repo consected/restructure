@@ -313,11 +313,10 @@
     }
   });
 
-  //TODO refactor to use luxon dates
   Handlebars.registerHelper('date_time', function (text) {
-    const d = (text) ? DateTime.fromISO(text) : DateTime.now();
+    const d = (text) ? _fpa.utils.DateTime.fromISO(text) : _fpa.utils.DateTime.now();
     const formatted = (d.isValid) ?
-        d.toFormat(date_time_formats[_fpa.state.current_user_preference.date_time_format]) :
+        d.toFormat(UserPreferences.date_time_format()) :
         text;
     return new Handlebars.SafeString(formatted);
   });
@@ -403,27 +402,19 @@
   });
 
   // Display date in local format, without adjusting the timezone and giving the appearance of changing the day
-  //Revise code, understand its purpose
   Handlebars.registerHelper('local_date', function (date_string, unknown, options) {
     if (date_string === null || date_string === '') return unknown;
-    const startTime = date_string; //
-    const testTime = new Date(Date.parse(date_string + 'T00:00:00Z')); //may not be necessary
+    const startTime = _fpa.utils.DateTime.fromISO(date_string)
 
-    console.log(testTime);
-    if (!testTime || testTime == 'Invalid Date') { //coercion for invalid date
+    if (!startTime.isValid) {
       if (options.hash.return_string)
         return date_string;
       else
         return unknown;
     }
 
-    // Using information from https://bugzilla.mozilla.org/show_bug.cgi?id=1139167 to prevent occasional day difference issues
-    const DateTime = luxon.DateTime;
-    const date_format = date_formats[_fpa.state.current_user_preference.date_format];
-    return DateTime.fromISO(startTime).toFormat(date_format);
-    //return new Date(startTime).toLocaleDateString(undefined, { timeZone: "UTC" });
-
-
+    const format = UserPreferences.date_format();
+    return startTime.toUTC().toFormat(format);
   });
 
   Handlebars.registerHelper('and', function (a, b, options) {
@@ -467,15 +458,18 @@
   });
 
 
-  Handlebars.registerHelper('local_time', function (stre, options) {
-    console.log(stre);
-    if (!stre || stre == '' || !stre.length) return;
-    if (options && !options.hash) options.hash = {};
-    //use the utils
-    var s = stre.toString();
-    const DateTime = luxon.DateTime;
-    //const date_format = date_formats[_fpa.state.current_user_preference.date_format];
-    return DateTime.fromISO(stre).toFormat('dd/MM/yyyy');
+  Handlebars.registerHelper('local_time', function (stre) {
+    if (!stre || stre === '' || !stre.length) return;
+    let s = stre.toString();
+
+    s = new Date(s);
+    if (s.toString() === 'Invalid Date') return stre;
+
+    const d = _fpa.utils.DateTime.fromJSDate(s);
+    if (!d.isValid) return stre;
+
+    const format = UserPreferences.time_format();
+    return d.toUTC().toFormat(format);
   });
 
 
